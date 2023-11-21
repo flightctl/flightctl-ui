@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { PageSection, Title } from '@patternfly/react-core';
 
-const ProfileSettings: React.FunctionComponent = () => (
+const EnrollmentRequests: React.FunctionComponent = () => (
   <PageSection>
     <Title headingLevel="h1" size="lg">
-      Profile Settings Page Title
+      Enrollment Requests
     </Title>
   </PageSection>
 );
 
-export { ProfileSettings };
+export { EnrollmentRequests };

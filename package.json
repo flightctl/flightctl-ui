@@ -11,7 +11,7 @@
     "dr:surge": "node dr-surge.js",
     "build": "webpack --config webpack.prod.js && npm run dr:surge",
     "start": "sirv dist --cors --single --host --port 8080",
-    "start:dev": "webpack serve --color --progress --config webpack.dev.js",
+    "start:dev": "webpack serve --host 0.0.0.0 --color --progress --config webpack.dev.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
