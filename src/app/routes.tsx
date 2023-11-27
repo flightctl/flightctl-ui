@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Route, RouteComponentProps, Switch, useLocation } from 'react-router-dom';
-import { Dashboard } from '@app/Dashboard/Dashboard';
+import { Overview } from '@app/Overview/Overview';
 import { EnrollmentRequests } from '@app//EnrollmentRequests/EnrollmentRequests';
 import { Fleets } from '@app/Fleets/Fleets';
 import { NotFound } from '@app/NotFound/NotFound';
@@ -30,11 +30,11 @@ const routes: AppRouteConfig[] = [
     label: 'Device Management',
     routes: [
       {
-        component: Dashboard,
+        component: Overview,
         exact: true,
-        label: 'Dashboard',
+        label: 'Overview',
         path: '/',
-        title: 'PFlightControl | Dashboard',
+        title: 'PFlightControl | Overview',
       },
       {
         component: EnrollmentRequests,

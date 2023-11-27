@@ -75,6 +75,7 @@ module.exports = (env) => {
           test: /\.(jpg|jpeg|png|gif)$/i,
           include: [
             path.resolve(__dirname, 'src'),
+            path.resolve(__dirname, 'src/assets/images'),
             path.resolve(__dirname, 'node_modules/patternfly'),
             path.resolve(__dirname, 'node_modules/@patternfly/patternfly/assets/images'),
             path.resolve(__dirname, 'node_modules/@patternfly/react-styles/css/assets/images'),
@@ -120,6 +121,9 @@ module.exports = (env) => {
       }),
       new CopyPlugin({
         patterns: [{ from: './src/favicon.png', to: 'images' }],
+      }),
+      new CopyPlugin({
+        patterns: [{ from: './src/assets/images/mock-ui-fleet-status.png', to: 'images' }],
       }),
     ],
     resolve: {
