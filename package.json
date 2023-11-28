@@ -10,8 +10,8 @@
     "prebuild": "npm run type-check && npm run clean",
     "dr:surge": "node dr-surge.js",
     "build": "webpack --config webpack.prod.js && npm run dr:surge",
-    "start": "sirv dist --cors --single --host --port 8080",
-    "start:dev": "webpack serve --host 0.0.0.0 --color --progress --config webpack.dev.js",
+    "start": "node app.js",
+    "start:dev": "concurrently \"node app.js\" \"webpack serve --host 0.0.0.0 --color --progress --config webpack.dev.js\"",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -43,6 +43,7 @@
     "@types/victory": "^33.1.5",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "concurrently": "^8.2.2",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.8.1",
     "css-minimizer-webpack-plugin": "^5.0.1",
@@ -80,12 +81,12 @@
     "webpack-merge": "^5.9.0"
   },
   "dependencies": {
-    "axios":"^1.4.0",
     "@patternfly/react-core": "^5.0.0",
-    "@patternfly/react-table":"^5.0.0",
     "@patternfly/react-icons": "^5.0.0",
     "@patternfly/react-styles": "^5.0.0",
+    "@patternfly/react-table": "^5.0.0",
     "@storybook/builder-webpack5": "^7.0.27",
+    "axios": "^1.4.0",
     "react": "^18",
     "react-dom": "^18",
     "sirv-cli": "^2.0.2"

@@ -28,7 +28,7 @@ import {
   Tr,
 } from '@patternfly/react-table';
 
-type fleet = {
+type device = {
   metadata: {
     name: string | null;
     creationTimestamp: string | null;
@@ -37,16 +37,18 @@ type fleet = {
       [key: string]: string;
     }
   };
-  spec: {
-    template: {
-      config: {};
-      os: {};
+  status: {
+    conditions: {};
+    systemInfo: {
+      architecture: string | null;
+      bootID: string | null;
+      machineID: string | null;
+      operatingSystem: string | null;
     };
-  status: {};
   };
 };
 type itemsList = {
-  items: fleet[];
+  items: device[];
 
 };
 const dateFormatter = (date) => {
@@ -67,20 +69,18 @@ const dateFormatter = (date) => {
 const columns = [
   { key: 'metadata.name', label: 'Name' },
   { key: 'metadata.labels', label: 'Labels' },
-  { key: 'os_image', label: 'OS Image' },
-  { key: 'config_template', label: 'Config Template' },
-  { key: 'devices_count', label: 'Device Count' },
-  { key: 'devices_nominal_count', label: 'Device Nominal Count' },
+  { key: 'status.systemInfo.machineID', label: 'Machine ID' },
+  { key: 'status.systemInfo.bootID', label: 'Boot ID' },
+  { key: 'status.online', label: 'Status' }
 ];
 
-
-
-const Fleets: React.FunctionComponent = () => {
+const Devices: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [fleetsData, setFleetsData] = React.useState<itemsList>({ items: [] });
+  const [devicesData, setDevicesData] = React.useState<itemsList>({ items: [] });
   function getEvents() {
-    fetchData('fleets').then((data) => {
-      setFleetsData(data);
+    fetchData('devices').then((data) => {
+
+      setDevicesData(data);
       setIsLoading(false);
     });
   }
@@ -92,7 +92,7 @@ const Fleets: React.FunctionComponent = () => {
 
   return (
     <PageSection>
-      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>Fleets</Title>
+      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>Devices</Title>
       <Table aria-label="Simple table">
         <Thead>
           <Tr>
@@ -102,15 +102,13 @@ const Fleets: React.FunctionComponent = () => {
             <Td></Td>
           </Tr>
         </Thead>
-
-        {fleetsData.items.length > 0 && (
-          <Tbody>
-            {fleetsData.items.map((fleet) => (
-              <Tr key={fleet.metadata.name}>
-                {columns.map((column) => (
-                  
-                  <Td dataLabel={column.label} key={`${column.label}${fleet.metadata.name}`}>
-                    {tableCellData(column, fleet)}
+        {devicesData.items.length > 0 && (
+          <Tbody>            
+            {devicesData.items.map((device) => (
+              <Tr key={device.metadata.name}>
+                {columns.map((column) => (   
+                  <Td dataLabel={column.label} key={`${column.label}${device.metadata.name}`}>
+                    {tableCellData(column, device)}
                   </Td>
                 ))}
                 <Td isActionCell>
@@ -129,4 +127,4 @@ const Fleets: React.FunctionComponent = () => {
   );
 };
 
-export { Fleets };
+export { Devices };

@@ -3,6 +3,7 @@ import { Route, RouteComponentProps, Switch, useLocation } from 'react-router-do
 import { Overview } from '@app/Overview/Overview';
 import { EnrollmentRequests } from '@app//EnrollmentRequests/EnrollmentRequests';
 import { Fleets } from '@app/Fleets/Fleets';
+import { Devices } from '@app/Devices/Devices';
 import { NotFound } from '@app/NotFound/NotFound';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
 
@@ -50,6 +51,13 @@ const routes: AppRouteConfig[] = [
         path: '/devicemanagement/fleets',
         title: 'FlightControl | Fleets',
       },
+      {
+        component: Devices,
+        exact: true,
+        label: 'Devices',
+        path: '/devicemanagement/devices',
+        title: 'FlightControl | Devices',
+      }
     ],
   },
 ];
