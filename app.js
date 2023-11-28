@@ -17,18 +17,61 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     next();
   });
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'build')));
 
 app.get('/api/v1/:kind', async (req, res) => {
-    const kind = req.params.kind;
-    const url = `https://localhost:3333/api/v1/${kind}`;
-    const cert = fs.readFileSync('certs/client-enrollment.crt');
-    const key = fs.readFileSync('certs/client-enrollment.key');
-    const ca = fs.readFileSync('certs/ca.crt');
-    const agent = new https.Agent({ cert, key, ca });
-    const response = await axios.get(url, { httpsAgent: agent });
-    res.send(response.data);
+    try {
+        const kind = req.params.kind;
+        const url = `https://localhost:3333/api/v1/${kind}`;
+        const cert = fs.readFileSync('certs/client-enrollment.crt');
+        const key = fs.readFileSync('certs/client-enrollment.key');
+        const ca = fs.readFileSync('certs/ca.crt');
+        const agent = new https.Agent({ cert, key, ca });
+        const response = await axios.get(url, { httpsAgent: agent });
+        res.send(response.data);
+    } catch (error) {
+        // catch error status code from axios response
+
+        console.error('Bad request:', error.message);
+        res.status(400).send('Bad request');
+
+        
+    }
+});
+app.delete('/api/v1/:kind/:name', async (req, res) => {
+    try {
+        const kind = req.params.kind;
+        const name = req.params.name;
+        const url = `https://localhost:3333/api/v1/${kind}/${name}`;
+        const cert = fs.readFileSync('certs/client-enrollment.crt');
+        const key = fs.readFileSync('certs/client-enrollment.key');
+        const ca = fs.readFileSync('certs/ca.crt');
+        const agent = new https.Agent({ cert, key, ca });
+        const response = await axios.delete(url, { httpsAgent: agent });
+        res.send(response.data);
+    } catch (error) {
+        // catch error status code from axios response
+
+        console.error('Bad request:', error.message);
+        res.status(400).send('Bad request'); 
+    }
+});
+app.put('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
+    try {
+        const name = req.params.name;
+        const url = `https://localhost:3333/api/v1/enrollmentrequests/${name}/approval`;
+        const cert = fs.readFileSync('certs/client-enrollment.crt');
+        const key = fs.readFileSync('certs/client-enrollment.key');
+        const ca = fs.readFileSync('certs/ca.crt');
+        const agent = new https.Agent({ cert, key, ca });
+        const response = await axios.put(url, { httpsAgent: agent });
+        res.send(response.data);
+    } catch (error) {
+        // catch error status code from axios response
+
+        console.error('Bad request:', error.message);
+        res.status(400).send('Bad request'); 
+    }
+
 });
 
 //set dist as static application folder

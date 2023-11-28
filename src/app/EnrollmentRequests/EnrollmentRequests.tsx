@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { fetchData, tableCellData, deleteObject } from '@app/utils/commonFunctions'; 
 
 import {
   Button,
@@ -29,18 +30,52 @@ import {
 
 // import axios from 'axios';
 
+//type enrollmentrequest = {
+//  fingerprint: string | null;
+//  hardware: string | null;
+//  request_time: string | null;
+//  target_fleet: string | null;
+//  target_labels: string | null;
+//  approver: string | null;
+//  approval_status: string | null;
+//  measurements: string;
+//  enrollment_status: string;
+//};
 type enrollmentrequest = {
-  fingerprint: string | null;
-  hardware: string | null;
-  request_time: string | null;
-  target_fleet: string | null;
-  target_labels: string | null;
-  approver: string | null;
-  approval_status: string | null;
-  measurements: string;
-  enrollment_status: string;
+  metadata: {
+    name: string;
+    creationTimestamp: string | null;
+    deletionTimestamp: string | null;
+    labels: {
+      [key: string]: string;
+    }
+  };
+  spec: {
+    deviceStatus: {
+      systemInfo: {
+        architecture: string | null;
+        bootID: string | null;
+        machineID: string | null;
+        operatingSystem: string | null;
+      };
+    };
+  };
+  status: {
+    conditions: [
+      {
+        lastTransitionTime: string | null;
+        message: string | null;
+        reason: string | null;
+        status: string | null;
+        type: string | null;
+      }
+    ]
+  };
 };
+type itemsList = {
+  items: enrollmentrequest[];
 
+};
 const dateFormatter = (date) => {
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
   let dateObj;
@@ -57,38 +92,23 @@ const dateFormatter = (date) => {
 
 // SET THE COLUMNS HERE!!!
 const columns = [
-  { key: 'fingerprint', label: 'Fingerprint' },
-  { key: 'request_time', label: 'Enrollment Request Time' },
-  { key: 'hardware', label: 'Hardware' },
-  { key: 'measurements', label: 'System Measurement' },
-  { key: 'approver', label: 'Approver' },
-  { key: 'approval_status', label: 'Approval Status' },
-  { key: 'target_fleet', label: 'Target Fleet' },
-  { key: 'target_labels', label: 'Target Labels' },
-  { key: 'enrollment_status', label: 'Enrollment Status' },
+  { key: 'metadata.name', label: 'Fingerprint' },
+  { key: 'metadata.creationTimestamp', label: 'Enrollment Request Time' },
+  { key: 'spec.deviceStatus.systemInfo.operatingSystem', label: 'Hardware' },
+  { key: 'status.conditions[0].reason', label: 'Approver' },
+  { key: 'status.conditions[0].status', label: 'Approval Status' },
+  { key: 'status.conditions[0].type', label: 'Enrollment Status' },
 ];
 
-const tableCellData = (column, enrollmentrequest) => {
-  const data = column.formatter ? column.formatter(enrollmentrequest[column.key]) : enrollmentrequest[column.key];
-  if (column.key === 'fingerprint') {
-    return <a href="#">{data}</a>;
-  }
-  return data;
-};
-
 const EnrollmentRequests: React.FunctionComponent = () => {
-  const [enrollmentRequestData, setEnrollmentRequestData] = React.useState<enrollmentrequest[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
-
+  const [enrollmentRequestData, setEnrollmentRequestData] = React.useState<itemsList>({ items: [] });
   function getEvents() {
-    // axios
-    //   //.get('http://192.168.0.116/data.json')
-    //   .get('/data.json')
-    //   .then((response) => response.data)
-    //   .then((data) => {
-    //     setEnrollmentRequestData(data);
-    //     setIsLoading(false);
-    //   });
+    fetchData('enrollmentrequests').then((data) => {
+
+      setEnrollmentRequestData(data);
+      setIsLoading(false);
+    });
   }
   React.useEffect(() => {
     setIsLoading(true);
@@ -109,12 +129,12 @@ const EnrollmentRequests: React.FunctionComponent = () => {
           </Tr>
         </Thead>
 
-        {enrollmentRequestData.length > 0 && (
+        {enrollmentRequestData.items.length > 0 && (
           <Tbody>
-            {enrollmentRequestData.map((enrollmentrequest) => (
-              <Tr key={enrollmentrequest.fingerprint}>
+            {enrollmentRequestData.items.map((enrollmentrequest) => (
+              <Tr key={enrollmentrequest.metadata.name}>
                 {columns.map((column) => (
-                  <Td dataLabel={column.label} key={`${column.label}${enrollmentrequest.fingerprint}`}>
+                  <Td dataLabel={column.label} key={`${column.label}${enrollmentrequest.metadata.name}`}>
                     {tableCellData(column, enrollmentrequest)}
                   </Td>
                 ))}
@@ -127,7 +147,7 @@ const EnrollmentRequests: React.FunctionComponent = () => {
                       },
                       {
                         title: 'Delete',
-                        onClick: () => alert(`Deny`),
+                        onClick: () => {setIsLoading(true); deleteObject('enrollmentrequests', enrollmentrequest.metadata.name); getEvents();},
                       },
                     ]}
                   />
