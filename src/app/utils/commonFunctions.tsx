@@ -1,8 +1,16 @@
 
 import axios from 'axios';
+var apiServer = window.location.protocol + '//' + window.location.hostname;
+
+if (window.location.port === "9000") {
+    apiServer += ':3001';
+} else {
+    apiServer += ':' + window.location.port;
+}
+
 export const fetchData = async (kind: string) => {
     try {
-        const response = await axios.get('http://localhost:3001/api/v1/' + kind);
+        const response = await axios.get(apiServer + '/api/v1/' + kind);
         console.log(response.data);
         return response.data;
     } catch (error) {
@@ -11,7 +19,7 @@ export const fetchData = async (kind: string) => {
 }
 export const deleteObject = async (kind: string, name: string) => {
     try {
-        const response = await axios.delete('http://localhost:3001/api/v1/' + kind + '/' + name);
+        const response = await axios.delete(apiServer + '/api/v1/' + kind + '/' + name);
         console.log(response.data);
         return response.data;
     } catch (error) {
@@ -20,7 +28,7 @@ export const deleteObject = async (kind: string, name: string) => {
 }
 export const approveEnrollmentRequest = async (name: string) => {
     try {
-        const response = await axios.put('http://localhost:3001/api/v1/enrollmentrequests/' + name + '/approve');
+        const response = await axios.put(apiServer + '/api/v1/enrollmentrequests/' + name + '/approve');
         console.log(response.data);
         return response.data;
     } catch (error) {
