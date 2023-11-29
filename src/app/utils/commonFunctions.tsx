@@ -1,12 +1,9 @@
 
 import axios from 'axios';
-var apiServer = window.location.protocol + '//' + window.location.hostname;
-
-if (window.location.port === "9000") {
-    apiServer += ':3001';
-} else {
-    apiServer += ':' + window.location.port;
-}
+var apiServer = "";
+if (process.env.NODE_ENV === 'development') {
+  apiServer = window.location.protocol + '//' + window.location.hostname + ":" + process.env.API_PORT;
+} 
 
 export const fetchData = async (kind: string) => {
     try {

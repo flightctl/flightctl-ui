@@ -4,7 +4,9 @@ const fs = require('fs');
 const https = require('https');
 const axios = require('axios');
 const path = require('path');
-
+// if you want to change api PORT for development environment,
+// you need to set also in webpack.dev.js as process.env.API_PORT
+process.env.PORT = process.env.PORT || 3001;
 const app = express();
 
 
@@ -12,12 +14,13 @@ app.use((req, res, next) => {
 
     //just for development
     res.setHeader('Access-Control-Allow-Origin', '*');
-    //
+    //for production add the url like this
+    //res.setHeader('Access-Control-Allow-Origin', 'https://www.flighctl.io');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     next();
   });
-
+console.log(process.env);
 app.get('/api/v1/:kind', async (req, res) => {
     try {
         const kind = req.params.kind;
@@ -82,6 +85,6 @@ app.get('/', function (req, res) {
 });
 
 
-app.listen(3001, () => {
-    console.log('Server listening on port 3001');
+app.listen(process.env.PORT, () => {
+    console.log('Server listening on port ' + process.env.PORT);
 });
