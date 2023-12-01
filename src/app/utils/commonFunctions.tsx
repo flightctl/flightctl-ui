@@ -8,16 +8,24 @@ if (process.env.NODE_ENV === 'development') {
 export const fetchData = async (kind: string) => {
     try {
         const response = await axios.get(apiServer + '/api/v1/' + kind);
-        console.log(response.data);
         return response.data;
     } catch (error) {
         console.error('Error making request:', error);
     }
 }
+
+export const fetchDataObj = async (kind: string, name: string) => {
+  try {
+      const response = await axios.get(apiServer + '/api/v1/' + kind + '/' + name);
+      return response.data;
+  } catch (error) {
+      console.error('Error making request:', error);
+  }
+}
+
 export const deleteObject = async (kind: string, name: string) => {
     try {
         const response = await axios.delete(apiServer + '/api/v1/' + kind + '/' + name);
-        console.log(response.data);
         return response.data;
     } catch (error) {
         console.error('Error making request:', error);
@@ -25,12 +33,20 @@ export const deleteObject = async (kind: string, name: string) => {
 }
 export const approveEnrollmentRequest = async (name: string) => {
     try {
-        const response = await axios.put(apiServer + '/api/v1/enrollmentrequests/' + name + '/approve');
-        console.log(response.data);
+        const response = await axios.put(apiServer + '/api/v1/enrollmentrequests/' + name + '/approval');
         return response.data;
     } catch (error) {
         console.error('Error making request:', error);
     }
+}
+
+export const rejectEnrollmentRequest = async (name: string) => {
+  try {
+      const response = await axios.put(apiServer + '/api/v1/enrollmentrequests/' + name + '/rejection');
+      return response.data;
+  } catch (error) {
+      console.error('Error making request:', error);
+  }
 }
 
 export const tableCellData = (column, fleet) => {

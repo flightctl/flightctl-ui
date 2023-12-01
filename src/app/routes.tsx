@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { Route, RouteComponentProps, Switch, useLocation } from 'react-router-dom';
 import { Overview } from '@app/Overview/Overview';
-import { EnrollmentRequests } from '@app//EnrollmentRequests/EnrollmentRequests';
+import { EnrollmentRequests } from '@app/EnrollmentRequests/EnrollmentRequests';
 import { Fleets } from '@app/Fleets/Fleets';
 import { Devices } from '@app/Devices/Devices';
+import { Enroll } from '@app/Enroll/Enroll';
 import { NotFound } from '@app/NotFound/NotFound';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
 
@@ -57,6 +58,12 @@ const routes: AppRouteConfig[] = [
         label: 'Devices',
         path: '/devicemanagement/devices',
         title: 'FlightControl | Devices',
+      },
+      {
+        component: Enroll,
+        exact: false,
+        path: '/enroll',
+        title: 'FlightControl | Enroll',
       }
     ],
   },

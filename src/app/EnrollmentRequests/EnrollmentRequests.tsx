@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { fetchData, tableCellData, deleteObject } from '@app/utils/commonFunctions'; 
-
+import { fetchData, tableCellData, deleteObject, approveEnrollmentRequest } from '@app/utils/commonFunctions'; 
+import { enrollmentrequestList } from '@app/utils/commonDataTypes';
 import {
   Button,
   EmptyState,
@@ -41,41 +41,7 @@ import {
 //  measurements: string;
 //  enrollment_status: string;
 //};
-type enrollmentrequest = {
-  metadata: {
-    name: string;
-    creationTimestamp: string | null;
-    deletionTimestamp: string | null;
-    labels: {
-      [key: string]: string;
-    }
-  };
-  spec: {
-    deviceStatus: {
-      systemInfo: {
-        architecture: string | null;
-        bootID: string | null;
-        machineID: string | null;
-        operatingSystem: string | null;
-      };
-    };
-  };
-  status: {
-    conditions: [
-      {
-        lastTransitionTime: string | null;
-        message: string | null;
-        reason: string | null;
-        status: string | null;
-        type: string | null;
-      }
-    ]
-  };
-};
-type itemsList = {
-  items: enrollmentrequest[];
 
-};
 const dateFormatter = (date) => {
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
   let dateObj;
@@ -100,9 +66,11 @@ const columns = [
   { key: 'status.conditions[0].type', label: 'Enrollment Status' },
 ];
 
+
+
 const EnrollmentRequests: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [enrollmentRequestData, setEnrollmentRequestData] = React.useState<itemsList>({ items: [] });
+  const [enrollmentRequestData, setEnrollmentRequestData] = React.useState<enrollmentrequestList>({ items: [] });
   function getEvents() {
     fetchData('enrollmentrequests').then((data) => {
 
@@ -115,6 +83,40 @@ const EnrollmentRequests: React.FunctionComponent = () => {
     getEvents();
     setInterval(getEvents, 10000);
   }, []);
+
+  const generateActions = (enrollmentrequest) => {
+    const actions = [
+      {
+        title: 'Reboot',
+        onClick: () => alert(`Approve`),
+      },
+      {
+        title: 'Delete',
+        onClick: () => {
+          setIsLoading(true);
+          deleteObject('enrollmentrequests', enrollmentrequest.metadata.name);
+          getEvents();
+        },
+      },
+    ];
+    enrollmentrequest.status.conditions.forEach((condition) => {
+      if ((condition.status !== "False") && (condition.type === "Approved")) {
+        actions.push({
+          title: 'Approve',
+          onClick: () => {
+            setIsLoading(true);
+            approveEnrollmentRequest(enrollmentrequest.metadata.name);
+            getEvents();
+          },
+        });
+        return;
+      }
+    });
+  
+    return actions;
+  };
+  
+
 
   return (
     <PageSection>
@@ -140,16 +142,7 @@ const EnrollmentRequests: React.FunctionComponent = () => {
                 ))}
                 <Td isActionCell>
                   <ActionsColumn
-                    items={[
-                      {
-                        title: 'Reboot',
-                        onClick: () => alert(`Approve`),
-                      },
-                      {
-                        title: 'Delete',
-                        onClick: () => {setIsLoading(true); deleteObject('enrollmentrequests', enrollmentrequest.metadata.name); getEvents();},
-                      },
-                    ]}
+                    items={generateActions(enrollmentrequest)}
                   />
                 </Td>
               </Tr>
