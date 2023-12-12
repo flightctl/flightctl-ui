@@ -1,9 +1,11 @@
 
 import axios from 'axios';
+import { useAuth } from "react-oidc-context";
 var apiServer = "";
 if (process.env.NODE_ENV === 'development') {
   apiServer = window.location.protocol + '//' + window.location.hostname + ":" + process.env.API_PORT;
 } 
+
 
 export const fetchData = async (kind: string) => {
     try {
@@ -15,11 +17,16 @@ export const fetchData = async (kind: string) => {
 }
 
 export const fetchDataObj = async (kind: string, name: string) => {
-  try {
-      const response = await axios.get(apiServer + '/api/v1/' + kind + '/' + name);
-      return response.data;
-  } catch (error) {
-      console.error('Error making request:', error);
+  //control if kind and name are valid
+  if (kind !== undefined && name !== undefined) {
+    try {
+        const response = await axios.get(apiServer + '/api/v1/' + kind + '/' + name);
+        return response.data;
+    } catch (error) {
+        console.error('Error making request:', error);
+    }
+  } else {
+    console.error('Error making request: invalid kind or name');
   }
 }
 

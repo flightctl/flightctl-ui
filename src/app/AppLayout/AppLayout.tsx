@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
+  Avatar,
   Brand,
   Button,
   Masthead,
@@ -17,14 +18,16 @@ import {
 	SkipToContent
 } from '@patternfly/react-core';
 import { IAppRoute, IAppRouteGroup, routes } from '@app/routes';
-import logo from '@app/bgimages/Patternfly-Logo.svg';
+import logo from '@app/bgimages/flightctl-logo.svg';
 import { BarsIcon } from '@patternfly/react-icons';
-
+import { useAuth } from "react-oidc-context";
 interface IAppLayout {
   children: React.ReactNode;
 }
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
+  const auth = useAuth();
+  // set user with current user from withAuth HOC
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const Header = (
     <Masthead>
@@ -38,6 +41,25 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           <Brand src={logo} alt="FlightControl Logo" heights={{ default: '36px' }} />
         </MastheadBrand>
       </MastheadMain>
+      {auth.user ? (
+        <div style={{ marginLeft: 'auto' }} id="userWelcome">
+           {auth.user?.profile.family_name}{' '}
+          <Button
+            variant="link"
+            onClick={() =>
+              void auth.signoutRedirect({ post_logout_redirect_uri: window.location.protocol + '//' + window.location.host })
+            }
+          >
+            Log out
+          </Button>
+        </div>
+      ) : (
+        <div style={{ marginLeft: 'auto' }} id="userWelcome">
+          <Button variant="link" onClick={() => void auth.signinRedirect()}>
+            Log in
+          </Button>
+        </div>
+      )}
     </Masthead>
   );
 

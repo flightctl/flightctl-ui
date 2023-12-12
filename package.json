@@ -87,8 +87,10 @@
     "@patternfly/react-table": "^5.0.0",
     "@storybook/builder-webpack5": "^7.0.27",
     "axios": "^1.4.0",
+    "oidc-client-ts": "^3.0.0-beta.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-oidc-context": "^3.0.0-beta.0",
     "sirv-cli": "^2.0.2"
   }
 }

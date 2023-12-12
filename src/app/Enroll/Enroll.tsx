@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { fetchData, fetchDataObj, approveEnrollmentRequest, rejectEnrollmentRequest } from '@app/utils/commonFunctions'; 
+import { fetchDataObj, approveEnrollmentRequest, rejectEnrollmentRequest } from '@app/utils/commonFunctions'; 
 import { enrollmentrequest } from '@app/utils/commonDataTypes';
 import {
   Alert,
@@ -51,11 +51,12 @@ const dateFormatter = (date) => {
 const windowPath = window.location.pathname.split("enroll/");
 const enrollID = windowPath[1];
 var enrollmentrequest;
-fetchDataObj("enrollmentrequests", enrollID).then((data) => {
+if (enrollID != null) {
+    fetchDataObj("enrollmentrequests", enrollID).then((data) => {
+        enrollmentrequest = data;
+    });
+}
 
-    enrollmentrequest = data;
-    
-});
 
 const Enroll: React.FunctionComponent = () => {
     const [showAlert, setShowAlert] = React.useState(false);
