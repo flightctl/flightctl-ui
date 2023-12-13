@@ -129,7 +129,7 @@ const Enroll: React.FunctionComponent = () => {
             });
 
         setFilteredItems(filtered || []);
-        setIsOpen(true); // Keep menu open after search executed
+        setIsOpen(true);
     };
 
     const onEnterPressed = (event: React.KeyboardEvent) => {

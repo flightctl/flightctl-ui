@@ -43,12 +43,10 @@ const Overview: React.FunctionComponent = () => {
     setIsOpenRegion(!isOpenRegion);
   };
   const onFleetSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    // eslint-disable-next-line no-console
     console.log('selected', value);
     setIsOpenFleet(false);
   };
   const onRegionSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    // eslint-disable-next-line no-console
     console.log('selected', value);
     setIsOpenRegion(false);
   };
@@ -70,184 +68,177 @@ const Overview: React.FunctionComponent = () => {
           <tr>
             <td>
               <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-              <FlexItem>
-              <Dropdown
-                isOpen={isOpenFleet}
-                onSelect={onFleetSelect}
-                onOpenChange={(isOpenFleet: boolean) => setIsOpenFleet(isOpenFleet)}
-                toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                  <MenuToggle ref={toggleRef} isFullWidth onClick={onFleetToggleClick} isExpanded={isOpenFleet}>
-                    <div id="togglefleet">Select Fleet:</div>
-                  </MenuToggle>
-                )}
-                ouiaId="fleetdropdown"
-                shouldFocusToggleOnSelect
-              >
-                <DropdownList id="dropdown-list-fleet">
-                  <SearchInput
-                    id="search-fleet"
-                    value=""
-                    placeholder="Search Fleet"
-                    onChange={() => {
-                      const searchInput = document.getElementById('search-fleet');
-                      const input = searchInput?.getElementsByTagName('input')[0];
-                      console.log(input?.value);
-                      if (input) {
-                        const searchValue = input.value;
-                        console.log("searchValue" + searchValue);
-                        if (searchValue) {
-                          const filtered = fleetList.filter((item) => {
-                            return item.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
-                          });
-                          console.log("filtered" + filtered);
-                          setFleetList(filtered);
-                        } else {
-                          setFleetList(fleetList);
-                        }
-                      }
-                    }}
-                  />
-                  {
-                    (<DropdownItem
-                      value="All fleets"
-                      key="all"
-                      description="select all fleets"
-                      onClick={() => {
-                        const toggle = document.getElementById('togglefleet');
-                        if (toggle) {
-                          toggle.innerHTML = "All fleets";
-                        }
-                      }}
-                    >
-                      All fleets
-                    </DropdownItem>)
-                  }{
-                    // for each fleet in fleetList, create a DropdownItem
-                    fleetListFiltered.map((fleet) => (
-                  <DropdownItem
-                    value={fleet.name}
-                    key={fleet.id}
-                    description={fleet.description}
-                    onClick={() => {
-                      const toggle = document.getElementById('togglefleet');
-                      if (toggle) {
-                        toggle.innerHTML = fleet.name;
-
-                      }
-                    }}
+                <FlexItem>
+                  <Dropdown
+                    isOpen={isOpenFleet}
+                    onSelect={onFleetSelect}
+                    onOpenChange={(isOpenFleet: boolean) => setIsOpenFleet(isOpenFleet)}
+                    toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                      <MenuToggle ref={toggleRef} isFullWidth onClick={onFleetToggleClick} isExpanded={isOpenFleet}>
+                        <div id="togglefleet">Select Fleet:</div>
+                      </MenuToggle>
+                    )}
+                    ouiaId="fleetdropdown"
+                    shouldFocusToggleOnSelect
                   >
-                    {fleet.name}
-                  </DropdownItem>
-                  ))
-
-                  }
-
-                </DropdownList>
-              </Dropdown>
-              </FlexItem>
-              <Divider
-                orientation={{
-                  default: 'vertical'
-                }}
-                inset={{ default: 'insetSm' }}
-              />
-              <FlexItem>
-              <Dropdown
-                isOpen={isOpenRegion}
-                onSelect={onRegionSelect}
-                onOpenChange={(isOpenRegion: boolean) => setIsOpenRegion(isOpenRegion)}
-                toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                  <MenuToggle ref={toggleRef} isFullWidth onClick={onRegionToggleClick} isExpanded={isOpenRegion}>
-                    <div id="toggleregion">Select Region:</div>
-                  </MenuToggle>
-                )}
-                ouiaId="regiondropdown"
-                shouldFocusToggleOnSelect
-              >
-                <DropdownList id="dropdown-list-region">
-                  <SearchInput
-                    id="search-region"
-                    value=""
-                    placeholder="Search region"
-                    onChange={() => {
-                      const searchInput = document.getElementById('search-region');
-                      const input = searchInput?.getElementsByTagName('input')[0];
-                      console.log(input?.value);
-                      if (input) {
-                        const searchValue = input.value;
-                        console.log("searchValue" + searchValue);
-                        if (searchValue) {
-                          const filtered = regionList.filter((item) => {
-                            return item.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
-                          });
-                          console.log("filtered" + filtered);
-                          setRegionList(filtered);
-                        } else {
-                          setRegionList(regionList);
-                        }
-                      }
-                    }}
-                  />
-                  {
-                    (<DropdownItem
-                      value="All regions"
-                      key="all"
-                      description="select all regions"
-                      onClick={() => {
-                        const toggle = document.getElementById('toggleregion');
-                        if (toggle) {
-                          toggle.innerHTML = "All regions";
-                        }
-                      }}
-                    >
-                      All regions
-                    </DropdownItem>)
-                  }{
-                    // for each fleet in fleetList, create a DropdownItem
-                    regionListFiltered.map((region) => (
-                      <DropdownItem
-                        value={region.name}
-                        key={region.id}
-                        description={region.description}
-                        onClick={() => {
-                          const toggle = document.getElementById('toggleregion');
-                          if (toggle) {
-                            toggle.innerHTML = region.name;
-
+                    <DropdownList id="dropdown-list-fleet">
+                      <SearchInput
+                        id="search-fleet"
+                        value=""
+                        placeholder="Search Fleet"
+                        onChange={() => {
+                          const searchInput = document.getElementById('search-fleet');
+                          const input = searchInput?.getElementsByTagName('input')[0];
+                          console.log(input?.value);
+                          if (input) {
+                            const searchValue = input.value;
+                            console.log("searchValue" + searchValue);
+                            if (searchValue) {
+                              const filtered = fleetList.filter((item) => {
+                                return item.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
+                              });
+                              console.log("filtered" + filtered);
+                              setFleetList(filtered);
+                            } else {
+                              setFleetList(fleetList);
+                            }
                           }
                         }}
-                      >
-                        {region.name}
-                      </DropdownItem>
-                    ))
+                      />
+                      {
+                        (<DropdownItem
+                          value="All fleets"
+                          key="all"
+                          description="select all fleets"
+                          onClick={() => {
+                            const toggle = document.getElementById('togglefleet');
+                            if (toggle) {
+                              toggle.innerHTML = "All fleets";
+                            }
+                          }}
+                        >
+                          All fleets
+                        </DropdownItem>)
+                      }{
+                        fleetListFiltered.map((fleet) => (
+                          <DropdownItem
+                            value={fleet.name}
+                            key={fleet.id}
+                            description={fleet.description}
+                            onClick={() => {
+                              const toggle = document.getElementById('togglefleet');
+                              if (toggle) {
+                                toggle.innerHTML = fleet.name;
 
-                  }
+                              }
+                            }}
+                          >
+                            {fleet.name}
+                          </DropdownItem>
+                        ))
 
-                </DropdownList>
-              </Dropdown>
-              </FlexItem>
+                      }
+
+                    </DropdownList>
+                  </Dropdown>
+                </FlexItem>
+                <Divider
+                  orientation={{
+                    default: 'vertical'
+                  }}
+                  inset={{ default: 'insetSm' }}
+                />
+                <FlexItem>
+                  <Dropdown
+                    isOpen={isOpenRegion}
+                    onSelect={onRegionSelect}
+                    onOpenChange={(isOpenRegion: boolean) => setIsOpenRegion(isOpenRegion)}
+                    toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                      <MenuToggle ref={toggleRef} isFullWidth onClick={onRegionToggleClick} isExpanded={isOpenRegion}>
+                        <div id="toggleregion">Select Region:</div>
+                      </MenuToggle>
+                    )}
+                    ouiaId="regiondropdown"
+                    shouldFocusToggleOnSelect
+                  >
+                    <DropdownList id="dropdown-list-region">
+                      <SearchInput
+                        id="search-region"
+                        value=""
+                        placeholder="Search region"
+                        onChange={() => {
+                          const searchInput = document.getElementById('search-region');
+                          const input = searchInput?.getElementsByTagName('input')[0];
+                          console.log(input?.value);
+                          if (input) {
+                            const searchValue = input.value;
+                            console.log("searchValue" + searchValue);
+                            if (searchValue) {
+                              const filtered = regionList.filter((item) => {
+                                return item.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
+                              });
+                              console.log("filtered" + filtered);
+                              setRegionList(filtered);
+                            } else {
+                              setRegionList(regionList);
+                            }
+                          }
+                        }}
+                      />
+                      {
+                        (<DropdownItem
+                          value="All regions"
+                          key="all"
+                          description="select all regions"
+                          onClick={() => {
+                            const toggle = document.getElementById('toggleregion');
+                            if (toggle) {
+                              toggle.innerHTML = "All regions";
+                            }
+                          }}
+                        >
+                          All regions
+                        </DropdownItem>)
+                      }{
+                        regionListFiltered.map((region) => (
+                          <DropdownItem
+                            value={region.name}
+                            key={region.id}
+                            description={region.description}
+                            onClick={() => {
+                              const toggle = document.getElementById('toggleregion');
+                              if (toggle) {
+                                toggle.innerHTML = region.name;
+                              }
+                            }}
+                          >
+                            {region.name}
+                          </DropdownItem>
+                        ))
+                      }
+                    </DropdownList>
+                  </Dropdown>
+                </FlexItem>
               </Flex>
             </td>
           </tr>
         </tbody>
       </table>
-
       <Card isCompact={true} isFlat={true} >
-
         <CardBody>
-        <Flex>
-          <FlexItem>
-          <div id="grid-total">Total: 10 <br></br><div id="total-toggle"></div><br></br></div>
-          </FlexItem>
-          <Divider
-            orientation={{
-              default: 'vertical'
-            }}
-            inset={{ default: 'insetSm' }}
-          />
-          <FlexItem>
-          <div id="grid-insync">In sync: WIP <br></br></div>
-          </FlexItem>
+          <Flex>
+            <FlexItem>
+              <div id="grid-total">Total: 10 <br></br><div id="total-toggle"></div><br></br></div>
+            </FlexItem>
+            <Divider
+              orientation={{
+                default: 'vertical'
+              }}
+              inset={{ default: 'insetSm' }}
+            />
+            <FlexItem>
+              <div id="grid-insync">In sync: WIP <br></br></div>
+            </FlexItem>
           </Flex>
           <br></br><br></br>
           <ChipGroup categoryName='Legend:' numChips={0} collapsedText='Show'>
@@ -308,7 +299,6 @@ const Overview: React.FunctionComponent = () => {
       <div id="tooltip" style={{ display: 'none' }}></div>
       <img src="/images/mock-ui-fleet-status.png" alt="Mock Fleet Status" width="834" height="318" />
     </PageSection>
-
   )
 };
 
@@ -326,26 +316,20 @@ function getDevices() {
       div.innerHTML = `Total: ${devices.length}<br>`;
       let cellcount = 0;
       const maxcellsperline = 10;
-      // create a table of devices in div "grid-total", with max 2 devices per row.
       let onlinecount = 0;
       let offlinecount = 0;
       let syncronizingcount = 0;
       if (devices.length > 0) {
-        // initiate table inside div
         const table = document.createElement('table');
-        // set table style with CSS to add 1px border, also to its cells
-
         table.innerHTML = '<tbody></tbody>';
         let tr = document.createElement('tr');
         const tbody = table.getElementsByTagName('tbody')[0];
         tbody.appendChild(tr);
-
         devices.forEach((device) => {
           const status = device.status.online;
           if (div) {
             cellcount++;
             if (cellcount > maxcellsperline) {
-              // create new row
               tr = document.createElement('tr');
               tbody.appendChild(tr);
               cellcount = 1;
@@ -356,12 +340,9 @@ function getDevices() {
             newDiv.style.backgroundColor = status === 'True' ? 'green' : 'red';
             newDiv.style.display = 'inline-block';
             newDiv.style.margin = '0px 5px 0px 0px';
-
-            // set newDiv like a link to the device page
             newDiv.onclick = () => {
               window.location.href = `/device/${device.metadata.name}`;
             };
-            // onover, show the device info in a tooltip on the mouse position
             const tooltip = document.getElementById('tooltip');
             newDiv.onmouseover = (event: MouseEvent) => {
               if (tooltip) {
@@ -391,8 +372,6 @@ function getDevices() {
         table.style.borderCollapse = 'collapse !important';
         div.appendChild(table);
       }
-
     }
-
   });
 }

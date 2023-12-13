@@ -1,7 +1,9 @@
 import * as React from 'react';
-import { fetchData, tableCellData } from '@app/utils/commonFunctions'; 
-
+import { fetchData, tableCellData } from '@app/utils/commonFunctions';
+import { deviceList } from '@app/utils/commonDataTypes';
 import {
+  ActionList,
+  ActionListItem,
   Button,
   EmptyState,
   EmptyStateActions,
@@ -26,31 +28,15 @@ import {
   Th,
   Thead,
   Tr,
+  IAction,
 } from '@patternfly/react-table';
 
-type device = {
+interface Device {
   metadata: {
-    name: string | null;
-    creationTimestamp: string | null;
-    deletionTimestamp: string | null;
-    labels: {
-      [key: string]: string;
-    }
-  };
-  status: {
-    conditions: {};
-    systemInfo: {
-      architecture: string | null;
-      bootID: string | null;
-      machineID: string | null;
-      operatingSystem: string | null;
-    };
-  };
-};
-type itemsList = {
-  items: device[];
+    name: string
+  }
+}
 
-};
 const dateFormatter = (date) => {
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
   let dateObj;
@@ -60,12 +46,9 @@ const dateFormatter = (date) => {
   } else {
     dateObj = new Date(date);
   }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   return `${dateObj.toLocaleDateString('en-US', options)} ${dateObj.toLocaleTimeString('en-US')}`;
 };
 
-// SET THE COLUMNS HERE!!!
 const columns = [
   { key: 'metadata.name', label: 'Name' },
   { key: 'metadata.labels', label: 'Labels' },
@@ -76,7 +59,15 @@ const columns = [
 
 const Devices: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [devicesData, setDevicesData] = React.useState<itemsList>({ items: [] });
+  const [devicesData, setDevicesData] = React.useState<deviceList>({ items: [] });
+  const defaultActions = (device: Device): IAction[] => [
+    {
+      title: "View",
+      onClick: () => window.location.replace(`/device/${device.metadata.name}`)
+    }
+  ];
+
+
   function getEvents() {
     fetchData('devices').then((data) => {
 
@@ -103,18 +94,19 @@ const Devices: React.FunctionComponent = () => {
           </Tr>
         </Thead>
         {devicesData.items.length > 0 && (
-          <Tbody>            
+          <Tbody>
             {devicesData.items.map((device) => (
+
               <Tr key={device.metadata.name}>
-                {columns.map((column) => (   
-                  <Td dataLabel={column.label} key={`${column.label}${device.metadata.name}`}>
-                    {tableCellData(column, device)}
-                  </Td>
-                ))}
+                {
+                  columns.map((column) => (
+                    <Td dataLabel={column.label} key={`${column.label}${device.metadata.name}`}>
+                      {tableCellData(column, device)}
+                    </Td>
+                  ))}
                 <Td isActionCell>
                   <ActionsColumn
-                    items={[
-                    ]}
+                    items={defaultActions(device as Device)}
                   />
                 </Td>
               </Tr>

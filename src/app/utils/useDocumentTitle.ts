@@ -5,7 +5,6 @@ export function useDocumentTitle(title: string) {
   React.useEffect(() => {
     const originalTitle = document.title;
     document.title = title;
-
     return () => {
       document.title = originalTitle;
     };

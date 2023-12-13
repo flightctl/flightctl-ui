@@ -5,6 +5,7 @@ import { EnrollmentRequests } from '@app/EnrollmentRequests/EnrollmentRequests';
 import { Fleets } from '@app/Fleets/Fleets';
 import { Devices } from '@app/Devices/Devices';
 import { Enroll } from '@app/Enroll/Enroll';
+import { Device } from '@app/Device/Device';
 import { NotFound } from '@app/NotFound/NotFound';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
 
@@ -64,6 +65,12 @@ const routes: AppRouteConfig[] = [
         exact: false,
         path: '/enroll',
         title: 'FlightControl | Enroll',
+      },
+      {
+        component: Device,
+        exact: false,
+        path: '/device',
+        title: 'FlightControl | Device',
       }
     ],
   },
