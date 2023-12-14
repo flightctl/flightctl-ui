@@ -1,22 +1,10 @@
 import * as React from 'react';
 import { fetchData, tableCellData } from '@app/utils/commonFunctions';
 import { deviceList } from '@app/utils/commonDataTypes';
+import { useAuth } from 'react-oidc-context';
 import {
-  ActionList,
-  ActionListItem,
-  Button,
-  EmptyState,
-  EmptyStateActions,
-  EmptyStateBody,
-  EmptyStateFooter,
-  EmptyStateHeader,
-  EmptyStateIcon,
-  EmptyStateVariant,
   PageSection,
   Spinner,
-  Text,
-  TextContent,
-  TextVariants,
   Title,
 } from '@patternfly/react-core';
 
@@ -58,6 +46,7 @@ const columns = [
 ];
 
 const Devices: React.FunctionComponent = () => {
+  const auth = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
   const [devicesData, setDevicesData] = React.useState<deviceList>({ items: [] });
   const defaultActions = (device: Device): IAction[] => [
@@ -69,8 +58,7 @@ const Devices: React.FunctionComponent = () => {
 
 
   function getEvents() {
-    fetchData('devices').then((data) => {
-
+    fetchData('devices', auth.user?.access_token ?? '').then((data) => {
       setDevicesData(data);
       setIsLoading(false);
     });
@@ -78,8 +66,13 @@ const Devices: React.FunctionComponent = () => {
   React.useEffect(() => {
     setIsLoading(true);
     getEvents();
-    setInterval(getEvents, 10000);
-  }, []);
+    setInterval(() => {
+      getEvents();
+    }, 10000);
+    return auth.events.addAccessTokenExpiring(() => {
+      auth.signinSilent();
+    })
+}, [auth.events, auth.signinSilent]);
 
   return (
     <PageSection>

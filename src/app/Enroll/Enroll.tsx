@@ -1,40 +1,21 @@
-import * as React from 'react';
+import React, { useState, useEffect} from 'react';
 import { fetchDataObj, approveEnrollmentRequest, rejectEnrollmentRequest } from '@app/utils/commonFunctions'; 
 import { enrollmentrequest } from '@app/utils/commonDataTypes';
+import { useAuth } from 'react-oidc-context';
 import {
   Alert,
-  AlertActionCloseButton,
   AlertActionLink,
   AlertGroup,
   Button,
-  ButtonVariant,
   Divider,
   Dropdown,
   DropdownList,
   DropdownItem,
-  EmptyState,
-  EmptyStateActions,
-  EmptyStateBody,
-  EmptyStateFooter,
-  EmptyStateHeader,
-  EmptyStateIcon,
-  EmptyStateVariant,
-  InputGroup,
-  InputGroupItem,
   MenuToggle,
-  MenuFooter,
-  MenuSearch,
-  MenuSearchInput,
   PageSection,
-  SearchInput,
-  Spinner,
-  Text,
   TextContent,
-  TextVariants,
   Title,
-  Wizard,
 } from '@patternfly/react-core';
-import SearchIcon from '@patternfly/react-icons/dist/esm/icons/search-icon';
 
 const dateFormatter = (date) => {
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -48,19 +29,23 @@ const dateFormatter = (date) => {
 
   return `${dateObj.toLocaleDateString('en-US', options)} ${dateObj.toLocaleTimeString('en-US')}`;
 };
-const windowPath = window.location.pathname.split("enroll/");
-const enrollID = windowPath[1];
-var enrollmentrequest;
-if (enrollID != null) {
-    fetchDataObj("enrollmentrequests", enrollID).then((data) => {
-        enrollmentrequest = data;
-    });
-}
+
+
+
 
 
 const Enroll: React.FunctionComponent = () => {
-    const [showAlert, setShowAlert] = React.useState(false);
 
+    const auth = useAuth();
+    const [showAlert, setShowAlert] = React.useState(false);
+    const [enrollmentrequest, setEnrollmentRequest] = useState<enrollmentrequest>();
+    const windowPath = window.location.pathname.split("enroll/");
+    const enrollID = windowPath[1];
+    useEffect(() => {
+        fetchDataObj("enrollmentrequests", enrollID, auth.user?.access_token ?? '').then((data) => {
+          setEnrollmentRequest(data);
+        });
+      }, []);
     React.useEffect(() => {
         const pageSidebar = document.getElementById("page-sidebar");
         if (pageSidebar) {
@@ -80,11 +65,6 @@ const Enroll: React.FunctionComponent = () => {
 
     const handleCancel = () => {
         setShowAlert(false);
-    };
-
-    const handleConfirmReject = () => {
-        setShowAlert(false);
-        rejectEnrollmentRequest(enrollmentrequest.metadata.name);
     };
 
     interface ItemData {
@@ -137,7 +117,10 @@ const Enroll: React.FunctionComponent = () => {
         onSearchButtonClick();
         }
     };
-
+    if (!enrollmentrequest) {
+        return <div>Loading...</div>; // o simplemente return null;
+      }
+    
     return (
         <PageSection style={{ textAlign: 'center' }}>
             <Title headingLevel="h1" size="lg">Enrollment Request</Title>
@@ -180,7 +163,7 @@ const Enroll: React.FunctionComponent = () => {
             </Dropdown>
             </div>
             <div style={ { marginBottom: '20px', marginTop: '20px' }}>
-                <Button variant="primary" style={{ fontSize: '30px', padding: '20px 20px' }} onClick={() => approveEnrollmentRequest(enrollmentrequest.metadata.name)}>Approve</Button>
+                <Button variant="primary" style={{ fontSize: '30px', padding: '20px 20px' }} onClick={() => approveEnrollmentRequest(enrollmentrequest.metadata.name, auth.user?.access_token ?? '')}>Approve</Button>
             </div>
             <div>
                 <Button variant="danger" onClick={handleReject}>Reject</Button>
@@ -192,7 +175,7 @@ const Enroll: React.FunctionComponent = () => {
                     title="Confirm Reject"
                     actionLinks={
                         <React.Fragment>
-                          <AlertActionLink onClick={() => {rejectEnrollmentRequest(enrollmentrequest.metadata.name); handleCancel()}}>Reject enrollment</AlertActionLink>
+                          <AlertActionLink onClick={() => {rejectEnrollmentRequest(enrollmentrequest.metadata.name, auth.user?.access_token ?? ''); handleCancel()}}>Reject enrollment</AlertActionLink>
                           <AlertActionLink onClick={(handleCancel)}>Cancel</AlertActionLink>
                         </React.Fragment>
                       }

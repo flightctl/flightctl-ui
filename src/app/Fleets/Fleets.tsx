@@ -1,20 +1,9 @@
 import * as React from 'react';
 import { fetchData, tableCellData } from '@app/utils/commonFunctions'; 
-
+import { useAuth } from 'react-oidc-context';
 import {
-  Button,
-  EmptyState,
-  EmptyStateActions,
-  EmptyStateBody,
-  EmptyStateFooter,
-  EmptyStateHeader,
-  EmptyStateIcon,
-  EmptyStateVariant,
   PageSection,
   Spinner,
-  Text,
-  TextContent,
-  TextVariants,
   Title,
 } from '@patternfly/react-core';
 
@@ -76,10 +65,11 @@ const columns = [
 
 
 const Fleets: React.FunctionComponent = () => {
+  const auth = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
   const [fleetsData, setFleetsData] = React.useState<itemsList>({ items: [] });
   function getEvents() {
-    fetchData('fleets').then((data) => {
+    fetchData('fleets', auth.user?.access_token ?? '').then((data) => {
       setFleetsData(data);
       setIsLoading(false);
     });
@@ -87,8 +77,14 @@ const Fleets: React.FunctionComponent = () => {
   React.useEffect(() => {
     setIsLoading(true);
     getEvents();
-    setInterval(getEvents, 10000);
-  }, []);
+    setInterval(() => {
+      getEvents();
+    }, 10000);
+    return auth.events.addAccessTokenExpiring(() => {
+      auth.signinSilent();
+    })
+  }, [auth.events, auth.signinSilent]);
+
 
   return (
     <PageSection>

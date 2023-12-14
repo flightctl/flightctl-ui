@@ -20,7 +20,7 @@ const App: React.FunctionComponent = () => {
   }
 
   if (auth.error) {
-    void auth.signinRedirect();
+    return <div>ERROR: {auth.error.toString() as React.ReactNode}</div>;
   }
 
   if (auth.isAuthenticated) {
@@ -33,11 +33,11 @@ const App: React.FunctionComponent = () => {
     );
   }
   void auth.signinRedirect();
+  return <div>Redirecting...</div>;
 };
 
 
 export default App;
-
 //const App: React.FunctionComponent = () => (
 //  <Router>
 //    <AppLayout>

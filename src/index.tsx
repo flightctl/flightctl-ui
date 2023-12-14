@@ -35,7 +35,6 @@ if (process.env.NODE_ENV !== "production") {
 // pass the keycloak instance to the provider at the root of your app
 
 
-
 const root = ReactDOM.createRoot(document.getElementById('root') as Element);
 
 root.render(

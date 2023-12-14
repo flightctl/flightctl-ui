@@ -37,6 +37,15 @@ REACT_APP_KEYCLOAK_CLIENTID="flightctl-ui"
 REACT_APP_KEYCLOAK_REDIRECT="http://localhost:9000"
 REACT_APP_KEYCLOAK_SECRET="CHANGE_ME"
 ```
+**NEW keycloak requirement: Secured API by JWT validation** 
+- Go to "Realm settings", "Keys" TAB
+- At the key of use "SIG", get the public key
+- Save it to certs/api-sig.key
+```
+-----BEGIN PUBLIC KEY-----
+MIIBI[...]
+-----END PUBLIC KEY-----
+```
 
 ## Running
 

@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const fs = require('fs');
 const https = require('https');
@@ -8,7 +7,11 @@ const path = require('path');
 // you need to set also in webpack.dev.js as process.env.API_PORT
 process.env.PORT = process.env.PORT || 3001;
 const app = express();
-
+var rs = require('jsrsasign');
+var KJUR = rs.KJUR;
+var KEYUTIL = rs.KEYUTIL;
+var key = fs.readFileSync('certs/api-sig.key', 'utf8'); 
+var pubKey = KEYUTIL.getKey(key);
 
 app.use((req, res, next) => {
 
@@ -17,19 +20,32 @@ app.use((req, res, next) => {
     //for production add the url like this
     //res.setHeader('Access-Control-Allow-Origin', 'https://www.flighctl.io');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
   });
 app.get('/api/v1/:kind', async (req, res) => {
     try {
-        const kind = req.params.kind;
-        const url = `https://localhost:3333/api/v1/${kind}`;
-        const cert = fs.readFileSync('certs/client-enrollment.crt');
-        const key = fs.readFileSync('certs/client-enrollment.key');
-        const ca = fs.readFileSync('certs/ca.crt');
-        const agent = new https.Agent({ cert, key, ca });
-        const response = await axios.get(url, { httpsAgent: agent });
-        res.send(response.data);
+        if (req.headers.authorization) {
+            // set const token from authorization header without Bearer
+            const token = req.headers.authorization.split(' ')[1];
+            var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, {alg: ['RS256']});
+            if (isValid) {
+                const kind = req.params.kind;
+                const url = `https://localhost:3333/api/v1/${kind}`;
+                const cert = fs.readFileSync('certs/client-enrollment.crt');
+                const key = fs.readFileSync('certs/client-enrollment.key');
+                const ca = fs.readFileSync('certs/ca.crt');
+                const agent = new https.Agent({ cert, key, ca });
+                const response = await axios.get(url, { httpsAgent: agent });
+                res.send(response.data);
+            } else {
+                console.log('Token is not valid');
+                res.status(401).send('Unauthorized');
+            }
+        } else {
+            console.log('No authorization header');
+            res.status(401).send('Unauthorized');
+        }
     } catch (error) {
         // catch error status code from axios response
 
@@ -41,15 +57,28 @@ app.get('/api/v1/:kind', async (req, res) => {
 });
 app.get('/api/v1/:kind/:name', async (req, res) => {
     try {
-        const kind = req.params.kind;
-        const name = req.params.name;
-        const url = `https://localhost:3333/api/v1/${kind}/${name}`;
-        const cert = fs.readFileSync('certs/client-enrollment.crt');
-        const key = fs.readFileSync('certs/client-enrollment.key');
-        const ca = fs.readFileSync('certs/ca.crt');
-        const agent = new https.Agent({ cert, key, ca });
-        const response = await axios.get(url, { httpsAgent: agent });
-        res.send(response.data);
+        if (req.headers.authorization) {
+            // set const token from authorization header without Bearer
+            const token = req.headers.authorization.split(' ')[1];
+            var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, {alg: ['RS256']});
+            if (isValid) {
+                const kind = req.params.kind;
+                const name = req.params.name;
+                const url = `https://localhost:3333/api/v1/${kind}/${name}`;
+                const cert = fs.readFileSync('certs/client-enrollment.crt');
+                const key = fs.readFileSync('certs/client-enrollment.key');
+                const ca = fs.readFileSync('certs/ca.crt');
+                const agent = new https.Agent({ cert, key, ca });
+                const response = await axios.get(url, { httpsAgent: agent });
+                res.send(response.data);
+            } else {
+                console.log('Token is not valid');
+                res.status(401).send('Unauthorized');
+            }
+        } else {
+            console.log('No authorization header');
+            res.status(401).send('Unauthorized');
+        }
     } catch (error) {
         // catch error status code from axios response
 
@@ -62,15 +91,28 @@ app.get('/api/v1/:kind/:name', async (req, res) => {
 
 app.delete('/api/v1/:kind/:name', async (req, res) => {
     try {
-        const kind = req.params.kind;
-        const name = req.params.name;
-        const url = `https://localhost:3333/api/v1/${kind}/${name}`;
-        const cert = fs.readFileSync('certs/client-enrollment.crt');
-        const key = fs.readFileSync('certs/client-enrollment.key');
-        const ca = fs.readFileSync('certs/ca.crt');
-        const agent = new https.Agent({ cert, key, ca });
-        const response = await axios.delete(url, { httpsAgent: agent });
-        res.send(response.data);
+        if (req.headers.authorization) {
+            // set const token from authorization header without Bearer
+            const token = req.headers.authorization.split(' ')[1];
+            var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, {alg: ['RS256']});
+            if (isValid) {
+                const kind = req.params.kind;
+                const name = req.params.name;
+                const url = `https://localhost:3333/api/v1/${kind}/${name}`;
+                const cert = fs.readFileSync('certs/client-enrollment.crt');
+                const key = fs.readFileSync('certs/client-enrollment.key');
+                const ca = fs.readFileSync('certs/ca.crt');
+                const agent = new https.Agent({ cert, key, ca });
+                const response = await axios.delete(url, { httpsAgent: agent });
+                res.send(response.data);
+            } else {
+                console.log('Token is not valid');
+                res.status(401).send('Unauthorized');
+            }
+        } else {
+            console.log('No authorization header');
+            res.status(401).send('Unauthorized');
+        }
     } catch (error) {
         // catch error status code from axios response
 
@@ -80,14 +122,27 @@ app.delete('/api/v1/:kind/:name', async (req, res) => {
 });
 app.put('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
     try {
-        const name = req.params.name;
-        const url = `https://localhost:3333/api/v1/enrollmentrequests/${name}/approval`;
-        const cert = fs.readFileSync('certs/client-enrollment.crt');
-        const key = fs.readFileSync('certs/client-enrollment.key');
-        const ca = fs.readFileSync('certs/ca.crt');
-        const agent = new https.Agent({ cert, key, ca });
-        const response = await axios.put(url, { httpsAgent: agent });
-        res.send(response.data);
+        if (req.headers.authorization) {
+            // set const token from authorization header without Bearer
+            const token = req.headers.authorization.split(' ')[1];
+            var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, {alg: ['RS256']});
+            if (isValid) {
+                const name = req.params.name;
+                const url = `https://localhost:3333/api/v1/enrollmentrequests/${name}/approval`;
+                const cert = fs.readFileSync('certs/client-enrollment.crt');
+                const key = fs.readFileSync('certs/client-enrollment.key');
+                const ca = fs.readFileSync('certs/ca.crt');
+                const agent = new https.Agent({ cert, key, ca });
+                const response = await axios.put(url, { httpsAgent: agent });
+                res.send(response.data);
+            } else {
+                console.log('Token is not valid');
+                res.status(401).send('Unauthorized');
+            }
+        } else {
+            console.log('No authorization header');
+            res.status(401).send('Unauthorized');
+        }
     } catch (error) {
         // catch error status code from axios response
 
@@ -99,14 +154,27 @@ app.put('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
 
 app.put('/api/v1/enrollmentrequests/:name/rejection', async (req, res) => {
     try {
-        const name = req.params.name;
-        const url = `https://localhost:3333/api/v1/enrollmentrequests/${name}/rejection`;
-        const cert = fs.readFileSync('certs/client-enrollment.crt');
-        const key = fs.readFileSync('certs/client-enrollment.key');
-        const ca = fs.readFileSync('certs/ca.crt');
-        const agent = new https.Agent({ cert, key, ca });
-        const response = await axios.put(url, { httpsAgent: agent });
-        res.send(response.data);
+        if (req.headers.authorization) {
+            // set const token from authorization header without Bearer
+            const token = req.headers.authorization.split(' ')[1];
+            var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, {alg: ['RS256']});
+            if (isValid) {
+                const name = req.params.name;
+                const url = `https://localhost:3333/api/v1/enrollmentrequests/${name}/rejection`;
+                const cert = fs.readFileSync('certs/client-enrollment.crt');
+                const key = fs.readFileSync('certs/client-enrollment.key');
+                const ca = fs.readFileSync('certs/ca.crt');
+                const agent = new https.Agent({ cert, key, ca });
+                const response = await axios.put(url, { httpsAgent: agent });
+                res.send(response.data);
+            } else {
+                console.log('Token is not valid');
+                res.status(401).send('Unauthorized');
+            }
+        } else {
+            console.log('No authorization header');
+            res.status(401).send('Unauthorized');
+        }
     } catch (error) {
         // catch error status code from axios response
 

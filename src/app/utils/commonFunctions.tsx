@@ -1,14 +1,13 @@
 
 import axios from 'axios';
-import { useAuth } from "react-oidc-context";
 var apiServer = "";
 if (process.env.NODE_ENV === 'development') {
   apiServer = window.location.protocol + '//' + window.location.hostname + ":" + process.env.API_PORT;
 }
 
-
-export const fetchData = async (kind: string) => {
+export const fetchData = async (kind: string, token: string) => {
   try {
+    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
     const response = await axios.get(apiServer + '/api/v1/' + kind);
     return response.data;
   } catch (error) {
@@ -16,9 +15,10 @@ export const fetchData = async (kind: string) => {
   }
 }
 
-export const fetchDataObj = async (kind: string, name: string) => {
+export const fetchDataObj = async (kind: string, name: string, token: string) => {
   if (kind !== undefined && name !== undefined) {
     try {
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
       const response = await axios.get(apiServer + '/api/v1/' + kind + '/' + name);
       return response.data;
     } catch (error) {
@@ -29,16 +29,18 @@ export const fetchDataObj = async (kind: string, name: string) => {
   }
 }
 
-export const deleteObject = async (kind: string, name: string) => {
+export const deleteObject = async (kind: string, name: string, token: string) => {
   try {
+    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
     const response = await axios.delete(apiServer + '/api/v1/' + kind + '/' + name);
     return response.data;
   } catch (error) {
     console.error('Error making request:', error);
   }
 }
-export const approveEnrollmentRequest = async (name: string) => {
-  try {
+export const approveEnrollmentRequest = async (name: string, token: string) => {
+try {
+    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
     const response = await axios.put(apiServer + '/api/v1/enrollmentrequests/' + name + '/approval');
     return response.data;
   } catch (error) {
@@ -46,8 +48,9 @@ export const approveEnrollmentRequest = async (name: string) => {
   }
 }
 
-export const rejectEnrollmentRequest = async (name: string) => {
-  try {
+export const rejectEnrollmentRequest = async (name: string, token: string) => {
+try {
+    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
     const response = await axios.put(apiServer + '/api/v1/enrollmentrequests/' + name + '/rejection');
     return response.data;
   } catch (error) {

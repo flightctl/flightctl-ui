@@ -1,20 +1,10 @@
 import * as React from 'react';
 import { fetchData, tableCellData, deleteObject, approveEnrollmentRequest } from '@app/utils/commonFunctions'; 
+import { useAuth } from 'react-oidc-context';
 import { enrollmentrequestList } from '@app/utils/commonDataTypes';
 import {
-  Button,
-  EmptyState,
-  EmptyStateActions,
-  EmptyStateBody,
-  EmptyStateFooter,
-  EmptyStateHeader,
-  EmptyStateIcon,
-  EmptyStateVariant,
   PageSection,
   Spinner,
-  Text,
-  TextContent,
-  TextVariants,
   Title,
 } from '@patternfly/react-core';
 
@@ -69,43 +59,52 @@ const columns = [
 
 
 const EnrollmentRequests: React.FunctionComponent = () => {
+  const auth = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
   const [enrollmentRequestData, setEnrollmentRequestData] = React.useState<enrollmentrequestList>({ items: [] });
   function getEvents() {
-    fetchData('enrollmentrequests').then((data) => {
+    fetchData('enrollmentrequests', auth.user?.access_token ?? '').then((data) => {
 
       setEnrollmentRequestData(data);
       setIsLoading(false);
     });
   }
+
   React.useEffect(() => {
     setIsLoading(true);
     getEvents();
-    setInterval(getEvents, 10000);
-  }, []);
+    setInterval(() => {
+      getEvents();
+    }, 10000);
+    return auth.events.addAccessTokenExpiring(() => {
+      auth.signinSilent();
+    })
+  }, [auth.events, auth.signinSilent]);
+
+
 
   const generateActions = (enrollmentrequest) => {
     const actions = [
       {
         title: 'Reboot',
-        onClick: () => alert(`Approve`),
+        onClick: () => alert(`Reboot`),
       },
       {
         title: 'Delete',
         onClick: () => {
           setIsLoading(true);
-          deleteObject('enrollmentrequests', enrollmentrequest.metadata.name);
+          deleteObject('enrollmentrequests', enrollmentrequest.metadata.name, auth.user?.access_token ?? '');
           getEvents();
         },
       },
     ];
     enrollmentrequest.status.conditions.forEach((condition) => {
-      if ((condition.status !== "False") && (condition.type === "Approved")) {
+      if ((condition.status === "False") && (condition.type === "Approved")) {
         actions.push({
           title: 'Approve',
           onClick: () => {
             setIsLoading(true);
-            approveEnrollmentRequest(enrollmentrequest.metadata.name);
+            approveEnrollmentRequest(enrollmentrequest.metadata.name, auth.user?.access_token ?? '');
             getEvents();
           },
         });
