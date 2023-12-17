@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/nodejs-16:latest as build
+FROM registry.access.redhat.com/ubi9/nodejs-18:latest as build
 USER root
 WORKDIR /app
 COPY package.json /app
@@ -6,7 +6,7 @@ COPY . /app
 RUN npm install
 RUN npm run build
 
-FROM registry.access.redhat.com/ubi9/nodejs-16:latest
+FROM registry.access.redhat.com/ubi9/nodejs-18:latest
 USER root
 WORKDIR /app
 COPY --from=build /app/dist /app/dist
