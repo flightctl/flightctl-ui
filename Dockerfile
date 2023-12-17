@@ -1,14 +1,18 @@
-FROM registry.access.redhat.com/ubi9/nodejs-16:latest
+FROM registry.access.redhat.com/ubi9/nodejs-16:latest as build
 USER root
-RUN npm run build
 WORKDIR /app
 COPY package.json /app
+COPY . /app
 RUN npm install
-COPY app.js /app
-COPY dist /app
+RUN npm run build
+
+FROM registry.access.redhat.com/ubi9/nodejs-16:latest
+COPY --from=build /app/build /app/build
+COPY --from=build /app/package.json /app/package.json
+COPY --from=build /app/app.js /app/app.js
 RUN dnf upgrade -y
 RUN dnf clean all
-RUN npm build
+RUN npm install
 RUN npm cache clean --force 
 RUN chown -R 1001:0 /app
 RUN rm -rf /app/.npm
