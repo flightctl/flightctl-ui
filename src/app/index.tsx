@@ -20,6 +20,7 @@ const App: React.FunctionComponent = () => {
   }
 
   if (auth.error) {
+    console.log(auth.error);
     return <div>ERROR: {auth.error.toString() as React.ReactNode}</div>;
   }
 

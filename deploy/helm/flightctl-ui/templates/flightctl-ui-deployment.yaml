@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flightctl-ui
+  namespace: {{ .Values.flightctlUi.namespace }}
+  labels:
+    app: flightctl-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flightctl-ui
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: flightctl-ui
+    spec:
+      containers:
+        - env:
+          - name: REACT_APP_KEYCLOAK_AUTHORITY
+            valueFrom:
+              secretKeyRef:
+                name: flightctl-ui
+                key: REACT_APP_KEYCLOAK_AUTHORITY
+          - name: REACT_APP_KEYCLOAK_CLIENTID
+            valueFrom:
+              secretKeyRef:
+                name: flightctl-ui
+                key: REACT_APP_KEYCLOAK_CLIENTID
+          - name: REACT_APP_KEYCLOAK_REDIRECT
+            valueFrom:
+              secretKeyRef:
+                name: flightctl-ui
+                key: REACT_APP_KEYCLOAK_REDIRECT
+          - name: REACT_APP_KEYCLOAK_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: flightctl-ui
+                key: REACT_APP_KEYCLOAK_SECRET
+          - name: PORT
+            valueFrom:
+              secretKeyRef:
+                name: flightctl-ui
+                key: PORT
+          - name: FLIGHTCTL_SERVER
+            valueFrom:
+              secretKeyRef:
+                name: flightctl-ui
+                key: FLIGHTCTL_SERVER
+          image: {{ .Values.flightctlUi.image }}
+          name: flightctl-ui
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /app/certs
+              name: flightctl-ui-certs
+      restartPolicy: Always
+      volumes:
+        - name: flightctl-ui-certs
+          secret:
+            secretName: flightctl-ui-certs
+            items:
+              - key: api-sig.key
+                path: api-sig.key
+              - key: ca.crt
+                path: ca.crt
+              - key: front-cli.crt
+                path: front-cli.crt
+              - key: front-cli.key
+                path: front-cli.key

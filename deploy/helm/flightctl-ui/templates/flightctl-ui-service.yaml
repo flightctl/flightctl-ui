@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: flightctl-ui
+  namespace: {{ .Values.flightctlUi.namespace }}
+  labels:
+    app: flightctl-ui
+spec:
+  ports:
+    - name: 8080-tcp
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: flightctl-ui

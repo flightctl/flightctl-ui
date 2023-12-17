@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: {{ .Values.keycloak.namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: keycloak
+    spec:
+      containers:
+      - args:
+        - start-dev
+        - --http-port=8080
+        - --proxy=edge
+        - --import-realm
+        env:
+          - name: DB_ADDR
+            valueFrom:
+              secretKeyRef:
+                name: keycloak
+                key: DB_ADDR
+          - name: DB_DATABSE
+            valueFrom:
+              secretKeyRef:
+                name: keycloak
+                key: DB_DATABSE
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: keycloak
+                key: DB_PASSWORD
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: keycloak
+                key: DB_USER
+          - name: DB_VENDOR
+            valueFrom:
+              secretKeyRef:
+                name: keycloak
+                key: DB_VENDOR
+          - name: KEYCLOAK_ADMIN
+            valueFrom:
+              secretKeyRef:
+                name: keycloak
+                key: KEYCLOAK_ADMIN
+          - name: KEYCLOAK_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: keycloak
+                key: KEYCLOAK_ADMIN_PASSWORD
+        image: {{ .Values.keycloak.image }}
+        name: keycloak
+        ports:
+        - containerPort: 8080
+        resources: {}
+        volumeMounts:
+        - mountPath: /opt/keycloak/data/import/
+          name: keycloak-claim
+      restartPolicy: Always
+      volumes:
+      - name: keycloak-claim
+        secret:
+          secretName: keycloak-realm
+          items:
+            - key: realm.json
+              path: realm.json

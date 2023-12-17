@@ -1,0 +1,7 @@
+apiVersion: v2
+name: flightctl-ui
+description: A helm chart for flightctl-ui and keycloak
+type: application
+version: 0.0.1
+appVersion: 0.0.1
+
