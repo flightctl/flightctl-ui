@@ -1,6 +1,6 @@
 FROM registry.access.redhat.com/ubi9/nodejs-16:latest
 USER root
-RUN npm build
+RUN npm run build
 WORKDIR /app
 COPY package.json /app
 RUN npm install
