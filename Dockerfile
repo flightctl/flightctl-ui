@@ -7,6 +7,8 @@ RUN npm install
 RUN npm run build
 
 FROM registry.access.redhat.com/ubi9/nodejs-16:latest
+USER root
+WORKDIR /app
 COPY --from=build /app/dist /app/dist
 COPY --from=build /app/package.json /app/package.json
 COPY --from=build /app/app.js /app/app.js
