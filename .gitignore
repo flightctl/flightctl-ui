@@ -1,6 +1,7 @@
 **/node_modules
 dist
 yarn-error.log
+package-lock.json
 yarn.lock
 stats.json
 coverage

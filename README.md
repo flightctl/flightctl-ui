@@ -23,9 +23,6 @@ cp ~/.flightctl/certs/ca.crt certs
 - Go to the flightctl Realm clients view like: http://localhost:9080/admin/master/console/#/flightctl/clients
 - select the ClientID "flightctl-ui"
 - Set the Access settings URLs and redirect URIs for your UI instance
-- Go to Credentials
-- Set Client Authenticator: "Client Id and Secret"
-- Copy the Client Secret
 - In the left Menu, go to Users and Create the first one
 - Once the user is created, go to its Credentials tab
 - Set the user password
@@ -35,7 +32,6 @@ cp ~/.flightctl/certs/ca.crt certs
 REACT_APP_KEYCLOAK_AUTHORITY="http://localhost:9080/realms/flightctl"
 REACT_APP_KEYCLOAK_CLIENTID="flightctl-ui"
 REACT_APP_KEYCLOAK_REDIRECT="http://localhost:9000"
-REACT_APP_KEYCLOAK_SECRET="CHANGE_ME"
 ```
 **NEW keycloak requirement: Secured API by JWT validation** 
 - Go to "Realm settings", "Keys" TAB
