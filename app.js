@@ -6,7 +6,7 @@ const path = require('path');
 require('dotenv').config();
 //skip certificate validation for development environment
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
+const KEYCLOAK_AUTHORITY = process.env.REACT_APP_KEYCLOAK_AUTHORITY || "http://localhost:9080/realms/flightctl"
 // if you want to change api PORT for development environment,
 // you need to set also in webpack.dev.js as process.env.API_PORT
 process.env.PORT = process.env.PORT || 3001;
@@ -15,7 +15,16 @@ const app = express();
 var rs = require('jsrsasign');
 var KJUR = rs.KJUR;
 var KEYUTIL = rs.KEYUTIL;
-var key = fs.readFileSync('certs/api-sig.key', 'utf8'); 
+let key;
+// fi certs/api-sig.key exists, use it to verify JWT, else, obtain public key from keycloak
+if (fs.existsSync('certs/api-sig.key')) {
+    key = fs.readFileSync('certs/api-sig.key', 'utf8'); 
+} else {
+    axios.get(KEYCLOAK_AUTHORITY)
+    .then(function (response) {
+        key = "-----BEGIN PUBLIC KEY-----\n" + response.data.public_key + "\n-----END PUBLIC KEY-----";
+    })
+}
 var pubKey = KEYUTIL.getKey(key);
 
 app.use((req, res, next) => {
