@@ -42,11 +42,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       </MastheadMain>
       {auth.user ? (
         <div style={{ marginLeft: 'auto' }} id="userWelcome">
-           {auth.user?.profile.family_name}{' '}
+           {auth.user?.profile.given_name}{' '}
           <Button
             variant="link"
             onClick={() =>
-              void auth.signoutRedirect({ post_logout_redirect_uri: window.location.protocol + '//' + window.location.host })
+              void auth.signoutRedirect()
             }
           >
             Log out
