@@ -3,9 +3,14 @@ const fs = require('fs');
 const https = require('https');
 const axios = require('axios');
 const path = require('path');
+require('dotenv').config();
+// set process.env.PORT for production environment
+
+
 // if you want to change api PORT for development environment,
 // you need to set also in webpack.dev.js as process.env.API_PORT
 process.env.PORT = process.env.PORT || 3001;
+process.env.FLIGHTCTL_SERVER = process.env.FLIGHTCTL_SERVER || 'https://localhost:3333';
 const app = express();
 var rs = require('jsrsasign');
 var KJUR = rs.KJUR;
@@ -31,9 +36,9 @@ app.get('/api/v1/:kind', async (req, res) => {
             var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, {alg: ['RS256']});
             if (isValid) {
                 const kind = req.params.kind;
-                const url = `https://localhost:3333/api/v1/${kind}`;
-                const cert = fs.readFileSync('certs/client-enrollment.crt');
-                const key = fs.readFileSync('certs/client-enrollment.key');
+                const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}`;
+                const cert = fs.readFileSync('certs/front-cli.crt');
+                const key = fs.readFileSync('certs/front-cli.key');
                 const ca = fs.readFileSync('certs/ca.crt');
                 const agent = new https.Agent({ cert, key, ca });
                 const response = await axios.get(url, { httpsAgent: agent });
