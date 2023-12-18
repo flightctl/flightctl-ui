@@ -5,7 +5,7 @@ COPY package.json /app
 COPY . /app
 RUN npm install
 RUN npm run build
-RUN sed -i '0,/<script/s//<script src="%PUBLIC_URL%\/env.js"><\/script><script/' build/index.html
+RUN sed -i '0,/<script/s//<script src="%PUBLIC_URL%\/env.js"><\/script><script/' dist/index.html
 
 FROM registry.access.redhat.com/ubi9/nodejs-18:latest
 USER root
