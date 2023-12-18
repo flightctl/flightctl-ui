@@ -4,8 +4,8 @@ const https = require('https');
 const axios = require('axios');
 const path = require('path');
 require('dotenv').config();
-// set process.env.PORT for production environment
-
+//skip certificate validation for development environment
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // if you want to change api PORT for development environment,
 // you need to set also in webpack.dev.js as process.env.API_PORT
