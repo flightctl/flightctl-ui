@@ -82,7 +82,7 @@ app.get('/api/v1/:kind/:name', async (req, res) => {
             if (isValid) {
                 const kind = req.params.kind;
                 const name = req.params.name;
-                const url = `https://localhost:3333/api/v1/${kind}/${name}`;
+                const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}/${name}`;
                 const cert = fs.readFileSync('certs/front-cli.crt');
                 const key = fs.readFileSync('certs/front-cli.key');
                 const ca = fs.readFileSync('certs/ca.crt');
@@ -116,7 +116,7 @@ app.delete('/api/v1/:kind/:name', async (req, res) => {
             if (isValid) {
                 const kind = req.params.kind;
                 const name = req.params.name;
-                const url = `https://localhost:3333/api/v1/${kind}/${name}`;
+                const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}/${name}`;
                 const cert = fs.readFileSync('certs/front-cli.crt');
                 const key = fs.readFileSync('certs/front-cli.key');
                 const ca = fs.readFileSync('certs/ca.crt');
@@ -146,7 +146,7 @@ app.put('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
             var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, {alg: ['RS256']});
             if (isValid) {
                 const name = req.params.name;
-                const url = `https://localhost:3333/api/v1/enrollmentrequests/${name}/approval`;
+                const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/enrollmentrequests/${name}/approval`;
                 const cert = fs.readFileSync('certs/front-cli.crt');
                 const key = fs.readFileSync('certs/front-cli.key');
                 const ca = fs.readFileSync('certs/ca.crt');
@@ -178,7 +178,7 @@ app.put('/api/v1/enrollmentrequests/:name/rejection', async (req, res) => {
             var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, {alg: ['RS256']});
             if (isValid) {
                 const name = req.params.name;
-                const url = `https://localhost:3333/api/v1/enrollmentrequests/${name}/rejection`;
+                const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/enrollmentrequests/${name}/rejection`;
                 const cert = fs.readFileSync('certs/front-cli.crt');
                 const key = fs.readFileSync('certs/front-cli.key');
                 const ca = fs.readFileSync('certs/ca.crt');
