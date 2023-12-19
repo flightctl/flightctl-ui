@@ -314,7 +314,7 @@ const Overview: React.FunctionComponent = () => {
         <CardBody>
           <Flex>
             <FlexItem>
-              <div id="grid-total">Total: 10 <br></br><div id="total-toggle"></div><br></br></div>
+              <div id="grid-total">Total: - <br></br><div id="total-toggle"></div><br></br></div>
             </FlexItem>
             <Divider
               orientation={{

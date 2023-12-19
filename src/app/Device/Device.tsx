@@ -203,7 +203,7 @@ const Device: React.FunctionComponent = () => {
     return (
         <PageSection >
 
-            <Title headingLevel="h1" size="lg">Device Details</Title>
+            <Title headingLevel="h1" size="lg">Device Details: {deviceID}</Title>
             <Tabs
                 activeKey={activeTabKey}
                 onSelect={handleTabClick}

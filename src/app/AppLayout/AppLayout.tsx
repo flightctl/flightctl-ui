@@ -42,7 +42,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       </MastheadMain>
       {auth.user ? (
         <div style={{ marginLeft: 'auto' }} id="userWelcome">
-           {auth.user?.profile.given_name}{' '}
+           {auth.user?.profile.preferred_username}{' '}
           <Button
             variant="link"
             onClick={() =>

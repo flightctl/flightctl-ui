@@ -4,8 +4,7 @@ const https = require('https');
 const axios = require('axios');
 const path = require('path');
 require('dotenv').config();
-//skip certificate validation for development environment
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const KEYCLOAK_AUTHORITY = process.env.REACT_APP_KEYCLOAK_AUTHORITY || "http://localhost:9080/realms/flightctl"
 // if you want to change api PORT for development environment,
 // you need to set also in webpack.dev.js as process.env.API_PORT
@@ -25,6 +24,7 @@ if (fs.existsSync('certs/api-sig.key')) {
         key = "-----BEGIN PUBLIC KEY-----\n" + response.data.public_key + "\n-----END PUBLIC KEY-----";
     })
 }
+console.log(key);
 var pubKey = KEYUTIL.getKey(key);
 
 app.use((req, res, next) => {
