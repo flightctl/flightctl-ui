@@ -205,7 +205,7 @@ app.put('/api/v1/enrollmentrequests/:name/rejection', async (req, res) => {
 //set dist as static application folder
 app.use(express.static(__dirname + '/dist'));
 //serve index.html file on route '/'
-app.get('/', function (req, res) {
+app.get('*', function (req, res) {
     res.sendFile(path.join(__dirname + '/dist/index.html'));
 });
 
