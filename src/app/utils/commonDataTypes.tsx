@@ -3,30 +3,13 @@ export type enrollmentrequest = {
     name: string;
     creationTimestamp: string | null;
     deletionTimestamp: string | null;
-    labels: [
-      { [key: string]: string | null; }
-    ]
+    labels:{ 
+      [key: string]: string | null; 
+    }
   };
-  spec: {
-    deviceStatus: {
-      systemInfo: {
-        architecture: string | null;
-        bootID: string | null;
-        machineID: string | null;
-        operatingSystem: string | null;
-      };
-    };
-  };
+  spec: {};
   status: {
-    conditions: [
-      {
-        lastTransitionTime: string | null;
-        message: string | null;
-        reason: string | null;
-        status: string | null;
-        type: string | null;
-      }
-    ]
+    conditions: {};
   };
 };
 export type enrollmentrequestList = {
@@ -38,7 +21,7 @@ export type device = {
     creationTimestamp: string | null;
     deletionTimestamp: string | null;
     labels: {
-      [key: string]: string;
+      [key: string]: string | null;
     }
   };
   status: {

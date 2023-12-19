@@ -37,7 +37,7 @@ const routes: AppRouteConfig[] = [
         exact: true,
         label: 'Overview',
         path: '/',
-        title: 'PFlightControl | Overview',
+        title: 'FlightControl | Overview',
       },
       {
         component: EnrollmentRequests,

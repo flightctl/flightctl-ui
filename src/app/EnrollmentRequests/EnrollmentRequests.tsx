@@ -18,6 +18,12 @@ import {
   Tr,
 } from '@patternfly/react-table';
 
+interface EnrollmentRequest {
+  metadata: {
+    name: string
+  }
+}
+
 // import axios from 'axios';
 
 //type enrollmentrequest = {

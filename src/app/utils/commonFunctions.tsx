@@ -58,9 +58,9 @@ try {
   }
 }
 
-export const tableCellData = (column, fleet) => {
+export const tableCellData = (column, obj) => {
   const columnKey = column.key.split('.');
-  let finalKey = fleet;
+  let finalKey = obj;
   if (columnKey.length > 1) {
     columnKey.forEach((key) => {
       // if key ends with [NUMBER] then it is an array of objects
@@ -76,7 +76,7 @@ export const tableCellData = (column, fleet) => {
       finalKey = finalKey[key];
     });
   } else {
-    finalKey = fleet[column.key];
+    finalKey = obj[column.key];
   }
   const data = column.formatter ? column.formatter(finalKey) : finalKey;
   if (data === undefined) {
