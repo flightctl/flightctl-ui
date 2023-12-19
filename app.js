@@ -15,6 +15,7 @@ var rs = require('jsrsasign');
 var KJUR = rs.KJUR;
 var KEYUTIL = rs.KEYUTIL;
 let key;
+let pubKey;
 // fi certs/api-sig.key exists, use it to verify JWT, else, obtain public key from keycloak
 if (fs.existsSync('certs/api-sig.key')) {
     key = fs.readFileSync('certs/api-sig.key', 'utf8'); 
@@ -22,10 +23,12 @@ if (fs.existsSync('certs/api-sig.key')) {
     axios.get(KEYCLOAK_AUTHORITY)
     .then(function (response) {
         key = "-----BEGIN PUBLIC KEY-----\n" + response.data.public_key + "\n-----END PUBLIC KEY-----";
+        pubKey = KEYUTIL.getKey(key);
+        console.log(key);
     })
 }
-console.log(key);
-var pubKey = KEYUTIL.getKey(key);
+
+
 
 app.use((req, res, next) => {
 
