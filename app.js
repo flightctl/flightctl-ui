@@ -8,6 +8,9 @@ require('dotenv').config();
 const KEYCLOAK_AUTHORITY = process.env.REACT_APP_KEYCLOAK_AUTHORITY || "http://localhost:9080/realms/flightctl"
 // if you want to change api PORT for development environment,
 // you need to set also in webpack.dev.js as process.env.API_PORT
+
+//ignore ssl verification for axios
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 process.env.PORT = process.env.PORT || 3001;
 process.env.FLIGHTCTL_SERVER = process.env.FLIGHTCTL_SERVER || 'https://localhost:3333';
 const app = express();

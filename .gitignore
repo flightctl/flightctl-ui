@@ -9,5 +9,6 @@ storybook-static
 .DS_Store
 .idea
 .env
+.env.local
 certs/
 deploy/helm/flightctl-ui/values-*.yaml

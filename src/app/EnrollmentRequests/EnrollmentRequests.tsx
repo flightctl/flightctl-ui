@@ -104,20 +104,22 @@ const EnrollmentRequests: React.FunctionComponent = () => {
         },
       },
     ];
-    enrollmentrequest.status.conditions.forEach((condition) => {
-      if ((condition.status === "False") && (condition.type === "Approved")) {
-        actions.push({
-          title: 'Approve',
-          onClick: () => {
-            setIsLoading(true);
-            approveEnrollmentRequest(enrollmentrequest.metadata.name, auth.user?.access_token ?? '');
-            getEvents();
-          },
-        });
-        return;
-      }
-    });
-  
+    if (enrollmentrequest.status > 0) {
+      console.log(enrollmentrequest.status);
+      enrollmentrequest.status.forEach((status) => {
+        if ((status.condition.status === "False") && (status.condition.type === "Approved")) {
+          actions.push({
+            title: 'Approve',
+            onClick: () => {
+              setIsLoading(true);
+              approveEnrollmentRequest(enrollmentrequest.metadata.name, auth.user?.access_token ?? '');
+              getEvents();
+            },
+          });
+          return;
+        }
+      });
+    }
     return actions;
   };
   

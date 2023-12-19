@@ -15,13 +15,13 @@ declare global {
 
 const KEYCLOAK_AUTHORITY = process.env.NODE_ENV === 'production' ? window.env.REACT_APP_KEYCLOAK_AUTHORITY : process.env.REACT_APP_KEYCLOAK_AUTHORITY || "http://localhost:9080/realms/flightctl"
 const KEYCLOAK_CLIENTID = process.env.NODE_ENV === 'production' ? window.env.KEYCLOAK_CLIENTID : process.env.REACT_APP_KEYCLOAK_CLIENTID || "flightctl-ui"
-const KEYCLOAK_REDIRECT = process.env.NODE_ENV === 'production' ? window.env.KEYCLOAK_REDIRECT : process.env.REACT_APP_KEYCLOAK_REDIRECT + window.location.pathname|| "http://localhost:9000" + window.location.pathname
+const KEYCLOAK_REDIRECT = process.env.NODE_ENV === 'production' ? window.env.KEYCLOAK_REDIRECT : process.env.REACT_APP_KEYCLOAK_REDIRECT || "http://localhost:9000" 
 
 
 const oidcConfig = {
   authority: KEYCLOAK_AUTHORITY,
   client_id: KEYCLOAK_CLIENTID,
-  redirect_uri: KEYCLOAK_REDIRECT,
+  redirect_uri: KEYCLOAK_REDIRECT + window.location.pathname,
   response_type: "code",
   scope: "openid profile email",
   automaticSilentRenew: true,

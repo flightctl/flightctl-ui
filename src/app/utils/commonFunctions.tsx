@@ -60,6 +60,7 @@ try {
 
 export const tableCellData = (column, obj) => {
   const columnKey = column.key.split('.');
+  console.log(column);
   let finalKey = obj;
   if (columnKey.length > 1) {
     columnKey.forEach((key) => {
@@ -67,6 +68,10 @@ export const tableCellData = (column, obj) => {
       if (key.match(/\[\d+\]/)) {
         const arrayKey = key.split('[');
         const arrayIndex = arrayKey[1].replace(']', '');
+        if (finalKey[arrayKey[0]] === undefined) {
+          return '-';
+        }
+        console.log(finalKey[arrayKey[0]]);
         finalKey = finalKey[arrayKey[0]][arrayIndex];
         return finalKey;
       }
