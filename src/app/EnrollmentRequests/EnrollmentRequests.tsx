@@ -102,6 +102,15 @@ const EnrollmentRequests: React.FunctionComponent = () => {
           return;
         }
       });
+    } else {
+      actions.push({
+        title: 'Approve',
+        onClick: () => {
+          setIsLoading(true);
+          approveEnrollmentRequest(enrollmentrequest.metadata.name, auth.user?.access_token ?? '');
+          getEvents();
+        },
+      });
     }
     return actions;
   };
