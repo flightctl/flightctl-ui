@@ -129,11 +129,9 @@ const Overview: React.FunctionComponent = () => {
     setIsOpenRegion(!isOpenRegion);
   };
   const onFleetSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    console.log('selected', value);
     setIsOpenFleet(false);
   };
   const onRegionSelect = (_event: React.MouseEvent<Element, MouseEvent> | undefined, value: string | number | undefined) => {
-    console.log('selected', value);
     setIsOpenRegion(false);
   };
   const fleetList = [
@@ -175,15 +173,12 @@ const Overview: React.FunctionComponent = () => {
                         onChange={() => {
                           const searchInput = document.getElementById('search-fleet');
                           const input = searchInput?.getElementsByTagName('input')[0];
-                          console.log(input?.value);
                           if (input) {
                             const searchValue = input.value;
-                            console.log("searchValue" + searchValue);
                             if (searchValue) {
                               const filtered = fleetList.filter((item) => {
                                 return item.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
                               });
-                              console.log("filtered" + filtered);
                               setFleetList(filtered);
                             } else {
                               setFleetList(fleetList);
@@ -255,15 +250,12 @@ const Overview: React.FunctionComponent = () => {
                         onChange={() => {
                           const searchInput = document.getElementById('search-region');
                           const input = searchInput?.getElementsByTagName('input')[0];
-                          console.log(input?.value);
                           if (input) {
                             const searchValue = input.value;
-                            console.log("searchValue" + searchValue);
                             if (searchValue) {
                               const filtered = regionList.filter((item) => {
                                 return item.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
                               });
-                              console.log("filtered" + filtered);
                               setRegionList(filtered);
                             } else {
                               setRegionList(regionList);

@@ -28,7 +28,6 @@ if (fs.existsSync('certs/api-sig.key')) {
     .then(function (response) {
         key = "-----BEGIN PUBLIC KEY-----\n" + response.data.public_key + "\n-----END PUBLIC KEY-----";
         pubKey = KEYUTIL.getKey(key);
-        console.log(key);
     })
 }
 

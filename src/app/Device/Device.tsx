@@ -154,7 +154,6 @@ const Device: React.FunctionComponent = () => {
     const [value, setValue] = React.useState('');
 
     const handleDeleteRow = (index) => {
-        console.log("index:" + index);
         const tmpTableRows = tableRows.filter((row, i) => i !== index);
         setTableRows([]);
         setTableRows(tmpTableRows);

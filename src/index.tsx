@@ -28,7 +28,6 @@ const oidcConfig = {
   loadUserInfo: true
 };
 
-console.log(oidcConfig);
 if (process.env.NODE_ENV !== "production") {
   const config = {
     rules: [

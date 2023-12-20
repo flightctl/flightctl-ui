@@ -67,11 +67,11 @@ const columns = [
 const EnrollmentRequests: React.FunctionComponent = () => {
   const auth = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [enrollmentRequestData, setEnrollmentRequestData] = React.useState<enrollmentrequestList>({ items: [] });
+  const [enrollmentRequestsData, setEnrollmentRequestsData] = React.useState<enrollmentrequestList>({ items: [] });
   function getEvents() {
     fetchData('enrollmentrequests', auth.user?.access_token ?? '').then((data) => {
 
-      setEnrollmentRequestData(data);
+      setEnrollmentRequestsData(data);
       setIsLoading(false);
     });
   }
@@ -105,7 +105,6 @@ const EnrollmentRequests: React.FunctionComponent = () => {
       },
     ];
     if (enrollmentrequest.status > 0) {
-      console.log(enrollmentrequest.status);
       enrollmentrequest.status.forEach((status) => {
         if ((status.condition.status === "False") && (status.condition.type === "Approved")) {
           actions.push({
@@ -122,8 +121,6 @@ const EnrollmentRequests: React.FunctionComponent = () => {
     }
     return actions;
   };
-  
-
 
   return (
     <PageSection>
@@ -138,9 +135,9 @@ const EnrollmentRequests: React.FunctionComponent = () => {
           </Tr>
         </Thead>
 
-        {enrollmentRequestData.items.length > 0 && (
+        {enrollmentRequestsData.items.length > 0 && (
           <Tbody>
-            {enrollmentRequestData.items.map((enrollmentrequest) => (
+            {enrollmentRequestsData.items.map((enrollmentrequest) => (
               <Tr key={enrollmentrequest.metadata.name}>
                 {columns.map((column) => (
                   <Td dataLabel={column.label} key={`${column.label}${enrollmentrequest.metadata.name}`}>
@@ -149,7 +146,7 @@ const EnrollmentRequests: React.FunctionComponent = () => {
                 ))}
                 <Td isActionCell>
                   <ActionsColumn
-                    items={generateActions(enrollmentrequest)}
+                    items={generateActions(enrollmentrequest as EnrollmentRequest)}
                   />
                 </Td>
               </Tr>

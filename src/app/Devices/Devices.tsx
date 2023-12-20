@@ -72,7 +72,7 @@ const Devices: React.FunctionComponent = () => {
     return auth.events.addAccessTokenExpiring(() => {
       auth.signinSilent();
     })
-}, [auth.events, auth.signinSilent]);
+  }, [auth.events, auth.signinSilent]);
 
   return (
     <PageSection>
