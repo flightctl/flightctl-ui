@@ -25,36 +25,7 @@ import { set } from 'yaml/dist/schema/yaml-1.1/set';
 const Overview: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const auth = useAuth();
-
-  /*
-    function getEvents() {
-      if (auth.user?.access_token) {
-        fetchData('fleets', auth.user?.access_token).then((data) => {
-          setFleetsData(data);
-          setIsLoading(false);
-        });
-      } else {
-        console.log("no access token");
-      }
-    }
-    React.useEffect(() => {
-      setIsLoading(true);
-      getEvents();
-      const interval = setInterval(() => {
-        getEvents();
-      }, 10000);
-      return () => clearInterval(interval);
-    },[auth]);
   
-  
-  */
-
-
-
-
-
-
-
   function getDevices() {
     if (auth.user?.access_token) {
       fetchData("devices", auth.user?.access_token).then((data) => {

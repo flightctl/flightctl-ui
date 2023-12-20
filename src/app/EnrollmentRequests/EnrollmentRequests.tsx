@@ -24,20 +24,6 @@ interface EnrollmentRequest {
   }
 }
 
-// import axios from 'axios';
-
-//type enrollmentrequest = {
-//  fingerprint: string | null;
-//  hardware: string | null;
-//  request_time: string | null;
-//  target_fleet: string | null;
-//  target_labels: string | null;
-//  approver: string | null;
-//  approval_status: string | null;
-//  measurements: string;
-//  enrollment_status: string;
-//};
-
 const dateFormatter = (date) => {
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
   let dateObj;
