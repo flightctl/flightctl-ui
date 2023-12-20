@@ -58,21 +58,21 @@ const Devices: React.FunctionComponent = () => {
 
 
   function getEvents() {
-    fetchData('devices', auth.user?.access_token ?? '').then((data) => {
-      setDevicesData(data);
-      setIsLoading(false);
-    });
+    if (auth.user?.access_token){
+      fetchData('devices', auth.user?.access_token ?? '').then((data) => {
+        setDevicesData(data);
+        setIsLoading(false);
+      });
+    }
   }
   React.useEffect(() => {
     setIsLoading(true);
     getEvents();
-    setInterval(() => {
+    const interval = setInterval(() => {
       getEvents();
     }, 10000);
-    return auth.events.addAccessTokenExpiring(() => {
-      auth.signinSilent();
-    })
-  }, [auth.events, auth.signinSilent]);
+    return clearInterval(interval);
+  }, [auth]);
 
   return (
     <PageSection>

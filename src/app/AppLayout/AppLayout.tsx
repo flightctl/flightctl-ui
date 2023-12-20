@@ -27,6 +27,7 @@ interface IAppLayout {
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const auth = useAuth();
+
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const Header = (
     <Masthead>

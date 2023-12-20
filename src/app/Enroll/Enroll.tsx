@@ -57,7 +57,7 @@ const Enroll: React.FunctionComponent = () => {
             pageSidebar.style.display = "";
           }
         };
-    }, []); 
+    }, [auth]); 
 
     const handleReject = () => {
         setShowAlert(true);

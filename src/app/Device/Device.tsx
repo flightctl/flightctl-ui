@@ -195,10 +195,7 @@ const Device: React.FunctionComponent = () => {
     React.useEffect(() => {
         setIsLoading(true);
         getEvents();
-        return auth.events.addAccessTokenExpiring(() => {
-          auth.signinSilent();
-        })
-      }, [auth.events, auth.signinSilent]);
+      }, [auth]);
     return (
         <PageSection >
 

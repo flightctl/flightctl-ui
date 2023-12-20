@@ -69,21 +69,23 @@ const Fleets: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [fleetsData, setFleetsData] = React.useState<itemsList>({ items: [] });
   function getEvents() {
-    fetchData('fleets', auth.user?.access_token ?? '').then((data) => {
-      setFleetsData(data);
-      setIsLoading(false);
-    });
+    if (auth.user?.access_token) {
+      fetchData('fleets', auth.user?.access_token).then((data) => {
+        setFleetsData(data);
+        setIsLoading(false);
+      });
+    } else {
+      console.log("no access token");
+    }
   }
   React.useEffect(() => {
     setIsLoading(true);
     getEvents();
-    setInterval(() => {
+    const interval = setInterval(() => {
       getEvents();
     }, 10000);
-    return auth.events.addAccessTokenExpiring(() => {
-      auth.signinSilent();
-    })
-  }, [auth.events, auth.signinSilent]);
+    return () => clearInterval(interval);
+  },[auth]);
 
 
   return (

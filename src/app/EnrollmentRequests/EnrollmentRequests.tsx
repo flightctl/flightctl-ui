@@ -79,13 +79,11 @@ const EnrollmentRequests: React.FunctionComponent = () => {
   React.useEffect(() => {
     setIsLoading(true);
     getEvents();
-    setInterval(() => {
+    const interval = setInterval(() => {
       getEvents();
     }, 10000);
-    return auth.events.addAccessTokenExpiring(() => {
-      auth.signinSilent();
-    })
-  }, [auth.events, auth.signinSilent]);
+    return clearInterval(interval);
+  },[auth]);
 
 
 
