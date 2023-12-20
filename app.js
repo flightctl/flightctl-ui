@@ -32,7 +32,10 @@ if (fs.existsSync('certs/api-sig.key')) {
 }
 
 
-
+const cert = fs.readFileSync('certs/front-cli.crt');
+const certkey = fs.readFileSync('certs/front-cli.key');
+const ca = fs.readFileSync('certs/ca.crt');
+const agent = new https.Agent({ cert, certkey, ca });
 app.use((req, res, next) => {
 
     //just for development
@@ -52,10 +55,6 @@ app.get('/api/v1/:kind', async (req, res) => {
             if (isValid) {
                 const kind = req.params.kind;
                 const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}`;
-                const cert = fs.readFileSync('certs/front-cli.crt');
-                const key = fs.readFileSync('certs/front-cli.key');
-                const ca = fs.readFileSync('certs/ca.crt');
-                const agent = new https.Agent({ cert, key, ca });
                 const response = await axios.get(url, { httpsAgent: agent });
                 res.send(response.data);
             } else {
@@ -85,10 +84,6 @@ app.get('/api/v1/:kind/:name', async (req, res) => {
                 const kind = req.params.kind;
                 const name = req.params.name;
                 const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}/${name}`;
-                const cert = fs.readFileSync('certs/front-cli.crt');
-                const key = fs.readFileSync('certs/front-cli.key');
-                const ca = fs.readFileSync('certs/ca.crt');
-                const agent = new https.Agent({ cert, key, ca });
                 const response = await axios.get(url, { httpsAgent: agent });
                 res.send(response.data);
             } else {
@@ -119,10 +114,6 @@ app.delete('/api/v1/:kind/:name', async (req, res) => {
                 const kind = req.params.kind;
                 const name = req.params.name;
                 const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}/${name}`;
-                const cert = fs.readFileSync('certs/front-cli.crt');
-                const key = fs.readFileSync('certs/front-cli.key');
-                const ca = fs.readFileSync('certs/ca.crt');
-                const agent = new https.Agent({ cert, key, ca });
                 const response = await axios.delete(url, { httpsAgent: agent });
                 res.send(response.data);
             } else {
@@ -140,7 +131,7 @@ app.delete('/api/v1/:kind/:name', async (req, res) => {
         res.status(400).send('Bad request'); 
     }
 });
-app.put('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
+app.post('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
     try {
         if (req.headers.authorization) {
             // set const token from authorization header without Bearer
@@ -149,11 +140,7 @@ app.put('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
             if (isValid) {
                 const name = req.params.name;
                 const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/enrollmentrequests/${name}/approval`;
-                const cert = fs.readFileSync('certs/front-cli.crt');
-                const key = fs.readFileSync('certs/front-cli.key');
-                const ca = fs.readFileSync('certs/ca.crt');
-                const agent = new https.Agent({ cert, key, ca });
-                const response = await axios.put(url, { httpsAgent: agent });
+                const response = await axios.post(url, { httpsAgent: agent });
                 res.send(response.data);
             } else {
                 console.log('Token is not valid');
@@ -172,7 +159,7 @@ app.put('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
 
 });
 
-app.put('/api/v1/enrollmentrequests/:name/rejection', async (req, res) => {
+app.post('/api/v1/enrollmentrequests/:name/rejection', async (req, res) => {
     try {
         if (req.headers.authorization) {
             // set const token from authorization header without Bearer
@@ -181,11 +168,7 @@ app.put('/api/v1/enrollmentrequests/:name/rejection', async (req, res) => {
             if (isValid) {
                 const name = req.params.name;
                 const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/enrollmentrequests/${name}/rejection`;
-                const cert = fs.readFileSync('certs/front-cli.crt');
-                const key = fs.readFileSync('certs/front-cli.key');
-                const ca = fs.readFileSync('certs/ca.crt');
-                const agent = new https.Agent({ cert, key, ca });
-                const response = await axios.put(url, { httpsAgent: agent });
+                const response = await axios.post(url, { httpsAgent: agent });
                 res.send(response.data);
             } else {
                 console.log('Token is not valid');
