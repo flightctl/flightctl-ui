@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { fetchData, tableCellData } from '@app/utils/commonFunctions';
+import { fetchData, tableCellData, deleteObject } from '@app/utils/commonFunctions';
 import { deviceList } from '@app/utils/commonDataTypes';
 import { useAuth } from 'react-oidc-context';
 import {
@@ -53,6 +53,10 @@ const Devices: React.FunctionComponent = () => {
     {
       title: "Details",
       onClick: () => window.location.replace(`/device/${device.metadata.name}`)
+    },
+    {
+      title: "Delete",
+      onClick: () => deleteObject("devices", device.metadata.name, auth.user?.access_token ?? '')
     }
   ];
 
