@@ -11,10 +11,6 @@ const KEYCLOAK_AUTHORITY = process.env.REACT_APP_KEYCLOAK_AUTHORITY || "http://l
 
 //ignore ssl verification for axios
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-console.log(process.env.NODE_ENV);
-if (process.env.NODE_ENV !== "production") {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-}
 
 process.env.PORT = process.env.PORT || 3001;
 process.env.FLIGHTCTL_SERVER = process.env.FLIGHTCTL_SERVER || 'https://localhost:3333';

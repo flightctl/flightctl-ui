@@ -88,9 +88,9 @@ const EnrollmentRequests: React.FunctionComponent = () => {
         },
       },
     ];
-    if (enrollmentrequest.status > 0) {
-      enrollmentrequest.status.forEach((status) => {
-        if ((status.condition.status === "False") && (status.condition.type === "Approved")) {
+    if (enrollmentrequest.status?.conditions) {
+      enrollmentrequest.status.conditions.forEach((condition) => {
+        if ((condition.status === "False") && (condition.type === "Approved")) {
           actions.push({
             title: 'Approve',
             onClick: () => {
@@ -103,6 +103,7 @@ const EnrollmentRequests: React.FunctionComponent = () => {
         }
       });
     } else {
+      console.log(enrollmentrequest.status?.conditions);
       actions.push({
         title: 'Approve',
         onClick: () => {

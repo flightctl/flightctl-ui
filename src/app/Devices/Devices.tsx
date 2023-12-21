@@ -51,7 +51,7 @@ const Devices: React.FunctionComponent = () => {
   const [devicesData, setDevicesData] = React.useState<deviceList>({ items: [] });
   const defaultActions = (device: Device): IAction[] => [
     {
-      title: "View",
+      title: "Details",
       onClick: () => window.location.replace(`/device/${device.metadata.name}`)
     }
   ];
