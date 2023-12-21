@@ -11,6 +11,8 @@ const KEYCLOAK_AUTHORITY = process.env.REACT_APP_KEYCLOAK_AUTHORITY || "http://l
 
 //ignore ssl verification for axios
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+
 process.env.PORT = process.env.PORT || 3001;
 process.env.FLIGHTCTL_SERVER = process.env.FLIGHTCTL_SERVER || 'https://localhost:3333';
 const app = express();
@@ -53,7 +55,6 @@ app.get('/api/v1/:kind', async (req, res) => {
             if (isValid) {
                 const kind = req.params.kind;
                 const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}`;
-                console.log(url);
                 const agent = new https.Agent({ cert, key: certkey, ca });
                 const response = await axios.get(url, { httpsAgent: agent });
                 res.send(response.data);

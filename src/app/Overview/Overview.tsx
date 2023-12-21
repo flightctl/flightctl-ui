@@ -25,7 +25,7 @@ import { set } from 'yaml/dist/schema/yaml-1.1/set';
 const Overview: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const auth = useAuth();
-  
+
   function getDevices() {
     if (auth.user?.access_token) {
       fetchData("devices", auth.user?.access_token).then((data) => {
@@ -44,6 +44,7 @@ const Overview: React.FunctionComponent = () => {
           let syncronizingcount = 0;
           if (devices.length > 0) {
             const table = document.createElement('table');
+            table.className = 'deviceGrid';
             table.innerHTML = '<tbody></tbody>';
             let tr = document.createElement('tr');
             const tbody = table.getElementsByTagName('tbody')[0];
@@ -58,11 +59,13 @@ const Overview: React.FunctionComponent = () => {
                   cellcount = 1;
                 }
                 const newDiv = document.createElement('div');
-                newDiv.style.width = '20px';
-                newDiv.style.height = '20px';
+                // set newDiv class deviceSquare
+                newDiv.className = 'deviceSquare';
+                newDiv.style.width = '7px';
+                newDiv.style.height = '7px';
                 newDiv.style.backgroundColor = status === 'True' ? 'green' : 'red';
                 newDiv.style.display = 'inline-block';
-                newDiv.style.margin = '0px 5px 0px 0px';
+                newDiv.style.margin = '2px 2px 0px 0px';
                 newDiv.onclick = () => {
                   window.location.href = `/device/${device.metadata.name}`;
                 };
@@ -96,8 +99,6 @@ const Overview: React.FunctionComponent = () => {
                 };
                 const td = document.createElement('td');
                 td.appendChild(newDiv);
-                td.style.padding = '0 !important';
-                tr.style.padding = '0 !important';
                 tr?.appendChild(td);
               }
             });
