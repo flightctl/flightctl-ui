@@ -18,6 +18,7 @@ div.deviceSquare:hover{
   transition: transform 0.2s;
   border: 1px solid #fff;
   border-radius: 1px;
+  cursor: pointer;
 }
 
 

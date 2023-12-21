@@ -321,13 +321,13 @@ const Overview: React.FunctionComponent = () => {
             </FlexItem>
           </Flex>
           <br></br><br></br>
-          <ChipGroup categoryName='Legend:' numChips={0} collapsedText='Show'>
+          <ChipGroup categoryName='' numChips={0} collapsedText='Show legend' expandedText='Hide legend'>
             <Chip isReadOnly={true}>
               <table>
                 <tbody>
                   <tr>
-                    <td><div style={{ background: 'tomato', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
-                    <td>Offline</td>
+                    <td><div style={{ background: 'limegreen', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
+                    <td>Online</td>
                   </tr>
                 </tbody>
               </table>
@@ -336,8 +336,8 @@ const Overview: React.FunctionComponent = () => {
               <table>
                 <tbody>
                   <tr>
-                    <td><div style={{ background: 'limegreen', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
-                    <td>Online</td>
+                    <td><div style={{ background: 'tomato', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
+                    <td>Error</td>
                   </tr>
                 </tbody>
               </table>
