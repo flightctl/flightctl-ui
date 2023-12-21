@@ -63,7 +63,7 @@ const Overview: React.FunctionComponent = () => {
                 newDiv.className = 'deviceSquare';
                 newDiv.style.width = '7px';
                 newDiv.style.height = '7px';
-                newDiv.style.backgroundColor = status === 'True' ? 'green' : 'red';
+                newDiv.style.backgroundColor = status === 'True' ? 'limegreen' : 'tomato';
                 newDiv.style.display = 'inline-block';
                 newDiv.style.margin = '2px 2px 0px 0px';
                 newDiv.onclick = () => {
@@ -102,7 +102,6 @@ const Overview: React.FunctionComponent = () => {
                 tr?.appendChild(td);
               }
             });
-            table.style.borderCollapse = 'collapse !important';
             div.appendChild(table);
           }
 
@@ -327,7 +326,7 @@ const Overview: React.FunctionComponent = () => {
               <table>
                 <tbody>
                   <tr>
-                    <td><div style={{ background: 'red', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
+                    <td><div style={{ background: 'tomato', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
                     <td>Offline</td>
                   </tr>
                 </tbody>
@@ -337,7 +336,7 @@ const Overview: React.FunctionComponent = () => {
               <table>
                 <tbody>
                   <tr>
-                    <td><div style={{ background: 'green', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
+                    <td><div style={{ background: 'limegreen', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
                     <td>Online</td>
                   </tr>
                 </tbody>
@@ -347,7 +346,7 @@ const Overview: React.FunctionComponent = () => {
               <table>
                 <tbody>
                   <tr>
-                    <td><div style={{ background: 'yellow', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
+                    <td><div style={{ background: 'khaki', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
                     <td>Degraded</td>
                   </tr>
                 </tbody>
@@ -357,7 +356,7 @@ const Overview: React.FunctionComponent = () => {
               <table>
                 <tbody>
                   <tr>
-                    <td><div style={{ background: 'blue', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
+                    <td><div style={{ background: 'cornflowerblue', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
                     <td>Syncing</td>
                   </tr>
                 </tbody>
@@ -367,7 +366,7 @@ const Overview: React.FunctionComponent = () => {
               <table>
                 <tbody>
                   <tr>
-                    <td><div style={{ background: 'gray', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
+                    <td><div style={{ background: 'gainsboro', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
                     <td>Offline</td>
                   </tr>
                 </tbody>
