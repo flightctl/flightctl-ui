@@ -38,7 +38,7 @@ const Overview: React.FunctionComponent = () => {
         if (div) {
           div.innerHTML = `Total: ${devices.length}<br>`;
           let cellcount = 0;
-          const maxcellsperline = 10;
+          const maxcellsperline = 40;
           let onlinecount = 0;
           let offlinecount = 0;
           let syncronizingcount = 0;
