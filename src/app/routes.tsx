@@ -3,11 +3,14 @@ import { Route, RouteComponentProps, Switch, useLocation } from 'react-router-do
 import { Overview } from '@app/Overview/Overview';
 import { EnrollmentRequests } from '@app/EnrollmentRequests/EnrollmentRequests';
 import { Fleets } from '@app/Fleets/Fleets';
+import { Fleet } from '@app/Fleet/Fleet';
+import { CreateFleet } from '@app/Fleets/Create';
 import { Devices } from '@app/Devices/Devices';
 import { Enroll } from '@app/Enroll/Enroll';
 import { Device } from '@app/Device/Device';
 import { NotFound } from '@app/NotFound/NotFound';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
+import { RemoteControl } from '@app/Device/rc';
 
 let routeFocusTimer: number;
 export interface IAppRoute {
@@ -54,6 +57,18 @@ const routes: AppRouteConfig[] = [
         title: 'FlightControl | Fleets',
       },
       {
+        component: Fleet,
+        exact: false,
+        path: '/fleet',
+        title: 'FlightControl | Fleet',
+      },
+      {
+        component: CreateFleet,
+        exact: false,
+        path: '/devicemanagement/fleets/create',
+        title: 'FlightControl | Create Fleet',
+      },
+      {
         component: Devices,
         exact: true,
         label: 'Devices',
@@ -71,6 +86,12 @@ const routes: AppRouteConfig[] = [
         exact: false,
         path: '/device',
         title: 'FlightControl | Device',
+      },
+      {
+        component: RemoteControl,
+        exact: false,
+        path: '/rc',
+        title: 'FlightControl | Device - Remote Control',
       }
     ],
   },

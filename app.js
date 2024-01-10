@@ -11,9 +11,14 @@ const KEYCLOAK_AUTHORITY = process.env.REACT_APP_KEYCLOAK_AUTHORITY || "http://l
 
 //ignore ssl verification for axios
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV !== "production") {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
 
 process.env.PORT = process.env.PORT || 3001;
 process.env.FLIGHTCTL_SERVER = process.env.FLIGHTCTL_SERVER || 'https://localhost:3333';
+process.env.RC_SVC = process.env.RC_SVC || 'flighctl-rc-svc:8082';
 const app = express();
 var rs = require('jsrsasign');
 var KJUR = rs.KJUR;
@@ -190,6 +195,36 @@ app.post('/api/v1/enrollmentrequests/:name/rejection', async (req, res) => {
     }
 
 });
+app.post('/api/v1/device/:deviceid/remotecontrol/enable', async (req, res) => {
+    try {
+        console.log("enableRC");
+        if (req.headers.authorization) {
+            // set const token from authorization header without Bearer
+            const token = req.headers.authorization.split(' ')[1];
+            var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, {alg: ['RS256']});
+            if (isValid) {
+                const deviceid = req.params.deviceid;
+                const url = `${process.env.RC_SVC}/api/v1/rcagent/${deviceid}/enable`;
+                console.log(url);
+                const response = await axios.post(url);
+                res.send(response.data);
+            } else {
+                console.log('Token is not valid');
+                res.status(401).send('Unauthorized');
+            }
+        } else {
+            console.log('No authorization header');
+            res.status(401).send('Unauthorized');
+        }
+    } catch (error) {
+        // catch error status code from axios response
+
+        console.error('Bad request:', error.message);
+        res.status(400).send('Bad request'); 
+    }
+
+});
+
 
 //set dist as static application folder
 app.use(express.static(__dirname + '/dist'));

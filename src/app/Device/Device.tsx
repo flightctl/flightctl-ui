@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import { fetchDataObj } from '@app/utils/commonFunctions';
+import { enableRCAgent } from '@app/utils/commonFunctions';
 import { device } from '@app/utils/commonDataTypes';
 import { useAuth } from 'react-oidc-context';
+import { LogViewer } from '@patternfly/react-log-viewer';
+import { RemoteControl } from '@app/Device/rc';
 import YAML from 'yaml';
 import {
     Accordion,
     AccordionItem,
     AccordionContent,
     AccordionToggle,
+    Card,
+    CardTitle,
+    CardBody,
+    CardFooter,
+    Checkbox,
     CodeBlock,
     CodeBlockCode,
     Button,
@@ -27,7 +35,8 @@ import {
     Tab,
     TabTitleText,
     TextInput,
-    Title
+    Title,
+    TextArea
 } from '@patternfly/react-core';
 import { Chart, ChartAxis, ChartBar, ChartGroup, ChartThemeColor, ChartTooltip } from '@patternfly/react-charts';
 import TrashIcon from '@patternfly/react-icons/dist/esm/icons/trash-icon';
@@ -68,7 +77,7 @@ const Device: React.FunctionComponent = () => {
 
     // I want to set label to time, datanum.x * 10 is the time in minutes negatives are in the past,
     // if datunum.x * 10 is like 120, convert it to 2h 0m for example
-    const label = ({datum}: any ) => {
+    const label = ({ datum }: any) => {
         const x = datum.x;
         const time = datum.x * -10;
         const hours = Math.floor(time / 60);
@@ -76,12 +85,6 @@ const Device: React.FunctionComponent = () => {
         const minutes = time % 60;
         return `${datum.name}: ${hours}h ${minutes}m`;
     };
-   // 
-    
-    
-    
-    //const label = ({ datum }) => `${datum.name}: ${datum.x *10}m`;
-
     const [expanded, setExpanded] = React.useState(['ex2-toggle1']);
     const displaySize = "lg";
     const toggle = (id) => {
@@ -97,8 +100,6 @@ const Device: React.FunctionComponent = () => {
     ) => {
         setActiveTabKey(tabIndex);
     };
-
-
     const [isOpenFleet, setIsOpenFleet] = React.useState(false);
     const onFleetToggleClick = () => {
         setFleetList(fleetList);
@@ -191,11 +192,35 @@ const Device: React.FunctionComponent = () => {
         return diffFormatedColor;
     }
 
+    const [logData, setLogData] = useState("Connecting to device...\n");
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "Enter") {
+            setLogData(prevLogData => `${prevLogData}\n${inputValue}`);
+            setInputValue(">");
+            getEvents();
+        }
+    }
+    const [inputValue, setInputValue] = React.useState(">");
+
+    const handleInputChange = (event: React.FormEvent<HTMLInputElement>, newValue: string) => {
+        // Ensure that "$: " is always at the start of the input
+        if (!newValue.startsWith(">")) {
+            setInputValue(`>${newValue}`);
+        } else {
+            setInputValue(newValue);
+        }
+    };
+
+    const enableRC = () => {
+        if (auth.user?.access_token) {
+            enableRCAgent(deviceID, auth.user?.access_token);
+        }
+    }
 
     React.useEffect(() => {
         setIsLoading(true);
         getEvents();
-      }, [auth]);
+    }, [auth, activeTabKey]);
     return (
         <PageSection >
 
@@ -596,8 +621,29 @@ const Device: React.FunctionComponent = () => {
                         </tbody>
                     </table>
                 </Tab>
-                <Tab eventKey={4} title={<TabTitleText>Actions</TabTitleText>} isAriaDisabled>
-                    TODO
+                <Tab eventKey={2} title={<TabTitleText>Actions</TabTitleText>}>
+                    <Card style={{ width: "50%" }} ouiaId="remoteControlCard">
+                        <CardTitle>Remote Control</CardTitle>
+                        <CardBody>
+                            Enable remote control on the device, with this enabled flightctl-agent on device will run a temporary component to enable remote access for troubleshooting.
+                        </CardBody>
+                        <CardBody>
+                            <span style={{ width: '50px' }}>TTL: (minutes) <TextInput type="number" id="ttl" name="ttl" aria-label="TTL" /></span>
+                            <br />
+                            <Checkbox label="Enable remote Terminal" id="terminal" name="terminal" aria-label="Enable remote Terminal" />
+                            <br />
+                            <Checkbox label="Enable OpenTelemetry-collector" id="otel" name="otel" aria-label="Enable OpenTelemetry-collector" />
+                            <TextArea id="otelconfig" name="otelconfig" aria-label="OpenTelemetry-collector config" isDisabled={true} />
+                            <Button variant="primary" onClick={enableRC}>Enable</Button>
+
+                        </CardBody>
+                    </Card>
+                </Tab>
+                <Tab eventKey={3} title={<TabTitleText>Terminal</TabTitleText>}>
+                    <div>
+                        {activeTabKey === 3 && <RemoteControl />}
+                    </div>
+
                 </Tab>
             </Tabs>
 

@@ -57,8 +57,6 @@ const Devices: React.FunctionComponent = () => {
     {
       title: "Delete",
       onClick: () => deleteObject("devices", device.metadata.name, auth.user?.access_token ?? '').then(() => getEvents())
-      // deleteObject is a async function, so we need to launch getEvents() after it's done
-        
     }
   ];
 

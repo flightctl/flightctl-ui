@@ -57,6 +57,16 @@ try {
     console.error('Error making request:', error);
   }
 }
+export const enableRCAgent = async (name: string, token: string) => {
+  try {
+    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+    const response = await axios.post(apiServer + '/api/v1/device/' + name + '/remotecontrol/enable');
+    return response.data;
+  }
+  catch (error) {
+    console.error('Error making request:', error);
+  }
+}
 
 export const tableCellData = (column, obj) => {
   const columnKey = column.key.split('.');
