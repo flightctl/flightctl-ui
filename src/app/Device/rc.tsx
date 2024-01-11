@@ -62,12 +62,13 @@ if (window.location.pathname.includes("rc/")) {
 const deviceID = windowPath[1];
 var connected = false;
 let socket;
+const URL_WS =  process.env.WS_URL ? process.env.WS_URL : 'http://localhost:8082';  
 const RemoteControl: React.FunctionComponent = () => {
     const terminal = React.useRef<Terminal | null>(null);
     const xtermContainer = React.useRef<HTMLElement | null>(null);
     const auth = useAuth();
 
-    const URL =  process.env.WS_URL ? process.env.WS_URL : 'http://localhost:8082';    
+  
     const [logData, setLogData] = useState("Connecting to device...");
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === "Enter") {
@@ -110,7 +111,7 @@ const RemoteControl: React.FunctionComponent = () => {
             const timer = setTimeout(() => {
                 console.log("deviceID: " + deviceID);
                 if (deviceID !== "")   {
-                    socket = io(URL, {
+                    socket = io(URL_WS, {
                         query: {
                             deviceID: deviceID
                         }
