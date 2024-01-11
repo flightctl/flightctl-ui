@@ -62,7 +62,11 @@ if (window.location.pathname.includes("rc/")) {
 const deviceID = windowPath[1];
 var connected = false;
 let socket;
-const URL_WS =  process.env.WS_URL ? process.env.WS_URL : 'http://localhost:8082';  
+console.log("window.env.WS_URL: " + window.env.WS_URL);
+console.log("window.env: " + window.env);
+console.log("process.env: " + process.env);
+console.log("process.env.WS_URL: " + process.env.WS_URL);
+const WS_URL =  window.env.WS_URL ? window.env.WS_URL : 'http://localhost:8082';  
 const RemoteControl: React.FunctionComponent = () => {
     const terminal = React.useRef<Terminal | null>(null);
     const xtermContainer = React.useRef<HTMLElement | null>(null);
@@ -111,7 +115,7 @@ const RemoteControl: React.FunctionComponent = () => {
             const timer = setTimeout(() => {
                 console.log("deviceID: " + deviceID);
                 if (deviceID !== "")   {
-                    socket = io(URL_WS, {
+                    socket = io(WS_URL, {
                         query: {
                             deviceID: deviceID
                         }
