@@ -9,6 +9,7 @@ declare global {
       REACT_APP_KEYCLOAK_AUTHORITY: string;
       KEYCLOAK_CLIENTID: string;
       KEYCLOAK_REDIRECT: string;
+      WS_URL: string;
     };
   }
 }
