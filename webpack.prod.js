@@ -30,8 +30,7 @@ module.exports = merge(common('production'), {
     rules: [
       {
         test: /\.css$/,
-        include: [...stylePaths],
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },
