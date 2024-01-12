@@ -38,10 +38,10 @@ export const deleteObject = async (kind: string, name: string, token: string) =>
     console.error('Error making request:', error);
   }
 }
-export const approveEnrollmentRequest = async (name: string, token: string) => {
+export const approveEnrollmentRequest = async (name: string, data: object, token: string) => {
 try {
     axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-    const response = await axios.post(apiServer + '/api/v1/enrollmentrequests/' + name + '/approval');
+    const response = await axios.post(apiServer + '/api/v1/enrollmentrequests/' + name + '/approve', data);
     return response.data;
   } catch (error) {
     console.error('Error making request:', error);

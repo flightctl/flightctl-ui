@@ -7,6 +7,7 @@ import {
   AlertActionLink,
   AlertGroup,
   Button,
+  ClipboardCopy,
   Divider,
   Dropdown,
   DropdownList,
@@ -14,6 +15,7 @@ import {
   MenuToggle,
   PageSection,
   TextContent,
+  Text,
   Title,
 } from '@patternfly/react-core';
 
@@ -37,10 +39,25 @@ const dateFormatter = (date) => {
 const Enroll: React.FunctionComponent = () => {
 
     const auth = useAuth();
+    var bodyApproval = {
+      "labels": {
+        "fleet": "",
+        "company.example.com/building": "",
+        "company.example.com/floor": "",
+        "company.example.com/room": "",
+        "approval-comment": ""
+      },
+      "region": "us-east-1",
+      "approved": true,
+      "approverBy": auth.user?.profile.preferred_username    
+    }
+
     const [showAlert, setShowAlert] = React.useState(false);
     const [enrollmentrequest, setEnrollmentRequest] = useState<enrollmentrequest>();
     const windowPath = window.location.pathname.split("enroll/");
     const enrollID = windowPath[1];
+
+
     useEffect(() => {
         fetchDataObj("enrollmentrequests", enrollID, auth.user?.access_token ?? '').then((data) => {
           setEnrollmentRequest(data);
@@ -120,14 +137,32 @@ const Enroll: React.FunctionComponent = () => {
     if (!enrollmentrequest) {
         return <div>Loading...</div>; // o simplemente return null;
       }
-    
+    const buildApproval = (enrollID: string) => {
+      var fleet;
+      if (selected === 'none for now') {
+        fleet = '';
+      } else {  
+        fleet = selected;
+      }
+      bodyApproval.labels.fleet = fleet;
+      bodyApproval.labels["company.example.com/building"] = (document.getElementById("building") as HTMLInputElement)?.value ?? '';
+      bodyApproval.labels["company.example.com/floor"] = (document.getElementById("floor") as HTMLInputElement)?.value ?? '';
+      bodyApproval.labels["company.example.com/room"] = (document.getElementById("room") as HTMLInputElement)?.value ?? '';
+      bodyApproval.labels["approval-comment"] = (document.getElementById("approvalComment") as HTMLInputElement)?.value ?? '';
+      bodyApproval.region = (document.getElementById("region") as HTMLInputElement)?.value ?? '';
+
+      approveEnrollmentRequest(enrollmentrequest.metadata.name, bodyApproval, auth.user?.access_token ?? '');
+    }
     return (
         <PageSection style={{ textAlign: 'center' }}>
-            <Title headingLevel="h1" size="lg">Enrollment Request</Title>
-            <TextContent>
-                <textarea name="enrollmentrequest" rows={3} cols={35} value={enrollmentrequest.metadata.name.toString()} readOnly></textarea>
-            </TextContent>
-            <div> Fleet to attach:
+            <Title headingLevel="h1" size="lg" style={{ marginBottom: "20px"}}>Enrollment Request</Title>
+            <div>
+            <ClipboardCopy style={{width: "350px", margin: '0 auto'}} isReadOnly hoverTip="Copy" variant="inline-compact" clickTip="Copied" isBlock>
+                <b>{enrollmentrequest.metadata.name.toString()}</b>
+            </ClipboardCopy>
+            </div>
+
+            <div style={{ width: '350px', margin: '0 auto' }}> Fleet to attach:
             <Dropdown
                 isOpen={isOpen}
                 onOpenChange={(isOpen) => setIsOpen(isOpen)}
@@ -161,9 +196,24 @@ const Enroll: React.FunctionComponent = () => {
                     })}
                 </DropdownList>
             </Dropdown>
+            <div style={ { marginBottom: '10px', marginTop: '10px', textAlign: 'right' }}>
+              region: <input type="text" id="region" name="region" size={10} defaultValue="us-east-1" />
+            </div>
+            <div style={ { marginBottom: '10px', marginTop: '10px', textAlign: 'right' }}>
+            company.example.com/building: <input type="text" id="building" name="building" size={10} />
+            </div>
+            <div style={ { marginBottom: '10px', marginTop: '10px', textAlign: 'right'  }}>
+            company.example.com/floor: <input type="text" id="floor" name="floor" size={10} />
+            </div>
+            <div style={ { marginBottom: '10px', marginTop: '10px', textAlign: 'right' }}>
+            company.example.com/room: <input type="text" id="room" name="room" size={10} />
+            </div>
+            <div style={ { marginBottom: '10px', marginTop: '10px'}}>
+            approval-comment: <input type="text" id="approvalComment" name="approvalComment" size={35} />
+            </div>
             </div>
             <div style={ { marginBottom: '20px', marginTop: '20px' }}>
-                <Button variant="primary" style={{ fontSize: '30px', padding: '20px 20px' }} onClick={() => approveEnrollmentRequest(enrollmentrequest.metadata.name, auth.user?.access_token ?? '')}>Approve</Button>
+                <Button variant="primary" style={{ fontSize: '30px', padding: '20px 20px' }} onClick={() => buildApproval(enrollmentrequest.metadata.name)}>Approve</Button>
             </div>
             <div>
                 <Button variant="danger" onClick={handleReject}>Reject</Button>
