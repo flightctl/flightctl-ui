@@ -138,7 +138,7 @@ app.delete('/api/v1/:kind/:name', async (req, res) => {
         res.status(400).send('Bad request'); 
     }
 });
-app.post('/api/v1/enrollmentrequests/:name/approve', async (req, res) => {
+app.post('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
     try {
         if (req.headers.authorization) {
             // set const token from authorization header without Bearer
@@ -146,7 +146,7 @@ app.post('/api/v1/enrollmentrequests/:name/approve', async (req, res) => {
             var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, {alg: ['RS256']});
             if (isValid) {
                 const name = req.params.name;
-                const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/enrollmentrequests/${name}/approve`;
+                const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/enrollmentrequests/${name}/approval`;
                 const agent = new https.Agent({ cert, key: certkey, ca });
                 const response = await axios.post(url, req.body, { httpsAgent: agent });
                 res.send(response.data);

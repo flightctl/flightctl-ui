@@ -2,6 +2,7 @@ import React, { useState, useEffect} from 'react';
 import { fetchDataObj, approveEnrollmentRequest, rejectEnrollmentRequest } from '@app/utils/commonFunctions'; 
 import { enrollmentrequest } from '@app/utils/commonDataTypes';
 import { useAuth } from 'react-oidc-context';
+import { EnrollStatus } from './EnrollStatus';
 import {
   Alert,
   AlertActionLink,
@@ -18,6 +19,7 @@ import {
   Text,
   Title,
 } from '@patternfly/react-core';
+import { set } from 'yaml/dist/schema/yaml-1.1/set';
 
 const dateFormatter = (date) => {
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -49,14 +51,14 @@ const Enroll: React.FunctionComponent = () => {
       },
       "region": "us-east-1",
       "approved": true,
-      "approverBy": auth.user?.profile.preferred_username    
+      "approvedBy": auth.user?.profile.preferred_username    
     }
 
     const [showAlert, setShowAlert] = React.useState(false);
     const [enrollmentrequest, setEnrollmentRequest] = useState<enrollmentrequest>();
     const windowPath = window.location.pathname.split("enroll/");
     const enrollID = windowPath[1];
-
+    const [approvalStatus, setApprovalStatus] = React.useState<string | null>(null);
 
     useEffect(() => {
         fetchDataObj("enrollmentrequests", enrollID, auth.user?.access_token ?? '').then((data) => {
@@ -137,7 +139,7 @@ const Enroll: React.FunctionComponent = () => {
     if (!enrollmentrequest) {
         return <div>Loading...</div>; // o simplemente return null;
       }
-    const buildApproval = (enrollID: string) => {
+    const buildApproval = async (enrollID: string) => {
       var fleet;
       if (selected === 'none for now') {
         fleet = '';
@@ -150,10 +152,27 @@ const Enroll: React.FunctionComponent = () => {
       bodyApproval.labels["company.example.com/room"] = (document.getElementById("room") as HTMLInputElement)?.value ?? '';
       bodyApproval.labels["approval-comment"] = (document.getElementById("approvalComment") as HTMLInputElement)?.value ?? '';
       bodyApproval.region = (document.getElementById("region") as HTMLInputElement)?.value ?? '';
+      console.log(JSON.stringify(bodyApproval));
+      const approveEnrollmentResponse = await approveEnrollmentRequest(enrollmentrequest.metadata.name, bodyApproval, auth.user?.access_token ?? '')
+        if (approveEnrollmentResponse.code === 200) {
+          setApprovalStatus('approved');
+        } else {
+          setApprovalStatus('error');
+        }
+    }
 
-      approveEnrollmentRequest(enrollmentrequest.metadata.name, bodyApproval, auth.user?.access_token ?? '');
+    const buidRejection = async (enrollID: string) => {
+      const rejectEnrollmentResponse = await rejectEnrollmentRequest(enrollmentrequest.metadata.name, auth.user?.access_token ?? '')
+      console.log(rejectEnrollmentResponse);
+      if (rejectEnrollmentResponse.code === 200) {
+        setApprovalStatus('rejected');
+      } else {
+        setApprovalStatus('error');
+      }
     }
     return (
+      <div>
+      {approvalStatus ? (<EnrollStatus enrollID={enrollID} enrollStatus={approvalStatus} />) : (
         <PageSection style={{ textAlign: 'center' }}>
             <Title headingLevel="h1" size="lg" style={{ marginBottom: "20px"}}>Enrollment Request</Title>
             <div>
@@ -225,7 +244,7 @@ const Enroll: React.FunctionComponent = () => {
                     title="Confirm Reject"
                     actionLinks={
                         <React.Fragment>
-                          <AlertActionLink onClick={() => {rejectEnrollmentRequest(enrollmentrequest.metadata.name, auth.user?.access_token ?? ''); handleCancel()}}>Reject enrollment</AlertActionLink>
+                          <AlertActionLink onClick={() => {buidRejection(enrollmentrequest.metadata.name); handleCancel()}}>Reject enrollment</AlertActionLink>
                           <AlertActionLink onClick={(handleCancel)}>Cancel</AlertActionLink>
                         </React.Fragment>
                       }
@@ -234,7 +253,8 @@ const Enroll: React.FunctionComponent = () => {
                 </Alert>
                 </AlertGroup>
             )}
-        </PageSection>
+        </PageSection>)}
+        </div>
     );
 };
 
