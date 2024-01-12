@@ -173,7 +173,7 @@ const EnrollmentRequests: React.FunctionComponent = () => {
             title: 'Approve',
             onClick: () => {
               setIsLoading(true);
-              approveEnrollmentRequest(enrollmentrequest.metadata.name, auth.user?.access_token ?? '');
+              approveEnrollmentRequest(enrollmentrequest.metadata.name, {approved: true, approvedBy: auth.user?.profile.preferred_username ?? "unknown"}, auth.user?.access_token ?? '');
               getEvents();
             },
           });
@@ -185,7 +185,7 @@ const EnrollmentRequests: React.FunctionComponent = () => {
         title: 'Approve',
         onClick: () => {
           setIsLoading(true);
-          approveEnrollmentRequest(enrollmentrequest.metadata.name, auth.user?.access_token ?? '');
+          approveEnrollmentRequest(enrollmentrequest.metadata.name, {approved: true, approvedBy: auth.user?.profile.preferred_username ?? "unknown"}, auth.user?.access_token ?? '');
           getEvents();
         },
       });
