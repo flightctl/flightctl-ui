@@ -123,7 +123,7 @@ module.exports = (env) => {
         patterns: [{ from: './src/favicon.png', to: 'images' }],
       }),
       new CopyPlugin({
-        patterns: [{ from: './src/assets/images/mock-ui-fleet-status.png', to: 'images' }],
+        patterns: [{ from: './src/assets/images/', to: 'images' }],
       }),
     ],
     resolve: {

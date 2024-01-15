@@ -4,10 +4,15 @@ import {
   Avatar,
   Brand,
   Button,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
   Masthead,
   MastheadBrand,
   MastheadMain,
   MastheadToggle,
+	MenuToggle,
+  MenuToggleElement,
 	Nav,
   NavExpandable,
   NavItem,
@@ -27,8 +32,24 @@ interface IAppLayout {
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const auth = useAuth();
-
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
+  const toggleRef = React.useRef<HTMLButtonElement>(null);
+  const onDropdownToggle = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+  const onDropdownSelect = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+  const userDropdownItems = [
+    <>
+      <DropdownItem key="group 2 profile">My profile</DropdownItem>
+      <DropdownItem key="group 2 user">User management</DropdownItem>
+      <DropdownItem key="group 2 logout"               onClick={() =>
+                void auth.signoutRedirect()
+              }>Logout</DropdownItem>
+    </>
+  ];
   const Header = (
     <Masthead>
       <MastheadToggle>
@@ -42,17 +63,30 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         </MastheadBrand>
       </MastheadMain>
       {auth.user ? (
-        <div style={{ marginLeft: 'auto' }} id="userWelcome">
-           {auth.user?.profile.preferred_username}{' '}
-          <Button
-            variant="link"
-            onClick={() =>
-              void auth.signoutRedirect()
-            }
+        <Dropdown
+        isOpen={isDropdownOpen}
+        onSelect={onDropdownSelect}
+        onOpenChange={(isOpen: boolean) => setIsDropdownOpen(isOpen)}
+        popperProps={{ position: 'right' }}
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle 
+            ref={toggleRef}
+            icon={<Avatar src="images/avatarimg.svg" alt="avatar" size="md" />} 
+            style={{ marginLeft: 'auto'}} 
+            onClick={onDropdownToggle} 
+            id="userMenu" 
+            isFullHeight 
+            isExpanded={isDropdownOpen} 
+            variant="plainText" 
           >
-            Log out
-          </Button>
-        </div>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }} id="userWelcome">
+          {auth.user?.profile.preferred_username}  
+          </div>
+          </MenuToggle>
+        )}
+        >
+           <DropdownList>{userDropdownItems}</DropdownList>
+          </Dropdown>
       ) : (
         <div style={{ marginLeft: 'auto' }} id="userWelcome">
           <Button variant="link" onClick={() => void auth.signinRedirect()}>

@@ -3,6 +3,7 @@ const fs = require('fs');
 const https = require('https');
 const axios = require('axios');
 const path = require('path');
+const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const KEYCLOAK_AUTHORITY = process.env.REACT_APP_KEYCLOAK_AUTHORITY || "http://localhost:9080/realms/flightctl"
@@ -39,7 +40,7 @@ if (fs.existsSync('certs/api-sig.key')) {
 const cert = fs.readFileSync('certs/front-cli.crt');
 const certkey = fs.readFileSync('certs/front-cli.key');
 const ca = fs.readFileSync('certs/ca.crt');
-
+app.use(bodyParser.json());
 app.use((req, res, next) => {
 
     //just for development
@@ -148,6 +149,7 @@ app.post('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
                 const name = req.params.name;
                 const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/enrollmentrequests/${name}/approval`;
                 const agent = new https.Agent({ cert, key: certkey, ca });
+                console.log(req.body);
                 const response = await axios.post(url, req.body, { httpsAgent: agent });
                 res.send(response.data);
             } else {
@@ -160,9 +162,9 @@ app.post('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
         }
     } catch (error) {
         // catch error status code from axios response
-
-        console.error('Bad request:', error.message);
-        res.status(400).send('Bad request'); 
+        console.log(error);
+        console.error('Bad request: status: ',error.status, ', ', error.message);
+        res.status(error.status).send(error.message); 
     }
 
 });
