@@ -94,6 +94,13 @@ const routes: AppRouteConfig[] = [
         title: 'FlightControl | Device - Remote Control',
       }
     ],
+  },
+  {
+    component: Workload,
+    exact: true,
+    label: 'Workload',
+    path: '/workload',
+    title: 'FlightControl | Workload',
   }
 ];
 

@@ -148,7 +148,7 @@ const Workload: React.FunctionComponent = () => {
   let [regionListFiltered, setRegionList] = useState(regionList);
   return (
     <PageSection>
-      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>Overview</Title>
+      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>Workload</Title>
       <table>
         <tbody>
           <tr>
@@ -377,7 +377,6 @@ const Workload: React.FunctionComponent = () => {
         </CardBody>
       </Card>
       <div id="tooltip" style={{ display: 'none' }}></div>
-      <img src="/images/mock-ui-fleet-status.png" alt="Mock Fleet Status" width="834" height="318" />
     </PageSection>
   )
 };
