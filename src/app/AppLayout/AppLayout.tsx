@@ -11,6 +11,7 @@ import {
   MastheadBrand,
   MastheadMain,
   MastheadToggle,
+  MastheadContent,
 	MenuToggle,
   MenuToggleElement,
 	Nav,
@@ -51,20 +52,24 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </>
   ];
   const Header = (
-    <Masthead>
+    <Masthead id="stack-inline-masthead" display={{ default: 'inline', lg: 'stack', '2xl': 'inline' }}>
+            <MastheadMain>
       <MastheadToggle>
         <Button variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation">
           <BarsIcon />
         </Button>
       </MastheadToggle>
-      <MastheadMain>
+
         <MastheadBrand>
           <Brand src={logo} alt="FlightControl Logo" heights={{ default: '36px' }} />
         </MastheadBrand>
-      </MastheadMain>
+        </MastheadMain>
+        <MastheadContent>
       {auth.user ? (
+        <div style={{ marginLeft: 'auto' }} id="userWelcome">
         <Dropdown
         isOpen={isDropdownOpen}
+        style={{ marginLeft: 'auto'}} 
         onSelect={onDropdownSelect}
         onOpenChange={(isOpen: boolean) => setIsDropdownOpen(isOpen)}
         popperProps={{ position: 'right' }}
@@ -79,14 +84,15 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
             isExpanded={isDropdownOpen} 
             variant="plainText" 
           >
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }} id="userWelcome">
+          
           {auth.user?.profile.preferred_username}  
-          </div>
+
           </MenuToggle>
         )}
         >
            <DropdownList>{userDropdownItems}</DropdownList>
           </Dropdown>
+          </div>
       ) : (
         <div style={{ marginLeft: 'auto' }} id="userWelcome">
           <Button variant="link" onClick={() => void auth.signinRedirect()}>
@@ -94,6 +100,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           </Button>
         </div>
       )}
+      </MastheadContent>
     </Masthead>
   );
 
