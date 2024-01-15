@@ -6,6 +6,7 @@ import {
   PageSection,
   Spinner,
   Title,
+  Label,
 } from '@patternfly/react-core';
 
 import {
@@ -93,14 +94,23 @@ const Devices: React.FunctionComponent = () => {
         {devicesData.items.length > 0 && (
           <Tbody>
             {devicesData.items.map((device) => (
-
               <Tr key={device.metadata.name}>
                 {
                   columns.map((column) => (
-                    <Td dataLabel={column.label} key={`${column.label}${device.metadata.name}`}>
-                      {tableCellData(column, device)}
-                    </Td>
-                  ))}
+                    // add a if column.key === "metadata.labels" then do a for loop to iterate through the labels and display them
+                    column.key === "metadata.labels"
+                    ? (
+                      <Td dataLabel={column.label} key={`${column.label}${device.metadata.name}`}>
+                        {tableCellData(column, device)}
+                      </Td>
+                    )
+                    : (
+                      <Td dataLabel={column.label} key={`${column.label}${device.metadata.name}`}>
+                        {tableCellData(column, device)}
+                      </Td>
+                    )
+                  ))
+                  }
                 <Td isActionCell>
                   <ActionsColumn
                     items={defaultActions(device as Device)}

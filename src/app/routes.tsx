@@ -11,7 +11,7 @@ import { Device } from '@app/Device/Device';
 import { NotFound } from '@app/NotFound/NotFound';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
 import { RemoteControl } from '@app/Device/rc';
-
+import { Workload } from '@app/Workload/Workload';
 let routeFocusTimer: number;
 export interface IAppRoute {
   label?: string; // Excluding the label will exclude the route from the nav sidebar in AppLayout
@@ -94,7 +94,7 @@ const routes: AppRouteConfig[] = [
         title: 'FlightControl | Device - Remote Control',
       }
     ],
-  },
+  }
 ];
 
 // a custom hook for sending focus to the primary content container

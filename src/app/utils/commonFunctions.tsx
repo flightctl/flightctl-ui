@@ -73,7 +73,20 @@ export const enableRCAgent = async (name: string, token: string) => {
 export const tableCellData = (column, obj) => {
   const columnKey = column.key.split('.');
   let finalKey = obj;
-  if (columnKey.length > 1) {
+  if (column.key === "metadata.labels") {
+    // If the column is metadata.labels then we need to iterate through the labels and display them
+    const labels = obj.metadata.labels;
+    let labelString = "";
+    for (const [key, value] of Object.entries(labels)) {
+      labelString += key + "=" + value + ", ";
+    }
+    if (labelString.length > 0) {
+      labelString = labelString.slice(0, -2);
+    } else {
+      labelString = "-";
+    }
+    return labelString;
+  } else if (columnKey.length > 1) {
     columnKey.forEach((key) => {
       // if key ends with [NUMBER] then it is an array of objects
       if (key.match(/\[\d+\]/)) {
