@@ -111,16 +111,11 @@ const RemoteControl: React.FunctionComponent = () => {
             const timer = setTimeout(() => {
                 console.log("deviceID: " + deviceID);
                 if (deviceID !== "")   {
-                    const intervalInitial = setInterval(() => {
-                        socket = io(WS_URL, {
-                            query: {
-                                deviceID: deviceID
-                            }
-                        });
-                        if (socket.connected) {
-                            clearInterval(intervalInitial);
+                    socket = io(WS_URL, {
+                        query: {
+                            deviceID: deviceID
                         }
-                    }, 1000);
+                    });
                     socket.on('connect', () => {
                         terminal.current?.writeln('Connected with \x1B[1;3;31mflightctl\x1B[0m remote-control service!');
                         terminal.current?.write("$ ")
