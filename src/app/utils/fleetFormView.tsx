@@ -193,8 +193,8 @@ const FormView: React.FunctionComponent<FormViewProps> = ({ name, setFleetName, 
                   <br />
                   <div style={{ fontWeight: 'bold' }}>
                     Configuration templates <span style={{ color: 'red' }}>*</span> 
-                    <div style={{marginLeft: '50px', marginTop: '10px'}}>
-                      <ExpandableSection toggleText="Source 1" isIndented onToggle={onToggleS1} isExpanded={isExpandedS1}>
+                    <div style={{marginLeft: '50px'}}>
+                      <ExpandableSection toggleText="Source 1" onToggle={onToggleS1} isExpanded={isExpandedS1}>
                       <Dropdown
                                 isOpen={isOpenSource1}
                                 onSelect={onSelectSource1}
@@ -376,10 +376,31 @@ const FormView: React.FunctionComponent<FormViewProps> = ({ name, setFleetName, 
                     </Button>
                       </div>
                       <br />
-                    <div><Button >Create fleet</Button> <Button variant="link">
+
+                  </div>
+                  <div>
+                  <ExpandableSection toggleText="Update policy">
+                  <div style={{ fontWeight: 'bold', marginLeft: '50px' }}>
+                        Fail threshold
+                        <TextInput aria-label="failThreshold" />
+                        <span style={{ fontWeight: 'normal'}}>Use either an absolute number or a percentage.</span>
+                  </div>
+                  <div style={{ fontWeight: 'bold', marginLeft: '50px' }}>
+                        Batch size
+                        <TextInput aria-label="failThreshold" />
+                        <span style={{ fontWeight: 'normal'}}>Use either an absolute number or a percentage.</span>
+                  </div>
+                    </ExpandableSection>
+                  </div>
+                  <div>
+                  <ExpandableSection toggleText="Extensibility">
+                    </ExpandableSection>
+                  </div>
+                  <div>
+                      <Button >Create fleet</Button> 
+                    <Button variant="link">
                       Cancel
                     </Button></div>
-                  </div>
                 </div>
                 
             )

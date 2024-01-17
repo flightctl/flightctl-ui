@@ -8,6 +8,9 @@ import { CreateFleet } from '@app/Fleets/Create';
 import { Devices } from '@app/Devices/Devices';
 import { Enroll } from '@app/Enroll/Enroll';
 import { Device } from '@app/Device/Device';
+import { GitRepositories } from '@app/GitRepositories/GitRepositories';
+import { Organization } from '@app/Organization/Organization';
+import { ImageBuilder } from '@app/ImageBuilder/ImageBuilder';
 import { NotFound } from '@app/NotFound/NotFound';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
 import { RemoteControl } from '@app/Device/rc';
@@ -101,6 +104,32 @@ const routes: AppRouteConfig[] = [
     label: 'Workload',
     path: '/workload',
     title: 'FlightControl | Workload',
+  },
+  {
+    label: 'Administration',
+    routes: [
+      {
+        component: GitRepositories,
+        exact: true,
+        label: 'Git Repositories',
+        path: '/administration/gitrepositories',
+        title: 'FlightControl | Git Repositories',
+      },
+      {
+        component: Organization,
+        exact: true,
+        label: 'Organization',
+        path: '/administration/organization',
+        title: 'FlightControl | Organization',
+      },
+      {
+        component: ImageBuilder,
+        exact: true,
+        label: 'Image Builder',
+        path: '/administration/imagebuilder',
+        title: 'FlightControl | Image Builder',
+      },
+    ],
   }
 ];
 

@@ -42,10 +42,11 @@ export const approveEnrollmentRequest = async (name: string, data: object, token
 try {
     axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
     const response = await axios.post(apiServer + '/api/v1/enrollmentrequests/' + name + '/approval', data);
-    return response.data;
-  } catch (error) {
+    return response;
+  } catch (error: any) {
+    console.log(error.response.status)
     console.error('Error making request:', error);
-    return error;
+    return error.response;
   }
 }
 

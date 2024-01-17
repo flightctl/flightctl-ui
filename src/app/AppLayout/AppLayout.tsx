@@ -44,9 +44,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   };
   const userDropdownItems = [
     <>
-      <DropdownItem key="group 2 profile">My profile</DropdownItem>
-      <DropdownItem key="group 2 user">User management</DropdownItem>
-      <DropdownItem key="group 2 logout"               onClick={() =>
+      <DropdownItem key="profile">My profile</DropdownItem>
+      <DropdownItem key="logout"               onClick={() =>
                 void auth.signoutRedirect()
               }>Logout</DropdownItem>
     </>
@@ -61,7 +60,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       </MastheadToggle>
 
         <MastheadBrand>
-          <Brand src={logo} alt="FlightControl Logo" heights={{ default: '36px' }} />
+          <Brand src={logo} alt="FlightControl Logo" heights={{ default: '30px' }} />
         </MastheadBrand>
         </MastheadMain>
         <MastheadContent>
@@ -72,12 +71,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         style={{ marginLeft: 'auto'}} 
         onSelect={onDropdownSelect}
         onOpenChange={(isOpen: boolean) => setIsDropdownOpen(isOpen)}
-        popperProps={{ position: 'right' }}
+        popperProps={{ position: 'end' }}
         toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
           <MenuToggle 
             ref={toggleRef}
             icon={<Avatar src="images/avatarimg.svg" alt="avatar" size="md" />} 
-            style={{ marginLeft: 'auto'}} 
+            
             onClick={onDropdownToggle} 
             id="userMenu" 
             isFullHeight 

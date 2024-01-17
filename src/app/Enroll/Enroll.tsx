@@ -154,7 +154,7 @@ const Enroll: React.FunctionComponent = () => {
       bodyApproval.region = (document.getElementById("region") as HTMLInputElement)?.value ?? '';
       console.log(JSON.stringify(bodyApproval));
       const approveEnrollmentResponse = await approveEnrollmentRequest(enrollmentrequest.metadata.name, bodyApproval, auth.user?.access_token ?? '')
-        if (approveEnrollmentResponse.code === 200) {
+        if ((approveEnrollmentResponse.code === 200) || (approveEnrollmentResponse.status === 200)) {
           setApprovalStatus('approved');
         } else {
           setApprovalStatus('error');

@@ -214,6 +214,8 @@ const Device: React.FunctionComponent = () => {
     const enableRC = () => {
         if (auth.user?.access_token) {
             enableRCAgent(deviceID, auth.user?.access_token);
+            // set activateTabKey to 3
+            setActiveTabKey(3);
         }
     }
 
@@ -630,10 +632,10 @@ const Device: React.FunctionComponent = () => {
                         <CardBody>
                             <span style={{ width: '50px' }}>TTL: (minutes) <TextInput type="number" id="ttl" name="ttl" aria-label="TTL" /></span>
                             <br />
-                            <Checkbox label="Enable remote Terminal" id="terminal" name="terminal" aria-label="Enable remote Terminal" />
+                            <Checkbox label="Enable remote Terminal" defaultChecked isDisabled id="terminal" name="terminal" aria-label="Enable remote Terminal" />
                             <br />
                             <Checkbox label="Enable OpenTelemetry-collector" id="otel" name="otel" aria-label="Enable OpenTelemetry-collector" />
-                            <TextArea id="otelconfig" name="otelconfig" aria-label="OpenTelemetry-collector config" isDisabled={true} />
+                            <TextArea id="otelconfig" name="otelconfig" aria-label="OpenTelemetry-collector config" isDisabled={true} value='TODO: add otel-collector yaml spec'/>
                             <Button variant="primary" onClick={enableRC}>Enable</Button>
 
                         </CardBody>

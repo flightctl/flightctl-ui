@@ -151,7 +151,7 @@ app.post('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
                 const agent = new https.Agent({ cert, key: certkey, ca });
                 console.log(req.body);
                 const response = await axios.post(url, req.body, { httpsAgent: agent });
-                res.send(response.data);
+                res.status(200).send(response.data);
             } else {
                 console.log('Token is not valid');
                 res.status(401).send('Unauthorized');
@@ -162,9 +162,8 @@ app.post('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
         }
     } catch (error) {
         // catch error status code from axios response
-        console.log(error);
-        console.error('Bad request: status: ',error.status, ', ', error.message);
-        res.status(error.status).send(error.message); 
+        console.error('Bad request: status: ',error.response.status, ', ', error.data);
+        res.status(error.response.status).send(error.data); 
     }
 
 });
