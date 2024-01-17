@@ -37,6 +37,7 @@ import {
     TextInput,
     Title
 } from '@patternfly/react-core';
+import { set } from 'yaml/dist/schema/yaml-1.1/set';
 
 const dateFormatter = (date) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -109,6 +110,17 @@ const RemoteControl: React.FunctionComponent = () => {
         console.log(connected);
         if (!connected) {
             const timer = setTimeout(() => {
+                const totalDots = 40;
+                let dots = 0;
+                const connecting = setInterval(() => {
+                    terminal.current?.write('.');
+                    dots++;
+                    if (dots === totalDots) {
+                        terminal.current?.writeln('');
+                        terminal.current?.write('Connecting to device... ' + deviceID);
+                        dots = 0;
+                    }
+                }, 1000);
                 console.log("deviceID: " + deviceID);
                 if (deviceID !== "")   {
                     socket = io(WS_URL, {
@@ -117,6 +129,7 @@ const RemoteControl: React.FunctionComponent = () => {
                         }
                     });
                     socket.on('connect', () => {
+                        clearInterval(connecting);
                         terminal.current?.writeln('Connected with \x1B[1;3;31mflightctl\x1B[0m remote-control service!');
                         terminal.current?.write("$ ")
                         var command = "";
