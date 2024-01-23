@@ -36,4 +36,5 @@ table.deviceGrid tbody tr td{
   display: inline-block;
   margin: 4px 2px 0px 0px;
   -webkit-mask-image: linear-gradient(to bottom right,rgba(0,0,0,1), rgba(0,0,0,0.6) 15% 20%,rgba(0,0,0,1) 40%);
+  mask-image: linear-gradient(to bottom right,rgba(0,0,0,1), rgba(0,0,0,0.6) 15% 20%,rgba(0,0,0,1) 40%);
 }
