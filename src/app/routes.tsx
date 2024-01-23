@@ -15,6 +15,9 @@ import { NotFound } from '@app/NotFound/NotFound';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
 import { RemoteControl } from '@app/Device/rc';
 import { Workload } from '@app/Workload/Workload';
+import { Experimental } from '@app/Experimental/Experimental';
+import { Experimental2 } from '@app/Experimental/Experimental2';
+import { Experimental3 } from '@app/Experimental/Experimental3';
 let routeFocusTimer: number;
 export interface IAppRoute {
   label?: string; // Excluding the label will exclude the route from the nav sidebar in AppLayout
@@ -44,6 +47,27 @@ const routes: AppRouteConfig[] = [
         label: 'Overview',
         path: '/',
         title: 'FlightControl | Overview',
+      },
+      {
+        component: Experimental,
+        exact: true,
+        label: 'Experimental',
+        path: '/experimental',
+        title: 'FlightControl | Experimental',
+      },
+      {
+        component: Experimental2,
+        exact: true,
+        label: 'Experimental2',
+        path: '/experimental2',
+        title: 'FlightControl | Experimental2',
+      },
+      {
+        component: Experimental3,
+        exact: true,
+        label: 'Experimental3',
+        path: '/experimental3',
+        title: 'FlightControl | Experimental3',
       },
       {
         component: EnrollmentRequests,

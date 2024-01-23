@@ -29,3 +29,11 @@ table.deviceGrid tbody tr td{
 .pf-v5-c-expandable-section__toggle-text {
   color: black;
 }
+
+.deviceSquare {
+  width: 8px;
+  height: 10px;
+  display: inline-block;
+  margin: 4px 2px 0px 0px;
+  -webkit-mask-image: linear-gradient(to bottom right,rgba(0,0,0,1), rgba(0,0,0,0.6) 15% 20%,rgba(0,0,0,1) 40%);
+}

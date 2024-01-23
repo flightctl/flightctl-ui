@@ -43,12 +43,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     setIsDropdownOpen(!isDropdownOpen);
   };
   const userDropdownItems = [
-    <>
-      <DropdownItem key="profile">My profile</DropdownItem>
+      <DropdownItem key="profile">My profile</DropdownItem>,
       <DropdownItem key="logout"               onClick={() =>
                 void auth.signoutRedirect()
               }>Logout</DropdownItem>
-    </>
   ];
   const Header = (
     <Masthead id="stack-inline-masthead" display={{ default: 'inline', lg: 'stack', '2xl': 'inline' }}>
