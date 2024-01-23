@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { fetchData, tableCellData } from '@app/utils/commonFunctions'; 
-import { useAuth } from 'react-oidc-context';
+import { tableCellData } from '@app/utils/commonFunctions';
 import { Link } from 'react-router-dom';
 import { CreateFleet } from './Create';
 import {
@@ -25,6 +24,7 @@ import {
   Thead,
   Tr,
 } from '@patternfly/react-table';
+import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 
 type fleet = {
   metadata: {
@@ -74,27 +74,7 @@ const columns = [
 
 
 const Fleets: React.FunctionComponent = () => {
-  const auth = useAuth();
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [fleetsData, setFleetsData] = React.useState<itemsList>({ items: [] });
-  function getEvents() {
-    if (auth.user?.access_token) {
-      fetchData('fleets', auth.user?.access_token).then((data) => {
-        setFleetsData(data);
-        setIsLoading(false);
-      });
-    } else {
-      console.log("no access token");
-    }
-  }
-  React.useEffect(() => {
-    setIsLoading(true);
-    getEvents();
-    const interval = setInterval(() => {
-      getEvents();
-    }, 10000);
-    return () => clearInterval(interval);
-  },[auth]);
+  const [fleetsData, isLoading, error] = useFetchPeriodically<itemsList>('fleets');
 
   const [isOpenFleet, setIsOpenFleet] = React.useState(false);
 
@@ -146,7 +126,7 @@ const Fleets: React.FunctionComponent = () => {
           </Tr>
         </Thead>
 
-        {fleetsData.items.length > 0 && (
+        {!!fleetsData?.items?.length && (
           <Tbody>
             {fleetsData.items.map((fleet) => (
               <Tr key={fleet.metadata.name}>

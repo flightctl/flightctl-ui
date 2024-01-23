@@ -25,12 +25,13 @@ export type device = {
     }
   };
   status: {
+    online: string;
     conditions: {};
     systemInfo: {
-      architecture: string | null;
-      bootID: string | null;
-      machineID: string | null;
-      operatingSystem: string | null;
+      architecture?: string;
+      bootID?: string;
+      machineID?: string;
+      operatingSystem?: string;
     };
   };
 };
