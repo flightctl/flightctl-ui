@@ -24,7 +24,8 @@
     "bundle-profile:analyze": "npm run build:bundle-profile && webpack-bundle-analyzer ./stats.json",
     "clean": "rimraf dist",
     "storybook": "start-storybook -p 6006",
-    "build:storybook": "build-storybook"
+    "build:storybook": "build-storybook",
+    "gen-types": "node ./scripts/openapi-typescript.js"
   },
   "devDependencies": {
     "@patternfly/react-charts": "^7.1.1",
@@ -56,6 +57,7 @@
     "jest": "^29.6.1",
     "jest-environment-jsdom": "^29.6.1",
     "mini-css-extract-plugin": "^2.7.6",
+    "openapi-typescript-codegen": "^0.27.0",
     "postcss": "^8.4.25",
     "prettier": "^3.0.0",
     "prop-types": "^15.8.1",
@@ -91,6 +93,7 @@
     "axios": "^1.4.0",
     "d3": "^7.8.5",
     "dotenv": "^16.3.1",
+    "js-yaml": "^4.1.0",
     "jsrsasign": "^10.9.0",
     "monaco-editor-webpack-plugin": "^7.1.0",
     "react": "^18",
