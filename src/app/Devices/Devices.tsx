@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { fetchData, tableCellData, deleteObject } from '@app/utils/commonFunctions';
+import { tableCellData, deleteObject } from '@app/utils/commonFunctions';
 import { deviceList } from '@app/utils/commonDataTypes';
 import { useAuth } from 'react-oidc-context';
 import {
@@ -19,6 +19,7 @@ import {
   Tr,
   IAction,
 } from '@patternfly/react-table';
+import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 
 interface Device {
   metadata: {
@@ -48,8 +49,7 @@ const columns = [
 
 const Devices: React.FunctionComponent = () => {
   const auth = useAuth();
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [devicesData, setDevicesData] = React.useState<deviceList>({ items: [] });
+  const [devicesData, isLoading, error, refetch] = useFetchPeriodically<deviceList>('devices');
   const defaultActions = (device: Device): IAction[] => [
     {
       title: "Details",
@@ -57,27 +57,11 @@ const Devices: React.FunctionComponent = () => {
     },
     {
       title: "Delete",
-      onClick: () => deleteObject("devices", device.metadata.name, auth.user?.access_token ?? '').then(() => getEvents())
+      onClick: () => deleteObject("devices", device.metadata.name, auth.user?.access_token ?? '').then(refetch)
     }
   ];
 
 
-  function getEvents() {
-    if (auth.user?.access_token){
-      fetchData('devices', auth.user?.access_token ?? '').then((data) => {
-        setDevicesData(data);
-        setIsLoading(false);
-      });
-    }
-  }
-  React.useEffect(() => {
-    setIsLoading(true);
-    getEvents();
-    const interval = setInterval(() => {
-      getEvents();
-    }, 10000);
-    return clearInterval(interval);
-  }, [auth]);
 
   return (
     <PageSection>
@@ -91,7 +75,7 @@ const Devices: React.FunctionComponent = () => {
             <Td></Td>
           </Tr>
         </Thead>
-        {devicesData.items.length > 0 && (
+        {!!devicesData?.items.length && (
           <Tbody>
             {devicesData.items.map((device) => (
               <Tr key={device.metadata.name}>

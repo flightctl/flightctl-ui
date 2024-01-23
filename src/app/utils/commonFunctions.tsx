@@ -1,26 +1,35 @@
 
-import axios from 'axios';
 var apiServer = "";
 if (process.env.NODE_ENV === 'development') {
   apiServer = window.location.protocol + '//' + window.location.hostname + ":" + process.env.API_PORT;
 }
 
-export const fetchData = async (kind: string, token: string) => {
+export const fetchData = async (kind: string, token: string, abortSignal?: AbortSignal) => {
   try {
-    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-    const response = await axios.get(apiServer + '/api/v1/' + kind);
-    return response.data;
+    const response = await fetch(`${apiServer}/api/v1/${kind}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      signal: abortSignal,
+    });
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Error making request:', error);
+    throw error;
   }
 }
 
 export const fetchDataObj = async (kind: string, name: string, token: string) => {
   if (kind !== undefined && name !== undefined) {
     try {
-      axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-      const response = await axios.get(apiServer + '/api/v1/' + kind + '/' + name);
-      return response.data;
+      const response = await fetch(`${apiServer}/api/v1/${kind}/${name}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error making request:', error);
     }
@@ -31,18 +40,28 @@ export const fetchDataObj = async (kind: string, name: string, token: string) =>
 
 export const deleteObject = async (kind: string, name: string, token: string) => {
   try {
-    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-    const response = await axios.delete(apiServer + '/api/v1/' + kind + '/' + name);
-    return response.data;
+    const response = await fetch(`${apiServer}/api/v1/${kind}/${name}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Error making request:', error);
   }
 }
 export const approveEnrollmentRequest = async (name: string, data: object, token: string) => {
 try {
-    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-    const response = await axios.post(apiServer + '/api/v1/enrollmentrequests/' + name + '/approval', data);
-    return response;
+    const response = await fetch(`${apiServer}/api/v1/enrollmentrequests/${name}/approval`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    return response
   } catch (error: any) {
     console.log(error.response.status)
     console.error('Error making request:', error);
@@ -52,9 +71,14 @@ try {
 
 export const rejectEnrollmentRequest = async (name: string, token: string) => {
 try {
-    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-    const response = await axios.post(apiServer + '/api/v1/enrollmentrequests/' + name + '/rejection');
-    return response.data;
+    const response = await fetch(`${apiServer}/api/v1/enrollmentrequests/${name}/rejection`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Error making request:', error);
     return error;
@@ -62,9 +86,14 @@ try {
 }
 export const enableRCAgent = async (name: string, token: string) => {
   try {
-    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-    const response = await axios.post(apiServer + '/api/v1/device/' + name + '/remotecontrol/enable');
-    return response.data;
+    const response = await fetch(`${apiServer}/api/v1/device/${name}/remotecontrol/enable`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    return data;
   }
   catch (error) {
     console.error('Error making request:', error);
