@@ -1,23 +1,23 @@
 import * as React from 'react';
 import { Route, RouteComponentProps, Switch, useLocation } from 'react-router-dom';
-import { Overview } from '@app/Overview/Overview';
-import { EnrollmentRequests } from '@app/EnrollmentRequests/EnrollmentRequests';
-import { Fleets } from '@app/Fleets/Fleets';
-import { Fleet } from '@app/Fleet/Fleet';
-import { CreateFleet } from '@app/Fleets/Create';
-import { Devices } from '@app/Devices/Devices';
-import { Enroll } from '@app/Enroll/Enroll';
-import { Device } from '@app/Device/Device';
-import { GitRepositories } from '@app/GitRepositories/GitRepositories';
-import { Organization } from '@app/Organization/Organization';
-import { ImageBuilder } from '@app/ImageBuilder/ImageBuilder';
-import { NotFound } from '@app/NotFound/NotFound';
-import { useDocumentTitle } from '@app/utils/useDocumentTitle';
-import { RemoteControl } from '@app/Device/rc';
-import { Workload } from '@app/Workload/Workload';
-import { Experimental } from '@app/Experimental/Experimental';
-import { Experimental2 } from '@app/Experimental/Experimental2';
-import { Experimental3 } from '@app/Experimental/Experimental3';
+import { Overview } from '@app/old/Overview/Overview';
+import { EnrollmentRequests } from '@app/old/EnrollmentRequests/EnrollmentRequests';
+import { Fleet } from '@app/old/Fleet/Fleet';
+import { Devices } from '@app/old/Devices/Devices';
+import { Enroll } from '@app/old/Enroll/Enroll';
+import { Device } from '@app/old/Device/Device';
+import { GitRepositories } from '@app/old/GitRepositories/GitRepositories';
+import { Organization } from '@app/old/Organization/Organization';
+import { ImageBuilder } from '@app/old/ImageBuilder/ImageBuilder';
+import { NotFound } from '@app/old/NotFound/NotFound';
+import { useDocumentTitle } from '@app/old/utils/useDocumentTitle';
+import { RemoteControl } from '@app/old/Device/rc';
+import { Workload } from '@app/old/Workload/Workload';
+import { Experimental } from '@app/old/Experimental/Experimental';
+import { Experimental2 } from '@app/old/Experimental/Experimental2';
+import { Experimental3 } from '@app/old/Experimental/Experimental3';
+import FleetList from './components/Fleet/FleetList';
+import CreateFleet from './components/Fleet/CreateFleet';
 let routeFocusTimer: number;
 export interface IAppRoute {
   label?: string; // Excluding the label will exclude the route from the nav sidebar in AppLayout
@@ -77,23 +77,23 @@ const routes: AppRouteConfig[] = [
         title: 'FlightControl | Enrollment Requests',
       },
       {
-        component: Fleets,
+        component: FleetList,
         exact: true,
         label: 'Fleets',
         path: '/devicemanagement/fleets',
         title: 'FlightControl | Fleets',
       },
       {
+        component: CreateFleet,
+        exact: true,
+        path: '/devicemanagement/fleets/create',
+        title: 'FlightControl | Create Fleet',
+      },
+      {
         component: Fleet,
         exact: false,
         path: '/fleet',
         title: 'FlightControl | Fleet',
-      },
-      {
-        component: CreateFleet,
-        exact: false,
-        path: '/devicemanagement/fleets/create',
-        title: 'FlightControl | Create Fleet',
       },
       {
         component: Devices,
@@ -119,7 +119,7 @@ const routes: AppRouteConfig[] = [
         exact: false,
         path: '/rc',
         title: 'FlightControl | Device - Remote Control',
-      }
+      },
     ],
   },
   {
@@ -154,7 +154,7 @@ const routes: AppRouteConfig[] = [
         title: 'FlightControl | Image Builder',
       },
     ],
-  }
+  },
 ];
 
 // a custom hook for sending focus to the primary content container
@@ -194,7 +194,7 @@ const PageNotFound = ({ title }: { title: string }) => {
 
 const flattenedRoutes: IAppRoute[] = routes.reduce(
   (flattened, route) => [...flattened, ...(route.routes ? route.routes : [route])],
-  [] as IAppRoute[]
+  [] as IAppRoute[],
 );
 
 const AppRoutes = (): React.ReactElement => (
