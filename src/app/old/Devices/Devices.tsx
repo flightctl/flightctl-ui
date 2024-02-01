@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { tableCellData, deleteObject } from '@app/utils/commonFunctions';
-import { deviceList } from '@app/utils/commonDataTypes';
+import { tableCellData, deleteObject } from '@app/old/utils/commonFunctions';
+import { deviceList } from '@app/old/utils/commonDataTypes';
 import { useAuth } from 'react-oidc-context';
 import {
   PageSection,

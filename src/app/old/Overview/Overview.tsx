@@ -10,7 +10,7 @@ import {
   CardHeader,
 } from '@patternfly/react-core';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
-import { deviceList } from '@app/utils/commonDataTypes';
+import { deviceList } from '@app/old/utils/commonDataTypes';
 import { DevicesDonuts } from './devicesDonuts';
 import { DevicesGrid } from './devicesGrid';
 import { Filter } from './filter';

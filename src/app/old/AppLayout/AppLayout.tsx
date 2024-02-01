@@ -24,7 +24,7 @@ import {
 	SkipToContent
 } from '@patternfly/react-core';
 import { IAppRoute, IAppRouteGroup, routes } from '@app/routes';
-import logo from '@app/bgimages/flightctl-logo.svg';
+import logo from '@app/old/bgimages/flightctl-logo.svg';
 import { BarsIcon } from '@patternfly/react-icons';
 import { useAuth } from 'react-oidc-context';
 interface IAppLayout {

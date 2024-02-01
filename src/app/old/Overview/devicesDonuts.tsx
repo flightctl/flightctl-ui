@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchData } from '@app/utils/commonFunctions';
+import { fetchData } from '@app/old/utils/commonFunctions';
 import { useAuth } from 'react-oidc-context';
 import {
   Card,

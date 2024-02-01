@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { deleteData, postData } from '@app/utils/commonFunctions';
+import { deleteData, postData } from '@app/old/utils/commonFunctions';
 import { useAuth } from 'react-oidc-context';
 
 export const useFetch = () => {

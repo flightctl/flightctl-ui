@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchData } from '@app/utils/commonFunctions';
+import { fetchData } from '@app/old/utils/commonFunctions';
 import { useAuth } from 'react-oidc-context';
 import {
   Card,
@@ -22,8 +22,8 @@ import {
 import { ChartDonut, ChartThemeColor } from '@patternfly/react-charts';
 import YAML from 'yaml';
 import * as d3 from "d3";
-import { DevicesDonuts } from '@app/Overview/devicesDonuts';
-const Experimental3: React.FunctionComponent = () => {
+
+const Experimental: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const auth = useAuth();
 
@@ -39,7 +39,7 @@ const Experimental3: React.FunctionComponent = () => {
         */
         let devices = datad.items;
         // deja devices con 10 de muestra
-        devices = devices.slice(0, 1000);
+        devices = devices.slice(0, 100);
         const fleets = [
           "solarpannels",
           "batteries",
@@ -59,10 +59,10 @@ const Experimental3: React.FunctionComponent = () => {
         */
         devices.forEach((device: any) => {
           device.fleet = fleets[Math.floor(Math.random() * fleets.length)];
-          if (Math.random() < 0.997) {
-            device.color = "limegreen";
+          if (Math.random() < 0.96) {
+            device.color = "green";
           } else {
-            device.color = "tomato";
+            device.color = "red";
           }
           device.region = regions[Math.floor(Math.random() * regions.length)];
           // convert device to YAML
@@ -72,30 +72,21 @@ const Experimental3: React.FunctionComponent = () => {
         const data: any = {
           name: "devices",
           children: fleets.map((fleet: any) => {
-            let feetColor = "limegreen";
             return {
               name: fleet,
               children: regions.map((region: any) => {
-                let regionColor = "limegreen";
                 return {
                   name: region,
                   children: devices.filter((device: any) => device.fleet === fleet && device.region === region).map((device: any) => {
-                    if (device.color !== "limegreen") {
-                      feetColor = device.color;
-                      regionColor = device.color;
-                    }
                     return {
-                      // get the first 10 characters of the name
-                      name: device.metadata.name.substring(0, 10),
+                      name: device.metadata.name,
                       value: 1,
                       color: device.color,
                       yaml: device.yaml
                     }
-                  }),
-                  color: regionColor
+                  })
                 }
-              }),
-              color: feetColor
+              })
             }
           })
         };
@@ -103,125 +94,163 @@ const Experimental3: React.FunctionComponent = () => {
         // https://observablehq.com/@d3/zoomable-icicle
           // Specify the chart’s dimensions.
           //set width and height with current window size
-
-
-
-          d3.select("#chart2").selectAll("*").remove();
-          const width = 700;
-          const height = width;
-          const radius = width / 6;
-          const green = d3.color("limegreen");
-          const red = d3.color("tomato");
-          const blue = d3.color("steelblue");
-          const color = d3.scaleOrdinal([green, red, blue]);
-
+          d3.select("#chart").selectAll("*").remove();
+          const width = window.innerWidth - 100;
+          const height = window.innerHeight - 100;
+          // Create the color just with red or green
+          const green = d3.color("green");
+          const red = d3.color("red");
+          const color = d3.scaleOrdinal([green, red]);
+          // Compute the layout.
           const hierarchy = d3.hierarchy(data)
               .sum(d => d.value)
-              .sort((a, b) => b.value - a.value);
+              .sort((a, b) => b.height - a.height || b.value - a.value);
           const root = d3.partition()
-              .size([2 * Math.PI, hierarchy.height + 1])
+              .size([height, (hierarchy.height + 1) * width / 3])
             (hierarchy);
-          root.each(d => d.current = d);
-          const arc = d3.arc()
-              .startAngle(d => d.x0)
-              .endAngle(d => d.x1)
-              .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
-              .padRadius(radius * 1.5)
-              .innerRadius(d => d.y0 * radius)
-              .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
-
-          const svg = d3.select("#chart2").append("svg")
-              .attr("viewBox", [-width / 2, -height /2, width, width])
-              .style("font", "10px sans-serif");
-
-          const path = svg.append("g")
-              .selectAll("path")
-              .data(root.descendants().slice(1))
-              .join("path")
-              .attr("fill", d => { 
-                return d.data.color;
+        
+          // Create the SVG container.
+          const svg = d3.select("#chart")
+              .attr("viewBox", [0, 0, width, height])
+              .attr("width", width)
+              .attr("height", height)
+              .attr("style", "max-width: 100%; height: auto; font: 16px;");
+        
+          // Append cells.
+          const cell = svg
+            .selectAll("g")
+            .data(root.descendants())
+            .join("g")
+              .attr("transform", d => `translate(${d.y0},${d.x0})`);
+        
+          const rect = cell.append("rect")
+              .attr("width", d => d.y1 - d.y0 - 1)
+              .attr("height", d => rectHeight(d))
+              .attr("fill-opacity", 0.6)
+              .attr("fill", d => {
+                if (!d.depth) return "#ccc";
+                // si d.depth == 3, con una probabilidad del 0.8, el color es verde, sino rojo
+                if (d.depth === 4) {
+                  return "gray";
+                } else if (d.depth === 3) {
+                  return d.data.color;
+                } else if (d.depth === 2) {
+                  // revisar el color de los hijos, si todos son verdes, el color es verde, sino rojo
+                  const children = d.children;
+                  let allGreen = true;
+                  children.forEach((child: any) => {
+                    if (child.data.color === "red") {
+                      allGreen = false;
+                    }
+                  });
+                  if (allGreen) {
+                    return green;
+                  } else {
+                    return red;
+                  }
+                } else {
+                  const children = d.children;
+                  let allGreen = true;
+                  children.forEach((child2: any) => {
+                    child2.children.forEach((child: any) => {
+                      if (child.data.color === "red") {
+                        allGreen = false;
+                      }
+                    }
+                    );
+                  });
+                  if (allGreen) {
+                    return green;
+                  } else {
+                    return red;
+                  }
+                }
               })
-              .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0)
-              .attr("pointer-events", d => arcVisible(d.current) ? "auto" : "none")
-              .attr("d", d => arc(d.current));
-          path.filter(d => d.children)
               .style("cursor", "pointer")
               .on("click", clicked);
-          
+        
+          const text = cell.append("text")
+            .style("user-select", "none")
+            .attr("pointer-events", "none")
+            .attr("x", 10)
+            .attr("y", 23)
+            .attr("fill-opacity", d => +labelVisible(d));
+          text.text((d: any) => {
+            return d.data.name;
+          }
+          );
+
+
           const format = d3.format(",d");
-          path.append("title")
-              .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
-
-          const label = svg.append("g")
-              .attr("pointer-events", "none")
-              .attr("text-anchor", "middle")
-              .style("user-select", "none")
-              .selectAll("text")
-              .data(root.descendants().slice(1))
-              .join("text")
-              .attr("dy", "0.35em")
-              .attr("fill-opacity", d => +labelVisible(d.current))
-              .attr("transform", d => labelTransform(d.current))
-              .text(d => d.data.name);
-
-          const parent = svg.append("circle")
-              .datum(root)
-              .attr("r", radius)
-              .attr("fill", "none")
-              .attr("pointer-events", "all")
-              .on("click", clicked);
-          
-          function clicked(event, p) {
-            parent.datum(p.parent || root);
-
-            root.each(d => d.target = {
-              x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
-              x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
-              y0: Math.max(0, d.y0 - p.depth),
-              y1: Math.max(0, d.y1 - p.depth)
-            });
-            
-            const t = svg.transition().duration(750);
-
-            // Transition the data on all arcs, even the ones that aren’t visible,
-            // so that if this transition is interrupted, entering arcs will start
-            // the next transition from the desired position.
-            path.transition(t)
-              .tween("data", d => {
-                const i = d3.interpolate(d.current, d.target);
-                return t => d.current = i(t);
-              })
-              .filter(function(this: SVGElement, d) {
-                return +(this.getAttribute("fill-opacity") ?? 0) || arcVisible(d.target);
-              })
-              .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 0.6 : 0.4) : 0)
-              .attr("pointer-events", d => arcVisible(d.target) ? "auto" : "none")
-              .attrTween("d", d => () => arc(d.current));
+          const tspan = text.append("tspan")
+              .attr("fill-opacity", d => +labelVisible(d) * 0.7)
               
-              label.filter(function(this: SVGElement, d) {
-                return +(this.getAttribute("fill-opacity") ?? 0) || labelVisible(d.target);
-              }).transition(t)
-                .attr("fill-opacity", d => +labelVisible(d.target))
-                .attrTween("transform", d => () => labelTransform(d.current));
-              }
-  
-              function arcVisible(d) {
-                return d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0;
-              }
-            
-              function labelVisible(d) {
-                return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.03;
-              }
-            
-              function labelTransform(d) {
-                const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-                const y = (d.y0 + d.y1) / 2 * radius;
-                return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
-              }
-            
-              return svg.node();
+              .text(d => {
+                if (d.depth < 3) {
+                  return ` ${format(d.value)}`;
+                } else {
+                  return "";
+                }
+              });
+
+          cell.append("title")
+              // if !d.data.yaml then show the name, else show the yaml
+.text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
+
+
+              // On click, change the focus and transitions it into view.
+          let focus = root;
+          function clicked(event, p) {
+            if (p.depth === 0) {
+              return;
+            }
+            if (p.depth === 3 && document.getElementById("float")?.style.display === "none" ) {
+              const float = document.getElementById("float");
+
+              // definir el contenido del float con el yaml respetando los saltos de linea y la indentación que tiene ya el yaml
+              // usando replaceAll("\n", "<br>") y replaceAll("  ", "&nbsp;&nbsp;") para respetar los saltos de linea y la indentación
+              float!.innerHTML = p.data.yaml.replaceAll("\n", "<br>").replaceAll("  ", "&nbsp;&nbsp;&nbsp;&nbsp;");
+              // definir un tamaño máximo para el float, y si el yaml es más grande, hacer scroll en el float
+              float!.style.maxHeight = "800px";
+              float!.style.overflow = "auto";
+
+
+              
+              setTimeout(() => {
+                float!.style.display = "block";
+              }, 700);
+            } else {
+              const float = document.getElementById("float");
+              float!.style.display = "none";
+            }
+
+            focus = focus === p ? p = p.parent : p;
+        
+            root.each(d => d.target = {
+              x0: (d.x0 - p.x0) / (p.x1 - p.x0) * height,
+              x1: (d.x1 - p.x0) / (p.x1 - p.x0) * height,
+              y0: d.y0 - p.y0,
+              y1: d.y1 - p.y0
             });
-            
+        
+            const t = cell.transition().duration(750)
+                .attr("transform", d => `translate(${d.target.y0},${d.target.x0})`);
+        
+            rect.transition(t).attr("height", d => rectHeight(d.target));
+            text.transition(t).attr("fill-opacity", d => +labelVisible(d.target));
+            tspan.transition(t).attr("fill-opacity", d => +labelVisible(d.target) * 0.7);
+          }
+          
+          function rectHeight(d) {
+            return d.x1 - d.x0 - Math.min(1, (d.x1 - d.x0) / 2);
+          }
+        
+          function labelVisible(d) {
+            return d.y1 <= width && d.y0 >= 0 && d.x1 - d.x0 > 16;
+          }
+          
+          
+      });
     }
   }
 
@@ -232,13 +261,11 @@ const Experimental3: React.FunctionComponent = () => {
   return (
     <PageSection>
       <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>Experimental</Title>
-      <svg id="chart2" width="700" height="700" style={{zIndex: "2", pointerEvents: "all"}}></svg>
-      
+      <svg id="chart" width="100%" height="900"></svg>
       <div id="float" style={{position: 'absolute', top: 100, right: 100, padding: "3px", width: "900px", background: "#eeeeee",display: "none"}}></div>
-      <div style={{position: "absolute", top: "357px", left: "522px", width: "300px", height:"300px", pointerEvents:"none", zIndex: "1"}} ><DevicesDonuts /></div>
     </PageSection>
   )
 };
 
-export { Experimental3 };
+export { Experimental };
 

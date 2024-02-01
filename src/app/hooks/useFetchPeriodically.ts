@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useAuth } from 'react-oidc-context';
-import { fetchData } from '@app/utils/commonFunctions';
+import { fetchData } from '@app/old/utils/commonFunctions';
 
 const TIMEOUT = 10000;
 

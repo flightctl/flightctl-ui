@@ -1,6 +1,6 @@
 import React, { useState, useEffect} from 'react';
-import { fetchDataObj, approveEnrollmentRequest, rejectEnrollmentRequest } from '@app/utils/commonFunctions'; 
-import { enrollmentrequest } from '@app/utils/commonDataTypes';
+import { fetchDataObj, approveEnrollmentRequest, rejectEnrollmentRequest } from '@app/old/utils/commonFunctions'; 
+import { enrollmentrequest } from '@app/old/utils/commonDataTypes';
 import { useAuth } from 'react-oidc-context';
 import { EnrollStatus } from './EnrollStatus';
 import {

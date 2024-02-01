@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { fetchDataObj } from '@app/utils/commonFunctions';
-import { device } from '@app/utils/commonDataTypes';
+import { fetchDataObj } from '@app/old/utils/commonFunctions';
+import { device } from '@app/old/utils/commonDataTypes';
 import { useAuth } from 'react-oidc-context';
 import { LogViewer } from '@patternfly/react-log-viewer';
 import YAML from 'yaml';

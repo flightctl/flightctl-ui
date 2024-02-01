@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { fetchData } from '@app/utils/commonFunctions';
-import { useAuth } from 'react-oidc-context';
 import {
   Card,
   CardBody,
@@ -17,10 +15,92 @@ import {
   DropdownItem,
   PageSection,
   Title,
-  CardHeader,
 } from '@patternfly/react-core';
+import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
+import { deviceList } from '@app/old/utils/commonDataTypes';
 
-const Filter: React.FunctionComponent = () => {
+
+
+const Workload: React.FunctionComponent = () => {
+  const [data, isLoading, error] = useFetchPeriodically<deviceList>('devices');
+
+  React.useEffect(() => {
+    if (data) {
+      const devices = data.items;
+      const div = document.getElementById('grid-total');
+      if (div) {
+        div.innerHTML = `Total: ${devices.length}<br>`;
+        let cellcount = 0;
+        const maxcellsperline = 40;
+        let onlinecount = 0;
+        let offlinecount = 0;
+        let syncronizingcount = 0;
+        if (devices.length > 0) {
+          const table = document.createElement('table');
+          table.className = 'deviceGrid';
+          table.innerHTML = '<tbody></tbody>';
+          let tr = document.createElement('tr');
+          const tbody = table.getElementsByTagName('tbody')[0];
+          tbody.appendChild(tr);
+          devices.forEach((device) => {
+            const status = device.status.online;
+            if (div) {
+              cellcount++;
+              if (cellcount > maxcellsperline) {
+                tr = document.createElement('tr');
+                tbody.appendChild(tr);
+                cellcount = 1;
+              }
+              const newDiv = document.createElement('div');
+              // set newDiv class deviceSquare
+              newDiv.className = 'deviceSquare';
+              newDiv.style.width = '7px';
+              newDiv.style.height = '7px';
+              newDiv.style.backgroundColor = status === 'True' ? 'limegreen' : 'tomato';
+              newDiv.style.display = 'inline-block';
+              newDiv.style.margin = '2px 2px 0px 0px';
+              newDiv.onclick = () => {
+                window.location.href = `/device/${device.metadata.name}`;
+              };
+              const tooltip = document.getElementById('tooltip');
+              newDiv.onmouseover = (event: MouseEvent) => {
+                if (tooltip) {
+                  if (device.status.systemInfo === undefined) {
+                    device.status.systemInfo = {};
+                  }
+                  device.status.systemInfo.architecture = device.status.systemInfo.architecture || "-";
+                  device.status.systemInfo.bootID = device.status.systemInfo.bootID || "-";
+                  device.status.systemInfo.machineID = device.status.systemInfo.machineID || "-";
+                  device.status.systemInfo.operatingSystem = device.status.systemInfo.operatingSystem || "-";
+                  device.status.online = device.status.online || "-";
+
+                  tooltip.style.display = 'block';
+                  tooltip.style.position = 'absolute';
+                  tooltip.style.left = `${event.clientX + 10}px`;
+                  tooltip.style.top = `${event.clientY + 10}px`;
+                  tooltip.style.backgroundColor = 'white';
+                  tooltip.style.border = '1px solid black';
+                  tooltip.style.padding = '5px';
+                  tooltip.style.zIndex = '1';
+                  tooltip.innerHTML = `Name: ${device.metadata.name}<br>Architecture: ${device.status.systemInfo.architecture}<br>Boot ID: ${device.status.systemInfo.bootID}<br>Machine ID: ${device.status.systemInfo.machineID}<br>Operating System: ${device.status.systemInfo.operatingSystem}<br>Status: ${device.status.online}`;
+                }
+                newDiv.onmouseleave = () => {
+                  if (tooltip) {
+                    tooltip.style.display = 'none';
+                  }
+                }
+              };
+              const td = document.createElement('td');
+              td.appendChild(newDiv);
+              tr?.appendChild(td);
+            }
+          });
+          div.appendChild(table);
+        };
+      }
+    }
+  }, [data]);
+
   const [isOpenFleet, setIsOpenFleet] = React.useState(false);
   const [isOpenRegion, setIsOpenRegion] = React.useState(false);
   const onFleetToggleClick = () => {
@@ -47,10 +127,14 @@ const Filter: React.FunctionComponent = () => {
     { id: 1, name: 'Madrid001', description: 'Madrid001, Spain' },
   ];
   let [regionListFiltered, setRegionList] = useState(regionList);
-
-
   return (
-    <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
+    <PageSection>
+      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>Workload</Title>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
                 <FlexItem>
                   <Dropdown
                     isOpen={isOpenFleet}
@@ -197,6 +281,86 @@ const Filter: React.FunctionComponent = () => {
                   </Dropdown>
                 </FlexItem>
               </Flex>
-    );
-}
-export { Filter };
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <Card isCompact={true} isFlat={true} >
+        <CardBody>
+          <Flex>
+            <FlexItem>
+              <div id="grid-total">Total: - <br></br><div id="total-toggle"></div><br></br></div>
+            </FlexItem>
+            <Divider
+              orientation={{
+                default: 'vertical'
+              }}
+              inset={{ default: 'insetSm' }}
+            />
+            <FlexItem>
+              <div id="grid-insync">In sync: WIP <br></br></div>
+            </FlexItem>
+          </Flex>
+          <br></br><br></br>
+          <ChipGroup categoryName='' numChips={0} collapsedText='Show legend' expandedText='Hide legend'>
+            <Chip isReadOnly={true}>
+              <table>
+                <tbody>
+                  <tr>
+                    <td><div style={{ background: 'limegreen', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
+                    <td>Online</td>
+                  </tr>
+                </tbody>
+              </table>
+            </Chip>
+            <Chip isReadOnly={true}>
+              <table>
+                <tbody>
+                  <tr>
+                    <td><div style={{ background: 'tomato', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
+                    <td>Error</td>
+                  </tr>
+                </tbody>
+              </table>
+            </Chip>
+            <Chip isReadOnly={true}>
+              <table>
+                <tbody>
+                  <tr>
+                    <td><div style={{ background: 'khaki', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
+                    <td>Degraded</td>
+                  </tr>
+                </tbody>
+              </table>
+            </Chip>
+            <Chip isReadOnly={true}>
+              <table>
+                <tbody>
+                  <tr>
+                    <td><div style={{ background: 'cornflowerblue', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
+                    <td>Syncing</td>
+                  </tr>
+                </tbody>
+              </table>
+            </Chip>
+            <Chip isReadOnly={true}>
+              <table>
+                <tbody>
+                  <tr>
+                    <td><div style={{ background: 'gainsboro', width: '15px', height: '15px', marginRight: '5px' } as React.CSSProperties}></div></td>
+                    <td>Offline</td>
+                  </tr>
+                </tbody>
+              </table>
+            </Chip>
+          </ChipGroup>
+
+        </CardBody>
+      </Card>
+      <div id="tooltip" style={{ display: 'none' }}></div>
+    </PageSection>
+  )
+};
+
+export { Workload };
+

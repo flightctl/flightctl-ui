@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchData } from '@app/utils/commonFunctions';
+import { fetchData } from '@app/old/utils/commonFunctions';
 import { useAuth } from 'react-oidc-context';
 import {
   Card,
@@ -22,7 +22,7 @@ import { set } from 'yaml/dist/schema/yaml-1.1/set';
 
 
 
-const Organization: React.FunctionComponent = () => {
+const GitRepositories: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const auth = useAuth();
 
@@ -31,11 +31,11 @@ const Organization: React.FunctionComponent = () => {
 
   return (
     <PageSection>
-      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>Organization</Title>
+      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>Git Repositories</Title>
 
     </PageSection>
   )
 };
 
-export { Organization };
+export { GitRepositories };
 

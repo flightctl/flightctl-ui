@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { fetchData, tableCellData, deleteObject, approveEnrollmentRequest } from '@app/utils/commonFunctions'; 
+import { fetchData, tableCellData, deleteObject, approveEnrollmentRequest } from '@app/old/utils/commonFunctions'; 
 import { useAuth } from 'react-oidc-context';
-import { enrollmentrequestList } from '@app/utils/commonDataTypes';
+import { enrollmentrequestList } from '@app/old/utils/commonDataTypes';
 import {
   PageSection,
   Pagination,
