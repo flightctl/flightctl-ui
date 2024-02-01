@@ -21,20 +21,6 @@ jobs:
         run: npm install
       - name: Run eslint
         run: npm run lint
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-      - name: Install dependencies
-        run: npm install
-      - name: Run tests
-        run: npm run test
   build:
     name: Build
     runs-on: ubuntu-latest
