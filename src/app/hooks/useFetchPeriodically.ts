@@ -26,7 +26,10 @@ export const useFetchPeriodically = <R>(endpoint: string): [R | undefined, boole
             setData(data);
             setError(undefined);
           } catch (err) {
-            setError(err);
+            // aborting fetch trows 'AbortError', we can ignore it
+            if (!abortController.signal.aborted) {
+              setError(err);
+            }
           }
           await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
         }
@@ -35,12 +38,14 @@ export const useFetchPeriodically = <R>(endpoint: string): [R | undefined, boole
 
     fetchPeriodically(ref.current);
     return () => {
+      // eslint-disable-next-line
       ref.current++;
       abortController?.abort();
     };
+    // eslint-disable-next-line
   }, [auth.user?.access_token, forceUpdate, endpoint]);
 
-  const refetch = React.useCallback(() => setForceUpdate(forceUpdate + 1), []);
+  const refetch = React.useCallback(() => setForceUpdate((val) => val + 1), []);
 
   return [data, isLoading, error, refetch];
 };

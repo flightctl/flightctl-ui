@@ -1,8 +1,41 @@
-
-var apiServer = "";
+let apiServer = '';
 if (process.env.NODE_ENV === 'development') {
-  apiServer = window.location.protocol + '//' + window.location.hostname + ":" + process.env.API_PORT;
+  apiServer = window.location.protocol + '//' + window.location.hostname + ':' + process.env.API_PORT;
 }
+
+export const postData = async (kind: string, token: string, data: unknown) => {
+  try {
+    const response = await fetch(`${apiServer}/api/v1/${kind}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    const resp = await response.json();
+    return resp;
+  } catch (error) {
+    console.error('Error making request:', error);
+    throw error;
+  }
+};
+
+export const deleteData = async (kind: string, token: string) => {
+  try {
+    const response = await fetch(`${apiServer}/api/v1/${kind}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: 'DELETE',
+    });
+    const resp = await response.json();
+    return resp;
+  } catch (error) {
+    console.error('Error making request:', error);
+    throw error;
+  }
+};
 
 export const fetchData = async (kind: string, token: string, abortSignal?: AbortSignal) => {
   try {
@@ -18,7 +51,7 @@ export const fetchData = async (kind: string, token: string, abortSignal?: Abort
     console.error('Error making request:', error);
     throw error;
   }
-}
+};
 
 export const fetchDataObj = async (kind: string, name: string, token: string) => {
   if (kind !== undefined && name !== undefined) {
@@ -36,7 +69,7 @@ export const fetchDataObj = async (kind: string, name: string, token: string) =>
   } else {
     console.error('Error making request: invalid kind or name');
   }
-}
+};
 
 export const deleteObject = async (kind: string, name: string, token: string) => {
   try {
@@ -51,9 +84,9 @@ export const deleteObject = async (kind: string, name: string, token: string) =>
   } catch (error) {
     console.error('Error making request:', error);
   }
-}
+};
 export const approveEnrollmentRequest = async (name: string, data: object, token: string) => {
-try {
+  try {
     const response = await fetch(`${apiServer}/api/v1/enrollmentrequests/${name}/approval`, {
       method: 'POST',
       headers: {
@@ -61,16 +94,16 @@ try {
       },
       body: JSON.stringify(data),
     });
-    return response
+    return response;
   } catch (error: any) {
-    console.log(error.response.status)
+    console.log(error.response.status);
     console.error('Error making request:', error);
     return error.response;
   }
-}
+};
 
 export const rejectEnrollmentRequest = async (name: string, token: string) => {
-try {
+  try {
     const response = await fetch(`${apiServer}/api/v1/enrollmentrequests/${name}/rejection`, {
       method: 'POST',
       headers: {
@@ -83,7 +116,7 @@ try {
     console.error('Error making request:', error);
     return error;
   }
-}
+};
 export const enableRCAgent = async (name: string, token: string) => {
   try {
     const response = await fetch(`${apiServer}/api/v1/device/${name}/remotecontrol/enable`, {
@@ -94,26 +127,25 @@ export const enableRCAgent = async (name: string, token: string) => {
     });
     const data = await response.json();
     return data;
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Error making request:', error);
   }
-}
+};
 
 export const tableCellData = (column, obj) => {
   const columnKey = column.key.split('.');
   let finalKey = obj;
-  if (column.key === "metadata.labels") {
+  if (column.key === 'metadata.labels') {
     // If the column is metadata.labels then we need to iterate through the labels and display them
     const labels = obj.metadata.labels;
-    let labelString = "";
+    let labelString = '';
     for (const [key, value] of Object.entries(labels)) {
-      labelString += key + "=" + value + ", ";
+      labelString += key + '=' + value + ', ';
     }
     if (labelString.length > 0) {
       labelString = labelString.slice(0, -2);
     } else {
-      labelString = "-";
+      labelString = '-';
     }
     return labelString;
   } else if (columnKey.length > 1) {

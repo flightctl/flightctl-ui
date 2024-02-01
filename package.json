@@ -93,6 +93,7 @@
     "axios": "^1.4.0",
     "d3": "^7.8.5",
     "dotenv": "^16.3.1",
+    "formik": "^2.4.5",
     "js-yaml": "^4.1.0",
     "jsrsasign": "^10.9.0",
     "monaco-editor-webpack-plugin": "^7.1.0",
