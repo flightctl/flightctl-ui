@@ -55,18 +55,6 @@ const EnrollStatus: React.FunctionComponent<{enrollID: string; enrollStatus: str
       stateIcon = ErrorIcon;
       stateIconColor = "var(--pf-v5-global--danger-color--100)";
     }
-    React.useEffect(() => {
-        const pageSidebar = document.getElementById("page-sidebar");
-        if (pageSidebar) {
-          pageSidebar.style.display = "none";
-        }
-    
-        return () => {
-          if (pageSidebar) {
-            pageSidebar.style.display = "";
-          }
-        };
-    }, [auth]); 
 
     return (
         <PageSection style={{ textAlign: 'center' }}>
