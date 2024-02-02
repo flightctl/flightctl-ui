@@ -17,7 +17,7 @@ import {
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { FleetList } from '@types';
 import * as React from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 const FleetTable = () => {
   const [fleetList, loading, error, refetch] = useFetchPeriodically<FleetList>('fleets');
@@ -51,7 +51,9 @@ const FleetTable = () => {
         <Tbody>
           {fleetList.items.map((fleet) => (
             <Tr key={fleet.metadata.name}>
-              <Td dataLabel="Name">{fleet.metadata.name}</Td>
+              <Td dataLabel="Name">
+                <Link to={`fleets/${fleet.metadata.name}`}>{fleet.metadata.name}</Link>
+              </Td>
               <Td dataLabel="Source">{fleet.spec.template.spec.os?.image || '-'}</Td>
               <Td dataLabel="Devices">-</Td>
               <Td dataLabel="In-sync">-</Td>

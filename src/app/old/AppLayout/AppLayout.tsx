@@ -12,16 +12,17 @@ import {
   MastheadMain,
   MastheadToggle,
   MastheadContent,
-	MenuToggle,
+  MenuToggle,
   MenuToggleElement,
-	Nav,
+  Nav,
   NavExpandable,
   NavItem,
-	NavList,
-	Page,
-	PageSidebar,
+  NavList,
+  Page,
+  PageSidebar,
   PageSidebarBody,
-	SkipToContent
+  PageToggleButton,
+  SkipToContent,
 } from '@patternfly/react-core';
 import { IAppRoute, IAppRouteGroup, routes } from '@app/routes';
 import logo from '@app/old/bgimages/flightctl-logo.svg';
@@ -34,14 +35,16 @@ interface IAppLayout {
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const auth = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-  const [sidebarOpen, setSidebarOpen] = React.useState(true);
-  const toggleRef = React.useRef<HTMLButtonElement>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+
+  const onSidebarToggle  = () => {
+    setIsSidebarOpen((prevIsOpen) => !prevIsOpen)
+  }
+
   const onDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
-  const onDropdownSelect = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
+
   const userDropdownItems = [
       <DropdownItem key="profile">My profile</DropdownItem>,
       <DropdownItem key="logout"               onClick={() =>
@@ -52,9 +55,15 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     <Masthead id="stack-inline-masthead" display={{ default: 'inline', lg: 'stack', '2xl': 'inline' }}>
             <MastheadMain>
       <MastheadToggle>
-        <Button variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation">
+        <PageToggleButton
+          variant="plain"
+          aria-label="Global navigation"
+          isSidebarOpen={isSidebarOpen}
+          onSidebarToggle={onSidebarToggle}
+          id="page-toggle-button"
+        >
           <BarsIcon />
-        </Button>
+        </PageToggleButton>
       </MastheadToggle>
 
         <MastheadBrand>
@@ -66,24 +75,21 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         <div style={{ marginLeft: 'auto' }} id="userWelcome">
         <Dropdown
         isOpen={isDropdownOpen}
-        style={{ marginLeft: 'auto'}} 
-        onSelect={onDropdownSelect}
+        style={{ marginLeft: 'auto'}}
+        onSelect={onDropdownToggle}
         onOpenChange={(isOpen: boolean) => setIsDropdownOpen(isOpen)}
         popperProps={{ position: 'end' }}
         toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-          <MenuToggle 
+          <MenuToggle
             ref={toggleRef}
-            icon={<Avatar src="images/avatarimg.svg" alt="avatar" size="md" />} 
-            
-            onClick={onDropdownToggle} 
-            id="userMenu" 
-            isFullHeight 
-            isExpanded={isDropdownOpen} 
-            variant="plainText" 
+            icon={<Avatar src="images/avatarimg.svg" alt="avatar" size="md" />}
+            onClick={onDropdownToggle}
+            id="userMenu"
+            isFullHeight
+            isExpanded={isDropdownOpen}
+            variant="plainText"
           >
-          
-          {auth.user?.profile.preferred_username}  
-
+          {auth.user?.profile.preferred_username}
           </MenuToggle>
         )}
         >
@@ -133,7 +139,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   );
 
   const Sidebar = (
-    <PageSidebar theme="dark" >
+    <PageSidebar theme="dark" isSidebarOpen={isSidebarOpen}>
       <PageSidebarBody>
         {Navigation}
       </PageSidebarBody>
@@ -155,7 +161,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     <Page
       mainContainerId={pageId}
       header={Header}
-      sidebar={sidebarOpen && Sidebar}
+      sidebar={Sidebar}
+      isManagedSidebar
       skipToContent={PageSkipToContent}>
       {children}
     </Page>

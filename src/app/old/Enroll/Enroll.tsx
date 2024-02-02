@@ -65,18 +65,6 @@ const Enroll: React.FunctionComponent = () => {
           setEnrollmentRequest(data);
         });
       }, []);
-    React.useEffect(() => {
-        const pageSidebar = document.getElementById("page-sidebar");
-        if (pageSidebar) {
-          pageSidebar.style.display = "none";
-        }
-    
-        return () => {
-          if (pageSidebar) {
-            pageSidebar.style.display = "";
-          }
-        };
-    }, [auth]); 
 
     const handleReject = () => {
         setShowAlert(true);

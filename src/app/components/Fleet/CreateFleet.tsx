@@ -55,10 +55,14 @@ const CreateFleetForm = () => {
   return (
     <Form>
       <FormGroup label="Name" isRequired>
-        <TextInput value={values.name} onChange={(_, value) => setFieldValue('name', value)} />
+        <TextInput aria-label="Name" value={values.name} onChange={(_, value) => setFieldValue('name', value)} />
       </FormGroup>
       <FormGroup label="OS image" isRequired>
-        <TextInput value={values.osImage} onChange={(_, value) => setFieldValue('osImage', value)} />
+        <TextInput
+          aria-label="OS image"
+          value={values.osImage}
+          onChange={(_, value) => setFieldValue('osImage', value)}
+        />
       </FormGroup>
       <ActionGroup>
         <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitting}>

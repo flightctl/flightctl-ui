@@ -18,6 +18,7 @@ import { Experimental2 } from '@app/old/Experimental/Experimental2';
 import { Experimental3 } from '@app/old/Experimental/Experimental3';
 import FleetList from './components/Fleet/FleetList';
 import CreateFleet from './components/Fleet/CreateFleet';
+import FleetDetails from '@app/components/Fleet/FleetDetails';
 let routeFocusTimer: number;
 export interface IAppRoute {
   label?: string; // Excluding the label will exclude the route from the nav sidebar in AppLayout
@@ -93,6 +94,12 @@ const routes: AppRouteConfig[] = [
         component: Fleet,
         exact: false,
         path: '/fleet',
+        title: 'FlightControl | Fleet',
+      },
+      {
+        component: FleetDetails,
+        exact: false,
+        path: '/devicemanagement/fleets',
         title: 'FlightControl | Fleet',
       },
       {
