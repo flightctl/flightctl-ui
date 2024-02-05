@@ -20,7 +20,7 @@ import { Workload } from '@app/old/Workload/Workload';
 import { useDocumentTitle } from '@app/old/utils/useDocumentTitle';
 import { NotFound } from '@app/old/NotFound/NotFound';
 
-import CreateFleet from '@app/components/Fleet/CreateFleet';
+import CreateFleet from '@app/components/Fleet/CreateFleet/CreateFleet';
 import FleetList from '@app/components/Fleet/FleetList';
 import FleetDetails from '@app/components/Fleet/FleetDetails';
 
