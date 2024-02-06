@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
 import {
   Avatar,
   Brand,
@@ -24,15 +23,14 @@ import {
   PageToggleButton,
   SkipToContent,
 } from '@patternfly/react-core';
-import { IAppRoute, IAppRouteGroup, routes } from '@app/routes';
 import logo from '@app/old/bgimages/flightctl-logo.svg';
 import { BarsIcon } from '@patternfly/react-icons';
 import { useAuth } from 'react-oidc-context';
-interface IAppLayout {
-  children: React.ReactNode;
-}
+import { Outlet } from "react-router-dom";
 
-const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
+import AppNavigation from './AppNavigation';
+
+const AppLayout: React.FunctionComponent = () => {
   const auth = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
@@ -107,41 +105,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </Masthead>
   );
 
-  const location = useLocation();
-
-  const renderNavItem = (route: IAppRoute, index: number) => (
-    <NavItem key={`${route.label}-${index}`} id={`${route.label}-${index}`} isActive={route.path === location.pathname}>
-      <NavLink exact={route.exact} to={route.path}>
-        {route.label}
-      </NavLink>
-    </NavItem>
-  );
-
-  const renderNavGroup = (group: IAppRouteGroup, groupIndex: number) => (
-    <NavExpandable
-      key={`${group.label}-${groupIndex}`}
-      id={`${group.label}-${groupIndex}`}
-      title={group.label}
-      isActive={group.routes.some((route) => route.path === location.pathname)}
-    >
-      {group.routes.map((route, idx) => route.label && renderNavItem(route, idx))}
-    </NavExpandable>
-  );
-
-  const Navigation = (
-    <Nav id="nav-primary-simple" theme="dark">
-      <NavList id="nav-list-simple">
-        {routes.map(
-          (route, idx) => route.label && (!route.routes ? renderNavItem(route, idx) : renderNavGroup(route, idx))
-        )}
-      </NavList>
-    </Nav>
-  );
-
   const Sidebar = (
     <PageSidebar theme="dark" isSidebarOpen={isSidebarOpen}>
       <PageSidebarBody>
-        {Navigation}
+        <AppNavigation />
       </PageSidebarBody>
     </PageSidebar>
   );
@@ -164,7 +131,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       sidebar={Sidebar}
       isManagedSidebar
       skipToContent={PageSkipToContent}>
-      {children}
+      <Outlet />
     </Page>
   );
 };

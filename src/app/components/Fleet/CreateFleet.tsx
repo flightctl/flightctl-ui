@@ -14,7 +14,7 @@ import {
 import { Fleet } from '@types';
 import { Formik, useFormikContext } from 'formik';
 import * as React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 type FleetFormValues = {
   name: string;
@@ -50,7 +50,7 @@ const getFleetResource = (values: FleetFormValues) => ({
 });
 
 const CreateFleetForm = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<FleetFormValues>();
   return (
     <Form>
@@ -68,7 +68,7 @@ const CreateFleetForm = () => {
         <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitting}>
           Create fleet
         </Button>
-        <Button variant="link" isDisabled={isSubmitting} onClick={history.goBack}>
+        <Button variant="link" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
           Cancel
         </Button>
       </ActionGroup>
@@ -77,7 +77,7 @@ const CreateFleetForm = () => {
 };
 
 const CreateFleet = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { post } = useFetch();
   return (
     <PageSection variant={PageSectionVariants.light}>
@@ -95,7 +95,7 @@ const CreateFleet = () => {
             }}
             onSubmit={async (values) => {
               await post<Fleet>('fleets', getFleetResource(values));
-              history.push('/devicemanagement/fleets');
+              navigate('/devicemanagement/fleets');
             }}
           >
             <CreateFleetForm />

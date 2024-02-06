@@ -17,7 +17,7 @@ import {
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { FleetList } from '@types';
 import * as React from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const FleetTable = () => {
   const [fleetList, loading, error, refetch] = useFetchPeriodically<FleetList>('fleets');
@@ -52,7 +52,7 @@ const FleetTable = () => {
           {fleetList.items.map((fleet) => (
             <Tr key={fleet.metadata.name}>
               <Td dataLabel="Name">
-                <Link to={`fleets/${fleet.metadata.name}`}>{fleet.metadata.name}</Link>
+                <Link to={`${fleet.metadata.name}`}>{fleet.metadata.name}</Link>
               </Td>
               <Td dataLabel="Source">{fleet.spec.template.spec.os?.image || '-'}</Td>
               <Td dataLabel="Devices">-</Td>
@@ -80,7 +80,7 @@ const FleetTable = () => {
 };
 
 const FleetList = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   return (
     <PageSection variant={PageSectionVariants.light}>
@@ -94,7 +94,7 @@ const FleetList = () => {
           <Toolbar>
             <ToolbarContent>
               <ToolbarItem>
-                <Button variant="primary" onClick={() => history.push('/devicemanagement/fleets/create')}>
+                <Button variant="primary" onClick={() => navigate('/devicemanagement/fleets/create')}>
                   Create
                 </Button>
               </ToolbarItem>
