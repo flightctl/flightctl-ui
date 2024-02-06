@@ -2,8 +2,8 @@ import { Label, LabelGroup } from '@patternfly/react-core';
 import * as React from 'react';
 
 type LabelsFieldProps = {
-  labels: { key: string; value: string }[];
-  setLabels: (newLabels: { key: string; value: string }[]) => void;
+  labels: { key: string; value: string | undefined }[];
+  setLabels: (newLabels: { key: string; value: string | undefined }[]) => void;
 };
 
 const LabelsField: React.FC<LabelsFieldProps> = ({ labels, setLabels }) => {
@@ -23,7 +23,7 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ labels, setLabels }) => {
   const onEdit = (index: number, nextText: string) => {
     const label = nextText.split('=');
     const newLabels = [...labels];
-    newLabels.splice(index, 1, { key: label[0], value: label[1] });
+    newLabels.splice(index, 1, { key: label[0], value: label.length ? label[1] : undefined });
     setLabels(newLabels);
   };
 
@@ -47,7 +47,7 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ labels, setLabels }) => {
           onEditComplete={(_, newText) => onEdit(index, newText)}
           isEditable
         >
-          {`${key}=${value}`}
+          {value ? `${key}=${value}` : key}
         </Label>
       ))}
     </LabelGroup>
