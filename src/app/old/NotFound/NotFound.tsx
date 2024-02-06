@@ -9,13 +9,13 @@ import {
   EmptyStateIcon,
   PageSection,
 } from '@patternfly/react-core';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const NotFound: React.FunctionComponent = () => {
   function GoHomeBtn() {
-    const history = useHistory();
+    const navigate = useNavigate();
     function handleClick() {
-      history.push('/');
+      navigate('/');
     }
     return (
       <Button onClick={handleClick}>Take me home</Button>

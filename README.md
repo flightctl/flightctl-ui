@@ -14,8 +14,8 @@ npm install
 ### Copy the flightctl-server certs to proxy the api access with express (app.js)
 ```
 mkdir certs
-cp ~/.flightctl/certs/client-enrollment.crt certs 
-cp ~/.flightctl/certs/client-enrollment.key certs 
+cp ~/.flightctl/certs/client-enrollment.crt certs/front-cli.crt
+cp ~/.flightctl/certs/client-enrollment.key certs/front-cli.key
 cp ~/.flightctl/certs/ca.crt certs
 ```
 
