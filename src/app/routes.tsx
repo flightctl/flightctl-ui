@@ -2,7 +2,7 @@ import * as React from 'react';
 import { PropsWithChildren } from 'react';
 
 import { Navigate, RouteObject, RouterProvider, createBrowserRouter, useRouteError } from 'react-router-dom';
-import { AppLayout } from '@app/old/AppLayout/AppLayout';
+import AppLayout from '@app/components/AppLayout/AppLayout';
 import { Overview } from '@app/old/Overview/Overview';
 import { Experimental } from '@app/old/Experimental/Experimental';
 import { Experimental2 } from '@app/old/Experimental/Experimental2';
