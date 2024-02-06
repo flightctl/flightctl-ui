@@ -2,28 +2,28 @@ import { Label, LabelGroup } from '@patternfly/react-core';
 import * as React from 'react';
 
 type LabelsFieldProps = {
-  labels: { [key: string]: string };
-  setLabels: (newLabels: { [key: string]: string }) => void;
+  labels: { key: string; value: string }[];
+  setLabels: (newLabels: { key: string; value: string }[]) => void;
 };
 
 const LabelsField: React.FC<LabelsFieldProps> = ({ labels, setLabels }) => {
-  const onClose = (e: React.MouseEvent<Element, MouseEvent>, labelKey: string) => {
-    const newLabels = { ...labels };
-    delete newLabels[labelKey];
+  const onClose = (e: React.MouseEvent<Element, MouseEvent>, index: number) => {
+    const newLabels = [...labels];
+    newLabels.splice(index, 1);
     setLabels(newLabels);
   };
 
   const onAdd = (e: React.MouseEvent<Element, MouseEvent>) => {
     e.preventDefault();
-    const newLabels = { ...labels, newLabel: 'newValue' };
+
+    const newLabels = [...labels, { key: 'key', value: 'value' }];
     setLabels(newLabels);
   };
 
-  const onEdit = (labelKey: string, nextText: string) => {
+  const onEdit = (index: number, nextText: string) => {
     const label = nextText.split('=');
-    const newLabels = { ...labels };
-    delete newLabels[labelKey];
-    newLabels[label[0]] = label[1];
+    const newLabels = [...labels];
+    newLabels.splice(index, 1, { key: label[0], value: label[1] });
     setLabels(newLabels);
   };
 
@@ -37,17 +37,17 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ labels, setLabels }) => {
         </Label>
       }
     >
-      {Object.keys(labels).map((labelKey) => (
+      {labels.map(({ key, value }, index) => (
         <Label
-          key={labelKey}
-          id={labelKey}
+          key={index}
+          id={`${index}`}
           color="blue"
-          onClose={(e) => onClose(e, labelKey)}
-          onEditCancel={(_, prevText) => onEdit(labelKey, prevText)}
-          onEditComplete={(_, newText) => onEdit(labelKey, newText)}
+          onClose={(e) => onClose(e, index)}
+          onEditCancel={(_, prevText) => onEdit(index, prevText)}
+          onEditComplete={(_, newText) => onEdit(index, newText)}
           isEditable
         >
-          {`${labelKey}=${labels[labelKey]}`}
+          {`${key}=${value}`}
         </Label>
       ))}
     </LabelGroup>

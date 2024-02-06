@@ -100,7 +100,7 @@ const InlineConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
       <FormGroup label="Source name" isRequired>
         <TextInput
           aria-label="Source name"
-          value={values.name}
+          value={template.name}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.name`, value)}
         />
       </FormGroup>

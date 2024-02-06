@@ -33,7 +33,10 @@ const getFleetResource = (values: FleetFormValues): Fleet => ({
   },
   spec: {
     selector: {
-      matchLabels: values.labels,
+      matchLabels: values.labels.reduce((acc, { key, value }) => {
+        acc[key] = value;
+        return acc;
+      }, {}),
     },
     template: {
       metadata: {
@@ -139,7 +142,7 @@ const CreateFleet = () => {
             initialValues={{
               name: '',
               osImage: '',
-              labels: {},
+              labels: [],
               configTemplates: [
                 {
                   type: 'git',

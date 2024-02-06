@@ -25,6 +25,6 @@ export type InlineConfigTemplate = ConfigTemplate & {
 export type FleetFormValues = {
   name: string;
   osImage: string;
-  labels: { [key: string]: string };
+  labels: { key: string; value: string }[];
   configTemplates: (GitConfigTemplate | KubeSecretTemplate | InlineConfigTemplate)[];
 };
