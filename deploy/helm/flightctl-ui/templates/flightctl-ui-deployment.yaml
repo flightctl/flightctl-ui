@@ -18,26 +18,26 @@ spec:
     spec:
       containers:
         - env:
-          - name: REACT_APP_KEYCLOAK_AUTHORITY
+          - name: KEYCLOAK_AUTHORITY
             valueFrom:
               secretKeyRef:
                 name: flightctl-ui
-                key: REACT_APP_KEYCLOAK_AUTHORITY
-          - name: REACT_APP_KEYCLOAK_CLIENTID
+                key: KEYCLOAK_AUTHORITY
+          - name: KEYCLOAK_CLIENTID
             valueFrom:
               secretKeyRef:
                 name: flightctl-ui
-                key: REACT_APP_KEYCLOAK_CLIENTID
-          - name: REACT_APP_KEYCLOAK_REDIRECT
+                key: KEYCLOAK_CLIENTID
+          - name: KEYCLOAK_REDIRECT
             valueFrom:
               secretKeyRef:
                 name: flightctl-ui
-                key: REACT_APP_KEYCLOAK_REDIRECT
-          - name: REACT_APP_KEYCLOAK_SECRET
+                key: KEYCLOAK_REDIRECT
+          - name: KEYCLOAK_SECRET
             valueFrom:
               secretKeyRef:
                 name: flightctl-ui
-                key: REACT_APP_KEYCLOAK_SECRET
+                key: KEYCLOAK_SECRET
           - name: PORT
             valueFrom:
               secretKeyRef:

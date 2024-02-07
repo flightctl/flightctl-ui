@@ -1,29 +1,15 @@
 import * as React from 'react';
-import { fetchData, tableCellData, deleteObject, approveEnrollmentRequest } from '@app/old/utils/commonFunctions'; 
-import { useAuth } from 'react-oidc-context';
+import { fetchData, tableCellData, deleteObject, approveEnrollmentRequest } from '@app/old/utils/commonFunctions';
 import { enrollmentrequestList } from '@app/old/utils/commonDataTypes';
-import {
-  PageSection,
-  Pagination,
-  Spinner,
-  Title,
-} from '@patternfly/react-core';
+import { PageSection, Pagination, Spinner, Title } from '@patternfly/react-core';
 
-import {
-  ActionsColumn,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  ThProps,
-} from '@patternfly/react-table';
+import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr, ThProps } from '@patternfly/react-table';
+import { useAuth } from '@app/hooks/useAuth';
 
 interface EnrollmentRequest {
   metadata: {
-    name: string
-  }
+    name: string;
+  };
 }
 
 const dateFormatter = (date) => {
@@ -51,19 +37,20 @@ const columns = [
 ];
 let totalEnrollmentRequests = 0;
 
-
 const EnrollmentRequests: React.FunctionComponent = () => {
   const auth = useAuth();
   let loading;
   const [isLoading, setIsLoading] = React.useState(false);
   const [enrollmentRequestsData, setEnrollmentRequestsData] = React.useState<enrollmentrequestList>({ items: [] });
-  const [enrollmentRequestsPageData, setEnrollmentRequestsPageData] = React.useState<enrollmentrequestList>({ items: [] });
+  const [enrollmentRequestsPageData, setEnrollmentRequestsPageData] = React.useState<enrollmentrequestList>({
+    items: [],
+  });
   const [activeSortIndex, setActiveSortIndex] = React.useState<number | null>(null);
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(20);
   const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc' | null>(null);
   // set columns sorteable
-    // add function to sort columns
+  // add function to sort columns
   const onSort = (_event, index: number, direction: 'asc' | 'desc' | null) => {
     setActiveSortIndex(index);
     setActiveSortDirection(direction);
@@ -72,26 +59,24 @@ const EnrollmentRequests: React.FunctionComponent = () => {
     sortBy: {
       index: activeSortIndex ?? 1,
       direction: activeSortDirection ?? 'asc',
-      defaultDirection: 'asc' // starting sort direction when first sorting a column. Defaults to 'asc'
+      defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
     },
     onSort: (_event, index, direction) => {
       setActiveSortIndex(index);
       setActiveSortDirection(direction);
     },
-    columnIndex
+    columnIndex,
   });
   getSortParams(1);
 
-
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
     setPage(newPage);
-
   };
 
   const onPerPageSelect = (
     _event: React.MouseEvent | React.KeyboardEvent | MouseEvent,
     newPerPage: number,
-    newPage: number
+    newPage: number,
   ) => {
     setPerPage(newPerPage);
     setPage(newPage);
@@ -119,12 +104,11 @@ const EnrollmentRequests: React.FunctionComponent = () => {
     }
   }, [activeSortIndex, activeSortDirection]);
 
- 
   function getEvents() {
     setIsLoading(true);
     loading = true;
     setEnrollmentRequestsPageData({ items: [] });
-    fetchData('enrollmentrequests', auth.user?.access_token ?? '').then((data) => {
+    fetchData('enrollmentrequests', auth?.user?.access_token ?? '').then((data) => {
       if (loading) {
         let sortedPageItems;
         totalEnrollmentRequests = data.items.length;
@@ -147,9 +131,7 @@ const EnrollmentRequests: React.FunctionComponent = () => {
       getEvents();
     }, 10000);
     return clearInterval(interval);
-  },[auth, page, perPage]);
-
-
+  }, [auth, page, perPage]);
 
   const generateActions = (enrollmentrequest) => {
     const actions = [
@@ -161,19 +143,23 @@ const EnrollmentRequests: React.FunctionComponent = () => {
         title: 'Delete',
         onClick: () => {
           setIsLoading(true);
-          deleteObject('enrollmentrequests', enrollmentrequest.metadata.name, auth.user?.access_token ?? '');
+          deleteObject('enrollmentrequests', enrollmentrequest.metadata.name, auth?.user?.access_token ?? '');
           getEvents();
         },
       },
     ];
     if (enrollmentrequest.status?.conditions) {
       enrollmentrequest.status.conditions.forEach((condition) => {
-        if ((condition.status === "False") && (condition.type === "Approved")) {
+        if (condition.status === 'False' && condition.type === 'Approved') {
           actions.push({
             title: 'Approve',
             onClick: () => {
               setIsLoading(true);
-              approveEnrollmentRequest(enrollmentrequest.metadata.name, {approved: true, approvedBy: auth.user?.profile.preferred_username ?? "unknown"}, auth.user?.access_token ?? '');
+              approveEnrollmentRequest(
+                enrollmentrequest.metadata.name,
+                { approved: true, approvedBy: auth?.user?.profile.preferred_username ?? 'unknown' },
+                auth?.user?.access_token ?? '',
+              );
               getEvents();
             },
           });
@@ -185,7 +171,11 @@ const EnrollmentRequests: React.FunctionComponent = () => {
         title: 'Approve',
         onClick: () => {
           setIsLoading(true);
-          approveEnrollmentRequest(enrollmentrequest.metadata.name, {approved: true, approvedBy: auth.user?.profile.preferred_username ?? "unknown"}, auth.user?.access_token ?? '');
+          approveEnrollmentRequest(
+            enrollmentrequest.metadata.name,
+            { approved: true, approvedBy: auth?.user?.profile.preferred_username ?? 'unknown' },
+            auth?.user?.access_token ?? '',
+          );
           getEvents();
         },
       });
@@ -195,7 +185,9 @@ const EnrollmentRequests: React.FunctionComponent = () => {
 
   return (
     <PageSection>
-      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>Enrollment Requests</Title>
+      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>
+        Enrollment Requests
+      </Title>
       <Pagination
         itemCount={totalEnrollmentRequests}
         perPage={perPage}
@@ -209,7 +201,9 @@ const EnrollmentRequests: React.FunctionComponent = () => {
         <Thead>
           <Tr>
             {columns.map((column) => (
-              <Th sort={getSortParams(columns.indexOf(column))} key={column.key}>{column.label}</Th>
+              <Th sort={getSortParams(columns.indexOf(column))} key={column.key}>
+                {column.label}
+              </Th>
             ))}
             <Td></Td>
           </Tr>
@@ -225,9 +219,7 @@ const EnrollmentRequests: React.FunctionComponent = () => {
                   </Td>
                 ))}
                 <Td isActionCell>
-                  <ActionsColumn
-                    items={generateActions(enrollmentrequest as EnrollmentRequest)}
-                  />
+                  <ActionsColumn items={generateActions(enrollmentrequest as EnrollmentRequest)} />
                 </Td>
               </Tr>
             ))}

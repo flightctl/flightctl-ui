@@ -1,9 +1,6 @@
-let apiServer = '';
-if (process.env.NODE_ENV === 'development') {
-  apiServer = window.location.protocol + '//' + window.location.hostname + ':' + process.env.API_PORT;
-}
+const apiServer = `${window.location.protocol}//${window.location.hostname}${window.API_PORT ? `:${window.API_PORT}` : ''}`;
 
-export const postData = async (kind: string, token: string, data: unknown) => {
+export const postData = async (kind: string, token: string | undefined, data: unknown) => {
   try {
     const response = await fetch(`${apiServer}/api/v1/${kind}`, {
       headers: {
@@ -21,7 +18,7 @@ export const postData = async (kind: string, token: string, data: unknown) => {
   }
 };
 
-export const deleteData = async (kind: string, token: string) => {
+export const deleteData = async (kind: string, token: string | undefined) => {
   try {
     const response = await fetch(`${apiServer}/api/v1/${kind}`, {
       headers: {
@@ -37,7 +34,7 @@ export const deleteData = async (kind: string, token: string) => {
   }
 };
 
-export const fetchData = async (kind: string, token: string, abortSignal?: AbortSignal) => {
+export const fetchData = async (kind: string, token: string | undefined, abortSignal?: AbortSignal) => {
   try {
     const response = await fetch(`${apiServer}/api/v1/${kind}`, {
       headers: {
@@ -117,7 +114,7 @@ export const rejectEnrollmentRequest = async (name: string, token: string) => {
     return error;
   }
 };
-export const enableRCAgent = async (name: string, token: string) => {
+export const enableRCAgent = async (name: string, token: string | undefined) => {
   try {
     const response = await fetch(`${apiServer}/api/v1/device/${name}/remotecontrol/enable`, {
       method: 'POST',

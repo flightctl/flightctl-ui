@@ -1,44 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from '@app/index';
-import { AuthProvider } from 'react-oidc-context';
+import { AuthProvider, AuthProviderProps } from 'react-oidc-context';
 import { ThemeProvider } from '@app/components/ThemeProvider/ThemeProvider';
 
 declare global {
   interface Window {
-    env: {
-      REACT_APP_KEYCLOAK_AUTHORITY: string;
-      KEYCLOAK_CLIENTID: string;
-      KEYCLOAK_REDIRECT: string;
-      WS_URL: string;
-    };
+    KEYCLOAK_AUTHORITY?: string;
+    KEYCLOAK_CLIENTID?: string;
+    KEYCLOAK_REDIRECT?: string;
+    API_PORT?: string;
   }
 }
 
-const KEYCLOAK_AUTHORITY =
-  process.env.NODE_ENV === 'production'
-    ? window.env.REACT_APP_KEYCLOAK_AUTHORITY
-    : process.env.REACT_APP_KEYCLOAK_AUTHORITY || 'http://localhost:9080/realms/flightctl';
-const KEYCLOAK_CLIENTID =
-  process.env.NODE_ENV === 'production'
-    ? window.env.KEYCLOAK_CLIENTID
-    : process.env.REACT_APP_KEYCLOAK_CLIENTID || 'flightctl-ui';
-const KEYCLOAK_REDIRECT =
-  process.env.NODE_ENV === 'production'
-    ? window.env.KEYCLOAK_REDIRECT
-    : process.env.REACT_APP_KEYCLOAK_REDIRECT || 'http://localhost:9000';
-// const WS_URL = process.env.NODE_ENV === 'production' ? window.env.WS_URL : process.env.WS_URL || "http://localhost:8082"
-const oidcConfig = {
-  authority: KEYCLOAK_AUTHORITY,
-  client_id: KEYCLOAK_CLIENTID,
-  redirect_uri: KEYCLOAK_REDIRECT + window.location.pathname,
-  response_type: 'code',
-  scope: 'openid profile email',
-  automaticSilentRenew: true,
-  loadUserInfo: true,
-};
-
-if (process.env.NODE_ENV !== 'production') {
+if (window.API_PORT) {
   const config = {
     rules: [
       {
@@ -56,12 +31,25 @@ if (process.env.NODE_ENV !== 'production') {
 
 const root = ReactDOM.createRoot(document.getElementById('root') as Element);
 
-root.render(
-  <AuthProvider {...oidcConfig}>
-    <React.StrictMode>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </React.StrictMode>
-  </AuthProvider>,
+const rootApp = (
+  <React.StrictMode>
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  </React.StrictMode>
 );
+
+if (window.KEYCLOAK_AUTHORITY && window.KEYCLOAK_CLIENTID && window.KEYCLOAK_REDIRECT) {
+  const oidcConfig: AuthProviderProps = {
+    authority: window.KEYCLOAK_AUTHORITY,
+    client_id: window.KEYCLOAK_CLIENTID,
+    redirect_uri: window.KEYCLOAK_REDIRECT + window.location.pathname,
+    response_type: 'code',
+    scope: 'openid profile email',
+    automaticSilentRenew: true,
+    loadUserInfo: true,
+  };
+  root.render(<AuthProvider {...oidcConfig}>{rootApp}</AuthProvider>);
+} else {
+  root.render(rootApp);
+}

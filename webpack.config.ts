@@ -1,14 +1,17 @@
-import { Configuration } from 'webpack';
+import { Configuration, DefinePlugin } from 'webpack';
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyPlugin from 'copy-webpack-plugin';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
-import Dotenv from 'dotenv-webpack';
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import TerserJSPlugin from 'terser-webpack-plugin';
+
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const BG_IMAGES_DIRNAME = 'bgimages';
 const ASSET_PATH = process.env.ASSET_PATH || '/';
@@ -146,10 +149,6 @@ const config: Configuration & {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src', 'index.html'),
     }),
-    new Dotenv({
-      systemvars: true,
-      silent: true,
-    }),
     new CopyPlugin({
       patterns: [{ from: './src/favicon.png', to: 'images' }],
     }),
@@ -189,6 +188,15 @@ if (NODE_ENV === 'production') {
     }),
   );
   config.devtool = 'source-map';
+} else {
+  config.plugins?.push(
+    new DefinePlugin({
+      'window.KEYCLOAK_AUTHORITY': JSON.stringify(process.env.KEYCLOAK_AUTHORITY),
+      'window.KEYCLOAK_CLIENTID': JSON.stringify(process.env.KEYCLOAK_CLIENTID),
+      'window.KEYCLOAK_REDIRECT': JSON.stringify(process.env.KEYCLOAK_REDIRECT),
+      'window.API_PORT': JSON.stringify(process.env.PORT) || '3001',
+    }),
+  );
 }
 
 export default config;

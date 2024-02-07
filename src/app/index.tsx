@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { useAuth } from 'react-oidc-context';
-
+import { useAuth } from '@app/hooks/useAuth';
 import { AppRoutes } from '@app/routes';
 
 import '@patternfly/react-core/dist/styles/base.css';
@@ -8,6 +7,11 @@ import '@app/app.css';
 
 const App: React.FunctionComponent = () => {
   const auth = useAuth();
+
+  if (!auth) {
+    return <AppRoutes />;
+  }
+
   switch (auth.activeNavigator) {
     case 'signinSilent':
       return <div>Signing you in...</div>;

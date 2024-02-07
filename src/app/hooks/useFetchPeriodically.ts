@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useAuth } from 'react-oidc-context';
 import { fetchData } from '@app/old/utils/commonFunctions';
+import { useAuth } from './useAuth';
 
 const TIMEOUT = 10000;
 
@@ -12,27 +12,27 @@ export const useFetchPeriodically = <R>(endpoint: string): [R | undefined, boole
   const auth = useAuth();
   const ref = React.useRef(0);
 
+  const userToken = auth?.user?.access_token;
+
   React.useEffect(() => {
     let abortController: AbortController;
     const fetchPeriodically = async (id: number) => {
       while (ref.current === id) {
-        if (auth.user?.access_token) {
-          try {
-            abortController = new AbortController();
-            const data = await fetchData(endpoint, auth.user.access_token, abortController.signal);
-            if (isLoading) {
-              setIsLoading(false);
-            }
-            setData(data);
-            setError(undefined);
-          } catch (err) {
-            // aborting fetch trows 'AbortError', we can ignore it
-            if (!abortController.signal.aborted) {
-              setError(err);
-            }
+        try {
+          abortController = new AbortController();
+          const data = await fetchData(endpoint, auth?.user?.access_token, abortController.signal);
+          if (isLoading) {
+            setIsLoading(false);
           }
-          await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
+          setData(data);
+          setError(undefined);
+        } catch (err) {
+          // aborting fetch trows 'AbortError', we can ignore it
+          if (!abortController.signal.aborted) {
+            setError(err);
+          }
         }
+        await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
       }
     };
 
@@ -43,7 +43,7 @@ export const useFetchPeriodically = <R>(endpoint: string): [R | undefined, boole
       abortController?.abort();
     };
     // eslint-disable-next-line
-  }, [auth.user?.access_token, forceUpdate, endpoint]);
+  }, [userToken, forceUpdate, endpoint]);
 
   const refetch = React.useCallback(() => setForceUpdate((val) => val + 1), []);
 

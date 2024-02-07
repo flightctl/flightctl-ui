@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { fetchData } from '@app/old/utils/commonFunctions';
-import { useAuth } from 'react-oidc-context';
 import {
   Card,
   CardBody,
@@ -19,23 +18,21 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { set } from 'yaml/dist/schema/yaml-1.1/set';
-
-
+import { useAuth } from '@app/hooks/useAuth';
 
 const GitRepositories: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const auth = useAuth();
 
-  React.useEffect(() => {
-  }, [auth]);
+  React.useEffect(() => {}, [auth]);
 
   return (
     <PageSection>
-      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>Git Repositories</Title>
-
+      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>
+        Git Repositories
+      </Title>
     </PageSection>
-  )
+  );
 };
 
 export { GitRepositories };
-

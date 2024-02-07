@@ -2,13 +2,11 @@ const express = require('express');
 const fs = require('fs');
 const https = require('https');
 const axios = require('axios');
-const path = require('path');
 const bodyParser = require('body-parser');
-require('dotenv').config();
+const rs = require('jsrsasign');
+const dotenv = require('dotenv');
 
-const KEYCLOAK_AUTHORITY = process.env.REACT_APP_KEYCLOAK_AUTHORITY || 'http://localhost:9080/realms/flightctl';
-// if you want to change api PORT for development environment,
-// you need to set also in webpack.dev.js as process.env.API_PORT
+dotenv.config();
 
 //ignore ssl verification for axios
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -21,19 +19,16 @@ process.env.PORT = process.env.PORT || 3001;
 process.env.FLIGHTCTL_SERVER = process.env.FLIGHTCTL_SERVER || 'https://localhost:3333';
 process.env.RC_SVC = process.env.RC_SVC || 'flighctl-rc-svc:8082';
 const app = express();
-var rs = require('jsrsasign');
-var KJUR = rs.KJUR;
-var KEYUTIL = rs.KEYUTIL;
 let key;
 let pubKey;
 // fi certs/api-sig.key exists, use it to verify JWT, else, obtain public key from keycloak
 if (fs.existsSync('certs/api-sig.key')) {
   key = fs.readFileSync('certs/api-sig.key', 'utf8');
-  pubKey = KEYUTIL.getKey(key);
-} else {
-  axios.get(KEYCLOAK_AUTHORITY).then(function (response) {
+  pubKey = rs.KEYUTIL.getKey(key);
+} else if (process.env.KEYCLOAK_AUTHORITY) {
+  axios.get(process.env.KEYCLOAK_AUTHORITY).then(function (response) {
     key = '-----BEGIN PUBLIC KEY-----\n' + response.data.public_key + '\n-----END PUBLIC KEY-----';
-    pubKey = KEYUTIL.getKey(key);
+    pubKey = rs.KEYUTIL.getKey(key);
   });
 }
 const cert = fs.readFileSync('certs/front-cli.crt');
@@ -49,29 +44,34 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
 });
-app.get('/api/v1/:kind', async (req, res) => {
-  try {
-    if (req.headers.authorization) {
-      // set const token from authorization header without Bearer
-      const token = req.headers.authorization.split(' ')[1];
-      var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, { alg: ['RS256'] });
-      if (isValid) {
-        const kind = req.params.kind;
-        const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}`;
-        const agent = new https.Agent({ cert, key: certkey, ca });
-        const response = await axios.get(url, { httpsAgent: agent });
-        res.send(response.data);
-      } else {
-        console.log('Token is not valid');
-        res.status(401).send('Unauthorized');
-      }
-    } else {
+app.use((req, res, next) => {
+  if (process.env.KEYCLOAK_AUTHORITY && req.method !== 'OPTIONS') {
+    if (!req.headers.authorization) {
       console.log('No authorization header');
       res.status(401).send('Unauthorized');
+      return;
     }
+    // set const token from authorization header without Bearer
+    const token = req.headers.authorization.split(' ')[1];
+    var isValid = rs.KJUR.jws.JWS.verifyJWT(token, pubKey, { alg: ['RS256'] });
+    if (!isValid) {
+      console.log('Token is not valid');
+      res.status(401).send('Unauthorized');
+      return;
+    }
+  }
+  next();
+});
+
+app.get('/api/v1/:kind', async (req, res) => {
+  try {
+    const kind = req.params.kind;
+    const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}`;
+    const agent = new https.Agent({ cert, key: certkey, ca });
+    const response = await axios.get(url, { httpsAgent: agent });
+    res.send(response.data);
   } catch (error) {
     // catch error status code from axios response
-
     console.error('Bad request:', error.message);
     res.status(400).send('Bad request');
   }
@@ -79,24 +79,11 @@ app.get('/api/v1/:kind', async (req, res) => {
 
 app.post('/api/v1/:kind', async (req, res) => {
   try {
-    if (req.headers.authorization) {
-      // set const token from authorization header without Bearer
-      const token = req.headers.authorization.split(' ')[1];
-      var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, { alg: ['RS256'] });
-      if (isValid) {
-        const kind = req.params.kind;
-        const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}`;
-        const agent = new https.Agent({ cert, key: certkey, ca });
-        const response = await axios.post(url, req.body, { httpsAgent: agent });
-        res.status(200).send(response.data);
-      } else {
-        console.log('Token is not valid');
-        res.status(401).send('Unauthorized');
-      }
-    } else {
-      console.log('No authorization header');
-      res.status(401).send('Unauthorized');
-    }
+    const kind = req.params.kind;
+    const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}`;
+    const agent = new https.Agent({ cert, key: certkey, ca });
+    const response = await axios.post(url, req.body, { httpsAgent: agent });
+    res.status(200).send(response.data);
   } catch (error) {
     // catch error status code from axios response
     console.error('Bad request: status: ', error.response.status, ', ', error.data);
@@ -106,28 +93,14 @@ app.post('/api/v1/:kind', async (req, res) => {
 
 app.get('/api/v1/:kind/:name', async (req, res) => {
   try {
-    if (req.headers.authorization) {
-      // set const token from authorization header without Bearer
-      const token = req.headers.authorization.split(' ')[1];
-      var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, { alg: ['RS256'] });
-      if (isValid) {
-        const kind = req.params.kind;
-        const name = req.params.name;
-        const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}/${name}`;
-        const agent = new https.Agent({ cert, key: certkey, ca });
-        const response = await axios.get(url, { httpsAgent: agent });
-        res.send(response.data);
-      } else {
-        console.log('Token is not valid');
-        res.status(401).send('Unauthorized');
-      }
-    } else {
-      console.log('No authorization header');
-      res.status(401).send('Unauthorized');
-    }
+    const kind = req.params.kind;
+    const name = req.params.name;
+    const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}/${name}`;
+    const agent = new https.Agent({ cert, key: certkey, ca });
+    const response = await axios.get(url, { httpsAgent: agent });
+    res.send(response.data);
   } catch (error) {
     // catch error status code from axios response
-
     console.error('Bad request:', error.message);
     res.status(400).send('Bad request');
   }
@@ -135,53 +108,26 @@ app.get('/api/v1/:kind/:name', async (req, res) => {
 
 app.delete('/api/v1/:kind/:name', async (req, res) => {
   try {
-    if (req.headers.authorization) {
-      // set const token from authorization header without Bearer
-      const token = req.headers.authorization.split(' ')[1];
-      var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, { alg: ['RS256'] });
-      if (isValid) {
-        const kind = req.params.kind;
-        const name = req.params.name;
-        const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}/${name}`;
-        const agent = new https.Agent({ cert, key: certkey, ca });
-        const response = await axios.delete(url, { httpsAgent: agent });
-        res.send(response.data);
-      } else {
-        console.log('Token is not valid');
-        res.status(401).send('Unauthorized');
-      }
-    } else {
-      console.log('No authorization header');
-      res.status(401).send('Unauthorized');
-    }
+    const kind = req.params.kind;
+    const name = req.params.name;
+    const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/${kind}/${name}`;
+    const agent = new https.Agent({ cert, key: certkey, ca });
+    const response = await axios.delete(url, { httpsAgent: agent });
+    res.send(response.data);
   } catch (error) {
     // catch error status code from axios response
-
     console.error('Bad request:', error.message);
     res.status(400).send('Bad request');
   }
 });
 app.post('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
   try {
-    if (req.headers.authorization) {
-      // set const token from authorization header without Bearer
-      const token = req.headers.authorization.split(' ')[1];
-      var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, { alg: ['RS256'] });
-      if (isValid) {
-        const name = req.params.name;
-        const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/enrollmentrequests/${name}/approval`;
-        const agent = new https.Agent({ cert, key: certkey, ca });
-        console.log(req.body);
-        const response = await axios.post(url, req.body, { httpsAgent: agent });
-        res.status(200).send(response.data);
-      } else {
-        console.log('Token is not valid');
-        res.status(401).send('Unauthorized');
-      }
-    } else {
-      console.log('No authorization header');
-      res.status(401).send('Unauthorized');
-    }
+    const name = req.params.name;
+    const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/enrollmentrequests/${name}/approval`;
+    const agent = new https.Agent({ cert, key: certkey, ca });
+    console.log(req.body);
+    const response = await axios.post(url, req.body, { httpsAgent: agent });
+    res.status(200).send(response.data);
   } catch (error) {
     // catch error status code from axios response
     console.error('Bad request: status: ', error.response.status, ', ', error.data);
@@ -191,55 +137,26 @@ app.post('/api/v1/enrollmentrequests/:name/approval', async (req, res) => {
 
 app.post('/api/v1/enrollmentrequests/:name/rejection', async (req, res) => {
   try {
-    if (req.headers.authorization) {
-      // set const token from authorization header without Bearer
-      const token = req.headers.authorization.split(' ')[1];
-      var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, { alg: ['RS256'] });
-      if (isValid) {
-        const name = req.params.name;
-        const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/enrollmentrequests/${name}/rejection`;
-        const agent = new https.Agent({ cert, key: certkey, ca });
-        const response = await axios.post(url, { httpsAgent: agent });
-        res.send(response.data);
-      } else {
-        console.log('Token is not valid');
-        res.status(401).send('Unauthorized');
-      }
-    } else {
-      console.log('No authorization header');
-      res.status(401).send('Unauthorized');
-    }
+    const name = req.params.name;
+    const url = `${process.env.FLIGHTCTL_SERVER}/api/v1/enrollmentrequests/${name}/rejection`;
+    const agent = new https.Agent({ cert, key: certkey, ca });
+    const response = await axios.post(url, { httpsAgent: agent });
+    res.send(response.data);
   } catch (error) {
     // catch error status code from axios response
-
     console.error('Bad request:', error.message);
     res.status(400).send('Bad request');
   }
 });
 app.post('/api/v1/device/:deviceid/remotecontrol/enable', async (req, res) => {
   try {
-    console.log('enableRC');
-    if (req.headers.authorization) {
-      // set const token from authorization header without Bearer
-      const token = req.headers.authorization.split(' ')[1];
-      var isValid = KJUR.jws.JWS.verifyJWT(token, pubKey, { alg: ['RS256'] });
-      if (isValid) {
-        const deviceid = req.params.deviceid;
-        const url = `${process.env.RC_SVC}/api/v1/rcagent/${deviceid}/enable`;
-        console.log(url);
-        const response = await axios.post(url);
-        res.send(response.data);
-      } else {
-        console.log('Token is not valid');
-        res.status(401).send('Unauthorized');
-      }
-    } else {
-      console.log('No authorization header');
-      res.status(401).send('Unauthorized');
-    }
+    const deviceid = req.params.deviceid;
+    const url = `${process.env.RC_SVC}/api/v1/rcagent/${deviceid}/enable`;
+    console.log(url);
+    const response = await axios.post(url);
+    res.send(response.data);
   } catch (error) {
     // catch error status code from axios response
-
     console.error('Bad request:', error.message);
     res.status(400).send('Bad request');
   }
@@ -249,7 +166,22 @@ app.post('/api/v1/device/:deviceid/remotecontrol/enable', async (req, res) => {
 app.use(express.static(__dirname + '/dist'));
 //serve index.html file on route '/'
 app.get('*', function (req, res) {
-  res.sendFile(path.join(__dirname + '/dist/index.html'));
+  fs.readFile(__dirname + '/dist/index.html', 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).send('Failed reading index.html');
+    }
+
+    const script = `
+      <script>
+        window.KEYCLOAK_AUTHORITY = ${JSON.stringify(process.env.KEYCLOAK_AUTHORITY)}
+        window.KEYCLOAK_CLIENTID = ${JSON.stringify(process.env.KEYCLOAK_CLIENTID)}
+        window.KEYCLOAK_REDIRECT = ${JSON.stringify(process.env.KEYCLOAK_REDIRECT)}
+      </script>
+    `;
+
+    const indexPage = data.replace('</body>', script + '</body>');
+    res.send(indexPage);
+  });
 });
 
 app.listen(process.env.PORT, () => {

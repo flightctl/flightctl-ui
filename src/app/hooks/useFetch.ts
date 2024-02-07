@@ -1,27 +1,15 @@
 import * as React from 'react';
 import { deleteData, postData } from '@app/old/utils/commonFunctions';
-import { useAuth } from 'react-oidc-context';
+import { useAuth } from './useAuth';
 
 export const useFetch = () => {
   const auth = useAuth();
 
-  const post = React.useCallback(
-    async <R>(kind: string, obj: R) => {
-      if (auth.user?.access_token) {
-        return postData(kind, auth.user.access_token, obj);
-      }
-    },
-    [auth.user?.access_token],
-  );
+  const userToken = auth?.user?.access_token;
 
-  const remove = React.useCallback(
-    async (kind: string) => {
-      if (auth.user?.access_token) {
-        return deleteData(kind, auth.user.access_token);
-      }
-    },
-    [auth.user?.access_token],
-  );
+  const post = React.useCallback(async <R>(kind: string, obj: R) => postData(kind, userToken, obj), [userToken]);
+
+  const remove = React.useCallback(async (kind: string) => deleteData(kind, userToken), [userToken]);
 
   return {
     post,

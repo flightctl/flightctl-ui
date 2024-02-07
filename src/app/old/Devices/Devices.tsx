@@ -1,30 +1,16 @@
 import * as React from 'react';
 import { tableCellData, deleteObject } from '@app/old/utils/commonFunctions';
 import { deviceList } from '@app/old/utils/commonDataTypes';
-import { useAuth } from 'react-oidc-context';
-import {
-  PageSection,
-  Spinner,
-  Title,
-  Label,
-} from '@patternfly/react-core';
+import { PageSection, Spinner, Title, Label } from '@patternfly/react-core';
 
-import {
-  ActionsColumn,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  IAction,
-} from '@patternfly/react-table';
+import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr, IAction } from '@patternfly/react-table';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
+import { useAuth } from '@app/hooks/useAuth';
 
 interface Device {
   metadata: {
-    name: string
-  }
+    name: string;
+  };
 }
 
 const dateFormatter = (date) => {
@@ -44,7 +30,7 @@ const columns = [
   { key: 'metadata.labels', label: 'Labels' },
   { key: 'status.systemInfo.machineID', label: 'Machine ID' },
   { key: 'status.systemInfo.bootID', label: 'Boot ID' },
-  { key: 'status.online', label: 'Status' }
+  { key: 'status.online', label: 'Status' },
 ];
 
 const Devices: React.FunctionComponent = () => {
@@ -52,20 +38,20 @@ const Devices: React.FunctionComponent = () => {
   const [devicesData, isLoading, error, refetch] = useFetchPeriodically<deviceList>('devices');
   const defaultActions = (device: Device): IAction[] => [
     {
-      title: "Details",
-      onClick: () => window.location.replace(`/device/${device.metadata.name}`)
+      title: 'Details',
+      onClick: () => window.location.replace(`/device/${device.metadata.name}`),
     },
     {
-      title: "Delete",
-      onClick: () => deleteObject("devices", device.metadata.name, auth.user?.access_token ?? '').then(refetch)
-    }
+      title: 'Delete',
+      onClick: () => deleteObject('devices', device.metadata.name, auth?.user?.access_token ?? '').then(refetch),
+    },
   ];
-
-
 
   return (
     <PageSection>
-      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>Devices</Title>
+      <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>
+        Devices
+      </Title>
       <Table aria-label="Simple table">
         <Thead>
           <Tr>
@@ -79,26 +65,20 @@ const Devices: React.FunctionComponent = () => {
           <Tbody>
             {devicesData.items.map((device) => (
               <Tr key={device.metadata.name}>
-                {
-                  columns.map((column) => (
-                    // add a if column.key === "metadata.labels" then do a for loop to iterate through the labels and display them
-                    column.key === "metadata.labels"
-                    ? (
-                      <Td dataLabel={column.label} key={`${column.label}${device.metadata.name}`}>
-                        {tableCellData(column, device)}
-                      </Td>
-                    )
-                    : (
-                      <Td dataLabel={column.label} key={`${column.label}${device.metadata.name}`}>
-                        {tableCellData(column, device)}
-                      </Td>
-                    )
-                  ))
-                  }
+                {columns.map((column) =>
+                  // add a if column.key === "metadata.labels" then do a for loop to iterate through the labels and display them
+                  column.key === 'metadata.labels' ? (
+                    <Td dataLabel={column.label} key={`${column.label}${device.metadata.name}`}>
+                      {tableCellData(column, device)}
+                    </Td>
+                  ) : (
+                    <Td dataLabel={column.label} key={`${column.label}${device.metadata.name}`}>
+                      {tableCellData(column, device)}
+                    </Td>
+                  ),
+                )}
                 <Td isActionCell>
-                  <ActionsColumn
-                    items={defaultActions(device as Device)}
-                  />
+                  <ActionsColumn items={defaultActions(device as Device)} />
                 </Td>
               </Tr>
             ))}
