@@ -19,7 +19,7 @@ import { getSourceUrls } from '@app/utils/fleetUtils';
 const FleetDetailsContent = ({ fleet }: { fleet: Required<Fleet> }) => {
   const sourceUrls = getSourceUrls(fleet);
   return (
-    <Grid>
+    <Grid hasGutter>
       <GridItem md={6}>
         <Card>
           <CardTitle>Details</CardTitle>
