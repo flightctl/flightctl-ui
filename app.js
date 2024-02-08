@@ -17,6 +17,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 process.env.PORT = process.env.PORT || 3001;
 process.env.FLIGHTCTL_SERVER = process.env.FLIGHTCTL_SERVER || 'https://localhost:3333';
+process.env.FLIGHTCTL_METRICS_SERVER = process.env.FLIGHTCTL_METRICS_SERVER || 'http://localhost:9090';
 process.env.RC_SVC = process.env.RC_SVC || 'flighctl-rc-svc:8082';
 const app = express();
 let key;
@@ -61,6 +62,23 @@ app.use((req, res, next) => {
     }
   }
   next();
+});
+
+app.get('/metrics', async (req, res) => {
+  try {
+    const metrics = (req.query.metrics || '').split(',');
+    const query = metrics.length === 1 ? metrics[0] : `{__name__=~"${metrics.join('|')}"}`;
+
+    const url = `${process.env.FLIGHTCTL_METRICS_SERVER}/api/v1/query?query=${query}`;
+    const agent = new https.Agent({ cert, key: certkey, ca });
+    const response = await axios.get(url, { httpsAgent: agent });
+
+    res.send(response.data);
+  } catch (error) {
+    // catch error status code from axios response
+    console.log('Prometheus server error', error.message);
+    res.status(400).send('Bad request');
+  }
 });
 
 app.get('/api/v1/:kind', async (req, res) => {

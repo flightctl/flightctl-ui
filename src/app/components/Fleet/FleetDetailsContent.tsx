@@ -13,10 +13,13 @@ import {
 } from '@patternfly/react-core';
 import { Fleet } from '@types';
 import { getDateDisplay } from '@app/utils/dateUtils';
-import SourceUrlList from './SourceUrlList';
 import { getSourceUrls } from '@app/utils/fleetUtils';
+import FleetServiceStatus from '@app/components/Metrics/FleetServiceStatus';
+import { PrometheusMetric } from '@app/types/extraTypes';
 
-const FleetDetailsContent = ({ fleet }: { fleet: Required<Fleet> }) => {
+import SourceUrlList from './SourceUrlList';
+
+const FleetDetailsContent = ({ fleet, metrics }: { fleet: Required<Fleet>, metrics: PrometheusMetric[] }) => {
   const sourceUrls = getSourceUrls(fleet);
   return (
     <Grid hasGutter>
@@ -49,7 +52,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Required<Fleet> }) => {
         <Card>
           <CardTitle>Service status</CardTitle>
           <CardBody>
-            <div style={{ fontSize: 30 }}>999</div>
+            <FleetServiceStatus metrics={metrics} />
           </CardBody>
         </Card>
       </GridItem>

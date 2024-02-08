@@ -2,6 +2,7 @@ flightctl-ui:
   namespace: flightctl
   image: quay.io/flightctl/flightctl-ui:latest
   flightctlServer: https://flightctl-server:3333
+  flightctlMetricsServer: https://flightctl-server:9090
   certs:
     ca: |
       -----BEGIN

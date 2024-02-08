@@ -1,5 +1,21 @@
 const apiServer = `${window.location.protocol}//${window.location.hostname}${window.API_PORT ? `:${window.API_PORT}` : ''}`;
 
+export const fetchMetrics = async (metrics: string[], token: string | undefined) => {
+  try {
+    const response = await fetch(`${apiServer}/metrics?metrics=${metrics.join(',')}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const resp = await response.json();
+    return resp.data.result;
+  } catch (error) {
+    console.error('Error making request:', error);
+    throw error;
+  }
+};
+
 export const postData = async (kind: string, token: string | undefined, data: unknown) => {
   try {
     const response = await fetch(`${apiServer}/api/v1/${kind}`, {

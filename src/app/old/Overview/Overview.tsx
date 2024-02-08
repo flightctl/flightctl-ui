@@ -16,9 +16,16 @@ import { DevicesGrid } from './devicesGrid';
 import { Filter } from './filter';
 import { Legend } from './legend';
 
+const fakeDevicesStatus = {
+  'Ready': { count: 720 },
+  'Error': { count: 63 },
+  'Offline': { count: 85 },
+  'Degraded': { count: 30 },
+}
+
 const Overview: React.FunctionComponent = () => {
   const [data] = useFetchPeriodically<deviceList>('devices');
-  
+
   return (
     <PageSection>
       <Title headingLevel="h1" size="lg" style={{ marginBottom: '15px' }}>Overview</Title>
@@ -49,7 +56,7 @@ const Overview: React.FunctionComponent = () => {
               inset={{ default: 'insetSm' }}
             />
             <FlexItem>
-              <DevicesDonuts></DevicesDonuts>
+              <DevicesDonuts fleetDevicesStatus={fakeDevicesStatus} totalDevices={1000}></DevicesDonuts>
             </FlexItem>
           </Flex>
           <br></br><br></br>
@@ -57,7 +64,7 @@ const Overview: React.FunctionComponent = () => {
 
         </CardBody>
       </Card>
-      
+
     </PageSection>
   )
 };

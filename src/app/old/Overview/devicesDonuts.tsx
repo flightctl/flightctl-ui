@@ -1,37 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { fetchData } from '@app/old/utils/commonFunctions';
-import { useAuth } from 'react-oidc-context';
-import {
-  Card,
-  CardBody,
-  Chip,
-  ChipGroup,
-  Flex,
-  FlexItem,
-  MenuToggle,
-  MenuToggleElement,
-  Divider,
-  SearchInput,
-  Dropdown,
-  DropdownList,
-  DropdownItem,
-  PageSection,
-  Title,
-  CardHeader,
-} from '@patternfly/react-core';
+import React from 'react';
+
 import { ChartDonut, ChartThemeColor } from '@patternfly/react-charts';
-const DevicesDonuts: React.FunctionComponent = () => {
+
+type DeviceStatusType = 'Ready' | 'Error' | 'Offline' | 'Degraded';
+
+
+type FleetDevicesStatus = Record<DeviceStatusType, {
+  count: number;
+}>
+
+const DevicesDonuts = ({
+  totalDevices,
+  fleetDevicesStatus
+                       } : {
+  totalDevices: number,
+  fleetDevicesStatus: FleetDevicesStatus
+}) => {
   return (
     <ChartDonut
       ariaDesc="Devices"
       ariaTitle="Devices"
       constrainToVisibleArea
-      data={[
-        { x: 'Ready', y: 720 },
-        { x: 'Error', y: 100 },
-        { x: 'Offline', y: 110 },
-        { x: 'Degraded', y: 60 },
-      ]}
+      data={Object.entries(fleetDevicesStatus).map(([statusType, statusInfo]) => {
+        return { x: statusType, y: statusInfo.count }
+      })}
       labels={({ datum }) => `${datum.x}: ${datum.y}`}
       name="chart3"
       colorScale={['limegreen', 'tomato', 'gainsboro', 'khaki']}
@@ -41,7 +33,7 @@ const DevicesDonuts: React.FunctionComponent = () => {
         top: 20,
       }}
       subTitle="Devices"
-      title="1000"
+      title={`${totalDevices}`}
       themeColor={ChartThemeColor.multiUnordered}
       width={350}
       height={300}
