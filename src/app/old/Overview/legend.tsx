@@ -19,7 +19,6 @@ import {
   Title,
   CardHeader,
 } from '@patternfly/react-core';
-
 const Legend: React.FunctionComponent = () => {
   return (
     <Flex justifyContent={{ default: 'justifyContentCenter' }}>

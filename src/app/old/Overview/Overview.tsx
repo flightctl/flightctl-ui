@@ -19,6 +19,7 @@ import { Legend } from './legend';
 const fakeDevicesStatus = {
   'Ready': { count: 720 },
   'Error': { count: 63 },
+  'Syncing': { count: 102 },
   'Offline': { count: 85 },
   'Degraded': { count: 30 },
 }

@@ -11,8 +11,9 @@ import { useAuth } from '@app/hooks/useAuth';
 
 const fakeDevicesStatus = {
   'Ready': { count: 720 },
-  'Error': { count: 100 },
-  'Offline': { count: 110 },
+  'Error': { count: 50 },
+  'Syncing': { count: 80},
+  'Offline': { count: 90 },
   'Degraded': { count: 60 },
 }
 

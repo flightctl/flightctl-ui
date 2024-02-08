@@ -19,13 +19,15 @@ const FleetServiceStatus = ( { metrics }: { metrics: PrometheusMetric[] } ) => {
   }) || 0;
 
   // Generate some random numbers based on the reduced info we have
-  const errors = enrollmentRequests === activeAgents ? 0 : Math.floor(activeAgents * 0.65);
+  const syncing = enrollmentRequests === activeAgents ? 0 : Math.floor(activeAgents * 0.6);
+  const errors = enrollmentRequests === activeAgents ? 0 : Math.floor(activeAgents * 0.25);
   const offline = enrollmentRequests === activeAgents ? 0 : Math.floor(activeAgents * 0.12);
-  const degraded = enrollmentRequests === activeAgents ? 0 : (activeAgents - enrollmentRequests - errors - offline);
+  const degraded = enrollmentRequests === activeAgents ? 0 : (activeAgents - enrollmentRequests - syncing - errors - offline);
 
   const devicesStatus = {
     'Ready': { count: activeAgents === 0 ? 0 : enrollmentRequests },
     'Error': { count: activeAgents === 0 ? 0 : errors },
+    'Syncing': { count: activeAgents === 0 ? 0 : syncing },
     'Offline': { count: activeAgents === 0 ? 0 : offline },
     'Degraded': { count: activeAgents === 0 ? 0 : degraded },
   }

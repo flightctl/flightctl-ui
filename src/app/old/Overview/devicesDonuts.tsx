@@ -2,7 +2,7 @@ import React from 'react';
 
 import { ChartDonut, ChartThemeColor } from '@patternfly/react-charts';
 
-type DeviceStatusType = 'Ready' | 'Error' | 'Offline' | 'Degraded';
+type DeviceStatusType = 'Ready' | 'Error' | 'Syncing' | 'Offline' | 'Degraded';
 
 
 type FleetDevicesStatus = Record<DeviceStatusType, {
@@ -26,7 +26,7 @@ const DevicesDonuts = ({
       })}
       labels={({ datum }) => `${datum.x}: ${datum.y}`}
       name="chart3"
-      colorScale={['limegreen', 'tomato', 'gainsboro', 'khaki']}
+      colorScale={['limegreen', 'tomato', 'khaki',  'cornflowerblue', 'gainsboro']}
       padding={{
         bottom: 65,
         right: 20, // Adjusted to accommodate legend
