@@ -29,6 +29,7 @@ const AppToolbar = () => {
       <ToolbarContent>
         <ToolbarItem>
           <Button
+            aria-label="Theme switch"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             icon={theme === 'dark' ? <MoonIcon /> : <SunIcon />}
             variant="plain"
