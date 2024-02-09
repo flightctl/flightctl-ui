@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Alert, Flex, FlexItem } from '@patternfly/react-core';
+import { Alert, Card, CardBody, CardHeader } from '@patternfly/react-core';
 
-import { DevicesDonuts } from '@app/old/Overview/devicesDonuts';
-import { Legend } from '@app/old/Overview/legend';
 import { buildQuery, getMetricNumericValue } from '@app/utils/metrics';
 import { useFetchMetrics } from '@app/hooks/useFetchMetrics';
 import { FlightControlMetrics, PrometheusMetric } from '@app/types/extraTypes';
+import LineChart from '@app/components/Metrics/LineChart';
 
 const metricNames: FlightControlMetrics[] = [
   FlightControlMetrics.ACTIVE_AGENT_COUNT_METRIC,
@@ -33,39 +32,38 @@ const FleetServiceStatus = () => {
     return <Alert variant="warning" title="No data available" isInline />;
   }
 
-  let activeAgents = getMetricNumericValue(metrics, FlightControlMetrics.ACTIVE_AGENT_COUNT_METRIC) || 0;
-  if (activeAgents < 200) {
-    // Faking that there are more devices, as we are getting all values the same
-    activeAgents = 200;
-  }
+  const activeAgents = getMetricNumericValue(metrics, FlightControlMetrics.ACTIVE_AGENT_COUNT_METRIC) || 0;
+
 
   const enrollmentRequests = getMetricNumericValue(metrics, FlightControlMetrics.TOTAL_API_REQUESTS_METRIC, {
     operation: 'create_enrollmentrequest',
   }) || 0;
 
-  // Generate some random numbers based on the reduced info we have
-  const syncing = enrollmentRequests === activeAgents ? 0 : Math.floor(activeAgents * 0.6);
-  const errors = enrollmentRequests === activeAgents ? 0 : Math.floor(activeAgents * 0.25);
-  const offline = enrollmentRequests === activeAgents ? 0 : Math.floor(activeAgents * 0.12);
-  const degraded = enrollmentRequests === activeAgents ? 0 : (activeAgents - enrollmentRequests - syncing - errors - offline);
+  const activeAgentSeries = [{ name: 'First', x: '5', y: 2 }, { name: 'First', x: '10', y: 16 }, { name: 'First', x: '15', y: 12 }];
+  const anotherSeries = [{ name: 'Second', x: '5', y: 15 }, { name: 'Second', x: '10', y: 11 }, { name: 'Second', x: '15', y: 18 }];
 
-  const devicesStatus = {
-    'Ready': { count: activeAgents === 0 ? 0 : enrollmentRequests },
-    'Error': { count: activeAgents === 0 ? 0 : errors },
-    'Syncing': { count: activeAgents === 0 ? 0 : syncing },
-    'Offline': { count: activeAgents === 0 ? 0 : offline },
-    'Degraded': { count: activeAgents === 0 ? 0 : degraded },
-  }
+  const lineSeries = [
+    {
+      label: 'Active agents',
+      themeColor: 'limegreen',
+      dataPoints: activeAgentSeries.map((dataPoint) => ({ name: 'Active agents', x: dataPoint.x, y: dataPoint.y })),
+    },
+    {
+      label: 'Another measurement',
+      themeColor: 'cornflowerblue',
+      dataPoints: anotherSeries.map((dataPoint) => ({ name: 'Active agents', x: dataPoint.x, y: dataPoint.y })),
+    }
+  ]
 
   return (
-    <Flex alignItems={{ default: "alignItemsCenter" }} justifyContent={{ default: 'justifyContentSpaceAround' }}>
-      <FlexItem>
-        <DevicesDonuts fleetDevicesStatus={devicesStatus} totalDevices={activeAgents}></DevicesDonuts>
-      </FlexItem>
-      <FlexItem>
-        <Legend />
-      </FlexItem>
-    </Flex>
+  <Card isCompact={true} isFlat={true} >
+    <CardHeader>
+      Active agents in the last X minutes
+    </CardHeader>
+    <CardBody>
+      <LineChart title="Hey you" ariaTitle="yourself" lineSeries={lineSeries} xAxisTicks={[1, 5, 10]} yAxisTicks={[10, 15, 20]} />
+    </CardBody>
+  </Card>
   )
 }
 
