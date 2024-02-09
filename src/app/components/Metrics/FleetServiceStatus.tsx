@@ -1,20 +1,45 @@
-import React from 'react';
-import { Flex, FlexItem } from '@patternfly/react-core';
-
-import { PrometheusMetric } from '@app/types/extraTypes';
+import React, { useState } from 'react';
+import { Alert, Flex, FlexItem } from '@patternfly/react-core';
 
 import { DevicesDonuts } from '@app/old/Overview/devicesDonuts';
 import { Legend } from '@app/old/Overview/legend';
-import { getMetricNumericValue } from '@app/utils/metrics';
+import { buildQuery, getMetricNumericValue } from '@app/utils/metrics';
+import { useFetchMetrics } from '@app/hooks/useFetchMetrics';
+import { FlightControlMetrics, PrometheusMetric } from '@app/types/extraTypes';
 
-const FleetServiceStatus = ( { metrics }: { metrics: PrometheusMetric[] } ) => {
-  let activeAgents = getMetricNumericValue(metrics, 'flightctl_devicesimulator_active_agent_count') || 0;
+const metricNames: FlightControlMetrics[] = [
+  FlightControlMetrics.ACTIVE_AGENT_COUNT_METRIC,
+];
+
+const FleetServiceStatus = () => {
+  const [metricsQuery /*, _setMetricsQuery */] = useState<string>(buildQuery({
+    metrics: metricNames,
+    range: {
+      from: 1707473202,
+      to: 1707474102,
+      step: 3, // one value every 3 seconds
+    },
+  }));
+
+  const [metrics, isLoading, error] = useFetchMetrics<PrometheusMetric[]>(metricsQuery);
+  if (isLoading) {
+    return <div>Loading chart...</div>
+  }
+  if (error) {
+    return <Alert variant="danger" title="An error occured" isInline />;
+  }
+  if (!metrics) {
+    // TODO empty state for the chart?
+    return <Alert variant="warning" title="No data available" isInline />;
+  }
+
+  let activeAgents = getMetricNumericValue(metrics, FlightControlMetrics.ACTIVE_AGENT_COUNT_METRIC) || 0;
   if (activeAgents < 200) {
     // Faking that there are more devices, as we are getting all values the same
     activeAgents = 200;
   }
 
-  const enrollmentRequests = getMetricNumericValue(metrics, 'flightctl_devicesimulator_api_requests_total', {
+  const enrollmentRequests = getMetricNumericValue(metrics, FlightControlMetrics.TOTAL_API_REQUESTS_METRIC, {
     operation: 'create_enrollmentrequest',
   }) || 0;
 

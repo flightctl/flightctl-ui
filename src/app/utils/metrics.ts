@@ -1,4 +1,4 @@
-import { PrometheusMetric } from '@app/types/extraTypes';
+import { FlightControlMetrics, PrometheusMetric } from '@app/types/extraTypes';
 
 type MetricValue = string | number | undefined;
 
@@ -29,7 +29,16 @@ const getMetricNumericValue = (metrics: PrometheusMetric[], name: string, filter
   return Number.isNaN(num) ? undefined : num;
 }
 
+const buildQuery = ({ metrics, range }: { metrics: FlightControlMetrics[], range?: { from: number, to: number, step: number } }) => {
+  let query = metrics.length === 1 ? metrics[0] : `__name__=~"${metrics.join('|')}"`;
+  if (range) {
+    query += `&start=${range.from}&end=${range.to}&step=${range.step}`;
+  }
+  return query;
+}
+
 export {
+  buildQuery,
   getMetricValue,
   getMetricNumericValue,
 }

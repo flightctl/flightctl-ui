@@ -5,6 +5,7 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 const rs = require('jsrsasign');
 const dotenv = require('dotenv');
+const parseUrl = require('parseurl');
 
 dotenv.config();
 
@@ -64,12 +65,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/metrics', async (req, res) => {
+app.get('/metrics-range', async (req, res) => {
   try {
-    const metrics = (req.query.metrics || '').split(',');
-    const query = metrics.length === 1 ? metrics[0] : `{__name__=~"${metrics.join('|')}"}`;
-
-    const url = `${process.env.FLIGHTCTL_METRICS_SERVER}/api/v1/query?query=${query}`;
+    const metricsQuery = parseUrl(req).query;
+    const url = `${process.env.FLIGHTCTL_METRICS_SERVER}/api/v1/query_range?${metricsQuery}`;
     const agent = new https.Agent({ cert, key: certkey, ca });
     const response = await axios.get(url, { httpsAgent: agent });
 

@@ -15,11 +15,10 @@ import { Fleet } from '@types';
 import { getDateDisplay } from '@app/utils/dateUtils';
 import { getSourceUrls } from '@app/utils/fleetUtils';
 import FleetServiceStatus from '@app/components/Metrics/FleetServiceStatus';
-import { PrometheusMetric } from '@app/types/extraTypes';
 
 import SourceUrlList from './SourceUrlList';
 
-const FleetDetailsContent = ({ fleet, metrics }: { fleet: Required<Fleet>, metrics: PrometheusMetric[] }) => {
+const FleetDetailsContent = ({ fleet }: { fleet: Required<Fleet> }) => {
   const sourceUrls = getSourceUrls(fleet);
   return (
     <Grid hasGutter>
@@ -52,7 +51,7 @@ const FleetDetailsContent = ({ fleet, metrics }: { fleet: Required<Fleet>, metri
         <Card>
           <CardTitle>Service status</CardTitle>
           <CardBody>
-            <FleetServiceStatus metrics={metrics} />
+            <FleetServiceStatus />
           </CardBody>
         </Card>
       </GridItem>

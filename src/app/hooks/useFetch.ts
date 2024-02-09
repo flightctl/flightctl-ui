@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { deleteData, fetchMetrics, postData } from '@app/old/utils/commonFunctions';
+import { deleteData, postData } from '@app/old/utils/commonFunctions';
 import { useAuth } from './useAuth';
 
 export const useFetch = () => {
@@ -11,11 +11,8 @@ export const useFetch = () => {
 
   const remove = React.useCallback(async (kind: string) => deleteData(kind, userToken), [userToken]);
 
-  const getMetrics = React.useCallback(async (metrics: string[]) => fetchMetrics(metrics, userToken), [userToken]);
-
   return {
     post,
     remove,
-    getMetrics,
   };
 };
