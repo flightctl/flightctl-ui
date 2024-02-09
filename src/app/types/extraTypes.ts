@@ -3,10 +3,13 @@ export enum FlightControlMetrics {
   TOTAL_API_REQUESTS_METRIC = 'flightctl_devicesimulator_api_requests_total',
 }
 
+export type MetricValue = [number, number | string];
+
 export interface PrometheusMetric {
   metric: {
     __name__: FlightControlMetrics;
     job: string;
   };
-  value: Array<string | number>;
+  value?: MetricValue;
+  values?: Array<MetricValue>;
 }

@@ -1,5 +1,13 @@
 import React from 'react';
-import { Chart, ChartAxis, ChartGroup, ChartLine, ChartProps, ChartVoronoiContainer } from '@patternfly/react-charts';
+import {
+  Chart,
+  ChartAxis,
+  ChartGroup,
+  ChartLabel,
+  ChartLine,
+  ChartProps,
+  ChartVoronoiContainer,
+} from '@patternfly/react-charts';
 
 interface LineSeriesDataPoint {
   name: string;
@@ -15,13 +23,13 @@ interface LineSeries {
 
 interface LineChartProps {
   title: string;
-  ariaTitle: string;
+  ariaTitle?: string;
   lineSeriesList: LineSeries[];
-  xAxisTicks: number[];
-  yAxisTicks: number[];
+  xTickCount: number;
+  yTickCount: number;
 }
 
-const LineChart = ({ title, ariaTitle, xAxisTicks, yAxisTicks, lineSeriesList }: LineChartProps) => {
+const TimeLineChart = ({ title, ariaTitle, xTickCount, yTickCount, lineSeriesList }: LineChartProps) => {
   const colorScale = lineSeriesList.map((series) => series.themeColor || '').filter((color) => !!color);
   const props: Partial<ChartProps> = {};
   if (colorScale.length > 0) {
@@ -36,21 +44,25 @@ const LineChart = ({ title, ariaTitle, xAxisTicks, yAxisTicks, lineSeriesList }:
       containerComponent={
         <ChartVoronoiContainer labels={({ datum }) => `${datum.name}: ${datum.y}`} constrainToVisibleArea />
       }
-      legendData={lineSeriesList.map((lineSeries) => ({ name: lineSeries.label }))}
-      legendOrientation="vertical"
-      legendPosition="right"
       height={250}
       name={title}
       padding={{
-        bottom: 50,
-        left: 50,
-        right: 200,
-        top: 50,
+        bottom: 75, // for the tick labels
+        left: 75, // for the tick labels
+        right: 50,
+        top: 20,
       }}
-      width={600}
     >
-      <ChartAxis tickValues={xAxisTicks} />
-      <ChartAxis dependentAxis showGrid tickValues={yAxisTicks} />
+      <ChartAxis
+        showGrid
+        tickCount={xTickCount}
+        tickFormat={(dateTick) => {
+          return new Date(dateTick * 1000).toLocaleString();
+        }}
+        tickLabelComponent={<ChartLabel angle={-45} textAnchor="end" />}
+        style={{ tickLabels: { fontSize: 8 } }}
+      />
+      <ChartAxis dependentAxis showGrid tickCount={yTickCount} style={{ tickLabels: { fontSize: 9 } }} />
       <ChartGroup>
         {lineSeriesList.map((lineSeries) => {
           return (
@@ -67,4 +79,4 @@ const LineChart = ({ title, ariaTitle, xAxisTicks, yAxisTicks, lineSeriesList }:
   );
 };
 
-export default LineChart;
+export default TimeLineChart;
