@@ -5,7 +5,6 @@ import { useAuth } from './useAuth';
 const TIMEOUT = 10000000;
 // const TIMEOUT = 10000;
 
-
 // TODO Try to reuse back into "useFetchPeriodically"
 export const useFetchMetrics = <R>(query: string): [R | undefined, boolean, unknown, VoidFunction] => {
   const [isLoading, setIsLoading] = React.useState(true);
