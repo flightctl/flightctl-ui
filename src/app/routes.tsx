@@ -8,9 +8,7 @@ import { Experimental } from '@app/old/Experimental/Experimental';
 import { Experimental2 } from '@app/old/Experimental/Experimental2';
 import { Experimental3 } from '@app/old/Experimental/Experimental3';
 import { Fleet } from '@app/old/Fleet/Fleet';
-import { EnrollmentRequests } from '@app/old/EnrollmentRequests/EnrollmentRequests';
 import { Devices } from '@app/old/Devices/Devices';
-import { Enroll } from '@app/old/Enroll/Enroll';
 import { Device } from '@app/old/Device/Device';
 import { RemoteControl } from '@app/old/Device/rc';
 import { GitRepositories } from '@app/old/GitRepositories/GitRepositories';
@@ -25,6 +23,7 @@ import FleetList from '@app/components/Fleet/FleetList';
 import FleetDetails from '@app/components/Fleet/FleetDetails';
 
 import { APP_TITLE } from '@app/constants';
+import EnrollmentRequestList from './components/EnrollmentRequest/EnrollmentRequestList';
 
 export type ExtendedRouteObject = RouteObject & {
   title: string;
@@ -127,16 +126,6 @@ const fleetRoutes = [
 ];
 const secondaryRoutes = [
   {
-    path: '/devicemanagement/enroll',
-    title: 'Enroll',
-    showInNav: false,
-    element: (
-      <TitledRoute title="Enroll">
-        <Enroll />
-      </TitledRoute>
-    ),
-  },
-  {
     path: '/devicemanagement/device',
     title: 'Device',
     showInNav: false,
@@ -179,7 +168,7 @@ const deviceManagementRoutes = [
     title: 'Enrollment Requests',
     element: (
       <TitledRoute title="Enrollment Requests">
-        <EnrollmentRequests />
+        <EnrollmentRequestList />
       </TitledRoute>
     ),
   },
