@@ -4,6 +4,9 @@ import {
   Alert,
   Bullseye,
   Button,
+  EmptyState,
+  EmptyStateBody,
+  EmptyStateHeader,
   PageSection,
   PageSectionVariants,
   Spinner,
@@ -12,7 +15,7 @@ import {
   Title,
   Toolbar,
   ToolbarContent,
-  ToolbarItem,
+  ToolbarItem
 } from '@patternfly/react-core';
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { FleetList } from '@types';
@@ -35,8 +38,17 @@ const FleetTable = () => {
     );
   }
 
+  if (!fleetList?.items?.length) {
+    // TODO UXD needed (design, copy and placing)
+    return (
+        <EmptyState>
+          <EmptyStateHeader titleText={<>You haven&apos;t created any fleets yet</>} headingLevel="h4" />
+          <EmptyStateBody>Create a new fleet using the &quot;Create&quot; button</EmptyStateBody>
+        </EmptyState>
+    )
+  }
+
   return (
-    !!fleetList && (
       <Table aria-label="Fleets table">
         <Thead>
           <Tr>
@@ -75,7 +87,6 @@ const FleetTable = () => {
           ))}
         </Tbody>
       </Table>
-    )
   );
 };
 
