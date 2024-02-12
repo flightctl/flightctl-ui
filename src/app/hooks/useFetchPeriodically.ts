@@ -31,6 +31,7 @@ export const useFetchPeriodically = <R>(endpoint: string): [R | undefined, boole
           if (!abortController.signal.aborted) {
             setError(err);
           }
+          setIsLoading(false);
         }
         await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
       }

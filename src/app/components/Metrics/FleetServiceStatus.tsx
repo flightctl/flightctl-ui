@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, Badge, Card, CardBody, CardHeader, MenuToggle, MenuToggleElement, Select, SelectList, SelectOption } from '@patternfly/react-core';
+import { Alert, Badge, Card, CardBody, CardHeader,
+  EmptyState, EmptyStateBody, MenuToggle, MenuToggleElement, Select, SelectList, SelectOption } from '@patternfly/react-core';
 
 import { FlightControlMetrics, PrometheusMetric } from '@app/types/extraTypes';
 import { getMetricSeries } from '@app/utils/metrics';
@@ -29,15 +30,8 @@ const FleetServiceStatus = () => {
   if (isLoading) {
     return <div>Loading chart...</div>;
   }
-  if (error) {
-    return <Alert variant="danger" title="An error occured" isInline />;
-  }
-  if (!metrics) {
-    // TODO empty state for the chart?
-    return <Alert variant="warning" title="No data available" isInline />;
-  }
 
-  const activeAgents = getMetricSeries(metrics, FlightControlMetrics.ACTIVE_AGENT_COUNT_METRIC) || [0, 0];
+  const activeAgents = getMetricSeries(metrics || [], FlightControlMetrics.ACTIVE_AGENT_COUNT_METRIC) || [0, 0];
   const lineSeries = [
     {
       label: 'Active agents',
@@ -89,9 +83,19 @@ const FleetServiceStatus = () => {
     <Card isCompact={true} isFlat={true}>
       <CardHeader actions={{ actions: chartTimeActions }}>
         Active agents in the last <strong>{chartFilters.period}</strong>
+        {error ? <Alert variant="danger" title="Service status update failed" className="pf-v5-u-py-md" isInline isPlain /> : null}
       </CardHeader>
       <CardBody>
-        <TimeLineChart title="Active agents" lineSeriesList={lineSeries} xTickCount={10} yTickCount={10} maxY={maxY} />
+        {metrics?.length ?
+        <TimeLineChart title="Active agents" lineSeriesList={lineSeries} xTickCount={10} yTickCount={10} maxY={maxY} /> : null}
+
+        {metrics?.length === 0  && !error ?
+          <EmptyState>
+            <EmptyStateBody>
+              No metrics exist for the selected period
+            </EmptyStateBody>
+          </EmptyState>
+           : null}
       </CardBody>
     </Card>
   );

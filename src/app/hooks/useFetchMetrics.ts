@@ -42,6 +42,7 @@ export const useFetchMetrics = <R>(metricNames: FlightControlMetrics[], period: 
           if (!abortController.signal.aborted) {
             setError(err);
           }
+          setIsLoading(false);
         }
         await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
       }
