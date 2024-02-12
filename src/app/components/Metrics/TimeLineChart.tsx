@@ -27,9 +27,10 @@ interface LineChartProps {
   lineSeriesList: LineSeries[];
   xTickCount: number;
   yTickCount: number;
+  maxY: number;
 }
 
-const TimeLineChart = ({ title, ariaTitle, xTickCount, yTickCount, lineSeriesList }: LineChartProps) => {
+const TimeLineChart = ({ title, ariaTitle, lineSeriesList, xTickCount, yTickCount, maxY }: LineChartProps) => {
   const colorScale = lineSeriesList.map((series) => series.themeColor || '').filter((color) => !!color);
   const props: Partial<ChartProps> = {};
   if (colorScale.length > 0) {
@@ -62,7 +63,8 @@ const TimeLineChart = ({ title, ariaTitle, xTickCount, yTickCount, lineSeriesLis
         tickLabelComponent={<ChartLabel angle={-45} textAnchor="end" />}
         style={{ tickLabels: { fontSize: 8 } }}
       />
-      <ChartAxis dependentAxis showGrid tickCount={yTickCount} style={{ tickLabels: { fontSize: 9 } }} />
+      <ChartAxis dependentAxis showGrid tickCount={yTickCount}
+                 style={{ tickLabels: { fontSize: 9 } }} domain={{ y: [0, maxY] }} />
       <ChartGroup>
         {lineSeriesList.map((lineSeries) => {
           return (
