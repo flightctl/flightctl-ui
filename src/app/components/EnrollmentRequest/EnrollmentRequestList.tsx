@@ -69,7 +69,7 @@ const EnrollmentRequestTable = () => {
     }
   };
 
-  const currentEnrollementRequest = erList?.items.find((er) => er.metadata.name === requestId);
+  const currentEnrollmentRequest = erList?.items.find((er) => er.metadata.name === requestId);
 
   const filteredData = erList?.items.filter((er) => {
     if (!filters.status.length) {
@@ -114,29 +114,17 @@ const EnrollmentRequestTable = () => {
                   onOpenChange={(isOpen) => setIsStatusExpanded(isOpen)}
                 >
                   <SelectList>
-                    <SelectOption
-                      hasCheckbox
-                      key="statusApproved"
-                      value="Approved"
-                      isSelected={filters.status.includes('Approved')}
-                    >
+                    <SelectOption hasCheckbox value="Approved" isSelected={filters.status.includes('Approved')}>
                       Approved
                     </SelectOption>
-                    <SelectOption
-                      hasCheckbox
-                      key="statusPending"
-                      value="Pending"
-                      isSelected={filters.status.includes('Pending')}
-                    >
+                    <SelectOption hasCheckbox value="Pending" isSelected={filters.status.includes('Pending')}>
                       Pending
                     </SelectOption>
-                    <SelectOption
-                      hasCheckbox
-                      key="statusDenied"
-                      value="Denied"
-                      isSelected={filters.status.includes('Denied')}
-                    >
+                    <SelectOption hasCheckbox value="Denied" isSelected={filters.status.includes('Denied')}>
                       Denied
+                    </SelectOption>
+                    <SelectOption hasCheckbox value="Unknown" isSelected={filters.status.includes('Unknown')}>
+                      Unknown
                     </SelectOption>
                   </SelectList>
                 </Select>
@@ -184,9 +172,9 @@ const EnrollmentRequestTable = () => {
             })}
           </Tbody>
         </Table>
-        {currentEnrollementRequest && (
+        {currentEnrollmentRequest && (
           <DeviceEnrollmentModal
-            enrollmentRequest={currentEnrollementRequest}
+            enrollmentRequest={currentEnrollmentRequest}
             onClose={(updateList) => {
               setRequestId(undefined);
               updateList && refetch();

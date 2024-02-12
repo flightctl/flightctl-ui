@@ -1,6 +1,6 @@
 import { EnrollmentRequest } from '@types';
 
-type ApprovalStatus = 'Approved' | 'Pending' | 'Denied';
+type ApprovalStatus = 'Approved' | 'Pending' | 'Denied' | 'Unknown';
 
 export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): ApprovalStatus => {
   const approvedCondition = enrollmentRequest.status?.conditions?.find((c) => c.type === 'Approved');
@@ -10,5 +10,8 @@ export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): Approva
   if (approvedCondition.status === 'True') {
     return 'Approved';
   }
-  return 'Denied';
+  if (approvedCondition.status === 'False') {
+    return 'Denied';
+  }
+  return 'Unknown';
 };
