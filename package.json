@@ -9,7 +9,7 @@
   "scripts": {
     "prebuild": "npm run type-check && npm run clean",
     "dr:surge": "node dr-surge.js",
-    "build": "npm run ts-node ./node_modules/.bin/webpack --mode=production && npm run dr:surge",
+    "build": "NODE_ENV=production npm run ts-node ./node_modules/.bin/webpack --mode=production && npm run dr:surge",
     "start": "node app.js",
     "start:dev": "concurrently \"nodemon --watch app.js\" \"npm run ts-node ./node_modules/.bin/webpack serve --mode=development --color --progress\"",
     "test": "jest",

@@ -18,6 +18,11 @@ spec:
     spec:
       containers:
         - env:
+          - name: BACKEND_KEYCLOAK_AUTHORITY
+            valueFrom:
+              secretKeyRef:
+                name: flightctl-ui
+                key: BACKEND_KEYCLOAK_AUTHORITY
           - name: KEYCLOAK_AUTHORITY
             valueFrom:
               secretKeyRef:
@@ -38,11 +43,8 @@ spec:
               secretKeyRef:
                 name: flightctl-ui
                 key: KEYCLOAK_SECRET
-          - name: PORT
-            valueFrom:
-              secretKeyRef:
-                name: flightctl-ui
-                key: PORT
+          - name: API_PORT
+            value: '8080'
           - name: FLIGHTCTL_SERVER
             valueFrom:
               secretKeyRef:
