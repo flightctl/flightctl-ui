@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Alert, Badge, Card, CardBody, CardHeader,
   EmptyState, EmptyStateBody, MenuToggle, MenuToggleElement, Select, SelectList, SelectOption } from '@patternfly/react-core';
 
-import { FlightControlMetrics, PrometheusMetric } from '@app/types/extraTypes';
+import { FlightControlMetrics, MetricsQuery, PrometheusMetric } from '@app/types/extraTypes';
 import { getMetricSeries } from '@app/utils/metrics';
-import { useFetchMetrics } from '@app/hooks/useFetchMetrics';
 import TimeLineChart from '@app/components/Metrics/TimeLineChart';
+import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 
-const metricNames: FlightControlMetrics[] = [FlightControlMetrics.ACTIVE_AGENT_COUNT_METRIC];
+const defaultMetric = FlightControlMetrics.ACTIVE_AGENT_COUNT_METRIC;
 
 const periods = [
   '15m',
@@ -20,11 +20,11 @@ const periods = [
 
 const FleetServiceStatus = () => {
   const [isOpenFilters, setIsOpenFilters] = useState(false);
-  const [chartFilters, setChartFilters ] = useState({ period: '30m' });
-  const [metrics, isLoading, error] = useFetchMetrics<PrometheusMetric[]>(metricNames, chartFilters.period);
+  const [metricsQuery, setMetricsQuery ] = useState<MetricsQuery>({ metrics: [defaultMetric], period: '30m' });
+  const [metrics, isLoading, error] = useFetchPeriodically<PrometheusMetric[]>(metricsQuery);
 
-  const onChartTimeSelect = (_event?: React.MouseEvent<Element, MouseEvent>, selection?: string | number | undefined) => {
-    setChartFilters({ period: selection as string });
+  const onChartTimeSelect = (_event?: React.MouseEvent<Element, MouseEvent>, selectedPeriod?: string | number | undefined) => {
+    setMetricsQuery({ metrics: [defaultMetric], period: selectedPeriod as string })
   }
 
   if (isLoading) {
@@ -61,28 +61,28 @@ const FleetServiceStatus = () => {
           }}
           isExpanded={isOpenFilters}
         >
-          Change chart period <Badge isRead>{chartFilters.period}</Badge>
+          Change chart period <Badge isRead>{metricsQuery.period}</Badge>
         </MenuToggle>
       )}
       onSelect={onChartTimeSelect}
-      selected={chartFilters.period}
+      selected={metricsQuery.period}
       isOpen={isOpenFilters}
       onOpenChange={(isOpen) => setIsOpenFilters(isOpen)}
     >
       <SelectList>
         {periods.map((period) => (
-          <SelectOption hasCheckbox key={period} value={period} isSelected={period === chartFilters.period}>
+          <SelectOption hasCheckbox key={period} value={period} isSelected={period === metricsQuery.period}>
             {period}
           </SelectOption>
         ))}
       </SelectList>
     </Select>
-  )
+  );
 
   return (
     <Card isCompact={true} isFlat={true}>
       <CardHeader actions={{ actions: chartTimeActions }}>
-        Active agents in the last <strong>{chartFilters.period}</strong>
+        Active agents in the last <strong>{metricsQuery.period}</strong>
         {error ? <Alert variant="danger" title="Service status update failed" className="pf-v5-u-py-md" isInline isPlain /> : null}
       </CardHeader>
       <CardBody>

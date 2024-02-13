@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { fetchMetrics } from '@app/old/utils/commonFunctions';
-import { FlightControlMetrics } from '@app/types/extraTypes';
-import { buildQuery, getPeriodTimestamps } from '@app/utils/metrics';
+import { MetricsQuery } from '@app/types/extraTypes';
 
 import { useAuth } from './useAuth';
+import { getRequestQueryString } from '@app/utils/api';
 
 const TIMEOUT = 10000;
 
 // TODO Try to reuse back into "useFetchPeriodically"
-export const useFetchMetrics = <R>(metricNames: FlightControlMetrics[], period: string): [R | undefined, boolean, unknown, VoidFunction] => {
+export const useFetchMetrics = <R>(queryObj: MetricsQuery): [R | undefined, boolean, unknown, VoidFunction] => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [data, setData] = React.useState<R>();
   const [error, setError] = React.useState<unknown>();
@@ -26,10 +26,7 @@ export const useFetchMetrics = <R>(metricNames: FlightControlMetrics[], period: 
           abortController = new AbortController();
 
           // Rebuilding the query to obtain the updated "from" / "to" instants
-          const metricsQuery = buildQuery({
-            metrics: metricNames,
-            range: getPeriodTimestamps(period),
-          });
+          const metricsQuery = getRequestQueryString(queryObj);
           const data = await fetchMetrics(metricsQuery, auth?.user?.access_token, abortController.signal);
 
           if (isLoading) {
@@ -55,7 +52,7 @@ export const useFetchMetrics = <R>(metricNames: FlightControlMetrics[], period: 
       abortController?.abort();
     };
     // eslint-disable-next-line
-  }, [userToken, forceUpdate, metricNames, period]);
+  }, [userToken, forceUpdate, queryObj]);
 
   const refetch = React.useCallback(() => setForceUpdate((val) => val + 1), []);
 

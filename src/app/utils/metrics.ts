@@ -1,4 +1,4 @@
-import { FlightControlMetrics, MetricValue, PrometheusMetric } from '@app/types/extraTypes';
+import { MetricValue, PrometheusMetric } from '@app/types/extraTypes';
 
 const getMetricSeries = (metrics: PrometheusMetric[], name: string): MetricValue[] => {
   const metricItem = metrics.find((metric) => {
@@ -42,18 +42,4 @@ const getPeriodTimestamps = (period: string) => {
   return { from: from / 1000, to: to / 1000, step };
 }
 
-const buildQuery = ({
-  metrics,
-  range,
-}: {
-  metrics: FlightControlMetrics[];
-  range?: { from: number; to: number; step: number };
-}) => {
-  let query = metrics.length === 1 ? metrics[0] : `__name__=~"${metrics.join('|')}"`;
-  if (range) {
-    query += `&start=${range.from}&end=${range.to}&step=${range.step}`;
-  }
-  return query;
-};
-
-export { buildQuery, getMetricSeries, getPeriodTimestamps };
+export { getMetricSeries, getPeriodTimestamps };

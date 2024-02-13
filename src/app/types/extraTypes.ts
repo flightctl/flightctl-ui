@@ -13,3 +13,14 @@ export interface PrometheusMetric {
   value?: MetricValue;
   values?: Array<MetricValue>;
 }
+
+export interface ApiQuery {
+  endpoint: string;
+}
+
+export interface MetricsQuery {
+  metrics: FlightControlMetrics[];
+  period: string;
+}
+
+export type FlightControlQuery = ApiQuery | MetricsQuery;

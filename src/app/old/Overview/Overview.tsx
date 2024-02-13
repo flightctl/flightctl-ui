@@ -25,7 +25,7 @@ const fakeDevicesStatus = {
 }
 
 const Overview: React.FunctionComponent = () => {
-  const [data] = useFetchPeriodically<deviceList>('devices');
+  const [data] = useFetchPeriodically<deviceList>({ endpoint: 'devices' });
 
   return (
     <PageSection>

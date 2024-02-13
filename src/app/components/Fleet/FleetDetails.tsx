@@ -9,7 +9,7 @@ import FleetDetailsContent from './FleetDetailsContent';
 
 const FleetDetails = () => {
   const { fleetId } = useParams();
-  const [fleetDetails, isLoading, error] = useFetchPeriodically<Required<Fleet>>(`fleets/${fleetId}`);
+  const [fleetDetails, isLoading, error] = useFetchPeriodically<Required<Fleet>>({ endpoint: `fleets/${fleetId}`});
 
   if (error && !fleetDetails) {
     return <div>Failed to retrieve fleet details</div>;

@@ -23,7 +23,7 @@ import * as React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const FleetTable = () => {
-  const [fleetList, loading, error, refetch] = useFetchPeriodically<FleetList>('fleets');
+  const [fleetList, loading, error, refetch] = useFetchPeriodically<FleetList>({ endpoint: 'fleets' });
   const { remove } = useFetch();
 
   if (error) {

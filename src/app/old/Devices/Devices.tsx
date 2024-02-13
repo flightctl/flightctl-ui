@@ -35,7 +35,7 @@ const columns = [
 
 const Devices: React.FunctionComponent = () => {
   const auth = useAuth();
-  const [devicesData, isLoading, error, refetch] = useFetchPeriodically<deviceList>('devices');
+  const [devicesData, isLoading, error, refetch] = useFetchPeriodically<deviceList>({ endpoint: 'devices'});
   const defaultActions = (device: Device): IAction[] => [
     {
       title: 'Details',
