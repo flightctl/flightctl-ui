@@ -7,7 +7,6 @@ import { Overview } from '@app/old/Overview/Overview';
 import { Experimental } from '@app/old/Experimental/Experimental';
 import { Experimental2 } from '@app/old/Experimental/Experimental2';
 import { Experimental3 } from '@app/old/Experimental/Experimental3';
-import { Devices } from '@app/old/Devices/Devices';
 import { Device } from '@app/old/Device/Device';
 import { RemoteControl } from '@app/old/Device/rc';
 import { GitRepositories } from '@app/old/GitRepositories/GitRepositories';
@@ -25,6 +24,7 @@ import { APP_TITLE } from '@app/constants';
 import EnrollmentRequestList from './components/EnrollmentRequest/EnrollmentRequestList';
 import DeviceEnrollmentPage from './components/EnrollmentRequest/DeviceEnrollmentPage';
 import { UserPreferencesContext } from './components/UserPreferences/UserPreferencesProvider';
+import DeviceList from './components/Device/DeviceList';
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -163,7 +163,7 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
         title: 'Devices',
         element: (
           <TitledRoute title="Devices">
-            <Devices />
+            <DeviceList />
           </TitledRoute>
         ),
       },

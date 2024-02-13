@@ -43,9 +43,10 @@ export const useFetchPeriodically = <R>(query: FlightControlQuery): [R | undefin
           setError(undefined);
         } catch (err) {
           // aborting fetch trows 'AbortError', we can ignore it
-          if (!abortController.signal.aborted) {
-            setError(err);
+          if (abortController.signal.aborted) {
+            return;
           }
+          setError(err);
           setIsLoading(false);
         }
         await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
