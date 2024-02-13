@@ -140,6 +140,8 @@ const EnrollmentRequestTable = () => {
               <Th>Name</Th>
               <Th>Creation timestamp</Th>
               <Th>Status</Th>
+              <Th>Approver</Th>
+              <Th>Approved on</Th>
               <Td />
             </Tr>
           </Thead>
@@ -151,6 +153,10 @@ const EnrollmentRequestTable = () => {
                   <Td dataLabel="Name">{er.metadata.name}</Td>
                   <Td dataLabel="Creation timestamp">{er.metadata.creationTimestamp}</Td>
                   <Td dataLabel="Status">{approvalStatus}</Td>
+                  <Td dataLabel="Approver">{er.status?.approval?.approved ? er.status?.approval?.approvedBy : '-'}</Td>
+                  <Td dataLabel="Approved on">
+                    {er.status?.approval?.approved ? er.status?.approval?.approvedAt : '-'}
+                  </Td>
                   <Td isActionCell>
                     <ActionsColumn
                       items={[

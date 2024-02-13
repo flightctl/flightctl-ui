@@ -6,12 +6,14 @@ import { useFetch } from '@app/hooks/useFetch';
 import { getErrorMessage } from '@app/utils/error';
 import DeviceEnrollmentForm, { DeviceEnrollmentFormProps, DeviceEnrollmentFormValues } from './DeviceEnrollmentForm';
 import { getApprovalStatus } from '@app/utils/status/enrollmentRequest';
+import { useAuth } from 'react-oidc-context';
 
 type DeviceEnrollmentModalProps = Omit<DeviceEnrollmentFormProps, 'error'>;
 
 const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmentRequest, onClose }) => {
   const { post } = useFetch();
   const [error, setError] = React.useState<string>();
+  const auth = useAuth();
   return (
     <Formik<DeviceEnrollmentFormValues>
       initialValues={{
@@ -28,6 +30,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
               acc[key] = value;
               return acc;
             }, {}),
+            approvedBy: auth?.user?.profile.preferred_username,
           });
           onClose(true);
         } catch (e) {
