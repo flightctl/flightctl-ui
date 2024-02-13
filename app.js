@@ -16,10 +16,12 @@ if (process.env.NODE_ENV !== 'production') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
 
-process.env.PORT = process.env.PORT || 3001;
+process.env.API_PORT = process.env.API_PORT || 3001;
 process.env.FLIGHTCTL_SERVER = process.env.FLIGHTCTL_SERVER || 'https://localhost:3333';
 process.env.FLIGHTCTL_METRICS_SERVER = process.env.FLIGHTCTL_METRICS_SERVER || 'http://localhost:9090';
 process.env.RC_SVC = process.env.RC_SVC || 'flighctl-rc-svc:8082';
+
+const KEYCLOAK_AUTH = process.env.BACKEND_KEYCLOAK_AUTHORITY || process.env.KEYCLOAK_AUTHORITY;
 const app = express();
 let key;
 let pubKey;
@@ -27,8 +29,8 @@ let pubKey;
 if (fs.existsSync('certs/api-sig.key')) {
   key = fs.readFileSync('certs/api-sig.key', 'utf8');
   pubKey = rs.KEYUTIL.getKey(key);
-} else if (process.env.KEYCLOAK_AUTHORITY) {
-  axios.get(process.env.KEYCLOAK_AUTHORITY).then(function (response) {
+} else if (KEYCLOAK_AUTH) {
+  axios.get(KEYCLOAK_AUTH).then(function (response) {
     key = '-----BEGIN PUBLIC KEY-----\n' + response.data.public_key + '\n-----END PUBLIC KEY-----';
     pubKey = rs.KEYUTIL.getKey(key);
   });
@@ -47,7 +49,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use((req, res, next) => {
-  if (process.env.KEYCLOAK_AUTHORITY && req.method !== 'OPTIONS') {
+  if (KEYCLOAK_AUTH && req.method !== 'OPTIONS' && req.path.startsWith('/api')) {
     if (!req.headers.authorization) {
       console.log('No authorization header');
       res.status(401).send('Unauthorized');
@@ -180,7 +182,14 @@ app.post('/api/v1/device/:deviceid/remotecontrol/enable', async (req, res) => {
 });
 
 //set dist as static application folder
-app.use(express.static(__dirname + '/dist'));
+app.use((req, res, next) => {
+  if (req.path !== '/') {
+    const staticHandler = express.static(__dirname + '/dist');
+    return staticHandler(req, res, next);
+  } else {
+    next();
+  }
+});
 //serve index.html file on route '/'
 app.get('*', function (req, res) {
   fs.readFile(__dirname + '/dist/index.html', 'utf8', (err, data) => {
@@ -196,11 +205,11 @@ app.get('*', function (req, res) {
       </script>
     `;
 
-    const indexPage = data.replace('</body>', script + '</body>');
+    const indexPage = data.replace('<head>', '<head>' + script);
     res.send(indexPage);
   });
 });
 
-app.listen(process.env.PORT, () => {
-  console.log('Server listening on port ' + process.env.PORT);
+app.listen(process.env.API_PORT, () => {
+  console.log('Server listening on port ' + process.env.API_PORT);
 });
