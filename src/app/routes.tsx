@@ -24,6 +24,7 @@ import FleetDetails from '@app/components/Fleet/FleetDetails';
 
 import { APP_TITLE } from '@app/constants';
 import EnrollmentRequestList from './components/EnrollmentRequest/EnrollmentRequestList';
+import DeviceEnrollmentPage from './components/EnrollmentRequest/DeviceEnrollmentPage';
 
 export type ExtendedRouteObject = RouteObject & {
   title: string;
@@ -169,6 +170,15 @@ const deviceManagementRoutes = [
     element: (
       <TitledRoute title="Enrollment Requests">
         <EnrollmentRequestList />
+      </TitledRoute>
+    ),
+  },
+  {
+    path: '/enroll/:id',
+    showInNav: false,
+    element: (
+      <TitledRoute title="Enrollment Request">
+        <DeviceEnrollmentPage />
       </TitledRoute>
     ),
   },

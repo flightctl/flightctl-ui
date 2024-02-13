@@ -27,7 +27,9 @@ import * as React from 'react';
 import DeviceEnrollmentModal from './DeviceEnrollmentModal/DeviceEnrollmentModal';
 
 const EnrollmentRequestTable = () => {
-  const [erList, loading, error, refetch] = useFetchPeriodically<EnrollmentRequestList>('enrollmentrequests');
+  const [erList, loading, error, refetch] = useFetchPeriodically<EnrollmentRequestList>({
+    endpoint: 'enrollmentrequests',
+  });
   const { remove } = useFetch();
   const [requestId, setRequestId] = React.useState<string>();
   const [filters, setFilters] = React.useState<{ status: string[] }>({

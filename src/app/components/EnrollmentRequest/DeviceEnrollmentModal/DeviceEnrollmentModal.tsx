@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { EnrollmentRequestApproval } from '@types';
-import { Modal } from '@patternfly/react-core';
+import { Alert, Modal } from '@patternfly/react-core';
 import { Formik } from 'formik';
 import { useFetch } from '@app/hooks/useFetch';
 import { getErrorMessage } from '@app/utils/error';
 import DeviceEnrollmentForm, { DeviceEnrollmentFormProps, DeviceEnrollmentFormValues } from './DeviceEnrollmentForm';
+import { getApprovalStatus } from '@app/utils/status/enrollmentRequest';
 
 type DeviceEnrollmentModalProps = Omit<DeviceEnrollmentFormProps, 'error'>;
 
@@ -36,7 +37,11 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
     >
       {({ isSubmitting }) => (
         <Modal title="Device enrollment request" isOpen onClose={() => !isSubmitting && onClose()} variant="small">
-          <DeviceEnrollmentForm enrollmentRequest={enrollmentRequest} onClose={onClose} error={error} />
+          {getApprovalStatus(enrollmentRequest) !== 'Approved' ? (
+            <DeviceEnrollmentForm enrollmentRequest={enrollmentRequest} onClose={onClose} error={error} />
+          ) : (
+            <Alert isInline variant="info" title="Enrollment request is already approved." />
+          )}
         </Modal>
       )}
     </Formik>
