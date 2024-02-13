@@ -131,7 +131,7 @@ export const rejectEnrollmentRequest = async (name: string, token: string) => {
     return error;
   }
 };
-export const enableRCAgent = async (name: string, token: string | undefined) => {
+export const enableRCAgent = async (name: string | undefined, token: string | undefined) => {
   try {
     const response = await fetch(`${apiServer}/api/v1/device/${name}/remotecontrol/enable`, {
       method: 'POST',

@@ -127,7 +127,7 @@ const fleetRoutes = [
 ];
 const secondaryRoutes = [
   {
-    path: '/devicemanagement/device',
+    path: '/devicemanagement/device/:deviceID',
     title: 'Device',
     showInNav: false,
     element: (

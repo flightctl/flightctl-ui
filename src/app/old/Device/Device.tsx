@@ -4,6 +4,7 @@ import { enableRCAgent } from '@app/old/utils/commonFunctions';
 import { device } from '@app/old/utils/commonDataTypes';
 import { LogViewer } from '@patternfly/react-log-viewer';
 import { RemoteControl } from '@app/old/Device/rc';
+import { useParams } from 'react-router-dom';
 import YAML from 'yaml';
 import {
   Accordion,
@@ -52,13 +53,12 @@ const dateFormatter = (date) => {
 
   return `${dateObj.toLocaleDateString('en-US', options)} ${dateObj.toLocaleTimeString('en-US')}`;
 };
-const windowPath = window.location.pathname.split('device/');
-const deviceID = windowPath[1];
 var device = new YAML.Document();
 
 const Device: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [deviceData, setDeviceData] = React.useState<device>();
+  const { deviceID } = useParams();
   const auth = useAuth();
   function getEvents() {
     setIsLoading(true);
@@ -212,10 +212,12 @@ const Device: React.FunctionComponent = () => {
     }
   };
 
-  const enableRC = () => {
-    enableRCAgent(deviceID, auth?.user?.access_token);
-    // set activateTabKey to 3
-    setActiveTabKey(3);
+  const enableRC = (deviceID: string | undefined) => () => {
+    if (deviceID !== undefined) {
+      enableRCAgent(deviceID, auth?.user?.access_token);
+      // set activateTabKey to 3
+      setActiveTabKey(3);
+    }
   };
 
   React.useEffect(() => {
@@ -693,7 +695,7 @@ const Device: React.FunctionComponent = () => {
                 isDisabled={true}
                 value="TODO: add otel-collector yaml spec"
               />
-              <Button variant="primary" onClick={enableRC}>
+              <Button variant="primary" onClick={enableRC(deviceID)}>
                 Enable
               </Button>
             </CardBody>
