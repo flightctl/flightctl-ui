@@ -22,7 +22,7 @@ export const useFetchPeriodically = <R>(query: FlightControlQuery): [R | undefin
   const isAPI = isApiQuery(query);
 
   // Callback that generates the updated query for refreshes. It may provide updated values for parameters such as from/to for metric queries
-  const getRequestQuery = React.useCallback(() => getRequestQueryString(query), [query])
+  const getRequestQuery = React.useCallback(() => getRequestQueryString(query), [query]);
 
   React.useEffect(() => {
     let abortController: AbortController;

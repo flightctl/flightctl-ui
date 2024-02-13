@@ -63,8 +63,13 @@ const TimeLineChart = ({ title, ariaTitle, lineSeriesList, xTickCount, yTickCoun
         tickLabelComponent={<ChartLabel angle={-45} textAnchor="end" />}
         style={{ tickLabels: { fontSize: 8 } }}
       />
-      <ChartAxis dependentAxis showGrid tickCount={yTickCount}
-                 style={{ tickLabels: { fontSize: 9 } }} domain={{ y: [0, maxY] }} />
+      <ChartAxis
+        dependentAxis
+        showGrid
+        tickCount={yTickCount}
+        style={{ tickLabels: { fontSize: 9 } }}
+        domain={{ y: [0, maxY] }}
+      />
       <ChartGroup>
         {lineSeriesList.map((lineSeries) => {
           return (

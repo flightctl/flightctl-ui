@@ -19,27 +19,27 @@ const getPeriodTimestamps = (period: string) => {
   let from: number;
   switch (period) {
     case '15m':
-      from = to - (15 * 60 * 1000)
+      from = to - 15 * 60 * 1000;
       break;
     case '30m':
-      from = to - (30 * 60 * 1000)
+      from = to - 30 * 60 * 1000;
       break;
     case '1h':
-      from = to - (1 * 60 * 60 * 1000)
+      from = to - 1 * 60 * 60 * 1000;
       break;
     case '8h':
-      from = to - (8 * 60 * 60 * 1000)
+      from = to - 8 * 60 * 60 * 1000;
       break;
     case '24h':
-      from = to - (24 * 60 * 60 * 1000)
+      from = to - 24 * 60 * 60 * 1000;
       break;
     case '72h':
     default:
-      from = to - (72 * 60 * 60 * 1000)
+      from = to - 72 * 60 * 60 * 1000;
       break;
   }
   // Prometheus query requires seconds, not milliseconds
   return { from: from / 1000, to: to / 1000, step };
-}
+};
 
 export { getMetricSeries, getPeriodTimestamps };

@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
-import { Alert, Badge, Card, CardBody, CardHeader,
-  EmptyState, EmptyStateBody, MenuToggle, MenuToggleElement, Select, SelectList, SelectOption } from '@patternfly/react-core';
+import {
+  Alert,
+  Badge,
+  Card,
+  CardBody,
+  CardHeader,
+  EmptyState,
+  EmptyStateBody,
+  MenuToggle,
+  MenuToggleElement,
+  Select,
+  SelectList,
+  SelectOption,
+} from '@patternfly/react-core';
 
 import { FlightControlMetrics, MetricsQuery, PrometheusMetric } from '@app/types/extraTypes';
 import { getMetricSeries } from '@app/utils/metrics';
@@ -9,23 +21,19 @@ import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 
 const defaultMetric = FlightControlMetrics.ACTIVE_AGENT_COUNT_METRIC;
 
-const periods = [
-  '15m',
-  '30m',
-  '1h',
-  '8h',
-  '24h',
-  '72h',
-];
+const periods = ['15m', '30m', '1h', '8h', '24h', '72h'];
 
 const FleetServiceStatus = () => {
   const [isOpenFilters, setIsOpenFilters] = useState(false);
-  const [metricsQuery, setMetricsQuery ] = useState<MetricsQuery>({ metrics: [defaultMetric], period: '30m' });
+  const [metricsQuery, setMetricsQuery] = useState<MetricsQuery>({ metrics: [defaultMetric], period: '30m' });
   const [metrics, isLoading, error] = useFetchPeriodically<PrometheusMetric[]>(metricsQuery);
 
-  const onChartTimeSelect = (_event?: React.MouseEvent<Element, MouseEvent>, selectedPeriod?: string | number | undefined) => {
-    setMetricsQuery({ metrics: [defaultMetric], period: selectedPeriod as string })
-  }
+  const onChartTimeSelect = (
+    _event?: React.MouseEvent<Element, MouseEvent>,
+    selectedPeriod?: string | number | undefined,
+  ) => {
+    setMetricsQuery({ metrics: [defaultMetric], period: selectedPeriod as string });
+  };
 
   if (isLoading) {
     return <div>Loading chart...</div>;
@@ -57,7 +65,7 @@ const FleetServiceStatus = () => {
         <MenuToggle
           ref={toggleRef}
           onClick={() => {
-            setIsOpenFilters(!isOpenFilters)
+            setIsOpenFilters(!isOpenFilters);
           }}
           isExpanded={isOpenFilters}
         >
@@ -83,19 +91,26 @@ const FleetServiceStatus = () => {
     <Card isCompact={true} isFlat={true}>
       <CardHeader actions={{ actions: chartTimeActions }}>
         Active agents in the last <strong>{metricsQuery.period}</strong>
-        {error ? <Alert variant="danger" title="Service status update failed" className="pf-v5-u-py-md" isInline isPlain /> : null}
+        {error ? (
+          <Alert variant="danger" title="Service status update failed" className="pf-v5-u-py-md" isInline isPlain />
+        ) : null}
       </CardHeader>
       <CardBody>
-        {metrics?.length ?
-        <TimeLineChart title="Active agents" lineSeriesList={lineSeries} xTickCount={10} yTickCount={10} maxY={maxY} /> : null}
+        {metrics?.length ? (
+          <TimeLineChart
+            title="Active agents"
+            lineSeriesList={lineSeries}
+            xTickCount={10}
+            yTickCount={10}
+            maxY={maxY}
+          />
+        ) : null}
 
-        {metrics?.length === 0  && !error ?
+        {metrics?.length === 0 && !error ? (
           <EmptyState>
-            <EmptyStateBody>
-              No metrics exist for the selected period
-            </EmptyStateBody>
+            <EmptyStateBody>No metrics exist for the selected period</EmptyStateBody>
           </EmptyState>
-           : null}
+        ) : null}
       </CardBody>
     </Card>
   );
