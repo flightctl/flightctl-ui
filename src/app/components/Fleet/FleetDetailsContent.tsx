@@ -13,8 +13,10 @@ import {
 } from '@patternfly/react-core';
 import { Fleet } from '@types';
 import { getDateDisplay } from '@app/utils/dateUtils';
-import SourceUrlList from './SourceUrlList';
 import { getSourceUrls } from '@app/utils/fleetUtils';
+import FleetServiceStatus from '@app/components/Metrics/FleetServiceStatus';
+
+import SourceUrlList from './SourceUrlList';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Required<Fleet> }) => {
   const sourceUrls = getSourceUrls(fleet);
@@ -49,7 +51,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Required<Fleet> }) => {
         <Card>
           <CardTitle>Service status</CardTitle>
           <CardBody>
-            <div style={{ fontSize: 30 }}>999</div>
+            <FleetServiceStatus />
           </CardBody>
         </Card>
       </GridItem>

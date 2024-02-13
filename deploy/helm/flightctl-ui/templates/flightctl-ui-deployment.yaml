@@ -50,6 +50,11 @@ spec:
               secretKeyRef:
                 name: flightctl-ui
                 key: FLIGHTCTL_SERVER
+          - name: FLIGHTCTL_METRICS_SERVER
+            valueFrom:
+              secretKeyRef:
+                name: flightctl-ui
+                key: FLIGHTCTL_METRICS_SERVER
           image: {{ .Values.flightctlUi.image }}
           name: flightctl-ui
           ports:

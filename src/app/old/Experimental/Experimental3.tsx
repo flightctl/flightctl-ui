@@ -1,30 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { fetchData } from '@app/old/utils/commonFunctions';
 import {
-  Card,
-  CardBody,
-  Chip,
-  ChipGroup,
-  Flex,
-  FlexItem,
-  MenuToggle,
-  MenuToggleElement,
-  Divider,
-  SearchInput,
-  Dropdown,
-  DropdownList,
-  DropdownItem,
   PageSection,
   Title,
-  CardHeader,
 } from '@patternfly/react-core';
-import { ChartDonut, ChartThemeColor } from '@patternfly/react-charts';
 import YAML from 'yaml';
 import * as d3 from 'd3';
 import { DevicesDonuts } from '@app/old/Overview/devicesDonuts';
 import { useAuth } from '@app/hooks/useAuth';
+
+const fakeDevicesStatus = {
+  'Ready': { count: 720 },
+  'Error': { count: 50 },
+  'Syncing': { count: 80},
+  'Offline': { count: 90 },
+  'Degraded': { count: 60 },
+}
+
 const Experimental3: React.FunctionComponent = () => {
-  const [isLoading, setIsLoading] = React.useState(false);
   const auth = useAuth();
 
   function getDevices() {
@@ -262,7 +255,7 @@ const Experimental3: React.FunctionComponent = () => {
           zIndex: '1',
         }}
       >
-        <DevicesDonuts />
+        <DevicesDonuts fleetDevicesStatus={fakeDevicesStatus} totalDevices={1000} />
       </div>
     </PageSection>
   );

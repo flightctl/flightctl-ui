@@ -1,15 +1,15 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Breadcrumb, BreadcrumbItem, PageSection, Title } from '@patternfly/react-core';
-import { Fleet } from '@types';
 
-import { useSingleFetch } from '@app/hooks/useSingleFetch';
+import { Fleet } from '@types';
+import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 
 import FleetDetailsContent from './FleetDetailsContent';
 
 const FleetDetails = () => {
   const { fleetId } = useParams();
-  const [fleetDetails, isLoading, error] = useSingleFetch<Required<Fleet>>(`fleets/${fleetId}`);
+  const [fleetDetails, isLoading, error] = useFetchPeriodically<Required<Fleet>>({ endpoint: `fleets/${fleetId}` });
 
   if (error && !fleetDetails) {
     return <div>Failed to retrieve fleet details</div>;

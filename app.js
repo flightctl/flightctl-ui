@@ -5,6 +5,7 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 const rs = require('jsrsasign');
 const dotenv = require('dotenv');
+const parseUrl = require('parseurl');
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 process.env.API_PORT = process.env.API_PORT || 3001;
 process.env.FLIGHTCTL_SERVER = process.env.FLIGHTCTL_SERVER || 'https://localhost:3333';
+process.env.FLIGHTCTL_METRICS_SERVER = process.env.FLIGHTCTL_METRICS_SERVER || 'http://localhost:9090';
 process.env.RC_SVC = process.env.RC_SVC || 'flighctl-rc-svc:8082';
 
 const KEYCLOAK_AUTH = process.env.BACKEND_KEYCLOAK_AUTHORITY || process.env.KEYCLOAK_AUTHORITY;
@@ -63,6 +65,21 @@ app.use((req, res, next) => {
     }
   }
   next();
+});
+
+app.get('/metrics-range', async (req, res) => {
+  try {
+    const metricsQuery = parseUrl(req).query;
+    const url = `${process.env.FLIGHTCTL_METRICS_SERVER}/api/v1/query_range?${metricsQuery}`;
+    const agent = new https.Agent({ cert, key: certkey, ca });
+    const response = await axios.get(url, { httpsAgent: agent });
+
+    res.send(response.data);
+  } catch (error) {
+    // catch error status code from axios response
+    console.log('Prometheus server error', error.message);
+    res.status(400).send('Bad request');
+  }
 });
 
 app.get('/api/v1/:kind', async (req, res) => {

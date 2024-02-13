@@ -22,7 +22,7 @@ import { deviceList } from '@app/old/utils/commonDataTypes';
 
 
 const Workload: React.FunctionComponent = () => {
-  const [data, isLoading, error] = useFetchPeriodically<deviceList>('devices');
+  const [data, isLoading, error] = useFetchPeriodically<deviceList>({ endpoint: 'devices' });
 
   React.useEffect(() => {
     if (data) {
