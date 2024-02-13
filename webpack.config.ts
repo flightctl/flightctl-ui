@@ -18,18 +18,14 @@ const ASSET_PATH = process.env.ASSET_PATH || '/';
 
 const NODE_ENV = (process.env.NODE_ENV || 'development') as Configuration['mode'];
 
-const HOST = process.env.HOST || 'localhost';
-const PORT = process.env.PORT || '9000';
-process.env.API_PORT = process.env.API_PORT || '3001';
-
 const config: Configuration & {
   devServer?: WebpackDevServerConfiguration;
 } = {
   mode: NODE_ENV,
   devtool: 'eval-source-map',
   devServer: {
-    host: HOST,
-    port: PORT,
+    host: 'localhost',
+    port: 9000,
     historyApiFallback: true,
     open: true,
     static: {
@@ -194,7 +190,7 @@ if (NODE_ENV === 'production') {
       'window.KEYCLOAK_AUTHORITY': JSON.stringify(process.env.KEYCLOAK_AUTHORITY),
       'window.KEYCLOAK_CLIENTID': JSON.stringify(process.env.KEYCLOAK_CLIENTID),
       'window.KEYCLOAK_REDIRECT': JSON.stringify(process.env.KEYCLOAK_REDIRECT),
-      'window.API_PORT': JSON.stringify(process.env.PORT) || '3001',
+      'window.API_PORT': JSON.stringify(process.env.API_PORT) || '3001',
     }),
   );
 }
