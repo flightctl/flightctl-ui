@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from '@app/index';
 import { AuthProvider, AuthProviderProps } from 'react-oidc-context';
-import { ThemeProvider } from '@app/components/ThemeProvider/ThemeProvider';
+import { UserPreferencesProvider } from '@app/components/UserPreferences/UserPreferencesProvider';
 
 declare global {
   interface Window {
@@ -33,9 +33,9 @@ const root = ReactDOM.createRoot(document.getElementById('root') as Element);
 
 const rootApp = (
   <React.StrictMode>
-    <ThemeProvider>
+    <UserPreferencesProvider>
       <App />
-    </ThemeProvider>
+    </UserPreferencesProvider>
   </React.StrictMode>
 );
 

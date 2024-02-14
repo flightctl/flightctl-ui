@@ -4,9 +4,14 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Nav, NavExpandable, NavItem, NavList } from '@patternfly/react-core';
 
 import { ExtendedRouteObject, appRouteSections } from '@app/routes';
+import { UserPreferencesContext } from '../UserPreferences/UserPreferencesProvider';
 
 const SectionRoute = ({ route }: { route: ExtendedRouteObject }) => {
+  const { experimentalFeatures } = React.useContext(UserPreferencesContext);
   if (route.showInNav === false) {
+    return null;
+  }
+  if (route.isExperimental && !experimentalFeatures) {
     return null;
   }
   return (
@@ -30,7 +35,7 @@ const AppNavigation = () => {
           return (
             <NavExpandable key={sectionName} id={sectionName} title={sectionName} isActive={isSectionActive}>
               {sectionRoutes.map((route) => (
-                <SectionRoute key={route.path} route={route as ExtendedRouteObject} />
+                <SectionRoute key={route.path} route={route} />
               ))}
             </NavExpandable>
           );

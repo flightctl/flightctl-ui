@@ -11,68 +11,80 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 import * as React from 'react';
-import { MoonIcon, SunIcon } from '@patternfly/react-icons';
 import { useAuth } from '@app/hooks/useAuth';
-import { ThemeContext } from '../ThemeProvider/ThemeProvider';
 
 import './AppToolbar.css';
+import UserPreferencesModal from '../UserPreferences/UserPreferencesModal';
 
-const AppToolbar = () => {
-  const auth = useAuth();
+type UserDropdownProps = {
+  children?: React.ReactNode;
+  username?: string;
+  onUserPreferences: VoidFunction;
+};
+
+const UserDropdown: React.FC<UserDropdownProps> = ({ children, username = 'User', onUserPreferences }) => {
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-  const { theme, setTheme } = React.useContext(ThemeContext);
   const onDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
   return (
+    <Dropdown
+      isOpen={isDropdownOpen}
+      onSelect={onDropdownToggle}
+      onOpenChange={setIsDropdownOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
+          icon={<Avatar src="images/avatarimg.svg" alt="avatar" size="md" />}
+          onClick={onDropdownToggle}
+          id="userMenu"
+          isFullHeight
+          isExpanded={isDropdownOpen}
+          variant="plainText"
+        >
+          {username}
+        </MenuToggle>
+      )}
+    >
+      <DropdownList>
+        <DropdownItem onClick={onUserPreferences}>User preferences</DropdownItem>
+        {children}
+      </DropdownList>
+    </Dropdown>
+  );
+};
+
+const AppToolbar = () => {
+  const [preferencesModalOpen, setPreferencesModalOpen] = React.useState(false);
+  const auth = useAuth();
+  const onUserPreferences = () => setPreferencesModalOpen(true);
+
+  let userDropdown = <UserDropdown onUserPreferences={onUserPreferences} />;
+
+  if (auth) {
+    if (auth.user) {
+      userDropdown = (
+        <UserDropdown username={auth.user.profile.preferred_username} onUserPreferences={onUserPreferences}>
+          <DropdownItem key="logout" onClick={() => void auth.signoutRedirect()}>
+            Logout
+          </DropdownItem>
+        </UserDropdown>
+      );
+    } else {
+      userDropdown = (
+        <Button variant="link" onClick={() => void auth.signinRedirect()}>
+          Log in
+        </Button>
+      );
+    }
+  }
+
+  return (
     <Toolbar isFullHeight isStatic className="fctl-app_toolbar">
       <ToolbarContent>
-        <ToolbarItem>
-          <Button
-            aria-label="Theme switch"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            icon={theme === 'dark' ? <MoonIcon /> : <SunIcon />}
-            variant="plain"
-          />
-        </ToolbarItem>
-        {auth && (
-          <ToolbarItem>
-            {auth.user ? (
-              <Dropdown
-                isOpen={isDropdownOpen}
-                onSelect={onDropdownToggle}
-                onOpenChange={setIsDropdownOpen}
-                toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                  <MenuToggle
-                    ref={toggleRef}
-                    icon={<Avatar src="images/avatarimg.svg" alt="avatar" size="md" />}
-                    onClick={onDropdownToggle}
-                    id="userMenu"
-                    isFullHeight
-                    isExpanded={isDropdownOpen}
-                    variant="plainText"
-                  >
-                    {auth.user?.profile.preferred_username}
-                  </MenuToggle>
-                )}
-              >
-                <DropdownList>
-                  {[
-                    <DropdownItem key="profile">My profile</DropdownItem>,
-                    <DropdownItem key="logout" onClick={() => void auth.signoutRedirect()}>
-                      Logout
-                    </DropdownItem>,
-                  ]}
-                </DropdownList>
-              </Dropdown>
-            ) : (
-              <Button variant="link" onClick={() => void auth.signinRedirect()}>
-                Log in
-              </Button>
-            )}
-          </ToolbarItem>
-        )}
+        <ToolbarItem>{userDropdown}</ToolbarItem>
       </ToolbarContent>
+      {preferencesModalOpen && <UserPreferencesModal onClose={() => setPreferencesModalOpen(!preferencesModalOpen)} />}
     </Toolbar>
   );
 };

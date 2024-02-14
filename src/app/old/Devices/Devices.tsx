@@ -39,7 +39,7 @@ const Devices: React.FunctionComponent = () => {
   const defaultActions = (device: Device): IAction[] => [
     {
       title: 'Details',
-      onClick: () => window.location.replace(`/devicemanagement/device/${device.metadata.name}`),
+      onClick: () => window.location.replace(`/devicemanagement/devices/${device.metadata.name}`),
     },
     {
       title: 'Delete',

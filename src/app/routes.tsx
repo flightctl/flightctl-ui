@@ -7,7 +7,6 @@ import { Overview } from '@app/old/Overview/Overview';
 import { Experimental } from '@app/old/Experimental/Experimental';
 import { Experimental2 } from '@app/old/Experimental/Experimental2';
 import { Experimental3 } from '@app/old/Experimental/Experimental3';
-import { Fleet } from '@app/old/Fleet/Fleet';
 import { Devices } from '@app/old/Devices/Devices';
 import { Device } from '@app/old/Device/Device';
 import { RemoteControl } from '@app/old/Device/rc';
@@ -25,10 +24,13 @@ import FleetDetails from '@app/components/Fleet/FleetDetails';
 import { APP_TITLE } from '@app/constants';
 import EnrollmentRequestList from './components/EnrollmentRequest/EnrollmentRequestList';
 import DeviceEnrollmentPage from './components/EnrollmentRequest/DeviceEnrollmentPage';
+import { UserPreferencesContext } from './components/UserPreferences/UserPreferencesProvider';
 
 export type ExtendedRouteObject = RouteObject & {
-  title: string;
+  title?: string;
   showInNav?: boolean;
+  isExperimental?: boolean;
+  children?: ExtendedRouteObject[];
 };
 
 const ErrorPage = () => {
@@ -50,7 +52,7 @@ const TitledRoute = ({ title, children }: PropsWithChildren<{ title: string }>) 
   return children;
 };
 
-const experimentalRoutes = [
+const experimentalRoutes: ExtendedRouteObject[] = [
   {
     path: '/experimental',
     title: 'Experimental',
@@ -59,6 +61,7 @@ const experimentalRoutes = [
         <Experimental />
       </TitledRoute>
     ),
+    isExperimental: true,
   },
   {
     path: '/experimental2',
@@ -68,6 +71,7 @@ const experimentalRoutes = [
         <Experimental2 />
       </TitledRoute>
     ),
+    isExperimental: true,
   },
   {
     path: '/experimental3',
@@ -77,82 +81,15 @@ const experimentalRoutes = [
         <Experimental3 />
       </TitledRoute>
     ),
+    isExperimental: true,
   },
 ];
 
-const fleetRoutes = [
-  {
-    path: '/devicemanagement/fleets',
-    title: 'Fleets',
-    children: [
-      {
-        index: true,
-        path: '/devicemanagement/fleets',
-        title: 'Fleets',
-        element: (
-          <TitledRoute title="Fleets">
-            <FleetList />
-          </TitledRoute>
-        ),
-      },
-      {
-        path: '/devicemanagement/fleets/create',
-        title: 'Create Fleet',
-        element: (
-          <TitledRoute title="Create Fleet">
-            <CreateFleet />
-          </TitledRoute>
-        ),
-      },
-      {
-        path: '/devicemanagement/fleets/:fleetId',
-        title: 'Fleet Details',
-        element: (
-          <TitledRoute title="Fleet Details">
-            <FleetDetails />
-          </TitledRoute>
-        ),
-      },
-      {
-        path: '/devicemanagement/fleets/old-fleet',
-        title: 'Fleet (Old)',
-        element: (
-          <TitledRoute title="Fleet (Old)">
-            <Fleet />
-          </TitledRoute>
-        ),
-      },
-    ],
-  },
-];
-const secondaryRoutes = [
-  {
-    path: '/devicemanagement/device/:deviceID',
-    title: 'Device',
-    showInNav: false,
-    element: (
-      <TitledRoute title="Device">
-        <Device />
-      </TitledRoute>
-    ),
-  },
-  {
-    path: '/devicemanagement/rc',
-    title: 'Remote Control',
-    showInNav: false,
-    element: (
-      <TitledRoute title="Remote Control">
-        <RemoteControl />
-      </TitledRoute>
-    ),
-  },
-];
-
-const deviceManagementRoutes = [
+const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteObject[] => [
   {
     path: '/',
     showInNav: false,
-    element: <Navigate to="/devicemanagement/overview" replace />,
+    element: <Navigate to={experimentalFeatures ? '/devicemanagement/overview' : '/devicemanagement/fleets'} replace />,
   },
   {
     path: '/devicemanagement/overview',
@@ -162,6 +99,7 @@ const deviceManagementRoutes = [
         <Overview />
       </TitledRoute>
     ),
+    isExperimental: true,
   },
   ...experimentalRoutes,
   {
@@ -175,6 +113,7 @@ const deviceManagementRoutes = [
   },
   {
     path: '/enroll/:id',
+    title: 'Enrollment Request',
     showInNav: false,
     element: (
       <TitledRoute title="Enrollment Request">
@@ -182,20 +121,77 @@ const deviceManagementRoutes = [
       </TitledRoute>
     ),
   },
-  ...fleetRoutes,
+  {
+    path: '/devicemanagement/fleets',
+    title: 'Fleets',
+    children: [
+      {
+        index: true,
+        title: 'Fleets',
+        element: (
+          <TitledRoute title="Fleets">
+            <FleetList />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'create',
+        title: 'Create Fleet',
+        element: (
+          <TitledRoute title="Create Fleet">
+            <CreateFleet />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: ':fleetId',
+        title: 'Fleet Details',
+        element: (
+          <TitledRoute title="Fleet Details">
+            <FleetDetails />
+          </TitledRoute>
+        ),
+      },
+    ],
+  },
   {
     path: '/devicemanagement/devices',
     title: 'Devices',
+    children: [
+      {
+        index: true,
+        title: 'Devices',
+        element: (
+          <TitledRoute title="Devices">
+            <Devices />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: ':deviceID',
+        title: 'Device',
+        showInNav: false,
+        element: (
+          <TitledRoute title="Device">
+            <Device />
+          </TitledRoute>
+        ),
+      },
+    ],
+  },
+  {
+    path: '/devicemanagement/rc',
+    title: 'Remote Control',
+    showInNav: false,
     element: (
-      <TitledRoute title="Devices">
-        <Devices />
+      <TitledRoute title="Remote Control">
+        <RemoteControl />
       </TitledRoute>
     ),
   },
-  ...secondaryRoutes,
-] as ExtendedRouteObject[];
+];
 
-const workloadRoutes = [
+const workloadRoutes: ExtendedRouteObject[] = [
   {
     path: '/workload',
     title: 'Workload',
@@ -205,9 +201,9 @@ const workloadRoutes = [
       </TitledRoute>
     ),
   },
-] as ExtendedRouteObject[];
+];
 
-const administrationRoutes = [
+const administrationRoutes: ExtendedRouteObject[] = [
   {
     path: '/administration/gitrepositories',
     title: 'Git Repositories',
@@ -235,25 +231,28 @@ const administrationRoutes = [
       </TitledRoute>
     ),
   },
-] as ExtendedRouteObject[];
+];
 
-const routes = [...deviceManagementRoutes, ...workloadRoutes, ...administrationRoutes];
+const AppRoutes = () => {
+  const { experimentalFeatures } = React.useContext(UserPreferencesContext);
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <AppLayout />,
-    errorElement: <ErrorPage />,
-    children: routes,
-  },
-]);
+  const routes = [...deviceManagementRoutes(experimentalFeatures), ...workloadRoutes, ...administrationRoutes];
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <AppLayout />,
+      errorElement: <ErrorPage />,
+      children: routes,
+    },
+  ]);
 
-const AppRoutes = () => <RouterProvider router={router} />;
+  return <RouterProvider router={router} />;
+};
 
 type AppRouteSections = 'Device Management' | 'Workload' | 'Administration';
 
 const appRouteSections: Record<AppRouteSections, ExtendedRouteObject[]> = {
-  'Device Management': deviceManagementRoutes,
+  'Device Management': deviceManagementRoutes(),
   Workload: workloadRoutes,
   Administration: administrationRoutes,
 };

@@ -1,15 +1,16 @@
 import * as React from 'react';
+import { useUserPreferences } from './useUserPreferences';
 
 export const THEME_LOCAL_STORAGE_KEY = 'flightctl/theme';
 const THEME_DARK_CLASS = 'pf-v5-theme-dark';
 
-type Theme = 'dark' | 'light';
+export type Theme = 'dark' | 'light' | 'system';
 
 export const ThemeContext = React.createContext<{
   theme: Theme;
   setTheme: (theme: Theme) => void;
 }>({
-  theme: 'light',
+  theme: 'system',
   setTheme: () => {},
 });
 
@@ -22,8 +23,7 @@ export const updateThemeClass = (htmlTagElement: HTMLElement, theme: string | nu
   }
 };
 
-const getInitTheme = (): Theme => {
-  const storageTheme = localStorage.getItem(THEME_LOCAL_STORAGE_KEY);
+const getTheme = (storageTheme: string | null): Theme => {
   switch (storageTheme) {
     case 'dark': {
       return 'dark';
@@ -32,22 +32,14 @@ const getInitTheme = (): Theme => {
       return 'light';
     }
     default: {
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'dark';
-      }
-      return 'light';
+      return 'system';
     }
   }
 };
 
-type ThemeProviderProps = {
-  children: React.ReactNode;
-};
-
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+export const useThemePreferences = () => {
   const htmlTagElement = document.documentElement;
-  const [theme, setTheme] = React.useState<Theme>(getInitTheme());
-  const storageTheme = localStorage.getItem(THEME_LOCAL_STORAGE_KEY);
+  const [value, setValue] = useUserPreferences(THEME_LOCAL_STORAGE_KEY);
 
   React.useEffect(() => {
     const mqListener = (e) => {
@@ -58,30 +50,23 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       }
     };
     const darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)');
-    if (!storageTheme) {
+    if (!value) {
       darkThemeMq.addEventListener('change', mqListener);
     }
-    updateThemeClass(htmlTagElement, storageTheme);
+    updateThemeClass(htmlTagElement, value);
     return () => darkThemeMq.removeEventListener('change', mqListener);
-  }, [htmlTagElement, storageTheme]);
+  }, [htmlTagElement, value]);
 
   const setThemeState = React.useCallback(
     (theme: Theme) => {
-      localStorage.setItem(THEME_LOCAL_STORAGE_KEY, theme);
-      setTheme(theme);
+      setValue(theme);
       updateThemeClass(htmlTagElement, theme);
     },
-    [htmlTagElement],
+    [htmlTagElement, setValue],
   );
 
-  return (
-    <ThemeContext.Provider
-      value={{
-        theme,
-        setTheme: setThemeState,
-      }}
-    >
-      {children}
-    </ThemeContext.Provider>
-  );
+  return {
+    theme: getTheme(value),
+    setTheme: setThemeState,
+  };
 };
