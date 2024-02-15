@@ -16,5 +16,13 @@ export type ObjectMeta = {
    * Map of string keys and values that can be used to organize and categorize (scope and select) objects.
    */
   labels?: Record<string, string>;
+  /**
+   * A sequence number representing a specific generation of the desired state. Populated by the system. Read-only.
+   */
+  generation?: number;
+  /**
+   * A resource that owns this resource, in "kind/name" format.
+   */
+  owner?: string;
 };
 
