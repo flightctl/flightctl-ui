@@ -7,8 +7,11 @@ import { useAuth } from './useAuth';
 
 const TIMEOUT = 10000;
 
-export const useFetchPeriodically = <R>(query: FlightControlQuery): [R | undefined, boolean, unknown, VoidFunction] => {
+export const useFetchPeriodically = <R>(
+  query: FlightControlQuery,
+): [R | undefined, boolean, unknown, VoidFunction, boolean] => {
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [data, setData] = React.useState<R>();
   const [error, setError] = React.useState<unknown>();
   const [forceUpdate, setForceUpdate] = React.useState(0);
@@ -31,6 +34,9 @@ export const useFetchPeriodically = <R>(query: FlightControlQuery): [R | undefin
       while (ref.current === id) {
         try {
           abortController = new AbortController();
+          if (id > 0) {
+            setIsRefreshing(true);
+          }
 
           const requestQuery = getRequestQuery();
 
@@ -39,6 +45,7 @@ export const useFetchPeriodically = <R>(query: FlightControlQuery): [R | undefin
           if (isLoading) {
             setIsLoading(false);
           }
+          setIsRefreshing(false);
           setData(data);
           setError(undefined);
         } catch (err) {
@@ -48,6 +55,7 @@ export const useFetchPeriodically = <R>(query: FlightControlQuery): [R | undefin
           }
           setError(err);
           setIsLoading(false);
+          setIsRefreshing(false);
         }
         await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
       }
@@ -64,5 +72,5 @@ export const useFetchPeriodically = <R>(query: FlightControlQuery): [R | undefin
 
   const refetch = React.useCallback(() => setForceUpdate((val) => val + 1), []);
 
-  return [data, isLoading, error, refetch];
+  return [data, isLoading, error, refetch, isRefreshing];
 };
