@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { ChartDonut, ChartThemeColor } from '@patternfly/react-charts';
+import { ChartDonut, ChartLabel, ChartThemeColor } from '@patternfly/react-charts';
+import { ChartCommonStyles } from '@patternfly/react-charts/src/components/ChartTheme/ChartStyles';
 
 type DeviceStatusType = 'Ready' | 'Error' | 'Syncing' | 'Offline' | 'Degraded';
 
@@ -33,6 +34,8 @@ const DevicesDonuts = ({
         top: 20,
       }}
       subTitle="Devices"
+      /* Setting a color that works well with both "dark/light" themes */
+      titleComponent={<ChartLabel style={{ fill: 'var(--pf-v5-global--primary-color--100' }} />}
       title={`${totalDevices}`}
       themeColor={ChartThemeColor.multiUnordered}
       width={350}

@@ -1,4 +1,4 @@
-import { Fleet } from '@types';
+import { Fleet, type FleetStatus } from '@types';
 
 const getSourceUrls = (fleet: Fleet) => {
   const templateSpecConfig = fleet.spec?.template?.spec?.config || [];
@@ -7,4 +7,17 @@ const getSourceUrls = (fleet: Fleet) => {
     .filter((sourceURL) => !!sourceURL);
 };
 
-export { getSourceUrls };
+// TODO fake implementation - revisit when we have proper data
+const getFleetStatusType = (status: FleetStatus) => {
+  const syncingCondition = status?.conditions?.find((c) => c.type === 'Syncing');
+  if (syncingCondition) {
+    return 'Syncing';
+  }
+  const syncedCondition = status?.conditions?.find((c) => c.type === 'Synced');
+  if (syncedCondition) {
+    return 'Synced';
+  }
+  return 'Unknown';
+};
+
+export { getSourceUrls, getFleetStatusType };

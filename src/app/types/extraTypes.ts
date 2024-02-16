@@ -14,6 +14,13 @@ export interface PrometheusMetric {
   values?: Array<MetricValue>;
 }
 
+export interface AppEvent {
+  title: string;
+  type: 'info' | 'warning' | 'error' | 'action';
+  content: string;
+  timestamp: string;
+}
+
 export interface ApiQuery {
   endpoint: string;
 }
