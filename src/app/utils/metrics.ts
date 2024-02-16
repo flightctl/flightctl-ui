@@ -14,7 +14,7 @@ const getMetricSeries = (metrics: PrometheusMetric[], name: string): MetricValue
 const getPeriodTimestamps = (period: string) => {
   const to = Date.now();
 
-  const step = period === '1h' ? 30 : 5;
+  let step = 5;
 
   let from: number;
   switch (period) {
@@ -26,15 +26,19 @@ const getPeriodTimestamps = (period: string) => {
       break;
     case '1h':
       from = to - 1 * 60 * 60 * 1000;
+      step = 20;
       break;
     case '8h':
       from = to - 8 * 60 * 60 * 1000;
+      step = 30;
       break;
     case '24h':
+      step = 120;
       from = to - 24 * 60 * 60 * 1000;
       break;
     case '72h':
     default:
+      step = 600;
       from = to - 72 * 60 * 60 * 1000;
       break;
   }
