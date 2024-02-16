@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Alert,
   Badge,
+  Bullseye,
   Card,
   CardBody,
   CardHeader,
@@ -12,21 +13,26 @@ import {
   Select,
   SelectList,
   SelectOption,
+  Spinner,
 } from '@patternfly/react-core';
 
 import { FlightControlMetrics, MetricsQuery, PrometheusMetric } from '@app/types/extraTypes';
 import { getMetricSeries } from '@app/utils/metrics';
 import TimeLineChart from '@app/components/Metrics/TimeLineChart';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
+import { getErrorMessage } from '@app/utils/error';
+
+import './FleetServiceStatus.css';
 
 const defaultMetric = FlightControlMetrics.ACTIVE_AGENT_COUNT_METRIC;
-
 const periods = ['15m', '30m', '1h', '8h', '24h', '72h'];
 
 const FleetServiceStatus = () => {
   const [isOpenFilters, setIsOpenFilters] = useState(false);
   const [metricsQuery, setMetricsQuery] = useState<MetricsQuery>({ metrics: [defaultMetric], period: '30m' });
-  const [metrics, isLoading, error] = useFetchPeriodically<PrometheusMetric[]>(metricsQuery);
+  const [metrics, isFirstLoad, error, , isRefreshing] = useFetchPeriodically<PrometheusMetric[]>(metricsQuery);
+  const isUpdatingData = isFirstLoad || isRefreshing;
+  const hasMetrics = !!metrics?.length;
 
   const onChartTimeSelect = (
     _event?: React.MouseEvent<Element, MouseEvent>,
@@ -34,10 +40,6 @@ const FleetServiceStatus = () => {
   ) => {
     setMetricsQuery({ metrics: [defaultMetric], period: selectedPeriod as string });
   };
-
-  if (isLoading) {
-    return <div>Loading chart...</div>;
-  }
 
   const activeAgents = getMetricSeries(metrics || [], FlightControlMetrics.ACTIVE_AGENT_COUNT_METRIC) || [0, 0];
   const lineSeries = [
@@ -91,12 +93,22 @@ const FleetServiceStatus = () => {
     <Card isCompact={true} isFlat={true}>
       <CardHeader actions={{ actions: chartTimeActions }}>
         Active agents in the last <strong>{metricsQuery.period}</strong>
-        {error ? (
-          <Alert variant="danger" title="Service status update failed" className="pf-v5-u-py-md" isInline isPlain />
-        ) : null}
       </CardHeader>
+
       <CardBody>
-        {metrics?.length ? (
+        {isFirstLoad && !hasMetrics && (
+          <Bullseye>
+            <Spinner />
+          </Bullseye>
+        )}
+        {!isFirstLoad && isRefreshing && <Spinner className="fctl-floating_spinner" size="lg" />}
+
+        {!isUpdatingData && error ? (
+          <Alert variant="danger" title="Service status update failed" className="pf-v5-u-py-md" isInline isPlain>
+            {getErrorMessage(error)}
+          </Alert>
+        ) : null}
+        {hasMetrics ? (
           <TimeLineChart
             title="Active agents"
             lineSeriesList={lineSeries}
@@ -106,7 +118,7 @@ const FleetServiceStatus = () => {
           />
         ) : null}
 
-        {metrics?.length === 0 && !error ? (
+        {!isFirstLoad && !hasMetrics && !error ? (
           <EmptyState>
             <EmptyStateBody>No metrics exist for the selected period</EmptyStateBody>
           </EmptyState>
