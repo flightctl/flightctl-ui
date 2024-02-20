@@ -41,8 +41,11 @@ export type RepositoryConditionType =
   | ConditionType.ResourceSyncSynced;
 
 export type EnrollmentRequestApprovalStatus = 'Approved' | 'Pending' | 'Denied' | 'Unknown';
+
 export type FleetUpdateStatus = 'Synced' | 'Syncing' | 'Unknown';
 export type RepositorySyncStatus = RepositoryConditionType | 'NotSynced' | 'NotParsed' | 'NotAccessible' | 'Unknown';
 export type ResourceStatusType = FleetUpdateStatus | RepositorySyncStatus | EnrollmentRequestApprovalStatus;
+
+export type StatusType = FleetUpdateStatus | RepositorySyncStatus | EnrollmentRequestApprovalStatus;
 
 export type FlightControlQuery = ApiQuery | MetricsQuery;

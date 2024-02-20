@@ -5,31 +5,34 @@ const getRepositorySyncStatus = (
   repository: Repository,
 ): {
   status: RepositorySyncStatus;
-  message: string;
+  message: string | undefined;
 } => {
   const conditions = repository.status?.conditions;
 
   const syncedCondition = conditions?.find((c) => c.type === ConditionType.ResourceSyncSynced);
   if (syncedCondition) {
+    const isOK = syncedCondition.status === 'True';
     return {
-      status: syncedCondition.status === 'True' ? ConditionType.ResourceSyncSynced : 'NotSynced',
-      message: syncedCondition.message || '',
+      status: isOK ? ConditionType.ResourceSyncSynced : 'NotSynced',
+      message: isOK ? '' : syncedCondition.message,
     };
   }
 
   const parsedCondition = conditions?.find((c) => c.type === ConditionType.ResourceSyncResourceParsed);
   if (parsedCondition) {
+    const isOK = parsedCondition.status === 'True';
     return {
-      status: parsedCondition.status === 'True' ? ConditionType.ResourceSyncResourceParsed : 'NotParsed',
-      message: parsedCondition.message || '',
+      status: isOK ? ConditionType.ResourceSyncResourceParsed : 'NotParsed',
+      message: isOK ? '' : parsedCondition.message,
     };
   }
 
   const accessibleCondition = conditions?.find((c) => c.type === ConditionType.RepositoryAccessible);
   if (accessibleCondition) {
+    const isOK = accessibleCondition.status === 'True';
     return {
-      status: accessibleCondition.status === 'True' ? ConditionType.RepositoryAccessible : 'NotAccessible',
-      message: accessibleCondition.message || '',
+      status: isOK ? ConditionType.RepositoryAccessible : 'NotAccessible',
+      message: isOK ? '' : accessibleCondition.message,
     };
   }
 
@@ -49,7 +52,7 @@ const getRepositoryLastTransitionTime = (repository: Repository): string | undef
       lastTime = condition.lastTransitionTime;
     }
   });
-  return lastTime;
+  return lastTime || '-';
 };
 
 export { getRepositorySyncStatus, getRepositoryLastTransitionTime };

@@ -20,8 +20,10 @@ import FleetList from '@app/components/Fleet/FleetList';
 import FleetDetails from '@app/components/Fleet/FleetDetails';
 import EnrollmentRequestList from '@app/components/EnrollmentRequest/EnrollmentRequestList';
 import DeviceEnrollmentPage from '@app/components/EnrollmentRequest/DeviceEnrollmentPage';
-import RepositoryList from '@app/components/Repositories/RepositoryList';
 import DeviceList from '@app/components/Device/DeviceList';
+import RepositoryList from '@app/components/Repositories/RepositoryList';
+import RepositoryDetails from '@app/components/Repositories/RepositoryDetails';
+import CreateRepository from '@app/components/Repositories/CreateRepository/CreateRepository';
 
 import { APP_TITLE } from '@app/constants';
 
@@ -208,11 +210,35 @@ const administrationRoutes: ExtendedRouteObject[] = [
   {
     path: '/administration/repositories',
     title: 'Repositories',
-    element: (
-      <TitledRoute title="Repositories">
-        <RepositoryList />
-      </TitledRoute>
-    ),
+    children: [
+      {
+        index: true,
+        title: 'Repositories',
+        element: (
+          <TitledRoute title="Repositories">
+            <RepositoryList />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'create',
+        title: 'Create Repository',
+        element: (
+          <TitledRoute title="Create Repository">
+            <CreateRepository />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: ':repositoryId',
+        title: 'Repository Details',
+        element: (
+          <TitledRoute title="Repository Details">
+            <RepositoryDetails />
+          </TitledRoute>
+        ),
+      },
+    ],
   },
   {
     path: '/administration/organization',
