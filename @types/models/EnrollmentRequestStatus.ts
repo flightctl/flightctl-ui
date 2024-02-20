@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Condition } from './Condition';
 import type { EnrollmentRequestApproval } from './EnrollmentRequestApproval';
-import type { EnrollmentRequestCondition } from './EnrollmentRequestCondition';
 /**
  * EnrollmentRequestStatus represents information about the status of a EnrollmentRequest.
  */
@@ -15,7 +15,7 @@ export type EnrollmentRequestStatus = {
   /**
    * Current state of the EnrollmentRequest.
    */
-  conditions?: Array<EnrollmentRequestCondition>;
+  conditions?: Array<Condition>;
   approval?: EnrollmentRequestApproval;
 };
 

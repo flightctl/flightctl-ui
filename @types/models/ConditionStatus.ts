@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export enum ConditionStatus {
-  TRUE = 'True',
-  FALSE = 'False',
-  UNKNOWN = 'Unknown',
+  ConditionStatusTrue = 'True',
+  ConditionStatusFalse = 'False',
+  ConditionStatusUnknown = 'Unknown',
 }
