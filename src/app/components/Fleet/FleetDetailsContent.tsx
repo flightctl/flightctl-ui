@@ -15,7 +15,8 @@ import { CheckCircleIcon, InProgressIcon, QuestionCircleIcon } from '@patternfly
 
 import { Fleet, FleetStatus } from '@types';
 import { getDateDisplay } from '@app/utils/dateUtils';
-import { getFleetStatusType, getSourceUrls } from '@app/utils/fleetUtils';
+import { getSourceUrls } from '@app/utils/fleets';
+import { getFleetStatusType } from '@app/utils/status/fleet';
 
 import { DevicesDonuts } from '@app/old/Overview/devicesDonuts';
 import EventList from '@app/components/common/EventList';

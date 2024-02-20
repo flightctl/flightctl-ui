@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Condition } from './Condition';
 import type { ContainerStatus } from './ContainerStatus';
-import type { DeviceCondition } from './DeviceCondition';
 import type { DeviceSystemdUnitStatus } from './DeviceSystemdUnitStatus';
 import type { DeviceSystemInfo } from './DeviceSystemInfo';
 /**
@@ -14,7 +14,7 @@ export type DeviceStatus = {
   /**
    * Current state of the device.
    */
-  conditions?: Array<DeviceCondition>;
+  conditions?: Array<Condition>;
   systemInfo?: DeviceSystemInfo;
   /**
    * Statuses of containers in the device.
