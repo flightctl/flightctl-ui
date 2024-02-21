@@ -9,7 +9,6 @@ import { Experimental2 } from '@app/old/Experimental/Experimental2';
 import { Experimental3 } from '@app/old/Experimental/Experimental3';
 import { Device } from '@app/old/Device/Device';
 import { RemoteControl } from '@app/old/Device/rc';
-import { GitRepositories } from '@app/old/GitRepositories/GitRepositories';
 import { Organization } from '@app/old/Organization/Organization';
 import { ImageBuilder } from '@app/old/ImageBuilder/ImageBuilder';
 import { Workload } from '@app/old/Workload/Workload';
@@ -19,12 +18,16 @@ import { NotFound } from '@app/old/NotFound/NotFound';
 import CreateFleet from '@app/components/Fleet/CreateFleet/CreateFleet';
 import FleetList from '@app/components/Fleet/FleetList';
 import FleetDetails from '@app/components/Fleet/FleetDetails';
+import EnrollmentRequestList from '@app/components/EnrollmentRequest/EnrollmentRequestList';
+import DeviceEnrollmentPage from '@app/components/EnrollmentRequest/DeviceEnrollmentPage';
+import DeviceList from '@app/components/Device/DeviceList';
+import RepositoryList from '@app/components/Repositories/RepositoryList';
+import RepositoryDetails from '@app/components/Repositories/RepositoryDetails';
+import CreateRepository from '@app/components/Repositories/CreateRepository/CreateRepository';
 
 import { APP_TITLE } from '@app/constants';
-import EnrollmentRequestList from './components/EnrollmentRequest/EnrollmentRequestList';
-import DeviceEnrollmentPage from './components/EnrollmentRequest/DeviceEnrollmentPage';
+
 import { UserPreferencesContext } from './components/UserPreferences/UserPreferencesProvider';
-import DeviceList from './components/Device/DeviceList';
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -205,13 +208,37 @@ const workloadRoutes: ExtendedRouteObject[] = [
 
 const administrationRoutes: ExtendedRouteObject[] = [
   {
-    path: '/administration/gitrepositories',
-    title: 'Git Repositories',
-    element: (
-      <TitledRoute title="Git Repositories">
-        <GitRepositories />
-      </TitledRoute>
-    ),
+    path: '/administration/repositories',
+    title: 'Repositories',
+    children: [
+      {
+        index: true,
+        title: 'Repositories',
+        element: (
+          <TitledRoute title="Repositories">
+            <RepositoryList />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'create',
+        title: 'Create Repository',
+        element: (
+          <TitledRoute title="Create Repository">
+            <CreateRepository />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: ':repositoryId',
+        title: 'Repository Details',
+        element: (
+          <TitledRoute title="Repository Details">
+            <RepositoryDetails />
+          </TitledRoute>
+        ),
+      },
+    ],
   },
   {
     path: '/administration/organization',

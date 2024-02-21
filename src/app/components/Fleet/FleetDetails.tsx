@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Breadcrumb, BreadcrumbItem, PageSection, Title } from '@patternfly/react-core';
+import { Breadcrumb, BreadcrumbItem, Bullseye, PageSection, Spinner, Title } from '@patternfly/react-core';
 
 import { Fleet } from '@types';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
@@ -15,7 +15,11 @@ const FleetDetails = () => {
     return <div>Failed to retrieve fleet details</div>;
   }
   if (isLoading || fleetDetails === undefined) {
-    return <div>Loading...</div>;
+    return (
+      <Bullseye>
+        <Spinner />
+      </Bullseye>
+    );
   }
 
   // TODO handle case when there's an error after having loaded fleetDetails previously. Show alert?

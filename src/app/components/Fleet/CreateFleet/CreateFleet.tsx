@@ -1,4 +1,8 @@
-import { useFetch } from '@app/hooks/useFetch';
+import * as React from 'react';
+import { Formik, useFormikContext } from 'formik';
+import { useNavigate } from 'react-router-dom';
+import * as yaml from 'js-yaml';
+
 import {
   ActionGroup,
   Alert,
@@ -16,17 +20,16 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { Fleet, GitConfigProviderSpec, InlineConfigProviderSpec, KubernetesSecretProviderSpec } from '@types';
-import { Formik, useFormikContext } from 'formik';
-import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useFetch } from '@app/hooks/useFetch';
+import { getErrorMessage } from '@app/utils/error';
+import { API_VERSION } from '@app/constants';
+
 import LabelsField from '../../form/LabelsField';
 import { FleetFormValues } from './types';
 import ConfigTemplateForm from './ConfigTemplateForm';
-import * as yaml from 'js-yaml';
-import { getErrorMessage } from '@app/utils/error';
 
 const getFleetResource = (values: FleetFormValues): Fleet => ({
-  apiVersion: 'v1alpha1',
+  apiVersion: API_VERSION,
   kind: 'Fleet',
   metadata: {
     name: values.name,
@@ -79,11 +82,7 @@ const getFleetResource = (values: FleetFormValues): Fleet => ({
   },
 });
 
-type CreateFleetFormProps = {
-  children?: React.ReactNode;
-};
-
-const CreateFleetForm: React.FC<CreateFleetFormProps> = ({ children }) => {
+const CreateFleetForm = ({ children }: React.PropsWithChildren<Record<never, never>>) => {
   const navigate = useNavigate();
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<FleetFormValues>();
   return (
