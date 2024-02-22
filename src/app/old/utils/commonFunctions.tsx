@@ -1,8 +1,11 @@
 const apiServer = `${window.location.protocol}//${window.location.hostname}${window.API_PORT ? `:${window.API_PORT}` : ''}`;
 
+const flightCtlAPI = `${apiServer}/api/flightctl`;
+const metricsAPI = `${apiServer}/api/metrics`;
+
 export const fetchMetrics = async (metricQuery: string, token: string | undefined, abortSignal?: AbortSignal) => {
   try {
-    const response = await fetch(`${apiServer}/metrics-range?query=${metricQuery}`, {
+    const response = await fetch(`${metricsAPI}/api/v1/query_range?${metricQuery}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -19,7 +22,7 @@ export const fetchMetrics = async (metricQuery: string, token: string | undefine
 
 export const postData = async (kind: string, token: string | undefined, data: unknown) => {
   try {
-    const response = await fetch(`${apiServer}/api/v1/${kind}`, {
+    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -37,7 +40,7 @@ export const postData = async (kind: string, token: string | undefined, data: un
 
 export const deleteData = async (kind: string, token: string | undefined) => {
   try {
-    const response = await fetch(`${apiServer}/api/v1/${kind}`, {
+    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -53,7 +56,7 @@ export const deleteData = async (kind: string, token: string | undefined) => {
 
 export const fetchData = async (kind: string, token: string | undefined, abortSignal?: AbortSignal) => {
   try {
-    const response = await fetch(`${apiServer}/api/v1/${kind}`, {
+    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -70,7 +73,7 @@ export const fetchData = async (kind: string, token: string | undefined, abortSi
 export const fetchDataObj = async (kind: string, name: string, token: string) => {
   if (kind !== undefined && name !== undefined) {
     try {
-      const response = await fetch(`${apiServer}/api/v1/${kind}/${name}`, {
+      const response = await fetch(`${flightCtlAPI}/api/v1/${kind}/${name}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -87,7 +90,7 @@ export const fetchDataObj = async (kind: string, name: string, token: string) =>
 
 export const deleteObject = async (kind: string, name: string, token: string) => {
   try {
-    const response = await fetch(`${apiServer}/api/v1/${kind}/${name}`, {
+    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}/${name}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -101,7 +104,7 @@ export const deleteObject = async (kind: string, name: string, token: string) =>
 };
 export const approveEnrollmentRequest = async (name: string, data: object, token: string) => {
   try {
-    const response = await fetch(`${apiServer}/api/v1/enrollmentrequests/${name}/approval`, {
+    const response = await fetch(`${flightCtlAPI}/api/v1/enrollmentrequests/${name}/approval`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -118,7 +121,7 @@ export const approveEnrollmentRequest = async (name: string, data: object, token
 
 export const rejectEnrollmentRequest = async (name: string, token: string) => {
   try {
-    const response = await fetch(`${apiServer}/api/v1/enrollmentrequests/${name}/rejection`, {
+    const response = await fetch(`${flightCtlAPI}/api/v1/enrollmentrequests/${name}/rejection`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -133,7 +136,7 @@ export const rejectEnrollmentRequest = async (name: string, token: string) => {
 };
 export const enableRCAgent = async (name: string | undefined, token: string | undefined) => {
   try {
-    const response = await fetch(`${apiServer}/api/v1/device/${name}/remotecontrol/enable`, {
+    const response = await fetch(`${apiServer}/api/v1/rcagent/${name}/enable`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,

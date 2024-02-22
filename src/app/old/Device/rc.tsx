@@ -3,7 +3,6 @@ import { fetchDataObj } from '@app/old/utils/commonFunctions';
 import { device } from '@app/old/utils/commonDataTypes';
 import { LogViewer } from '@patternfly/react-log-viewer';
 import YAML from 'yaml';
-import axios from 'axios';
 import { io } from 'socket.io-client';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';

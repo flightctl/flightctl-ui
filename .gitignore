@@ -5,6 +5,7 @@ yarn.lock
 stats.json
 coverage
 storybook-static
+proxy/flightctl-ui
 .DS_Store
 .idea
 .env
