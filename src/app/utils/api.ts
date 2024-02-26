@@ -9,7 +9,8 @@ const getMetricsQueryString = (metricsQuery: MetricsQuery) => {
   const { metrics, period } = metricsQuery;
   const range = getPeriodTimestamps(period);
 
-  let query = metrics.length === 1 ? metrics[0] : `__name__=~"${metrics.join('|')}"`;
+  const metric = metrics.length === 1 ? metrics[0] : `__name__=~"${metrics.join('|')}"`;
+  let query = `query=${metric}`;
   if (range) {
     query += `&start=${range.from}&end=${range.to}&step=${range.step}`;
   }
