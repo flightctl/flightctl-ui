@@ -5,7 +5,7 @@ const metricsAPI = `${apiServer}/api/metrics`;
 
 export const fetchMetrics = async (metricQuery: string, token: string | undefined, abortSignal?: AbortSignal) => {
   try {
-    const response = await fetch(`${metricsAPI}/api/v1/query_range?${metricQuery}`, {
+    const response = await fetch(`${metricsAPI}/api/v1/query?query=${metricQuery}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

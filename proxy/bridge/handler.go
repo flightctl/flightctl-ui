@@ -31,6 +31,18 @@ func createReverseProxy(apiURL string) (*url.URL, *httputil.ReverseProxy) {
 		panic(err)
 	}
 	proxy := httputil.NewSingleHostReverseProxy(target)
+	proxy.ModifyResponse = func(r *http.Response) error {
+		filterHeaders := []string{
+			"Access-Control-Allow-Headers",
+			"Access-Control-Allow-Methods",
+			"Access-Control-Allow-Origin",
+			"Access-Control-Expose-Headers",
+		}
+		for _, h := range filterHeaders {
+			r.Header.Del(h)
+		}
+		return nil
+	}
 	return target, proxy
 }
 
