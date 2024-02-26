@@ -1,10 +1,12 @@
 import * as React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 import { Nav, NavExpandable, NavItem, NavList } from '@patternfly/react-core';
 
 import { ExtendedRouteObject, appRouteSections } from '@app/routes';
 import { UserPreferencesContext } from '../UserPreferences/UserPreferencesProvider';
+
+import './AppNavigation.css';
 
 const SectionRoute = ({ route }: { route: ExtendedRouteObject }) => {
   const { experimentalFeatures } = React.useContext(UserPreferencesContext);
@@ -22,24 +24,20 @@ const SectionRoute = ({ route }: { route: ExtendedRouteObject }) => {
 };
 
 const AppNavigation = () => {
-  const location = useLocation();
   if (!appRouteSections) {
     return null;
   }
 
   return (
-    <Nav id="nav-primary-simple" theme="dark">
-      <NavList id="nav-list-simple">
-        {Object.entries(appRouteSections).map(([sectionName, sectionRoutes]) => {
-          const isSectionActive = sectionRoutes.some((route) => route.path === location.pathname);
-          return (
-            <NavExpandable key={sectionName} id={sectionName} title={sectionName} isActive={isSectionActive}>
-              {sectionRoutes.map((route) => (
-                <SectionRoute key={route.path} route={route} />
-              ))}
-            </NavExpandable>
-          );
-        })}
+    <Nav id="flightclt-nav" theme="dark">
+      <NavList id="flightclt-navlist">
+        {Object.entries(appRouteSections).map(([sectionName, sectionRoutes]) => (
+          <NavExpandable key={sectionName} id={sectionName} title={sectionName}>
+            {sectionRoutes.map((route) => (
+              <SectionRoute key={route.path} route={route} />
+            ))}
+          </NavExpandable>
+        ))}
       </NavList>
     </Nav>
   );
