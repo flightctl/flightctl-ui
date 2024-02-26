@@ -69,5 +69,8 @@
     "comments": "on",
     "strings": "on",
     "other": "on"
+  },
+  "[go]": {
+    "editor.defaultFormatter": "golang.go"
   }
 }
