@@ -1,8 +1,8 @@
-import { ConditionType, Repository } from '@types';
+import { ConditionType, Repository, ResourceSync } from '@types';
 import { RepositorySyncStatus } from '@app/types/extraTypes';
 
 const getRepositorySyncStatus = (
-  repository: Repository,
+  repository: Repository | ResourceSync,
 ): {
   status: RepositorySyncStatus;
   message: string | undefined;
@@ -55,4 +55,9 @@ const getRepositoryLastTransitionTime = (repository: Repository): string | undef
   return lastTime || '-';
 };
 
-export { getRepositorySyncStatus, getRepositoryLastTransitionTime };
+const getObservedHash = (resourceSync: ResourceSync): string | undefined => {
+  const lastHash = resourceSync.status?.observedCommit;
+  return lastHash ? lastHash.substring(0, 7) : '-';
+};
+
+export { getRepositorySyncStatus, getRepositoryLastTransitionTime, getObservedHash };

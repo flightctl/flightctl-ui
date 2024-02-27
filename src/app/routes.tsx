@@ -21,9 +21,9 @@ import FleetDetails from '@app/components/Fleet/FleetDetails';
 import EnrollmentRequestList from '@app/components/EnrollmentRequest/EnrollmentRequestList';
 import DeviceEnrollmentPage from '@app/components/EnrollmentRequest/DeviceEnrollmentPage';
 import DeviceList from '@app/components/Device/DeviceList';
-import RepositoryList from '@app/components/Repositories/RepositoryList';
-import RepositoryDetails from '@app/components/Repositories/RepositoryDetails';
-import CreateRepository from '@app/components/Repositories/CreateRepository/CreateRepository';
+import RepositoryList from '@app/components/Repository/RepositoryList';
+import RepositoryDetails from '@app/components/Repository/RepositoryDetails';
+import CreateRepository from '@app/components/Repository/CreateRepository/CreateRepository';
 
 import { APP_TITLE } from '@app/constants';
 

@@ -11,12 +11,12 @@ export type ResourceSyncStatus = {
    * The last commit hash that was synced
    *
    */
-  lastSyncedCommitHash?: string;
+  observedCommit?: string;
   /**
-   * The last repository path that was synced
+   * The last generation that was synced
    *
    */
-  lastSyncedPath?: string;
+  observedGeneration?: number;
   /**
    * Current state of a resourcesync.
    */

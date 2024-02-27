@@ -24,9 +24,10 @@ import { Repository } from '@types';
 
 import StatusInfo from '@app/components/common/StatusInfo';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '@app/utils/status/repository';
+import RepositoryResourceSyncList from '@app/components/ResourceSync/RepositoryResourceSyncList';
 
 const RepositoryDetails = () => {
-  const { repositoryId } = useParams();
+  const { repositoryId } = useParams() as { repositoryId: string };
   const [repoDetails, isLoading, error] = useFetchPeriodically<Required<Repository>>({
     endpoint: `repositories/${repositoryId}`,
   });
@@ -95,6 +96,14 @@ const RepositoryDetails = () => {
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               </DescriptionList>
+            </CardBody>
+          </Card>
+        </GridItem>
+        <GridItem md={8}>
+          <Card>
+            <CardTitle>Resource syncs</CardTitle>
+            <CardBody>
+              <RepositoryResourceSyncList repositoryId={repositoryId} />
             </CardBody>
           </Card>
         </GridItem>

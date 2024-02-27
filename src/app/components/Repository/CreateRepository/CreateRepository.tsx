@@ -120,7 +120,7 @@ const CreateRepository = () => {
               setError(undefined);
               try {
                 await post<Repository>('repositories', getRepository(values));
-                navigate('/administration/repositories');
+                navigate(`/administration/repositories/${values.name}`);
               } catch (e) {
                 setError(getErrorMessage(e));
               }

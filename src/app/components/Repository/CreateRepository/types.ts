@@ -1,8 +1,8 @@
 export type RepositoryFormValues = {
   name: string;
-  url: '';
+  url: string;
   credentials: {
-    user: '';
-    password: '';
+    user: string;
+    password: string;
   };
 };
