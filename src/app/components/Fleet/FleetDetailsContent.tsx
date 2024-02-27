@@ -20,7 +20,9 @@ import { getFleetStatusType } from '@app/utils/status/fleet';
 
 import { DevicesDonuts } from '@app/old/Overview/devicesDonuts';
 import EventList from '@app/components/common/EventList';
+import LabelsView from '@app/components/common/LabelsView';
 import FleetServiceStatus from '@app/components/Metrics/FleetServiceStatus';
+import { UserPreferencesContext } from '@app/components/UserPreferences/UserPreferencesProvider';
 
 import SourceUrlList from './SourceUrlList';
 
@@ -60,11 +62,12 @@ const FleetStatus = ({ status }: { status: FleetStatus }) => {
 };
 
 const FleetDetailsContent = ({ fleet }: { fleet: Required<Fleet> }) => {
-  const sourceUrls = getSourceUrls(fleet);
+  const { experimentalFeatures } = React.useContext(UserPreferencesContext);
 
+  const sourceUrls = getSourceUrls(fleet);
   return (
     <Grid hasGutter>
-      <GridItem md={6}>
+      <GridItem md={experimentalFeatures ? 6 : 12}>
         <Card>
           <CardTitle>Details</CardTitle>
           <CardBody>
@@ -76,27 +79,44 @@ const FleetDetailsContent = ({ fleet }: { fleet: Required<Fleet> }) => {
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
-                <DescriptionListTerm>Created by</DescriptionListTerm>
-                <DescriptionListDescription>user unknown</DescriptionListDescription>
+                <DescriptionListTerm>OS image</DescriptionListTerm>
+                <DescriptionListDescription>{fleet.spec.template.spec.os?.image}</DescriptionListDescription>
               </DescriptionListGroup>
+              <DescriptionListGroup>
+                <DescriptionListTerm>Label selector</DescriptionListTerm>
+                <DescriptionListDescription>
+                  <LabelsView labels={fleet.spec.selector?.matchLabels} />
+                </DescriptionListDescription>
+              </DescriptionListGroup>
+              {experimentalFeatures && (
+                <DescriptionListGroup>
+                  <DescriptionListTerm>Created by</DescriptionListTerm>
+                  <DescriptionListDescription>user unknown</DescriptionListDescription>
+                </DescriptionListGroup>
+              )}
+
               <DescriptionListGroup>
                 <DescriptionListTerm>Status</DescriptionListTerm>
                 <DescriptionListDescription>
                   <FleetStatus status={fleet.status} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>Fail threshold</DescriptionListTerm>
-                <DescriptionListDescription>20% of batch (m)</DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>Batch size</DescriptionListTerm>
-                <DescriptionListDescription>10% (m)</DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>Maintenance window</DescriptionListTerm>
-                <DescriptionListDescription>--</DescriptionListDescription>
-              </DescriptionListGroup>
+              {experimentalFeatures && (
+                <>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>Fail threshold</DescriptionListTerm>
+                    <DescriptionListDescription>20% of batch (m)</DescriptionListDescription>
+                  </DescriptionListGroup>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>Batch size</DescriptionListTerm>
+                    <DescriptionListDescription>10% (m)</DescriptionListDescription>
+                  </DescriptionListGroup>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>Maintenance window</DescriptionListTerm>
+                    <DescriptionListDescription>--</DescriptionListDescription>
+                  </DescriptionListGroup>
+                </>
+              )}
               <DescriptionListGroup>
                 <DescriptionListTerm>Sources</DescriptionListTerm>
                 <DescriptionListDescription>
@@ -107,30 +127,34 @@ const FleetDetailsContent = ({ fleet }: { fleet: Required<Fleet> }) => {
           </CardBody>
         </Card>
       </GridItem>
-      <GridItem md={6}>
-        <Card>
-          <CardTitle>Service status (m)</CardTitle>
-          <CardBody>
-            <FleetServiceStatus />
-          </CardBody>
-        </Card>
-      </GridItem>
-      <GridItem md={6}>
-        <Card>
-          <CardTitle>Events (m)</CardTitle>
-          <CardBody>
-            <EventList />
-          </CardBody>
-        </Card>
-      </GridItem>
-      <GridItem md={6}>
-        <Card>
-          <CardTitle>Update status (m)</CardTitle>
-          <CardBody>
-            <DevicesDonuts fleetDevicesStatus={fakeDevicesStatus} totalDevices={1000}></DevicesDonuts>
-          </CardBody>
-        </Card>
-      </GridItem>
+      {experimentalFeatures && (
+        <>
+          <GridItem md={6}>
+            <Card>
+              <CardTitle>Service status (m)</CardTitle>
+              <CardBody>
+                <FleetServiceStatus />
+              </CardBody>
+            </Card>
+          </GridItem>
+          <GridItem md={6}>
+            <Card>
+              <CardTitle>Events (m)</CardTitle>
+              <CardBody>
+                <EventList />
+              </CardBody>
+            </Card>
+          </GridItem>
+          <GridItem md={6}>
+            <Card>
+              <CardTitle>Update status (m)</CardTitle>
+              <CardBody>
+                <DevicesDonuts fleetDevicesStatus={fakeDevicesStatus} totalDevices={1000}></DevicesDonuts>
+              </CardBody>
+            </Card>
+          </GridItem>
+        </>
+      )}
     </Grid>
   );
 };
