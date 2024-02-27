@@ -19,6 +19,9 @@ RUN go build
 
 FROM registry.access.redhat.com/ubi9/ubi-micro
 WORKDIR /app/proxy
+RUN microdnf update -y && \
+    microdnf install -y ca-certificates && \
+    microdnf clean all
 COPY --from=build /app/dist /app/dist
 COPY --from=proxy-build /app/flightctl-ui /app/proxy
 EXPOSE 8080
