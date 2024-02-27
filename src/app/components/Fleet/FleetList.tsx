@@ -15,6 +15,7 @@ import * as React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
+import LabelsView from '@app/components/common/LabelsView';
 
 const FleetEmptyState = () => (
   <EmptyState>
@@ -43,10 +44,8 @@ const FleetTable = () => {
         <Thead>
           <Tr>
             <Th>Name</Th>
-            <Th>Source</Th>
-            <Th>Devices</Th>
-            <Th>In-sync</Th>
-            <Th>Status</Th>
+            <Th>OS image</Th>
+            <Th>Label selector</Th>
             <Td />
           </Tr>
         </Thead>
@@ -56,10 +55,10 @@ const FleetTable = () => {
               <Td dataLabel="Name">
                 <Link to={`${fleet.metadata.name}`}>{fleet.metadata.name}</Link>
               </Td>
-              <Td dataLabel="Source">{fleet.spec.template.spec.os?.image || '-'}</Td>
-              <Td dataLabel="Devices">-</Td>
-              <Td dataLabel="In-sync">-</Td>
-              <Td dataLabel="Status">-</Td>
+              <Td dataLabel="OS image">{fleet.spec.template.spec.os?.image || '-'}</Td>
+              <Td dataLabel="Label selector">
+                <LabelsView labels={fleet.spec.selector?.matchLabels} />
+              </Td>
               <Td isActionCell>
                 <ActionsColumn
                   items={[
