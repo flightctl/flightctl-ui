@@ -11,7 +11,9 @@ const SourceUrlList = ({ sourceUrls }: { sourceUrls: string[] }) => {
         </Button>
       ))}
     </section>
-  ) : '-';
+  ) : (
+    '-'
+  );
 };
 
 export default SourceUrlList;

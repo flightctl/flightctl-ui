@@ -194,19 +194,17 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
   },
 ];
 
-const workloadRoutes: ExtendedRouteObject[] = [
+const administrationRoutes: ExtendedRouteObject[] = [
   {
     path: '/workload',
     title: 'Workload',
+    isExperimental: true,
     element: (
       <TitledRoute title="Workload">
         <Workload />
       </TitledRoute>
     ),
   },
-];
-
-const administrationRoutes: ExtendedRouteObject[] = [
   {
     path: '/administration/repositories',
     title: 'Repositories',
@@ -243,6 +241,7 @@ const administrationRoutes: ExtendedRouteObject[] = [
   {
     path: '/administration/organization',
     title: 'Organization',
+    isExperimental: true,
     element: (
       <TitledRoute title="Organization">
         <Organization />
@@ -252,6 +251,7 @@ const administrationRoutes: ExtendedRouteObject[] = [
   {
     path: '/administration/imagebuilder',
     title: 'Image Builder',
+    isExperimental: true,
     element: (
       <TitledRoute title="Image Builder">
         <ImageBuilder />
@@ -263,7 +263,7 @@ const administrationRoutes: ExtendedRouteObject[] = [
 const AppRoutes = () => {
   const { experimentalFeatures } = React.useContext(UserPreferencesContext);
 
-  const routes = [...deviceManagementRoutes(experimentalFeatures), ...workloadRoutes, ...administrationRoutes];
+  const routes = [...deviceManagementRoutes(experimentalFeatures), ...administrationRoutes];
   const router = createBrowserRouter([
     {
       path: '/',
@@ -276,11 +276,10 @@ const AppRoutes = () => {
   return <RouterProvider router={router} />;
 };
 
-type AppRouteSections = 'Device Management' | 'Workload' | 'Administration';
+type AppRouteSections = 'Device Management' | 'Administration';
 
 const appRouteSections: Record<AppRouteSections, ExtendedRouteObject[]> = {
   'Device Management': deviceManagementRoutes(),
-  Workload: workloadRoutes,
   Administration: administrationRoutes,
 };
 

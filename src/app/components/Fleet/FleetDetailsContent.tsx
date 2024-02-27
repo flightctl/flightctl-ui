@@ -80,9 +80,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Required<Fleet> }) => {
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>OS image</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {fleet.spec.template.spec.os?.image}
-                </DescriptionListDescription>
+                <DescriptionListDescription>{fleet.spec.template.spec.os?.image}</DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>Label selector</DescriptionListTerm>
@@ -105,10 +103,10 @@ const FleetDetailsContent = ({ fleet }: { fleet: Required<Fleet> }) => {
               </DescriptionListGroup>
               {experimentalFeatures && (
                 <>
-                <DescriptionListGroup>
-                  <DescriptionListTerm>Fail threshold</DescriptionListTerm>
-                  <DescriptionListDescription>20% of batch (m)</DescriptionListDescription>
-                </DescriptionListGroup>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>Fail threshold</DescriptionListTerm>
+                    <DescriptionListDescription>20% of batch (m)</DescriptionListDescription>
+                  </DescriptionListGroup>
                   <DescriptionListGroup>
                     <DescriptionListTerm>Batch size</DescriptionListTerm>
                     <DescriptionListDescription>10% (m)</DescriptionListDescription>
