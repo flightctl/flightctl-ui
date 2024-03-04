@@ -38,6 +38,24 @@ export const postData = async (kind: string, token: string | undefined, data: un
   }
 };
 
+export const putData = async (kind: string, token: string | undefined, data: unknown) => {
+  try {
+    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    const resp = await response.json();
+    return resp;
+  } catch (error) {
+    console.error('Error making request:', error);
+    throw error;
+  }
+};
+
 export const deleteData = async (kind: string, token: string | undefined) => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
@@ -132,19 +150,5 @@ export const rejectEnrollmentRequest = async (name: string, token: string) => {
   } catch (error) {
     console.error('Error making request:', error);
     return error;
-  }
-};
-export const enableRCAgent = async (name: string | undefined, token: string | undefined) => {
-  try {
-    const response = await fetch(`${apiServer}/api/v1/rcagent/${name}/enable`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error making request:', error);
   }
 };

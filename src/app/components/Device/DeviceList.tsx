@@ -29,8 +29,9 @@ const DeviceTable = () => {
       <Table aria-label="Devices table">
         <Thead>
           <Tr>
-            <Th>Name</Th>
-            <Th>Fleet</Th>
+            <Th modifier="wrap">Fingerprint</Th>
+            <Th modifier="wrap">Name</Th>
+            <Th modifier="wrap">Fleet</Th>
             <Th modifier="wrap">Creation timestamp</Th>
             <Th modifier="wrap">Operating system</Th>
             <Td />
@@ -42,9 +43,10 @@ const DeviceTable = () => {
             const fleetName = getDeviceFleet(device);
             return (
               <Tr key={deviceName}>
-                <Td dataLabel="Name">
+                <Td dataLabel="Fingerprint">
                   <Link to={`/devicemanagement/devices/${deviceName}`}>{deviceName}</Link>
                 </Td>
+                <Td dataLabel="Name">{device.metadata.labels?.displayName || '-'}</Td>
                 <Td dataLabel="Fleet">
                   {fleetName ? (
                     <Link to={`/devicemanagement/fleets/${fleetName}`}>{fleetName}</Link>
