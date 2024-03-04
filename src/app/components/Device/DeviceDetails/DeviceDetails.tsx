@@ -13,8 +13,6 @@ import {
   DescriptionListTerm,
   Grid,
   GridItem,
-  Label,
-  LabelGroup,
 } from '@patternfly/react-core';
 import { getDateDisplay } from '@app/utils/dates';
 import ContainersTable from './ContainersTable';
@@ -23,12 +21,13 @@ import ConditionsTable from './ConditionsTable';
 import IntegrityTable from './IntegrityTable';
 
 import './DeviceDetails.css';
+import LabelsView from '@app/components/common/LabelsView';
 
 const DeviceDetails = () => {
   const { deviceId } = useParams() as { deviceId: string };
   const [device, loading, error, refetch] = useFetchPeriodically<Required<Device>>({ endpoint: `devices/${deviceId}` });
 
-  const name = device?.metadata.labels?.name || device?.metadata.name;
+  const name = device?.metadata.labels?.displayName || device?.metadata.name;
 
   return (
     <DetailsPage
@@ -69,18 +68,7 @@ const DeviceDetails = () => {
                 <DescriptionListGroup>
                   <DescriptionListTerm>Labels</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <LabelGroup numLabels={5}>
-                      {device?.metadata?.labels?.length
-                        ? Object.keys(device.metadata.labels).map((key) => {
-                            const value = device?.metadata?.labels?.[key];
-                            return (
-                              <Label key={key} id={`${key}`} color="blue">
-                                {value ? `${key}=${value}` : key}
-                              </Label>
-                            );
-                          })
-                        : '-'}
-                    </LabelGroup>
+                    <LabelsView labels={device?.metadata?.labels} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               </DescriptionList>

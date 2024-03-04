@@ -152,17 +152,3 @@ export const rejectEnrollmentRequest = async (name: string, token: string) => {
     return error;
   }
 };
-export const enableRCAgent = async (name: string | undefined, token: string | undefined) => {
-  try {
-    const response = await fetch(`${apiServer}/api/v1/rcagent/${name}/enable`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error making request:', error);
-  }
-};

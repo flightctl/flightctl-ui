@@ -19,15 +19,15 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
       initialValues={{
         labels: [],
         region: '',
-        name: '',
+        displayName: '',
       }}
-      onSubmit={async ({ region, labels, name }) => {
+      onSubmit={async ({ region, labels, displayName }) => {
         setError(undefined);
         const deviceLabels: EnrollmentRequestApproval['labels'] = labels.reduce((acc, { key, value }) => {
           acc[key] = value;
           return acc;
         }, {});
-        deviceLabels.name = name;
+        deviceLabels.displayName = displayName;
         try {
           await post<EnrollmentRequestApproval>(`enrollmentrequests/${enrollmentRequest.metadata.name}/approval`, {
             approved: true,

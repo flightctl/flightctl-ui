@@ -34,7 +34,11 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
   };
 
   return (
-    <Form>
+    <Form
+      onSubmit={(e) => {
+        e.preventDefault();
+      }}
+    >
       <LabelGroup
         isEditable
         addLabelControl={
@@ -42,6 +46,8 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
             Add match pattern
           </Label>
         }
+        numLabels={20}
+        defaultIsOpen
       >
         {values.matchPatterns.map((pattern, index) => (
           <Label

@@ -42,11 +42,11 @@ const DeviceTable = () => {
             const deviceName = device.metadata.name as string;
             const fleetName = getDeviceFleet(device);
             return (
-              <Tr key={device.metadata.name}>
+              <Tr key={deviceName}>
                 <Td dataLabel="Fingerprint">
                   <Link to={`/devicemanagement/devices/${deviceName}`}>{deviceName}</Link>
                 </Td>
-                <Td dataLabel="Name">{device.metadata.labels?.name || '-'}</Td>
+                <Td dataLabel="Name">{device.metadata.labels?.displayName || '-'}</Td>
                 <Td dataLabel="Fleet">
                   {fleetName ? (
                     <Link to={`/devicemanagement/fleets/${fleetName}`}>{fleetName}</Link>
@@ -61,14 +61,14 @@ const DeviceTable = () => {
                   )}
                 </Td>
                 <Td dataLabel="Creation timestamp">{device.metadata.creationTimestamp || '-'}</Td>
-                <Td dataLabel="Machine ID">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
+                <Td dataLabel="Operating system">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
                 <Td isActionCell>
                   <ActionsColumn
                     items={[
                       {
                         title: 'Delete',
                         onClick: async () => {
-                          await remove(`devices/${device.metadata.name}`);
+                          await remove(`devices/${deviceName}`);
                           refetch();
                         },
                       },
