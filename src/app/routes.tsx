@@ -7,8 +7,6 @@ import { Overview } from '@app/old/Overview/Overview';
 import { Experimental } from '@app/old/Experimental/Experimental';
 import { Experimental2 } from '@app/old/Experimental/Experimental2';
 import { Experimental3 } from '@app/old/Experimental/Experimental3';
-import { Device } from '@app/old/Device/Device';
-import { RemoteControl } from '@app/old/Device/rc';
 import { Organization } from '@app/old/Organization/Organization';
 import { ImageBuilder } from '@app/old/ImageBuilder/ImageBuilder';
 import { Workload } from '@app/old/Workload/Workload';
@@ -28,6 +26,7 @@ import CreateRepository from '@app/components/Repository/CreateRepository/Create
 import { APP_TITLE } from '@app/constants';
 
 import { UserPreferencesContext } from './components/UserPreferences/UserPreferencesProvider';
+import DeviceDetails from './components/Device/DeviceDetails/DeviceDetails';
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -115,7 +114,7 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
     ),
   },
   {
-    path: '/enroll/:id',
+    path: '/manage/:id',
     title: 'Enrollment Request',
     showInNav: false,
     element: (
@@ -171,26 +170,16 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
         ),
       },
       {
-        path: ':deviceID',
+        path: ':deviceId',
         title: 'Device',
         showInNav: false,
         element: (
           <TitledRoute title="Device">
-            <Device />
+            <DeviceDetails />
           </TitledRoute>
         ),
       },
     ],
-  },
-  {
-    path: '/devicemanagement/rc',
-    title: 'Remote Control',
-    showInNav: false,
-    element: (
-      <TitledRoute title="Remote Control">
-        <RemoteControl />
-      </TitledRoute>
-    ),
   },
 ];
 

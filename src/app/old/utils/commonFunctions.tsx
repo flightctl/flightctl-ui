@@ -38,6 +38,24 @@ export const postData = async (kind: string, token: string | undefined, data: un
   }
 };
 
+export const putData = async (kind: string, token: string | undefined, data: unknown) => {
+  try {
+    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    const resp = await response.json();
+    return resp;
+  } catch (error) {
+    console.error('Error making request:', error);
+    throw error;
+  }
+};
+
 export const deleteData = async (kind: string, token: string | undefined) => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {

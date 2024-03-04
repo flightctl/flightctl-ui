@@ -1,7 +1,7 @@
 type ArgumentTypes = Parameters<typeof Intl.DateTimeFormat>;
 
 // TODO use a date library and display dates according to user locale
-const getDateDisplay = (timestamp: string, withTime: boolean = false) => {
+const getDateDisplay = (timestamp?: string, withTime: boolean = false) => {
   if (!timestamp) {
     return 'N/A';
   }

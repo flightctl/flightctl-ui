@@ -29,8 +29,9 @@ const DeviceTable = () => {
       <Table aria-label="Devices table">
         <Thead>
           <Tr>
-            <Th>Name</Th>
-            <Th>Fleet</Th>
+            <Th modifier="wrap">Fingerprint</Th>
+            <Th modifier="wrap">Name</Th>
+            <Th modifier="wrap">Fleet</Th>
             <Th modifier="wrap">Creation timestamp</Th>
             <Th modifier="wrap">Operating system</Th>
             <Td />
@@ -41,10 +42,11 @@ const DeviceTable = () => {
             const deviceName = device.metadata.name as string;
             const fleetName = getDeviceFleet(device);
             return (
-              <Tr key={deviceName}>
-                <Td dataLabel="Name">
+              <Tr key={device.metadata.name}>
+                <Td dataLabel="Fingerprint">
                   <Link to={`/devicemanagement/devices/${deviceName}`}>{deviceName}</Link>
                 </Td>
+                <Td dataLabel="Name">{device.metadata.labels?.name || '-'}</Td>
                 <Td dataLabel="Fleet">
                   {fleetName ? (
                     <Link to={`/devicemanagement/fleets/${fleetName}`}>{fleetName}</Link>
@@ -59,14 +61,14 @@ const DeviceTable = () => {
                   )}
                 </Td>
                 <Td dataLabel="Creation timestamp">{device.metadata.creationTimestamp || '-'}</Td>
-                <Td dataLabel="Operating system">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
+                <Td dataLabel="Machine ID">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
                 <Td isActionCell>
                   <ActionsColumn
                     items={[
                       {
                         title: 'Delete',
                         onClick: async () => {
-                          await remove(`devices/${deviceName}`);
+                          await remove(`devices/${device.metadata.name}`);
                           refetch();
                         },
                       },
