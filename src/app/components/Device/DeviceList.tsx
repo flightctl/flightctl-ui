@@ -1,10 +1,14 @@
-import { useFetch } from '@app/hooks/useFetch';
-import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
-import { EmptyState, EmptyStateHeader } from '@patternfly/react-core';
-import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { DeviceList } from '@types';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import { EmptyState, EmptyStateHeader, Icon } from '@patternfly/react-core';
+import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { InfoCircleIcon } from '@patternfly/react-icons';
+
+import { useFetch } from '@app/hooks/useFetch';
+import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
+import { getDeviceFleet } from '@app/utils/devices';
+import { DeviceList } from '@types';
+
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 
@@ -26,34 +30,52 @@ const DeviceTable = () => {
         <Thead>
           <Tr>
             <Th>Name</Th>
+            <Th>Fleet</Th>
             <Th modifier="wrap">Creation timestamp</Th>
             <Th modifier="wrap">Operating system</Th>
             <Td />
           </Tr>
         </Thead>
         <Tbody>
-          {devicesList?.items.map((device) => (
-            <Tr key={device.metadata.name}>
-              <Td dataLabel="Name">
-                <Link to={`${device.metadata.name}`}>{device.metadata.name}</Link>
-              </Td>
-              <Td dataLabel="Creation timestamp">{device.metadata.creationTimestamp || '-'}</Td>
-              <Td dataLabel="Machine ID">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
-              <Td isActionCell>
-                <ActionsColumn
-                  items={[
-                    {
-                      title: 'Delete',
-                      onClick: async () => {
-                        await remove(`devices/${device.metadata.name}`);
-                        refetch();
+          {devicesList?.items.map((device) => {
+            const deviceName = device.metadata.name as string;
+            const fleetName = getDeviceFleet(device);
+            return (
+              <Tr key={deviceName}>
+                <Td dataLabel="Name">
+                  <Link to={`/devicemanagement/devices/${deviceName}`}>{deviceName}</Link>
+                </Td>
+                <Td dataLabel="Fleet">
+                  {fleetName ? (
+                    <Link to={`/devicemanagement/fleets/${fleetName}`}>{fleetName}</Link>
+                  ) : (
+                    <>
+                      {' '}
+                      <Icon status="info">
+                        <InfoCircleIcon />
+                      </Icon>{' '}
+                      No matching Fleet
+                    </>
+                  )}
+                </Td>
+                <Td dataLabel="Creation timestamp">{device.metadata.creationTimestamp || '-'}</Td>
+                <Td dataLabel="Operating system">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
+                <Td isActionCell>
+                  <ActionsColumn
+                    items={[
+                      {
+                        title: 'Delete',
+                        onClick: async () => {
+                          await remove(`devices/${deviceName}`);
+                          refetch();
+                        },
                       },
-                    },
-                  ]}
-                />
-              </Td>
-            </Tr>
-          ))}
+                    ]}
+                  />
+                </Td>
+              </Tr>
+            );
+          })}
         </Tbody>
       </Table>
     </ListPageBody>

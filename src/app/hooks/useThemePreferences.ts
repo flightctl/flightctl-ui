@@ -6,14 +6,6 @@ const THEME_DARK_CLASS = 'pf-v5-theme-dark';
 
 export type Theme = 'dark' | 'light' | 'system';
 
-export const ThemeContext = React.createContext<{
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-}>({
-  theme: 'system',
-  setTheme: () => {},
-});
-
 export const updateThemeClass = (htmlTagElement: HTMLElement, theme: string | null) => {
   const systemTheme: Theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   if (theme === 'dark' || (!theme && systemTheme === 'dark')) {
