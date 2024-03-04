@@ -3,7 +3,7 @@ import * as React from 'react';
 import { AppEvent } from '@app/types/extraTypes';
 import { ExclamationCircleIcon, ExclamationTriangleIcon, InfoIcon, WrenchIcon } from '@patternfly/react-icons';
 import { Icon, Stack, StackItem } from '@patternfly/react-core';
-import { getDateDisplay } from '@app/utils/dateUtils';
+import { getDateDisplay } from '@app/utils/dates';
 
 const getIcon = (event: AppEvent) => {
   switch (event.type) {

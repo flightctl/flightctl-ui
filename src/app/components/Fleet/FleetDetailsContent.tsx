@@ -14,7 +14,7 @@ import {
 import { CheckCircleIcon, InProgressIcon, QuestionCircleIcon } from '@patternfly/react-icons';
 
 import { Fleet, FleetStatus } from '@types';
-import { getDateDisplay } from '@app/utils/dateUtils';
+import { getDateDisplay } from '@app/utils/dates';
 import { getSourceUrls } from '@app/utils/fleets';
 import { getFleetStatusType } from '@app/utils/status/fleet';
 

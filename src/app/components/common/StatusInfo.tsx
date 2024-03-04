@@ -1,16 +1,16 @@
 import * as React from 'react';
-
-import { StatusType } from '@app/types/extraTypes';
 import { InfoCircleIcon } from '@patternfly/react-icons';
-import { Tooltip } from '@patternfly/react-core';
+import { Icon, Tooltip } from '@patternfly/react-core';
 
-const StatusInfo = ({ statusInfo }: { statusInfo: { status: StatusType; message?: string } }) => {
+const StatusInfo = ({ statusInfo }: { statusInfo: { status: string; message?: string } }) => {
   return (
     <div>
       {statusInfo.status}{' '}
       {statusInfo.message && (
         <Tooltip content={statusInfo.message}>
-          <InfoCircleIcon />
+          <Icon status="info">
+            <InfoCircleIcon />
+          </Icon>
         </Tooltip>
       )}
     </div>

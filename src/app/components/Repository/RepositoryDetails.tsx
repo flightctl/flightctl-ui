@@ -4,6 +4,7 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   Bullseye,
+  Button,
   Card,
   CardBody,
   CardTitle,
@@ -13,11 +14,13 @@ import {
   DescriptionListTerm,
   Grid,
   GridItem,
+  Icon,
   PageSection,
   Spinner,
   Title,
+  Tooltip,
 } from '@patternfly/react-core';
-import { CheckCircleIcon, WarningTriangleIcon } from '@patternfly/react-icons';
+import { CheckCircleIcon, ExternalLinkAltIcon, InfoCircleIcon, QuestionCircleIcon } from '@patternfly/react-icons';
 
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import { Repository } from '@types';
@@ -55,14 +58,26 @@ const RepositoryDetails = () => {
         {repositoryId}
       </Title>
       <Grid hasGutter>
-        <GridItem md={8}>
+        <GridItem>
           <Card>
             <CardTitle>Details</CardTitle>
             <CardBody>
-              <DescriptionList columnModifier={{ lg: '3Col' }}>
+              <DescriptionList columnModifier={{ lg: '2Col' }}>
                 <DescriptionListGroup>
                   <DescriptionListTerm>Url</DescriptionListTerm>
-                  <DescriptionListDescription>{repoDetails.spec.repo}</DescriptionListDescription>
+                  <DescriptionListDescription>
+                    <Button
+                      component="a"
+                      variant="link"
+                      isInline
+                      href={repoDetails.spec.repo}
+                      target="_blank"
+                      icon={<ExternalLinkAltIcon />}
+                      iconPosition="end"
+                    >
+                      {repoDetails.spec.repo}
+                    </Button>
+                  </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>Status</DescriptionListTerm>
@@ -86,11 +101,17 @@ const RepositoryDetails = () => {
                   <DescriptionListDescription>
                     {repoDetails.spec.password ? (
                       <>
-                        <CheckCircleIcon /> Password is set
+                        <Icon status="success">
+                          <CheckCircleIcon />
+                        </Icon>{' '}
+                        Password is set
                       </>
                     ) : (
                       <>
-                        <WarningTriangleIcon /> Password not set
+                        <Icon status="info">
+                          <InfoCircleIcon />
+                        </Icon>{' '}
+                        Password not set
                       </>
                     )}
                   </DescriptionListDescription>
@@ -99,9 +120,22 @@ const RepositoryDetails = () => {
             </CardBody>
           </Card>
         </GridItem>
-        <GridItem md={8}>
+        <GridItem>
           <Card>
-            <CardTitle>Resource syncs</CardTitle>
+            <CardTitle>
+              Resource syncs{' '}
+              <Tooltip
+                content={
+                  <div>
+                    Flight control will monitor the specified paths, import the defined fleets and synchronise devices
+                  </div>
+                }
+              >
+                <Icon status="info">
+                  <QuestionCircleIcon />
+                </Icon>
+              </Tooltip>
+            </CardTitle>
             <CardBody>
               <RepositoryResourceSyncList repositoryId={repositoryId} />
             </CardBody>

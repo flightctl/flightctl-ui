@@ -1,10 +1,10 @@
 import { ConditionType, Repository, ResourceSync } from '@types';
-import { RepositorySyncStatus } from '@app/types/extraTypes';
+import { timeSinceText } from '@app/utils/dates';
 
 const getRepositorySyncStatus = (
   repository: Repository | ResourceSync,
 ): {
-  status: RepositorySyncStatus;
+  status: string;
   message: string | undefined;
 } => {
   const conditions = repository.status?.conditions;
@@ -13,7 +13,7 @@ const getRepositorySyncStatus = (
   if (syncedCondition) {
     const isOK = syncedCondition.status === 'True';
     return {
-      status: isOK ? ConditionType.ResourceSyncSynced : 'NotSynced',
+      status: isOK ? ConditionType.ResourceSyncSynced : 'Not synced',
       message: isOK ? '' : syncedCondition.message,
     };
   }
@@ -22,7 +22,7 @@ const getRepositorySyncStatus = (
   if (parsedCondition) {
     const isOK = parsedCondition.status === 'True';
     return {
-      status: isOK ? ConditionType.ResourceSyncResourceParsed : 'NotParsed',
+      status: isOK ? ConditionType.ResourceSyncResourceParsed : 'Not parsed',
       message: isOK ? '' : parsedCondition.message,
     };
   }
@@ -31,14 +31,14 @@ const getRepositorySyncStatus = (
   if (accessibleCondition) {
     const isOK = accessibleCondition.status === 'True';
     return {
-      status: isOK ? ConditionType.RepositoryAccessible : 'NotAccessible',
+      status: isOK ? ConditionType.RepositoryAccessible : 'Not accessible',
       message: isOK ? '' : accessibleCondition.message,
     };
   }
 
   return {
-    status: 'Unknown',
-    message: '',
+    status: 'Sync pending',
+    message: 'Waiting for first sync',
   };
 };
 
@@ -52,7 +52,8 @@ const getRepositoryLastTransitionTime = (repository: Repository): string | undef
       lastTime = condition.lastTransitionTime;
     }
   });
-  return lastTime || '-';
+
+  return lastTime ? `${timeSinceText(new Date(lastTime).getTime())} ago` : '-';
 };
 
 const getObservedHash = (resourceSync: ResourceSync): string | undefined => {

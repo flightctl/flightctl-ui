@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Formik, useFormikContext } from 'formik';
+import { ObjectSchema, boolean, object, string } from 'yup';
 import {
   ActionGroup,
   Alert,
   Breadcrumb,
   BreadcrumbItem,
   Button,
+  Checkbox,
   Form,
   FormGroup,
   FormSection,
@@ -15,7 +17,6 @@ import {
   PageSectionVariants,
   Stack,
   StackItem,
-  TextInput,
   Title,
 } from '@patternfly/react-core';
 import { useFetch } from '@app/hooks/useFetch';
@@ -24,13 +25,40 @@ import { RepositoryFormValues } from './types';
 import { Repository } from '@types';
 import { getErrorMessage } from '@app/utils/error';
 import { API_VERSION } from '@app/constants';
+import TextField from '@app/components/form/TextField';
+
+const gitRegex = new RegExp(/^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)(\/)?$/);
+
+const repositorySchema: ObjectSchema<RepositoryFormValues> = object({
+  name: string().required('Name is required'),
+  url: string()
+    .matches(gitRegex, 'Repository URL format is invalid. Enter the URL used for cloning the repository')
+    .required('Repository URL is required'),
+  credentials: object()
+    .shape({
+      isPublic: boolean().required(),
+      username: string()
+        .trim()
+        .when('isPublic', {
+          is: false,
+          then: (schema) => schema.required('Username is required for private repositories'),
+        }),
+      password: string()
+        .trim()
+        .when('isPublic', {
+          is: false,
+          then: (schema) => schema.required('Password is required for private repositories'),
+        }),
+    })
+    .required(),
+});
 
 const getRepository = (values: RepositoryFormValues) => {
   const spec: Partial<Repository['spec']> = {
     repo: values.url,
   };
-  if (values.credentials.user && values.credentials.password) {
-    spec.username = values.credentials.user;
+  if (values.credentials?.username && values.credentials?.password) {
+    spec.username = values.credentials.username;
     spec.password = values.credentials.password;
   }
   return {
@@ -47,37 +75,52 @@ const getRepository = (values: RepositoryFormValues) => {
 
 const CreateRepositoryForm = ({ children }: React.PropsWithChildren<Record<never, never>>) => {
   const navigate = useNavigate();
-  const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<RepositoryFormValues>();
+  const { values, setFieldValue, isValid, dirty, submitForm, isSubmitting } = useFormikContext<RepositoryFormValues>();
+  const isSubmitDisabled = isSubmitting || !dirty || !isValid;
+
   return (
     <Form>
       <Grid hasGutter span={8}>
         <FormGroup label="Name" isRequired>
-          <TextInput aria-label="Name" value={values.name} onChange={(_, value) => setFieldValue('name', value)} />
+          <TextField name="name" aria-label="Name" value={values.name} />
         </FormGroup>
         <FormGroup label="Url" isRequired>
-          <TextInput aria-label="Url" value={values.url} onChange={(_, value) => setFieldValue('url', value)} />
+          <TextField
+            name="url"
+            aria-label="Url"
+            value={values.url}
+            helperText="Repository URL as defined for cloning the repository. Example: https://github.com/flightctl/flightctl-demos.git"
+          />
         </FormGroup>
         <FormSection title="Credentials">
-          <FormGroup label="Username">
-            <TextInput
-              aria-label="Username"
-              value={values.credentials.user}
-              onChange={(_, value) => setFieldValue('credentials.user', value)}
-            />
-          </FormGroup>
-          <FormGroup label="Password">
-            <TextInput
-              aria-label="Password"
-              type="password"
-              value={values.credentials.password}
-              onChange={(_, value) => setFieldValue('credentials.password', value)}
-            />
-          </FormGroup>
+          <div>
+            <Checkbox
+              id="public-repository"
+              isChecked={values.credentials.isPublic}
+              onChange={() => setFieldValue('credentials.isPublic', !values.credentials.isPublic)}
+            />{' '}
+            This repository can be accessed publicly
+          </div>
+          {!values.credentials.isPublic && (
+            <>
+              <FormGroup label="Username">
+                <TextField name="credentials.username" aria-label="Username" value={values.credentials.username} />
+              </FormGroup>
+              <FormGroup label="Password">
+                <TextField
+                  name="credentials.password"
+                  aria-label="Password"
+                  value={values.credentials.password}
+                  type="password"
+                />
+              </FormGroup>
+            </>
+          )}
         </FormSection>
       </Grid>
       {children}
       <ActionGroup>
-        <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitting}>
+        <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
           Create repository
         </Button>
         <Button variant="link" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
@@ -112,10 +155,12 @@ const CreateRepository = () => {
               name: '',
               url: '',
               credentials: {
-                user: '',
+                isPublic: true,
+                username: '',
                 password: '',
               },
             }}
+            validationSchema={repositorySchema}
             onSubmit={async (values) => {
               setError(undefined);
               try {
