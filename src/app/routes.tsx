@@ -2,7 +2,6 @@ import * as React from 'react';
 import { PropsWithChildren } from 'react';
 
 import { Navigate, RouteObject, RouterProvider, createBrowserRouter, useParams, useRouteError } from 'react-router-dom';
-import AppLayout from '@app/components/AppLayout/AppLayout';
 import { Overview } from '@app/old/Overview/Overview';
 import { Experimental } from '@app/old/Experimental/Experimental';
 import { Experimental2 } from '@app/old/Experimental/Experimental2';
@@ -10,9 +9,9 @@ import { Experimental3 } from '@app/old/Experimental/Experimental3';
 import { Organization } from '@app/old/Organization/Organization';
 import { ImageBuilder } from '@app/old/ImageBuilder/ImageBuilder';
 import { Workload } from '@app/old/Workload/Workload';
-import { useDocumentTitle } from '@app/old/utils/useDocumentTitle';
-import { NotFound } from '@app/old/NotFound/NotFound';
 
+import AppLayout from '@app/components/AppLayout/AppLayout';
+import NotFound from '@app/components/AppLayout/NotFound';
 import CreateFleet from '@app/components/Fleet/CreateFleet/CreateFleet';
 import FleetList from '@app/components/Fleet/FleetList';
 import FleetDetails from '@app/components/Fleet/FleetDetails';
@@ -23,6 +22,7 @@ import RepositoryList from '@app/components/Repository/RepositoryList';
 import RepositoryDetails from '@app/components/Repository/RepositoryDetails';
 import CreateRepository from '@app/components/Repository/CreateRepository/CreateRepository';
 
+import { useDocumentTitle } from '@app/hooks/useDocumentTitle';
 import { APP_TITLE } from '@app/constants';
 
 import { UserPreferencesContext } from './components/UserPreferences/UserPreferencesProvider';
