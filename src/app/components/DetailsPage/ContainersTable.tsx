@@ -1,10 +1,14 @@
 import { Bullseye } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { Device } from '@types';
+import { ContainerStatus } from '@types';
 import * as React from 'react';
 
-const ContainersTable = ({ device }: { device: Device }) => {
-  return device.status?.containers ? (
+type ContainersTableProps = {
+  containers: ContainerStatus[] | undefined;
+};
+
+const ContainersTable: React.FC<ContainersTableProps> = ({ containers }) => {
+  return containers?.length ? (
     <Table aria-label="Device containers table">
       <Thead>
         <Tr>
@@ -14,7 +18,7 @@ const ContainersTable = ({ device }: { device: Device }) => {
         </Tr>
       </Thead>
       <Tbody>
-        {device.status.containers.map((container) => (
+        {containers.map((container) => (
           <Tr key={container.id}>
             <Td dataLabel="Name">{container.name}</Td>
             <Td dataLabel="Image">{container.image}</Td>

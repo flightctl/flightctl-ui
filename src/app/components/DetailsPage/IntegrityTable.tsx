@@ -1,16 +1,15 @@
 import { Bullseye } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { Device } from '@types';
 import * as React from 'react';
 
 import './IntegrityTable.css';
 
 type IntegrityTableProps = {
-  device: Device;
+  measurements: Record<string, string> | undefined;
 };
 
-const IntegrityTable: React.FC<IntegrityTableProps> = ({ device }) => {
-  return device.status?.systemInfo?.measurements ? (
+const IntegrityTable: React.FC<IntegrityTableProps> = ({ measurements }) => {
+  return measurements ? (
     <Table aria-label="System integrity table">
       <Thead>
         <Tr>
@@ -19,11 +18,11 @@ const IntegrityTable: React.FC<IntegrityTableProps> = ({ device }) => {
         </Tr>
       </Thead>
       <Tbody>
-        {Object.keys(device.status.systemInfo.measurements).map((key) => (
+        {Object.keys(measurements).map((key) => (
           <Tr key={key}>
             <Td dataLabel="Type">{key}</Td>
             <Td dataLabel="Status" className="fctl-integrity-value">
-              {device.status?.systemInfo?.measurements[key]}
+              {measurements[key]}
             </Td>
           </Tr>
         ))}

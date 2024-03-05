@@ -16,7 +16,6 @@ import CreateFleet from '@app/components/Fleet/CreateFleet/CreateFleet';
 import FleetList from '@app/components/Fleet/FleetList';
 import FleetDetails from '@app/components/Fleet/FleetDetails';
 import EnrollmentRequestList from '@app/components/EnrollmentRequest/EnrollmentRequestList';
-import DeviceEnrollmentPage from '@app/components/EnrollmentRequest/DeviceEnrollmentPage';
 import DeviceList from '@app/components/Device/DeviceList';
 import RepositoryList from '@app/components/Repository/RepositoryList';
 import RepositoryDetails from '@app/components/Repository/RepositoryDetails';
@@ -27,6 +26,7 @@ import { APP_TITLE } from '@app/constants';
 
 import { UserPreferencesContext } from './components/UserPreferences/UserPreferencesProvider';
 import DeviceDetails from './components/Device/DeviceDetails/DeviceDetails';
+import EnrollmentRequestDetails from './components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails';
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -92,6 +92,11 @@ const RedirectToDeviceDetails = () => {
   return <Navigate to={`/devicemanagement/devices/${deviceId}`} replace />;
 };
 
+const RedirectToEnrollmentDetails = () => {
+  const { enrollmentRequestId } = useParams() as { enrollmentRequestId: string };
+  return <Navigate to={`/devicemanagement/enrollmentrequests/${enrollmentRequestId}`} replace />;
+};
+
 const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteObject[] => [
   {
     path: '/',
@@ -112,21 +117,32 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
   {
     path: '/devicemanagement/enrollmentrequests',
     title: 'Enrollment Requests',
-    element: (
-      <TitledRoute title="Enrollment Requests">
-        <EnrollmentRequestList />
-      </TitledRoute>
-    ),
+    children: [
+      {
+        index: true,
+        title: 'Enrollment Requests',
+        element: (
+          <TitledRoute title="Enrollment Requests">
+            <EnrollmentRequestList />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: ':enrollmentRequestId',
+        title: 'Enrollment Request Details',
+        element: (
+          <TitledRoute title="Enrollment Request Details">
+            <EnrollmentRequestDetails />
+          </TitledRoute>
+        ),
+      },
+    ],
   },
   {
-    path: '/enroll/:id',
+    path: '/enroll/:enrollmentRequestId',
     title: 'Enrollment Request',
     showInNav: false,
-    element: (
-      <TitledRoute title="Enrollment Request">
-        <DeviceEnrollmentPage />
-      </TitledRoute>
-    ),
+    element: <RedirectToEnrollmentDetails />,
   },
   {
     path: '/devicemanagement/fleets',

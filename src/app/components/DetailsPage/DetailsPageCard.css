@@ -1,8 +1,8 @@
-.fctl-device-details__card-body {
+.fctl-details-page__card-body {
     max-height: 30rem;
     overflow: auto;
 }
 
-.fctl-device-details__card {
+.fctl-details-page__card {
     height: 100%
 }

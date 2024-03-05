@@ -15,13 +15,13 @@ import {
   GridItem,
 } from '@patternfly/react-core';
 import { getDateDisplay } from '@app/utils/dates';
-import ContainersTable from './ContainersTable';
 import SystemdTable from './SystemdTable';
-import ConditionsTable from './ConditionsTable';
-import IntegrityTable from './IntegrityTable';
 
-import './DeviceDetails.css';
 import LabelsView from '@app/components/common/LabelsView';
+import ConditionsTable from '@app/components/DetailsPage/ConditionsTable';
+import ContainersTable from '@app/components/DetailsPage/ContainersTable';
+import IntegrityTable from '@app/components/DetailsPage/IntegrityTable';
+import DetailsPageCard, { DetailsPageCardBody } from '@app/components/DetailsPage/DetailsPageCard';
 
 const DeviceDetails = () => {
   const { deviceId } = useParams() as { deviceId: string };
@@ -76,36 +76,34 @@ const DeviceDetails = () => {
           </Card>
         </GridItem>
         <GridItem md={6}>
-          <Card className="fctl-device-details__card">
+          <DetailsPageCard>
             <CardTitle>Conditions</CardTitle>
-            <CardBody className="fctl-device-details__card-body">
-              {device && <ConditionsTable device={device} />}
-            </CardBody>
-          </Card>
+            <DetailsPageCardBody>
+              {device && <ConditionsTable conditions={device.status.conditions} />}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
         </GridItem>
         <GridItem md={6}>
-          <Card className="fctl-device-details__card">
+          <DetailsPageCard>
             <CardTitle>Systemd units</CardTitle>
-            <CardBody className="fctl-device-details__card-body">
-              {device && <SystemdTable device={device} refetch={refetch} />}
-            </CardBody>
-          </Card>
+            <DetailsPageCardBody>{device && <SystemdTable device={device} refetch={refetch} />}</DetailsPageCardBody>
+          </DetailsPageCard>
         </GridItem>
         <GridItem md={6}>
-          <Card className="fctl-device-details__card">
+          <DetailsPageCard>
             <CardTitle>Containers</CardTitle>
-            <CardBody className="fctl-device-details__card-body">
-              {device && <ContainersTable device={device} />}
-            </CardBody>
-          </Card>
+            <DetailsPageCardBody>
+              {device && <ContainersTable containers={device.status.containers} />}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
         </GridItem>
         <GridItem md={6}>
-          <Card className="fctl-device-details__card">
+          <DetailsPageCard>
             <CardTitle>System integrity measurements</CardTitle>
-            <CardBody className="fctl-device-details__card-body">
-              {device && <IntegrityTable device={device} />}
-            </CardBody>
-          </Card>
+            <DetailsPageCardBody>
+              {device && <IntegrityTable measurements={device.status.systemInfo?.measurements} />}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
         </GridItem>
       </Grid>
     </DetailsPage>
