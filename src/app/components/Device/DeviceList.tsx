@@ -7,10 +7,16 @@ import { InfoCircleIcon } from '@patternfly/react-icons';
 import { useFetch } from '@app/hooks/useFetch';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import { getDeviceFleet } from '@app/utils/devices';
-import { DeviceList } from '@types';
+import { Device, DeviceList } from '@types';
 
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
+
+interface DeviceTableProps {
+  devices: Device[];
+  showFleet: boolean;
+  refetch: VoidFunction;
+}
 
 const DeviceEmptyState = () => (
   <EmptyState>
@@ -18,35 +24,37 @@ const DeviceEmptyState = () => (
   </EmptyState>
 );
 
-const DeviceTable = () => {
-  const [devicesList, loading, error, refetch] = useFetchPeriodically<DeviceList>({
-    endpoint: 'devices',
-  });
+export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) => {
   const { remove } = useFetch();
 
+  const onDelete = async (deviceName: string) => {
+    await remove(`devices/${deviceName}`);
+    refetch();
+  };
+
   return (
-    <ListPageBody data={devicesList?.items} error={error} loading={loading} emptyState={<DeviceEmptyState />}>
-      <Table aria-label="Devices table">
-        <Thead>
-          <Tr>
-            <Th modifier="wrap">Fingerprint</Th>
-            <Th modifier="wrap">Name</Th>
-            <Th modifier="wrap">Fleet</Th>
-            <Th modifier="wrap">Creation timestamp</Th>
-            <Th modifier="wrap">Operating system</Th>
-            <Td />
-          </Tr>
-        </Thead>
-        <Tbody>
-          {devicesList?.items.map((device) => {
-            const deviceName = device.metadata.name as string;
-            const fleetName = getDeviceFleet(device);
-            return (
-              <Tr key={deviceName}>
-                <Td dataLabel="Fingerprint">
-                  <Link to={`/devicemanagement/devices/${deviceName}`}>{deviceName}</Link>
-                </Td>
-                <Td dataLabel="Name">{device.metadata.labels?.displayName || '-'}</Td>
+    <Table aria-label="Devices table">
+      <Thead>
+        <Tr>
+          <Th modifier="wrap">Fingerprint</Th>
+          <Th modifier="wrap">Name</Th>
+          {showFleet && <Th>Fleet</Th>}
+          <Th modifier="wrap">Creation timestamp</Th>
+          <Th modifier="wrap">Operating system</Th>
+          <Td />
+        </Tr>
+      </Thead>
+      <Tbody>
+        {devices.map((device) => {
+          const deviceName = device.metadata.name as string;
+          const fleetName = getDeviceFleet(device);
+          return (
+            <Tr key={deviceName}>
+              <Td dataLabel="Fingerprint">
+                <Link to={`/devicemanagement/devices/${deviceName}`}>{deviceName}</Link>
+              </Td>
+              <Td dataLabel="Name">{device.metadata.labels?.displayName || '-'}</Td>
+              {showFleet && (
                 <Td dataLabel="Fleet">
                   {fleetName ? (
                     <Link to={`/devicemanagement/fleets/${fleetName}`}>{fleetName}</Link>
@@ -60,33 +68,42 @@ const DeviceTable = () => {
                     </>
                   )}
                 </Td>
-                <Td dataLabel="Creation timestamp">{device.metadata.creationTimestamp || '-'}</Td>
-                <Td dataLabel="Operating system">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
-                <Td isActionCell>
-                  <ActionsColumn
-                    items={[
-                      {
-                        title: 'Delete',
-                        onClick: async () => {
-                          await remove(`devices/${deviceName}`);
-                          refetch();
-                        },
-                      },
-                    ]}
-                  />
-                </Td>
-              </Tr>
-            );
-          })}
-        </Tbody>
-      </Table>
+              )}
+              <Td dataLabel="Creation timestamp">{device.metadata.creationTimestamp || '-'}</Td>
+              <Td dataLabel="Operating system">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
+              <Td isActionCell>
+                <ActionsColumn
+                  items={[
+                    {
+                      title: 'Delete',
+                      onClick: () => onDelete(deviceName),
+                    },
+                  ]}
+                />
+              </Td>
+            </Tr>
+          );
+        })}
+      </Tbody>
+    </Table>
+  );
+};
+
+const DeviceListTable = () => {
+  const [devicesList, loading, error, refetch] = useFetchPeriodically<DeviceList>({
+    endpoint: 'devices',
+  });
+
+  return (
+    <ListPageBody data={devicesList?.items} error={error} loading={loading} emptyState={<DeviceEmptyState />}>
+      <DeviceTable devices={devicesList?.items || []} refetch={refetch} showFleet />
     </ListPageBody>
   );
 };
 
 const DeviceList = () => (
   <ListPage title="Devices">
-    <DeviceTable />
+    <DeviceListTable />
   </ListPage>
 );
 
