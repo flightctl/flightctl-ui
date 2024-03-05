@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import * as yaml from 'js-yaml';
 
 import {
-  ActionGroup,
   Alert,
   Breadcrumb,
   BreadcrumbItem,
@@ -23,6 +22,7 @@ import { Fleet, GitConfigProviderSpec, InlineConfigProviderSpec, KubernetesSecre
 import { useFetch } from '@app/hooks/useFetch';
 import { getErrorMessage } from '@app/utils/error';
 import { API_VERSION } from '@app/constants';
+import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
 
 import LabelsField from '../../form/LabelsField';
 import { FleetFormValues } from './types';
@@ -106,14 +106,14 @@ const CreateFleetForm = ({ children }: React.PropsWithChildren<Record<never, nev
         </FormGroup>
       </Grid>
       {children}
-      <ActionGroup>
+      <FlightCtlActionGroup>
         <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitting}>
           Create fleet
         </Button>
         <Button variant="link" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
           Cancel
         </Button>
-      </ActionGroup>
+      </FlightCtlActionGroup>
     </Form>
   );
 };

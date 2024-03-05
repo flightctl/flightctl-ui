@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { EnrollmentRequest } from '@types';
-import { ActionGroup, Alert, Button, Form, FormGroup, TextInput } from '@patternfly/react-core';
+import { Alert, Button, Form, FormGroup, TextInput } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
+
 import LabelsField from '@app/components/form/LabelsField';
+import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
 
 export type DeviceEnrollmentFormValues = {
   labels: { key: string; value: string }[];
@@ -37,14 +39,14 @@ const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentR
         />
       </FormGroup>
       {error && <Alert isInline title={error} variant="danger" />}
-      <ActionGroup>
+      <FlightCtlActionGroup>
         <Button key="confirm" variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
           Approve request
         </Button>
         <Button key="cancel" variant="link" onClick={() => onClose()} isDisabled={isSubmitting}>
           Cancel
         </Button>
-      </ActionGroup>
+      </FlightCtlActionGroup>
     </Form>
   );
 };

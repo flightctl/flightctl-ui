@@ -1,5 +1,4 @@
 import {
-  ActionGroup,
   Button,
   Form,
   FormGroup,
@@ -15,6 +14,7 @@ import {
 import * as React from 'react';
 import { UserPreferencesContext } from './UserPreferencesProvider';
 import { Theme } from '@app/hooks/useThemePreferences';
+import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
 
 const themeLabels: { [key in Theme]: string } = {
   system: 'System default',
@@ -72,11 +72,11 @@ const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) 
           </Form>
         </StackItem>
         <StackItem>
-          <ActionGroup>
+          <FlightCtlActionGroup>
             <Button variant="secondary" onClick={onClose}>
               Close
             </Button>
-          </ActionGroup>
+          </FlightCtlActionGroup>
         </StackItem>
       </Stack>
     </Modal>

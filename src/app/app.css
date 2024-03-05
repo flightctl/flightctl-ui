@@ -4,30 +4,12 @@ body,
   height: 100%;
 }
 
-.pf-v5-c-content {
-  --pf-v5-c-content--small--Color: red; /* changes all <small> color to red */
-  --pf-v5-c-content--blockquote--BorderLeftColor: purple; /* changes all <blockquote> left border color to purple */
-  --pf-v5-c-content--hr--BackgroundColor: lemonchiffon; /* changes a <hr> color to lemonchiffon */
-}
-.pf-v5-c-card {
-  --pf-v5-c-card--m-full-height--Height: 70%;
-}
-
 div.deviceSquare:hover{
   transform: scale(2.5);
   transition: transform 0.2s;
   border: 1px solid #fff;
   border-radius: 1px;
   cursor: pointer;
-}
-
-
-table.deviceGrid tbody tr td{
-  line-height: 0;
-}
-
-.pf-v5-c-expandable-section__toggle-text {
-  color: black;
 }
 
 .deviceSquare {

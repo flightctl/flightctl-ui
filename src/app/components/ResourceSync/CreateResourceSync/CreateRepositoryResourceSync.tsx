@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ActionGroup, Alert, Button, Form, FormGroup, Grid } from '@patternfly/react-core';
+import { Alert, Button, Form, FormGroup, Grid } from '@patternfly/react-core';
 import { Formik, useFormikContext } from 'formik';
 import { ObjectSchema, object, string } from 'yup';
 
@@ -8,6 +8,7 @@ import { useFetch } from '@app/hooks/useFetch';
 import { getErrorMessage } from '@app/utils/error';
 import { API_VERSION } from '@app/constants';
 import TextField from '@app/components/form/TextField';
+import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
 
 type RepositoryResourceSyncValues = {
   name: string;
@@ -80,14 +81,14 @@ const CreateRepositoryResourceSyncForm = ({
         </FormGroup>
       </Grid>
       {children}
-      <ActionGroup>
+      <FlightCtlActionGroup>
         <Button variant="primary" onClick={formSubmit} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
           Create resource sync
         </Button>
         <Button variant="link" isDisabled={isSubmitting} onClick={onCancel}>
           Cancel
         </Button>
-      </ActionGroup>
+      </FlightCtlActionGroup>
     </Form>
   );
 };
