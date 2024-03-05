@@ -9,6 +9,7 @@ import { getDateDisplay } from '@app/utils/dates';
 import { getApprovalStatus } from '@app/utils/status/enrollmentRequest';
 import {
   Bullseye,
+  Button,
   Card,
   CardBody,
   CardFooter,
@@ -23,6 +24,7 @@ import {
   Grid,
   GridItem,
   MenuToggle,
+  Popover,
   Stack,
   StackItem,
   TextArea,
@@ -36,6 +38,7 @@ import './EnrollmentRequestDetails.css';
 import { useFetch } from '@app/hooks/useFetch';
 import DeviceEnrollmentModal from '../DeviceEnrollmentModal/DeviceEnrollmentModal';
 import DetailsPageCard, { DetailsPageCardBody } from '@app/components/DetailsPage/DetailsPageCard';
+import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 
 const EnrollmentRequestDetails = () => {
   const { enrollmentRequestId } = useParams() as { enrollmentRequestId: string };
@@ -47,7 +50,7 @@ const EnrollmentRequestDetails = () => {
   const navigate = useNavigate();
   const [isApprovalModalOpen, setIsApprovalModalOpen] = React.useState(false);
 
-  const approvalStatus = getApprovalStatus(er);
+  const approvalStatus = er ? getApprovalStatus(er) : '-';
 
   return (
     <DetailsPage
@@ -134,7 +137,18 @@ const EnrollmentRequestDetails = () => {
             </GridItem>
             <GridItem md={6}>
               <DetailsPageCard>
-                <CardTitle>Certificate signing request</CardTitle>
+                <CardTitle>
+                  <>
+                    Certificate signing request
+                    <Popover
+                      triggerAction="hover"
+                      aria-label="Helper text"
+                      bodyContent="A PEM-encoded PKCS#10 certificate signing request."
+                    >
+                      <Button isInline variant="plain" icon={<OutlinedQuestionCircleIcon />} />
+                    </Popover>
+                  </>
+                </CardTitle>
                 <DetailsPageCardBody>
                   {er?.spec.csr ? (
                     <TextArea
@@ -148,12 +162,22 @@ const EnrollmentRequestDetails = () => {
                     <Bullseye>Not available</Bullseye>
                   )}
                 </DetailsPageCardBody>
-                <CardFooter>A PEM-encoded PKCS#10 certificate signing request.</CardFooter>
               </DetailsPageCard>
             </GridItem>
             <GridItem md={6}>
               <DetailsPageCard>
-                <CardTitle>Certificate</CardTitle>
+                <CardTitle>
+                  <>
+                    Certificate
+                    <Popover
+                      triggerAction="hover"
+                      aria-label="Helper text"
+                      bodyContent="A PEM-encoded signed certificate."
+                    >
+                      <Button isInline variant="plain" icon={<OutlinedQuestionCircleIcon />} />
+                    </Popover>
+                  </>
+                </CardTitle>
                 <DetailsPageCardBody>
                   {er?.status?.certificate ? (
                     <TextArea
@@ -167,14 +191,14 @@ const EnrollmentRequestDetails = () => {
                     <Bullseye>Not available</Bullseye>
                   )}
                 </DetailsPageCardBody>
-                <CardFooter>A PEM-encoded signed certificate.</CardFooter>
+                <CardFooter></CardFooter>
               </DetailsPageCard>
             </GridItem>
             <GridItem md={6}>
               <DetailsPageCard>
                 <CardTitle>Conditions</CardTitle>
                 <DetailsPageCardBody>
-                  {er && <ConditionsTable conditions={er.status?.conditions} />}
+                  {er && <ConditionsTable type="Enrollment request" conditions={er.status?.conditions} />}
                 </DetailsPageCardBody>
               </DetailsPageCard>
             </GridItem>
@@ -182,7 +206,7 @@ const EnrollmentRequestDetails = () => {
               <DetailsPageCard>
                 <CardTitle>Device conditions</CardTitle>
                 <DetailsPageCardBody>
-                  {er && <ConditionsTable conditions={er.spec.deviceStatus?.conditions} />}
+                  {er && <ConditionsTable type="Device" conditions={er.spec.deviceStatus?.conditions} />}
                 </DetailsPageCardBody>
               </DetailsPageCard>
             </GridItem>

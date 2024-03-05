@@ -9,7 +9,7 @@ type IntegrityTableProps = {
 };
 
 const IntegrityTable: React.FC<IntegrityTableProps> = ({ measurements }) => {
-  return measurements ? (
+  return measurements && Object.keys(measurements).length ? (
     <Table aria-label="System integrity table">
       <Thead>
         <Tr>

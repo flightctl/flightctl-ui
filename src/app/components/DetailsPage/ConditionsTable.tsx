@@ -5,16 +5,18 @@ import * as React from 'react';
 
 type ConditionsTableProps = {
   conditions: Array<Condition> | undefined;
+  type: string;
 };
 
-const ConditionsTable: React.FC<ConditionsTableProps> = ({ conditions }) => {
+const ConditionsTable: React.FC<ConditionsTableProps> = ({ conditions, type }) => {
   return conditions?.length ? (
-    <Table aria-label="Device conditions table">
+    <Table aria-label={`${type} conditions table`}>
       <Thead>
         <Tr>
           <Th>Type</Th>
           <Th modifier="wrap">Status</Th>
           <Th modifier="wrap">Reason</Th>
+          <Th modifier="wrap">Message</Th>
         </Tr>
       </Thead>
       <Tbody>
@@ -23,6 +25,7 @@ const ConditionsTable: React.FC<ConditionsTableProps> = ({ conditions }) => {
             <Td dataLabel="Type">{condition.type}</Td>
             <Td dataLabel="Status">{condition.status}</Td>
             <Td dataLabel="Reason">{condition.reason || '-'}</Td>
+            <Td dataLabel="Message">{condition.message || '-'}</Td>
           </Tr>
         ))}
       </Tbody>

@@ -1,8 +1,8 @@
 import { ConditionType, EnrollmentRequest } from '@types';
 import { EnrollmentRequestApprovalStatus } from '@app/types/extraTypes';
 
-export const getApprovalStatus = (enrollmentRequest?: EnrollmentRequest): EnrollmentRequestApprovalStatus => {
-  const approvedCondition = enrollmentRequest?.status?.conditions?.find(
+export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): EnrollmentRequestApprovalStatus => {
+  const approvedCondition = enrollmentRequest.status?.conditions?.find(
     (c) => c.type === ConditionType.EnrollmentRequestApproved,
   );
   if (!approvedCondition) {

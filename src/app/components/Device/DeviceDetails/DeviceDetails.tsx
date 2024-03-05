@@ -79,7 +79,7 @@ const DeviceDetails = () => {
           <DetailsPageCard>
             <CardTitle>Conditions</CardTitle>
             <DetailsPageCardBody>
-              {device && <ConditionsTable conditions={device.status.conditions} />}
+              {device && <ConditionsTable type="Device" conditions={device.status.conditions} />}
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
