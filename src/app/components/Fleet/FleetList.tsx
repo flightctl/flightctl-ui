@@ -3,7 +3,9 @@ import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import {
   Button,
   EmptyState,
+  EmptyStateActions,
   EmptyStateBody,
+  EmptyStateFooter,
   EmptyStateHeader,
   Toolbar,
   ToolbarContent,
@@ -17,29 +19,40 @@ import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import LabelsView from '@app/components/common/LabelsView';
 
+const FleetListToolbar = () => {
+  const navigate = useNavigate();
+  return (
+    <Toolbar>
+      <ToolbarContent>
+        <ToolbarItem>
+          <Button variant="primary" onClick={() => navigate('/devicemanagement/fleets/create')}>
+            Create
+          </Button>
+        </ToolbarItem>
+      </ToolbarContent>
+    </Toolbar>
+  );
+};
+
 const FleetEmptyState = () => (
   <EmptyState>
     <EmptyStateHeader titleText={<>You haven&apos;t created any fleets yet</>} headingLevel="h4" />
     <EmptyStateBody>Create a new fleet using the &quot;Create&quot; button</EmptyStateBody>
+    <EmptyStateFooter>
+      <EmptyStateActions>
+        <FleetListToolbar />
+      </EmptyStateActions>
+    </EmptyStateFooter>
   </EmptyState>
 );
 
 const FleetTable = () => {
-  const navigate = useNavigate();
   const [fleetList, loading, error, refetch] = useFetchPeriodically<FleetList>({ endpoint: 'fleets' });
   const { remove } = useFetch();
 
   return (
     <ListPageBody data={fleetList?.items} error={error} loading={loading} emptyState={<FleetEmptyState />}>
-      <Toolbar>
-        <ToolbarContent>
-          <ToolbarItem>
-            <Button variant="primary" onClick={() => navigate('/devicemanagement/fleets/create')}>
-              Create
-            </Button>
-          </ToolbarItem>
-        </ToolbarContent>
-      </Toolbar>
+      <FleetListToolbar />
       <Table aria-label="Fleets table">
         <Thead>
           <Tr>
