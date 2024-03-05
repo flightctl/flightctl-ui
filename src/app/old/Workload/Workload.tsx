@@ -17,12 +17,10 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
-import { deviceList } from '@app/old/utils/commonDataTypes';
-
-
+import { DeviceList } from '@types';
 
 const Workload: React.FunctionComponent = () => {
-  const [data, isLoading, error] = useFetchPeriodically<deviceList>({ endpoint: 'devices' });
+  const [data, isLoading, error] = useFetchPeriodically<DeviceList>({ endpoint: 'devices' });
 
   React.useEffect(() => {
     if (data) {
@@ -32,9 +30,7 @@ const Workload: React.FunctionComponent = () => {
         div.innerHTML = `Total: ${devices.length}<br>`;
         let cellcount = 0;
         const maxcellsperline = 40;
-        let onlinecount = 0;
-        let offlinecount = 0;
-        let syncronizingcount = 0;
+
         if (devices.length > 0) {
           const table = document.createElement('table');
           table.className = 'deviceGrid';
@@ -43,7 +39,6 @@ const Workload: React.FunctionComponent = () => {
           const tbody = table.getElementsByTagName('tbody')[0];
           tbody.appendChild(tr);
           devices.forEach((device) => {
-            const status = device.status.online;
             if (div) {
               cellcount++;
               if (cellcount > maxcellsperline) {
@@ -56,7 +51,7 @@ const Workload: React.FunctionComponent = () => {
               newDiv.className = 'deviceSquare';
               newDiv.style.width = '7px';
               newDiv.style.height = '7px';
-              newDiv.style.backgroundColor = status === 'True' ? 'limegreen' : 'tomato';
+              newDiv.style.backgroundColor = 'limegreen';
               newDiv.style.display = 'inline-block';
               newDiv.style.margin = '2px 2px 0px 0px';
               newDiv.onclick = () => {
@@ -65,15 +60,6 @@ const Workload: React.FunctionComponent = () => {
               const tooltip = document.getElementById('tooltip');
               newDiv.onmouseover = (event: MouseEvent) => {
                 if (tooltip) {
-                  if (device.status.systemInfo === undefined) {
-                    device.status.systemInfo = {};
-                  }
-                  device.status.systemInfo.architecture = device.status.systemInfo.architecture || "-";
-                  device.status.systemInfo.bootID = device.status.systemInfo.bootID || "-";
-                  device.status.systemInfo.machineID = device.status.systemInfo.machineID || "-";
-                  device.status.systemInfo.operatingSystem = device.status.systemInfo.operatingSystem || "-";
-                  device.status.online = device.status.online || "-";
-
                   tooltip.style.display = 'block';
                   tooltip.style.position = 'absolute';
                   tooltip.style.left = `${event.clientX + 10}px`;
@@ -82,7 +68,7 @@ const Workload: React.FunctionComponent = () => {
                   tooltip.style.border = '1px solid black';
                   tooltip.style.padding = '5px';
                   tooltip.style.zIndex = '1';
-                  tooltip.innerHTML = `Name: ${device.metadata.name}<br>Architecture: ${device.status.systemInfo.architecture}<br>Boot ID: ${device.status.systemInfo.bootID}<br>Machine ID: ${device.status.systemInfo.machineID}<br>Operating System: ${device.status.systemInfo.operatingSystem}<br>Status: ${device.status.online}`;
+                  tooltip.innerHTML = `Name: ${device.metadata.name}<br>Architecture: ${device.status?.systemInfo?.architecture || '-'}<br>Boot ID: ${device.status?.systemInfo?.bootID || '-'}<br>Machine ID: ${device.status?.systemInfo?.machineID || '-'}<br>Operating System: ${device.status?.systemInfo?.operatingSystem || '-'}<br>Status: True`;
                 }
                 newDiv.onmouseleave = () => {
                   if (tooltip) {

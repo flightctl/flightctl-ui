@@ -10,11 +10,11 @@ import {
   CardHeader,
 } from '@patternfly/react-core';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
-import { deviceList } from '@app/old/utils/commonDataTypes';
 import { DevicesDonuts } from './devicesDonuts';
 import { DevicesGrid } from './devicesGrid';
 import { Filter } from './filter';
 import { Legend } from './legend';
+import { DeviceList } from '@types';
 
 const fakeDevicesStatus = {
   'Ready': { count: 720 },
@@ -25,7 +25,7 @@ const fakeDevicesStatus = {
 }
 
 const Overview: React.FunctionComponent = () => {
-  const [data] = useFetchPeriodically<deviceList>({ endpoint: 'devices' });
+  const [data] = useFetchPeriodically<DeviceList>({ endpoint: 'devices' });
 
   return (
     <PageSection>

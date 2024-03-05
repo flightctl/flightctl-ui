@@ -20,6 +20,7 @@
     "strict": true,
     "paths": {
       "@app/*": ["src/app/*"],
+      "@fctl-assets/*": ["src/assets/*"],
       "@types": ["@types"],
       "@assets/*": ["node_modules/@patternfly/react-core/dist/styles/assets/*"],
     },
