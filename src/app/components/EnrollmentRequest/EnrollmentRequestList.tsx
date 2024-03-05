@@ -21,6 +21,7 @@ import * as React from 'react';
 import DeviceEnrollmentModal from './DeviceEnrollmentModal/DeviceEnrollmentModal';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
+import { Link } from 'react-router-dom';
 
 const EnrollmentRequestEmptyState = () => (
   <EmptyState>
@@ -137,7 +138,9 @@ const EnrollmentRequestTable = () => {
             const approvalStatus = getApprovalStatus(er);
             return (
               <Tr key={er.metadata.name}>
-                <Td dataLabel="Name">{er.metadata.name}</Td>
+                <Td dataLabel="Name">
+                  <Link to={`/devicemanagement/enrollmentrequests/${er.metadata.name}`}>{er.metadata.name || '-'}</Link>
+                </Td>
                 <Td dataLabel="Creation timestamp">{er.metadata.creationTimestamp}</Td>
                 <Td dataLabel="Status">{approvalStatus}</Td>
                 <Td isActionCell>

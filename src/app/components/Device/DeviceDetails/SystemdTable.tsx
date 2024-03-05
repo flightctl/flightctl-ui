@@ -1,11 +1,13 @@
-import { Bullseye, Button, Label, LabelGroup, Split, SplitItem, Stack, StackItem } from '@patternfly/react-core';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Button, Label, LabelGroup, Split, SplitItem, Stack, StackItem } from '@patternfly/react-core';
 import { Device } from '@types';
 import * as React from 'react';
 import MatchPatternsModal from '../MatchPatternsModal/MatchPatternsModal';
+import SystemdDetailsTable from '../../DetailsPage/SystemdTable';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
-const SystemdTable = ({ device, refetch }: { device: Device; refetch: VoidFunction }) => {
+type SystemdTableProps = { device: Device; refetch: VoidFunction };
+
+const SystemdTable: React.FC<SystemdTableProps> = ({ refetch, device }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   return (
     <>
@@ -29,28 +31,7 @@ const SystemdTable = ({ device, refetch }: { device: Device; refetch: VoidFuncti
           </Split>
         </StackItem>
         <StackItem>
-          {device.status?.systemdUnits?.length ? (
-            <Table aria-label="Device systemd table">
-              <Thead>
-                <Tr>
-                  <Th>Name</Th>
-                  <Th modifier="wrap">Loaded state</Th>
-                  <Th modifier="wrap">Active state</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {device.status.systemdUnits.map((unit) => (
-                  <Tr key={unit.name}>
-                    <Td dataLabel="Name">{unit.name}</Td>
-                    <Td dataLabel="Loaded state">{unit.loadState}</Td>
-                    <Td dataLabel="Active state">{unit.activeState}</Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          ) : (
-            <Bullseye>No systemd units found</Bullseye>
-          )}
+          <SystemdDetailsTable systemdUnits={device.status?.systemdUnits} />
         </StackItem>
       </Stack>
       {isModalOpen && (
