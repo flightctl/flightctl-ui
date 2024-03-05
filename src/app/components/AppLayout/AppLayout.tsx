@@ -12,10 +12,10 @@ import {
   PageToggleButton,
   SkipToContent,
 } from '@patternfly/react-core';
-import logo from '@app/old/bgimages/flightctl-logo.svg';
 import { BarsIcon } from '@patternfly/react-icons';
 import { Outlet } from 'react-router-dom';
 
+import logo from '@fctl-assets/bgimages/flightctl-logo.svg';
 import AppNavigation from './AppNavigation';
 import AppToolbar from './AppToolbar';
 

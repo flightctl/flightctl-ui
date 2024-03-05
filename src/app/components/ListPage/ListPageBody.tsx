@@ -27,7 +27,7 @@ const ListPageBody: React.FC<ListPageBodyProps> = ({ error, loading, data, child
     );
   }
 
-  if (!data) {
+  if (!data || data.length === 0) {
     return emptyState;
   }
 
