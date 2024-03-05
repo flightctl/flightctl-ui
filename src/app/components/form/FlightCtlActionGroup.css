@@ -1,0 +1,9 @@
+/**
+  Overwrites the "sm" margins set by Patternfly, which cut the focus outline vertically
+ */
+.fctl-form__action-footer .pf-v5-c-form__actions > * {
+  --pf-v5-c-form__actions--child--MarginTop: var(--pf-v5-global--spacer--md);
+  --pf-v5-c-form__actions--child--MarginBottom: var(--pf-v5-global--spacer--md);
+  --pf-v5-c-form__actions--child--MarginLeft: var(--pf-v5-global--spacer--md);
+  --pf-v5-c-form__actions--child--MarginRight: var(--pf-v5-global--spacer--md);
+}
