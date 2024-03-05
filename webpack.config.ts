@@ -137,9 +137,10 @@ const config: Configuration & {
     ],
   },
   output: {
-    filename: '[name].bundle.js',
+    filename: '[name].bundle-[contenthash].js',
     path: path.resolve(__dirname, 'dist'),
     publicPath: ASSET_PATH,
+    chunkFilename: '[name].bundle-[contenthash].js',
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -179,8 +180,8 @@ if (NODE_ENV === 'production') {
   };
   config.plugins?.push(
     new MiniCssExtractPlugin({
-      filename: '[name].css',
-      chunkFilename: '[name].bundle.css',
+      filename: '[name]-[contenthash].css',
+      chunkFilename: '[name].bundle-[contenthash].css',
     }),
   );
   config.devtool = 'source-map';
