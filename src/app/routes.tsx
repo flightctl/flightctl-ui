@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { PropsWithChildren } from 'react';
 
-import { Navigate, RouteObject, RouterProvider, createBrowserRouter, useRouteError } from 'react-router-dom';
+import { Navigate, RouteObject, RouterProvider, createBrowserRouter, useParams, useRouteError } from 'react-router-dom';
 import AppLayout from '@app/components/AppLayout/AppLayout';
 import { Overview } from '@app/old/Overview/Overview';
 import { Experimental } from '@app/old/Experimental/Experimental';
@@ -87,6 +87,11 @@ const experimentalRoutes: ExtendedRouteObject[] = [
   },
 ];
 
+const RedirectToDeviceDetails = () => {
+  const { deviceId } = useParams() as { deviceId: string };
+  return <Navigate to={`/devicemanagement/devices/${deviceId}`} replace />;
+};
+
 const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteObject[] => [
   {
     path: '/',
@@ -114,7 +119,7 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
     ),
   },
   {
-    path: '/manage/:id',
+    path: '/enroll/:id',
     title: 'Enrollment Request',
     showInNav: false,
     element: (
@@ -155,6 +160,12 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
         ),
       },
     ],
+  },
+  {
+    path: '/manage/:deviceId',
+    title: 'Device',
+    showInNav: false,
+    element: <RedirectToDeviceDetails />,
   },
   {
     path: '/devicemanagement/devices',
