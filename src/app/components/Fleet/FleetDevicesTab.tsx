@@ -14,7 +14,7 @@ const FleetDevicesTab = ({
   onDevicesLoaded: (deviceCount: number) => void;
 }) => {
   const [deviceList, loadingDevices, devicesError, refetch] = useFetchPeriodically<DeviceList>({
-    endpoint: `devices?owner=${fleetName}`,
+    endpoint: `devices?owner=Fleet/${fleetName}`,
   });
 
   React.useEffect(() => {
