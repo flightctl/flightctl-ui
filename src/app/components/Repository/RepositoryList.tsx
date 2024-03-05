@@ -2,7 +2,9 @@ import React from 'react';
 import {
   Button,
   EmptyState,
+  EmptyStateActions,
   EmptyStateBody,
+  EmptyStateFooter,
   EmptyStateHeader,
   Toolbar,
   ToolbarContent,
@@ -19,29 +21,41 @@ import ListPage from '@app/components/ListPage/ListPage';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '@app/utils/status/repository';
 import StatusInfo from '@app/components/common/StatusInfo';
 
+const RepositoryToolbar = () => {
+  const navigate = useNavigate();
+
+  return (
+    <Toolbar>
+      <ToolbarContent>
+        <ToolbarItem>
+          <Button variant="primary" onClick={() => navigate('/administration/repositories/create')}>
+            Create
+          </Button>
+        </ToolbarItem>
+      </ToolbarContent>
+    </Toolbar>
+  );
+};
+
 const RepositoryEmptyState = () => (
   <EmptyState>
     <EmptyStateHeader titleText={<>You haven&apos;t created any repositories yet</>} headingLevel="h4" />
     <EmptyStateBody>Create a new repository using the &quot;Create&quot; button</EmptyStateBody>
+    <EmptyStateFooter>
+      <EmptyStateActions>
+        <RepositoryToolbar />
+      </EmptyStateActions>
+    </EmptyStateFooter>
   </EmptyState>
 );
 
 const RepositoryTable = () => {
-  const navigate = useNavigate();
   const [repositoryList, loading, error, refetch] = useFetchPeriodically<RepositoryList>({ endpoint: 'repositories' });
   const { remove } = useFetch();
 
   return (
     <ListPageBody data={repositoryList?.items} error={error} loading={loading} emptyState={<RepositoryEmptyState />}>
-      <Toolbar>
-        <ToolbarContent>
-          <ToolbarItem>
-            <Button variant="primary" onClick={() => navigate('/administration/repositories/create')}>
-              Create
-            </Button>
-          </ToolbarItem>
-        </ToolbarContent>
-      </Toolbar>
+      <RepositoryToolbar />
       <Table aria-label="Repositories table">
         <Thead>
           <Tr>
