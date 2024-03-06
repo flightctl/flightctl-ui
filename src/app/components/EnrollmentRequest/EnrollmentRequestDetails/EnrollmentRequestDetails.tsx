@@ -1,8 +1,8 @@
-import ConditionsTable from '@app/components/DetailsPage/ConditionsTable';
-import ContainersTable from '@app/components/DetailsPage/ContainersTable';
+import ConditionsTable from '@app/components/DetailsPage/Tables/ConditionsTable';
+import ContainersTable from '@app/components/DetailsPage/Tables/ContainersTable';
 import DetailsPage from '@app/components/DetailsPage/DetailsPage';
-import IntegrityTable from '@app/components/DetailsPage/IntegrityTable';
-import SystemdTable from '@app/components/DetailsPage/SystemdTable';
+import IntegrityTable from '@app/components/DetailsPage/Tables/IntegrityTable';
+import SystemdTable from '@app/components/DetailsPage/Tables/SystemdTable';
 import LabelsView from '@app/components/common/LabelsView';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import { getDateDisplay } from '@app/utils/dates';
@@ -18,12 +18,10 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
-  Dropdown,
   DropdownItem,
   DropdownList,
   Grid,
   GridItem,
-  MenuToggle,
   Popover,
   Stack,
   StackItem,
@@ -39,16 +37,25 @@ import { useFetch } from '@app/hooks/useFetch';
 import DeviceEnrollmentModal from '../DeviceEnrollmentModal/DeviceEnrollmentModal';
 import DetailsPageCard, { DetailsPageCardBody } from '@app/components/DetailsPage/DetailsPageCard';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
+import DetailsPageActions, { useDeleteAction } from '@app/components/DetailsPage/DetailsPageActions';
 
 const EnrollmentRequestDetails = () => {
   const { enrollmentRequestId } = useParams() as { enrollmentRequestId: string };
   const [er, loading, error, refetch] = useFetchPeriodically<EnrollmentRequest>({
     endpoint: `enrollmentrequests/${enrollmentRequestId}`,
   });
-  const [actionsOpen, setActionsOpen] = React.useState(false);
   const { remove } = useFetch();
   const navigate = useNavigate();
   const [isApprovalModalOpen, setIsApprovalModalOpen] = React.useState(false);
+
+  const { deleteAction, deleteModal } = useDeleteAction({
+    resourceName: enrollmentRequestId,
+    resourceType: 'Enrollment request',
+    onDelete: async () => {
+      await remove(`enrollmentrequests/${enrollmentRequestId}`);
+      navigate('/devicemanagement/enrollmentrequests');
+    },
+  });
 
   const approvalStatus = er ? getApprovalStatus(er) : '-';
 
@@ -62,35 +69,14 @@ const EnrollmentRequestDetails = () => {
     >
       <Stack hasGutter>
         <StackItem>
-          <Dropdown
-            isOpen={actionsOpen}
-            onSelect={() => setActionsOpen(false)}
-            toggle={(toggleRef) => (
-              <MenuToggle
-                ref={toggleRef}
-                isExpanded={actionsOpen}
-                onClick={() => setActionsOpen(!actionsOpen)}
-                aria-label="Actions dropdown"
-                variant="primary"
-              >
-                Actions
-              </MenuToggle>
-            )}
-          >
+          <DetailsPageActions>
             <DropdownList>
               <DropdownItem onClick={() => setIsApprovalModalOpen(true)} isDisabled={approvalStatus !== 'Pending'}>
                 Approve
               </DropdownItem>
-              <DropdownItem
-                onClick={async () => {
-                  await remove(`enrollmentrequests/${enrollmentRequestId}`);
-                  navigate('/devicemanagement/enrollmentrequests');
-                }}
-              >
-                Delete
-              </DropdownItem>
+              {deleteAction}
             </DropdownList>
-          </Dropdown>
+          </DetailsPageActions>
         </StackItem>
         <StackItem>
           <Grid hasGutter>
@@ -246,6 +232,7 @@ const EnrollmentRequestDetails = () => {
           }}
         />
       )}
+      {deleteModal}
     </DetailsPage>
   );
 };

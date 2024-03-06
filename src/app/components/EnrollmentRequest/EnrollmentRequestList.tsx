@@ -22,6 +22,7 @@ import DeviceEnrollmentModal from './DeviceEnrollmentModal/DeviceEnrollmentModal
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import { Link } from 'react-router-dom';
+import { useDeleteListAction } from '../ListPage/ListPageActions';
 
 const EnrollmentRequestEmptyState = () => (
   <EmptyState>
@@ -39,6 +40,13 @@ const EnrollmentRequestTable = () => {
     status: [],
   });
   const [isStatusExpanded, setIsStatusExpanded] = React.useState(false);
+  const { deleteAction, deleteModal } = useDeleteListAction({
+    resourceType: 'Enrollment request',
+    onDelete: async (resourceId: string) => {
+      await remove(`enrollmentrequests/${resourceId}`);
+      refetch();
+    },
+  });
 
   const onStatusSelect = (event?: React.MouseEvent<Element, MouseEvent>, selection?: string | number) => {
     const checked = (event?.target as HTMLInputElement)?.checked;
@@ -151,13 +159,7 @@ const EnrollmentRequestTable = () => {
                         onClick: () => setRequestId(er.metadata.name),
                         isDisabled: approvalStatus !== 'Pending',
                       },
-                      {
-                        title: 'Delete',
-                        onClick: async () => {
-                          await remove(`enrollmentrequests/${er.metadata.name}`);
-                          refetch();
-                        },
-                      },
+                      deleteAction(er.metadata.name || ''),
                     ]}
                   />
                 </Td>
@@ -175,6 +177,7 @@ const EnrollmentRequestTable = () => {
           }}
         />
       )}
+      {deleteModal}
     </ListPageBody>
   );
 };

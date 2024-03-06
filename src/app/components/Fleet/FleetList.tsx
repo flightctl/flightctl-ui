@@ -18,6 +18,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import LabelsView from '@app/components/common/LabelsView';
+import { useDeleteListAction } from '../ListPage/ListPageActions';
 
 const FleetListToolbar = () => {
   const navigate = useNavigate();
@@ -49,6 +50,13 @@ const FleetEmptyState = () => (
 const FleetTable = () => {
   const [fleetList, loading, error, refetch] = useFetchPeriodically<FleetList>({ endpoint: 'fleets' });
   const { remove } = useFetch();
+  const { deleteAction, deleteModal } = useDeleteListAction({
+    resourceType: 'Fleet',
+    onDelete: async (resourceId: string) => {
+      await remove(`fleets/${resourceId}`);
+      refetch();
+    },
+  });
 
   return (
     <ListPageBody data={fleetList?.items} error={error} loading={loading} emptyState={<FleetEmptyState />}>
@@ -73,22 +81,13 @@ const FleetTable = () => {
                 <LabelsView labels={fleet.spec.selector?.matchLabels} />
               </Td>
               <Td isActionCell>
-                <ActionsColumn
-                  items={[
-                    {
-                      title: 'Delete',
-                      onClick: async () => {
-                        await remove(`fleets/${fleet.metadata.name}`);
-                        refetch();
-                      },
-                    },
-                  ]}
-                />
+                <ActionsColumn items={[deleteAction(fleet.metadata.name || '')]} />
               </Td>
             </Tr>
           ))}
         </Tbody>
       </Table>
+      {deleteModal}
     </ListPageBody>
   );
 };

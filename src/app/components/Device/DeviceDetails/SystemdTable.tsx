@@ -2,7 +2,7 @@ import { Button, Label, LabelGroup, Split, SplitItem, Stack, StackItem } from '@
 import { Device } from '@types';
 import * as React from 'react';
 import MatchPatternsModal from '../MatchPatternsModal/MatchPatternsModal';
-import SystemdDetailsTable from '../../DetailsPage/SystemdTable';
+import SystemdDetailsTable from '../../DetailsPage/Tables/SystemdTable';
 import { PencilAltIcon } from '@patternfly/react-icons';
 
 type SystemdTableProps = { device: Device; refetch: VoidFunction };
