@@ -9,49 +9,51 @@ import { ResourceSync, ResourceSyncList } from '@types';
 import { getObservedHash, getRepositorySyncStatus } from '@app/utils/status/repository';
 import StatusInfo from '@app/components/common/StatusInfo';
 import CreateRepositoryResourceSync from '@app/components/ResourceSync/CreateResourceSync/CreateRepositoryResourceSync';
+import { useDeleteListAction } from '../ListPage/ListPageActions';
 
 const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: ResourceSync[]; refetch: VoidFunction }) => {
   const { remove } = useFetch();
 
+  const { deleteAction, deleteModal } = useDeleteListAction({
+    resourceType: 'Resource Sync',
+    onDelete: async (resourceId: string) => {
+      await remove(`resourcesyncs/${resourceId}`);
+      refetch();
+    },
+  });
+
   return (
-    <Table aria-label="Repositories table">
-      <Thead>
-        <Tr>
-          <Th>Name</Th>
-          <Th>Path</Th>
-          <Th>Target revision</Th>
-          <Th>Status</Th>
-          <Th>Observed hash</Th>
-          <Td />
-        </Tr>
-      </Thead>
-      <Tbody>
-        {resourceSyncs.map((resourceSync) => (
-          <Tr key={resourceSync.metadata.name}>
-            <Td dataLabel="Name">{resourceSync.metadata.name}</Td>
-            <Td dataLabel="Path">{resourceSync.spec.path || ''}</Td>
-            <Td dataLabel="Target revision">{resourceSync.spec.targetRevision}</Td>
-            <Td dataLabel="Status">
-              <StatusInfo statusInfo={getRepositorySyncStatus(resourceSync)} />
-            </Td>
-            <Td dataLabel="Observed hash">{getObservedHash(resourceSync)}</Td>
-            <Td isActionCell>
-              <ActionsColumn
-                items={[
-                  {
-                    title: 'Delete',
-                    onClick: async () => {
-                      await remove(`resourcesync/${resourceSync.metadata.name}`);
-                      refetch();
-                    },
-                  },
-                ]}
-              />
-            </Td>
+    <>
+      <Table aria-label="Repositories table">
+        <Thead>
+          <Tr>
+            <Th>Name</Th>
+            <Th>Path</Th>
+            <Th>Target revision</Th>
+            <Th>Status</Th>
+            <Th>Observed hash</Th>
+            <Td />
           </Tr>
-        ))}
-      </Tbody>
-    </Table>
+        </Thead>
+        <Tbody>
+          {resourceSyncs.map((resourceSync) => (
+            <Tr key={resourceSync.metadata.name}>
+              <Td dataLabel="Name">{resourceSync.metadata.name}</Td>
+              <Td dataLabel="Path">{resourceSync.spec.path || ''}</Td>
+              <Td dataLabel="Target revision">{resourceSync.spec.targetRevision}</Td>
+              <Td dataLabel="Status">
+                <StatusInfo statusInfo={getRepositorySyncStatus(resourceSync)} />
+              </Td>
+              <Td dataLabel="Observed hash">{getObservedHash(resourceSync)}</Td>
+              <Td isActionCell>
+                <ActionsColumn items={[deleteAction(resourceSync.metadata.name || '')]} />
+              </Td>
+            </Tr>
+          ))}
+        </Tbody>
+      </Table>
+      {deleteModal}
+    </>
   );
 };
 
