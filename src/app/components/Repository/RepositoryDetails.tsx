@@ -50,9 +50,7 @@ const RepositoryDetails = () => {
     <PageSection>
       <Breadcrumb>
         <BreadcrumbItem to="/administration/repositories">Repositories</BreadcrumbItem>
-        <BreadcrumbItem to="#" isActive>
-          {repositoryId}
-        </BreadcrumbItem>
+        <BreadcrumbItem isActive>{repositoryId}</BreadcrumbItem>
       </Breadcrumb>
       <Title headingLevel="h1" size="3xl">
         {repositoryId}

@@ -128,9 +128,7 @@ const CreateFleet = () => {
         <StackItem>
           <Breadcrumb>
             <BreadcrumbItem to="/devicemanagement/fleets">Fleets</BreadcrumbItem>
-            <BreadcrumbItem to="#" isActive>
-              Create fleet
-            </BreadcrumbItem>
+            <BreadcrumbItem isActive>Create fleet</BreadcrumbItem>
           </Breadcrumb>
           <Title headingLevel="h1" size="3xl">
             Create fleet

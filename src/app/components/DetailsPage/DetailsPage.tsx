@@ -43,9 +43,7 @@ const DetailsPage: React.FC<DetailsPageProps> = ({ title, children, error, loadi
         <StackItem>
           <Breadcrumb>
             <BreadcrumbItem to={resourceLink}>{resourceName}</BreadcrumbItem>
-            <BreadcrumbItem to="#" isActive>
-              {title}
-            </BreadcrumbItem>
+            <BreadcrumbItem isActive>{title}</BreadcrumbItem>
           </Breadcrumb>
         </StackItem>
         <StackItem>

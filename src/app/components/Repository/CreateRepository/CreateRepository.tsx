@@ -141,9 +141,7 @@ const CreateRepository = () => {
         <StackItem>
           <Breadcrumb>
             <BreadcrumbItem to="/administration/repositories">Repositories</BreadcrumbItem>
-            <BreadcrumbItem to="#" isActive>
-              Create repository
-            </BreadcrumbItem>
+            <BreadcrumbItem isActive>Create repository</BreadcrumbItem>
           </Breadcrumb>
           <Title headingLevel="h1" size="3xl">
             Create repository
