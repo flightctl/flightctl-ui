@@ -11,12 +11,7 @@ module.exports = {
     tsconfigRootDir: '.',
   },
   // we want to use the recommended rules provided from the typescript plugin
-  extends: [
-    '@redhat-cloud-services/eslint-config-redhat-cloud-services',
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:@typescript-eslint/recommended',
-  ],
+  extends: ['@redhat-cloud-services/eslint-config-redhat-cloud-services', 'eslint:recommended', 'plugin:react/recommended', 'plugin:@typescript-eslint/recommended', 'plugin:storybook/recommended'],
   globals: {
     window: 'readonly',
     describe: 'readonly',
