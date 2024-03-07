@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Formik, useFormikContext } from 'formik';
 import { ObjectSchema, boolean, object, string } from 'yup';
 import {
@@ -138,7 +138,9 @@ const CreateRepository = () => {
       <Stack hasGutter>
         <StackItem>
           <Breadcrumb>
-            <BreadcrumbItem to="/administration/repositories">Repositories</BreadcrumbItem>
+            <BreadcrumbItem>
+              <Link to="/administration/repositories">Repositories</Link>
+            </BreadcrumbItem>
             <BreadcrumbItem isActive>Create repository</BreadcrumbItem>
           </Breadcrumb>
           <Title headingLevel="h1" size="3xl">
