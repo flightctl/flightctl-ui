@@ -1,5 +1,6 @@
-FROM registry.access.redhat.com/ubi9/nodejs-18:latest as build
+FROM registry.access.redhat.com/ubi9/nodejs-18-minimal:latest as build
 USER root
+
 WORKDIR /app
 COPY package.json /app
 COPY package-lock.json /app
@@ -8,6 +9,7 @@ COPY dr-surge.js /app
 COPY webpack.config.ts /app
 COPY src /app/src
 COPY @types /app/@types
+ENV NODE_OPTIONS='--max-old-space-size=8192'
 RUN npm ci
 RUN npm run build-frontend
 
