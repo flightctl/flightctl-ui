@@ -15,9 +15,8 @@ import {
   Icon,
   Stack,
   StackItem,
-  Tooltip,
 } from '@patternfly/react-core';
-import { CheckCircleIcon, ExternalLinkAltIcon, InfoCircleIcon, QuestionCircleIcon } from '@patternfly/react-icons';
+import { CheckCircleIcon, ExternalLinkAltIcon, InfoCircleIcon } from '@patternfly/react-icons';
 
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import { Repository } from '@types';
@@ -28,6 +27,7 @@ import RepositoryResourceSyncList from '@app/components/ResourceSync/RepositoryR
 import DetailsPage from '../DetailsPage/DetailsPage';
 import DetailsPageActions, { useDeleteAction } from '../DetailsPage/DetailsPageActions';
 import { useFetch } from '@app/hooks/useFetch';
+import WithHelperText from '../WithHelperText/WithHelperText';
 
 const RepositoryDetails = () => {
   const { repositoryId } = useParams() as { repositoryId: string };
@@ -127,19 +127,9 @@ const RepositoryDetails = () => {
             <GridItem>
               <Card>
                 <CardTitle>
-                  Resource syncs{' '}
-                  <Tooltip
-                    content={
-                      <div>
-                        Flight control will monitor the specified paths, import the defined fleets and synchronise
-                        devices
-                      </div>
-                    }
-                  >
-                    <Icon status="info">
-                      <QuestionCircleIcon />
-                    </Icon>
-                  </Tooltip>
+                  <WithHelperText popoverContent="Flight control will monitor the specified paths, import the defined fleets and synchronise devices">
+                    Resource syncs
+                  </WithHelperText>
                 </CardTitle>
                 <CardBody>
                   <RepositoryResourceSyncList repositoryId={repositoryId} />
