@@ -27,12 +27,12 @@ import { getErrorMessage } from '@app/utils/error';
 import { API_VERSION } from '@app/constants';
 import TextField from '@app/components/form/TextField';
 
-const gitRegex = new RegExp(/^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)(\/)?$/);
+const gitRegex = new RegExp(/^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/);
 
 const repositorySchema: ObjectSchema<RepositoryFormValues> = object({
   name: string().required('Name is required'),
   url: string()
-    .matches(gitRegex, 'Repository URL format is invalid. Enter the URL used for cloning the repository')
+    .matches(gitRegex, 'Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos')
     .required('Repository URL is required'),
   credentials: object()
     .shape({
@@ -89,18 +89,16 @@ const CreateRepositoryForm = ({ children }: React.PropsWithChildren<Record<never
             name="url"
             aria-label="Url"
             value={values.url}
-            helperText="Repository URL as defined for cloning the repository. Example: https://github.com/flightctl/flightctl-demos.git"
+            helperText="Repository URL. Example: https://github.com/flightctl/flightctl-demos"
           />
         </FormGroup>
         <FormSection title="Credentials">
-          <div>
-            <Checkbox
-              id="public-repository"
-              isChecked={values.credentials.isPublic}
-              onChange={() => setFieldValue('credentials.isPublic', !values.credentials.isPublic)}
-            />{' '}
-            This repository can be accessed publicly
-          </div>
+          <Checkbox
+            id="public-repository"
+            label="This repository can be accessed publicly"
+            isChecked={values.credentials.isPublic}
+            onChange={() => setFieldValue('credentials.isPublic', !values.credentials.isPublic)}
+          />
           {!values.credentials.isPublic && (
             <>
               <FormGroup label="Username">
