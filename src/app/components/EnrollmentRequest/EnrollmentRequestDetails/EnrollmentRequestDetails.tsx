@@ -21,8 +21,6 @@ import {
   DropdownList,
   Grid,
   GridItem,
-  Stack,
-  StackItem,
   TextArea,
 } from '@patternfly/react-core';
 import { EnrollmentRequest } from '@types';
@@ -64,147 +62,143 @@ const EnrollmentRequestDetails = () => {
       title={er?.metadata.name}
       resourceLink="/devicemanagement/enrollmentrequests"
       resourceName="Enrollment requests"
+      actions={
+        <DetailsPageActions>
+          <DropdownList>
+            <DropdownItem onClick={() => setIsApprovalModalOpen(true)} isDisabled={approvalStatus !== 'Pending'}>
+              Approve
+            </DropdownItem>
+            {deleteAction}
+          </DropdownList>
+        </DetailsPageActions>
+      }
     >
-      <Stack hasGutter>
-        <StackItem>
-          <DetailsPageActions>
-            <DropdownList>
-              <DropdownItem onClick={() => setIsApprovalModalOpen(true)} isDisabled={approvalStatus !== 'Pending'}>
-                Approve
-              </DropdownItem>
-              {deleteAction}
-            </DropdownList>
-          </DetailsPageActions>
-        </StackItem>
-        <StackItem>
-          <Grid hasGutter>
-            <GridItem md={12}>
-              <Card>
-                <CardTitle>Details</CardTitle>
-                <CardBody>
-                  <DescriptionList columnModifier={{ lg: '3Col' }}>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Name</DescriptionListTerm>
-                      <DescriptionListDescription>{er?.metadata.name || '-'}</DescriptionListDescription>
-                    </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Created</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        {getDateDisplay(er?.metadata.creationTimestamp)}
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>OS</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        {er?.spec?.deviceStatus?.systemInfo?.operatingSystem || '-'}
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Architecture</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        {er?.spec?.deviceStatus?.systemInfo?.architecture || '-'}
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Labels</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        <LabelsView labels={er?.metadata.labels} />
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Status</DescriptionListTerm>
-                      <DescriptionListDescription>{approvalStatus}</DescriptionListDescription>
-                    </DescriptionListGroup>
-                  </DescriptionList>
-                </CardBody>
-              </Card>
-            </GridItem>
-            <GridItem md={6}>
-              <DetailsPageCard>
-                <CardTitle>
-                  <WithHelperText popoverContent="A PEM-encoded PKCS#10 certificate signing request.">
-                    Certificate signing request
-                  </WithHelperText>
-                </CardTitle>
-                <DetailsPageCardBody>
-                  {er?.spec.csr ? (
-                    <TextArea
-                      aria-label="CSR"
-                      value={er.spec.csr}
-                      readOnlyVariant="plain"
-                      autoResize
-                      className="fctl-enrollment-details__text-area"
-                    />
-                  ) : (
-                    <Bullseye>Not available</Bullseye>
-                  )}
-                </DetailsPageCardBody>
-              </DetailsPageCard>
-            </GridItem>
-            <GridItem md={6}>
-              <DetailsPageCard>
-                <CardTitle>
-                  <WithHelperText popoverContent="A PEM-encoded signed certificate.">Certificate</WithHelperText>
-                </CardTitle>
-                <DetailsPageCardBody>
-                  {er?.status?.certificate ? (
-                    <TextArea
-                      aria-label="Certificate"
-                      value={er.status.certificate}
-                      readOnlyVariant="plain"
-                      autoResize
-                      className="fctl-enrollment-details__text-area"
-                    />
-                  ) : (
-                    <Bullseye>Not available</Bullseye>
-                  )}
-                </DetailsPageCardBody>
-                <CardFooter></CardFooter>
-              </DetailsPageCard>
-            </GridItem>
-            <GridItem md={6}>
-              <DetailsPageCard>
-                <CardTitle>Conditions</CardTitle>
-                <DetailsPageCardBody>
-                  {er && <ConditionsTable type="Enrollment request" conditions={er.status?.conditions} />}
-                </DetailsPageCardBody>
-              </DetailsPageCard>
-            </GridItem>
-            <GridItem md={6}>
-              <DetailsPageCard>
-                <CardTitle>Device conditions</CardTitle>
-                <DetailsPageCardBody>
-                  {er && <ConditionsTable type="Device" conditions={er.spec.deviceStatus?.conditions} />}
-                </DetailsPageCardBody>
-              </DetailsPageCard>
-            </GridItem>
-            <GridItem md={6}>
-              <DetailsPageCard>
-                <CardTitle>Systemd units</CardTitle>
-                <DetailsPageCardBody>
-                  {er && <SystemdTable systemdUnits={er?.spec.deviceStatus?.systemdUnits} />}
-                </DetailsPageCardBody>
-              </DetailsPageCard>
-            </GridItem>
-            <GridItem md={6}>
-              <DetailsPageCard>
-                <CardTitle>Containers</CardTitle>
-                <DetailsPageCardBody>
-                  {er && <ContainersTable containers={er.spec.deviceStatus?.containers} />}
-                </DetailsPageCardBody>
-              </DetailsPageCard>
-            </GridItem>
-            <GridItem md={6}>
-              <DetailsPageCard>
-                <CardTitle>System integrity measurements</CardTitle>
-                <DetailsPageCardBody>
-                  {er && <IntegrityTable measurements={er.spec.deviceStatus?.systemInfo?.measurements} />}
-                </DetailsPageCardBody>
-              </DetailsPageCard>
-            </GridItem>
-          </Grid>
-        </StackItem>
-      </Stack>
+      <Grid hasGutter>
+        <GridItem md={12}>
+          <Card>
+            <CardTitle>Details</CardTitle>
+            <CardBody>
+              <DescriptionList columnModifier={{ lg: '3Col' }}>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>Name</DescriptionListTerm>
+                  <DescriptionListDescription>{er?.metadata.name || '-'}</DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>Created</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    {getDateDisplay(er?.metadata.creationTimestamp)}
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>OS</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    {er?.spec?.deviceStatus?.systemInfo?.operatingSystem || '-'}
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>Architecture</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    {er?.spec?.deviceStatus?.systemInfo?.architecture || '-'}
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>Labels</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <LabelsView labels={er?.metadata.labels} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>Status</DescriptionListTerm>
+                  <DescriptionListDescription>{approvalStatus}</DescriptionListDescription>
+                </DescriptionListGroup>
+              </DescriptionList>
+            </CardBody>
+          </Card>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <CardTitle>
+              <WithHelperText popoverContent="A PEM-encoded PKCS#10 certificate signing request.">
+                Certificate signing request
+              </WithHelperText>
+            </CardTitle>
+            <DetailsPageCardBody>
+              {er?.spec.csr ? (
+                <TextArea
+                  aria-label="CSR"
+                  value={er.spec.csr}
+                  readOnlyVariant="plain"
+                  autoResize
+                  className="fctl-enrollment-details__text-area"
+                />
+              ) : (
+                <Bullseye>Not available</Bullseye>
+              )}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <CardTitle>
+              <WithHelperText popoverContent="A PEM-encoded signed certificate.">Certificate</WithHelperText>
+            </CardTitle>
+            <DetailsPageCardBody>
+              {er?.status?.certificate ? (
+                <TextArea
+                  aria-label="Certificate"
+                  value={er.status.certificate}
+                  readOnlyVariant="plain"
+                  autoResize
+                  className="fctl-enrollment-details__text-area"
+                />
+              ) : (
+                <Bullseye>Not available</Bullseye>
+              )}
+            </DetailsPageCardBody>
+            <CardFooter></CardFooter>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <CardTitle>Conditions</CardTitle>
+            <DetailsPageCardBody>
+              {er && <ConditionsTable type="Enrollment request" conditions={er.status?.conditions} />}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <CardTitle>Device conditions</CardTitle>
+            <DetailsPageCardBody>
+              {er && <ConditionsTable type="Device" conditions={er.spec.deviceStatus?.conditions} />}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <CardTitle>Systemd units</CardTitle>
+            <DetailsPageCardBody>
+              {er && <SystemdTable systemdUnits={er?.spec.deviceStatus?.systemdUnits} />}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <CardTitle>Containers</CardTitle>
+            <DetailsPageCardBody>
+              {er && <ContainersTable containers={er.spec.deviceStatus?.containers} />}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <CardTitle>System integrity measurements</CardTitle>
+            <DetailsPageCardBody>
+              {er && <IntegrityTable measurements={er.spec.deviceStatus?.systemInfo?.measurements} />}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+      </Grid>
       {er && isApprovalModalOpen && (
         <DeviceEnrollmentModal
           enrollmentRequest={er}

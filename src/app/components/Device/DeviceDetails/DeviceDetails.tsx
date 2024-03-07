@@ -14,8 +14,6 @@ import {
   DropdownList,
   Grid,
   GridItem,
-  Stack,
-  StackItem,
 } from '@patternfly/react-core';
 import { getDateDisplay } from '@app/utils/dates';
 import { useNavigate } from 'react-router-dom';
@@ -53,87 +51,81 @@ const DeviceDetails = () => {
       title={name}
       resourceLink="/devicemanagement/devices"
       resourceName="Devices"
+      actions={
+        <DetailsPageActions>
+          <DropdownList>{deleteAction}</DropdownList>
+        </DetailsPageActions>
+      }
     >
-      <Stack hasGutter>
-        <StackItem>
-          <DetailsPageActions>
-            <DropdownList>{deleteAction}</DropdownList>
-          </DetailsPageActions>
-        </StackItem>
-        <StackItem>
-          <Grid hasGutter>
-            <GridItem md={12}>
-              <Card>
-                <CardTitle>Details</CardTitle>
-                <CardBody>
-                  <DescriptionList columnModifier={{ lg: '3Col' }}>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Fingerprint</DescriptionListTerm>
-                      <DescriptionListDescription>{device?.metadata.name || '-'}</DescriptionListDescription>
-                    </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Created</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        {getDateDisplay(device?.metadata.creationTimestamp)}
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>OS</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        {device?.status.systemInfo?.operatingSystem || '-'}
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Architecture</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        {device?.status?.systemInfo?.architecture || '-'}
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Labels</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        <LabelsView labels={device?.metadata?.labels} />
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
-                  </DescriptionList>
-                </CardBody>
-              </Card>
-            </GridItem>
-            <GridItem md={6}>
-              <DetailsPageCard>
-                <CardTitle>Conditions</CardTitle>
-                <DetailsPageCardBody>
-                  {device && <ConditionsTable type="Device" conditions={device.status.conditions} />}
-                </DetailsPageCardBody>
-              </DetailsPageCard>
-            </GridItem>
-            <GridItem md={6}>
-              <DetailsPageCard>
-                <CardTitle>Systemd units</CardTitle>
-                <DetailsPageCardBody>
-                  {device && <SystemdTable device={device} refetch={refetch} />}
-                </DetailsPageCardBody>
-              </DetailsPageCard>
-            </GridItem>
-            <GridItem md={6}>
-              <DetailsPageCard>
-                <CardTitle>Containers</CardTitle>
-                <DetailsPageCardBody>
-                  {device && <ContainersTable containers={device.status.containers} />}
-                </DetailsPageCardBody>
-              </DetailsPageCard>
-            </GridItem>
-            <GridItem md={6}>
-              <DetailsPageCard>
-                <CardTitle>System integrity measurements</CardTitle>
-                <DetailsPageCardBody>
-                  {device && <IntegrityTable measurements={device.status.systemInfo?.measurements} />}
-                </DetailsPageCardBody>
-              </DetailsPageCard>
-            </GridItem>
-          </Grid>
-        </StackItem>
-      </Stack>
+      <Grid hasGutter>
+        <GridItem md={12}>
+          <Card>
+            <CardTitle>Details</CardTitle>
+            <CardBody>
+              <DescriptionList columnModifier={{ lg: '3Col' }}>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>Fingerprint</DescriptionListTerm>
+                  <DescriptionListDescription>{device?.metadata.name || '-'}</DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>Created</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    {getDateDisplay(device?.metadata.creationTimestamp)}
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>OS</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    {device?.status.systemInfo?.operatingSystem || '-'}
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>Architecture</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    {device?.status?.systemInfo?.architecture || '-'}
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>Labels</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <LabelsView labels={device?.metadata?.labels} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+              </DescriptionList>
+            </CardBody>
+          </Card>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <CardTitle>Conditions</CardTitle>
+            <DetailsPageCardBody>
+              {device && <ConditionsTable type="Device" conditions={device.status.conditions} />}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <CardTitle>Systemd units</CardTitle>
+            <DetailsPageCardBody>{device && <SystemdTable device={device} refetch={refetch} />}</DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <CardTitle>Containers</CardTitle>
+            <DetailsPageCardBody>
+              {device && <ContainersTable containers={device.status.containers} />}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <CardTitle>System integrity measurements</CardTitle>
+            <DetailsPageCardBody>
+              {device && <IntegrityTable measurements={device.status.systemInfo?.measurements} />}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+      </Grid>
       {deleteModal}
     </DetailsPage>
   );

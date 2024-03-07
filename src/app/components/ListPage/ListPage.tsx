@@ -1,4 +1,4 @@
-import { PageSection, PageSectionVariants, Stack, StackItem, Title } from '@patternfly/react-core';
+import { PageSection, PageSectionVariants, Title } from '@patternfly/react-core';
 import * as React from 'react';
 
 type ListPageProps = {
@@ -8,16 +8,14 @@ type ListPageProps = {
 
 const ListPage: React.FC<ListPageProps> = ({ title, children }) => {
   return (
-    <PageSection variant={PageSectionVariants.light}>
-      <Stack hasGutter>
-        <StackItem>
-          <Title headingLevel="h1" size="3xl">
-            {title}
-          </Title>
-        </StackItem>
-        <StackItem>{children}</StackItem>
-      </Stack>
-    </PageSection>
+    <>
+      <PageSection variant={PageSectionVariants.light}>
+        <Title headingLevel="h1" size="3xl">
+          {title}
+        </Title>
+      </PageSection>
+      <PageSection>{children}</PageSection>
+    </>
   );
 };
 

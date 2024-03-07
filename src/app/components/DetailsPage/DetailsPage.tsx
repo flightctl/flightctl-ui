@@ -6,8 +6,8 @@ import {
   Bullseye,
   PageSection,
   Spinner,
-  Stack,
-  StackItem,
+  Split,
+  SplitItem,
   Title,
 } from '@patternfly/react-core';
 import * as React from 'react';
@@ -20,9 +20,20 @@ type DetailsPageProps = {
   loading: boolean;
   resourceName: string;
   resourceLink: string;
+  actions?: React.ReactNode;
+  nav?: React.ReactNode;
 };
 
-const DetailsPage: React.FC<DetailsPageProps> = ({ title, children, error, loading, resourceLink, resourceName }) => {
+const DetailsPage: React.FC<DetailsPageProps> = ({
+  title,
+  children,
+  error,
+  loading,
+  resourceLink,
+  resourceName,
+  actions,
+  nav,
+}) => {
   let content = children;
   if (error) {
     content = (
@@ -39,24 +50,32 @@ const DetailsPage: React.FC<DetailsPageProps> = ({ title, children, error, loadi
   }
 
   return (
-    <PageSection>
-      <Stack hasGutter>
-        <StackItem>
-          <Breadcrumb>
-            <BreadcrumbItem>
-              <Link to={resourceLink}>{resourceName}</Link>
-            </BreadcrumbItem>
-            <BreadcrumbItem isActive>{title}</BreadcrumbItem>
-          </Breadcrumb>
-        </StackItem>
-        <StackItem>
-          <Title headingLevel="h1" size="3xl">
-            {title}
-          </Title>
-        </StackItem>
-        <StackItem>{content}</StackItem>
-      </Stack>
-    </PageSection>
+    <>
+      <PageSection variant="light" type="breadcrumb">
+        <Breadcrumb>
+          <BreadcrumbItem>
+            <Link to={resourceLink}>{resourceName}</Link>
+          </BreadcrumbItem>
+          <BreadcrumbItem isActive>{title}</BreadcrumbItem>
+        </Breadcrumb>
+      </PageSection>
+      <PageSection variant="light">
+        <Split hasGutter>
+          <SplitItem isFilled>
+            <Title headingLevel="h1" size="3xl">
+              {title}
+            </Title>
+          </SplitItem>
+          <SplitItem>{actions}</SplitItem>
+        </Split>
+      </PageSection>
+      {nav && (
+        <PageSection variant="light" type="nav">
+          {nav}
+        </PageSection>
+      )}
+      <PageSection>{content}</PageSection>
+    </>
   );
 };
 
