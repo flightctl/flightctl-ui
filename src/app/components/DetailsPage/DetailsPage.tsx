@@ -11,6 +11,7 @@ import {
   Title,
 } from '@patternfly/react-core';
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 
 type DetailsPageProps = {
   title: string | undefined;
@@ -42,7 +43,9 @@ const DetailsPage: React.FC<DetailsPageProps> = ({ title, children, error, loadi
       <Stack hasGutter>
         <StackItem>
           <Breadcrumb>
-            <BreadcrumbItem to={resourceLink}>{resourceName}</BreadcrumbItem>
+            <BreadcrumbItem>
+              <Link to={resourceLink}>{resourceName}</Link>
+            </BreadcrumbItem>
             <BreadcrumbItem isActive>{title}</BreadcrumbItem>
           </Breadcrumb>
         </StackItem>

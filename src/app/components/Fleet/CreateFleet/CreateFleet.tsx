@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Formik, useFormikContext } from 'formik';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import * as yaml from 'js-yaml';
 
 import {
@@ -130,7 +130,9 @@ const CreateFleet = () => {
       <Stack hasGutter>
         <StackItem>
           <Breadcrumb>
-            <BreadcrumbItem to="/devicemanagement/fleets">Fleets</BreadcrumbItem>
+            <BreadcrumbItem>
+              <Link to="/devicemanagement/fleets">Fleets</Link>
+            </BreadcrumbItem>
             <BreadcrumbItem isActive>Create fleet</BreadcrumbItem>
           </Breadcrumb>
           <Title headingLevel="h1" size="3xl">
