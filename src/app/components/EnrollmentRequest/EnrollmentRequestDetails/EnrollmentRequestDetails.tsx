@@ -9,7 +9,6 @@ import { getDateDisplay } from '@app/utils/dates';
 import { getApprovalStatus } from '@app/utils/status/enrollmentRequest';
 import {
   Bullseye,
-  Button,
   Card,
   CardBody,
   CardFooter,
@@ -22,7 +21,6 @@ import {
   DropdownList,
   Grid,
   GridItem,
-  Popover,
   Stack,
   StackItem,
   TextArea,
@@ -36,8 +34,8 @@ import './EnrollmentRequestDetails.css';
 import { useFetch } from '@app/hooks/useFetch';
 import DeviceEnrollmentModal from '../DeviceEnrollmentModal/DeviceEnrollmentModal';
 import DetailsPageCard, { DetailsPageCardBody } from '@app/components/DetailsPage/DetailsPageCard';
-import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import DetailsPageActions, { useDeleteAction } from '@app/components/DetailsPage/DetailsPageActions';
+import WithHelperText from '@app/components/WithHelperText/WithHelperText';
 
 const EnrollmentRequestDetails = () => {
   const { enrollmentRequestId } = useParams() as { enrollmentRequestId: string };
@@ -124,16 +122,9 @@ const EnrollmentRequestDetails = () => {
             <GridItem md={6}>
               <DetailsPageCard>
                 <CardTitle>
-                  <>
+                  <WithHelperText popoverContent="A PEM-encoded PKCS#10 certificate signing request.">
                     Certificate signing request
-                    <Popover
-                      triggerAction="hover"
-                      aria-label="Helper text"
-                      bodyContent="A PEM-encoded PKCS#10 certificate signing request."
-                    >
-                      <Button isInline variant="plain" icon={<OutlinedQuestionCircleIcon />} />
-                    </Popover>
-                  </>
+                  </WithHelperText>
                 </CardTitle>
                 <DetailsPageCardBody>
                   {er?.spec.csr ? (
@@ -153,16 +144,7 @@ const EnrollmentRequestDetails = () => {
             <GridItem md={6}>
               <DetailsPageCard>
                 <CardTitle>
-                  <>
-                    Certificate
-                    <Popover
-                      triggerAction="hover"
-                      aria-label="Helper text"
-                      bodyContent="A PEM-encoded signed certificate."
-                    >
-                      <Button isInline variant="plain" icon={<OutlinedQuestionCircleIcon />} />
-                    </Popover>
-                  </>
+                  <WithHelperText popoverContent="A PEM-encoded signed certificate.">Certificate</WithHelperText>
                 </CardTitle>
                 <DetailsPageCardBody>
                   {er?.status?.certificate ? (
