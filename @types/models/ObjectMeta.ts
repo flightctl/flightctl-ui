@@ -24,5 +24,9 @@ export type ObjectMeta = {
    * A resource that owns this resource, in "kind/name" format.
    */
   owner?: string;
+  /**
+   * Properties set by the service.
+   */
+  annotations?: Record<string, string>;
 };
 

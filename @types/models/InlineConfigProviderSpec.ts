@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type InlineConfigProviderSpec = {
-  name: string;
+import type { GenericConfigSpec } from './GenericConfigSpec';
+export type InlineConfigProviderSpec = (GenericConfigSpec & {
   inline: Record<string, any>;
-};
+});
 

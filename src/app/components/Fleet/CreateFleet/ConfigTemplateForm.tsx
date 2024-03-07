@@ -146,7 +146,7 @@ const ConfigTemplateForm = () => {
                                 repoURL: '',
                                 targetRevision: '',
                               } as GitConfigTemplate;
-                            } else if (value === 'kubeSecret') {
+                            } else if (value === 'kube') {
                               template = {
                                 type: 'kube',
                                 mountPath: '',
@@ -166,7 +166,7 @@ const ConfigTemplateForm = () => {
                           aria-label="Source select input"
                         >
                           <FormSelectOption value="git" label="Git config provider" />
-                          <FormSelectOption value="kubeSecret" label="Kubernetes secret provider" />
+                          <FormSelectOption value="kube" label="Kubernetes secret provider" />
                           <FormSelectOption value="inline" label="Inline config provider" />
                         </FormSelect>
                       </FormGroup>

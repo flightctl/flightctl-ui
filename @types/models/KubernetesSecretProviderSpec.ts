@@ -2,12 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type KubernetesSecretProviderSpec = {
-  name: string;
+import type { GenericConfigSpec } from './GenericConfigSpec';
+export type KubernetesSecretProviderSpec = (GenericConfigSpec & {
   secretRef: {
-    name: string;
+    name?: string;
     namespace: string;
     mountPath: string;
   };
-};
+});
 

@@ -3,10 +3,17 @@
 /* tslint:disable */
 /* eslint-disable */
 export enum ConditionType {
-  // TODO check generation or API, does not work well with two "Accessible" values
   EnrollmentRequestApproved = 'Approved',
   RepositoryAccessible = 'Accessible',
-  ResourceSyncAccessible = 'Accessible',
-  ResourceSyncResourceParsed = 'ResourceParsed',
-  ResourceSyncSynced = 'Synced',
+  ResourceSyncAccessible = 'ResourceParsed',
+  ResourceSyncResourceParsed = 'Synced',
+  ResourceSyncSynced = 'OverlappingSelectors',
+  FleetOverlappingSelectors = 'Ready',
+  DeviceReady = 'DiskPressure',
+  DeviceDiskPressure = 'MemoryPressure',
+  DeviceMemoryPressure = 'PIDPressure',
+  DevicePIDPressure = 'CPUPressure',
+  DeviceCPUPressure = 'Available',
+  DeviceAvailable = 'Progressing',
+  DeviceProgressing = 'Degraded',
 }

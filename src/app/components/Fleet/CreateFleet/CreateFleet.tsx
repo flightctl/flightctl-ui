@@ -18,7 +18,7 @@ import {
   TextInput,
   Title,
 } from '@patternfly/react-core';
-import { Fleet, GitConfigProviderSpec, InlineConfigProviderSpec, KubernetesSecretProviderSpec } from '@types';
+import { Fleet } from '@types';
 import { useFetch } from '@app/hooks/useFetch';
 import { getErrorMessage } from '@app/utils/error';
 import { API_VERSION } from '@app/constants';
@@ -54,28 +54,31 @@ const getFleetResource = (values: FleetFormValues): Fleet => ({
         config: values.configTemplates.map((ct) => {
           if (ct.type === 'git') {
             return {
+              configType: 'GitConfigProviderSpec',
               name: ct.name,
               gitRef: {
                 path: ct.path,
-                repoURL: ct.repoURL,
+                repository: ct.repoURL,
                 targetRevision: ct.targetRevision,
               },
-            } as GitConfigProviderSpec;
+            };
           }
           if (ct.type === 'kube') {
             return {
+              configType: 'KubernetesSecretProviderSpec',
               name: ct.name,
               secretRef: {
                 mountPath: ct.mountPath,
                 name: ct.secretName,
                 namespace: ct.secretNs,
               },
-            } as KubernetesSecretProviderSpec;
+            };
           }
           return {
+            configType: 'InlineConfigProviderSpec',
             inline: yaml.load(ct.inline),
             name: ct.name,
-          } as InlineConfigProviderSpec;
+          };
         }),
       },
     },
