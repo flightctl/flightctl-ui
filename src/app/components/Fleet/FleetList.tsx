@@ -20,18 +20,12 @@ import ListPageBody from '../ListPage/ListPageBody';
 import LabelsView from '@app/components/common/LabelsView';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 
-const FleetListToolbar = () => {
+const CreateFleetButton = () => {
   const navigate = useNavigate();
   return (
-    <Toolbar>
-      <ToolbarContent>
-        <ToolbarItem>
-          <Button variant="primary" onClick={() => navigate('/devicemanagement/fleets/create')}>
-            Create
-          </Button>
-        </ToolbarItem>
-      </ToolbarContent>
-    </Toolbar>
+    <Button variant="primary" onClick={() => navigate('/devicemanagement/fleets/create')}>
+      Create
+    </Button>
   );
 };
 
@@ -41,7 +35,7 @@ const FleetEmptyState = () => (
     <EmptyStateBody>Create a new fleet using the &quot;Create&quot; button</EmptyStateBody>
     <EmptyStateFooter>
       <EmptyStateActions>
-        <FleetListToolbar />
+        <CreateFleetButton />
       </EmptyStateActions>
     </EmptyStateFooter>
   </EmptyState>
@@ -60,7 +54,13 @@ const FleetTable = () => {
 
   return (
     <ListPageBody data={fleetList?.items} error={error} loading={loading} emptyState={<FleetEmptyState />}>
-      <FleetListToolbar />
+      <Toolbar>
+        <ToolbarContent>
+          <ToolbarItem>
+            <CreateFleetButton />
+          </ToolbarItem>
+        </ToolbarContent>
+      </Toolbar>
       <Table aria-label="Fleets table">
         <Thead>
           <Tr>

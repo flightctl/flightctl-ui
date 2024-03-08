@@ -12,7 +12,7 @@ type ActiveChildrenProps = {
 const ActiveChildren: React.FC<ActiveChildrenProps> = ({ isActive, children, setIsActive }) => {
   React.useEffect(() => {
     setIsActive(isActive);
-  }, [isActive]);
+  }, [isActive, setIsActive]);
   return children;
 };
 
