@@ -22,19 +22,13 @@ import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '@app/u
 import StatusInfo from '@app/components/common/StatusInfo';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 
-const RepositoryToolbar = () => {
+const CreateRepositoryButton = () => {
   const navigate = useNavigate();
 
   return (
-    <Toolbar>
-      <ToolbarContent>
-        <ToolbarItem>
-          <Button variant="primary" onClick={() => navigate('/administration/repositories/create')}>
-            Create
-          </Button>
-        </ToolbarItem>
-      </ToolbarContent>
-    </Toolbar>
+    <Button variant="primary" onClick={() => navigate('/administration/repositories/create')}>
+      Create
+    </Button>
   );
 };
 
@@ -44,7 +38,7 @@ const RepositoryEmptyState = () => (
     <EmptyStateBody>Create a new repository using the &quot;Create&quot; button</EmptyStateBody>
     <EmptyStateFooter>
       <EmptyStateActions>
-        <RepositoryToolbar />
+        <CreateRepositoryButton />
       </EmptyStateActions>
     </EmptyStateFooter>
   </EmptyState>
@@ -63,7 +57,13 @@ const RepositoryTable = () => {
 
   return (
     <ListPageBody data={repositoryList?.items} error={error} loading={loading} emptyState={<RepositoryEmptyState />}>
-      <RepositoryToolbar />
+      <Toolbar>
+        <ToolbarContent>
+          <ToolbarItem>
+            <CreateRepositoryButton />
+          </ToolbarItem>
+        </ToolbarContent>
+      </Toolbar>
       <Table aria-label="Repositories table">
         <Thead>
           <Tr>

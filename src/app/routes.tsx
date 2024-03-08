@@ -14,7 +14,7 @@ import AppLayout from '@app/components/AppLayout/AppLayout';
 import NotFound from '@app/components/AppLayout/NotFound';
 import CreateFleet from '@app/components/Fleet/CreateFleet/CreateFleet';
 import FleetList from '@app/components/Fleet/FleetList';
-import FleetDetails from '@app/components/Fleet/FleetDetails';
+import FleetDetails from '@app/components/Fleet/FleetDetails/FleetDetails';
 import EnrollmentRequestList from '@app/components/EnrollmentRequest/EnrollmentRequestList';
 import DeviceList from '@app/components/Device/DeviceList';
 import RepositoryList from '@app/components/Repository/RepositoryList';
@@ -167,7 +167,7 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
         ),
       },
       {
-        path: ':fleetId',
+        path: ':fleetId/*',
         title: 'Fleet Details',
         element: (
           <TitledRoute title="Fleet Details">

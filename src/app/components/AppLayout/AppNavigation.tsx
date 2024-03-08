@@ -1,12 +1,10 @@
 import * as React from 'react';
-import { NavLink } from 'react-router-dom';
 
-import { Nav, NavExpandable, NavItem, NavList } from '@patternfly/react-core';
+import { Nav, NavExpandable, NavList } from '@patternfly/react-core';
 
 import { ExtendedRouteObject, appRouteSections } from '@app/routes';
 import { UserPreferencesContext } from '../UserPreferences/UserPreferencesProvider';
-
-import './AppNavigation.css';
+import NavItem from '../NavItem/NavItem';
 
 const SectionRoute = ({ route }: { route: ExtendedRouteObject }) => {
   const { experimentalFeatures } = React.useContext(UserPreferencesContext);
@@ -16,11 +14,7 @@ const SectionRoute = ({ route }: { route: ExtendedRouteObject }) => {
   if (route.isExperimental && !experimentalFeatures) {
     return null;
   }
-  return (
-    <NavItem id={route.path} key={route.path}>
-      <NavLink to={route.path || ''}>{route.title}</NavLink>
-    </NavItem>
-  );
+  return <NavItem to={route.path || ''}>{route.title}</NavItem>;
 };
 
 const AppNavigation = () => {
