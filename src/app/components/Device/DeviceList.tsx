@@ -1,14 +1,13 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { EmptyState, EmptyStateHeader, Icon } from '@patternfly/react-core';
+import { EmptyState, EmptyStateHeader } from '@patternfly/react-core';
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { InfoCircleIcon } from '@patternfly/react-icons';
 
 import { useFetch } from '@app/hooks/useFetch';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
-import { getDeviceFleet } from '@app/utils/devices';
 import { Device, DeviceList } from '@types';
 
+import DeviceFleet from '@app/components/Device/DeviceDetails/DeviceFleet';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
@@ -51,7 +50,6 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
         <Tbody>
           {devices.map((device) => {
             const deviceName = device.metadata.name as string;
-            const fleetName = getDeviceFleet(device);
             return (
               <Tr key={deviceName}>
                 <Td dataLabel="Fingerprint">
@@ -60,21 +58,11 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
                 <Td dataLabel="Name">{device.metadata.labels?.displayName || '-'}</Td>
                 {showFleet && (
                   <Td dataLabel="Fleet">
-                    {fleetName ? (
-                      <Link to={`/devicemanagement/fleets/${fleetName}`}>{fleetName}</Link>
-                    ) : (
-                      <>
-                        {' '}
-                        <Icon status="info">
-                          <InfoCircleIcon />
-                        </Icon>{' '}
-                        No matching Fleet
-                      </>
-                    )}
+                    <DeviceFleet deviceMetadata={device.metadata} />
                   </Td>
                 )}
                 <Td dataLabel="Creation timestamp">{device.metadata.creationTimestamp || '-'}</Td>
-                <Td dataLabel="Operating system">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
+                <Td dataLabel="Operating system">{device.spec.os?.image || '-'}</Td>
                 <Td isActionCell>
                   <ActionsColumn items={[deleteAction(device.metadata.name || '', deviceName)]} />
                 </Td>

@@ -25,6 +25,7 @@ import ContainersTable from '@app/components/DetailsPage/Tables/ContainersTable'
 import IntegrityTable from '@app/components/DetailsPage/Tables/IntegrityTable';
 import DetailsPageCard, { DetailsPageCardBody } from '@app/components/DetailsPage/DetailsPageCard';
 import DetailsPageActions, { useDeleteAction } from '@app/components/DetailsPage/DetailsPageActions';
+import DeviceFleet from '@app/components/Device/DeviceDetails/DeviceFleet';
 import { useFetch } from '@app/hooks/useFetch';
 
 const DeviceDetails = () => {
@@ -74,10 +75,14 @@ const DeviceDetails = () => {
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>OS</DescriptionListTerm>
+                  <DescriptionListTerm>Fleet</DescriptionListTerm>
                   <DescriptionListDescription>
-                    {device?.status.systemInfo?.operatingSystem || '-'}
+                    <DeviceFleet deviceMetadata={device?.metadata || {}} />
                   </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>OS</DescriptionListTerm>
+                  <DescriptionListDescription>{device?.spec.os?.image || '-'}</DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>Architecture</DescriptionListTerm>
