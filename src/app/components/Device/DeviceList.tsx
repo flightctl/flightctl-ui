@@ -25,6 +25,9 @@ import { DeleteListActionResult, useDeleteListAction } from '../ListPage/ListPag
 import { getDeviceFleet } from '@app/utils/devices';
 import AddDeviceModal from './AddDeviceModal/AddDeviceModal';
 import EnrollmentRequestTable from '../EnrollmentRequest/EnrollmentRequestTable';
+import { getDateDisplay } from '@app/utils/dates';
+import { TableColumn } from '@app/types/extraTypes';
+import { useTableSort } from '@app/hooks/useTableSort';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -65,7 +68,7 @@ const DeviceRow = ({
           <DeviceFleet deviceMetadata={device.metadata} />
         </Td>
       )}
-      <Td dataLabel="Creation timestamp">{device.metadata.creationTimestamp || '-'}</Td>
+      <Td dataLabel="Created at">{getDateDisplay(device.metadata.creationTimestamp)}</Td>
       <Td dataLabel="Operating system">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
       <Td isActionCell>
         <ActionsColumn
@@ -81,6 +84,58 @@ const DeviceRow = ({
     </Tr>
   );
 };
+
+const getColumns = (showFleet: boolean): TableColumn<Device>[] => [
+  {
+    name: 'Fingerprint',
+    onSort: (resources) =>
+      resources.sort((a, b) => {
+        const aFingerprint = a.metadata.name || '-';
+        const bFingerprint = b.metadata.name || '-';
+        return aFingerprint.localeCompare(bFingerprint);
+      }),
+  },
+  {
+    name: 'Name',
+    onSort: (resources) =>
+      resources.sort((a, b) => {
+        const aName = a.metadata.labels?.displayName || '-';
+        const bName = b.metadata.labels?.displayName || '-';
+        return aName.localeCompare(bName);
+      }),
+  },
+  ...(showFleet
+    ? [
+        {
+          name: 'Fleet',
+          onSort: (resources) =>
+            resources.sort((a, b) => {
+              const aFleet = getDeviceFleet(a.metadata) || '-';
+              const bFleet = getDeviceFleet(b.metadata) || '-';
+              return aFleet.localeCompare(bFleet);
+            }),
+        } as TableColumn<Device>,
+      ]
+    : []),
+  {
+    name: 'Created at',
+    onSort: (resources) =>
+      resources.sort((a, b) => {
+        const aDate = a.metadata.creationTimestamp || 0;
+        const bDate = b.metadata.creationTimestamp || 0;
+        return new Date(bDate).getTime() - new Date(aDate).getTime();
+      }),
+  },
+  {
+    name: 'Operating system',
+    onSort: (resources) =>
+      resources.sort((a, b) => {
+        const aOS = a.status?.systemInfo?.operatingSystem || '-';
+        const bOS = b.status?.systemInfo?.operatingSystem || '-';
+        return aOS.localeCompare(bOS);
+      }),
+  },
+];
 
 interface DeviceTableProps {
   devices: Device[];
@@ -98,6 +153,9 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
     },
   });
 
+  const columns = React.useMemo(() => getColumns(showFleet), [showFleet]);
+  const { getSortParams, sortedData } = useTableSort(devices, columns);
+
   return (
     <>
       <PageSection variant="light">
@@ -106,16 +164,16 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
       <Table aria-label="Devices table">
         <Thead>
           <Tr>
-            <Th modifier="wrap">Fingerprint</Th>
-            <Th modifier="wrap">Name</Th>
-            {showFleet && <Th>Fleet</Th>}
-            <Th modifier="wrap">Creation timestamp</Th>
-            <Th modifier="wrap">Operating system</Th>
+            {columns.map((c, index) => (
+              <Th key={c.name} modifier="wrap" sort={getSortParams(index)}>
+                {c.name}
+              </Th>
+            ))}
             <Td />
           </Tr>
         </Thead>
         <Tbody>
-          {devices.map((device) => (
+          {sortedData.map((device) => (
             <DeviceRow device={device} showFleet={showFleet} key={device.metadata.name} deleteAction={deleteAction} />
           ))}
         </Tbody>

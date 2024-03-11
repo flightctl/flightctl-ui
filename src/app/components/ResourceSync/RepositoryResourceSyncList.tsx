@@ -11,6 +11,56 @@ import { getObservedHash, getRepositorySyncStatus } from '@app/utils/status/repo
 import StatusInfo from '@app/components/common/StatusInfo';
 import CreateRepositoryResourceSync from '@app/components/ResourceSync/CreateResourceSync/CreateRepositoryResourceSync';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
+import { useTableSort } from '@app/hooks/useTableSort';
+import { TableColumn } from '@app/types/extraTypes';
+
+const columns: TableColumn<ResourceSync>[] = [
+  {
+    name: 'Name',
+    onSort: (resources) =>
+      resources.sort((a, b) => {
+        const aName = a.metadata.name || '-';
+        const bName = b.metadata.name || '-';
+        return aName.localeCompare(bName);
+      }),
+  },
+  {
+    name: 'Path',
+    onSort: (resources) =>
+      resources.sort((a, b) => {
+        const aPath = a.spec.path || '-';
+        const bPath = b.spec.path || '-';
+        return aPath.localeCompare(bPath);
+      }),
+  },
+  {
+    name: 'Target revision',
+    onSort: (resources) =>
+      resources.sort((a, b) => {
+        const aRevision = a.spec.targetRevision || '-';
+        const bRevision = b.spec.targetRevision || '-';
+        return aRevision.localeCompare(bRevision);
+      }),
+  },
+  {
+    name: 'Status',
+    onSort: (resources) =>
+      resources.sort((a, b) => {
+        const aStatus = getRepositorySyncStatus(a);
+        const bStatus = getRepositorySyncStatus(b);
+        return aStatus.status.localeCompare(bStatus.status);
+      }),
+  },
+  {
+    name: 'Observed hash',
+    onSort: (resources) =>
+      resources.sort((a, b) => {
+        const aHash = getObservedHash(a) || '-';
+        const bHash = getObservedHash(b) || '-';
+        return aHash.localeCompare(bHash);
+      }),
+  },
+];
 
 import './RepositoryResourceSyncList.css';
 
@@ -47,21 +97,23 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
     },
   });
 
+  const { getSortParams, sortedData } = useTableSort(resourceSyncs, columns);
+
   return (
     <>
       <Table aria-label="Repositories table">
         <Thead>
           <Tr>
-            <Th>Name</Th>
-            <Th>Path</Th>
-            <Th>Target revision</Th>
-            <Th>Status</Th>
-            <Th>Observed hash</Th>
+            {columns.map((c, index) => (
+              <Th key={c.name} sort={getSortParams(index)}>
+                {c.name}
+              </Th>
+            ))}
             <Td />
           </Tr>
         </Thead>
         <Tbody>
-          {resourceSyncs.map((resourceSync) => {
+          {sortedData.map((resourceSync) => {
             const rsName = resourceSync.metadata.name as string;
             const rsRef = rsRefs[rsName];
             const isSelected = rsName === selectedRs;

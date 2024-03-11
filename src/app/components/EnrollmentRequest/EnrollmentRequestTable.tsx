@@ -20,6 +20,50 @@ import * as React from 'react';
 import DeviceEnrollmentModal from './DeviceEnrollmentModal/DeviceEnrollmentModal';
 import { Link } from 'react-router-dom';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
+import { TableColumn } from '@app/types/extraTypes';
+import { useTableSort } from '@app/hooks/useTableSort';
+import { getDateDisplay } from '@app/utils/dates';
+
+const columns: TableColumn<EnrollmentRequest>[] = [
+  {
+    name: 'Name',
+    onSort: (resources) =>
+      resources.sort((a, b) => {
+        const aFingerprint = a.metadata.name || '-';
+        const bFingerprint = b.metadata.name || '-';
+        return aFingerprint.localeCompare(bFingerprint);
+      }),
+  },
+  {
+    name: 'Status',
+    defaultSort: true,
+    onSort: (resources) =>
+      resources.sort((a, b) => {
+        const aStatus = getApprovalStatus(a);
+        const bStatus = getApprovalStatus(b);
+        if (aStatus === 'Pending approval' && bStatus === 'Pending approval') {
+          return 0;
+        }
+        if (aStatus === 'Pending approval') {
+          return -1;
+        }
+
+        if (bStatus === 'Pending approval') {
+          return 1;
+        }
+        return aStatus.localeCompare(bStatus);
+      }),
+  },
+  {
+    name: 'Created at',
+    onSort: (resources) =>
+      resources.sort((a, b) => {
+        const aDate = a.metadata.creationTimestamp || 0;
+        const bDate = b.metadata.creationTimestamp || 0;
+        return new Date(bDate).getTime() - new Date(aDate).getTime();
+      }),
+  },
+];
 
 type EnrollmentRequestTableProps = {
   enrollmentRequests: EnrollmentRequest[];
@@ -71,6 +115,8 @@ const EnrollmentRequestTable: React.FC<EnrollmentRequestTableProps> = ({ enrollm
     }
     return filters.status.includes(getApprovalStatus(er));
   });
+
+  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   return (
     <>
@@ -135,14 +181,16 @@ const EnrollmentRequestTable: React.FC<EnrollmentRequestTableProps> = ({ enrollm
       <Table aria-label="Enrollment requests table">
         <Thead>
           <Tr>
-            <Th>Name</Th>
-            <Th>Status</Th>
-            <Th>Creation timestamp</Th>
+            {columns.map((c, index) => (
+              <Th key={c.name} sort={getSortParams(index)}>
+                {c.name}
+              </Th>
+            ))}
             <Td />
           </Tr>
         </Thead>
         <Tbody>
-          {filteredData?.map((er) => {
+          {sortedData.map((er) => {
             const approvalStatus = getApprovalStatus(er);
             return (
               <Tr key={er.metadata.name}>
@@ -150,7 +198,7 @@ const EnrollmentRequestTable: React.FC<EnrollmentRequestTableProps> = ({ enrollm
                   <Link to={`/devicemanagement/enrollmentrequests/${er.metadata.name}`}>{er.metadata.name || '-'}</Link>
                 </Td>
                 <Td dataLabel="Status">{approvalStatus}</Td>
-                <Td dataLabel="Creation timestamp">{er.metadata.creationTimestamp}</Td>
+                <Td dataLabel="Created at">{getDateDisplay(er.metadata.creationTimestamp)}</Td>
                 <Td isActionCell>
                   <ActionsColumn
                     items={[
