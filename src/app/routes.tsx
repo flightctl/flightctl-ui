@@ -1,7 +1,15 @@
 import * as React from 'react';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useEffect } from 'react';
 
-import { Navigate, RouteObject, RouterProvider, createBrowserRouter, useParams, useRouteError } from 'react-router-dom';
+import {
+  Navigate,
+  RouteObject,
+  RouterProvider,
+  createBrowserRouter,
+  useNavigate,
+  useParams,
+  useRouteError,
+} from 'react-router-dom';
 import { Overview } from '@app/old/Overview/Overview';
 import { Experimental } from '@app/old/Experimental/Experimental';
 import { Experimental2 } from '@app/old/Experimental/Experimental2';
@@ -52,6 +60,12 @@ const ErrorPage = () => {
 const TitledRoute = ({ title, children }: PropsWithChildren<{ title: string }>) => {
   useDocumentTitle(`${APP_TITLE} | ${title}`);
   return children;
+};
+
+const Refresh = () => {
+  const navigate = useNavigate();
+  useEffect(() => navigate(-1), [navigate]);
+  return <></>;
 };
 
 const experimentalRoutes: ExtendedRouteObject[] = [
@@ -283,6 +297,10 @@ const administrationRoutes: ExtendedRouteObject[] = [
         <ImageBuilder />
       </TitledRoute>
     ),
+  },
+  {
+    path: '/refresh',
+    element: <Refresh />,
   },
 ];
 

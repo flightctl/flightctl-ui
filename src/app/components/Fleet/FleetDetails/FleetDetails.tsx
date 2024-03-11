@@ -13,8 +13,9 @@ import FleetDevicesTab from './Tabs/FleetDevicesTab';
 import NavItem from '@app/components/NavItem/NavItem';
 
 const FleetDetails = () => {
-  const { fleetId } = useParams();
+  const { fleetId } = useParams() as { fleetId: string };
   const [fleet, isLoading, error] = useFetchPeriodically<Required<Fleet>>({ endpoint: `fleets/${fleetId}` });
+
   const { remove } = useFetch();
   const navigate = useNavigate();
   const { deleteAction, deleteModal } = useDeleteAction({
@@ -31,9 +32,9 @@ const FleetDetails = () => {
     <DetailsPage
       loading={isLoading}
       error={error}
-      title={fleetId}
+      id={fleetId}
       resourceLink="/devicemanagement/fleets"
-      resourceName="Fleets"
+      resourceType="Fleets"
       actions={
         <DetailsPageActions>
           <DropdownList>{deleteAction}</DropdownList>
