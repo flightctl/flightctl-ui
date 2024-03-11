@@ -1,14 +1,21 @@
-import { Button, Label, LabelGroup, Split, SplitItem, Stack, StackItem } from '@patternfly/react-core';
-import { Device } from '@types';
 import * as React from 'react';
+import { Button, Label, LabelGroup, Split, SplitItem, Stack, StackItem } from '@patternfly/react-core';
+import { PencilAltIcon } from '@patternfly/react-icons';
+
+import { Device } from '@types';
+import WithTooltip from '@app/components/common/WithTooltip';
+import { getDeviceFleet } from '@app/utils/devices';
+
 import MatchPatternsModal from '../MatchPatternsModal/MatchPatternsModal';
 import SystemdDetailsTable from '../../DetailsPage/Tables/SystemdTable';
-import { PencilAltIcon } from '@patternfly/react-icons';
 
 type SystemdTableProps = { device: Device; refetch: VoidFunction };
 
 const SystemdTable: React.FC<SystemdTableProps> = ({ refetch, device }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const disabledEditReason = getDeviceFleet(device.metadata)
+    ? 'The device is owned by a fleet and it cannot be edited'
+    : '';
   return (
     <>
       <Stack hasGutter>
@@ -24,8 +31,15 @@ const SystemdTable: React.FC<SystemdTableProps> = ({ refetch, device }) => {
               </LabelGroup>
             </SplitItem>
             <SplitItem>
-              <Button variant="link" icon={<PencilAltIcon />} onClick={() => setIsModalOpen(true)}>
-                Edit
+              <Button
+                variant="link"
+                icon={<PencilAltIcon />}
+                onClick={() => setIsModalOpen(true)}
+                isAriaDisabled={!!disabledEditReason}
+              >
+                <WithTooltip showTooltip={!!disabledEditReason} content={disabledEditReason}>
+                  <span>Edit</span>
+                </WithTooltip>
               </Button>
             </SplitItem>
           </Split>
