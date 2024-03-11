@@ -11,6 +11,7 @@ import DeviceFleet from '@app/components/Device/DeviceDetails/DeviceFleet';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
+import { getDeviceFleet } from '@app/utils/devices';
 
 interface DeviceTableProps {
   devices: Device[];
@@ -51,6 +52,7 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
           {devices.map((device) => {
             const deviceName = device.metadata.name as string;
             const displayName = device.metadata.labels?.displayName;
+            const boundFleet = getDeviceFleet(device.metadata);
             return (
               <Tr key={deviceName}>
                 <Td dataLabel="Fingerprint">
@@ -65,7 +67,15 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
                 <Td dataLabel="Creation timestamp">{device.metadata.creationTimestamp || '-'}</Td>
                 <Td dataLabel="Operating system">{device.spec.os?.image || '-'}</Td>
                 <Td isActionCell>
-                  <ActionsColumn items={[deleteAction({ resourceId: deviceName, resourceName: displayName })]} />
+                  <ActionsColumn
+                    items={[
+                      deleteAction({
+                        resourceId: deviceName,
+                        resourceName: displayName,
+                        disabledReason: boundFleet ? 'Devices bound to a fleet cannot be deleted' : '',
+                      }),
+                    ]}
+                  />
                 </Td>
               </Tr>
             );

@@ -44,12 +44,12 @@ const ResourceSyncToRepository = () => {
         Resource sync {rsId}
       </Title>
       {error ? (
-          <EmptyState>
-            <EmptyStateHeader>
-              Could not find the details for the resourcesync <strong>{rsId}</strong>
-            </EmptyStateHeader>
-            <EmptyStateBody>{error}</EmptyStateBody>
-          </EmptyState>
+        <EmptyState>
+          <EmptyStateHeader>
+            Could not find the details for the resourcesync <strong>{rsId}</strong>
+          </EmptyStateHeader>
+          <EmptyStateBody>{error}</EmptyStateBody>
+        </EmptyState>
       ) : (
         <Bullseye>
           <Spinner />
