@@ -22,6 +22,7 @@ import { getFleetStatusType } from '@app/utils/status/fleet';
 import { CheckCircleIcon, InProgressIcon, QuestionCircleIcon } from '@patternfly/react-icons';
 import { getSourceUrls } from '@app/utils/fleets';
 import FleetServiceStatus from '@app/components/Metrics/FleetServiceStatus';
+import FleetOwnerLink from '@app/components/Fleet/FleetDetails/FleetOwnerLink';
 
 const fakeDevicesStatus = {
   Ready: { count: 720 },
@@ -69,12 +70,6 @@ const DetailsTab = ({ fleet }: { fleet: Fleet }) => {
           <CardBody>
             <DescriptionList columnModifier={{ lg: '3Col' }}>
               <DescriptionListGroup>
-                <DescriptionListTerm>Created</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {getDateDisplay(fleet.metadata.creationTimestamp || '')}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
                 <DescriptionListTerm>OS image</DescriptionListTerm>
                 <DescriptionListDescription>{fleet.spec.template.spec.os?.image}</DescriptionListDescription>
               </DescriptionListGroup>
@@ -84,13 +79,12 @@ const DetailsTab = ({ fleet }: { fleet: Fleet }) => {
                   <LabelsView labels={fleet.spec.selector?.matchLabels} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
-              {experimentalFeatures && (
-                <DescriptionListGroup>
-                  <DescriptionListTerm>Created by</DescriptionListTerm>
-                  <DescriptionListDescription>user unknown</DescriptionListDescription>
-                </DescriptionListGroup>
-              )}
-
+              <DescriptionListGroup>
+                <DescriptionListTerm>Managed by</DescriptionListTerm>
+                <DescriptionListDescription>
+                  <FleetOwnerLink owner={fleet.metadata.owner} />
+                </DescriptionListDescription>
+              </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>Status</DescriptionListTerm>
                 <DescriptionListDescription>
@@ -119,6 +113,18 @@ const DetailsTab = ({ fleet }: { fleet: Fleet }) => {
                   <SourceUrlList sourceUrls={getSourceUrls(fleet)} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
+              <DescriptionListGroup>
+                <DescriptionListTerm>Created</DescriptionListTerm>
+                <DescriptionListDescription>
+                  {getDateDisplay(fleet.metadata.creationTimestamp || '')}
+                </DescriptionListDescription>
+              </DescriptionListGroup>
+              {experimentalFeatures && (
+                <DescriptionListGroup>
+                  <DescriptionListTerm>Created by</DescriptionListTerm>
+                  <DescriptionListDescription>user unknown</DescriptionListDescription>
+                </DescriptionListGroup>
+              )}
             </DescriptionList>
           </CardBody>
         </Card>

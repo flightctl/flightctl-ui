@@ -24,6 +24,7 @@ const FleetDetails = () => {
     },
     resourceName: fleet?.metadata.name || '',
     resourceType: 'Fleet',
+    disabledReason: fleet?.metadata?.owner && 'Fleets managed by a Resourcesync cannot be deleted',
   });
 
   return (

@@ -50,12 +50,13 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
         <Tbody>
           {devices.map((device) => {
             const deviceName = device.metadata.name as string;
+            const displayName = device.metadata.labels?.displayName;
             return (
               <Tr key={deviceName}>
                 <Td dataLabel="Fingerprint">
                   <Link to={`/devicemanagement/devices/${deviceName}`}>{deviceName}</Link>
                 </Td>
-                <Td dataLabel="Name">{device.metadata.labels?.displayName || '-'}</Td>
+                <Td dataLabel="Name">{displayName || '-'}</Td>
                 {showFleet && (
                   <Td dataLabel="Fleet">
                     <DeviceFleet deviceMetadata={device.metadata} />
@@ -64,7 +65,7 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
                 <Td dataLabel="Creation timestamp">{device.metadata.creationTimestamp || '-'}</Td>
                 <Td dataLabel="Operating system">{device.spec.os?.image || '-'}</Td>
                 <Td isActionCell>
-                  <ActionsColumn items={[deleteAction(device.metadata.name || '', deviceName)]} />
+                  <ActionsColumn items={[deleteAction({ resourceId: deviceName, resourceName: displayName })]} />
                 </Td>
               </Tr>
             );

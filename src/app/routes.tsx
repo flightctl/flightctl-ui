@@ -16,17 +16,17 @@ import CreateFleet from '@app/components/Fleet/CreateFleet/CreateFleet';
 import FleetList from '@app/components/Fleet/FleetList';
 import FleetDetails from '@app/components/Fleet/FleetDetails/FleetDetails';
 import EnrollmentRequestList from '@app/components/EnrollmentRequest/EnrollmentRequestList';
+import EnrollmentRequestDetails from '@app/components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails';
 import DeviceList from '@app/components/Device/DeviceList';
-import RepositoryList from '@app/components/Repository/RepositoryList';
-import RepositoryDetails from '@app/components/Repository/RepositoryDetails';
+import DeviceDetails from '@app/components/Device/DeviceDetails/DeviceDetails';
 import CreateRepository from '@app/components/Repository/CreateRepository/CreateRepository';
+import RepositoryList from '@app/components/Repository/RepositoryList';
+import RepositoryDetails from '@app/components/Repository/RepositoryDetails/RepositoryDetails';
+import ResourceSyncToRepository from '@app/components/ResourceSync/ResourceSyncToRepository';
 
 import { useDocumentTitle } from '@app/hooks/useDocumentTitle';
 import { APP_TITLE } from '@app/constants';
-
 import { UserPreferencesContext } from './components/UserPreferences/UserPreferencesProvider';
-import DeviceDetails from './components/Device/DeviceDetails/DeviceDetails';
-import EnrollmentRequestDetails from './components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails';
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -244,7 +244,7 @@ const administrationRoutes: ExtendedRouteObject[] = [
         ),
       },
       {
-        path: ':repositoryId',
+        path: ':repositoryId/*',
         title: 'Repository Details',
         element: (
           <TitledRoute title="Repository Details">
@@ -253,6 +253,16 @@ const administrationRoutes: ExtendedRouteObject[] = [
         ),
       },
     ],
+  },
+  {
+    path: '/administration/resourcesyncs/:rsId',
+    title: 'Resource sync',
+    // Fetches the RS from its ID and redirects to the repository page
+    element: (
+      <TitledRoute title="Resource sync">
+        <ResourceSyncToRepository />
+      </TitledRoute>
+    ),
   },
   {
     path: '/administration/organization',

@@ -6,11 +6,20 @@ type DeleteActionProps = {
   onDelete: () => Promise<unknown>;
   resourceType: string;
   resourceName: string;
+  disabledReason?: string | boolean;
 };
 
-export const useDeleteAction = ({ resourceType, resourceName, onDelete }: DeleteActionProps) => {
+export const useDeleteAction = ({ resourceType, resourceName, onDelete, disabledReason }: DeleteActionProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
-  const deleteAction = <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>Delete</DropdownItem>;
+  const deleteAction = (
+    <DropdownItem
+      onClick={() => setIsDeleteModalOpen(true)}
+      isAriaDisabled={!!disabledReason}
+      tooltipProps={{ content: disabledReason }}
+    >
+      Delete
+    </DropdownItem>
+  );
   const deleteModal = isDeleteModalOpen && (
     <DeleteModal
       resourceType={resourceType}

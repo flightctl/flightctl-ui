@@ -2,6 +2,7 @@ import * as React from 'react';
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import PlusCircleIcon from '@patternfly/react-icons/dist/esm/icons/plus-circle-icon';
 import { Button, EmptyState, EmptyStateBody, Grid, GridItem, Spinner } from '@patternfly/react-core';
+import { useLocation } from 'react-router';
 
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import { useFetch } from '@app/hooks/useFetch';
@@ -11,8 +12,32 @@ import StatusInfo from '@app/components/common/StatusInfo';
 import CreateRepositoryResourceSync from '@app/components/ResourceSync/CreateResourceSync/CreateRepositoryResourceSync';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 
+import './RepositoryResourceSyncList.css';
+
+const createRefs = (rsList: ResourceSync[]) => {
+  const rsRefs = {};
+  rsList.forEach((rs) => {
+    if (rs.metadata.name) {
+      rsRefs[rs.metadata.name] = React.createRef();
+    }
+  });
+  return rsRefs;
+};
+
 const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: ResourceSync[]; refetch: VoidFunction }) => {
   const { remove } = useFetch();
+  const { hash = '#' } = useLocation();
+  const rsRefs = createRefs(resourceSyncs);
+  const selectedRs = hash.split('#')[1];
+
+  React.useEffect(() => {
+    const rsRow = rsRefs[selectedRs]?.current;
+    if (rsRow) {
+      rsRow.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
+    // Needs to be run only at the beginning
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { deleteAction, deleteModal } = useDeleteListAction({
     resourceType: 'Resource Sync',
@@ -36,20 +61,25 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
           </Tr>
         </Thead>
         <Tbody>
-          {resourceSyncs.map((resourceSync) => (
-            <Tr key={resourceSync.metadata.name}>
-              <Td dataLabel="Name">{resourceSync.metadata.name}</Td>
-              <Td dataLabel="Path">{resourceSync.spec.path || ''}</Td>
-              <Td dataLabel="Target revision">{resourceSync.spec.targetRevision}</Td>
-              <Td dataLabel="Status">
-                <StatusInfo statusInfo={getRepositorySyncStatus(resourceSync)} />
-              </Td>
-              <Td dataLabel="Observed hash">{getObservedHash(resourceSync)}</Td>
-              <Td isActionCell>
-                <ActionsColumn items={[deleteAction(resourceSync.metadata.name || '')]} />
-              </Td>
-            </Tr>
-          ))}
+          {resourceSyncs.map((resourceSync) => {
+            const rsName = resourceSync.metadata.name as string;
+            const rsRef = rsRefs[rsName];
+            const isSelected = rsName === selectedRs;
+            return (
+              <Tr key={rsName} ref={rsRef} className={isSelected ? 'fctl_rslist-row--selected' : ''}>
+                <Td dataLabel="Name">{rsName}</Td>
+                <Td dataLabel="Path">{resourceSync.spec.path || ''}</Td>
+                <Td dataLabel="Target revision">{resourceSync.spec.targetRevision}</Td>
+                <Td dataLabel="Status">
+                  <StatusInfo statusInfo={getRepositorySyncStatus(resourceSync)} />
+                </Td>
+                <Td dataLabel="Observed hash">{getObservedHash(resourceSync)}</Td>
+                <Td isActionCell>
+                  <ActionsColumn items={[deleteAction({ resourceId: rsName || '' })]} />
+                </Td>
+              </Tr>
+            );
+          })}
         </Tbody>
       </Table>
       {deleteModal}

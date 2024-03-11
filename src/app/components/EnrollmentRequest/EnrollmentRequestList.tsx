@@ -159,7 +159,7 @@ const EnrollmentRequestTable = () => {
                         onClick: () => setRequestId(er.metadata.name),
                         isDisabled: approvalStatus !== 'Pending',
                       },
-                      deleteAction(er.metadata.name || ''),
+                      deleteAction({ resourceId: er.metadata.name || '' }),
                     ]}
                   />
                 </Td>

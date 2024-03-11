@@ -86,7 +86,7 @@ const RepositoryTable = () => {
               </Td>
               <Td dataLabel="Last transition">{getRepositoryLastTransitionTime(repository)}</Td>
               <Td isActionCell>
-                <ActionsColumn items={[deleteAction(repository.metadata.name || '')]} />
+                <ActionsColumn items={[deleteAction({ resourceId: repository.metadata.name || '' })]} />
               </Td>
             </Tr>
           ))}

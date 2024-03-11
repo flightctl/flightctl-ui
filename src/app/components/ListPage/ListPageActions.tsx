@@ -9,13 +9,26 @@ type DeleteListActionProps = {
 export const useDeleteListAction = ({ resourceType, onDelete }: DeleteListActionProps) => {
   const [deleteResource, setDeleteResource] = React.useState<string>();
   const [name, setName] = React.useState<string>();
-  const deleteAction = (resourceId: string, resourceName?: string) => ({
-    title: 'Delete',
-    onClick: () => {
-      setDeleteResource(resourceId);
-      setName(resourceName);
-    },
-  });
+  const deleteAction = ({
+    resourceId,
+    resourceName,
+    disabledReason,
+  }: {
+    resourceId: string;
+    resourceName?: string;
+    disabledReason?: string | boolean;
+  }) => {
+    const popperProps = disabledReason ? { tooltipProps: { content: disabledReason } } : undefined;
+    return {
+      title: 'Delete',
+      isAriaDisabled: !!disabledReason,
+      ...popperProps,
+      onClick: () => {
+        setDeleteResource(resourceId);
+        setName(resourceName);
+      },
+    };
+  };
 
   const onClose = () => {
     setDeleteResource(undefined);

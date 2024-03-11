@@ -1,5 +1,4 @@
-import { useFetch } from '@app/hooks/useFetch';
-import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
+import * as React from 'react';
 import {
   Button,
   EmptyState,
@@ -12,13 +11,16 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { FleetList } from '@types';
-import * as React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
+import { FleetList } from '@types';
+import { useFetch } from '@app/hooks/useFetch';
+import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
+import LabelsView from '@app/components/common/LabelsView';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
-import LabelsView from '@app/components/common/LabelsView';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
+import FleetOwnerLink from './FleetDetails/FleetOwnerLink';
 
 const CreateFleetButton = () => {
   const navigate = useNavigate();
@@ -67,6 +69,7 @@ const FleetTable = () => {
             <Th>Name</Th>
             <Th>OS image</Th>
             <Th>Label selector</Th>
+            <Th>Managed by</Th>
             <Td />
           </Tr>
         </Thead>
@@ -80,8 +83,18 @@ const FleetTable = () => {
               <Td dataLabel="Label selector">
                 <LabelsView labels={fleet.spec.selector?.matchLabels} />
               </Td>
+              <Td dataLabel="Managed by">
+                <FleetOwnerLink owner={fleet.metadata?.owner} />
+              </Td>
               <Td isActionCell>
-                <ActionsColumn items={[deleteAction(fleet.metadata.name || '')]} />
+                <ActionsColumn
+                  items={[
+                    deleteAction({
+                      resourceId: fleet.metadata.name || '',
+                      disabledReason: !!fleet.metadata?.owner && 'Fleets managed by a Resourcesync cannot be deleted',
+                    }),
+                  ]}
+                />
               </Td>
             </Tr>
           ))}

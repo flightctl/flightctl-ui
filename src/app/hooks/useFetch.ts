@@ -1,11 +1,13 @@
 import * as React from 'react';
-import { deleteData, postData, putData } from '@app/old/utils/commonFunctions';
+import { deleteData, fetchData, postData, putData } from '@app/old/utils/commonFunctions';
 import { useAuth } from './useAuth';
 
 export const useFetch = () => {
   const auth = useAuth();
 
   const userToken = auth?.user?.access_token;
+
+  const get = React.useCallback(async (kind: string) => fetchData(kind, userToken), [userToken]);
 
   const post = React.useCallback(async <R>(kind: string, obj: R) => postData(kind, userToken, obj), [userToken]);
 
@@ -14,8 +16,9 @@ export const useFetch = () => {
   const remove = React.useCallback(async (kind: string) => deleteData(kind, userToken), [userToken]);
 
   return {
+    get,
     post,
-    remove,
     put,
+    remove,
   };
 };
