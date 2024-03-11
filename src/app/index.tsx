@@ -24,7 +24,7 @@ const App: React.FunctionComponent = () => {
   }
 
   if (auth.error) {
-    console.log(auth.error);
+    console.log(auth.error); // eslint-disable-line no-console
     return <div>Auth Error: {auth.error.toString() as React.ReactNode}</div>;
   }
 
