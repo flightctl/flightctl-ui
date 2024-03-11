@@ -3,6 +3,14 @@ const apiServer = `${window.location.protocol}//${window.location.hostname}${win
 const flightCtlAPI = `${apiServer}/api/flightctl`;
 const metricsAPI = `${apiServer}/api/metrics`;
 
+const handleApiJSONResponse = async (response) => {
+  if (response.ok) {
+    const data = await response.json();
+    return data;
+  }
+  throw new Error(`Error ${response.status}:${response.statusText}`)
+}
+
 export const fetchMetrics = async (metricQuery: string, token: string | undefined, abortSignal?: AbortSignal) => {
   try {
     const response = await fetch(`${metricsAPI}/api/v1/query_range?${metricQuery}`, {
@@ -11,9 +19,7 @@ export const fetchMetrics = async (metricQuery: string, token: string | undefine
       },
       signal: abortSignal,
     });
-
-    const resp = await response.json();
-    return resp.data.result;
+    return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making request:', error);
     throw error;
@@ -30,8 +36,7 @@ export const postData = async (kind: string, token: string | undefined, data: un
       method: 'POST',
       body: JSON.stringify(data),
     });
-    const resp = await response.json();
-    return resp;
+    return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making request:', error);
     throw error;
@@ -48,8 +53,7 @@ export const putData = async (kind: string, token: string | undefined, data: unk
       method: 'PUT',
       body: JSON.stringify(data),
     });
-    const resp = await response.json();
-    return resp;
+    return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making request:', error);
     throw error;
@@ -64,8 +68,7 @@ export const deleteData = async (kind: string, token: string | undefined) => {
       },
       method: 'DELETE',
     });
-    const resp = await response.json();
-    return resp;
+    return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making request:', error);
     throw error;
@@ -80,8 +83,7 @@ export const fetchData = async (kind: string, token: string | undefined, abortSi
       },
       signal: abortSignal,
     });
-    const data = await response.json();
-    return data;
+    return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making request:', error);
     throw error;
@@ -96,8 +98,7 @@ export const fetchDataObj = async (kind: string, name: string, token: string) =>
           Authorization: `Bearer ${token}`,
         },
       });
-      const data = await response.json();
-      return data;
+      return handleApiJSONResponse(response);
     } catch (error) {
       console.error('Error making request:', error);
     }
@@ -114,8 +115,7 @@ export const deleteObject = async (kind: string, name: string, token: string) =>
         Authorization: `Bearer ${token}`,
       },
     });
-    const data = await response.json();
-    return data;
+    return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making request:', error);
   }
@@ -145,8 +145,7 @@ export const rejectEnrollmentRequest = async (name: string, token: string) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    const data = await response.json();
-    return data;
+    return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making request:', error);
     return error;

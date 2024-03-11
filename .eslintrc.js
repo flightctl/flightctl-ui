@@ -54,11 +54,12 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
+    'react/prop-types': 'off',
     '@typescript-eslint/interface-name-prefix': 'off',
     'prettier/prettier': 'off',
     'import/no-unresolved': 'off',
     'import/extensions': 'off',
-    'react/prop-types': 'off',
+    'no-console': 'error',
   },
   env: {
     browser: true,

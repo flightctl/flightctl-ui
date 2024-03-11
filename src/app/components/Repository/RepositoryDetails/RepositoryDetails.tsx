@@ -33,9 +33,10 @@ const RepositoryDetails = () => {
     <DetailsPage
       loading={isLoading}
       error={error}
-      title={repoDetails?.metadata.name}
+      id={repositoryId}
+      title={repoDetails?.metadata.name as string}
       resourceLink="/administration/repositories"
-      resourceName="Repositories"
+      resourceType="Repositories"
       actions={
         <DetailsPageActions>
           <DropdownList>{deleteAction}</DropdownList>

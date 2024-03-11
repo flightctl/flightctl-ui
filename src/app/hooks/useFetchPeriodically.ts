@@ -46,7 +46,7 @@ export const useFetchPeriodically = <R>(
             setIsLoading(false);
           }
           setIsRefreshing(false);
-          setData(data);
+          setData(isAPI ? data : data.data.result);
           setError(undefined);
         } catch (err) {
           // aborting fetch trows 'AbortError', we can ignore it

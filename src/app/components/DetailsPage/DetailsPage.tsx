@@ -1,4 +1,4 @@
-import { getErrorMessage } from '@app/utils/error';
+import * as React from 'react';
 import {
   Alert,
   Breadcrumb,
@@ -10,32 +10,40 @@ import {
   SplitItem,
   Title,
 } from '@patternfly/react-core';
-import * as React from 'react';
 import { Link } from 'react-router-dom';
 
+import { getErrorMessage } from '@app/utils/error';
+import DetailsNotFound from './DetailsNotFound';
+
 type DetailsPageProps = {
-  title: string | undefined;
+  id: string;
+  title?: string;
   children: React.ReactNode;
   error: unknown;
   loading: boolean;
-  resourceName: string;
+  resourceType: 'Fleets' | 'Devices' | 'Repositories' | 'Enrollment requests';
   resourceLink: string;
   actions?: React.ReactNode;
   nav?: React.ReactNode;
 };
 
 const DetailsPage: React.FC<DetailsPageProps> = ({
+  id,
   title,
   children,
   error,
   loading,
   resourceLink,
-  resourceName,
+  resourceType,
   actions,
   nav,
 }) => {
   let content = children;
   if (error) {
+    const msg = getErrorMessage(error);
+    if (msg === 'Error 404:Not Found') {
+      return <DetailsNotFound kind={resourceType} id={id} />;
+    }
     content = (
       <Alert isInline variant="danger" title="Failed to retrieve resource details">
         {getErrorMessage(error)}
@@ -54,16 +62,16 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
       <PageSection variant="light" type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
-            <Link to={resourceLink}>{resourceName}</Link>
+            <Link to={resourceLink}>{resourceType}</Link>
           </BreadcrumbItem>
-          <BreadcrumbItem isActive>{title}</BreadcrumbItem>
+          <BreadcrumbItem isActive>{title || id}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
       <PageSection variant="light">
         <Split hasGutter>
           <SplitItem isFilled>
             <Title headingLevel="h1" size="3xl">
-              {title}
+              {title || id}
             </Title>
           </SplitItem>
           <SplitItem>{actions}</SplitItem>

@@ -59,9 +59,9 @@ const EnrollmentRequestDetails = () => {
     <DetailsPage
       loading={loading}
       error={error}
-      title={er?.metadata.name}
+      id={er?.metadata.name as string}
       resourceLink="/devicemanagement/enrollmentrequests"
-      resourceName="Enrollment requests"
+      resourceType="Enrollment requests"
       actions={
         <DetailsPageActions>
           <DropdownList>
