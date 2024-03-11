@@ -8,10 +8,7 @@ const handleApiJSONResponse = async (response) => {
     const data = await response.json();
     return data;
   }
-  if (response.status === 500) {
-    throw new Error('Server error');
-  }
-  throw new Error('Not Found')
+  throw new Error(`Error ${response.status}:${response.statusText}`)
 }
 
 export const fetchMetrics = async (metricQuery: string, token: string | undefined, abortSignal?: AbortSignal) => {

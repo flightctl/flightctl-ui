@@ -41,7 +41,7 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
   let content = children;
   if (error) {
     const msg = getErrorMessage(error);
-    if (msg === 'Not Found') {
+    if (msg === 'Error 404:Not Found') {
       return <DetailsNotFound kind={resourceType} id={id} />;
     }
     content = (
