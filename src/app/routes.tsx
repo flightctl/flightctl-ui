@@ -271,6 +271,7 @@ const administrationRoutes: ExtendedRouteObject[] = [
   {
     path: '/administration/resourcesyncs/:rsId',
     title: 'Resource sync',
+    showInNav: false,
     // Fetches the RS from its ID and redirects to the repository page
     element: (
       <TitledRoute title="Resource sync">
