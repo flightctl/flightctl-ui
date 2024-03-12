@@ -60,12 +60,15 @@ const EnrollmentRequestDetails = () => {
       loading={loading}
       error={error}
       id={er?.metadata.name as string}
-      resourceLink="/devicemanagement/enrollmentrequests"
-      resourceType="Enrollment requests"
+      resourceLink="/devicemanagement/devices"
+      resourceType="Devices"
       actions={
         <DetailsPageActions>
           <DropdownList>
-            <DropdownItem onClick={() => setIsApprovalModalOpen(true)} isDisabled={approvalStatus !== 'Pending'}>
+            <DropdownItem
+              onClick={() => setIsApprovalModalOpen(true)}
+              isDisabled={approvalStatus !== 'Pending approval'}
+            >
               Approve
             </DropdownItem>
             {deleteAction}

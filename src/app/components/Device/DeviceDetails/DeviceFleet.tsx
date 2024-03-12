@@ -5,6 +5,8 @@ import { InfoCircleIcon } from '@patternfly/react-icons';
 import { ObjectMeta } from '@types';
 import { getDeviceFleet, getMissingFleetDetails } from '@app/utils/devices';
 
+import './DeviceFleet.css';
+
 const MissingFleetContent = ({ detail }: { detail: { message: string; owners: string[] } }) => {
   return (
     <span>
@@ -35,7 +37,7 @@ const DeviceFleet = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => {
       {fleetName ? (
         <Link to={`/devicemanagement/fleets/${fleetName}`}>{fleetName}</Link>
       ) : (
-        <>
+        <div className="fctl-device-fleet">
           No owner fleet
           <Popover
             triggerAction="hover"
@@ -44,7 +46,7 @@ const DeviceFleet = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => {
           >
             <Button isInline variant="plain" icon={<InfoCircleIcon />} />
           </Popover>
-        </>
+        </div>
       )}
     </div>
   );

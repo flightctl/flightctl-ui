@@ -1,29 +1,92 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { EmptyState, EmptyStateHeader } from '@patternfly/react-core';
+import {
+  Button,
+  EmptyState,
+  EmptyStateActions,
+  EmptyStateBody,
+  EmptyStateFooter,
+  EmptyStateHeader,
+  PageSection,
+  Stack,
+  StackItem,
+  Title,
+} from '@patternfly/react-core';
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import { useFetch } from '@app/hooks/useFetch';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
-import { Device, DeviceList } from '@types';
+import { Device, DeviceList, EnrollmentRequestList } from '@types';
 
 import DeviceFleet from '@app/components/Device/DeviceDetails/DeviceFleet';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
-import { useDeleteListAction } from '../ListPage/ListPageActions';
+import { DeleteListActionResult, useDeleteListAction } from '../ListPage/ListPageActions';
 import { getDeviceFleet } from '@app/utils/devices';
+import AddDeviceModal from './AddDeviceModal/AddDeviceModal';
+import EnrollmentRequestTable from '../EnrollmentRequest/EnrollmentRequestTable';
+
+type DeviceEmptyStateProps = {
+  onAddDevice: VoidFunction;
+};
+
+const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => (
+  <EmptyState>
+    <EmptyStateHeader titleText={<>There are no devices yet</>} headingLevel="h4" />
+    <EmptyStateBody>Add a new device using the &quot;Add&quot; button</EmptyStateBody>
+    <EmptyStateFooter>
+      <EmptyStateActions>
+        <Button onClick={onAddDevice}>Add device</Button>
+      </EmptyStateActions>
+    </EmptyStateFooter>
+  </EmptyState>
+);
+
+const DeviceRow = ({
+  device,
+  showFleet,
+  deleteAction,
+}: {
+  device: Device;
+  showFleet: boolean;
+  deleteAction: DeleteListActionResult['deleteAction'];
+}) => {
+  const deviceName = device.metadata.name as string;
+  const displayName = device.metadata.labels?.displayName;
+  const boundFleet = getDeviceFleet(device.metadata);
+  return (
+    <Tr key={deviceName}>
+      <Td dataLabel="Fingerprint">
+        <Link to={`/devicemanagement/devices/${deviceName}`}>{deviceName}</Link>
+      </Td>
+      <Td dataLabel="Name">{displayName || '-'}</Td>
+      {showFleet && (
+        <Td dataLabel="Fleet">
+          <DeviceFleet deviceMetadata={device.metadata} />
+        </Td>
+      )}
+      <Td dataLabel="Creation timestamp">{device.metadata.creationTimestamp || '-'}</Td>
+      <Td dataLabel="Operating system">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
+      <Td isActionCell>
+        <ActionsColumn
+          items={[
+            deleteAction({
+              resourceId: deviceName,
+              resourceName: displayName,
+              disabledReason: boundFleet ? 'Devices bound to a fleet cannot be deleted' : '',
+            }),
+          ]}
+        />
+      </Td>
+    </Tr>
+  );
+};
 
 interface DeviceTableProps {
   devices: Device[];
   showFleet: boolean;
   refetch: VoidFunction;
 }
-
-const DeviceEmptyState = () => (
-  <EmptyState>
-    <EmptyStateHeader titleText={<>There are no devices yet</>} headingLevel="h4" />
-  </EmptyState>
-);
 
 export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) => {
   const { remove } = useFetch();
@@ -37,6 +100,9 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
 
   return (
     <>
+      <PageSection variant="light">
+        <Title headingLevel="h3">Devices</Title>
+      </PageSection>
       <Table aria-label="Devices table">
         <Thead>
           <Tr>
@@ -49,37 +115,9 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
           </Tr>
         </Thead>
         <Tbody>
-          {devices.map((device) => {
-            const deviceName = device.metadata.name as string;
-            const displayName = device.metadata.labels?.displayName;
-            const boundFleet = getDeviceFleet(device.metadata);
-            return (
-              <Tr key={deviceName}>
-                <Td dataLabel="Fingerprint">
-                  <Link to={`/devicemanagement/devices/${deviceName}`}>{deviceName}</Link>
-                </Td>
-                <Td dataLabel="Name">{displayName || '-'}</Td>
-                {showFleet && (
-                  <Td dataLabel="Fleet">
-                    <DeviceFleet deviceMetadata={device.metadata} />
-                  </Td>
-                )}
-                <Td dataLabel="Creation timestamp">{device.metadata.creationTimestamp || '-'}</Td>
-                <Td dataLabel="Operating system">{device.spec.os?.image || '-'}</Td>
-                <Td isActionCell>
-                  <ActionsColumn
-                    items={[
-                      deleteAction({
-                        resourceId: deviceName,
-                        resourceName: displayName,
-                        disabledReason: boundFleet ? 'Devices bound to a fleet cannot be deleted' : '',
-                      }),
-                    ]}
-                  />
-                </Td>
-              </Tr>
-            );
-          })}
+          {devices.map((device) => (
+            <DeviceRow device={device} showFleet={showFleet} key={device.metadata.name} deleteAction={deleteAction} />
+          ))}
         </Tbody>
       </Table>
       {deleteModal}
@@ -87,22 +125,44 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
   );
 };
 
-const DeviceListTable = () => {
+const DeviceList = () => {
+  const [addDeviceModal, setAddDeviceModal] = React.useState(false);
   const [devicesList, loading, error, refetch] = useFetchPeriodically<DeviceList>({
     endpoint: 'devices',
   });
 
+  const [erList, erLoading, erEror, erRefetch] = useFetchPeriodically<EnrollmentRequestList>({
+    endpoint: 'enrollmentrequests',
+  });
+
+  const data = [...(devicesList?.items || []), ...(erList?.items || [])];
+
   return (
-    <ListPageBody data={devicesList?.items} error={error} loading={loading} emptyState={<DeviceEmptyState />}>
-      <DeviceTable devices={devicesList?.items || []} refetch={refetch} showFleet />
-    </ListPageBody>
+    <>
+      <ListPage title="Devices" actions={<Button onClick={() => setAddDeviceModal(true)}>Add device</Button>}>
+        <ListPageBody
+          data={data}
+          error={error || erEror}
+          loading={loading || erLoading}
+          emptyState={<DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />}
+        >
+          <Stack hasGutter>
+            {erList?.items && (
+              <StackItem>
+                <EnrollmentRequestTable enrollmentRequests={erList.items} refetch={erRefetch} />
+              </StackItem>
+            )}
+            {devicesList?.items && (
+              <StackItem>
+                <DeviceTable devices={devicesList.items} refetch={refetch} showFleet />
+              </StackItem>
+            )}
+          </Stack>
+        </ListPageBody>
+      </ListPage>
+      {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}
+    </>
   );
 };
-
-const DeviceList = () => (
-  <ListPage title="Devices">
-    <DeviceListTable />
-  </ListPage>
-);
 
 export default DeviceList;

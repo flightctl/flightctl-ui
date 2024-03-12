@@ -1,23 +1,21 @@
 import * as React from 'react';
 import DeleteModal from '../DeleteModal/DeleteModal';
+import { IAction } from '@patternfly/react-table';
+
+export type DeleteListActionResult = {
+  deleteAction: (params: { resourceId: string; resourceName?: string; disabledReason?: string | boolean }) => IAction;
+  deleteModal: React.ReactNode;
+};
 
 type DeleteListActionProps = {
   onDelete: (resourceId: string) => Promise<unknown>;
   resourceType: string;
 };
 
-export const useDeleteListAction = ({ resourceType, onDelete }: DeleteListActionProps) => {
+export const useDeleteListAction = ({ resourceType, onDelete }: DeleteListActionProps): DeleteListActionResult => {
   const [deleteResource, setDeleteResource] = React.useState<string>();
   const [name, setName] = React.useState<string>();
-  const deleteAction = ({
-    resourceId,
-    resourceName,
-    disabledReason,
-  }: {
-    resourceId: string;
-    resourceName?: string;
-    disabledReason?: string | boolean;
-  }) => {
+  const deleteAction: DeleteListActionResult['deleteAction'] = ({ resourceId, resourceName, disabledReason }) => {
     const popperProps = disabledReason ? { tooltipProps: { content: disabledReason } } : undefined;
     return {
       title: 'Delete',

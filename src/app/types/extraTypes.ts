@@ -40,7 +40,7 @@ export type RepositoryConditionType =
   | ConditionType.ResourceSyncAccessible
   | ConditionType.ResourceSyncSynced;
 
-export type EnrollmentRequestApprovalStatus = 'Approved' | 'Pending' | 'Denied' | 'Unknown';
+export type EnrollmentRequestApprovalStatus = 'Approved' | 'Pending approval' | 'Denied' | 'Unknown';
 
 export type FleetUpdateStatus = 'Synced' | 'Syncing' | 'Unknown';
 export type RepositorySyncStatus = RepositoryConditionType | 'NotSynced' | 'NotParsed' | 'NotAccessible' | 'Unknown';

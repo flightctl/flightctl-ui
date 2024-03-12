@@ -6,7 +6,7 @@ export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): Enrollm
     (c) => c.type === ConditionType.EnrollmentRequestApproved,
   );
   if (!approvedCondition) {
-    return 'Pending';
+    return 'Pending approval';
   }
   if (approvedCondition.status === 'True') {
     return 'Approved';

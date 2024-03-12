@@ -10,6 +10,8 @@ declare global {
     KEYCLOAK_CLIENTID?: string;
     KEYCLOAK_REDIRECT?: string;
     API_PORT?: string;
+    QCOW2_IMG_URL?: string;
+    BOOTC_IMG_URL?: string;
   }
 }
 

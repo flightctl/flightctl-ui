@@ -23,7 +23,6 @@ import NotFound from '@app/components/AppLayout/NotFound';
 import CreateFleet from '@app/components/Fleet/CreateFleet/CreateFleet';
 import FleetList from '@app/components/Fleet/FleetList';
 import FleetDetails from '@app/components/Fleet/FleetDetails/FleetDetails';
-import EnrollmentRequestList from '@app/components/EnrollmentRequest/EnrollmentRequestList';
 import EnrollmentRequestDetails from '@app/components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails';
 import DeviceList from '@app/components/Device/DeviceList';
 import DeviceDetails from '@app/components/Device/DeviceDetails/DeviceDetails';
@@ -129,28 +128,14 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
   },
   ...experimentalRoutes,
   {
-    path: '/devicemanagement/enrollmentrequests',
-    title: 'Enrollment Requests',
-    children: [
-      {
-        index: true,
-        title: 'Enrollment Requests',
-        element: (
-          <TitledRoute title="Enrollment Requests">
-            <EnrollmentRequestList />
-          </TitledRoute>
-        ),
-      },
-      {
-        path: ':enrollmentRequestId',
-        title: 'Enrollment Request Details',
-        element: (
-          <TitledRoute title="Enrollment Request Details">
-            <EnrollmentRequestDetails />
-          </TitledRoute>
-        ),
-      },
-    ],
+    path: '/devicemanagement/enrollmentrequests/:enrollmentRequestId',
+    title: 'Enrollment Request Details',
+    element: (
+      <TitledRoute title="Enrollment Request Details">
+        <EnrollmentRequestDetails />
+      </TitledRoute>
+    ),
+    showInNav: false,
   },
   {
     path: '/enroll/:enrollmentRequestId',

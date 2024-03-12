@@ -1,43 +1,36 @@
 import { useFetch } from '@app/hooks/useFetch';
-import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import { getApprovalStatus } from '@app/utils/status/enrollmentRequest';
 import {
   Badge,
-  EmptyState,
-  EmptyStateHeader,
   MenuToggle,
   MenuToggleElement,
+  PageSection,
   Select,
   SelectList,
   SelectOption,
+  Title,
   Toolbar,
   ToolbarContent,
   ToolbarFilter,
   ToolbarGroup,
 } from '@patternfly/react-core';
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { EnrollmentRequestList } from '@types';
+import { EnrollmentRequest } from '@types';
 import * as React from 'react';
 import DeviceEnrollmentModal from './DeviceEnrollmentModal/DeviceEnrollmentModal';
-import ListPage from '../ListPage/ListPage';
-import ListPageBody from '../ListPage/ListPageBody';
 import { Link } from 'react-router-dom';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 
-const EnrollmentRequestEmptyState = () => (
-  <EmptyState>
-    <EmptyStateHeader titleText={<>There are no enrollment requests yet</>} headingLevel="h4" />
-  </EmptyState>
-);
+type EnrollmentRequestTableProps = {
+  enrollmentRequests: EnrollmentRequest[];
+  refetch: VoidFunction;
+};
 
-const EnrollmentRequestTable = () => {
-  const [erList, loading, error, refetch] = useFetchPeriodically<EnrollmentRequestList>({
-    endpoint: 'enrollmentrequests',
-  });
+const EnrollmentRequestTable: React.FC<EnrollmentRequestTableProps> = ({ enrollmentRequests, refetch }) => {
   const { remove } = useFetch();
   const [requestId, setRequestId] = React.useState<string>();
   const [filters, setFilters] = React.useState<{ status: string[] }>({
-    status: [],
+    status: ['Pending approval'],
   });
   const [isStatusExpanded, setIsStatusExpanded] = React.useState(false);
   const { deleteAction, deleteModal } = useDeleteListAction({
@@ -70,9 +63,9 @@ const EnrollmentRequestTable = () => {
     }
   };
 
-  const currentEnrollmentRequest = erList?.items.find((er) => er.metadata.name === requestId);
+  const currentEnrollmentRequest = enrollmentRequests.find((er) => er.metadata.name === requestId);
 
-  const filteredData = erList?.items.filter((er) => {
+  const filteredData = enrollmentRequests.filter((er) => {
     if (!filters.status.length) {
       return true;
     }
@@ -80,7 +73,10 @@ const EnrollmentRequestTable = () => {
   });
 
   return (
-    <ListPageBody data={erList?.items} loading={loading} error={error} emptyState={<EnrollmentRequestEmptyState />}>
+    <>
+      <PageSection variant="light">
+        <Title headingLevel="h3">Enrollment requests</Title>
+      </PageSection>
       <Toolbar id="enrollment-toolbar" clearAllFilters={() => onDelete('', '')}>
         <ToolbarContent>
           <ToolbarGroup variant="filter-group">
@@ -117,8 +113,12 @@ const EnrollmentRequestTable = () => {
                   <SelectOption hasCheckbox value="Approved" isSelected={filters.status.includes('Approved')}>
                     Approved
                   </SelectOption>
-                  <SelectOption hasCheckbox value="Pending" isSelected={filters.status.includes('Pending')}>
-                    Pending
+                  <SelectOption
+                    hasCheckbox
+                    value="Pending approval"
+                    isSelected={filters.status.includes('Pending approval')}
+                  >
+                    Pending approval
                   </SelectOption>
                   <SelectOption hasCheckbox value="Denied" isSelected={filters.status.includes('Denied')}>
                     Denied
@@ -136,8 +136,8 @@ const EnrollmentRequestTable = () => {
         <Thead>
           <Tr>
             <Th>Name</Th>
-            <Th>Creation timestamp</Th>
             <Th>Status</Th>
+            <Th>Creation timestamp</Th>
             <Td />
           </Tr>
         </Thead>
@@ -149,15 +149,15 @@ const EnrollmentRequestTable = () => {
                 <Td dataLabel="Name">
                   <Link to={`/devicemanagement/enrollmentrequests/${er.metadata.name}`}>{er.metadata.name || '-'}</Link>
                 </Td>
-                <Td dataLabel="Creation timestamp">{er.metadata.creationTimestamp}</Td>
                 <Td dataLabel="Status">{approvalStatus}</Td>
+                <Td dataLabel="Creation timestamp">{er.metadata.creationTimestamp}</Td>
                 <Td isActionCell>
                   <ActionsColumn
                     items={[
                       {
                         title: 'Approve',
                         onClick: () => setRequestId(er.metadata.name),
-                        isDisabled: approvalStatus !== 'Pending',
+                        isDisabled: approvalStatus !== 'Pending approval',
                       },
                       deleteAction({ resourceId: er.metadata.name || '' }),
                     ]}
@@ -178,14 +178,8 @@ const EnrollmentRequestTable = () => {
         />
       )}
       {deleteModal}
-    </ListPageBody>
+    </>
   );
 };
 
-const EnrollmentRequestList = () => (
-  <ListPage title="Enrollment requests">
-    <EnrollmentRequestTable />
-  </ListPage>
-);
-
-export default EnrollmentRequestList;
+export default EnrollmentRequestTable;
