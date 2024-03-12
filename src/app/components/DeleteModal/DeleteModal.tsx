@@ -30,9 +30,10 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ onDelete, onClose, resourceTy
             try {
               setIsDeleting(true);
               await onDelete();
-              setIsDeleting(false);
             } catch (err) {
               setError(getErrorMessage(err));
+            } finally {
+              setIsDeleting(false);
             }
           }}
         >
