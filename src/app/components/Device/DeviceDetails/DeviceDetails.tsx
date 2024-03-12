@@ -27,6 +27,7 @@ import DetailsPageCard, { DetailsPageCardBody } from '@app/components/DetailsPag
 import DetailsPageActions, { useDeleteAction } from '@app/components/DetailsPage/DetailsPageActions';
 import DeviceFleet from '@app/components/Device/DeviceDetails/DeviceFleet';
 import { useFetch } from '@app/hooks/useFetch';
+import { getDeviceFleet } from '@app/utils/devices';
 
 const DeviceDetails = () => {
   const { deviceId } = useParams() as { deviceId: string };
@@ -35,12 +36,14 @@ const DeviceDetails = () => {
   const { remove } = useFetch();
 
   const name = (device?.metadata.labels?.displayName || device?.metadata.name) as string;
+  const boundFleet = getDeviceFleet(device?.metadata || {});
 
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {
       await remove(`devices/${deviceId}`);
       navigate('/devicemanagement/devices');
     },
+    disabledReason: boundFleet ? 'Devices bound to a fleet cannot be deleted' : '',
     resourceName: name,
     resourceType: 'Device',
   });
