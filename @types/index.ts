@@ -11,6 +11,7 @@ export type { Device } from './models/Device';
 export type { DeviceList } from './models/DeviceList';
 export type { DeviceOSSpec } from './models/DeviceOSSpec';
 export type { DeviceSpec } from './models/DeviceSpec';
+export type { DeviceSpecification } from './models/DeviceSpecification';
 export type { DeviceStatus } from './models/DeviceStatus';
 export type { DeviceSystemdUnitStatus } from './models/DeviceSystemdUnitStatus';
 export type { DeviceSystemInfo } from './models/DeviceSystemInfo';
@@ -31,6 +32,7 @@ export type { KubernetesSecretProviderSpec } from './models/KubernetesSecretProv
 export type { LabelSelector } from './models/LabelSelector';
 export type { ListMeta } from './models/ListMeta';
 export type { ObjectMeta } from './models/ObjectMeta';
+export type { RenderedDeviceSpec } from './models/RenderedDeviceSpec';
 export type { Repository } from './models/Repository';
 export type { RepositoryList } from './models/RepositoryList';
 export type { RepositorySpec } from './models/RepositorySpec';

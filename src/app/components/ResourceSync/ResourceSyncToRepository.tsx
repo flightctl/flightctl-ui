@@ -21,7 +21,7 @@ const ResourceSyncToRepository = () => {
   React.useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const rsDetails = await get(`resourcesync/${rsId}`);
+        const rsDetails = await get(`resourcesyncs/${rsId}`);
 
         const repository = rsDetails.spec?.repository;
         if (repository) {

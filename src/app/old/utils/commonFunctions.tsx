@@ -8,7 +8,14 @@ const handleApiJSONResponse = async (response) => {
     const data = await response.json();
     return data;
   }
-  throw new Error(`Error ${response.status}:${response.statusText}`)
+
+  let errorText;
+  try {
+    errorText = await response.text();
+  } catch (e) {
+    // ignore
+  }
+  throw new Error(`Error ${response.status}: ${response.statusText} - ${errorText}`)
 }
 
 export const fetchMetrics = async (metricQuery: string, token: string | undefined, abortSignal?: AbortSignal) => {

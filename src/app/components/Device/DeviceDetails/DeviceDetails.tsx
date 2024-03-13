@@ -86,7 +86,7 @@ const DeviceDetails = () => {
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>OS</DescriptionListTerm>
-                  <DescriptionListDescription>{device?.spec.os?.image || '-'}</DescriptionListDescription>
+                  <DescriptionListDescription>{device?.spec?.os?.image || '-'}</DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>Architecture</DescriptionListTerm>

@@ -3,23 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Condition } from './Condition';
-import type { DeviceOSSpec } from './DeviceOSSpec';
-import type { GitConfigProviderSpec } from './GitConfigProviderSpec';
-import type { InlineConfigProviderSpec } from './InlineConfigProviderSpec';
-import type { KubernetesSecretProviderSpec } from './KubernetesSecretProviderSpec';
-/**
- * TemplateVersionStatus represents information about the status of a template version.
- */
-export type TemplateVersionStatus = {
-  os?: DeviceOSSpec;
-  /**
-   * List of config resources.
-   */
-  config?: Array<(GitConfigProviderSpec | KubernetesSecretProviderSpec | InlineConfigProviderSpec)>;
+import type { DeviceSpecification } from './DeviceSpecification';
+export type TemplateVersionStatus = (DeviceSpecification & {
   updatedAt?: string;
   /**
    * Current state of the device.
    */
   conditions?: Array<Condition>;
-};
+});
 

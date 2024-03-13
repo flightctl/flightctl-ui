@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DeviceSpec } from './DeviceSpec';
+import type { DeviceSpecification } from './DeviceSpecification';
 import type { LabelSelector } from './LabelSelector';
 import type { ObjectMeta } from './ObjectMeta';
 /**
@@ -12,7 +12,7 @@ export type FleetSpec = {
   selector?: LabelSelector;
   template: {
     metadata?: ObjectMeta;
-    spec: DeviceSpec;
+    spec: DeviceSpecification;
   };
 };
 
