@@ -52,7 +52,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
               <DescriptionListGroup>
                 <DescriptionListTerm>Last transition</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {repoDetails ? getRepositoryLastTransitionTime(repoDetails) : '-'}
+                  {repoDetails ? getRepositoryLastTransitionTime(repoDetails).text : '-'}
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>

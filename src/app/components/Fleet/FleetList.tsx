@@ -13,7 +13,7 @@ import {
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { FleetList } from '@types';
+import { Fleet, FleetList } from '@types';
 import { useFetch } from '@app/hooks/useFetch';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import LabelsView from '@app/components/common/LabelsView';
@@ -21,6 +21,10 @@ import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import FleetOwnerLink from './FleetDetails/FleetOwnerLink';
+import { useTableSort } from '@app/hooks/useTableSort';
+import { TableColumn } from '@app/types/extraTypes';
+import { sortByName, sortByOwner } from '@app/utils/sort/generic';
+import { sortFleetsByOSImg } from '@app/utils/sort/fleet';
 
 const CreateFleetButton = () => {
   const navigate = useNavigate();
@@ -43,6 +47,24 @@ const FleetEmptyState = () => (
   </EmptyState>
 );
 
+const columns: TableColumn<Fleet>[] = [
+  {
+    name: 'Name',
+    onSort: sortByName,
+  },
+  {
+    name: 'OS image',
+    onSort: sortFleetsByOSImg,
+  },
+  {
+    name: 'Label selector',
+  },
+  {
+    name: 'Managed by',
+    onSort: sortByOwner,
+  },
+];
+
 const FleetTable = () => {
   const [fleetList, loading, error, refetch] = useFetchPeriodically<FleetList>({ endpoint: 'fleets' });
   const { remove } = useFetch();
@@ -53,6 +75,8 @@ const FleetTable = () => {
       refetch();
     },
   });
+
+  const { getSortParams, sortedData } = useTableSort(fleetList?.items || [], columns);
 
   return (
     <ListPageBody data={fleetList?.items} error={error} loading={loading} emptyState={<FleetEmptyState />}>
@@ -66,15 +90,16 @@ const FleetTable = () => {
       <Table aria-label="Fleets table">
         <Thead>
           <Tr>
-            <Th>Name</Th>
-            <Th>OS image</Th>
-            <Th>Label selector</Th>
-            <Th>Managed by</Th>
+            {columns.map((c, index) => (
+              <Th key={c.name} sort={getSortParams(index)}>
+                {c.name}
+              </Th>
+            ))}
             <Td />
           </Tr>
         </Thead>
         <Tbody>
-          {fleetList?.items.map((fleet) => (
+          {sortedData.map((fleet) => (
             <Tr key={fleet.metadata.name}>
               <Td dataLabel="Name">
                 <Link to={`${fleet.metadata.name}`}>{fleet.metadata.name}</Link>

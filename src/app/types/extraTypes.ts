@@ -49,3 +49,9 @@ export type ResourceStatusType = FleetUpdateStatus | RepositorySyncStatus | Enro
 export type StatusType = FleetUpdateStatus | RepositorySyncStatus | EnrollmentRequestApprovalStatus;
 
 export type FlightControlQuery = ApiQuery | MetricsQuery;
+
+export type TableColumn<D> = {
+  name: string;
+  onSort?: (data: D[]) => D[];
+  defaultSort?: boolean;
+};

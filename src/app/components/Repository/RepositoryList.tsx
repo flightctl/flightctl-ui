@@ -13,7 +13,7 @@ import {
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { RepositoryList } from '@types';
+import { Repository, RepositoryList } from '@types';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import { useFetch } from '@app/hooks/useFetch';
 import ListPageBody from '@app/components/ListPage/ListPageBody';
@@ -21,6 +21,14 @@ import ListPage from '@app/components/ListPage/ListPage';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '@app/utils/status/repository';
 import StatusInfo from '@app/components/common/StatusInfo';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
+import { useTableSort } from '@app/hooks/useTableSort';
+import { TableColumn } from '@app/types/extraTypes';
+import { sortByName } from '@app/utils/sort/generic';
+import {
+  sortRepositoriesByLastTransition,
+  sortRepositoriesBySyncStatus,
+  sortRepositoriesByUrl,
+} from '@app/utils/sort/repository';
 
 const CreateRepositoryButton = () => {
   const navigate = useNavigate();
@@ -44,6 +52,25 @@ const RepositoryEmptyState = () => (
   </EmptyState>
 );
 
+const columns: TableColumn<Repository>[] = [
+  {
+    name: 'Name',
+    onSort: sortByName,
+  },
+  {
+    name: 'Url',
+    onSort: sortRepositoriesByUrl,
+  },
+  {
+    name: 'Sync status',
+    onSort: sortRepositoriesBySyncStatus,
+  },
+  {
+    name: 'Last transition',
+    onSort: sortRepositoriesByLastTransition,
+  },
+];
+
 const RepositoryTable = () => {
   const [repositoryList, loading, error, refetch] = useFetchPeriodically<RepositoryList>({ endpoint: 'repositories' });
   const { remove } = useFetch();
@@ -54,6 +81,8 @@ const RepositoryTable = () => {
       refetch();
     },
   });
+
+  const { getSortParams, sortedData } = useTableSort(repositoryList?.items || [], columns);
 
   return (
     <ListPageBody data={repositoryList?.items} error={error} loading={loading} emptyState={<RepositoryEmptyState />}>
@@ -67,15 +96,16 @@ const RepositoryTable = () => {
       <Table aria-label="Repositories table">
         <Thead>
           <Tr>
-            <Th>Name</Th>
-            <Th>Url</Th>
-            <Th>Sync status</Th>
-            <Th>Last transition</Th>
+            {columns.map((c, index) => (
+              <Th key={c.name} sort={getSortParams(index)}>
+                {c.name}
+              </Th>
+            ))}
             <Td />
           </Tr>
         </Thead>
         <Tbody>
-          {repositoryList?.items.map((repository) => (
+          {sortedData.map((repository) => (
             <Tr key={repository.metadata.name}>
               <Td dataLabel="Name">
                 <Link to={`${repository.metadata.name}`}>{repository.metadata.name}</Link>
@@ -84,7 +114,7 @@ const RepositoryTable = () => {
               <Td dataLabel="Sync status">
                 <StatusInfo statusInfo={getRepositorySyncStatus(repository)} />
               </Td>
-              <Td dataLabel="Last transition">{getRepositoryLastTransitionTime(repository)}</Td>
+              <Td dataLabel="Last transition">{getRepositoryLastTransitionTime(repository).text}</Td>
               <Td isActionCell>
                 <ActionsColumn items={[deleteAction({ resourceId: repository.metadata.name || '' })]} />
               </Td>

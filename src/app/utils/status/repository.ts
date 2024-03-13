@@ -42,7 +42,12 @@ const getRepositorySyncStatus = (
   };
 };
 
-const getRepositoryLastTransitionTime = (repository: Repository): string | undefined => {
+const getRepositoryLastTransitionTime = (
+  repository: Repository,
+): {
+  text: string;
+  timestamp: string;
+} => {
   const conditions = repository.status?.conditions;
 
   let lastTime: string | undefined = undefined;
@@ -53,7 +58,10 @@ const getRepositoryLastTransitionTime = (repository: Repository): string | undef
     }
   });
 
-  return lastTime ? `${timeSinceText(new Date(lastTime).getTime())} ago` : '-';
+  return {
+    text: lastTime ? `${timeSinceText(new Date(lastTime).getTime())} ago` : '-',
+    timestamp: lastTime || '0',
+  };
 };
 
 const getObservedHash = (resourceSync: ResourceSync): string | undefined => {

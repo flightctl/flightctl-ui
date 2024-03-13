@@ -11,8 +11,40 @@ import { getObservedHash, getRepositorySyncStatus } from '@app/utils/status/repo
 import StatusInfo from '@app/components/common/StatusInfo';
 import CreateRepositoryResourceSync from '@app/components/ResourceSync/CreateResourceSync/CreateRepositoryResourceSync';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
+import { useTableSort } from '@app/hooks/useTableSort';
+import { TableColumn } from '@app/types/extraTypes';
+import { sortByName } from '@app/utils/sort/generic';
+import {
+  sortResourceSyncsByHash,
+  sortResourceSyncsByPath,
+  sortResourceSyncsByRevision,
+  sortResourceSyncsByStatus,
+} from '@app/utils/sort/resourceSync';
 
 import './RepositoryResourceSyncList.css';
+
+const columns: TableColumn<ResourceSync>[] = [
+  {
+    name: 'Name',
+    onSort: sortByName,
+  },
+  {
+    name: 'Path',
+    onSort: sortResourceSyncsByPath,
+  },
+  {
+    name: 'Target revision',
+    onSort: sortResourceSyncsByRevision,
+  },
+  {
+    name: 'Status',
+    onSort: sortResourceSyncsByStatus,
+  },
+  {
+    name: 'Observed hash',
+    onSort: sortResourceSyncsByHash,
+  },
+];
 
 const createRefs = (rsList: ResourceSync[]) => {
   const rsRefs = {};
@@ -47,21 +79,23 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
     },
   });
 
+  const { getSortParams, sortedData } = useTableSort(resourceSyncs, columns);
+
   return (
     <>
       <Table aria-label="Repositories table">
         <Thead>
           <Tr>
-            <Th>Name</Th>
-            <Th>Path</Th>
-            <Th>Target revision</Th>
-            <Th>Status</Th>
-            <Th>Observed hash</Th>
+            {columns.map((c, index) => (
+              <Th key={c.name} sort={getSortParams(index)}>
+                {c.name}
+              </Th>
+            ))}
             <Td />
           </Tr>
         </Thead>
         <Tbody>
-          {resourceSyncs.map((resourceSync) => {
+          {sortedData.map((resourceSync) => {
             const rsName = resourceSync.metadata.name as string;
             const rsRef = rsRefs[rsName];
             const isSelected = rsName === selectedRs;
