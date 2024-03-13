@@ -10,7 +10,7 @@ import {
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Fleet, FleetList } from '@types';
@@ -22,9 +22,11 @@ import ListPageBody from '../ListPage/ListPageBody';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import FleetOwnerLink from './FleetDetails/FleetOwnerLink';
 import { useTableSort } from '@app/hooks/useTableSort';
-import { TableColumn } from '@app/types/extraTypes';
 import { sortByName, sortByOwner } from '@app/utils/sort/generic';
 import { sortFleetsByOSImg } from '@app/utils/sort/fleet';
+import { useTableTextSearch } from '@app/hooks/useTableTextSearch';
+import TableTextSearch from '../Table/TableTextSearch';
+import Table, { TableColumn } from '../Table/Table';
 
 const CreateFleetButton = () => {
   const navigate = useNavigate();
@@ -64,6 +66,7 @@ const columns: TableColumn<Fleet>[] = [
     onSort: sortByOwner,
   },
 ];
+const getSearchText = (fleet: Fleet) => [fleet.metadata.name];
 
 const FleetTable = () => {
   const [fleetList, loading, error, refetch] = useFetchPeriodically<FleetList>({ endpoint: 'fleets' });
@@ -76,28 +79,19 @@ const FleetTable = () => {
     },
   });
 
-  const { getSortParams, sortedData } = useTableSort(fleetList?.items || [], columns);
+  const { search, setSearch, filteredData } = useTableTextSearch(fleetList?.items || [], getSearchText);
+  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   return (
     <ListPageBody data={fleetList?.items} error={error} loading={loading} emptyState={<FleetEmptyState />}>
       <Toolbar>
         <ToolbarContent>
-          <ToolbarItem>
-            <CreateFleetButton />
+          <ToolbarItem variant="search-filter">
+            <TableTextSearch value={search} setValue={setSearch} />
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
-      <Table aria-label="Fleets table">
-        <Thead>
-          <Tr>
-            {columns.map((c, index) => (
-              <Th key={c.name} sort={getSortParams(index)}>
-                {c.name}
-              </Th>
-            ))}
-            <Td />
-          </Tr>
-        </Thead>
+      <Table aria-label="Fleets table" columns={columns} data={filteredData} getSortParams={getSortParams}>
         <Tbody>
           {sortedData.map((fleet) => (
             <Tr key={fleet.metadata.name}>
@@ -131,7 +125,7 @@ const FleetTable = () => {
 };
 
 const FleetList = () => (
-  <ListPage title="Fleets">
+  <ListPage title="Fleets" actions={<CreateFleetButton />}>
     <FleetTable />
   </ListPage>
 );

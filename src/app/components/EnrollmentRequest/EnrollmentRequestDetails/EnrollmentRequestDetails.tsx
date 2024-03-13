@@ -6,7 +6,7 @@ import SystemdTable from '@app/components/DetailsPage/Tables/SystemdTable';
 import LabelsView from '@app/components/common/LabelsView';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import { getDateDisplay } from '@app/utils/dates';
-import { getApprovalStatus } from '@app/utils/status/enrollmentRequest';
+import { ApprovalStatus, getApprovalStatus } from '@app/utils/status/enrollmentRequest';
 import {
   Bullseye,
   Card,
@@ -67,7 +67,7 @@ const EnrollmentRequestDetails = () => {
           <DropdownList>
             <DropdownItem
               onClick={() => setIsApprovalModalOpen(true)}
-              isDisabled={approvalStatus !== 'Pending approval'}
+              isDisabled={approvalStatus !== ApprovalStatus.Pending}
             >
               Approve
             </DropdownItem>

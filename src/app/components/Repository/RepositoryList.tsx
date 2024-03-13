@@ -10,7 +10,7 @@ import {
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Repository, RepositoryList } from '@types';
@@ -22,13 +22,15 @@ import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '@app/u
 import StatusInfo from '@app/components/common/StatusInfo';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import { useTableSort } from '@app/hooks/useTableSort';
-import { TableColumn } from '@app/types/extraTypes';
 import { sortByName } from '@app/utils/sort/generic';
 import {
   sortRepositoriesByLastTransition,
   sortRepositoriesBySyncStatus,
   sortRepositoriesByUrl,
 } from '@app/utils/sort/repository';
+import { useTableTextSearch } from '@app/hooks/useTableTextSearch';
+import TableTextSearch from '../Table/TableTextSearch';
+import Table, { TableColumn } from '../Table/Table';
 
 const CreateRepositoryButton = () => {
   const navigate = useNavigate();
@@ -71,6 +73,8 @@ const columns: TableColumn<Repository>[] = [
   },
 ];
 
+const getSearchText = (repo: Repository) => [repo.metadata.name];
+
 const RepositoryTable = () => {
   const [repositoryList, loading, error, refetch] = useFetchPeriodically<RepositoryList>({ endpoint: 'repositories' });
   const { remove } = useFetch();
@@ -82,28 +86,19 @@ const RepositoryTable = () => {
     },
   });
 
-  const { getSortParams, sortedData } = useTableSort(repositoryList?.items || [], columns);
+  const { search, setSearch, filteredData } = useTableTextSearch(repositoryList?.items || [], getSearchText);
+  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   return (
     <ListPageBody data={repositoryList?.items} error={error} loading={loading} emptyState={<RepositoryEmptyState />}>
       <Toolbar>
         <ToolbarContent>
-          <ToolbarItem>
-            <CreateRepositoryButton />
+          <ToolbarItem variant="search-filter">
+            <TableTextSearch value={search} setValue={setSearch} />
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
-      <Table aria-label="Repositories table">
-        <Thead>
-          <Tr>
-            {columns.map((c, index) => (
-              <Th key={c.name} sort={getSortParams(index)}>
-                {c.name}
-              </Th>
-            ))}
-            <Td />
-          </Tr>
-        </Thead>
+      <Table aria-label="Repositories table" data={filteredData} columns={columns} getSortParams={getSortParams}>
         <Tbody>
           {sortedData.map((repository) => (
             <Tr key={repository.metadata.name}>
@@ -129,7 +124,7 @@ const RepositoryTable = () => {
 
 const RepositoryList = () => {
   return (
-    <ListPage title="Repositories">
+    <ListPage title="Repositories" actions={<CreateRepositoryButton />}>
       <RepositoryTable />
     </ListPage>
   );

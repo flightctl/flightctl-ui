@@ -1,4 +1,4 @@
-import { TableColumn } from '@app/types/extraTypes';
+import { TableColumn } from '@app/components/Table/Table';
 import { ThProps } from '@patternfly/react-table';
 import * as React from 'react';
 

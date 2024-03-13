@@ -1,18 +1,24 @@
 import { ConditionType, EnrollmentRequest } from '@types';
-import { EnrollmentRequestApprovalStatus } from '@app/types/extraTypes';
 
-export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): EnrollmentRequestApprovalStatus => {
+export enum ApprovalStatus {
+  Pending = 'Pending approval',
+  Approved = 'Approved',
+  Denied = 'Denied',
+  Unknown = 'Unknown',
+}
+
+export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): ApprovalStatus => {
   const approvedCondition = enrollmentRequest.status?.conditions?.find(
-    (c) => c.type === ConditionType.EnrollmentRequestApproved,
+    (c) => c.type === ConditionType.EnrollmentRequestApproved
   );
   if (!approvedCondition) {
-    return 'Pending approval';
+    return ApprovalStatus.Pending;
   }
   if (approvedCondition.status === 'True') {
-    return 'Approved';
+    return ApprovalStatus.Approved;
   }
   if (approvedCondition.status === 'False') {
-    return 'Denied';
+    return ApprovalStatus.Denied;
   }
-  return 'Unknown';
+  return ApprovalStatus.Unknown;
 };
