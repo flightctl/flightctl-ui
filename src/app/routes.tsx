@@ -77,6 +77,7 @@ const experimentalRoutes: ExtendedRouteObject[] = [
       </TitledRoute>
     ),
     isExperimental: true,
+    showInNav: true,
   },
   {
     path: '/experimental2',
@@ -87,6 +88,7 @@ const experimentalRoutes: ExtendedRouteObject[] = [
       </TitledRoute>
     ),
     isExperimental: true,
+    showInNav: true,
   },
   {
     path: '/experimental3',
@@ -97,6 +99,7 @@ const experimentalRoutes: ExtendedRouteObject[] = [
       </TitledRoute>
     ),
     isExperimental: true,
+    showInNav: true,
   },
 ];
 
@@ -113,12 +116,12 @@ const RedirectToEnrollmentDetails = () => {
 const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteObject[] => [
   {
     path: '/',
-    showInNav: false,
     element: <Navigate to={experimentalFeatures ? '/devicemanagement/overview' : '/devicemanagement/fleets'} replace />,
   },
   {
     path: '/devicemanagement/overview',
     title: 'Overview',
+    showInNav: true,
     element: (
       <TitledRoute title="Overview">
         <Overview />
@@ -135,17 +138,16 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
         <EnrollmentRequestDetails />
       </TitledRoute>
     ),
-    showInNav: false,
   },
   {
     path: '/enroll/:enrollmentRequestId',
     title: 'Enrollment Request',
-    showInNav: false,
     element: <RedirectToEnrollmentDetails />,
   },
   {
     path: '/devicemanagement/fleets',
     title: 'Fleets',
+    showInNav: true,
     children: [
       {
         index: true,
@@ -179,12 +181,12 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
   {
     path: '/manage/:deviceId',
     title: 'Device',
-    showInNav: false,
     element: <RedirectToDeviceDetails />,
   },
   {
     path: '/devicemanagement/devices',
     title: 'Devices',
+    showInNav: true,
     children: [
       {
         index: true,
@@ -198,7 +200,6 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
       {
         path: ':deviceId',
         title: 'Device',
-        showInNav: false,
         element: (
           <TitledRoute title="Device">
             <DeviceDetails />
@@ -213,6 +214,7 @@ const administrationRoutes: ExtendedRouteObject[] = [
   {
     path: '/workload',
     title: 'Workload',
+    showInNav: true,
     isExperimental: true,
     element: (
       <TitledRoute title="Workload">
@@ -222,6 +224,7 @@ const administrationRoutes: ExtendedRouteObject[] = [
   },
   {
     path: '/administration/repositories',
+    showInNav: true,
     title: 'Repositories',
     children: [
       {
@@ -256,7 +259,6 @@ const administrationRoutes: ExtendedRouteObject[] = [
   {
     path: '/administration/resourcesyncs/:rsId',
     title: 'Resource sync',
-    showInNav: false,
     // Fetches the RS from its ID and redirects to the repository page
     element: (
       <TitledRoute title="Resource sync">
@@ -268,6 +270,7 @@ const administrationRoutes: ExtendedRouteObject[] = [
     path: '/administration/organization',
     title: 'Organization',
     isExperimental: true,
+    showInNav: true,
     element: (
       <TitledRoute title="Organization">
         <Organization />
@@ -278,6 +281,7 @@ const administrationRoutes: ExtendedRouteObject[] = [
     path: '/administration/imagebuilder',
     title: 'Image Builder',
     isExperimental: true,
+    showInNav: true,
     element: (
       <TitledRoute title="Image Builder">
         <ImageBuilder />

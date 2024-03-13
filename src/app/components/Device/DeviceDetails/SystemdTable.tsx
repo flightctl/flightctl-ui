@@ -23,7 +23,7 @@ const SystemdTable: React.FC<SystemdTableProps> = ({ refetch, device }) => {
           <Split hasGutter>
             <SplitItem isFilled>
               <LabelGroup numLabels={5}>
-                {device.spec.systemd?.matchPatterns?.map((pattern, index) => (
+                {device.spec?.systemd?.matchPatterns?.map((pattern, index) => (
                   <Label key={index} id={`${index}`} color="blue">
                     {pattern}
                   </Label>

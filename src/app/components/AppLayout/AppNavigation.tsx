@@ -8,7 +8,7 @@ import NavItem from '../NavItem/NavItem';
 
 const SectionRoute = ({ route }: { route: ExtendedRouteObject }) => {
   const { experimentalFeatures } = React.useContext(UserPreferencesContext);
-  if (route.showInNav === false) {
+  if (!route.showInNav) {
     return null;
   }
   if (route.isExperimental && !experimentalFeatures) {

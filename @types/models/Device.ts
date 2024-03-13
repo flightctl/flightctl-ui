@@ -18,7 +18,7 @@ export type Device = {
    */
   kind: string;
   metadata: ObjectMeta;
-  spec: DeviceSpec;
+  spec?: DeviceSpec;
   status?: DeviceStatus;
 };
 

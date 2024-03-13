@@ -12,12 +12,13 @@ type MatchPatternsModalProps = {
 };
 
 const getDevice = (device: Device, matchPatterns: string[]) => {
+  const spec = device.spec || { systemd: {} };
   return {
     ...device,
     spec: {
-      ...device.spec,
+      ...spec,
       systemd: {
-        ...(device.spec.systemd || {}),
+        ...device.spec?.systemd,
         matchPatterns,
       },
     },
@@ -30,7 +31,7 @@ const MatchPatternsModal: React.FC<MatchPatternsModalProps> = ({ onClose, device
   return (
     <Modal title="Edit match patterns" isOpen onClose={() => onClose()} variant="small">
       <Formik<MatchPatternsFormValues>
-        initialValues={{ matchPatterns: device.spec.systemd?.matchPatterns || [] }}
+        initialValues={{ matchPatterns: device.spec?.systemd?.matchPatterns || [] }}
         onSubmit={async ({ matchPatterns }) => {
           try {
             await put(`devices/${device.metadata.name}`, getDevice(device, matchPatterns));
