@@ -27,7 +27,7 @@ export const useTableSort = <D>(data: D[], columns: TableColumn<D>[]) => {
             columnIndex,
           }
         : undefined,
-    [activeSortIndex, activeSortDirection, columns]
+    [activeSortIndex, activeSortDirection, columns],
   );
 
   const sortedData = React.useMemo(() => {

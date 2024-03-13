@@ -30,7 +30,7 @@ const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
     actions.unshift(
       <Button key="download" onClick={() => window.open(window.QCOW2_IMG_URL, '_blank')}>
         Download disk
-      </Button>
+      </Button>,
     );
   }
   return (
