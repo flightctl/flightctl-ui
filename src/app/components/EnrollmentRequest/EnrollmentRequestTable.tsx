@@ -23,45 +23,22 @@ import { useDeleteListAction } from '../ListPage/ListPageActions';
 import { TableColumn } from '@app/types/extraTypes';
 import { useTableSort } from '@app/hooks/useTableSort';
 import { getDateDisplay } from '@app/utils/dates';
+import { sortByCreationTimestamp, sortByName } from '@app/utils/sort/generic';
+import { sortERsByStatus } from '@app/utils/sort/enrollmentRequest';
 
 const columns: TableColumn<EnrollmentRequest>[] = [
   {
     name: 'Name',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aFingerprint = a.metadata.name || '-';
-        const bFingerprint = b.metadata.name || '-';
-        return aFingerprint.localeCompare(bFingerprint);
-      }),
+    onSort: sortByName,
   },
   {
     name: 'Status',
     defaultSort: true,
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aStatus = getApprovalStatus(a);
-        const bStatus = getApprovalStatus(b);
-        if (aStatus === 'Pending approval' && bStatus === 'Pending approval') {
-          return 0;
-        }
-        if (aStatus === 'Pending approval') {
-          return -1;
-        }
-
-        if (bStatus === 'Pending approval') {
-          return 1;
-        }
-        return aStatus.localeCompare(bStatus);
-      }),
+    onSort: sortERsByStatus,
   },
   {
     name: 'Created at',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aDate = a.metadata.creationTimestamp || 0;
-        const bDate = b.metadata.creationTimestamp || 0;
-        return new Date(bDate).getTime() - new Date(aDate).getTime();
-      }),
+    onSort: sortByCreationTimestamp,
   },
 ];
 

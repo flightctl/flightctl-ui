@@ -13,56 +13,38 @@ import CreateRepositoryResourceSync from '@app/components/ResourceSync/CreateRes
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import { useTableSort } from '@app/hooks/useTableSort';
 import { TableColumn } from '@app/types/extraTypes';
+import { sortByName } from '@app/utils/sort/generic';
+import {
+  sortResourceSyncsByHash,
+  sortResourceSyncsByPath,
+  sortResourceSyncsByRevision,
+  sortResourceSyncsByStatus,
+} from '@app/utils/sort/resourceSync';
+
+import './RepositoryResourceSyncList.css';
 
 const columns: TableColumn<ResourceSync>[] = [
   {
     name: 'Name',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aName = a.metadata.name || '-';
-        const bName = b.metadata.name || '-';
-        return aName.localeCompare(bName);
-      }),
+    onSort: sortByName,
   },
   {
     name: 'Path',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aPath = a.spec.path || '-';
-        const bPath = b.spec.path || '-';
-        return aPath.localeCompare(bPath);
-      }),
+    onSort: sortResourceSyncsByPath,
   },
   {
     name: 'Target revision',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aRevision = a.spec.targetRevision || '-';
-        const bRevision = b.spec.targetRevision || '-';
-        return aRevision.localeCompare(bRevision);
-      }),
+    onSort: sortResourceSyncsByRevision,
   },
   {
     name: 'Status',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aStatus = getRepositorySyncStatus(a);
-        const bStatus = getRepositorySyncStatus(b);
-        return aStatus.status.localeCompare(bStatus.status);
-      }),
+    onSort: sortResourceSyncsByStatus,
   },
   {
     name: 'Observed hash',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aHash = getObservedHash(a) || '-';
-        const bHash = getObservedHash(b) || '-';
-        return aHash.localeCompare(bHash);
-      }),
+    onSort: sortResourceSyncsByHash,
   },
 ];
-
-import './RepositoryResourceSyncList.css';
 
 const createRefs = (rsList: ResourceSync[]) => {
   const rsRefs = {};

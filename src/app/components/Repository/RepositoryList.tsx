@@ -23,6 +23,12 @@ import StatusInfo from '@app/components/common/StatusInfo';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import { useTableSort } from '@app/hooks/useTableSort';
 import { TableColumn } from '@app/types/extraTypes';
+import { sortByName } from '@app/utils/sort/generic';
+import {
+  sortRepositoriesByLastTransition,
+  sortRepositoriesBySyncStatus,
+  sortRepositoriesByUrl,
+} from '@app/utils/sort/repository';
 
 const CreateRepositoryButton = () => {
   const navigate = useNavigate();
@@ -49,39 +55,19 @@ const RepositoryEmptyState = () => (
 const columns: TableColumn<Repository>[] = [
   {
     name: 'Name',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aName = a.metadata.name || '-';
-        const bName = b.metadata.name || '-';
-        return aName.localeCompare(bName);
-      }),
+    onSort: sortByName,
   },
   {
     name: 'Url',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aUrl = a.spec.repo || '-';
-        const bUrl = b.spec.repo || '-';
-        return aUrl.localeCompare(bUrl);
-      }),
+    onSort: sortRepositoriesByUrl,
   },
   {
     name: 'Sync status',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aStatus = getRepositorySyncStatus(a);
-        const bStatus = getRepositorySyncStatus(b);
-        return aStatus.status.localeCompare(bStatus.status);
-      }),
+    onSort: sortRepositoriesBySyncStatus,
   },
   {
     name: 'Last transition',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aTransition = getRepositoryLastTransitionTime(a).timestamp;
-        const bTransition = getRepositoryLastTransitionTime(b).timestamp;
-        return new Date(bTransition).getTime() - new Date(aTransition).getTime();
-      }),
+    onSort: sortRepositoriesByLastTransition,
   },
 ];
 

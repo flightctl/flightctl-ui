@@ -23,6 +23,8 @@ import { useDeleteListAction } from '../ListPage/ListPageActions';
 import FleetOwnerLink from './FleetDetails/FleetOwnerLink';
 import { useTableSort } from '@app/hooks/useTableSort';
 import { TableColumn } from '@app/types/extraTypes';
+import { sortByName, sortByOwner } from '@app/utils/sort/generic';
+import { sortFleetsByOSImg } from '@app/utils/sort/fleet';
 
 const CreateFleetButton = () => {
   const navigate = useNavigate();
@@ -48,33 +50,18 @@ const FleetEmptyState = () => (
 const columns: TableColumn<Fleet>[] = [
   {
     name: 'Name',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aName = a.metadata.name || '-';
-        const bName = b.metadata.name || '-';
-        return aName.localeCompare(bName);
-      }),
+    onSort: sortByName,
   },
   {
     name: 'OS image',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aOS = a.spec.template.spec.os?.image || '-';
-        const bOS = b.spec.template.spec.os?.image || '-';
-        return aOS.localeCompare(bOS);
-      }),
+    onSort: sortFleetsByOSImg,
   },
   {
     name: 'Label selector',
   },
   {
     name: 'Managed by',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aOwner = a.metadata?.owner || '-';
-        const bOwner = b.metadata?.owner || '-';
-        return aOwner.localeCompare(bOwner);
-      }),
+    onSort: sortByOwner,
   },
 ];
 

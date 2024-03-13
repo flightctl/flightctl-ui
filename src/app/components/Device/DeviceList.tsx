@@ -28,6 +28,8 @@ import EnrollmentRequestTable from '../EnrollmentRequest/EnrollmentRequestTable'
 import { getDateDisplay } from '@app/utils/dates';
 import { TableColumn } from '@app/types/extraTypes';
 import { useTableSort } from '@app/hooks/useTableSort';
+import { sortByCreationTimestamp, sortByDisplayName, sortByName } from '@app/utils/sort/generic';
+import { sortDevicesByFleet, sortDevicesByOS } from '@app/utils/sort/device';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -88,52 +90,27 @@ const DeviceRow = ({
 const getColumns = (showFleet: boolean): TableColumn<Device>[] => [
   {
     name: 'Fingerprint',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aFingerprint = a.metadata.name || '-';
-        const bFingerprint = b.metadata.name || '-';
-        return aFingerprint.localeCompare(bFingerprint);
-      }),
+    onSort: sortByName,
   },
   {
     name: 'Name',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aName = a.metadata.labels?.displayName || '-';
-        const bName = b.metadata.labels?.displayName || '-';
-        return aName.localeCompare(bName);
-      }),
+    onSort: sortByDisplayName,
   },
   ...(showFleet
     ? [
         {
           name: 'Fleet',
-          onSort: (resources) =>
-            resources.sort((a, b) => {
-              const aFleet = getDeviceFleet(a.metadata) || '-';
-              const bFleet = getDeviceFleet(b.metadata) || '-';
-              return aFleet.localeCompare(bFleet);
-            }),
-        } as TableColumn<Device>,
+          onSort: sortDevicesByFleet,
+        },
       ]
     : []),
   {
     name: 'Created at',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aDate = a.metadata.creationTimestamp || 0;
-        const bDate = b.metadata.creationTimestamp || 0;
-        return new Date(bDate).getTime() - new Date(aDate).getTime();
-      }),
+    onSort: sortByCreationTimestamp,
   },
   {
     name: 'Operating system',
-    onSort: (resources) =>
-      resources.sort((a, b) => {
-        const aOS = a.status?.systemInfo?.operatingSystem || '-';
-        const bOS = b.status?.systemInfo?.operatingSystem || '-';
-        return aOS.localeCompare(bOS);
-      }),
+    onSort: sortDevicesByOS,
   },
 ];
 
