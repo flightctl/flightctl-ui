@@ -9,13 +9,19 @@ const handleApiJSONResponse = async (response) => {
     return data;
   }
 
+  if (response.status === 404) {
+    // We skip the response message for 404 errors, which is { message: '' }
+    throw new Error(`Error ${response.status}: ${response.statusText}`)
+  }
+
   let errorText;
   try {
-    errorText = await response.text();
+    const text = await response.text();
+    errorText = ` - ${text}`;
   } catch (e) {
     // ignore
   }
-  throw new Error(`Error ${response.status}: ${response.statusText} - ${errorText}`)
+  throw new Error(`Error ${response.status}: ${response.statusText}${errorText}`)
 }
 
 export const fetchMetrics = async (metricQuery: string, token: string | undefined, abortSignal?: AbortSignal) => {
