@@ -26,7 +26,7 @@ const FleetDevicesTab = ({ fleetName }: { fleetName: string }) => {
           <EmptyStateBody>The fleet has no associated devices</EmptyStateBody>
         </EmptyState>
       ) : (
-        <DeviceTable devices={deviceList.items} refetch={refetch} showFleet={false} />
+        <DeviceTable resources={deviceList.items} refetch={refetch} showFleet={false} />
       );
   }
 
