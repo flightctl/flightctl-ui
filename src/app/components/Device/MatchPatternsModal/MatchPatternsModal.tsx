@@ -12,7 +12,7 @@ type MatchPatternsModalProps = {
 };
 
 const getDevice = (device: Device, matchPatterns: string[]) => {
-  const spec = device.spec || { systemd: {} };
+  const spec = device.spec || {};
   return {
     ...device,
     spec: {
@@ -25,6 +25,14 @@ const getDevice = (device: Device, matchPatterns: string[]) => {
   };
 };
 
+/**
+ * Modal for editing the Systemd units matchPatterns of a Device.
+ * This operation is only supported for devices that are NOT bound to fleets, in which case
+ * the systemd units definition are defined in the `device.spec` itself, not via a templateVersion.
+
+ * @param device FlightCtl device
+ * @param onClose on close callback
+ */
 const MatchPatternsModal: React.FC<MatchPatternsModalProps> = ({ onClose, device }) => {
   const { put } = useFetch();
   const [error, setError] = React.useState<string>();

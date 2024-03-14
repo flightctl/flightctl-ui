@@ -1,8 +1,6 @@
-import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
-import { Device } from '@types';
 import * as React from 'react';
 import { useParams } from 'react-router';
-import DetailsPage from '../../DetailsPage/DetailsPage';
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardBody,
@@ -15,23 +13,26 @@ import {
   Grid,
   GridItem,
 } from '@patternfly/react-core';
-import { getDateDisplay } from '@app/utils/dates';
-import { useNavigate } from 'react-router-dom';
-import SystemdTable from './SystemdTable';
 
+import { Device } from '@types';
+import { getDateDisplay } from '@app/utils/dates';
+import { getDeviceFleet } from '@app/utils/devices';
+import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
+import { useFetch } from '@app/hooks/useFetch';
 import LabelsView from '@app/components/common/LabelsView';
 import ConditionsTable from '@app/components/DetailsPage/Tables/ConditionsTable';
 import ContainersTable from '@app/components/DetailsPage/Tables/ContainersTable';
 import IntegrityTable from '@app/components/DetailsPage/Tables/IntegrityTable';
+import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageCard, { DetailsPageCardBody } from '@app/components/DetailsPage/DetailsPageCard';
 import DetailsPageActions, { useDeleteAction } from '@app/components/DetailsPage/DetailsPageActions';
 import DeviceFleet from '@app/components/Device/DeviceDetails/DeviceFleet';
-import { useFetch } from '@app/hooks/useFetch';
-import { getDeviceFleet } from '@app/utils/devices';
+import SystemdTable from './SystemdTable';
 
 const DeviceDetails = () => {
   const { deviceId } = useParams() as { deviceId: string };
   const [device, loading, error, refetch] = useFetchPeriodically<Required<Device>>({ endpoint: `devices/${deviceId}` });
+
   const navigate = useNavigate();
   const { remove } = useFetch();
 
@@ -47,6 +48,12 @@ const DeviceDetails = () => {
     resourceName: name,
     resourceType: 'Device',
   });
+
+  const onSystemdUnitsUpdate = () => {
+    // Only the device details need to be refreshed.
+    // Devices that use templateVersions are bound to a fleet, and they cannot be directly edited.
+    refetch();
+  };
 
   return (
     <DetailsPage
@@ -86,7 +93,9 @@ const DeviceDetails = () => {
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>OS</DescriptionListTerm>
-                  <DescriptionListDescription>{device?.spec?.os?.image || '-'}</DescriptionListDescription>
+                  <DescriptionListDescription>
+                    {device?.status?.systemInfo?.operatingSystem || '-'}
+                  </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>Architecture</DescriptionListTerm>
@@ -115,7 +124,9 @@ const DeviceDetails = () => {
         <GridItem md={6}>
           <DetailsPageCard>
             <CardTitle>Systemd units</CardTitle>
-            <DetailsPageCardBody>{device && <SystemdTable device={device} refetch={refetch} />}</DetailsPageCardBody>
+            <DetailsPageCardBody>
+              {device && <SystemdTable device={device} onSystemdUnitsUpdate={onSystemdUnitsUpdate} />}
+            </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
         <GridItem md={6}>

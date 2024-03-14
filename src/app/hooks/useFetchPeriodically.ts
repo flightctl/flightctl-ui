@@ -32,30 +32,31 @@ export const useFetchPeriodically = <R>(
 
     const fetchPeriodically = async (id: number) => {
       while (ref.current === id) {
-        try {
-          abortController = new AbortController();
-          if (id > 0) {
-            setIsRefreshing(true);
-          }
+        const requestQuery = getRequestQuery();
+        if (requestQuery) {
+          try {
+            abortController = new AbortController();
+            if (id > 0) {
+              setIsRefreshing(true);
+            }
 
-          const requestQuery = getRequestQuery();
-
-          const fetchFn = isAPI ? fetchData : fetchMetrics;
-          const data = await fetchFn(requestQuery, auth?.user?.access_token, abortController.signal);
-          if (isLoading) {
+            const fetchFn = isAPI ? fetchData : fetchMetrics;
+            const data = await fetchFn(requestQuery, auth?.user?.access_token, abortController.signal);
+            if (isLoading) {
+              setIsLoading(false);
+            }
+            setIsRefreshing(false);
+            setData(isAPI ? data : data.data.result);
+            setError(undefined);
+          } catch (err) {
+            // aborting fetch trows 'AbortError', we can ignore it
+            if (abortController.signal.aborted) {
+              return;
+            }
+            setError(err);
             setIsLoading(false);
+            setIsRefreshing(false);
           }
-          setIsRefreshing(false);
-          setData(isAPI ? data : data.data.result);
-          setError(undefined);
-        } catch (err) {
-          // aborting fetch trows 'AbortError', we can ignore it
-          if (abortController.signal.aborted) {
-            return;
-          }
-          setError(err);
-          setIsLoading(false);
-          setIsRefreshing(false);
         }
         await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
       }
