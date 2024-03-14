@@ -44,7 +44,9 @@ const DeviceDetails = () => {
       await remove(`devices/${deviceId}`);
       navigate('/devicemanagement/devices');
     },
-    disabledReason: boundFleet ? 'Devices bound to a fleet cannot be deleted' : '',
+    // Deleting devices bound to fleets directly will be disabled soon
+    disabledReason: boundFleet ? '' : '',
+    // disabledReason: boundFleet ? 'Devices bound to a fleet cannot be deleted' : '',
     resourceName: name,
     resourceType: 'Device',
   });

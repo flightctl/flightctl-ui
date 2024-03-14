@@ -83,7 +83,9 @@ const DeviceRow = ({
             deleteAction({
               resourceId: deviceName,
               resourceName: displayName,
-              disabledReason: boundFleet ? 'Devices bound to a fleet cannot be deleted' : '',
+              // Deleting devices bound to fleets directly will be disabled soon
+              disabledReason: boundFleet ? '' : '',
+              // disabledReason: boundFleet ? 'Devices bound to a fleet cannot be deleted' : '',
             }),
           ]}
         />
