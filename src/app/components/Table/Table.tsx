@@ -22,7 +22,7 @@ const Table: TableFC = ({ columns, children, data, getSortParams, ...rest }) => 
   if (!data.length) {
     return (
       <PageSection variant="light">
-        <Bullseye>No resoures are matching the current filters.</Bullseye>
+        <Bullseye>No resources are matching the current filters.</Bullseye>
       </PageSection>
     );
   }
