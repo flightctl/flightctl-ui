@@ -11,8 +11,11 @@ import {
   Stack,
   StackItem,
   Title,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
 } from '@patternfly/react-core';
-import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 
 import { useFetch } from '@app/hooks/useFetch';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
@@ -26,10 +29,12 @@ import { getDeviceFleet } from '@app/utils/devices';
 import AddDeviceModal from './AddDeviceModal/AddDeviceModal';
 import EnrollmentRequestTable from '../EnrollmentRequest/EnrollmentRequestTable';
 import { getDateDisplay } from '@app/utils/dates';
-import { TableColumn } from '@app/types/extraTypes';
 import { useTableSort } from '@app/hooks/useTableSort';
 import { sortByCreationTimestamp, sortByDisplayName, sortByName } from '@app/utils/sort/generic';
 import { sortDevicesByFleet, sortDevicesByOS } from '@app/utils/sort/device';
+import TableTextSearch from '../Table/TableTextSearch';
+import { useTableTextSearch } from '@app/hooks/useTableTextSearch';
+import Table, { TableColumn } from '../Table/Table';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -113,6 +118,7 @@ const getColumns = (showFleet: boolean): TableColumn<Device>[] => [
     onSort: sortDevicesByOS,
   },
 ];
+const getSearchText = (device: Device) => [device.metadata.name, device.metadata.labels?.displayName];
 
 interface DeviceTableProps {
   devices: Device[];
@@ -131,24 +137,22 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
   });
 
   const columns = React.useMemo(() => getColumns(showFleet), [showFleet]);
-  const { getSortParams, sortedData } = useTableSort(devices, columns);
+  const { search, setSearch, filteredData } = useTableTextSearch(devices, getSearchText);
+  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   return (
     <>
       <PageSection variant="light">
         <Title headingLevel="h3">Devices</Title>
       </PageSection>
-      <Table aria-label="Devices table">
-        <Thead>
-          <Tr>
-            {columns.map((c, index) => (
-              <Th key={c.name} modifier="wrap" sort={getSortParams(index)}>
-                {c.name}
-              </Th>
-            ))}
-            <Td />
-          </Tr>
-        </Thead>
+      <Toolbar id="devices-toolbar">
+        <ToolbarContent>
+          <ToolbarItem variant="search-filter">
+            <TableTextSearch value={search} setValue={setSearch} placeholder="Search by name or fingerprint" />
+          </ToolbarItem>
+        </ToolbarContent>
+      </Toolbar>
+      <Table aria-label="Devices table" columns={columns} data={filteredData} getSortParams={getSortParams}>
         <Tbody>
           {sortedData.map((device) => (
             <DeviceRow device={device} showFleet={showFleet} key={device.metadata.name} deleteAction={deleteAction} />

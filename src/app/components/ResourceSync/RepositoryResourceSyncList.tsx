@@ -1,7 +1,17 @@
 import * as React from 'react';
-import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 import PlusCircleIcon from '@patternfly/react-icons/dist/esm/icons/plus-circle-icon';
-import { Button, EmptyState, EmptyStateBody, Grid, GridItem, Spinner } from '@patternfly/react-core';
+import {
+  Button,
+  EmptyState,
+  EmptyStateBody,
+  Grid,
+  GridItem,
+  Spinner,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
+} from '@patternfly/react-core';
 import { useLocation } from 'react-router';
 
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
@@ -12,7 +22,6 @@ import StatusInfo from '@app/components/common/StatusInfo';
 import CreateRepositoryResourceSync from '@app/components/ResourceSync/CreateResourceSync/CreateRepositoryResourceSync';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import { useTableSort } from '@app/hooks/useTableSort';
-import { TableColumn } from '@app/types/extraTypes';
 import { sortByName } from '@app/utils/sort/generic';
 import {
   sortResourceSyncsByHash,
@@ -20,6 +29,9 @@ import {
   sortResourceSyncsByRevision,
   sortResourceSyncsByStatus,
 } from '@app/utils/sort/resourceSync';
+import Table, { TableColumn } from '../Table/Table';
+import { useTableTextSearch } from '@app/hooks/useTableTextSearch';
+import TableTextSearch from '../Table/TableTextSearch';
 
 import './RepositoryResourceSyncList.css';
 
@@ -56,6 +68,8 @@ const createRefs = (rsList: ResourceSync[]) => {
   return rsRefs;
 };
 
+const getSearchText = (resourceSync: ResourceSync) => [resourceSync.metadata.name];
+
 const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: ResourceSync[]; refetch: VoidFunction }) => {
   const { remove } = useFetch();
   const { hash = '#' } = useLocation();
@@ -79,21 +93,20 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
     },
   });
 
-  const { getSortParams, sortedData } = useTableSort(resourceSyncs, columns);
+  const { filteredData, search, setSearch } = useTableTextSearch(resourceSyncs, getSearchText);
+
+  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   return (
     <>
-      <Table aria-label="Repositories table">
-        <Thead>
-          <Tr>
-            {columns.map((c, index) => (
-              <Th key={c.name} sort={getSortParams(index)}>
-                {c.name}
-              </Th>
-            ))}
-            <Td />
-          </Tr>
-        </Thead>
+      <Toolbar id="resource-sync-toolbar">
+        <ToolbarContent>
+          <ToolbarItem variant="search-filter">
+            <TableTextSearch value={search} setValue={setSearch} />
+          </ToolbarItem>
+        </ToolbarContent>
+      </Toolbar>
+      <Table aria-label="Repositories table" columns={columns} data={filteredData} getSortParams={getSortParams}>
         <Tbody>
           {sortedData.map((resourceSync) => {
             const rsName = resourceSync.metadata.name as string;

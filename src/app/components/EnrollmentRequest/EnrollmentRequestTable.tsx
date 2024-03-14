@@ -1,34 +1,132 @@
 import { useFetch } from '@app/hooks/useFetch';
-import { getApprovalStatus } from '@app/utils/status/enrollmentRequest';
+import { ApprovalStatus, getApprovalStatus } from '@app/utils/status/enrollmentRequest';
 import {
   Badge,
   MenuToggle,
-  MenuToggleElement,
   PageSection,
   Select,
   SelectList,
   SelectOption,
+  SelectProps,
   Title,
   Toolbar,
   ToolbarContent,
   ToolbarFilter,
   ToolbarGroup,
+  ToolbarItem,
 } from '@patternfly/react-core';
-import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 import { EnrollmentRequest } from '@types';
 import * as React from 'react';
 import DeviceEnrollmentModal from './DeviceEnrollmentModal/DeviceEnrollmentModal';
 import { Link } from 'react-router-dom';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
-import { TableColumn } from '@app/types/extraTypes';
 import { useTableSort } from '@app/hooks/useTableSort';
 import { getDateDisplay } from '@app/utils/dates';
 import { sortByCreationTimestamp, sortByName } from '@app/utils/sort/generic';
 import { sortERsByStatus } from '@app/utils/sort/enrollmentRequest';
+import TableTextSearch, { TableTextSearchProps } from '../Table/TableTextSearch';
+import Table, { TableColumn } from '../Table/Table';
+import { useERFilters } from './useERFilters';
+
+type EnrollmentRequestListToolbarProps = {
+  search: TableTextSearchProps['value'];
+  setSearch: TableTextSearchProps['setValue'];
+  filters: { status: ApprovalStatus[] };
+  setFilters: React.Dispatch<
+    React.SetStateAction<{
+      status: ApprovalStatus[];
+    }>
+  >;
+};
+
+const EnrollmentRequestListToolbar: React.FC<EnrollmentRequestListToolbarProps> = ({
+  search,
+  setSearch,
+  filters,
+  setFilters,
+}) => {
+  const [isStatusExpanded, setIsStatusExpanded] = React.useState(false);
+
+  const onStatusSelect: SelectProps['onSelect'] = (e, selection) => {
+    const checked = (e?.target as HTMLInputElement)?.checked;
+    setFilters((filters) => ({
+      ...filters,
+      status: checked
+        ? [...filters.status, selection as ApprovalStatus]
+        : filters.status.filter((s) => s !== selection),
+    }));
+  };
+
+  const onDeleteGroup = (type: string) => {
+    if (type === 'Status') {
+      setFilters({ status: [] });
+    }
+  };
+
+  const onDelete = (type?: string, id?: string) => {
+    if (type === 'Status') {
+      setFilters({ status: filters.status.filter((fil: string) => fil !== id) });
+    } else {
+      setFilters({ status: [] });
+      setSearch('');
+    }
+  };
+
+  return (
+    <Toolbar id="enrollment-toolbar" clearAllFilters={onDelete}>
+      <ToolbarContent>
+        <ToolbarItem variant="search-filter">
+          <TableTextSearch value={search} setValue={setSearch} placeholder="Search by fingerprint" />
+        </ToolbarItem>
+        <ToolbarGroup variant="filter-group">
+          <ToolbarFilter
+            chips={filters.status}
+            deleteChip={(category, chip) => onDelete(category as string, chip as string)}
+            deleteChipGroup={(category) => onDeleteGroup(category as string)}
+            categoryName="Status"
+          >
+            <Select
+              aria-label="Status"
+              role="menu"
+              toggle={(toggleRef) => (
+                <MenuToggle
+                  ref={toggleRef}
+                  onClick={() => setIsStatusExpanded(!isStatusExpanded)}
+                  isExpanded={isStatusExpanded}
+                >
+                  Status
+                  {filters.status.length > 0 && <Badge isRead>{filters.status.length}</Badge>}
+                </MenuToggle>
+              )}
+              onSelect={onStatusSelect}
+              selected={filters.status}
+              isOpen={isStatusExpanded}
+              onOpenChange={setIsStatusExpanded}
+            >
+              <SelectList>
+                {Object.keys(ApprovalStatus).map((key) => (
+                  <SelectOption
+                    key={key}
+                    hasCheckbox
+                    value={ApprovalStatus[key]}
+                    isSelected={filters.status.includes(ApprovalStatus[key])}
+                  >
+                    {ApprovalStatus[key]}
+                  </SelectOption>
+                ))}
+              </SelectList>
+            </Select>
+          </ToolbarFilter>
+        </ToolbarGroup>
+      </ToolbarContent>
+    </Toolbar>
+  );
+};
 
 const columns: TableColumn<EnrollmentRequest>[] = [
   {
-    name: 'Name',
+    name: 'Fingerprint',
     onSort: sortByName,
   },
   {
@@ -50,10 +148,6 @@ type EnrollmentRequestTableProps = {
 const EnrollmentRequestTable: React.FC<EnrollmentRequestTableProps> = ({ enrollmentRequests, refetch }) => {
   const { remove } = useFetch();
   const [requestId, setRequestId] = React.useState<string>();
-  const [filters, setFilters] = React.useState<{ status: string[] }>({
-    status: ['Pending approval'],
-  });
-  const [isStatusExpanded, setIsStatusExpanded] = React.useState(false);
   const { deleteAction, deleteModal } = useDeleteListAction({
     resourceType: 'Enrollment request',
     onDelete: async (resourceId: string) => {
@@ -62,37 +156,9 @@ const EnrollmentRequestTable: React.FC<EnrollmentRequestTableProps> = ({ enrollm
     },
   });
 
-  const onStatusSelect = (event?: React.MouseEvent<Element, MouseEvent>, selection?: string | number) => {
-    const checked = (event?.target as HTMLInputElement)?.checked;
-    setFilters((filters) => ({
-      ...filters,
-      status: checked ? [...filters.status, selection as string] : filters.status.filter((s) => s !== selection),
-    }));
-  };
-
-  const onDeleteGroup = (type: string) => {
-    if (type === 'Status') {
-      setFilters({ status: [] });
-    }
-  };
-
-  const onDelete = (type: string, id: string) => {
-    if (type === 'Status') {
-      setFilters({ status: filters.status.filter((fil: string) => fil !== id) });
-    } else {
-      setFilters({ status: [] });
-    }
-  };
-
   const currentEnrollmentRequest = enrollmentRequests.find((er) => er.metadata.name === requestId);
 
-  const filteredData = enrollmentRequests.filter((er) => {
-    if (!filters.status.length) {
-      return true;
-    }
-    return filters.status.includes(getApprovalStatus(er));
-  });
-
+  const { filteredData, ...rest } = useERFilters(enrollmentRequests);
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   return (
@@ -100,78 +166,14 @@ const EnrollmentRequestTable: React.FC<EnrollmentRequestTableProps> = ({ enrollm
       <PageSection variant="light">
         <Title headingLevel="h3">Enrollment requests</Title>
       </PageSection>
-      <Toolbar id="enrollment-toolbar" clearAllFilters={() => onDelete('', '')}>
-        <ToolbarContent>
-          <ToolbarGroup variant="filter-group">
-            <ToolbarFilter
-              chips={filters.status}
-              deleteChip={(category, chip) => onDelete(category as string, chip as string)}
-              deleteChipGroup={(category) => onDeleteGroup(category as string)}
-              categoryName="Status"
-            >
-              <Select
-                aria-label="Status"
-                role="menu"
-                toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                  <MenuToggle
-                    ref={toggleRef}
-                    onClick={() => setIsStatusExpanded(!isStatusExpanded)}
-                    isExpanded={isStatusExpanded}
-                    style={
-                      {
-                        width: '140px',
-                      } as React.CSSProperties
-                    }
-                  >
-                    Status
-                    {filters.status.length > 0 && <Badge isRead>{filters.status.length}</Badge>}
-                  </MenuToggle>
-                )}
-                onSelect={onStatusSelect}
-                selected={filters.status}
-                isOpen={isStatusExpanded}
-                onOpenChange={(isOpen) => setIsStatusExpanded(isOpen)}
-              >
-                <SelectList>
-                  <SelectOption hasCheckbox value="Approved" isSelected={filters.status.includes('Approved')}>
-                    Approved
-                  </SelectOption>
-                  <SelectOption
-                    hasCheckbox
-                    value="Pending approval"
-                    isSelected={filters.status.includes('Pending approval')}
-                  >
-                    Pending approval
-                  </SelectOption>
-                  <SelectOption hasCheckbox value="Denied" isSelected={filters.status.includes('Denied')}>
-                    Denied
-                  </SelectOption>
-                  <SelectOption hasCheckbox value="Unknown" isSelected={filters.status.includes('Unknown')}>
-                    Unknown
-                  </SelectOption>
-                </SelectList>
-              </Select>
-            </ToolbarFilter>
-          </ToolbarGroup>
-        </ToolbarContent>
-      </Toolbar>
-      <Table aria-label="Enrollment requests table">
-        <Thead>
-          <Tr>
-            {columns.map((c, index) => (
-              <Th key={c.name} sort={getSortParams(index)}>
-                {c.name}
-              </Th>
-            ))}
-            <Td />
-          </Tr>
-        </Thead>
+      <EnrollmentRequestListToolbar {...rest} />
+      <Table aria-label="Enrollment requests table" columns={columns} data={filteredData} getSortParams={getSortParams}>
         <Tbody>
           {sortedData.map((er) => {
             const approvalStatus = getApprovalStatus(er);
             return (
               <Tr key={er.metadata.name}>
-                <Td dataLabel="Name">
+                <Td dataLabel="Fingerprint">
                   <Link to={`/devicemanagement/enrollmentrequests/${er.metadata.name}`}>{er.metadata.name || '-'}</Link>
                 </Td>
                 <Td dataLabel="Status">{approvalStatus}</Td>
@@ -182,7 +184,7 @@ const EnrollmentRequestTable: React.FC<EnrollmentRequestTableProps> = ({ enrollm
                       {
                         title: 'Approve',
                         onClick: () => setRequestId(er.metadata.name),
-                        isDisabled: approvalStatus !== 'Pending approval',
+                        isDisabled: approvalStatus !== ApprovalStatus.Pending,
                       },
                       deleteAction({ resourceId: er.metadata.name || '' }),
                     ]}
