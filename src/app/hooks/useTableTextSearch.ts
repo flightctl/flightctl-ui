@@ -3,7 +3,7 @@ import * as fuzzy from 'fuzzysearch';
 
 export const useTableTextSearch = <D>(
   data: D[],
-  getText: (datum: D) => Array<string | undefined>
+  getText: (datum: D) => Array<string | undefined>,
 ): { search: string; setSearch: (value: string) => void; filteredData: D[] } => {
   const [search, setSearch] = React.useState<string>('');
 

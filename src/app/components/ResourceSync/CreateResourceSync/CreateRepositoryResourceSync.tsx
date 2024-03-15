@@ -41,21 +41,11 @@ const getResourceSync = (repositoryId: string, values: RepositoryResourceSyncVal
 };
 
 const CreateRepositoryResourceSyncForm = ({
-  onSuccess,
   onCancel,
   children,
-}: React.PropsWithChildren<{ onSuccess: VoidFunction; onCancel: VoidFunction }>) => {
+}: React.PropsWithChildren<{ onCancel: VoidFunction }>) => {
   const { values, isValid, dirty, submitForm, isSubmitting } = useFormikContext<RepositoryResourceSyncValues>();
   const isSubmitDisabled = isSubmitting || !dirty || !isValid;
-
-  const formSubmit = async () => {
-    await submitForm();
-
-    if (isValid && dirty) {
-      // Only close the form when the form is filled in and valid
-      onSuccess();
-    }
-  };
 
   return (
     <Form>
@@ -82,7 +72,7 @@ const CreateRepositoryResourceSyncForm = ({
       </Grid>
       {children}
       <FlightCtlActionGroup>
-        <Button variant="primary" onClick={formSubmit} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
+        <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
           Create resource sync
         </Button>
         <Button variant="link" isDisabled={isSubmitting} onClick={onCancel}>
@@ -95,11 +85,11 @@ const CreateRepositoryResourceSyncForm = ({
 
 const CreateRepositoryResourceSync = ({
   repositoryId,
-  onSuccess,
+  onCreateResult,
   onCancel,
 }: {
   repositoryId: string;
-  onSuccess: VoidFunction;
+  onCreateResult: (success: boolean) => void;
   onCancel: VoidFunction;
 }) => {
   const [error, setError] = React.useState<string>();
@@ -115,15 +105,17 @@ const CreateRepositoryResourceSync = ({
       validationSchema={resourceSyncSchema}
       onSubmit={async (values) => {
         setError(undefined);
+
         try {
           await post<ResourceSync>('resourcesyncs', getResourceSync(repositoryId, values));
-          onSuccess();
+          onCreateResult(true);
         } catch (e) {
           setError(getErrorMessage(e));
+          onCreateResult(false);
         }
       }}
     >
-      <CreateRepositoryResourceSyncForm onSuccess={onSuccess} onCancel={onCancel}>
+      <CreateRepositoryResourceSyncForm onCancel={onCancel}>
         {error && (
           <Alert isInline variant="danger" title="An error occured">
             {error}

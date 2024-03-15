@@ -161,9 +161,11 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
 
   const items = rsList?.items || [];
 
-  const onResourceSyncCreated = () => {
-    setIsFormVisible(false);
-    refetch();
+  const onCreateResourceSyncResult = (success: boolean) => {
+    if (success) {
+      setIsFormVisible(false);
+      refetch();
+    }
   };
 
   return (
@@ -180,7 +182,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
           {isFormVisible ? (
             <CreateRepositoryResourceSync
               repositoryId={repositoryId}
-              onSuccess={onResourceSyncCreated}
+              onCreateResult={onCreateResourceSyncResult}
               onCancel={() => {
                 setIsFormVisible(false);
               }}

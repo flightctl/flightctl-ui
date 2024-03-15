@@ -16,8 +16,8 @@ const handleApiJSONResponse = async (response) => {
 
   let errorText;
   try {
-    const text = await response.text();
-    errorText = ` - ${text}`;
+    const json = await response.json();
+    errorText = ` - ${json.message || json}`;
   } catch (e) {
     // ignore
   }

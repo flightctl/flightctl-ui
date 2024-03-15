@@ -18,7 +18,7 @@ export const useERFilters = (enrollmentRequests: EnrollmentRequest[]) => {
         }
         return filters.status.includes(getApprovalStatus(er));
       }),
-    [enrollmentRequests, filters]
+    [enrollmentRequests, filters],
   );
 
   const { search, setSearch, filteredData } = useTableTextSearch(fData, getSearchText);

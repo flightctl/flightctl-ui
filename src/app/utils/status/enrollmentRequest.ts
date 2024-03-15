@@ -9,7 +9,7 @@ export enum ApprovalStatus {
 
 export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): ApprovalStatus => {
   const approvedCondition = enrollmentRequest.status?.conditions?.find(
-    (c) => c.type === ConditionType.EnrollmentRequestApproved
+    (c) => c.type === ConditionType.EnrollmentRequestApproved,
   );
   if (!approvedCondition) {
     return ApprovalStatus.Pending;
