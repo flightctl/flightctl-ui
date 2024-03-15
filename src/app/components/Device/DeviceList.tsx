@@ -162,10 +162,17 @@ const DeviceList = () => {
     endpoint: 'enrollmentrequests',
   });
 
-  const data = [
-    ...(devicesList?.items || []),
-    ...(erList?.items || []).filter((er) => !devicesList?.items.some((d) => d.metadata.name === er.metadata.name)),
-  ];
+  const data = React.useMemo(() => {
+    const devices = devicesList?.items || [];
+    const ers = erList?.items || [];
+
+    const deviceIds = devices.reduce((acc, curr) => {
+      acc[curr.metadata.name || ''] = {};
+      return acc;
+    }, {});
+
+    return [...devices, ...ers.filter((er) => !deviceIds[er.metadata.name || ''])];
+  }, [devicesList?.items, erList?.items]);
 
   const refetch = () => {
     devicesRefetch();

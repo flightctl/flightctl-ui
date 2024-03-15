@@ -35,7 +35,17 @@ export const sortDevicesByOS = (resources: Array<Device | EnrollmentRequest>) =>
 
 export const sortDevicesByFleet = (resources: Array<Device | EnrollmentRequest>) =>
   resources.sort((a, b) => {
-    const aFleet = getDeviceFleet(a.metadata) || '-';
-    const bFleet = getDeviceFleet(b.metadata) || '-';
-    return aFleet.localeCompare(bFleet);
+    const aFleet = getDeviceFleet(a.metadata);
+    const bFleet = getDeviceFleet(b.metadata);
+
+    if (!aFleet && !bFleet) {
+      // sort ERs first, then Devices
+      if (isEnrollmentRequest(a) && !isEnrollmentRequest(b)) {
+        return -1;
+      }
+      if (isEnrollmentRequest(b) && !isEnrollmentRequest(a)) {
+        return 1;
+      }
+    }
+    return (aFleet || '-').localeCompare(bFleet || '-');
   });
