@@ -6,6 +6,9 @@ export type TableColumn<D> = {
   name: string;
   onSort?: (data: D[]) => D[];
   defaultSort?: boolean;
+  thProps?: Omit<ThProps, 'sort'> & {
+    ref?: React.Ref<HTMLTableCellElement> | undefined;
+  };
 };
 
 type TableProps<D> = {
@@ -32,7 +35,7 @@ const Table: TableFC = ({ columns, children, data, getSortParams, ...rest }) => 
       <Thead>
         <Tr>
           {columns.map((c, index) => (
-            <Th key={c.name} sort={getSortParams(index)}>
+            <Th key={c.name} sort={getSortParams(index)} {...c.thProps}>
               {c.name}
             </Th>
           ))}

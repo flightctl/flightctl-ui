@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
 import {
   Button,
   EmptyState,
@@ -7,34 +6,26 @@ import {
   EmptyStateBody,
   EmptyStateFooter,
   EmptyStateHeader,
-  PageSection,
-  Stack,
-  StackItem,
-  Title,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem,
 } from '@patternfly/react-core';
-import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
+import { Tbody } from '@patternfly/react-table';
 
 import { useFetch } from '@app/hooks/useFetch';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
-import { Device, DeviceList, EnrollmentRequestList } from '@types';
+import { Device, DeviceList, EnrollmentRequest, EnrollmentRequestList } from '@types';
 
-import DeviceFleet from '@app/components/Device/DeviceDetails/DeviceFleet';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
-import { DeleteListActionResult, useDeleteListAction } from '../ListPage/ListPageActions';
-import { getDeviceFleet } from '@app/utils/devices';
+import { useDeleteListAction } from '../ListPage/ListPageActions';
 import AddDeviceModal from './AddDeviceModal/AddDeviceModal';
-import EnrollmentRequestTable from '../EnrollmentRequest/EnrollmentRequestTable';
-import { getDateDisplay } from '@app/utils/dates';
 import { useTableSort } from '@app/hooks/useTableSort';
 import { sortByCreationTimestamp, sortByDisplayName, sortByName } from '@app/utils/sort/generic';
-import { sortDevicesByFleet, sortDevicesByOS } from '@app/utils/sort/device';
-import TableTextSearch from '../Table/TableTextSearch';
-import { useTableTextSearch } from '@app/hooks/useTableTextSearch';
+import { sortDevicesByFleet, sortDevicesByOS, sortDevicesByStatus } from '@app/utils/sort/device';
 import Table, { TableColumn } from '../Table/Table';
+import DeviceEnrollmentModal from '../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
+import EnrollmentRequestTableRow from '../EnrollmentRequest/EnrollmentRequestTableRow';
+import DeviceTableToolbar from './DeviceTableToolbar';
+import { isEnrollmentRequest, useDeviceFilters } from './useDeviceFilters';
+import DeviceTableRow from './DeviceTableRow';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -52,49 +43,7 @@ const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => (
   </EmptyState>
 );
 
-const DeviceRow = ({
-  device,
-  showFleet,
-  deleteAction,
-}: {
-  device: Device;
-  showFleet: boolean;
-  deleteAction: DeleteListActionResult['deleteAction'];
-}) => {
-  const deviceName = device.metadata.name as string;
-  const displayName = device.metadata.labels?.displayName;
-  const boundFleet = getDeviceFleet(device.metadata);
-  return (
-    <Tr key={deviceName}>
-      <Td dataLabel="Fingerprint">
-        <Link to={`/devicemanagement/devices/${deviceName}`}>{deviceName}</Link>
-      </Td>
-      <Td dataLabel="Name">{displayName || '-'}</Td>
-      {showFleet && (
-        <Td dataLabel="Fleet">
-          <DeviceFleet deviceMetadata={device.metadata} />
-        </Td>
-      )}
-      <Td dataLabel="Created at">{getDateDisplay(device.metadata.creationTimestamp)}</Td>
-      <Td dataLabel="Operating system">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
-      <Td isActionCell>
-        <ActionsColumn
-          items={[
-            deleteAction({
-              resourceId: deviceName,
-              resourceName: displayName,
-              // Deleting devices bound to fleets directly will be disabled soon
-              disabledReason: boundFleet ? '' : '',
-              // disabledReason: boundFleet ? 'Devices bound to a fleet cannot be deleted' : '',
-            }),
-          ]}
-        />
-      </Td>
-    </Tr>
-  );
-};
-
-const getColumns = (showFleet: boolean): TableColumn<Device>[] => [
+const getColumns = (showFleet: boolean): TableColumn<Device | EnrollmentRequest>[] => [
   {
     name: 'Fingerprint',
     onSort: sortByName,
@@ -102,6 +51,11 @@ const getColumns = (showFleet: boolean): TableColumn<Device>[] => [
   {
     name: 'Name',
     onSort: sortByDisplayName,
+  },
+  {
+    name: 'Status',
+    onSort: sortDevicesByStatus,
+    defaultSort: true,
   },
   ...(showFleet
     ? [
@@ -118,19 +72,23 @@ const getColumns = (showFleet: boolean): TableColumn<Device>[] => [
   {
     name: 'Operating system',
     onSort: sortDevicesByOS,
+    thProps: {
+      modifier: 'wrap',
+    },
   },
 ];
-const getSearchText = (device: Device) => [device.metadata.name, device.metadata.labels?.displayName];
 
 interface DeviceTableProps {
-  devices: Device[];
+  resources: Array<Device | EnrollmentRequest>;
   showFleet: boolean;
   refetch: VoidFunction;
 }
 
-export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) => {
+export const DeviceTable = ({ resources, showFleet, refetch }: DeviceTableProps) => {
   const { remove } = useFetch();
-  const { deleteAction, deleteModal } = useDeleteListAction({
+
+  const [requestId, setRequestId] = React.useState<string>();
+  const { deleteAction: deleteDeviceAction, deleteModal: deleteDeviceModal } = useDeleteListAction({
     resourceType: 'Device',
     onDelete: async (resourceId: string) => {
       await remove(`devices/${resourceId}`);
@@ -138,37 +96,65 @@ export const DeviceTable = ({ devices, showFleet, refetch }: DeviceTableProps) =
     },
   });
 
+  const { deleteAction: deleteErAction, deleteModal: deleteErModal } = useDeleteListAction({
+    resourceType: 'Enrollment request',
+    onDelete: async (resourceId: string) => {
+      await remove(`enrollmentrequests/${resourceId}`);
+      refetch();
+    },
+  });
+
+  const currentEnrollmentRequest = resources.find(
+    (res) => res.metadata.name === requestId && isEnrollmentRequest(res),
+  ) as EnrollmentRequest | undefined;
+
   const columns = React.useMemo(() => getColumns(showFleet), [showFleet]);
-  const { search, setSearch, filteredData } = useTableTextSearch(devices, getSearchText);
+  const { filteredData, ...rest } = useDeviceFilters(resources);
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   return (
     <>
-      <PageSection variant="light">
-        <Title headingLevel="h3">Devices</Title>
-      </PageSection>
-      <Toolbar id="devices-toolbar">
-        <ToolbarContent>
-          <ToolbarItem variant="search-filter">
-            <TableTextSearch value={search} setValue={setSearch} placeholder="Search by name or fingerprint" />
-          </ToolbarItem>
-        </ToolbarContent>
-      </Toolbar>
+      <DeviceTableToolbar {...rest} />
       <Table aria-label="Devices table" columns={columns} data={filteredData} getSortParams={getSortParams}>
         <Tbody>
-          {sortedData.map((device) => (
-            <DeviceRow device={device} showFleet={showFleet} key={device.metadata.name} deleteAction={deleteAction} />
-          ))}
+          {sortedData.map((resource) =>
+            isEnrollmentRequest(resource) ? (
+              <EnrollmentRequestTableRow
+                er={resource}
+                showFleet={showFleet}
+                key={resource.metadata.name}
+                deleteAction={deleteErAction}
+                onApprove={setRequestId}
+              />
+            ) : (
+              <DeviceTableRow
+                device={resource}
+                showFleet={showFleet}
+                key={resource.metadata.name}
+                deleteAction={deleteDeviceAction}
+              />
+            ),
+          )}
         </Tbody>
       </Table>
-      {deleteModal}
+      {deleteDeviceModal}
+      {deleteErModal}
+      {currentEnrollmentRequest && (
+        <DeviceEnrollmentModal
+          enrollmentRequest={currentEnrollmentRequest}
+          onClose={(updateList) => {
+            setRequestId(undefined);
+            updateList && refetch();
+          }}
+        />
+      )}
     </>
   );
 };
 
 const DeviceList = () => {
   const [addDeviceModal, setAddDeviceModal] = React.useState(false);
-  const [devicesList, loading, error, refetch] = useFetchPeriodically<DeviceList>({
+  const [devicesList, devicesLoading, devicesError, devicesRefetch] = useFetchPeriodically<DeviceList>({
     endpoint: 'devices',
   });
 
@@ -176,29 +162,33 @@ const DeviceList = () => {
     endpoint: 'enrollmentrequests',
   });
 
-  const data = [...(devicesList?.items || []), ...(erList?.items || [])];
+  const data = React.useMemo(() => {
+    const devices = devicesList?.items || [];
+    const ers = erList?.items || [];
+
+    const deviceIds = devices.reduce((acc, curr) => {
+      acc[curr.metadata.name || ''] = {};
+      return acc;
+    }, {});
+
+    return [...devices, ...ers.filter((er) => !deviceIds[er.metadata.name || ''])];
+  }, [devicesList?.items, erList?.items]);
+
+  const refetch = () => {
+    devicesRefetch();
+    erRefetch();
+  };
 
   return (
     <>
       <ListPage title="Devices" actions={<Button onClick={() => setAddDeviceModal(true)}>Add device</Button>}>
         <ListPageBody
           data={data}
-          error={error || erEror}
-          loading={loading || erLoading}
+          error={devicesError || erEror}
+          loading={devicesLoading || erLoading}
           emptyState={<DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />}
         >
-          <Stack hasGutter>
-            {erList?.items && (
-              <StackItem>
-                <EnrollmentRequestTable enrollmentRequests={erList.items} refetch={erRefetch} />
-              </StackItem>
-            )}
-            {devicesList?.items && (
-              <StackItem>
-                <DeviceTable devices={devicesList.items} refetch={refetch} showFleet />
-              </StackItem>
-            )}
-          </Stack>
+          <DeviceTable resources={data} refetch={refetch} showFleet />
         </ListPageBody>
       </ListPage>
       {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}

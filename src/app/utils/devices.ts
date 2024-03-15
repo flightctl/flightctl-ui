@@ -1,5 +1,13 @@
 import { ObjectMeta } from '@types';
 
+export const getFingerprintDisplay = <R extends { metadata: ObjectMeta }>(resource: R) => {
+  const fingerprint = resource.metadata.name;
+  if (!fingerprint) {
+    return '-';
+  }
+  return `${fingerprint.substring(0, 6)}...${fingerprint.substring(fingerprint.length - 7, fingerprint.length - 1)}`;
+};
+
 const deviceFleetRegExp = /^Fleet\/(?<fleetName>.*)$/;
 
 const getDeviceFleet = (metadata: ObjectMeta) => {
