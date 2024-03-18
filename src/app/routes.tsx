@@ -10,13 +10,6 @@ import {
   useParams,
   useRouteError,
 } from 'react-router-dom';
-import { Overview } from '@app/old/Overview/Overview';
-import { Experimental } from '@app/old/Experimental/Experimental';
-import { Experimental2 } from '@app/old/Experimental/Experimental2';
-import { Experimental3 } from '@app/old/Experimental/Experimental3';
-import { Organization } from '@app/old/Organization/Organization';
-import { ImageBuilder } from '@app/old/ImageBuilder/ImageBuilder';
-import { Workload } from '@app/old/Workload/Workload';
 
 import AppLayout from '@app/components/AppLayout/AppLayout';
 import NotFound from '@app/components/AppLayout/NotFound';
@@ -33,12 +26,10 @@ import ResourceSyncToRepository from '@app/components/ResourceSync/ResourceSyncT
 
 import { useDocumentTitle } from '@app/hooks/useDocumentTitle';
 import { APP_TITLE } from '@app/constants';
-import { UserPreferencesContext } from './components/UserPreferences/UserPreferencesProvider';
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
   showInNav?: boolean;
-  isExperimental?: boolean;
   children?: ExtendedRouteObject[];
 };
 
@@ -67,42 +58,6 @@ const Refresh = () => {
   return <></>;
 };
 
-const experimentalRoutes: ExtendedRouteObject[] = [
-  {
-    path: '/experimental',
-    title: 'Experimental',
-    element: (
-      <TitledRoute title="Experimental">
-        <Experimental />
-      </TitledRoute>
-    ),
-    isExperimental: true,
-    showInNav: true,
-  },
-  {
-    path: '/experimental2',
-    title: 'Experimental2',
-    element: (
-      <TitledRoute title="Experimental2">
-        <Experimental2 />
-      </TitledRoute>
-    ),
-    isExperimental: true,
-    showInNav: true,
-  },
-  {
-    path: '/experimental3',
-    title: 'Experimental3',
-    element: (
-      <TitledRoute title="Experimental3">
-        <Experimental3 />
-      </TitledRoute>
-    ),
-    isExperimental: true,
-    showInNav: true,
-  },
-];
-
 const RedirectToDeviceDetails = () => {
   const { deviceId } = useParams() as { deviceId: string };
   return <Navigate to={`/devicemanagement/devices/${deviceId}`} replace />;
@@ -113,23 +68,11 @@ const RedirectToEnrollmentDetails = () => {
   return <Navigate to={`/devicemanagement/enrollmentrequests/${enrollmentRequestId}`} replace />;
 };
 
-const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteObject[] => [
+const appRoutes: ExtendedRouteObject[] = [
   {
     path: '/',
-    element: <Navigate to={experimentalFeatures ? '/devicemanagement/overview' : '/devicemanagement/fleets'} replace />,
+    element: <Navigate to="/devicemanagement/fleets" replace />,
   },
-  {
-    path: '/devicemanagement/overview',
-    title: 'Overview',
-    showInNav: true,
-    element: (
-      <TitledRoute title="Overview">
-        <Overview />
-      </TitledRoute>
-    ),
-    isExperimental: true,
-  },
-  ...experimentalRoutes,
   {
     path: '/devicemanagement/enrollmentrequests/:enrollmentRequestId',
     title: 'Enrollment Request Details',
@@ -208,22 +151,8 @@ const deviceManagementRoutes = (experimentalFeatures?: boolean): ExtendedRouteOb
       },
     ],
   },
-];
-
-const administrationRoutes: ExtendedRouteObject[] = [
   {
-    path: '/workload',
-    title: 'Workload',
-    showInNav: true,
-    isExperimental: true,
-    element: (
-      <TitledRoute title="Workload">
-        <Workload />
-      </TitledRoute>
-    ),
-  },
-  {
-    path: '/administration/repositories',
+    path: '/devicemanagement/repositories',
     showInNav: true,
     title: 'Repositories',
     children: [
@@ -257,7 +186,7 @@ const administrationRoutes: ExtendedRouteObject[] = [
     ],
   },
   {
-    path: '/administration/resourcesyncs/:rsId',
+    path: '/devicemanagement/resourcesyncs/:rsId',
     title: 'Resource sync',
     // Fetches the RS from its ID and redirects to the repository page
     element: (
@@ -267,54 +196,22 @@ const administrationRoutes: ExtendedRouteObject[] = [
     ),
   },
   {
-    path: '/administration/organization',
-    title: 'Organization',
-    isExperimental: true,
-    showInNav: true,
-    element: (
-      <TitledRoute title="Organization">
-        <Organization />
-      </TitledRoute>
-    ),
-  },
-  {
-    path: '/administration/imagebuilder',
-    title: 'Image Builder',
-    isExperimental: true,
-    showInNav: true,
-    element: (
-      <TitledRoute title="Image Builder">
-        <ImageBuilder />
-      </TitledRoute>
-    ),
-  },
-  {
     path: '/refresh',
     element: <Refresh />,
   },
 ];
 
-const AppRoutes = () => {
-  const { experimentalFeatures } = React.useContext(UserPreferencesContext);
-
-  const routes = [...deviceManagementRoutes(experimentalFeatures), ...administrationRoutes];
+const AppRouter = () => {
   const router = createBrowserRouter([
     {
       path: '/',
       element: <AppLayout />,
       errorElement: <ErrorPage />,
-      children: routes,
+      children: appRoutes,
     },
   ]);
 
   return <RouterProvider router={router} />;
 };
 
-type AppRouteSections = 'Device Management' | 'Administration';
-
-const appRouteSections: Record<AppRouteSections, ExtendedRouteObject[]> = {
-  'Device Management': deviceManagementRoutes(),
-  Administration: administrationRoutes,
-};
-
-export { AppRoutes, appRouteSections };
+export { AppRouter, appRoutes };

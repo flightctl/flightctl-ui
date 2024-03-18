@@ -26,7 +26,7 @@ const ResourceSyncToRepository = () => {
         const repository = rsDetails.spec?.repository;
         if (repository) {
           setError(undefined);
-          navigate(`/administration/repositories/${repository}/resourcesyncs#${rsId}`);
+          navigate(`/devicemanagement/repositories/${repository}/resourcesyncs#${rsId}`);
         } else {
           setError(`Resourcesync ${rsId} is not linked to a repository`);
         }

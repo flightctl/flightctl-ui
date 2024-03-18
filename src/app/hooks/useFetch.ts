@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { deleteData, fetchData, postData, putData } from '@app/old/utils/commonFunctions';
+import { deleteData, fetchData, postData, putData } from '@app/utils/apiCalls';
 import { useAuth } from './useAuth';
 
 export const useFetch = () => {

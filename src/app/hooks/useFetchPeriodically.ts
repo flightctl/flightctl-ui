@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { fetchData, fetchMetrics } from '@app/old/utils/commonFunctions';
+import { fetchData, fetchMetrics } from '@app/utils/apiCalls';
 import { FlightControlQuery } from '@app/types/extraTypes';
 import { getQueryStringHash, getRequestQueryString, isApiQuery } from '@app/utils/api';
 

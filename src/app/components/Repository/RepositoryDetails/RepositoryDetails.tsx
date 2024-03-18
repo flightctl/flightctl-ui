@@ -23,7 +23,7 @@ const RepositoryDetails = () => {
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {
       await remove(`repositories/${repositoryId}`);
-      navigate('/administration/repositories');
+      navigate('/devicemanagement/repositories');
     },
     resourceName: repositoryId,
     resourceType: 'Repository',
@@ -35,7 +35,7 @@ const RepositoryDetails = () => {
       error={error}
       id={repositoryId}
       title={repoDetails?.metadata.name as string}
-      resourceLink="/administration/repositories"
+      resourceLink="/devicemanagement/repositories"
       resourceType="Repositories"
       actions={
         <DetailsPageActions>

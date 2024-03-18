@@ -3,7 +3,6 @@ import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyPlugin from 'copy-webpack-plugin';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
-import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
@@ -152,7 +151,6 @@ const config: Configuration & {
     new CopyPlugin({
       patterns: [{ from: './src/assets/images/', to: 'images' }],
     }),
-    new MonacoWebpackPlugin(),
   ],
   resolve: {
     extensions: ['.js', '.ts', '.tsx', '.jsx'],

@@ -36,7 +36,7 @@ const CreateRepositoryButton = () => {
   const navigate = useNavigate();
 
   return (
-    <Button variant="primary" onClick={() => navigate('/administration/repositories/create')}>
+    <Button variant="primary" onClick={() => navigate('/devicemanagement/repositories/create')}>
       Create
     </Button>
   );

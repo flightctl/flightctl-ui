@@ -12,7 +12,7 @@ const FleetOwnerLink = ({ owner }: { owner: string | undefined }) => {
 
   return (
     <div>
-      <Label color="green">RS</Label> <Link to={`/administration/resourcesyncs/${ownerRsName}`}>{ownerRsName}</Link>
+      <Label color="green">RS</Label> <Link to={`/devicemanagement/resourcesyncs/${ownerRsName}`}>{ownerRsName}</Link>
     </div>
   );
 };

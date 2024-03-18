@@ -139,7 +139,7 @@ const CreateRepository = () => {
         <StackItem>
           <Breadcrumb>
             <BreadcrumbItem>
-              <Link to="/administration/repositories">Repositories</Link>
+              <Link to="/devicemanagement/repositories">Repositories</Link>
             </BreadcrumbItem>
             <BreadcrumbItem isActive>Create repository</BreadcrumbItem>
           </Breadcrumb>
@@ -163,7 +163,7 @@ const CreateRepository = () => {
               setError(undefined);
               try {
                 await post<Repository>('repositories', getRepository(values));
-                navigate(`/administration/repositories/${values.name}`);
+                navigate(`/devicemanagement/repositories/${values.name}`);
               } catch (e) {
                 setError(getErrorMessage(e));
               }

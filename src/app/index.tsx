@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useAuth } from '@app/hooks/useAuth';
-import { AppRoutes } from '@app/routes';
+import { AppRouter } from '@app/routes';
 
 import '@patternfly/react-core/dist/styles/base.css';
 import '@app/app.css';
@@ -9,7 +9,7 @@ const App: React.FunctionComponent = () => {
   const auth = useAuth();
 
   if (!auth) {
-    return <AppRoutes />;
+    return <AppRouter />;
   }
 
   switch (auth.activeNavigator) {
@@ -29,7 +29,7 @@ const App: React.FunctionComponent = () => {
   }
 
   if (auth.isAuthenticated) {
-    return <AppRoutes />;
+    return <AppRouter />;
   }
   void auth.signinRedirect();
   return <div>Redirecting...</div>;

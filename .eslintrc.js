@@ -65,5 +65,5 @@ module.exports = {
     browser: true,
     node: true,
   },
-  ignorePatterns: ['src/app/old/**'],
+  ignorePatterns: [],
 };

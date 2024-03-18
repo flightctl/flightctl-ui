@@ -9,7 +9,6 @@ import {
   SelectOption,
   Stack,
   StackItem,
-  Switch,
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { UserPreferencesContext } from './UserPreferencesProvider';
@@ -27,9 +26,9 @@ type UserPreferencesModalProps = {
 };
 
 const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) => {
-  const { theme, setTheme, experimentalFeatures, setExperimentalFeatures } = React.useContext(UserPreferencesContext);
+  const { theme, setTheme } = React.useContext(UserPreferencesContext);
 
-  const [themeExpaded, setThemeExpanded] = React.useState(false);
+  const [themeExpanded, setThemeExpanded] = React.useState(false);
   return (
     <Modal title="User preferences" isOpen variant="small" onClose={onClose}>
       <Stack hasGutter>
@@ -42,7 +41,7 @@ const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) 
                     ref={toggleRef}
                     style={{ width: '100%' }}
                     onClick={() => setThemeExpanded(true)}
-                    isExpanded={themeExpaded}
+                    isExpanded={themeExpanded}
                   >
                     {themeLabels[theme]}
                   </MenuToggle>
@@ -53,7 +52,7 @@ const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) 
                   setThemeExpanded(false);
                 }}
                 aria-label="theme"
-                isOpen={themeExpaded}
+                isOpen={themeExpanded}
                 onOpenChange={setThemeExpanded}
               >
                 {Object.keys(themeLabels).map((theme) => (
@@ -63,12 +62,6 @@ const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) 
                 ))}
               </Select>
             </FormGroup>
-            <Switch
-              aria-label="Experimental features"
-              label="Experimental features"
-              isChecked={experimentalFeatures}
-              onChange={(_, checked) => setExperimentalFeatures(checked)}
-            />
           </Form>
         </StackItem>
         <StackItem>

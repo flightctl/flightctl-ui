@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 const apiServer = `${window.location.protocol}//${window.location.hostname}${window.API_PORT ? `:${window.API_PORT}` : ''}`;
 
 const flightCtlAPI = `${apiServer}/api/flightctl`;
@@ -11,7 +13,7 @@ const handleApiJSONResponse = async (response) => {
 
   if (response.status === 404) {
     // We skip the response message for 404 errors, which is { message: '' }
-    throw new Error(`Error ${response.status}: ${response.statusText}`)
+    throw new Error(`Error ${response.status}: ${response.statusText}`);
   }
 
   let errorText;
@@ -21,8 +23,8 @@ const handleApiJSONResponse = async (response) => {
   } catch (e) {
     // ignore
   }
-  throw new Error(`Error ${response.status}: ${response.statusText}${errorText}`)
-}
+  throw new Error(`Error ${response.status}: ${response.statusText}${errorText}`);
+};
 
 export const fetchMetrics = async (metricQuery: string, token: string | undefined, abortSignal?: AbortSignal) => {
   try {
@@ -143,8 +145,7 @@ export const approveEnrollmentRequest = async (name: string, data: object, token
       body: JSON.stringify(data),
     });
     return response;
-  } catch (error: any) {
-    console.log(error.response.status);
+  } catch (error) {
     console.error('Error making request:', error);
     return error.response;
   }
