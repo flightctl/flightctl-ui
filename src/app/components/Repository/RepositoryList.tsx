@@ -15,12 +15,10 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { Repository, RepositoryList } from '@types';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
-import { useFetch } from '@app/hooks/useFetch';
 import ListPageBody from '@app/components/ListPage/ListPageBody';
 import ListPage from '@app/components/ListPage/ListPage';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '@app/utils/status/repository';
 import StatusInfo from '@app/components/common/StatusInfo';
-import { useDeleteListAction } from '../ListPage/ListPageActions';
 import { useTableSort } from '@app/hooks/useTableSort';
 import { sortByName } from '@app/utils/sort/generic';
 import {
@@ -29,6 +27,7 @@ import {
   sortRepositoriesByUrl,
 } from '@app/utils/sort/repository';
 import { useTableTextSearch } from '@app/hooks/useTableTextSearch';
+import RepositoryCustomDeleteModal from './RepositoryDetails/RepositoryCustomDeleteModal';
 import TableTextSearch from '../Table/TableTextSearch';
 import Table, { TableColumn } from '../Table/Table';
 
@@ -77,14 +76,12 @@ const getSearchText = (repo: Repository) => [repo.metadata.name];
 
 const RepositoryTable = () => {
   const [repositoryList, loading, error, refetch] = useFetchPeriodically<RepositoryList>({ endpoint: 'repositories' });
-  const { remove } = useFetch();
-  const { deleteAction, deleteModal } = useDeleteListAction({
-    resourceType: 'Repository',
-    onDelete: async (resourceId: string) => {
-      await remove(`repositories/${resourceId}`);
-      refetch();
-    },
-  });
+  const [deleteModalRepoId, setDeleteModalRepoId] = React.useState<string>();
+
+  const onDeleteSuccess = () => {
+    setDeleteModalRepoId(undefined);
+    refetch();
+  };
 
   const { search, setSearch, filteredData } = useTableTextSearch(repositoryList?.items || [], getSearchText);
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
@@ -111,13 +108,26 @@ const RepositoryTable = () => {
               </Td>
               <Td dataLabel="Last transition">{getRepositoryLastTransitionTime(repository).text}</Td>
               <Td isActionCell>
-                <ActionsColumn items={[deleteAction({ resourceId: repository.metadata.name || '' })]} />
+                <ActionsColumn
+                  items={[
+                    {
+                      title: 'Delete',
+                      onClick: () => setDeleteModalRepoId(repository.metadata.name),
+                    },
+                  ]}
+                />
               </Td>
             </Tr>
           ))}
         </Tbody>
       </Table>
-      {deleteModal}
+      {!!deleteModalRepoId && (
+        <RepositoryCustomDeleteModal
+          onClose={() => setDeleteModalRepoId(undefined)}
+          onDeleteSuccess={onDeleteSuccess}
+          repositoryId={deleteModalRepoId}
+        />
+      )}
     </ListPageBody>
   );
 };
