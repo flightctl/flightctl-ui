@@ -11,10 +11,9 @@ type EnrollmentRequestTableRow = {
   er: EnrollmentRequest;
   onApprove: (id: string) => void;
   deleteAction: DeleteListActionResult['deleteAction'];
-  showFleet: boolean;
 };
 
-const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({ er, onApprove, deleteAction, showFleet }) => {
+const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({ er, onApprove, deleteAction }) => {
   const approvalStatus = getApprovalStatus(er);
   return (
     <Tr key={er.metadata.name}>
@@ -23,7 +22,7 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({ er, on
       </Td>
       <Td dataLabel="Name">-</Td>
       <Td dataLabel="Status">{approvalStatus}</Td>
-      {showFleet && <Td dataLabel="Fleet">-</Td>}
+      <Td dataLabel="Fleet">-</Td>
       <Td dataLabel="Created at">{getDateDisplay(er.metadata.creationTimestamp)}</Td>
       <Td dataLabel="Operating system">{er.spec.deviceStatus?.systemInfo?.operatingSystem || '-'}</Td>
       <Td isActionCell>

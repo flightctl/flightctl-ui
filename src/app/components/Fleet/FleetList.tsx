@@ -83,7 +83,12 @@ const FleetTable = () => {
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   return (
-    <ListPageBody data={fleetList?.items} error={error} loading={loading} emptyState={<FleetEmptyState />}>
+    <ListPageBody
+      isEmpty={!fleetList?.items || fleetList.items.length === 0}
+      error={error}
+      loading={loading}
+      emptyState={<FleetEmptyState />}
+    >
       <Toolbar>
         <ToolbarContent>
           <ToolbarItem variant="search-filter">

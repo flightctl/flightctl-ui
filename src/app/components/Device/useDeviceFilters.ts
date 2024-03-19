@@ -11,10 +11,11 @@ const getSearchText = (resource: Device | EnrollmentRequest) => [
   resource.metadata.labels?.displayName,
 ];
 
-export const useDeviceFilters = (resources: Array<Device | EnrollmentRequest>) => {
+export const useDeviceFilters = (resources: Array<Device | EnrollmentRequest>, queryFilters) => {
   const [filters, setFilters] = React.useState<{ status: ApprovalStatus[] }>({
     status: [],
   });
+  const [fleetName, setFleetName] = React.useState<string>(queryFilters.filterByFleetId);
 
   const fData = React.useMemo(
     () =>
@@ -33,6 +34,8 @@ export const useDeviceFilters = (resources: Array<Device | EnrollmentRequest>) =
 
   return {
     filteredData,
+    fleetName,
+    setFleetName,
     search,
     setSearch,
     filters,

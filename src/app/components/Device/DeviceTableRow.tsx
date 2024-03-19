@@ -10,11 +10,9 @@ import { getDateDisplay } from '@app/utils/dates';
 
 const DeviceTableRow = ({
   device,
-  showFleet,
   deleteAction,
 }: {
   device: Device;
-  showFleet: boolean;
   deleteAction: DeleteListActionResult['deleteAction'];
 }) => {
   const deviceName = device.metadata.name as string;
@@ -27,11 +25,9 @@ const DeviceTableRow = ({
       </Td>
       <Td dataLabel="Name">{displayName || '-'}</Td>
       <Td dataLabel="Status">{ApprovalStatus.Approved}</Td>
-      {showFleet && (
-        <Td dataLabel="Fleet">
-          <DeviceFleet deviceMetadata={device.metadata} />
-        </Td>
-      )}
+      <Td dataLabel="Fleet">
+        <DeviceFleet deviceMetadata={device.metadata} />
+      </Td>
       <Td dataLabel="Created at">{getDateDisplay(device.metadata.creationTimestamp)}</Td>
       <Td dataLabel="Operating system">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
       <Td isActionCell>

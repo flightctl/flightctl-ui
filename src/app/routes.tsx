@@ -111,7 +111,7 @@ const appRoutes: ExtendedRouteObject[] = [
         ),
       },
       {
-        path: ':fleetId/*',
+        path: ':fleetId',
         title: 'Fleet Details',
         element: (
           <TitledRoute title="Fleet Details">

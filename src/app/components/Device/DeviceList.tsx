@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Button,
   EmptyState,
@@ -43,7 +44,7 @@ const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => (
   </EmptyState>
 );
 
-const getColumns = (showFleet: boolean): TableColumn<Device | EnrollmentRequest>[] => [
+const deviceColumns: TableColumn<Device | EnrollmentRequest>[] = [
   {
     name: 'Fingerprint',
     onSort: sortByName,
@@ -57,14 +58,10 @@ const getColumns = (showFleet: boolean): TableColumn<Device | EnrollmentRequest>
     onSort: sortDevicesByStatus,
     defaultSort: true,
   },
-  ...(showFleet
-    ? [
-        {
-          name: 'Fleet',
-          onSort: sortDevicesByFleet,
-        },
-      ]
-    : []),
+  {
+    name: 'Fleet',
+    onSort: sortDevicesByFleet,
+  },
   {
     name: 'Created at',
     onSort: sortByCreationTimestamp,
@@ -79,12 +76,12 @@ const getColumns = (showFleet: boolean): TableColumn<Device | EnrollmentRequest>
 ];
 
 interface DeviceTableProps {
+  queryFilters: { filterByFleetId: string | null };
   resources: Array<Device | EnrollmentRequest>;
-  showFleet: boolean;
   refetch: VoidFunction;
 }
 
-export const DeviceTable = ({ resources, showFleet, refetch }: DeviceTableProps) => {
+export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTableProps) => {
   const { remove } = useFetch();
 
   const [requestId, setRequestId] = React.useState<string>();
@@ -108,31 +105,24 @@ export const DeviceTable = ({ resources, showFleet, refetch }: DeviceTableProps)
     (res) => res.metadata.name === requestId && isEnrollmentRequest(res),
   ) as EnrollmentRequest | undefined;
 
-  const columns = React.useMemo(() => getColumns(showFleet), [showFleet]);
-  const { filteredData, ...rest } = useDeviceFilters(resources);
-  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
+  const { filteredData, ...rest } = useDeviceFilters(resources, queryFilters);
+  const { getSortParams, sortedData } = useTableSort(filteredData, deviceColumns);
 
   return (
     <>
       <DeviceTableToolbar {...rest} />
-      <Table aria-label="Devices table" columns={columns} data={filteredData} getSortParams={getSortParams}>
+      <Table aria-label="Devices table" columns={deviceColumns} data={filteredData} getSortParams={getSortParams}>
         <Tbody>
           {sortedData.map((resource) =>
             isEnrollmentRequest(resource) ? (
               <EnrollmentRequestTableRow
                 er={resource}
-                showFleet={showFleet}
                 key={resource.metadata.name}
                 deleteAction={deleteErAction}
                 onApprove={setRequestId}
               />
             ) : (
-              <DeviceTableRow
-                device={resource}
-                showFleet={showFleet}
-                key={resource.metadata.name}
-                deleteAction={deleteDeviceAction}
-              />
+              <DeviceTableRow device={resource} key={resource.metadata.name} deleteAction={deleteDeviceAction} />
             ),
           )}
         </Tbody>
@@ -153,26 +143,32 @@ export const DeviceTable = ({ resources, showFleet, refetch }: DeviceTableProps)
 };
 
 const DeviceList = () => {
+  const [searchParams] = useSearchParams();
+  const filterByFleetId = searchParams.get('fleetId');
+
   const [addDeviceModal, setAddDeviceModal] = React.useState(false);
   const [devicesList, devicesLoading, devicesError, devicesRefetch] = useFetchPeriodically<DeviceList>({
-    endpoint: 'devices',
+    endpoint: `devices${filterByFleetId ? `?owner=Fleet/${filterByFleetId}` : ''}`,
   });
 
   const [erList, erLoading, erEror, erRefetch] = useFetchPeriodically<EnrollmentRequestList>({
-    endpoint: 'enrollmentrequests',
+    endpoint: filterByFleetId ? '' : 'enrollmentrequests',
   });
 
   const data = React.useMemo(() => {
     const devices = devicesList?.items || [];
-    const ers = erList?.items || [];
+    if (filterByFleetId) {
+      return devices;
+    }
 
     const deviceIds = devices.reduce((acc, curr) => {
       acc[curr.metadata.name || ''] = {};
       return acc;
     }, {});
 
+    const ers = erList?.items || [];
     return [...devices, ...ers.filter((er) => !deviceIds[er.metadata.name || ''])];
-  }, [devicesList?.items, erList?.items]);
+  }, [devicesList?.items, erList?.items, filterByFleetId]);
 
   const refetch = () => {
     devicesRefetch();
@@ -183,12 +179,12 @@ const DeviceList = () => {
     <>
       <ListPage title="Devices" actions={<Button onClick={() => setAddDeviceModal(true)}>Add device</Button>}>
         <ListPageBody
-          data={data}
+          isEmpty={(!data?.length || data.length === 0) && !filterByFleetId}
           error={devicesError || erEror}
-          loading={devicesLoading || erLoading}
+          loading={devicesLoading || (erLoading && !filterByFleetId)}
           emptyState={<DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />}
         >
-          <DeviceTable resources={data} refetch={refetch} showFleet />
+          <DeviceTable resources={data} refetch={refetch} queryFilters={{ filterByFleetId }} />
         </ListPageBody>
       </ListPage>
       {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}

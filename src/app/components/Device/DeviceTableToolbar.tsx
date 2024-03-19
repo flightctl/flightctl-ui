@@ -1,23 +1,31 @@
 import {
   Badge,
   MenuToggle,
+  SearchInput,
   Select,
   SelectList,
   SelectOption,
   SelectProps,
   Toolbar,
+  ToolbarChip,
+  ToolbarChipGroup,
   ToolbarContent,
   ToolbarFilter,
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
 import * as React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import TableTextSearch, { TableTextSearchProps } from '../Table/TableTextSearch';
 import { ApprovalStatus } from '@app/utils/status/enrollmentRequest';
+
+type FilterCategory = 'Status' | 'Name / ID' | 'Fleet';
 
 type DeviceTableToolbarProps = {
   search: TableTextSearchProps['value'];
   setSearch: TableTextSearchProps['setValue'];
+  fleetName: string | undefined;
+  setFleetName: (fleetName: string) => void;
   filters: { status: ApprovalStatus[] };
   setFilters: React.Dispatch<
     React.SetStateAction<{
@@ -26,8 +34,17 @@ type DeviceTableToolbarProps = {
   >;
 };
 
-const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({ search, setSearch, filters, setFilters }) => {
+const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
+  fleetName,
+  setFleetName,
+  search,
+  setSearch,
+  filters,
+  setFilters,
+}) => {
   const [isStatusExpanded, setIsStatusExpanded] = React.useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const fleetNameFilter = searchParams.get('fleetId');
 
   const onStatusSelect: SelectProps['onSelect'] = (e, selection) => {
     const checked = (e?.target as HTMLInputElement)?.checked;
@@ -39,31 +56,67 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({ search, setSear
     }));
   };
 
-  const onDeleteGroup = (type: string) => {
-    if (type === 'Status') {
-      setFilters({ status: [] });
-    }
+  const clearFleetFilter = () => {
+    setSearchParams('');
   };
 
-  const onDelete = (type?: string, id?: string) => {
+  const onApplyFleetFilter = () => {
+    // The change in the URL is detected by DeviceList. It will change the query to filter by fleet
+    setSearchParams({ fleetId: fleetName || '' });
+  };
+
+  const onDeleteFilterGroup = (category: string | ToolbarChipGroup) => {
+    const type = category as FilterCategory;
     if (type === 'Status') {
-      setFilters({ status: filters.status.filter((fil: string) => fil !== id) });
+      setFilters({ status: [] });
     } else {
       setFilters({ status: [] });
       setSearch('');
+      clearFleetFilter();
     }
   };
+
+  const onDeleteFilterChip = (category: string | ToolbarChipGroup, chip: ToolbarChip | string) => {
+    const type = category as FilterCategory;
+    const id = chip as string;
+    if (type === 'Status') {
+      setFilters({ status: filters.status.filter((fil: string) => fil !== id) });
+    } else if (type === 'Name / ID') {
+      setSearch('');
+    } else if (type === 'Fleet') {
+      clearFleetFilter();
+    }
+  };
+
   return (
-    <Toolbar id="devices-toolbar" clearAllFilters={onDelete}>
+    <Toolbar id="devices-toolbar" clearAllFilters={() => onDeleteFilterGroup('')}>
       <ToolbarContent>
         <ToolbarItem variant="search-filter">
-          <TableTextSearch value={search} setValue={setSearch} placeholder="Search by name or fingerprint" />
+          <ToolbarFilter chips={search ? [search] : []} deleteChip={onDeleteFilterChip} categoryName="Name / ID">
+            <TableTextSearch value={search} setValue={setSearch} placeholder="Search by name or fingerprint" />
+          </ToolbarFilter>
+        </ToolbarItem>
+        <ToolbarItem variant="search-filter">
+          <ToolbarFilter
+            chips={fleetNameFilter ? [fleetNameFilter] : []}
+            deleteChip={onDeleteFilterChip}
+            categoryName="Fleet"
+          >
+            <SearchInput
+              aria-label="Fleet name (exact match)"
+              onChange={(_event, value) => setFleetName(value)}
+              value={fleetNameFilter ? fleetName : undefined}
+              placeholder="Fleet name (exact match)"
+              onClear={clearFleetFilter}
+              onSearch={onApplyFleetFilter}
+            />
+          </ToolbarFilter>
         </ToolbarItem>
         <ToolbarGroup variant="filter-group">
           <ToolbarFilter
             chips={filters.status}
-            deleteChip={(category, chip) => onDelete(category as string, chip as string)}
-            deleteChipGroup={(category) => onDeleteGroup(category as string)}
+            deleteChip={onDeleteFilterChip}
+            deleteChipGroup={onDeleteFilterGroup}
             categoryName="Status"
           >
             <Select

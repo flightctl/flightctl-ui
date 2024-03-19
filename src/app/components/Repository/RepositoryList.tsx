@@ -87,7 +87,12 @@ const RepositoryTable = () => {
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   return (
-    <ListPageBody data={repositoryList?.items} error={error} loading={loading} emptyState={<RepositoryEmptyState />}>
+    <ListPageBody
+      isEmpty={!repositoryList?.items || repositoryList.items.length === 0}
+      error={error}
+      loading={loading}
+      emptyState={<RepositoryEmptyState />}
+    >
       <Toolbar>
         <ToolbarContent>
           <ToolbarItem variant="search-filter">

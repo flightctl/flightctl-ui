@@ -11,9 +11,12 @@ import {
   Grid,
   GridItem,
   Label,
+  Spinner,
 } from '@patternfly/react-core';
 import * as React from 'react';
-import SourceUrlList from '../../SourceUrlList';
+import { Link } from 'react-router-dom';
+
+import SourceUrlList from '../SourceUrlList';
 import { Fleet, FleetStatus } from '@types';
 import { getFleetStatusType } from '@app/utils/status/fleet';
 import { CheckCircleIcon, InProgressIcon, QuestionCircleIcon } from '@patternfly/react-icons';
@@ -47,7 +50,17 @@ const FleetStatus = ({ status }: { status: FleetStatus }) => {
   );
 };
 
-const DetailsTab = ({ fleet }: { fleet: Fleet }) => {
+const FleetDevices = ({ fleetId, count }: { fleetId: string; count: number | undefined }) => {
+  if (count === undefined) {
+    return <Spinner size="sm" />;
+  }
+  if (count === 0) {
+    return <>0</>;
+  }
+  return <Link to={`/devicemanagement/devices?fleetId=${fleetId}`}>{count}</Link>;
+};
+
+const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCount: number | undefined }) => {
   return (
     <Grid hasGutter>
       <GridItem md={12}>
@@ -63,6 +76,12 @@ const DetailsTab = ({ fleet }: { fleet: Fleet }) => {
                 <DescriptionListTerm>Label selector</DescriptionListTerm>
                 <DescriptionListDescription>
                   <LabelsView labels={fleet.spec.selector?.matchLabels} />
+                </DescriptionListDescription>
+              </DescriptionListGroup>
+              <DescriptionListGroup>
+                <DescriptionListTerm>Associated devices</DescriptionListTerm>
+                <DescriptionListDescription>
+                  <FleetDevices fleetId={fleet.metadata.name as string} count={devicesCount} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
@@ -97,4 +116,4 @@ const DetailsTab = ({ fleet }: { fleet: Fleet }) => {
   );
 };
 
-export default DetailsTab;
+export default FleetDetailsContent;
