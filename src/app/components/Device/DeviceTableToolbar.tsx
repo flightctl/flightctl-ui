@@ -18,6 +18,8 @@ import * as React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import TableTextSearch, { TableTextSearchProps } from '../Table/TableTextSearch';
 import { ApprovalStatus } from '@app/utils/status/enrollmentRequest';
+import { DeviceConditionStatus } from '@app/utils/status/device';
+import { combinedDevicesStatuses } from '@app/utils/status/devices';
 
 type FilterCategory = 'Status' | 'Name / ID' | 'Fleet';
 
@@ -26,10 +28,10 @@ type DeviceTableToolbarProps = {
   setSearch: TableTextSearchProps['setValue'];
   fleetName: string | undefined;
   setFleetName: (fleetName: string) => void;
-  filters: { status: ApprovalStatus[] };
+  filters: { status: Array<DeviceConditionStatus | ApprovalStatus> };
   setFilters: React.Dispatch<
     React.SetStateAction<{
-      status: ApprovalStatus[];
+      status: Array<DeviceConditionStatus | ApprovalStatus>;
     }>
   >;
 };
@@ -138,14 +140,14 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
               onOpenChange={setIsStatusExpanded}
             >
               <SelectList>
-                {Object.keys(ApprovalStatus).map((key) => (
+                {combinedDevicesStatuses.map((status) => (
                   <SelectOption
-                    key={key}
+                    key={status.key}
                     hasCheckbox
-                    value={ApprovalStatus[key]}
-                    isSelected={filters.status.includes(ApprovalStatus[key])}
+                    value={status.label}
+                    isSelected={filters.status.includes(status.label)}
                   >
-                    {ApprovalStatus[key]}
+                    {status.label}
                   </SelectOption>
                 ))}
               </SelectList>

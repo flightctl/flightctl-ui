@@ -26,7 +26,8 @@ import IntegrityTable from '@app/components/DetailsPage/Tables/IntegrityTable';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageCard, { DetailsPageCardBody } from '@app/components/DetailsPage/DetailsPageCard';
 import DetailsPageActions, { useDeleteAction } from '@app/components/DetailsPage/DetailsPageActions';
-import DeviceFleet from '@app/components/Device/DeviceDetails/DeviceFleet';
+import DeviceFleet from './DeviceFleet';
+import DeviceStatus from './DeviceStatus';
 import SystemdTable from './SystemdTable';
 
 const DeviceDetails = () => {
@@ -91,6 +92,12 @@ const DeviceDetails = () => {
                   <DescriptionListTerm>Fleet</DescriptionListTerm>
                   <DescriptionListDescription>
                     <DeviceFleet deviceMetadata={device?.metadata || {}} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>Status</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <DeviceStatus device={device} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>

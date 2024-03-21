@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { DeleteListActionResult } from '../ListPage/ListPageActions';
 import { getDateDisplay } from '@app/utils/dates';
 import { getFingerprintDisplay } from '@app/utils/devices';
+import EnrollmentRequestStatus from './EnrollmentRequestStatus';
 
 type EnrollmentRequestTableRow = {
   er: EnrollmentRequest;
@@ -21,7 +22,9 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({ er, on
         <Link to={`/devicemanagement/enrollmentrequests/${er.metadata.name}`}>{getFingerprintDisplay(er)}</Link>
       </Td>
       <Td dataLabel="Name">-</Td>
-      <Td dataLabel="Status">{approvalStatus}</Td>
+      <Td dataLabel="Status">
+        <EnrollmentRequestStatus er={er} />
+      </Td>
       <Td dataLabel="Fleet">-</Td>
       <Td dataLabel="Created at">{getDateDisplay(er.metadata.creationTimestamp)}</Td>
       <Td dataLabel="Operating system">{er.spec.deviceStatus?.systemInfo?.operatingSystem || '-'}</Td>

@@ -1,12 +1,13 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
+import { ActionsColumn, Td, Tr } from '@patternfly/react-table';
+
 import { Device } from '@types';
 import { DeleteListActionResult } from '../ListPage/ListPageActions';
 import { getDeviceFleet, getFingerprintDisplay } from '@app/utils/devices';
-import { ActionsColumn, Td, Tr } from '@patternfly/react-table';
-import { Link } from 'react-router-dom';
-import { ApprovalStatus } from '@app/utils/status/enrollmentRequest';
-import DeviceFleet from './DeviceDetails/DeviceFleet';
 import { getDateDisplay } from '@app/utils/dates';
+import DeviceStatus from './DeviceDetails/DeviceStatus';
+import DeviceFleet from './DeviceDetails/DeviceFleet';
 
 const DeviceTableRow = ({
   device,
@@ -24,7 +25,9 @@ const DeviceTableRow = ({
         <Link to={`/devicemanagement/devices/${deviceName}`}>{getFingerprintDisplay(device)}</Link>
       </Td>
       <Td dataLabel="Name">{displayName || '-'}</Td>
-      <Td dataLabel="Status">{ApprovalStatus.Approved}</Td>
+      <Td dataLabel="Status">
+        <DeviceStatus device={device} />
+      </Td>
       <Td dataLabel="Fleet">
         <DeviceFleet deviceMetadata={device.metadata} />
       </Td>

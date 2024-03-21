@@ -34,6 +34,7 @@ import DeviceEnrollmentModal from '../DeviceEnrollmentModal/DeviceEnrollmentModa
 import DetailsPageCard, { DetailsPageCardBody } from '@app/components/DetailsPage/DetailsPageCard';
 import DetailsPageActions, { useDeleteAction } from '@app/components/DetailsPage/DetailsPageActions';
 import WithHelperText from '@app/components/WithHelperText/WithHelperText';
+import EnrollmentRequestStatus from '@app/components/EnrollmentRequest/EnrollmentRequestStatus';
 
 const EnrollmentRequestDetails = () => {
   const { enrollmentRequestId } = useParams() as { enrollmentRequestId: string };
@@ -112,7 +113,9 @@ const EnrollmentRequestDetails = () => {
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>Status</DescriptionListTerm>
-                  <DescriptionListDescription>{approvalStatus}</DescriptionListDescription>
+                  <DescriptionListDescription>
+                    <EnrollmentRequestStatus er={er} />
+                  </DescriptionListDescription>
                 </DescriptionListGroup>
               </DescriptionList>
             </CardBody>

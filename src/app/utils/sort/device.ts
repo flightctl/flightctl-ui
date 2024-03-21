@@ -2,22 +2,34 @@ import { Device, EnrollmentRequest } from '@types';
 import { getDeviceFleet } from '../devices';
 import { isEnrollmentRequest } from '@app/components/Device/useDeviceFilters';
 import { ApprovalStatus, getApprovalStatus } from '../status/enrollmentRequest';
+import { DeviceConditionStatus, deviceStatusOrder, getDeviceStatus } from '@app/utils/status/device';
 
 export const sortDevicesByStatus = (resources: Array<Device | EnrollmentRequest>) =>
   resources.sort((a, b) => {
-    const aStatus = isEnrollmentRequest(a) ? getApprovalStatus(a) : ApprovalStatus.Approved;
-    const bStatus = isEnrollmentRequest(b) ? getApprovalStatus(b) : ApprovalStatus.Approved;
-    if (aStatus === ApprovalStatus.Pending && bStatus === ApprovalStatus.Pending) {
-      return 0;
-    }
-    if (aStatus === ApprovalStatus.Pending) {
-      return -1;
+    const isERa = isEnrollmentRequest(a);
+    const isERb = isEnrollmentRequest(b);
+
+    const aStatus = isERa ? getApprovalStatus(a) : getDeviceStatus(a);
+    const bStatus = isERb ? getApprovalStatus(b) : getDeviceStatus(b);
+
+    if (isERa && isERb) {
+      // Sort when both are EnrollmentRequests
+      if (aStatus === ApprovalStatus.Pending || bStatus === ApprovalStatus.Pending) {
+        if (aStatus === bStatus) {
+          return 0;
+        }
+        return aStatus === ApprovalStatus.Pending ? -1 : 1;
+      }
+      return aStatus.localeCompare(bStatus);
+    } else if (isERa || isERb) {
+      // Sort when only one is an EnrollmentRequest
+      return isERa ? -1 : 1;
     }
 
-    if (bStatus === ApprovalStatus.Pending) {
-      return 1;
-    }
-    return aStatus.localeCompare(bStatus);
+    // Sort when both are devices
+    const aIndex = deviceStatusOrder.indexOf(aStatus as DeviceConditionStatus);
+    const bIndex = deviceStatusOrder.indexOf(bStatus as DeviceConditionStatus);
+    return aIndex - bIndex;
   });
 
 export const sortDevicesByOS = (resources: Array<Device | EnrollmentRequest>) =>
