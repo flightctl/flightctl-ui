@@ -33,14 +33,19 @@ export interface MetricsQuery {
 }
 
 // We define separate "ConditionType" for each resource type, given it's generic in the API
-export type FleetConditionType = 'Synced' | 'Syncing'; // TODO reference values from the API when they are defined
+
+export type FleetConditionType =
+  | ConditionType.FleetOverlappingSelectors
+  | ConditionType.ResourceSyncSynced
+  | 'Syncing'
+  | 'Unknown';
+
 export type RepositoryConditionType =
   | ConditionType.RepositoryAccessible
   | ConditionType.ResourceSyncResourceParsed
   | ConditionType.ResourceSyncAccessible
   | ConditionType.ResourceSyncSynced;
 
-export type FleetUpdateStatus = 'Synced' | 'Syncing' | 'Unknown';
 export type RepositorySyncStatus = RepositoryConditionType | 'NotSynced' | 'NotParsed' | 'NotAccessible' | 'Unknown';
 
 export type FlightControlQuery = ApiQuery | MetricsQuery;

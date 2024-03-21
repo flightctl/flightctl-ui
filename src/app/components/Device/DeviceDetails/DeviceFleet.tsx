@@ -7,25 +7,39 @@ import { getDeviceFleet, getMissingFleetDetails } from '@app/utils/devices';
 
 import './DeviceFleet.css';
 
-const MissingFleetContent = ({ detail }: { detail: { message: string; owners: string[] } }) => {
+const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => {
+  const details = getMissingFleetDetails(deviceMetadata);
+  const hasMultipleOwners = details.owners.length > 1;
+
   return (
-    <span>
-      {detail.message}
-      {detail.owners.length > 0 && (
-        <span>
-          {': '}
-          <List>
-            {detail.owners.map((ownerFleet) => {
-              return (
-                <ListItem key={ownerFleet}>
-                  <Link to={`/devicemanagement/fleets/${ownerFleet}`}>{ownerFleet}</Link>
-                </ListItem>
-              );
-            })}
-          </List>
-        </span>
-      )}
-    </span>
+    <div className="fctl-device-fleet">
+      {hasMultipleOwners ? 'Multiple owners' : 'No owner fleet'}
+      <Popover
+        triggerAction="hover"
+        aria-label="Missing fleeet detail"
+        bodyContent={
+          <span>
+            {details.message}
+            {hasMultipleOwners && (
+              <span>
+                {': '}
+                <List>
+                  {details.owners.map((ownerFleet) => {
+                    return (
+                      <ListItem key={ownerFleet}>
+                        <Link to={`/devicemanagement/fleets/${ownerFleet}`}>{ownerFleet}</Link>
+                      </ListItem>
+                    );
+                  })}
+                </List>
+              </span>
+            )}
+          </span>
+        }
+      >
+        <Button isInline variant="plain" icon={<InfoCircleIcon />} />
+      </Popover>
+    </div>
   );
 };
 
@@ -37,16 +51,7 @@ const DeviceFleet = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => {
       {fleetName ? (
         <Link to={`/devicemanagement/fleets/${fleetName}`}>{fleetName}</Link>
       ) : (
-        <div className="fctl-device-fleet">
-          No owner fleet
-          <Popover
-            triggerAction="hover"
-            aria-label="Missing fleeet detail"
-            bodyContent={<MissingFleetContent detail={getMissingFleetDetails(deviceMetadata)} />}
-          >
-            <Button isInline variant="plain" icon={<InfoCircleIcon />} />
-          </Popover>
-        </div>
+        <FleetLessDevice deviceMetadata={deviceMetadata} />
       )}
     </div>
   );

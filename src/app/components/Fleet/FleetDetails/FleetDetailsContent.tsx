@@ -17,25 +17,32 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 
 import SourceUrlList from '../SourceUrlList';
-import { Fleet, FleetStatus } from '@types';
+import { ConditionType, Fleet, FleetStatus } from '@types';
 import { getFleetStatusType } from '@app/utils/status/fleet';
-import { CheckCircleIcon, InProgressIcon, QuestionCircleIcon } from '@patternfly/react-icons';
+import { CheckCircleIcon, InProgressIcon, QuestionCircleIcon, WarningTriangleIcon } from '@patternfly/react-icons';
 import { getSourceUrls } from '@app/utils/fleets';
 import FleetOwnerLink from '@app/components/Fleet/FleetDetails/FleetOwnerLink';
+import WithTooltip from '@app/components/common/WithTooltip';
 
 const FleetStatus = ({ status }: { status: FleetStatus }) => {
   const statusType = getFleetStatusType(status);
   let color;
   let icon;
+  let tooltip;
 
   switch (statusType) {
     case 'Syncing':
       color = 'orange';
       icon = <InProgressIcon />;
       break;
-    case 'Synced':
+    case ConditionType.ResourceSyncSynced:
       color = 'green';
       icon = <CheckCircleIcon />;
+      break;
+    case ConditionType.FleetOverlappingSelectors:
+      color = 'orange';
+      icon = <WarningTriangleIcon />;
+      tooltip = `Fleet's selector overlaps with at least one other fleet, causing ambiguous device ownership.`;
       break;
     default:
       color = 'grey';
@@ -44,9 +51,11 @@ const FleetStatus = ({ status }: { status: FleetStatus }) => {
   }
 
   return (
-    <Label color={color} icon={icon}>
-      {statusType}
-    </Label>
+    <WithTooltip showTooltip={!!tooltip} content={tooltip}>
+      <Label color={color} icon={icon}>
+        {statusType}
+      </Label>
+    </WithTooltip>
   );
 };
 
