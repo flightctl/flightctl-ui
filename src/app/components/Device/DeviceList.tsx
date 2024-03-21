@@ -27,6 +27,8 @@ import EnrollmentRequestTableRow from '../EnrollmentRequest/EnrollmentRequestTab
 import DeviceTableToolbar from './DeviceTableToolbar';
 import { isEnrollmentRequest, useDeviceFilters } from './useDeviceFilters';
 import DeviceTableRow from './DeviceTableRow';
+import { useEditLabelsAction } from '@app/hooks/useEditLabelsAction';
+import { getUpdatedDevice } from '@app/utils/devices';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -101,6 +103,12 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
     },
   });
 
+  const { editLabelsAction, editLabelsModal } = useEditLabelsAction<Device>({
+    submitTransformer: getUpdatedDevice,
+    resourceType: 'devices',
+    onEditSuccess: refetch,
+  });
+
   const currentEnrollmentRequest = resources.find(
     (res) => res.metadata.name === requestId && isEnrollmentRequest(res),
   ) as EnrollmentRequest | undefined;
@@ -122,11 +130,17 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
                 onApprove={setRequestId}
               />
             ) : (
-              <DeviceTableRow device={resource} key={resource.metadata.name} deleteAction={deleteDeviceAction} />
+              <DeviceTableRow
+                device={resource}
+                key={resource.metadata.name}
+                editLabelsAction={editLabelsAction}
+                deleteAction={deleteDeviceAction}
+              />
             ),
           )}
         </Tbody>
       </Table>
+      {editLabelsModal}
       {deleteDeviceModal}
       {deleteErModal}
       {currentEnrollmentRequest && (

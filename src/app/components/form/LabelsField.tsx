@@ -1,9 +1,10 @@
 import { Label, LabelGroup } from '@patternfly/react-core';
 import * as React from 'react';
+import { FlightCtlLabel } from '@app/types/extraTypes';
 
 type LabelsFieldProps = {
-  labels: { key: string; value: string | undefined }[];
-  setLabels: (newLabels: { key: string; value: string | undefined }[]) => void;
+  labels: FlightCtlLabel[];
+  setLabels: (newLabels: FlightCtlLabel[]) => void;
 };
 
 const LabelsField: React.FC<LabelsFieldProps> = ({ labels, setLabels }) => {

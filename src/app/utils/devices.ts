@@ -1,4 +1,5 @@
-import { ObjectMeta } from '@types';
+import { Device, ObjectMeta } from '@types';
+import { FlightCtlLabel } from '@app/types/extraTypes';
 
 export const getFingerprintDisplay = <R extends { metadata: ObjectMeta }>(resource: R) => {
   const fingerprint = resource.metadata.name;
@@ -33,4 +34,18 @@ const getMissingFleetDetails = (metadata: ObjectMeta): { message: string; owners
   };
 };
 
-export { getDeviceFleet, getMissingFleetDetails };
+const getUpdatedDevice = (device: Device, newLabels: FlightCtlLabel[]): Device => {
+  const deviceLabels: ObjectMeta['labels'] = newLabels.reduce((acc, { key, value }) => {
+    acc[key] = value;
+    return acc;
+  }, {});
+  return {
+    ...device,
+    metadata: {
+      ...device.metadata,
+      labels: deviceLabels,
+    },
+  };
+};
+
+export { getDeviceFleet, getUpdatedDevice, getMissingFleetDetails };

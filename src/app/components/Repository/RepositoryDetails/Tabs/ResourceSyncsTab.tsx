@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Card, CardBody, CardTitle, GridItem } from '@patternfly/react-core';
 
-import WithHelperText from '@app/components/WithHelperText/WithHelperText';
+import WithHelperText from '@app/components/common/WithHelperText';
 import RepositoryResourceSyncList from '@app/components/ResourceSync/RepositoryResourceSyncList';
 
 const ResourceSyncsTab = ({ repositoryId }: { repositoryId: string }) => {

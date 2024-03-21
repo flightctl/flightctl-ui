@@ -1,4 +1,4 @@
-import { ConditionType } from '@types';
+import { ConditionType, Device, Fleet } from '@types';
 
 export enum FlightControlMetrics {
   ACTIVE_AGENT_COUNT_METRIC = 'flightctl_devicesimulator_active_agent_count',
@@ -16,11 +16,11 @@ export interface PrometheusMetric {
   values?: Array<MetricValue>;
 }
 
-export interface AppEvent {
-  title: string;
-  type: 'info' | 'warning' | 'error' | 'action';
-  content: string;
-  timestamp: string;
+export type LabelEditable = Device | Fleet;
+
+export interface FlightCtlLabel {
+  key: string;
+  value: string | undefined;
 }
 
 export interface ApiQuery {

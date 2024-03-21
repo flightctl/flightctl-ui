@@ -21,12 +21,14 @@ import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import FleetOwnerLink from './FleetDetails/FleetOwnerLink';
-import { useTableSort } from '@app/hooks/useTableSort';
 import { sortByName, sortByOwner } from '@app/utils/sort/generic';
 import { sortFleetsByOSImg } from '@app/utils/sort/fleet';
-import { useTableTextSearch } from '@app/hooks/useTableTextSearch';
 import TableTextSearch from '../Table/TableTextSearch';
 import Table, { TableColumn } from '../Table/Table';
+import { useEditLabelsAction } from '@app/hooks/useEditLabelsAction';
+import { getUpdatedFleet } from '@app/utils/fleets';
+import { useTableTextSearch } from '@app/hooks/useTableTextSearch';
+import { useTableSort } from '@app/hooks/useTableSort';
 
 const CreateFleetButton = () => {
   const navigate = useNavigate();
@@ -79,6 +81,12 @@ const FleetTable = () => {
     },
   });
 
+  const { editLabelsAction, editLabelsModal } = useEditLabelsAction<Fleet>({
+    submitTransformer: getUpdatedFleet,
+    resourceType: 'fleets',
+    onEditSuccess: refetch,
+  });
+
   const { search, setSearch, filteredData } = useTableTextSearch(fleetList?.items || [], getSearchText);
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
@@ -98,33 +106,41 @@ const FleetTable = () => {
       </Toolbar>
       <Table aria-label="Fleets table" columns={columns} data={filteredData} getSortParams={getSortParams}>
         <Tbody>
-          {sortedData.map((fleet) => (
-            <Tr key={fleet.metadata.name}>
-              <Td dataLabel="Name">
-                <Link to={`${fleet.metadata.name}`}>{fleet.metadata.name}</Link>
-              </Td>
-              <Td dataLabel="OS image">{fleet.spec.template.spec.os?.image || '-'}</Td>
-              <Td dataLabel="Label selector">
-                <LabelsView labels={fleet.spec.selector?.matchLabels} />
-              </Td>
-              <Td dataLabel="Managed by">
-                <FleetOwnerLink owner={fleet.metadata?.owner} />
-              </Td>
-              <Td isActionCell>
-                <ActionsColumn
-                  items={[
-                    deleteAction({
-                      resourceId: fleet.metadata.name || '',
-                      disabledReason: !!fleet.metadata?.owner && 'Fleets managed by a Resourcesync cannot be deleted',
-                    }),
-                  ]}
-                />
-              </Td>
-            </Tr>
-          ))}
+          {sortedData.map((fleet) => {
+            const fleetName = fleet.metadata.name as string;
+            return (
+              <Tr key={fleetName}>
+                <Td dataLabel="Name">
+                  <Link to={fleetName}>{fleetName}</Link>
+                </Td>
+                <Td dataLabel="OS image">{fleet.spec.template.spec.os?.image || '-'}</Td>
+                <Td dataLabel="Label selector">
+                  <LabelsView prefix={fleetName} labels={fleet.spec.selector?.matchLabels} />
+                </Td>
+                <Td dataLabel="Managed by">
+                  <FleetOwnerLink owner={fleet.metadata?.owner} />
+                </Td>
+                <Td isActionCell>
+                  <ActionsColumn
+                    items={[
+                      deleteAction({
+                        resourceId: fleetName,
+                        disabledReason: !!fleet.metadata?.owner && 'Fleets managed by a Resourcesync cannot be deleted',
+                      }),
+                      editLabelsAction({
+                        resourceId: fleetName,
+                        disabledReason: !!fleet.metadata?.owner && 'Fleets managed by a Resourcesync cannot be edited',
+                      }),
+                    ]}
+                  />
+                </Td>
+              </Tr>
+            );
+          })}
         </Tbody>
       </Table>
       {deleteModal}
+      {editLabelsModal}
     </ListPageBody>
   );
 };

@@ -1,6 +1,7 @@
-import { Dropdown, DropdownItem, MenuToggle } from '@patternfly/react-core';
 import * as React from 'react';
-import DeleteModal from '../DeleteModal/DeleteModal';
+import { Dropdown, DropdownItem, MenuToggle } from '@patternfly/react-core';
+
+import DeleteModal from '@app/components/modals/DeleteModal/DeleteModal';
 
 type DeleteActionProps = {
   onDelete: () => Promise<unknown>;
@@ -14,8 +15,14 @@ export const useDeleteAction = ({ resourceType, resourceName, onDelete, disabled
   const deleteAction = (
     <DropdownItem
       onClick={() => setIsDeleteModalOpen(true)}
-      isAriaDisabled={!!disabledReason}
-      tooltipProps={{ content: disabledReason }}
+      {...(disabledReason
+        ? {
+            isAriaDisabled: true,
+            tooltipProps: {
+              content: disabledReason,
+            },
+          }
+        : undefined)}
     >
       Delete
     </DropdownItem>

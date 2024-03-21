@@ -1,3 +1,5 @@
+import { FlightCtlLabel } from '@app/types/extraTypes';
+
 export type ConfigTemplate = {
   type: 'git' | 'kube' | 'inline';
   name: string;
@@ -25,6 +27,6 @@ export type InlineConfigTemplate = ConfigTemplate & {
 export type FleetFormValues = {
   name: string;
   osImage: string;
-  labels: { key: string; value: string }[];
+  labels: FlightCtlLabel[];
   configTemplates: (GitConfigTemplate | KubeSecretTemplate | InlineConfigTemplate)[];
 };

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import DeleteModal from '../DeleteModal/DeleteModal';
+import DeleteModal from '@app/components/modals/DeleteModal/DeleteModal';
 import { IAction } from '@patternfly/react-table';
 
 export type DeleteListActionResult = {

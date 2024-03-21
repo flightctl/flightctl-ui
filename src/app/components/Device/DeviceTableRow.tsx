@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { ActionsColumn, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, IAction, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@types';
 import { DeleteListActionResult } from '../ListPage/ListPageActions';
@@ -12,9 +12,17 @@ import DeviceFleet from './DeviceDetails/DeviceFleet';
 const DeviceTableRow = ({
   device,
   deleteAction,
+  editLabelsAction,
 }: {
   device: Device;
   deleteAction: DeleteListActionResult['deleteAction'];
+  editLabelsAction: ({
+    resourceId,
+    disabledReason,
+  }: {
+    resourceId: string;
+    disabledReason: string | undefined;
+  }) => IAction;
 }) => {
   const deviceName = device.metadata.name as string;
   const displayName = device.metadata.labels?.displayName;
@@ -39,9 +47,10 @@ const DeviceTableRow = ({
             deleteAction({
               resourceId: deviceName,
               resourceName: displayName,
-              // Deleting devices bound to fleets directly will be disabled soon
-              disabledReason: boundFleet ? '' : '',
-              // disabledReason: boundFleet ? 'Devices bound to a fleet cannot be deleted' : '',
+            }),
+            editLabelsAction({
+              resourceId: deviceName,
+              disabledReason: boundFleet ? 'Devices bound to a fleet cannot be edited' : '',
             }),
           ]}
         />

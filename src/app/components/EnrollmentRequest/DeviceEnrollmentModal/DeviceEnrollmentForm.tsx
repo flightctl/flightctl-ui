@@ -5,9 +5,10 @@ import { useFormikContext } from 'formik';
 
 import LabelsField from '@app/components/form/LabelsField';
 import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
+import { FlightCtlLabel } from '@app/types/extraTypes';
 
 export type DeviceEnrollmentFormValues = {
-  labels: { key: string; value: string }[];
+  labels: FlightCtlLabel[];
   region: string;
   displayName: string;
 };

@@ -1,13 +1,15 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { DropdownList } from '@patternfly/react-core';
-
+import { DropdownItem, DropdownList } from '@patternfly/react-core';
 import { DeviceList, Fleet } from '@types';
+
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import { useFetch } from '@app/hooks/useFetch';
+import { useEditLabelsAction } from '@app/hooks/useEditLabelsAction';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import FleetDetailsContent from './FleetDetailsContent';
+import { getUpdatedFleet } from '@app/utils/fleets';
 
 const getFleetDeviceCount = (fleetDevicesResp: DeviceList | undefined): number | undefined => {
   if (fleetDevicesResp === undefined) {
@@ -20,19 +22,27 @@ const getFleetDeviceCount = (fleetDevicesResp: DeviceList | undefined): number |
 
 const FleetDetails = () => {
   const { fleetId } = useParams() as { fleetId: string };
-  const [fleet, isLoading, error] = useFetchPeriodically<Required<Fleet>>({ endpoint: `fleets/${fleetId}` });
+  const [fleet, isLoading, error, refetch] = useFetchPeriodically<Required<Fleet>>({ endpoint: `fleets/${fleetId}` });
   const [fleetDevicesResp] = useFetchPeriodically<DeviceList>({ endpoint: `devices?owner=Fleet/${fleetId}&limit=1` });
 
   const { remove } = useFetch();
   const navigate = useNavigate();
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {
-      await remove(`fleets/${fleet?.metadata.name}`);
+      await remove(`fleets/${fleetId}`);
       navigate('/devicemanagement/fleets');
     },
-    resourceName: fleet?.metadata.name || '',
+    resourceName: fleetId,
     resourceType: 'Fleet',
     disabledReason: fleet?.metadata?.owner && 'Fleets managed by a Resourcesync cannot be deleted',
+  });
+
+  const { editLabelsAction, editLabelsModal } = useEditLabelsAction<Fleet>({
+    submitTransformer: getUpdatedFleet,
+    resourceType: 'fleets',
+    onEditSuccess: () => {
+      refetch();
+    },
   });
 
   return (
@@ -44,7 +54,17 @@ const FleetDetails = () => {
       resourceType="Fleets"
       actions={
         <DetailsPageActions>
-          <DropdownList>{deleteAction}</DropdownList>
+          <DropdownList>
+            {deleteAction}
+            <DropdownItem
+              {...editLabelsAction({
+                resourceId: fleetId,
+                disabledReason: fleet?.metadata?.owner && 'Fleets managed by a Resourcesync cannot be edited',
+              })}
+            >
+              Edit labels
+            </DropdownItem>
+          </DropdownList>
         </DetailsPageActions>
       }
     >
@@ -52,6 +72,7 @@ const FleetDetails = () => {
         <>
           <FleetDetailsContent fleet={fleet} devicesCount={getFleetDeviceCount(fleetDevicesResp)} />
           {deleteModal}
+          {editLabelsModal}
         </>
       )}
     </DetailsPage>

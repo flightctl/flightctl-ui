@@ -28,13 +28,14 @@ import * as React from 'react';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 
-import './EnrollmentRequestDetails.css';
 import { useFetch } from '@app/hooks/useFetch';
 import DeviceEnrollmentModal from '../DeviceEnrollmentModal/DeviceEnrollmentModal';
 import DetailsPageCard, { DetailsPageCardBody } from '@app/components/DetailsPage/DetailsPageCard';
 import DetailsPageActions, { useDeleteAction } from '@app/components/DetailsPage/DetailsPageActions';
-import WithHelperText from '@app/components/WithHelperText/WithHelperText';
 import EnrollmentRequestStatus from '@app/components/EnrollmentRequest/EnrollmentRequestStatus';
+import WithHelperText from '@app/components/common/WithHelperText';
+
+import './EnrollmentRequestDetails.css';
 
 const EnrollmentRequestDetails = () => {
   const { enrollmentRequestId } = useParams() as { enrollmentRequestId: string };
@@ -108,7 +109,7 @@ const EnrollmentRequestDetails = () => {
                 <DescriptionListGroup>
                   <DescriptionListTerm>Labels</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <LabelsView labels={er?.metadata.labels} />
+                    <LabelsView prefix="er" labels={er?.metadata.labels} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>

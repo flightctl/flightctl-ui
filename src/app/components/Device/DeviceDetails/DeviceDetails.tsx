@@ -9,6 +9,7 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
+  DropdownItem,
   DropdownList,
   Grid,
   GridItem,
@@ -16,7 +17,7 @@ import {
 
 import { Device } from '@types';
 import { getDateDisplay } from '@app/utils/dates';
-import { getDeviceFleet } from '@app/utils/devices';
+import { getDeviceFleet, getUpdatedDevice } from '@app/utils/devices';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import { useFetch } from '@app/hooks/useFetch';
 import LabelsView from '@app/components/common/LabelsView';
@@ -29,6 +30,7 @@ import DetailsPageActions, { useDeleteAction } from '@app/components/DetailsPage
 import DeviceFleet from './DeviceFleet';
 import DeviceStatus from './DeviceStatus';
 import SystemdTable from './SystemdTable';
+import { useEditLabelsAction } from '@app/hooks/useEditLabelsAction';
 
 const DeviceDetails = () => {
   const { deviceId } = useParams() as { deviceId: string };
@@ -52,6 +54,12 @@ const DeviceDetails = () => {
     resourceType: 'Device',
   });
 
+  const { editLabelsAction, editLabelsModal } = useEditLabelsAction<Device>({
+    submitTransformer: getUpdatedDevice,
+    resourceType: 'devices',
+    onEditSuccess: refetch,
+  });
+
   const onSystemdUnitsUpdate = () => {
     // Only the device details need to be refreshed.
     // Devices that use templateVersions are bound to a fleet, and they cannot be directly edited.
@@ -68,7 +76,17 @@ const DeviceDetails = () => {
       resourceType="Devices"
       actions={
         <DetailsPageActions>
-          <DropdownList>{deleteAction}</DropdownList>
+          <DropdownList>
+            {deleteAction}
+            <DropdownItem
+              {...editLabelsAction({
+                disabledReason: boundFleet ? 'Devices bound to a fleet cannot be edited' : '',
+                resourceId: deviceId,
+              })}
+            >
+              Edit labels
+            </DropdownItem>
+          </DropdownList>
         </DetailsPageActions>
       }
     >
@@ -115,7 +133,7 @@ const DeviceDetails = () => {
                 <DescriptionListGroup>
                   <DescriptionListTerm>Labels</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <LabelsView labels={device?.metadata?.labels} />
+                    <LabelsView prefix="deviceDet" labels={device?.metadata?.labels} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               </DescriptionList>
@@ -156,6 +174,7 @@ const DeviceDetails = () => {
         </GridItem>
       </Grid>
       {deleteModal}
+      {editLabelsModal}
     </DetailsPage>
   );
 };
