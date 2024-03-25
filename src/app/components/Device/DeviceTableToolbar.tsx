@@ -34,6 +34,7 @@ type DeviceTableToolbarProps = {
       status: Array<DeviceConditionStatus | ApprovalStatus>;
     }>
   >;
+  children: React.ReactNode;
 };
 
 const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
@@ -43,6 +44,7 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
   setSearch,
   filters,
   setFilters,
+  children,
 }) => {
   const [isStatusExpanded, setIsStatusExpanded] = React.useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -154,6 +156,7 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
             </Select>
           </ToolbarFilter>
         </ToolbarGroup>
+        {children}
       </ToolbarContent>
     </Toolbar>
   );

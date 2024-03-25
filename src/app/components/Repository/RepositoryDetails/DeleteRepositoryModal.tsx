@@ -20,13 +20,13 @@ import { WarningTriangleIcon } from '@patternfly/react-icons';
 import { getErrorMessage } from '@app/utils/error';
 import { useFetch } from '@app/hooks/useFetch';
 
-type RepositoryCustomDeleteModalProps = {
+type DeleteRepositoryModalProps = {
   onClose: VoidFunction;
   onDeleteSuccess: VoidFunction;
   repositoryId: string;
 };
 
-const RepositoryCustomDeleteModal = ({ repositoryId, onClose, onDeleteSuccess }: RepositoryCustomDeleteModalProps) => {
+const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: DeleteRepositoryModalProps) => {
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [error, setError] = React.useState<string>();
   const [message, setMessage] = React.useState<string>();
@@ -175,4 +175,4 @@ const RepositoryCustomDeleteModal = ({ repositoryId, onClose, onDeleteSuccess }:
   );
 };
 
-export default RepositoryCustomDeleteModal;
+export default DeleteRepositoryModal;

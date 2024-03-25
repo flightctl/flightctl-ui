@@ -10,7 +10,7 @@ import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
 import DetailsTab from './Tabs/DetailsTab';
 import ResourceSyncsTab from './Tabs/ResourceSyncsTab';
-import RepositoryCustomDeleteModal from './RepositoryCustomDeleteModal';
+import DeleteRepositoryModal from './DeleteRepositoryModal';
 
 const RepositoryDetails = () => {
   const { repositoryId } = useParams() as { repositoryId: string };
@@ -57,7 +57,7 @@ const RepositoryDetails = () => {
             <Route path="resourcesyncs" element={<ResourceSyncsTab repositoryId={repositoryId} />} />
           </Routes>
           {isDeleteModalOpen && (
-            <RepositoryCustomDeleteModal
+            <DeleteRepositoryModal
               onClose={() => setIsDeleteModalOpen(false)}
               onDeleteSuccess={onDeleteSuccess}
               repositoryId={repositoryId}

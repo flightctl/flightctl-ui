@@ -1,21 +1,20 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { ActionsColumn, IAction, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@types';
-import { DeleteListActionResult } from '../ListPage/ListPageActions';
 import { getDeviceFleet, getFingerprintDisplay } from '@app/utils/devices';
-import { getDateDisplay } from '@app/utils/dates';
-import DeviceStatus from './DeviceDetails/DeviceStatus';
 import DeviceFleet from './DeviceDetails/DeviceFleet';
+import { getDateDisplay } from '@app/utils/dates';
+import { DeleteListActionResult } from '../ListPage/types';
+import DeviceStatus from './DeviceDetails/DeviceStatus';
 
-const DeviceTableRow = ({
-  device,
-  deleteAction,
-  editLabelsAction,
-}: {
+type DeviceTableRowProps = {
   device: Device;
   deleteAction: DeleteListActionResult['deleteAction'];
+  rowIndex: number;
+  onRowSelect: (device: Device) => OnSelect;
+  isRowSelected: (device: Device) => boolean;
   editLabelsAction: ({
     resourceId,
     disabledReason,
@@ -23,12 +22,28 @@ const DeviceTableRow = ({
     resourceId: string;
     disabledReason: string | undefined;
   }) => IAction;
+};
+
+const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
+  device,
+  deleteAction,
+  rowIndex,
+  onRowSelect,
+  isRowSelected,
+  editLabelsAction,
 }) => {
   const deviceName = device.metadata.name as string;
   const displayName = device.metadata.labels?.displayName;
   const boundFleet = getDeviceFleet(device.metadata);
   return (
     <Tr key={deviceName}>
+      <Td
+        select={{
+          rowIndex,
+          onSelect: onRowSelect(device),
+          isSelected: isRowSelected(device),
+        }}
+      />
       <Td dataLabel="Fingerprint">
         <Link to={`/devicemanagement/devices/${deviceName}`}>{getFingerprintDisplay(device)}</Link>
       </Td>

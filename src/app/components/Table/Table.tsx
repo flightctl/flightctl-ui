@@ -17,11 +17,13 @@ type TableProps<D> = {
   data: D[];
   'aria-label': string;
   getSortParams: (columnIndex: number) => ThProps['sort'];
+  onSelectAll?: (isSelected: boolean) => void;
+  isAllSelected?: boolean;
 };
 
 type TableFC = <D>(props: TableProps<D>) => JSX.Element;
 
-const Table: TableFC = ({ columns, children, data, getSortParams, ...rest }) => {
+const Table: TableFC = ({ columns, children, data, getSortParams, onSelectAll, isAllSelected, ...rest }) => {
   if (!data.length) {
     return (
       <PageSection variant="light">
@@ -34,6 +36,14 @@ const Table: TableFC = ({ columns, children, data, getSortParams, ...rest }) => 
     <PFTable {...rest}>
       <Thead>
         <Tr>
+          {onSelectAll && (
+            <Th
+              select={{
+                onSelect: (_event, isSelecting) => onSelectAll(isSelecting),
+                isSelected: !!isAllSelected,
+              }}
+            />
+          )}
           {columns.map((c, index) => (
             <Th key={c.name} sort={getSortParams(index)} {...c.thProps}>
               {c.name}

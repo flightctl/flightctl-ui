@@ -1,11 +1,13 @@
 import React from 'react';
 import {
   Button,
+  DropdownList,
   EmptyState,
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
   EmptyStateHeader,
+  SelectOption,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -27,9 +29,13 @@ import {
   sortRepositoriesByUrl,
 } from '@app/utils/sort/repository';
 import { useTableTextSearch } from '@app/hooks/useTableTextSearch';
-import RepositoryCustomDeleteModal from './RepositoryDetails/RepositoryCustomDeleteModal';
+import DeleteRepositoryModal from './RepositoryDetails/DeleteRepositoryModal';
 import TableTextSearch from '../Table/TableTextSearch';
 import Table, { TableColumn } from '../Table/Table';
+import TableActions from '../Table/TableActions';
+import { useTableSelect } from '@app/hooks/useTableSelect';
+import { getResourceId } from '@app/utils/resource';
+import MassDeleteRepositoryModal from '../modals/massModals/MassDeleteRepositoryModal/MassDeleteRepositoryModal';
 
 const CreateRepositoryButton = () => {
   const navigate = useNavigate();
@@ -77,6 +83,7 @@ const getSearchText = (repo: Repository) => [repo.metadata.name];
 const RepositoryTable = () => {
   const [repositoryList, loading, error, refetch] = useFetchPeriodically<RepositoryList>({ endpoint: 'repositories' });
   const [deleteModalRepoId, setDeleteModalRepoId] = React.useState<string>();
+  const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
 
   const onDeleteSuccess = () => {
     setDeleteModalRepoId(undefined);
@@ -85,6 +92,8 @@ const RepositoryTable = () => {
 
   const { search, setSearch, filteredData } = useTableTextSearch(repositoryList?.items || [], getSearchText);
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
+
+  const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
 
   return (
     <ListPageBody
@@ -98,12 +107,35 @@ const RepositoryTable = () => {
           <ToolbarItem variant="search-filter">
             <TableTextSearch value={search} setValue={setSearch} />
           </ToolbarItem>
+          <ToolbarItem>
+            <TableActions>
+              <DropdownList>
+                <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassDeleteModalOpen(true)}>
+                  Delete
+                </SelectOption>
+              </DropdownList>
+            </TableActions>
+          </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
-      <Table aria-label="Repositories table" data={filteredData} columns={columns} getSortParams={getSortParams}>
+      <Table
+        aria-label="Repositories table"
+        isAllSelected={isAllSelected}
+        onSelectAll={setAllSelected}
+        data={filteredData}
+        columns={columns}
+        getSortParams={getSortParams}
+      >
         <Tbody>
-          {sortedData.map((repository) => (
+          {sortedData.map((repository, rowIndex) => (
             <Tr key={repository.metadata.name}>
+              <Td
+                select={{
+                  rowIndex,
+                  onSelect: onRowSelect(repository),
+                  isSelected: isRowSelected(repository),
+                }}
+              />
               <Td dataLabel="Name">
                 <Link to={`${repository.metadata.name}`}>{repository.metadata.name}</Link>
               </Td>
@@ -127,10 +159,17 @@ const RepositoryTable = () => {
         </Tbody>
       </Table>
       {!!deleteModalRepoId && (
-        <RepositoryCustomDeleteModal
+        <DeleteRepositoryModal
           onClose={() => setDeleteModalRepoId(undefined)}
           onDeleteSuccess={onDeleteSuccess}
           repositoryId={deleteModalRepoId}
+        />
+      )}
+      {isMassDeleteModalOpen && (
+        <MassDeleteRepositoryModal
+          onClose={() => setIsMassDeleteModalOpen(false)}
+          onDeleteSuccess={refetch}
+          repositories={sortedData.filter((d) => selectedResources.includes(getResourceId(d)))}
         />
       )}
     </ListPageBody>

@@ -1,23 +1,40 @@
-import { ApprovalStatus, getApprovalStatus } from '@app/utils/status/enrollmentRequest';
-import { ActionsColumn, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 import { EnrollmentRequest } from '@types';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { DeleteListActionResult } from '../ListPage/ListPageActions';
 import { getDateDisplay } from '@app/utils/dates';
 import { getFingerprintDisplay } from '@app/utils/devices';
 import EnrollmentRequestStatus from './EnrollmentRequestStatus';
+import { DeleteListActionResult } from '../ListPage/types';
+import { ApprovalStatus, getApprovalStatus } from '@app/utils/status/enrollmentRequest';
 
 type EnrollmentRequestTableRow = {
+  rowIndex: number;
+  onRowSelect: (er: EnrollmentRequest) => OnSelect;
+  isRowSelected: (er: EnrollmentRequest) => boolean;
   er: EnrollmentRequest;
   onApprove: (id: string) => void;
   deleteAction: DeleteListActionResult['deleteAction'];
 };
 
-const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({ er, onApprove, deleteAction }) => {
+const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
+  er,
+  deleteAction,
+  rowIndex,
+  onRowSelect,
+  isRowSelected,
+  onApprove,
+}) => {
   const approvalStatus = getApprovalStatus(er);
   return (
     <Tr key={er.metadata.name}>
+      <Td
+        select={{
+          rowIndex,
+          onSelect: onRowSelect(er),
+          isSelected: isRowSelected(er),
+        }}
+      />
       <Td dataLabel="Fingerprint">
         <Link to={`/devicemanagement/enrollmentrequests/${er.metadata.name}`}>{getFingerprintDisplay(er)}</Link>
       </Td>

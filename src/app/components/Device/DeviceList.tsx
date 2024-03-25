@@ -7,6 +7,9 @@ import {
   EmptyStateBody,
   EmptyStateFooter,
   EmptyStateHeader,
+  SelectList,
+  SelectOption,
+  ToolbarItem,
 } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 
@@ -22,13 +25,19 @@ import { useTableSort } from '@app/hooks/useTableSort';
 import { sortByCreationTimestamp, sortByDisplayName, sortByName } from '@app/utils/sort/generic';
 import { sortDevicesByFleet, sortDevicesByOS, sortDevicesByStatus } from '@app/utils/sort/device';
 import Table, { TableColumn } from '../Table/Table';
-import DeviceEnrollmentModal from '../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
 import EnrollmentRequestTableRow from '../EnrollmentRequest/EnrollmentRequestTableRow';
 import DeviceTableToolbar from './DeviceTableToolbar';
-import { isEnrollmentRequest, useDeviceFilters } from './useDeviceFilters';
+import { useDeviceFilters } from './useDeviceFilters';
 import DeviceTableRow from './DeviceTableRow';
 import { useEditLabelsAction } from '@app/hooks/useEditLabelsAction';
 import { getUpdatedDevice } from '@app/utils/devices';
+import { useTableSelect } from '@app/hooks/useTableSelect';
+import TableActions from '../Table/TableActions';
+import { getResourceId } from '@app/utils/resource';
+import { isEnrollmentRequest } from '@app/types/extraTypes';
+import MassDeleteDeviceModal from '../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
+import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
+import DeviceEnrollmentModal from '../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -84,9 +93,16 @@ interface DeviceTableProps {
 }
 
 export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTableProps) => {
+  const [requestId, setRequestId] = React.useState<string>();
+  const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
+  const [isMassApproveModalOpen, setIsMassApproveModalOpen] = React.useState(false);
   const { remove } = useFetch();
 
-  const [requestId, setRequestId] = React.useState<string>();
+  const { filteredData, ...rest } = useDeviceFilters(resources, queryFilters);
+  const { getSortParams, sortedData } = useTableSort(filteredData, deviceColumns);
+
+  const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
+
   const { deleteAction: deleteDeviceAction, deleteModal: deleteDeviceModal } = useDeleteListAction({
     resourceType: 'Device',
     onDelete: async (resourceId: string) => {
@@ -113,20 +129,40 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
     (res) => res.metadata.name === requestId && isEnrollmentRequest(res),
   ) as EnrollmentRequest | undefined;
 
-  const { filteredData, ...rest } = useDeviceFilters(resources, queryFilters);
-  const { getSortParams, sortedData } = useTableSort(filteredData, deviceColumns);
-
   return (
     <>
-      <DeviceTableToolbar {...rest} />
-      <Table aria-label="Devices table" columns={deviceColumns} data={filteredData} getSortParams={getSortParams}>
+      <DeviceTableToolbar {...rest}>
+        <ToolbarItem>
+          <TableActions>
+            <SelectList>
+              <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassApproveModalOpen(true)}>
+                Approve
+              </SelectOption>
+              <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassDeleteModalOpen(true)}>
+                Delete
+              </SelectOption>
+            </SelectList>
+          </TableActions>
+        </ToolbarItem>
+      </DeviceTableToolbar>
+      <Table
+        aria-label="Devices table"
+        columns={deviceColumns}
+        data={filteredData}
+        getSortParams={getSortParams}
+        isAllSelected={isAllSelected}
+        onSelectAll={setAllSelected}
+      >
         <Tbody>
-          {sortedData.map((resource) =>
+          {sortedData.map((resource, index) =>
             isEnrollmentRequest(resource) ? (
               <EnrollmentRequestTableRow
                 er={resource}
                 key={resource.metadata.name}
                 deleteAction={deleteErAction}
+                onRowSelect={onRowSelect}
+                isRowSelected={isRowSelected}
+                rowIndex={index}
                 onApprove={setRequestId}
               />
             ) : (
@@ -135,6 +171,9 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
                 key={resource.metadata.name}
                 editLabelsAction={editLabelsAction}
                 deleteAction={deleteDeviceAction}
+                onRowSelect={onRowSelect}
+                isRowSelected={isRowSelected}
+                rowIndex={index}
               />
             ),
           )}
@@ -149,6 +188,26 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
           onClose={(updateList) => {
             setRequestId(undefined);
             updateList && refetch();
+          }}
+        />
+      )}
+      {isMassDeleteModalOpen && (
+        <MassDeleteDeviceModal
+          onClose={() => setIsMassDeleteModalOpen(false)}
+          resources={sortedData.filter((r) => selectedResources.includes(getResourceId(r)))}
+          onDeleteSuccess={() => {
+            setIsMassDeleteModalOpen(false);
+            refetch();
+          }}
+        />
+      )}
+      {isMassApproveModalOpen && (
+        <MassApproveDeviceModal
+          onClose={() => setIsMassApproveModalOpen(false)}
+          resources={sortedData.filter((r) => selectedResources.includes(getResourceId(r)))}
+          onApproveSuccess={() => {
+            setIsMassApproveModalOpen(false);
+            refetch();
           }}
         />
       )}

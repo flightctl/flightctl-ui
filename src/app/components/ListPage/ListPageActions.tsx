@@ -13,7 +13,7 @@ type DeleteListActionProps = {
 };
 
 export const useDeleteListAction = ({ resourceType, onDelete }: DeleteListActionProps): DeleteListActionResult => {
-  const [deleteResource, setDeleteResource] = React.useState<string>();
+  const [deleteResourceId, setDeleteResourceId] = React.useState<string>();
   const [name, setName] = React.useState<string>();
   const deleteAction: DeleteListActionResult['deleteAction'] = ({ resourceId, resourceName, disabledReason }) => {
     const popperProps = disabledReason ? { tooltipProps: { content: disabledReason } } : undefined;
@@ -22,23 +22,24 @@ export const useDeleteListAction = ({ resourceType, onDelete }: DeleteListAction
       isAriaDisabled: !!disabledReason,
       ...popperProps,
       onClick: () => {
-        setDeleteResource(resourceId);
+        setDeleteResourceId(resourceId);
         setName(resourceName);
       },
     };
   };
 
   const onClose = () => {
-    setDeleteResource(undefined);
+    setDeleteResourceId(undefined);
     setName(undefined);
   };
-  const deleteModal = deleteResource && (
+
+  const deleteModal = deleteResourceId && (
     <DeleteModal
       resourceType={resourceType}
-      resourceName={name || deleteResource}
+      resourceName={name || deleteResourceId}
       onClose={onClose}
       onDelete={async () => {
-        await onDelete(deleteResource);
+        await onDelete(deleteResourceId);
         onClose();
       }}
     />

@@ -3,9 +3,7 @@ import { useTableTextSearch } from '@app/hooks/useTableTextSearch';
 import { ApprovalStatus, getApprovalStatus } from '@app/utils/status/enrollmentRequest';
 import { DeviceConditionStatus, getDeviceStatus } from '@app/utils/status/device';
 import { Device, EnrollmentRequest } from '@types';
-
-export const isEnrollmentRequest = (resource: Device | EnrollmentRequest): resource is EnrollmentRequest =>
-  resource.kind === 'EnrollmentRequest';
+import { isEnrollmentRequest } from '@app/types/extraTypes';
 
 const getSearchText = (resource: Device | EnrollmentRequest) => [
   resource.metadata.name,

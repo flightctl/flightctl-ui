@@ -7,6 +7,8 @@ import {
   EmptyStateBody,
   Grid,
   GridItem,
+  SelectList,
+  SelectOption,
   Spinner,
   Toolbar,
   ToolbarContent,
@@ -32,8 +34,12 @@ import {
 import Table, { TableColumn } from '../Table/Table';
 import { useTableTextSearch } from '@app/hooks/useTableTextSearch';
 import TableTextSearch from '../Table/TableTextSearch';
+import { useTableSelect } from '@app/hooks/useTableSelect';
+import TableActions from '../Table/TableActions';
+import { getResourceId } from '@app/utils/resource';
 
 import './RepositoryResourceSyncList.css';
+import MassDeleteResourceSyncModal from '../modals/massModals/MassDeleteResourceSyncModal/MassDeleteResourceSyncModal';
 
 const columns: TableColumn<ResourceSync>[] = [
   {
@@ -85,17 +91,20 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const { filteredData, search, setSearch } = useTableTextSearch(resourceSyncs, getSearchText);
+
+  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
+
+  const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
+
   const { deleteAction, deleteModal } = useDeleteListAction({
-    resourceType: 'Resource Sync',
-    onDelete: async (resourceId: string) => {
+    resourceType: 'resourcesync',
+    onDelete: async (resourceId) => {
       await remove(`resourcesyncs/${resourceId}`);
       refetch();
     },
   });
-
-  const { filteredData, search, setSearch } = useTableTextSearch(resourceSyncs, getSearchText);
-
-  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
+  const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
 
   return (
     <>
@@ -104,16 +113,39 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
           <ToolbarItem variant="search-filter">
             <TableTextSearch value={search} setValue={setSearch} />
           </ToolbarItem>
+          <ToolbarItem>
+            <TableActions>
+              <SelectList>
+                <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassDeleteModalOpen(true)}>
+                  Delete
+                </SelectOption>
+              </SelectList>
+            </TableActions>
+          </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
-      <Table aria-label="Repositories table" columns={columns} data={filteredData} getSortParams={getSortParams}>
+      <Table
+        aria-label="Repositories table"
+        isAllSelected={isAllSelected}
+        onSelectAll={setAllSelected}
+        columns={columns}
+        data={filteredData}
+        getSortParams={getSortParams}
+      >
         <Tbody>
-          {sortedData.map((resourceSync) => {
+          {sortedData.map((resourceSync, rowIndex) => {
             const rsName = resourceSync.metadata.name as string;
             const rsRef = rsRefs[rsName];
             const isSelected = rsName === selectedRs;
             return (
               <Tr key={rsName} ref={rsRef} className={isSelected ? 'fctl_rslist-row--selected' : ''}>
+                <Td
+                  select={{
+                    rowIndex,
+                    onSelect: onRowSelect(resourceSync),
+                    isSelected: isRowSelected(resourceSync),
+                  }}
+                />
                 <Td dataLabel="Name">{rsName}</Td>
                 <Td dataLabel="Path">{resourceSync.spec.path || ''}</Td>
                 <Td dataLabel="Target revision">{resourceSync.spec.targetRevision}</Td>
@@ -122,7 +154,7 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
                 </Td>
                 <Td dataLabel="Observed hash">{getObservedHash(resourceSync)}</Td>
                 <Td isActionCell>
-                  <ActionsColumn items={[deleteAction({ resourceId: rsName || '' })]} />
+                  <ActionsColumn items={[deleteAction({ resourceId: resourceSync.metadata.name || '' })]} />
                 </Td>
               </Tr>
             );
@@ -130,6 +162,16 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
         </Tbody>
       </Table>
       {deleteModal}
+      {isMassDeleteModalOpen && (
+        <MassDeleteResourceSyncModal
+          onClose={() => setIsMassDeleteModalOpen(false)}
+          resources={sortedData.filter((r) => selectedResources.includes(getResourceId(r)))}
+          onDeleteSuccess={() => {
+            setIsMassDeleteModalOpen(false);
+            refetch();
+          }}
+        />
+      )}
     </>
   );
 };

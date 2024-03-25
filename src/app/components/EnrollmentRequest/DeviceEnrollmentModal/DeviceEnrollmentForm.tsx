@@ -17,15 +17,18 @@ export type DeviceEnrollmentFormProps = {
   enrollmentRequest: EnrollmentRequest;
   onClose: (refetch?: boolean) => void;
   error?: string;
+  children?: React.ReactNode;
 };
 
-const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentRequest, onClose, error }) => {
+const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentRequest, onClose, error, children }) => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<DeviceEnrollmentFormValues>();
   return (
     <Form>
-      <FormGroup label="Fingerprint">
-        <TextInput aria-label="Fingerprint" isDisabled value={enrollmentRequest.metadata.name} />
-      </FormGroup>
+      {enrollmentRequest && (
+        <FormGroup label="Fingerprint">
+          <TextInput aria-label="Fingerprint" isDisabled value={enrollmentRequest.metadata.name} />
+        </FormGroup>
+      )}
       <FormGroup label="Labels">
         <LabelsField labels={values.labels} setLabels={(labels) => setFieldValue('labels', labels)} />
       </FormGroup>
@@ -39,10 +42,11 @@ const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentR
           onChange={(_, value) => setFieldValue('displayName', value)}
         />
       </FormGroup>
+      {children}
       {error && <Alert isInline title={error} variant="danger" />}
       <FlightCtlActionGroup>
         <Button key="confirm" variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
-          Approve request
+          Approve
         </Button>
         <Button key="cancel" variant="link" onClick={() => onClose()} isDisabled={isSubmitting}>
           Cancel

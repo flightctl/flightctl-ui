@@ -5,7 +5,7 @@ const apiServer = `${window.location.protocol}//${window.location.hostname}${win
 const flightCtlAPI = `${apiServer}/api/flightctl`;
 const metricsAPI = `${apiServer}/api/metrics`;
 
-const handleApiJSONResponse = async (response) => {
+const handleApiJSONResponse = async (response: Response) => {
   if (response.ok) {
     const data = await response.json();
     return data;
@@ -16,7 +16,7 @@ const handleApiJSONResponse = async (response) => {
     throw new Error(`Error ${response.status}: ${response.statusText}`);
   }
 
-  let errorText;
+  let errorText = '';
   try {
     const json = await response.json();
     errorText = ` - ${json.message || json}`;

@@ -1,8 +1,8 @@
 import { Device, EnrollmentRequest } from '@types';
 import { getDeviceFleet } from '../devices';
-import { isEnrollmentRequest } from '@app/components/Device/useDeviceFilters';
 import { ApprovalStatus, getApprovalStatus } from '../status/enrollmentRequest';
 import { DeviceConditionStatus, deviceStatusOrder, getDeviceStatus } from '@app/utils/status/device';
+import { isEnrollmentRequest } from '@app/types/extraTypes';
 
 export const sortDevicesByStatus = (resources: Array<Device | EnrollmentRequest>) =>
   resources.sort((a, b) => {

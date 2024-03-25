@@ -6,6 +6,8 @@ import {
   EmptyStateBody,
   EmptyStateFooter,
   EmptyStateHeader,
+  SelectList,
+  SelectOption,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -29,6 +31,10 @@ import { useEditLabelsAction } from '@app/hooks/useEditLabelsAction';
 import { getUpdatedFleet } from '@app/utils/fleets';
 import { useTableTextSearch } from '@app/hooks/useTableTextSearch';
 import { useTableSort } from '@app/hooks/useTableSort';
+import { useTableSelect } from '@app/hooks/useTableSelect';
+import TableActions from '../Table/TableActions';
+import { getResourceId } from '@app/utils/resource';
+import MassDeleteFleetModal from '../modals/massModals/MassDeleteFleetModal/MassDeleteFleetModal';
 
 const CreateFleetButton = () => {
   const navigate = useNavigate();
@@ -68,14 +74,25 @@ const columns: TableColumn<Fleet>[] = [
     onSort: sortByOwner,
   },
 ];
+
 const getSearchText = (fleet: Fleet) => [fleet.metadata.name];
+
+const canDeleteResource = (fleet: Fleet) =>
+  fleet.metadata?.owner ? 'Fleets managed by a Resourcesync cannot be deleted' : undefined;
 
 const FleetTable = () => {
   const [fleetList, loading, error, refetch] = useFetchPeriodically<FleetList>({ endpoint: 'fleets' });
   const { remove } = useFetch();
+  const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
+
+  const { search, setSearch, filteredData } = useTableTextSearch(fleetList?.items || [], getSearchText);
+  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
+
+  const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
+
   const { deleteAction, deleteModal } = useDeleteListAction({
-    resourceType: 'Fleet',
-    onDelete: async (resourceId: string) => {
+    resourceType: 'fleet',
+    onDelete: async (resourceId) => {
       await remove(`fleets/${resourceId}`);
       refetch();
     },
@@ -86,9 +103,6 @@ const FleetTable = () => {
     resourceType: 'fleets',
     onEditSuccess: refetch,
   });
-
-  const { search, setSearch, filteredData } = useTableTextSearch(fleetList?.items || [], getSearchText);
-  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   return (
     <ListPageBody
@@ -102,16 +116,39 @@ const FleetTable = () => {
           <ToolbarItem variant="search-filter">
             <TableTextSearch value={search} setValue={setSearch} />
           </ToolbarItem>
+          <ToolbarItem>
+            <TableActions>
+              <SelectList>
+                <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassDeleteModalOpen(true)}>
+                  Delete
+                </SelectOption>
+              </SelectList>
+            </TableActions>
+          </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
-      <Table aria-label="Fleets table" columns={columns} data={filteredData} getSortParams={getSortParams}>
+      <Table
+        aria-label="Fleets table"
+        columns={columns}
+        data={filteredData}
+        getSortParams={getSortParams}
+        isAllSelected={isAllSelected}
+        onSelectAll={setAllSelected}
+      >
         <Tbody>
-          {sortedData.map((fleet) => {
+          {sortedData.map((fleet, rowIndex) => {
             const fleetName = fleet.metadata.name as string;
             return (
               <Tr key={fleetName}>
+                <Td
+                  select={{
+                    rowIndex,
+                    onSelect: onRowSelect(fleet),
+                    isSelected: isRowSelected(fleet),
+                  }}
+                />
                 <Td dataLabel="Name">
-                  <Link to={fleetName}>{fleetName}</Link>
+                  <Link to={`${fleetName}`}>{fleetName}</Link>
                 </Td>
                 <Td dataLabel="OS image">{fleet.spec.template.spec.os?.image || '-'}</Td>
                 <Td dataLabel="Label selector">
@@ -123,13 +160,13 @@ const FleetTable = () => {
                 <Td isActionCell>
                   <ActionsColumn
                     items={[
-                      deleteAction({
-                        resourceId: fleetName,
-                        disabledReason: !!fleet.metadata?.owner && 'Fleets managed by a Resourcesync cannot be deleted',
-                      }),
                       editLabelsAction({
                         resourceId: fleetName,
                         disabledReason: !!fleet.metadata?.owner && 'Fleets managed by a Resourcesync cannot be edited',
+                      }),
+                      deleteAction({
+                        resourceId: fleetName,
+                        disabledReason: canDeleteResource(fleet),
                       }),
                     ]}
                   />
@@ -141,6 +178,16 @@ const FleetTable = () => {
       </Table>
       {deleteModal}
       {editLabelsModal}
+      {isMassDeleteModalOpen && (
+        <MassDeleteFleetModal
+          onClose={() => setIsMassDeleteModalOpen(false)}
+          resources={sortedData.filter((r) => selectedResources.includes(getResourceId(r)))}
+          onDeleteSuccess={() => {
+            setIsMassDeleteModalOpen(false);
+            refetch();
+          }}
+        />
+      )}
     </ListPageBody>
   );
 };
