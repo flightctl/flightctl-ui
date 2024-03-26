@@ -25,26 +25,41 @@ import CreateRepositoryForm from './CreateRepositoryForm';
 const gitRegex = new RegExp(/^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/);
 const pathRegex = /\/.+/;
 
-export const repoSyncSchema = (resourceSyncs: ResourceSync[]) => {
-  const existingNames = resourceSyncs.map((rs) => rs.metadata.name || '');
+export const repoSyncSchema = (
+  values: ResourceSyncFormValue[],
+  resourceSyncs: ResourceSync[],
+  repositoryId?: string,
+) => {
+  const existingNames = resourceSyncs
+    .filter((rs) => (repositoryId ? rs.spec.repository !== repositoryId : true))
+    .map((rs) => rs.metadata.name || '');
   return array()
     .of(
       object().shape({
         name: string()
-          .required('Name is required')
+          .required('Name is required.')
+          .test('Must be unique', 'Must be unique', (value) => {
+            if (!value) {
+              return true;
+            }
+            return values.filter((v) => v.name === value).length === 1;
+          })
           .notOneOf(existingNames, 'Resource sync with the same name already exists.'),
-        targetRevision: string().required('Target revision is required'),
-        path: string().matches(pathRegex, 'Must be an absolute path').required('Path is required'),
+        targetRevision: string().required('Target revision is required.'),
+        path: string().matches(pathRegex, 'Must be an absolute path.').required('Path is required.'),
       }),
     )
     .required();
 };
 
 export const repositorySchema =
-  (resourceSyncs: ResourceSync[], repositories: Repository[]) => (values: RepositoryFormValues) => {
+  (resourceSyncs: ResourceSync[], repositories: Repository[], repositoryId?: string) =>
+  (values: RepositoryFormValues) => {
     const repoNames = repositories.map((r) => r.metadata.name || '');
     return object({
-      name: string().required('Name is required').notOneOf(repoNames, 'Repository with the same name already exists.'),
+      name: repositoryId
+        ? string()
+        : string().required('Name is required').notOneOf(repoNames, 'Repository with the same name already exists.'),
       url: string()
         .matches(gitRegex, 'Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos')
         .required('Repository URL is required'),
@@ -66,7 +81,9 @@ export const repositorySchema =
         })
         .required(),
       useResourceSyncs: boolean().required(),
-      resourceSyncs: values.useResourceSyncs ? repoSyncSchema(resourceSyncs) : array(),
+      resourceSyncs: values.useResourceSyncs
+        ? repoSyncSchema(values.resourceSyncs, resourceSyncs, repositoryId)
+        : array(),
     });
   };
 
@@ -142,12 +159,14 @@ const getInitValues = (repository?: Repository, resourceSyncs?: ResourceSync[]):
     },
     useResourceSyncs: !!resourceSyncs?.length,
     resourceSyncs: resourceSyncs?.length
-      ? resourceSyncs.map((rs) => ({
-          name: rs.metadata.name || '',
-          path: rs.spec.path || '',
-          targetRevision: rs.spec.targetRevision || '',
-          exists: true,
-        }))
+      ? resourceSyncs
+          .filter((rs) => rs.spec.repository === repository.metadata.name)
+          .map((rs) => ({
+            name: rs.metadata.name || '',
+            path: rs.spec.path || '',
+            targetRevision: rs.spec.targetRevision || '',
+            exists: true,
+          }))
       : [{ name: '', path: '', targetRevision: '' }],
   };
 };
@@ -208,7 +227,7 @@ const CreateRepository = () => {
           ) : (
             <Formik<RepositoryFormValues>
               initialValues={getInitValues(repository, resourceSyncs)}
-              validationSchema={lazy(repositorySchema(resourceSyncs || [], repositories || []))}
+              validationSchema={lazy(repositorySchema(resourceSyncs || [], repositories || [], repositoryId))}
               onSubmit={async (values) => {
                 setErrors(undefined);
                 if (repositoryId) {

@@ -48,7 +48,7 @@ const CreateResourceSyncsForm = () => {
                   helperText="For example: /inverter-fleet/fleets/eu-west-prod-001/fleet.yaml"
                 />
               </FormGroup>
-              <FormGroup>
+              <FormGroup isInline>
                 {values.resourceSyncs.length > 1 && (
                   <Button variant="link" icon={<MinusCircleIcon />} iconPosition="left" onClick={() => remove(index)}>
                     Remove resource sync
@@ -57,18 +57,16 @@ const CreateResourceSyncsForm = () => {
               </FormGroup>
             </FormSection>
           ))}
-          <FormSection>
-            <FormGroup>
-              <Button
-                variant="link"
-                icon={<PlusCircleIcon />}
-                iconPosition="left"
-                onClick={() => push({ name: '', path: '', targetRevision: '' } as ResourceSyncFormValue)}
-              >
-                Add resource sync
-              </Button>
-            </FormGroup>
-          </FormSection>
+          <div>
+            <Button
+              variant="link"
+              icon={<PlusCircleIcon />}
+              iconPosition="left"
+              onClick={() => push({ name: '', path: '', targetRevision: '' } as ResourceSyncFormValue)}
+            >
+              Add resource sync
+            </Button>
+          </div>
         </>
       )}
     </FieldArray>

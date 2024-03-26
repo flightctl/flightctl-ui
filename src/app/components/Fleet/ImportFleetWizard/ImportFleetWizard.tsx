@@ -37,7 +37,7 @@ const validationSchema = (resourceSyncs: ResourceSync[], repositories: Repositor
     values.useExistingRepo
       ? Yup.object({
           existingRepo: Yup.string().required('Repository is required'),
-          resourceSyncs: repoSyncSchema(resourceSyncs),
+          resourceSyncs: repoSyncSchema(values.resourceSyncs, resourceSyncs),
         })
       : repositorySchema(resourceSyncs, repositories)({ ...values, useResourceSyncs: true }),
   );

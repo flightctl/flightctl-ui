@@ -1,13 +1,4 @@
-import {
-  Form,
-  FormGroup,
-  FormSection,
-  FormSelect,
-  FormSelectOption,
-  Radio,
-  Split,
-  SplitItem,
-} from '@patternfly/react-core';
+import { Form, FormGroup, FormSection, FormSelect, FormSelectOption, Radio } from '@patternfly/react-core';
 import * as React from 'react';
 import { ImportFleetFormValues } from '../types';
 import { FormikErrors, useFormikContext } from 'formik';
@@ -80,28 +71,22 @@ const RepositoryStep = ({ repositories }: { repositories: Repository[] }) => {
   return (
     <Form>
       <FormSection>
-        <FormGroup>
-          <Split hasGutter>
-            <SplitItem>
-              <Radio
-                isChecked={values.useExistingRepo}
-                onChange={() => setFieldValue('useExistingRepo', true)}
-                id="existing-repo"
-                name="repo"
-                label="Use an existing repository"
-                isDisabled={!repositories.length}
-              />
-            </SplitItem>
-            <SplitItem>
-              <Radio
-                isChecked={!values.useExistingRepo}
-                onChange={() => setFieldValue('useExistingRepo', false)}
-                id="new-repo"
-                name="repo"
-                label="Use a new repository"
-              />
-            </SplitItem>
-          </Split>
+        <FormGroup isInline>
+          <Radio
+            isChecked={values.useExistingRepo}
+            onChange={() => setFieldValue('useExistingRepo', true)}
+            id="existing-repo"
+            name="repo"
+            label="Use an existing repository"
+            isDisabled={!repositories.length}
+          />
+          <Radio
+            isChecked={!values.useExistingRepo}
+            onChange={() => setFieldValue('useExistingRepo', false)}
+            id="new-repo"
+            name="repo"
+            label="Use a new repository"
+          />
         </FormGroup>
       </FormSection>
       <FormSection>
