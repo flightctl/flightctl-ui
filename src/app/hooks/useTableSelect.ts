@@ -3,7 +3,7 @@ import { OnSelect } from '@patternfly/react-table';
 import { ObjectMeta } from '@types';
 import * as React from 'react';
 
-export const useTableSelect = <R extends { metadata: ObjectMeta }>(resources: R[]) => {
+export const useTableSelect = <R extends { kind: string; metadata: ObjectMeta }>(resources: R[]) => {
   const [selectedResources, setSelectedResources] = React.useState<string[]>([]);
   const [isAllSelected, setIsAllSelected] = React.useState<boolean>(false);
 

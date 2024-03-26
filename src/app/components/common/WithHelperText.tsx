@@ -3,7 +3,7 @@ import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 
 type WithHelperTextProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   popoverContent: PopoverProps['bodyContent'];
 };
 

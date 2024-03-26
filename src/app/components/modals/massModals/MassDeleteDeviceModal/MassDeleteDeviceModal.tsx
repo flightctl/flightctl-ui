@@ -1,4 +1,3 @@
-import { getResourceId } from '@app/utils/resource';
 import { Alert, Button, Modal, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
 import { Device, EnrollmentRequest } from '@types';
 import * as React from 'react';
@@ -25,7 +24,7 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
     setProgress(0);
     setIsDeleting(true);
     const promises = resources.map(async (r) => {
-      await remove(`${isEnrollmentRequest(r) ? 'enrollmentrequests' : 'devices'}`, getResourceId(r));
+      await remove(`${isEnrollmentRequest(r) ? 'enrollmentrequests' : 'devices'}`, r.metadata.name || '');
       setProgress((p) => p + 1);
     });
     setTotalProgress(promises.length);

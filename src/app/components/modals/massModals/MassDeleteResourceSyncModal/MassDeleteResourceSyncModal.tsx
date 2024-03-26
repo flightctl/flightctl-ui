@@ -1,4 +1,3 @@
-import { getResourceId } from '@app/utils/resource';
 import { Alert, Button, Modal, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
 import { ResourceSync } from '@types';
 import * as React from 'react';
@@ -27,7 +26,7 @@ const MassDeleteResourceSyncModal: React.FC<MassDeleteResourceSyncModalProps> = 
     setIsDeleting(true);
     setProgress(0);
     const promises = resources.map(async (r) => {
-      await remove('resourcesyncs', getResourceId(r));
+      await remove('resourcesyncs', r.metadata.name || '');
       setProgress((p) => p + 1);
     });
     setProgressTotal(promises.length);

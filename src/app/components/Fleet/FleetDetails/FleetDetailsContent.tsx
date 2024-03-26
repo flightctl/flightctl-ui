@@ -10,54 +10,16 @@ import {
   DescriptionListTerm,
   Grid,
   GridItem,
-  Label,
   Spinner,
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
 import SourceUrlList from '../SourceUrlList';
-import { ConditionType, Fleet, FleetStatus } from '@types';
-import { getFleetStatusType } from '@app/utils/status/fleet';
-import { CheckCircleIcon, InProgressIcon, QuestionCircleIcon, WarningTriangleIcon } from '@patternfly/react-icons';
+import { Fleet } from '@types';
 import { getSourceUrls } from '@app/utils/fleets';
 import FleetOwnerLink from '@app/components/Fleet/FleetDetails/FleetOwnerLink';
-import WithTooltip from '@app/components/common/WithTooltip';
-
-const FleetStatus = ({ status }: { status: FleetStatus }) => {
-  const statusType = getFleetStatusType(status);
-  let color;
-  let icon;
-  let tooltip;
-
-  switch (statusType) {
-    case 'Syncing':
-      color = 'orange';
-      icon = <InProgressIcon />;
-      break;
-    case ConditionType.ResourceSyncSynced:
-      color = 'green';
-      icon = <CheckCircleIcon />;
-      break;
-    case ConditionType.FleetOverlappingSelectors:
-      color = 'orange';
-      icon = <WarningTriangleIcon />;
-      tooltip = `Fleet's selector overlaps with at least one other fleet, causing ambiguous device ownership.`;
-      break;
-    default:
-      color = 'grey';
-      icon = <QuestionCircleIcon />;
-      break;
-  }
-
-  return (
-    <WithTooltip showTooltip={!!tooltip} content={tooltip}>
-      <Label color={color} icon={icon}>
-        {statusType}
-      </Label>
-    </WithTooltip>
-  );
-};
+import FleetStatus from '../FleetStatus';
 
 const FleetDevices = ({ fleetId, count }: { fleetId: string; count: number | undefined }) => {
   if (count === undefined) {
@@ -102,7 +64,7 @@ const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCou
               <DescriptionListGroup>
                 <DescriptionListTerm>Status</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {fleet.status && <FleetStatus status={fleet.status} />}
+                  <FleetStatus fleet={fleet} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>

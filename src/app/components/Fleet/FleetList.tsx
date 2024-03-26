@@ -8,23 +8,23 @@ import {
   EmptyStateHeader,
   SelectList,
   SelectOption,
+  Split,
+  SplitItem,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
-import { Link, useNavigate } from 'react-router-dom';
+import { Tbody } from '@patternfly/react-table';
+import { useNavigate } from 'react-router-dom';
 
-import { Fleet, FleetList } from '@types';
+import { Fleet, FleetList, ResourceSync, ResourceSyncList } from '@types';
 import { useFetch } from '@app/hooks/useFetch';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
-import LabelsView from '@app/components/common/LabelsView';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
-import FleetOwnerLink from './FleetDetails/FleetOwnerLink';
 import { sortByName, sortByOwner } from '@app/utils/sort/generic';
-import { sortFleetsByOSImg } from '@app/utils/sort/fleet';
+import { sortByStatus, sortFleetsByOSImg } from '@app/utils/sort/fleet';
 import TableTextSearch from '../Table/TableTextSearch';
 import Table, { TableColumn } from '../Table/Table';
 import { useEditLabelsAction } from '@app/hooks/useEditLabelsAction';
@@ -35,13 +35,25 @@ import { useTableSelect } from '@app/hooks/useTableSelect';
 import TableActions from '../Table/TableActions';
 import { getResourceId } from '@app/utils/resource';
 import MassDeleteFleetModal from '../modals/massModals/MassDeleteFleetModal/MassDeleteFleetModal';
+import { isFleet } from '@app/types/extraTypes';
+import FleetRow from './FleetRow';
+import ResourceSyncRow from './ResourceSyncRow';
 
-const CreateFleetButton = () => {
+const FleetPageActions = () => {
   const navigate = useNavigate();
   return (
-    <Button variant="primary" onClick={() => navigate('/devicemanagement/fleets/create')}>
-      Create
-    </Button>
+    <Split hasGutter>
+      <SplitItem>
+        <Button variant="primary" onClick={() => navigate('/devicemanagement/fleets/create')}>
+          Create
+        </Button>
+      </SplitItem>
+      <SplitItem>
+        <Button variant="secondary" onClick={() => navigate('/devicemanagement/fleets/import')}>
+          Import
+        </Button>
+      </SplitItem>
+    </Split>
   );
 };
 
@@ -51,13 +63,13 @@ const FleetEmptyState = () => (
     <EmptyStateBody>Create a new fleet using the &quot;Create&quot; button</EmptyStateBody>
     <EmptyStateFooter>
       <EmptyStateActions>
-        <CreateFleetButton />
+        <FleetPageActions />
       </EmptyStateActions>
     </EmptyStateFooter>
   </EmptyState>
 );
 
-const columns: TableColumn<Fleet>[] = [
+const columns: TableColumn<Fleet | ResourceSync>[] = [
   {
     name: 'Name',
     onSort: sortByName,
@@ -70,22 +82,32 @@ const columns: TableColumn<Fleet>[] = [
     name: 'Label selector',
   },
   {
+    name: 'Status',
+    onSort: sortByStatus,
+  },
+  {
     name: 'Managed by',
     onSort: sortByOwner,
   },
 ];
 
-const getSearchText = (fleet: Fleet) => [fleet.metadata.name];
-
-const canDeleteResource = (fleet: Fleet) =>
-  fleet.metadata?.owner ? 'Fleets managed by a Resourcesync cannot be deleted' : undefined;
+const getSearchText = (resource: Fleet | ResourceSync) => [resource.metadata.name];
 
 const FleetTable = () => {
   const [fleetList, loading, error, refetch] = useFetchPeriodically<FleetList>({ endpoint: 'fleets' });
+  const [rsList, rsLoading, rsError, rsRefetch] = useFetchPeriodically<ResourceSyncList>({ endpoint: 'resourcesyncs' });
+
   const { remove } = useFetch();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
 
-  const { search, setSearch, filteredData } = useTableTextSearch(fleetList?.items || [], getSearchText);
+  const data = [
+    ...(fleetList?.items || []),
+    ...(rsList?.items || []).filter(
+      (rs) => !(fleetList?.items || []).some((fleet) => fleet.metadata.owner === `ResourceSync/${rs.metadata.name}`),
+    ),
+  ];
+
+  const { search, setSearch, filteredData } = useTableTextSearch(data, getSearchText);
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
@@ -98,6 +120,14 @@ const FleetTable = () => {
     },
   });
 
+  const { deleteAction: deleteRsAction, deleteModal: deleteRsModal } = useDeleteListAction({
+    resourceType: 'resource sync',
+    onDelete: async (resourceId) => {
+      await remove('resourcesyncs', resourceId);
+      rsRefetch();
+    },
+  });
+
   const { editLabelsAction, editLabelsModal } = useEditLabelsAction<Fleet>({
     submitTransformer: getUpdatedFleet,
     resourceType: 'fleets',
@@ -106,9 +136,9 @@ const FleetTable = () => {
 
   return (
     <ListPageBody
-      isEmpty={!fleetList?.items || fleetList.items.length === 0}
-      error={error}
-      loading={loading}
+      isEmpty={data.length === 0}
+      error={error || rsError}
+      loading={loading || rsLoading}
       emptyState={<FleetEmptyState />}
     >
       <Toolbar>
@@ -136,48 +166,34 @@ const FleetTable = () => {
         onSelectAll={setAllSelected}
       >
         <Tbody>
-          {sortedData.map((fleet, rowIndex) => {
-            const fleetName = fleet.metadata.name as string;
-            return (
-              <Tr key={fleetName}>
-                <Td
-                  select={{
-                    rowIndex,
-                    onSelect: onRowSelect(fleet),
-                    isSelected: isRowSelected(fleet),
-                  }}
-                />
-                <Td dataLabel="Name">
-                  <Link to={`${fleetName}`}>{fleetName}</Link>
-                </Td>
-                <Td dataLabel="OS image">{fleet.spec.template.spec.os?.image || '-'}</Td>
-                <Td dataLabel="Label selector">
-                  <LabelsView prefix={fleetName} labels={fleet.spec.selector?.matchLabels} />
-                </Td>
-                <Td dataLabel="Managed by">
-                  <FleetOwnerLink owner={fleet.metadata?.owner} />
-                </Td>
-                <Td isActionCell>
-                  <ActionsColumn
-                    items={[
-                      editLabelsAction({
-                        resourceId: fleetName,
-                        disabledReason: !!fleet.metadata?.owner && 'Fleets managed by a Resourcesync cannot be edited',
-                      }),
-                      deleteAction({
-                        resourceId: fleetName,
-                        disabledReason: canDeleteResource(fleet),
-                      }),
-                    ]}
-                  />
-                </Td>
-              </Tr>
-            );
-          })}
+          {sortedData.map((resource, rowIndex) =>
+            isFleet(resource) ? (
+              <FleetRow
+                key={getResourceId(resource)}
+                fleet={resource}
+                rowIndex={rowIndex}
+                deleteAction={deleteAction}
+                editLabelsAction={editLabelsAction}
+                isRowSelected={isRowSelected}
+                onRowSelect={onRowSelect}
+              />
+            ) : (
+              <ResourceSyncRow
+                key={getResourceId(resource)}
+                resourceSync={resource}
+                rowIndex={rowIndex}
+                isRowSelected={isRowSelected}
+                onRowSelect={onRowSelect}
+                deleteAction={deleteRsAction}
+                editLabelsAction={editLabelsAction}
+              />
+            ),
+          )}
         </Tbody>
       </Table>
       {deleteModal}
       {editLabelsModal}
+      {deleteRsModal}
       {isMassDeleteModalOpen && (
         <MassDeleteFleetModal
           onClose={() => setIsMassDeleteModalOpen(false)}
@@ -185,6 +201,7 @@ const FleetTable = () => {
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
             refetch();
+            rsRefetch();
           }}
         />
       )}
@@ -193,7 +210,7 @@ const FleetTable = () => {
 };
 
 const FleetList = () => (
-  <ListPage title="Fleets" actions={<CreateFleetButton />}>
+  <ListPage title="Fleets" actions={<FleetPageActions />}>
     <FleetTable />
   </ListPage>
 );

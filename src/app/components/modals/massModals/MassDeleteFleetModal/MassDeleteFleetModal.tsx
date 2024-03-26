@@ -1,15 +1,15 @@
-import { getResourceId } from '@app/utils/resource';
 import { Alert, Button, Modal, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
-import { Fleet } from '@types';
+import { Fleet, ResourceSync } from '@types';
 import * as React from 'react';
 import { getErrorMessage } from '@app/utils/error';
 import { useFetch } from '@app/hooks/useFetch';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import FleetOwnerLink from '@app/components/Fleet/FleetDetails/FleetOwnerLink';
+import FleetOwnerLink, { RSLink } from '@app/components/Fleet/FleetDetails/FleetOwnerLink';
+import { isFleet } from '@app/types/extraTypes';
 
 type MassDeleteFleetModalProps = {
   onClose: VoidFunction;
-  resources: Fleet[];
+  resources: Array<Fleet | ResourceSync>;
   onDeleteSuccess: VoidFunction;
 };
 
@@ -26,7 +26,7 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
     setProgress(0);
     setIsDeleting(true);
     const promises = resourcesToDelete.map(async (r) => {
-      await remove('fleets', getResourceId(r));
+      await remove(isFleet(r) ? 'fleets' : 'resourcesyncs', r.metadata.name || '');
       setProgress((p) => p + 1);
     });
 
@@ -84,9 +84,13 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
               {resources.map((resource) => {
                 return (
                   <Tr key={resource.metadata.name}>
-                    <Td dataLabel="Name">{resource.metadata.name || '-'}</Td>
+                    <Td dataLabel="Name">{(isFleet(resource) && resource.metadata.name) || '-'}</Td>
                     <Td dataLabel="Managed by">
-                      <FleetOwnerLink owner={resource.metadata.owner} />
+                      {isFleet(resource) ? (
+                        <FleetOwnerLink owner={resource.metadata.owner} />
+                      ) : (
+                        <RSLink rsName={resource.metadata.name || ''} />
+                      )}
                     </Td>
                   </Tr>
                 );

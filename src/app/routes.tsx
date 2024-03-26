@@ -26,6 +26,7 @@ import ResourceSyncToRepository from '@app/components/ResourceSync/ResourceSyncT
 
 import { useDocumentTitle } from '@app/hooks/useDocumentTitle';
 import { APP_TITLE } from '@app/constants';
+import ImportFleetWizard from './components/Fleet/ImportFleetWizard/ImportFleetWizard';
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -107,6 +108,15 @@ const appRoutes: ExtendedRouteObject[] = [
         element: (
           <TitledRoute title="Create Fleet">
             <CreateFleet />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'import',
+        title: 'Import Fleet',
+        element: (
+          <TitledRoute title="Import Fleet">
+            <ImportFleetWizard />
           </TitledRoute>
         ),
       },

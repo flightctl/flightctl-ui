@@ -1,3 +1,4 @@
 import { ObjectMeta } from '@types';
 
-export const getResourceId = <R extends { metadata: ObjectMeta }>(resource: R) => resource.metadata.name || '';
+export const getResourceId = <R extends { kind: string; metadata: ObjectMeta }>(resource: R) =>
+  `${resource.kind}/${resource.metadata.name || ''}`;

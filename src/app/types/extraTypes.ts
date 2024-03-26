@@ -1,4 +1,4 @@
-import { ConditionType, Device, EnrollmentRequest, Fleet } from '@types';
+import { ConditionType, Device, EnrollmentRequest, Fleet, ResourceSync } from '@types';
 
 export enum FlightControlMetrics {
   ACTIVE_AGENT_COUNT_METRIC = 'flightctl_devicesimulator_active_agent_count',
@@ -52,3 +52,5 @@ export type FlightControlQuery = ApiQuery | MetricsQuery;
 
 export const isEnrollmentRequest = (resource: Device | EnrollmentRequest): resource is EnrollmentRequest =>
   resource.kind === 'EnrollmentRequest';
+
+export const isFleet = (resource: ResourceSync | Fleet): resource is Fleet => resource.kind === 'Fleet';

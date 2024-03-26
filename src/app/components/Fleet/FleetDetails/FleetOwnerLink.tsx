@@ -4,17 +4,19 @@ import { Label } from '@patternfly/react-core';
 
 const rsOwnerRegex = /^ResourceSync\/(?<rsName>.*)$/;
 
+export const RSLink = ({ rsName }: { rsName: string }) => (
+  <div>
+    <Label color="green">RS</Label> <Link to={`/devicemanagement/resourcesyncs/${rsName}`}>{rsName}</Link>
+  </div>
+);
+
 const FleetOwnerLink = ({ owner }: { owner: string | undefined }) => {
   const ownerRsName = rsOwnerRegex.exec(owner || '')?.groups?.rsName;
   if (!ownerRsName) {
     return '-';
   }
 
-  return (
-    <div>
-      <Label color="green">RS</Label> <Link to={`/devicemanagement/resourcesyncs/${ownerRsName}`}>{ownerRsName}</Link>
-    </div>
-  );
+  return <RSLink rsName={ownerRsName} />;
 };
 
 export default FleetOwnerLink;

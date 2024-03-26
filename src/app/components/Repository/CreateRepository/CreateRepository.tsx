@@ -17,7 +17,7 @@ import {
 import { useFetch } from '@app/hooks/useFetch';
 
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
-import { Repository, ResourceSync, ResourceSyncList } from '@types';
+import { Repository, RepositoryList, ResourceSync, ResourceSyncList } from '@types';
 import { getErrorMessage } from '@app/utils/error';
 import { API_VERSION } from '@app/constants';
 import CreateRepositoryForm from './CreateRepositoryForm';
@@ -25,45 +25,52 @@ import CreateRepositoryForm from './CreateRepositoryForm';
 const gitRegex = new RegExp(/^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/);
 const pathRegex = /\/.+/;
 
-const repositorySchema = lazy((values: RepositoryFormValues) =>
-  object({
-    name: string().required('Name is required'),
-    url: string()
-      .matches(gitRegex, 'Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos')
-      .required('Repository URL is required'),
-    credentials: object()
-      .shape({
-        isPrivate: boolean().required(),
-        username: string()
-          .trim()
-          .when('isPublic', {
-            is: false,
-            then: (schema) => schema.required('Username is required for private repositories'),
-          }),
-        password: string()
-          .trim()
-          .when('isPublic', {
-            is: false,
-            then: (schema) => schema.required('Password is required for private repositories'),
-          }),
-      })
-      .required(),
-    useResourceSyncs: boolean().required(),
-    resourceSyncs: values.useResourceSyncs
-      ? array()
-          .of(
-            object().shape({
-              name: string().required('Name is required'),
-              targetRevision: string().required('Target revision is required'),
-              path: string().matches(pathRegex, 'Must be an absolute path').required('Path is required'),
-            }),
-          )
-          .required()
-      : array(),
-  }),
-);
+export const repoSyncSchema = (resourceSyncs: ResourceSync[]) => {
+  const existingNames = resourceSyncs.map((rs) => rs.metadata.name || '');
+  return array()
+    .of(
+      object().shape({
+        name: string()
+          .required('Name is required')
+          .notOneOf(existingNames, 'Resource sync with the same name already exists.'),
+        targetRevision: string().required('Target revision is required'),
+        path: string().matches(pathRegex, 'Must be an absolute path').required('Path is required'),
+      }),
+    )
+    .required();
+};
 
-const getRepository = (values: RepositoryFormValues) => {
+export const repositorySchema =
+  (resourceSyncs: ResourceSync[], repositories: Repository[]) => (values: RepositoryFormValues) => {
+    const repoNames = repositories.map((r) => r.metadata.name || '');
+    return object({
+      name: string().required('Name is required').notOneOf(repoNames, 'Repository with the same name already exists.'),
+      url: string()
+        .matches(gitRegex, 'Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos')
+        .required('Repository URL is required'),
+      credentials: object()
+        .shape({
+          isPrivate: boolean().required(),
+          username: string()
+            .trim()
+            .when('isPublic', {
+              is: false,
+              then: (schema) => schema.required('Username is required for private repositories'),
+            }),
+          password: string()
+            .trim()
+            .when('isPublic', {
+              is: false,
+              then: (schema) => schema.required('Password is required for private repositories'),
+            }),
+        })
+        .required(),
+      useResourceSyncs: boolean().required(),
+      resourceSyncs: values.useResourceSyncs ? repoSyncSchema(resourceSyncs) : array(),
+    });
+  };
+
+export const getRepository = (values: Pick<RepositoryFormValues, 'name' | 'url' | 'credentials'>) => {
   const spec: Partial<Repository['spec']> = {
     repo: values.url,
   };
@@ -83,7 +90,7 @@ const getRepository = (values: RepositoryFormValues) => {
   };
 };
 
-const getResourceSync = (repositoryId: string, values: ResourceSyncFormValue): ResourceSync => {
+export const getResourceSync = (repositoryId: string, values: ResourceSyncFormValue): ResourceSync => {
   return {
     apiVersion: API_VERSION,
     kind: 'ResourceSync',
@@ -99,7 +106,7 @@ const getResourceSync = (repositoryId: string, values: ResourceSyncFormValue): R
   };
 };
 
-const handlePromises = async (promises: Promise<unknown>[]): Promise<string[]> => {
+export const handlePromises = async (promises: Promise<unknown>[]): Promise<string[]> => {
   const results = await Promise.allSettled(promises);
   const failedPromises = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
   return failedPromises.map((fp) => getErrorMessage(fp.reason));
@@ -151,33 +158,33 @@ const CreateRepository = () => {
   const { post, get, put, remove } = useFetch();
   const [errors, setErrors] = React.useState<string[]>();
   const [isLoading, setIsLoading] = React.useState(!!repositoryId);
-  const [repository, setRepository] = React.useState<Repository>();
+  const [repositories, setRepositories] = React.useState<Repository[]>();
   const [resourceSyncs, setResourceSyncs] = React.useState<ResourceSync[]>();
 
   React.useEffect(() => {
     const fetchResources = async () => {
-      if (repositoryId) {
-        setIsLoading(true);
-        const results = await Promise.allSettled([
-          get<Repository>(`repositories/${repositoryId}`),
-          get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${repositoryId}`),
-        ]);
-        if (results[0].status === 'rejected') {
-          setErrors([`Failed to fetch repository: ${getErrorMessage(results[0].reason)}`]);
-          return;
-        }
-        setRepository(results[0].value);
-
-        if (results[1].status === 'rejected') {
-          setErrors([`Failed to fetch resource syncs: ${getErrorMessage(results[1].reason)}`]);
-          return;
-        }
-        setResourceSyncs(results[1].value.items);
-        setIsLoading(false);
+      setIsLoading(true);
+      const results = await Promise.allSettled([
+        get<RepositoryList>('repositories'),
+        get<ResourceSyncList>('resourcesyncs'),
+      ]);
+      if (results[0].status === 'rejected') {
+        setErrors([`Failed to fetch repositories: ${getErrorMessage(results[0].reason)}`]);
+        return;
       }
+      setRepositories(results[0].value.items);
+
+      if (results[1].status === 'rejected') {
+        setErrors([`Failed to fetch resource syncs: ${getErrorMessage(results[1].reason)}`]);
+        return;
+      }
+      setResourceSyncs(results[1].value.items);
+      setIsLoading(false);
     };
     fetchResources();
-  }, [repositoryId, get]);
+  }, [get]);
+
+  const repository = repositories?.find((r) => r.metadata.name === repositoryId);
 
   return (
     <PageSection variant={PageSectionVariants.light}>
@@ -201,7 +208,7 @@ const CreateRepository = () => {
           ) : (
             <Formik<RepositoryFormValues>
               initialValues={getInitValues(repository, resourceSyncs)}
-              validationSchema={repositorySchema}
+              validationSchema={lazy(repositorySchema(resourceSyncs || [], repositories || []))}
               onSubmit={async (values) => {
                 setErrors(undefined);
                 if (repositoryId) {

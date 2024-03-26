@@ -36,7 +36,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
   const displayName = device.metadata.labels?.displayName;
   const boundFleet = getDeviceFleet(device.metadata);
   return (
-    <Tr key={deviceName}>
+    <Tr>
       <Td
         select={{
           rowIndex,

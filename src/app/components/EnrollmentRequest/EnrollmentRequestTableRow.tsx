@@ -27,7 +27,7 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
 }) => {
   const approvalStatus = getApprovalStatus(er);
   return (
-    <Tr key={er.metadata.name}>
+    <Tr>
       <Td
         select={{
           rowIndex,

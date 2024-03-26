@@ -42,8 +42,8 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
     const promises = repositories.map(async (r) => {
       const repositoryId = getResourceId(r);
       if (deleteAll || selectedRepositories.includes(repositoryId)) {
-        const resourceSyncs = await get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${repositoryId}`);
-        const rsyncPromises = resourceSyncs.items.map((rsync) => remove('resourcesyncs', getResourceId(rsync)));
+        const resourceSyncs = await get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${r.metadata.name}`);
+        const rsyncPromises = resourceSyncs.items.map((rsync) => remove('resourcesyncs', rsync.metadata.name || ''));
         const rsyncResults = await Promise.allSettled(rsyncPromises);
         const rejectedResults = rsyncResults.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
         if (rejectedResults.length) {
@@ -118,7 +118,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
                 const repositoryId = getResourceId(repository);
                 return (
                   <Tr key={repository.metadata.name}>
-                    <Td dataLabel="Repository name">{repositoryId}</Td>
+                    <Td dataLabel="Repository name">{repository.metadata.name}</Td>
                     <Td
                       select={{
                         rowIndex,

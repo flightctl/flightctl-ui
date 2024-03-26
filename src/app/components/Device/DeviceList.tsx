@@ -157,8 +157,8 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
           {sortedData.map((resource, index) =>
             isEnrollmentRequest(resource) ? (
               <EnrollmentRequestTableRow
+                key={getResourceId(resource)}
                 er={resource}
-                key={resource.metadata.name}
                 deleteAction={deleteErAction}
                 onRowSelect={onRowSelect}
                 isRowSelected={isRowSelected}
@@ -167,8 +167,8 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
               />
             ) : (
               <DeviceTableRow
+                key={getResourceId(resource)}
                 device={resource}
-                key={resource.metadata.name}
                 editLabelsAction={editLabelsAction}
                 deleteAction={deleteDeviceAction}
                 onRowSelect={onRowSelect}

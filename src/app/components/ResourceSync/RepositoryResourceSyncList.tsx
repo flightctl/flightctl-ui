@@ -15,8 +15,7 @@ import { useLocation } from 'react-router';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import { useFetch } from '@app/hooks/useFetch';
 import { ResourceSync, ResourceSyncList } from '@types';
-import { getObservedHash, getRepositorySyncStatus } from '@app/utils/status/repository';
-import StatusInfo from '@app/components/common/StatusInfo';
+import { getObservedHash } from '@app/utils/status/repository';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import { useTableSort } from '@app/hooks/useTableSort';
 import { sortByName } from '@app/utils/sort/generic';
@@ -35,6 +34,7 @@ import { getResourceId } from '@app/utils/resource';
 
 import './RepositoryResourceSyncList.css';
 import MassDeleteResourceSyncModal from '../modals/massModals/MassDeleteResourceSyncModal/MassDeleteResourceSyncModal';
+import ResourceSyncStatus from './ResourceSyncStatus';
 
 const columns: TableColumn<ResourceSync>[] = [
   {
@@ -120,7 +120,7 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
         </ToolbarContent>
       </Toolbar>
       <Table
-        aria-label="Repositories table"
+        aria-label="Resource syncs table"
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
         columns={columns}
@@ -133,7 +133,7 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
             const rsRef = rsRefs[rsName];
             const isSelected = rsName === selectedRs;
             return (
-              <Tr key={rsName} ref={rsRef} className={isSelected ? 'fctl_rslist-row--selected' : ''}>
+              <Tr key={rsName} ref={rsRef} className={isSelected ? 'fctl-rslist-row--selected' : ''}>
                 <Td
                   select={{
                     rowIndex,
@@ -145,7 +145,7 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
                 <Td dataLabel="Path">{resourceSync.spec.path || ''}</Td>
                 <Td dataLabel="Target revision">{resourceSync.spec.targetRevision}</Td>
                 <Td dataLabel="Status">
-                  <StatusInfo statusInfo={getRepositorySyncStatus(resourceSync)} />
+                  <ResourceSyncStatus resourceSync={resourceSync} />
                 </Td>
                 <Td dataLabel="Observed hash">{getObservedHash(resourceSync)}</Td>
                 <Td isActionCell>
