@@ -2,23 +2,25 @@ import * as React from 'react';
 import { Formik, useFormikContext } from 'formik';
 import { Link, useNavigate } from 'react-router-dom';
 import * as yaml from 'js-yaml';
+import * as Yup from 'yup';
 
 import {
   Alert,
   Breadcrumb,
   BreadcrumbItem,
+  Bullseye,
   Button,
   Form,
   FormGroup,
   Grid,
   PageSection,
   PageSectionVariants,
+  Spinner,
   Stack,
   StackItem,
-  TextInput,
   Title,
 } from '@patternfly/react-core';
-import { Fleet } from '@types';
+import { Fleet, FleetList } from '@types';
 import { useFetch } from '@app/hooks/useFetch';
 import { getErrorMessage } from '@app/utils/error';
 import { API_VERSION } from '@app/constants';
@@ -27,6 +29,28 @@ import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
 import LabelsField from '../../form/LabelsField';
 import { FleetFormValues } from './types';
 import ConfigTemplateForm from './ConfigTemplateForm';
+import TextField from '@app/components/form/TextField';
+import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
+
+const validationSchema = (fleets: Fleet[]) => {
+  const existingFleets = fleets.map((f) => f.metadata.name);
+  return Yup.object<FleetFormValues>({
+    name: Yup.string()
+      .required('Name is required.')
+      .notOneOf(existingFleets, 'Fleet with the same name already exists.'),
+    osImage: Yup.string().required('OS image is required.'),
+    labels: Yup.array().required(),
+    configTemplates: Yup.array().of(
+      Yup.object({
+        type: Yup.string().required(),
+        name: Yup.string().required('Name is required.'),
+        path: Yup.string().required('Path is required.'),
+        repoURL: Yup.string().required('Repository URL is required.'),
+        targetRevision: Yup.string().required('Target revision is required.'),
+      }),
+    ),
+  });
+};
 
 const getFleetResource = (values: FleetFormValues): Fleet => ({
   apiVersion: API_VERSION,
@@ -87,15 +111,21 @@ const getFleetResource = (values: FleetFormValues): Fleet => ({
 
 const CreateFleetForm = ({ children }: React.PropsWithChildren<Record<never, never>>) => {
   const navigate = useNavigate();
-  const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<FleetFormValues>();
+  const { values, setFieldValue, submitForm, isSubmitting, isValid } = useFormikContext<FleetFormValues>();
   return (
     <Form>
       <Grid hasGutter span={8}>
         <FormGroup label="Name" isRequired>
-          <TextInput aria-label="Name" value={values.name} onChange={(_, value) => setFieldValue('name', value)} />
+          <TextField
+            name="name"
+            aria-label="Name"
+            value={values.name}
+            onChange={(_, value) => setFieldValue('name', value)}
+          />
         </FormGroup>
         <FormGroup label="OS image" isRequired>
-          <TextInput
+          <TextField
+            name="osImage"
             aria-label="OS image"
             value={values.osImage}
             onChange={(_, value) => setFieldValue('osImage', value)}
@@ -110,7 +140,7 @@ const CreateFleetForm = ({ children }: React.PropsWithChildren<Record<never, nev
       </Grid>
       {children}
       <FlightCtlActionGroup>
-        <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitting}>
+        <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitting || !isValid}>
           Create fleet
         </Button>
         <Button variant="link" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
@@ -125,6 +155,23 @@ const CreateFleet = () => {
   const navigate = useNavigate();
   const { post } = useFetch();
   const [error, setError] = React.useState<string>();
+  const [fleetList, isLoading, fetchError] = useFetchPeriodically<FleetList>({ endpoint: 'fleets' });
+
+  if (isLoading) {
+    return (
+      <Bullseye>
+        <Spinner />
+      </Bullseye>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <Alert isInline variant="danger" title="An error occured.">
+        {getErrorMessage(fetchError)}
+      </Alert>
+    );
+  }
   return (
     <PageSection variant={PageSectionVariants.light}>
       <Stack hasGutter>
@@ -155,6 +202,7 @@ const CreateFleet = () => {
                 },
               ],
             }}
+            validationSchema={validationSchema(fleetList?.items || [])}
             onSubmit={async (values) => {
               setError(undefined);
               try {
@@ -164,6 +212,7 @@ const CreateFleet = () => {
                 setError(getErrorMessage(e));
               }
             }}
+            validateOnMount
           >
             <CreateFleetForm>
               {error && (

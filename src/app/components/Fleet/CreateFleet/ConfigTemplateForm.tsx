@@ -2,6 +2,7 @@ import {
   Button,
   Divider,
   FormGroup,
+  FormSection,
   FormSelect,
   FormSelectOption,
   Grid,
@@ -13,6 +14,7 @@ import { FieldArray, useFormikContext } from 'formik';
 import * as React from 'react';
 import { FleetFormValues, GitConfigTemplate, InlineConfigTemplate, KubeSecretTemplate } from './types';
 import { MinusCircleIcon, PlusCircleIcon } from '@patternfly/react-icons';
+import TextField from '@app/components/form/TextField';
 
 type GitConfigFormProps = {
   index: number;
@@ -24,29 +26,33 @@ const GitConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
   return (
     <>
       <FormGroup label="Source name" isRequired>
-        <TextInput
+        <TextField
           aria-label="Source name"
+          name={`configTemplates[${index}].name`}
           value={template.name}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.name`, value)}
         />
       </FormGroup>
       <FormGroup label="Repository URL" isRequired>
-        <TextInput
+        <TextField
           aria-label="Repository URL"
+          name={`configTemplates[${index}].repoURL`}
           value={template.repoURL}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.repoURL`, value)}
         />
       </FormGroup>
       <FormGroup label="Repository target reference" isRequired>
-        <TextInput
+        <TextField
           aria-label="Repository target reference"
+          name={`configTemplates[${index}].targetRevision`}
           value={template.targetRevision}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.targetRevision`, value)}
         />
       </FormGroup>
       <FormGroup label="Repository path" isRequired>
-        <TextInput
+        <TextField
           aria-label="Repository path"
+          name={`configTemplates[${index}].path`}
           value={template.path}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.path`, value)}
         />
@@ -125,7 +131,7 @@ const ConfigTemplateForm = () => {
           <GridItem span={11}>
             <Grid hasGutter>
               {values.configTemplates.map((ct, index) => (
-                <React.Fragment key={index}>
+                <FormSection key={index}>
                   {index !== 0 && (
                     <GridItem>
                       <Divider component="div" />
@@ -173,40 +179,44 @@ const ConfigTemplateForm = () => {
                       {ct.type === 'git' && <GitConfigForm index={index} />}
                       {ct.type === 'kube' && <KubeConfigForm index={index} />}
                       {ct.type === 'inline' && <InlineConfigForm index={index} />}
-                      {index !== 0 && (
-                        <Button
-                          variant="link"
-                          icon={<MinusCircleIcon />}
-                          iconPosition="start"
-                          onClick={() => remove(index)}
-                        >
-                          Remove source
-                        </Button>
+                      {values.configTemplates.length > 1 && (
+                        <FormGroup>
+                          <Button
+                            variant="link"
+                            icon={<MinusCircleIcon />}
+                            iconPosition="start"
+                            onClick={() => remove(index)}
+                          >
+                            Remove source
+                          </Button>
+                        </FormGroup>
                       )}
                     </Grid>
                   </GridItem>
-                </React.Fragment>
+                </FormSection>
               ))}
             </Grid>
           </GridItem>
-          <GridItem>
-            <Button
-              variant="link"
-              icon={<PlusCircleIcon />}
-              iconPosition="start"
-              onClick={() => {
-                push({
-                  name: '',
-                  path: '',
-                  repoURL: '',
-                  targetRevision: '',
-                  type: 'git',
-                } as GitConfigTemplate);
-              }}
-            >
-              Add source
-            </Button>
-          </GridItem>
+          <FormSection>
+            <FormGroup>
+              <Button
+                variant="link"
+                icon={<PlusCircleIcon />}
+                iconPosition="start"
+                onClick={() => {
+                  push({
+                    name: '',
+                    path: '',
+                    repoURL: '',
+                    targetRevision: '',
+                    type: 'git',
+                  } as GitConfigTemplate);
+                }}
+              >
+                Add source
+              </Button>
+            </FormGroup>
+          </FormSection>
         </Grid>
       )}
     </FieldArray>
