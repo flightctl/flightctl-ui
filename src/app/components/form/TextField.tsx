@@ -28,7 +28,6 @@ const TextField = React.forwardRef(({ helperText, ...props }: TextFieldProps, re
 
   const fieldId = `textfield-${props.name}`;
   const hasError = meta.touched && !!meta.error;
-  const message = hasError ? meta.error : helperText;
 
   return (
     <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId}>
@@ -41,11 +40,18 @@ const TextField = React.forwardRef(({ helperText, ...props }: TextFieldProps, re
         validated={hasError ? 'error' : 'default'}
       />
 
-      {message && (
+      {helperText && (
         <FormHelperText>
           <HelperText>
-            <HelperTextItem icon={hasError && <ExclamationCircleIcon />} variant={hasError ? 'error' : 'default'}>
-              {message}
+            <HelperTextItem variant={'default'}>{helperText}</HelperTextItem>
+          </HelperText>
+        </FormHelperText>
+      )}
+      {hasError && (
+        <FormHelperText>
+          <HelperText>
+            <HelperTextItem icon={<ExclamationCircleIcon />} variant={'error'}>
+              {meta.error}
             </HelperTextItem>
           </HelperText>
         </FormHelperText>
