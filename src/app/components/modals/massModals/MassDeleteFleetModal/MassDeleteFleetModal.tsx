@@ -26,7 +26,7 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
     setProgress(0);
     setIsDeleting(true);
     const promises = resourcesToDelete.map(async (r) => {
-      await remove(`fleets/${getResourceId(r)}`);
+      await remove('fleets', getResourceId(r));
       setProgress((p) => p + 1);
     });
 

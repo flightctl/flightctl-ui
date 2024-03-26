@@ -29,7 +29,7 @@ const FleetDetails = () => {
   const navigate = useNavigate();
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {
-      await remove(`fleets/${fleetId}`);
+      await remove('fleets', fleetId);
       navigate('/devicemanagement/fleets');
     },
     resourceName: fleetId,

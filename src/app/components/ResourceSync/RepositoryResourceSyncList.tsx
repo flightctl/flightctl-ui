@@ -1,12 +1,8 @@
 import * as React from 'react';
 import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
-import PlusCircleIcon from '@patternfly/react-icons/dist/esm/icons/plus-circle-icon';
 import {
-  Button,
   EmptyState,
   EmptyStateBody,
-  Grid,
-  GridItem,
   SelectList,
   SelectOption,
   Spinner,
@@ -21,7 +17,6 @@ import { useFetch } from '@app/hooks/useFetch';
 import { ResourceSync, ResourceSyncList } from '@types';
 import { getObservedHash, getRepositorySyncStatus } from '@app/utils/status/repository';
 import StatusInfo from '@app/components/common/StatusInfo';
-import CreateRepositoryResourceSync from '@app/components/ResourceSync/CreateResourceSync/CreateRepositoryResourceSync';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import { useTableSort } from '@app/hooks/useTableSort';
 import { sortByName } from '@app/utils/sort/generic';
@@ -98,9 +93,9 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
   const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
 
   const { deleteAction, deleteModal } = useDeleteListAction({
-    resourceType: 'resourcesync',
-    onDelete: async (resourceId) => {
-      await remove(`resourcesyncs/${resourceId}`);
+    resourceType: 'Resource Sync',
+    onDelete: async (resourceId: string) => {
+      await remove('resourcesyncs', resourceId);
       refetch();
     },
   });
@@ -196,53 +191,16 @@ const ResourceSyncEmptyState = ({ isLoading, error }: { isLoading: boolean; erro
 };
 
 const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) => {
-  const [isFormVisible, setIsFormVisible] = React.useState<boolean>(false);
   const [rsList, isLoading, error, refetch] = useFetchPeriodically<ResourceSyncList>({
     endpoint: `resourcesyncs?labelSelector=repository=${repositoryId}`,
   });
 
   const items = rsList?.items || [];
 
-  const onCreateResourceSyncResult = (success: boolean) => {
-    if (success) {
-      setIsFormVisible(false);
-      refetch();
-    }
-  };
-
-  return (
-    <Grid hasGutter>
-      <GridItem>
-        {items.length === 0 ? (
-          <ResourceSyncEmptyState isLoading={isLoading} error={error as string} />
-        ) : (
-          <ResourceSyncTable resourceSyncs={items} refetch={refetch} />
-        )}
-      </GridItem>
-      {!isLoading && (
-        <GridItem>
-          {isFormVisible ? (
-            <CreateRepositoryResourceSync
-              repositoryId={repositoryId}
-              onCreateResult={onCreateResourceSyncResult}
-              onCancel={() => {
-                setIsFormVisible(false);
-              }}
-            />
-          ) : (
-            <Button
-              variant="link"
-              onClick={() => {
-                setIsFormVisible(true);
-              }}
-              icon={<PlusCircleIcon />}
-            >
-              Add a new resource sync
-            </Button>
-          )}
-        </GridItem>
-      )}
-    </Grid>
+  return items.length === 0 ? (
+    <ResourceSyncEmptyState isLoading={isLoading} error={error as string} />
+  ) : (
+    <ResourceSyncTable resourceSyncs={items} refetch={refetch} />
   );
 };
 

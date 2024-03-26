@@ -19,6 +19,7 @@ import { WarningTriangleIcon } from '@patternfly/react-icons';
 
 import { getErrorMessage } from '@app/utils/error';
 import { useFetch } from '@app/hooks/useFetch';
+import { ResourceSyncList } from '@types';
 
 type DeleteRepositoryModalProps = {
   onClose: VoidFunction;
@@ -35,14 +36,14 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
   const hasResourceSyncs = !!resourceSyncIds?.length;
 
   const deleteRepositoryOnly = async () => {
-    await remove(`repositories/${repositoryId}`);
+    await remove('repositories', repositoryId);
   };
 
   const deleteRepositoryAndResourceSyncs = async () => {
     const toDeleteCount = resourceSyncIds?.length || 0;
     setMessage(`Deleting ${toDeleteCount} resourcesyncs`);
 
-    const promises = (resourceSyncIds || []).map((id) => remove(`resourcesyncs/${id}`));
+    const promises = (resourceSyncIds || []).map((id) => remove('resourcesyncs', id));
     const results = await Promise.allSettled(promises);
     const deletedCount = results.filter((result) => result.status === 'fulfilled').length;
 
@@ -58,8 +59,8 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
   useEffect(() => {
     const loadRS = async () => {
       try {
-        const resourceSyncs = await get(`resourcesyncs?labelSelector=repository=${repositoryId}`);
-        setResourceSyncIds(resourceSyncs?.items?.map((rs) => rs.metadata.name));
+        const resourceSyncs = await get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${repositoryId}`);
+        setResourceSyncIds(resourceSyncs.items.map((rs) => rs.metadata.name || ''));
       } catch (e) {
         const error = `We couldn't fetch the repository resourcesyncs. If the repository contains resourcesyncs, they won't be deleted`;
         setError(`${error}. Detail: ${getErrorMessage(e)}`);

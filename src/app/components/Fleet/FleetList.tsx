@@ -93,7 +93,7 @@ const FleetTable = () => {
   const { deleteAction, deleteModal } = useDeleteListAction({
     resourceType: 'fleet',
     onDelete: async (resourceId) => {
-      await remove(`fleets/${resourceId}`);
+      await remove('fleets', resourceId);
       refetch();
     },
   });

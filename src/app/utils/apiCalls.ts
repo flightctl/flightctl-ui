@@ -75,9 +75,9 @@ export const putData = async (kind: string, token: string | undefined, data: unk
   }
 };
 
-export const deleteData = async (kind: string, token: string | undefined) => {
+export const deleteData = async (kind: string, token: string | undefined, objId: string) => {
   try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
+    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}/${objId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

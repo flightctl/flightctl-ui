@@ -44,7 +44,7 @@ const DeviceDetails = () => {
 
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {
-      await remove(`devices/${deviceId}`);
+      await remove('devices', deviceId);
       navigate('/devicemanagement/devices');
     },
     // Deleting devices bound to fleets directly will be disabled soon

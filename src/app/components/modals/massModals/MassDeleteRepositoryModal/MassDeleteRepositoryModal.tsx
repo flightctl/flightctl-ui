@@ -14,7 +14,7 @@ import {
   StackItem,
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { Repository } from '@types';
+import { Repository, ResourceSyncList } from '@types';
 import * as React from 'react';
 
 type MassDeleteRepositoryModalProps = {
@@ -42,15 +42,15 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
     const promises = repositories.map(async (r) => {
       const repositoryId = getResourceId(r);
       if (deleteAll || selectedRepositories.includes(repositoryId)) {
-        const resourceSyncs = await get(`resourcesyncs?labelSelector=repository=${repositoryId}`);
-        const rsyncPromises = resourceSyncs.map((rsync) => remove(`resourcesyncs/${getResourceId(rsync)}`));
+        const resourceSyncs = await get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${repositoryId}`);
+        const rsyncPromises = resourceSyncs.items.map((rsync) => remove('resourcesyncs', getResourceId(rsync)));
         const rsyncResults = await Promise.allSettled(rsyncPromises);
         const rejectedResults = rsyncResults.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
         if (rejectedResults.length) {
           throw new Error(`Failed to delete resource syncs: ${getErrorMessage(rejectedResults[0].reason)}`);
         }
       }
-      await remove(`repositories/${repositoryId}`);
+      await remove('repositories', repositoryId);
       setProgress((p) => p + 1);
     });
     setProgressTotal(promises.length);

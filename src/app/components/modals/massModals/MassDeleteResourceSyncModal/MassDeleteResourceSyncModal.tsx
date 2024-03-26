@@ -27,7 +27,7 @@ const MassDeleteResourceSyncModal: React.FC<MassDeleteResourceSyncModalProps> = 
     setIsDeleting(true);
     setProgress(0);
     const promises = resources.map(async (r) => {
-      await remove(`resourcesyncs/${getResourceId(r)}`);
+      await remove('resourcesyncs', getResourceId(r));
       setProgress((p) => p + 1);
     });
     setProgressTotal(promises.length);

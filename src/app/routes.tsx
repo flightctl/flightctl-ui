@@ -175,6 +175,15 @@ const appRoutes: ExtendedRouteObject[] = [
         ),
       },
       {
+        path: 'edit/:repositoryId',
+        title: 'Edit repository',
+        element: (
+          <TitledRoute title="Edit repository">
+            <CreateRepository />
+          </TitledRoute>
+        ),
+      },
+      {
         path: ':repositoryId/*',
         title: 'Repository Details',
         element: (

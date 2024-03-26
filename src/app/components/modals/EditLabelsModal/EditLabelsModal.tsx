@@ -59,7 +59,7 @@ function EditLabelsModal<T extends LabelEditable>({
   React.useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await get(queryEndpoint);
+        const data = await get<T>(queryEndpoint);
         if (data) {
           setDataItem(data);
         }

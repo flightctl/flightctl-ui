@@ -7,13 +7,16 @@ export const useFetch = () => {
 
   const userToken = auth?.user?.access_token;
 
-  const get = React.useCallback(async (kind: string) => fetchData(kind, userToken), [userToken]);
+  const get = React.useCallback(async <R>(kind: string): Promise<R> => fetchData(kind, userToken), [userToken]);
 
   const post = React.useCallback(async <R>(kind: string, obj: R) => postData(kind, userToken, obj), [userToken]);
 
   const put = React.useCallback(async <R>(kind: string, obj: R) => putData(kind, userToken, obj), [userToken]);
 
-  const remove = React.useCallback(async (kind: string) => deleteData(kind, userToken), [userToken]);
+  const remove = React.useCallback(
+    async (kind: string, objId: string) => deleteData(kind, userToken, objId),
+    [userToken],
+  );
 
   return {
     get,

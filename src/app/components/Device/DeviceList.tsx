@@ -106,7 +106,7 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
   const { deleteAction: deleteDeviceAction, deleteModal: deleteDeviceModal } = useDeleteListAction({
     resourceType: 'Device',
     onDelete: async (resourceId: string) => {
-      await remove(`devices/${resourceId}`);
+      await remove('devices', resourceId);
       refetch();
     },
   });
@@ -114,7 +114,7 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
   const { deleteAction: deleteErAction, deleteModal: deleteErModal } = useDeleteListAction({
     resourceType: 'Enrollment request',
     onDelete: async (resourceId: string) => {
-      await remove(`enrollmentrequests/${resourceId}`);
+      await remove('enrollmentrequests', resourceId);
       refetch();
     },
   });

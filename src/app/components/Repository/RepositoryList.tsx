@@ -85,6 +85,8 @@ const RepositoryTable = () => {
   const [deleteModalRepoId, setDeleteModalRepoId] = React.useState<string>();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
 
+  const navigate = useNavigate();
+
   const onDeleteSuccess = () => {
     setDeleteModalRepoId(undefined);
     refetch();
@@ -147,6 +149,10 @@ const RepositoryTable = () => {
               <Td isActionCell>
                 <ActionsColumn
                   items={[
+                    {
+                      title: 'Edit',
+                      onClick: () => navigate(`/devicemanagement/repositories/edit/${repository.metadata.name}`),
+                    },
                     {
                       title: 'Delete',
                       onClick: () => setDeleteModalRepoId(repository.metadata.name),

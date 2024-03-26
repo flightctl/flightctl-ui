@@ -25,7 +25,7 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
     setProgress(0);
     setIsDeleting(true);
     const promises = resources.map(async (r) => {
-      await remove(`${isEnrollmentRequest(r) ? 'enrollmentrequests' : 'devices'}/${getResourceId(r)}`);
+      await remove(`${isEnrollmentRequest(r) ? 'enrollmentrequests' : 'devices'}`, getResourceId(r));
       setProgress((p) => p + 1);
     });
     setTotalProgress(promises.length);

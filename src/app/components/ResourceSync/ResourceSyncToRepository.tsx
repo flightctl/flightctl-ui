@@ -10,6 +10,7 @@ import {
   Spinner,
   Title,
 } from '@patternfly/react-core';
+import { ResourceSync } from '@types';
 
 const ResourceSyncToRepository = () => {
   const navigate = useNavigate();
@@ -21,9 +22,9 @@ const ResourceSyncToRepository = () => {
   React.useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const rsDetails = await get(`resourcesyncs/${rsId}`);
+        const rsDetails = await get<ResourceSync>(`resourcesyncs/${rsId}`);
 
-        const repository = rsDetails.spec?.repository;
+        const repository = rsDetails.spec.repository;
         if (repository) {
           setError(undefined);
           navigate(`/devicemanagement/repositories/${repository}/resourcesyncs#${rsId}`);
