@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@types';
-import { getDeviceFleet, getFingerprintDisplay } from '@app/utils/devices';
+import { getFingerprintDisplay } from '@app/utils/devices';
 import DeviceFleet from './DeviceDetails/DeviceFleet';
 import { getDateDisplay } from '@app/utils/dates';
 import { DeleteListActionResult } from '../ListPage/types';
@@ -15,13 +15,7 @@ type DeviceTableRowProps = {
   rowIndex: number;
   onRowSelect: (device: Device) => OnSelect;
   isRowSelected: (device: Device) => boolean;
-  editLabelsAction: ({
-    resourceId,
-    disabledReason,
-  }: {
-    resourceId: string;
-    disabledReason: string | undefined;
-  }) => IAction;
+  editLabelsAction: ({ resourceId, disabledReason }: { resourceId: string; disabledReason?: string }) => IAction;
 };
 
 const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
@@ -34,7 +28,6 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
 }) => {
   const deviceName = device.metadata.name as string;
   const displayName = device.metadata.labels?.displayName;
-  const boundFleet = getDeviceFleet(device.metadata);
   return (
     <Tr>
       <Td
@@ -65,7 +58,6 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
             }),
             editLabelsAction({
               resourceId: deviceName,
-              disabledReason: boundFleet ? 'Devices bound to a fleet cannot be edited' : '',
             }),
           ]}
         />

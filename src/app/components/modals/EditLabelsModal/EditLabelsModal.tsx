@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Formik, useFormikContext } from 'formik';
-import { Alert, Bullseye, Button, Form, FormGroup, Modal, Spinner, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, Bullseye, Button, Form, FormGroup, Modal, Spinner } from '@patternfly/react-core';
 
 import { getErrorMessage } from '@app/utils/error';
 import LabelsField from '@app/components/form/LabelsField';
@@ -52,31 +52,25 @@ function EditLabelsModal<T extends LabelEditable>({
   onClose,
 }: EditLabelsModalProps<T>) {
   const { get, put } = useFetch();
-  const [error, setError] = React.useState<string>();
+  const [submitError, setSubmitError] = React.useState<string>();
   const [dataItem, setDataItem] = React.useState<T>();
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [loadingError, setLoadingError] = React.useState<string>();
   const queryEndpoint = `${resourceType}/${resourceName}`;
 
   React.useEffect(() => {
     const loadData = async () => {
       try {
         const data = await get<T>(queryEndpoint);
-        if (data) {
-          setDataItem(data);
-        }
+        setDataItem(data);
       } catch (e) {
-        setError(getErrorMessage(e));
+        setLoadingError(getErrorMessage(e));
+      } finally {
+        setIsLoading(false);
       }
     };
     void loadData();
   }, [get, queryEndpoint]);
-
-  if (!dataItem && !error) {
-    return (
-      <Bullseye>
-        <Spinner />
-      </Bullseye>
-    );
-  }
 
   let labels: Record<string, string>;
   if (resourceType === 'fleets') {
@@ -87,42 +81,53 @@ function EditLabelsModal<T extends LabelEditable>({
     labels = device?.metadata?.labels || {};
   }
 
+  let modalBody: React.ReactNode;
+
+  if (isLoading) {
+    modalBody = (
+      <Bullseye>
+        <Spinner />
+      </Bullseye>
+    );
+  } else if (loadingError || !dataItem) {
+    modalBody = (
+      <Alert isInline title={`Failed to retrieve the labels of ${resourceType} ${resourceName}`} variant="danger">
+        {loadingError}
+      </Alert>
+    );
+  } else {
+    modalBody = (
+      <Formik<EditLabelsFormValues>
+        initialValues={{
+          labels: Object.entries(labels).map((labelEntry) => ({
+            key: labelEntry[0],
+            value: labelEntry[1],
+          })),
+        }}
+        onSubmit={async ({ labels }) => {
+          try {
+            const updatedData = submitTransformer(dataItem, labels);
+            await put(queryEndpoint, updatedData);
+            onClose(true);
+          } catch (e) {
+            setSubmitError(getErrorMessage(e));
+          }
+        }}
+      >
+        <EditLabelsForm onClose={onClose} error={submitError} />
+      </Formik>
+    );
+  }
+
   return (
-    <Formik<EditLabelsFormValues>
-      initialValues={{
-        labels: Object.entries(labels).map((labelEntry) => ({
-          key: labelEntry[0],
-          value: labelEntry[1],
-        })),
-      }}
-      onSubmit={async ({ labels }) => {
-        try {
-          const updatedData = submitTransformer(dataItem!, labels);
-          await put(queryEndpoint, updatedData);
-          onClose(true);
-        } catch (e) {
-          setError(getErrorMessage(e));
-        }
-      }}
+    <Modal
+      title={resourceType === 'fleets' ? 'Edit fleet labels' : 'Edit device labels'}
+      isOpen
+      onClose={() => onClose()}
+      variant="small"
     >
-      <Modal title={`Edit fleet labels`} isOpen onClose={() => onClose()} variant="small">
-        <Stack hasGutter>
-          <StackItem>
-            {dataItem ? (
-              <EditLabelsForm onClose={onClose} error={error} />
-            ) : (
-              <Alert
-                isInline
-                title={`Failed to retrieve the labels of ${resourceType} ${resourceName}`}
-                variant="danger"
-              >
-                {error}
-              </Alert>
-            )}
-          </StackItem>
-        </Stack>
-      </Modal>
-    </Formik>
+      {modalBody}
+    </Modal>
   );
 }
 

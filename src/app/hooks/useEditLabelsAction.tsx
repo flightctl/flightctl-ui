@@ -28,9 +28,7 @@ export function useEditLabelsAction<T extends LabelEditable>({
       title: 'Edit labels',
       isAriaDisabled: !!disabledReason,
       ...popperProps,
-      onClick: () => {
-        setResourceName(resourceId);
-      },
+      onClick: () => setResourceName(resourceId),
     };
   };
   const editLabelsModal = !!resourceName && (
