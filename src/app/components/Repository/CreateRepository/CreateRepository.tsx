@@ -80,7 +80,7 @@ export const repositorySchema =
             }),
         })
         .required(),
-      useResourceSyncs: boolean().required(),
+      useResourceSyncs: boolean(),
       resourceSyncs: values.useResourceSyncs
         ? repoSyncSchema(values.resourceSyncs, resourceSyncs, repositoryId)
         : array(),
