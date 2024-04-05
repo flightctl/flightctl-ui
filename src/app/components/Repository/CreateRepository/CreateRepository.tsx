@@ -23,6 +23,7 @@ import { API_VERSION } from '@app/constants';
 import CreateRepositoryForm from './CreateRepositoryForm';
 
 const gitRegex = new RegExp(/^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/);
+const repoNameRegex = /^[a-zA-Z0-9-_\\.]+$/;
 const pathRegex = /\/.+/;
 
 export const repoSyncSchema = (
@@ -59,7 +60,11 @@ export const repositorySchema =
     return object({
       name: repositoryId
         ? string()
-        : string().required('Name is required').notOneOf(repoNames, 'Repository with the same name already exists.'),
+        : string()
+            .required('Name is required')
+            .notOneOf(repoNames, 'Repository with the same name already exists.')
+            .matches(repoNameRegex, 'Name can only contain alphanumeric characters, and the characters ., -, and _.')
+            .max(255, 'Name must not exceed 255 characters'),
       url: string()
         .matches(gitRegex, 'Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos')
         .required('Repository URL is required'),
