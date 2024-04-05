@@ -5,12 +5,10 @@ import * as React from 'react';
 type ListPageBodyProps = {
   error: unknown;
   loading: boolean;
-  isEmpty: boolean;
   children: React.ReactNode;
-  emptyState: React.ReactNode;
 };
 
-const ListPageBody: React.FC<ListPageBodyProps> = ({ error, loading, isEmpty, children, emptyState }) => {
+const ListPageBody: React.FC<ListPageBodyProps> = ({ error, loading, children }) => {
   if (error) {
     return (
       <Alert variant="danger" title="An error occured" isInline>
@@ -26,11 +24,6 @@ const ListPageBody: React.FC<ListPageBodyProps> = ({ error, loading, isEmpty, ch
       </Bullseye>
     );
   }
-
-  if (isEmpty) {
-    return emptyState;
-  }
-
   return children;
 };
 

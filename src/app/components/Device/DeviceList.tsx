@@ -1,17 +1,16 @@
 import * as React from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Button,
-  EmptyState,
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  EmptyStateHeader,
   SelectList,
   SelectOption,
   ToolbarItem,
 } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
+import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons/microchip-icon';
 
 import { useFetch } from '@app/hooks/useFetch';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
@@ -38,21 +37,24 @@ import { isEnrollmentRequest } from '@app/types/extraTypes';
 import MassDeleteDeviceModal from '../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
 import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
 import DeviceEnrollmentModal from '../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
+import ResourceListEmptyState from '@app/components/common/ResourceListEmptyState';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
 };
 
 const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => (
-  <EmptyState>
-    <EmptyStateHeader titleText={<>There are no devices yet</>} headingLevel="h4" />
-    <EmptyStateBody>Add a new device using the &quot;Add&quot; button</EmptyStateBody>
+  <ResourceListEmptyState icon={MicrochipIcon} titleText="No devices here!">
+    <EmptyStateBody>
+      You can add devices and label them to match fleets, or your can{' '}
+      <Link to="/devicemanagement/fleets">start with a fleet</Link> and add devices into it.
+    </EmptyStateBody>
     <EmptyStateFooter>
       <EmptyStateActions>
-        <Button onClick={onAddDevice}>Add device</Button>
+        <Button onClick={onAddDevice}>Add devices</Button>
       </EmptyStateActions>
     </EmptyStateFooter>
-  </EmptyState>
+  </ResourceListEmptyState>
 );
 
 const deviceColumns: TableColumn<Device | EnrollmentRequest>[] = [
@@ -94,6 +96,7 @@ interface DeviceTableProps {
 
 export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTableProps) => {
   const [requestId, setRequestId] = React.useState<string>();
+  const [addDeviceModal, setAddDeviceModal] = React.useState(false);
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
   const [isMassApproveModalOpen, setIsMassApproveModalOpen] = React.useState(false);
   const { remove } = useFetch();
@@ -133,6 +136,9 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
     <>
       <DeviceTableToolbar {...rest}>
         <ToolbarItem>
+          <Button onClick={() => setAddDeviceModal(true)}>Add devices</Button>
+        </ToolbarItem>
+        <ToolbarItem>
           <TableActions>
             <SelectList>
               <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassApproveModalOpen(true)}>
@@ -148,7 +154,7 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
       <Table
         aria-label="Devices table"
         columns={deviceColumns}
-        data={filteredData}
+        emptyFilters={filteredData.length === 0 && resources.length > 0}
         getSortParams={getSortParams}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
@@ -179,9 +185,11 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
           )}
         </Tbody>
       </Table>
+      {resources.length === 0 && <DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />}
       {editLabelsModal}
       {deleteDeviceModal}
       {deleteErModal}
+      {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}
       {currentEnrollmentRequest && (
         <DeviceEnrollmentModal
           enrollmentRequest={currentEnrollmentRequest}
@@ -219,7 +227,6 @@ const DeviceList = () => {
   const [searchParams] = useSearchParams();
   const filterByFleetId = searchParams.get('fleetId');
 
-  const [addDeviceModal, setAddDeviceModal] = React.useState(false);
   const [devicesList, devicesLoading, devicesError, devicesRefetch] = useFetchPeriodically<DeviceList>({
     endpoint: `devices${filterByFleetId ? `?owner=Fleet/${filterByFleetId}` : ''}`,
   });
@@ -250,17 +257,11 @@ const DeviceList = () => {
 
   return (
     <>
-      <ListPage title="Devices" actions={<Button onClick={() => setAddDeviceModal(true)}>Add device</Button>}>
-        <ListPageBody
-          isEmpty={(!data?.length || data.length === 0) && !filterByFleetId}
-          error={devicesError || erEror}
-          loading={devicesLoading || (erLoading && !filterByFleetId)}
-          emptyState={<DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />}
-        >
+      <ListPage title="Devices">
+        <ListPageBody error={devicesError || erEror} loading={devicesLoading || (erLoading && !filterByFleetId)}>
           <DeviceTable resources={data} refetch={refetch} queryFilters={{ filterByFleetId }} />
         </ListPageBody>
       </ListPage>
-      {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}
     </>
   );
 };

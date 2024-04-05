@@ -64,6 +64,7 @@ const MassDeleteResourceSyncModal: React.FC<MassDeleteResourceSyncModalProps> = 
             <Thead>
               <Tr>
                 <Th>Name</Th>
+                <Th>Revision</Th>
                 <Th>Path</Th>
               </Tr>
             </Thead>
@@ -72,6 +73,7 @@ const MassDeleteResourceSyncModal: React.FC<MassDeleteResourceSyncModalProps> = 
                 return (
                   <Tr key={resource.metadata.name}>
                     <Td dataLabel="Name">{resource.metadata.name || '-'}</Td>
+                    <Td dataLabel="Target revision">{resource.spec.targetRevision || '-'}</Td>
                     <Td dataLabel="Path">{resource.spec.path || '-'}</Td>
                   </Tr>
                 );

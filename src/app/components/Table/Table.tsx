@@ -1,6 +1,6 @@
+import * as React from 'react';
 import { Bullseye, PageSection } from '@patternfly/react-core';
 import { Table as PFTable, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
-import * as React from 'react';
 
 export type TableColumn<D> = {
   name: string;
@@ -14,7 +14,7 @@ export type TableColumn<D> = {
 type TableProps<D> = {
   columns: TableColumn<D>[];
   children: React.ReactNode;
-  data: D[];
+  emptyFilters: boolean;
   'aria-label': string;
   getSortParams: (columnIndex: number) => ThProps['sort'];
   onSelectAll?: (isSelected: boolean) => void;
@@ -23,8 +23,8 @@ type TableProps<D> = {
 
 type TableFC = <D>(props: TableProps<D>) => JSX.Element;
 
-const Table: TableFC = ({ columns, children, data, getSortParams, onSelectAll, isAllSelected, ...rest }) => {
-  if (!data.length) {
+const Table: TableFC = ({ columns, children, emptyFilters, getSortParams, onSelectAll, isAllSelected, ...rest }) => {
+  if (emptyFilters) {
     return (
       <PageSection variant="light">
         <Bullseye>No resources are matching the current filters.</Bullseye>

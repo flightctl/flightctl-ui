@@ -1,27 +1,20 @@
-import { PageSection, PageSectionVariants, Split, SplitItem, Title } from '@patternfly/react-core';
 import * as React from 'react';
+
+import { PageSection, PageSectionVariants, Title } from '@patternfly/react-core';
 
 type ListPageProps = {
   title: string;
   children: React.ReactNode;
-  actions?: React.ReactNode;
 };
 
-const ListPage: React.FC<ListPageProps> = ({ title, children, actions }) => {
+const ListPage: React.FC<ListPageProps> = ({ title, children }) => {
   return (
-    <>
-      <PageSection variant={PageSectionVariants.light}>
-        <Split hasGutter>
-          <SplitItem isFilled>
-            <Title headingLevel="h1" size="3xl">
-              {title}
-            </Title>
-          </SplitItem>
-          {actions && <SplitItem>{actions}</SplitItem>}
-        </Split>
-      </PageSection>
-      <PageSection>{children}</PageSection>
-    </>
+    <PageSection variant={PageSectionVariants.light}>
+      <Title headingLevel="h1" size="3xl">
+        {title}
+      </Title>
+      {children}
+    </PageSection>
   );
 };
 

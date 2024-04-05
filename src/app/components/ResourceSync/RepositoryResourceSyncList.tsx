@@ -124,7 +124,7 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
         columns={columns}
-        data={filteredData}
+        emptyFilters={filteredData.length === 0 && resourceSyncs.length > 0}
         getSortParams={getSortParams}
       >
         <Tbody>

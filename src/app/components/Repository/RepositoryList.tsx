@@ -2,18 +2,17 @@ import React from 'react';
 import {
   Button,
   DropdownList,
-  EmptyState,
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  EmptyStateHeader,
   SelectOption,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 import { Link, useNavigate } from 'react-router-dom';
+import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
+import { RepositoryIcon } from '@patternfly/react-icons/dist/js/icons/repository-icon';
 
 import { Repository, RepositoryList } from '@types';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
@@ -36,27 +35,32 @@ import TableActions from '../Table/TableActions';
 import { useTableSelect } from '@app/hooks/useTableSelect';
 import { getResourceId } from '@app/utils/resource';
 import MassDeleteRepositoryModal from '../modals/massModals/MassDeleteRepositoryModal/MassDeleteRepositoryModal';
+import ResourceListEmptyState from '@app/components/common/ResourceListEmptyState';
 
-const CreateRepositoryButton = () => {
+const CreateRepositoryButton = ({ buttonText }: { buttonText?: string }) => {
   const navigate = useNavigate();
 
   return (
     <Button variant="primary" onClick={() => navigate('/devicemanagement/repositories/create')}>
-      Create
+      {buttonText || 'Create a repository'}
     </Button>
   );
 };
 
 const RepositoryEmptyState = () => (
-  <EmptyState>
-    <EmptyStateHeader titleText={<>You haven&apos;t created any repositories yet</>} headingLevel="h4" />
-    <EmptyStateBody>Create a new repository using the &quot;Create&quot; button</EmptyStateBody>
+  <ResourceListEmptyState icon={RepositoryIcon} titleText="No repositories here!">
+    <EmptyStateBody>
+      You can create repositories and use them to point to Git repositories.
+      <br />
+      Adding resource syncs to them will allow you to keep your fleet&apos;s configurations updated and synced
+      automatically.
+    </EmptyStateBody>
     <EmptyStateFooter>
       <EmptyStateActions>
         <CreateRepositoryButton />
       </EmptyStateActions>
     </EmptyStateFooter>
-  </EmptyState>
+  </ResourceListEmptyState>
 );
 
 const columns: TableColumn<Repository>[] = [
@@ -98,16 +102,14 @@ const RepositoryTable = () => {
   const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
 
   return (
-    <ListPageBody
-      isEmpty={!repositoryList?.items || repositoryList.items.length === 0}
-      error={error}
-      loading={loading}
-      emptyState={<RepositoryEmptyState />}
-    >
+    <ListPageBody error={error} loading={loading}>
       <Toolbar>
         <ToolbarContent>
           <ToolbarItem variant="search-filter">
             <TableTextSearch value={search} setValue={setSearch} />
+          </ToolbarItem>
+          <ToolbarItem>
+            <CreateRepositoryButton buttonText="Create repository" />
           </ToolbarItem>
           <ToolbarItem>
             <TableActions>
@@ -122,9 +124,9 @@ const RepositoryTable = () => {
       </Toolbar>
       <Table
         aria-label="Repositories table"
+        emptyFilters={filteredData.length === 0 && (repositoryList?.items.length || 0) > 0}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
-        data={filteredData}
         columns={columns}
         getSortParams={getSortParams}
       >
@@ -164,6 +166,7 @@ const RepositoryTable = () => {
           ))}
         </Tbody>
       </Table>
+      {repositoryList?.items.length === 0 && <RepositoryEmptyState />}
       {!!deleteModalRepoId && (
         <DeleteRepositoryModal
           onClose={() => setDeleteModalRepoId(undefined)}
@@ -184,7 +187,7 @@ const RepositoryTable = () => {
 
 const RepositoryList = () => {
   return (
-    <ListPage title="Repositories" actions={<CreateRepositoryButton />}>
+    <ListPage title="Repositories">
       <RepositoryTable />
     </ListPage>
   );

@@ -1,11 +1,9 @@
 import * as React from 'react';
 import {
   Button,
-  EmptyState,
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  EmptyStateHeader,
   SelectList,
   SelectOption,
   Split,
@@ -16,6 +14,7 @@ import {
 } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 import { useNavigate } from 'react-router-dom';
+import { TopologyIcon } from '@patternfly/react-icons/dist/js/icons/topology-icon';
 
 import { Fleet, FleetList, ResourceSync, ResourceSyncList } from '@types';
 import { useFetch } from '@app/hooks/useFetch';
@@ -38,19 +37,20 @@ import MassDeleteFleetModal from '../modals/massModals/MassDeleteFleetModal/Mass
 import { isFleet } from '@app/types/extraTypes';
 import FleetRow from './FleetRow';
 import ResourceSyncRow from './ResourceSyncRow';
+import ResourceListEmptyState from '@app/components/common/ResourceListEmptyState';
 
-const FleetPageActions = () => {
+const FleetPageActions = ({ createText }: { createText?: string }) => {
   const navigate = useNavigate();
   return (
     <Split hasGutter>
       <SplitItem>
         <Button variant="primary" onClick={() => navigate('/devicemanagement/fleets/create')}>
-          Create
+          {createText || 'Create a fleet'}
         </Button>
       </SplitItem>
       <SplitItem>
         <Button variant="secondary" onClick={() => navigate('/devicemanagement/fleets/import')}>
-          Import
+          Import fleets
         </Button>
       </SplitItem>
     </Split>
@@ -58,15 +58,18 @@ const FleetPageActions = () => {
 };
 
 const FleetEmptyState = () => (
-  <EmptyState>
-    <EmptyStateHeader titleText={<>You haven&apos;t created any fleets yet</>} headingLevel="h4" />
-    <EmptyStateBody>Create a new fleet using the &quot;Create&quot; button</EmptyStateBody>
+  <ResourceListEmptyState icon={TopologyIcon} titleText="No fleets here!">
+    <EmptyStateBody>
+      Fleets are an easy way to manage multiple devices that share the same configurations.
+      <br />
+      With fleets you&apos;ll be able to edit and update devices in mass.
+    </EmptyStateBody>
     <EmptyStateFooter>
       <EmptyStateActions>
         <FleetPageActions />
       </EmptyStateActions>
     </EmptyStateFooter>
-  </EmptyState>
+  </ResourceListEmptyState>
 );
 
 const columns: TableColumn<Fleet | ResourceSync>[] = [
@@ -135,16 +138,14 @@ const FleetTable = () => {
   });
 
   return (
-    <ListPageBody
-      isEmpty={data.length === 0}
-      error={error || rsError}
-      loading={loading || rsLoading}
-      emptyState={<FleetEmptyState />}
-    >
+    <ListPageBody error={error || rsError} loading={loading || rsLoading}>
       <Toolbar>
         <ToolbarContent>
           <ToolbarItem variant="search-filter">
             <TableTextSearch value={search} setValue={setSearch} />
+          </ToolbarItem>
+          <ToolbarItem>
+            <FleetPageActions createText="Create fleet" />
           </ToolbarItem>
           <ToolbarItem>
             <TableActions>
@@ -160,7 +161,7 @@ const FleetTable = () => {
       <Table
         aria-label="Fleets table"
         columns={columns}
-        data={filteredData}
+        emptyFilters={filteredData.length === 0 && data.length > 0}
         getSortParams={getSortParams}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
@@ -191,6 +192,7 @@ const FleetTable = () => {
           )}
         </Tbody>
       </Table>
+      {data.length === 0 && <FleetEmptyState />}
       {deleteModal}
       {editLabelsModal}
       {deleteRsModal}
@@ -210,7 +212,7 @@ const FleetTable = () => {
 };
 
 const FleetList = () => (
-  <ListPage title="Fleets" actions={<FleetPageActions />}>
+  <ListPage title="Fleets">
     <FleetTable />
   </ListPage>
 );

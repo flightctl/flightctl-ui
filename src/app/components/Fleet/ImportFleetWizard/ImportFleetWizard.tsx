@@ -66,14 +66,12 @@ const ImportFleetWizardFooter = () => {
 
   return (
     <WizardFooterWrapper>
-      <Button
-        variant="secondary"
-        onClick={goToPrevStep}
-        isDisabled={isSubmitting || activeStep.id === repositoryStepId}
-      >
-        Back
-      </Button>
       {primaryBtn}
+      {activeStep.id !== repositoryStepId && (
+        <Button variant="secondary" onClick={goToPrevStep} isDisabled={isSubmitting}>
+          Back
+        </Button>
+      )}
       <Button variant="link" onClick={() => navigate(-1)} isDisabled={isSubmitting}>
         Cancel
       </Button>
