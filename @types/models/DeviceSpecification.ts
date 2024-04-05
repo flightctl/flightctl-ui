@@ -13,7 +13,7 @@ export type DeviceSpecification = {
    */
   config?: Array<(GitConfigProviderSpec | KubernetesSecretProviderSpec | InlineConfigProviderSpec)>;
   containers?: {
-    matchPattern?: Array<string>;
+    matchPatterns?: Array<string>;
   };
   systemd?: {
     matchPatterns?: Array<string>;

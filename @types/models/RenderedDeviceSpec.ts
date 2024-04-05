@@ -8,7 +8,7 @@ export type RenderedDeviceSpec = {
   templateVersion: string;
   os?: DeviceOSSpec;
   containers?: {
-    matchPattern?: Array<string>;
+    matchPatterns?: Array<string>;
   };
   config?: string;
   systemd?: {
