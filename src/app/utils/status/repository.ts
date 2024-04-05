@@ -1,7 +1,7 @@
 import { ConditionType, Repository, ResourceSync } from '@types';
 import { timeSinceText } from '@app/utils/dates';
 
-type ResourceSyncStatus =
+export type RepositorySyncStatus =
   | ConditionType.ResourceSyncSynced
   | 'Not synced'
   | ConditionType.ResourceSyncResourceParsed
@@ -13,7 +13,7 @@ type ResourceSyncStatus =
 const getRepositorySyncStatus = (
   repository: Repository | ResourceSync,
 ): {
-  status: ResourceSyncStatus;
+  status: RepositorySyncStatus;
   message: string | undefined;
 } => {
   const conditions = repository.status?.conditions;
