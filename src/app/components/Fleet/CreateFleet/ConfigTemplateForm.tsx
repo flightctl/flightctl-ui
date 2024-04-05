@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import {
   Button,
   Divider,
@@ -11,10 +13,11 @@ import {
   TextInput,
 } from '@patternfly/react-core';
 import { FieldArray, useFormikContext } from 'formik';
-import * as React from 'react';
-import { FleetFormValues, GitConfigTemplate, InlineConfigTemplate, KubeSecretTemplate } from './types';
-import { MinusCircleIcon, PlusCircleIcon } from '@patternfly/react-icons';
+import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
+import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
+
 import TextField from '@app/components/form/TextField';
+import { FleetFormValues, GitConfigTemplate, InlineConfigTemplate, KubeSecretTemplate } from './types';
 
 type GitConfigFormProps = {
   index: number;

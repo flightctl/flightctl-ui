@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { InfoCircleIcon } from '@patternfly/react-icons';
+import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 import { Icon, Tooltip } from '@patternfly/react-core';
 
 const StatusInfo = ({ statusInfo }: { statusInfo: { status: string; message?: string } }) => {

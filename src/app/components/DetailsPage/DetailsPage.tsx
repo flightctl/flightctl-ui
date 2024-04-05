@@ -15,7 +15,7 @@ import { Link } from 'react-router-dom';
 import { getErrorMessage } from '@app/utils/error';
 import DetailsNotFound from './DetailsNotFound';
 
-type DetailsPageProps = {
+export type DetailsPageProps = {
   id: string;
   title?: string;
   children: React.ReactNode;
@@ -70,7 +70,7 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
       <PageSection variant="light">
         <Split hasGutter>
           <SplitItem isFilled>
-            <Title headingLevel="h1" size="3xl">
+            <Title headingLevel="h1" size="3xl" role="heading">
               {title || id}
             </Title>
           </SplitItem>

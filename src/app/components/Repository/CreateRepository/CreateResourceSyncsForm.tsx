@@ -1,10 +1,12 @@
-import TextField from '@app/components/form/TextField';
-import { Button, FormGroup, FormSection } from '@patternfly/react-core';
-import { MinusCircleIcon, PlusCircleIcon } from '@patternfly/react-icons';
-import { FieldArray, useFormikContext } from 'formik';
 import * as React from 'react';
-import { RepositoryFormValues, ResourceSyncFormValue } from './types';
+import { FieldArray, useFormikContext } from 'formik';
+import { Button, FormGroup, FormSection } from '@patternfly/react-core';
+import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
+import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
+
+import TextField from '@app/components/form/TextField';
 import WithHelperText from '@app/components/common/WithHelperText';
+import { RepositoryFormValues, ResourceSyncFormValue } from './types';
 
 const CreateResourceSyncsForm = () => {
   const { values } = useFormikContext<RepositoryFormValues>();

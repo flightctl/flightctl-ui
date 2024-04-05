@@ -8,7 +8,7 @@ import {
   TextInput,
   TextInputProps,
 } from '@patternfly/react-core';
-import { ExclamationCircleIcon } from '@patternfly/react-icons';
+import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 interface TextFieldProps extends TextInputProps {
   name: string;

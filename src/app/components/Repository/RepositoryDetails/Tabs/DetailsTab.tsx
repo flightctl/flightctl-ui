@@ -12,7 +12,9 @@ import {
   GridItem,
   Icon,
 } from '@patternfly/react-core';
-import { CheckCircleIcon, ExternalLinkAltIcon, InfoCircleIcon } from '@patternfly/react-icons';
+import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
+import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
+import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
 import StatusInfo from '@app/components/common/StatusInfo';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '@app/utils/status/repository';

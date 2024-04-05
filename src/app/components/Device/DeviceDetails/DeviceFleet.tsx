@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { Button, List, ListItem, Popover } from '@patternfly/react-core';
-import { InfoCircleIcon } from '@patternfly/react-icons';
+import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 import { ObjectMeta } from '@types';
 import { getDeviceFleet, getMissingFleetDetails } from '@app/utils/devices';
 

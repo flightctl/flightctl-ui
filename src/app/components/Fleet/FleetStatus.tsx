@@ -1,9 +1,13 @@
-import { getFleetStatusType } from '@app/utils/status/fleet';
-import { CheckCircleIcon, InProgressIcon, QuestionCircleIcon, WarningTriangleIcon } from '@patternfly/react-icons';
-import { ConditionType, Fleet } from '@types';
 import * as React from 'react';
-import WithTooltip from '../common/WithTooltip';
 import { Label, LabelProps } from '@patternfly/react-core';
+import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
+import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progress-icon';
+import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/question-circle-icon';
+import { WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons/warning-triangle-icon';
+
+import { getFleetStatusType } from '@app/utils/status/fleet';
+import { ConditionType, Fleet } from '@types';
+import WithTooltip from '../common/WithTooltip';
 
 const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
   const statusType = getFleetStatusType(fleet);

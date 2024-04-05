@@ -1,6 +1,6 @@
-import { Button, Popover, PopoverProps } from '@patternfly/react-core';
-import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
+import { Button, Popover, PopoverProps } from '@patternfly/react-core';
+import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 
 type WithHelperTextProps = {
   children?: React.ReactNode;

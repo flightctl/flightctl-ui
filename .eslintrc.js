@@ -11,7 +11,13 @@ module.exports = {
     tsconfigRootDir: '.',
   },
   // we want to use the recommended rules provided from the typescript plugin
-  extends: ['@redhat-cloud-services/eslint-config-redhat-cloud-services', 'eslint:recommended', 'plugin:react/recommended', 'plugin:@typescript-eslint/recommended', 'plugin:storybook/recommended'],
+  extends: [
+    '@redhat-cloud-services/eslint-config-redhat-cloud-services',
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:storybook/recommended',
+  ],
   globals: {
     window: 'readonly',
     describe: 'readonly',
@@ -31,6 +37,13 @@ module.exports = {
       parser: '@typescript-eslint/parser',
       plugins: ['@typescript-eslint'],
       extends: ['plugin:@typescript-eslint/recommended'],
+      overrides: [
+        {
+          // 3) Now we enable eslint-plugin-testing-library rules or preset only for matching testing files!
+          files: ['**/?(*.)+(spec).ts?(x)'],
+          extends: ['plugin:testing-library/react'],
+        },
+      ],
       rules: {
         'react/prop-types': 'off',
         '@typescript-eslint/no-unused-vars': 'error',
@@ -51,6 +64,31 @@ module.exports = {
         ignoreDeclarationSort: true,
       },
     ],
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: [
+          {
+            group: ['@patternfly/react-icons/dist/esm**'],
+            message: 'Import using the full js path `@patternfly/react-icons/dist/js/icons<icon>` instead',
+          },
+          {
+            group: ['@patternfly/react-tokens/dist/esm**'],
+            message: 'Import using the full js path `@patternfly/react-tokens/dist/js/icons<icon>` instead',
+          },
+        ],
+        paths: [
+          {
+            name: '@patternfly/react-icons',
+            message: 'Import using full path `@patternfly/react-icons/dist/js/icons<icon>` instead',
+          },
+          {
+            name: '@patternfly/react-tokens',
+            message: 'Import using full path `@patternfly/react-tokens/dist/js/<token>` instead',
+          },
+        ],
+      },
+    ],
     '@typescript-eslint/explicit-function-return-type': 'off',
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
@@ -60,6 +98,7 @@ module.exports = {
     'import/no-unresolved': 'off',
     'import/extensions': 'off',
     'no-console': 'error',
+    "testing-library/prefer-user-event": "error",
   },
   env: {
     browser: true,

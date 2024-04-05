@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Alert, Button, Label, LabelGroup, Spinner, Split, SplitItem, Stack, StackItem } from '@patternfly/react-core';
-import { PencilAltIcon } from '@patternfly/react-icons';
+import { PencilAltIcon } from '@patternfly/react-icons/dist/js/icons/pencil-alt-icon';
 
 import { Device } from '@types';
 import WithTooltip from '@app/components/common/WithTooltip';

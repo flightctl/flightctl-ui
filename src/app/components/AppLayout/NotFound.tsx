@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ExclamationTriangleIcon } from '@patternfly/react-icons';
+import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 import {
   Button,
   EmptyState,

@@ -12,7 +12,7 @@ import {
   PageToggleButton,
   SkipToContent,
 } from '@patternfly/react-core';
-import { BarsIcon } from '@patternfly/react-icons';
+import { BarsIcon } from '@patternfly/react-icons/dist/js/icons/bars-icon';
 import { Outlet } from 'react-router-dom';
 
 import logo from '@fctl-assets/bgimages/flightctl-logo.svg';

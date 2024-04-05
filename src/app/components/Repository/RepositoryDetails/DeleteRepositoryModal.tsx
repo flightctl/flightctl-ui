@@ -15,7 +15,7 @@ import {
   Text,
   TextContent,
 } from '@patternfly/react-core';
-import { WarningTriangleIcon } from '@patternfly/react-icons';
+import { WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons/warning-triangle-icon';
 
 import { getErrorMessage } from '@app/utils/error';
 import { useFetch } from '@app/hooks/useFetch';

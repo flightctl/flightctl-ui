@@ -12,7 +12,7 @@ import {
   StackItem,
 } from '@patternfly/react-core';
 import { useNavigate } from 'react-router-dom';
-import { ExclamationTriangleIcon } from '@patternfly/react-icons';
+import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 
 interface DetailsInfo {
   kind: string;
