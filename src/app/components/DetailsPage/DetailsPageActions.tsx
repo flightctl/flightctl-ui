@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Dropdown, DropdownItem, MenuToggle } from '@patternfly/react-core';
 
 import DeleteModal from '@app/components/modals/DeleteModal/DeleteModal';
+import { useTranslation } from 'react-i18next';
 
 type DeleteActionProps = {
   onDelete: () => Promise<unknown>;
@@ -11,6 +12,7 @@ type DeleteActionProps = {
 };
 
 export const useDeleteAction = ({ resourceType, resourceName, onDelete, disabledReason }: DeleteActionProps) => {
+  const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
   const deleteAction = (
     <DropdownItem
@@ -24,7 +26,7 @@ export const useDeleteAction = ({ resourceType, resourceName, onDelete, disabled
           }
         : undefined)}
     >
-      Delete
+      {t('Delete')}
     </DropdownItem>
   );
   const deleteModal = isDeleteModalOpen && (
@@ -44,6 +46,7 @@ type DetailsPageActionsProps = {
 };
 
 const DetailsPageActions: React.FC<DetailsPageActionsProps> = ({ children }) => {
+  const { t } = useTranslation();
   const [actionsOpen, setActionsOpen] = React.useState(false);
   return (
     <Dropdown
@@ -57,7 +60,7 @@ const DetailsPageActions: React.FC<DetailsPageActionsProps> = ({ children }) => 
           aria-label="Actions dropdown"
           variant="primary"
         >
-          Actions
+          {t('Actions')}
         </MenuToggle>
       )}
     >

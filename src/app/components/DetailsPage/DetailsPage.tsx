@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 
 import { getErrorMessage } from '@app/utils/error';
 import DetailsNotFound from './DetailsNotFound';
+import { useTranslation } from 'react-i18next';
 
 export type DetailsPageProps = {
   id: string;
@@ -38,6 +39,7 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
   actions,
   nav,
 }) => {
+  const { t } = useTranslation();
   let content = children;
   if (error) {
     const msg = getErrorMessage(error);
@@ -45,7 +47,7 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
       return <DetailsNotFound kind={resourceType} id={id} />;
     }
     content = (
-      <Alert isInline variant="danger" title="Failed to retrieve resource details">
+      <Alert isInline variant="danger" title={t('Failed to retrieve resource details')}>
         {getErrorMessage(error)}
       </Alert>
     );

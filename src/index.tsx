@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from '@app/index';
 import { AuthProvider, AuthProviderProps } from 'react-oidc-context';
 import { UserPreferencesProvider } from '@app/components/UserPreferences/UserPreferencesProvider';
+import './i18n';
 
 declare global {
   interface Window {

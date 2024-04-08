@@ -9,6 +9,7 @@ COPY dr-surge.js /app
 COPY webpack.config.ts /app
 COPY src /app/src
 COPY @types /app/@types
+COPY locales /app/locales
 ENV NODE_OPTIONS='--max-old-space-size=8192'
 RUN npm ci
 RUN npm run build-frontend

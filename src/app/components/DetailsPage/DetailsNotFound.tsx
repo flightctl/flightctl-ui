@@ -13,8 +13,9 @@ import {
 } from '@patternfly/react-core';
 import { useNavigate } from 'react-router-dom';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
+import { useTranslation } from 'react-i18next';
 
-interface DetailsInfo {
+interface DetailsNotFoundProps {
   kind: string;
   id: string;
 }
@@ -34,27 +35,28 @@ const getKindTitle = (kind: string) => {
   }
 };
 
-const DetailsNotFound = (props: DetailsInfo) => {
+const DetailsNotFound = ({ kind, id }: DetailsNotFoundProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const tryAgain = () => {
     navigate('/refresh');
   };
 
-  const kindTitle = getKindTitle(props.kind);
+  const kindTitle = getKindTitle(kind);
 
   return (
     <PageSection>
       <EmptyState variant="full">
         <EmptyStateHeader
-          titleText={`${getKindTitle(props.kind)} not found`}
+          titleText={`${getKindTitle(kind)} not found`}
           icon={<EmptyStateIcon icon={ExclamationTriangleIcon} />}
           headingLevel="h1"
         />
         <EmptyStateBody>
           <Stack>
             <StackItem>
-              We couldn&apos;t find the {kindTitle} with id <strong>{props.id}</strong>
+              We couldn&apos;t find the {kindTitle} with id <strong>{id}</strong>
             </StackItem>
             <StackItem>
               <small>This page will continue to attempt to fetch the details</small>
@@ -64,12 +66,12 @@ const DetailsNotFound = (props: DetailsInfo) => {
         <EmptyStateFooter>
           <EmptyStateActions>
             <Button variant="primary" onClick={() => navigate('/')}>
-              Take me home
+              {t('Take me home')}
             </Button>
           </EmptyStateActions>
           <EmptyStateActions>
             <Button variant="link" onClick={tryAgain}>
-              Try refreshing manually
+              {t('Try refreshing manually')}
             </Button>
           </EmptyStateActions>
         </EmptyStateFooter>

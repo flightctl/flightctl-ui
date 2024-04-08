@@ -10,7 +10,7 @@
     "prebuild": "npm run type-check && npm run clean",
     "dr:surge": "node dr-surge.js",
     "build": "cd proxy && go build && npm run build-frontend",
-    "build-frontend": "NODE_ENV=production npm run ts-node ./node_modules/.bin/webpack --mode=production && npm run dr:surge",
+    "build-frontend": "NODE_ENV=production npm run ts-node ./node_modules/.bin/webpack --mode=production && npm run dr:surge && npm run i18n",
     "start": "cd proxy && ./flightctl-ui",
     "start:dev": "concurrently \"cd proxy && nodemon --watch 'proxy/**/*' --exec 'go run' app.go --signal SIGTERM\" \"npm run ts-node ./node_modules/.bin/webpack serve --mode=development --color --progress\"",
     "test": "jest",
@@ -27,7 +27,8 @@
     "storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
     "gen-types": "node ./scripts/openapi-typescript.js",
-    "ts-node": "ts-node -O '{\"module\":\"commonjs\"}'"
+    "ts-node": "ts-node -O '{\"module\":\"commonjs\"}'",
+    "i18n": "i18next \"src/**/*.{js,jsx,ts,tsx}\" [-oc] -c i18next-parser.config.js && git diff --exit-code locales/en/translation.json"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.24.0",
@@ -95,9 +96,14 @@
     "dotenv": "^16.3.1",
     "formik": "^2.4.5",
     "fuzzysearch": "^1.0.3",
+    "i18next": "^23.10.1",
+    "i18next-browser-languagedetector": "^7.2.1",
+    "i18next-http-backend": "^2.5.0",
+    "i18next-parser": "6.5.0",
     "js-yaml": "^4.1.0",
     "react": "^18",
     "react-dom": "^18.2.0",
+    "react-i18next": "^14.1.0",
     "react-oidc-context": "^3.0.0",
     "react-router-dom": "^6.22.0",
     "ts-node": "^10.9.2",

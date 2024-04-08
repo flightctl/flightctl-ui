@@ -151,6 +151,9 @@ const config: Configuration & {
     new CopyPlugin({
       patterns: [{ from: './src/assets/images/', to: 'images' }],
     }),
+    new CopyPlugin({
+      patterns: [{ from: './locales', to: 'locales' }],
+    }),
   ],
   resolve: {
     extensions: ['.js', '.ts', '.tsx', '.jsx'],
