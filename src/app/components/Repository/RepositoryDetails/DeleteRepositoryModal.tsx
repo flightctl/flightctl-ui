@@ -1,20 +1,6 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import {
-  Alert,
-  Button,
-  Icon,
-  List,
-  ListComponent,
-  ListItem,
-  Modal,
-  OrderType,
-  Spinner,
-  Stack,
-  StackItem,
-  Text,
-  TextContent,
-} from '@patternfly/react-core';
+import { Alert, Button, Icon, Modal, Spinner, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
 import { WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons/warning-triangle-icon';
 
 import { getErrorMessage } from '@app/utils/error';
@@ -28,63 +14,56 @@ type DeleteRepositoryModalProps = {
 };
 
 const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: DeleteRepositoryModalProps) => {
+  const { get, remove } = useFetch();
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [error, setError] = React.useState<string>();
+  const [rsError, setRsError] = React.useState<string>();
   const [message, setMessage] = React.useState<string>();
-  const { get, remove } = useFetch();
   const [resourceSyncIds, setResourceSyncIds] = React.useState<string[]>();
-  const hasResourceSyncs = !!resourceSyncIds?.length;
-
-  const deleteRepositoryOnly = async () => {
-    await remove('repositories', repositoryId);
-  };
+  const isLoadingRSs = resourceSyncIds === undefined;
+  const hasResourceSyncs = !isLoadingRSs && resourceSyncIds.length > 0;
 
   const deleteRepositoryAndResourceSyncs = async () => {
-    const toDeleteCount = resourceSyncIds?.length || 0;
-    setMessage(`Deleting ${toDeleteCount} resourcesyncs`);
-
-    const promises = (resourceSyncIds || []).map((id) => remove('resourcesyncs', id));
-    const results = await Promise.allSettled(promises);
-    const deletedCount = results.filter((result) => result.status === 'fulfilled').length;
-
-    const allDeleted = deletedCount === toDeleteCount;
-    if (allDeleted) {
-      await deleteRepositoryOnly();
-    } else {
-      setError(`${toDeleteCount - deletedCount} resourcesyncs could not be deleted, try deleting them manually`);
+    const toDeleteRSs = resourceSyncIds?.length || 0;
+    let deletedCount = 0;
+    if (toDeleteRSs > 0) {
+      setMessage(`Deleting ${toDeleteRSs} resource syncs`);
+      const promises = (resourceSyncIds || []).map((id) => remove('resourcesyncs', id));
+      const results = await Promise.allSettled(promises);
+      deletedCount = results.filter((result) => result.status === 'fulfilled').length;
     }
-    return allDeleted;
+
+    const nonDeletedRSs = toDeleteRSs - deletedCount;
+    if (nonDeletedRSs !== 0) {
+      setError(`${nonDeletedRSs} resource syncs could not be deleted. Try deleting them manually.`);
+      return false;
+    }
+    await remove('repositories', repositoryId);
+    return true;
   };
 
-  useEffect(() => {
-    const loadRS = async () => {
-      try {
-        const resourceSyncs = await get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${repositoryId}`);
-        setResourceSyncIds(resourceSyncs.items.map((rs) => rs.metadata.name || ''));
-      } catch (e) {
-        const error = `We couldn't fetch the repository resourcesyncs. If the repository contains resourcesyncs, they won't be deleted`;
-        setError(`${error}. Detail: ${getErrorMessage(e)}`);
-        setResourceSyncIds([]);
-      }
-    };
-    void loadRS();
+  const loadRS = React.useCallback(async () => {
+    try {
+      const resourceSyncs = await get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${repositoryId}`);
+      setResourceSyncIds(resourceSyncs.items.map((rs) => rs.metadata.name || ''));
+      setRsError(undefined);
+    } catch (e) {
+      const error = `The repository cannot be safely deleted at this moment, as we couldn't determine if the repository contains resourcesyncs.`;
+      setRsError(`${error}. Detail: ${getErrorMessage(e)}`);
+      setResourceSyncIds([]);
+    }
   }, [get, repositoryId]);
 
-  if (resourceSyncIds === undefined) {
-    return <Spinner />;
-  }
+  useEffect(() => {
+    void loadRS();
+  }, [loadRS]);
 
-  const deleteAction = async (actionName: 'repoAndRSs' | 'repoOnly') => {
+  const deleteAction = async () => {
     setError(undefined);
     try {
       setIsDeleting(true);
-      if (actionName === 'repoAndRSs') {
-        const success = await deleteRepositoryAndResourceSyncs();
-        if (success) {
-          onDeleteSuccess();
-        }
-      } else {
-        await deleteRepositoryOnly();
+      const success = await deleteRepositoryAndResourceSyncs();
+      if (success) {
         onDeleteSuccess();
       }
     } catch (err) {
@@ -94,32 +73,6 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
     }
   };
 
-  const deleteActions = [
-    <Button
-      key="repoOnly"
-      variant="danger"
-      isDisabled={isDeleting}
-      isLoading={isDeleting}
-      onClick={() => deleteAction('repoOnly')}
-    >
-      {hasResourceSyncs ? '1. Delete the repository only' : 'Delete the repository'}
-    </Button>,
-  ];
-  if (hasResourceSyncs) {
-    deleteActions.push(
-      <Button
-        key="repoAndRSs"
-        isLoading={isDeleting}
-        variant="link"
-        isDanger
-        isDisabled={isDeleting}
-        onClick={() => deleteAction('repoAndRSs')}
-      >
-        2. Delete the resourcesyncs as well
-      </Button>,
-    );
-  }
-
   return (
     <Modal
       title={`Delete repository ?`}
@@ -127,7 +80,22 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
       onClose={onClose}
       variant={hasResourceSyncs ? 'medium' : 'small'}
       actions={[
-        ...deleteActions,
+        rsError ? (
+          <Button variant="primary" onClick={loadRS}>
+            Reload resource syncs
+          </Button>
+        ) : (
+          <Button
+            key="confirm"
+            variant="danger"
+            isDanger={hasResourceSyncs}
+            isDisabled={isLoadingRSs || isDeleting}
+            isLoading={isLoadingRSs || isDeleting}
+            onClick={deleteAction}
+          >
+            {hasResourceSyncs ? 'Delete the repository and resource syncs' : 'Delete the repository'}
+          </Button>
+        ),
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
           Cancel
         </Button>,
@@ -141,29 +109,31 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
                 <Icon status="warning" size="md">
                   <WarningTriangleIcon />
                 </Icon>{' '}
-                This repository has resourcesyncs. Choose one of the following options:
+                This repository defines resource syncs. By deleting the repository, its resource syncs will also be
+                deleted.
+              </Text>
+              <Text>
+                Any fleet that is being managed by this repository&apos;s resource syncs, will stop being managed by the
+                service.
               </Text>
             </TextContent>
-            <List component={ListComponent.ol} type={OrderType.number}>
-              <ListItem>
-                Delete the repository only, and keep the resourcesyncs. The fleet(s) linked to the resourcesyncs will
-                continue to be managed by FlightCtl.
-              </ListItem>
-              <ListItem>
-                Delete both the repository and its resourcesyncs (RSs).{' '}
-                <strong>The fleet(s) linked to the resourcesyncs will become unmanaged.</strong>
-              </ListItem>
-            </List>
           </StackItem>
         )}
-        <StackItem>
-          Are you sure you want to delete the repository <b>{repositoryId}</b>?
-        </StackItem>
-        {isDeleting && message && (
+        {rsError ? (
+          <Alert isInline variant="warning" title="Cannot delete repository">
+            {rsError}
+          </Alert>
+        ) : (
           <StackItem>
-            <Spinner size="sm" /> {message}
+            Are you sure you want to delete the repository <b>{repositoryId}</b>?
           </StackItem>
         )}
+        {(isDeleting && message) ||
+          (isLoadingRSs && (
+            <StackItem>
+              <Spinner size="sm" /> {isLoadingRSs ? 'Checking if the repository has resource syncs' : message}
+            </StackItem>
+          ))}
         {error && (
           <StackItem>
             <Alert isInline variant="danger" title="An error occured">

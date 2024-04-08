@@ -34,7 +34,7 @@ const FleetDetails = () => {
     },
     resourceName: fleetId,
     resourceType: 'Fleet',
-    disabledReason: fleet?.metadata?.owner && 'Fleets managed by a Resourcesync cannot be deleted',
+    disabledReason: fleet?.metadata?.owner && 'Fleets managed by a resource sync cannot be deleted',
   });
 
   const { editLabelsAction, editLabelsModal } = useEditLabelsAction<Fleet>({
@@ -59,7 +59,7 @@ const FleetDetails = () => {
             <DropdownItem
               {...editLabelsAction({
                 resourceId: fleetId,
-                disabledReason: fleet?.metadata?.owner && 'Fleets managed by a Resourcesync cannot be edited',
+                disabledReason: fleet?.metadata?.owner && 'Fleets managed by a resource sync cannot be edited',
               })}
             >
               Edit labels
