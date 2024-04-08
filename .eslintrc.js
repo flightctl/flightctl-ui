@@ -86,6 +86,11 @@ module.exports = {
             name: '@patternfly/react-tokens',
             message: 'Import using full path `@patternfly/react-tokens/dist/js/<token>` instead',
           },
+          {
+            name: '@patternfly/react-core',
+            importNames: ['ActionGroup'],
+            message: 'Use FlightCtlActionGroup to wrap the footer actions',
+          },
         ],
       },
     ],

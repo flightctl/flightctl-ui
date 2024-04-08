@@ -1,8 +1,10 @@
 import * as React from 'react';
-import TextField from '@app/components/form/TextField';
-import { ActionGroup, Button, Checkbox, Form, FormGroup, FormSection, Grid } from '@patternfly/react-core';
+import { Button, Checkbox, Form, FormGroup, FormSection, Grid } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 import { useNavigate } from 'react-router-dom';
+
+import TextField from '@app/components/form/TextField';
+import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
 import { RepositoryFormValues } from './types';
 import CreateResourceSyncsForm from './CreateResourceSyncsForm';
 
@@ -70,14 +72,14 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({ children, i
         />
       </Grid>
       {children}
-      <ActionGroup>
+      <FlightCtlActionGroup>
         <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
           {isEdit ? 'Edit repository' : 'Create repository'}
         </Button>
         <Button variant="link" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
           Cancel
         </Button>
-      </ActionGroup>
+      </FlightCtlActionGroup>
     </Form>
   );
 };

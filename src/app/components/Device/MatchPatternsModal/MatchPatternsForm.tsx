@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { ActionGroup, Alert, Button, Form, Label, LabelGroup } from '@patternfly/react-core';
+import { Alert, Button, Form, Label, LabelGroup } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
+import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
 
 export type MatchPatternsFormValues = {
   matchPatterns: string[];
@@ -64,14 +65,14 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
         ))}
       </LabelGroup>
       {error && <Alert isInline title={error} variant="danger" />}
-      <ActionGroup>
+      <FlightCtlActionGroup>
         <Button key="confirm" variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
           Update match patterns
         </Button>
         <Button key="cancel" variant="link" onClick={() => onClose()} isDisabled={isSubmitting}>
           Cancel
         </Button>
-      </ActionGroup>
+      </FlightCtlActionGroup>
     </Form>
   );
 };

@@ -1,4 +1,5 @@
 import * as React from 'react';
+// eslint-disable-next-line no-restricted-imports
 import { ActionGroup } from '@patternfly/react-core';
 
 import './FlightCtlActionGroup.css';
