@@ -9,9 +9,11 @@ const ResourceSyncsTab = ({ repositoryId }: { repositoryId: string }) => {
     <GridItem>
       <Card>
         <CardTitle>
-          <WithHelperText popoverContent="Flight control will monitor the specified paths, import the defined fleets and synchronise devices">
-            Resource syncs
-          </WithHelperText>
+          <WithHelperText
+            showLabel
+            ariaLabel="Resource syncs"
+            content="Flight control will monitor the specified paths, import the defined fleets and synchronise devices"
+          />
         </CardTitle>
         <CardBody>
           <RepositoryResourceSyncList repositoryId={repositoryId} />

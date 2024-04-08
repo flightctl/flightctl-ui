@@ -12,7 +12,7 @@ const ResourceListEmptyState = ({
   children,
 }: React.PropsWithChildren<ResourceListEmptyStateProps>) => (
   <EmptyState style={{ '--pf-v5-c-empty-state--PaddingTop': '4rem' } as React.CSSProperties}>
-    <EmptyStateHeader titleText={titleText} headingLevel="h4" icon={<EmptyStateIcon icon={icon}></EmptyStateIcon>} />
+    <EmptyStateHeader titleText={titleText} headingLevel="h4" icon={<EmptyStateIcon icon={icon} />} />
     {children}
   </EmptyState>
 );

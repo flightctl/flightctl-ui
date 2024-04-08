@@ -27,7 +27,7 @@ const CreateResourceSyncsForm = () => {
               <FormGroup
                 label="Target revision"
                 isRequired
-                labelIcon={<WithHelperText popoverContent="Name of a branch or a tag." />}
+                labelIcon={<WithHelperText ariaLabel="Target revision" content="Name of a branch or a tag." />}
               >
                 <TextField
                   name={`resourceSyncs[${index}].targetRevision`}
@@ -40,7 +40,10 @@ const CreateResourceSyncsForm = () => {
                 label="Path"
                 isRequired
                 labelIcon={
-                  <WithHelperText popoverContent="Absolute path to the file or directory holding the resource definitions." />
+                  <WithHelperText
+                    ariaLabel="Path"
+                    content="Absolute path to the file or directory holding the resource definitions."
+                  />
                 }
               >
                 <TextField

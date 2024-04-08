@@ -11,7 +11,6 @@ import {
   Bullseye,
   Card,
   CardBody,
-  CardFooter,
   CardTitle,
   DescriptionList,
   DescriptionListDescription,
@@ -125,9 +124,11 @@ const EnrollmentRequestDetails = () => {
         <GridItem md={6}>
           <DetailsPageCard>
             <CardTitle>
-              <WithHelperText popoverContent="A PEM-encoded PKCS#10 certificate signing request.">
-                Certificate signing request
-              </WithHelperText>
+              <WithHelperText
+                showLabel
+                ariaLabel="Certificate signing request"
+                content="A PEM-encoded PKCS#10 certificate signing request."
+              />
             </CardTitle>
             <DetailsPageCardBody>
               {er?.spec.csr ? (
@@ -147,7 +148,7 @@ const EnrollmentRequestDetails = () => {
         <GridItem md={6}>
           <DetailsPageCard>
             <CardTitle>
-              <WithHelperText popoverContent="A PEM-encoded signed certificate.">Certificate</WithHelperText>
+              <WithHelperText showLabel ariaLabel="Certificate" content="A PEM-encoded signed certificate." />
             </CardTitle>
             <DetailsPageCardBody>
               {er?.status?.certificate ? (
@@ -162,7 +163,6 @@ const EnrollmentRequestDetails = () => {
                 <Bullseye>Not available</Bullseye>
               )}
             </DetailsPageCardBody>
-            <CardFooter></CardFooter>
           </DetailsPageCard>
         </GridItem>
         <GridItem md={6}>

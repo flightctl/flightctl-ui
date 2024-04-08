@@ -44,7 +44,7 @@ const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
             label={`Use a container image (bootc) ${window.BOOTC_IMG_URL ? '' : '(Not available)'}`}
             id="bootc"
             isDisabled={!window.BOOTC_IMG_URL}
-          ></Radio>
+          />
           <Radio
             isChecked={imgType === 'qcow2'}
             name="qcow2"
@@ -52,7 +52,7 @@ const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
             label={`Use a disk image (qcow2) ${window.QCOW2_IMG_URL ? '' : '(Not available)'}`}
             id="qcow2"
             isDisabled={!window.QCOW2_IMG_URL}
-          ></Radio>
+          />
         </GridItem>
         <GridItem>
           {imgType === 'bootc' && (
