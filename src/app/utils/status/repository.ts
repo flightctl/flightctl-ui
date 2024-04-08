@@ -1,4 +1,4 @@
-import { ConditionType, Repository, ResourceSync } from '@types';
+import { ConditionStatus, ConditionType, Repository, ResourceSync } from '@types';
 import { timeSinceText } from '@app/utils/dates';
 
 export type RepositorySyncStatus =
@@ -18,33 +18,51 @@ const getRepositorySyncStatus = (
 } => {
   const conditions = repository.status?.conditions;
 
-  const syncedCondition = conditions?.find((c) => c.type === ConditionType.ResourceSyncSynced);
-  if (syncedCondition) {
-    const isOK = syncedCondition.status === 'True';
+  const accessibleCondition = conditions?.find((c) => c.type === ConditionType.RepositoryAccessible);
+  if (accessibleCondition?.status === ConditionStatus.ConditionStatusFalse) {
     return {
-      status: isOK ? ConditionType.ResourceSyncSynced : 'Not synced',
-      message: isOK ? '' : syncedCondition.message,
+      status: 'Not accessible',
+      message: accessibleCondition.message,
     };
   }
 
   const parsedCondition = conditions?.find((c) => c.type === ConditionType.ResourceSyncResourceParsed);
+  if (parsedCondition?.status === ConditionStatus.ConditionStatusFalse) {
+    return {
+      status: 'Not parsed',
+      message: parsedCondition.message,
+    };
+  }
+
+  const syncedCondition = conditions?.find((c) => c.type === ConditionType.ResourceSyncSynced);
+  if (syncedCondition?.status === ConditionStatus.ConditionStatusFalse) {
+    return {
+      status: 'Not synced',
+      message: syncedCondition.message,
+    };
+  }
+
+  // Now there are no error situations we know of, let's return the most "advanced" status
+  if (syncedCondition) {
+    return {
+      status: ConditionType.ResourceSyncSynced,
+      message: '',
+    };
+  }
   if (parsedCondition) {
-    const isOK = parsedCondition.status === 'True';
     return {
-      status: isOK ? ConditionType.ResourceSyncResourceParsed : 'Not parsed',
-      message: isOK ? '' : parsedCondition.message,
+      status: ConditionType.ResourceSyncResourceParsed,
+      message: '',
     };
   }
-
-  const accessibleCondition = conditions?.find((c) => c.type === ConditionType.RepositoryAccessible);
   if (accessibleCondition) {
-    const isOK = accessibleCondition.status === 'True';
     return {
-      status: isOK ? ConditionType.RepositoryAccessible : 'Not accessible',
-      message: isOK ? '' : accessibleCondition.message,
+      status: ConditionType.RepositoryAccessible,
+      message: '',
     };
   }
 
+  // As a fallback, we indicate the repository is waiting for sync
   return {
     status: 'Sync pending',
     message: 'Waiting for first sync',

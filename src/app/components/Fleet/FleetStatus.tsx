@@ -6,17 +6,16 @@ import { WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons/warni
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 import { ConditionType, Fleet } from '@types';
-import { getFleetStatusType } from '@app/utils/status/fleet';
+import { getFleetSyncStatus } from '@app/utils/status/fleet';
 import WithTooltip from '../common/WithTooltip';
 
 const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
-  const statusType = getFleetStatusType(fleet);
+  const syncStatus = getFleetSyncStatus(fleet);
 
   let color: LabelProps['color'];
   let icon: React.ReactNode;
-  let tooltip: string | undefined;
 
-  switch (statusType) {
+  switch (syncStatus.status) {
     case ConditionType.FleetValid:
       color = 'green';
       icon = <CheckCircleIcon />;
@@ -24,7 +23,6 @@ const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
     case ConditionType.FleetOverlappingSelectors:
       color = 'orange';
       icon = <WarningTriangleIcon />;
-      tooltip = `Fleet's selector overlaps with at least one other fleet, causing ambiguous device ownership.`;
       break;
     case 'Invalid':
       color = 'red';
@@ -37,9 +35,9 @@ const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
   }
 
   return (
-    <WithTooltip showTooltip={!!tooltip} content={tooltip}>
+    <WithTooltip showTooltip={!!syncStatus.message} content={syncStatus.message}>
       <Label color={color} icon={icon}>
-        {statusType}
+        {syncStatus.status}
       </Label>
     </WithTooltip>
   );

@@ -1,7 +1,7 @@
 import { isFleet } from '@app/types/extraTypes';
 import { Fleet, ResourceSync } from '@types';
 import { getRepositorySyncStatus } from '../status/repository';
-import { getFleetStatusType } from '../status/fleet';
+import { getFleetSyncStatus } from '../status/fleet';
 
 export const sortFleetsByOSImg = (resources: Array<Fleet | ResourceSync>) =>
   resources.sort((a, b) => {
@@ -12,7 +12,7 @@ export const sortFleetsByOSImg = (resources: Array<Fleet | ResourceSync>) =>
 
 export const sortByStatus = (resources: Array<Fleet | ResourceSync>) =>
   resources.sort((a, b) => {
-    const aStatus = isFleet(a) ? getFleetStatusType(a) : getRepositorySyncStatus(a).status;
-    const bStatus = isFleet(b) ? getFleetStatusType(b) : getRepositorySyncStatus(b).status;
+    const aStatus = isFleet(a) ? getFleetSyncStatus(a).status : getRepositorySyncStatus(a).status;
+    const bStatus = isFleet(b) ? getFleetSyncStatus(b).status : getRepositorySyncStatus(b).status;
     return aStatus.localeCompare(bStatus);
   });
