@@ -50,7 +50,7 @@ const EnrollmentRequestDetails = () => {
     resourceType: 'Enrollment request',
     onDelete: async () => {
       await remove('enrollmentrequests', enrollmentRequestId);
-      navigate('/devicemanagement/enrollmentrequests');
+      navigate('/devicemanagement/devices');
     },
   });
 
