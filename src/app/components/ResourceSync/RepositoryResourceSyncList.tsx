@@ -35,26 +35,28 @@ import { getResourceId } from '@app/utils/resource';
 import './RepositoryResourceSyncList.css';
 import MassDeleteResourceSyncModal from '../modals/massModals/MassDeleteResourceSyncModal/MassDeleteResourceSyncModal';
 import ResourceSyncStatus from './ResourceSyncStatus';
+import { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
-const columns: TableColumn<ResourceSync>[] = [
+const getColumns = (t: TFunction): TableColumn<ResourceSync>[] => [
   {
-    name: 'Name',
+    name: t('Name'),
     onSort: sortByName,
   },
   {
-    name: 'Path',
+    name: t('Path'),
     onSort: sortResourceSyncsByPath,
   },
   {
-    name: 'Target revision',
+    name: t('Target revision'),
     onSort: sortResourceSyncsByRevision,
   },
   {
-    name: 'Status',
+    name: t('Status'),
     onSort: sortResourceSyncsByStatus,
   },
   {
-    name: 'Observed hash',
+    name: t('Observed hash'),
     onSort: sortResourceSyncsByHash,
   },
 ];
@@ -72,6 +74,7 @@ const createRefs = (rsList: ResourceSync[]) => {
 const getSearchText = (resourceSync: ResourceSync) => [resourceSync.metadata.name];
 
 const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: ResourceSync[]; refetch: VoidFunction }) => {
+  const { t } = useTranslation();
   const { remove } = useFetch();
   const { hash = '#' } = useLocation();
   const rsRefs = createRefs(resourceSyncs);
@@ -88,6 +91,7 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
 
   const { filteredData, search, setSearch } = useTableTextSearch(resourceSyncs, getSearchText);
 
+  const columns = React.useMemo(() => getColumns(t), [t]);
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
@@ -112,7 +116,7 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
             <TableActions>
               <SelectList>
                 <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassDeleteModalOpen(true)}>
-                  Delete
+                  {t('Delete')}
                 </SelectOption>
               </SelectList>
             </TableActions>
@@ -120,7 +124,7 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
         </ToolbarContent>
       </Toolbar>
       <Table
-        aria-label="Resource syncs table"
+        aria-label={t('Resource syncs table')}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
         columns={columns}
@@ -141,13 +145,13 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
                     isSelected: isRowSelected(resourceSync),
                   }}
                 />
-                <Td dataLabel="Name">{rsName}</Td>
-                <Td dataLabel="Path">{resourceSync.spec.path || ''}</Td>
-                <Td dataLabel="Target revision">{resourceSync.spec.targetRevision}</Td>
-                <Td dataLabel="Status">
+                <Td dataLabel={t('Name')}>{rsName}</Td>
+                <Td dataLabel={t('Path')}>{resourceSync.spec.path || ''}</Td>
+                <Td dataLabel={t('Target revision')}>{resourceSync.spec.targetRevision}</Td>
+                <Td dataLabel={t('Status')}>
                   <ResourceSyncStatus resourceSync={resourceSync} />
                 </Td>
-                <Td dataLabel="Observed hash">{getObservedHash(resourceSync)}</Td>
+                <Td dataLabel={t('Observed hash')}>{getObservedHash(resourceSync)}</Td>
                 <Td isActionCell>
                   <ActionsColumn items={[deleteAction({ resourceId: resourceSync.metadata.name || '' })]} />
                 </Td>
@@ -172,13 +176,14 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
 };
 
 const ResourceSyncEmptyState = ({ isLoading, error }: { isLoading: boolean; error: string }) => {
-  let content: React.JSX.Element | string = 'This repository does not have associated resource syncs yet';
+  const { t } = useTranslation();
+  let content: React.JSX.Element | string = t('This repository does not have associated resource syncs yet');
   if (isLoading) {
     content = <Spinner />;
   } else if (error) {
     content = (
       <span style={{ color: 'var(--pf-v5-global--danger-color--100)' }}>
-        Failed to load the repository&apos;s resource syncs
+        {t(`Failed to load the repository's resource syncs`)}
       </span>
     );
   }

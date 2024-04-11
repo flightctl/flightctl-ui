@@ -27,6 +27,8 @@ import ResourceSyncToRepository from '@app/components/ResourceSync/ResourceSyncT
 import { useDocumentTitle } from '@app/hooks/useDocumentTitle';
 import { APP_TITLE } from '@app/constants';
 import ImportFleetWizard from './components/Fleet/ImportFleetWizard/ImportFleetWizard';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -35,17 +37,18 @@ export type ExtendedRouteObject = RouteObject & {
 };
 
 const ErrorPage = () => {
+  const { t } = useTranslation();
   const error = useRouteError() as { status: number };
 
   if (error.status === 404) {
     return (
-      <TitledRoute title="404 Page Not Found">
+      <TitledRoute title={t('404 Page Not Found')}>
         <NotFound />
       </TitledRoute>
     );
   }
 
-  return <div>Error page - details should be displayed here</div>;
+  return <div>{t('Error page - details should be displayed here')}</div>;
 };
 
 const TitledRoute = ({ title, children }: PropsWithChildren<{ title: string }>) => {
@@ -69,62 +72,62 @@ const RedirectToEnrollmentDetails = () => {
   return <Navigate to={`/devicemanagement/enrollmentrequests/${enrollmentRequestId}`} replace />;
 };
 
-const appRoutes: ExtendedRouteObject[] = [
+const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
   {
     path: '/',
     element: <Navigate to="/devicemanagement/fleets" replace />,
   },
   {
     path: '/devicemanagement/enrollmentrequests/:enrollmentRequestId',
-    title: 'Enrollment Request Details',
+    title: t('Enrollment Request Details'),
     element: (
-      <TitledRoute title="Enrollment Request Details">
+      <TitledRoute title={t('Enrollment Request Details')}>
         <EnrollmentRequestDetails />
       </TitledRoute>
     ),
   },
   {
     path: '/enroll/:enrollmentRequestId',
-    title: 'Enrollment Request',
+    title: t('Enrollment Request'),
     element: <RedirectToEnrollmentDetails />,
   },
   {
     path: '/devicemanagement/fleets',
-    title: 'Fleets',
+    title: t('Fleets'),
     showInNav: true,
     children: [
       {
         index: true,
-        title: 'Fleets',
+        title: t('Fleets'),
         element: (
-          <TitledRoute title="Fleets">
+          <TitledRoute title={t('Fleets')}>
             <FleetList />
           </TitledRoute>
         ),
       },
       {
         path: 'create',
-        title: 'Create Fleet',
+        title: t('Create Fleet'),
         element: (
-          <TitledRoute title="Create Fleet">
+          <TitledRoute title={t('Create Fleet')}>
             <CreateFleet />
           </TitledRoute>
         ),
       },
       {
         path: 'import',
-        title: 'Import Fleet',
+        title: t('Import Fleet'),
         element: (
-          <TitledRoute title="Import Fleet">
+          <TitledRoute title={t('Import Fleet')}>
             <ImportFleetWizard />
           </TitledRoute>
         ),
       },
       {
         path: ':fleetId',
-        title: 'Fleet Details',
+        title: t('Fleet Details'),
         element: (
-          <TitledRoute title="Fleet Details">
+          <TitledRoute title={t('Fleet Details')}>
             <FleetDetails />
           </TitledRoute>
         ),
@@ -133,28 +136,28 @@ const appRoutes: ExtendedRouteObject[] = [
   },
   {
     path: '/manage/:deviceId',
-    title: 'Device',
+    title: t('Device'),
     element: <RedirectToDeviceDetails />,
   },
   {
     path: '/devicemanagement/devices',
-    title: 'Devices',
+    title: t('Devices'),
     showInNav: true,
     children: [
       {
         index: true,
-        title: 'Devices',
+        title: t('Devices'),
         element: (
-          <TitledRoute title="Devices">
+          <TitledRoute title={t('Devices')}>
             <DeviceList />
           </TitledRoute>
         ),
       },
       {
         path: ':deviceId',
-        title: 'Device',
+        title: t('Device'),
         element: (
-          <TitledRoute title="Device">
+          <TitledRoute title={t('Device')}>
             <DeviceDetails />
           </TitledRoute>
         ),
@@ -164,40 +167,40 @@ const appRoutes: ExtendedRouteObject[] = [
   {
     path: '/devicemanagement/repositories',
     showInNav: true,
-    title: 'Repositories',
+    title: t('Repositories'),
     children: [
       {
         index: true,
-        title: 'Repositories',
+        title: t('Repositories'),
         element: (
-          <TitledRoute title="Repositories">
+          <TitledRoute title={t('Repositories')}>
             <RepositoryList />
           </TitledRoute>
         ),
       },
       {
         path: 'create',
-        title: 'Create Repository',
+        title: t('Create Repository'),
         element: (
-          <TitledRoute title="Create Repository">
+          <TitledRoute title={t('Create Repository')}>
             <CreateRepository />
           </TitledRoute>
         ),
       },
       {
         path: 'edit/:repositoryId',
-        title: 'Edit repository',
+        title: t('Edit repository'),
         element: (
-          <TitledRoute title="Edit repository">
+          <TitledRoute title={t('Edit repository')}>
             <CreateRepository />
           </TitledRoute>
         ),
       },
       {
         path: ':repositoryId/*',
-        title: 'Repository Details',
+        title: t('Repository Details'),
         element: (
-          <TitledRoute title="Repository Details">
+          <TitledRoute title={t('Repository Details')}>
             <RepositoryDetails />
           </TitledRoute>
         ),
@@ -206,10 +209,10 @@ const appRoutes: ExtendedRouteObject[] = [
   },
   {
     path: '/devicemanagement/resourcesyncs/:rsId',
-    title: 'Resource sync',
+    title: t('Resource sync'),
     // Fetches the RS from its ID and redirects to the repository page
     element: (
-      <TitledRoute title="Resource sync">
+      <TitledRoute title={t('Resource sync')}>
         <ResourceSyncToRepository />
       </TitledRoute>
     ),
@@ -221,16 +224,17 @@ const appRoutes: ExtendedRouteObject[] = [
 ];
 
 const AppRouter = () => {
+  const { t } = useTranslation();
   const router = createBrowserRouter([
     {
       path: '/',
       element: <AppLayout />,
       errorElement: <ErrorPage />,
-      children: appRoutes,
+      children: getAppRoutes(t),
     },
   ]);
 
   return <RouterProvider router={router} />;
 };
 
-export { AppRouter, appRoutes };
+export { AppRouter, getAppRoutes };

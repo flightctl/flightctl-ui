@@ -7,38 +7,40 @@ import TextField from '@app/components/form/TextField';
 import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
 import { RepositoryFormValues } from './types';
 import CreateResourceSyncsForm from './CreateResourceSyncsForm';
+import { useTranslation } from 'react-i18next';
 
 export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
+  const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<RepositoryFormValues>();
   return (
     <>
-      <FormGroup label="Repository name" isRequired>
-        <TextField name="name" aria-label="Repository name" value={values.name} isDisabled={isEdit} />
+      <FormGroup label={t('Repository name')} isRequired>
+        <TextField name="name" aria-label={t('Repository name')} value={values.name} isDisabled={isEdit} />
       </FormGroup>
-      <FormGroup label="Repository URL" isRequired>
+      <FormGroup label={t('Repository URL')} isRequired>
         <TextField
           name="url"
-          aria-label="Repository URL"
+          aria-label={t('Repository URL')}
           value={values.url}
-          helperText="For example: https://github.com/flightctl/flightctl-demos"
+          helperText={t('For example: https://github.com/flightctl/flightctl-demos')}
         />
       </FormGroup>
       <FormSection>
         <Checkbox
           id="private-repository"
-          label="This repository a private repository"
+          label={t('This repository a private repository')}
           isChecked={values.credentials.isPrivate}
           onChange={(_, checked) => setFieldValue('credentials.isPrivate', checked)}
         />
         {values.credentials.isPrivate && (
           <>
-            <FormGroup label="Username">
-              <TextField name="credentials.username" aria-label="Username" value={values.credentials.username} />
+            <FormGroup label={t('Username')}>
+              <TextField name="credentials.username" aria-label={t('Username')} value={values.credentials.username} />
             </FormGroup>
-            <FormGroup label="Password">
+            <FormGroup label={t('Password')}>
               <TextField
                 name="credentials.password"
-                aria-label="Password"
+                aria-label={t('Password')}
                 value={values.credentials.password}
                 type="password"
               />
@@ -55,6 +57,7 @@ type CreateRepositoryFormProps = React.PropsWithChildren<Record<never, never>> &
 };
 
 const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({ children, isEdit }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { values, setFieldValue, isValid, dirty, submitForm, isSubmitting } = useFormikContext<RepositoryFormValues>();
   const isSubmitDisabled = isSubmitting || !dirty || !isValid;
@@ -65,7 +68,7 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({ children, i
         <RepositoryForm isEdit={isEdit} />
         <Checkbox
           id="use-resource-syncs"
-          label="Use resource syncs"
+          label={t('Use resource syncs')}
           isChecked={values.useResourceSyncs}
           onChange={(_, checked) => setFieldValue('useResourceSyncs', checked)}
           body={values.useResourceSyncs && <CreateResourceSyncsForm />}
@@ -74,10 +77,10 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({ children, i
       {children}
       <FlightCtlActionGroup>
         <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
-          {isEdit ? 'Edit repository' : 'Create repository'}
+          {isEdit ? t('Edit repository') : t('Create repository')}
         </Button>
         <Button variant="link" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
-          Cancel
+          {t('Cancel')}
         </Button>
       </FlightCtlActionGroup>
     </Form>

@@ -6,6 +6,7 @@ import { useFetch } from '@app/hooks/useFetch';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import FleetOwnerLink, { RSLink } from '@app/components/Fleet/FleetDetails/FleetOwnerLink';
 import { isFleet } from '@app/types/extraTypes';
+import { useTranslation } from 'react-i18next';
 
 type MassDeleteFleetModalProps = {
   onClose: VoidFunction;
@@ -14,6 +15,7 @@ type MassDeleteFleetModalProps = {
 };
 
 const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, resources, onDeleteSuccess }) => {
+  const { t } = useTranslation();
   const [progress, setProgress] = React.useState(0);
   const [progressTotal, setProgressTotal] = React.useState(0);
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -44,31 +46,34 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
   };
   return (
     <Modal
-      title="Delete fleets"
+      title={t('Delete fleets')}
       isOpen
       onClose={onClose}
       showClose={!isDeleting}
       variant="medium"
       actions={[
         <Button key="delete" variant="danger" onClick={deleteResources} isLoading={isDeleting} isDisabled={isDeleting}>
-          Delete
+          {t('Delete')}
         </Button>,
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
-          Cancel
+          {t('Cancel')}
         </Button>,
       ]}
     >
       <Stack hasGutter>
         <StackItem>
-          The following fleets will be deleted and as a result, the devices managed by them will be left unmanaged. Are
-          you sure you want to delete the listed fleets?
+          {t(
+            'The following fleets will be deleted and as a result, the devices managed by them will be left unmanaged. Are you sure you want to delete the listed fleets?',
+          )}
         </StackItem>
         {resourcesToDelete.length !== resources.length && (
           <StackItem>
             <Alert
               variant="info"
               isInline
-              title={`Resource syncs manage some of the selected fleets and they cannot be deleted. To remove those fleets, delete the resource syncs from the related repositories inside the "Repositories" tab.`}
+              title={t(
+                `Resource syncs manage some of the selected fleets and they cannot be deleted. To remove those fleets, delete the resource syncs from the related repositories inside the "Repositories" tab.`,
+              )}
             />
           </StackItem>
         )}
@@ -76,16 +81,16 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
           <Table>
             <Thead>
               <Tr>
-                <Th>Name</Th>
-                <Th>Managed by</Th>
+                <Th>{t('Name')}</Th>
+                <Th>{t('Managed by')}</Th>
               </Tr>
             </Thead>
             <Tbody>
               {resources.map((resource) => {
                 return (
                   <Tr key={resource.metadata.name}>
-                    <Td dataLabel="Name">{(isFleet(resource) && resource.metadata.name) || '-'}</Td>
-                    <Td dataLabel="Managed by">
+                    <Td dataLabel={t('Name')}>{(isFleet(resource) && resource.metadata.name) || '-'}</Td>
+                    <Td dataLabel={t('Managed by')}>
                       {isFleet(resource) ? (
                         <FleetOwnerLink owner={resource.metadata.owner} />
                       ) : (
@@ -104,16 +109,16 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
               value={progress}
               min={0}
               max={progressTotal}
-              title="Deleting..."
+              title={t('Deleting...')}
               measureLocation={ProgressMeasureLocation.top}
-              label={`${progress} of ${progressTotal}`}
-              valueText={`${progress} of ${progressTotal}`}
+              label={t('{{progress}} of {{progressTotal}}', { progress, progressTotal })}
+              valueText={t('{{progress}} of {{progressTotal}}', { progress, progressTotal })}
             />
           </StackItem>
         )}
         {errors?.length && (
           <StackItem>
-            <Alert isInline variant="danger" title="An error occured">
+            <Alert isInline variant="danger" title={t('An error occured')}>
               <Stack hasGutter>
                 {errors.map((e, index) => (
                   <StackItem key={index}>{e}</StackItem>

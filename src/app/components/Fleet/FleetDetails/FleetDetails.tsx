@@ -10,6 +10,7 @@ import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import FleetDetailsContent from './FleetDetailsContent';
 import { getUpdatedFleet } from '@app/utils/fleets';
+import { useTranslation } from 'react-i18next';
 
 const getFleetDeviceCount = (fleetDevicesResp: DeviceList | undefined): number | undefined => {
   if (fleetDevicesResp === undefined) {
@@ -21,6 +22,7 @@ const getFleetDeviceCount = (fleetDevicesResp: DeviceList | undefined): number |
 };
 
 const FleetDetails = () => {
+  const { t } = useTranslation();
   const { fleetId } = useParams() as { fleetId: string };
   const [fleet, isLoading, error, refetch] = useFetchPeriodically<Required<Fleet>>({ endpoint: `fleets/${fleetId}` });
   const [fleetDevicesResp] = useFetchPeriodically<DeviceList>({ endpoint: `devices?owner=Fleet/${fleetId}&limit=1` });
@@ -34,7 +36,7 @@ const FleetDetails = () => {
     },
     resourceName: fleetId,
     resourceType: 'Fleet',
-    disabledReason: fleet?.metadata?.owner && 'Fleets managed by a resource sync cannot be deleted',
+    disabledReason: fleet?.metadata?.owner && t('Fleets managed by a resource sync cannot be deleted'),
   });
 
   const { editLabelsAction, editLabelsModal } = useEditLabelsAction<Fleet>({
@@ -59,10 +61,10 @@ const FleetDetails = () => {
             <DropdownItem
               {...editLabelsAction({
                 resourceId: fleetId,
-                disabledReason: fleet?.metadata?.owner && 'Fleets managed by a resource sync cannot be edited',
+                disabledReason: fleet?.metadata?.owner && t('Fleets managed by a resource sync cannot be edited'),
               })}
             >
-              Edit labels
+              {t('Edit labels')}
             </DropdownItem>
           </DropdownList>
         </DetailsPageActions>

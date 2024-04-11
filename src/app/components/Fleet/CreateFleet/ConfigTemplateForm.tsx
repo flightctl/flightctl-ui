@@ -18,43 +18,45 @@ import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circl
 
 import TextField from '@app/components/form/TextField';
 import { FleetFormValues, GitConfigTemplate, InlineConfigTemplate, KubeSecretTemplate } from './types';
+import { useTranslation } from 'react-i18next';
 
 type GitConfigFormProps = {
   index: number;
 };
 
 const GitConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
+  const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<FleetFormValues>();
   const template = values.configTemplates[index] as GitConfigTemplate;
   return (
     <>
-      <FormGroup label="Source name" isRequired>
+      <FormGroup label={t('Source name')} isRequired>
         <TextField
-          aria-label="Source name"
+          aria-label={t('Source name')}
           name={`configTemplates[${index}].name`}
           value={template.name}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.name`, value)}
         />
       </FormGroup>
-      <FormGroup label="Repository URL" isRequired>
+      <FormGroup label={t('Repository URL')} isRequired>
         <TextField
-          aria-label="Repository URL"
+          aria-label={t('Repository URL')}
           name={`configTemplates[${index}].repoURL`}
           value={template.repoURL}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.repoURL`, value)}
         />
       </FormGroup>
-      <FormGroup label="Repository target reference" isRequired>
+      <FormGroup label={t('Repository target reference')} isRequired>
         <TextField
-          aria-label="Repository target reference"
+          aria-label={t('Repository target reference')}
           name={`configTemplates[${index}].targetRevision`}
           value={template.targetRevision}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.targetRevision`, value)}
         />
       </FormGroup>
-      <FormGroup label="Repository path" isRequired>
+      <FormGroup label={t('Repository path')} isRequired>
         <TextField
-          aria-label="Repository path"
+          aria-label={t('Repository path')}
           name={`configTemplates[${index}].path`}
           value={template.path}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.path`, value)}
@@ -65,34 +67,35 @@ const GitConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
 };
 
 const KubeConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
+  const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<FleetFormValues>();
   const template = values.configTemplates[index] as KubeSecretTemplate;
   return (
     <Grid hasGutter>
-      <FormGroup label="Source name" isRequired>
+      <FormGroup label={t('Source name')} isRequired>
         <TextInput
-          aria-label="Source name"
+          aria-label={t('Source name')}
           value={template.name}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.name`, value)}
         />
       </FormGroup>
-      <FormGroup label="Secret name" isRequired>
+      <FormGroup label={t('Secret name')} isRequired>
         <TextInput
-          aria-label="Secret name"
+          aria-label={t('Secret name')}
           value={template.secretName}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.secretName`, value)}
         />
       </FormGroup>
-      <FormGroup label="Secret namespace" isRequired>
+      <FormGroup label={t('Secret namespace')} isRequired>
         <TextInput
-          aria-label="Secret namespace"
+          aria-label={t('Secret namespace')}
           value={template.secretNs}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.secretNs`, value)}
         />
       </FormGroup>
-      <FormGroup label="Mount path" isRequired>
+      <FormGroup label={t('Mount path')} isRequired>
         <TextInput
-          aria-label="Mount path"
+          aria-label={t('Mount path')}
           value={template.mountPath}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.mountPath`, value)}
         />
@@ -102,22 +105,23 @@ const KubeConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
 };
 
 const InlineConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
+  const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<FleetFormValues>();
   const template = values.configTemplates[index] as InlineConfigTemplate;
   return (
     <Grid hasGutter>
-      <FormGroup label="Source name" isRequired>
+      <FormGroup label={t('Source name')} isRequired>
         <TextInput
-          aria-label="Source name"
+          aria-label={t('Source name')}
           value={template.name}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.name`, value)}
         />
       </FormGroup>
-      <FormGroup label="Inline" isRequired>
+      <FormGroup label={t('Inline')} isRequired>
         <TextArea
           value={template.inline}
           onChange={(_, value) => setFieldValue(`configTemplates.${index}.inline`, value)}
-          aria-label="Inline"
+          aria-label={t('Inline')}
         />
       </FormGroup>
     </Grid>
@@ -125,6 +129,7 @@ const InlineConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
 };
 
 const ConfigTemplateForm = () => {
+  const { t } = useTranslation();
   const { values } = useFormikContext<FleetFormValues>();
   return (
     <FieldArray name="configTemplates">
@@ -142,7 +147,7 @@ const ConfigTemplateForm = () => {
                   )}
                   <GridItem>
                     <Grid hasGutter>
-                      <FormGroup label="Source" isRequired>
+                      <FormGroup label={t('Source')} isRequired>
                         <FormSelect
                           value={ct.type}
                           onChange={(_, value) => {
@@ -172,11 +177,11 @@ const ConfigTemplateForm = () => {
                             }
                             replace(index, template);
                           }}
-                          aria-label="Source select input"
+                          aria-label={t('Source select input')}
                         >
-                          <FormSelectOption value="git" label="Git config provider" />
-                          <FormSelectOption value="kube" label="Kubernetes secret provider" />
-                          <FormSelectOption value="inline" label="Inline config provider" />
+                          <FormSelectOption value="git" label={t('Git config provider')} />
+                          <FormSelectOption value="kube" label={t('Kubernetes secret provider')} />
+                          <FormSelectOption value="inline" label={t('Inline config provider')} />
                         </FormSelect>
                       </FormGroup>
                       {ct.type === 'git' && <GitConfigForm index={index} />}
@@ -190,7 +195,7 @@ const ConfigTemplateForm = () => {
                             iconPosition="start"
                             onClick={() => remove(index)}
                           >
-                            Remove source
+                            {t('Remove source')}
                           </Button>
                         </FormGroup>
                       )}
@@ -216,7 +221,7 @@ const ConfigTemplateForm = () => {
                   } as GitConfigTemplate);
                 }}
               >
-                Add source
+                {t('Add source')}
               </Button>
             </FormGroup>
           </FormSection>

@@ -31,18 +31,21 @@ import * as Yup from 'yup';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 
 import './ImportFleetWizard.css';
+import { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
-const validationSchema = (resourceSyncs: ResourceSync[], repositories: Repository[]) =>
+const validationSchema = (t: TFunction, resourceSyncs: ResourceSync[], repositories: Repository[]) =>
   Yup.lazy((values: ImportFleetFormValues) =>
     values.useExistingRepo
       ? Yup.object({
-          existingRepo: Yup.string().required('Repository is required'),
-          resourceSyncs: repoSyncSchema(values.resourceSyncs, resourceSyncs),
+          existingRepo: Yup.string().required(t('Repository is required')),
+          resourceSyncs: repoSyncSchema(t, values.resourceSyncs, resourceSyncs),
         })
-      : repositorySchema(resourceSyncs, repositories)({ ...values, useResourceSyncs: true }),
+      : repositorySchema(t, resourceSyncs, repositories)({ ...values, useResourceSyncs: true }),
   );
 
 const ImportFleetWizardFooter = () => {
+  const { t } = useTranslation();
   const { goToNextStep, goToPrevStep, activeStep } = useWizardContext();
   const { submitForm, isSubmitting, errors, values } = useFormikContext<ImportFleetFormValues>();
   const navigate = useNavigate();
@@ -56,11 +59,11 @@ const ImportFleetWizardFooter = () => {
   }
   const primaryBtn = isReviewStep ? (
     <Button variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
-      Import
+      {t('Import')}
     </Button>
   ) : (
     <Button variant="primary" onClick={goToNextStep} isDisabled={!isStepValid}>
-      Next
+      {t('Next')}
     </Button>
   );
 
@@ -69,17 +72,18 @@ const ImportFleetWizardFooter = () => {
       {primaryBtn}
       {activeStep.id !== repositoryStepId && (
         <Button variant="secondary" onClick={goToPrevStep} isDisabled={isSubmitting}>
-          Back
+          {t('Back')}
         </Button>
       )}
       <Button variant="link" onClick={() => navigate(-1)} isDisabled={isSubmitting}>
-        Cancel
+        {t('Cancel')}
       </Button>
     </WizardFooterWrapper>
   );
 };
 
 const ImportFleetWizard = () => {
+  const { t } = useTranslation();
   const { post } = useFetch();
   const [errors, setErrors] = React.useState<string[]>();
   const navigate = useNavigate();
@@ -97,7 +101,7 @@ const ImportFleetWizard = () => {
 
   if (error || rsError) {
     return (
-      <Alert isInline variant="danger" title="An error occured">
+      <Alert isInline variant="danger" title={t('An error occured')}>
         {error ? getErrorMessage(error) : getErrorMessage(rsError)}
       </Alert>
     );
@@ -121,7 +125,7 @@ const ImportFleetWizard = () => {
         ],
         url: '',
       }}
-      validationSchema={validationSchema(rsList?.items || [], repoList?.items || [])}
+      validationSchema={validationSchema(t, rsList?.items || [], repoList?.items || [])}
       validateOnMount
       onSubmit={async (values) => {
         setErrors(undefined);
@@ -149,18 +153,18 @@ const ImportFleetWizard = () => {
     >
       {({ values, errors: formikErrors }) => (
         <Wizard
-          header={<WizardHeader title="Import fleets" isCloseHidden />}
+          header={<WizardHeader title={t('Import fleets')} isCloseHidden />}
           footer={<ImportFleetWizardFooter />}
           onStepChange={(_, step) => setCurrentStep(step)}
           className="fctl-import-fleet"
         >
-          <WizardStep name="Select or create repository" id={repositoryStepId}>
+          <WizardStep name={t('Select or create repository')} id={repositoryStepId}>
             {(!currentStep || currentStep?.id === repositoryStepId) && (
               <RepositoryStep repositories={repoList?.items || []} />
             )}
           </WizardStep>
           <WizardStep
-            name="Add resource sync"
+            name={t('Add resource sync')}
             id={resourceSyncStepId}
             isDisabled={
               (!currentStep || currentStep?.id === repositoryStepId) && !isRepoStepValid(values, formikErrors)
@@ -169,7 +173,7 @@ const ImportFleetWizard = () => {
             {currentStep?.id === resourceSyncStepId && <ResourceSyncStep />}
           </WizardStep>
           <WizardStep
-            name="Review"
+            name={t('Review')}
             id={reviewStepId}
             isDisabled={!isRepoStepValid(values, formikErrors) || !isResourceSyncStepValid(formikErrors)}
           >

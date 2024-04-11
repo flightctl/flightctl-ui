@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import EditLabelsModal from '@app/components/modals/EditLabelsModal/EditLabelsModal';
 import { FlightCtlLabel, LabelEditable } from '@app/types/extraTypes';
+import { useTranslation } from 'react-i18next';
 
 type EditLabelsActionProps<T extends LabelEditable> = {
   resourceType: 'fleets' | 'devices';
@@ -14,6 +15,7 @@ export function useEditLabelsAction<T extends LabelEditable>({
   submitTransformer,
   onEditSuccess,
 }: EditLabelsActionProps<T>) {
+  const { t } = useTranslation();
   const [resourceName, setResourceName] = React.useState<string>();
 
   const editLabelsAction = ({
@@ -25,7 +27,7 @@ export function useEditLabelsAction<T extends LabelEditable>({
   }) => {
     const popperProps = disabledReason ? { tooltipProps: { content: disabledReason } } : undefined;
     return {
-      title: 'Edit labels',
+      title: t('Edit labels'),
       isAriaDisabled: !!disabledReason,
       ...popperProps,
       onClick: () => setResourceName(resourceId),

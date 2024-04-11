@@ -36,48 +36,56 @@ import { useTableSelect } from '@app/hooks/useTableSelect';
 import { getResourceId } from '@app/utils/resource';
 import MassDeleteRepositoryModal from '../modals/massModals/MassDeleteRepositoryModal/MassDeleteRepositoryModal';
 import ResourceListEmptyState from '@app/components/common/ResourceListEmptyState';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 const CreateRepositoryButton = ({ buttonText }: { buttonText?: string }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
     <Button variant="primary" onClick={() => navigate('/devicemanagement/repositories/create')}>
-      {buttonText || 'Create a repository'}
+      {buttonText || t('Create a repository')}
     </Button>
   );
 };
 
-const RepositoryEmptyState = () => (
-  <ResourceListEmptyState icon={RepositoryIcon} titleText="No repositories here!">
-    <EmptyStateBody>
-      You can create repositories and use them to point to Git repositories.
-      <br />
-      Adding resource syncs to them will allow you to keep your fleet&apos;s configurations updated and synced
-      automatically.
-    </EmptyStateBody>
-    <EmptyStateFooter>
-      <EmptyStateActions>
-        <CreateRepositoryButton />
-      </EmptyStateActions>
-    </EmptyStateFooter>
-  </ResourceListEmptyState>
-);
+const RepositoryEmptyState = () => {
+  const { t } = useTranslation();
+  return (
+    <ResourceListEmptyState icon={RepositoryIcon} titleText={t('No repositories here!')}>
+      <EmptyStateBody>
+        <>
+          {t('You can create repositories and use them to point to Git repositories.')}
+          <br />
+          {t(` Adding resource syncs to them will allow you to keep your fleet's configurations updated and synced
+          automatically.`)}
+        </>
+      </EmptyStateBody>
+      <EmptyStateFooter>
+        <EmptyStateActions>
+          <CreateRepositoryButton />
+        </EmptyStateActions>
+      </EmptyStateFooter>
+    </ResourceListEmptyState>
+  );
+};
 
-const columns: TableColumn<Repository>[] = [
+const getColumns = (t: TFunction): TableColumn<Repository>[] => [
   {
-    name: 'Name',
+    name: t('Name'),
     onSort: sortByName,
   },
   {
-    name: 'Url',
+    name: t('Url'),
     onSort: sortRepositoriesByUrl,
   },
   {
-    name: 'Sync status',
+    name: t('Sync status'),
     onSort: sortRepositoriesBySyncStatus,
   },
   {
-    name: 'Last transition',
+    name: t('Last transition'),
     onSort: sortRepositoriesByLastTransition,
   },
 ];
@@ -85,6 +93,7 @@ const columns: TableColumn<Repository>[] = [
 const getSearchText = (repo: Repository) => [repo.metadata.name];
 
 const RepositoryTable = () => {
+  const { t } = useTranslation();
   const [repositoryList, loading, error, refetch] = useFetchPeriodically<RepositoryList>({ endpoint: 'repositories' });
   const [deleteModalRepoId, setDeleteModalRepoId] = React.useState<string>();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
@@ -97,6 +106,8 @@ const RepositoryTable = () => {
   };
 
   const { search, setSearch, filteredData } = useTableTextSearch(repositoryList?.items || [], getSearchText);
+
+  const columns = React.useMemo(() => getColumns(t), [t]);
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
@@ -109,13 +120,13 @@ const RepositoryTable = () => {
             <TableTextSearch value={search} setValue={setSearch} />
           </ToolbarItem>
           <ToolbarItem>
-            <CreateRepositoryButton buttonText="Create repository" />
+            <CreateRepositoryButton buttonText={t('Create repository')} />
           </ToolbarItem>
           <ToolbarItem>
             <TableActions>
               <DropdownList>
                 <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassDeleteModalOpen(true)}>
-                  Delete
+                  {t('Delete')}
                 </SelectOption>
               </DropdownList>
             </TableActions>
@@ -123,7 +134,7 @@ const RepositoryTable = () => {
         </ToolbarContent>
       </Toolbar>
       <Table
-        aria-label="Repositories table"
+        aria-label={t('Repositories table')}
         emptyFilters={filteredData.length === 0 && (repositoryList?.items.length || 0) > 0}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
@@ -140,23 +151,23 @@ const RepositoryTable = () => {
                   isSelected: isRowSelected(repository),
                 }}
               />
-              <Td dataLabel="Name">
+              <Td dataLabel={t('Name')}>
                 <Link to={`${repository.metadata.name}`}>{repository.metadata.name}</Link>
               </Td>
-              <Td dataLabel="Url">{repository.spec.repo || '-'}</Td>
-              <Td dataLabel="Sync status">
+              <Td dataLabel={t('Url')}>{repository.spec.repo || '-'}</Td>
+              <Td dataLabel={t('Sync status')}>
                 <StatusInfo statusInfo={getRepositorySyncStatus(repository)} />
               </Td>
-              <Td dataLabel="Last transition">{getRepositoryLastTransitionTime(repository).text}</Td>
+              <Td dataLabel={t('Last transition')}>{getRepositoryLastTransitionTime(repository).text}</Td>
               <Td isActionCell>
                 <ActionsColumn
                   items={[
                     {
-                      title: 'Edit',
+                      title: t('Edit'),
                       onClick: () => navigate(`/devicemanagement/repositories/edit/${repository.metadata.name}`),
                     },
                     {
-                      title: 'Delete',
+                      title: t('Delete'),
                       onClick: () => setDeleteModalRepoId(repository.metadata.name),
                     },
                   ]}
@@ -186,8 +197,9 @@ const RepositoryTable = () => {
 };
 
 const RepositoryList = () => {
+  const { t } = useTranslation();
   return (
-    <ListPage title="Repositories">
+    <ListPage title={t('Repositories')}>
       <RepositoryTable />
     </ListPage>
   );

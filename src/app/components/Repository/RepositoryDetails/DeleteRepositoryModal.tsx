@@ -6,6 +6,7 @@ import { WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons/warni
 import { getErrorMessage } from '@app/utils/error';
 import { useFetch } from '@app/hooks/useFetch';
 import { ResourceSyncList } from '@types';
+import { Trans, useTranslation } from 'react-i18next';
 
 type DeleteRepositoryModalProps = {
   onClose: VoidFunction;
@@ -14,6 +15,7 @@ type DeleteRepositoryModalProps = {
 };
 
 const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: DeleteRepositoryModalProps) => {
+  const { t } = useTranslation();
   const { get, remove } = useFetch();
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [error, setError] = React.useState<string>();
@@ -27,7 +29,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
     const toDeleteRSs = resourceSyncIds?.length || 0;
     let deletedCount = 0;
     if (toDeleteRSs > 0) {
-      setMessage(`Deleting ${toDeleteRSs} resource syncs`);
+      setMessage(t('Deleting {{count}} resource sync', { count: toDeleteRSs }));
       const promises = (resourceSyncIds || []).map((id) => remove('resourcesyncs', id));
       const results = await Promise.allSettled(promises);
       deletedCount = results.filter((result) => result.status === 'fulfilled').length;
@@ -35,7 +37,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
 
     const nonDeletedRSs = toDeleteRSs - deletedCount;
     if (nonDeletedRSs !== 0) {
-      setError(`${nonDeletedRSs} resource syncs could not be deleted. Try deleting them manually.`);
+      setError(t('{{count}} resource sync could not be deleted. Try deleting it manually.', { count: nonDeletedRSs }));
       return false;
     }
     await remove('repositories', repositoryId);
@@ -48,10 +50,15 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
       setResourceSyncIds(resourceSyncs.items.map((rs) => rs.metadata.name || ''));
       setRsError(undefined);
     } catch (e) {
-      const error = `The repository cannot be safely deleted at this moment, as we couldn't determine if the repository contains resourcesyncs.`;
-      setRsError(`${error}. Detail: ${getErrorMessage(e)}`);
+      setRsError(
+        t(
+          `The repository cannot be safely deleted at this moment, as we couldn't determine if the repository contains resourcesyncs. Detail: {{detail}}`,
+          { detail: getErrorMessage(e) },
+        ),
+      );
       setResourceSyncIds([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [get, repositoryId]);
 
   useEffect(() => {
@@ -75,14 +82,14 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
 
   return (
     <Modal
-      title={`Delete repository ?`}
+      title={t('Delete repository ?')}
       isOpen
       onClose={onClose}
       variant={hasResourceSyncs ? 'medium' : 'small'}
       actions={[
         rsError ? (
           <Button variant="primary" onClick={loadRS}>
-            Reload resource syncs
+            {t('Reload resource syncs')}
           </Button>
         ) : (
           <Button
@@ -93,11 +100,11 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
             isLoading={isLoadingRSs || isDeleting}
             onClick={deleteAction}
           >
-            {hasResourceSyncs ? 'Delete the repository and resource syncs' : 'Delete the repository'}
+            {hasResourceSyncs ? t('Delete the repository and resource syncs') : t('Delete the repository')}
           </Button>
         ),
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
-          Cancel
+          {t('Cancel')}
         </Button>,
       ]}
     >
@@ -109,34 +116,38 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
                 <Icon status="warning" size="md">
                   <WarningTriangleIcon />
                 </Icon>{' '}
-                This repository defines resource syncs. By deleting the repository, its resource syncs will also be
-                deleted.
+                {t(
+                  'This repository defines resource syncs. By deleting the repository, its resource syncs will also be deleted.',
+                )}
               </Text>
               <Text>
-                Any fleet that is being managed by this repository&apos;s resource syncs, will stop being managed by the
-                service.
+                {t(
+                  `Any fleet that is being managed by this repository's resource syncs, will stop being managed by the service.`,
+                )}
               </Text>
             </TextContent>
           </StackItem>
         )}
         {rsError ? (
-          <Alert isInline variant="warning" title="Cannot delete repository">
+          <Alert isInline variant="warning" title={t('Cannot delete repository')}>
             {rsError}
           </Alert>
         ) : (
           <StackItem>
-            Are you sure you want to delete the repository <b>{repositoryId}</b>?
+            <Trans t={t}>
+              Are you sure you want to delete the repository <b>{repositoryId}</b>?
+            </Trans>
           </StackItem>
         )}
         {(isDeleting && message) ||
           (isLoadingRSs && (
             <StackItem>
-              <Spinner size="sm" /> {isLoadingRSs ? 'Checking if the repository has resource syncs' : message}
+              <Spinner size="sm" /> {isLoadingRSs ? t('Checking if the repository has resource syncs') : message}
             </StackItem>
           ))}
         {error && (
           <StackItem>
-            <Alert isInline variant="danger" title="An error occured">
+            <Alert isInline variant="danger" title={t('An error occured')}>
               {error}
             </Alert>
           </StackItem>

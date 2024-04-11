@@ -14,6 +14,8 @@ module.exports = {
   // An array of directory names to be searched recursively up from the requiring module's location
   moduleDirectories: ['node_modules', '<rootDir>/src'],
 
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+
   // A map from regular expressions to module names that allow to stub out resources with a single module
   moduleNameMapper: {
     '\\.(css|less)$': '<rootDir>/__mocks__/styleMock.js',

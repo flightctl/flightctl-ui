@@ -8,6 +8,7 @@ import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
 import { FlightCtlLabel, LabelEditable } from '@app/types/extraTypes';
 import { useFetch } from '@app/hooks/useFetch';
 import { Device, Fleet } from '@types';
+import { useTranslation } from 'react-i18next';
 
 type EditLabelsModalProps<MT extends LabelEditable> = {
   resourceType: 'fleets' | 'devices';
@@ -26,19 +27,20 @@ type EditLabelsFormValues = {
 };
 
 const EditLabelsForm = ({ onClose, error }: EditLabelsFormProps) => {
+  const { t } = useTranslation();
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<EditLabelsFormValues>();
   return (
     <Form>
-      <FormGroup label="Labels">
+      <FormGroup label={t('Labels')}>
         <LabelsField labels={values.labels} setLabels={(labels) => setFieldValue('labels', labels)} />
       </FormGroup>
       {error && <Alert isInline title={error} variant="danger" />}
       <FlightCtlActionGroup>
         <Button key="confirm" variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
-          Edit labels
+          {t('Edit labels')}
         </Button>
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isSubmitting}>
-          Cancel
+          {t('Cancel')}
         </Button>
       </FlightCtlActionGroup>
     </Form>
@@ -51,6 +53,7 @@ function EditLabelsModal<T extends LabelEditable>({
   submitTransformer,
   onClose,
 }: EditLabelsModalProps<T>) {
+  const { t } = useTranslation();
   const { get, put } = useFetch();
   const [submitError, setSubmitError] = React.useState<string>();
   const [dataItem, setDataItem] = React.useState<T>();
@@ -91,7 +94,11 @@ function EditLabelsModal<T extends LabelEditable>({
     );
   } else if (loadingError || !dataItem) {
     modalBody = (
-      <Alert isInline title={`Failed to retrieve the labels of ${resourceType} ${resourceName}`} variant="danger">
+      <Alert
+        isInline
+        title={t('Failed to retrieve the labels of {{resourceType}} {{resourceName}}', { resourceType, resourceName })}
+        variant="danger"
+      >
         {loadingError}
       </Alert>
     );
@@ -121,7 +128,7 @@ function EditLabelsModal<T extends LabelEditable>({
 
   return (
     <Modal
-      title={resourceType === 'fleets' ? 'Edit fleet labels' : 'Edit device labels'}
+      title={t('Edit {{type}} labels', { type: resourceType === 'fleets' ? 'fleet' : 'device' })}
       isOpen
       onClose={() => onClose()}
       variant="small"

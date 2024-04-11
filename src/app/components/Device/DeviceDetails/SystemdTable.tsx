@@ -10,6 +10,7 @@ import MatchPatternsModal from '../MatchPatternsModal/MatchPatternsModal';
 import SystemdDetailsTable from '../../DetailsPage/Tables/SystemdTable';
 import { getErrorMessage } from '@app/utils/error';
 import { useTemplateVersion } from '@app/hooks/useTemplateVersion';
+import { useTranslation } from 'react-i18next';
 
 type SystemdTableProps = {
   device: Device;
@@ -17,11 +18,12 @@ type SystemdTableProps = {
 };
 
 const SystemdTable: React.FC<SystemdTableProps> = ({ device, onSystemdUnitsUpdate }) => {
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [useTV, tv, isLoading, error] = useTemplateVersion(device);
 
   const disabledEditReason = getDeviceFleet(device.metadata)
-    ? 'The device is owned by a fleet and it cannot be edited'
+    ? t('The device is owned by a fleet and it cannot be edited')
     : '';
 
   const matchPatterns = useTV ? tv?.status?.systemd?.matchPatterns : device.spec?.systemd?.matchPatterns;
@@ -52,7 +54,7 @@ const SystemdTable: React.FC<SystemdTableProps> = ({ device, onSystemdUnitsUpdat
                 isAriaDisabled={!!disabledEditReason}
               >
                 <WithTooltip showTooltip={!!disabledEditReason} content={disabledEditReason}>
-                  <span>Edit</span>
+                  <span>{t('Edit')}</span>
                 </WithTooltip>
               </Button>
             </SplitItem>
@@ -60,7 +62,7 @@ const SystemdTable: React.FC<SystemdTableProps> = ({ device, onSystemdUnitsUpdat
         </StackItem>
         {error ? (
           <StackItem>
-            <Alert variant="danger" title="Failed to obtain the systemd units's matchPatterns" isInline>
+            <Alert variant="danger" title={t(`Failed to obtain the systemd units's matchPatterns`)} isInline>
               {getErrorMessage(error)}
             </Alert>
           </StackItem>

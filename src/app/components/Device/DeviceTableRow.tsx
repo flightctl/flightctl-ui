@@ -8,6 +8,7 @@ import DeviceFleet from './DeviceDetails/DeviceFleet';
 import { getDateDisplay } from '@app/utils/dates';
 import { DeleteListActionResult } from '../ListPage/types';
 import DeviceStatus from './DeviceDetails/DeviceStatus';
+import { useTranslation } from 'react-i18next';
 
 type DeviceTableRowProps = {
   device: Device;
@@ -26,6 +27,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
   isRowSelected,
   editLabelsAction,
 }) => {
+  const { t } = useTranslation();
   const deviceName = device.metadata.name as string;
   const displayName = device.metadata.labels?.displayName;
   return (
@@ -37,18 +39,18 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
           isSelected: isRowSelected(device),
         }}
       />
-      <Td dataLabel="Fingerprint">
+      <Td dataLabel={t('Fingerprint')}>
         <Link to={`/devicemanagement/devices/${deviceName}`}>{getFingerprintDisplay(device)}</Link>
       </Td>
-      <Td dataLabel="Name">{displayName || '-'}</Td>
-      <Td dataLabel="Status">
+      <Td dataLabel={t('Name')}>{displayName || '-'}</Td>
+      <Td dataLabel={t('Status')}>
         <DeviceStatus device={device} />
       </Td>
-      <Td dataLabel="Fleet">
+      <Td dataLabel={t('Fleet')}>
         <DeviceFleet deviceMetadata={device.metadata} />
       </Td>
-      <Td dataLabel="Created at">{getDateDisplay(device.metadata.creationTimestamp)}</Td>
-      <Td dataLabel="Operating system">{device.status?.systemInfo?.operatingSystem || '-'}</Td>
+      <Td dataLabel={t('Created at')}>{getDateDisplay(device.metadata.creationTimestamp)}</Td>
+      <Td dataLabel={t('Operating system')}>{device.status?.systemInfo?.operatingSystem || '-'}</Td>
       <Td isActionCell>
         <ActionsColumn
           items={[

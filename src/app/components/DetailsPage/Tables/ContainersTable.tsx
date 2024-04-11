@@ -2,33 +2,35 @@ import { Bullseye } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { ContainerStatus } from '@types';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 type ContainersTableProps = {
   containers: ContainerStatus[] | undefined;
 };
 
 const ContainersTable: React.FC<ContainersTableProps> = ({ containers }) => {
+  const { t } = useTranslation();
   return containers?.length ? (
-    <Table aria-label="Device containers table">
+    <Table aria-label={t('Device containers table')}>
       <Thead>
         <Tr>
-          <Th>Name</Th>
-          <Th modifier="wrap">Image</Th>
-          <Th modifier="wrap">Status</Th>
+          <Th>{t('Name')}</Th>
+          <Th modifier="wrap">{t('Image')}</Th>
+          <Th modifier="wrap">{t('Status')}</Th>
         </Tr>
       </Thead>
       <Tbody>
         {containers.map((container) => (
           <Tr key={container.id}>
-            <Td dataLabel="Name">{container.name}</Td>
-            <Td dataLabel="Image">{container.image}</Td>
-            <Td dataLabel="Status">{container.status}</Td>
+            <Td dataLabel={t('Name')}>{container.name}</Td>
+            <Td dataLabel={t('Image')}>{container.image}</Td>
+            <Td dataLabel={t('Status')}>{container.status}</Td>
           </Tr>
         ))}
       </Tbody>
     </Table>
   ) : (
-    <Bullseye>No containers found</Bullseye>
+    <Bullseye>{t('No containers found')}</Bullseye>
   );
 };
 

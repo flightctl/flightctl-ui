@@ -18,8 +18,10 @@ import { Outlet } from 'react-router-dom';
 import logo from '@fctl-assets/bgimages/flightctl-logo.svg';
 import AppNavigation from './AppNavigation';
 import AppToolbar from './AppToolbar';
+import { useTranslation } from 'react-i18next';
 
 const AppLayout: React.FC = () => {
+  const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
   const onSidebarToggle = () => {
@@ -32,7 +34,7 @@ const AppLayout: React.FC = () => {
         <MastheadToggle>
           <PageToggleButton
             variant="plain"
-            aria-label="Global navigation"
+            aria-label={t('Global navigation')}
             isSidebarOpen={isSidebarOpen}
             onSidebarToggle={onSidebarToggle}
             id="page-toggle-button"
@@ -70,7 +72,7 @@ const AppLayout: React.FC = () => {
       }}
       href={`#${pageId}`}
     >
-      Skip to Content
+      {t('Skip to Content')}
     </SkipToContent>
   );
   return (

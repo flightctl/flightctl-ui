@@ -13,25 +13,57 @@ import {
 } from '@patternfly/react-core';
 import { useNavigate } from 'react-router-dom';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 interface DetailsNotFoundProps {
   kind: string;
   id: string;
 }
 
-const getKindTitle = (kind: string) => {
+const getKindMsgs = (t: TFunction, kind: string, id: string) => {
   switch (kind) {
     case 'Fleets':
-      return 'fleet';
+      return {
+        title: t('Fleet not found'),
+        msg: (
+          <Trans t={t}>
+            We could not find the fleet with id <strong>{id}</strong>
+          </Trans>
+        ),
+      };
     case 'Devices':
-      return 'device';
+      return {
+        title: t('Device not found'),
+        msg: (
+          <Trans t={t}>
+            We could not find the device with id <strong>{id}</strong>
+          </Trans>
+        ),
+      };
     case 'Repositories':
-      return 'repository';
+      return {
+        title: t('Repository not found'),
+        msg: (
+          <Trans t={t}>
+            We could not find the repository with id <strong>{id}</strong>
+          </Trans>
+        ),
+      };
     case 'Enrollment requests':
-      return 'Enrollment request';
+      return {
+        title: t('Enrollment request not found'),
+        msg: (
+          <Trans t={t}>
+            We could not find the enrollment request with id <strong>{id}</strong>
+          </Trans>
+        ),
+      };
     default:
-      return kind.toLowerCase();
+      return {
+        title: kind.toLowerCase(),
+        msg: '',
+      };
   }
 };
 
@@ -43,23 +75,21 @@ const DetailsNotFound = ({ kind, id }: DetailsNotFoundProps) => {
     navigate('/refresh');
   };
 
-  const kindTitle = getKindTitle(kind);
+  const { title, msg } = getKindMsgs(t, kind, id);
 
   return (
     <PageSection>
       <EmptyState variant="full">
         <EmptyStateHeader
-          titleText={`${getKindTitle(kind)} not found`}
+          titleText={title}
           icon={<EmptyStateIcon icon={ExclamationTriangleIcon} />}
           headingLevel="h1"
         />
         <EmptyStateBody>
           <Stack>
+            <StackItem>{msg}</StackItem>
             <StackItem>
-              We couldn&apos;t find the {kindTitle} with id <strong>{id}</strong>
-            </StackItem>
-            <StackItem>
-              <small>This page will continue to attempt to fetch the details</small>
+              <small>{t('This page will continue to attempt to fetch the details')}</small>
             </StackItem>
           </Stack>
         </EmptyStateBody>

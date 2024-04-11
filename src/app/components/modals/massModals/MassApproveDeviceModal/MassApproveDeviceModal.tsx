@@ -22,10 +22,11 @@ import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { ApprovalStatus, getApprovalStatus } from '@app/utils/status/enrollmentRequest';
 import { Formik } from 'formik';
 import { getFingerprintDisplay } from '@app/utils/devices';
-
-import './MassApproveDeviceModal.css';
 import { isEnrollmentRequest } from '@app/types/extraTypes';
 import LabelsField from '@app/components/form/LabelsField';
+import { useTranslation } from 'react-i18next';
+
+import './MassApproveDeviceModal.css';
 
 const templateToName = (index: number, nameTemplate: string) => nameTemplate.replace(/{{n+}}/g, `${index + 1}`);
 
@@ -42,6 +43,7 @@ type MassApproveDeviceModalProps = {
 };
 
 const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose, onApproveSuccess, resources }) => {
+  const { t } = useTranslation();
   const [progress, setProgress] = React.useState(0);
   const [totalProgress, setTotalProgress] = React.useState(0);
   const [errors, setErrors] = React.useState<string[]>();
@@ -93,7 +95,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
     >
       {({ isSubmitting, values, setFieldValue, submitForm }) => (
         <Modal
-          title="Approve pending devices"
+          title={t('Approve pending devices')}
           isOpen
           onClose={onClose}
           showClose={!isSubmitting}
@@ -106,24 +108,25 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
               isLoading={isSubmitting}
               isDisabled={isSubmitting}
             >
-              Approve
+              {t('Approve')}
             </Button>,
             <Button key="cancel" variant="link" onClick={onClose} isDisabled={isSubmitting}>
-              Cancel
+              {t('Cancel')}
             </Button>,
           ]}
         >
           <Stack hasGutter>
             <StackItem>
-              Make sure you recognise and expect the following devices before approving them. Are you sure you want to
-              approve the listed devices?
+              {t(
+                'Make sure you recognise and expect the following devices before approving them. Are you sure you want to approve the listed devices?',
+              )}
             </StackItem>
             {enrollmentRequests.length !== resources.length && (
               <StackItem>
                 <Alert
                   variant="info"
                   isInline
-                  title="Some of the selected devices were already approved and will be excluded."
+                  title={t('Some of the selected devices were already approved and will be excluded.')}
                 />
               </StackItem>
             )}
@@ -131,17 +134,17 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
               <Table>
                 <Thead>
                   <Tr>
-                    <Th>Fingerprint</Th>
-                    <Th>Status</Th>
+                    <Th>{t('Fingerprint')}</Th>
+                    <Th>{t('Status')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {resources.map((resource) => {
                     return (
                       <Tr key={resource.metadata.name}>
-                        <Td dataLabel="Fingerprint">{getFingerprintDisplay(resource)}</Td>
-                        <Td dataLabel="Status">
-                          {isEnrollmentRequest(resource) ? getApprovalStatus(resource) : 'Already approved'}
+                        <Td dataLabel={t('Fingerprint')}>{getFingerprintDisplay(resource)}</Td>
+                        <Td dataLabel={t('Status')}>
+                          {isEnrollmentRequest(resource) ? getApprovalStatus(resource) : t('Already approved')}
                         </Td>
                       </Tr>
                     );
@@ -151,31 +154,31 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
             </StackItem>
             <StackItem>
               <Form>
-                <FormGroup label="Labels">
+                <FormGroup label={t('Labels')}>
                   <LabelsField labels={values.labels} setLabels={(labels) => setFieldValue('labels', labels)} />
                 </FormGroup>
-                <FormGroup label="Region" isRequired>
+                <FormGroup label={t('Region')} isRequired>
                   <TextInput
-                    aria-label="Region"
+                    aria-label={t('Region')}
                     value={values.region}
                     onChange={(_, value) => setFieldValue('region', value)}
                   />
                 </FormGroup>
-                <FormGroup label="Name" isRequired>
+                <FormGroup label={t('Name')} isRequired>
                   <FormHelperText>
                     <HelperText>
                       <HelperTextItem>
-                        <div>Name devices using the custom template.</div>
+                        <div>{t('Name devices using the custom template.')}</div>
                         <div>
                           <>
-                            <strong>{`{{n}}`}</strong> to add a number.
+                            <strong>{`{{n}}`}</strong> {t('to add a number.')}
                           </>
                         </div>
                       </HelperTextItem>
                     </HelperText>
                   </FormHelperText>
                   <TextInput
-                    aria-label="Name"
+                    aria-label={t('Name')}
                     value={values.displayName}
                     onChange={(_, value) => setFieldValue('displayName', value)}
                     placeholder="device-{{n}}"
@@ -189,16 +192,16 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
                   value={progress}
                   min={0}
                   max={totalProgress}
-                  title="Approving..."
+                  title={t('Approving...')}
                   measureLocation={ProgressMeasureLocation.top}
-                  label={`${progress} of ${totalProgress}`}
-                  valueText={`${progress} of ${totalProgress}`}
+                  label={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
+                  valueText={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
                 />
               </StackItem>
             )}
             {errors?.length && (
               <StackItem>
-                <Alert isInline variant="danger" title="An error occured">
+                <Alert isInline variant="danger" title={t('An error occured')}>
                   <Stack hasGutter>
                     {errors.map((e, index) => (
                       <StackItem key={index}>{e}</StackItem>

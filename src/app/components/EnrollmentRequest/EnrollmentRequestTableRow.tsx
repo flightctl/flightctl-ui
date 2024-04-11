@@ -7,6 +7,7 @@ import { getFingerprintDisplay } from '@app/utils/devices';
 import EnrollmentRequestStatus from './EnrollmentRequestStatus';
 import { DeleteListActionResult } from '../ListPage/types';
 import { ApprovalStatus, getApprovalStatus } from '@app/utils/status/enrollmentRequest';
+import { useTranslation } from 'react-i18next';
 
 type EnrollmentRequestTableRow = {
   rowIndex: number;
@@ -25,6 +26,7 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
   isRowSelected,
   onApprove,
 }) => {
+  const { t } = useTranslation();
   const approvalStatus = getApprovalStatus(er);
   return (
     <Tr>
@@ -35,21 +37,21 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
           isSelected: isRowSelected(er),
         }}
       />
-      <Td dataLabel="Fingerprint">
+      <Td dataLabel={t('Fingerprint')}>
         <Link to={`/devicemanagement/enrollmentrequests/${er.metadata.name}`}>{getFingerprintDisplay(er)}</Link>
       </Td>
-      <Td dataLabel="Name">-</Td>
-      <Td dataLabel="Status">
+      <Td dataLabel={t('Name')}>-</Td>
+      <Td dataLabel={t('Status')}>
         <EnrollmentRequestStatus er={er} />
       </Td>
-      <Td dataLabel="Fleet">-</Td>
-      <Td dataLabel="Created at">{getDateDisplay(er.metadata.creationTimestamp)}</Td>
-      <Td dataLabel="Operating system">{er.spec.deviceStatus?.systemInfo?.operatingSystem || '-'}</Td>
+      <Td dataLabel={t('Fleet')}>-</Td>
+      <Td dataLabel={t('Created at')}>{getDateDisplay(er.metadata.creationTimestamp)}</Td>
+      <Td dataLabel={t('Operating system')}>{er.spec.deviceStatus?.systemInfo?.operatingSystem || '-'}</Td>
       <Td isActionCell>
         <ActionsColumn
           items={[
             {
-              title: 'Approve',
+              title: t('Approve'),
               onClick: () => er.metadata.name && onApprove(er.metadata.name),
               isDisabled: approvalStatus !== ApprovalStatus.Pending,
             },

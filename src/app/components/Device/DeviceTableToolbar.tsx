@@ -20,8 +20,11 @@ import TableTextSearch, { TableTextSearchProps } from '../Table/TableTextSearch'
 import { ApprovalStatus } from '@app/utils/status/enrollmentRequest';
 import { DeviceConditionStatus } from '@app/utils/status/device';
 import { combinedDevicesStatuses } from '@app/utils/status/devices';
+import { useTranslation } from 'react-i18next';
 
-type FilterCategory = 'Status' | 'Name / ID' | 'Fleet';
+type FilterCategory = {
+  key: 'status' | 'id' | 'fleet';
+};
 
 type DeviceTableToolbarProps = {
   search: TableTextSearchProps['value'];
@@ -46,6 +49,7 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
   setFilters,
   children,
 }) => {
+  const { t } = useTranslation();
   const [isStatusExpanded, setIsStatusExpanded] = React.useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const fleetNameFilter = searchParams.get('fleetId');
@@ -70,8 +74,8 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
   };
 
   const onDeleteFilterGroup = (category: string | ToolbarChipGroup) => {
-    const type = category as FilterCategory;
-    if (type === 'Status') {
+    const { key } = category as FilterCategory;
+    if (key === 'status') {
       setFilters({ status: [] });
     } else {
       setFilters({ status: [] });
@@ -81,13 +85,13 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
   };
 
   const onDeleteFilterChip = (category: string | ToolbarChipGroup, chip: ToolbarChip | string) => {
-    const type = category as FilterCategory;
+    const { key } = category as FilterCategory;
     const id = chip as string;
-    if (type === 'Status') {
+    if (key === 'status') {
       setFilters({ status: filters.status.filter((fil: string) => fil !== id) });
-    } else if (type === 'Name / ID') {
+    } else if (key === 'id') {
       setSearch('');
-    } else if (type === 'Fleet') {
+    } else if (key === 'fleet') {
       clearFleetFilter();
     }
   };
@@ -96,21 +100,31 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
     <Toolbar id="devices-toolbar" clearAllFilters={() => onDeleteFilterGroup('')}>
       <ToolbarContent>
         <ToolbarItem variant="search-filter">
-          <ToolbarFilter chips={search ? [search] : []} deleteChip={onDeleteFilterChip} categoryName="Name / ID">
-            <TableTextSearch value={search} setValue={setSearch} placeholder="Search by name or fingerprint" />
+          <ToolbarFilter
+            chips={search ? [search] : []}
+            deleteChip={onDeleteFilterChip}
+            categoryName={{
+              key: 'id',
+              name: t('Name / ID'),
+            }}
+          >
+            <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name or fingerprint')} />
           </ToolbarFilter>
         </ToolbarItem>
         <ToolbarItem variant="search-filter">
           <ToolbarFilter
             chips={fleetNameFilter ? [fleetNameFilter] : []}
             deleteChip={onDeleteFilterChip}
-            categoryName="Fleet"
+            categoryName={{
+              key: 'fleet',
+              name: t('Fleet'),
+            }}
           >
             <SearchInput
-              aria-label="Fleet name (exact match)"
+              aria-label={t('Fleet name (exact match)')}
               onChange={(_event, value) => setFleetName(value)}
               value={fleetNameFilter ? fleetName : undefined}
-              placeholder="Fleet name (exact match)"
+              placeholder={t('Fleet name (exact match)')}
               onClear={clearFleetFilter}
               onSearch={onApplyFleetFilter}
             />
@@ -121,10 +135,13 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
             chips={filters.status}
             deleteChip={onDeleteFilterChip}
             deleteChipGroup={onDeleteFilterGroup}
-            categoryName="Status"
+            categoryName={{
+              key: 'status',
+              name: t('Status'),
+            }}
           >
             <Select
-              aria-label="Status"
+              aria-label={t('Status')}
               role="menu"
               toggle={(toggleRef) => (
                 <MenuToggle
@@ -132,7 +149,7 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
                   onClick={() => setIsStatusExpanded(!isStatusExpanded)}
                   isExpanded={isStatusExpanded}
                 >
-                  Status
+                  {t('Status')}
                   {filters.status.length > 0 && <Badge isRead>{filters.status.length}</Badge>}
                 </MenuToggle>
               )}

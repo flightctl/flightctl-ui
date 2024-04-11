@@ -11,8 +11,10 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { ResourceSync } from '@types';
+import { Trans, useTranslation } from 'react-i18next';
 
 const ResourceSyncToRepository = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { get } = useFetch();
 
@@ -29,25 +31,28 @@ const ResourceSyncToRepository = () => {
           setError(undefined);
           navigate(`/devicemanagement/repositories/${repository}/resourcesyncs#${rsId}`);
         } else {
-          setError(`Resourcesync ${rsId} is not linked to a repository`);
+          setError(t('Resourcesync {{rsId}} is not linked to a repository', { rsId }));
         }
       } catch (e) {
-        setError(`Resourcesync ${rsId} could not be found`);
+        setError(t('Resourcesync {{rsId}} could not be found', { rsId }));
       }
     };
 
     void fetchDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [get, navigate, rsId]);
 
   return (
     <PageSection variant="light">
       <Title headingLevel="h1" size="3xl">
-        Resource sync {rsId}
+        {t('Resource sync {{rsId}}', { rsId })}
       </Title>
       {error ? (
         <EmptyState>
           <EmptyStateHeader>
-            Could not find the details for the resourcesync <strong>{rsId}</strong>
+            <Trans t={t}>
+              Could not find the details for the resourcesync <strong>{rsId}</strong>
+            </Trans>
           </EmptyStateHeader>
           <EmptyStateBody>{error}</EmptyStateBody>
         </EmptyState>

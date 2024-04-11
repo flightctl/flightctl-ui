@@ -21,12 +21,15 @@ import { Repository, RepositoryList, ResourceSync, ResourceSyncList } from '@typ
 import { getErrorMessage } from '@app/utils/error';
 import { API_VERSION } from '@app/constants';
 import CreateRepositoryForm from './CreateRepositoryForm';
+import { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 const gitRegex = new RegExp(/^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/);
 const repoNameRegex = /^[a-zA-Z0-9-_\\.]+$/;
 const pathRegex = /\/.+/;
 
 export const repoSyncSchema = (
+  t: TFunction,
   values: ResourceSyncFormValue[],
   resourceSyncs: ResourceSync[],
   repositoryId?: string,
@@ -38,36 +41,36 @@ export const repoSyncSchema = (
     .of(
       object().shape({
         name: string()
-          .required('Name is required.')
-          .test('Must be unique', 'Must be unique', (value) => {
+          .required(t('Name is required.'))
+          .test('Must be unique', t('Must be unique'), (value) => {
             if (!value) {
               return true;
             }
             return values.filter((v) => v.name === value).length === 1;
           })
-          .notOneOf(existingNames, 'Resource sync with the same name already exists.'),
-        targetRevision: string().required('Target revision is required.'),
-        path: string().matches(pathRegex, 'Must be an absolute path.').required('Path is required.'),
+          .notOneOf(existingNames, t('Resource sync with the same name already exists.')),
+        targetRevision: string().required(t('Target revision is required.')),
+        path: string().matches(pathRegex, t('Must be an absolute path.')).required(t('Path is required.')),
       }),
     )
     .required();
 };
 
 export const repositorySchema =
-  (resourceSyncs: ResourceSync[], repositories: Repository[], repositoryId?: string) =>
+  (t: TFunction, resourceSyncs: ResourceSync[], repositories: Repository[], repositoryId?: string) =>
   (values: RepositoryFormValues) => {
     const repoNames = repositories.map((r) => r.metadata.name || '');
     return object({
       name: repositoryId
         ? string()
         : string()
-            .required('Name is required')
-            .notOneOf(repoNames, 'Repository with the same name already exists.')
-            .matches(repoNameRegex, 'Name can only contain alphanumeric characters, and the characters ., -, and _.')
-            .max(255, 'Name must not exceed 255 characters'),
+            .required(t('Name is required'))
+            .notOneOf(repoNames, t('Repository with the same name already exists.'))
+            .matches(repoNameRegex, t('Name can only contain alphanumeric characters, and the characters ., -, and _.'))
+            .max(255, t('Name must not exceed 255 characters')),
       url: string()
-        .matches(gitRegex, 'Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos')
-        .required('Repository URL is required'),
+        .matches(gitRegex, t('Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos'))
+        .required(t('Repository URL is required')),
       credentials: object()
         .shape({
           isPrivate: boolean().required(),
@@ -75,19 +78,19 @@ export const repositorySchema =
             .trim()
             .when('isPublic', {
               is: false,
-              then: (schema) => schema.required('Username is required for private repositories'),
+              then: (schema) => schema.required(t('Username is required for private repositories')),
             }),
           password: string()
             .trim()
             .when('isPublic', {
               is: false,
-              then: (schema) => schema.required('Password is required for private repositories'),
+              then: (schema) => schema.required(t('Password is required for private repositories')),
             }),
         })
         .required(),
       useResourceSyncs: boolean(),
       resourceSyncs: values.useResourceSyncs
-        ? repoSyncSchema(values.resourceSyncs, resourceSyncs, repositoryId)
+        ? repoSyncSchema(t, values.resourceSyncs, resourceSyncs, repositoryId)
         : array(),
     });
   };
@@ -177,6 +180,7 @@ const getInitValues = (repository?: Repository, resourceSyncs?: ResourceSync[]):
 };
 
 const CreateRepository = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { repositoryId } = useParams<{ repositoryId: string }>();
   const { post, get, put, remove } = useFetch();
@@ -216,12 +220,12 @@ const CreateRepository = () => {
         <StackItem>
           <Breadcrumb>
             <BreadcrumbItem>
-              <Link to="/devicemanagement/repositories">Repositories</Link>
+              <Link to="/devicemanagement/repositories">{t('Repositories')}</Link>
             </BreadcrumbItem>
-            <BreadcrumbItem isActive>{repositoryId ? 'Edit repository' : 'Create repository'}</BreadcrumbItem>
+            <BreadcrumbItem isActive>{repositoryId ? t('Edit repository') : t('Create repository')}</BreadcrumbItem>
           </Breadcrumb>
           <Title headingLevel="h1" size="3xl">
-            {repositoryId ? 'Edit repository' : 'Create repository'}
+            {repositoryId ? t('Edit repository') : t('Create repository')}
           </Title>
         </StackItem>
         <StackItem>
@@ -232,7 +236,7 @@ const CreateRepository = () => {
           ) : (
             <Formik<RepositoryFormValues>
               initialValues={getInitValues(repository, resourceSyncs)}
-              validationSchema={lazy(repositorySchema(resourceSyncs || [], repositories || [], repositoryId))}
+              validationSchema={lazy(repositorySchema(t, resourceSyncs || [], repositories || [], repositoryId))}
               onSubmit={async (values) => {
                 setErrors(undefined);
                 if (repositoryId) {
@@ -304,7 +308,7 @@ const CreateRepository = () => {
             >
               <CreateRepositoryForm isEdit={!!repository}>
                 {errors?.length && (
-                  <Alert isInline variant="danger" title="An error occured">
+                  <Alert isInline variant="danger" title={t('An error occured')}>
                     {errors.map((e, index) => (
                       <div key={index}>{e}</div>
                     ))}

@@ -3,30 +3,32 @@ import { useFormikContext } from 'formik';
 import * as React from 'react';
 import { ImportFleetFormValues } from '../types';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { useTranslation } from 'react-i18next';
 
 export const reviewStepId = 'review';
 
 const ReviewStep = ({ errors }: { errors?: string[] }) => {
+  const { t } = useTranslation();
   const { values } = useFormikContext<ImportFleetFormValues>();
   return (
     <Stack hasGutter>
       <StackItem isFilled>
         <Form>
-          <FormGroup label="Repository">
+          <FormGroup label={t('Repository')}>
             <TextInput
               value={values.useExistingRepo ? values.existingRepo : values.name}
               type="text"
-              aria-label="disabled repository input"
+              aria-label={t('disabled repository input')}
               isDisabled
             />
           </FormGroup>
-          <FormGroup label="Resource syncs">
+          <FormGroup label={t('Resource syncs')}>
             <Table>
               <Thead>
                 <Tr>
-                  <Th>Name</Th>
-                  <Th>Path</Th>
-                  <Th>Target revision</Th>
+                  <Th>{t('Name')}</Th>
+                  <Th>{t('Path')}</Th>
+                  <Th>{t('Target revision')}</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -46,12 +48,14 @@ const ReviewStep = ({ errors }: { errors?: string[] }) => {
         <Alert
           isInline
           variant="info"
-          title="Fleets will appear in the fleets table list and their status will be reflecting the resource sync process status. After a few minutes, they should be synced and enabled."
+          title={t(
+            'Fleets will appear in the fleets table list and their status will be reflecting the resource sync process status. After a few minutes, they should be synced and enabled.',
+          )}
         />
       </StackItem>
       {errors?.length && (
         <StackItem>
-          <Alert isInline variant="danger" title="An error occured.">
+          <Alert isInline variant="danger" title={t('An error occured.')}>
             {errors?.map((e, index) => <div key={index}>{e}</div>)}
           </Alert>
         </StackItem>

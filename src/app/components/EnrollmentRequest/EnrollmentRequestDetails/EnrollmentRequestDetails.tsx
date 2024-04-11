@@ -35,8 +35,10 @@ import EnrollmentRequestStatus from '@app/components/EnrollmentRequest/Enrollmen
 import WithHelperText from '@app/components/common/WithHelperText';
 
 import './EnrollmentRequestDetails.css';
+import { useTranslation } from 'react-i18next';
 
 const EnrollmentRequestDetails = () => {
+  const { t } = useTranslation();
   const { enrollmentRequestId } = useParams() as { enrollmentRequestId: string };
   const [er, loading, error, refetch] = useFetchPeriodically<EnrollmentRequest>({
     endpoint: `enrollmentrequests/${enrollmentRequestId}`,
@@ -70,7 +72,7 @@ const EnrollmentRequestDetails = () => {
               onClick={() => setIsApprovalModalOpen(true)}
               isDisabled={approvalStatus !== ApprovalStatus.Pending}
             >
-              Approve
+              {t('Approve')}
             </DropdownItem>
             {deleteAction}
           </DropdownList>
@@ -80,39 +82,39 @@ const EnrollmentRequestDetails = () => {
       <Grid hasGutter>
         <GridItem md={12}>
           <Card>
-            <CardTitle>Details</CardTitle>
+            <CardTitle>{t('Details')}</CardTitle>
             <CardBody>
               <DescriptionList columnModifier={{ lg: '3Col' }}>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>Name</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
                   <DescriptionListDescription>{er?.metadata.name || '-'}</DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>Created</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     {getDateDisplay(er?.metadata.creationTimestamp)}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>OS</DescriptionListTerm>
+                  <DescriptionListTerm>{t('OS')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     {er?.spec?.deviceStatus?.systemInfo?.operatingSystem || '-'}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>Architecture</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Architecture')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     {er?.spec?.deviceStatus?.systemInfo?.architecture || '-'}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>Labels</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Labels')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     <LabelsView prefix="er" labels={er?.metadata.labels} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>Status</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     <EnrollmentRequestStatus er={er} />
                   </DescriptionListDescription>
@@ -126,21 +128,21 @@ const EnrollmentRequestDetails = () => {
             <CardTitle>
               <WithHelperText
                 showLabel
-                ariaLabel="Certificate signing request"
-                content="A PEM-encoded PKCS#10 certificate signing request."
+                ariaLabel={t('Certificate signing request')}
+                content={t('A PEM-encoded PKCS#10 certificate signing request.')}
               />
             </CardTitle>
             <DetailsPageCardBody>
               {er?.spec.csr ? (
                 <TextArea
-                  aria-label="CSR"
+                  aria-label={t('Certificate Signing Request')}
                   value={er.spec.csr}
                   readOnlyVariant="plain"
                   autoResize
                   className="fctl-enrollment-details__text-area"
                 />
               ) : (
-                <Bullseye>Not available</Bullseye>
+                <Bullseye>{t('Not available')}</Bullseye>
               )}
             </DetailsPageCardBody>
           </DetailsPageCard>
@@ -148,42 +150,52 @@ const EnrollmentRequestDetails = () => {
         <GridItem md={6}>
           <DetailsPageCard>
             <CardTitle>
-              <WithHelperText showLabel ariaLabel="Certificate" content="A PEM-encoded signed certificate." />
+              <WithHelperText showLabel ariaLabel={t('Certificate')} content={t('A PEM-encoded signed certificate.')} />
             </CardTitle>
             <DetailsPageCardBody>
               {er?.status?.certificate ? (
                 <TextArea
-                  aria-label="Certificate"
+                  aria-label={t('Certificate')}
                   value={er.status.certificate}
                   readOnlyVariant="plain"
                   autoResize
                   className="fctl-enrollment-details__text-area"
                 />
               ) : (
-                <Bullseye>Not available</Bullseye>
+                <Bullseye>{t('Not available')}</Bullseye>
               )}
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <CardTitle>Conditions</CardTitle>
+            <CardTitle>{t('Conditions')}</CardTitle>
             <DetailsPageCardBody>
-              {er && <ConditionsTable type="Enrollment request" conditions={er.status?.conditions} />}
+              {er && (
+                <ConditionsTable
+                  ariaLabel={t('Enrollment request conditions table')}
+                  conditions={er.status?.conditions}
+                />
+              )}
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <CardTitle>Device conditions</CardTitle>
+            <CardTitle>{t('Device conditions')}</CardTitle>
             <DetailsPageCardBody>
-              {er && <ConditionsTable type="Device" conditions={er.spec.deviceStatus?.conditions} />}
+              {er && (
+                <ConditionsTable
+                  ariaLabel={t('Device conditions table')}
+                  conditions={er.spec.deviceStatus?.conditions}
+                />
+              )}
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <CardTitle>Systemd units</CardTitle>
+            <CardTitle>{t('Systemd units')}</CardTitle>
             <DetailsPageCardBody>
               {er && <SystemdTable systemdUnits={er?.spec.deviceStatus?.systemdUnits} />}
             </DetailsPageCardBody>
@@ -191,7 +203,7 @@ const EnrollmentRequestDetails = () => {
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <CardTitle>Containers</CardTitle>
+            <CardTitle>{t('Containers')}</CardTitle>
             <DetailsPageCardBody>
               {er && <ContainersTable containers={er.spec.deviceStatus?.containers} />}
             </DetailsPageCardBody>
@@ -199,7 +211,7 @@ const EnrollmentRequestDetails = () => {
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <CardTitle>System integrity measurements</CardTitle>
+            <CardTitle>{t('System integrity measurements')}</CardTitle>
             <DetailsPageCardBody>
               {er && <IntegrityTable measurements={er.spec.deviceStatus?.systemInfo?.measurements} />}
             </DetailsPageCardBody>

@@ -38,49 +38,56 @@ import MassDeleteDeviceModal from '../modals/massModals/MassDeleteDeviceModal/Ma
 import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
 import DeviceEnrollmentModal from '../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
 import ResourceListEmptyState from '@app/components/common/ResourceListEmptyState';
+import { Trans, useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
 };
 
-const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => (
-  <ResourceListEmptyState icon={MicrochipIcon} titleText="No devices here!">
-    <EmptyStateBody>
-      You can add devices and label them to match fleets, or your can{' '}
-      <Link to="/devicemanagement/fleets">start with a fleet</Link> and add devices into it.
-    </EmptyStateBody>
-    <EmptyStateFooter>
-      <EmptyStateActions>
-        <Button onClick={onAddDevice}>Add devices</Button>
-      </EmptyStateActions>
-    </EmptyStateFooter>
-  </ResourceListEmptyState>
-);
+const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => {
+  const { t } = useTranslation();
+  return (
+    <ResourceListEmptyState icon={MicrochipIcon} titleText={t('No devices here!')}>
+      <EmptyStateBody>
+        <Trans t={t}>
+          You can add devices and label them to match fleets, or your can{' '}
+          <Link to="/devicemanagement/fleets">start with a fleet</Link> and add devices into it.
+        </Trans>
+      </EmptyStateBody>
+      <EmptyStateFooter>
+        <EmptyStateActions>
+          <Button onClick={onAddDevice}>{t('Add devices')}</Button>
+        </EmptyStateActions>
+      </EmptyStateFooter>
+    </ResourceListEmptyState>
+  );
+};
 
-const deviceColumns: TableColumn<Device | EnrollmentRequest>[] = [
+const getDeviceColumns = (t: TFunction): TableColumn<Device | EnrollmentRequest>[] => [
   {
-    name: 'Fingerprint',
+    name: t('Fingerprint'),
     onSort: sortByName,
   },
   {
-    name: 'Name',
+    name: t('Name'),
     onSort: sortByDisplayName,
   },
   {
-    name: 'Status',
+    name: t('Status'),
     onSort: sortDevicesByStatus,
     defaultSort: true,
   },
   {
-    name: 'Fleet',
+    name: t('Fleet'),
     onSort: sortDevicesByFleet,
   },
   {
-    name: 'Created at',
+    name: t('Created at'),
     onSort: sortByCreationTimestamp,
   },
   {
-    name: 'Operating system',
+    name: t('Operating system'),
     onSort: sortDevicesByOS,
     thProps: {
       modifier: 'wrap',
@@ -95,11 +102,14 @@ interface DeviceTableProps {
 }
 
 export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTableProps) => {
+  const { t } = useTranslation();
   const [requestId, setRequestId] = React.useState<string>();
   const [addDeviceModal, setAddDeviceModal] = React.useState(false);
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
   const [isMassApproveModalOpen, setIsMassApproveModalOpen] = React.useState(false);
   const { remove } = useFetch();
+
+  const deviceColumns = React.useMemo(() => getDeviceColumns(t), [t]);
 
   const { filteredData, ...rest } = useDeviceFilters(resources, queryFilters);
   const { getSortParams, sortedData } = useTableSort(filteredData, deviceColumns);
@@ -136,23 +146,23 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
     <>
       <DeviceTableToolbar {...rest}>
         <ToolbarItem>
-          <Button onClick={() => setAddDeviceModal(true)}>Add devices</Button>
+          <Button onClick={() => setAddDeviceModal(true)}>{t('Add devices')}</Button>
         </ToolbarItem>
         <ToolbarItem>
           <TableActions>
             <SelectList>
               <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassApproveModalOpen(true)}>
-                Approve
+                {t('Approve')}
               </SelectOption>
               <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassDeleteModalOpen(true)}>
-                Delete
+                {t('Delete')}
               </SelectOption>
             </SelectList>
           </TableActions>
         </ToolbarItem>
       </DeviceTableToolbar>
       <Table
-        aria-label="Devices table"
+        aria-label={t('Devices table')}
         columns={deviceColumns}
         emptyFilters={filteredData.length === 0 && resources.length > 0}
         getSortParams={getSortParams}
@@ -224,6 +234,7 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
 };
 
 const DeviceList = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const filterByFleetId = searchParams.get('fleetId');
 
@@ -257,7 +268,7 @@ const DeviceList = () => {
 
   return (
     <>
-      <ListPage title="Devices">
+      <ListPage title={t('Devices')}>
         <ListPageBody error={devicesError || erEror} loading={devicesLoading || (erLoading && !filterByFleetId)}>
           <DeviceTable resources={data} refetch={refetch} queryFilters={{ filterByFleetId }} />
         </ListPageBody>

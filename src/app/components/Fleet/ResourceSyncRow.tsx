@@ -4,6 +4,7 @@ import * as React from 'react';
 import { RSLink } from './FleetDetails/FleetOwnerLink';
 import { DeleteListActionResult } from '../ListPage/types';
 import ResourceSyncStatus from '../ResourceSync/ResourceSyncStatus';
+import { useTranslation } from 'react-i18next';
 
 type ResourceSyncRowProps = {
   resourceSync: ResourceSync;
@@ -28,6 +29,7 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
   deleteAction,
   editLabelsAction,
 }) => {
+  const { t } = useTranslation();
   return (
     <Tr>
       <Td
@@ -37,13 +39,13 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
           isSelected: isRowSelected(resourceSync),
         }}
       />
-      <Td dataLabel="Name">-</Td>
-      <Td dataLabel="OS image">-</Td>
-      <Td dataLabel="Label selector">-</Td>
-      <Td dataLabel="Status">
+      <Td dataLabel={t('Name')}>-</Td>
+      <Td dataLabel={t('OS image')}>-</Td>
+      <Td dataLabel={t('Label selector')}>-</Td>
+      <Td dataLabel={t('Status')}>
         <ResourceSyncStatus resourceSync={resourceSync} />
       </Td>
-      <Td dataLabel="Managed by">
+      <Td dataLabel={t('Managed by')}>
         <RSLink rsName={resourceSync.metadata.name || ''} />
       </Td>
       <Td isActionCell>
@@ -51,7 +53,7 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
           items={[
             editLabelsAction({
               resourceId: resourceSync.metadata.name || '',
-              disabledReason: 'Fleets managed by a Resourcesync cannot be edited',
+              disabledReason: t('Fleets managed by a Resourcesync cannot be edited'),
             }),
             deleteAction({
               resourceId: resourceSync.metadata.name || '',

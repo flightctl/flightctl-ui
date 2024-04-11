@@ -31,8 +31,10 @@ import DeviceFleet from './DeviceFleet';
 import DeviceStatus from './DeviceStatus';
 import SystemdTable from './SystemdTable';
 import { useEditLabelsAction } from '@app/hooks/useEditLabelsAction';
+import { useTranslation } from 'react-i18next';
 
 const DeviceDetails = () => {
+  const { t } = useTranslation();
   const { deviceId } = useParams() as { deviceId: string };
   const [device, loading, error, refetch] = useFetchPeriodically<Required<Device>>({ endpoint: `devices/${deviceId}` });
 
@@ -80,11 +82,11 @@ const DeviceDetails = () => {
             {deleteAction}
             <DropdownItem
               {...editLabelsAction({
-                disabledReason: boundFleet ? 'Devices bound to a fleet cannot be edited' : '',
+                disabledReason: boundFleet ? t('Devices bound to a fleet cannot be edited') : '',
                 resourceId: deviceId,
               })}
             >
-              Edit labels
+              {t('Edit labels')}
             </DropdownItem>
           </DropdownList>
         </DetailsPageActions>
@@ -93,45 +95,45 @@ const DeviceDetails = () => {
       <Grid hasGutter>
         <GridItem md={12}>
           <Card>
-            <CardTitle>Details</CardTitle>
+            <CardTitle>{t('Details')}</CardTitle>
             <CardBody>
               <DescriptionList columnModifier={{ lg: '3Col' }}>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>Fingerprint</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Fingerprint')}</DescriptionListTerm>
                   <DescriptionListDescription>{device?.metadata.name || '-'}</DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>Created</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     {getDateDisplay(device?.metadata.creationTimestamp)}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>Fleet</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Fleet')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     <DeviceFleet deviceMetadata={device?.metadata || {}} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>Status</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     <DeviceStatus device={device} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>OS</DescriptionListTerm>
+                  <DescriptionListTerm>{t('OS')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     {device?.status?.systemInfo?.operatingSystem || '-'}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>Architecture</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Architecture')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     {device?.status?.systemInfo?.architecture || '-'}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>Labels</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Labels')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     <LabelsView prefix="deviceDet" labels={device?.metadata?.labels} />
                   </DescriptionListDescription>
@@ -142,15 +144,17 @@ const DeviceDetails = () => {
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <CardTitle>Conditions</CardTitle>
+            <CardTitle>{t('Conditions')}</CardTitle>
             <DetailsPageCardBody>
-              {device && <ConditionsTable type="Device" conditions={device.status.conditions} />}
+              {device && (
+                <ConditionsTable ariaLabel={t('Device conditions table')} conditions={device.status.conditions} />
+              )}
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <CardTitle>Systemd units</CardTitle>
+            <CardTitle>{t('Systemd units')}</CardTitle>
             <DetailsPageCardBody>
               {device && <SystemdTable device={device} onSystemdUnitsUpdate={onSystemdUnitsUpdate} />}
             </DetailsPageCardBody>
@@ -158,7 +162,7 @@ const DeviceDetails = () => {
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <CardTitle>Containers</CardTitle>
+            <CardTitle>{t('Containers')}</CardTitle>
             <DetailsPageCardBody>
               {device && <ContainersTable containers={device.status.containers} />}
             </DetailsPageCardBody>
@@ -166,7 +170,7 @@ const DeviceDetails = () => {
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <CardTitle>System integrity measurements</CardTitle>
+            <CardTitle>{t('System integrity measurements')}</CardTitle>
             <DetailsPageCardBody>
               {device && <IntegrityTable measurements={device.status.systemInfo?.measurements} />}
             </DetailsPageCardBody>

@@ -7,10 +7,12 @@ import { getErrorMessage } from '@app/utils/error';
 import DeviceEnrollmentForm, { DeviceEnrollmentFormProps, DeviceEnrollmentFormValues } from './DeviceEnrollmentForm';
 import { ApprovalStatus, getApprovalStatus } from '@app/utils/status/enrollmentRequest';
 import { useAuth } from 'react-oidc-context';
+import { useTranslation } from 'react-i18next';
 
 type DeviceEnrollmentModalProps = Omit<DeviceEnrollmentFormProps, 'error'>;
 
 const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmentRequest, onClose }) => {
+  const { t } = useTranslation();
   const { post } = useFetch();
   const [error, setError] = React.useState<string>();
   const auth = useAuth();
@@ -42,11 +44,11 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
       }}
     >
       {({ isSubmitting }) => (
-        <Modal title="Device enrollment request" isOpen onClose={() => !isSubmitting && onClose()} variant="small">
+        <Modal title={t('Device enrollment request')} isOpen onClose={() => !isSubmitting && onClose()} variant="small">
           {getApprovalStatus(enrollmentRequest) !== ApprovalStatus.Approved ? (
             <DeviceEnrollmentForm enrollmentRequest={enrollmentRequest} onClose={onClose} error={error} />
           ) : (
-            <Alert isInline variant="info" title="Enrollment request is already approved." />
+            <Alert isInline variant="info" title={t('Enrollment request is already approved.')} />
           )}
         </Modal>
       )}

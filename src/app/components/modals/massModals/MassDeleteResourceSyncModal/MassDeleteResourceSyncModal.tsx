@@ -4,6 +4,7 @@ import * as React from 'react';
 import { getErrorMessage } from '@app/utils/error';
 import { useFetch } from '@app/hooks/useFetch';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { useTranslation } from 'react-i18next';
 
 type MassDeleteResourceSyncModalProps = {
   onClose: VoidFunction;
@@ -16,6 +17,7 @@ const MassDeleteResourceSyncModal: React.FC<MassDeleteResourceSyncModalProps> = 
   resources,
   onDeleteSuccess,
 }) => {
+  const { t } = useTranslation();
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [progress, setProgress] = React.useState(0);
   const [progressTotal, setProgressTotal] = React.useState(0);
@@ -43,38 +45,38 @@ const MassDeleteResourceSyncModal: React.FC<MassDeleteResourceSyncModalProps> = 
   };
   return (
     <Modal
-      title="Delete resource syncs"
+      title={t('Delete resource syncs')}
       isOpen
       onClose={onClose}
       showClose={!isDeleting}
       variant="medium"
       actions={[
         <Button key="delete" variant="danger" onClick={deleteResources} isLoading={isDeleting} isDisabled={isDeleting}>
-          Delete
+          {t('Delete')}
         </Button>,
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
-          Cancel
+          {t('Cancel')}
         </Button>,
       ]}
     >
       <Stack hasGutter>
-        <StackItem>Are you sure you want to delete the following resource syncs ?</StackItem>
+        <StackItem>{t('Are you sure you want to delete the following resource syncs ?')}</StackItem>
         <StackItem>
           <Table>
             <Thead>
               <Tr>
-                <Th>Name</Th>
-                <Th>Revision</Th>
-                <Th>Path</Th>
+                <Th>{t('Name')}</Th>
+                <Th>{t('Revision')}</Th>
+                <Th>{t('Path')}</Th>
               </Tr>
             </Thead>
             <Tbody>
               {resources.map((resource) => {
                 return (
                   <Tr key={resource.metadata.name}>
-                    <Td dataLabel="Name">{resource.metadata.name || '-'}</Td>
-                    <Td dataLabel="Target revision">{resource.spec.targetRevision || '-'}</Td>
-                    <Td dataLabel="Path">{resource.spec.path || '-'}</Td>
+                    <Td dataLabel={t('Name')}>{resource.metadata.name || '-'}</Td>
+                    <Td dataLabel={t('Target revision')}>{resource.spec.targetRevision || '-'}</Td>
+                    <Td dataLabel={t('Path')}>{resource.spec.path || '-'}</Td>
                   </Tr>
                 );
               })}
@@ -87,16 +89,16 @@ const MassDeleteResourceSyncModal: React.FC<MassDeleteResourceSyncModalProps> = 
               value={progress}
               min={0}
               max={progressTotal}
-              title="Deleting..."
+              title={t('Deleting...')}
               measureLocation={ProgressMeasureLocation.top}
-              label={`${progress} of ${progressTotal}`}
-              valueText={`${progress} of ${progressTotal}`}
+              label={t('{{progress}} of {{progressTotal}}', { progress, progressTotal })}
+              valueText={t('{{progress}} of {{progressTotal}}', { progress, progressTotal })}
             />
           </StackItem>
         )}
         {errors?.length && (
           <StackItem>
-            <Alert isInline variant="danger" title="An error occured">
+            <Alert isInline variant="danger" title={t('An error occured')}>
               <Stack hasGutter>
                 {errors.map((e, index) => (
                   <StackItem key={index}>{e}</StackItem>

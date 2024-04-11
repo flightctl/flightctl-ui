@@ -6,9 +6,7 @@ import FleetOwnerLink from './FleetDetails/FleetOwnerLink';
 import { Fleet } from '@types';
 import { DeleteListActionResult } from '../ListPage/types';
 import FleetStatus from './FleetStatus';
-
-const canDeleteResource = (fleet: Fleet) =>
-  fleet.metadata?.owner ? 'Fleets managed by a Resourcesync cannot be deleted' : undefined;
+import { useTranslation } from 'react-i18next';
 
 type FleetRowProps = {
   fleet: Fleet;
@@ -33,6 +31,7 @@ const FleetRow: React.FC<FleetRowProps> = ({
   editLabelsAction,
   deleteAction,
 }) => {
+  const { t } = useTranslation();
   const fleetName = fleet.metadata.name || '';
   return (
     <Tr>
@@ -43,17 +42,17 @@ const FleetRow: React.FC<FleetRowProps> = ({
           isSelected: isRowSelected(fleet),
         }}
       />
-      <Td dataLabel="Name">
+      <Td dataLabel={t('Name')}>
         <Link to={`${fleetName}`}>{fleetName}</Link>
       </Td>
-      <Td dataLabel="OS image">{fleet.spec.template.spec.os?.image || '-'}</Td>
-      <Td dataLabel="Label selector">
+      <Td dataLabel={t('OS image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>
+      <Td dataLabel={t('Label selector')}>
         <LabelsView prefix={fleetName} labels={fleet.spec.selector?.matchLabels} />
       </Td>
-      <Td dataLabel="Status">
+      <Td dataLabel={t('Status')}>
         <FleetStatus fleet={fleet} />
       </Td>
-      <Td dataLabel="Managed by">
+      <Td dataLabel={t('Managed by')}>
         <FleetOwnerLink owner={fleet.metadata?.owner} />
       </Td>
       <Td isActionCell>
@@ -61,11 +60,15 @@ const FleetRow: React.FC<FleetRowProps> = ({
           items={[
             editLabelsAction({
               resourceId: fleetName,
-              disabledReason: fleet.metadata?.owner ? 'Fleets managed by a Resourcesync cannot be edited' : undefined,
+              disabledReason: fleet.metadata?.owner
+                ? t('Fleets managed by a Resourcesync cannot be edited')
+                : undefined,
             }),
             deleteAction({
               resourceId: fleetName,
-              disabledReason: canDeleteResource(fleet),
+              disabledReason: fleet.metadata?.owner
+                ? t('Fleets managed by a Resourcesync cannot be deleted')
+                : undefined,
             }),
           ]}
         />

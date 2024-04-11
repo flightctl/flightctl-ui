@@ -31,22 +31,24 @@ import { FleetFormValues } from './types';
 import ConfigTemplateForm from './ConfigTemplateForm';
 import TextField from '@app/components/form/TextField';
 import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
+import { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
-const validationSchema = (fleets: Fleet[]) => {
+const validationSchema = (t: TFunction, fleets: Fleet[]) => {
   const existingFleets = fleets.map((f) => f.metadata.name);
   return Yup.object<FleetFormValues>({
     name: Yup.string()
-      .required('Name is required.')
-      .notOneOf(existingFleets, 'Fleet with the same name already exists.'),
-    osImage: Yup.string().required('OS image is required.'),
+      .required(t('Name is required.'))
+      .notOneOf(existingFleets, t('Fleet with the same name already exists.')),
+    osImage: Yup.string().required(t('OS image is required.')),
     labels: Yup.array().required(),
     configTemplates: Yup.array().of(
       Yup.object({
         type: Yup.string().required(),
-        name: Yup.string().required('Name is required.'),
-        path: Yup.string().required('Path is required.'),
-        repoURL: Yup.string().required('Repository URL is required.'),
-        targetRevision: Yup.string().required('Target revision is required.'),
+        name: Yup.string().required(t('Name is required.')),
+        path: Yup.string().required(t('Path is required.')),
+        repoURL: Yup.string().required(t('Repository URL is required.')),
+        targetRevision: Yup.string().required(t('Target revision is required.')),
       }),
     ),
   });
@@ -110,41 +112,42 @@ const getFleetResource = (values: FleetFormValues): Fleet => ({
 });
 
 const CreateFleetForm = ({ children }: React.PropsWithChildren<Record<never, never>>) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { values, setFieldValue, submitForm, isSubmitting, isValid } = useFormikContext<FleetFormValues>();
   return (
     <Form>
       <Grid hasGutter span={8}>
-        <FormGroup label="Name" isRequired>
+        <FormGroup label={t('Name')} isRequired>
           <TextField
             name="name"
-            aria-label="Name"
+            aria-label={t('Name')}
             value={values.name}
             onChange={(_, value) => setFieldValue('name', value)}
           />
         </FormGroup>
-        <FormGroup label="OS image" isRequired>
+        <FormGroup label={t('OS image')} isRequired>
           <TextField
             name="osImage"
-            aria-label="OS image"
+            aria-label={t('OS image')}
             value={values.osImage}
             onChange={(_, value) => setFieldValue('osImage', value)}
           />
         </FormGroup>
-        <FormGroup label="Labels" isRequired>
+        <FormGroup label={t('Labels')} isRequired>
           <LabelsField labels={values.labels} setLabels={(newLabels) => setFieldValue('labels', newLabels)} />
         </FormGroup>
-        <FormGroup label="Configuration templates" isRequired>
+        <FormGroup label={t('Configuration templates')} isRequired>
           <ConfigTemplateForm />
         </FormGroup>
       </Grid>
       {children}
       <FlightCtlActionGroup>
         <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitting || !isValid}>
-          Create fleet
+          {t('Create fleet')}
         </Button>
         <Button variant="link" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
-          Cancel
+          {t('Cancel')}
         </Button>
       </FlightCtlActionGroup>
     </Form>
@@ -152,6 +155,7 @@ const CreateFleetForm = ({ children }: React.PropsWithChildren<Record<never, nev
 };
 
 const CreateFleet = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { post } = useFetch();
   const [error, setError] = React.useState<string>();
@@ -167,7 +171,7 @@ const CreateFleet = () => {
 
   if (fetchError) {
     return (
-      <Alert isInline variant="danger" title="An error occured.">
+      <Alert isInline variant="danger" title={t('An error occured.')}>
         {getErrorMessage(fetchError)}
       </Alert>
     );
@@ -178,12 +182,12 @@ const CreateFleet = () => {
         <StackItem>
           <Breadcrumb>
             <BreadcrumbItem>
-              <Link to="/devicemanagement/fleets">Fleets</Link>
+              <Link to="/devicemanagement/fleets">{t('Fleets')}</Link>
             </BreadcrumbItem>
-            <BreadcrumbItem isActive>Create fleet</BreadcrumbItem>
+            <BreadcrumbItem isActive>{t('Create fleet')}</BreadcrumbItem>
           </Breadcrumb>
           <Title headingLevel="h1" size="3xl">
-            Create fleet
+            {t('Create fleet')}
           </Title>
         </StackItem>
         <StackItem>
@@ -202,7 +206,7 @@ const CreateFleet = () => {
                 },
               ],
             }}
-            validationSchema={validationSchema(fleetList?.items || [])}
+            validationSchema={validationSchema(t, fleetList?.items || [])}
             onSubmit={async (values) => {
               setError(undefined);
               try {
@@ -216,7 +220,7 @@ const CreateFleet = () => {
           >
             <CreateFleetForm>
               {error && (
-                <Alert isInline variant="danger" title="An error occured">
+                <Alert isInline variant="danger" title={t('An error occured')}>
                   {error}
                 </Alert>
               )}

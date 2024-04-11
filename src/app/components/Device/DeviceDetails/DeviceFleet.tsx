@@ -6,17 +6,19 @@ import { ObjectMeta } from '@types';
 import { getDeviceFleet, getMissingFleetDetails } from '@app/utils/devices';
 
 import './DeviceFleet.css';
+import { useTranslation } from 'react-i18next';
 
 const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => {
+  const { t } = useTranslation();
   const details = getMissingFleetDetails(deviceMetadata);
   const hasMultipleOwners = details.owners.length > 1;
 
   return (
     <div className="fctl-device-fleet">
-      {hasMultipleOwners ? 'Multiple owners' : 'No owner fleet'}
+      {hasMultipleOwners ? t('Multiple owners') : t('No owner fleet')}
       <Popover
         triggerAction="hover"
-        aria-label="Missing fleeet detail"
+        aria-label={t('Missing fleeet detail')}
         bodyContent={
           <span>
             {details.message}

@@ -15,6 +15,7 @@ import { useAuth } from '@app/hooks/useAuth';
 
 import './AppToolbar.css';
 import UserPreferencesModal from '../UserPreferences/UserPreferencesModal';
+import { useTranslation } from 'react-i18next';
 
 type UserDropdownProps = {
   children?: React.ReactNode;
@@ -23,6 +24,7 @@ type UserDropdownProps = {
 };
 
 const UserDropdown: React.FC<UserDropdownProps> = ({ children, username = 'User', onUserPreferences }) => {
+  const { t } = useTranslation();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const onDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -47,7 +49,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ children, username = 'User'
       )}
     >
       <DropdownList>
-        <DropdownItem onClick={onUserPreferences}>User preferences</DropdownItem>
+        <DropdownItem onClick={onUserPreferences}>{t('User preferences')}</DropdownItem>
         {children}
       </DropdownList>
     </Dropdown>
@@ -55,6 +57,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ children, username = 'User'
 };
 
 const AppToolbar = () => {
+  const { t } = useTranslation();
   const [preferencesModalOpen, setPreferencesModalOpen] = React.useState(false);
   const auth = useAuth();
   const onUserPreferences = () => setPreferencesModalOpen(true);
@@ -66,14 +69,14 @@ const AppToolbar = () => {
       userDropdown = (
         <UserDropdown username={auth.user.profile.preferred_username} onUserPreferences={onUserPreferences}>
           <DropdownItem key="logout" onClick={() => void auth.signoutRedirect()}>
-            Logout
+            {t('Logout')}
           </DropdownItem>
         </UserDropdown>
       );
     } else {
       userDropdown = (
         <Button variant="link" onClick={() => void auth.signinRedirect()}>
-          Log in
+          {t('Log in')}
         </Button>
       );
     }

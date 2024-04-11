@@ -1,6 +1,7 @@
 import { Label, LabelGroup } from '@patternfly/react-core';
 import * as React from 'react';
 import { FlightCtlLabel } from '@app/types/extraTypes';
+import { useTranslation } from 'react-i18next';
 
 type LabelsFieldProps = {
   labels: FlightCtlLabel[];
@@ -8,6 +9,7 @@ type LabelsFieldProps = {
 };
 
 const LabelsField: React.FC<LabelsFieldProps> = ({ labels, setLabels }) => {
+  const { t } = useTranslation();
   const onClose = (e: React.MouseEvent<Element, MouseEvent>, index: number) => {
     const newLabels = [...labels];
     newLabels.splice(index, 1);
@@ -34,7 +36,7 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ labels, setLabels }) => {
       isEditable
       addLabelControl={
         <Label color="blue" variant="outline" isOverflowLabel onClick={onAdd}>
-          Add label
+          {t('Add label')}
         </Label>
       }
     >

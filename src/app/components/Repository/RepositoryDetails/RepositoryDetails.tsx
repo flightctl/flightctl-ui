@@ -11,8 +11,10 @@ import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
 import DetailsTab from './Tabs/DetailsTab';
 import ResourceSyncsTab from './Tabs/ResourceSyncsTab';
 import DeleteRepositoryModal from './DeleteRepositoryModal';
+import { useTranslation } from 'react-i18next';
 
 const RepositoryDetails = () => {
+  const { t } = useTranslation();
   const { repositoryId } = useParams() as { repositoryId: string };
   const [repoDetails, isLoading, error] = useFetchPeriodically<Required<Repository>>({
     endpoint: `repositories/${repositoryId}`,
@@ -37,17 +39,17 @@ const RepositoryDetails = () => {
         <DetailsPageActions>
           <DropdownList>
             <DropdownItem onClick={() => navigate(`/devicemanagement/repositories/edit/${repositoryId}`)}>
-              Edit
+              {t('Edit')}
             </DropdownItem>
-            <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>Delete</DropdownItem>
+            <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete')}</DropdownItem>
           </DropdownList>
         </DetailsPageActions>
       }
       nav={
         <Nav variant="tertiary">
           <NavList>
-            <NavItem to="details">Details</NavItem>
-            <NavItem to="resourcesyncs">Resource syncs</NavItem>
+            <NavItem to="details">{t('Details')}</NavItem>
+            <NavItem to="resourcesyncs">{t('Resource syncs')}</NavItem>
           </NavList>
         </Nav>
       }

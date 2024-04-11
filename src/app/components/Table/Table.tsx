@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Bullseye, PageSection } from '@patternfly/react-core';
 import { Table as PFTable, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
+import { useTranslation } from 'react-i18next';
 
 export type TableColumn<D> = {
   name: string;
@@ -24,10 +25,11 @@ type TableProps<D> = {
 type TableFC = <D>(props: TableProps<D>) => JSX.Element;
 
 const Table: TableFC = ({ columns, children, emptyFilters, getSortParams, onSelectAll, isAllSelected, ...rest }) => {
+  const { t } = useTranslation();
   if (emptyFilters) {
     return (
       <PageSection variant="light">
-        <Bullseye>No resources are matching the current filters.</Bullseye>
+        <Bullseye>{t('No resources are matching the current filters.')}</Bullseye>
       </PageSection>
     );
   }

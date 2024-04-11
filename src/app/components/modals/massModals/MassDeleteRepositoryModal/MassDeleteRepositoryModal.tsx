@@ -16,6 +16,7 @@ import {
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { Repository, ResourceSyncList } from '@types';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 type MassDeleteRepositoryModalProps = {
   onClose: VoidFunction;
@@ -28,6 +29,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
   onDeleteSuccess,
   repositories,
 }) => {
+  const { t } = useTranslation();
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [errors, setErrors] = React.useState<string[]>();
   const [deleteAll, setDeleteAll] = React.useState(true);
@@ -68,7 +70,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
 
   return (
     <Modal
-      title="Delete repositories"
+      title={t('Delete repositories')}
       isOpen
       onClose={onClose}
       showClose={!isDeleting}
@@ -81,20 +83,20 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
           isLoading={isDeleting}
           isDisabled={isDeleting}
         >
-          Delete
+          {t('Delete')}
         </Button>,
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
-          Cancel
+          {t('Cancel')}
         </Button>,
       ]}
     >
       <Stack hasGutter>
-        <StackItem>Are you sure you want to delete the following repositories ?</StackItem>
+        <StackItem>{t('Are you sure you want to delete the following repositories ?')}</StackItem>
         <StackItem>
           <Table>
             <Thead>
               <Tr>
-                <Th>Repository name</Th>
+                <Th>{t('Repository name')}</Th>
                 <Th modifier="nowrap">
                   <Split hasGutter>
                     <SplitItem>
@@ -105,10 +107,10 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
                           setSelectedRepositories([]);
                         }}
                         id="select-all"
-                        name="Delete Resource Syncs"
+                        name={t('Delete Resource Syncs')}
                       />
                     </SplitItem>
-                    <SplitItem>Delete Resource Syncs</SplitItem>
+                    <SplitItem>{t('Delete Resource Syncs')}</SplitItem>
                   </Split>
                 </Th>
               </Tr>
@@ -118,7 +120,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
                 const repositoryId = getResourceId(repository);
                 return (
                   <Tr key={repository.metadata.name}>
-                    <Td dataLabel="Repository name">{repository.metadata.name}</Td>
+                    <Td dataLabel={t('Repository name')}>{repository.metadata.name}</Td>
                     <Td
                       select={{
                         rowIndex,
@@ -151,16 +153,16 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
               value={progress}
               min={0}
               max={progressTotal}
-              title="Deleting..."
+              title={t('Deleting...')}
               measureLocation={ProgressMeasureLocation.top}
-              label={`${progress} of ${progressTotal}`}
-              valueText={`${progress} of ${progressTotal}`}
+              label={t('{{progress}} of {{progressTotal}}', { progress, progressTotal })}
+              valueText={t('{{progress}} of {{progressTotal}}', { progress, progressTotal })}
             />
           </StackItem>
         )}
         {errors?.length && (
           <StackItem>
-            <Alert isInline variant="danger" title="An error occured">
+            <Alert isInline variant="danger" title={t('An error occured')}>
               <Stack hasGutter>
                 {errors.map((e, index) => (
                   <StackItem key={index}>{e}</StackItem>

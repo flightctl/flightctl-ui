@@ -76,7 +76,7 @@ describe('Details page', () => {
         </DetailsPage>,
       );
 
-      expect(screen.getByText('device not found')).toBeInTheDocument();
+      expect(screen.getByText('Device not found')).toBeInTheDocument();
       expect(screen.queryByText('Content')).not.toBeInTheDocument();
     });
   });

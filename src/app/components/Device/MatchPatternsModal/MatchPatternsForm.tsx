@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Alert, Button, Form, Label, LabelGroup } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
+import { useTranslation } from 'react-i18next';
 
 export type MatchPatternsFormValues = {
   matchPatterns: string[];
@@ -13,6 +14,7 @@ export type MatchPatternsFormProps = {
 };
 
 const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error }) => {
+  const { t } = useTranslation();
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<MatchPatternsFormValues>();
 
   const onPatternClose = (e: React.MouseEvent<Element, MouseEvent>, index: number) => {
@@ -44,7 +46,7 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
         isEditable
         addLabelControl={
           <Label color="blue" variant="outline" isOverflowLabel onClick={onAdd}>
-            Add match pattern
+            {t('Add match pattern')}
           </Label>
         }
         numLabels={20}
@@ -67,10 +69,10 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
       {error && <Alert isInline title={error} variant="danger" />}
       <FlightCtlActionGroup>
         <Button key="confirm" variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
-          Update match patterns
+          {t('Update match patterns')}
         </Button>
         <Button key="cancel" variant="link" onClick={() => onClose()} isDisabled={isSubmitting}>
-          Cancel
+          {t('Cancel')}
         </Button>
       </FlightCtlActionGroup>
     </Form>

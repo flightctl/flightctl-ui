@@ -5,6 +5,7 @@ import * as React from 'react';
 import MatchPatternsForm, { MatchPatternsFormValues } from './MatchPatternsForm';
 import { useFetch } from '@app/hooks/useFetch';
 import { getErrorMessage } from '@app/utils/error';
+import { useTranslation } from 'react-i18next';
 
 type MatchPatternsModalProps = {
   onClose: (reload?: boolean) => void;
@@ -34,10 +35,11 @@ const getDevice = (device: Device, matchPatterns: string[]) => {
  * @param onClose on close callback
  */
 const MatchPatternsModal: React.FC<MatchPatternsModalProps> = ({ onClose, device }) => {
+  const { t } = useTranslation();
   const { put } = useFetch();
   const [error, setError] = React.useState<string>();
   return (
-    <Modal title="Edit match patterns" isOpen onClose={() => onClose()} variant="small">
+    <Modal title={t('Edit match patterns')} isOpen onClose={() => onClose()} variant="small">
       <Formik<MatchPatternsFormValues>
         initialValues={{ matchPatterns: device.spec?.systemd?.matchPatterns || [] }}
         onSubmit={async ({ matchPatterns }) => {

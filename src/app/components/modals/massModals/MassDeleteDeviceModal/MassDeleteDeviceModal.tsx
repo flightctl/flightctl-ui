@@ -6,6 +6,7 @@ import { useFetch } from '@app/hooks/useFetch';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { getFingerprintDisplay } from '@app/utils/devices';
 import { isEnrollmentRequest } from '@app/types/extraTypes';
+import { useTranslation } from 'react-i18next';
 
 type MassDeleteDeviceModalProps = {
   onClose: VoidFunction;
@@ -14,6 +15,7 @@ type MassDeleteDeviceModalProps = {
 };
 
 const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, resources, onDeleteSuccess }) => {
+  const { t } = useTranslation();
   const [progress, setProgress] = React.useState(0);
   const [totalProgress, setTotalProgress] = React.useState(0);
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -41,36 +43,36 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
   };
   return (
     <Modal
-      title="Delete devices"
+      title={t('Delete devices')}
       isOpen
       onClose={onClose}
       showClose={!isDeleting}
       variant="medium"
       actions={[
         <Button key="delete" variant="danger" onClick={deleteResources} isLoading={isDeleting} isDisabled={isDeleting}>
-          Delete
+          {t('Delete')}
         </Button>,
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
-          Cancel
+          {t('Cancel')}
         </Button>,
       ]}
     >
       <Stack hasGutter>
-        <StackItem>Are you sure you want to delete the following devices ?</StackItem>
+        <StackItem>{t('Are you sure you want to delete the following devices ?')}</StackItem>
         <StackItem>
           <Table>
             <Thead>
               <Tr>
-                <Th>Fingerprint</Th>
-                <Th>Name</Th>
+                <Th>{t('Fingerprint')}</Th>
+                <Th>{t('Name')}</Th>
               </Tr>
             </Thead>
             <Tbody>
               {resources.map((resource) => {
                 return (
                   <Tr key={resource.metadata.name}>
-                    <Td dataLabel="Fingerprint">{getFingerprintDisplay(resource)}</Td>
-                    <Td dataLabel="Name">{resource.metadata.labels?.displayName || '-'}</Td>
+                    <Td dataLabel={t('Fingerprint')}>{getFingerprintDisplay(resource)}</Td>
+                    <Td dataLabel={t('Name')}>{resource.metadata.labels?.displayName || '-'}</Td>
                   </Tr>
                 );
               })}
@@ -83,16 +85,16 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
               value={progress}
               min={0}
               max={totalProgress}
-              title="Approving..."
+              title={t('Approving...')}
               measureLocation={ProgressMeasureLocation.top}
-              label={`${progress} of ${totalProgress}`}
-              valueText={`${progress} of ${totalProgress}`}
+              label={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
+              valueText={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
             />
           </StackItem>
         )}
         {errors?.length && (
           <StackItem>
-            <Alert isInline variant="danger" title="An error occured">
+            <Alert isInline variant="danger" title={t('An error occured')}>
               <Stack hasGutter>
                 {errors.map((e, index) => (
                   <StackItem key={index}>{e}</StackItem>

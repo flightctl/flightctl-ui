@@ -57,7 +57,7 @@ const DetailsPageActions: React.FC<DetailsPageActionsProps> = ({ children }) => 
           ref={toggleRef}
           isExpanded={actionsOpen}
           onClick={() => setActionsOpen(!actionsOpen)}
-          aria-label="Actions dropdown"
+          aria-label={t('Actions dropdown')}
           variant="primary"
         >
           {t('Actions')}

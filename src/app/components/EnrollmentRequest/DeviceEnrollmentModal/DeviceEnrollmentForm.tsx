@@ -6,6 +6,7 @@ import { useFormikContext } from 'formik';
 import LabelsField from '@app/components/form/LabelsField';
 import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
 import { FlightCtlLabel } from '@app/types/extraTypes';
+import { useTranslation } from 'react-i18next';
 
 export type DeviceEnrollmentFormValues = {
   labels: FlightCtlLabel[];
@@ -21,23 +22,24 @@ export type DeviceEnrollmentFormProps = {
 };
 
 const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentRequest, onClose, error, children }) => {
+  const { t } = useTranslation();
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<DeviceEnrollmentFormValues>();
   return (
     <Form>
       {enrollmentRequest && (
-        <FormGroup label="Fingerprint">
+        <FormGroup label={t('Fingerprint')}>
           <TextInput aria-label="Fingerprint" isDisabled value={enrollmentRequest.metadata.name} />
         </FormGroup>
       )}
-      <FormGroup label="Labels">
+      <FormGroup label={t('Labels')}>
         <LabelsField labels={values.labels} setLabels={(labels) => setFieldValue('labels', labels)} />
       </FormGroup>
-      <FormGroup label="Region" isRequired>
+      <FormGroup label={t('Region')} isRequired>
         <TextInput aria-label="Region" value={values.region} onChange={(_, value) => setFieldValue('region', value)} />
       </FormGroup>
-      <FormGroup label="Name" isRequired>
+      <FormGroup label={t('Name')} isRequired>
         <TextInput
-          aria-label="Name"
+          aria-label={t('Name')}
           value={values.displayName}
           onChange={(_, value) => setFieldValue('displayName', value)}
         />
@@ -46,10 +48,10 @@ const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentR
       {error && <Alert isInline title={error} variant="danger" />}
       <FlightCtlActionGroup>
         <Button key="confirm" variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
-          Approve
+          {t('Approve')}
         </Button>
         <Button key="cancel" variant="link" onClick={() => onClose()} isDisabled={isSubmitting}>
-          Cancel
+          {t('Cancel')}
         </Button>
       </FlightCtlActionGroup>
     </Form>

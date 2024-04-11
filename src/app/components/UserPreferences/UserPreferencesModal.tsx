@@ -14,27 +14,32 @@ import * as React from 'react';
 import { UserPreferencesContext } from './UserPreferencesProvider';
 import { Theme } from '@app/hooks/useThemePreferences';
 import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
-const themeLabels: { [key in Theme]: string } = {
-  system: 'System default',
-  light: 'Light',
-  dark: 'Dark',
-};
+const getThemeLabels = (t: TFunction): { [key in Theme]: string } => ({
+  system: t('System default'),
+  light: t('Light'),
+  dark: t('Dark'),
+});
 
 type UserPreferencesModalProps = {
   onClose: VoidFunction;
 };
 
 const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) => {
+  const { t } = useTranslation();
   const { theme, setTheme } = React.useContext(UserPreferencesContext);
+
+  const themeLabels = getThemeLabels(t);
 
   const [themeExpanded, setThemeExpanded] = React.useState(false);
   return (
-    <Modal title="User preferences" isOpen variant="small" onClose={onClose}>
+    <Modal title={t('User preferences')} isOpen variant="small" onClose={onClose}>
       <Stack hasGutter>
         <StackItem>
           <Form>
-            <FormGroup label="Theme">
+            <FormGroup label={t('Theme')}>
               <Select
                 toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                   <MenuToggle
@@ -67,7 +72,7 @@ const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) 
         <StackItem>
           <FlightCtlActionGroup>
             <Button variant="secondary" onClick={onClose}>
-              Close
+              {t('Close')}
             </Button>
           </FlightCtlActionGroup>
         </StackItem>
