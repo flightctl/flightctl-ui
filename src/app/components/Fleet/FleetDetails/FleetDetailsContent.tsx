@@ -15,9 +15,9 @@ import {
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import SourceUrlList from '../SourceUrlList';
+import RepositorySourceList from '../RepositorySourceList';
 import { Fleet } from '@types';
-import { getSourceUrls } from '@app/utils/fleets';
+import { getRepositorySources } from '@app/utils/fleets';
 import FleetOwnerLink from '@app/components/Fleet/FleetDetails/FleetOwnerLink';
 import FleetStatus from '../FleetStatus';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +34,7 @@ const FleetDevices = ({ fleetId, count }: { fleetId: string; count: number | und
 
 const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCount: number | undefined }) => {
   const { t } = useTranslation();
+  const repositorySources = getRepositorySources(fleet);
   return (
     <Grid hasGutter>
       <GridItem md={12}>
@@ -41,6 +42,18 @@ const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCou
           <CardTitle>{t('Details')}</CardTitle>
           <CardBody>
             <DescriptionList columnModifier={{ lg: '3Col' }}>
+              <DescriptionListGroup>
+                <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
+                <DescriptionListDescription>
+                  {getDateDisplay(fleet.metadata.creationTimestamp || '')}
+                </DescriptionListDescription>
+              </DescriptionListGroup>
+              <DescriptionListGroup>
+                <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
+                <DescriptionListDescription>
+                  <FleetStatus fleet={fleet} />
+                </DescriptionListDescription>
+              </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('OS image')}</DescriptionListTerm>
                 <DescriptionListDescription>{fleet.spec.template.spec.os?.image}</DescriptionListDescription>
@@ -64,21 +77,9 @@ const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCou
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
+                <DescriptionListTerm>{t('Sources ({{size}})', { size: repositorySources.length })}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <FleetStatus fleet={fleet} />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Sources')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  <SourceUrlList sourceUrls={getSourceUrls(fleet)} />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {getDateDisplay(fleet.metadata.creationTimestamp || '')}
+                  <RepositorySourceList repositorySources={repositorySources} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>

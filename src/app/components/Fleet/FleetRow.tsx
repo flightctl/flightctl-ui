@@ -2,11 +2,11 @@ import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-tabl
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import LabelsView from '../common/LabelsView';
-import FleetOwnerLink from './FleetDetails/FleetOwnerLink';
 import { Fleet } from '@types';
 import { DeleteListActionResult } from '../ListPage/types';
 import FleetStatus from './FleetStatus';
 import { useTranslation } from 'react-i18next';
+import { FleetOwnerLinkIcon, getOwnerName } from './FleetDetails/FleetOwnerLink';
 
 type FleetRowProps = {
   fleet: Fleet;
@@ -43,7 +43,9 @@ const FleetRow: React.FC<FleetRowProps> = ({
         }}
       />
       <Td dataLabel={t('Name')}>
-        <Link to={`${fleetName}`}>{fleetName}</Link>
+        <FleetOwnerLinkIcon hasOwner={!!getOwnerName({ owner: fleet.metadata.owner })}>
+          <Link to={`${fleetName}`}>{fleetName}</Link>
+        </FleetOwnerLinkIcon>
       </Td>
       <Td dataLabel={t('OS image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>
       <Td dataLabel={t('Label selector')}>
@@ -51,9 +53,6 @@ const FleetRow: React.FC<FleetRowProps> = ({
       </Td>
       <Td dataLabel={t('Status')}>
         <FleetStatus fleet={fleet} />
-      </Td>
-      <Td dataLabel={t('Managed by')}>
-        <FleetOwnerLink owner={fleet.metadata?.owner} />
       </Td>
       <Td isActionCell>
         <ActionsColumn

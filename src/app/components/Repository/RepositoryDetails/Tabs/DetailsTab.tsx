@@ -21,6 +21,23 @@ import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '@app/u
 import { Repository } from '@types';
 import { useTranslation } from 'react-i18next';
 
+export const RepositoryURLLink = ({ url }: { url: string | undefined }) =>
+  url ? (
+    <Button
+      component="a"
+      variant="link"
+      isInline
+      href={url}
+      target="_blank"
+      icon={<ExternalLinkAltIcon />}
+      iconPosition="end"
+    >
+      {url}
+    </Button>
+  ) : (
+    '-'
+  );
+
 const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
   const { t } = useTranslation();
   return (
@@ -33,17 +50,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Url')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <Button
-                    component="a"
-                    variant="link"
-                    isInline
-                    href={repoDetails?.spec.repo}
-                    target="_blank"
-                    icon={<ExternalLinkAltIcon />}
-                    iconPosition="end"
-                  >
-                    {repoDetails?.spec.repo}
-                  </Button>
+                  <RepositoryURLLink url={repoDetails.spec.repo} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>

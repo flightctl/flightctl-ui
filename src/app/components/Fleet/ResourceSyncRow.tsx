@@ -1,7 +1,7 @@
 import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
 import { ResourceSync } from '@types';
 import * as React from 'react';
-import { RSLink } from './FleetDetails/FleetOwnerLink';
+import { FleetOwnerLinkIcon } from './FleetDetails/FleetOwnerLink';
 import { DeleteListActionResult } from '../ListPage/types';
 import ResourceSyncStatus from '../ResourceSync/ResourceSyncStatus';
 import { useTranslation } from 'react-i18next';
@@ -39,14 +39,13 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
           isSelected: isRowSelected(resourceSync),
         }}
       />
-      <Td dataLabel={t('Name')}>-</Td>
+      <Td dataLabel={t('Name')}>
+        <FleetOwnerLinkIcon hasOwner>-</FleetOwnerLinkIcon>
+      </Td>
       <Td dataLabel={t('OS image')}>-</Td>
       <Td dataLabel={t('Label selector')}>-</Td>
       <Td dataLabel={t('Status')}>
         <ResourceSyncStatus resourceSync={resourceSync} />
-      </Td>
-      <Td dataLabel={t('Managed by')}>
-        <RSLink rsName={resourceSync.metadata.name || ''} />
       </Td>
       <Td isActionCell>
         <ActionsColumn

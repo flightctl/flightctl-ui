@@ -1,11 +1,11 @@
 import { Fleet, ObjectMeta } from '@types';
 import { FlightCtlLabel } from '@app/types/extraTypes';
 
-const getSourceUrls = (fleet: Fleet) => {
+const getRepositorySources = (fleet: Fleet) => {
   const templateSpecConfig = fleet.spec?.template?.spec?.config || [];
   return templateSpecConfig
     .map((config) => ('gitRef' in config ? config.gitRef?.repository : ''))
-    .filter((sourceURL) => !!sourceURL);
+    .filter((repoName) => !!repoName);
 };
 
 const getUpdatedFleet = (fleet: Fleet, newLabels: FlightCtlLabel[]): Fleet => {
@@ -25,4 +25,4 @@ const getUpdatedFleet = (fleet: Fleet, newLabels: FlightCtlLabel[]): Fleet => {
   };
 };
 
-export { getSourceUrls, getUpdatedFleet };
+export { getRepositorySources, getUpdatedFleet };

@@ -195,7 +195,7 @@ const ConfigTemplateForm = () => {
                             iconPosition="start"
                             onClick={() => remove(index)}
                           >
-                            {t('Remove source')}
+                            {t('Remove template')}
                           </Button>
                         </FormGroup>
                       )}
@@ -221,7 +221,7 @@ const ConfigTemplateForm = () => {
                   } as GitConfigTemplate);
                 }}
               >
-                {t('Add source')}
+                {t('Add template')}
               </Button>
             </FormGroup>
           </FormSection>

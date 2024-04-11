@@ -22,7 +22,7 @@ import { useFetchPeriodically } from '@app/hooks/useFetchPeriodically';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
-import { sortByName, sortByOwner } from '@app/utils/sort/generic';
+import { sortByName } from '@app/utils/sort/generic';
 import { sortByStatus, sortFleetsByOSImg } from '@app/utils/sort/fleet';
 import TableTextSearch from '../Table/TableTextSearch';
 import Table, { TableColumn } from '../Table/Table';
@@ -95,10 +95,6 @@ const getColumns = (t: TFunction): TableColumn<Fleet | ResourceSync>[] => [
   {
     name: t('Status'),
     onSort: sortByStatus,
-  },
-  {
-    name: t('Managed by'),
-    onSort: sortByOwner,
   },
 ];
 

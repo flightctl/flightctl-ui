@@ -43,11 +43,11 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
         <Link to={`/devicemanagement/devices/${deviceName}`}>{getFingerprintDisplay(device)}</Link>
       </Td>
       <Td dataLabel={t('Name')}>{displayName || '-'}</Td>
-      <Td dataLabel={t('Status')}>
-        <DeviceStatus device={device} />
-      </Td>
       <Td dataLabel={t('Fleet')}>
         <DeviceFleet deviceMetadata={device.metadata} />
+      </Td>
+      <Td dataLabel={t('Status')}>
+        <DeviceStatus device={device} />
       </Td>
       <Td dataLabel={t('Created at')}>{getDateDisplay(device.metadata.creationTimestamp)}</Td>
       <Td dataLabel={t('Operating system')}>{device.status?.systemInfo?.operatingSystem || '-'}</Td>

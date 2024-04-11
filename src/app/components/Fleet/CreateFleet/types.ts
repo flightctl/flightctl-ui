@@ -27,6 +27,7 @@ export type InlineConfigTemplate = ConfigTemplate & {
 export type FleetFormValues = {
   name: string;
   osImage: string;
+  fleetLabels: FlightCtlLabel[];
   labels: FlightCtlLabel[];
   configTemplates: (GitConfigTemplate | KubeSecretTemplate | InlineConfigTemplate)[];
 };

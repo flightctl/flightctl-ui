@@ -40,7 +40,8 @@ const validationSchema = (t: TFunction, fleets: Fleet[]) => {
     name: Yup.string()
       .required(t('Name is required.'))
       .notOneOf(existingFleets, t('Fleet with the same name already exists.')),
-    osImage: Yup.string().required(t('OS image is required.')),
+    osImage: Yup.string(),
+    fleetLabels: Yup.array().required(),
     labels: Yup.array().required(),
     configTemplates: Yup.array().of(
       Yup.object({
@@ -59,6 +60,10 @@ const getFleetResource = (values: FleetFormValues): Fleet => ({
   kind: 'Fleet',
   metadata: {
     name: values.name,
+    labels: values.fleetLabels.reduce((acc, { key, value }) => {
+      acc[key] = value;
+      return acc;
+    }, {}),
   },
   spec: {
     selector: {
@@ -126,16 +131,22 @@ const CreateFleetForm = ({ children }: React.PropsWithChildren<Record<never, nev
             onChange={(_, value) => setFieldValue('name', value)}
           />
         </FormGroup>
-        <FormGroup label={t('OS image')} isRequired>
+        <FormGroup label={t('Device label selector')}>
+          <LabelsField labels={values.labels} setLabels={(newLabels) => setFieldValue('labels', newLabels)} />
+        </FormGroup>
+        <FormGroup label={t('Fleet labels')}>
+          <LabelsField labels={values.fleetLabels} setLabels={(newLabels) => setFieldValue('fleetLabels', newLabels)} />
+        </FormGroup>
+        <FormGroup label={t('OS image')}>
           <TextField
             name="osImage"
             aria-label={t('OS image')}
             value={values.osImage}
             onChange={(_, value) => setFieldValue('osImage', value)}
+            helperText={t(
+              'Must be either an OCI image ref (e.g. "quay.io/redhat/rhde:9.3") or ostree ref (e.g. "https://ostree.fedoraproject.org/iot?ref=fedora/stable/x86_64/iot"). Keep this empty if you do not want to manage your OS from fleet.',
+            )}
           />
-        </FormGroup>
-        <FormGroup label={t('Labels')} isRequired>
-          <LabelsField labels={values.labels} setLabels={(newLabels) => setFieldValue('labels', newLabels)} />
         </FormGroup>
         <FormGroup label={t('Configuration templates')} isRequired>
           <ConfigTemplateForm />
@@ -195,6 +206,7 @@ const CreateFleet = () => {
             initialValues={{
               name: '',
               osImage: '',
+              fleetLabels: [],
               labels: [],
               configTemplates: [
                 {

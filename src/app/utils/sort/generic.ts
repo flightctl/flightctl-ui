@@ -20,10 +20,3 @@ export const sortByDisplayName = <R extends { metadata: ObjectMeta }>(resources:
     const bName = b.metadata.labels?.displayName || '-';
     return aName.localeCompare(bName);
   });
-
-export const sortByOwner = <R extends { metadata: ObjectMeta }>(resources: R[]) =>
-  resources.sort((a, b) => {
-    const aOwner = a.metadata?.owner || '-';
-    const bOwner = b.metadata?.owner || '-';
-    return aOwner.localeCompare(bOwner);
-  });

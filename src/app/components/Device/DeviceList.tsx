@@ -74,13 +74,13 @@ const getDeviceColumns = (t: TFunction): TableColumn<Device | EnrollmentRequest>
     onSort: sortByDisplayName,
   },
   {
+    name: t('Fleet'),
+    onSort: sortDevicesByFleet,
+  },
+  {
     name: t('Status'),
     onSort: sortDevicesByStatus,
     defaultSort: true,
-  },
-  {
-    name: t('Fleet'),
-    onSort: sortDevicesByFleet,
   },
   {
     name: t('Created at'),
