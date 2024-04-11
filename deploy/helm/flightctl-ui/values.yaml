@@ -49,7 +49,7 @@ keycloak:
     postgresqlMasterUser: admin
     postgresqlPassword: CHANGE_ME
     postgresqlUser: keycloak
-    dbAddr: keycloak-db
+    dbAddr: jdbc:postgresql://keycloak-db/keycloak
     dbVendor: postgres
 
   
