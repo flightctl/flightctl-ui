@@ -6,7 +6,7 @@ export const getFingerprintDisplay = <R extends { metadata: ObjectMeta }>(resour
   if (!fingerprint) {
     return '-';
   }
-  return `${fingerprint.substring(0, 6)}...${fingerprint.substring(fingerprint.length - 7, fingerprint.length - 1)}`;
+  return `${fingerprint.substring(0, 6)}...${fingerprint.substring(fingerprint.length - 7)}`;
 };
 
 const deviceFleetRegExp = /^Fleet\/(?<fleetName>.*)$/;
