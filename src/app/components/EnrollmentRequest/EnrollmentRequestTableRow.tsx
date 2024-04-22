@@ -29,7 +29,7 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
   const { t } = useTranslation();
   const approvalStatus = getApprovalStatus(er);
   return (
-    <Tr>
+    <Tr data-testid={`enrollment-request-${rowIndex}`}>
       <Td
         select={{
           rowIndex,

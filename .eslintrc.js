@@ -7,7 +7,7 @@ module.exports = {
     jsx: true,
     js: true,
     useJSXTextNode: true,
-    project: './tsconfig.json',
+    project: ['./tsconfig.json', './cypress/tsconfig.json'],
     tsconfigRootDir: '.',
   },
   // we want to use the recommended rules provided from the typescript plugin

@@ -7,6 +7,29 @@ on:
       - release*
 
 jobs:
+  preflight-check:
+    # Prevents running the workflow when a PR is marked as draft.
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+      - name: Check if PR is draft
+        id: check
+        run: |
+          if [[ "${{ github.event.pull_request.draft }}" == "true" ]]; then
+            skip=true
+          else
+            skip=false
+          fi
+          echo "skip=${skip}" >> $GITHUB_OUTPUT
+          echo "skip=${skip}"
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -37,3 +60,29 @@ jobs:
         run: npm install
       - name: Attempt a build
         run: npm run build
+  integration-tests:
+    needs: preflight-check
+    if: needs.preflight-check.outputs.skip == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+      - name: Run integration tests
+        uses: cypress-io/github-action@v6
+        with:
+          install-command: npm install
+          build: npm run build-frontend
+          config-file: cypress/cypress.config.ts
+          browser: chrome
+          start: npm run integration-tests:ci
+          wait-on: 'http://localhost:9000'
+          wait-on-timeout: 60
+      - name: Store test execution screenshots on failure
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots

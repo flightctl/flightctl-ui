@@ -28,5 +28,5 @@
     "skipLibCheck": true,
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js", "**/*.json"],
-  "exclude": ["node_modules"],
+  "exclude": ["cypress", "node_modules"],
 }
