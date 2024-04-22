@@ -35,7 +35,7 @@ jobs:
             org.flightctl.flightctl-ui.github.sha=${{ github.sha }}
             org.flightctl.flightctl-ui.github.ref_name=${{ github.ref_name }}
           extra-args: |
-            --ulimit nofile=4096:4096
+            --ulimit nofile=10000:10000
           containerfiles: Dockerfile
           context: .
 
