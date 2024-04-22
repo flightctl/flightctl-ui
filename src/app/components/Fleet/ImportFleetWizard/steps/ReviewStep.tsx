@@ -55,7 +55,7 @@ const ReviewStep = ({ errors }: { errors?: string[] }) => {
       </StackItem>
       {errors?.length && (
         <StackItem>
-          <Alert isInline variant="danger" title={t('An error occured.')}>
+          <Alert isInline variant="danger" title={t('An error occurred')}>
             {errors?.map((e, index) => <div key={index}>{e}</div>)}
           </Alert>
         </StackItem>

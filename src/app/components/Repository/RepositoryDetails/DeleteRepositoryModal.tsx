@@ -147,7 +147,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
           ))}
         {error && (
           <StackItem>
-            <Alert isInline variant="danger" title={t('An error occured')}>
+            <Alert isInline variant="danger" title={t('An error occurred')}>
               {error}
             </Alert>
           </StackItem>

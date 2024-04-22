@@ -94,7 +94,7 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
         )}
         {errors?.length && (
           <StackItem>
-            <Alert isInline variant="danger" title={t('An error occured')}>
+            <Alert isInline variant="danger" title={t('An error occurred')}>
               <Stack hasGutter>
                 {errors.map((e, index) => (
                   <StackItem key={index}>{e}</StackItem>

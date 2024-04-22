@@ -162,7 +162,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
         )}
         {errors?.length && (
           <StackItem>
-            <Alert isInline variant="danger" title={t('An error occured')}>
+            <Alert isInline variant="danger" title={t('An error occurred')}>
               <Stack hasGutter>
                 {errors.map((e, index) => (
                   <StackItem key={index}>{e}</StackItem>

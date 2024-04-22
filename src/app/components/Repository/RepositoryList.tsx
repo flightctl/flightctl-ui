@@ -163,11 +163,11 @@ const RepositoryTable = () => {
                 <ActionsColumn
                   items={[
                     {
-                      title: t('Edit'),
+                      title: t('Edit repository'),
                       onClick: () => navigate(`/devicemanagement/repositories/edit/${repository.metadata.name}`),
                     },
                     {
-                      title: t('Delete'),
+                      title: t('Delete repository'),
                       onClick: () => setDeleteModalRepoId(repository.metadata.name),
                     },
                   ]}

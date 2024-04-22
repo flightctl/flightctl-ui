@@ -39,9 +39,9 @@ const RepositoryDetails = () => {
         <DetailsPageActions>
           <DropdownList>
             <DropdownItem onClick={() => navigate(`/devicemanagement/repositories/edit/${repositoryId}`)}>
-              {t('Edit')}
+              {t('Edit repository')}
             </DropdownItem>
-            <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete')}</DropdownItem>
+            <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete repository')}</DropdownItem>
           </DropdownList>
         </DetailsPageActions>
       }

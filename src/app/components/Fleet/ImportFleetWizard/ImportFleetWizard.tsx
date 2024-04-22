@@ -101,7 +101,7 @@ const ImportFleetWizard = () => {
 
   if (error || rsError) {
     return (
-      <Alert isInline variant="danger" title={t('An error occured')}>
+      <Alert isInline variant="danger" title={t('An error occurred')}>
         {error ? getErrorMessage(error) : getErrorMessage(rsError)}
       </Alert>
     );

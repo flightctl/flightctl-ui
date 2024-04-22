@@ -13,7 +13,7 @@ const ListPageBody: React.FC<ListPageBodyProps> = ({ error, loading, children })
   const { t } = useTranslation();
   if (error) {
     return (
-      <Alert variant="danger" title={t('An error occured')} isInline>
+      <Alert variant="danger" title={t('An error occurred')} isInline>
         {getErrorMessage(error)}
       </Alert>
     );

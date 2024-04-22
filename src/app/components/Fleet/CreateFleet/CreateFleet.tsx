@@ -182,7 +182,7 @@ const CreateFleet = () => {
 
   if (fetchError) {
     return (
-      <Alert isInline variant="danger" title={t('An error occured.')}>
+      <Alert isInline variant="danger" title={t('An error occurred')}>
         {getErrorMessage(fetchError)}
       </Alert>
     );
@@ -232,7 +232,7 @@ const CreateFleet = () => {
           >
             <CreateFleetForm>
               {error && (
-                <Alert isInline variant="danger" title={t('An error occured')}>
+                <Alert isInline variant="danger" title={t('An error occurred')}>
                   {error}
                 </Alert>
               )}

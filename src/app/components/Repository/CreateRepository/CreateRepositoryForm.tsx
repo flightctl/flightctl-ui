@@ -28,7 +28,7 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
       <FormSection>
         <Checkbox
           id="private-repository"
-          label={t('This repository a private repository')}
+          label={t('This is a private repository')}
           isChecked={values.credentials.isPrivate}
           onChange={(_, checked) => setFieldValue('credentials.isPrivate', checked)}
         />
