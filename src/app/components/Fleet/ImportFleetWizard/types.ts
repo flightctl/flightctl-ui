@@ -1,4 +1,5 @@
 export type ImportFleetRSFormValue = {
+  exists: boolean;
   name: string;
   targetRevision: string;
   path: string;

@@ -1,17 +1,35 @@
 import * as React from 'react';
-import { FieldArray, useFormikContext } from 'formik';
+import { Field, FieldArray, useFormikContext } from 'formik';
 import { Button, FormGroup, FormSection } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
+import { useTranslation } from 'react-i18next';
 
+import { useFetch } from '@app/hooks/useFetch';
 import TextField from '@app/components/form/TextField';
 import WithHelperText from '@app/components/common/WithHelperText';
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
-import { useTranslation } from 'react-i18next';
 
 const CreateResourceSyncsForm = () => {
   const { t } = useTranslation();
+  const { get } = useFetch();
   const { values } = useFormikContext<RepositoryFormValues>();
+
+  const validateExistingRsName = async (name: string) => {
+    const rsExists = values.resourceSyncs.find((formRs) => formRs.name === name && formRs.exists);
+    if (rsExists) {
+      // We should not validate the item against itself
+      return undefined;
+    }
+
+    try {
+      await get(`resourcesyncs/${name}`);
+      return t(`A resource sync named "{{name}}" already exists`, { name });
+    } catch (e) {
+      return undefined;
+    }
+  };
+
   return (
     <FieldArray name="resourceSyncs">
       {({ remove, push }) => (
@@ -19,12 +37,16 @@ const CreateResourceSyncsForm = () => {
           {values.resourceSyncs.map((resourceSync, index) => (
             <FormSection key={index}>
               <FormGroup label={t('Resource sync name')} isRequired>
-                <TextField
-                  name={`resourceSyncs[${index}].name`}
-                  aria-label={t('Resource sync name')}
-                  value={resourceSync.name}
-                  isDisabled={resourceSync.exists}
-                />
+                <Field name={`resourceSyncs[${index}].name`} validate={validateExistingRsName}>
+                  {() => (
+                    <TextField
+                      name={`resourceSyncs[${index}].name`}
+                      aria-label={t('Resource sync name')}
+                      value={resourceSync.name}
+                      isDisabled={resourceSync.exists}
+                    />
+                  )}
+                </Field>
               </FormGroup>
               <FormGroup
                 label={t('Target revision')}

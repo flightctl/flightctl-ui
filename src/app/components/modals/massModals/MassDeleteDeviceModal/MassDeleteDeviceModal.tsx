@@ -7,6 +7,7 @@ import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { getFingerprintDisplay } from '@app/utils/devices';
 import { isEnrollmentRequest } from '@app/types/extraTypes';
 import { useTranslation } from 'react-i18next';
+import { isPromiseRejected } from '@app/types/typeUtils';
 
 type MassDeleteDeviceModalProps = {
   onClose: VoidFunction;
@@ -33,7 +34,7 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
     const results = await Promise.allSettled(promises);
     setIsDeleting(false);
 
-    const rejectedResults = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+    const rejectedResults = results.filter(isPromiseRejected);
 
     if (rejectedResults.length) {
       setErrors(rejectedResults.map((r) => getErrorMessage(r.reason)));

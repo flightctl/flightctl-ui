@@ -124,12 +124,7 @@ const CreateFleetForm = ({ children }: React.PropsWithChildren<Record<never, nev
     <Form>
       <Grid hasGutter span={8}>
         <FormGroup label={t('Name')} isRequired>
-          <TextField
-            name="name"
-            aria-label={t('Name')}
-            value={values.name}
-            onChange={(_, value) => setFieldValue('name', value)}
-          />
+          <TextField name="name" aria-label={t('Name')} value={values.name} />
         </FormGroup>
         <FormGroup label={t('Device label selector')}>
           <LabelsField labels={values.labels} setLabels={(newLabels) => setFieldValue('labels', newLabels)} />
@@ -142,7 +137,6 @@ const CreateFleetForm = ({ children }: React.PropsWithChildren<Record<never, nev
             name="osImage"
             aria-label={t('OS image')}
             value={values.osImage}
-            onChange={(_, value) => setFieldValue('osImage', value)}
             helperText={t(
               'Must be either an OCI image ref (e.g. "quay.io/redhat/rhde:9.3") or ostree ref (e.g. "https://ostree.fedoraproject.org/iot?ref=fedora/stable/x86_64/iot"). Keep this empty if you do not want to manage your OS from fleet.',
             )}

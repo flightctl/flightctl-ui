@@ -18,7 +18,7 @@ import ResourceSyncStep, { isResourceSyncStepValid, resourceSyncStepId } from '.
 import { Formik, useFormikContext } from 'formik';
 import { ImportFleetFormValues } from './types';
 import { useFetch } from '@app/hooks/useFetch';
-import { Repository, RepositoryList, ResourceSync, ResourceSyncList } from '@types';
+import { Repository, RepositoryList, ResourceSync } from '@types';
 import {
   getRepository,
   getResourceSync,
@@ -34,14 +34,14 @@ import './ImportFleetWizard.css';
 import { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
-const validationSchema = (t: TFunction, resourceSyncs: ResourceSync[], repositories: Repository[]) =>
+const validationSchema = (t: TFunction) =>
   Yup.lazy((values: ImportFleetFormValues) =>
     values.useExistingRepo
       ? Yup.object({
           existingRepo: Yup.string().required(t('Repository is required')),
-          resourceSyncs: repoSyncSchema(t, values.resourceSyncs, resourceSyncs),
+          resourceSyncs: repoSyncSchema(t, values.resourceSyncs),
         })
-      : repositorySchema(t, resourceSyncs, repositories)({ ...values, useResourceSyncs: true }),
+      : repositorySchema(t, undefined)({ ...values, useResourceSyncs: true, exists: false }),
   );
 
 const ImportFleetWizardFooter = () => {
@@ -89,9 +89,8 @@ const ImportFleetWizard = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
   const [repoList, isLoading, error] = useFetchPeriodically<RepositoryList>({ endpoint: 'repositories' });
-  const [rsList, isRsLoading, rsError] = useFetchPeriodically<ResourceSyncList>({ endpoint: 'resourcesyncs' });
 
-  if (isLoading || isRsLoading) {
+  if (isLoading) {
     return (
       <Bullseye>
         <Spinner />
@@ -99,10 +98,10 @@ const ImportFleetWizard = () => {
     );
   }
 
-  if (error || rsError) {
+  if (error) {
     return (
       <Alert isInline variant="danger" title={t('An error occurred')}>
-        {error ? getErrorMessage(error) : getErrorMessage(rsError)}
+        {getErrorMessage(error)}
       </Alert>
     );
   }
@@ -118,6 +117,7 @@ const ImportFleetWizard = () => {
         },
         resourceSyncs: [
           {
+            exists: false,
             name: '',
             path: '',
             targetRevision: '',
@@ -125,8 +125,9 @@ const ImportFleetWizard = () => {
         ],
         url: '',
       }}
-      validationSchema={validationSchema(t, rsList?.items || [], repoList?.items || [])}
+      validationSchema={validationSchema(t)}
       validateOnMount
+      validateOnChange={false}
       onSubmit={async (values) => {
         setErrors(undefined);
         if (!values.useExistingRepo) {

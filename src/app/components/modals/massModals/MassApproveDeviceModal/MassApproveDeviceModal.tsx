@@ -18,13 +18,15 @@ import {
   StackItem,
   TextInput,
 } from '@patternfly/react-core';
+import { useTranslation } from 'react-i18next';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { ApprovalStatus, getApprovalStatus } from '@app/utils/status/enrollmentRequest';
 import { Formik } from 'formik';
+
+import { ApprovalStatus, getApprovalStatus } from '@app/utils/status/enrollmentRequest';
 import { getFingerprintDisplay } from '@app/utils/devices';
 import { isEnrollmentRequest } from '@app/types/extraTypes';
 import LabelsField from '@app/components/form/LabelsField';
-import { useTranslation } from 'react-i18next';
+import { isPromiseRejected } from '@app/types/typeUtils';
 
 import './MassApproveDeviceModal.css';
 
@@ -76,7 +78,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
     });
     setTotalProgress(promises.length);
     const results = await Promise.allSettled(promises);
-    const rejectedResults = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+    const rejectedResults = results.filter(isPromiseRejected);
 
     if (rejectedResults.length) {
       setErrors(rejectedResults.map((r) => getErrorMessage(r.reason)));

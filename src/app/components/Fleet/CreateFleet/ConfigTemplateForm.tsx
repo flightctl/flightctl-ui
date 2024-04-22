@@ -10,7 +10,6 @@ import {
   Grid,
   GridItem,
   TextArea,
-  TextInput,
 } from '@patternfly/react-core';
 import { FieldArray, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
@@ -26,24 +25,18 @@ type GitConfigFormProps = {
 
 const GitConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
   const { t } = useTranslation();
-  const { values, setFieldValue } = useFormikContext<FleetFormValues>();
+  const { values } = useFormikContext<FleetFormValues>();
   const template = values.configTemplates[index] as GitConfigTemplate;
   return (
     <>
       <FormGroup label={t('Source name')} isRequired>
-        <TextField
-          aria-label={t('Source name')}
-          name={`configTemplates[${index}].name`}
-          value={template.name}
-          onChange={(_, value) => setFieldValue(`configTemplates.${index}.name`, value)}
-        />
+        <TextField aria-label={t('Source name')} name={`configTemplates[${index}].name`} value={template.name} />
       </FormGroup>
       <FormGroup label={t('Repository URL')} isRequired>
         <TextField
           aria-label={t('Repository URL')}
           name={`configTemplates[${index}].repoURL`}
           value={template.repoURL}
-          onChange={(_, value) => setFieldValue(`configTemplates.${index}.repoURL`, value)}
         />
       </FormGroup>
       <FormGroup label={t('Repository target reference')} isRequired>
@@ -51,16 +44,10 @@ const GitConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
           aria-label={t('Repository target reference')}
           name={`configTemplates[${index}].targetRevision`}
           value={template.targetRevision}
-          onChange={(_, value) => setFieldValue(`configTemplates.${index}.targetRevision`, value)}
         />
       </FormGroup>
       <FormGroup label={t('Repository path')} isRequired>
-        <TextField
-          aria-label={t('Repository path')}
-          name={`configTemplates[${index}].path`}
-          value={template.path}
-          onChange={(_, value) => setFieldValue(`configTemplates.${index}.path`, value)}
-        />
+        <TextField aria-label={t('Repository path')} name={`configTemplates[${index}].path`} value={template.path} />
       </FormGroup>
     </>
   );
@@ -68,36 +55,32 @@ const GitConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
 
 const KubeConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
   const { t } = useTranslation();
-  const { values, setFieldValue } = useFormikContext<FleetFormValues>();
+  const { values } = useFormikContext<FleetFormValues>();
   const template = values.configTemplates[index] as KubeSecretTemplate;
   return (
     <Grid hasGutter>
       <FormGroup label={t('Source name')} isRequired>
-        <TextInput
-          aria-label={t('Source name')}
-          value={template.name}
-          onChange={(_, value) => setFieldValue(`configTemplates.${index}.name`, value)}
-        />
+        <TextField aria-label={t('Source name')} value={template.name} name={`configTemplates.${index}.name`} />
       </FormGroup>
       <FormGroup label={t('Secret name')} isRequired>
-        <TextInput
+        <TextField
           aria-label={t('Secret name')}
           value={template.secretName}
-          onChange={(_, value) => setFieldValue(`configTemplates.${index}.secretName`, value)}
+          name={`configTemplates.${index}.secretName`}
         />
       </FormGroup>
       <FormGroup label={t('Secret namespace')} isRequired>
-        <TextInput
+        <TextField
           aria-label={t('Secret namespace')}
+          name={`configTemplates.${index}.secretNs`}
           value={template.secretNs}
-          onChange={(_, value) => setFieldValue(`configTemplates.${index}.secretNs`, value)}
         />
       </FormGroup>
       <FormGroup label={t('Mount path')} isRequired>
-        <TextInput
+        <TextField
           aria-label={t('Mount path')}
+          name={`configTemplates.${index}.mountPath`}
           value={template.mountPath}
-          onChange={(_, value) => setFieldValue(`configTemplates.${index}.mountPath`, value)}
         />
       </FormGroup>
     </Grid>
@@ -111,11 +94,7 @@ const InlineConfigForm: React.FC<GitConfigFormProps> = ({ index }) => {
   return (
     <Grid hasGutter>
       <FormGroup label={t('Source name')} isRequired>
-        <TextInput
-          aria-label={t('Source name')}
-          value={template.name}
-          onChange={(_, value) => setFieldValue(`configTemplates.${index}.name`, value)}
-        />
+        <TextField aria-label={t('Source name')} name={`configTemplates.${index}.name`} value={template.name} />
       </FormGroup>
       <FormGroup label={t('Inline')} isRequired>
         <TextArea

@@ -1,21 +1,40 @@
 import * as React from 'react';
 import { Button, Checkbox, Form, FormGroup, FormSection, Grid } from '@patternfly/react-core';
-import { useFormikContext } from 'formik';
+import { Field, useFormikContext } from 'formik';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
+import { useFetch } from '@app/hooks/useFetch';
 import TextField from '@app/components/form/TextField';
 import FlightCtlActionGroup from '@app/components/form/FlightCtlActionGroup';
 import { RepositoryFormValues } from './types';
 import CreateResourceSyncsForm from './CreateResourceSyncsForm';
-import { useTranslation } from 'react-i18next';
 
 export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
   const { t } = useTranslation();
+  const { get } = useFetch();
   const { values, setFieldValue } = useFormikContext<RepositoryFormValues>();
+
+  const validateExistingRepositoryName = async (name: string) => {
+    const repoExists = values.exists;
+    if (repoExists) {
+      // We should not validate the item against itself
+      return undefined;
+    }
+    try {
+      await get(`repositories/${name}`);
+      return t(`A repository named "{{name}}" already exists`, { name });
+    } catch (e) {
+      return undefined;
+    }
+  };
+
   return (
     <>
       <FormGroup label={t('Repository name')} isRequired>
-        <TextField name="name" aria-label={t('Repository name')} value={values.name} isDisabled={isEdit} />
+        <Field name="name" validate={validateExistingRepositoryName}>
+          {() => <TextField name="name" aria-label={t('Repository name')} value={values.name} isDisabled={isEdit} />}
+        </Field>
       </FormGroup>
       <FormGroup label={t('Repository URL')} isRequired>
         <TextField
@@ -56,7 +75,7 @@ type CreateRepositoryFormProps = React.PropsWithChildren<Record<never, never>> &
   isEdit: boolean;
 };
 
-const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({ children, isEdit }) => {
+const CreateRepositoryForm = ({ isEdit, children }: CreateRepositoryFormProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { values, setFieldValue, isValid, dirty, submitForm, isSubmitting } = useFormikContext<RepositoryFormValues>();

@@ -188,7 +188,10 @@ const RepositoryTable = () => {
       {isMassDeleteModalOpen && (
         <MassDeleteRepositoryModal
           onClose={() => setIsMassDeleteModalOpen(false)}
-          onDeleteSuccess={refetch}
+          onDeleteSuccess={() => {
+            setIsMassDeleteModalOpen(false);
+            refetch();
+          }}
           repositories={sortedData.filter((d) => selectedResources.includes(getResourceId(d)))}
         />
       )}

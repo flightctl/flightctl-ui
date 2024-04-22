@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { getErrorMessage } from '@app/utils/error';
 import { Repository } from '@types';
 import { RepositoryURLLink } from '../Repository/RepositoryDetails/Tabs/DetailsTab';
+import { isPromiseRejected } from '@app/types/typeUtils';
 
 const useArrayEq = (array: string[]) => {
   const prevArrayRef = React.useRef(array);
@@ -31,7 +32,7 @@ const RepositorySourceList = ({ repositorySources }: { repositorySources: string
     const fetch = async () => {
       const promises = sources.map((r) => get<Repository>(`repositories/${r}`));
       const results = await Promise.allSettled(promises);
-      const failed = results.some((r) => r.status === 'rejected');
+      const failed = results.some(isPromiseRejected);
       if (failed) {
         const failures = results.reduce((acc, curr, index) => {
           if (curr.status === 'rejected') {

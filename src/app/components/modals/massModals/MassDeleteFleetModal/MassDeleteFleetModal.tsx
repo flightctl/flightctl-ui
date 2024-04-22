@@ -7,6 +7,7 @@ import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import FleetOwnerLink, { RSLink } from '@app/components/Fleet/FleetDetails/FleetOwnerLink';
 import { isFleet } from '@app/types/extraTypes';
 import { useTranslation } from 'react-i18next';
+import { isPromiseRejected } from '@app/types/typeUtils';
 
 type MassDeleteFleetModalProps = {
   onClose: VoidFunction;
@@ -36,7 +37,7 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
     const results = await Promise.allSettled(promises);
     setIsDeleting(false);
 
-    const rejectedResults = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+    const rejectedResults = results.filter(isPromiseRejected);
 
     if (rejectedResults.length) {
       setErrors(rejectedResults.map((r) => getErrorMessage(r.reason)));

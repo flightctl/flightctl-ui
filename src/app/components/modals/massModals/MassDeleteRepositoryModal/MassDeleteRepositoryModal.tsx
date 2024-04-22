@@ -1,6 +1,5 @@
 import { useFetch } from '@app/hooks/useFetch';
 import { getErrorMessage } from '@app/utils/error';
-import { getResourceId } from '@app/utils/resource';
 import {
   Alert,
   Button,
@@ -17,6 +16,7 @@ import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { Repository, ResourceSyncList } from '@types';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { isPromiseRejected } from '@app/types/typeUtils';
 
 type MassDeleteRepositoryModalProps = {
   onClose: VoidFunction;
@@ -33,7 +33,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [errors, setErrors] = React.useState<string[]>();
   const [deleteAll, setDeleteAll] = React.useState(true);
-  const [selectedRepositories, setSelectedRepositories] = React.useState<string[]>([]);
+  const [selectedRepositoryIds, setSelectedRepositoryIds] = React.useState<string[]>([]);
   const [progress, setProgress] = React.useState(0);
   const [progressTotal, setProgressTotal] = React.useState(0);
   const { get, remove } = useFetch();
@@ -42,12 +42,12 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
     setIsDeleting(true);
     setProgress(0);
     const promises = repositories.map(async (r) => {
-      const repositoryId = getResourceId(r);
-      if (deleteAll || selectedRepositories.includes(repositoryId)) {
-        const resourceSyncs = await get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${r.metadata.name}`);
+      const repositoryId = r.metadata.name || '';
+      if (deleteAll || selectedRepositoryIds.includes(repositoryId)) {
+        const resourceSyncs = await get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${repositoryId}`);
         const rsyncPromises = resourceSyncs.items.map((rsync) => remove('resourcesyncs', rsync.metadata.name || ''));
         const rsyncResults = await Promise.allSettled(rsyncPromises);
-        const rejectedResults = rsyncResults.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+        const rejectedResults = rsyncResults.filter(isPromiseRejected);
         if (rejectedResults.length) {
           throw new Error(`Failed to delete resource syncs: ${getErrorMessage(rejectedResults[0].reason)}`);
         }
@@ -59,7 +59,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
     const results = await Promise.allSettled(promises);
     setIsDeleting(false);
 
-    const rejectedResults = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+    const rejectedResults = results.filter(isPromiseRejected);
 
     if (rejectedResults.length) {
       setErrors(rejectedResults.map((r) => getErrorMessage(r.reason)));
@@ -104,7 +104,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
                         isChecked={deleteAll}
                         onChange={(_, checked) => {
                           setDeleteAll(checked);
-                          setSelectedRepositories([]);
+                          setSelectedRepositoryIds([]);
                         }}
                         id="select-all"
                         name={t('Delete Resource Syncs')}
@@ -117,28 +117,28 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
             </Thead>
             <Tbody>
               {repositories.map((repository, rowIndex) => {
-                const repositoryId = getResourceId(repository);
+                const repositoryId = repository.metadata.name || '';
                 return (
-                  <Tr key={repository.metadata.name}>
-                    <Td dataLabel={t('Repository name')}>{repository.metadata.name}</Td>
+                  <Tr key={repositoryId}>
+                    <Td dataLabel={t('Repository name')}>{repositoryId}</Td>
                     <Td
                       select={{
                         rowIndex,
                         onSelect: (_, isSelected) => {
                           if (isSelected) {
-                            setSelectedRepositories([...selectedRepositories, repositoryId]);
+                            setSelectedRepositoryIds([...selectedRepositoryIds, repositoryId]);
                           } else {
                             if (deleteAll) {
-                              setSelectedRepositories(
-                                repositories.map(getResourceId).filter((r) => r !== repositoryId),
+                              setSelectedRepositoryIds(
+                                repositories.map((r) => r.metadata.name || '').filter((id) => id !== repositoryId),
                               );
                             } else {
-                              setSelectedRepositories(selectedRepositories.filter((r) => r !== repositoryId));
+                              setSelectedRepositoryIds(selectedRepositoryIds.filter((id) => id !== repositoryId));
                             }
                             setDeleteAll(false);
                           }
                         },
-                        isSelected: deleteAll || !!selectedRepositories.includes(repositoryId),
+                        isSelected: deleteAll || selectedRepositoryIds.includes(repositoryId),
                       }}
                     />
                   </Tr>

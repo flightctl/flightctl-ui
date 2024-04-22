@@ -10,17 +10,15 @@ import {
 } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
-interface TextFieldProps extends TextInputProps {
+interface TextFieldProps extends Omit<TextInputProps, 'onChange'> {
   name: string;
   helperText?: React.ReactNode;
 }
 
 const TextField = React.forwardRef(({ helperText, ...props }: TextFieldProps, ref: React.Ref<HTMLInputElement>) => {
-  const x = useField({
+  const [field, meta, { setValue }] = useField({
     name: props.name,
   });
-
-  const [field, meta, { setValue }] = x;
 
   const onChange = (_ev, value: string) => {
     void setValue(value);
