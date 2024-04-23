@@ -17,7 +17,7 @@ const CreateResourceSyncsForm = () => {
 
   const validateExistingRsName = async (name: string) => {
     const rsExists = values.resourceSyncs.find((formRs) => formRs.name === name && formRs.exists);
-    if (rsExists) {
+    if (rsExists || !name) {
       // We should not validate the item against itself
       return undefined;
     }

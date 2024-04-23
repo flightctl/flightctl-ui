@@ -112,9 +112,7 @@ const ImportFleetWizard = () => {
         useExistingRepo: false,
         existingRepo: '',
         name: '',
-        credentials: {
-          isPrivate: false,
-        },
+        isPrivate: false,
         resourceSyncs: [
           {
             exists: false,

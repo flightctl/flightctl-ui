@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Formik } from 'formik';
-import { array, boolean, lazy, object, string } from 'yup';
+import { TestContext, array, boolean, lazy, object, string } from 'yup';
 import {
   Alert,
   Breadcrumb,
@@ -50,47 +50,73 @@ export const repoSyncSchema = (t: TFunction, values: ResourceSyncFormValue[]) =>
     .required();
 };
 
-export const repositorySchema = (t: TFunction, repositoryId: string | undefined) => (values: RepositoryFormValues) => {
-  return object({
-    name: repositoryId
-      ? string()
-      : string()
-          .defined(t('Name is required'))
-          .matches(repoNameRegex, t('Name can only contain alphanumeric characters, and the characters ., -, and _.'))
-          .max(255, t('Name must not exceed 255 characters')),
-    url: string()
-      .matches(gitRegex, t('Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos'))
-      .defined(t('Repository URL is required')),
-    credentials: object()
-      .shape({
-        isPrivate: boolean().required(),
-        username: string()
-          .trim()
-          .when('isPublic', {
-            is: false,
-            then: (schema) => schema.required(t('Username is required for private repositories')),
-          }),
-        password: string()
-          .trim()
-          .when('isPublic', {
-            is: false,
-            then: (schema) => schema.required(t('Password is required for private repositories')),
-          }),
-      })
-      .required(),
-    useResourceSyncs: boolean(),
-    resourceSyncs: values.useResourceSyncs ? repoSyncSchema(t, values.resourceSyncs) : array(),
-  });
-};
+export const repositorySchema =
+  (t: TFunction, repository: Repository | undefined) => (values: RepositoryFormValues) => {
+    return object({
+      name: repository
+        ? string()
+        : string()
+            .defined(t('Name is required'))
+            .matches(repoNameRegex, t('Name can only contain alphanumeric characters, and the characters ., -, and _.'))
+            .max(255, t('Name must not exceed 255 characters')),
+      url: string()
+        .matches(gitRegex, t('Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos'))
+        .defined(t('Repository URL is required')),
+      isPrivate: boolean().required(),
+      username: string()
+        .trim()
+        .when('isPrivate', {
+          is: true,
+          then: (schema) => schema.required(t('Username is required for private repositories')),
+        }),
+      password: string()
+        .trim()
+        .test(
+          'enter-new-user-password',
+          t("The repository's username or URL has changed. Please enter the new password."),
+          (password: string | undefined, context: TestContext) => {
+            // This check handles only the edition of existing private repositories
+            const updatedDetails = context.parent as RepositoryFormValues;
+            if (!repository || !updatedDetails.isPrivate) {
+              return true;
+            }
 
-export const getRepository = (values: Pick<RepositoryFormValues, 'name' | 'url' | 'credentials'>) => {
+            const shouldReenterPassword =
+              updatedDetails.username !== repository?.spec.username || updatedDetails.url !== repository?.spec.repo;
+
+            return Boolean(!shouldReenterPassword || password);
+          },
+        )
+        .test(
+          'password-is-needed',
+          t('Password is required for private repositories'),
+          (password: string | undefined, context: TestContext) => {
+            // This check handles only the creation of private repositories
+            const updatedDetails = context.parent as RepositoryFormValues;
+            if (repository || !updatedDetails.isPrivate) {
+              return true;
+            }
+
+            return Boolean(password);
+          },
+        ),
+
+      useResourceSyncs: boolean(),
+      resourceSyncs: values.useResourceSyncs ? repoSyncSchema(t, values.resourceSyncs) : array(),
+    });
+  };
+
+export const getRepository = (
+  values: Pick<RepositoryFormValues, 'name' | 'url' | 'username' | 'password' | 'isPrivate'>,
+) => {
   const spec: Partial<Repository['spec']> = {
     repo: values.url,
   };
-  if (values.credentials?.username && values.credentials?.password) {
-    spec.username = values.credentials.username;
-    spec.password = values.credentials.password;
+  if (values.isPrivate) {
+    spec.username = values.username;
+    spec.password = values.password;
   }
+
   return {
     apiVersion: API_VERSION,
     kind: 'Repository',
@@ -125,17 +151,41 @@ export const handlePromises = async (promises: Promise<unknown>[]): Promise<stri
   return failedPromises.map((fp) => getErrorMessage(fp.reason));
 };
 
+const shouldUpdateRepositoryDetails = (values: RepositoryFormValues, repository: Repository) => {
+  const isStoredPrivate = !!repository.spec.username;
+  const { isPrivate, username, password, url } = values;
+
+  if (url !== repository.spec.repo) {
+    // Url has changed
+    return true;
+  }
+
+  if (isPrivate !== isStoredPrivate) {
+    // Privacy has changed
+    return true;
+  }
+
+  if (isStoredPrivate) {
+    if (username !== repository.spec.username) {
+      return true;
+    }
+    // If the user left the password blank, we shouldn't update it. Only if they typed a new one.
+    if (password) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const getInitValues = (repository?: Repository, resourceSyncs?: ResourceSync[]): RepositoryFormValues => {
   if (!repository) {
     return {
       exists: false,
       name: '',
       url: '',
-      credentials: {
-        isPrivate: false,
-        username: '',
-        password: '',
-      },
+      isPrivate: false,
+      username: '',
+      password: '',
       useResourceSyncs: true,
       resourceSyncs: [
         {
@@ -146,15 +196,14 @@ const getInitValues = (repository?: Repository, resourceSyncs?: ResourceSync[]):
       ],
     };
   }
+
   return {
     exists: true,
     name: repository.metadata.name || '',
     url: repository.spec.repo || '',
-    credentials: {
-      isPrivate: !!repository.spec.username,
-      username: repository.spec.username,
-      password: repository.spec.password,
-    },
+    isPrivate: !!repository.spec.username,
+    username: repository.spec.username,
+    password: '', // Password must be empty in any case as we don't have its value
     useResourceSyncs: !!resourceSyncs?.length,
     resourceSyncs: resourceSyncs?.length
       ? resourceSyncs
@@ -236,17 +285,17 @@ const CreateRepository = () => {
           ) : (
             <Formik<RepositoryFormValues>
               initialValues={getInitValues(repositoryDetails, resourceSyncs)}
-              validationSchema={lazy(repositorySchema(t, repositoryId))}
+              validationSchema={lazy(repositorySchema(t, repositoryDetails))}
               validateOnChange={false}
               onSubmit={async (values) => {
                 setErrors(undefined);
                 if (repositoryId) {
                   try {
-                    const storedRSs = resourceSyncs || [];
-                    if (values.url !== repositoryDetails?.spec.repo) {
+                    if (shouldUpdateRepositoryDetails(values, repositoryDetails as Repository)) {
                       await put<Repository>(`repositories/${repositoryId}`, getRepository(values));
                     }
                     if (values.useResourceSyncs) {
+                      const storedRSs = resourceSyncs || [];
                       const rsToRemovePromises = storedRSs
                         .filter(
                           (storedRs) => !values.resourceSyncs.some((formRs) => formRs.name === storedRs.metadata.name),

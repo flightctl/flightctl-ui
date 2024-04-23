@@ -9,11 +9,9 @@ export type RepositoryFormValues = {
   exists: boolean;
   name: string;
   url: string;
-  credentials: {
-    isPrivate: boolean;
-    username?: string;
-    password?: string;
-  };
+  isPrivate: boolean;
+  username?: string;
+  password?: string;
   useResourceSyncs: boolean;
   resourceSyncs: ResourceSyncFormValue[];
 };

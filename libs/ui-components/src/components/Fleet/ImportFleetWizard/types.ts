@@ -10,10 +10,8 @@ export type ImportFleetFormValues = {
   existingRepo: string;
   name: string;
   url: string;
-  credentials: {
-    isPrivate: boolean;
-    username?: string;
-    password?: string;
-  };
+  isPrivate: boolean;
+  username?: string;
+  password?: string;
   resourceSyncs: ImportFleetRSFormValue[];
 };

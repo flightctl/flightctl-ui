@@ -14,11 +14,11 @@ import { useNavigate } from '../../../hooks/useNavigate';
 export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
   const { t } = useTranslation();
   const { get } = useFetch();
-  const { values, setFieldValue } = useFormikContext<RepositoryFormValues>();
+  const { values, setFieldValue, setFieldTouched } = useFormikContext<RepositoryFormValues>();
 
   const validateExistingRepositoryName = async (name: string) => {
     const repoExists = values.exists;
-    if (repoExists) {
+    if (repoExists || !name) {
       // We should not validate the item against itself
       return undefined;
     }
@@ -43,25 +43,46 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
           aria-label={t('Repository URL')}
           value={values.url}
           helperText={t('For example: https://github.com/flightctl/flightctl-demos')}
+          onBlur={() => {
+            // We need to ask the user to enter a new password
+            setFieldTouched('url', true);
+            if (isEdit) {
+              setFieldTouched('password', true);
+            }
+          }}
         />
       </FormGroup>
       <FormSection>
         <Checkbox
           id="private-repository"
           label={t('This is a private repository')}
-          isChecked={values.credentials.isPrivate}
-          onChange={(_, checked) => setFieldValue('credentials.isPrivate', checked)}
+          isChecked={values.isPrivate}
+          onChange={(_, checked) => setFieldValue('isPrivate', checked)}
         />
-        {values.credentials.isPrivate && (
+        {values.isPrivate && (
           <>
             <FormGroup label={t('Username')}>
-              <TextField name="credentials.username" aria-label={t('Username')} value={values.credentials.username} />
+              <TextField
+                name="username"
+                aria-label={t('Username')}
+                value={values.username}
+                onBlur={() => {
+                  // We need to ask the user to enter a new password
+                  setFieldTouched('username', true);
+                  if (isEdit) {
+                    setFieldTouched('password', true);
+                  }
+                }}
+              />
             </FormGroup>
             <FormGroup label={t('Password')}>
               <TextField
-                name="credentials.password"
+                name="password"
+                helperText={
+                  isEdit ? t('Leave the password blank to keep it unchanged. Enter a new password to update it.') : ''
+                }
                 aria-label={t('Password')}
-                value={values.credentials.password}
+                value={values.password}
                 type="password"
               />
             </FormGroup>
