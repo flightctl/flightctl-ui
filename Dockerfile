@@ -20,8 +20,8 @@ USER 0
 RUN go build
 
 FROM registry.access.redhat.com/ubi9/ubi-micro
-WORKDIR /app/proxy
-COPY --from=ui-build /app/apps/standalone/dist /app/dist
+COPY --from=ui-build /app/apps/standalone/dist /app/proxy/dist
 COPY --from=proxy-build /app/flightctl-ui /app/proxy
+WORKDIR /app/proxy
 EXPOSE 8080
 CMD ./flightctl-ui
