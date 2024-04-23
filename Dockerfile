@@ -1,5 +1,6 @@
 FROM registry.access.redhat.com/ubi9/nodejs-18-minimal:latest as ui-build
 USER root
+RUN microdnf install -y rsync
 
 WORKDIR /app
 COPY package.json /app
