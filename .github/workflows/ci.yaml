@@ -41,12 +41,14 @@ jobs:
         with:
           node-version: lts/*
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+      - name: Attempt a build
+        run: npm run build
       - name: Run eslint
         run: npm run lint
       - name: Run unit tests
         run: npm run test
-  build:
+  build-standalone:
     name: Build
     runs-on: ubuntu-latest
     steps:
@@ -57,9 +59,23 @@ jobs:
         with:
           node-version: lts/*
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Attempt a build
         run: npm run build
+  build-ocp:
+    name: Build ocp plugin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npm ci
+      - name: Attempt a build
+        run: npm run build:ocp
   integration-tests:
     needs: preflight-check
     if: needs.preflight-check.outputs.skip == 'false'
@@ -73,9 +89,9 @@ jobs:
       - name: Run integration tests
         uses: cypress-io/github-action@v6
         with:
-          install-command: npm install
-          build: npm run build-frontend
-          config-file: cypress/cypress.config.ts
+          install-command: npm ci
+          build: npm run build
+          config-file: libs/cypress/cypress.config.ts
           browser: chrome
           start: npm run integration-tests:ci
           wait-on: 'http://localhost:9000'

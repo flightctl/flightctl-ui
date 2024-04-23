@@ -1,32 +1,25 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "rootDir": ".",
-    "outDir": "dist",
-    "module": "esnext",
-    "target": "es5",
-    "lib": ["es6", "dom"],
-    "sourceMap": true,
-    "jsx": "react",
-    "moduleResolution": "node",
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noImplicitAny": false,
-    "allowJs": true,
-    "useUnknownInCatchVariables": false,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "incremental": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "paths": {
-      "@app/*": ["src/app/*"],
-      "@fctl-assets/*": ["src/assets/*"],
-      "@types": ["@types"],
-      "@assets/*": ["node_modules/@patternfly/react-core/dist/styles/assets/*"],
-    },
-    "importHelpers": true,
-    "skipLibCheck": true,
   },
+  "references": [
+    {
+      "path": "./libs/ui-components",
+    },
+    {
+      "path": "./libs/types",
+    },
+    {
+      "path": "./apps/ocp-plugin",
+    },
+    {
+      "path": "./apps/standalone",
+    },
+  ],
   "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js", "**/*.json"],
-  "exclude": ["cypress", "node_modules"],
 }

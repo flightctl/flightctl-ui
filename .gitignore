@@ -1,5 +1,5 @@
 **/node_modules
-dist
+**/dist
 yarn-error.log
 yarn.lock
 stats.json
@@ -8,7 +8,8 @@ storybook-static
 proxy/flightctl-ui
 .DS_Store
 .idea
-.env
-.env.local
+.env*
 certs/
-deploy/helm/flightctl-ui/values-*.yaml
+**/helm/flightctl-ui/values-*.yaml
+**/ocp-console/
+*.tsbuildinfo

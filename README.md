@@ -1,17 +1,22 @@
 # Flight Control UI
 
-## Building
+Monorepo containing UIs for [flightctl](https://github.com/flightctl/flightctl)
 
 ### Prerequisites:
-* `git`, `nodejs:18`
+* `git`, `nodejs:18`, `npm:10`, `rsync`
+
+## Building
 
 ### Checkout the repo and from within the repo run:
 
 ```
-npm install
+npm ci
+npm run build
 ```
 
-### Copy the flightctl-server certs to proxy the api access with express (app.js)
+## Running
+
+### Copy the flightctl-server certs to proxy the api requests
 ```
 mkdir certs
 cp ~/.flightctl/certs/client-enrollment.crt certs/front-cli.crt
@@ -19,23 +24,18 @@ cp ~/.flightctl/certs/client-enrollment.key certs/front-cli.key
 cp ~/.flightctl/certs/ca.crt certs
 ```
 
-## Running
-
-Start the Flight Control UI:
-
-DEV:
+### Running Standalone UI
 
 ```
-npm run start:dev
-```
-PRE/PRO
-
-```
-npm run build
+npm run dev
 ```
 
+### Running UI as OCP plugin
+
+Login to OCP cluster and run:
+
 ```
-npm run start
+npm run dev:ocp 
 ```
 
 ### (Optional) Configure Keycloak:
@@ -51,13 +51,4 @@ npm run start
 KEYCLOAK_AUTHORITY="http://localhost:9080/realms/flightctl"
 KEYCLOAK_CLIENTID="flightctl-ui"
 KEYCLOAK_REDIRECT="http://localhost:9000"
-```
-**NEW keycloak requirement: Secured API by JWT validation** 
-- Go to "Realm settings", "Keys" TAB
-- At the key of use "SIG", get the public key
-- Save it to certs/api-sig.key
-```
------BEGIN PUBLIC KEY-----
-MIIBI[...]
------END PUBLIC KEY-----
 ```

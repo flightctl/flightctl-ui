@@ -1,0 +1,35 @@
+[
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/fleets"],
+      "component": { "$codeRef": "FleetsPage" }
+    }
+  },
+  {
+    "type": "console.navigation/section",
+    "properties": {
+      "id": "fctl",
+      "perspective": "admin",
+      "name": "%plugin__flightctl-plugin~Edge Management%"
+    }
+  },
+  {
+    "type": "console.navigation/href",
+    "properties": {
+      "id": "fctl-fleets",
+      "name": "%plugin__flightctl-plugin~Fleets%",
+      "href": "/edge/fleets",
+      "perspective": "admin",
+      "section": "fctl"
+    }
+  },
+  {
+    "type": "console.context-provider",
+    "properties": {
+      "provider": { "$codeRef": "appContext.OCPPluginAppContext" },
+      "useValueHook": { "$codeRef": "appContext.useValuesAppContext" }
+    }
+  }
+]

@@ -14,7 +14,7 @@ import (
 type SpaHandler struct{}
 
 func serveIndexPage(w http.ResponseWriter, r *http.Request) {
-	content, err := os.ReadFile("../dist/index.html")
+	content, err := os.ReadFile("./dist/index.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -33,7 +33,11 @@ func serveIndexPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h SpaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	path := filepath.Join("../dist", r.URL.Path)
+	var path string
+	if strings.HasSuffix(r.URL.Path, "plugin__flightctl-plugin.json") {
+		r.URL.Path = strings.Replace(r.URL.Path, "plugin__flightctl-plugin.json", "translation.json", 1)
+	}
+	path = filepath.Join("./dist", r.URL.Path)
 	fi, err := os.Stat(path)
 	if os.IsNotExist(err) || fi.IsDir() || path == "index.html" {
 		serveIndexPage(w, r)
@@ -48,5 +52,5 @@ func (h SpaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// otherwise, use http.FileServer to serve the static file
-	http.FileServer(http.Dir("../dist")).ServeHTTP(w, r)
+	http.FileServer(http.Dir("./dist")).ServeHTTP(w, r)
 }

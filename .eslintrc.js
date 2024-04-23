@@ -1,39 +1,22 @@
 module.exports = {
-  // tells eslint to use the TypeScript parser
   parser: '@typescript-eslint/parser',
-  // tell the TypeScript parser that we want to use JSX syntax
   parserOptions: {
-    tsx: true,
-    jsx: true,
-    js: true,
-    useJSXTextNode: true,
-    project: ['./tsconfig.json', './cypress/tsconfig.json'],
-    tsconfigRootDir: '.',
+    comment: true,
+    ecmaFeatures: {
+      jsx: true,
+    },
+    ecmaVersion: 'latest',
+    project: true,
+    sourceType: 'module',
   },
-  // we want to use the recommended rules provided from the typescript plugin
   extends: [
-    '@redhat-cloud-services/eslint-config-redhat-cloud-services',
-    'eslint:recommended',
     'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:storybook/recommended',
+    'plugin:@typescript-eslint/recommended-requiring-type-checking',
   ],
-  globals: {
-    window: 'readonly',
-    describe: 'readonly',
-    test: 'readonly',
-    expect: 'readonly',
-    it: 'readonly',
-    process: 'readonly',
-    document: 'readonly',
-    insights: 'readonly',
-    shallow: 'readonly',
-    render: 'readonly',
-    mount: 'readonly',
-  },
   overrides: [
     {
-      files: ['src/**/*.ts', 'src/**/*.tsx'],
+      files: ['**/src/**/*.ts', '**/src/**/*.tsx'],
       parser: '@typescript-eslint/parser',
       plugins: ['@typescript-eslint'],
       extends: ['plugin:@typescript-eslint/recommended'],
@@ -52,10 +35,9 @@ module.exports = {
   ],
   settings: {
     react: {
-      version: '^16.11.0',
+      version: 'detect',
     },
   },
-  // includes the typescript specific rules found here: https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#supported-rules
   plugins: ['@typescript-eslint', 'react-hooks', 'eslint-plugin-react-hooks'],
   rules: {
     'sort-imports': [
@@ -104,11 +86,14 @@ module.exports = {
     'import/no-unresolved': 'off',
     'import/extensions': 'off',
     'no-console': 'error',
-    "testing-library/prefer-user-event": "error",
+    'testing-library/prefer-user-event': 'error',
+    '@typescript-eslint/no-misused-promises': 'off',
+    '@typescript-eslint/no-floating-promises': 'off',
+    '@typescript-eslint/no-unsafe-enum-comparison': 'off',
   },
   env: {
     browser: true,
     node: true,
   },
-  ignorePatterns: [],
+  ignorePatterns: ['*.json'],
 };

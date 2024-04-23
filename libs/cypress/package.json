@@ -1,0 +1,16 @@
+{
+  "name": "@flightctl/ui-tests-cypress",
+  "version": "0.0.0",
+  "description": "Cypress tests for Flightctl UI",
+  "repository": "https://github.com/flightctl/flightctl-ui.git",
+  "homepage": "https://github.com/flightctl/flightctl-ui.git",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "integration-tests:open": "cypress open --config-file cypress.config.ts",
+    "integration-tests:ci": "npm run -w @flightctl/standalone start-prod"
+  },
+  "devDependencies": {
+    "cypress": "^13.7.0"
+  }
+}
