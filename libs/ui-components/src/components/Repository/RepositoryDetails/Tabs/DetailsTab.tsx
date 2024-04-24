@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  Button,
   Card,
   CardBody,
   CardTitle,
@@ -13,30 +12,13 @@ import {
   Icon,
 } from '@patternfly/react-core';
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
-import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
 import StatusInfo from '../../../common/StatusInfo';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../../utils/status/repository';
 import { Repository } from '@flightctl/types';
 import { useTranslation } from 'react-i18next';
-
-export const RepositoryURLLink = ({ url }: { url: string | undefined }) =>
-  url ? (
-    <Button
-      component="a"
-      variant="link"
-      isInline
-      href={url}
-      target="_blank"
-      icon={<ExternalLinkAltIcon />}
-      iconPosition="end"
-    >
-      {url}
-    </Button>
-  ) : (
-    '-'
-  );
+import RepositorySource from '../RepositorySource';
 
 const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
   const { t } = useTranslation();
@@ -50,7 +32,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Url')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <RepositoryURLLink url={repoDetails.spec.repo} />
+                  <RepositorySource sourceDetails={{ url: repoDetails.spec.repo, type: 'git' }} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>

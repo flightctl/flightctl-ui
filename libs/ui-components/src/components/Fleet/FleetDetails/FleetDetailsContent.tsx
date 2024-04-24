@@ -14,13 +14,13 @@ import {
 } from '@patternfly/react-core';
 import * as React from 'react';
 
-import RepositorySourceList from '../RepositorySourceList';
 import { Fleet } from '@flightctl/types';
-import { getRepositorySources } from '../../../utils/fleets';
+import { getSourceItems } from '../../../utils/fleets';
 import FleetOwnerLink from './FleetOwnerLink';
 import FleetStatus from '../FleetStatus';
 import { useTranslation } from 'react-i18next';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
+import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
 
 const FleetDevices = ({ fleetId, count }: { fleetId: string; count: number | undefined }) => {
   if (count === undefined) {
@@ -38,7 +38,7 @@ const FleetDevices = ({ fleetId, count }: { fleetId: string; count: number | und
 
 const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCount: number | undefined }) => {
   const { t } = useTranslation();
-  const repositorySources = getRepositorySources(fleet);
+  const sourceItems = getSourceItems(fleet);
   return (
     <Grid hasGutter>
       <GridItem md={12}>
@@ -81,9 +81,9 @@ const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCou
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('Sources ({{size}})', { size: repositorySources.length })}</DescriptionListTerm>
+                <DescriptionListTerm>{t('Sources ({{size}})', { size: sourceItems.length })}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <RepositorySourceList repositorySources={repositorySources} />
+                  <RepositorySourceList sourceItems={sourceItems} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>
