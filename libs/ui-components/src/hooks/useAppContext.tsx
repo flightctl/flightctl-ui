@@ -15,8 +15,8 @@ import { ROUTE, getRoute } from './useNavigate';
 
 export type AppContextProps = {
   appType: 'standalone' | 'ocp';
-  qcow2ImgUrl: string;
-  bootcImgUrl: string;
+  qcow2ImgUrl: string | undefined;
+  bootcImgUrl: string | undefined;
   user?: string; // auth?.user?.profile.preferred_username
   i18n: {
     transNamespace?: string;
@@ -46,8 +46,8 @@ export type AppContextProps = {
 
 export const AppContext = React.createContext<AppContextProps>({
   appType: 'standalone',
-  qcow2ImgUrl: '',
-  bootcImgUrl: '',
+  qcow2ImgUrl: undefined,
+  bootcImgUrl: undefined,
   router: {
     useNavigate,
     Link,

@@ -20,8 +20,8 @@ const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics'> = {
   i18n: {
     transNamespace: undefined,
   },
-  bootcImgUrl: '',
-  qcow2ImgUrl: '',
+  bootcImgUrl: window.BOOTC_IMG_URL,
+  qcow2ImgUrl: window.QCOW2_IMG_URL,
   router: {
     useNavigate,
     Link,
