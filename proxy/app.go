@@ -32,7 +32,7 @@ func main() {
 	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler(utils.GetEnvVar("FLIGHTCTL_METRICS_SERVER", "http://localhost:9090")))
 
 	spa := server.SpaHandler{}
-	router.PathPrefix("/").Handler(spa)
+	router.PathPrefix("/").Handler(server.GzipHandler(spa))
 
 	addr := ":" + utils.GetEnvVar("API_PORT", "3001")
 

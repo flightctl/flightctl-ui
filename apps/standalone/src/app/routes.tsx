@@ -2,25 +2,40 @@ import * as React from 'react';
 import { PropsWithChildren } from 'react';
 
 import { Navigate, RouteObject, RouterProvider, createBrowserRouter, useParams, useRouteError } from 'react-router-dom';
+import { useDocumentTitle } from '@flightctl/ui-components/hooks/useDocumentTitle';
+import { APP_TITLE } from '@flightctl/ui-components/constants';
+import { useTranslation } from '@flightctl/ui-components/hooks/useTranslation';
+import { TFunction } from 'i18next';
 
 import AppLayout from './components/AppLayout/AppLayout';
 import NotFound from './components/AppLayout/NotFound';
-import CreateFleet from '@flightctl/ui-components/components/Fleet/CreateFleet/CreateFleet';
-import FleetList from '@flightctl/ui-components/components/Fleet/FleetList';
-import FleetDetails from '@flightctl/ui-components/components/Fleet/FleetDetails/FleetDetails';
-import EnrollmentRequestDetails from '@flightctl/ui-components/components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails';
-import DeviceList from '@flightctl/ui-components/components/Device/DeviceList';
-import DeviceDetails from '@flightctl/ui-components/components/Device/DeviceDetails/DeviceDetails';
-import CreateRepository from '@flightctl/ui-components/components/Repository/CreateRepository/CreateRepository';
-import RepositoryList from '@flightctl/ui-components/components/Repository/RepositoryList';
-import RepositoryDetails from '@flightctl/ui-components/components/Repository/RepositoryDetails/RepositoryDetails';
-import ResourceSyncToRepository from '@flightctl/ui-components/components/ResourceSync/ResourceSyncToRepository';
+import { Bullseye, Spinner } from '@patternfly/react-core';
+const EnrollmentRequestDetails = React.lazy(
+  () =>
+    import('@flightctl/ui-components/components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails'),
+);
+const DeviceList = React.lazy(() => import('@flightctl/ui-components/components/Device/DeviceList'));
+const DeviceDetails = React.lazy(
+  () => import('@flightctl/ui-components/components/Device/DeviceDetails/DeviceDetails'),
+);
+const CreateRepository = React.lazy(
+  () => import('@flightctl/ui-components/components/Repository/CreateRepository/CreateRepository'),
+);
+const RepositoryList = React.lazy(() => import('@flightctl/ui-components/components/Repository/RepositoryList'));
+const RepositoryDetails = React.lazy(
+  () => import('@flightctl/ui-components/components/Repository/RepositoryDetails/RepositoryDetails'),
+);
+const ResourceSyncToRepository = React.lazy(
+  () => import('@flightctl/ui-components/components/ResourceSync/ResourceSyncToRepository'),
+);
 
-import { useDocumentTitle } from '@flightctl/ui-components/hooks/useDocumentTitle';
-import { APP_TITLE } from '@flightctl/ui-components/constants';
-import ImportFleetWizard from '@flightctl/ui-components/components/Fleet/ImportFleetWizard/ImportFleetWizard';
-import { useTranslation } from 'react-i18next';
-import { TFunction } from 'i18next';
+const ImportFleetWizard = React.lazy(
+  () => import('@flightctl/ui-components/components/Fleet/ImportFleetWizard/ImportFleetWizard'),
+);
+
+const CreateFleet = React.lazy(() => import('@flightctl/ui-components/components/Fleet/CreateFleet/CreateFleet'));
+const FleetList = React.lazy(() => import('@flightctl/ui-components/components/Fleet/FleetList'));
+const FleetDetails = React.lazy(() => import('@flightctl/ui-components/components/Fleet/FleetDetails/FleetDetails'));
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -45,7 +60,17 @@ const ErrorPage = () => {
 
 const TitledRoute = ({ title, children }: PropsWithChildren<{ title: string }>) => {
   useDocumentTitle(`${APP_TITLE} | ${title}`);
-  return children;
+  return (
+    <React.Suspense
+      fallback={
+        <Bullseye>
+          <Spinner />
+        </Bullseye>
+      }
+    >
+      {children}
+    </React.Suspense>
+  );
 };
 
 const RedirectToDeviceDetails = () => {
