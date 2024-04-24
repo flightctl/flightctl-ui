@@ -1,8 +1,10 @@
-import CreateResourceSyncsForm from '../../../Repository/CreateRepository/CreateResourceSyncsForm';
-import { Form } from '@patternfly/react-core';
 import * as React from 'react';
-import { ImportFleetFormValues } from '../types';
+import { Form, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
 import { FormikErrors } from 'formik';
+import { useTranslation } from 'react-i18next';
+
+import CreateResourceSyncsForm from '../../../Repository/CreateRepository/CreateResourceSyncsForm';
+import { ImportFleetFormValues } from '../types';
 
 export const resourceSyncStepId = 'resource-sync';
 export const isResourceSyncStepValid = (errors: FormikErrors<ImportFleetFormValues>) => {
@@ -12,10 +14,26 @@ export const isResourceSyncStepValid = (errors: FormikErrors<ImportFleetFormValu
   return !errors.resourceSyncs;
 };
 
-const ResourceSyncStep = () => (
-  <Form>
-    <CreateResourceSyncsForm />
-  </Form>
-);
+const ResourceSyncStep = () => {
+  const { t } = useTranslation();
+  return (
+    <Stack hasGutter>
+      <StackItem>
+        <TextContent>
+          <Text>
+            {t(
+              "A resource sync is an automated Gitops way to manage imported fleets. The resource sync monitors changes made to the source repository and update the fleet's configurations accordingly.",
+            )}
+          </Text>
+        </TextContent>
+      </StackItem>
+      <StackItem>
+        <Form>
+          <CreateResourceSyncsForm />
+        </Form>
+      </StackItem>
+    </Stack>
+  );
+};
 
 export default ResourceSyncStep;

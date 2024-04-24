@@ -95,7 +95,7 @@ const CreateResourceSyncsForm = () => {
               iconPosition="left"
               onClick={() => push({ name: '', path: '', targetRevision: '' } as ResourceSyncFormValue)}
             >
-              {t('Add resource sync')}
+              {t('Add another resource sync')}
             </Button>
           </div>
         </>
