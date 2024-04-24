@@ -310,8 +310,9 @@ const CreateRepository = () => {
                         .filter((formRs) => {
                           const resourceSync = storedRSs.find((storedRs) => storedRs.metadata.name === formRs.name);
                           return (
-                            resourceSync?.spec.path !== formRs.path ||
-                            resourceSync.spec.targetRevision !== formRs.targetRevision
+                            resourceSync &&
+                            (resourceSync.spec.path !== formRs.path ||
+                              resourceSync.spec.targetRevision !== formRs.targetRevision)
                           );
                         })
                         .map((rs) => put<ResourceSync>(`resourcesyncs/${rs.name}`, getResourceSync(values.name, rs)));
