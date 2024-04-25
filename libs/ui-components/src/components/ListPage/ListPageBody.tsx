@@ -1,7 +1,7 @@
 import { getErrorMessage } from '../../utils/error';
 import { Alert, Bullseye, Spinner } from '@patternfly/react-core';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 
 type ListPageBodyProps = {
   error: unknown;

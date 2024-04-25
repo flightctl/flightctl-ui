@@ -37,7 +37,8 @@ import MassDeleteDeviceModal from '../modals/massModals/MassDeleteDeviceModal/Ma
 import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
 import DeviceEnrollmentModal from '../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import { TFunction } from 'i18next';
 import { useAppContext } from '../../hooks/useAppContext';
 

@@ -14,7 +14,7 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { TFunction } from 'i18next';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';

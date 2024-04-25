@@ -6,7 +6,8 @@ import { WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons/warni
 import { getErrorMessage } from '../../../utils/error';
 import { useFetch } from '../../../hooks/useFetch';
 import { ResourceSyncList } from '@flightctl/types';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 type DeleteRepositoryModalProps = {
   onClose: VoidFunction;

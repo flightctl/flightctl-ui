@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Button, Checkbox, Form, FormGroup, FormSection, Grid } from '@patternfly/react-core';
 import { Field, useFormikContext } from 'formik';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 import { useFetch } from '../../../hooks/useFetch';
 import TextField from '../../form/TextField';

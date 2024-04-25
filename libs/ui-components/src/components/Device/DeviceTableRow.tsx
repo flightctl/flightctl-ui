@@ -7,7 +7,7 @@ import DeviceFleet from './DeviceDetails/DeviceFleet';
 import { getDateDisplay } from '../../utils/dates';
 import { DeleteListActionResult } from '../ListPage/types';
 import DeviceStatus from './DeviceDetails/DeviceStatus';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
 
 type DeviceTableRowProps = {

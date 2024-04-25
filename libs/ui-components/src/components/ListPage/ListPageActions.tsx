@@ -1,7 +1,7 @@
 import * as React from 'react';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import { IAction } from '@patternfly/react-table';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export type DeleteListActionResult = {
   deleteAction: (params: { resourceId: string; resourceName?: string; disabledReason?: string | boolean }) => IAction;

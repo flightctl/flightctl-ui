@@ -3,10 +3,10 @@ import { Button, List, ListItem, Popover } from '@patternfly/react-core';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 import { ObjectMeta } from '@flightctl/types';
 import { getDeviceFleet, getMissingFleetDetails } from '../../../utils/devices';
+import { useTranslation } from '../../../hooks/useTranslation';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 import './DeviceFleet.css';
-import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../../hooks/useAppContext';
 
 const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => {
   const {

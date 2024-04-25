@@ -3,7 +3,7 @@ import { Field, FieldArray, useFormikContext } from 'formik';
 import { Button, FormGroup, FormSection } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 import { useFetch } from '../../../hooks/useFetch';
 import TextField from '../../form/TextField';

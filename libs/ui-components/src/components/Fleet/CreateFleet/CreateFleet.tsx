@@ -31,7 +31,7 @@ import ConfigTemplateForm from './ConfigTemplateForm';
 import TextField from '../../form/TextField';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { TFunction } from 'i18next';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 
 const validationSchema = (t: TFunction, fleets: Fleet[]) => {

@@ -6,7 +6,7 @@ import { useFormikContext } from 'formik';
 import LabelsField from '../../form/LabelsField';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { FlightCtlLabel } from '../../../types/extraTypes';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 export type DeviceEnrollmentFormValues = {
   labels: FlightCtlLabel[];

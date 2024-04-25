@@ -28,11 +28,11 @@ import {
 import { getErrorMessage } from '../../../utils/error';
 import * as Yup from 'yup';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
+import { TFunction } from 'i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
+import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 
 import './ImportFleetWizard.css';
-import { TFunction } from 'i18next';
-import { useTranslation } from 'react-i18next';
-import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 
 const validationSchema = (t: TFunction) =>
   Yup.lazy((values: ImportFleetFormValues) =>

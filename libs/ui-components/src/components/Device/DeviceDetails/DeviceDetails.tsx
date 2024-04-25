@@ -29,7 +29,7 @@ import DeviceFleet from './DeviceFleet';
 import DeviceStatus from './DeviceStatus';
 import SystemdTable from './SystemdTable';
 import { useEditLabelsAction } from '../../../hooks/useEditLabelsAction';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 

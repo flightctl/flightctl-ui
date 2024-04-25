@@ -6,7 +6,7 @@ import { useFetch } from '../../../../hooks/useFetch';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { getFingerprintDisplay } from '../../../../utils/devices';
 import { isEnrollmentRequest } from '../../../../types/extraTypes';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../../hooks/useTranslation';
 import { isPromiseRejected } from '../../../../types/typeUtils';
 
 type MassDeleteDeviceModalProps = {

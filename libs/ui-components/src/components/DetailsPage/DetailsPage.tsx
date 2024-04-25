@@ -13,7 +13,7 @@ import {
 
 import { getErrorMessage } from '../../utils/error';
 import DetailsNotFound from './DetailsNotFound';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
 
 export type DetailsPageProps = {

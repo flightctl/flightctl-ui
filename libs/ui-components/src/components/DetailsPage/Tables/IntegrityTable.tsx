@@ -1,9 +1,9 @@
 import { Bullseye } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import * as React from 'react';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 import './IntegrityTable.css';
-import { useTranslation } from 'react-i18next';
 
 type IntegrityTableProps = {
   measurements: Record<string, string> | undefined;

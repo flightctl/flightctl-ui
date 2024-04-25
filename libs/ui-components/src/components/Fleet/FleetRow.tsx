@@ -4,7 +4,7 @@ import LabelsView from '../common/LabelsView';
 import { Fleet } from '@flightctl/types';
 import { DeleteListActionResult } from '../ListPage/types';
 import FleetStatus from './FleetStatus';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import { FleetOwnerLinkIcon, getOwnerName } from './FleetDetails/FleetOwnerLink';
 import { Link, ROUTE } from '../../hooks/useNavigate';
 

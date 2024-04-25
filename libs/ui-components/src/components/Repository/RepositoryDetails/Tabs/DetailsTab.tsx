@@ -17,7 +17,7 @@ import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circl
 import StatusInfo from '../../../common/StatusInfo';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../../utils/status/repository';
 import { Repository } from '@flightctl/types';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../../hooks/useTranslation';
 import RepositorySource from '../RepositorySource';
 
 const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {

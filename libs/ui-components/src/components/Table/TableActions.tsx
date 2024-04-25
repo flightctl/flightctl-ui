@@ -1,6 +1,6 @@
 import { MenuToggle, Select } from '@patternfly/react-core';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 
 type TableActionsProps = {
   children: React.ReactNode;

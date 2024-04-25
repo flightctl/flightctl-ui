@@ -16,7 +16,7 @@ import {
   TextListItem,
 } from '@patternfly/react-core';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {

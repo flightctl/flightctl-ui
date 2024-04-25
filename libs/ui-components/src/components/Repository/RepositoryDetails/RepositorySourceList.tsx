@@ -1,6 +1,5 @@
 import React from 'react';
 import { Spinner, Stack, StackItem } from '@patternfly/react-core';
-import { useTranslation } from 'react-i18next';
 
 import { Repository } from '@flightctl/types';
 import { useFetch } from '../../../hooks/useFetch';
@@ -8,6 +7,7 @@ import { isPromiseRejected } from '../../../types/typeUtils';
 import { getErrorMessage } from '../../../utils/error';
 import RepositorySource, { RepositorySourceDetails } from './RepositorySource';
 import { SourceItem } from '../../../utils/fleets';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 const useArrayEq = (array: string[]) => {
   const prevArrayRef = React.useRef(array);

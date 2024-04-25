@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Dropdown, DropdownItem, MenuToggle } from '@patternfly/react-core';
 
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 
 type DeleteActionProps = {
   onDelete: () => Promise<unknown>;

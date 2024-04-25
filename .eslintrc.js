@@ -73,6 +73,11 @@ module.exports = {
             importNames: ['ActionGroup'],
             message: 'Use FlightCtlActionGroup to wrap the footer actions',
           },
+          {
+            name: 'react-i18next',
+            importNames: ['useTranslation'],
+            message: 'Import useTranslation from @flightctl/ui-components/hooks/useTranslation instead',
+          },
         ],
       },
     ],

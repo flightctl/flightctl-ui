@@ -8,7 +8,7 @@ import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { FlightCtlLabel, LabelEditable } from '../../../types/extraTypes';
 import { useFetch } from '../../../hooks/useFetch';
 import { Device, Fleet } from '@flightctl/types';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 type EditLabelsModalProps<MT extends LabelEditable> = {
   resourceType: 'fleets' | 'devices';

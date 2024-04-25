@@ -9,7 +9,7 @@ import {
   EmptyStateIcon,
   PageSection,
 } from '@patternfly/react-core';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@flightctl/ui-components/hooks/useTranslation';
 import { ROUTE, useNavigate } from '@flightctl/ui-components/hooks/useNavigate';
 
 const NotFound = () => {

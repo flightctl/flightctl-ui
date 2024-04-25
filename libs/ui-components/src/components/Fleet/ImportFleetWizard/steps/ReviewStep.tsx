@@ -3,7 +3,7 @@ import { useFormikContext } from 'formik';
 import * as React from 'react';
 import { ImportFleetFormValues } from '../types';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../../hooks/useTranslation';
 
 export const reviewStepId = 'review';
 

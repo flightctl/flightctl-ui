@@ -10,7 +10,8 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { ResourceSync } from '@flightctl/types';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { useAppContext } from '../../hooks/useAppContext';
 

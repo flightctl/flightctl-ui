@@ -31,11 +31,11 @@ import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsP
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import EnrollmentRequestStatus from '../../EnrollmentRequest/EnrollmentRequestStatus';
 import WithHelperText from '../../common/WithHelperText';
-
-import './EnrollmentRequestDetails.css';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
+
+import './EnrollmentRequestDetails.css';
 
 const EnrollmentRequestDetails = () => {
   const { t } = useTranslation();

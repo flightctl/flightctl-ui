@@ -1,7 +1,7 @@
 import { Label, LabelGroup } from '@patternfly/react-core';
 import * as React from 'react';
 import { FlightCtlLabel } from '../../types/extraTypes';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 
 type LabelsFieldProps = {
   labels: FlightCtlLabel[];

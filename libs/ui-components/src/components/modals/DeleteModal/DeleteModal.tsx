@@ -1,7 +1,8 @@
 import { getErrorMessage } from '../../../utils/error';
 import { Alert, Button, Modal, Stack, StackItem } from '@patternfly/react-core';
 import * as React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 type DeleteModalProps = {
   onDelete: () => Promise<unknown>;

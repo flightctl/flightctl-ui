@@ -37,9 +37,10 @@ import { isFleet } from '../../types/extraTypes';
 import FleetRow from './FleetRow';
 import ResourceSyncRow from './ResourceSyncRow';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import { TFunction } from 'i18next';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
+import { Trans } from 'react-i18next';
 
 const FleetPageActions = ({ createText }: { createText?: string }) => {
   const { t } = useTranslation();

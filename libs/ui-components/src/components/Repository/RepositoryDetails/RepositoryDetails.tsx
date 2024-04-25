@@ -10,7 +10,7 @@ import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
 import DetailsTab from './Tabs/DetailsTab';
 import ResourceSyncsTab from './Tabs/ResourceSyncsTab';
 import DeleteRepositoryModal from './DeleteRepositoryModal';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 

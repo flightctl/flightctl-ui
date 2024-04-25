@@ -2,7 +2,7 @@ import { Bullseye } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { ContainerStatus } from '@flightctl/types';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 type ContainersTableProps = {
   containers: ContainerStatus[] | undefined;

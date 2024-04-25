@@ -15,7 +15,7 @@ import {
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { Repository, ResourceSyncList } from '@flightctl/types';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../../hooks/useTranslation';
 import { isPromiseRejected } from '../../../../types/typeUtils';
 
 type MassDeleteRepositoryModalProps = {

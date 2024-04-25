@@ -5,7 +5,7 @@ import * as React from 'react';
 import MatchPatternsForm, { MatchPatternsFormValues } from './MatchPatternsForm';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 type MatchPatternsModalProps = {
   onClose: (reload?: boolean) => void;

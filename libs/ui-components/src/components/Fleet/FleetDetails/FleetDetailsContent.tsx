@@ -18,7 +18,7 @@ import { Fleet } from '@flightctl/types';
 import { getSourceItems } from '../../../utils/fleets';
 import FleetOwnerLink from './FleetOwnerLink';
 import FleetStatus from '../FleetStatus';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
 

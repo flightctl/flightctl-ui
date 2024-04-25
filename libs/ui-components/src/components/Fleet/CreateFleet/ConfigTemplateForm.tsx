@@ -17,7 +17,7 @@ import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circl
 
 import TextField from '../../form/TextField';
 import { FleetFormValues, GitConfigTemplate, InlineConfigTemplate, KubeSecretTemplate } from './types';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 type GitConfigFormProps = {
   index: number;

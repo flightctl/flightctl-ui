@@ -10,7 +10,7 @@ import MatchPatternsModal from '../MatchPatternsModal/MatchPatternsModal';
 import SystemdDetailsTable from '../../DetailsPage/Tables/SystemdTable';
 import { getErrorMessage } from '../../../utils/error';
 import { useTemplateVersion } from '../../../hooks/useTemplateVersion';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 type SystemdTableProps = {
   device: Device;

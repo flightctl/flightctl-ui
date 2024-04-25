@@ -4,7 +4,7 @@ import * as React from 'react';
 import { FleetOwnerLinkIcon } from './FleetDetails/FleetOwnerLink';
 import { DeleteListActionResult } from '../ListPage/types';
 import ResourceSyncStatus from '../ResourceSync/ResourceSyncStatus';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 
 type ResourceSyncRowProps = {
   resourceSync: ResourceSync;

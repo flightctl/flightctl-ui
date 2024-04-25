@@ -7,7 +7,7 @@ import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { RepositoryForm } from '../../../Repository/CreateRepository/CreateRepositoryForm';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../../utils/status/repository';
 import StatusInfo from '../../../common/StatusInfo';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../../hooks/useTranslation';
 
 export const repositoryStepId = 'repository';
 

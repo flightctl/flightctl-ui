@@ -14,7 +14,7 @@ import * as React from 'react';
 import { UserPreferencesContext } from './UserPreferencesProvider';
 import { Theme } from '../../hooks/useThemePreferences';
 import FlightCtlActionGroup from '../form/FlightCtlActionGroup';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import { TFunction } from 'i18next';
 
 const getThemeLabels = (t: TFunction): { [key in Theme]: string } => ({

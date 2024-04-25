@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Alert, Button, Form, Label, LabelGroup } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 export type MatchPatternsFormValues = {
   matchPatterns: string[];

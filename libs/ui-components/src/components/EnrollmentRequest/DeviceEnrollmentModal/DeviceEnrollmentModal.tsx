@@ -7,7 +7,7 @@ import { getErrorMessage } from '../../../utils/error';
 import DeviceEnrollmentForm, { DeviceEnrollmentFormProps, DeviceEnrollmentFormValues } from './DeviceEnrollmentForm';
 import { ApprovalStatus, getApprovalStatus } from '../../../utils/status/enrollmentRequest';
 import { useAuth } from 'react-oidc-context';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 type DeviceEnrollmentModalProps = Omit<DeviceEnrollmentFormProps, 'error'>;
 

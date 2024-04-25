@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Form, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
 import { FormikErrors } from 'formik';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../../hooks/useTranslation';
 
 import CreateResourceSyncsForm from '../../../Repository/CreateRepository/CreateResourceSyncsForm';
 import { ImportFleetFormValues } from '../types';

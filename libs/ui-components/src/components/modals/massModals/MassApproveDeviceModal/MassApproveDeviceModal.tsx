@@ -16,7 +16,7 @@ import {
   StackItem,
   TextInput,
 } from '@patternfly/react-core';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../../hooks/useTranslation';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { Formik } from 'formik';
 

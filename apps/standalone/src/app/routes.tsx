@@ -32,7 +32,6 @@ const ResourceSyncToRepository = React.lazy(
 const ImportFleetWizard = React.lazy(
   () => import('@flightctl/ui-components/components/Fleet/ImportFleetWizard/ImportFleetWizard'),
 );
-
 const CreateFleet = React.lazy(() => import('@flightctl/ui-components/components/Fleet/CreateFleet/CreateFleet'));
 const FleetList = React.lazy(() => import('@flightctl/ui-components/components/Fleet/FleetList'));
 const FleetDetails = React.lazy(() => import('@flightctl/ui-components/components/Fleet/FleetDetails/FleetDetails'));

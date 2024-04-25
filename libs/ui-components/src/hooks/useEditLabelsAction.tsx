@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import EditLabelsModal from '../components/modals/EditLabelsModal/EditLabelsModal';
 import { FlightCtlLabel, LabelEditable } from '../types/extraTypes';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from './useTranslation';
 
 type EditLabelsActionProps<T extends LabelEditable> = {
   resourceType: 'fleets' | 'devices';

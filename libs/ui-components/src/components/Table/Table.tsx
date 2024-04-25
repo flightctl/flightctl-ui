@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Bullseye, PageSection } from '@patternfly/react-core';
 import { Table as PFTable, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export type TableColumn<D> = {
   name: string;

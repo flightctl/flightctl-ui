@@ -1,6 +1,6 @@
 import { SearchInput, SearchInputProps } from '@patternfly/react-core';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export type TableTextSearchProps = Omit<SearchInputProps, 'onClear' | 'onChange' | 'aria-label'> & {
   setValue: (val: string) => void;

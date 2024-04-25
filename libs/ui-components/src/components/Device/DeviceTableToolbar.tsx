@@ -19,7 +19,7 @@ import TableTextSearch, { TableTextSearchProps } from '../Table/TableTextSearch'
 import { ApprovalStatus } from '../../utils/status/enrollmentRequest';
 import { DeviceConditionStatus } from '../../utils/status/device';
 import { combinedDevicesStatuses } from '../../utils/status/devices';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
 
 type FilterCategory = {

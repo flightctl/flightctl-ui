@@ -35,7 +35,7 @@ import './RepositoryResourceSyncList.css';
 import MassDeleteResourceSyncModal from '../modals/massModals/MassDeleteResourceSyncModal/MassDeleteResourceSyncModal';
 import ResourceSyncStatus from './ResourceSyncStatus';
 import { TFunction } from 'i18next';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
 
 const getColumns = (t: TFunction): TableColumn<ResourceSync>[] => [

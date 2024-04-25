@@ -6,7 +6,7 @@ import { getFingerprintDisplay } from '../../utils/devices';
 import EnrollmentRequestStatus from './EnrollmentRequestStatus';
 import { DeleteListActionResult } from '../ListPage/types';
 import { ApprovalStatus, getApprovalStatus } from '../../utils/status/enrollmentRequest';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Link, ROUTE } from '../../hooks/useNavigate';
 
 type EnrollmentRequestTableRow = {

@@ -35,7 +35,7 @@ import { useTableSelect } from '../../hooks/useTableSelect';
 import { getResourceId } from '../../utils/resource';
 import MassDeleteRepositoryModal from '../modals/massModals/MassDeleteRepositoryModal/MassDeleteRepositoryModal';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../hooks/useTranslation';
 import { TFunction } from 'i18next';
 import { Link, ROUTE, useNavigate } from '../../hooks/useNavigate';
 
