@@ -1,4 +1,13 @@
-import { Alert, Button, Modal, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
+import {
+  Alert,
+  Button,
+  ExpandableSection,
+  Modal,
+  Progress,
+  ProgressMeasureLocation,
+  Stack,
+  StackItem,
+} from '@patternfly/react-core';
 import { Fleet, ResourceSync } from '@flightctl/types';
 import * as React from 'react';
 import { getErrorMessage } from '../../../../utils/error';
@@ -15,6 +24,36 @@ type MassDeleteFleetModalProps = {
   onDeleteSuccess: VoidFunction;
 };
 
+const MassDeleteFleetTable = ({ resources }: { resources: Array<Fleet | ResourceSync> }) => {
+  const { t } = useTranslation();
+  return (
+    <Table>
+      <Thead>
+        <Tr>
+          <Th>{t('Name')}</Th>
+          <Th>{t('Managed by')}</Th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {resources.map((resource) => {
+          return (
+            <Tr key={resource.metadata.name}>
+              <Td dataLabel={t('Name')}>{(isFleet(resource) && resource.metadata.name) || '-'}</Td>
+              <Td dataLabel={t('Managed by')}>
+                {isFleet(resource) ? (
+                  <FleetOwnerLink owner={resource.metadata.owner} />
+                ) : (
+                  <RSLink rsName={resource.metadata.name || ''} />
+                )}
+              </Td>
+            </Tr>
+          );
+        })}
+      </Tbody>
+    </Table>
+  );
+};
+
 const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, resources, onDeleteSuccess }) => {
   const { t } = useTranslation();
   const [progress, setProgress] = React.useState(0);
@@ -24,6 +63,7 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
   const { remove } = useFetch();
 
   const resourcesToDelete = resources.filter((r) => !r.metadata.owner);
+  const resourcesToSkip = resources.filter((r) => r.metadata.owner);
 
   const deleteResources = async () => {
     setProgress(0);
@@ -45,6 +85,39 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
       onDeleteSuccess();
     }
   };
+
+  if (resourcesToDelete.length === 0) {
+    return (
+      <Modal
+        title={t('Delete fleets')}
+        isOpen
+        onClose={onClose}
+        showClose
+        variant="medium"
+        actions={[
+          <Button key="close" variant="primary" onClick={onClose}>
+            {t('Close')}
+          </Button>,
+        ]}
+      >
+        <Stack hasGutter>
+          <StackItem>
+            <Alert
+              variant="info"
+              isInline
+              title={t(
+                'All the fleets you selected are managed by a resource sync and cannot be deleted. To remove those fleets, delete the resource syncs from the related repositories inside the "Repositories" tab.',
+              )}
+            />
+          </StackItem>
+          <StackItem>
+            <MassDeleteFleetTable resources={resources} />
+          </StackItem>
+        </Stack>
+      </Modal>
+    );
+  }
+
   return (
     <Modal
       title={t('Delete fleets')}
@@ -67,43 +140,29 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
             'The following fleets will be deleted and as a result, the devices managed by them will be left unmanaged. Are you sure you want to delete the listed fleets?',
           )}
         </StackItem>
-        {resourcesToDelete.length !== resources.length && (
-          <StackItem>
-            <Alert
-              variant="info"
-              isInline
-              title={t(
-                `Resource syncs manage some of the selected fleets and they cannot be deleted. To remove those fleets, delete the resource syncs from the related repositories inside the "Repositories" tab.`,
-              )}
-            />
-          </StackItem>
-        )}
         <StackItem>
-          <Table>
-            <Thead>
-              <Tr>
-                <Th>{t('Name')}</Th>
-                <Th>{t('Managed by')}</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {resources.map((resource) => {
-                return (
-                  <Tr key={resource.metadata.name}>
-                    <Td dataLabel={t('Name')}>{(isFleet(resource) && resource.metadata.name) || '-'}</Td>
-                    <Td dataLabel={t('Managed by')}>
-                      {isFleet(resource) ? (
-                        <FleetOwnerLink owner={resource.metadata.owner} />
-                      ) : (
-                        <RSLink rsName={resource.metadata.name || ''} />
-                      )}
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
+          <MassDeleteFleetTable resources={resourcesToDelete} />
         </StackItem>
+
+        {resourcesToSkip.length > 0 && (
+          <>
+            <StackItem>
+              <Alert
+                variant="info"
+                isInline
+                title={t(
+                  `Some fleets you selected are managed by a resource sync and cannot be deleted. To remove those fleets, delete the resource syncs from the related repositories inside the "Repositories" tab.`,
+                )}
+              />
+            </StackItem>
+            <StackItem>
+              <ExpandableSection toggleText="Show fleets">
+                <MassDeleteFleetTable resources={resourcesToSkip} />
+              </ExpandableSection>
+            </StackItem>
+          </>
+        )}
+
         {isDeleting && (
           <StackItem>
             <Progress
