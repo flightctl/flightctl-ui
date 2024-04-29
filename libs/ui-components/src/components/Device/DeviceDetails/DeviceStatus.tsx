@@ -8,6 +8,13 @@ import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progres
 import { DeviceConditionStatus, getDeviceStatus } from '../../../utils/status/device';
 import { Device } from '@flightctl/types';
 
+// TODO https://issues.redhat.com/browse/MGMT-17658 Statuses need translations (for devices, fleets, etc)
+export const ApprovedStatus = () => (
+  <Label color="green" icon={<CheckCircleIcon />}>
+    Approved
+  </Label>
+);
+
 const DeviceStatus = ({ device }: { device?: Device }) => {
   const status = device ? getDeviceStatus(device) : DeviceConditionStatus.Approved;
   let color: LabelProps['color'];

@@ -1,41 +1,58 @@
 import { Device, EnrollmentRequest, EnrollmentRequestApproval } from '@flightctl/types';
 import * as React from 'react';
-import { getErrorMessage } from '../../../../utils/error';
 import {
   Alert,
   Button,
   Form,
   FormGroup,
-  FormHelperText,
-  HelperText,
-  HelperTextItem,
   Modal,
   Progress,
   ProgressMeasureLocation,
   Stack,
   StackItem,
-  TextInput,
 } from '@patternfly/react-core';
-import { useTranslation } from '../../../../hooks/useTranslation';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { Formik } from 'formik';
+import { TFunction } from 'i18next';
+import * as Yup from 'yup';
 
+import TextField from '../../../form/TextField';
+import LabelsField from '../../../form/LabelsField';
 import { isPromiseRejected } from '../../../../types/typeUtils';
+import { isEnrollmentRequest } from '../../../../types/extraTypes';
 import { ApprovalStatus, getApprovalStatus } from '../../../../utils/status/enrollmentRequest';
 import { getFingerprintDisplay } from '../../../../utils/devices';
-import { isEnrollmentRequest } from '../../../../types/extraTypes';
-import LabelsField from '../../../form/LabelsField';
+import { getErrorMessage } from '../../../../utils/error';
 import { useAppContext } from '../../../../hooks/useAppContext';
+import { useTranslation } from '../../../../hooks/useTranslation';
+import EnrollmentRequestStatus from '../../../EnrollmentRequest/EnrollmentRequestStatus';
+import { ApprovedStatus } from '../../../Device/DeviceDetails/DeviceStatus';
 
 import './MassApproveDeviceModal.css';
 
-const templateToName = (index: number, nameTemplate: string) => nameTemplate.replace(/{{n+}}/g, `${index + 1}`);
+const templateToName = (index: number, nameTemplate: string) =>
+  nameTemplate ? nameTemplate.replace(/{{n+}}/g, `${index + 1}`) : '-';
+
+const isPendingEnrollmentRequest = (r: Device | EnrollmentRequest): r is EnrollmentRequest => {
+  return isEnrollmentRequest(r) && getApprovalStatus(r) !== ApprovalStatus.Approved;
+};
 
 type DeviceEnrollmentFormValues = {
   labels: { key: string; value: string }[];
   region: string;
   displayName: string;
 };
+
+const validationSchema = (t: TFunction) =>
+  Yup.object({
+    displayName: Yup.string()
+      .matches(
+        /{{n}}/,
+        t('Device display names must be unique. Add a number to the template to generate unique names.'),
+      )
+      .required(t('Display name is required.')),
+    region: Yup.string().required(t('Region is required.')),
+  });
 
 type MassApproveDeviceModalProps = {
   onClose: VoidFunction;
@@ -53,14 +70,12 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
     fetch: { post },
   } = useAppContext();
 
-  const enrollmentRequests = resources.filter(
-    (r) => isEnrollmentRequest(r) && getApprovalStatus(r) !== ApprovalStatus.Approved,
-  ) as EnrollmentRequest[];
+  const pendingEnrollments = resources.filter(isPendingEnrollmentRequest);
 
   const approveResources = async (values: DeviceEnrollmentFormValues) => {
     setProgress(0);
     setErrors(undefined);
-    const promises = enrollmentRequests.map(async (r, index) => {
+    const promises = pendingEnrollments.map(async (r, index) => {
       const labels = values.labels.reduce(
         (acc, { key, value }) => {
           acc[key] = value;
@@ -87,6 +102,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
       onApproveSuccess();
     }
   };
+
   return (
     <Formik<DeviceEnrollmentFormValues>
       initialValues={{
@@ -94,9 +110,10 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
         region: '',
         displayName: '',
       }}
+      validationSchema={validationSchema(t)}
       onSubmit={approveResources}
     >
-      {({ isSubmitting, values, setFieldValue, submitForm }) => (
+      {({ isSubmitting, values, setFieldValue, submitForm, isValid, dirty }) => (
         <Modal
           title={t('Approve pending devices')}
           isOpen
@@ -105,11 +122,11 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
           variant="medium"
           actions={[
             <Button
-              key="delete"
+              key="approve"
               variant="primary"
               onClick={submitForm}
               isLoading={isSubmitting}
-              isDisabled={isSubmitting}
+              isDisabled={isSubmitting || !isValid || !dirty}
             >
               {t('Approve')}
             </Button>,
@@ -124,7 +141,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
                 'Make sure you recognise and expect the following devices before approving them. Are you sure you want to approve the listed devices?',
               )}
             </StackItem>
-            {enrollmentRequests.length !== resources.length && (
+            {pendingEnrollments.length !== resources.length && (
               <StackItem>
                 <Alert
                   variant="info"
@@ -137,17 +154,22 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
               <Table>
                 <Thead>
                   <Tr>
-                    <Th>{t('Fingerprint')}</Th>
-                    <Th>{t('Status')}</Th>
+                    <Th width={25}>{t('Fingerprint')}</Th>
+                    <Th width={25}>{t('Status')}</Th>
+                    <Th width={50}>{t('Display name')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {resources.map((resource) => {
+                  {resources.map((resource, index) => {
+                    const isPendingEr = isPendingEnrollmentRequest(resource);
                     return (
                       <Tr key={resource.metadata.name}>
                         <Td dataLabel={t('Fingerprint')}>{getFingerprintDisplay(resource)}</Td>
                         <Td dataLabel={t('Status')}>
-                          {isEnrollmentRequest(resource) ? getApprovalStatus(resource) : t('Already approved')}
+                          {isPendingEr ? <EnrollmentRequestStatus er={resource} /> : <ApprovedStatus />}
+                        </Td>
+                        <Td dataLabel={t('Display name')}>
+                          {isPendingEr ? templateToName(index, values.displayName) : '-'}
                         </Td>
                       </Tr>
                     );
@@ -161,30 +183,20 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
                   <LabelsField labels={values.labels} setLabels={(labels) => setFieldValue('labels', labels)} />
                 </FormGroup>
                 <FormGroup label={t('Region')} isRequired>
-                  <TextInput
-                    aria-label={t('Region')}
-                    value={values.region}
-                    onChange={(_, value) => setFieldValue('region', value)}
-                  />
+                  <TextField name="region" aria-label={t('Region')} />
                 </FormGroup>
-                <FormGroup label={t('Name')} isRequired>
-                  <FormHelperText>
-                    <HelperText>
-                      <HelperTextItem>
-                        <div>{t('Name devices using the custom template.')}</div>
-                        <div>
-                          <>
-                            <strong>{`{{n}}`}</strong> {t('to add a number.')}
-                          </>
-                        </div>
-                      </HelperTextItem>
-                    </HelperText>
-                  </FormHelperText>
-                  <TextInput
-                    aria-label={t('Name')}
-                    value={values.displayName}
-                    onChange={(_, value) => setFieldValue('displayName', value)}
+
+                <FormGroup label={t('Display name')} isRequired>
+                  <TextField
+                    name="displayName"
+                    aria-label={t('Display name')}
                     placeholder="device-{{n}}"
+                    helperText={
+                      <>
+                        {t('Name devices using a custom template. Add a number using')}
+                        <strong> {`{{n}}`}</strong>
+                      </>
+                    }
                   />
                 </FormGroup>
               </Form>

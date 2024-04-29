@@ -228,6 +228,7 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
           onClose={() => setIsMassApproveModalOpen(false)}
           resources={sortedData.filter((r) => selectedResources.includes(getResourceId(r)))}
           onApproveSuccess={() => {
+            setAllSelected(false);
             setIsMassApproveModalOpen(false);
             refetch();
           }}
