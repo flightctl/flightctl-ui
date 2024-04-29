@@ -32,7 +32,6 @@ import TableTextSearch from '../Table/TableTextSearch';
 import Table, { TableColumn } from '../Table/Table';
 import TableActions from '../Table/TableActions';
 import { useTableSelect } from '../../hooks/useTableSelect';
-import { getResourceId } from '../../utils/resource';
 import MassDeleteRepositoryModal from '../modals/massModals/MassDeleteRepositoryModal/MassDeleteRepositoryModal';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -110,7 +109,7 @@ const RepositoryTable = () => {
   const columns = React.useMemo(() => getColumns(t), [t]);
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
-  const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
+  const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
   return (
     <ListPageBody error={error} loading={loading}>
@@ -125,7 +124,7 @@ const RepositoryTable = () => {
           <ToolbarItem>
             <TableActions>
               <DropdownList>
-                <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassDeleteModalOpen(true)}>
+                <SelectOption isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)}>
                   {t('Delete')}
                 </SelectOption>
               </DropdownList>
@@ -194,7 +193,7 @@ const RepositoryTable = () => {
             setIsMassDeleteModalOpen(false);
             refetch();
           }}
-          repositories={sortedData.filter((d) => selectedResources.includes(getResourceId(d)))}
+          repositories={sortedData.filter(isRowSelected)}
         />
       )}
     </ListPageBody>

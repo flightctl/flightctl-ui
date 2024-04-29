@@ -109,12 +109,15 @@ const FleetTable = () => {
   const { remove } = useFetch();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
 
-  const data = [
-    ...(fleetList?.items || []),
-    ...(rsList?.items || []).filter(
-      (rs) => !(fleetList?.items || []).some((fleet) => fleet.metadata.owner === `ResourceSync/${rs.metadata.name}`),
-    ),
-  ];
+  const data = React.useMemo(
+    () => [
+      ...(fleetList?.items || []),
+      ...(rsList?.items || []).filter(
+        (rs) => !(fleetList?.items || []).some((fleet) => fleet.metadata.owner === `ResourceSync/${rs.metadata.name}`),
+      ),
+    ],
+    [fleetList, rsList],
+  );
 
   const { search, setSearch, filteredData } = useTableTextSearch(data, getSearchText);
 
@@ -122,7 +125,7 @@ const FleetTable = () => {
 
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
-  const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
+  const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
 
   const { deleteAction, deleteModal } = useDeleteListAction({
     resourceType: 'fleet',
@@ -159,7 +162,7 @@ const FleetTable = () => {
           <ToolbarItem>
             <TableActions>
               <SelectList>
-                <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassDeleteModalOpen(true)}>
+                <SelectOption isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)}>
                   {t('Delete')}
                 </SelectOption>
               </SelectList>
@@ -208,7 +211,7 @@ const FleetTable = () => {
       {isMassDeleteModalOpen && (
         <MassDeleteFleetModal
           onClose={() => setIsMassDeleteModalOpen(false)}
-          resources={sortedData.filter((r) => selectedResources.includes(getResourceId(r)))}
+          resources={sortedData.filter(isRowSelected)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
             refetch();

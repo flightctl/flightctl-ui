@@ -29,7 +29,6 @@ import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import TableTextSearch from '../Table/TableTextSearch';
 import { useTableSelect } from '../../hooks/useTableSelect';
 import TableActions from '../Table/TableActions';
-import { getResourceId } from '../../utils/resource';
 
 import './RepositoryResourceSyncList.css';
 import MassDeleteResourceSyncModal from '../modals/massModals/MassDeleteResourceSyncModal/MassDeleteResourceSyncModal';
@@ -97,7 +96,7 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
   const columns = React.useMemo(() => getColumns(t), [t]);
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
-  const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
+  const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
   const { deleteAction, deleteModal } = useDeleteListAction({
     resourceType: 'Resource Sync',
@@ -118,7 +117,7 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
           <ToolbarItem>
             <TableActions>
               <SelectList>
-                <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassDeleteModalOpen(true)}>
+                <SelectOption isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)}>
                   {t('Delete')}
                 </SelectOption>
               </SelectList>
@@ -167,7 +166,7 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
       {isMassDeleteModalOpen && (
         <MassDeleteResourceSyncModal
           onClose={() => setIsMassDeleteModalOpen(false)}
-          resources={sortedData.filter((r) => selectedResources.includes(getResourceId(r)))}
+          resources={sortedData.filter(isRowSelected)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
             refetch();

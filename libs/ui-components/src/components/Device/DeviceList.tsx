@@ -118,7 +118,7 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
   const { filteredData, ...rest } = useDeviceFilters(resources, queryFilters);
   const { getSortParams, sortedData } = useTableSort(filteredData, deviceColumns);
 
-  const { onRowSelect, selectedResources, isAllSelected, isRowSelected, setAllSelected } = useTableSelect(sortedData);
+  const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
   const { deleteAction: deleteDeviceAction, deleteModal: deleteDeviceModal } = useDeleteListAction({
     resourceType: 'Device',
@@ -155,10 +155,10 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
         <ToolbarItem>
           <TableActions>
             <SelectList>
-              <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassApproveModalOpen(true)}>
+              <SelectOption isDisabled={!hasSelectedRows} onClick={() => setIsMassApproveModalOpen(true)}>
                 {t('Approve')}
               </SelectOption>
-              <SelectOption isDisabled={!selectedResources.length} onClick={() => setIsMassDeleteModalOpen(true)}>
+              <SelectOption isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)}>
                 {t('Delete')}
               </SelectOption>
             </SelectList>
@@ -216,7 +216,7 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
       {isMassDeleteModalOpen && (
         <MassDeleteDeviceModal
           onClose={() => setIsMassDeleteModalOpen(false)}
-          resources={sortedData.filter((r) => selectedResources.includes(getResourceId(r)))}
+          resources={sortedData.filter(isRowSelected)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
             refetch();
@@ -226,7 +226,7 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
       {isMassApproveModalOpen && (
         <MassApproveDeviceModal
           onClose={() => setIsMassApproveModalOpen(false)}
-          resources={sortedData.filter((r) => selectedResources.includes(getResourceId(r)))}
+          resources={sortedData.filter(isRowSelected)}
           onApproveSuccess={() => {
             setAllSelected(false);
             setIsMassApproveModalOpen(false);

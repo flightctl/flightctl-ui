@@ -3,40 +3,45 @@ import { OnSelect } from '@patternfly/react-table';
 import { ObjectMeta } from '@flightctl/types';
 import * as React from 'react';
 
-export const useTableSelect = <R extends { kind: string; metadata: ObjectMeta }>(resources: R[]) => {
-  const [selectedResources, setSelectedResources] = React.useState<string[]>([]);
+export const useTableSelect = <R extends { kind: string; metadata: ObjectMeta }>() => {
   const [isAllSelected, setIsAllSelected] = React.useState<boolean>(false);
+  // The elements in this "selectedResourceIds" can either be:
+  // - included in the selection, when "isAllSelected=false"
+  // - excluded from the selection, when "isAllSelected=true"
+  const [selectedResourceIds, setSelectedResourceIds] = React.useState<string[]>([]);
 
-  React.useEffect(() => {
-    if (isAllSelected) {
-      setSelectedResources(resources.map((r) => getResourceId(r)));
-    }
-  }, [resources, isAllSelected]);
+  const hasSelectedRows = isAllSelected || selectedResourceIds.length > 0;
 
   const setAllSelected = (isSelected: boolean) => {
     setIsAllSelected(isSelected);
-    !isSelected && setSelectedResources([]);
+    setSelectedResourceIds([]);
   };
 
   const onRowSelect =
     (resource: R): OnSelect =>
     (_, isSelecting) => {
       const resourceId = getResourceId(resource);
-      if (isSelecting) {
-        setSelectedResources([...selectedResources, resourceId]);
+
+      const addElementToList = (isAllSelected && !isSelecting) || (!isAllSelected && isSelecting);
+      if (addElementToList) {
+        setSelectedResourceIds([...selectedResourceIds, resourceId]);
       } else {
-        setSelectedResources(selectedResources.filter((id) => id !== resourceId));
-        if (isAllSelected) {
-          setAllSelected(false);
-        }
+        setSelectedResourceIds(selectedResourceIds.filter((id) => id !== resourceId));
       }
     };
 
-  const isRowSelected = (resource: R) => isAllSelected || selectedResources.includes(getResourceId(resource));
+  const isRowSelected = (resource: R) => {
+    if (isAllSelected) {
+      return !selectedResourceIds.includes(getResourceId(resource));
+    } else {
+      return selectedResourceIds.includes(getResourceId(resource));
+    }
+  };
+
   return {
     onRowSelect,
-    selectedResources,
-    isAllSelected,
+    hasSelectedRows,
+    isAllSelected: isAllSelected && selectedResourceIds.length === 0,
     setAllSelected,
     isRowSelected,
   };
