@@ -10,6 +10,7 @@
     "./libs/ui-components",
     "./libs/types",
     "./libs/cypress",
+    "./libs/i18n",
     "./apps/ocp-plugin",
     "./apps/standalone"
   ],
@@ -26,7 +27,7 @@
     "integration-tests:open": "npm run -w @flightctl/ui-tests-cypress integration-tests:open",
     "lint": "eslint \"{libs,apps}/*/src/**/*.{js,jsx,ts,tsx}\" && prettier --check \"{libs,apps}/*/src/**/*.{js,jsx,ts,tsx}\" && npm run i18n",
     "format": "prettier --check --write \"{libs,apps}/*/src/**/*.{js,jsx,ts,tsx}\"",
-    "i18n": "i18next \"{libs,apps}/*/src/**/*.{js,jsx,ts,tsx}\" [-oc] -c i18next-parser.config.js && git diff --exit-code locales/en/translation.json"
+    "i18n": "npm run -w @flightctl/i18n i18n"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.5",

@@ -15,7 +15,7 @@ i18n
     resources: {
       en: {
         // eslint-disable-next-line
-        translation: require('../../../locales/en/translation.json'),
+        translation: require('../../i18n/locales/en/translation.json'),
       },
     },
   });

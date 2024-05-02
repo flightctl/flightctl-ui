@@ -154,7 +154,7 @@ const config: Configuration & {
       patterns: [{ from: './src/assets/images/', to: 'images' }],
     }),
     new CopyPlugin({
-      patterns: [{ from: '../../locales', to: 'locales' }],
+      patterns: [{ from: '../../libs/i18n/locales', to: 'locales' }],
     }),
   ],
   resolve: {

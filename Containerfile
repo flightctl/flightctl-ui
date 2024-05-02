@@ -8,7 +8,6 @@ COPY package-lock.json /app
 COPY tsconfig.json /app
 COPY libs /app/libs
 COPY apps /app/apps
-COPY locales /app/locales
 ENV NODE_OPTIONS='--max-old-space-size=8192'
 RUN npm ci
 RUN npm run build
