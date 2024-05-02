@@ -12,7 +12,7 @@
   "scripts": {
     "prebuild": "tsc --noEmit && rimraf dist",
     "build": "tsc --build",
-    "gen-types": "node ./scripts/openapi-typescript.js && npm run build",
+    "gen-types": "node ./scripts/openapi-typescript.js && rsync -a --remove-source-files tmp-types/ ./ && npm run build",
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}'"
   },
   "devDependencies": {

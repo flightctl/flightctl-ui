@@ -18,7 +18,7 @@ const processJsonAPI = (jsonString) => {
 
 async function main() {
   const swaggerUrl = 'https://raw.githubusercontent.com/flightctl/flightctl/main/api/v1alpha1/openapi.yaml';
-  const output = path.resolve(__dirname, '../@types');
+  const output = path.resolve(__dirname, '../tmp-types');
   const response = await fetch(swaggerUrl);
   const data = await response.text();
 

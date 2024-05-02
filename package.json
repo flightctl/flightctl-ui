@@ -20,6 +20,7 @@
     "build": " npm run build:libs && npm run -w @flightctl/standalone build",
     "build:ocp": "npm run build:libs && npm run -w @flightctl/ocp-plugin build",
     "build:libs": "npm run -w @flightctl/types build && npm run -w @flightctl/ui-components build",
+    "gen-types": "npm run -w @flightctl/types gen-types",
     "test": "npm run -w @flightctl/ui-components test",
     "integration-tests:ci": "npm run -w @flightctl/ui-tests-cypress integration-tests:ci",
     "integration-tests:open": "npm run -w @flightctl/ui-tests-cypress integration-tests:open",

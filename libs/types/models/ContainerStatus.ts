@@ -19,5 +19,9 @@ export type ContainerStatus = {
    * Image of the container.
    */
   image: string;
+  /**
+   * Engine running the container (e.g., podman, crio, etc).
+   */
+  engine: string;
 };
 

@@ -7,11 +7,11 @@ export type ResourceSyncSpec = {
    * The name of the repository resource to use as the sync source
    *
    */
-  repository?: string;
+  repository: string;
   /**
    * The desired revision in the repository
    */
-  targetRevision?: string;
+  targetRevision: string;
   /**
    * The path of a file or directory in the repository. If a directory,
    * the directory should contain only resource definitions with no
@@ -19,6 +19,6 @@ export type ResourceSyncSpec = {
    * more resources.
    *
    */
-  path?: string;
+  path: string;
 };
 
