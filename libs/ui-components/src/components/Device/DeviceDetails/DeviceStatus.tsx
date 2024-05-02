@@ -24,6 +24,7 @@ const DeviceStatus = ({ device }: { device?: Device }) => {
     case DeviceConditionStatus.Valid:
     case DeviceConditionStatus.Approved:
     case DeviceConditionStatus.Available:
+      color = 'green';
       icon = <CheckCircleIcon />;
       break;
     case DeviceConditionStatus.Progressing:
@@ -38,8 +39,6 @@ const DeviceStatus = ({ device }: { device?: Device }) => {
       color = 'red';
       icon = <ExclamationCircleIcon />;
       break;
-    default:
-      color = 'green';
   }
 
   return (

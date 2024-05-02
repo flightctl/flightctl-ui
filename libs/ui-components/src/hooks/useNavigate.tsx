@@ -57,7 +57,7 @@ export const getRoute: AppContextProps['router']['getRoute'] = (to) => {
       return '/devicemanagement/resourcesyncs';
     case ROUTE.ENROLLMENT_REQUESTS:
     case ROUTE.ENROLLMENT_REQUEST_DETAILS:
-      return '/devicemanagement/resourcesyncs';
+      return '/devicemanagement/enrollmentrequests';
     default:
       return '/';
   }

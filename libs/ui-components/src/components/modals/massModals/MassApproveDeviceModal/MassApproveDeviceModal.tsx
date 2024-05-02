@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   Alert,
   Button,
+  ExpandableSection,
   Form,
   FormGroup,
   Modal,
@@ -26,7 +27,6 @@ import { getErrorMessage } from '../../../../utils/error';
 import { useAppContext } from '../../../../hooks/useAppContext';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import EnrollmentRequestStatus from '../../../EnrollmentRequest/EnrollmentRequestStatus';
-import { ApprovedStatus } from '../../../Device/DeviceDetails/DeviceStatus';
 
 import './MassApproveDeviceModal.css';
 
@@ -46,11 +46,8 @@ type DeviceEnrollmentFormValues = {
 const validationSchema = (t: TFunction) =>
   Yup.object({
     displayName: Yup.string()
-      .matches(
-        /{{n}}/,
-        t('Device display names must be unique. Add a number to the template to generate unique names.'),
-      )
-      .required(t('Display name is required.')),
+      .matches(/{{n}}/, t('Device names must be unique. Add a number to the template to generate unique names.'))
+      .required(t('Name is required.')),
     region: Yup.string().required(t('Region is required.')),
   });
 
@@ -58,6 +55,28 @@ type MassApproveDeviceModalProps = {
   onClose: VoidFunction;
   resources: Array<Device | EnrollmentRequest>;
   onApproveSuccess: VoidFunction;
+};
+
+const ApprovedDevicesTable = ({ devices }: { devices: Array<EnrollmentRequest | Device> }) => {
+  const { t } = useTranslation();
+  return (
+    <Table>
+      <Thead>
+        <Tr>
+          <Th width={25}>{t('Fingerprint')}</Th>
+          <Th width={50}>{t('Name')}</Th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {devices.map((device) => (
+          <Tr key={device.metadata.name}>
+            <Td dataLabel={t('Fingerprint')}>{getFingerprintDisplay(device)}</Td>
+            <Td dataLabel={t('Name')}>{device.metadata.labels?.displayName || '-'}</Td>
+          </Tr>
+        ))}
+      </Tbody>
+    </Table>
+  );
 };
 
 const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose, onApproveSuccess, resources }) => {
@@ -71,6 +90,37 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
   } = useAppContext();
 
   const pendingEnrollments = resources.filter(isPendingEnrollmentRequest);
+  const resourcesToSkip = resources.filter((r) => !isPendingEnrollmentRequest(r));
+
+  if (pendingEnrollments.length === 0) {
+    return (
+      <Modal
+        title={t('Approve pending devices')}
+        isOpen
+        onClose={onClose}
+        showClose
+        variant="medium"
+        actions={[
+          <Button key="close" variant="primary" onClick={onClose}>
+            {t('Close')}
+          </Button>,
+        ]}
+      >
+        <Stack hasGutter>
+          <StackItem>
+            <Alert
+              variant="info"
+              isInline
+              title={t('All the devices you selected are already approved and cannot be approved again.')}
+            />
+          </StackItem>
+          <StackItem>
+            <ApprovedDevicesTable devices={resourcesToSkip} />
+          </StackItem>
+        </Stack>
+      </Modal>
+    );
+  }
 
   const approveResources = async (values: DeviceEnrollmentFormValues) => {
     setProgress(0);
@@ -141,39 +191,25 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
                 'Make sure you recognise and expect the following devices before approving them. Are you sure you want to approve the listed devices?',
               )}
             </StackItem>
-            {pendingEnrollments.length !== resources.length && (
-              <StackItem>
-                <Alert
-                  variant="info"
-                  isInline
-                  title={t('Some of the selected devices were already approved and will be excluded.')}
-                />
-              </StackItem>
-            )}
             <StackItem className="fctl-mass-approve__table">
               <Table>
                 <Thead>
                   <Tr>
                     <Th width={25}>{t('Fingerprint')}</Th>
                     <Th width={25}>{t('Status')}</Th>
-                    <Th width={50}>{t('Display name')}</Th>
+                    <Th width={50}>{t('Name')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {resources.map((resource, index) => {
-                    const isPendingEr = isPendingEnrollmentRequest(resource);
-                    return (
-                      <Tr key={resource.metadata.name}>
-                        <Td dataLabel={t('Fingerprint')}>{getFingerprintDisplay(resource)}</Td>
-                        <Td dataLabel={t('Status')}>
-                          {isPendingEr ? <EnrollmentRequestStatus er={resource} /> : <ApprovedStatus />}
-                        </Td>
-                        <Td dataLabel={t('Display name')}>
-                          {isPendingEr ? templateToName(index, values.displayName) : '-'}
-                        </Td>
-                      </Tr>
-                    );
-                  })}
+                  {pendingEnrollments.map((pendingEr, index) => (
+                    <Tr key={pendingEr.metadata.name}>
+                      <Td dataLabel={t('Fingerprint')}>{getFingerprintDisplay(pendingEr)}</Td>
+                      <Td dataLabel={t('Status')}>
+                        <EnrollmentRequestStatus er={pendingEr} />
+                      </Td>
+                      <Td dataLabel={t('Name')}>{templateToName(index, values.displayName)}</Td>
+                    </Tr>
+                  ))}
                 </Tbody>
               </Table>
             </StackItem>
@@ -186,10 +222,10 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
                   <TextField name="region" aria-label={t('Region')} />
                 </FormGroup>
 
-                <FormGroup label={t('Display name')} isRequired>
+                <FormGroup label={t('Name')} isRequired>
                   <TextField
                     name="displayName"
-                    aria-label={t('Display name')}
+                    aria-label={t('Name')}
                     placeholder="device-{{n}}"
                     helperText={
                       <>
@@ -201,6 +237,22 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
                 </FormGroup>
               </Form>
             </StackItem>
+            {resourcesToSkip.length > 0 && (
+              <>
+                <StackItem>
+                  <Alert
+                    variant="info"
+                    isInline
+                    title={t('Some devices you selected are already approved and will be excluded.')}
+                  />
+                </StackItem>
+                <StackItem>
+                  <ExpandableSection toggleText={t('Show already approved devices')}>
+                    <ApprovedDevicesTable devices={resourcesToSkip} />
+                  </ExpandableSection>
+                </StackItem>
+              </>
+            )}
             {isSubmitting && (
               <StackItem>
                 <Progress
