@@ -68,6 +68,7 @@ const EnrollmentRequestDetails = () => {
       id={er?.metadata.name as string}
       resourceLink="/devicemanagement/devices"
       resourceType="Devices"
+      resourceTypeLabel={t('Devices')}
       actions={
         <DetailsPageActions>
           <DropdownList>

@@ -159,7 +159,7 @@ const RepositoryTable = () => {
               <Td dataLabel={t('Sync status')}>
                 <StatusInfo statusInfo={getRepositorySyncStatus(repository)} />
               </Td>
-              <Td dataLabel={t('Last transition')}>{getRepositoryLastTransitionTime(repository).text}</Td>
+              <Td dataLabel={t('Last transition')}>{getRepositoryLastTransitionTime(repository, t).text}</Td>
               <Td isActionCell>
                 <ActionsColumn
                   items={[

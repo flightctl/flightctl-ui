@@ -7,10 +7,14 @@ import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exc
 
 import { ConditionType, ResourceSync } from '@flightctl/types';
 import WithTooltip from '../common/WithTooltip';
-import { getRepositorySyncStatus } from '../../utils/status/repository';
+import { getRepositorySyncStatus, repositoryStatusLabels } from '../../utils/status/repository';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const ResourceSyncStatus = ({ resourceSync }: { resourceSync: ResourceSync }) => {
-  const statusType = getRepositorySyncStatus(resourceSync);
+  const { t } = useTranslation();
+  const statusType = getRepositorySyncStatus(resourceSync, t);
+  const statusLabels = repositoryStatusLabels(t);
+
   let color: LabelProps['color'];
   let icon: React.ReactNode;
 
@@ -40,7 +44,7 @@ const ResourceSyncStatus = ({ resourceSync }: { resourceSync: ResourceSync }) =>
   return (
     <WithTooltip showTooltip={!!statusType.message} content={statusType.message}>
       <Label color={color} icon={icon}>
-        {statusType.status}
+        {statusLabels[statusType.status]}
       </Label>
     </WithTooltip>
   );

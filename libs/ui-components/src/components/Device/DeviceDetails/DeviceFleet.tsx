@@ -13,7 +13,7 @@ const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => 
     router: { Link },
   } = useAppContext();
   const { t } = useTranslation();
-  const details = getMissingFleetDetails(deviceMetadata);
+  const details = getMissingFleetDetails(t, deviceMetadata);
   const hasMultipleOwners = details.owners.length > 1;
 
   return (

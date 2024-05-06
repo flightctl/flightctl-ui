@@ -1,3 +1,4 @@
+import { TFunction } from 'i18next';
 import { ConditionStatus, ConditionType, Device } from '@flightctl/types';
 
 export enum DeviceConditionStatus {
@@ -18,6 +19,15 @@ export const deviceStatusOrder: DeviceConditionStatus[] = [
   DeviceConditionStatus.Degraded,
   DeviceConditionStatus.Unavailable,
 ];
+
+export const deviceStatusLabels = (t: TFunction) => ({
+  [DeviceConditionStatus.Valid]: t('Valid'),
+  [DeviceConditionStatus.Approved]: t('Approved'),
+  [DeviceConditionStatus.Available]: t('Available'),
+  [DeviceConditionStatus.Progressing]: t('Progressing'),
+  [DeviceConditionStatus.Degraded]: t('Degraded'),
+  [DeviceConditionStatus.Unavailable]: t('Unavailable'),
+});
 
 export const getDeviceStatus = (device: Device): DeviceConditionStatus => {
   const unavailableCondition = device.status?.conditions?.find(

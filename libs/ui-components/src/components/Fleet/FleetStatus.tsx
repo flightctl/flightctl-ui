@@ -6,11 +6,14 @@ import { WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons/warni
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 import { ConditionType, Fleet } from '@flightctl/types';
-import { getFleetSyncStatus } from '../../utils/status/fleet';
+import { fleetStatusLabels, getFleetSyncStatus } from '../../utils/status/fleet';
 import WithTooltip from '../common/WithTooltip';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
-  const syncStatus = getFleetSyncStatus(fleet);
+  const { t } = useTranslation();
+  const syncStatus = getFleetSyncStatus(fleet, t);
+  const statusLabels = fleetStatusLabels(t);
 
   let color: LabelProps['color'];
   let icon: React.ReactNode;
@@ -37,7 +40,7 @@ const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
   return (
     <WithTooltip showTooltip={!!syncStatus.message} content={syncStatus.message}>
       <Label color={color} icon={icon}>
-        {syncStatus.status}
+        {statusLabels[syncStatus.status]}
       </Label>
     </WithTooltip>
   );

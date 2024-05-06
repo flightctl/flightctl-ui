@@ -1,3 +1,4 @@
+import { TFunction } from 'i18next';
 import { ConditionStatus, ConditionType, Repository, ResourceSync } from '@flightctl/types';
 import { timeSinceText } from '../dates';
 
@@ -10,8 +11,19 @@ export type RepositorySyncStatus =
   | 'Not accessible'
   | 'Sync pending';
 
+const repositoryStatusLabels = (t: TFunction) => ({
+  [ConditionType.ResourceSyncSynced]: t('Synced'),
+  'Not synced': t('Not synced'),
+  [ConditionType.ResourceSyncResourceParsed]: t('Parsed'),
+  'Not parsed': t('Not parsed'),
+  [ConditionType.RepositoryAccessible]: t('Accessible'),
+  'Not accessible': t('Not accessible'),
+  'Sync pending': t('Sync pending'),
+});
+
 const getRepositorySyncStatus = (
   repository: Repository | ResourceSync,
+  t: TFunction = (s: string) => s,
 ): {
   status: RepositorySyncStatus;
   message: string | undefined;
@@ -65,12 +77,13 @@ const getRepositorySyncStatus = (
   // As a fallback, we indicate the repository is waiting for sync
   return {
     status: 'Sync pending',
-    message: 'Waiting for first sync',
+    message: t('Waiting for first sync'),
   };
 };
 
 const getRepositoryLastTransitionTime = (
   repository: Repository,
+  t: TFunction = (s: string) => s,
 ): {
   text: string;
   timestamp: string;
@@ -86,7 +99,7 @@ const getRepositoryLastTransitionTime = (
   });
 
   return {
-    text: lastTime ? `${timeSinceText(new Date(lastTime).getTime())} ago` : '-',
+    text: lastTime ? timeSinceText(t, new Date(lastTime).getTime()) : '-',
     timestamp: lastTime || '0',
   };
 };
@@ -96,4 +109,4 @@ const getObservedHash = (resourceSync: ResourceSync): string | undefined => {
   return lastHash ? lastHash.substring(0, 7) : '-';
 };
 
-export { getRepositorySyncStatus, getRepositoryLastTransitionTime, getObservedHash };
+export { getRepositorySyncStatus, getRepositoryLastTransitionTime, getObservedHash, repositoryStatusLabels };

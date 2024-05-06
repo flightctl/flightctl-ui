@@ -11,8 +11,8 @@ import {
   GridItem,
   Icon,
 } from '@patternfly/react-core';
-import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
-import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
+import { LockedIcon } from '@patternfly/react-icons/dist/js/icons/locked-icon';
+import { LockOpenIcon } from '@patternfly/react-icons/dist/js/icons/lock-open-icon';
 
 import StatusInfo from '../../../common/StatusInfo';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../../utils/status/repository';
@@ -45,7 +45,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Last transition')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {repoDetails ? getRepositoryLastTransitionTime(repoDetails).text : '-'}
+                  {repoDetails ? getRepositoryLastTransitionTime(repoDetails, t).text : '-'}
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
@@ -53,21 +53,21 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
                 <DescriptionListDescription>{repoDetails?.spec.username || '-'}</DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('Password')}</DescriptionListTerm>
+                <DescriptionListTerm>{t('Privacy')}</DescriptionListTerm>
                 <DescriptionListDescription>
                   {repoDetails?.spec.password ? (
                     <>
                       <Icon status="success">
-                        <CheckCircleIcon />
+                        <LockedIcon />
                       </Icon>{' '}
-                      {t('Password is set')}
+                      {t('Repository is private')}
                     </>
                   ) : (
                     <>
-                      <Icon status="info">
-                        <InfoCircleIcon />
+                      <Icon status="success">
+                        <LockOpenIcon />
                       </Icon>{' '}
-                      {t('Password not set')}
+                      {t('Repository is public')}
                     </>
                   )}
                 </DescriptionListDescription>

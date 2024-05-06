@@ -59,6 +59,7 @@ const FleetDetails = () => {
       id={fleetId}
       resourceLink="/devicemanagement/fleets"
       resourceType="Fleets"
+      resourceTypeLabel={t('Fleets')}
       actions={
         <DetailsPageActions>
           <DropdownList>

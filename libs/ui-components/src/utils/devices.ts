@@ -1,5 +1,6 @@
 import { Device, ObjectMeta } from '@flightctl/types';
 import { FlightCtlLabel } from '../types/extraTypes';
+import { TFunction } from 'i18next';
 
 export const getFingerprintDisplay = <R extends { metadata: ObjectMeta }>(resource: R) => {
   const fingerprint = resource.metadata.name;
@@ -16,20 +17,20 @@ const getDeviceFleet = (metadata: ObjectMeta) => {
   return match?.groups?.fleetName || null;
 };
 
-const getMissingFleetDetails = (metadata: ObjectMeta): { message: string; owners: string[] } => {
+const getMissingFleetDetails = (t: TFunction, metadata: ObjectMeta): { message: string; owners: string[] } => {
   const multipleOwnersInfo = Object.keys(metadata.annotations || {}).find((key) => key === 'MultipleOwners');
   if (multipleOwnersInfo) {
     // When the multiple owners issue is resolved, the annotation is still present
     const owners = metadata.annotations?.MultipleOwners || '';
     if (owners.length > 0) {
       return {
-        message: 'Device is owned by more than one fleet',
+        message: t('Device is owned by more than one fleet'),
         owners: owners.split(','),
       };
     }
   }
   return {
-    message: 'No fleet matches the device selectors',
+    message: t('No fleet matches the device selectors'),
     owners: [],
   };
 };

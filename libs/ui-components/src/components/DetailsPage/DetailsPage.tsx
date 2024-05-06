@@ -23,6 +23,7 @@ export type DetailsPageProps = {
   error: unknown;
   loading: boolean;
   resourceType: 'Fleets' | 'Devices' | 'Repositories' | 'Enrollment requests';
+  resourceTypeLabel: string;
   resourceLink: string;
   actions?: React.ReactNode;
   nav?: React.ReactNode;
@@ -36,6 +37,7 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
   loading,
   resourceLink,
   resourceType,
+  resourceTypeLabel,
   actions,
   nav,
 }) => {
@@ -67,7 +69,7 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
       <PageSection variant="light" type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
-            <Link to={resourceLink}>{resourceType}</Link>
+            <Link to={resourceLink}>{resourceTypeLabel}</Link>
           </BreadcrumbItem>
           <BreadcrumbItem isActive>{title || id}</BreadcrumbItem>
         </Breadcrumb>

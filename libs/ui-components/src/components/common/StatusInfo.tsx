@@ -5,12 +5,16 @@ import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exc
 import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/question-circle-icon';
 import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progress-icon';
 
-import { RepositorySyncStatus } from '../../utils/status/repository';
-import WithTooltip from '../common/WithTooltip';
 import { ConditionType } from '@flightctl/types';
+import { RepositorySyncStatus, repositoryStatusLabels } from '../../utils/status/repository';
+import WithTooltip from '../common/WithTooltip';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const StatusInfo = ({ statusInfo }: { statusInfo: { status: RepositorySyncStatus; message?: string } }) => {
   const statusType = statusInfo.status;
+  const { t } = useTranslation();
+
+  const statusLabels = repositoryStatusLabels(t);
 
   let icon: LabelProps['icon'];
   let color: LabelProps['color'];
@@ -40,7 +44,7 @@ const StatusInfo = ({ statusInfo }: { statusInfo: { status: RepositorySyncStatus
   return (
     <WithTooltip showTooltip={!!statusInfo.message} content={statusInfo.message}>
       <Label color={color} icon={icon}>
-        {statusType}
+        {statusLabels[statusType]}
       </Label>
     </WithTooltip>
   );

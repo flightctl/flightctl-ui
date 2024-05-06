@@ -88,19 +88,22 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
   };
 
   const onDeleteFilterChip = (category: string | ToolbarChipGroup, chip: ToolbarChip | string) => {
-    const { key } = category as FilterCategory;
-    const id = chip as string;
-    if (key === 'status') {
+    if (category === 'status') {
+      const id = chip as string;
       setFilters({ status: filters.status.filter((fil: string) => fil !== id) });
-    } else if (key === 'id') {
+    } else if (category === 'id') {
       setSearch('');
-    } else if (key === 'fleet') {
+    } else if (category === 'fleet') {
       clearFleetFilter();
     }
   };
 
   return (
-    <Toolbar id="devices-toolbar" clearAllFilters={() => onDeleteFilterGroup('')}>
+    <Toolbar
+      id="devices-toolbar"
+      clearFiltersButtonText={t('Clear all filters')}
+      clearAllFilters={() => onDeleteFilterGroup({ key: '', name: '' })}
+    >
       <ToolbarContent>
         <ToolbarItem variant="search-filter">
           <ToolbarFilter

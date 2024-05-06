@@ -58,7 +58,7 @@ const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
               <Td dataLabel={t('Sync status')}>
                 <StatusInfo statusInfo={getRepositorySyncStatus(currentRepo)} />
               </Td>
-              <Td dataLabel={t('Last transition')}>{getRepositoryLastTransitionTime(currentRepo).text}</Td>
+              <Td dataLabel={t('Last transition')}>{getRepositoryLastTransitionTime(currentRepo, t).text}</Td>
             </Tr>
           </Tbody>
         </Table>

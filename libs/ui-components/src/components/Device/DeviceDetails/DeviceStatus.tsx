@@ -1,22 +1,19 @@
 import * as React from 'react';
 import { Label, LabelProps } from '@patternfly/react-core';
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
-import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { DisconnectedIcon } from '@patternfly/react-icons/dist/js/icons/disconnected-icon';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progress-icon';
 
-import { DeviceConditionStatus, getDeviceStatus } from '../../../utils/status/device';
 import { Device } from '@flightctl/types';
-
-// TODO https://issues.redhat.com/browse/MGMT-17658 Statuses need translations (for devices, fleets, etc)
-export const ApprovedStatus = () => (
-  <Label color="green" icon={<CheckCircleIcon />}>
-    Approved
-  </Label>
-);
+import { useTranslation } from '../../../hooks/useTranslation';
+import { DeviceConditionStatus, deviceStatusLabels, getDeviceStatus } from '../../../utils/status/device';
 
 const DeviceStatus = ({ device }: { device?: Device }) => {
   const status = device ? getDeviceStatus(device) : DeviceConditionStatus.Approved;
+  const { t } = useTranslation();
+  const statusLabels = deviceStatusLabels(t);
+
   let color: LabelProps['color'];
   let icon: LabelProps['icon'];
 
@@ -36,14 +33,14 @@ const DeviceStatus = ({ device }: { device?: Device }) => {
       icon = <ExclamationTriangleIcon />;
       break;
     case DeviceConditionStatus.Unavailable:
-      color = 'red';
-      icon = <ExclamationCircleIcon />;
+      color = 'orange';
+      icon = <DisconnectedIcon />;
       break;
   }
 
   return (
     <Label color={color} icon={icon}>
-      {status}
+      {statusLabels[status] || t('Unknown')}
     </Label>
   );
 };

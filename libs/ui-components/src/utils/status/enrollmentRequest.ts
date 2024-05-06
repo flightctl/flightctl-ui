@@ -1,3 +1,4 @@
+import { TFunction } from 'i18next';
 import { ConditionType, EnrollmentRequest } from '@flightctl/types';
 
 export enum ApprovalStatus {
@@ -6,6 +7,13 @@ export enum ApprovalStatus {
   Denied = 'Denied',
   Unknown = 'Unknown',
 }
+
+export const approvalStatusLabels = (t: TFunction): Record<ApprovalStatus, string> => ({
+  [ApprovalStatus.Pending]: t('Pending approval'),
+  [ApprovalStatus.Approved]: t('Approved'),
+  [ApprovalStatus.Denied]: t('Denied'),
+  [ApprovalStatus.Unknown]: t('Unknown'),
+});
 
 export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): ApprovalStatus => {
   const approvedCondition = enrollmentRequest.status?.conditions?.find(

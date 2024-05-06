@@ -79,6 +79,7 @@ const DeviceDetails = () => {
       title={name}
       resourceLink="/devicemanagement/devices"
       resourceType="Devices"
+      resourceTypeLabel={t('Devices')}
       actions={
         <DetailsPageActions>
           <DropdownList>

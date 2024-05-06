@@ -13,6 +13,7 @@ const baseProps: DetailsPageProps = {
   loading: false,
   resourceLink: '/devicemanagement/devices',
   resourceType: 'Devices',
+  resourceTypeLabel: 'Devices',
   actions: undefined,
   nav: undefined,
 };

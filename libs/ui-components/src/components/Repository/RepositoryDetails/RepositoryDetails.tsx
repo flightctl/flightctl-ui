@@ -39,6 +39,7 @@ const RepositoryDetails = () => {
       title={repoDetails?.metadata.name as string}
       resourceLink="/devicemanagement/repositories"
       resourceType="Repositories"
+      resourceTypeLabel={t('Repositories')}
       actions={
         <DetailsPageActions>
           <DropdownList>

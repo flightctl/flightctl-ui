@@ -6,10 +6,14 @@ import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/questi
 import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progress-icon';
 
 import { EnrollmentRequest } from '@flightctl/types';
-import { ApprovalStatus, getApprovalStatus } from '../../utils/status/enrollmentRequest';
+import { ApprovalStatus, approvalStatusLabels, getApprovalStatus } from '../../utils/status/enrollmentRequest';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const EnrollmentRequestStatus = ({ er }: { er?: EnrollmentRequest }) => {
+  const { t } = useTranslation();
   const status = er ? getApprovalStatus(er) : ApprovalStatus.Unknown;
+  const statusLabels = approvalStatusLabels(t);
+
   let color: LabelProps['color'];
   let icon: LabelProps['icon'];
 
@@ -34,7 +38,7 @@ const EnrollmentRequestStatus = ({ er }: { er?: EnrollmentRequest }) => {
 
   return (
     <Label color={color} icon={icon}>
-      {status}
+      {statusLabels[status]}
     </Label>
   );
 };
