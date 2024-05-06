@@ -32,7 +32,10 @@ const ResourceSyncToRepository = React.lazy(
 const ImportFleetWizard = React.lazy(
   () => import('@flightctl/ui-components/components/Fleet/ImportFleetWizard/ImportFleetWizard'),
 );
-const CreateFleet = React.lazy(() => import('@flightctl/ui-components/components/Fleet/CreateFleet/CreateFleet'));
+const CreateFleetWizard = React.lazy(
+  () => import('@flightctl/ui-components/components/Fleet/CreateFleet/CreateFleetWizard'),
+);
+
 const FleetList = React.lazy(() => import('@flightctl/ui-components/components/Fleet/FleetList'));
 const FleetDetails = React.lazy(() => import('@flightctl/ui-components/components/Fleet/FleetDetails/FleetDetails'));
 
@@ -120,7 +123,7 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         title: t('Create Fleet'),
         element: (
           <TitledRoute title={t('Create Fleet')}>
-            <CreateFleet />
+            <CreateFleetWizard />
           </TitledRoute>
         ),
       },
@@ -130,6 +133,15 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         element: (
           <TitledRoute title={t('Import Fleet')}>
             <ImportFleetWizard />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'edit/:fleetId',
+        title: t('Edit Fleet'),
+        element: (
+          <TitledRoute title={t('Edit Fleet')}>
+            <CreateFleetWizard />
           </TitledRoute>
         ),
       },

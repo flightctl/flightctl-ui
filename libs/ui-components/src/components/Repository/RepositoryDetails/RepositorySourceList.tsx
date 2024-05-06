@@ -46,7 +46,9 @@ const RepositorySourceList = ({ sourceItems }: { sourceItems: SourceItem[] }) =>
         const isRepoMissing = isPromiseRejected(result);
         const name = repositorySourceNames[index];
         const errorMessage = isRepoMissing
-          ? `${t('The repository "{{name}}" defined for this source failed to load.', { name: repositoryNames[index] })} ${getErrorMessage(result.reason)}`
+          ? `${t('The repository "{{name}}" defined for this source failed to load.', {
+              name: repositoryNames[index],
+            })} ${getErrorMessage(result.reason)}`
           : undefined;
         const url = isRepoMissing ? undefined : result.value.spec.repo;
         return {
@@ -64,7 +66,7 @@ const RepositorySourceList = ({ sourceItems }: { sourceItems: SourceItem[] }) =>
   }, [t, get, repositoryNames, repositorySourceNames]);
 
   if (isLoading) {
-    return <Spinner />;
+    return <Spinner size="sm" />;
   }
 
   const allItems: RepositorySourceDetails[] = repoDetailItems?.length

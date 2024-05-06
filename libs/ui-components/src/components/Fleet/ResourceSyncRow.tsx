@@ -1,4 +1,4 @@
-import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 import { ResourceSync } from '@flightctl/types';
 import * as React from 'react';
 import { FleetOwnerLinkIcon } from './FleetDetails/FleetOwnerLink';
@@ -12,13 +12,6 @@ type ResourceSyncRowProps = {
   rowIndex: number;
   onRowSelect: (rs: ResourceSync) => OnSelect;
   isRowSelected: (rs: ResourceSync) => boolean;
-  editLabelsAction: ({
-    resourceId,
-    disabledReason,
-  }: {
-    resourceId: string;
-    disabledReason: string | undefined;
-  }) => IAction;
 };
 
 const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
@@ -27,7 +20,6 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
   onRowSelect,
   isRowSelected,
   deleteAction,
-  editLabelsAction,
 }) => {
   const { t } = useTranslation();
   return (
@@ -42,7 +34,7 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
       <Td dataLabel={t('Name')}>
         <FleetOwnerLinkIcon hasOwner>-</FleetOwnerLinkIcon>
       </Td>
-      <Td dataLabel={t('OS image')}>-</Td>
+      <Td dataLabel={t('System image')}>-</Td>
       <Td dataLabel={t('Label selector')}>-</Td>
       <Td dataLabel={t('Status')}>
         <ResourceSyncStatus resourceSync={resourceSync} />
@@ -50,10 +42,11 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
       <Td isActionCell>
         <ActionsColumn
           items={[
-            editLabelsAction({
-              resourceId: resourceSync.metadata.name || '',
-              disabledReason: t('Fleets managed by a Resourcesync cannot be edited'),
-            }),
+            {
+              title: t('Edit'),
+              tooltipProps: t('Fleets managed by a Resourcesync cannot be edited'),
+              isAriaDisabled: true,
+            },
             deleteAction({
               resourceId: resourceSync.metadata.name || '',
             }),

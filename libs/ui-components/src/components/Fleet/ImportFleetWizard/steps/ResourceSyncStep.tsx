@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Form, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
+import { Form, Grid, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
 import { FormikErrors } from 'formik';
 import { useTranslation } from '../../../../hooks/useTranslation';
 
@@ -29,7 +29,9 @@ const ResourceSyncStep = () => {
       </StackItem>
       <StackItem>
         <Form>
-          <CreateResourceSyncsForm />
+          <Grid span={8}>
+            <CreateResourceSyncsForm />
+          </Grid>
         </Form>
       </StackItem>
     </Stack>

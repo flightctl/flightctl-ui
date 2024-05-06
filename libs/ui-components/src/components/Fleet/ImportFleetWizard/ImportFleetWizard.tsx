@@ -1,11 +1,15 @@
 import {
   Alert,
+  Breadcrumb,
+  BreadcrumbItem,
   Bullseye,
   Button,
+  PageSection,
+  PageSectionVariants,
   Spinner,
+  Title,
   Wizard,
   WizardFooterWrapper,
-  WizardHeader,
   WizardStep,
   WizardStepType,
   useWizardContext,
@@ -31,6 +35,7 @@ import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { TFunction } from 'i18next';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 import './ImportFleetWizard.css';
 
@@ -70,11 +75,9 @@ const ImportFleetWizardFooter = () => {
   return (
     <WizardFooterWrapper>
       {primaryBtn}
-      {activeStep.id !== repositoryStepId && (
-        <Button variant="secondary" onClick={goToPrevStep} isDisabled={isSubmitting}>
-          {t('Back')}
-        </Button>
-      )}
+      <Button variant="secondary" onClick={goToPrevStep} isDisabled={isSubmitting || activeStep.id == repositoryStepId}>
+        {t('Back')}
+      </Button>
       <Button variant="link" onClick={() => navigate(-1)} isDisabled={isSubmitting}>
         {t('Cancel')}
       </Button>
@@ -85,102 +88,125 @@ const ImportFleetWizardFooter = () => {
 const ImportFleetWizard = () => {
   const { t } = useTranslation();
   const { post } = useFetch();
+  const {
+    router: { Link },
+  } = useAppContext();
   const [errors, setErrors] = React.useState<string[]>();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
   const [repoList, isLoading, error] = useFetchPeriodically<RepositoryList>({ endpoint: 'repositories' });
 
+  let body;
+
   if (isLoading) {
-    return (
+    body = (
       <Bullseye>
         <Spinner />
       </Bullseye>
     );
-  }
-
-  if (error) {
-    return (
+  } else if (error) {
+    body = (
       <Alert isInline variant="danger" title={t('An error occurred')}>
         {getErrorMessage(error)}
       </Alert>
     );
+  } else {
+    body = (
+      <Formik<ImportFleetFormValues>
+        initialValues={{
+          useExistingRepo: false,
+          existingRepo: '',
+          name: '',
+          isPrivate: false,
+          resourceSyncs: [
+            {
+              exists: false,
+              name: '',
+              path: '',
+              targetRevision: '',
+            },
+          ],
+          url: '',
+        }}
+        validationSchema={validationSchema(t)}
+        validateOnMount
+        validateOnChange={false}
+        onSubmit={async (values) => {
+          setErrors(undefined);
+          if (!values.useExistingRepo) {
+            try {
+              await post<Repository>('repositories', getRepository(values));
+            } catch (e) {
+              setErrors([getErrorMessage(e)]);
+              return;
+            }
+          }
+          const resourceSyncPromises = values.resourceSyncs.map((rs) =>
+            post<ResourceSync>(
+              'resourcesyncs',
+              getResourceSync(values.useExistingRepo ? values.existingRepo : values.name, rs),
+            ),
+          );
+          const errors = await handlePromises(resourceSyncPromises);
+          if (errors.length) {
+            setErrors(errors);
+            return;
+          }
+          navigate(ROUTE.FLEETS);
+        }}
+      >
+        {({ values, errors: formikErrors }) => (
+          <Wizard
+            footer={<ImportFleetWizardFooter />}
+            onStepChange={(_, step) => setCurrentStep(step)}
+            className="fctl-import-fleet"
+          >
+            <WizardStep name={t('Select or create repository')} id={repositoryStepId}>
+              {(!currentStep || currentStep?.id === repositoryStepId) && (
+                <RepositoryStep repositories={repoList?.items || []} />
+              )}
+            </WizardStep>
+            <WizardStep
+              name={t('Add resource sync')}
+              id={resourceSyncStepId}
+              isDisabled={
+                (!currentStep || currentStep?.id === repositoryStepId) && !isRepoStepValid(values, formikErrors)
+              }
+            >
+              {currentStep?.id === resourceSyncStepId && <ResourceSyncStep />}
+            </WizardStep>
+            <WizardStep
+              name={t('Review')}
+              id={reviewStepId}
+              isDisabled={!isRepoStepValid(values, formikErrors) || !isResourceSyncStepValid(formikErrors)}
+            >
+              {currentStep?.id === reviewStepId && <ReviewStep errors={errors} />}
+            </WizardStep>
+          </Wizard>
+        )}
+      </Formik>
+    );
   }
 
   return (
-    <Formik<ImportFleetFormValues>
-      initialValues={{
-        useExistingRepo: false,
-        existingRepo: '',
-        name: '',
-        isPrivate: false,
-        resourceSyncs: [
-          {
-            exists: false,
-            name: '',
-            path: '',
-            targetRevision: '',
-          },
-        ],
-        url: '',
-      }}
-      validationSchema={validationSchema(t)}
-      validateOnMount
-      validateOnChange={false}
-      onSubmit={async (values) => {
-        setErrors(undefined);
-        if (!values.useExistingRepo) {
-          try {
-            await post<Repository>('repositories', getRepository(values));
-          } catch (e) {
-            setErrors([getErrorMessage(e)]);
-            return;
-          }
-        }
-        const resourceSyncPromises = values.resourceSyncs.map((rs) =>
-          post<ResourceSync>(
-            'resourcesyncs',
-            getResourceSync(values.useExistingRepo ? values.existingRepo : values.name, rs),
-          ),
-        );
-        const errors = await handlePromises(resourceSyncPromises);
-        if (errors.length) {
-          setErrors(errors);
-          return;
-        }
-        navigate(ROUTE.FLEETS);
-      }}
-    >
-      {({ values, errors: formikErrors }) => (
-        <Wizard
-          header={<WizardHeader title={t('Import fleets')} isCloseHidden />}
-          footer={<ImportFleetWizardFooter />}
-          onStepChange={(_, step) => setCurrentStep(step)}
-          className="fctl-import-fleet"
-        >
-          <WizardStep name={t('Select or create repository')} id={repositoryStepId}>
-            {(!currentStep || currentStep?.id === repositoryStepId) && (
-              <RepositoryStep repositories={repoList?.items || []} />
-            )}
-          </WizardStep>
-          <WizardStep
-            name={t('Add resource sync')}
-            id={resourceSyncStepId}
-            isDisabled={
-              (!currentStep || currentStep?.id === repositoryStepId) && !isRepoStepValid(values, formikErrors)
-            }
-          >
-            {currentStep?.id === resourceSyncStepId && <ResourceSyncStep />}
-          </WizardStep>
-          <WizardStep
-            name={t('Review')}
-            id={reviewStepId}
-            isDisabled={!isRepoStepValid(values, formikErrors) || !isResourceSyncStepValid(formikErrors)}
-          >
-            {currentStep?.id === reviewStepId && <ReviewStep errors={errors} />}
-          </WizardStep>
-        </Wizard>
-      )}
-    </Formik>
+    <>
+      <PageSection variant="light" type="breadcrumb">
+        <Breadcrumb>
+          <BreadcrumbItem>
+            <Link to={'/devicemanagement/fleets'}>{t('Fleets')}</Link>
+          </BreadcrumbItem>
+          <BreadcrumbItem isActive>{t('Create fleet')}</BreadcrumbItem>
+        </Breadcrumb>
+      </PageSection>
+      <PageSection variant={PageSectionVariants.light}>
+        <Title headingLevel="h1" size="3xl">
+          {t('Import fleets')}
+        </Title>
+      </PageSection>
+      <PageSection variant={PageSectionVariants.light} type="wizard">
+        {body}
+      </PageSection>
+    </>
   );
 };
 

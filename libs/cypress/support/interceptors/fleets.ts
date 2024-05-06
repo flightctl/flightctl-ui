@@ -30,6 +30,15 @@ const loadInterceptors = () => {
     });
   }).as('fleets');
 
+  cy.intercept('GET', '/api/flightctl/api/v1/fleets/*', (req) => {
+    const newFleetName = Cypress.env('FLIGHTCTL_ADD_FLEET');
+    if (req.url.endsWith(newFleetName)) {
+      req.reply({
+        body: buildNewFleet(newFleetName),
+      });
+    }
+  }).as('get-fleet');
+
   cy.intercept('POST', '/api/flightctl/api/v1/fleets', (req) => {
     const newFleetName = req.body.metadata.name;
     Cypress.env('FLIGHTCTL_ADD_FLEET', newFleetName);

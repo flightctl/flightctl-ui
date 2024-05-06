@@ -8,6 +8,7 @@ import DeviceEnrollmentForm, { DeviceEnrollmentFormProps, DeviceEnrollmentFormVa
 import { ApprovalStatus, getApprovalStatus } from '../../../utils/status/enrollmentRequest';
 import { useAuth } from 'react-oidc-context';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { toAPILabel } from '../../../utils/labels';
 
 type DeviceEnrollmentModalProps = Omit<DeviceEnrollmentFormProps, 'error'>;
 
@@ -25,10 +26,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
       }}
       onSubmit={async ({ region, labels, displayName }) => {
         setError(undefined);
-        const deviceLabels: EnrollmentRequestApproval['labels'] = labels.reduce((acc, { key, value }) => {
-          acc[key] = value;
-          return acc;
-        }, {});
+        const deviceLabels: EnrollmentRequestApproval['labels'] = toAPILabel(labels);
         deviceLabels.displayName = displayName;
         try {
           await post<EnrollmentRequestApproval>(`enrollmentrequests/${enrollmentRequest.metadata.name}/approval`, {

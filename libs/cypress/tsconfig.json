@@ -6,7 +6,7 @@
     "noEmit": false,
     "target": "es5",
     "sourceMap": false,
-    "lib": ["es5", "dom"],
-    "types": ["cypress"],
-  },
+    "lib": ["es5", "dom", "ES2015"],
+    "types": ["cypress"]
+  }
 }

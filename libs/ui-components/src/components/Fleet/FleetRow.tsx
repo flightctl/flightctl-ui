@@ -1,4 +1,4 @@
-import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 import * as React from 'react';
 import LabelsView from '../common/LabelsView';
 import { Fleet } from '@flightctl/types';
@@ -6,33 +6,23 @@ import { DeleteListActionResult } from '../ListPage/types';
 import FleetStatus from './FleetStatus';
 import { useTranslation } from '../../hooks/useTranslation';
 import { FleetOwnerLinkIcon, getOwnerName } from './FleetDetails/FleetOwnerLink';
-import { Link, ROUTE } from '../../hooks/useNavigate';
+import { Link, ROUTE, useNavigate } from '../../hooks/useNavigate';
 
 type FleetRowProps = {
   fleet: Fleet;
   rowIndex: number;
   onRowSelect: (device: Fleet) => OnSelect;
   isRowSelected: (device: Fleet) => boolean;
-  editLabelsAction: ({
-    resourceId,
-    disabledReason,
-  }: {
-    resourceId: string;
-    disabledReason: string | undefined;
-  }) => IAction;
   deleteAction: DeleteListActionResult['deleteAction'];
 };
 
-const FleetRow: React.FC<FleetRowProps> = ({
-  fleet,
-  rowIndex,
-  onRowSelect,
-  isRowSelected,
-  editLabelsAction,
-  deleteAction,
-}) => {
+const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRowSelected, deleteAction }) => {
   const { t } = useTranslation();
   const fleetName = fleet.metadata.name || '';
+  const navigate = useNavigate();
+
+  const isManaged = !!fleet.metadata?.owner;
+
   return (
     <Tr>
       <Td
@@ -47,7 +37,7 @@ const FleetRow: React.FC<FleetRowProps> = ({
           <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: fleetName }}>{fleetName}</Link>
         </FleetOwnerLinkIcon>
       </Td>
-      <Td dataLabel={t('OS image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>
+      <Td dataLabel={t('System image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>
       <Td dataLabel={t('Label selector')}>
         <LabelsView prefix={fleetName} labels={fleet.spec.selector?.matchLabels} />
       </Td>
@@ -57,17 +47,15 @@ const FleetRow: React.FC<FleetRowProps> = ({
       <Td isActionCell>
         <ActionsColumn
           items={[
-            editLabelsAction({
-              resourceId: fleetName,
-              disabledReason: fleet.metadata?.owner
-                ? t('Fleets managed by a Resourcesync cannot be edited')
-                : undefined,
-            }),
+            {
+              title: t('Edit'),
+              onClick: () => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetName }),
+              tooltipProps: isManaged ? { content: t('Fleets managed by a Resourcesync cannot be edited') } : undefined,
+              isAriaDisabled: isManaged,
+            },
             deleteAction({
               resourceId: fleetName,
-              disabledReason: fleet.metadata?.owner
-                ? t('Fleets managed by a Resourcesync cannot be deleted')
-                : undefined,
+              disabledReason: isManaged ? t('Fleets managed by a Resourcesync cannot be deleted') : undefined,
             }),
           ]}
         />

@@ -1,4 +1,4 @@
-import { Form, FormGroup, FormSection, FormSelect, FormSelectOption, Radio } from '@patternfly/react-core';
+import { Form, FormGroup, FormSection, FormSelect, FormSelectOption, Grid, Radio } from '@patternfly/react-core';
 import * as React from 'react';
 import { ImportFleetFormValues } from '../types';
 import { FormikErrors, useFormikContext } from 'formik';
@@ -73,28 +73,30 @@ const RepositoryStep = ({ repositories }: { repositories: Repository[] }) => {
 
   return (
     <Form>
-      <FormSection>
-        <FormGroup isInline>
-          <Radio
-            isChecked={values.useExistingRepo}
-            onChange={() => setFieldValue('useExistingRepo', true)}
-            id="existing-repo"
-            name="repo"
-            label={t('Use an existing repository')}
-            isDisabled={!repositories.length}
-          />
-          <Radio
-            isChecked={!values.useExistingRepo}
-            onChange={() => setFieldValue('useExistingRepo', false)}
-            id="new-repo"
-            name="repo"
-            label={t('Use a new repository')}
-          />
-        </FormGroup>
-      </FormSection>
-      <FormSection>
-        {values.useExistingRepo ? <ExistingRepoForm repositories={repositories} /> : <RepositoryForm />}
-      </FormSection>
+      <Grid span={8}>
+        <FormSection>
+          <FormGroup isInline>
+            <Radio
+              isChecked={values.useExistingRepo}
+              onChange={() => setFieldValue('useExistingRepo', true)}
+              id="existing-repo"
+              name="repo"
+              label={t('Use an existing repository')}
+              isDisabled={!repositories.length}
+            />
+            <Radio
+              isChecked={!values.useExistingRepo}
+              onChange={() => setFieldValue('useExistingRepo', false)}
+              id="new-repo"
+              name="repo"
+              label={t('Use a new repository')}
+            />
+          </FormGroup>
+        </FormSection>
+        <FormSection>
+          {values.useExistingRepo ? <ExistingRepoForm repositories={repositories} /> : <RepositoryForm />}
+        </FormSection>
+      </Grid>
     </Form>
   );
 };

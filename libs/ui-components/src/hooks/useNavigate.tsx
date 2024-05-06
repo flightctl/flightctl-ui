@@ -13,6 +13,7 @@ export enum ROUTE {
   FLEET_CREATE,
   FLEET_IMPORT,
   FLEET_DETAILS,
+  FLEET_EDIT,
   DEVICES,
   REPOSITORIES,
   REPO_CREATE,
@@ -26,6 +27,7 @@ export enum ROUTE {
 
 type RouteWithPostfix =
   | ROUTE.FLEET_DETAILS
+  | ROUTE.FLEET_EDIT
   | ROUTE.REPO_DETAILS
   | ROUTE.RESOURCE_SYNC_DETAILS
   | ROUTE.REPO_EDIT
@@ -41,6 +43,8 @@ export const getRoute: AppContextProps['router']['getRoute'] = (to) => {
       return '/devicemanagement/fleets';
     case ROUTE.FLEET_CREATE:
       return '/devicemanagement/fleets/create';
+    case ROUTE.FLEET_EDIT:
+      return '/devicemanagement/fleets/edit';
     case ROUTE.FLEET_IMPORT:
       return '/devicemanagement/fleets/import';
     case ROUTE.DEVICES:

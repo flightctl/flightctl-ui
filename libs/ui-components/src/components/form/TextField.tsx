@@ -18,15 +18,16 @@ interface TextFieldProps extends Omit<TextInputProps, 'onChange'> {
 
 const TextField = React.forwardRef(
   ({ helperText, onChangeCustom, ...props }: TextFieldProps, ref: React.Ref<HTMLInputElement>) => {
-    const [field, meta, { setValue }] = useField({
+    const [field, meta, { setValue, setTouched }] = useField({
       name: props.name,
     });
 
-    const onChange = (_ev, value: string) => {
-      void setValue(value);
+    const onChange: TextInputProps['onChange'] = async (_, value) => {
+      await setValue(value);
       if (onChangeCustom) {
         onChangeCustom(value);
       }
+      await setTouched(true);
     };
 
     const fieldId = `textfield-${props.name}`;

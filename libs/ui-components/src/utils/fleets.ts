@@ -1,5 +1,6 @@
 import { Fleet, ObjectMeta } from '@flightctl/types';
 import { FlightCtlLabel } from '../types/extraTypes';
+import { toAPILabel } from './labels';
 
 export type SourceItem = {
   type: 'git' | 'inline' | 'secret';
@@ -7,8 +8,7 @@ export type SourceItem = {
   displayText: string;
 };
 
-const getSourceItems = (fleet: Fleet): SourceItem[] => {
-  const templateSpecConfig = fleet.spec?.template?.spec?.config || [];
+const getSourceItems = (templateSpecConfig: Fleet['spec']['template']['spec']['config'] = []): SourceItem[] => {
   return templateSpecConfig
     .map((config) => {
       let sourceItem: SourceItem;
@@ -29,10 +29,7 @@ const getSourceItems = (fleet: Fleet): SourceItem[] => {
 };
 
 const getUpdatedFleet = (fleet: Fleet, newLabels: FlightCtlLabel[]): Fleet => {
-  const fleetLabels: ObjectMeta['labels'] = newLabels.reduce((acc, { key, value }) => {
-    acc[key] = value;
-    return acc;
-  }, {});
+  const fleetLabels: ObjectMeta['labels'] = toAPILabel(newLabels);
   return {
     ...fleet,
     spec: {

@@ -1,1 +1,1 @@
-export const val = 1;
+export * from './initialRepositories';

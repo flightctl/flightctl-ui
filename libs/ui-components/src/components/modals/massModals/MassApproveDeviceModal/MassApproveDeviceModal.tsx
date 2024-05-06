@@ -27,6 +27,7 @@ import { getErrorMessage } from '../../../../utils/error';
 import { useAppContext } from '../../../../hooks/useAppContext';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import EnrollmentRequestStatus from '../../../EnrollmentRequest/EnrollmentRequestStatus';
+import { toAPILabel } from '../../../../utils/labels';
 
 import './MassApproveDeviceModal.css';
 
@@ -126,13 +127,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
     setProgress(0);
     setErrors(undefined);
     const promises = pendingEnrollments.map(async (r, index) => {
-      const labels = values.labels.reduce(
-        (acc, { key, value }) => {
-          acc[key] = value;
-          return acc;
-        },
-        {} as Record<string, string>,
-      );
+      const labels = toAPILabel(values.labels);
       labels.displayName = templateToName(index, values.displayName);
       await post<EnrollmentRequestApproval>(`enrollmentrequests/${r.metadata.name}/approval`, {
         approved: true,

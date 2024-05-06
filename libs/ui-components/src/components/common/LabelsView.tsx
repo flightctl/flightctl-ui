@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Label, LabelGroup } from '@patternfly/react-core';
 
-const LabelsView = ({ prefix, labels }: { prefix: string; labels: Record<string, string> | undefined }) => {
+const LabelsView = ({ prefix, labels }: { prefix: string; labels: Record<string, string | undefined> | undefined }) => {
   const labelItems = Object.entries(labels || {});
   if (labelItems.length === 0) {
     return '-';

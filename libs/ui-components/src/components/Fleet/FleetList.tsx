@@ -25,8 +25,6 @@ import { sortByName } from '../../utils/sort/generic';
 import { sortByStatus, sortFleetsByOSImg } from '../../utils/sort/fleet';
 import TableTextSearch from '../Table/TableTextSearch';
 import Table, { TableColumn } from '../Table/Table';
-import { useEditLabelsAction } from '../../hooks/useEditLabelsAction';
-import { getUpdatedFleet } from '../../utils/fleets';
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import { useTableSort } from '../../hooks/useTableSort';
 import { useTableSelect } from '../../hooks/useTableSelect';
@@ -87,7 +85,7 @@ const getColumns = (t: TFunction): TableColumn<Fleet | ResourceSync>[] => [
     onSort: sortByName,
   },
   {
-    name: t('OS image'),
+    name: t('System image'),
     onSort: sortFleetsByOSImg,
   },
   {
@@ -143,12 +141,6 @@ const FleetTable = () => {
     },
   });
 
-  const { editLabelsAction, editLabelsModal } = useEditLabelsAction<Fleet>({
-    submitTransformer: getUpdatedFleet,
-    resourceType: 'fleets',
-    onEditSuccess: refetch,
-  });
-
   return (
     <ListPageBody error={error || rsError} loading={loading || rsLoading}>
       <Toolbar>
@@ -186,7 +178,6 @@ const FleetTable = () => {
                 fleet={resource}
                 rowIndex={rowIndex}
                 deleteAction={deleteAction}
-                editLabelsAction={editLabelsAction}
                 isRowSelected={isRowSelected}
                 onRowSelect={onRowSelect}
               />
@@ -198,7 +189,6 @@ const FleetTable = () => {
                 isRowSelected={isRowSelected}
                 onRowSelect={onRowSelect}
                 deleteAction={deleteRsAction}
-                editLabelsAction={editLabelsAction}
               />
             ),
           )}
@@ -206,7 +196,6 @@ const FleetTable = () => {
       </Table>
       {data.length === 0 && <FleetEmptyState />}
       {deleteModal}
-      {editLabelsModal}
       {deleteRsModal}
       {isMassDeleteModalOpen && (
         <MassDeleteFleetModal

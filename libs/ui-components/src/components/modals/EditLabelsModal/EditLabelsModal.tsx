@@ -9,6 +9,7 @@ import { FlightCtlLabel, LabelEditable } from '../../../types/extraTypes';
 import { useFetch } from '../../../hooks/useFetch';
 import { Device, Fleet } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { fromAPILabel } from '../../../utils/labels';
 
 type EditLabelsModalProps<MT extends LabelEditable> = {
   resourceType: 'fleets' | 'devices';
@@ -106,10 +107,7 @@ function EditLabelsModal<T extends LabelEditable>({
     modalBody = (
       <Formik<EditLabelsFormValues>
         initialValues={{
-          labels: Object.entries(labels).map((labelEntry) => ({
-            key: labelEntry[0],
-            value: labelEntry[1],
-          })),
+          labels: fromAPILabel(labels),
         }}
         onSubmit={async ({ labels }) => {
           try {

@@ -38,7 +38,7 @@ const FleetDevices = ({ fleetId, count }: { fleetId: string; count: number | und
 
 const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCount: number | undefined }) => {
   const { t } = useTranslation();
-  const sourceItems = getSourceItems(fleet);
+  const sourceItems = getSourceItems(fleet.spec.template.spec.config);
   return (
     <Grid hasGutter>
       <GridItem md={12}>
@@ -59,7 +59,7 @@ const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCou
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('OS image')}</DescriptionListTerm>
+                <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
                 <DescriptionListDescription>{fleet.spec.template.spec.os?.image}</DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>

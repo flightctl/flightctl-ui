@@ -20,7 +20,7 @@ export type LabelEditable = Device | Fleet;
 
 export interface FlightCtlLabel {
   key: string;
-  value: string | undefined;
+  value?: string;
 }
 
 export interface ApiQuery {

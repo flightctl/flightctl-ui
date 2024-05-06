@@ -1,6 +1,7 @@
 import { Device, ObjectMeta } from '@flightctl/types';
 import { FlightCtlLabel } from '../types/extraTypes';
 import { TFunction } from 'i18next';
+import { toAPILabel } from './labels';
 
 export const getFingerprintDisplay = <R extends { metadata: ObjectMeta }>(resource: R) => {
   const fingerprint = resource.metadata.name;
@@ -36,10 +37,7 @@ const getMissingFleetDetails = (t: TFunction, metadata: ObjectMeta): { message: 
 };
 
 const getUpdatedDevice = (device: Device, newLabels: FlightCtlLabel[]): Device => {
-  const deviceLabels: ObjectMeta['labels'] = newLabels.reduce((acc, { key, value }) => {
-    acc[key] = value;
-    return acc;
-  }, {});
+  const deviceLabels: ObjectMeta['labels'] = toAPILabel(newLabels);
   return {
     ...device,
     metadata: {

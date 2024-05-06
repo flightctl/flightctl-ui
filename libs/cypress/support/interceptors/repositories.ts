@@ -1,4 +1,5 @@
 import { Repository } from '@flightctl/types';
+import { repoList } from '../../fixtures';
 
 const buildRepositoriesResponse = (repositories: Repository[]) => ({
   apiVersion: 'v1alpha1',
@@ -10,7 +11,7 @@ const buildRepositoriesResponse = (repositories: Repository[]) => ({
 const loadInterceptors = () => {
   cy.intercept('GET', '/api/flightctl/api/v1/repositories', (req) => {
     req.reply({
-      body: buildRepositoriesResponse([]),
+      body: buildRepositoriesResponse(repoList),
     });
   }).as('repository-list');
 };
