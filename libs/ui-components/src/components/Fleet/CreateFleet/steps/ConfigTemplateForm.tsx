@@ -7,14 +7,11 @@ import {
   ExpandableSection,
   FormGroup,
   FormSection,
-  FormSelect,
-  FormSelectOption,
   Grid,
+  MenuFooter,
   Spinner,
   Split,
   SplitItem,
-  Stack,
-  StackItem,
 } from '@patternfly/react-core';
 import { FieldArray, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
@@ -26,9 +23,10 @@ import { FleetFormValues, GitConfigTemplate, InlineConfigTemplate, KubeSecretTem
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';
-import { Trans } from 'react-i18next';
-import { Link, ROUTE } from '../../../../hooks/useNavigate';
 import TextAreaField from '../../../form/TextAreaField';
+import FormSelect from '../../../form/FormSelect';
+import CreateRepositoryModal from '../../../modals/CreateRepositoryModal/CreateRepositoryModal';
+import { sortByName } from '../../../../utils/sort/generic';
 
 const useValidateOnMount = () => {
   const { validateForm } = useFormikContext<FleetFormValues>();
@@ -44,54 +42,48 @@ type ConfigFormProps = {
   index: number;
 };
 
-const GitConfigForm: React.FC<
-  ConfigFormProps & {
-    repositories: Repository[];
-  }
-> = ({ index, repositories }) => {
+const GitConfigForm: React.FC<ConfigFormProps & Pick<ConfigSectionProps, 'repositories' | 'repoRefetch'>> = ({
+  index,
+  repositories,
+  repoRefetch,
+}) => {
+  const [createRepoModalOpen, setCreateRepoModalOpen] = React.useState(false);
   const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<FleetFormValues>();
   const template = values.configTemplates[index] as GitConfigTemplate;
 
   useValidateOnMount();
 
-  const defaultRepoName = repositories[0]?.metadata.name || '';
+  const defaultRepoName = repositories[0]?.metadata.name;
 
   React.useEffect(() => {
-    if (template.repository === '') {
+    if (defaultRepoName && template.repository === '') {
       setFieldValue(`configTemplates[${index}].repository`, defaultRepoName);
     }
   }, [template.repository, defaultRepoName, index, setFieldValue]);
   return (
     <>
       <FormGroup label={t('Repository')} isRequired>
-        <Stack hasGutter>
-          <StackItem>
-            <FormSelect
-              value={template.repository}
-              onChange={(_, value) => setFieldValue(`configTemplates[${index}].repository`, value)}
-              aria-label={t('Repository select input')}
-              isDisabled={!repositories.length}
+        <FormSelect
+          name={`configTemplates[${index}].repository`}
+          items={repositories.reduce((acc, curr) => {
+            acc[curr.metadata.name || ''] = curr.metadata.name;
+            return acc;
+          }, {})}
+        >
+          <MenuFooter>
+            <Button
+              variant="link"
+              isInline
+              icon={<PlusCircleIcon />}
+              onClick={() => {
+                setCreateRepoModalOpen(true);
+              }}
             >
-              {repositories.map((repo) => (
-                <FormSelectOption
-                  key={repo.metadata.name}
-                  value={repo.metadata.name}
-                  label={repo.metadata.name || ''}
-                />
-              ))}
-            </FormSelect>
-          </StackItem>
-          {!repositories.length && (
-            <StackItem>
-              <Alert isInline variant="warning" title={t('No repository exists.')}>
-                <Trans t={t}>
-                  No repository has been created yet. <Link to={ROUTE.REPO_CREATE}>Create a new repository</Link>{' '}
-                </Trans>
-              </Alert>
-            </StackItem>
-          )}
-        </Stack>
+              {t('Create repository')}
+            </Button>
+          </MenuFooter>
+        </FormSelect>
       </FormGroup>
       <FormGroup label={t('Branch/tag/commit')} isRequired>
         <TextField
@@ -108,6 +100,16 @@ const GitConfigForm: React.FC<
           placeholder={t('/absolute/path')}
         />
       </FormGroup>
+      {createRepoModalOpen && (
+        <CreateRepositoryModal
+          onClose={() => setCreateRepoModalOpen(false)}
+          onSuccess={(repo) => {
+            setCreateRepoModalOpen(false);
+            repoRefetch();
+            setFieldValue(`configTemplates[${index}].repository`, repo.metadata.name, true);
+          }}
+        />
+      )}
     </>
   );
 };
@@ -159,10 +161,10 @@ type ConfigSectionProps = {
   ct: KubeSecretTemplate | InlineConfigTemplate | GitConfigTemplate;
   index: number;
   repositories: Repository[];
-  replace: (index: number, value: KubeSecretTemplate | InlineConfigTemplate | GitConfigTemplate) => void;
+  repoRefetch: VoidFunction;
 };
 
-const ConfigSection = ({ ct, index, replace, repositories }: ConfigSectionProps) => {
+const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionProps) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = React.useState(true);
   const { values } = useFormikContext<FleetFormValues>();
@@ -186,45 +188,15 @@ const ConfigSection = ({ ct, index, replace, repositories }: ConfigSectionProps)
         </FormGroup>
         <FormGroup label={t('Source type')} isRequired>
           <FormSelect
-            value={ct.type}
-            onChange={(_, value) => {
-              let template: GitConfigTemplate | KubeSecretTemplate | InlineConfigTemplate;
-              if (value === 'git') {
-                template = {
-                  type: 'git',
-                  name: ct.name,
-                  path: '',
-                  repository: '',
-                  targetRevision: '',
-                } as GitConfigTemplate;
-              } else if (value === 'secret') {
-                template = {
-                  type: 'secret',
-                  mountPath: '',
-                  name: ct.name,
-                  secretName: '',
-                  secretNs: '',
-                } as KubeSecretTemplate;
-              } else {
-                template = {
-                  type: 'inline',
-                  inline: '',
-                  name: ct.name,
-                } as InlineConfigTemplate;
-              }
-              replace(index, template);
+            items={{
+              git: t('Git config provider'),
+              // secret: t('Kubernetes secret provider'), not supported yet
+              inline: t('Inline config provider'),
             }}
-            aria-label={t('Source select input')}
-          >
-            <FormSelectOption value="git" label={t('Git config provider')} />
-            {
-              // not supported yet
-              //<FormSelectOption value="secret" label={t('Kubernetes secret provider')} />
-            }
-            <FormSelectOption value="inline" label={t('Inline config provider')} />
-          </FormSelect>
+            name={`configTemplates[${index}].type`}
+          />
         </FormGroup>
-        {ct.type === 'git' && <GitConfigForm index={index} repositories={repositories} />}
+        {ct.type === 'git' && <GitConfigForm index={index} repositories={repositories} repoRefetch={repoRefetch} />}
         {ct.type === 'secret' && <KubeConfigForm index={index} />}
         {ct.type === 'inline' && <InlineConfigForm index={index} />}
       </Grid>
@@ -235,7 +207,11 @@ const ConfigSection = ({ ct, index, replace, repositories }: ConfigSectionProps)
 const ConfigTemplateForm = () => {
   const { t } = useTranslation();
   const { values } = useFormikContext<FleetFormValues>();
-  const [repositoryList, isLoading, error] = useFetchPeriodically<RepositoryList>({ endpoint: 'repositories' });
+  const [repositoryList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>({
+    endpoint: 'repositories',
+  });
+
+  const repositories = React.useMemo(() => sortByName(repositoryList?.items || []), [repositoryList]);
 
   if (error) {
     return (
@@ -253,13 +229,13 @@ const ConfigTemplateForm = () => {
 
   return (
     <FieldArray name="configTemplates">
-      {({ push, replace, remove }) => (
+      {({ push, remove }) => (
         <>
           {values.configTemplates.map((ct, index) => (
             <FormSection key={index}>
               <Split hasGutter>
                 <SplitItem isFilled>
-                  <ConfigSection replace={replace} ct={ct} index={index} repositories={repositoryList?.items || []} />
+                  <ConfigSection ct={ct} index={index} repositories={repositories} repoRefetch={refetch} />
                 </SplitItem>
                 <SplitItem>
                   <Button

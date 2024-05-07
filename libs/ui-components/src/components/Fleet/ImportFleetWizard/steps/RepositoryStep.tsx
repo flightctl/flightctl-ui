@@ -1,4 +1,4 @@
-import { Form, FormGroup, FormSection, FormSelect, FormSelectOption, Grid, Radio } from '@patternfly/react-core';
+import { Form, FormGroup, FormSection, Grid, Radio } from '@patternfly/react-core';
 import * as React from 'react';
 import { ImportFleetFormValues } from '../types';
 import { FormikErrors, useFormikContext } from 'formik';
@@ -8,6 +8,7 @@ import { RepositoryForm } from '../../../Repository/CreateRepository/CreateRepos
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../../utils/status/repository';
 import StatusInfo from '../../../common/StatusInfo';
 import { useTranslation } from '../../../../hooks/useTranslation';
+import FormSelect from '../../../form/FormSelect';
 
 export const repositoryStepId = 'repository';
 
@@ -34,14 +35,12 @@ const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
     <>
       <FormGroup label={t('Repository')} fieldId="repository">
         <FormSelect
-          value={values.existingRepo}
-          onChange={(_, value) => setFieldValue('existingRepo', value)}
-          aria-label={t('Select repository')}
-        >
-          {repositories.map((repo) => (
-            <FormSelectOption key={repo.metadata.name} value={repo.metadata.name} label={repo.metadata.name || ''} />
-          ))}
-        </FormSelect>
+          name="existingRepo"
+          items={repositories.reduce((acc, curr) => {
+            acc[curr.metadata.name || ''] = curr.metadata.name || '';
+            return acc;
+          }, {})}
+        />
       </FormGroup>
       {currentRepo && (
         <Table>

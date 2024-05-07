@@ -1,0 +1,8 @@
+.fctl-form-select__toggle {
+    width: 100%;
+}
+
+.fctl-form-select__menu {
+    max-height: 20rem;
+    overflow: auto;
+}

@@ -28,7 +28,7 @@ import {
   handlePromises,
   repoSyncSchema,
   repositorySchema,
-} from '../../Repository/CreateRepository/CreateRepository';
+} from '../../Repository/CreateRepository/utils';
 import { getErrorMessage } from '../../../utils/error';
 import * as Yup from 'yup';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
