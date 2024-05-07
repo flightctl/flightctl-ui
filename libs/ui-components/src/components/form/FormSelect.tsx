@@ -54,7 +54,6 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, childr
           </MenuToggle>
         )}
         isOpen={isOpen}
-        className="fctl-form-select__menu"
         onOpenChange={(open) => {
           if (!open && !meta.touched) {
             setTouched(true);
@@ -63,7 +62,7 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, childr
         }}
       >
         {!!Object.keys(items).length && (
-          <SelectList>
+          <SelectList className="fctl-form-select__menu">
             {Object.keys(items).map((key) => (
               <SelectOption key={key} value={key}>
                 {items[key]}
