@@ -127,7 +127,10 @@ const CreateRepositoryFormContent = ({
             id="use-resource-syncs"
             label={t('Use resource syncs')}
             isChecked={values.useResourceSyncs}
-            onChange={(_, checked) => setFieldValue('useResourceSyncs', checked)}
+            onChange={(_, checked) => {
+              // Trigger validation of the resource syncs items
+              return setFieldValue('useResourceSyncs', checked, true);
+            }}
             body={values.useResourceSyncs && <CreateResourceSyncsForm />}
           />
         )}
