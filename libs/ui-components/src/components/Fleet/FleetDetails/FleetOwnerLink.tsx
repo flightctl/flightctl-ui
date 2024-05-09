@@ -2,6 +2,8 @@ import * as React from 'react';
 import { Label } from '@patternfly/react-core';
 import { CodeBranchIcon } from '@patternfly/react-icons/dist/js/icons/code-branch-icon';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
+import WithTooltip from '../../common/WithTooltip';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 const rsOwnerRegex = /^ResourceSync\/(?<rsName>.*)$/;
 
@@ -22,15 +24,26 @@ const FleetOwnerLink = ({ owner }: { owner: string | undefined }) => {
   return <RSLink rsName={ownerRsName} />;
 };
 
-export const FleetOwnerLinkIcon = ({ hasOwner, children }: { hasOwner: boolean; children: React.ReactNode }) => {
-  if (!hasOwner) {
+export const FleetOwnerLinkIcon = ({
+  ownerName,
+  children,
+}: React.PropsWithChildren<{
+  ownerName: string | undefined;
+}>) => {
+  const { t } = useTranslation();
+  if (!ownerName) {
     return children;
   }
 
   return (
-    <>
-      <CodeBranchIcon /> {children}
-    </>
+    <WithTooltip
+      content={t('Managed by the resource sync {{resourceSyncName}}', { resourceSyncName: ownerName })}
+      showTooltip
+    >
+      <>
+        <CodeBranchIcon /> {children}
+      </>
+    </WithTooltip>
   );
 };
 

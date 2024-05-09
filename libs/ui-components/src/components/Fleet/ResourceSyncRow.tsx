@@ -32,7 +32,7 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
         }}
       />
       <Td dataLabel={t('Name')}>
-        <FleetOwnerLinkIcon hasOwner>-</FleetOwnerLinkIcon>
+        <FleetOwnerLinkIcon ownerName="-" />
       </Td>
       <Td dataLabel={t('System image')}>-</Td>
       <Td dataLabel={t('Label selector')}>-</Td>

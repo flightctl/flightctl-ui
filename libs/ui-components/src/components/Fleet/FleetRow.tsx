@@ -33,7 +33,7 @@ const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRow
         }}
       />
       <Td dataLabel={t('Name')}>
-        <FleetOwnerLinkIcon hasOwner={!!getOwnerName(fleet.metadata.owner)}>
+        <FleetOwnerLinkIcon ownerName={getOwnerName(fleet.metadata.owner)}>
           <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: fleetName }}>{fleetName}</Link>
         </FleetOwnerLinkIcon>
       </Td>

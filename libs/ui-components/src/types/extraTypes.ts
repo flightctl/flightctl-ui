@@ -36,7 +36,7 @@ export type FleetConditionType =
   | ConditionType.FleetOverlappingSelectors
   | ConditionType.FleetValid
   | 'Invalid'
-  | 'Unknown';
+  | 'SyncPending';
 
 export type FlightControlQuery = ApiQuery | MetricsQuery;
 

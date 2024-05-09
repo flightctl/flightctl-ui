@@ -4,6 +4,7 @@ import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-cir
 import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/question-circle-icon';
 import { WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons/warning-triangle-icon';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progress-icon';
 
 import { ConditionType, Fleet } from '@flightctl/types';
 import { fleetStatusLabels, getFleetSyncStatus } from '../../utils/status/fleet';
@@ -26,6 +27,10 @@ const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
     case ConditionType.FleetOverlappingSelectors:
       color = 'orange';
       icon = <WarningTriangleIcon />;
+      break;
+    case 'SyncPending':
+      icon = <InProgressIcon />;
+      color = 'blue';
       break;
     case 'Invalid':
       color = 'red';

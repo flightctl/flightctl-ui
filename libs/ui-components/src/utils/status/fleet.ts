@@ -6,7 +6,7 @@ const fleetStatusLabels = (t: TFunction) => ({
   [ConditionType.FleetOverlappingSelectors]: t('Selectors overlap'),
   [ConditionType.FleetValid]: t('Valid'),
   Invalid: t('Invalid'),
-  Unknown: t('Unknown'),
+  SyncPending: t('Sync pending'),
 });
 
 const getFleetSyncStatus = (
@@ -37,7 +37,7 @@ const getFleetSyncStatus = (
     };
   }
   return {
-    status: 'Unknown',
+    status: 'SyncPending',
     message: t('Waiting for first sync'),
   };
 };

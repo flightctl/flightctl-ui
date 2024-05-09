@@ -179,6 +179,7 @@
   "Associated devices": "Associated devices",
   "Managed by": "Managed by",
   "Sources ({{size}})": "Sources ({{size}})",
+  "Managed by the resource sync {{resourceSyncName}}": "Managed by the resource sync {{resourceSyncName}}",
   "Create a fleet": "Create a fleet",
   "Import fleets": "Import fleets",
   "No fleets here!": "No fleets here!",
@@ -322,6 +323,7 @@
   "Denied": "Denied",
   "Selectors overlap": "Selectors overlap",
   "Invalid": "Invalid",
+  "Sync pending": "Sync pending",
   "Fleet's selector overlaps with at least one other fleet, causing ambiguous device ownership.": "Fleet's selector overlaps with at least one other fleet, causing ambiguous device ownership.",
   "Waiting for first sync": "Waiting for first sync",
   "Synced": "Synced",
@@ -329,6 +331,5 @@
   "Parsed": "Parsed",
   "Not parsed": "Not parsed",
   "Accessible": "Accessible",
-  "Not accessible": "Not accessible",
-  "Sync pending": "Sync pending"
+  "Not accessible": "Not accessible"
 }
