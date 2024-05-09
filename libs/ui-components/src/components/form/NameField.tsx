@@ -22,6 +22,7 @@ const NameField: React.FC<NameFieldProps> = ({ name, isDisabled, resourceType, g
     abortControllerRef.current = new AbortController();
     if (isDisabled || !value) {
       currentErrorRef.current = undefined;
+      return;
     }
     try {
       await get(`${resourceType}/${value}`, abortControllerRef.current.signal);
