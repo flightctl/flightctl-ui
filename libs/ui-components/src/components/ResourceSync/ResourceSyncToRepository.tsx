@@ -36,10 +36,10 @@ const ResourceSyncToRepository = () => {
           setError(undefined);
           navigate({ route: ROUTE.REPO_DETAILS, postfix: `${repository}/resourcesyncs#${rsId}` });
         } else {
-          setError(t('Resourcesync {{rsId}} is not linked to a repository', { rsId }));
+          setError(t('Resource sync {{rsId}} is not linked to a repository', { rsId }));
         }
       } catch (e) {
-        setError(t('Resourcesync {{rsId}} could not be found', { rsId }));
+        setError(t('Resource sync {{rsId}} could not be found', { rsId }));
       }
     };
 
@@ -56,7 +56,7 @@ const ResourceSyncToRepository = () => {
         <EmptyState>
           <EmptyStateHeader>
             <Trans t={t}>
-              Could not find the details for the resourcesync <strong>{rsId}</strong>
+              Could not find the details for the resource sync <strong>{rsId}</strong>
             </Trans>
           </EmptyStateHeader>
           <EmptyStateBody>{error}</EmptyStateBody>

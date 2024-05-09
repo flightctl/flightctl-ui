@@ -14,6 +14,8 @@ import {
 } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 import { TopologyIcon } from '@patternfly/react-icons/dist/js/icons/topology-icon';
+import { Trans } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 import { Fleet, FleetList, ResourceSync, ResourceSyncList } from '@flightctl/types';
 import { useFetch } from '../../hooks/useFetch';
@@ -36,9 +38,8 @@ import FleetRow from './FleetRow';
 import ResourceSyncRow from './ResourceSyncRow';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { useTranslation } from '../../hooks/useTranslation';
-import { TFunction } from 'i18next';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
-import { Trans } from 'react-i18next';
+import DeleteFleetModal from './DeleteFleetModal/DeleteFleetModal';
 
 const FleetPageActions = ({ createText }: { createText?: string }) => {
   const { t } = useTranslation();
@@ -103,9 +104,10 @@ const FleetTable = () => {
   const { t } = useTranslation();
   const [fleetList, loading, error, refetch] = useFetchPeriodically<FleetList>({ endpoint: 'fleets' });
   const [rsList, rsLoading, rsError, rsRefetch] = useFetchPeriodically<ResourceSyncList>({ endpoint: 'resourcesyncs' });
-
   const { remove } = useFetch();
+
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
+  const [fleetToDeleteId, setFleetToDeleteId] = React.useState<string>();
 
   const data = React.useMemo(
     () => [
@@ -124,14 +126,6 @@ const FleetTable = () => {
   const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
-
-  const { deleteAction, deleteModal } = useDeleteListAction({
-    resourceType: 'fleet',
-    onDelete: async (resourceId) => {
-      await remove(`fleets/${resourceId}`);
-      refetch();
-    },
-  });
 
   const { deleteAction: deleteRsAction, deleteModal: deleteRsModal } = useDeleteListAction({
     resourceType: 'resource sync',
@@ -177,7 +171,9 @@ const FleetTable = () => {
                 key={getResourceId(resource)}
                 fleet={resource}
                 rowIndex={rowIndex}
-                deleteAction={deleteAction}
+                onDeleteClick={() => {
+                  setFleetToDeleteId(resource.metadata.name || '');
+                }}
                 isRowSelected={isRowSelected}
                 onRowSelect={onRowSelect}
               />
@@ -195,7 +191,19 @@ const FleetTable = () => {
         </Tbody>
       </Table>
       {data.length === 0 && <FleetEmptyState />}
-      {deleteModal}
+      {fleetToDeleteId && (
+        <DeleteFleetModal
+          fleetId={fleetToDeleteId}
+          onClose={(hasDeleted?: boolean) => {
+            if (hasDeleted) {
+              // Both lists are linked, so they both need to be refreshed
+              rsRefetch();
+              refetch();
+            }
+            setFleetToDeleteId(undefined);
+          }}
+        />
+      )}
       {deleteRsModal}
       {isMassDeleteModalOpen && (
         <MassDeleteFleetModal

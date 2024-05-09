@@ -5,8 +5,7 @@ import { Link, ROUTE } from '../../../hooks/useNavigate';
 
 const rsOwnerRegex = /^ResourceSync\/(?<rsName>.*)$/;
 
-export const getOwnerName = ({ owner }: { owner: string | undefined }) =>
-  rsOwnerRegex.exec(owner || '')?.groups?.rsName;
+export const getOwnerName = (owner: string | undefined) => rsOwnerRegex.exec(owner || '')?.groups?.rsName;
 
 export const RSLink = ({ rsName }: { rsName: string }) => (
   <div>
@@ -15,7 +14,7 @@ export const RSLink = ({ rsName }: { rsName: string }) => (
 );
 
 const FleetOwnerLink = ({ owner }: { owner: string | undefined }) => {
-  const ownerRsName = getOwnerName({ owner });
+  const ownerRsName = getOwnerName(owner);
   if (!ownerRsName) {
     return '-';
   }

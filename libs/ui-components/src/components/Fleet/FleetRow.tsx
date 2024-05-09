@@ -1,22 +1,22 @@
-import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 import * as React from 'react';
-import LabelsView from '../common/LabelsView';
+import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
+
 import { Fleet } from '@flightctl/types';
-import { DeleteListActionResult } from '../ListPage/types';
-import FleetStatus from './FleetStatus';
+import LabelsView from '../common/LabelsView';
 import { useTranslation } from '../../hooks/useTranslation';
 import { FleetOwnerLinkIcon, getOwnerName } from './FleetDetails/FleetOwnerLink';
 import { Link, ROUTE, useNavigate } from '../../hooks/useNavigate';
+import FleetStatus from './FleetStatus';
 
 type FleetRowProps = {
   fleet: Fleet;
   rowIndex: number;
-  onRowSelect: (device: Fleet) => OnSelect;
-  isRowSelected: (device: Fleet) => boolean;
-  deleteAction: DeleteListActionResult['deleteAction'];
+  onRowSelect: (fleet: Fleet) => OnSelect;
+  isRowSelected: (fleet: Fleet) => boolean;
+  onDeleteClick: () => void;
 };
 
-const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRowSelected, deleteAction }) => {
+const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRowSelected, onDeleteClick }) => {
   const { t } = useTranslation();
   const fleetName = fleet.metadata.name || '';
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRow
         }}
       />
       <Td dataLabel={t('Name')}>
-        <FleetOwnerLinkIcon hasOwner={!!getOwnerName({ owner: fleet.metadata.owner })}>
+        <FleetOwnerLinkIcon hasOwner={!!getOwnerName(fleet.metadata.owner)}>
           <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: fleetName }}>{fleetName}</Link>
         </FleetOwnerLinkIcon>
       </Td>
@@ -50,13 +50,15 @@ const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRow
             {
               title: t('Edit'),
               onClick: () => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetName }),
-              tooltipProps: isManaged ? { content: t('Fleets managed by a Resourcesync cannot be edited') } : undefined,
+              tooltipProps: isManaged
+                ? { content: t('Fleets managed by a resource sync cannot be edited') }
+                : undefined,
               isAriaDisabled: isManaged,
             },
-            deleteAction({
-              resourceId: fleetName,
-              disabledReason: isManaged ? t('Fleets managed by a Resourcesync cannot be deleted') : undefined,
-            }),
+            {
+              title: t('Delete'),
+              onClick: onDeleteClick,
+            },
           ]}
         />
       </Td>

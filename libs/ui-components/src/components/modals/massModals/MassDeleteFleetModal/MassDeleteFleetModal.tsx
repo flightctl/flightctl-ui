@@ -106,7 +106,7 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
               variant="info"
               isInline
               title={t(
-                'All the fleets you selected are managed by a resource sync and cannot be deleted. To remove those fleets, delete the resource syncs from the related repositories inside the "Repositories" tab.',
+                'All the fleets you selected are managed by a resource sync and cannot be deleted. You can remove each fleet individually. Alternatively, to delete multiple fleets, first delete the resource syncs from the related repositories inside the "Repositories" tab.',
               )}
             />
           </StackItem>

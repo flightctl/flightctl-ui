@@ -44,7 +44,7 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
           items={[
             {
               title: t('Edit'),
-              tooltipProps: t('Fleets managed by a Resourcesync cannot be edited'),
+              tooltipProps: t('Fleets managed by a resource sync cannot be edited'),
               isAriaDisabled: true,
             },
             deleteAction({

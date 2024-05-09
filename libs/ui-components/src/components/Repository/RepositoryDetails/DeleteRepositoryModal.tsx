@@ -53,7 +53,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
     } catch (e) {
       setRsError(
         t(
-          `The repository cannot be safely deleted at this moment, as we couldn't determine if the repository contains resourcesyncs. Detail: {{detail}}`,
+          `The repository cannot be safely deleted at this moment, as we couldn't determine if the repository contains resource syncs. Detail: {{detail}}`,
           { detail: getErrorMessage(e) },
         ),
       );

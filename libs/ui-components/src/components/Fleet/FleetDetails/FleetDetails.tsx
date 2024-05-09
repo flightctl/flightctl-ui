@@ -3,13 +3,13 @@ import { DropdownItem, DropdownList } from '@patternfly/react-core';
 import { DeviceList, Fleet } from '@flightctl/types';
 
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { useFetch } from '../../../hooks/useFetch';
 import DetailsPage from '../../DetailsPage/DetailsPage';
-import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
+import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
 import FleetDetailsContent from './FleetDetailsContent';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
+import DeleteFleetModal from '../DeleteFleetModal/DeleteFleetModal';
 
 const getFleetDeviceCount = (fleetDevicesResp: DeviceList | undefined): number | undefined => {
   if (fleetDevicesResp === undefined) {
@@ -27,23 +27,13 @@ const FleetDetails = () => {
     router: { useParams },
   } = useAppContext();
   const { fleetId } = useParams() as { fleetId: string };
-  const [fleet, isLoading, error] = useFetchPeriodically<Required<Fleet>>({ endpoint: `fleets/${fleetId}` });
+  const [fleet, isLoading, error, refetch] = useFetchPeriodically<Required<Fleet>>({ endpoint: `fleets/${fleetId}` });
   const [fleetDevicesResp] = useFetchPeriodically<DeviceList>({ endpoint: `devices?owner=Fleet/${fleetId}&limit=1` });
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>();
 
-  const { remove } = useFetch();
   const navigate = useNavigate();
 
   const isManaged = !!fleet?.metadata?.owner;
-
-  const { deleteAction, deleteModal } = useDeleteAction({
-    onDelete: async () => {
-      await remove(`fleets/${fleetId}`);
-      navigate(ROUTE.FLEETS);
-    },
-    resourceName: fleetId,
-    resourceType: 'Fleet',
-    disabledReason: isManaged && t('Fleets managed by a resource sync cannot be deleted'),
-  });
 
   return (
     <DetailsPage
@@ -69,7 +59,14 @@ const FleetDetails = () => {
             >
               {t('Edit')}
             </DropdownItem>
-            {deleteAction}
+            <DropdownItem
+              title={t('Delete')}
+              onClick={() => {
+                setIsDeleteModalOpen(true);
+              }}
+            >
+              {t('Delete')}
+            </DropdownItem>
           </DropdownList>
         </DetailsPageActions>
       }
@@ -77,7 +74,18 @@ const FleetDetails = () => {
       {fleet && (
         <>
           <FleetDetailsContent fleet={fleet} devicesCount={getFleetDeviceCount(fleetDevicesResp)} />
-          {deleteModal}
+          {isDeleteModalOpen && (
+            <DeleteFleetModal
+              fleetId={fleetId}
+              onClose={(hasDeleted?: boolean) => {
+                if (hasDeleted) {
+                  refetch();
+                  navigate(ROUTE.FLEETS);
+                }
+                setIsDeleteModalOpen(false);
+              }}
+            />
+          )}
         </>
       )}
     </DetailsPage>
