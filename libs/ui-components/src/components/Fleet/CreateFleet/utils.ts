@@ -18,12 +18,9 @@ import { toAPILabel } from '../../../utils/labels';
 
 const absolutePathRegex = /^\/.*$/;
 
-export const getValidationSchema = (t: TFunction, fleets?: Fleet[]) => {
-  const existingFleets = (fleets || []).map((f) => f.metadata.name);
+export const getValidationSchema = (t: TFunction) => {
   return Yup.object<FleetFormValues>({
-    name: Yup.string()
-      .required(t('Name is required.'))
-      .notOneOf(existingFleets, t('Fleet with the same name already exists.')),
+    name: Yup.string().required(t('Name is required.')),
     osImage: Yup.string(),
     fleetLabels: Yup.array().required(),
     labels: Yup.array().required(),

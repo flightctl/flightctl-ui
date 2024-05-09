@@ -10,7 +10,7 @@ import {
 } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
-interface TextFieldProps extends Omit<TextInputProps, 'onChange'> {
+export interface TextFieldProps extends Omit<TextInputProps, 'onChange'> {
   name: string;
   helperText?: React.ReactNode;
   onChangeCustom?: (value: string) => void;

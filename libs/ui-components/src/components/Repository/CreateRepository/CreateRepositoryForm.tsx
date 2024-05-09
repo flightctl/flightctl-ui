@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Alert, Button, Checkbox, Form, FormGroup, FormSection, Grid } from '@patternfly/react-core';
-import { Field, Formik, useFormikContext } from 'formik';
+import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import { useTranslation } from '../../../hooks/useTranslation';
 
@@ -20,32 +20,20 @@ import {
 } from './utils';
 import { Repository, ResourceSync } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
+import NameField from '../../form/NameField';
 
 export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
   const { t } = useTranslation();
-  const { get } = useFetch();
   const { values, setFieldValue, setFieldTouched } = useFormikContext<RepositoryFormValues>();
-
-  const validateExistingRepositoryName = async (name: string) => {
-    const repoExists = values.exists;
-    if (repoExists || !name) {
-      // We should not validate the item against itself
-      return undefined;
-    }
-    try {
-      await get(`repositories/${name}`);
-      return t(`A repository named "{{name}}" already exists`, { name });
-    } catch (e) {
-      return undefined;
-    }
-  };
 
   return (
     <>
       <FormGroup label={t('Repository name')} isRequired>
-        <Field name="name" validate={validateExistingRepositoryName}>
-          {() => <TextField name="name" aria-label={t('Repository name')} value={values.name} isDisabled={isEdit} />}
-        </Field>
+        <NameField
+          name="name"
+          resourceType="repositories"
+          getExistsErrMsg={(value) => t(`A repository named "{{value}}" already exists`, { value })}
+        />
       </FormGroup>
       <FormGroup label={t('Repository URL')} isRequired>
         <TextField
@@ -71,7 +59,7 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
         />
         {values.isPrivate && (
           <>
-            <FormGroup label={t('Username')}>
+            <FormGroup label={t('Username')} isRequired>
               <TextField
                 name="username"
                 aria-label={t('Username')}
@@ -85,7 +73,7 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
                 }}
               />
             </FormGroup>
-            <FormGroup label={t('Password')}>
+            <FormGroup label={t('Password')} isRequired>
               <TextField
                 name="password"
                 helperText={

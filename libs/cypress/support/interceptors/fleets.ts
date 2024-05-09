@@ -36,6 +36,18 @@ const loadInterceptors = () => {
       req.reply({
         body: buildNewFleet(newFleetName),
       });
+      return;
+    }
+
+    const requestedFleet = basicFleets.find((f) => req.url.endsWith(f.metadata.name));
+    if (requestedFleet) {
+      req.reply({
+        body: requestedFleet,
+      });
+    } else {
+      req.reply({
+        statusCode: 404,
+      });
     }
   }).as('get-fleet');
 

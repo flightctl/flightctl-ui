@@ -78,6 +78,10 @@ module.exports = {
             importNames: ['useTranslation'],
             message: 'Import useTranslation from @flightctl/ui-components/hooks/useTranslation instead',
           },
+          {
+            name: 'lodash',
+            message: 'Import using full path `lodash/<function>` instead',
+          },
         ],
       },
     ],

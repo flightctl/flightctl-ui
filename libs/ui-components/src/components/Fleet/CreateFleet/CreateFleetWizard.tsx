@@ -12,13 +12,12 @@ import {
   WizardStepType,
 } from '@patternfly/react-core';
 import * as React from 'react';
-import { Fleet, FleetList } from '@flightctl/types';
+import { Fleet } from '@flightctl/types';
 import { Formik } from 'formik';
 import ReviewStep, { reviewStepId } from './steps/ReviewStep';
 import { FleetFormValues } from './types';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
-import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import GeneralInfoStep, { generalInfoStepId, isGeneralInfoStepValid } from './steps/GeneralInfoStep';
@@ -40,29 +39,27 @@ const CreateFleetWizard = () => {
   const [error, setError] = React.useState<unknown>();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
-  const [fleetList, fleetsLoading, fleetsError] = useFetchPeriodically<FleetList>({ endpoint: 'fleets' });
-
-  const [fleetId, fleet, editLoading, editError] = useEditFleet();
+  const [fleetId, fleet, loading, editError] = useEditFleet();
   const isEdit = !!fleetId;
   let body;
 
-  if (fleetsLoading || editLoading) {
+  if (loading) {
     body = (
       <Bullseye>
         <Spinner />
       </Bullseye>
     );
-  } else if (fleetsError || editError) {
+  } else if (editError) {
     body = (
       <Alert isInline variant="danger" title={t('An error occurred')}>
-        {getErrorMessage(fleetsError || editError)}
+        {getErrorMessage(editError)}
       </Alert>
     );
   } else {
     body = (
       <Formik<FleetFormValues>
         initialValues={getInitialValues(fleet)}
-        validationSchema={getValidationSchema(t, isEdit ? undefined : fleetList?.items)}
+        validationSchema={getValidationSchema(t)}
         validateOnMount
         validateOnChange={false}
         onSubmit={async (values) => {

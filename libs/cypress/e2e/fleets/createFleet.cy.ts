@@ -50,7 +50,10 @@ describe('Create fleet form', () => {
     createFleetWizardPage = new CreateFleetWizardPage();
 
     createFleetWizardPage.newFleetNameField.type(existingFleetName).blur();
-    createFleetWizardPage.newFleetNameErrorMessage.should('have.text', 'Fleet with the same name already exists.');
+    createFleetWizardPage.newFleetNameErrorMessage.should(
+      'have.text',
+      'A fleet named "eu-west-prod-001" already exists'
+    );
     createFleetWizardPage.nextFleetWizardButton.should('be.disabled');
 
     // Fix the duplicate fleet name and check that the form could be submitted
