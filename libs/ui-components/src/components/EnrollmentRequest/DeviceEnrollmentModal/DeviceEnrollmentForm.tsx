@@ -7,6 +7,7 @@ import LabelsField from '../../form/LabelsField';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
+import TextField from '../../form/TextField';
 
 export type DeviceEnrollmentFormValues = {
   labels: FlightCtlLabel[];
@@ -23,26 +24,22 @@ export type DeviceEnrollmentFormProps = {
 
 const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentRequest, onClose, error, children }) => {
   const { t } = useTranslation();
-  const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<DeviceEnrollmentFormValues>();
+  const { submitForm, isSubmitting } = useFormikContext<DeviceEnrollmentFormValues>();
   return (
     <Form>
       {enrollmentRequest && (
         <FormGroup label={t('Fingerprint')}>
-          <TextInput aria-label="Fingerprint" isDisabled value={enrollmentRequest.metadata.name} />
+          <TextInput aria-label={t('Fingerprint')} isDisabled value={enrollmentRequest.metadata.name} />
         </FormGroup>
       )}
       <FormGroup label={t('Labels')}>
-        <LabelsField labels={values.labels} setLabels={(labels) => setFieldValue('labels', labels)} />
+        <LabelsField name="labels" />
       </FormGroup>
       <FormGroup label={t('Region')} isRequired>
-        <TextInput aria-label="Region" value={values.region} onChange={(_, value) => setFieldValue('region', value)} />
+        <TextField name="region" aria-label={t('Region')} />
       </FormGroup>
       <FormGroup label={t('Name')} isRequired>
-        <TextInput
-          aria-label={t('Name')}
-          value={values.displayName}
-          onChange={(_, value) => setFieldValue('displayName', value)}
-        />
+        <TextField name="displayName" aria-label={t('Display name')} />
       </FormGroup>
       {children}
       {error && <Alert isInline title={error} variant="danger" />}

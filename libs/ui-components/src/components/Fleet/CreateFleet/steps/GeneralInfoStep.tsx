@@ -1,6 +1,6 @@
 import { Form, FormGroup, Grid } from '@patternfly/react-core';
 import * as React from 'react';
-import { FormikErrors, useFormikContext } from 'formik';
+import { FormikErrors } from 'formik';
 import { FleetFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import NameField from '../../../form/NameField';
@@ -14,8 +14,6 @@ export const isGeneralInfoStepValid = (errors: FormikErrors<FleetFormValues>) =>
 
 const GeneralInfoStep = ({ isEdit }: { isEdit: boolean }) => {
   const { t } = useTranslation();
-  const { values, setFieldValue } = useFormikContext<FleetFormValues>();
-
   return (
     <Grid span={8}>
       <Form>
@@ -29,10 +27,10 @@ const GeneralInfoStep = ({ isEdit }: { isEdit: boolean }) => {
           />
         </FormGroup>
         <FormGroup label={t('Fleet labels')}>
-          <LabelsField labels={values.fleetLabels} setLabels={(newLabels) => setFieldValue('fleetLabels', newLabels)} />
+          <LabelsField name="fleetLabels" />
         </FormGroup>
         <FormGroup label={t('Device label selector')}>
-          <LabelsField labels={values.labels} setLabels={(newLabels) => setFieldValue('labels', newLabels)} />
+          <LabelsField name="labels" />
         </FormGroup>
       </Form>
     </Grid>

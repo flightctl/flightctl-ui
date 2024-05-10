@@ -29,11 +29,11 @@ type EditLabelsFormValues = {
 
 const EditLabelsForm = ({ onClose, error }: EditLabelsFormProps) => {
   const { t } = useTranslation();
-  const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<EditLabelsFormValues>();
+  const { submitForm, isSubmitting } = useFormikContext<EditLabelsFormValues>();
   return (
     <Form>
       <FormGroup label={t('Labels')}>
-        <LabelsField labels={values.labels} setLabels={(labels) => setFieldValue('labels', labels)} />
+        <LabelsField name="labels" />
       </FormGroup>
       {error && <Alert isInline title={error} variant="danger" />}
       <FlightCtlActionGroup>

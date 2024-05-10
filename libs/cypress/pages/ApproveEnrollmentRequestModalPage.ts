@@ -36,7 +36,7 @@ export class ApproveEnrollmentRequestModalPage {
   }
 
   get displayNameField() {
-    return cy.get('input[aria-label="Name"]');
+    return cy.get('input[aria-label="Display name"]');
   }
 
   get approveSubmitButton() {

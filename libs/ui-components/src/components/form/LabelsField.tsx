@@ -2,13 +2,14 @@ import { Label, LabelGroup } from '@patternfly/react-core';
 import * as React from 'react';
 import { FlightCtlLabel } from '../../types/extraTypes';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useField } from 'formik';
 
 type LabelsFieldProps = {
-  labels: FlightCtlLabel[];
-  setLabels: (newLabels: FlightCtlLabel[]) => void;
+  name: string;
 };
 
-const LabelsField: React.FC<LabelsFieldProps> = ({ labels, setLabels }) => {
+const LabelsField: React.FC<LabelsFieldProps> = ({ name }) => {
+  const [{ value: labels }, , { setValue: setLabels }] = useField<FlightCtlLabel[]>(name);
   const { t } = useTranslation();
   const onClose = (e: React.MouseEvent<Element, MouseEvent>, index: number) => {
     const newLabels = [...labels];

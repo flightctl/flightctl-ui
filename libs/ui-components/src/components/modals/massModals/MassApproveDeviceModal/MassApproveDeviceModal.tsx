@@ -158,7 +158,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
       validationSchema={validationSchema(t)}
       onSubmit={approveResources}
     >
-      {({ isSubmitting, values, setFieldValue, submitForm, isValid, dirty }) => (
+      {({ isSubmitting, values, submitForm, isValid, dirty }) => (
         <Modal
           title={t('Approve pending devices')}
           isOpen
@@ -211,7 +211,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
             <StackItem>
               <Form>
                 <FormGroup label={t('Labels')}>
-                  <LabelsField labels={values.labels} setLabels={(labels) => setFieldValue('labels', labels)} />
+                  <LabelsField name="labels" />
                 </FormGroup>
                 <FormGroup label={t('Region')} isRequired>
                   <TextField name="region" aria-label={t('Region')} />
