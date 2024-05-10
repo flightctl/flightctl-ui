@@ -1,3 +1,5 @@
+import { ListMeta } from '@flightctl/types';
+
 import { ApiQuery, FlightControlQuery, MetricsQuery } from '../types/extraTypes';
 import { getPeriodTimestamps } from '../utils/metrics';
 
@@ -40,4 +42,25 @@ const getRequestQueryString = (queryObj: FlightControlQuery) => {
   return getMetricsQueryString(queryObj);
 };
 
-export { isApiQuery, getRequestQueryString, getQueryStringHash, getApiQueryString, getMetricsQueryString };
+interface ApiList {
+  items: Array<unknown>;
+  metadata: ListMeta;
+}
+
+const getApiListCount = (listResponse: ApiList | undefined): number | undefined => {
+  if (listResponse === undefined) {
+    return undefined;
+  }
+  const hasItems = listResponse.items.length > 0;
+  const extraItems = listResponse.metadata.remainingItemCount || 0;
+  return hasItems ? 1 + extraItems : 0;
+};
+
+export {
+  isApiQuery,
+  getRequestQueryString,
+  getQueryStringHash,
+  getApiQueryString,
+  getMetricsQueryString,
+  getApiListCount,
+};

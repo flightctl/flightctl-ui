@@ -10,15 +10,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import DeleteFleetModal from '../DeleteFleetModal/DeleteFleetModal';
-
-const getFleetDeviceCount = (fleetDevicesResp: DeviceList | undefined): number | undefined => {
-  if (fleetDevicesResp === undefined) {
-    return undefined;
-  }
-  const hasItems = fleetDevicesResp.items.length > 0;
-  const extraDevices = fleetDevicesResp.metadata.remainingItemCount || 0;
-  return hasItems ? 1 + extraDevices : 0;
-};
+import { getApiListCount } from '../../../utils/api';
 
 const FleetDetails = () => {
   const { t } = useTranslation();
@@ -73,7 +65,7 @@ const FleetDetails = () => {
     >
       {fleet && (
         <>
-          <FleetDetailsContent fleet={fleet} devicesCount={getFleetDeviceCount(fleetDevicesResp)} />
+          <FleetDetailsContent fleet={fleet} devicesCount={getApiListCount(fleetDevicesResp)} />
           {isDeleteModalOpen && (
             <DeleteFleetModal
               fleetId={fleetId}

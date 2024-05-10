@@ -57,12 +57,12 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
       <Td isActionCell>
         <ActionsColumn
           items={[
+            editLabelsAction({
+              resourceId: deviceName,
+            }),
             deleteAction({
               resourceId: deviceName,
               resourceName: displayName,
-            }),
-            editLabelsAction({
-              resourceId: deviceName,
             }),
           ]}
         />

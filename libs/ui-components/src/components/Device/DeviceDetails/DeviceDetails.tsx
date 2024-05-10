@@ -83,7 +83,6 @@ const DeviceDetails = () => {
       actions={
         <DetailsPageActions>
           <DropdownList>
-            {deleteAction}
             <DropdownItem
               {...editLabelsAction({
                 disabledReason: boundFleet ? t('Devices bound to a fleet cannot be edited') : '',
@@ -92,6 +91,7 @@ const DeviceDetails = () => {
             >
               {t('Edit labels')}
             </DropdownItem>
+            {deleteAction}
           </DropdownList>
         </DetailsPageActions>
       }
