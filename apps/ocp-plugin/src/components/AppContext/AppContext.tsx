@@ -11,6 +11,8 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom-v5-compat';
+import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/reducers';
+import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
 import { useMetrics } from '../../hooks/useMetrics';
 
@@ -38,9 +40,10 @@ const appRoutes = {
 export const useValuesAppContext = (): AppContextProps => {
   const fetch = useFetch();
   const metrics = useMetrics();
+  const userInfo = useSelector(getUser);
   return {
     appType: 'ocp',
-    user: undefined, // TODO how to get username ?
+    user: userInfo?.username || '',
     bootcImgUrl: '1',
     qcow2ImgUrl: '',
     router: {
