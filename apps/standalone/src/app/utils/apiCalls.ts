@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 
-const apiServer = `${window.location.protocol}//${window.location.hostname}${window.API_PORT ? `:${window.API_PORT}` : ''}`;
-
-//const apiServer = `${window.location.protocol}//${window.location.hostname}${window.API_PORT ? `:${window.API_PORT}` : ':9000'}/api/proxy/plugin/flightctl-plugin`;
+const apiServer = `${window.location.protocol}//${window.location.hostname}${
+  window.API_PORT ? `:${window.API_PORT}` : ''
+}`;
 
 const flightCtlAPI = `${apiServer}/api/flightctl`;
 const metricsAPI = `${apiServer}/api/metrics`;

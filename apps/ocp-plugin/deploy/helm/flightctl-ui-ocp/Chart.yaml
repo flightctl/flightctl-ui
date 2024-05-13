@@ -1,0 +1,7 @@
+apiVersion: v2
+name: flightctl-ui-ocp
+description: A helm chart for flightctl-ui OCP plugin
+type: application
+version: 0.0.1
+appVersion: 0.0.1
+

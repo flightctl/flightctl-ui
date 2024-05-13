@@ -1,6 +1,14 @@
 /* eslint-disable no-console */
 
-const apiServer = `${window.location.protocol}//${window.location.hostname}:9000/api/proxy/plugin/flightctl-plugin`;
+declare global {
+  interface Window {
+    FCTL_API_PORT?: string;
+  }
+}
+
+const apiServer = `${window.location.protocol}//${window.location.hostname}${
+  window.FCTL_API_PORT ? `:${window.FCTL_API_PORT}` : ''
+}/api/proxy/plugin/flightctl-plugin/api-proxy`;
 
 const flightCtlAPI = `${apiServer}/api/flightctl`;
 const metricsAPI = `${apiServer}/api/metrics`;

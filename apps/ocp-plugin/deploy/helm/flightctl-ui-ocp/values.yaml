@@ -1,0 +1,18 @@
+flightctl-ui:
+  namespace: flightctl
+  image: quay.io/rawagner/fctl-ocp:tls6
+  flightctlServer: https://flightctl-server:3333
+  flightctlMetricsServer: https://flightctl-server:9090
+  certs:
+    ca: |
+      -----BEGIN
+      -----END
+    frontClicrt: |
+      -----BEGIN
+      -----END
+    frontClikey: |
+      -----BE
+      -----END
+    apiSigkey: |
+      -----BEGIN
+      -----END

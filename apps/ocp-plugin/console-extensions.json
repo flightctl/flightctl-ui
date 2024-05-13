@@ -1,18 +1,18 @@
 [
   {
-    "type": "console.page/route",
+    "type": "console.context-provider",
     "properties": {
-      "exact": true,
-      "path": ["/edge/fleets"],
-      "component": { "$codeRef": "FleetsPage" }
+      "provider": { "$codeRef": "appContext.OCPPluginAppContext" },
+      "useValueHook": { "$codeRef": "appContext.useValuesAppContext" }
     }
   },
   {
     "type": "console.navigation/section",
     "properties": {
       "id": "fctl",
-      "perspective": "admin",
-      "name": "%plugin__flightctl-plugin~Edge Management%"
+      "perspective": "acm",
+      "name": "%plugin__flightctl-plugin~Edge Management%",
+      "insertAfter": "mce-infrastructure"
     }
   },
   {
@@ -21,15 +21,116 @@
       "id": "fctl-fleets",
       "name": "%plugin__flightctl-plugin~Fleets%",
       "href": "/edge/fleets",
-      "perspective": "admin",
+      "perspective": "acm",
       "section": "fctl"
     }
   },
   {
-    "type": "console.context-provider",
+    "type": "console.navigation/href",
     "properties": {
-      "provider": { "$codeRef": "appContext.OCPPluginAppContext" },
-      "useValueHook": { "$codeRef": "appContext.useValuesAppContext" }
+      "id": "fctl-devices",
+      "name": "%plugin__flightctl-plugin~Devices%",
+      "href": "/edge/devices",
+      "perspective": "acm",
+      "section": "fctl"
+    }
+  },
+  {
+    "type": "console.navigation/href",
+    "properties": {
+      "id": "fctl-repositories",
+      "name": "%plugin__flightctl-plugin~Repositories%",
+      "href": "/edge/repositories",
+      "perspective": "acm",
+      "section": "fctl"
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/fleets"],
+      "component": { "$codeRef": "FleetsPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/fleets/create", "/edge/fleets/edit/:fleetId"],
+      "component": { "$codeRef": "CreateFleetWizardPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/fleets/import"],
+      "component": { "$codeRef": "ImportFleetWizardPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/fleets/:fleetId"],
+      "component": { "$codeRef": "FleetDetailsPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/devices"],
+      "component": { "$codeRef": "DevicesPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/devices/:deviceId"],
+      "component": { "$codeRef": "DeviceDetailsPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/repositories"],
+      "component": { "$codeRef": "RepositoriesPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/repositories/create", "/edge/repositories/edit/:repositoryId"],
+      "component": { "$codeRef": "CreateRepositoryPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": false,
+      "path": ["/edge/repositories/:repositoryId"],
+      "component": { "$codeRef": "RepositoryDetailsPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/resourcesyncs/:rsId"],
+      "component": { "$codeRef": "ResourceSyncToRepositoryPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/enrollmentrequests/:enrollmentRequestId"],
+      "component": { "$codeRef": "EnrollmentRequestDetailsPage" }
     }
   }
 ]

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"log"
 	"net/http"
 	"time"
@@ -36,12 +37,38 @@ func main() {
 
 	addr := ":" + utils.GetEnvVar("API_PORT", "3001")
 
+	tlsKeyPath := utils.GetEnvVar("TLS_KEY", "")
+	tlsCertPath := utils.GetEnvVar("TLS_CERT", "")
+
+	var config *tls.Config
+
+	if tlsKeyPath != "" && tlsCertPath != "" {
+		cert, err := tls.LoadX509KeyPair(tlsCertPath, tlsKeyPath)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		config = &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		}
+
+	}
+
 	srv := &http.Server{
 		Handler:      corsHandler(router),
 		Addr:         addr,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
+
 	log.Println("Proxy running at", addr)
-	log.Fatal(srv.ListenAndServe())
+
+	if config != nil {
+		srv.TLSConfig = config
+		log.Println("Running as HTTPS")
+		log.Fatal(srv.ListenAndServeTLS("", ""))
+	} else {
+		log.Fatal(srv.ListenAndServe())
+	}
+
 }

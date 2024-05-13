@@ -20,26 +20,28 @@ const getRoute: AppContextProps['router']['getRoute'] = (to) => {
   switch (to) {
     case ROUTE.FLEETS:
     case ROUTE.FLEET_DETAILS:
-      return '/devicemanagement/fleets';
+      return '/edge/fleets';
     case ROUTE.FLEET_CREATE:
       return '/edge/fleets/create';
+    case ROUTE.FLEET_EDIT:
+      return '/edge/fleets/edit';
     case ROUTE.FLEET_IMPORT:
       return '/edge/fleets/import';
     case ROUTE.DEVICES:
-      return '/devicemanagement/devices';
+      return '/edge/devices';
     case ROUTE.REPO_CREATE:
-      return '/devicemanagement/repositories/create';
+      return '/edge/repositories/create';
     case ROUTE.REPO_EDIT:
-      return '/devicemanagement/repositories/edit';
+      return '/edge/repositories/edit';
     case ROUTE.REPO_DETAILS:
     case ROUTE.REPOSITORIES:
-      return '/devicemanagement/repositories';
+      return '/edge/repositories';
     case ROUTE.RESOURCE_SYNCS:
     case ROUTE.RESOURCE_SYNC_DETAILS:
-      return '/devicemanagement/resourcesyncs';
+      return '/edge/resourcesyncs';
     case ROUTE.ENROLLMENT_REQUESTS:
     case ROUTE.ENROLLMENT_REQUEST_DETAILS:
-      return '/devicemanagement/resourcesyncs';
+      return '/edge/enrollmentrequests';
     default:
       return '/';
   }

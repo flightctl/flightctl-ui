@@ -1,5 +1,6 @@
-import { Configuration } from 'webpack';
+import { Configuration, DefinePlugin } from 'webpack';
 import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
+import CopyPlugin from 'copy-webpack-plugin';
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
@@ -61,7 +62,12 @@ const config: Configuration & {
     path: path.resolve(__dirname, 'dist'),
     chunkFilename: '[name].bundle-[contenthash].js',
   },
-  plugins: [new ConsoleRemotePlugin()],
+  plugins: [
+    new ConsoleRemotePlugin(),
+    new CopyPlugin({
+      patterns: [{ from: '../../libs/i18n/locales', to: 'locales' }],
+    }),
+  ],
   resolve: {
     extensions: ['.js', '.ts', '.tsx', '.jsx'],
     symlinks: false,
@@ -91,9 +97,15 @@ if (NODE_ENV === 'production') {
     new MiniCssExtractPlugin({
       filename: '[name]-[contenthash].css',
       chunkFilename: '[name].bundle-[contenthash].css',
-    }),
+    })
   );
   config.devtool = 'source-map';
+} else {
+  config.plugins?.push(
+    new DefinePlugin({
+      'window.FCTL_API_PORT': '9000',
+    })
+  );
 }
 
 export default config;

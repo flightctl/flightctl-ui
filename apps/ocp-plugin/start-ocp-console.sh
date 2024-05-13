@@ -47,18 +47,22 @@ echo "API Server: $BRIDGE_K8S_MODE_OFF_CLUSTER_ENDPOINT"
 echo "Console Image: $CONSOLE_IMAGE"
 echo "Console URL: http://localhost:${CONSOLE_PORT}"
 
+
+oc port-forward -n multicluster-engine service/console-mce-console 2000:3000 &
+oc port-forward -n open-cluster-management service/console-chart-console-v2 2001:3000 &
+
 # Prefer podman if installed. Otherwise, fall back to docker.
 if [ -x "$(command -v podman)" ]; then
     if [ "$(uname -s)" = "Linux" ]; then
         # Use host networking on Linux since host.containers.internal is unreachable in some environments.
-        BRIDGE_PLUGINS="flightctl-plugin=http://localhost:9001"
+        BRIDGE_PLUGINS="flightctl-plugin=http://localhost:9001,mce=https://localhost:2000/plugin,acm=https://localhost:2001/plugin"
 
         podman run \
           -v $PWD/ocp-console/console-client-secret:/tmp/console-client-secret:Z \
           -v $PWD/ocp-console/ca.crt:/tmp/ca.crt:Z \
           --pull always \
           --rm --network=host \
-          --env BRIDGE_PLUGIN_PROXY='{"services": [{"consoleAPIPath": "/api/proxy/plugin/flightctl-plugin/", "endpoint":"http://localhost:3001","authorize":false}]}' \
+          --env BRIDGE_PLUGIN_PROXY='{"services": [{"consoleAPIPath": "/api/proxy/plugin/flightctl-plugin/api-proxy/", "endpoint":"http://localhost:3001","authorize":false},{"consoleAPIPath": "/api/proxy/plugin/mce/console/", "endpoint":"https://localhost:2000","authorize":true},{"consoleAPIPath": "/api/proxy/plugin/acm/console/", "endpoint":"https://localhost:2000","authorize":true}]}' \
           --env-file <(set | grep BRIDGE) \
           $CONSOLE_IMAGE
     else
