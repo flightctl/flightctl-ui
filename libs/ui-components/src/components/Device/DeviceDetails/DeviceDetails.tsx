@@ -77,7 +77,7 @@ const DeviceDetails = () => {
       error={error}
       id={deviceId}
       title={name}
-      resourceLink="/devicemanagement/devices"
+      resourceLink={ROUTE.DEVICES}
       resourceType="Devices"
       resourceTypeLabel={t('Devices')}
       actions={

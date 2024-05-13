@@ -4,6 +4,7 @@ import { checkAccessibility, render, screen } from '../../tests/test-utils';
 
 import DetailsPage, { type DetailsPageProps } from './DetailsPage';
 import { Button } from '@patternfly/react-core';
+import { ROUTE } from '../../hooks/useNavigate';
 
 const baseProps: DetailsPageProps = {
   id: 'device-id',
@@ -11,7 +12,7 @@ const baseProps: DetailsPageProps = {
   children: null,
   error: null,
   loading: false,
-  resourceLink: '/devicemanagement/devices',
+  resourceLink: ROUTE.DEVICES,
   resourceType: 'Devices',
   resourceTypeLabel: 'Devices',
   actions: undefined,

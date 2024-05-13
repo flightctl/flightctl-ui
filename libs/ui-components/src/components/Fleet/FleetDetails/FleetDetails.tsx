@@ -32,7 +32,7 @@ const FleetDetails = () => {
       loading={isLoading}
       error={error}
       id={fleetId}
-      resourceLink="/devicemanagement/fleets"
+      resourceLink={ROUTE.FLEETS}
       resourceType="Fleets"
       resourceTypeLabel={t('Fleets')}
       actions={

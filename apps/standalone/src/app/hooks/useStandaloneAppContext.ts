@@ -1,5 +1,4 @@
-import { AppContextProps } from '@flightctl/ui-components/hooks/useAppContext';
-import { getRoute } from '@flightctl/ui-components/hooks/useNavigate';
+import { AppContextProps, appRoutes } from '@flightctl/ui-components/hooks/useAppContext';
 import {
   Link,
   NavLink,
@@ -25,7 +24,7 @@ const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics'> = {
   router: {
     useNavigate,
     Link,
-    getRoute,
+    appRoutes,
     NavLink,
     Navigate,
     Route,

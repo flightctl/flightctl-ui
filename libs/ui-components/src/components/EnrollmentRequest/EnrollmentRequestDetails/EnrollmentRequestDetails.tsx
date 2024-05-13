@@ -66,7 +66,7 @@ const EnrollmentRequestDetails = () => {
       loading={loading}
       error={error}
       id={er?.metadata.name as string}
-      resourceLink="/devicemanagement/devices"
+      resourceLink={ROUTE.DEVICES}
       resourceType="Devices"
       resourceTypeLabel={t('Devices')}
       actions={

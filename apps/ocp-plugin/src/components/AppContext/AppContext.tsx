@@ -16,35 +16,23 @@ import { useMetrics } from '../../hooks/useMetrics';
 
 export const OCPPluginAppContext = AppContext.Provider;
 
-const getRoute: AppContextProps['router']['getRoute'] = (to) => {
-  switch (to) {
-    case ROUTE.FLEETS:
-    case ROUTE.FLEET_DETAILS:
-      return '/edge/fleets';
-    case ROUTE.FLEET_CREATE:
-      return '/edge/fleets/create';
-    case ROUTE.FLEET_EDIT:
-      return '/edge/fleets/edit';
-    case ROUTE.FLEET_IMPORT:
-      return '/edge/fleets/import';
-    case ROUTE.DEVICES:
-      return '/edge/devices';
-    case ROUTE.REPO_CREATE:
-      return '/edge/repositories/create';
-    case ROUTE.REPO_EDIT:
-      return '/edge/repositories/edit';
-    case ROUTE.REPO_DETAILS:
-    case ROUTE.REPOSITORIES:
-      return '/edge/repositories';
-    case ROUTE.RESOURCE_SYNCS:
-    case ROUTE.RESOURCE_SYNC_DETAILS:
-      return '/edge/resourcesyncs';
-    case ROUTE.ENROLLMENT_REQUESTS:
-    case ROUTE.ENROLLMENT_REQUEST_DETAILS:
-      return '/edge/enrollmentrequests';
-    default:
-      return '/';
-  }
+const appRoutes = {
+  [ROUTE.ROOT]: '/',
+  [ROUTE.FLEETS]: '/edge/fleets',
+  [ROUTE.FLEET_DETAILS]: '/edge/fleets',
+  [ROUTE.FLEET_CREATE]: '/edge/fleets/create',
+  [ROUTE.FLEET_EDIT]: '/edge/fleets/edit',
+  [ROUTE.FLEET_IMPORT]: '/edge/fleets/import',
+  [ROUTE.DEVICES]: '/edge/devices',
+  [ROUTE.DEVICE_DETAILS]: '/edge/devices',
+  [ROUTE.REPO_CREATE]: '/edge/repositories/create',
+  [ROUTE.REPO_EDIT]: '/edge/repositories/edit',
+  [ROUTE.REPO_DETAILS]: '/edge/repositories',
+  [ROUTE.REPOSITORIES]: '/edge/repositories',
+  [ROUTE.RESOURCE_SYNCS]: '/edge/resourcesyncs',
+  [ROUTE.RESOURCE_SYNC_DETAILS]: '/edge/resourcesyncs',
+  [ROUTE.ENROLLMENT_REQUESTS]: '/edge/enrollmentrequests',
+  [ROUTE.ENROLLMENT_REQUEST_DETAILS]: '/edge/enrollmentrequests',
 };
 
 export const useValuesAppContext = (): AppContextProps => {
@@ -58,7 +46,7 @@ export const useValuesAppContext = (): AppContextProps => {
     router: {
       useNavigate,
       Link,
-      getRoute,
+      appRoutes,
       NavLink,
       Routes,
       Navigate,

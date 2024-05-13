@@ -4,14 +4,11 @@ import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circl
 import { ObjectMeta } from '@flightctl/types';
 import { getDeviceFleet, getMissingFleetDetails } from '../../../utils/devices';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { useAppContext } from '../../../hooks/useAppContext';
+import { Link, ROUTE } from '../../../hooks/useNavigate';
 
 import './DeviceFleet.css';
 
 const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => {
-  const {
-    router: { Link },
-  } = useAppContext();
   const { t } = useTranslation();
   const details = getMissingFleetDetails(t, deviceMetadata);
   const hasMultipleOwners = details.owners.length > 1;
@@ -32,7 +29,7 @@ const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => 
                   {details.owners.map((ownerFleet) => {
                     return (
                       <ListItem key={ownerFleet}>
-                        <Link to={`/devicemanagement/fleets/${ownerFleet}`}>{ownerFleet}</Link>
+                        <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: ownerFleet }}>{ownerFleet}</Link>
                       </ListItem>
                     );
                   })}
@@ -49,15 +46,12 @@ const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => 
 };
 
 const DeviceFleet = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => {
-  const {
-    router: { Link },
-  } = useAppContext();
   const fleetName = getDeviceFleet(deviceMetadata);
 
   return (
     <div>
       {fleetName ? (
-        <Link to={`/devicemanagement/fleets/${fleetName}`}>{fleetName}</Link>
+        <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: fleetName }}>{fleetName}</Link>
       ) : (
         <FleetLessDevice deviceMetadata={deviceMetadata} />
       )}

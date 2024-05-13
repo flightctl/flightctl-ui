@@ -8,7 +8,7 @@ import { getDateDisplay } from '../../utils/dates';
 import { DeleteListActionResult } from '../ListPage/types';
 import DeviceStatus from './DeviceDetails/DeviceStatus';
 import { useTranslation } from '../../hooks/useTranslation';
-import { useAppContext } from '../../hooks/useAppContext';
+import { Link, ROUTE } from '../../hooks/useNavigate';
 
 type DeviceTableRowProps = {
   device: Device;
@@ -28,9 +28,6 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
   editLabelsAction,
 }) => {
   const { t } = useTranslation();
-  const {
-    router: { Link },
-  } = useAppContext();
   const deviceName = device.metadata.name as string;
   const displayName = device.metadata.labels?.displayName;
   return (
@@ -43,7 +40,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
         }}
       />
       <Td dataLabel={t('Fingerprint')}>
-        <Link to={`/devicemanagement/devices/${deviceName}`}>{getFingerprintDisplay(device)}</Link>
+        <Link to={{ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }}>{getFingerprintDisplay(device)}</Link>
       </Td>
       <Td dataLabel={t('Name')}>{displayName || '-'}</Td>
       <Td dataLabel={t('Fleet')}>

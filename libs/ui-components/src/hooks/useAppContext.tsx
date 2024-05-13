@@ -11,7 +11,26 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
-import { ROUTE, getRoute } from './useNavigate';
+import { ROUTE } from './useNavigate';
+
+export const appRoutes = {
+  [ROUTE.ROOT]: '/',
+  [ROUTE.FLEETS]: '/devicemanagement/fleets',
+  [ROUTE.FLEET_DETAILS]: '/devicemanagement/fleets',
+  [ROUTE.FLEET_CREATE]: '/devicemanagement/fleets/create',
+  [ROUTE.FLEET_EDIT]: '/devicemanagement/fleets/edit',
+  [ROUTE.FLEET_IMPORT]: '/devicemanagement/fleets/import',
+  [ROUTE.DEVICES]: '/devicemanagement/devices',
+  [ROUTE.DEVICE_DETAILS]: '/devicemanagement/devices',
+  [ROUTE.REPO_CREATE]: '/devicemanagement/repositories/create',
+  [ROUTE.REPO_EDIT]: '/devicemanagement/repositories/edit',
+  [ROUTE.REPO_DETAILS]: '/devicemanagement/repositories',
+  [ROUTE.REPOSITORIES]: '/devicemanagement/repositories',
+  [ROUTE.RESOURCE_SYNCS]: '/devicemanagement/resourcesyncs',
+  [ROUTE.RESOURCE_SYNC_DETAILS]: '/devicemanagement/resourcesyncs',
+  [ROUTE.ENROLLMENT_REQUESTS]: '/devicemanagement/enrollmentrequests',
+  [ROUTE.ENROLLMENT_REQUEST_DETAILS]: '/devicemanagement/enrollmentrequests',
+};
 
 export type AppContextProps = {
   appType: 'standalone' | 'ocp';
@@ -24,7 +43,7 @@ export type AppContextProps = {
   router: {
     useNavigate: () => RouterNavigateFunction;
     Link: typeof Link;
-    getRoute: (route: ROUTE) => string;
+    appRoutes: Record<ROUTE, string>;
     NavLink: typeof NavLink;
     useSearchParams: typeof useSearchParams;
     useParams: typeof useParams;
@@ -51,7 +70,7 @@ export const AppContext = React.createContext<AppContextProps>({
   router: {
     useNavigate,
     Link,
-    getRoute,
+    appRoutes,
     NavLink,
     useParams,
     useSearchParams,

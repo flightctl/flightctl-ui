@@ -37,7 +37,7 @@ const RepositoryDetails = () => {
       error={error}
       id={repositoryId}
       title={repoDetails?.metadata.name as string}
-      resourceLink="/devicemanagement/repositories"
+      resourceLink={ROUTE.REPOSITORIES}
       resourceType="Repositories"
       resourceTypeLabel={t('Repositories')}
       actions={

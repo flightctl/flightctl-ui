@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { LinkProps as RouterLinkProps } from 'react-router-dom';
-import { AppContextProps, useAppContext } from './useAppContext';
+import { useAppContext } from './useAppContext';
 
 export interface NavigateFunction {
   (to: Route | ToObj): void;
@@ -8,21 +8,22 @@ export interface NavigateFunction {
 }
 
 export enum ROUTE {
-  ROOT,
-  FLEETS,
-  FLEET_CREATE,
-  FLEET_IMPORT,
-  FLEET_DETAILS,
-  FLEET_EDIT,
-  DEVICES,
-  REPOSITORIES,
-  REPO_CREATE,
-  REPO_EDIT,
-  REPO_DETAILS,
-  RESOURCE_SYNCS,
-  RESOURCE_SYNC_DETAILS,
-  ENROLLMENT_REQUESTS,
-  ENROLLMENT_REQUEST_DETAILS,
+  ROOT = 'ROOT',
+  FLEETS = 'FLEETS',
+  FLEET_CREATE = 'FLEET_CREATE',
+  FLEET_IMPORT = 'FLEET_IMPORT',
+  FLEET_DETAILS = ' FLEET_DETAILS',
+  FLEET_EDIT = 'FLEET_DETAILS',
+  DEVICES = 'DEVICES',
+  DEVICE_DETAILS = 'DEVICE_DETAILS',
+  REPOSITORIES = 'REPOSITORIES',
+  REPO_CREATE = 'REPO_CREATE',
+  REPO_EDIT = 'REPO_EDIT',
+  REPO_DETAILS = ' REPO_DETAILS',
+  RESOURCE_SYNCS = ' RESOURCE_SYNCS',
+  RESOURCE_SYNC_DETAILS = ' RESOURCE_SYNC_DETAILS',
+  ENROLLMENT_REQUESTS = 'ENROLLMENT_REQUESTS',
+  ENROLLMENT_REQUEST_DETAILS = 'ENROLLMENT_REQUEST_DETAILS',
 }
 
 type RouteWithPostfix =
@@ -31,45 +32,15 @@ type RouteWithPostfix =
   | ROUTE.REPO_DETAILS
   | ROUTE.RESOURCE_SYNC_DETAILS
   | ROUTE.REPO_EDIT
+  | ROUTE.DEVICE_DETAILS
   | ROUTE.ENROLLMENT_REQUEST_DETAILS;
-type Route = Exclude<ROUTE, RouteWithPostfix>;
+export type Route = Exclude<ROUTE, RouteWithPostfix>;
 
 type ToObj = { route: RouteWithPostfix; postfix: string | undefined };
 
-export const getRoute: AppContextProps['router']['getRoute'] = (to) => {
-  switch (to) {
-    case ROUTE.FLEETS:
-    case ROUTE.FLEET_DETAILS:
-      return '/devicemanagement/fleets';
-    case ROUTE.FLEET_CREATE:
-      return '/devicemanagement/fleets/create';
-    case ROUTE.FLEET_EDIT:
-      return '/devicemanagement/fleets/edit';
-    case ROUTE.FLEET_IMPORT:
-      return '/devicemanagement/fleets/import';
-    case ROUTE.DEVICES:
-      return '/devicemanagement/devices';
-    case ROUTE.REPO_CREATE:
-      return '/devicemanagement/repositories/create';
-    case ROUTE.REPO_EDIT:
-      return '/devicemanagement/repositories/edit';
-    case ROUTE.REPO_DETAILS:
-    case ROUTE.REPOSITORIES:
-      return '/devicemanagement/repositories';
-    case ROUTE.RESOURCE_SYNCS:
-    case ROUTE.RESOURCE_SYNC_DETAILS:
-      return '/devicemanagement/resourcesyncs';
-    case ROUTE.ENROLLMENT_REQUESTS:
-    case ROUTE.ENROLLMENT_REQUEST_DETAILS:
-      return '/devicemanagement/enrollmentrequests';
-    default:
-      return '/';
-  }
-};
-
 export const useNavigate = () => {
   const {
-    router: { useNavigate: useRouterNavigate, getRoute },
+    router: { useNavigate: useRouterNavigate, appRoutes },
   } = useAppContext();
 
   const navigate = useRouterNavigate();
@@ -78,16 +49,17 @@ export const useNavigate = () => {
     (to: Route | number | ToObj) => {
       if (typeof to === 'number') {
         navigate(to);
-      }
-      if (toParamIsToObj(to)) {
-        const route = getRoute(to.route);
-        navigate(`${route}/${to.postfix}`);
       } else {
-        const route = getRoute(to);
-        navigate(route);
+        if (toParamIsToObj(to)) {
+          const route = appRoutes[to.route];
+          navigate(`${route}/${to.postfix}`);
+        } else {
+          const route = appRoutes[to];
+          navigate(route);
+        }
       }
     },
-    [navigate, getRoute],
+    [navigate, appRoutes],
   );
 };
 
@@ -105,14 +77,14 @@ const toParamIsToObj = (to: LinkProps['to']): to is ToObj => {
 
 export const Link = ({ to, query, ...rest }: LinkProps) => {
   const {
-    router: { Link: RouterLink, getRoute },
+    router: { Link: RouterLink, appRoutes },
   } = useAppContext();
 
   let route = '';
   if (toParamIsToObj(to)) {
-    route = `${getRoute(to.route)}/${to.postfix}`;
+    route = `${appRoutes[to.route]}/${to.postfix}`;
   } else {
-    route = getRoute(to);
+    route = appRoutes[to];
   }
 
   return <RouterLink to={query ? `${route}?${query}` : route} {...rest} />;

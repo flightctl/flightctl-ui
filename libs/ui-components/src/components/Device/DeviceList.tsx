@@ -41,6 +41,7 @@ import { Trans } from 'react-i18next';
 import { useTranslation } from '../../hooks/useTranslation';
 import { TFunction } from 'i18next';
 import { useAppContext } from '../../hooks/useAppContext';
+import { Link, ROUTE } from '../../hooks/useNavigate';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -48,15 +49,12 @@ type DeviceEmptyStateProps = {
 
 const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => {
   const { t } = useTranslation();
-  const {
-    router: { Link },
-  } = useAppContext();
   return (
     <ResourceListEmptyState icon={MicrochipIcon} titleText={t('No devices here!')}>
       <EmptyStateBody>
         <Trans t={t}>
           You can add devices and label them to match fleets, or your can{' '}
-          <Link to="/devicemanagement/fleets">start with a fleet</Link> and add devices into it.
+          <Link to={ROUTE.FLEETS}>start with a fleet</Link> and add devices into it.
         </Trans>
       </EmptyStateBody>
       <EmptyStateFooter>

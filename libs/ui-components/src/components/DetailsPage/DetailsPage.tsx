@@ -14,7 +14,7 @@ import {
 import { getErrorMessage } from '../../utils/error';
 import DetailsNotFound from './DetailsNotFound';
 import { useTranslation } from '../../hooks/useTranslation';
-import { useAppContext } from '../../hooks/useAppContext';
+import { Link, Route } from '../../hooks/useNavigate';
 
 export type DetailsPageProps = {
   id: string;
@@ -24,7 +24,7 @@ export type DetailsPageProps = {
   loading: boolean;
   resourceType: 'Fleets' | 'Devices' | 'Repositories' | 'Enrollment requests';
   resourceTypeLabel: string;
-  resourceLink: string;
+  resourceLink: Route;
   actions?: React.ReactNode;
   nav?: React.ReactNode;
 };
@@ -42,9 +42,6 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
   nav,
 }) => {
   const { t } = useTranslation();
-  const {
-    router: { Link },
-  } = useAppContext();
   let content = children;
   if (error) {
     const msg = getErrorMessage(error);

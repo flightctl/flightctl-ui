@@ -34,8 +34,7 @@ import * as Yup from 'yup';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { TFunction } from 'i18next';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
-import { useAppContext } from '../../../hooks/useAppContext';
+import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 
 import './ImportFleetWizard.css';
 
@@ -88,9 +87,6 @@ const ImportFleetWizardFooter = () => {
 const ImportFleetWizard = () => {
   const { t } = useTranslation();
   const { post } = useFetch();
-  const {
-    router: { Link },
-  } = useAppContext();
   const [errors, setErrors] = React.useState<string[]>();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
@@ -193,7 +189,7 @@ const ImportFleetWizard = () => {
       <PageSection variant="light" type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
-            <Link to={'/devicemanagement/fleets'}>{t('Fleets')}</Link>
+            <Link to={ROUTE.FLEETS}>{t('Fleets')}</Link>
           </BreadcrumbItem>
           <BreadcrumbItem isActive>{t('Create fleet')}</BreadcrumbItem>
         </Breadcrumb>

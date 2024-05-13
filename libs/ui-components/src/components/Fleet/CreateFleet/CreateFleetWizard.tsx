@@ -19,11 +19,10 @@ import { FleetFormValues } from './types';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
+import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import GeneralInfoStep, { generalInfoStepId, isGeneralInfoStepValid } from './steps/GeneralInfoStep';
 
 import DeviceTemplateStep, { deviceTemplateStepId, isDeviceTemplateStepValid } from './steps/DeviceTemplateStep';
-import { useAppContext } from '../../../hooks/useAppContext';
 import { getFleetResource, getInitialValues, getValidationSchema } from './utils';
 import CreateFleetWizardFooter from './CreateFleetWizardFooter';
 import { useEditFleet } from './useEditFleet';
@@ -33,9 +32,6 @@ import './CreateFleetWizard.css';
 const CreateFleetWizard = () => {
   const { t } = useTranslation();
   const { post, put } = useFetch();
-  const {
-    router: { Link },
-  } = useAppContext();
   const [error, setError] = React.useState<unknown>();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
@@ -113,11 +109,11 @@ const CreateFleetWizard = () => {
       <PageSection variant="light" type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
-            <Link to={'/devicemanagement/fleets'}>{t('Fleets')}</Link>
+            <Link to={ROUTE.FLEETS}>{t('Fleets')}</Link>
           </BreadcrumbItem>
           {fleetId && (
             <BreadcrumbItem>
-              <Link to={`/devicemanagement/fleets/${fleetId}`}>{fleetId}</Link>
+              <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: fleetId }}>{fleetId}</Link>
             </BreadcrumbItem>
           )}
           <BreadcrumbItem isActive>{title}</BreadcrumbItem>
