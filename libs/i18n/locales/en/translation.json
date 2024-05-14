@@ -159,6 +159,7 @@
   "Fleet labels": "Fleet labels",
   "Device label selector": "Device label selector",
   "The fleet will not manage system image": "The fleet will not manage system image",
+  "Label keys must be unique": "Label keys must be unique",
   "Name is required.": "Name is required.",
   "Provider type is required.": "Provider type is required.",
   "Path is required.": "Path is required.",
