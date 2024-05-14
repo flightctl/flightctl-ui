@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Formik, useFormikContext } from 'formik';
 import { Alert, Bullseye, Button, Form, FormGroup, Modal, Spinner } from '@patternfly/react-core';
+import { TFunction } from 'i18next';
+import * as Yup from 'yup';
 
 import { getErrorMessage } from '../../../utils/error';
 import LabelsField from '../../form/LabelsField';
@@ -10,6 +12,7 @@ import { useFetch } from '../../../hooks/useFetch';
 import { Device, Fleet } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { fromAPILabel } from '../../../utils/labels';
+import { uniqueLabelKeysSchema } from '../../form/validations';
 
 type EditLabelsModalProps<MT extends LabelEditable> = {
   resourceType: 'fleets' | 'devices';
@@ -20,24 +23,38 @@ type EditLabelsModalProps<MT extends LabelEditable> = {
 
 type EditLabelsFormProps = {
   onClose: VoidFunction;
-  error: string | undefined;
+  submitError: string | undefined;
 };
 
 type EditLabelsFormValues = {
   labels: FlightCtlLabel[];
 };
 
-const EditLabelsForm = ({ onClose, error }: EditLabelsFormProps) => {
+const getValidationSchema = (t: TFunction) => {
+  return Yup.object<EditLabelsFormValues>({
+    labels: uniqueLabelKeysSchema(t),
+  });
+};
+
+const EditLabelsForm = ({ onClose, submitError }: EditLabelsFormProps) => {
   const { t } = useTranslation();
-  const { submitForm, isSubmitting } = useFormikContext<EditLabelsFormValues>();
+  const { submitForm, isSubmitting, errors: formErrors } = useFormikContext<EditLabelsFormValues>();
+
+  const hasFormErrors = Object.keys(formErrors).length > 0;
   return (
     <Form onSubmit={(ev) => ev.preventDefault()}>
       <FormGroup label={t('Labels')}>
         <LabelsField name="labels" />
       </FormGroup>
-      {error && <Alert isInline title={error} variant="danger" />}
+      {submitError && <Alert isInline title={submitError} variant="danger" />}
       <FlightCtlActionGroup>
-        <Button key="confirm" variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
+        <Button
+          key="confirm"
+          variant="primary"
+          onClick={submitForm}
+          isDisabled={isSubmitting || hasFormErrors}
+          isLoading={isSubmitting}
+        >
           {t('Edit labels')}
         </Button>
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isSubmitting}>
@@ -109,6 +126,7 @@ function EditLabelsModal<T extends LabelEditable>({
         initialValues={{
           labels: fromAPILabel(labels),
         }}
+        validationSchema={getValidationSchema(t)}
         onSubmit={async ({ labels }) => {
           try {
             const updatedData = submitTransformer(dataItem, labels);
@@ -119,7 +137,7 @@ function EditLabelsModal<T extends LabelEditable>({
           }
         }}
       >
-        <EditLabelsForm onClose={onClose} error={submitError} />
+        <EditLabelsForm onClose={onClose} submitError={submitError} />
       </Formik>
     );
   }

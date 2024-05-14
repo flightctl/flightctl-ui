@@ -16,23 +16,9 @@ import {
 } from './types';
 import { API_VERSION } from '../../../constants';
 import { toAPILabel } from '../../../utils/labels';
-import { FlightCtlLabel } from '../../../types/extraTypes';
+import { uniqueLabelKeysSchema } from '../../form/validations';
 
 const absolutePathRegex = /^\/.*$/;
-
-const uniqueLabelKeysSchema = (t: TFunction) =>
-  Yup.array()
-    .of(
-      Yup.object<FlightCtlLabel>().shape({
-        key: Yup.string().required(),
-        value: Yup.string().required(),
-      }),
-    )
-    .required()
-    .test('unique keys', t('Label keys must be unique'), (labels: FlightCtlLabel[]) => {
-      const uniqueKeys = new Set(labels.map((label) => label.key));
-      return uniqueKeys.size === labels.length;
-    });
 
 export const getValidationSchema = (t: TFunction) => {
   return Yup.object<FleetFormValues>({
