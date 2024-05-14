@@ -31,6 +31,14 @@ export class CreateFleetWizardPage {
     return cy.get('input[aria-label="Source name"]');
   }
 
+  get newFleetSourceTypeField() {
+    return cy.get('button[id="selectfield-configTemplates[0].type-menu"]');
+  }
+
+  get newFleetGitSourceTypeField() {
+    return cy.contains('button', 'Git config provider');
+  }
+
   get newFleetTargetReferenceField() {
     return cy.get('input[aria-label="Branch/tag/commit"]');
   }

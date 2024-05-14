@@ -1,0 +1,3 @@
+.fctl-config-template--error {
+    color: var(--pf-v5-global--danger-color--100)
+}

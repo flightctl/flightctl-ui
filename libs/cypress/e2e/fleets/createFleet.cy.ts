@@ -1,4 +1,4 @@
-import { FleetDetailsPage } from '../../pages/FleetDetaislPage';
+import { FleetDetailsPage } from '../../pages/FleetDetailsPage';
 import { FleetsPage } from '../../pages/FleetsPage';
 import { CreateFleetWizardPage } from '../../pages/CreateFleetWizardPage';
 
@@ -31,6 +31,8 @@ describe('Create fleet form', () => {
 
     createFleetWizardPage.addTemplateButton.should('be.enabled').click();
     createFleetWizardPage.newFleetSourceNameField.type('my-source');
+    createFleetWizardPage.newFleetSourceTypeField.click();
+    createFleetWizardPage.newFleetGitSourceTypeField.click();
 
     createFleetWizardPage.newFleetTargetReferenceField.type('main');
     createFleetWizardPage.newFleetRepositoryPathField.type('/some-path');
