@@ -26,6 +26,7 @@ import DeviceTemplateStep, { deviceTemplateStepId, isDeviceTemplateStepValid } f
 import { getFleetResource, getInitialValues, getValidationSchema } from './utils';
 import CreateFleetWizardFooter from './CreateFleetWizardFooter';
 import { useEditFleet } from './useEditFleet';
+import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 
 import './CreateFleetWizard.css';
 
@@ -73,29 +74,32 @@ const CreateFleetWizard = () => {
         {({ errors: formikErrors }) => {
           const generalStepValid = isGeneralInfoStepValid(formikErrors);
           return (
-            <Wizard
-              footer={<CreateFleetWizardFooter isEdit={isEdit} />}
-              onStepChange={(_, step) => setCurrentStep(step)}
-              className="fctl-create-fleet"
-            >
-              <WizardStep name={t('General info')} id={generalInfoStepId}>
-                {(!currentStep || currentStep?.id === generalInfoStepId) && <GeneralInfoStep isEdit={isEdit} />}
-              </WizardStep>
-              <WizardStep
-                name={t('Device template')}
-                id={deviceTemplateStepId}
-                isDisabled={(!currentStep || currentStep?.id === generalInfoStepId) && !generalStepValid}
+            <>
+              <LeaveFormConfirmation />
+              <Wizard
+                footer={<CreateFleetWizardFooter isEdit={isEdit} />}
+                onStepChange={(_, step) => setCurrentStep(step)}
+                className="fctl-create-fleet"
               >
-                {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep />}
-              </WizardStep>
-              <WizardStep
-                name={isEdit ? t('Review and update') : t('Review and create')}
-                id={reviewStepId}
-                isDisabled={!generalStepValid || !isDeviceTemplateStepValid(formikErrors)}
-              >
-                {currentStep?.id === reviewStepId && <ReviewStep error={error} />}
-              </WizardStep>
-            </Wizard>
+                <WizardStep name={t('General info')} id={generalInfoStepId}>
+                  {(!currentStep || currentStep?.id === generalInfoStepId) && <GeneralInfoStep isEdit={isEdit} />}
+                </WizardStep>
+                <WizardStep
+                  name={t('Device template')}
+                  id={deviceTemplateStepId}
+                  isDisabled={(!currentStep || currentStep?.id === generalInfoStepId) && !generalStepValid}
+                >
+                  {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep />}
+                </WizardStep>
+                <WizardStep
+                  name={isEdit ? t('Review and update') : t('Review and create')}
+                  id={reviewStepId}
+                  isDisabled={!generalStepValid || !isDeviceTemplateStepValid(formikErrors)}
+                >
+                  {currentStep?.id === reviewStepId && <ReviewStep error={error} />}
+                </WizardStep>
+              </Wizard>
+            </>
           );
         }}
       </Formik>

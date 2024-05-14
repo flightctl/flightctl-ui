@@ -1,15 +1,15 @@
 import * as React from 'react';
-import { PropsWithChildren } from 'react';
-
+import { Bullseye, Spinner } from '@patternfly/react-core';
 import { Navigate, RouteObject, RouterProvider, createBrowserRouter, useParams, useRouteError } from 'react-router-dom';
+import { TFunction } from 'i18next';
+
 import { useDocumentTitle } from '@flightctl/ui-components/hooks/useDocumentTitle';
 import { APP_TITLE } from '@flightctl/ui-components/constants';
 import { useTranslation } from '@flightctl/ui-components/hooks/useTranslation';
-import { TFunction } from 'i18next';
 
 import AppLayout from './components/AppLayout/AppLayout';
 import NotFound from './components/AppLayout/NotFound';
-import { Bullseye, Spinner } from '@patternfly/react-core';
+
 const EnrollmentRequestDetails = React.lazy(
   () =>
     import('@flightctl/ui-components/components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails'),
@@ -60,7 +60,7 @@ const ErrorPage = () => {
   return <div>{t('Error page - details should be displayed here')}</div>;
 };
 
-const TitledRoute = ({ title, children }: PropsWithChildren<{ title: string }>) => {
+const TitledRoute = ({ title, children }: React.PropsWithChildren<{ title: string }>) => {
   useDocumentTitle(`${APP_TITLE} | ${title}`);
   return (
     <React.Suspense

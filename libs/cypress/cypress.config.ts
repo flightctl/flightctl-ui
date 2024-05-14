@@ -17,39 +17,4 @@ export default defineConfig({
       bundler: 'webpack',
     },
   },
-
-  component: {
-    devServer: {
-      framework: 'react',
-      bundler: 'webpack',
-    },
-  },
-
-  component: {
-    devServer: {
-      framework: 'react',
-      bundler: 'webpack',
-    },
-  },
-
-  component: {
-    devServer: {
-      framework: 'react',
-      bundler: 'webpack',
-    },
-  },
-
-  component: {
-    devServer: {
-      framework: 'react',
-      bundler: 'webpack',
-    },
-  },
-
-  component: {
-    devServer: {
-      framework: 'react',
-      bundler: 'webpack',
-    },
-  },
 });

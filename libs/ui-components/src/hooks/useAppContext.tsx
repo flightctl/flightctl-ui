@@ -6,6 +6,7 @@ import {
   Route,
   NavigateFunction as RouterNavigateFunction,
   Routes,
+  useBlocker,
   useLocation,
   useNavigate,
   useParams,
@@ -46,6 +47,7 @@ export type AppContextProps = {
     appRoutes: Record<ROUTE, string>;
     NavLink: typeof NavLink;
     useSearchParams: typeof useSearchParams;
+    useBlocker: typeof useBlocker;
     useParams: typeof useParams;
     Navigate: typeof Navigate;
     Route: typeof Route;
@@ -73,6 +75,7 @@ export const AppContext = React.createContext<AppContextProps>({
     appRoutes,
     NavLink,
     useParams,
+    useBlocker,
     useSearchParams,
     Route,
     Routes,

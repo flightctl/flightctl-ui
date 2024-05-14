@@ -21,6 +21,7 @@ import {
 import { Repository, ResourceSync } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
 import NameField from '../../form/NameField';
+import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 
 export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
   const { t } = useTranslation();
@@ -154,6 +155,7 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
   const [errors, setErrors] = React.useState<string[]>();
   const { put, remove, post } = useFetch();
   const { t } = useTranslation();
+
   return (
     <Formik<RepositoryFormValues>
       initialValues={getInitValues(repository, resourceSyncs, hideResourceSyncs)}
@@ -233,6 +235,7 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
             ))}
           </Alert>
         )}
+        <LeaveFormConfirmation />
       </CreateRepositoryFormContent>
     </Formik>
   );

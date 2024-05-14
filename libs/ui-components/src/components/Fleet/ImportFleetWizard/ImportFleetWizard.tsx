@@ -15,10 +15,13 @@ import {
   useWizardContext,
 } from '@patternfly/react-core';
 import * as React from 'react';
+import * as Yup from 'yup';
+import { TFunction } from 'i18next';
+import { Formik, useFormikContext } from 'formik';
+
 import RepositoryStep, { isRepoStepValid, repositoryStepId } from './steps/RepositoryStep';
 import ReviewStep, { reviewStepId } from './steps/ReviewStep';
 import ResourceSyncStep, { isResourceSyncStepValid, resourceSyncStepId } from './steps/ResourceSyncStep';
-import { Formik, useFormikContext } from 'formik';
 import { ImportFleetFormValues } from './types';
 import { useFetch } from '../../../hooks/useFetch';
 import { Repository, RepositoryList, ResourceSync } from '@flightctl/types';
@@ -30,11 +33,11 @@ import {
   repositorySchema,
 } from '../../Repository/CreateRepository/utils';
 import { getErrorMessage } from '../../../utils/error';
-import * as Yup from 'yup';
+
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { TFunction } from 'i18next';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
+import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 
 import './ImportFleetWizard.css';
 
@@ -152,33 +155,36 @@ const ImportFleetWizard = () => {
         }}
       >
         {({ values, errors: formikErrors }) => (
-          <Wizard
-            footer={<ImportFleetWizardFooter />}
-            onStepChange={(_, step) => setCurrentStep(step)}
-            className="fctl-import-fleet"
-          >
-            <WizardStep name={t('Select or create repository')} id={repositoryStepId}>
-              {(!currentStep || currentStep?.id === repositoryStepId) && (
-                <RepositoryStep repositories={repoList?.items || []} />
-              )}
-            </WizardStep>
-            <WizardStep
-              name={t('Add resource sync')}
-              id={resourceSyncStepId}
-              isDisabled={
-                (!currentStep || currentStep?.id === repositoryStepId) && !isRepoStepValid(values, formikErrors)
-              }
+          <>
+            <LeaveFormConfirmation />
+            <Wizard
+              footer={<ImportFleetWizardFooter />}
+              onStepChange={(_, step) => setCurrentStep(step)}
+              className="fctl-import-fleet"
             >
-              {currentStep?.id === resourceSyncStepId && <ResourceSyncStep />}
-            </WizardStep>
-            <WizardStep
-              name={t('Review')}
-              id={reviewStepId}
-              isDisabled={!isRepoStepValid(values, formikErrors) || !isResourceSyncStepValid(formikErrors)}
-            >
-              {currentStep?.id === reviewStepId && <ReviewStep errors={errors} />}
-            </WizardStep>
-          </Wizard>
+              <WizardStep name={t('Select or create repository')} id={repositoryStepId}>
+                {(!currentStep || currentStep?.id === repositoryStepId) && (
+                  <RepositoryStep repositories={repoList?.items || []} />
+                )}
+              </WizardStep>
+              <WizardStep
+                name={t('Add resource sync')}
+                id={resourceSyncStepId}
+                isDisabled={
+                  (!currentStep || currentStep?.id === repositoryStepId) && !isRepoStepValid(values, formikErrors)
+                }
+              >
+                {currentStep?.id === resourceSyncStepId && <ResourceSyncStep />}
+              </WizardStep>
+              <WizardStep
+                name={t('Review')}
+                id={reviewStepId}
+                isDisabled={!isRepoStepValid(values, formikErrors) || !isResourceSyncStepValid(formikErrors)}
+              >
+                {currentStep?.id === reviewStepId && <ReviewStep errors={errors} />}
+              </WizardStep>
+            </Wizard>
+          </>
         )}
       </Formik>
     );

@@ -1,3 +1,5 @@
+import { MainNavigationSection } from '../../pages/MainNavigationSection';
+
 const mainPages = ['Devices', 'Fleets', 'Repositories'];
 
 describe('App navigation', () => {
@@ -15,8 +17,7 @@ describe('App navigation', () => {
     it(`opens the ${page} page when clicking on its menu entry`, () => {
       cy.visit('/');
 
-      cy.get('button[aria-label="Global navigation"]').click();
-      cy.get('nav').contains(page).click();
+      MainNavigationSection.navigateToFlightCtlSection(page)
 
       cy.get('h1').should('have.text', page);
     });
