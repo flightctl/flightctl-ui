@@ -51,18 +51,41 @@ const ConfirmNavigationDialog = ({ blocker }: { blocker: Blocker }) => {
   );
 };
 
+const RouterBlocker = ({ lock }: { lock: boolean }) => {
+  const {
+    router: { useBlocker },
+  } = useAppContext();
+
+  const shouldBlock: BlockerFunction = ({ currentLocation, nextLocation }) => {
+    return lock && currentLocation.pathname !== nextLocation.pathname;
+  };
+  const blocker = useBlocker?.(shouldBlock);
+
+  return <>{blocker ? <ConfirmNavigationDialog blocker={blocker} /> : null}</>;
+};
+
+const BrowserBlocker = ({ lock }: { lock: boolean }) => {
+  const { t } = useTranslation();
+  const {
+    router: { Prompt },
+  } = useAppContext();
+
+  return (
+    Prompt &&
+    lock && <Prompt message={t('Are you sure you want to leave the current page? Unsaved changes will be lost.')} />
+  );
+};
+
 const LeaveFormConfirmation = () => {
   const { dirty, isSubmitting } = useFormikContext();
   const {
     router: { useBlocker },
   } = useAppContext();
 
-  const shouldBlock: BlockerFunction = ({ currentLocation, nextLocation }) => {
-    return !isSubmitting && dirty && currentLocation.pathname !== nextLocation.pathname;
-  };
-  const blocker = useBlocker(shouldBlock);
+  const lock = !isSubmitting && dirty;
 
-  return <>{blocker ? <ConfirmNavigationDialog blocker={blocker} /> : null}</>;
+  // workaround for OCP plugin where useBlocker is not yet available due to older react-router-dom version
+  return useBlocker ? <RouterBlocker lock={lock} /> : <BrowserBlocker lock={lock} />;
 };
 
 export default LeaveFormConfirmation;

@@ -1,4 +1,4 @@
-import { AppContext, AppContextProps } from '@flightctl/ui-components/src/hooks/useAppContext';
+import { AppContext, AppContextProps, NavLinkFC, PromptFC } from '@flightctl/ui-components/src/hooks/useAppContext';
 import { ROUTE } from '@flightctl/ui-components/src/hooks/useNavigate';
 import {
   Link,
@@ -6,12 +6,12 @@ import {
   Navigate,
   Route,
   Routes,
-  useBlocker,
   useLocation,
   useNavigate,
   useParams,
   useSearchParams,
 } from 'react-router-dom-v5-compat';
+import { Prompt } from 'react-router-dom';
 import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/reducers';
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
@@ -50,15 +50,15 @@ export const useValuesAppContext = (): AppContextProps => {
     router: {
       Link,
       appRoutes,
-      NavLink,
+      NavLink: NavLink as NavLinkFC,
       Routes,
       Navigate,
       Route,
-      useBlocker,
       useLocation,
       useNavigate,
       useParams,
       useSearchParams,
+      Prompt: Prompt as PromptFC,
     },
     i18n: {
       transNamespace: 'plugin__flightctl-plugin',

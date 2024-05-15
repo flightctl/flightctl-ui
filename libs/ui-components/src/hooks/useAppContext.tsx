@@ -33,6 +33,9 @@ export const appRoutes = {
   [ROUTE.ENROLLMENT_REQUEST_DETAILS]: '/devicemanagement/enrollmentrequests',
 };
 
+export type NavLinkFC = React.FC<{ to: string; children: (props: { isActive: boolean }) => React.ReactNode }>;
+export type PromptFC = React.FC<{ message: string }>;
+
 export type AppContextProps = {
   appType: 'standalone' | 'ocp';
   qcow2ImgUrl: string | undefined;
@@ -45,14 +48,15 @@ export type AppContextProps = {
     useNavigate: () => RouterNavigateFunction;
     Link: typeof Link;
     appRoutes: Record<ROUTE, string>;
-    NavLink: typeof NavLink;
+    NavLink: NavLinkFC;
     useSearchParams: typeof useSearchParams;
-    useBlocker: typeof useBlocker;
+    useBlocker?: typeof useBlocker;
     useParams: typeof useParams;
     Navigate: typeof Navigate;
     Route: typeof Route;
     Routes: typeof Routes;
     useLocation: typeof useLocation;
+    Prompt?: PromptFC;
   };
   fetch: {
     get: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
@@ -73,7 +77,7 @@ export const AppContext = React.createContext<AppContextProps>({
     useNavigate,
     Link,
     appRoutes,
-    NavLink,
+    NavLink: NavLink as NavLinkFC,
     useParams,
     useBlocker,
     useSearchParams,
