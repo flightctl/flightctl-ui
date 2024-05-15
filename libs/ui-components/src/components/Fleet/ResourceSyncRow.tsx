@@ -1,7 +1,8 @@
 import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 import { ResourceSync } from '@flightctl/types';
 import * as React from 'react';
-import { FleetOwnerLinkIcon } from './FleetDetails/FleetOwnerLink';
+import { CodeBranchIcon } from '@patternfly/react-icons/dist/js/icons/code-branch-icon';
+
 import { DeleteListActionResult } from '../ListPage/types';
 import ResourceSyncStatus from '../ResourceSync/ResourceSyncStatus';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -32,7 +33,7 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
         }}
       />
       <Td dataLabel={t('Name')}>
-        <FleetOwnerLinkIcon ownerName="-" />
+        <CodeBranchIcon />
       </Td>
       <Td dataLabel={t('System image')}>-</Td>
       <Td dataLabel={t('Label selector')}>-</Td>
