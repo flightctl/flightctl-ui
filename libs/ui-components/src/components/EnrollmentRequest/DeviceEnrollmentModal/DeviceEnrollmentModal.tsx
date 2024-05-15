@@ -2,11 +2,14 @@ import * as React from 'react';
 import { EnrollmentRequestApproval } from '@flightctl/types';
 import { Alert, Modal } from '@patternfly/react-core';
 import { Formik } from 'formik';
+
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
 import DeviceEnrollmentForm, { DeviceEnrollmentFormProps, DeviceEnrollmentFormValues } from './DeviceEnrollmentForm';
 import { ApprovalStatus, getApprovalStatus } from '../../../utils/status/enrollmentRequest';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { deviceApprovalValidationSchema } from '../../form/validations';
+
 import { toAPILabel } from '../../../utils/labels';
 import { useAppContext } from '../../../hooks/useAppContext';
 
@@ -24,6 +27,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
         region: '',
         displayName: '',
       }}
+      validationSchema={deviceApprovalValidationSchema(t, { isSingleDevice: true })}
       onSubmit={async ({ region, labels, displayName }) => {
         setError(undefined);
         const deviceLabels: EnrollmentRequestApproval['labels'] = toAPILabel(labels);

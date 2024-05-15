@@ -15,10 +15,11 @@ const EditableLabelControl = ({ addButtonText, defaultLabel, onAddLabel }: Edita
   const { t } = useTranslation();
 
   const onConfirmAdd = () => {
-    onAddLabel(label);
-    setIsEditing(false);
-    setLabel('');
-    return false;
+    if (label) {
+      onAddLabel(label);
+      setIsEditing(false);
+      setLabel('');
+    }
   };
 
   const onDiscardAdd = () => {

@@ -14,11 +14,10 @@ import {
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { Formik } from 'formik';
-import { TFunction } from 'i18next';
-import * as Yup from 'yup';
 
 import TextField from '../../../form/TextField';
 import LabelsField from '../../../form/LabelsField';
+import { deviceApprovalValidationSchema } from '../../../form/validations';
 import { isPromiseRejected } from '../../../../types/typeUtils';
 import { isEnrollmentRequest } from '../../../../types/extraTypes';
 import { ApprovalStatus, getApprovalStatus } from '../../../../utils/status/enrollmentRequest';
@@ -43,15 +42,6 @@ type DeviceEnrollmentFormValues = {
   region: string;
   displayName: string;
 };
-
-const validationSchema = (t: TFunction) =>
-  Yup.object({
-    displayName: Yup.string()
-      .matches(/{{n}}/, t('Device names must be unique. Add a number to the template to generate unique names.'))
-      .required(t('Name is required.')),
-    region: Yup.string().required(t('Region is required.')),
-  });
-
 type MassApproveDeviceModalProps = {
   onClose: VoidFunction;
   resources: Array<Device | EnrollmentRequest>;
@@ -155,7 +145,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
         region: '',
         displayName: '',
       }}
-      validationSchema={validationSchema(t)}
+      validationSchema={deviceApprovalValidationSchema(t, { isSingleDevice: false })}
       onSubmit={approveResources}
     >
       {({ isSubmitting, values, submitForm, isValid, dirty }) => (
