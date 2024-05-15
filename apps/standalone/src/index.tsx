@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM, { render } from 'react-dom';
 import App from './app/index';
 import { AuthProvider, AuthProviderProps } from 'react-oidc-context';
-import { UserPreferencesProvider } from '@flightctl/ui-components/components/UserPreferences/UserPreferencesProvider';
+import { UserPreferencesProvider } from '@flightctl/ui-components/src/components/UserPreferences/UserPreferencesProvider';
 import './i18n';
 
 declare global {

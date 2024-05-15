@@ -3,8 +3,8 @@ import { Nav, NavList } from '@patternfly/react-core';
 
 import { getAppRoutes } from '../../routes';
 
-import NavItem from '@flightctl/ui-components/components/NavItem/NavItem';
-import { useTranslation } from '@flightctl/ui-components/hooks/useTranslation';
+import NavItem from '@flightctl/ui-components/src/components/NavItem/NavItem';
+import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 
 const AppNavigation = () => {
   const { t } = useTranslation();

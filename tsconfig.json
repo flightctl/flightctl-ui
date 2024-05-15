@@ -1,25 +1,8 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "incremental": true,
     "esModuleInterop": true,
   },
-  "references": [
-    {
-      "path": "./libs/ui-components",
-    },
-    {
-      "path": "./libs/types",
-    },
-    {
-      "path": "./apps/ocp-plugin",
-    },
-    {
-      "path": "./apps/standalone",
-    },
-  ],
   "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js", "**/*.json"],
+  "exclude": ["node_modules", "dist"],
 }

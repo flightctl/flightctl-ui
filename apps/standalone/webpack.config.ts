@@ -39,13 +39,13 @@ const config: Configuration & {
   module: {
     rules: [
       {
-        test: /\.(tsx|ts|jsx)?$/,
+        test: /\.(jsx?|tsx?)$/,
+        exclude: /node_modules\/(?!@flightctl)/,
         use: [
           {
             loader: 'ts-loader',
             options: {
-              transpileOnly: true,
-              experimentalWatchApi: true,
+              allowTsInNodeModules: true,
             },
           },
         ],

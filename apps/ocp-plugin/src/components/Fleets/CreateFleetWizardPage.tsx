@@ -1,5 +1,5 @@
 import * as React from 'react';
-import CreateFleetWizard from '@flightctl/ui-components/components/Fleet/CreateFleet/CreateFleetWizard';
+import CreateFleetWizard from '@flightctl/ui-components/src/components/Fleet/CreateFleet/CreateFleetWizard';
 
 const CreateFleetWizardPage = () => {
   return <CreateFleetWizard />;

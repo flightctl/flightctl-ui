@@ -1,4 +1,4 @@
-import { AppContextProps, appRoutes } from '@flightctl/ui-components/hooks/useAppContext';
+import { AppContextProps, appRoutes } from '@flightctl/ui-components/src/hooks/useAppContext';
 import {
   Link,
   NavLink,

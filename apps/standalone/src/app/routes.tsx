@@ -3,41 +3,45 @@ import { Bullseye, Spinner } from '@patternfly/react-core';
 import { Navigate, RouteObject, RouterProvider, createBrowserRouter, useParams, useRouteError } from 'react-router-dom';
 import { TFunction } from 'i18next';
 
-import { useDocumentTitle } from '@flightctl/ui-components/hooks/useDocumentTitle';
-import { APP_TITLE } from '@flightctl/ui-components/constants';
-import { useTranslation } from '@flightctl/ui-components/hooks/useTranslation';
+import { useDocumentTitle } from '@flightctl/ui-components/src/hooks/useDocumentTitle';
+import { APP_TITLE } from '@flightctl/ui-components/src/constants';
+import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 
 import AppLayout from './components/AppLayout/AppLayout';
 import NotFound from './components/AppLayout/NotFound';
 
 const EnrollmentRequestDetails = React.lazy(
   () =>
-    import('@flightctl/ui-components/components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails'),
+    import(
+      '@flightctl/ui-components/src/components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails'
+    ),
 );
-const DeviceList = React.lazy(() => import('@flightctl/ui-components/components/Device/DeviceList'));
+const DeviceList = React.lazy(() => import('@flightctl/ui-components/src/components/Device/DeviceList'));
 const DeviceDetails = React.lazy(
-  () => import('@flightctl/ui-components/components/Device/DeviceDetails/DeviceDetails'),
+  () => import('@flightctl/ui-components/src/components/Device/DeviceDetails/DeviceDetails'),
 );
 const CreateRepository = React.lazy(
-  () => import('@flightctl/ui-components/components/Repository/CreateRepository/CreateRepository'),
+  () => import('@flightctl/ui-components/src/components/Repository/CreateRepository/CreateRepository'),
 );
-const RepositoryList = React.lazy(() => import('@flightctl/ui-components/components/Repository/RepositoryList'));
+const RepositoryList = React.lazy(() => import('@flightctl/ui-components/src/components/Repository/RepositoryList'));
 const RepositoryDetails = React.lazy(
-  () => import('@flightctl/ui-components/components/Repository/RepositoryDetails/RepositoryDetails'),
+  () => import('@flightctl/ui-components/src/components/Repository/RepositoryDetails/RepositoryDetails'),
 );
 const ResourceSyncToRepository = React.lazy(
-  () => import('@flightctl/ui-components/components/ResourceSync/ResourceSyncToRepository'),
+  () => import('@flightctl/ui-components/src/components/ResourceSync/ResourceSyncToRepository'),
 );
 
 const ImportFleetWizard = React.lazy(
-  () => import('@flightctl/ui-components/components/Fleet/ImportFleetWizard/ImportFleetWizard'),
+  () => import('@flightctl/ui-components/src/components/Fleet/ImportFleetWizard/ImportFleetWizard'),
 );
 const CreateFleetWizard = React.lazy(
-  () => import('@flightctl/ui-components/components/Fleet/CreateFleet/CreateFleetWizard'),
+  () => import('@flightctl/ui-components/src/components/Fleet/CreateFleet/CreateFleetWizard'),
 );
 
-const FleetList = React.lazy(() => import('@flightctl/ui-components/components/Fleet/FleetList'));
-const FleetDetails = React.lazy(() => import('@flightctl/ui-components/components/Fleet/FleetDetails/FleetDetails'));
+const FleetList = React.lazy(() => import('@flightctl/ui-components/src/components/Fleet/FleetList'));
+const FleetDetails = React.lazy(
+  () => import('@flightctl/ui-components/src/components/Fleet/FleetDetails/FleetDetails'),
+);
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;

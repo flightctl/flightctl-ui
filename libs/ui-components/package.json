@@ -6,9 +6,6 @@
   "homepage": "https://github.com/flightctl/flightctl-ui.git",
   "license": "MIT",
   "private": true,
-  "exports": {
-    "./*": "./dist/src/*.js"
-  },
   "scripts": {
     "prebuild": "tsc --noEmit && rimraf dist",
     "build": "tsc --build && npm run copy:css",

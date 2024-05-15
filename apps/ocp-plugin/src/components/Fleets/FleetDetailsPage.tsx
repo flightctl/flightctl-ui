@@ -1,5 +1,5 @@
 import * as React from 'react';
-import FleetDetails from '@flightctl/ui-components/components/Fleet/FleetDetails/FleetDetails';
+import FleetDetails from '@flightctl/ui-components/src/components/Fleet/FleetDetails/FleetDetails';
 
 const FleetDetailsPage = () => {
   return <FleetDetails />;
