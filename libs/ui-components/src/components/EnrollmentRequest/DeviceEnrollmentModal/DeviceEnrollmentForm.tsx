@@ -24,7 +24,8 @@ export type DeviceEnrollmentFormProps = {
 
 const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentRequest, onClose, error, children }) => {
   const { t } = useTranslation();
-  const { submitForm, isSubmitting } = useFormikContext<DeviceEnrollmentFormValues>();
+  const { submitForm, isSubmitting, errors: formErrors, dirty } = useFormikContext<DeviceEnrollmentFormValues>();
+  const disableSubmit = !dirty || Object.keys(formErrors).length > 0;
   return (
     <Form onSubmit={(ev) => ev.preventDefault()}>
       {enrollmentRequest && (
@@ -44,7 +45,13 @@ const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentR
       {children}
       {error && <Alert isInline title={error} variant="danger" />}
       <FlightCtlActionGroup>
-        <Button key="confirm" variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
+        <Button
+          key="confirm"
+          variant="primary"
+          onClick={submitForm}
+          isDisabled={disableSubmit || isSubmitting}
+          isLoading={isSubmitting}
+        >
           {t('Approve')}
         </Button>
         <Button key="cancel" variant="link" onClick={() => onClose()} isDisabled={isSubmitting}>

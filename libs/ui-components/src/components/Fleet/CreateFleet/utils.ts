@@ -16,6 +16,7 @@ import {
 } from './types';
 import { API_VERSION } from '../../../constants';
 import { toAPILabel } from '../../../utils/labels';
+import { uniqueLabelKeysSchema } from '../../form/validations';
 
 const absolutePathRegex = /^\/.*$/;
 
@@ -23,8 +24,8 @@ export const getValidationSchema = (t: TFunction) => {
   return Yup.object<FleetFormValues>({
     name: Yup.string().required(t('Name is required.')),
     osImage: Yup.string(),
-    fleetLabels: Yup.array().required(),
-    labels: Yup.array().required(),
+    fleetLabels: uniqueLabelKeysSchema(t),
+    labels: uniqueLabelKeysSchema(t),
     configTemplates: Yup.array().of(
       Yup.lazy((value: FleetConfigTemplate) => {
         if (isGitConfigTemplate(value)) {
