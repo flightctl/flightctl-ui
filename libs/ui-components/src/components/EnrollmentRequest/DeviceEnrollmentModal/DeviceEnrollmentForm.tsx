@@ -26,7 +26,7 @@ const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentR
   const { t } = useTranslation();
   const { submitForm, isSubmitting } = useFormikContext<DeviceEnrollmentFormValues>();
   return (
-    <Form>
+    <Form onSubmit={(ev) => ev.preventDefault()}>
       {enrollmentRequest && (
         <FormGroup label={t('Fingerprint')}>
           <TextInput aria-label={t('Fingerprint')} isDisabled value={enrollmentRequest.metadata.name} />

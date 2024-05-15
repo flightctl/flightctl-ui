@@ -3,6 +3,7 @@ import { Alert, Button, Form, Label, LabelGroup } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { useTranslation } from '../../../hooks/useTranslation';
+import EditableLabelControl from '../../common/EditableLabelControl';
 
 export type MatchPatternsFormValues = {
   matchPatterns: string[];
@@ -20,20 +21,18 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
   const onPatternClose = (e: React.MouseEvent<Element, MouseEvent>, index: number) => {
     const newMatchPatterns = [...values.matchPatterns];
     newMatchPatterns.splice(index, 1);
-    setFieldValue('matchPatterns', newMatchPatterns);
+    void setFieldValue('matchPatterns', newMatchPatterns);
   };
 
-  const onAdd = (e: React.MouseEvent<Element, MouseEvent>) => {
-    e.preventDefault();
-
-    const newMatchPatterns = [...values.matchPatterns, 'pattern\\*'];
-    setFieldValue('matchPatterns', newMatchPatterns);
+  const onAdd = (text: string) => {
+    const newMatchPatterns = [...values.matchPatterns, text];
+    void setFieldValue('matchPatterns', newMatchPatterns);
   };
 
   const onEdit = (index: number, nextText: string) => {
     const newMatchPatterns = [...values.matchPatterns];
     newMatchPatterns.splice(index, 1, nextText);
-    setFieldValue('matchPatterns', newMatchPatterns);
+    void setFieldValue('matchPatterns', newMatchPatterns);
   };
 
   return (
@@ -45,9 +44,7 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
       <LabelGroup
         isEditable
         addLabelControl={
-          <Label color="blue" variant="outline" isOverflowLabel onClick={onAdd}>
-            {t('Add match pattern')}
-          </Label>
+          <EditableLabelControl defaultLabel="pattern\\*" addButtonText={t('Add match pattern')} onAddLabel={onAdd} />
         }
         numLabels={20}
         defaultIsOpen

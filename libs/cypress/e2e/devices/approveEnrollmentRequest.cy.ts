@@ -1,8 +1,8 @@
 import { DevicesPage } from '../../pages/DevicesPage';
 import { ApproveEnrollmentRequestModalPage } from '../../pages/ApproveEnrollmentRequestModalPage';
 
-let devicesPage;
-let approveERModalPage;
+let devicesPage: DevicesPage;
+let approveERModalPage: ApproveEnrollmentRequestModalPage;
 
 describe('Enrollment requests approval', () => {
   beforeEach(() => {
@@ -27,10 +27,9 @@ describe('Enrollment requests approval', () => {
       'a021622d8633782719874da4052f957faa742fc7050026748bc79065c8819d139',
     );
 
-    // Define a new label
+    // Define a new label. The field for adding the new label is focused and can be changed
     approveERModalPage.addNewLabelButton.click();
-    approveERModalPage.newlyAddedLabelButton.click();
-    approveERModalPage.newLabelField.clear().type('thisisatest=yes');
+    cy.focused().should('have.value', 'key=value').clear().type('this-is-a-test=yes');
 
     // Fill in the rest of the form
     approveERModalPage.regionField.type('spain');
