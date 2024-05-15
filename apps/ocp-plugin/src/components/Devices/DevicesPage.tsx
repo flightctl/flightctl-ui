@@ -1,5 +1,5 @@
 import * as React from 'react';
-import DeviceList from '@flightctl/ui-components/components/Device/DeviceList';
+import DeviceList from '@flightctl/ui-components/src/components/Device/DeviceList';
 
 const DevicesPage = () => {
   return <DeviceList />;

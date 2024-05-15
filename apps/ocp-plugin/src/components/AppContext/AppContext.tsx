@@ -1,5 +1,5 @@
-import { AppContext, AppContextProps } from '@flightctl/ui-components/hooks/useAppContext';
-import { ROUTE } from '@flightctl/ui-components/hooks/useNavigate';
+import { AppContext, AppContextProps } from '@flightctl/ui-components/src/hooks/useAppContext';
+import { ROUTE } from '@flightctl/ui-components/src/hooks/useNavigate';
 import {
   Link,
   NavLink,

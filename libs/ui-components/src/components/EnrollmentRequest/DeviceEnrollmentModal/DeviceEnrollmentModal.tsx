@@ -6,9 +6,9 @@ import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
 import DeviceEnrollmentForm, { DeviceEnrollmentFormProps, DeviceEnrollmentFormValues } from './DeviceEnrollmentForm';
 import { ApprovalStatus, getApprovalStatus } from '../../../utils/status/enrollmentRequest';
-import { useAuth } from 'react-oidc-context';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { toAPILabel } from '../../../utils/labels';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 type DeviceEnrollmentModalProps = Omit<DeviceEnrollmentFormProps, 'error'>;
 
@@ -16,7 +16,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
   const { t } = useTranslation();
   const { post } = useFetch();
   const [error, setError] = React.useState<string>();
-  const auth = useAuth();
+  const { user } = useAppContext();
   return (
     <Formik<DeviceEnrollmentFormValues>
       initialValues={{
@@ -33,7 +33,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
             approved: true,
             region,
             labels: deviceLabels,
-            approvedBy: auth?.user?.profile.preferred_username,
+            approvedBy: user,
           });
           onClose(true);
         } catch (e) {

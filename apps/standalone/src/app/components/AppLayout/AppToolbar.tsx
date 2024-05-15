@@ -14,8 +14,8 @@ import * as React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 
 import './AppToolbar.css';
-import UserPreferencesModal from '@flightctl/ui-components/components/UserPreferences/UserPreferencesModal';
-import { useTranslation } from '@flightctl/ui-components/hooks/useTranslation';
+import UserPreferencesModal from '@flightctl/ui-components/src/components/UserPreferences/UserPreferencesModal';
+import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 
 type UserDropdownProps = {
   children?: React.ReactNode;

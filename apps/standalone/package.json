@@ -10,10 +10,9 @@
     "prebuild": "tsc --noEmit && rimraf dist",
     "build": "NODE_ENV=production npm run ts-node ../../node_modules/.bin/webpack --mode=production",
     "start-prod": "npm run ts-node ../../node_modules/.bin/webpack serve --mode=production --color --progress",
-    "dev": "concurrently \"npm run dev:proxy\" \"npm run dev:components\" \"npm run dev:ui\"",
+    "dev": "concurrently \"npm run dev:proxy\" \"npm run dev:ui\"",
     "dev:proxy": "cd ../../proxy && nodemon --watch 'proxy/**/*' --exec 'go run' app.go --signal SIGTERM",
     "dev:ui": "npm run ts-node ../../node_modules/.bin/webpack serve --mode=development --color --progress",
-    "dev:components": "npm run -w @flightctl/ui-components dev",
     "lint": "eslint --ext .tsx,.ts ./src/ && prettier --check './src/**/*.{tsx,ts}' && npm run i18n",
     "format": "prettier --check --write './src/**/*.{tsx,ts}'",
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}'"

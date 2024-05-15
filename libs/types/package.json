@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./index.ts"
   },
   "scripts": {
     "prebuild": "tsc --noEmit && rimraf dist",

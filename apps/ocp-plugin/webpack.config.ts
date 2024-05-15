@@ -34,12 +34,12 @@ const config: Configuration & {
     rules: [
       {
         test: /\.(jsx?|tsx?)$/,
-        exclude: /node_modules/,
+        exclude: /node_modules\/(?!@flightctl)/,
         use: [
           {
             loader: 'ts-loader',
             options: {
-              configFile: path.resolve(__dirname, 'tsconfig.json'),
+              allowTsInNodeModules: true,
             },
           },
         ],
@@ -63,10 +63,10 @@ const config: Configuration & {
     chunkFilename: '[name].bundle-[contenthash].js',
   },
   plugins: [
-    new ConsoleRemotePlugin(),
     new CopyPlugin({
       patterns: [{ from: '../../libs/i18n/locales', to: 'locales' }],
     }),
+    new ConsoleRemotePlugin(),
   ],
   resolve: {
     extensions: ['.js', '.ts', '.tsx', '.jsx'],
@@ -97,14 +97,14 @@ if (NODE_ENV === 'production') {
     new MiniCssExtractPlugin({
       filename: '[name]-[contenthash].css',
       chunkFilename: '[name].bundle-[contenthash].css',
-    })
+    }),
   );
   config.devtool = 'source-map';
 } else {
   config.plugins?.push(
     new DefinePlugin({
       'window.FCTL_API_PORT': '9000',
-    })
+    }),
   );
 }
 

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { AppRouter } from './routes';
 
-import { AppContext } from '@flightctl/ui-components/hooks/useAppContext';
+import { AppContext } from '@flightctl/ui-components/src/hooks/useAppContext';
 import { useAuth } from './hooks/useAuth';
 import { useStandaloneAppContext } from './hooks/useStandaloneAppContext';
 

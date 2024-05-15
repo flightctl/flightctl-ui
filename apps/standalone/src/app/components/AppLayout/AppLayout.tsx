@@ -18,7 +18,7 @@ import { Outlet } from 'react-router-dom';
 import logo from '@fctl-assets/bgimages/flightctl-logo.svg';
 import AppNavigation from './AppNavigation';
 import AppToolbar from './AppToolbar';
-import { useTranslation } from '@flightctl/ui-components/hooks/useTranslation';
+import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 
 const AppLayout: React.FC = () => {
   const { t } = useTranslation();

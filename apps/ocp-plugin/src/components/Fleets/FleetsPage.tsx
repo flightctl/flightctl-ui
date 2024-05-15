@@ -1,5 +1,5 @@
 import * as React from 'react';
-import FleetList from '@flightctl/ui-components/components/Fleet/FleetList';
+import FleetList from '@flightctl/ui-components/src/components/Fleet/FleetList';
 
 const FleetsPage = () => {
   return <FleetList />;
