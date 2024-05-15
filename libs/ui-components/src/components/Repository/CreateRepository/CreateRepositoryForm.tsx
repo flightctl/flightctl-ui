@@ -32,6 +32,8 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
       <FormGroup label={t('Repository name')} isRequired>
         <NameField
           name="name"
+          aria-label={t('Repository name')}
+          isDisabled={isEdit}
           resourceType="repositories"
           getExistsErrMsg={(value) => t(`A repository named "{{value}}" already exists`, { value })}
         />

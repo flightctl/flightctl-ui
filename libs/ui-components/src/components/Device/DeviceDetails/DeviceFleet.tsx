@@ -18,7 +18,7 @@ const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => 
       {hasMultipleOwners ? t('Multiple owners') : t('No owner fleet')}
       <Popover
         triggerAction="hover"
-        aria-label={t('Missing fleeet detail')}
+        aria-label={t('Missing fleet detail')}
         bodyContent={
           <span>
             {details.message}
@@ -39,7 +39,7 @@ const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => 
           </span>
         }
       >
-        <Button isInline variant="plain" icon={<InfoCircleIcon />} />
+        <Button isInline variant="plain" icon={<InfoCircleIcon />} aria-label={t('Ownership information')} />
       </Popover>
     </div>
   );

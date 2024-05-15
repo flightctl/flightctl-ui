@@ -10,6 +10,7 @@ import {
   KubeSecretTemplate,
   isGitConfigTemplate,
   isGitProviderSpec,
+  isInlineConfigTemplate,
   isKubeProviderSpec,
   isKubeSecretTemplate,
 } from './types';
@@ -28,7 +29,7 @@ export const getValidationSchema = (t: TFunction) => {
       Yup.lazy((value: FleetConfigTemplate) => {
         if (isGitConfigTemplate(value)) {
           return Yup.object<GitConfigTemplate>().shape({
-            type: Yup.string().required(),
+            type: Yup.string().required(t('Provider type is required.')),
             name: Yup.string().required(t('Name is required.')),
             path: Yup.string().required(t('Path is required.')).matches(absolutePathRegex, t('Path must be absolute.')),
             repository: Yup.string().required(t('Repository is required.')),
@@ -36,7 +37,7 @@ export const getValidationSchema = (t: TFunction) => {
           });
         } else if (isKubeSecretTemplate(value)) {
           return Yup.object<KubeSecretTemplate>().shape({
-            type: Yup.string().required(),
+            type: Yup.string().required(t('Provider type is required.')),
             name: Yup.string().required(t('Name is required.')),
             secretName: Yup.string().required(t('Secret name is required.')),
             secretNs: Yup.string().required(t('Secret namespace is required.')),
@@ -44,21 +45,26 @@ export const getValidationSchema = (t: TFunction) => {
               .required(t('Mount path is required.'))
               .matches(absolutePathRegex, t('Mount path must be absolute.')),
           });
+        } else if (isInlineConfigTemplate(value)) {
+          return Yup.object<InlineConfigTemplate>().shape({
+            type: Yup.string().required(t('Provider type is required.')),
+            name: Yup.string().required(t('Name is required.')),
+            inline: Yup.string()
+              .required(t('Inline config is required.'))
+              .test('yaml object', t('Inline config must be a valid yaml object.'), (value) => {
+                try {
+                  const yamlResult = yaml.load(value);
+                  return typeof yamlResult === 'object';
+                } catch (err) {
+                  return false;
+                }
+              }),
+          });
         }
 
         return Yup.object<InlineConfigTemplate>().shape({
-          type: Yup.string().required(),
+          type: Yup.string().required(t('Provider type is required.')),
           name: Yup.string().required(t('Name is required.')),
-          inline: Yup.string()
-            .required(t('Inline config is required.'))
-            .test('yaml object', t('Inline config must be a valid yaml object.'), (value) => {
-              try {
-                const yamlResult = yaml.load(value);
-                return typeof yamlResult === 'object';
-              } catch (err) {
-                return false;
-              }
-            }),
         });
       }),
     ),

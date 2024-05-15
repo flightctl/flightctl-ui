@@ -21,16 +21,10 @@ export const isRepoStepValid = (values: ImportFleetFormValues, errors: FormikErr
 
 const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
   const { t } = useTranslation();
-  const { values, setFieldValue } = useFormikContext<ImportFleetFormValues>();
+  const { values } = useFormikContext<ImportFleetFormValues>();
 
   const currentRepo = repositories.find((r) => r.metadata.name === values.existingRepo);
 
-  React.useEffect(() => {
-    const repoId = repositories[0]?.metadata.name;
-    if (!values.existingRepo && repoId) {
-      setFieldValue('existingRepo', repoId);
-    }
-  }, [values.existingRepo, repositories, setFieldValue]);
   return (
     <>
       <FormGroup label={t('Repository')} fieldId="repository">

@@ -27,15 +27,22 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, childr
     name: name,
   });
 
-  const fieldId = `textfield-${name}`;
+  const fieldId = `selectfield-${name}`;
   const hasError = meta.touched && !!meta.error;
+
+  React.useEffect(() => {
+    const hasOneItem = Object.keys(items).length === 1;
+    if (hasOneItem && !field.value) {
+      setValue(Object.keys(items)[0], true);
+    }
+  }, [items, field.value, setValue]);
   return (
     <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId}>
       <Select
         id={fieldId}
         selected={field.value}
         onSelect={(_, value) => {
-          setValue(value as string);
+          setValue(value as string, true);
           setIsOpen(false);
         }}
         toggle={(toggleRef) => (
@@ -49,6 +56,7 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, childr
             }}
             isExpanded={isOpen}
             className="fctl-form-select__toggle"
+            id={`${fieldId}-menu`}
           >
             {items[field.value] || ''}
           </MenuToggle>

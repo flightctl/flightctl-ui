@@ -31,7 +31,7 @@ const EditLabelsForm = ({ onClose, error }: EditLabelsFormProps) => {
   const { t } = useTranslation();
   const { submitForm, isSubmitting } = useFormikContext<EditLabelsFormValues>();
   return (
-    <Form>
+    <Form onSubmit={(ev) => ev.preventDefault()}>
       <FormGroup label={t('Labels')}>
         <LabelsField name="labels" />
       </FormGroup>

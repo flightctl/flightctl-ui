@@ -13,13 +13,20 @@ import {
   Split,
   SplitItem,
 } from '@patternfly/react-core';
-import { FieldArray, useFormikContext } from 'formik';
+import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { Repository, RepositoryList } from '@flightctl/types';
+import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 import TextField from '../../../form/TextField';
-import { FleetFormValues, GitConfigTemplate, InlineConfigTemplate, KubeSecretTemplate } from '../types';
+import {
+  FleetConfigTemplate,
+  FleetFormValues,
+  GitConfigTemplate,
+  InlineConfigTemplate,
+  KubeSecretTemplate,
+} from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';
@@ -27,6 +34,9 @@ import TextAreaField from '../../../form/TextAreaField';
 import FormSelect from '../../../form/FormSelect';
 import CreateRepositoryModal from '../../../modals/CreateRepositoryModal/CreateRepositoryModal';
 import { sortByName } from '../../../../utils/sort/generic';
+import WithTooltip from '../../../common/WithTooltip';
+
+import './ConfigTemplateForm.css';
 
 const useValidateOnMount = () => {
   const { validateForm } = useFormikContext<FleetFormValues>();
@@ -52,15 +62,6 @@ const GitConfigForm: React.FC<ConfigFormProps & Pick<ConfigSectionProps, 'reposi
   const { values, setFieldValue } = useFormikContext<FleetFormValues>();
   const template = values.configTemplates[index] as GitConfigTemplate;
 
-  useValidateOnMount();
-
-  const defaultRepoName = repositories[0]?.metadata.name;
-
-  React.useEffect(() => {
-    if (defaultRepoName && template.repository === '') {
-      setFieldValue(`configTemplates[${index}].repository`, defaultRepoName);
-    }
-  }, [template.repository, defaultRepoName, index, setFieldValue]);
   return (
     <>
       <FormGroup label={t('Repository')} isRequired>
@@ -118,7 +119,6 @@ const KubeConfigForm: React.FC<ConfigFormProps> = ({ index }) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<FleetFormValues>();
   const template = values.configTemplates[index] as KubeSecretTemplate;
-  useValidateOnMount();
   return (
     <>
       <FormGroup label={t('Secret name')} isRequired>
@@ -149,7 +149,6 @@ const KubeConfigForm: React.FC<ConfigFormProps> = ({ index }) => {
 
 const InlineConfigForm: React.FC<ConfigFormProps> = ({ index }) => {
   const { t } = useTranslation();
-  useValidateOnMount();
   return (
     <FormGroup label={t('Inline')} isRequired>
       <TextAreaField name={`configTemplates.${index}.inline`} />
@@ -167,8 +166,11 @@ type ConfigSectionProps = {
 const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionProps) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = React.useState(true);
-  const { values } = useFormikContext<FleetFormValues>();
-  const template = values.configTemplates[index] as GitConfigTemplate;
+  const fieldName = `configTemplates[${index}]`;
+  const { setFieldTouched } = useFormikContext<FleetFormValues>();
+  const [{ value: template }, { error }, { setTouched }] = useField<FleetConfigTemplate>(fieldName);
+
+  useValidateOnMount();
 
   return (
     <ExpandableSection
@@ -176,15 +178,28 @@ const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionPr
         <Split hasGutter>
           <SplitItem>{t('Configurations/applications')}</SplitItem>
           {!isExpanded && !!template.name && <SplitItem style={{ color: 'black' }}>{template.name}</SplitItem>}
+          {!isExpanded && error && (
+            <SplitItem>
+              <WithTooltip showTooltip content={t('Invalid configuration')}>
+                <ExclamationCircleIcon className="fctl-config-template--error" />
+              </WithTooltip>
+            </SplitItem>
+          )}
         </Split>
       }
       isIndented
       isExpanded={isExpanded}
-      onToggle={(_, expanded) => setIsExpanded(expanded)}
+      onToggle={(_, expanded) => {
+        setTouched(true);
+        Object.keys((error as unknown as object) || {}).forEach((key) => {
+          setFieldTouched(`${fieldName}.${key}`, true);
+        });
+        setIsExpanded(expanded);
+      }}
     >
       <Grid hasGutter>
         <FormGroup label={t('Source name')} isRequired>
-          <TextField aria-label={t('Source name')} name={`configTemplates[${index}].name`} value={ct.name} />
+          <TextField aria-label={t('Source name')} name={`${fieldName}.name`} value={ct.name} />
         </FormGroup>
         <FormGroup label={t('Source type')} isRequired>
           <FormSelect
@@ -193,7 +208,7 @@ const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionPr
               // secret: t('Kubernetes secret provider'), not supported yet
               inline: t('Inline config provider'),
             }}
-            name={`configTemplates[${index}].type`}
+            name={`${fieldName}.type`}
           />
         </FormGroup>
         {ct.type === 'git' && <GitConfigForm index={index} repositories={repositories} repoRefetch={repoRefetch} />}
@@ -257,11 +272,8 @@ const ConfigTemplateForm = () => {
                 onClick={() => {
                   push({
                     name: '',
-                    path: '',
-                    repository: '',
-                    targetRevision: '',
-                    type: 'git',
-                  } as GitConfigTemplate);
+                    type: '',
+                  });
                 }}
               >
                 {t('Add configurations/applications')}
