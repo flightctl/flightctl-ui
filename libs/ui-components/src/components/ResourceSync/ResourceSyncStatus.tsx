@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Label, LabelProps, List, ListItem, Popover, Stack, StackItem } from '@patternfly/react-core';
+import { Label, LabelProps, Popover, Stack, StackItem } from '@patternfly/react-core';
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
 import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progress-icon';
 import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/question-circle-icon';
@@ -10,6 +10,7 @@ import WithTooltip from '../common/WithTooltip';
 import { getRepositorySyncStatus, repositoryStatusLabels } from '../../utils/status/repository';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Link, ROUTE } from '../../hooks/useNavigate';
+import { Trans } from 'react-i18next';
 
 type ResourceSyncStatusProps = {
   resourceSync: ResourceSync;
@@ -49,29 +50,25 @@ const ResourceSyncStatus = ({ resourceSync, showLinksOnError = false }: Resource
 
   if (color === 'red' && showLinksOnError) {
     const repositoryName = resourceSync.spec.repository;
+    const rsName = resourceSync.metadata.name;
     return (
       <Popover
-        alertSeverityVariant="danger"
         triggerAction="hover"
         aria-label={t('Invalid resource sync configuration')}
         headerContent={t('Invalid resource sync configuration')}
         bodyContent={
           <Stack hasGutter>
+            <StackItem>
+              <Trans t={t}>
+                An error occurred when trying to apply the resource sync <strong>{rsName}</strong> from repository{' '}
+                <strong>{repositoryName}</strong>:
+              </Trans>
+            </StackItem>
             <StackItem>{statusType.message}</StackItem>
             <StackItem>
-              {t('Use the links below to review the resource sync settings and correct the configuration.')}
-              <List>
-                <ListItem>
-                  {t('Resource sync')}:{' '}
-                  <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: resourceSync.metadata.name }}>
-                    {resourceSync.metadata.name}
-                  </Link>
-                </ListItem>
-                <ListItem>
-                  {t('Repository')}:{' '}
-                  <Link to={{ route: ROUTE.REPO_DETAILS, postfix: repositoryName }}>{repositoryName}</Link>
-                </ListItem>
-              </List>
+              <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: resourceSync.metadata.name }}>
+                Review and fix the configuration
+              </Link>
             </StackItem>
           </Stack>
         }
