@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Label } from '@patternfly/react-core';
 import { CodeBranchIcon } from '@patternfly/react-icons/dist/js/icons/code-branch-icon';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
 import WithTooltip from '../../common/WithTooltip';
@@ -11,7 +10,7 @@ export const getOwnerName = (owner: string | undefined) => rsOwnerRegex.exec(own
 
 export const RSLink = ({ rsName }: { rsName: string }) => (
   <div>
-    <Label color="green">RS</Label> <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: rsName }}>{rsName}</Link>
+    <CodeBranchIcon /> <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: rsName }}>{rsName}</Link>
   </div>
 );
 

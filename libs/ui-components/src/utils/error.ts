@@ -1,3 +1,8 @@
+import upperFirst from 'lodash/upperFirst';
+import toLower from 'lodash/toLower';
+
+import type { Condition } from '@flightctl/types';
+
 export const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
     return error.message || '';
@@ -10,3 +15,8 @@ export const getErrorMessage = (error: unknown): string => {
   }
   return 'Unexpected error';
 };
+
+const uppercaseSentence = (s: string | undefined) => (s ? upperFirst(toLower(s)) : '');
+
+export const getConditionMessage = (condition: Condition): string =>
+  [uppercaseSentence(condition.reason), uppercaseSentence(condition.message)].filter((msg) => !!msg).join('. ');
