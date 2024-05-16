@@ -18,14 +18,13 @@ import { Formik } from 'formik';
 import TextField from '../../../form/TextField';
 import LabelsField from '../../../form/LabelsField';
 import { deviceApprovalValidationSchema } from '../../../form/validations';
+import DisplayName from '../../../common/DisplayName';
 import { isPromiseRejected } from '../../../../types/typeUtils';
 import { isEnrollmentRequest } from '../../../../types/extraTypes';
 import { ApprovalStatus, getApprovalStatus } from '../../../../utils/status/enrollmentRequest';
-import { getFingerprintDisplay } from '../../../../utils/devices';
 import { getErrorMessage } from '../../../../utils/error';
 import { useAppContext } from '../../../../hooks/useAppContext';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import EnrollmentRequestStatus from '../../../EnrollmentRequest/EnrollmentRequestStatus';
 import { toAPILabel } from '../../../../utils/labels';
 
 import './MassApproveDeviceModal.css';
@@ -61,7 +60,9 @@ const ApprovedDevicesTable = ({ devices }: { devices: Array<EnrollmentRequest | 
       <Tbody>
         {devices.map((device) => (
           <Tr key={device.metadata.name}>
-            <Td dataLabel={t('Fingerprint')}>{getFingerprintDisplay(device)}</Td>
+            <Td dataLabel={t('Fingerprint')}>
+              <DisplayName name={device.metadata.name} />
+            </Td>
             <Td dataLabel={t('Name')}>{device.metadata.labels?.displayName || '-'}</Td>
           </Tr>
         ))}
@@ -180,17 +181,15 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
               <Table>
                 <Thead>
                   <Tr>
-                    <Th width={25}>{t('Fingerprint')}</Th>
-                    <Th width={25}>{t('Status')}</Th>
-                    <Th width={50}>{t('Name')}</Th>
+                    <Th width={60}>{t('Fingerprint')}</Th>
+                    <Th width={40}>{t('Name')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {pendingEnrollments.map((pendingEr, index) => (
                     <Tr key={pendingEr.metadata.name}>
-                      <Td dataLabel={t('Fingerprint')}>{getFingerprintDisplay(pendingEr)}</Td>
-                      <Td dataLabel={t('Status')}>
-                        <EnrollmentRequestStatus er={pendingEr} />
+                      <Td dataLabel={t('Fingerprint')}>
+                        <DisplayName name={pendingEr.metadata.name} />
                       </Td>
                       <Td dataLabel={t('Name')}>{templateToName(index, values.displayName)}</Td>
                     </Tr>
@@ -206,7 +205,6 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
                 <FormGroup label={t('Region')} isRequired>
                   <TextField name="region" aria-label={t('Region')} />
                 </FormGroup>
-
                 <FormGroup label={t('Name')} isRequired>
                   <TextField
                     name="displayName"

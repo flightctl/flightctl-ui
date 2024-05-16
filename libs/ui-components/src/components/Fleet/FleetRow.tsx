@@ -5,8 +5,9 @@ import { Fleet } from '@flightctl/types';
 import LabelsView from '../common/LabelsView';
 import { useTranslation } from '../../hooks/useTranslation';
 import { FleetOwnerLinkIcon, getOwnerName } from './FleetDetails/FleetOwnerLink';
-import { Link, ROUTE, useNavigate } from '../../hooks/useNavigate';
+import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import FleetStatus from './FleetStatus';
+import DisplayName from '../common/DisplayName';
 
 type FleetRowProps = {
   fleet: Fleet;
@@ -34,7 +35,7 @@ const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRow
       />
       <Td dataLabel={t('Name')}>
         <FleetOwnerLinkIcon ownerName={getOwnerName(fleet.metadata.owner)}>
-          <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: fleetName }}>{fleetName}</Link>
+          <DisplayName name={fleetName} routeLink={ROUTE.FLEET_DETAILS} />
         </FleetOwnerLinkIcon>
       </Td>
       <Td dataLabel={t('System image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>

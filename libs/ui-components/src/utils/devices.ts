@@ -3,14 +3,6 @@ import { FlightCtlLabel } from '../types/extraTypes';
 import { TFunction } from 'i18next';
 import { toAPILabel } from './labels';
 
-export const getFingerprintDisplay = <R extends { metadata: ObjectMeta }>(resource: R) => {
-  const fingerprint = resource.metadata.name;
-  if (!fingerprint) {
-    return '-';
-  }
-  return `${fingerprint.substring(0, 6)}...${fingerprint.substring(fingerprint.length - 7)}`;
-};
-
 const deviceFleetRegExp = /^Fleet\/(?<fleetName>.*)$/;
 
 const getDeviceFleet = (metadata: ObjectMeta) => {

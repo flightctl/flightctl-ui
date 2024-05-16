@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { EnrollmentRequest } from '@flightctl/types';
-import { Alert, Button, Form, FormGroup, TextInput } from '@patternfly/react-core';
+import { Alert, Button, Form, FormGroup } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
 import LabelsField from '../../form/LabelsField';
@@ -8,6 +8,7 @@ import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
 import TextField from '../../form/TextField';
+import DisplayName from '../../common/DisplayName';
 
 export type DeviceEnrollmentFormValues = {
   labels: FlightCtlLabel[];
@@ -29,8 +30,8 @@ const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentR
   return (
     <Form onSubmit={(ev) => ev.preventDefault()}>
       {enrollmentRequest && (
-        <FormGroup label={t('Fingerprint')}>
-          <TextInput aria-label={t('Fingerprint')} isDisabled value={enrollmentRequest.metadata.name} />
+        <FormGroup label={t('Fingerprint')} aria-label={t('Fingerprint')}>
+          <DisplayName name={enrollmentRequest.metadata.name} variant="full" />
         </FormGroup>
       )}
       <FormGroup label={t('Labels')}>

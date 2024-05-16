@@ -12,6 +12,7 @@ import {
 } from '@patternfly/react-core';
 import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 import { RepositoryIcon } from '@patternfly/react-icons/dist/js/icons/repository-icon';
+import { TFunction } from 'i18next';
 
 import { Repository, RepositoryList } from '@flightctl/types';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
@@ -35,8 +36,8 @@ import { useTableSelect } from '../../hooks/useTableSelect';
 import MassDeleteRepositoryModal from '../modals/massModals/MassDeleteRepositoryModal/MassDeleteRepositoryModal';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { useTranslation } from '../../hooks/useTranslation';
-import { TFunction } from 'i18next';
-import { Link, ROUTE, useNavigate } from '../../hooks/useNavigate';
+import { ROUTE, useNavigate } from '../../hooks/useNavigate';
+import DisplayName from '../common/DisplayName';
 
 const CreateRepositoryButton = ({ buttonText }: { buttonText?: string }) => {
   const { t } = useTranslation();
@@ -151,9 +152,7 @@ const RepositoryTable = () => {
                 }}
               />
               <Td dataLabel={t('Name')}>
-                <Link to={{ route: ROUTE.REPO_DETAILS, postfix: repository.metadata.name }}>
-                  {repository.metadata.name}
-                </Link>
+                <DisplayName name={repository.metadata.name} routeLink={ROUTE.REPO_DETAILS} />
               </Td>
               <Td dataLabel={t('Url')}>{repository.spec.repo || '-'}</Td>
               <Td dataLabel={t('Sync status')}>

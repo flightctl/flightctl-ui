@@ -2,13 +2,13 @@ import * as React from 'react';
 import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@flightctl/types';
-import { getFingerprintDisplay } from '../../utils/devices';
 import DeviceFleet from './DeviceDetails/DeviceFleet';
 import { getDateDisplay } from '../../utils/dates';
 import { DeleteListActionResult } from '../ListPage/types';
 import DeviceStatus from './DeviceDetails/DeviceStatus';
 import { useTranslation } from '../../hooks/useTranslation';
-import { Link, ROUTE } from '../../hooks/useNavigate';
+import { ROUTE } from '../../hooks/useNavigate';
+import DisplayName from '../common/DisplayName';
 
 type DeviceTableRowProps = {
   device: Device;
@@ -40,7 +40,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
         }}
       />
       <Td dataLabel={t('Fingerprint')}>
-        <Link to={{ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }}>{getFingerprintDisplay(device)}</Link>
+        <DisplayName name={deviceName} routeLink={ROUTE.DEVICE_DETAILS} />
       </Td>
       <Td dataLabel={t('Name')}>{displayName || '-'}</Td>
       <Td dataLabel={t('Fleet')}>

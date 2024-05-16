@@ -1,0 +1,30 @@
+.fctl-display-name {
+  display: inline-flex;
+  align-items: center;
+}
+
+.fctl-display-name.fctl-display-name__full {
+  display: flex;
+}
+
+
+.fctl-display-name .fctl-display-name__text {
+  text-wrap: nowrap;
+  overflow-x: hidden;
+}
+
+.fctl-display-name .pf-v5-c-button {
+  /* The copy name button is hidden by default */
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%); 
+  overflow: hidden;
+  white-space: nowrap; 
+}
+
+.fctl-display-name:hover .pf-v5-c-button {
+  /* Makes the copy name button visible when hovering over the name */
+  clip: initial;
+  clip-path: initial;
+  overflow: visible;
+  white-space: initial;
+}

@@ -26,7 +26,7 @@ export enum ROUTE {
   ENROLLMENT_REQUEST_DETAILS = 'ENROLLMENT_REQUEST_DETAILS',
 }
 
-type RouteWithPostfix =
+export type RouteWithPostfix =
   | ROUTE.FLEET_DETAILS
   | ROUTE.FLEET_EDIT
   | ROUTE.REPO_DETAILS

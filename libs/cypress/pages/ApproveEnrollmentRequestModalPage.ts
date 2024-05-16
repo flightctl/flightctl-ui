@@ -27,7 +27,7 @@ export class ApproveEnrollmentRequestModalPage {
     return cy.get('#editable-input').should('contain.value', 'key=value');
   }
 
-  get fingerprintField() {
+  get fingerprintName() {
     return cy.get('[aria-label="Fingerprint"]');
   }
 

@@ -4,10 +4,10 @@ import * as React from 'react';
 import { getErrorMessage } from '../../../../utils/error';
 import { useFetch } from '../../../../hooks/useFetch';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { getFingerprintDisplay } from '../../../../utils/devices';
 import { isEnrollmentRequest } from '../../../../types/extraTypes';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { isPromiseRejected } from '../../../../types/typeUtils';
+import DisplayName from '../../../common/DisplayName';
 
 type MassDeleteDeviceModalProps = {
   onClose: VoidFunction;
@@ -72,7 +72,9 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
               {resources.map((resource) => {
                 return (
                   <Tr key={resource.metadata.name}>
-                    <Td dataLabel={t('Fingerprint')}>{getFingerprintDisplay(resource)}</Td>
+                    <Td dataLabel={t('Fingerprint')}>
+                      <DisplayName name={resource.metadata.name} />
+                    </Td>
                     <Td dataLabel={t('Name')}>{resource.metadata.labels?.displayName || '-'}</Td>
                   </Tr>
                 );

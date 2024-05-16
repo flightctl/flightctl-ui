@@ -2,12 +2,12 @@ import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 import { EnrollmentRequest } from '@flightctl/types';
 import * as React from 'react';
 import { getDateDisplay } from '../../utils/dates';
-import { getFingerprintDisplay } from '../../utils/devices';
 import EnrollmentRequestStatus from './EnrollmentRequestStatus';
 import { DeleteListActionResult } from '../ListPage/types';
 import { ApprovalStatus, getApprovalStatus } from '../../utils/status/enrollmentRequest';
 import { useTranslation } from '../../hooks/useTranslation';
-import { Link, ROUTE } from '../../hooks/useNavigate';
+import { ROUTE } from '../../hooks/useNavigate';
+import DisplayName from '../common/DisplayName';
 
 type EnrollmentRequestTableRow = {
   rowIndex: number;
@@ -28,6 +28,7 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
 }) => {
   const { t } = useTranslation();
   const approvalStatus = getApprovalStatus(er);
+  const erName = er.metadata.name as string;
   return (
     <Tr data-testid={`enrollment-request-${rowIndex}`}>
       <Td
@@ -38,9 +39,7 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
         }}
       />
       <Td dataLabel={t('Fingerprint')}>
-        <Link to={{ route: ROUTE.ENROLLMENT_REQUEST_DETAILS, postfix: er.metadata.name }}>
-          {getFingerprintDisplay(er)}
-        </Link>
+        <DisplayName name={erName} routeLink={ROUTE.ENROLLMENT_REQUEST_DETAILS} />
       </Td>
       <Td dataLabel={t('Name')}>-</Td>
       <Td dataLabel={t('Fleet')}>-</Td>

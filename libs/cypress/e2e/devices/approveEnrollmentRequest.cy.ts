@@ -22,8 +22,8 @@ describe('Enrollment requests approval', () => {
     // Validate that the enrollment request details shown are correct
     approveERModalPage = new ApproveEnrollmentRequestModalPage();
     approveERModalPage.modalTitle.should('contain.text', 'Device enrollment request');
-    approveERModalPage.fingerprintField.should(
-      'contain.value',
+    approveERModalPage.fingerprintName.should(
+      'contain.text',
       'a021622d8633782719874da4052f957faa742fc7050026748bc79065c8819d139',
     );
 
