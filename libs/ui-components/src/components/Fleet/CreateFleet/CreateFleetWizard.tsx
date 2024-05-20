@@ -52,6 +52,12 @@ const CreateFleetWizard = () => {
         {getErrorMessage(editError)}
       </Alert>
     );
+  } else if (!!fleet?.metadata.owner) {
+    body = (
+      <Alert isInline variant="info" title={t('Fleet is non-editable')}>
+        {t('This fleet is managed by a resource sync and it cannot be edited directly.')}
+      </Alert>
+    );
   } else {
     body = (
       <Formik<FleetFormValues>
