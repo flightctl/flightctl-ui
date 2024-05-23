@@ -1,7 +1,8 @@
 import { Device, ObjectMeta } from '@flightctl/types';
-import { FlightCtlLabel } from '../types/extraTypes';
+import { DeviceAnnotation, FlightCtlLabel } from '../types/extraTypes';
 import { TFunction } from 'i18next';
 import { toAPILabel } from './labels';
+import { getMetadataAnnotation } from './api';
 
 const deviceFleetRegExp = /^Fleet\/(?<fleetName>.*)$/;
 
@@ -11,10 +12,10 @@ const getDeviceFleet = (metadata: ObjectMeta) => {
 };
 
 const getMissingFleetDetails = (t: TFunction, metadata: ObjectMeta): { message: string; owners: string[] } => {
-  const multipleOwnersInfo = Object.keys(metadata.annotations || {}).find((key) => key === 'MultipleOwners');
+  const multipleOwnersInfo = getMetadataAnnotation(metadata, DeviceAnnotation.MultipleOwners);
   if (multipleOwnersInfo) {
     // When the multiple owners issue is resolved, the annotation is still present
-    const owners = metadata.annotations?.MultipleOwners || '';
+    const owners = multipleOwnersInfo || '';
     if (owners.length > 0) {
       return {
         message: t('Device is owned by more than one fleet'),
