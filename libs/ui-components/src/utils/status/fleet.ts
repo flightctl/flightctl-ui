@@ -1,6 +1,7 @@
 import { ConditionStatus, ConditionType, Fleet } from '@flightctl/types';
 import { FleetConditionType } from '../../types/extraTypes';
 import { TFunction } from 'i18next';
+import { getConditionMessage } from '../error';
 
 const fleetStatusLabels = (t: TFunction) => ({
   [ConditionType.FleetOverlappingSelectors]: t('Selectors overlap'),
@@ -31,8 +32,9 @@ const getFleetSyncStatus = (
   const validCondition = (fleet.status?.conditions || []).find((c) => c.type === ConditionType.FleetValid);
   if (validCondition) {
     const isOK = validCondition.status === ConditionStatus.ConditionStatusTrue;
+    const message = isOK ? '' : getConditionMessage(validCondition);
     return {
-      message: isOK ? '' : validCondition.message,
+      message,
       status: isOK ? ConditionType.FleetValid : 'Invalid',
     };
   }

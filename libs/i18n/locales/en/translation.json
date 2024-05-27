@@ -297,6 +297,8 @@
   "Resource syncs table": "Resource syncs table",
   "This repository does not have associated resource syncs yet": "This repository does not have associated resource syncs yet",
   "Failed to load the repository's resource syncs": "Failed to load the repository's resource syncs",
+  "Invalid resource sync configuration": "Invalid resource sync configuration",
+  "An error occurred when trying to apply the resource sync <1>{rsName}</1> from repository <4>{repositoryName}</4>:": "An error occurred when trying to apply the resource sync <1>{rsName}</1> from repository <4>{repositoryName}</4>:",
   "Resource sync {{rsId}} is not linked to a repository": "Resource sync {{rsId}} is not linked to a repository",
   "Resource sync {{rsId}} could not be found": "Resource sync {{rsId}} could not be found",
   "Resource sync {{rsId}}": "Resource sync {{rsId}}",

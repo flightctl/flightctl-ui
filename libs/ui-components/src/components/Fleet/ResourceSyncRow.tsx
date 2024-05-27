@@ -38,7 +38,7 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
       <Td dataLabel={t('System image')}>-</Td>
       <Td dataLabel={t('Label selector')}>-</Td>
       <Td dataLabel={t('Status')}>
-        <ResourceSyncStatus resourceSync={resourceSync} />
+        <ResourceSyncStatus resourceSync={resourceSync} showLinksOnError />
       </Td>
       <Td isActionCell>
         <ActionsColumn

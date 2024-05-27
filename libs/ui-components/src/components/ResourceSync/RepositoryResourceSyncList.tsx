@@ -10,6 +10,7 @@ import {
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
+import { TFunction } from 'i18next';
 
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { useFetch } from '../../hooks/useFetch';
@@ -30,12 +31,12 @@ import TableTextSearch from '../Table/TableTextSearch';
 import { useTableSelect } from '../../hooks/useTableSelect';
 import TableActions from '../Table/TableActions';
 
-import './RepositoryResourceSyncList.css';
 import MassDeleteResourceSyncModal from '../modals/massModals/MassDeleteResourceSyncModal/MassDeleteResourceSyncModal';
 import ResourceSyncStatus from './ResourceSyncStatus';
-import { TFunction } from 'i18next';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
+
+import './RepositoryResourceSyncList.css';
 
 const getColumns = (t: TFunction): TableColumn<ResourceSync>[] => [
   {
