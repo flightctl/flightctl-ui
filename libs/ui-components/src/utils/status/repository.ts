@@ -1,6 +1,7 @@
 import { TFunction } from 'i18next';
 import { ConditionStatus, ConditionType, Repository, ResourceSync } from '@flightctl/types';
 import { timeSinceText } from '../dates';
+import { getConditionMessage } from '../error';
 
 export type RepositorySyncStatus =
   | ConditionType.ResourceSyncSynced
@@ -34,7 +35,7 @@ const getRepositorySyncStatus = (
   if (accessibleCondition?.status === ConditionStatus.ConditionStatusFalse) {
     return {
       status: 'Not accessible',
-      message: accessibleCondition.message,
+      message: getConditionMessage(accessibleCondition),
     };
   }
 
@@ -42,7 +43,7 @@ const getRepositorySyncStatus = (
   if (parsedCondition?.status === ConditionStatus.ConditionStatusFalse) {
     return {
       status: 'Not parsed',
-      message: parsedCondition.message,
+      message: getConditionMessage(parsedCondition),
     };
   }
 
@@ -50,7 +51,7 @@ const getRepositorySyncStatus = (
   if (syncedCondition?.status === ConditionStatus.ConditionStatusFalse) {
     return {
       status: 'Not synced',
-      message: syncedCondition.message,
+      message: getConditionMessage(syncedCondition),
     };
   }
 
