@@ -40,6 +40,13 @@ export type FleetConditionType =
 
 export type FlightControlQuery = ApiQuery | MetricsQuery;
 
+export enum DeviceAnnotation {
+  TemplateVersion = 'TemplateVersion',
+  MultipleOwners = 'MultipleOwners',
+}
+
+export type AnnotationType = DeviceAnnotation; // Add more types when they are added to the API
+
 export const isEnrollmentRequest = (resource: Device | EnrollmentRequest): resource is EnrollmentRequest =>
   resource.kind === 'EnrollmentRequest';
 

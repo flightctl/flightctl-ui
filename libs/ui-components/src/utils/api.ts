@@ -1,6 +1,6 @@
-import { ListMeta } from '@flightctl/types';
+import { ListMeta, ObjectMeta } from '@flightctl/types';
 
-import { ApiQuery, FlightControlQuery, MetricsQuery } from '../types/extraTypes';
+import { AnnotationType, ApiQuery, FlightControlQuery, MetricsQuery } from '../types/extraTypes';
 import { getPeriodTimestamps } from '../utils/metrics';
 
 const isApiQuery = (query: ApiQuery | MetricsQuery): query is ApiQuery => 'endpoint' in query;
@@ -56,10 +56,18 @@ const getApiListCount = (listResponse: ApiList | undefined): number | undefined 
   return hasItems ? 1 + extraItems : 0;
 };
 
+const getMetadataAnnotation = (metadata: ObjectMeta | undefined, annotation: AnnotationType) => {
+  if (metadata?.annotations) {
+    return metadata.annotations[annotation];
+  }
+  return undefined;
+};
+
 export {
   isApiQuery,
   getRequestQueryString,
   getQueryStringHash,
+  getMetadataAnnotation,
   getApiQueryString,
   getMetricsQueryString,
   getApiListCount,
