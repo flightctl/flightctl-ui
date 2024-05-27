@@ -16,7 +16,7 @@ npm run build
 
 ## Running
 
-### Copy the flightctl-server certs to proxy the api requests
+### Copy the flightctl-server certs to proxy the API requests
 ```
 mkdir certs
 cp ~/.flightctl/certs/client-enrollment.crt certs/front-cli.crt
