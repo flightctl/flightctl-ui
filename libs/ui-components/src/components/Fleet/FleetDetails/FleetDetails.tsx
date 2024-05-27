@@ -56,6 +56,16 @@ const FleetDetails = () => {
               onClick={() => {
                 setIsDeleteModalOpen(true);
               }}
+              isAriaDisabled={isManaged}
+              tooltipProps={
+                isManaged
+                  ? {
+                      content: t(
+                        "This fleet is managed by a resource sync and cannot be directly deleted. Either remove this fleet's definition from the resource sync configuration, or delete the resource sync first.",
+                      ),
+                    }
+                  : undefined
+              }
             >
               {t('Delete')}
             </DropdownItem>

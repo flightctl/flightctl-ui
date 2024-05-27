@@ -59,6 +59,14 @@ const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRow
             {
               title: t('Delete'),
               onClick: onDeleteClick,
+              tooltipProps: isManaged
+                ? {
+                    content: t(
+                      "This fleet is managed by a resource sync and cannot be directly deleted. Either remove this fleet's definition from the resource sync configuration, or delete the resource sync first.",
+                    ),
+                  }
+                : undefined,
+              isAriaDisabled: isManaged,
             },
           ]}
         />
