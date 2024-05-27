@@ -71,7 +71,7 @@ const RepositoryStep = ({ repositories }: { repositories: Repository[] }) => {
           <FormGroup isInline>
             <Radio
               isChecked={values.useExistingRepo}
-              onChange={() => setFieldValue('useExistingRepo', true)}
+              onChange={() => setFieldValue('useExistingRepo', true, true)}
               id="existing-repo"
               name="repo"
               label={t('Use an existing repository')}
@@ -79,7 +79,7 @@ const RepositoryStep = ({ repositories }: { repositories: Repository[] }) => {
             />
             <Radio
               isChecked={!values.useExistingRepo}
-              onChange={() => setFieldValue('useExistingRepo', false)}
+              onChange={() => setFieldValue('useExistingRepo', false, true)}
               id="new-repo"
               name="repo"
               label={t('Use a new repository')}
