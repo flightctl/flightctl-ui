@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@flightctl/types';
 import DeviceFleet from './DeviceDetails/DeviceFleet';
@@ -7,7 +7,7 @@ import { getDateDisplay } from '../../utils/dates';
 import { DeleteListActionResult } from '../ListPage/types';
 import DeviceStatus from './DeviceDetails/DeviceStatus';
 import { useTranslation } from '../../hooks/useTranslation';
-import { ROUTE } from '../../hooks/useNavigate';
+import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import DisplayName from '../common/DisplayName';
 
 type DeviceTableRowProps = {
@@ -16,7 +16,6 @@ type DeviceTableRowProps = {
   rowIndex: number;
   onRowSelect: (device: Device) => OnSelect;
   isRowSelected: (device: Device) => boolean;
-  editLabelsAction: ({ resourceId, disabledReason }: { resourceId: string; disabledReason?: string }) => IAction;
 };
 
 const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
@@ -25,9 +24,9 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
   rowIndex,
   onRowSelect,
   isRowSelected,
-  editLabelsAction,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const deviceName = device.metadata.name as string;
   const displayName = device.metadata.labels?.displayName;
   return (
@@ -54,9 +53,10 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
       <Td isActionCell>
         <ActionsColumn
           items={[
-            editLabelsAction({
-              resourceId: deviceName,
-            }),
+            {
+              title: t('Edit device'),
+              onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
+            },
             deleteAction({
               resourceId: deviceName,
               resourceName: displayName,

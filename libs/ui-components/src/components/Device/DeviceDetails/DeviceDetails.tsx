@@ -7,7 +7,6 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
-  DropdownItem,
   DropdownList,
   Grid,
   GridItem,
@@ -15,10 +14,8 @@ import {
 
 import { Device } from '@flightctl/types';
 import { getDateDisplay } from '../../../utils/dates';
-import { getDeviceFleet, getUpdatedDevice } from '../../../utils/devices';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { useFetch } from '../../../hooks/useFetch';
-import LabelsView from '../../common/LabelsView';
 import ConditionsTable from '../../DetailsPage/Tables/ConditionsTable';
 import ContainersTable from '../../DetailsPage/Tables/ContainersTable';
 import IntegrityTable from '../../DetailsPage/Tables/IntegrityTable';
@@ -28,10 +25,10 @@ import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPa
 import DeviceFleet from './DeviceFleet';
 import DeviceStatus from './DeviceStatus';
 import SystemdTable from './SystemdTable';
-import { useEditLabelsAction } from '../../../hooks/useEditLabelsAction';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
+import EditLabelsForm from '../../modals/EditLabelsModal/EditLabelsForm';
 
 const DeviceDetails = () => {
   const { t } = useTranslation();
@@ -45,31 +42,15 @@ const DeviceDetails = () => {
   const { remove } = useFetch();
 
   const name = (device?.metadata.labels?.displayName || device?.metadata.name) as string;
-  const boundFleet = getDeviceFleet(device?.metadata || {});
 
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {
       await remove(`devices/${deviceId}`);
       navigate(ROUTE.DEVICES);
     },
-    // Deleting devices bound to fleets directly will be disabled soon
-    disabledReason: boundFleet ? '' : '',
-    // disabledReason: boundFleet ? 'Devices bound to a fleet cannot be deleted' : '',
     resourceName: name,
     resourceType: 'Device',
   });
-
-  const { editLabelsAction, editLabelsModal } = useEditLabelsAction<Device>({
-    submitTransformer: getUpdatedDevice,
-    resourceType: 'devices',
-    onEditSuccess: refetch,
-  });
-
-  const onSystemdUnitsUpdate = () => {
-    // Only the device details need to be refreshed.
-    // Devices that use templateVersions are bound to a fleet, and they cannot be directly edited.
-    refetch();
-  };
 
   return (
     <DetailsPage
@@ -82,17 +63,7 @@ const DeviceDetails = () => {
       resourceTypeLabel={t('Devices')}
       actions={
         <DetailsPageActions>
-          <DropdownList>
-            <DropdownItem
-              {...editLabelsAction({
-                disabledReason: boundFleet ? t('Devices bound to a fleet cannot be edited') : '',
-                resourceId: deviceId,
-              })}
-            >
-              {t('Edit labels')}
-            </DropdownItem>
-            {deleteAction}
-          </DropdownList>
+          <DropdownList>{deleteAction}</DropdownList>
         </DetailsPageActions>
       }
     >
@@ -136,12 +107,7 @@ const DeviceDetails = () => {
                     {device?.status?.systemInfo?.architecture || '-'}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
-                <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Labels')}</DescriptionListTerm>
-                  <DescriptionListDescription>
-                    <LabelsView prefix="deviceDet" labels={device?.metadata?.labels} />
-                  </DescriptionListDescription>
-                </DescriptionListGroup>
+                {device && <EditLabelsForm device={device} onDeviceUpdate={refetch} />}
               </DescriptionList>
             </CardBody>
           </Card>
@@ -160,7 +126,7 @@ const DeviceDetails = () => {
           <DetailsPageCard>
             <CardTitle>{t('Systemd units')}</CardTitle>
             <DetailsPageCardBody>
-              {device && <SystemdTable device={device} onSystemdUnitsUpdate={onSystemdUnitsUpdate} />}
+              {device && <SystemdTable device={device} onSystemdUnitsUpdate={refetch} />}
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
@@ -182,7 +148,6 @@ const DeviceDetails = () => {
         </GridItem>
       </Grid>
       {deleteModal}
-      {editLabelsModal}
     </DetailsPage>
   );
 };

@@ -16,8 +16,6 @@ export interface PrometheusMetric {
   values?: Array<MetricValue>;
 }
 
-export type LabelEditable = Device | Fleet;
-
 export interface FlightCtlLabel {
   key: string;
   value?: string;

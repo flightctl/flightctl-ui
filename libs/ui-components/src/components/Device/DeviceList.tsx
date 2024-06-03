@@ -27,8 +27,6 @@ import EnrollmentRequestTableRow from '../EnrollmentRequest/EnrollmentRequestTab
 import DeviceTableToolbar from './DeviceTableToolbar';
 import { useDeviceFilters } from './useDeviceFilters';
 import DeviceTableRow from './DeviceTableRow';
-import { useEditLabelsAction } from '../../hooks/useEditLabelsAction';
-import { getUpdatedDevice } from '../../utils/devices';
 import { useTableSelect } from '../../hooks/useTableSelect';
 import TableActions from '../Table/TableActions';
 import { getResourceId } from '../../utils/resource';
@@ -134,12 +132,6 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
     },
   });
 
-  const { editLabelsAction, editLabelsModal } = useEditLabelsAction<Device>({
-    submitTransformer: getUpdatedDevice,
-    resourceType: 'devices',
-    onEditSuccess: refetch,
-  });
-
   const currentEnrollmentRequest = resources.find(
     (res) => res.metadata.name === requestId && isEnrollmentRequest(res),
   ) as EnrollmentRequest | undefined;
@@ -187,7 +179,6 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
               <DeviceTableRow
                 key={getResourceId(resource)}
                 device={resource}
-                editLabelsAction={editLabelsAction}
                 deleteAction={deleteDeviceAction}
                 onRowSelect={onRowSelect}
                 isRowSelected={isRowSelected}
@@ -198,7 +189,6 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
         </Tbody>
       </Table>
       {resources.length === 0 && <DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />}
-      {editLabelsModal}
       {deleteDeviceModal}
       {deleteErModal}
       {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}
