@@ -41,8 +41,9 @@ const DeleteFleetModal = ({ fleetId, onClose }: { fleetId: string; onClose: (has
             try {
               setIsDeleting(true);
               await onDelete();
+              setIsDeleting(false);
               onClose(true);
-            } finally {
+            } catch {
               setIsDeleting(false);
             }
           }}
