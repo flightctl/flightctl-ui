@@ -4,8 +4,7 @@
 /* eslint-disable */
 import type { DeviceOSSpec } from './DeviceOSSpec';
 export type RenderedDeviceSpec = {
-  owner: string;
-  templateVersion: string;
+  renderedVersion: string;
   os?: DeviceOSSpec;
   containers?: {
     matchPatterns?: Array<string>;

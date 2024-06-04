@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Condition } from './Condition';
-import type { DeviceSpecification } from './DeviceSpecification';
-export type TemplateVersionStatus = (DeviceSpecification & {
+import type { DeviceSpec } from './DeviceSpec';
+export type TemplateVersionStatus = (DeviceSpec & {
   updatedAt?: string;
   /**
    * Current state of the device.

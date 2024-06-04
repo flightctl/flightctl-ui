@@ -2,14 +2,21 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DeviceSpecification } from './DeviceSpecification';
-/**
- * DeviceSpec is a description of a device's target state.
- */
-export type DeviceSpec = (DeviceSpecification & {
+import type { DeviceOSSpec } from './DeviceOSSpec';
+import type { GitConfigProviderSpec } from './GitConfigProviderSpec';
+import type { InlineConfigProviderSpec } from './InlineConfigProviderSpec';
+import type { KubernetesSecretProviderSpec } from './KubernetesSecretProviderSpec';
+export type DeviceSpec = {
+  os?: DeviceOSSpec;
   /**
-   * The TemplateVersion representing the target state for this device.
+   * List of config resources.
    */
-  templateVersion?: string;
-});
+  config?: Array<(GitConfigProviderSpec | KubernetesSecretProviderSpec | InlineConfigProviderSpec)>;
+  containers?: {
+    matchPatterns?: Array<string>;
+  };
+  systemd?: {
+    matchPatterns?: Array<string>;
+  };
+};
 

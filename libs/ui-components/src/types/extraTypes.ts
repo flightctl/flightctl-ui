@@ -41,8 +41,9 @@ export type FleetConditionType =
 export type FlightControlQuery = ApiQuery | MetricsQuery;
 
 export enum DeviceAnnotation {
-  TemplateVersion = 'TemplateVersion',
-  MultipleOwners = 'MultipleOwners',
+  TemplateVersion = 'fleet-controller/templateVersion',
+  MultipleOwners = 'fleet-controller/multipleOwners',
+  RenderedVersion = 'device-controller/renderedVersion',
 }
 
 export type AnnotationType = DeviceAnnotation; // Add more types when they are added to the API

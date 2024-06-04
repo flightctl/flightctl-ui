@@ -11,7 +11,6 @@ export type { Device } from './models/Device';
 export type { DeviceList } from './models/DeviceList';
 export type { DeviceOSSpec } from './models/DeviceOSSpec';
 export type { DeviceSpec } from './models/DeviceSpec';
-export type { DeviceSpecification } from './models/DeviceSpecification';
 export type { DeviceStatus } from './models/DeviceStatus';
 export type { DeviceSystemdUnitStatus } from './models/DeviceSystemdUnitStatus';
 export type { DeviceSystemInfo } from './models/DeviceSystemInfo';
