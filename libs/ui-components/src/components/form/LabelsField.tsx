@@ -1,10 +1,12 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { FormHelperText, HelperText, HelperTextItem, Label, LabelGroup } from '@patternfly/react-core';
+import { Button, FormHelperText, HelperText, HelperTextItem, Label, LabelGroup } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { TimesIcon } from '@patternfly/react-icons/dist/js/icons/times-icon';
 
 import { FlightCtlLabel } from '../../types/extraTypes';
 import EditableLabelControl from '../common/EditableLabelControl';
+import { useTranslation } from '../../hooks/useTranslation';
 
 type LabelsFieldProps = {
   name: string;
@@ -15,6 +17,7 @@ type LabelsFieldProps = {
 
 const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addButtonText, isEditable }) => {
   const [{ value: labels }, meta, { setValue: setLabels }] = useField<FlightCtlLabel[]>(name);
+  const { t } = useTranslation();
 
   const updateLabels = async (newLabels: FlightCtlLabel[]) => {
     const errors = await setLabels(newLabels, true);
@@ -24,6 +27,9 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addBu
   };
 
   const onDelete = async (_ev: React.MouseEvent<Element, MouseEvent>, index: number) => {
+    if (!isEditable) {
+      return;
+    }
     const newLabels = [...labels];
     newLabels.splice(index, 1);
     await updateLabels(newLabels);
@@ -70,10 +76,16 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addBu
             key={index}
             id={`${index}`}
             color="blue"
+            closeBtn={
+              isEditable ? undefined : (
+                <Button variant="plain" aria-label={t('Delete')} isDisabled icon={<TimesIcon />} />
+              )
+            }
+            isDisabled={!isEditable}
             onClose={(e) => onDelete(e, index)}
             onEditCancel={(_, prevText) => onEdit(index, prevText)}
             onEditComplete={(_, newText) => onEdit(index, newText)}
-            isEditable
+            isEditable={isEditable ?? true}
           >
             {value ? `${key}=${value}` : key}
           </Label>
