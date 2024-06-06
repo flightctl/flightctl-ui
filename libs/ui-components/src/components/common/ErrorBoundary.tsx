@@ -33,6 +33,9 @@ class ErrorBoundary extends React.Component<Props, State> {
   render() {
     const { hasError, error } = this.state;
     const { children, t } = this.props;
+    if (!hasError && !children) {
+      return null;
+    }
 
     return hasError ? (
       <Alert variant="danger" title={t('Unexpected error occurred')} isInline>
