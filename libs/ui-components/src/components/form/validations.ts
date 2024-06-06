@@ -1,10 +1,8 @@
 import * as Yup from 'yup';
 import { TFunction } from 'i18next';
+import { FlightCtlLabel } from '../../types/extraTypes';
 
-export interface UnvalidatedLabel {
-  key?: string;
-  value?: string;
-}
+type UnvalidatedLabel = Partial<FlightCtlLabel>;
 
 export const uniqueLabelKeysSchema = (t: TFunction) =>
   Yup.array()
