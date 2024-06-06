@@ -18,7 +18,8 @@ export enum ConditionType {
   DeviceAvailable = 'Available',
   DeviceProgressing = 'Progressing',
   DeviceDegraded = 'Degraded',
-  DeviceValid = 'Valid',
+  DeviceSpecValid = 'SpecValid',
   DeviceSystemdUnitsRunning = 'SystemdUnitsRunning',
   DeviceContainersRunning = 'ContainersRunning',
+  TemplateVersionValid = 'Valid',
 }

@@ -2,7 +2,7 @@ import { TFunction } from 'i18next';
 import { ConditionStatus, ConditionType, Device } from '@flightctl/types';
 
 export enum DeviceConditionStatus {
-  Valid = ConditionType.DeviceValid,
+  Valid = ConditionType.DeviceSpecValid,
   Available = ConditionType.DeviceAvailable,
   Progressing = ConditionType.DeviceProgressing,
   Approved = 'Approved', // Lack of a True condition
