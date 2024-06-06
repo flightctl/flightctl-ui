@@ -15,6 +15,7 @@ import { getErrorMessage } from '../../utils/error';
 import DetailsNotFound from './DetailsNotFound';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Link, Route } from '../../hooks/useNavigate';
+import ErrorBoundary from '../common/ErrorBoundary';
 
 export type DetailsPageProps = {
   id: string;
@@ -86,7 +87,9 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
           {nav}
         </PageSection>
       )}
-      <PageSection>{content}</PageSection>
+      <PageSection>
+        <ErrorBoundary>{content}</ErrorBoundary>
+      </PageSection>
     </>
   );
 };

@@ -9,6 +9,7 @@ import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslatio
 
 import AppLayout from './components/AppLayout/AppLayout';
 import NotFound from './components/AppLayout/NotFound';
+import ErrorBoundary from '@flightctl/ui-components/src/components/common/ErrorBoundary';
 
 const EnrollmentRequestDetails = React.lazy(
   () =>
@@ -74,7 +75,7 @@ const TitledRoute = ({ title, children }: React.PropsWithChildren<{ title: strin
         </Bullseye>
       }
     >
-      {children}
+      <ErrorBoundary>{children}</ErrorBoundary>
     </React.Suspense>
   );
 };

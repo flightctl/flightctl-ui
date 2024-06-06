@@ -27,6 +27,7 @@ import { getFleetResource, getInitialValues, getValidationSchema } from './utils
 import CreateFleetWizardFooter from './CreateFleetWizardFooter';
 import { useEditFleet } from './useEditFleet';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
+import ErrorBoundary from '../../common/ErrorBoundary';
 
 import './CreateFleetWizard.css';
 
@@ -135,7 +136,7 @@ const CreateFleetWizard = () => {
         </Title>
       </PageSection>
       <PageSection variant={PageSectionVariants.light} type="wizard">
-        {body}
+        <ErrorBoundary>{body}</ErrorBoundary>
       </PageSection>
     </>
   );

@@ -38,6 +38,7 @@ import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
+import ErrorBoundary from '../../common/ErrorBoundary';
 
 import './ImportFleetWizard.css';
 
@@ -206,7 +207,7 @@ const ImportFleetWizard = () => {
         </Title>
       </PageSection>
       <PageSection variant={PageSectionVariants.light} type="wizard">
-        {body}
+        <ErrorBoundary>{body}</ErrorBoundary>
       </PageSection>
     </>
   );
