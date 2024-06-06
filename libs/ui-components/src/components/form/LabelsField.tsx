@@ -81,7 +81,6 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addBu
                 <Button variant="plain" aria-label={t('Delete')} isDisabled icon={<TimesIcon />} />
               )
             }
-            isDisabled={!isEditable}
             onClose={(e) => onDelete(e, index)}
             onEditCancel={(_, prevText) => onEdit(index, prevText)}
             onEditComplete={(_, newText) => onEdit(index, newText)}

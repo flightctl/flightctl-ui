@@ -53,14 +53,16 @@ const EditableLabelControl = ({
       }}
     />
   ) : (
+    // TODO Improve UX when Patternfly is at or above 5.3.x and we can directly use "isDisabled"
     <Label
-      isDisabled={!isEditable}
-      color="blue"
+      color={isEditable ? 'blue' : 'grey'}
       variant="outline"
-      isOverflowLabel
+      isOverflowLabel={isEditable}
       onClick={() => {
-        setIsEditing(true);
-        setLabel(defaultLabel);
+        if (isEditable) {
+          setIsEditing(true);
+          setLabel(defaultLabel);
+        }
       }}
     >
       {addButtonText || t('Add label')}
