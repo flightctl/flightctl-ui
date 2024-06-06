@@ -209,6 +209,7 @@
   "Resource syncs": "Resource syncs",
   "Target revision": "Target revision",
   "Fleets will appear in the fleets table list and their status will be reflecting the resource sync process status. After a few minutes, they should be synced and enabled.": "Fleets will appear in the fleets table list and their status will be reflecting the resource sync process status. After a few minutes, they should be synced and enabled.",
+  "Label keys are required. Invalid labels: {{invalidLabels}}": "Label keys are required. Invalid labels: {{invalidLabels}}",
   "Label keys must be unique": "Label keys must be unique",
   "Device names must be unique. Add a number to the template to generate unique names.": "Device names must be unique. Add a number to the template to generate unique names.",
   "Region is required.": "Region is required.",
