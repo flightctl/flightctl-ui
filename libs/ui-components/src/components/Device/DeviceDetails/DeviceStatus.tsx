@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Label, LabelProps } from '@patternfly/react-core';
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
 import { DisconnectedIcon } from '@patternfly/react-icons/dist/js/icons/disconnected-icon';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
@@ -8,41 +7,38 @@ import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progres
 import { Device } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { DeviceConditionStatus, deviceStatusLabels, getDeviceStatus } from '../../../utils/status/device';
+import StatusLabel, { StatusLabelColor } from '../../common/StatusLabel';
 
 const DeviceStatus = ({ device }: { device?: Device }) => {
   const status = device ? getDeviceStatus(device) : DeviceConditionStatus.Approved;
   const { t } = useTranslation();
   const statusLabels = deviceStatusLabels(t);
 
-  let color: LabelProps['color'];
-  let icon: LabelProps['icon'];
+  let labelStatus: StatusLabelColor;
+  let icon: React.ReactNode;
 
   switch (status) {
     case DeviceConditionStatus.Valid:
     case DeviceConditionStatus.Approved:
     case DeviceConditionStatus.Available:
-      color = 'green';
+      labelStatus = 'success';
       icon = <CheckCircleIcon />;
       break;
     case DeviceConditionStatus.Progressing:
-      color = 'blue';
+      labelStatus = 'info';
       icon = <InProgressIcon />;
       break;
     case DeviceConditionStatus.Degraded:
-      color = 'orange';
+      labelStatus = 'warning';
       icon = <ExclamationTriangleIcon />;
       break;
     case DeviceConditionStatus.Unavailable:
-      color = 'orange';
+      labelStatus = 'warning';
       icon = <DisconnectedIcon />;
       break;
   }
 
-  return (
-    <Label color={color} icon={icon}>
-      {statusLabels[status] || t('Unknown')}
-    </Label>
-  );
+  return <StatusLabel label={statusLabels[status]} status={labelStatus || 'unknown'} icon={icon} />;
 };
 
 export default DeviceStatus;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Label, LabelProps } from '@patternfly/react-core';
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/question-circle-icon';
@@ -7,47 +6,42 @@ import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progres
 
 import { ConditionType } from '@flightctl/types';
 import { RepositorySyncStatus, repositoryStatusLabels } from '../../utils/status/repository';
-import WithTooltip from '../common/WithTooltip';
 import { useTranslation } from '../../hooks/useTranslation';
+import StatusLabel, { StatusLabelColor } from './StatusLabel';
 
-const StatusInfo = ({ statusInfo }: { statusInfo: { status: RepositorySyncStatus; message?: string } }) => {
+const RepositoryStatusInfo = ({ statusInfo }: { statusInfo: { status: RepositorySyncStatus; message?: string } }) => {
   const statusType = statusInfo.status;
   const { t } = useTranslation();
 
   const statusLabels = repositoryStatusLabels(t);
 
-  let icon: LabelProps['icon'];
-  let color: LabelProps['color'];
+  let icon: React.ReactNode;
+  let status: StatusLabelColor;
+
   switch (statusType) {
     case ConditionType.ResourceSyncSynced:
     case ConditionType.RepositoryAccessible:
-      color = 'green';
+      status = 'success';
       icon = <CheckCircleIcon />;
       break;
     case 'Sync pending':
-      color = 'orange';
+      status = 'warning';
       icon = <InProgressIcon />;
       break;
     case 'Not synced':
     case 'Not parsed':
     case 'Not accessible':
-      color = 'red';
+      status = 'danger';
       icon = <ExclamationCircleIcon />;
       break;
 
     default:
-      color = 'grey';
+      status = 'unknown';
       icon = <QuestionCircleIcon />;
       break;
   }
 
-  return (
-    <WithTooltip showTooltip={!!statusInfo.message} content={statusInfo.message}>
-      <Label color={color} icon={icon}>
-        {statusLabels[statusType]}
-      </Label>
-    </WithTooltip>
-  );
+  return <StatusLabel label={statusLabels[statusType]} status={status} icon={icon} tooltip={statusInfo.message} />;
 };
 
-export default StatusInfo;
+export default RepositoryStatusInfo;
