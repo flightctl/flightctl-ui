@@ -39,10 +39,10 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
           isSelected: isRowSelected(device),
         }}
       />
+      <Td dataLabel={t('Name')}>{displayName || '-'}</Td>
       <Td dataLabel={t('Fingerprint')}>
         <DisplayName name={deviceName} routeLink={ROUTE.DEVICE_DETAILS} />
       </Td>
-      <Td dataLabel={t('Name')}>{displayName || '-'}</Td>
       <Td dataLabel={t('Fleet')}>
         <DeviceFleet deviceMetadata={device.metadata} />
       </Td>
@@ -50,7 +50,6 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
         <DeviceStatus device={device} />
       </Td>
       <Td dataLabel={t('Created at')}>{getDateDisplay(device.metadata.creationTimestamp)}</Td>
-      <Td dataLabel={t('Operating system')}>{device.status?.systemInfo?.operatingSystem || '-'}</Td>
       <Td isActionCell>
         <ActionsColumn
           items={[
