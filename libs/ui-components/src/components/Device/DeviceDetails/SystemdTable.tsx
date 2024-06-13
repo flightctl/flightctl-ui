@@ -39,7 +39,7 @@ const SystemdTable: React.FC<SystemdTableProps> = ({ device, onSystemdUnitsUpdat
               ) : (
                 <LabelGroup numLabels={5}>
                   {matchPatterns?.map((pattern, index) => (
-                    <Label key={index} id={`${index}`} color="blue">
+                    <Label key={index} id={`${index}`}>
                       {pattern}
                     </Label>
                   ))}

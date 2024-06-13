@@ -4,14 +4,14 @@ import { ContainerStatus } from '@flightctl/types';
 import * as React from 'react';
 import { useTranslation } from '../../../hooks/useTranslation';
 
-type ContainersTableProps = {
+type ApplicationsTableProps = {
   containers: ContainerStatus[] | undefined;
 };
 
-const ContainersTable: React.FC<ContainersTableProps> = ({ containers }) => {
+const ApplicationsTable: React.FC<ApplicationsTableProps> = ({ containers }) => {
   const { t } = useTranslation();
   return containers?.length ? (
-    <Table aria-label={t('Device containers table')}>
+    <Table aria-label={t('Device applications table')}>
       <Thead>
         <Tr>
           <Th>{t('Name')}</Th>
@@ -30,8 +30,8 @@ const ContainersTable: React.FC<ContainersTableProps> = ({ containers }) => {
       </Tbody>
     </Table>
   ) : (
-    <Bullseye>{t('No containers found')}</Bullseye>
+    <Bullseye>{t('No applications found')}</Bullseye>
   );
 };
 
-export default ContainersTable;
+export default ApplicationsTable;

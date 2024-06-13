@@ -47,7 +47,7 @@ const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormConte
 
   return (
     <Form onSubmit={(ev) => ev.preventDefault()}>
-      <FormGroup label={t('Labels')}>
+      <FormGroup label={t('Device labels')}>
         <LabelsField
           name="labels"
           addButtonText={isSubmitting ? t('Saving...') : undefined}

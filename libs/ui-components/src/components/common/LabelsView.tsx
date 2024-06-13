@@ -10,7 +10,7 @@ const LabelsView = ({ prefix, labels }: { prefix: string; labels: Record<string,
   return (
     <LabelGroup numLabels={5}>
       {labelItems.map(([key, value], index: number) => (
-        <Label key={`${prefix}_${index}`} id={`${prefix}_${index}`} color="blue">
+        <Label key={`${prefix}_${index}`} id={`${prefix}_${index}`}>
           {value ? `${key}=${value}` : key}
         </Label>
       ))}

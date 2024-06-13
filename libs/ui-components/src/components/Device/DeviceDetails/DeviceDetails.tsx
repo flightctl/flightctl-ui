@@ -1,7 +1,5 @@
 import * as React from 'react';
 import {
-  Card,
-  CardBody,
   CardTitle,
   DescriptionList,
   DescriptionListDescription,
@@ -16,19 +14,18 @@ import { Device } from '@flightctl/types';
 import { getDateDisplay } from '../../../utils/dates';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { useFetch } from '../../../hooks/useFetch';
-import ConditionsTable from '../../DetailsPage/Tables/ConditionsTable';
-import ContainersTable from '../../DetailsPage/Tables/ContainersTable';
-import IntegrityTable from '../../DetailsPage/Tables/IntegrityTable';
+import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
 import DetailsPage from '../../DetailsPage/DetailsPage';
-import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
-import DeviceFleet from './DeviceFleet';
 import DeviceStatus from './DeviceStatus';
-import SystemdTable from './SystemdTable';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import EditLabelsForm from '../../modals/EditLabelsModal/EditLabelsForm';
+import DisplayName from '../../common/DisplayName';
+import DeviceFleet from './DeviceFleet';
+import DetailsPageCard, { DetailsPageCardBody, DetailsPageCardTitle } from '../../DetailsPage/DetailsPageCard';
+import SystemdTable from './SystemdTable';
 
 const DeviceDetails = () => {
   const { t } = useTranslation();
@@ -69,80 +66,79 @@ const DeviceDetails = () => {
     >
       <Grid hasGutter>
         <GridItem md={12}>
-          <Card>
-            <CardTitle>{t('Details')}</CardTitle>
-            <CardBody>
-              <DescriptionList columnModifier={{ lg: '3Col' }}>
+          <DetailsPageCard>
+            <DetailsPageCardBody>
+              <DescriptionList isAutoColumnWidths columnModifier={{ default: '3Col' }}>
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Fingerprint')}</DescriptionListTerm>
-                  <DescriptionListDescription>{device?.metadata.name || '-'}</DescriptionListDescription>
-                </DescriptionListGroup>
-                <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
                   <DescriptionListDescription>
-                    {getDateDisplay(device?.metadata.creationTimestamp)}
+                    <DisplayName name={device?.metadata.name || '-'} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
+                {device && <EditLabelsForm device={device} onDeviceUpdate={refetch} />}
+              </DescriptionList>
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <DetailsPageCardTitle title={t('System status')} />
+            <DetailsPageCardBody>
+              <DescriptionList columnModifier={{ default: '3Col' }}>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Fleet')}</DescriptionListTerm>
-                  <DescriptionListDescription>
-                    <DeviceFleet deviceMetadata={device?.metadata || {}} />
-                  </DescriptionListDescription>
-                </DescriptionListGroup>
-                <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Device status')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     <DeviceStatus device={device} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>{t('OS')}</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Created at')}</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    {getDateDisplay(device?.metadata.creationTimestamp)}
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+              </DescriptionList>
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <DetailsPageCardTitle title={t('Configurations')} />
+            <DetailsPageCardBody>
+              <DescriptionList columnModifier={{ default: '3Col' }}>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     {device?.status?.systemInfo?.operatingSystem || '-'}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Architecture')}</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Source name')}</DescriptionListTerm>
+                  <DescriptionListDescription>TODO</DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('Fleet name')}</DescriptionListTerm>
                   <DescriptionListDescription>
-                    {device?.status?.systemInfo?.architecture || '-'}
+                    <DeviceFleet deviceMetadata={device?.metadata || {}} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
-                {device && <EditLabelsForm device={device} onDeviceUpdate={refetch} />}
               </DescriptionList>
-            </CardBody>
-          </Card>
-        </GridItem>
-        <GridItem md={6}>
-          <DetailsPageCard>
-            <CardTitle>{t('Conditions')}</CardTitle>
-            <DetailsPageCardBody>
-              {device && (
-                <ConditionsTable ariaLabel={t('Device conditions table')} conditions={device.status.conditions} />
-              )}
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <CardTitle>{t('Systemd units')}</CardTitle>
+            <CardTitle>{t('Applications')}</CardTitle>
+            <DetailsPageCardBody>
+              {device && <ApplicationsTable containers={device.status.containers} />}
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={6}>
+          <DetailsPageCard>
+            <CardTitle>{t('System services')}</CardTitle>
             <DetailsPageCardBody>
               {device && <SystemdTable device={device} onSystemdUnitsUpdate={refetch} />}
-            </DetailsPageCardBody>
-          </DetailsPageCard>
-        </GridItem>
-        <GridItem md={6}>
-          <DetailsPageCard>
-            <CardTitle>{t('Containers')}</CardTitle>
-            <DetailsPageCardBody>
-              {device && <ContainersTable containers={device.status.containers} />}
-            </DetailsPageCardBody>
-          </DetailsPageCard>
-        </GridItem>
-        <GridItem md={6}>
-          <DetailsPageCard>
-            <CardTitle>{t('System integrity measurements')}</CardTitle>
-            <DetailsPageCardBody>
-              {device && <IntegrityTable measurements={device.status.systemInfo?.measurements} />}
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>

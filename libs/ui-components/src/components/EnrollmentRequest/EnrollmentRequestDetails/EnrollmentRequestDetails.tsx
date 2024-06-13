@@ -1,5 +1,5 @@
 import ConditionsTable from '../../DetailsPage/Tables/ConditionsTable';
-import ContainersTable from '../../DetailsPage/Tables/ContainersTable';
+import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import IntegrityTable from '../../DetailsPage/Tables/IntegrityTable';
 import SystemdTable from '../../DetailsPage/Tables/SystemdTable';
@@ -209,7 +209,7 @@ const EnrollmentRequestDetails = () => {
           <DetailsPageCard>
             <CardTitle>{t('Containers')}</CardTitle>
             <DetailsPageCardBody>
-              {er && <ContainersTable containers={er.spec.deviceStatus?.containers} />}
+              {er && <ApplicationsTable containers={er.spec.deviceStatus?.containers} />}
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>

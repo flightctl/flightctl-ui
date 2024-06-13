@@ -75,7 +75,6 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addBu
           <Label
             key={index}
             id={`${index}`}
-            color="blue"
             closeBtn={
               isEditable ? undefined : (
                 <Button variant="plain" aria-label={t('Delete')} isDisabled icon={<TimesIcon />} />
