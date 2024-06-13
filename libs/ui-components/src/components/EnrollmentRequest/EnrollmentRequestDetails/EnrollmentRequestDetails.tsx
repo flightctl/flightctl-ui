@@ -2,7 +2,7 @@ import ConditionsTable from '../../DetailsPage/Tables/ConditionsTable';
 import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import IntegrityTable from '../../DetailsPage/Tables/IntegrityTable';
-import SystemdTable from '../../DetailsPage/Tables/SystemdTable';
+import SystemdDetailsTable from '../../DetailsPage/Tables/SystemdDetailsTable';
 import LabelsView from '../../common/LabelsView';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { getDateDisplay } from '../../../utils/dates';
@@ -201,7 +201,7 @@ const EnrollmentRequestDetails = () => {
           <DetailsPageCard>
             <CardTitle>{t('Systemd units')}</CardTitle>
             <DetailsPageCardBody>
-              {er && <SystemdTable systemdUnits={er?.spec.deviceStatus?.systemdUnits} />}
+              {er && <SystemdDetailsTable systemdUnits={er?.spec.deviceStatus?.systemdUnits} />}
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Button, Label, LabelGroup, Spinner, Split, SplitItem, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, Button, Spinner, Stack, StackItem } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons/dist/js/icons/pencil-alt-icon';
 
 import { Device } from '@flightctl/types';
@@ -7,10 +7,10 @@ import WithTooltip from '../../common/WithTooltip';
 import { getDeviceFleet } from '../../../utils/devices';
 
 import MatchPatternsModal from '../MatchPatternsModal/MatchPatternsModal';
-import SystemdDetailsTable from '../../DetailsPage/Tables/SystemdTable';
 import { getErrorMessage } from '../../../utils/error';
 import { useTemplateVersion } from '../../../hooks/useTemplateVersion';
 import { useTranslation } from '../../../hooks/useTranslation';
+import SystemdDetailsTable from '../../DetailsPage/Tables/SystemdDetailsTable';
 
 type SystemdTableProps = {
   device: Device;
@@ -27,38 +27,22 @@ const SystemdTable: React.FC<SystemdTableProps> = ({ device, onSystemdUnitsUpdat
     : '';
 
   const matchPatterns = useTV ? tv?.status?.systemd?.matchPatterns : device.spec?.systemd?.matchPatterns;
+  const systemdUnits = device.status?.systemdUnits;
 
   return (
     <>
       <Stack hasGutter>
         <StackItem>
-          <Split hasGutter>
-            <SplitItem isFilled>
-              {isLoading ? (
-                <Spinner />
-              ) : (
-                <LabelGroup numLabels={5}>
-                  {matchPatterns?.map((pattern, index) => (
-                    <Label key={index} id={`${index}`}>
-                      {pattern}
-                    </Label>
-                  ))}
-                </LabelGroup>
-              )}
-            </SplitItem>
-            <SplitItem>
-              <Button
-                variant="link"
-                icon={<PencilAltIcon />}
-                onClick={() => setIsModalOpen(true)}
-                isAriaDisabled={!!disabledEditReason}
-              >
-                <WithTooltip showTooltip={!!disabledEditReason} content={disabledEditReason}>
-                  <span>{t('Edit')}</span>
-                </WithTooltip>
-              </Button>
-            </SplitItem>
-          </Split>
+          <Button
+            variant="link"
+            icon={<PencilAltIcon />}
+            onClick={() => setIsModalOpen(true)}
+            isAriaDisabled={!!disabledEditReason}
+          >
+            <WithTooltip showTooltip={!!disabledEditReason} content={disabledEditReason}>
+              <span>{t('Edit')}</span>
+            </WithTooltip>
+          </Button>
         </StackItem>
         {error ? (
           <StackItem>
@@ -67,9 +51,13 @@ const SystemdTable: React.FC<SystemdTableProps> = ({ device, onSystemdUnitsUpdat
             </Alert>
           </StackItem>
         ) : null}
-        <StackItem>
-          <SystemdDetailsTable systemdUnits={device.status?.systemdUnits} />
-        </StackItem>
+        {isLoading ? (
+          <Spinner />
+        ) : (
+          <StackItem>
+            <SystemdDetailsTable matchPatterns={matchPatterns} systemdUnits={systemdUnits} />
+          </StackItem>
+        )}
       </Stack>
       {isModalOpen && (
         <MatchPatternsModal

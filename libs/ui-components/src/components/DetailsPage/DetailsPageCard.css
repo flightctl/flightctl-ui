@@ -6,3 +6,7 @@
 .fctl-details-page__card {
     height: 100%
 }
+
+.fctl-details-page__card-title .pf-v5-c-divider {
+  margin-top: 1rem;
+}

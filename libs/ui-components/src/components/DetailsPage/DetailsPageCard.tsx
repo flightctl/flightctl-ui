@@ -8,7 +8,7 @@ const DetailsPageCard: React.FC<CardProps> = (props) => <Card className="fctl-de
 export const DetailsPageCardTitle = ({ title }: { title: string }) => (
   <CardTitle className="fctl-details-page__card-title">
     {title}
-    <Divider style={{ paddingTop: '0.75rem' }} />
+    <Divider component="div" />
   </CardTitle>
 );
 

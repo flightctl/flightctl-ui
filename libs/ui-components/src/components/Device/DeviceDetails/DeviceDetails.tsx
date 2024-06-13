@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  CardTitle,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -105,16 +104,12 @@ const DeviceDetails = () => {
           <DetailsPageCard>
             <DetailsPageCardTitle title={t('Configurations')} />
             <DetailsPageCardBody>
-              <DescriptionList columnModifier={{ default: '3Col' }}>
+              <DescriptionList columnModifier={{ default: '2Col' }}>
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     {device?.status?.systemInfo?.operatingSystem || '-'}
                   </DescriptionListDescription>
-                </DescriptionListGroup>
-                <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Source name')}</DescriptionListTerm>
-                  <DescriptionListDescription>TODO</DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Fleet name')}</DescriptionListTerm>
@@ -128,7 +123,7 @@ const DeviceDetails = () => {
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <CardTitle>{t('Applications')}</CardTitle>
+            <DetailsPageCardTitle title={t('Applications')} />
             <DetailsPageCardBody>
               {device && <ApplicationsTable containers={device.status.containers} />}
             </DetailsPageCardBody>
@@ -136,7 +131,7 @@ const DeviceDetails = () => {
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <CardTitle>{t('System services')}</CardTitle>
+            <DetailsPageCardTitle title={t('System services')} />
             <DetailsPageCardBody>
               {device && <SystemdTable device={device} onSystemdUnitsUpdate={refetch} />}
             </DetailsPageCardBody>
