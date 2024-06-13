@@ -1,24 +1,41 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { FormHelperText, HelperText, HelperTextItem, Label, LabelGroup } from '@patternfly/react-core';
+import { Button, FormHelperText, HelperText, HelperTextItem, Label, LabelGroup } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { TimesIcon } from '@patternfly/react-icons/dist/js/icons/times-icon';
 
 import { FlightCtlLabel } from '../../types/extraTypes';
 import EditableLabelControl from '../common/EditableLabelControl';
+import { useTranslation } from '../../hooks/useTranslation';
 
 type LabelsFieldProps = {
   name: string;
+  isEditable?: boolean;
+  addButtonText?: string;
+  onChangeCallback?: (newLabels: FlightCtlLabel[], hasErrors: boolean) => void;
 };
 
-const LabelsField: React.FC<LabelsFieldProps> = ({ name }) => {
+const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addButtonText, isEditable }) => {
   const [{ value: labels }, meta, { setValue: setLabels }] = useField<FlightCtlLabel[]>(name);
-  const onClose = (_ev: React.MouseEvent<Element, MouseEvent>, index: number) => {
-    const newLabels = [...labels];
-    newLabels.splice(index, 1);
-    setLabels(newLabels, true);
+  const { t } = useTranslation();
+
+  const updateLabels = async (newLabels: FlightCtlLabel[]) => {
+    const errors = await setLabels(newLabels, true);
+    const hasErrors = Object.keys(errors || {}).length > 0;
+
+    onChangeCallback && onChangeCallback(newLabels, hasErrors);
   };
 
-  const onAdd = (text: string) => {
+  const onDelete = async (_ev: React.MouseEvent<Element, MouseEvent>, index: number) => {
+    if (!isEditable) {
+      return;
+    }
+    const newLabels = [...labels];
+    newLabels.splice(index, 1);
+    await updateLabels(newLabels);
+  };
+
+  const onAdd = async (text: string) => {
     const split = text.split('=');
     let newLabel: FlightCtlLabel;
     if (split.length === 2) {
@@ -28,32 +45,46 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ name }) => {
     }
 
     const newLabels = [...labels, newLabel];
-    setLabels(newLabels, true);
+
+    await updateLabels(newLabels);
   };
 
-  const onEdit = (index: number, nextText: string) => {
+  const onEdit = async (index: number, nextText: string) => {
     const label = nextText.split('=');
     const newLabels = [...labels];
     newLabels.splice(index, 1, { key: label[0], value: label.length ? label[1] : undefined });
-    setLabels(newLabels, true);
+
+    await updateLabels(newLabels);
   };
 
   return (
     <>
       <LabelGroup
         numLabels={5}
-        isEditable
-        addLabelControl={<EditableLabelControl defaultLabel="key=value" onAddLabel={onAdd} />}
+        isEditable={isEditable ?? true}
+        addLabelControl={
+          <EditableLabelControl
+            defaultLabel="key=value"
+            addButtonText={addButtonText}
+            onAddLabel={onAdd}
+            isEditable={isEditable ?? true}
+          />
+        }
       >
         {labels.map(({ key, value }, index) => (
           <Label
             key={index}
             id={`${index}`}
             color="blue"
-            onClose={(e) => onClose(e, index)}
+            closeBtn={
+              isEditable ? undefined : (
+                <Button variant="plain" aria-label={t('Delete')} isDisabled icon={<TimesIcon />} />
+              )
+            }
+            onClose={(e) => onDelete(e, index)}
             onEditCancel={(_, prevText) => onEdit(index, prevText)}
             onEditComplete={(_, newText) => onEdit(index, newText)}
-            isEditable
+            isEditable={isEditable ?? true}
           >
             {value ? `${key}=${value}` : key}
           </Label>

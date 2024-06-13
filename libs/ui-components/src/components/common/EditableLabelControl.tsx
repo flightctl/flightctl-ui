@@ -4,12 +4,18 @@ import { Label, TextInput } from '@patternfly/react-core';
 import { useTranslation } from '../../hooks/useTranslation';
 
 type EditableLabelControlProps = {
+  isEditable?: boolean;
   addButtonText?: string;
   defaultLabel: string;
   onAddLabel: (text: string) => void;
 };
 
-const EditableLabelControl = ({ addButtonText, defaultLabel, onAddLabel }: EditableLabelControlProps) => {
+const EditableLabelControl = ({
+  addButtonText,
+  defaultLabel,
+  onAddLabel,
+  isEditable = true,
+}: EditableLabelControlProps) => {
   const [isEditing, setIsEditing] = React.useState<boolean>();
   const [label, setLabel] = React.useState<string>('');
   const { t } = useTranslation();
@@ -47,13 +53,16 @@ const EditableLabelControl = ({ addButtonText, defaultLabel, onAddLabel }: Edita
       }}
     />
   ) : (
+    // TODO Improve UX when Patternfly is at or above 5.3.x and we can directly use "isDisabled"
     <Label
-      color="blue"
+      color={isEditable ? 'blue' : 'grey'}
       variant="outline"
-      isOverflowLabel
+      isOverflowLabel={isEditable}
       onClick={() => {
-        setIsEditing(true);
-        setLabel(defaultLabel);
+        if (isEditable) {
+          setIsEditing(true);
+          setLabel(defaultLabel);
+        }
       }}
     >
       {addButtonText || t('Add label')}
