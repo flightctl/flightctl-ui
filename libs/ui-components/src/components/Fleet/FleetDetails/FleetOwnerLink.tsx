@@ -39,9 +39,9 @@ export const FleetOwnerLinkIcon = ({
       content={t('Managed by the resource sync {{resourceSyncName}}', { resourceSyncName: ownerName })}
       showTooltip
     >
-      <>
+      <span style={{ display: 'flex', alignItems: 'center' }}>
         <CodeBranchIcon /> {children}
-      </>
+      </span>
     </WithTooltip>
   );
 };
