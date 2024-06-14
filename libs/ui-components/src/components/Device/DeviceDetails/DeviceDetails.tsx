@@ -25,6 +25,8 @@ import DisplayName from '../../common/DisplayName';
 import DeviceFleet from './DeviceFleet';
 import DetailsPageCard, { DetailsPageCardBody, DetailsPageCardTitle } from '../../DetailsPage/DetailsPageCard';
 import SystemdTable from './SystemdTable';
+import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
+import { getSourceItems } from '../../../utils/devices';
 
 const DeviceDetails = () => {
   const { t } = useTranslation();
@@ -47,6 +49,8 @@ const DeviceDetails = () => {
     resourceName: name,
     resourceType: 'Device',
   });
+
+  const sourceItems = getSourceItems(device?.spec.config);
 
   return (
     <DetailsPage
@@ -115,6 +119,12 @@ const DeviceDetails = () => {
                   <DescriptionListTerm>{t('Fleet name')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     <DeviceFleet deviceMetadata={device?.metadata || {}} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('Sources ({{size}})', { size: sourceItems.length })}</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <RepositorySourceList sourceItems={sourceItems} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               </DescriptionList>

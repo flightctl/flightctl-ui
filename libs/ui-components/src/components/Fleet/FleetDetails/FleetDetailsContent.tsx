@@ -15,12 +15,12 @@ import {
 import * as React from 'react';
 
 import { Fleet } from '@flightctl/types';
-import { getSourceItems } from '../../../utils/fleets';
 import FleetOwnerLink from './FleetOwnerLink';
 import FleetStatus from '../FleetStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
+import { getSourceItems } from '../../../utils/devices';
 
 const FleetDevices = ({ fleetId, count }: { fleetId: string; count: number | undefined }) => {
   if (count === undefined) {

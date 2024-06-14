@@ -6,8 +6,8 @@ import { useFetch } from '../../../hooks/useFetch';
 import { isPromiseRejected } from '../../../types/typeUtils';
 import { getErrorMessage } from '../../../utils/error';
 import RepositorySource, { RepositorySourceDetails } from './RepositorySource';
-import { SourceItem } from '../../../utils/fleets';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { SourceItem } from '../../../utils/devices';
 
 const useArrayEq = (array: string[]) => {
   const prevArrayRef = React.useRef(array);

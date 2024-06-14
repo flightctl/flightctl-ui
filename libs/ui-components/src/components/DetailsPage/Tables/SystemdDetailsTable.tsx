@@ -6,12 +6,12 @@ import { DeviceSystemdUnitStatus } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import SystemdStatus from '../../Device/DeviceDetails/SystemdStatus';
 
-type NewSystemdDetailsTableProps = {
+type SystemdDetailsTableProps = {
   matchPatterns?: Array<string>;
   systemdUnits: DeviceSystemdUnitStatus[] | undefined;
 };
 
-const SystemdDetailsTable = ({ matchPatterns, systemdUnits }: NewSystemdDetailsTableProps) => {
+const SystemdDetailsTable = ({ matchPatterns, systemdUnits }: SystemdDetailsTableProps) => {
   const { t } = useTranslation();
   const hasPatterns = matchPatterns && matchPatterns.length > 0;
   const hasUnits = systemdUnits && systemdUnits.length > 0;
