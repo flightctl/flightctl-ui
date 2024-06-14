@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  Alert,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -27,6 +28,8 @@ import DetailsPageCard, { DetailsPageCardBody, DetailsPageCardTitle } from '../.
 import SystemdTable from './SystemdTable';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
 import { getSourceItems } from '../../../utils/devices';
+import { useTemplateVersion } from '../../../hooks/useTemplateVersion';
+import { getErrorMessage } from '../../../utils/error';
 
 const DeviceDetails = () => {
   const { t } = useTranslation();
@@ -35,6 +38,7 @@ const DeviceDetails = () => {
   } = useAppContext();
   const { deviceId } = useParams() as { deviceId: string };
   const [device, loading, error, refetch] = useFetchPeriodically<Required<Device>>({ endpoint: `devices/${deviceId}` });
+  const [, /* useTv */ tv, loadingTv, errorTv] = useTemplateVersion(device);
 
   const navigate = useNavigate();
   const { remove } = useFetch();
@@ -51,10 +55,9 @@ const DeviceDetails = () => {
   });
 
   const sourceItems = getSourceItems(device?.spec.config);
-
   return (
     <DetailsPage
-      loading={loading}
+      loading={loading || loadingTv}
       error={error}
       id={deviceId}
       title={name}
@@ -68,6 +71,14 @@ const DeviceDetails = () => {
       }
     >
       <Grid hasGutter>
+        {!!errorTv && (
+          <GridItem md={12}>
+            <Alert isInline variant="warning" title={t('Some device details could not be loaded.')}>
+              {getErrorMessage(errorTv)}
+            </Alert>
+          </GridItem>
+        )}
+
         <GridItem md={12}>
           <DetailsPageCard>
             <DetailsPageCardBody>
@@ -112,7 +123,7 @@ const DeviceDetails = () => {
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
                   <DescriptionListDescription>
-                    {device?.status?.systemInfo?.operatingSystem || '-'}
+                    {tv?.status?.os?.image || device?.status?.systemInfo?.operatingSystem || '-'}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
@@ -143,7 +154,7 @@ const DeviceDetails = () => {
           <DetailsPageCard>
             <DetailsPageCardTitle title={t('System services')} />
             <DetailsPageCardBody>
-              {device && <SystemdTable device={device} onSystemdUnitsUpdate={refetch} />}
+              {device && <SystemdTable device={device} templateVersion={tv} onSystemdUnitsUpdate={refetch} />}
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
