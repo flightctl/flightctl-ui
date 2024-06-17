@@ -14,7 +14,7 @@ import {
 import { LockedIcon } from '@patternfly/react-icons/dist/js/icons/locked-icon';
 import { LockOpenIcon } from '@patternfly/react-icons/dist/js/icons/lock-open-icon';
 
-import StatusInfo from '../../../common/StatusInfo';
+import RepositoryStatusInfo from '../../../common/RepositoryStatusInfo';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../../utils/status/repository';
 import { Repository } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -39,7 +39,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
                 <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
                 <DescriptionListDescription>
                   {' '}
-                  {repoDetails ? <StatusInfo statusInfo={getRepositorySyncStatus(repoDetails)} /> : '-'}
+                  {repoDetails ? <RepositoryStatusInfo statusInfo={getRepositorySyncStatus(repoDetails)} /> : '-'}
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>

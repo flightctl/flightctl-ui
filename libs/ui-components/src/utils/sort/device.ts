@@ -32,19 +32,6 @@ export const sortDevicesByStatus = (resources: Array<Device | EnrollmentRequest>
     return aIndex - bIndex;
   });
 
-export const sortDevicesByOS = (resources: Array<Device | EnrollmentRequest>) =>
-  resources.sort((a, b) => {
-    const aOS =
-      (isEnrollmentRequest(a)
-        ? a.spec.deviceStatus?.systemInfo?.operatingSystem
-        : a.status?.systemInfo?.operatingSystem) || '-';
-    const bOS =
-      (isEnrollmentRequest(b)
-        ? b.spec.deviceStatus?.systemInfo?.operatingSystem
-        : b.status?.systemInfo?.operatingSystem) || '-';
-    return aOS.localeCompare(bOS);
-  });
-
 export const sortDevicesByFleet = (resources: Array<Device | EnrollmentRequest>) =>
   resources.sort((a, b) => {
     const aFleet = getDeviceFleet(a.metadata);

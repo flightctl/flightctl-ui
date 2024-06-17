@@ -19,7 +19,7 @@ import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import ListPageBody from '../ListPage/ListPageBody';
 import ListPage from '../ListPage/ListPage';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../utils/status/repository';
-import StatusInfo from '../common/StatusInfo';
+import RepositoryStatusInfo from '../common/RepositoryStatusInfo';
 import { useTableSort } from '../../hooks/useTableSort';
 import { sortByName } from '../../utils/sort/generic';
 import {
@@ -156,7 +156,7 @@ const RepositoryTable = () => {
               </Td>
               <Td dataLabel={t('Url')}>{repository.spec.repo || '-'}</Td>
               <Td dataLabel={t('Sync status')}>
-                <StatusInfo statusInfo={getRepositorySyncStatus(repository)} />
+                <RepositoryStatusInfo statusInfo={getRepositorySyncStatus(repository)} />
               </Td>
               <Td dataLabel={t('Last transition')}>{getRepositoryLastTransitionTime(repository, t).text}</Td>
               <Td isActionCell>

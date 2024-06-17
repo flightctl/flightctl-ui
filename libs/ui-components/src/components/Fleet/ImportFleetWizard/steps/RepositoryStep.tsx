@@ -6,7 +6,7 @@ import { Repository } from '@flightctl/types';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { RepositoryForm } from '../../../Repository/CreateRepository/CreateRepositoryForm';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../../utils/status/repository';
-import StatusInfo from '../../../common/StatusInfo';
+import RepositoryStatusInfo from '../../../common/RepositoryStatusInfo';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelect from '../../../form/FormSelect';
 
@@ -49,7 +49,7 @@ const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
             <Tr>
               <Td dataLabel={t('URL')}>{currentRepo.spec.repo}</Td>
               <Td dataLabel={t('Sync status')}>
-                <StatusInfo statusInfo={getRepositorySyncStatus(currentRepo)} />
+                <RepositoryStatusInfo statusInfo={getRepositorySyncStatus(currentRepo)} />
               </Td>
               <Td dataLabel={t('Last transition')}>{getRepositoryLastTransitionTime(currentRepo, t).text}</Td>
             </Tr>

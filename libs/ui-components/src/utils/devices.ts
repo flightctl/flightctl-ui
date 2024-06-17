@@ -24,7 +24,7 @@ const getMissingFleetDetails = (t: TFunction, metadata: ObjectMeta): { message: 
     }
   }
   return {
-    message: t('No fleet matches the device selectors'),
+    message: t("Device labels don't match any fleet's label selector"),
     owners: [],
   };
 };

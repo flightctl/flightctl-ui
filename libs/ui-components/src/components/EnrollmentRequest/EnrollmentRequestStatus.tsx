@@ -1,46 +1,42 @@
 import * as React from 'react';
-import { Label, LabelProps } from '@patternfly/react-core';
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/question-circle-icon';
-import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progress-icon';
+import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-circle-icon';
 
 import { EnrollmentRequest } from '@flightctl/types';
 import { ApprovalStatus, approvalStatusLabels, getApprovalStatus } from '../../utils/status/enrollmentRequest';
 import { useTranslation } from '../../hooks/useTranslation';
+import StatusLabel, { StatusLabelColor } from '../common/StatusLabel';
 
 const EnrollmentRequestStatus = ({ er }: { er?: EnrollmentRequest }) => {
   const { t } = useTranslation();
   const status = er ? getApprovalStatus(er) : ApprovalStatus.Unknown;
   const statusLabels = approvalStatusLabels(t);
 
-  let color: LabelProps['color'];
-  let icon: LabelProps['icon'];
+  let colorStatus: StatusLabelColor;
+  let icon: React.ReactNode;
 
   switch (status) {
     case ApprovalStatus.Pending:
-      icon = <InProgressIcon />;
-      color = 'blue';
+      icon = <PauseCircleIcon />;
+      colorStatus = 'info';
       break;
     case ApprovalStatus.Approved:
-      color = 'green';
+      colorStatus = 'success';
       icon = <CheckCircleIcon />;
       break;
     case ApprovalStatus.Denied:
-      color = 'red';
+      colorStatus = 'danger';
       icon = <ExclamationCircleIcon />;
       break;
     case ApprovalStatus.Unknown:
-      color = 'grey';
+      colorStatus = 'unknown';
       icon = <QuestionCircleIcon />;
       break;
   }
 
-  return (
-    <Label color={color} icon={icon}>
-      {statusLabels[status]}
-    </Label>
-  );
+  return <StatusLabel label={statusLabels[status]} status={colorStatus} icon={icon} />;
 };
 
 export default EnrollmentRequestStatus;

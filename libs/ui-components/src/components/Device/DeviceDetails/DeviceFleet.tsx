@@ -15,7 +15,7 @@ const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => 
 
   return (
     <div className="fctl-device-fleet">
-      {hasMultipleOwners ? t('Multiple owners') : t('No owner fleet')}
+      {hasMultipleOwners ? t('Multiple owners') : t('None')}
       <Popover
         triggerAction="hover"
         aria-label={t('Missing fleet detail')}

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Label, LabelProps } from '@patternfly/react-core';
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
 import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/question-circle-icon';
 import { WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons/warning-triangle-icon';
@@ -8,46 +7,42 @@ import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progres
 
 import { ConditionType, Fleet } from '@flightctl/types';
 import { fleetStatusLabels, getFleetSyncStatus } from '../../utils/status/fleet';
-import WithTooltip from '../common/WithTooltip';
 import { useTranslation } from '../../hooks/useTranslation';
+import StatusLabel, { StatusLabelColor } from '../common/StatusLabel';
 
 const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
   const syncStatus = getFleetSyncStatus(fleet, t);
   const statusLabels = fleetStatusLabels(t);
 
-  let color: LabelProps['color'];
+  let color: StatusLabelColor;
   let icon: React.ReactNode;
 
   switch (syncStatus.status) {
     case ConditionType.FleetValid:
-      color = 'green';
+      color = 'success';
       icon = <CheckCircleIcon />;
       break;
     case ConditionType.FleetOverlappingSelectors:
-      color = 'orange';
+      color = 'warning';
       icon = <WarningTriangleIcon />;
       break;
     case 'SyncPending':
       icon = <InProgressIcon />;
-      color = 'blue';
+      color = 'info';
       break;
     case 'Invalid':
-      color = 'red';
+      color = 'danger';
       icon = <ExclamationCircleIcon />;
       break;
     default:
-      color = 'grey';
+      color = 'unknown';
       icon = <QuestionCircleIcon />;
       break;
   }
 
   return (
-    <WithTooltip showTooltip={!!syncStatus.message} content={syncStatus.message}>
-      <Label color={color} icon={icon}>
-        {statusLabels[syncStatus.status]}
-      </Label>
-    </WithTooltip>
+    <StatusLabel label={statusLabels[syncStatus.status]} status={color} icon={icon} tooltip={syncStatus.message} />
   );
 };
 

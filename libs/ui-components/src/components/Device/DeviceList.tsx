@@ -21,7 +21,7 @@ import { useDeleteListAction } from '../ListPage/ListPageActions';
 import AddDeviceModal from './AddDeviceModal/AddDeviceModal';
 import { useTableSort } from '../../hooks/useTableSort';
 import { sortByCreationTimestamp, sortByDisplayName, sortByName } from '../../utils/sort/generic';
-import { sortDevicesByFleet, sortDevicesByOS, sortDevicesByStatus } from '../../utils/sort/device';
+import { sortDevicesByFleet, sortDevicesByStatus } from '../../utils/sort/device';
 import Table, { TableColumn } from '../Table/Table';
 import EnrollmentRequestTableRow from '../EnrollmentRequest/EnrollmentRequestTableRow';
 import DeviceTableToolbar from './DeviceTableToolbar';
@@ -66,12 +66,12 @@ const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => {
 
 const getDeviceColumns = (t: TFunction): TableColumn<Device | EnrollmentRequest>[] => [
   {
-    name: t('Fingerprint'),
-    onSort: sortByName,
-  },
-  {
     name: t('Name'),
     onSort: sortByDisplayName,
+  },
+  {
+    name: t('Fingerprint'),
+    onSort: sortByName,
   },
   {
     name: t('Fleet'),
@@ -85,13 +85,6 @@ const getDeviceColumns = (t: TFunction): TableColumn<Device | EnrollmentRequest>
   {
     name: t('Created at'),
     onSort: sortByCreationTimestamp,
-  },
-  {
-    name: t('Operating system'),
-    onSort: sortDevicesByOS,
-    thProps: {
-      modifier: 'wrap',
-    },
   },
 ];
 

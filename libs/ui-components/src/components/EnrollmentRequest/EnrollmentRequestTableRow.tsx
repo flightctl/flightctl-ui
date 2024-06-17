@@ -38,16 +38,15 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
           isSelected: isRowSelected(er),
         }}
       />
+      <Td dataLabel={t('Name')}>-</Td>
       <Td dataLabel={t('Fingerprint')}>
         <DisplayName name={erName} routeLink={ROUTE.ENROLLMENT_REQUEST_DETAILS} />
       </Td>
-      <Td dataLabel={t('Name')}>-</Td>
       <Td dataLabel={t('Fleet')}>-</Td>
       <Td dataLabel={t('Status')}>
         <EnrollmentRequestStatus er={er} />
       </Td>
       <Td dataLabel={t('Created at')}>{getDateDisplay(er.metadata.creationTimestamp)}</Td>
-      <Td dataLabel={t('Operating system')}>{er.spec.deviceStatus?.systemInfo?.operatingSystem || '-'}</Td>
       <Td isActionCell>
         <ActionsColumn
           items={[
