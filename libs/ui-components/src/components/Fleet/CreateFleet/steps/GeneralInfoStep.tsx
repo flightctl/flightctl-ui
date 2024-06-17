@@ -5,6 +5,7 @@ import { FleetFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import NameField from '../../../form/NameField';
 import LabelsField from '../../../form/LabelsField';
+import { KubernetesLabelHelperText } from '../../../common/HelperTextItems';
 
 export const generalInfoStepId = 'general-info';
 
@@ -23,6 +24,7 @@ const GeneralInfoStep = ({ isEdit }: { isEdit: boolean }) => {
             aria-label={t('Name')}
             isDisabled={isEdit}
             resourceType="fleets"
+            helperText={<KubernetesLabelHelperText />}
             getExistsErrMsg={(name) => t(`A fleet named "{{name}}" already exists`, { name })}
           />
         </FormGroup>

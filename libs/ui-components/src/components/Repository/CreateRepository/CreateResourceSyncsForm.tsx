@@ -7,6 +7,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 
 import TextField from '../../form/TextField';
 import WithHelperText from '../../common/WithHelperText';
+import { KubernetesLabelHelperText } from '../../common/HelperTextItems';
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
 import NameField from '../../form/NameField';
 
@@ -26,6 +27,7 @@ const CreateResourceSyncsForm = () => {
                   aria-label={t('Resource sync name')}
                   value={resourceSync.name}
                   isDisabled={resourceSync.exists}
+                  helperText={<KubernetesLabelHelperText />}
                   getExistsErrMsg={(name) => t(`A resource sync named "{{name}}" already exists`, { name })}
                   resourceType="resourcesyncs"
                 />

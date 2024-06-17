@@ -40,3 +40,16 @@ export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDev
     region: Yup.string().required(t('Region is required.')),
     labels: uniqueLabelKeysSchema(t),
   });
+
+const K8S_LABEL_REGEXP = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
+
+export const validKubernetesLabel = (
+  t: TFunction,
+  { isRequired, fieldName }: { isRequired: boolean; fieldName?: string },
+) =>
+  isRequired
+    ? Yup.string()
+        .defined(t('{{ fieldName }} is required', { fieldName: fieldName || t('Name') }))
+        .matches(K8S_LABEL_REGEXP, t('Invalid pattern'))
+        .max(63, t('{{ fieldName }} must not exceed 63 characters', { fieldName: fieldName || t('Name') }))
+    : Yup.string();
