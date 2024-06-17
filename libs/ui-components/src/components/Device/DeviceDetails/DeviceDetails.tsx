@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
   Alert,
+  CardTitle,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -24,7 +25,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import EditLabelsForm from '../../modals/EditLabelsModal/EditLabelsForm';
 import DisplayName from '../../common/DisplayName';
 import DeviceFleet from './DeviceFleet';
-import DetailsPageCard, { DetailsPageCardBody, DetailsPageCardTitle } from '../../DetailsPage/DetailsPageCard';
+import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
 import SystemdTable from './SystemdTable';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
 import { getSourceItems } from '../../../utils/devices';
@@ -96,7 +97,7 @@ const DeviceDetails = () => {
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <DetailsPageCardTitle title={t('System status')} />
+            <CardTitle>{t('System status')}</CardTitle>
             <DetailsPageCardBody>
               <DescriptionList columnModifier={{ default: '3Col' }}>
                 <DescriptionListGroup>
@@ -117,7 +118,7 @@ const DeviceDetails = () => {
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <DetailsPageCardTitle title={t('Configurations')} />
+            <CardTitle>{t('Configurations')}</CardTitle>
             <DetailsPageCardBody>
               <DescriptionList columnModifier={{ default: '2Col' }}>
                 <DescriptionListGroup>
@@ -144,7 +145,7 @@ const DeviceDetails = () => {
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <DetailsPageCardTitle title={t('Applications')} />
+            <CardTitle>{t('Applications')}</CardTitle>
             <DetailsPageCardBody>
               {device && <ApplicationsTable containers={device.status.containers} />}
             </DetailsPageCardBody>
@@ -152,7 +153,7 @@ const DeviceDetails = () => {
         </GridItem>
         <GridItem md={6}>
           <DetailsPageCard>
-            <DetailsPageCardTitle title={t('System services')} />
+            <CardTitle>{t('System services')}</CardTitle>
             <DetailsPageCardBody>
               {device && <SystemdTable device={device} templateVersion={tv} onSystemdUnitsUpdate={refetch} />}
             </DetailsPageCardBody>
