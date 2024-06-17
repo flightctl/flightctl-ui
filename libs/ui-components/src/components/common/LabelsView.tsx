@@ -19,13 +19,14 @@ const LabelsView = ({ variant, prefix, labels }: LabelsViewProps) => {
   }
 
   const isLimited = variant === 'collapsed';
-
   return (
     <LabelGroup
       numLabels={isLimited ? 2 : 5}
       className={isLimited ? 'fctl-labels-view__collapsed' : undefined}
       expandedText={t('Show less')}
-      collapsedText={t('${remaining} more')}
+      // Label group will use this template and inject the correct count of labels.
+      // For it to work, the variable name must be "remaining"
+      collapsedText={t('{{remaining}} more', { remaining: 0 })}
     >
       {labelItems.map(([key, value], index: number) => (
         <Label key={`${prefix}_${index}`} id={`${prefix}_${index}`} color="blue">
