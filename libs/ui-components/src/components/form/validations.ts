@@ -4,6 +4,12 @@ import { FlightCtlLabel } from '../../types/extraTypes';
 
 type UnvalidatedLabel = Partial<FlightCtlLabel>;
 
+const SYSTEMD_PATTERNS_REGEXP = /^[a-z][a-z0-9-_.]*$/;
+const SYSTEMD_UNITS_MAX_PATTERNS = 256;
+
+export const maxLengthString = (t: TFunction, props: { maxLength: number; fieldName: string }) =>
+  Yup.string().max(props.maxLength, t('{{ fieldName }} must not exceed {{ maxLength }} characters', props));
+
 export const uniqueLabelKeysSchema = (t: TFunction) =>
   Yup.array()
     .of(
@@ -30,6 +36,35 @@ export const uniqueLabelKeysSchema = (t: TFunction) =>
       return uniqueKeys.size === labels.length;
     });
 
+export const deviceSystemdUnitsValidationSchema = (t: TFunction) =>
+  Yup.object({
+    matchPatterns: Yup.array()
+      .max(
+        SYSTEMD_UNITS_MAX_PATTERNS,
+        t('The maximum number of systemd units is {{maxSystemUnits}}.', { maxSystemUnits: SYSTEMD_UNITS_MAX_PATTERNS }),
+      )
+      .of(Yup.string().required('Unit name is required.'))
+      .test('invalid patterns', (patterns: string[] | undefined, testContext) => {
+        // TODO analyze https://github.com/systemd/systemd/blob/9cebda59e818cdb89dc1e53ab5bb51b91b3dc3ff/src/basic/unit-name.c#L42
+        // and adjust the regular expression and / or the validation to accommodate for it
+        const invalidPatterns = (patterns || []).filter((pattern) => {
+          return pattern.length > SYSTEMD_UNITS_MAX_PATTERNS || !SYSTEMD_PATTERNS_REGEXP.test(pattern);
+        });
+        if (invalidPatterns.length === 0) {
+          return true;
+        }
+        return testContext.createError({
+          message: t('Invalid systemd unit names: {{invalidPatterns}}', {
+            invalidPatterns: invalidPatterns.join(', '),
+          }),
+        });
+      })
+      .test('unique patterns', t('Systemd unit names must be unique'), (patterns: string[] | undefined) => {
+        const uniqueKeys = new Set(patterns || []);
+        return uniqueKeys.size === (patterns?.length || 0);
+      }),
+  });
+
 export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDevice: boolean }) =>
   Yup.object({
     displayName: conf.isSingleDevice
@@ -40,9 +75,6 @@ export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDev
     region: Yup.string().required(t('Region is required.')),
     labels: uniqueLabelKeysSchema(t),
   });
-
-export const maxLengthString = (t: TFunction, props: { maxLength: number; fieldName: string }) =>
-  Yup.string().max(props.maxLength, t('{{ fieldName }} must not exceed {{ maxLength }} characters', props));
 
 const K8S_LABEL_REGEXP = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
 

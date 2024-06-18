@@ -6,6 +6,7 @@ import MatchPatternsForm, { MatchPatternsFormValues } from './MatchPatternsForm'
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { deviceSystemdUnitsValidationSchema } from '../../form/validations';
 
 type MatchPatternsModalProps = {
   onClose: (reload?: boolean) => void;
@@ -41,6 +42,7 @@ const MatchPatternsModal: React.FC<MatchPatternsModalProps> = ({ onClose, device
   return (
     <Modal title={t('Edit match patterns')} isOpen onClose={() => onClose()} variant="small">
       <Formik<MatchPatternsFormValues>
+        validationSchema={deviceSystemdUnitsValidationSchema(t)}
         initialValues={{ matchPatterns: device.spec?.systemd?.matchPatterns || [] }}
         onSubmit={async ({ matchPatterns }) => {
           try {

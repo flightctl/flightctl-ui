@@ -1,6 +1,17 @@
 import * as React from 'react';
-import { Alert, Button, Form, Label, LabelGroup } from '@patternfly/react-core';
+import {
+  Alert,
+  Button,
+  Form,
+  FormHelperText,
+  HelperText,
+  HelperTextItem,
+  Label,
+  LabelGroup,
+} from '@patternfly/react-core';
+import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { useFormikContext } from 'formik';
+
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { useTranslation } from '../../../hooks/useTranslation';
 import EditableLabelControl from '../../common/EditableLabelControl';
@@ -16,7 +27,13 @@ export type MatchPatternsFormProps = {
 
 const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error }) => {
   const { t } = useTranslation();
-  const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<MatchPatternsFormValues>();
+  const {
+    values,
+    setFieldValue,
+    submitForm,
+    isSubmitting,
+    errors: formErrors,
+  } = useFormikContext<MatchPatternsFormValues>();
 
   const onPatternClose = (e: React.MouseEvent<Element, MouseEvent>, index: number) => {
     const newMatchPatterns = [...values.matchPatterns];
@@ -35,6 +52,8 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
     void setFieldValue('matchPatterns', newMatchPatterns);
   };
 
+  const hasFormErrors = !!formErrors.matchPatterns;
+
   return (
     <Form
       onSubmit={(e) => {
@@ -44,7 +63,7 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
       <LabelGroup
         isEditable
         addLabelControl={
-          <EditableLabelControl defaultLabel="pattern\\*" addButtonText={t('Add match pattern')} onAddLabel={onAdd} />
+          <EditableLabelControl defaultLabel="name.service" addButtonText={t('Add match pattern')} onAddLabel={onAdd} />
         }
         numLabels={20}
         defaultIsOpen
@@ -62,9 +81,24 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
           </Label>
         ))}
       </LabelGroup>
+      {hasFormErrors && (
+        <FormHelperText>
+          <HelperText>
+            <HelperTextItem icon={<ExclamationCircleIcon />} variant={'error'}>
+              {formErrors.matchPatterns}
+            </HelperTextItem>
+          </HelperText>
+        </FormHelperText>
+      )}
       {error && <Alert isInline title={error} variant="danger" />}
       <FlightCtlActionGroup>
-        <Button key="confirm" variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
+        <Button
+          key="confirm"
+          variant="primary"
+          onClick={submitForm}
+          isDisabled={isSubmitting || hasFormErrors}
+          isLoading={isSubmitting}
+        >
           {t('Update match patterns')}
         </Button>
         <Button key="cancel" variant="link" onClick={() => onClose()} isDisabled={isSubmitting}>
