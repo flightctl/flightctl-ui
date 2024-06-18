@@ -15,7 +15,10 @@ import * as Yup from 'yup';
 import { TFunction } from 'i18next';
 import { isHttpRepoSpec, isSshRepoSpec } from '../../../types/extraTypes';
 import { appendJSONPatch } from '../../../utils/patch';
-import { validKubernetesLabel } from '../../form/validations';
+import { maxLengthString, validKubernetesLabel } from '../../form/validations';
+
+const MAX_TARGET_REVISION_LENGTH = 244;
+const MAX_PATH_LENGTH = 2048;
 
 export const getInitValues = (
   repository?: Repository,
@@ -291,8 +294,13 @@ export const repoSyncSchema = (t: TFunction, values: ResourceSyncFormValue[]) =>
           }
           return values.filter((v) => v.name === value).length === 1;
         }),
-        targetRevision: Yup.string().defined(t('Target revision is required.')),
-        path: Yup.string().matches(pathRegex, t('Must be an absolute path.')).defined(t('Path is required.')),
+        targetRevision: maxLengthString(t, {
+          maxLength: MAX_TARGET_REVISION_LENGTH,
+          fieldName: t('Target revision'),
+        }).defined(t('Target revision is required.')),
+        path: maxLengthString(t, { maxLength: MAX_PATH_LENGTH, fieldName: t('Path') })
+          .matches(pathRegex, t('Must be an absolute path.'))
+          .defined(t('Path is required.')),
       }),
     )
     .required();

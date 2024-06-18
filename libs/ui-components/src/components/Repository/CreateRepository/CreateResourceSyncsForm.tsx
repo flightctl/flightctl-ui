@@ -52,7 +52,9 @@ const CreateResourceSyncsForm = () => {
                 labelIcon={
                   <WithHelperText
                     ariaLabel={t('Path')}
-                    content={t('Absolute path to the file or directory holding the resource definitions.')}
+                    content={t(
+                      'The absolute path of a file or directory in the repository. If a directory, the directory should contain only resource definitions with no subdirectories.',
+                    )}
                   />
                 }
               >

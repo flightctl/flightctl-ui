@@ -41,6 +41,9 @@ export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDev
     labels: uniqueLabelKeysSchema(t),
   });
 
+export const maxLengthString = (t: TFunction, props: { maxLength: number; fieldName: string }) =>
+  Yup.string().max(props.maxLength, t('{{ fieldName }} must not exceed {{ maxLength }} characters', props));
+
 const K8S_LABEL_REGEXP = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
 
 export const validKubernetesLabel = (
@@ -48,8 +51,7 @@ export const validKubernetesLabel = (
   { isRequired, fieldName }: { isRequired: boolean; fieldName?: string },
 ) =>
   isRequired
-    ? Yup.string()
+    ? maxLengthString(t, { maxLength: 63, fieldName: fieldName || t('Name') })
         .defined(t('{{ fieldName }} is required', { fieldName: fieldName || t('Name') }))
         .matches(K8S_LABEL_REGEXP, t('Invalid pattern'))
-        .max(63, t('{{ fieldName }} must not exceed 63 characters', { fieldName: fieldName || t('Name') }))
     : Yup.string();
