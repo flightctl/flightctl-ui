@@ -9,6 +9,7 @@ import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
 import TextField from '../../form/TextField';
 import DisplayName from '../../common/DisplayName';
+import { KubernetesLabelHelperText } from '../../common/HelperTextItems';
 
 export type DeviceEnrollmentFormValues = {
   labels: FlightCtlLabel[];
@@ -41,7 +42,7 @@ const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentR
         <TextField name="region" aria-label={t('Region')} />
       </FormGroup>
       <FormGroup label={t('Name')} isRequired>
-        <TextField name="displayName" aria-label={t('Display name')} />
+        <TextField name="displayName" aria-label={t('Display name')} helperText={<KubernetesLabelHelperText />} />
       </FormGroup>
       {children}
       {error && <Alert isInline title={error} variant="danger" />}

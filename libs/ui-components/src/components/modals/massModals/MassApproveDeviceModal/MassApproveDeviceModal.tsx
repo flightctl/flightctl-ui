@@ -63,7 +63,7 @@ const ApprovedDevicesTable = ({ devices }: { devices: Array<EnrollmentRequest | 
             <Td dataLabel={t('Fingerprint')}>
               <DisplayName name={device.metadata.name} />
             </Td>
-            <Td dataLabel={t('Name')}>{device.metadata.labels?.displayName || '-'}</Td>
+            <Td dataLabel={t('Name')}>{device.metadata.labels?.['display-name'] || '-'}</Td>
           </Tr>
         ))}
       </Tbody>
@@ -119,7 +119,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
     setErrors(undefined);
     const promises = pendingEnrollments.map(async (r, index) => {
       const labels = toAPILabel(values.labels);
-      labels.displayName = templateToName(index, values.displayName);
+      labels['display-name'] = templateToName(index, values.displayName);
       await post<EnrollmentRequestApproval>(`enrollmentrequests/${r.metadata.name}/approval`, {
         approved: true,
         region: values.region,

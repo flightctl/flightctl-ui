@@ -16,7 +16,7 @@ export const sortByCreationTimestamp = <R extends { metadata: ObjectMeta }>(reso
 
 export const sortByDisplayName = <R extends { metadata: ObjectMeta }>(resources: R[]) =>
   resources.sort((a, b) => {
-    const aName = a.metadata.labels?.displayName || '-';
-    const bName = b.metadata.labels?.displayName || '-';
+    const aName = a.metadata.labels?.['display-name'] || '-';
+    const bName = b.metadata.labels?.['display-name'] || '-';
     return aName.localeCompare(bName);
   });

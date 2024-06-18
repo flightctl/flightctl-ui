@@ -11,7 +11,7 @@ import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useFetch } from '../../../hooks/useFetch';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { fromAPILabel } from '../../../utils/labels';
-import { uniqueLabelKeysSchema } from '../../form/validations';
+import { validLabelsSchema } from '../../form/validations';
 import { getUpdatedDevice } from '../../../utils/devices';
 import { getErrorMessage } from '../../../utils/error';
 
@@ -26,7 +26,7 @@ type EditLabelsFormContentProps = {
 
 const getValidationSchema = (t: TFunction) => {
   return Yup.object<EditLabelsFormValues>({
-    labels: uniqueLabelKeysSchema(t),
+    labels: validLabelsSchema(t),
   });
 };
 

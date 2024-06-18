@@ -16,16 +16,16 @@ import {
 } from './types';
 import { API_VERSION } from '../../../constants';
 import { toAPILabel } from '../../../utils/labels';
-import { uniqueLabelKeysSchema, validKubernetesLabel } from '../../form/validations';
+import { maxLengthString, validKubernetesLabel, validLabelsSchema } from '../../form/validations';
 
 const absolutePathRegex = /^\/.*$/;
 
 export const getValidationSchema = (t: TFunction) => {
   return Yup.object<FleetFormValues>({
     name: validKubernetesLabel(t, { isRequired: true }),
-    osImage: Yup.string(),
-    fleetLabels: uniqueLabelKeysSchema(t),
-    labels: uniqueLabelKeysSchema(t),
+    osImage: maxLengthString(t, { fieldName: t('System image'), maxLength: 2048 }),
+    fleetLabels: validLabelsSchema(t),
+    labels: validLabelsSchema(t),
     configTemplates: Yup.array().of(
       Yup.lazy((value: FleetConfigTemplate) => {
         if (isGitConfigTemplate(value)) {
@@ -50,7 +50,7 @@ export const getValidationSchema = (t: TFunction) => {
           return Yup.object<InlineConfigTemplate>().shape({
             type: Yup.string().required(t('Provider type is required.')),
             name: validKubernetesLabel(t, { isRequired: true }),
-            inline: Yup.string()
+            inline: maxLengthString(t, { fieldName: t('Inline config'), maxLength: 65535 })
               .required(t('Inline config is required.'))
               .test('yaml object', t('Inline config must be a valid yaml object.'), (value) => {
                 try {

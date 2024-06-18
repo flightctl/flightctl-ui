@@ -5,7 +5,7 @@ const approvedErStatus = {
     approved: true,
     approvedAt: '2024-04-10T12:13:45Z',
     approvedBy: 'unknown',
-    labels: { displayName: 'east-device', fleet: 'eu-east-prod-001', region: 'spain' },
+    labels: { 'display-name': 'east-device', fleet: 'eu-east-prod-001', region: 'spain' },
     region: 'spain',
   },
   certificate: '-----BEGIN CERTIFICATE-----\nCERTIFICATE CONTENT\n-----END CERTIFICATE-----\n',

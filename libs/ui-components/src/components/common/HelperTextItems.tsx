@@ -8,7 +8,7 @@ export const KubernetesLabelHelperText = () => {
   const { t } = useTranslation();
   return (
     <>
-      {t('Must be a valid Kubernetes label key')}{' '}
+      {t('Must be a valid Kubernetes label')}{' '}
       <Button
         component="a"
         variant="link"

@@ -44,7 +44,7 @@ const DeviceDetails = () => {
   const navigate = useNavigate();
   const { remove } = useFetch();
 
-  const name = (device?.metadata.labels?.displayName || device?.metadata.name) as string;
+  const name = (device?.metadata.labels?.['display-name'] || device?.metadata.name) as string;
 
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {

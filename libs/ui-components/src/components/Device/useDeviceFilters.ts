@@ -7,7 +7,7 @@ import { isEnrollmentRequest } from '../../types/extraTypes';
 
 const getSearchText = (resource: Device | EnrollmentRequest) => [
   resource.metadata.name,
-  resource.metadata.labels?.displayName,
+  resource.metadata.labels?.['display-name'],
 ];
 
 export const useDeviceFilters = (

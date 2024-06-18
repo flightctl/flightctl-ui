@@ -26,7 +26,6 @@ import CheckboxField from '../../form/CheckboxField';
 import RadioField from '../../form/RadioField';
 import TextField from '../../form/TextField';
 
-
 import './CreateRepositoryForm.css';
 
 const AdvancedSection = () => {
