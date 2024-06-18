@@ -15,8 +15,8 @@ import LabelsView from '../../../common/LabelsView';
 import { toAPILabel } from '../../../../utils/labels';
 import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
 import { getAPIConfig } from '../utils';
-import { getSourceItems } from '../../../../utils/fleets';
 import { getErrorMessage } from '../../../../utils/error';
+import { getSourceItems } from '../../../../utils/devices';
 
 export const reviewStepId = 'review';
 

@@ -53,7 +53,6 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
           <Label
             key={index}
             id={`${index}`}
-            color="blue"
             onClose={(e) => onPatternClose(e, index)}
             onEditCancel={(_, prevText) => onEdit(index, prevText)}
             onEditComplete={(_, newText) => onEdit(index, newText)}
