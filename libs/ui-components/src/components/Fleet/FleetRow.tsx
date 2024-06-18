@@ -71,7 +71,7 @@ const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRow
       </Td>
       <Td dataLabel={t('System image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>
       <Td dataLabel={t('Label selector')}>
-        <LabelsView prefix={fleetName} labels={fleet.spec.selector?.matchLabels} />
+        <LabelsView prefix={fleetName} labels={fleet.spec.selector?.matchLabels} variant="collapsed" />
       </Td>
       <Td dataLabel={t('Status')}>
         <FleetStatus fleet={fleet} />

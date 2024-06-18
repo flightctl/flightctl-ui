@@ -15,7 +15,7 @@ type LabelsFieldProps = {
   onChangeCallback?: (newLabels: FlightCtlLabel[], hasErrors: boolean) => void;
 };
 
-const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addButtonText, isEditable }) => {
+const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addButtonText, isEditable = true }) => {
   const [{ value: labels }, meta, { setValue: setLabels }] = useField<FlightCtlLabel[]>(name);
   const { t } = useTranslation();
 
@@ -61,13 +61,13 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addBu
     <>
       <LabelGroup
         numLabels={5}
-        isEditable={isEditable ?? true}
+        isEditable={isEditable}
         addLabelControl={
           <EditableLabelControl
             defaultLabel="key=value"
             addButtonText={addButtonText}
             onAddLabel={onAdd}
-            isEditable={isEditable ?? true}
+            isEditable={isEditable}
           />
         }
       >
@@ -83,7 +83,7 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addBu
             onClose={(e) => onDelete(e, index)}
             onEditCancel={(_, prevText) => onEdit(index, prevText)}
             onEditComplete={(_, newText) => onEdit(index, newText)}
-            isEditable={isEditable ?? true}
+            isEditable={isEditable}
           >
             {value ? `${key}=${value}` : key}
           </Label>
