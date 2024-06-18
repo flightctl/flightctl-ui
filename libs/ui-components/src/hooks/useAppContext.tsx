@@ -36,6 +36,12 @@ export const appRoutes = {
 export type NavLinkFC = React.FC<{ to: string; children: (props: { isActive: boolean }) => React.ReactNode }>;
 export type PromptFC = React.FC<{ message: string }>;
 
+export type JSONPatch<V = unknown> = {
+  op: 'replace' | 'remove' | 'add';
+  path: string;
+  value?: V;
+};
+
 export type AppContextProps = {
   appType: 'standalone' | 'ocp';
   qcow2ImgUrl: string | undefined;
@@ -63,6 +69,7 @@ export type AppContextProps = {
     put: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
     post: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
     remove: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
+    patch: <R>(kind: string, patches: JSONPatch[], abortSignal?: AbortSignal) => Promise<R>;
   };
   metrics: {
     get: <R>(query: string, abortSignal?: AbortSignal) => Promise<R>;
@@ -98,6 +105,8 @@ export const AppContext = React.createContext<AppContextProps>({
     post: async () => ({}) as any,
     // eslint-disable-next-line
     remove: async () => ({}) as any,
+    // eslint-disable-next-line
+    patch: async () => ({}) as any,
   },
   metrics: {
     // eslint-disable-next-line

@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 
+import { JSONPatch } from '@flightctl/ui-components/src/hooks/useAppContext';
+
 const apiServer = `${window.location.protocol}//${window.location.hostname}${
   window.API_PORT ? `:${window.API_PORT}` : ''
 }`;
@@ -88,6 +90,29 @@ export const deleteData = async <R>(kind: string, token: string | undefined, abo
         Authorization: `Bearer ${token}`,
       },
       method: 'DELETE',
+      signal: abortSignal,
+    });
+    return handleApiJSONResponse(response);
+  } catch (error) {
+    console.error('Error making request:', error);
+    throw error;
+  }
+};
+
+export const patchData = async <R>(
+  kind: string,
+  token: string | undefined,
+  data: JSONPatch[],
+  abortSignal?: AbortSignal,
+): Promise<R> => {
+  try {
+    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json-patch+json',
+      },
+      method: 'PATCH',
+      body: JSON.stringify(data),
       signal: abortSignal,
     });
     return handleApiJSONResponse(response);

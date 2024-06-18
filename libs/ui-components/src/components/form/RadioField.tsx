@@ -1,40 +1,37 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { FormGroup, FormHelperText, HelperText, HelperTextItem, TextArea, TextAreaProps } from '@patternfly/react-core';
+import { FormGroup, FormHelperText, HelperText, HelperTextItem, Radio, RadioProps } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
-interface TextAreaFieldProps extends Omit<TextAreaProps, 'onChange'> {
+export interface RadioFieldrops extends Omit<RadioProps, 'onChange' | 'ref' | 'checked'> {
+  checkedValue?: unknown;
   name: string;
   helperText?: React.ReactNode;
-  onChangeCustom?: (value: string) => void;
-  minHeight?: string;
 }
 
-const TextAreaField = ({ helperText, onChangeCustom, minHeight = '10rem', ...props }: TextAreaFieldProps) => {
+const RadioField = ({ helperText, checkedValue, name, ...props }: RadioFieldrops) => {
   const [field, meta, { setValue, setTouched }] = useField({
-    name: props.name,
+    name,
   });
 
-  const onChange: TextAreaProps['onChange'] = async (_, value) => {
-    await setValue(value);
-    if (onChangeCustom) {
-      onChangeCustom(value);
+  const onChange: RadioProps['onChange'] = async (_, checked) => {
+    if (checked) {
+      await setValue(checkedValue || true, true);
+      await setTouched(true);
     }
-    await setTouched(true);
   };
 
-  const fieldId = `textareafield-${props.name}`;
+  const fieldId = `radiofield-${props.id}`;
   const hasError = meta.touched && !!meta.error;
 
   return (
     <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId}>
-      <TextArea
+      <Radio
         {...field}
         {...props}
         id={fieldId}
         onChange={onChange}
-        validated={hasError ? 'error' : 'default'}
-        style={{ minHeight }}
+        isChecked={checkedValue ? field.value === checkedValue : !!field.value}
       />
 
       {helperText && (
@@ -57,6 +54,6 @@ const TextAreaField = ({ helperText, onChangeCustom, minHeight = '10rem', ...pro
   );
 };
 
-TextAreaField.displayName = 'TextAreaField';
+RadioField.displayName = 'RadioField';
 
-export default TextAreaField;
+export default RadioField;

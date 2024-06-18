@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Button, Checkbox, Form, FormGroup, FormSection, Grid } from '@patternfly/react-core';
+import { Alert, Button, Checkbox, Form, FormGroup, FormSection, Grid, Split, SplitItem } from '@patternfly/react-core';
 import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -13,19 +13,84 @@ import CreateResourceSyncsForm from './CreateResourceSyncsForm';
 import {
   getInitValues,
   getRepository,
+  getRepositoryPatches,
   getResourceSync,
   handlePromises,
   repositorySchema,
-  shouldUpdateRepositoryDetails,
 } from './utils';
 import { Repository, ResourceSync } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
 import NameField from '../../form/NameField';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
+import TextAreaField from '../../form/TextAreaField';
+import CheckboxField from '../../form/CheckboxField';
+import RadioField from '../../form/RadioField';
+
+import './CreateRepositoryForm.css';
+
+const AdvacedSection = () => {
+  const { t } = useTranslation();
+  const { values } = useFormikContext<RepositoryFormValues>();
+
+  return (
+    <FormSection>
+      <Split hasGutter>
+        <SplitItem>
+          <RadioField id="http-radio" name="configType" label="HTTP" checkedValue="http" />
+        </SplitItem>
+        <SplitItem>
+          <RadioField id="ssh-radio" name="configType" label="SSH" checkedValue="ssh" />
+        </SplitItem>
+      </Split>
+      {values.configType === 'http' && (
+        <Grid hasGutter className="fctl-create-repo__adv-section">
+          <CheckboxField name="httpConfig.basicAuth.use" label={t('Basic')}>
+            <FormGroup label={t('Username')} isRequired>
+              <TextField name="httpConfig.basicAuth.username" aria-label={t('Username')} />
+            </FormGroup>
+            <FormGroup label={t('Password')} isRequired>
+              <TextField name="httpConfig.basicAuth.password" aria-label={t('Password')} type="password" />
+            </FormGroup>
+          </CheckboxField>
+          <CheckboxField name="httpConfig.mTlsAuth.use" label={t('mTLS')}>
+            <FormGroup label={t('Client TLS certificate')} isRequired>
+              <TextAreaField name="httpConfig.mTlsAuth.tlsCrt" aria-label={t('Client TLS certificate')} />
+            </FormGroup>
+            <FormGroup label={t('Client TLS key')} isRequired>
+              <TextAreaField name="httpConfig.mTlsAuth.tlsKey" aria-label={t('Client TLS key')} />
+            </FormGroup>
+          </CheckboxField>
+          <FormGroup>
+            <CheckboxField name="httpConfig.skipServerVerification" label={t('Skip server verification')} />
+          </FormGroup>
+          <FormGroup label={t('CA certificate')}>
+            <TextAreaField
+              name="httpConfig.caCrt"
+              aria-label={t('Username')}
+              isDisabled={values.httpConfig?.skipServerVerification}
+            />
+          </FormGroup>
+        </Grid>
+      )}
+      {values.configType === 'ssh' && (
+        <Grid hasGutter className="fctl-create-repo__adv-section">
+          <FormGroup label={t('SSH private key')}>
+            <TextAreaField name="sshConfig.sshPrivateKey" aria-label={t('SSH private key')} />
+          </FormGroup>
+          <FormGroup label={t('Private key passphrase')}>
+            <TextField name="sshConfig.privateKeyPassphrase" aria-label={t('Private key passphrase')} type="password" />
+          </FormGroup>
+          <FormGroup>
+            <CheckboxField name="sshConfig.skipServerVerification" label={t('Skip server verification')} />
+          </FormGroup>
+        </Grid>
+      )}
+    </FormSection>
+  );
+};
 
 export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
   const { t } = useTranslation();
-  const { values, setFieldValue, setFieldTouched } = useFormikContext<RepositoryFormValues>();
 
   return (
     <>
@@ -42,54 +107,10 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
         <TextField
           name="url"
           aria-label={t('Repository URL')}
-          value={values.url}
           helperText={t('For example: https://github.com/flightctl/flightctl-demos')}
-          onBlur={() => {
-            // We need to ask the user to enter a new password
-            setFieldTouched('url', true);
-            if (isEdit) {
-              setFieldTouched('password', true);
-            }
-          }}
         />
       </FormGroup>
-      <FormSection>
-        <Checkbox
-          id="private-repository"
-          label={t('This is a private repository')}
-          isChecked={values.isPrivate}
-          onChange={(_, checked) => setFieldValue('isPrivate', checked)}
-        />
-        {values.isPrivate && (
-          <>
-            <FormGroup label={t('Username')} isRequired>
-              <TextField
-                name="username"
-                aria-label={t('Username')}
-                value={values.username}
-                onBlur={() => {
-                  // We need to ask the user to enter a new password
-                  setFieldTouched('username', true);
-                  if (isEdit) {
-                    setFieldTouched('password', true);
-                  }
-                }}
-              />
-            </FormGroup>
-            <FormGroup label={t('Password')} isRequired>
-              <TextField
-                name="password"
-                helperText={
-                  isEdit ? t('Leave the password blank to keep it unchanged. Enter a new password to update it.') : ''
-                }
-                aria-label={t('Password')}
-                value={values.password}
-                type="password"
-              />
-            </FormGroup>
-          </>
-        )}
-      </FormSection>
+      <CheckboxField name="useAdvancedConfig" label={t('Use advanced configurations')} body={<AdvacedSection />} />
     </>
   );
 };
@@ -155,7 +176,7 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
   onSuccess,
 }) => {
   const [errors, setErrors] = React.useState<string[]>();
-  const { put, remove, post } = useFetch();
+  const { put, remove, post, patch } = useFetch();
   const { t } = useTranslation();
 
   return (
@@ -166,9 +187,10 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
       onSubmit={async (values) => {
         setErrors(undefined);
         if (repository) {
+          const patches = getRepositoryPatches(values, repository);
           try {
-            if (shouldUpdateRepositoryDetails(values, repository)) {
-              await put<Repository>(`repositories/${repository.metadata.name}`, getRepository(values));
+            if (patches.length) {
+              await patch<Repository>(`repositories/${repository.metadata.name}`, patches);
             }
             if (values.useResourceSyncs) {
               const storedRSs = resourceSyncs || [];

@@ -1,3 +1,5 @@
+import { RepositoryFormValues } from '../../Repository/CreateRepository/types';
+
 export type ImportFleetRSFormValue = {
   exists: boolean;
   name: string;
@@ -5,13 +7,7 @@ export type ImportFleetRSFormValue = {
   path: string;
 };
 
-export type ImportFleetFormValues = {
+export type ImportFleetFormValues = RepositoryFormValues & {
   useExistingRepo: boolean;
   existingRepo: string;
-  name: string;
-  url: string;
-  isPrivate: boolean;
-  username?: string;
-  password?: string;
-  resourceSyncs: ImportFleetRSFormValue[];
 };

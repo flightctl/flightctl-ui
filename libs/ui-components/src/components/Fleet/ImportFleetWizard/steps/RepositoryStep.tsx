@@ -16,7 +16,14 @@ export const isRepoStepValid = (values: ImportFleetFormValues, errors: FormikErr
   if (values.useExistingRepo) {
     return !errors.existingRepo;
   }
-  return !errors.name && !errors.url && !errors.password && !errors.username;
+  return (
+    !errors.name &&
+    !errors.url &&
+    !errors.configType &&
+    !errors.httpConfig &&
+    !errors.sshConfig &&
+    !errors.useAdvancedConfig
+  );
 };
 
 const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
