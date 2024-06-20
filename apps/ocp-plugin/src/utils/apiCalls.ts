@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import { JSONPatch } from '@flightctl/ui-components/src/hooks/useAppContext';
+import { PatchRequest } from '@flightctl/types';
 
 declare global {
   interface Window {
@@ -93,7 +93,7 @@ export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Pr
   }
 };
 
-export const patchData = async <R>(kind: string, data: JSONPatch[], abortSignal?: AbortSignal): Promise<R> => {
+export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal?: AbortSignal): Promise<R> => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
