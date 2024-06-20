@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { deleteData, fetchData, patchData, postData, putData } from '../utils/apiCalls';
 import { useAuth } from './useAuth';
-import { JSONPatch } from '@flightctl/ui-components/src/hooks/useAppContext';
+import { PatchRequest } from '@flightctl/types';
 
 export const useFetch = () => {
   const auth = useAuth();
@@ -29,7 +29,7 @@ export const useFetch = () => {
   );
 
   const patch = React.useCallback(
-    async <R>(kind: string, obj: JSONPatch[], abortSignal?: AbortSignal): Promise<R> =>
+    async <R>(kind: string, obj: PatchRequest, abortSignal?: AbortSignal): Promise<R> =>
       patchData(kind, userToken, obj, abortSignal),
     [userToken],
   );

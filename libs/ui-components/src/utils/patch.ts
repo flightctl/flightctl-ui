@@ -1,4 +1,4 @@
-import { JSONPatch } from '../hooks/useAppContext';
+import { PatchRequest } from '@flightctl/types';
 import isNil from 'lodash/isNil';
 
 export const appendJSONPatch = <V = unknown>({
@@ -8,7 +8,7 @@ export const appendJSONPatch = <V = unknown>({
   path,
   encodeB64,
 }: {
-  patches: JSONPatch[];
+  patches: PatchRequest;
   newValue: V;
   originalValue: V;
   path: string;

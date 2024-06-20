@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
-
-import { JSONPatch } from '@flightctl/ui-components/src/hooks/useAppContext';
+import { PatchRequest } from '@flightctl/types';
 
 const apiServer = `${window.location.protocol}//${window.location.hostname}${
   window.API_PORT ? `:${window.API_PORT}` : ''
@@ -102,7 +101,7 @@ export const deleteData = async <R>(kind: string, token: string | undefined, abo
 export const patchData = async <R>(
   kind: string,
   token: string | undefined,
-  data: JSONPatch[],
+  data: PatchRequest,
   abortSignal?: AbortSignal,
 ): Promise<R> => {
   try {

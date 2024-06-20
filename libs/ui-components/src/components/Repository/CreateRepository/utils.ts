@@ -3,6 +3,7 @@ import {
   GitHttpRepoSpec,
   GitSshConfig,
   GitSshRepoSpec,
+  PatchRequest,
   Repository,
   RepositorySpec,
   ResourceSync,
@@ -13,7 +14,6 @@ import { getErrorMessage } from '../../../utils/error';
 import * as Yup from 'yup';
 import { TFunction } from 'i18next';
 import { isHttpRepoSpec, isSshRepoSpec } from '../../../types/extraTypes';
-import { JSONPatch } from '../../../hooks/useAppContext';
 import { appendJSONPatch } from '../../../utils/patch';
 
 export const getInitValues = (
@@ -88,8 +88,8 @@ export const getInitValues = (
   return formValues;
 };
 
-export const getRepositoryPatches = (values: RepositoryFormValues, repository: Repository): JSONPatch[] => {
-  const patches: JSONPatch[] = [];
+export const getRepositoryPatches = (values: RepositoryFormValues, repository: Repository): PatchRequest => {
+  const patches: PatchRequest = [];
   appendJSONPatch({
     patches,
     newValue: values.url,

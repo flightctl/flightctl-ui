@@ -13,6 +13,7 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 import { ROUTE } from './useNavigate';
+import { PatchRequest } from '@flightctl/types';
 
 export const appRoutes = {
   [ROUTE.ROOT]: '/',
@@ -35,12 +36,6 @@ export const appRoutes = {
 
 export type NavLinkFC = React.FC<{ to: string; children: (props: { isActive: boolean }) => React.ReactNode }>;
 export type PromptFC = React.FC<{ message: string }>;
-
-export type JSONPatch<V = unknown> = {
-  op: 'replace' | 'remove' | 'add';
-  path: string;
-  value?: V;
-};
 
 export type AppContextProps = {
   appType: 'standalone' | 'ocp';
@@ -69,7 +64,7 @@ export type AppContextProps = {
     put: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
     post: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
     remove: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
-    patch: <R>(kind: string, patches: JSONPatch[], abortSignal?: AbortSignal) => Promise<R>;
+    patch: <R>(kind: string, patches: PatchRequest, abortSignal?: AbortSignal) => Promise<R>;
   };
   metrics: {
     get: <R>(query: string, abortSignal?: AbortSignal) => Promise<R>;
