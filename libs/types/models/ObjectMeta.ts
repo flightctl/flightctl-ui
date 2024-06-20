@@ -28,5 +28,9 @@ export type ObjectMeta = {
    * Properties set by the service.
    */
   annotations?: Record<string, string>;
+  /**
+   * An opaque string that identifies the server's internal version of an object.
+   */
+  resourceVersion?: string;
 };
 

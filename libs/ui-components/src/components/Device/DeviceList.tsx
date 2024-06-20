@@ -10,6 +10,8 @@ import {
 } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons/microchip-icon';
+import { Trans } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 import { useFetch } from '../../hooks/useFetch';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
@@ -19,7 +21,6 @@ import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import AddDeviceModal from './AddDeviceModal/AddDeviceModal';
-import { useTableSort } from '../../hooks/useTableSort';
 import { sortByCreationTimestamp, sortByDisplayName, sortByName } from '../../utils/sort/generic';
 import { sortDevicesByFleet, sortDevicesByStatus } from '../../utils/sort/device';
 import Table, { TableColumn } from '../Table/Table';
@@ -27,17 +28,17 @@ import EnrollmentRequestTableRow from '../EnrollmentRequest/EnrollmentRequestTab
 import DeviceTableToolbar from './DeviceTableToolbar';
 import { useDeviceFilters } from './useDeviceFilters';
 import DeviceTableRow from './DeviceTableRow';
-import { useTableSelect } from '../../hooks/useTableSelect';
 import TableActions from '../Table/TableActions';
 import { getResourceId } from '../../utils/resource';
+import { FilterSearchParams } from '../../utils/status/devices';
 import { isEnrollmentRequest } from '../../types/extraTypes';
 import MassDeleteDeviceModal from '../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
 import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
 import DeviceEnrollmentModal from '../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
-import { Trans } from 'react-i18next';
+import { useTableSort } from '../../hooks/useTableSort';
+import { useTableSelect } from '../../hooks/useTableSelect';
 import { useTranslation } from '../../hooks/useTranslation';
-import { TFunction } from 'i18next';
 import { useAppContext } from '../../hooks/useAppContext';
 import { Link, ROUTE } from '../../hooks/useNavigate';
 
@@ -89,12 +90,12 @@ const getDeviceColumns = (t: TFunction): TableColumn<Device | EnrollmentRequest>
 ];
 
 interface DeviceTableProps {
-  queryFilters: { filterByFleetId: string | undefined };
+  searchParams: URLSearchParams;
   resources: Array<Device | EnrollmentRequest>;
   refetch: VoidFunction;
 }
 
-export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTableProps) => {
+export const DeviceTable = ({ resources, searchParams, refetch }: DeviceTableProps) => {
   const { t } = useTranslation();
   const [requestId, setRequestId] = React.useState<string>();
   const [addDeviceModal, setAddDeviceModal] = React.useState(false);
@@ -104,7 +105,7 @@ export const DeviceTable = ({ resources, queryFilters, refetch }: DeviceTablePro
 
   const deviceColumns = React.useMemo(() => getDeviceColumns(t), [t]);
 
-  const { filteredData, ...rest } = useDeviceFilters(resources, queryFilters);
+  const { filteredData, ...rest } = useDeviceFilters(resources, searchParams);
   const { getSortParams, sortedData } = useTableSort(filteredData, deviceColumns);
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
@@ -225,13 +226,13 @@ const DeviceList = () => {
     router: { useSearchParams },
   } = useAppContext();
   const [searchParams] = useSearchParams();
-  const filterByFleetId = searchParams.get('fleetId') || undefined;
+  const filterByFleetId = searchParams.get(FilterSearchParams.Fleet) || undefined;
 
   const [devicesList, devicesLoading, devicesError, devicesRefetch] = useFetchPeriodically<DeviceList>({
     endpoint: `devices${filterByFleetId ? `?owner=Fleet/${filterByFleetId}` : ''}`,
   });
 
-  const [erList, erLoading, erEror, erRefetch] = useFetchPeriodically<EnrollmentRequestList>({
+  const [erList, erLoading, erError, erRefetch] = useFetchPeriodically<EnrollmentRequestList>({
     endpoint: filterByFleetId ? '' : 'enrollmentrequests',
   });
 
@@ -258,8 +259,8 @@ const DeviceList = () => {
   return (
     <>
       <ListPage title={t('Devices')}>
-        <ListPageBody error={devicesError || erEror} loading={devicesLoading || (erLoading && !filterByFleetId)}>
-          <DeviceTable resources={data} refetch={refetch} queryFilters={{ filterByFleetId }} />
+        <ListPageBody error={devicesError || erError} loading={devicesLoading || (erLoading && !filterByFleetId)}>
+          <DeviceTable resources={data} refetch={refetch} searchParams={searchParams} />
         </ListPageBody>
       </ListPage>
     </>
