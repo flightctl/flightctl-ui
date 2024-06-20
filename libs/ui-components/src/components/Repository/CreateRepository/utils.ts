@@ -1,9 +1,20 @@
-import { Repository, ResourceSync } from '@flightctl/types';
+import {
+  GitHttpConfig,
+  GitHttpRepoSpec,
+  GitSshConfig,
+  GitSshRepoSpec,
+  PatchRequest,
+  Repository,
+  RepositorySpec,
+  ResourceSync,
+} from '@flightctl/types';
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
 import { API_VERSION } from '../../../constants';
 import { getErrorMessage } from '../../../utils/error';
 import * as Yup from 'yup';
 import { TFunction } from 'i18next';
+import { isHttpRepoSpec, isSshRepoSpec } from '../../../types/extraTypes';
+import { appendJSONPatch } from '../../../utils/patch';
 
 export const getInitValues = (
   repository?: Repository,
@@ -15,9 +26,8 @@ export const getInitValues = (
       exists: false,
       name: '',
       url: '',
-      isPrivate: false,
-      username: '',
-      password: '',
+      useAdvancedConfig: false,
+      configType: 'http',
       useResourceSyncs: !hideResourceSyncs,
       resourceSyncs: [
         {
@@ -29,14 +39,13 @@ export const getInitValues = (
     };
   }
 
-  return {
+  const formValues: RepositoryFormValues = {
     exists: true,
     name: repository.metadata.name || '',
     url: repository.spec.repo || '',
-    isPrivate: !!repository.spec.username,
-    username: repository.spec.username,
-    password: '', // Password must be empty in any case as we don't have its value
     useResourceSyncs: !!resourceSyncs?.length,
+    useAdvancedConfig: false,
+    configType: 'http',
     resourceSyncs: resourceSyncs?.length
       ? resourceSyncs
           .filter((rs) => rs.spec.repository === repository.metadata.name)
@@ -48,32 +57,224 @@ export const getInitValues = (
           }))
       : [{ name: '', path: '', targetRevision: '' }],
   };
+
+  if (isHttpRepoSpec(repository.spec)) {
+    formValues.useAdvancedConfig = true;
+    formValues.configType = 'http';
+    formValues.httpConfig = {
+      caCrt: repository.spec.httpConfig['ca.crt'] ? atob(repository.spec.httpConfig['ca.crt']) : undefined,
+      basicAuth: {
+        username: repository.spec.httpConfig.username,
+        password: repository.spec.httpConfig.password,
+        use: !!repository.spec.httpConfig.username || !!repository.spec.httpConfig.password,
+      },
+      mTlsAuth: {
+        tlsCrt: repository.spec.httpConfig['tls.crt'],
+        tlsKey: repository.spec.httpConfig['tls.key'],
+        use: !!repository.spec.httpConfig['tls.crt'] || !!repository.spec.httpConfig['tls.key'],
+      },
+      skipServerVerification: repository.spec.httpConfig.skipServerVerification,
+    };
+  } else if (isSshRepoSpec(repository.spec)) {
+    formValues.useAdvancedConfig = true;
+    formValues.configType = 'ssh';
+    formValues.sshConfig = {
+      privateKeyPassphrase: repository.spec.sshConfig.privateKeyPassphrase,
+      skipServerVerification: repository.spec.sshConfig.skipServerVerification,
+      sshPrivateKey: repository.spec.sshConfig.sshPrivateKey,
+    };
+  }
+
+  return formValues;
 };
 
-export const shouldUpdateRepositoryDetails = (values: RepositoryFormValues, repository: Repository) => {
-  const isStoredPrivate = !!repository.spec.username;
-  const { isPrivate, username, password, url } = values;
+export const getRepositoryPatches = (values: RepositoryFormValues, repository: Repository): PatchRequest => {
+  const patches: PatchRequest = [];
+  appendJSONPatch({
+    patches,
+    newValue: values.url,
+    originalValue: repository.spec.repo,
+    path: '/spec/repo',
+  });
 
-  if (url !== repository.spec.repo) {
-    // Url has changed
-    return true;
-  }
-
-  if (isPrivate !== isStoredPrivate) {
-    // Privacy has changed
-    return true;
-  }
-
-  if (isStoredPrivate) {
-    if (username !== repository.spec.username) {
-      return true;
+  if (!values.useAdvancedConfig) {
+    if (isHttpRepoSpec(repository.spec)) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/httpConfig',
+      });
     }
-    // If the user left the password blank, we shouldn't update it. Only if they typed a new one.
-    if (password) {
-      return true;
+    if (isSshRepoSpec(repository.spec)) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/sshConfig',
+      });
+    }
+    return patches;
+  }
+
+  if (values.configType === 'http') {
+    if (isSshRepoSpec(repository.spec)) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/sshConfig',
+      });
+    }
+    if (!isHttpRepoSpec(repository.spec)) {
+      const value: GitHttpConfig = {
+        skipServerVerification: values.httpConfig?.skipServerVerification,
+      };
+
+      if (values.httpConfig?.caCrt && !value.skipServerVerification) {
+        value['ca.crt'] = btoa(values.httpConfig.caCrt);
+      }
+
+      if (values.httpConfig?.basicAuth?.use) {
+        value.password = values.httpConfig.basicAuth.password;
+        value.username = values.httpConfig.basicAuth.username;
+      }
+      if (values.httpConfig?.mTlsAuth?.use) {
+        if (values.httpConfig.mTlsAuth.tlsCrt) {
+          value['tls.crt'] = btoa(values.httpConfig.mTlsAuth.tlsCrt);
+        }
+        if (values.httpConfig.mTlsAuth.tlsKey) {
+          value['tls.key'] = btoa(values.httpConfig.mTlsAuth.tlsKey);
+        }
+      }
+      patches.push({
+        op: 'add',
+        path: '/spec/httpConfig',
+        value,
+      });
+    } else {
+      appendJSONPatch({
+        patches,
+        newValue: values.httpConfig?.skipServerVerification,
+        originalValue: repository.spec.httpConfig.skipServerVerification,
+        path: '/spec/httpConfig/skipServerVerification',
+      });
+      if (values.httpConfig?.skipServerVerification) {
+        if (repository.spec.httpConfig['ca.crt']) {
+          patches.push({
+            op: 'remove',
+            path: '/spec/httpConfig/ca.crt',
+          });
+        }
+      } else {
+        const caCrt = values.httpConfig?.caCrt;
+        appendJSONPatch({
+          patches,
+          newValue: caCrt ? btoa(caCrt) : caCrt,
+          originalValue: repository.spec.httpConfig['ca.crt'],
+          path: '/spec/httpConfig/ca.crt',
+        });
+      }
+
+      if (!values.httpConfig?.basicAuth?.use) {
+        if (repository.spec.httpConfig.password) {
+          patches.push({
+            op: 'remove',
+            path: '/spec/httpConfig/password',
+          });
+        }
+        if (repository.spec.httpConfig.username) {
+          patches.push({
+            op: 'remove',
+            path: '/spec/httpConfig/username',
+          });
+        }
+      } else {
+        appendJSONPatch({
+          patches,
+          newValue: values.httpConfig?.basicAuth.password,
+          originalValue: repository.spec.httpConfig.password,
+          path: '/spec/httpConfig/password',
+        });
+        appendJSONPatch({
+          patches,
+          newValue: values.httpConfig?.basicAuth.username,
+          originalValue: repository.spec.httpConfig.username,
+          path: '/spec/httpConfig/username',
+        });
+      }
+
+      if (!values.httpConfig?.mTlsAuth?.use) {
+        if (repository.spec.httpConfig['tls.crt']) {
+          patches.push({
+            op: 'remove',
+            path: '/spec/httpConfig/tls.crt',
+          });
+        }
+        if (repository.spec.httpConfig['tls.key']) {
+          patches.push({
+            op: 'remove',
+            path: '/spec/httpConfig/tls.key',
+          });
+        }
+      } else {
+        appendJSONPatch({
+          patches,
+          newValue: values.httpConfig?.mTlsAuth.tlsCrt,
+          originalValue: repository.spec.httpConfig['tls.crt'],
+          path: '/spec/httpConfig/tls.crt',
+          encodeB64: true,
+        });
+        appendJSONPatch({
+          patches,
+          newValue: values.httpConfig?.mTlsAuth.tlsKey,
+          originalValue: repository.spec.httpConfig['tls.key'],
+          path: '/spec/httpConfig/tls.key',
+          encodeB64: true,
+        });
+      }
+    }
+  } else if (values.configType === 'ssh') {
+    if (isHttpRepoSpec(repository.spec)) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/httpConfig',
+      });
+    }
+    if (!isSshRepoSpec(repository.spec)) {
+      const value: GitSshConfig = {
+        privateKeyPassphrase: values.sshConfig?.privateKeyPassphrase,
+        skipServerVerification: values.sshConfig?.skipServerVerification,
+      };
+      if (values.sshConfig?.sshPrivateKey) {
+        value.sshPrivateKey = btoa(values.sshConfig.sshPrivateKey);
+      }
+
+      patches.push({
+        op: 'add',
+        path: '/spec/sshConfig',
+        value,
+      });
+    } else {
+      appendJSONPatch({
+        patches,
+        newValue: values.sshConfig?.privateKeyPassphrase,
+        originalValue: repository.spec.sshConfig.privateKeyPassphrase,
+        path: '/spec/sshConfig/privateKeyPassphrase',
+      });
+
+      appendJSONPatch({
+        patches,
+        newValue: values.sshConfig?.skipServerVerification,
+        originalValue: repository.spec.sshConfig.skipServerVerification,
+        path: '/spec/sshConfig/skipServerVerification',
+      });
+
+      appendJSONPatch({
+        patches,
+        newValue: values.sshConfig?.sshPrivateKey,
+        originalValue: repository.spec.sshConfig.sshPrivateKey,
+        path: '/spec/sshConfig/sshPrivateKey',
+        encodeB64: true,
+      });
     }
   }
-  return false;
+
+  return patches;
 };
 
 const gitRegex = new RegExp(/^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/);
@@ -111,59 +312,63 @@ export const repositorySchema =
       url: Yup.string()
         .matches(gitRegex, t('Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos'))
         .defined(t('Repository URL is required')),
-      isPrivate: Yup.boolean().required(),
-      username: Yup.string()
-        .trim()
-        .when('isPrivate', {
-          is: true,
-          then: (schema) => schema.required(t('Username is required for private repositories')),
+      configType: values.useAdvancedConfig ? Yup.string().required(t('Repository type is required')) : Yup.string(),
+      httpConfig: Yup.object({
+        basicAuth: Yup.object({
+          username: values.httpConfig?.basicAuth?.use ? Yup.string().required(t('Username is required')) : Yup.string(),
+          password: values.httpConfig?.basicAuth?.use ? Yup.string().required(t('Password is required')) : Yup.string(),
         }),
-      password: Yup.string()
-        .trim()
-        .test(
-          'enter-new-user-password',
-          t("The repository's username or URL has changed. Please enter the new password."),
-          (password: string | undefined, context: Yup.TestContext) => {
-            // This check handles only the edition of existing private repositories
-            const updatedDetails = context.parent as RepositoryFormValues;
-            if (!repository || !updatedDetails.isPrivate) {
-              return true;
-            }
-
-            const shouldReenterPassword =
-              updatedDetails.username !== repository?.spec.username || updatedDetails.url !== repository?.spec.repo;
-
-            return Boolean(!shouldReenterPassword || password);
-          },
-        )
-        .test(
-          'password-is-needed',
-          t('Password is required for private repositories'),
-          (password: string | undefined, context: Yup.TestContext) => {
-            // This check handles only the creation of private repositories
-            const updatedDetails = context.parent as RepositoryFormValues;
-            if (repository || !updatedDetails.isPrivate) {
-              return true;
-            }
-
-            return Boolean(password);
-          },
-        ),
-
+        mTlsAuth: Yup.object({
+          tlsCrt: values.httpConfig?.mTlsAuth?.use
+            ? Yup.string().required(t('Client TLS certificate is required'))
+            : Yup.string(),
+          tlsKey: values.httpConfig?.mTlsAuth?.use
+            ? Yup.string().required(t('Client TLS key is required'))
+            : Yup.string(),
+        }),
+      }),
       useResourceSyncs: Yup.boolean(),
       resourceSyncs: values.useResourceSyncs ? repoSyncSchema(t, values.resourceSyncs) : Yup.array(),
     });
   };
 
-export const getRepository = (
-  values: Pick<RepositoryFormValues, 'name' | 'url' | 'username' | 'password' | 'isPrivate'>,
-) => {
-  const spec: Partial<Repository['spec']> = {
+export const getRepository = (values: Omit<RepositoryFormValues, 'useResourceSyncs' | 'resourceSyncs'>): Repository => {
+  const spec: RepositorySpec = {
     repo: values.url,
   };
-  if (values.isPrivate) {
-    spec.username = values.username;
-    spec.password = values.password;
+  if (values.configType === 'http' && values.httpConfig) {
+    (spec as GitHttpRepoSpec).httpConfig = {
+      skipServerVerification: values.httpConfig.skipServerVerification,
+    };
+    const caCrt = values.httpConfig.caCrt;
+    if (caCrt && !values.httpConfig.skipServerVerification) {
+      (spec as GitHttpRepoSpec).httpConfig['ca.crt'] = btoa(caCrt);
+    }
+    if (values.httpConfig.basicAuth?.use) {
+      (spec as GitHttpRepoSpec).httpConfig.username = values.httpConfig.basicAuth.username;
+      (spec as GitHttpRepoSpec).httpConfig.password = values.httpConfig.basicAuth.password;
+    }
+
+    if (values.httpConfig.mTlsAuth?.use) {
+      const tlsCrt = values.httpConfig.mTlsAuth.tlsCrt;
+      if (tlsCrt) {
+        (spec as GitHttpRepoSpec).httpConfig['tls.crt'] = btoa(tlsCrt);
+      }
+      const tlsKey = values.httpConfig.mTlsAuth.tlsKey;
+      if (tlsKey) {
+        (spec as GitHttpRepoSpec).httpConfig['tls.key'] = btoa(tlsKey);
+      }
+    }
+  } else if (values.configType === 'ssh' && values.sshConfig) {
+    (spec as GitSshRepoSpec).sshConfig = {
+      privateKeyPassphrase: values.sshConfig.privateKeyPassphrase,
+      skipServerVerification: values.sshConfig.skipServerVerification,
+    };
+
+    const sshPrivateKey = values.sshConfig.sshPrivateKey;
+    if (sshPrivateKey) {
+      (spec as GitSshRepoSpec).sshConfig.sshPrivateKey = btoa(sshPrivateKey);
+    }
   }
 
   return {
@@ -172,9 +377,7 @@ export const getRepository = (
     metadata: {
       name: values.name,
     },
-    spec: {
-      ...spec,
-    },
+    spec,
   };
 };
 

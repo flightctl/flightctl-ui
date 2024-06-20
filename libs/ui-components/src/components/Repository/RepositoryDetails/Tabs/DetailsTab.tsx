@@ -19,6 +19,37 @@ import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../
 import { Repository } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import RepositorySource from '../RepositorySource';
+import { isHttpRepoSpec, isSshRepoSpec } from '../../../../types/extraTypes';
+
+const RepoPrivacy = ({ repo }: { repo: Repository }) => {
+  const { t } = useTranslation();
+  let isPrivate = false;
+  if (isHttpRepoSpec(repo.spec)) {
+    if (repo.spec.httpConfig.password || repo.spec.httpConfig['tls.crt'] || repo.spec.httpConfig['tls.key']) {
+      isPrivate = true;
+    }
+  } else if (isSshRepoSpec(repo.spec)) {
+    if (repo.spec.sshConfig.sshPrivateKey) {
+      isPrivate = true;
+    }
+  }
+
+  return isPrivate ? (
+    <>
+      <Icon status="success">
+        <LockedIcon />
+      </Icon>{' '}
+      {t('Repository is private')}
+    </>
+  ) : (
+    <>
+      <Icon status="success">
+        <LockOpenIcon />
+      </Icon>{' '}
+      {t('Repository is public')}
+    </>
+  );
+};
 
 const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
   const { t } = useTranslation();
@@ -49,27 +80,9 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('Username')}</DescriptionListTerm>
-                <DescriptionListDescription>{repoDetails?.spec.username || '-'}</DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
                 <DescriptionListTerm>{t('Privacy')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {repoDetails?.spec.password ? (
-                    <>
-                      <Icon status="success">
-                        <LockedIcon />
-                      </Icon>{' '}
-                      {t('Repository is private')}
-                    </>
-                  ) : (
-                    <>
-                      <Icon status="success">
-                        <LockOpenIcon />
-                      </Icon>{' '}
-                      {t('Repository is public')}
-                    </>
-                  )}
+                  <RepoPrivacy repo={repoDetails} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>

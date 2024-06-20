@@ -13,6 +13,7 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 import { ROUTE } from './useNavigate';
+import { PatchRequest } from '@flightctl/types';
 
 export const appRoutes = {
   [ROUTE.ROOT]: '/',
@@ -63,6 +64,7 @@ export type AppContextProps = {
     put: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
     post: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
     remove: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
+    patch: <R>(kind: string, patches: PatchRequest, abortSignal?: AbortSignal) => Promise<R>;
   };
   metrics: {
     get: <R>(query: string, abortSignal?: AbortSignal) => Promise<R>;
@@ -98,6 +100,8 @@ export const AppContext = React.createContext<AppContextProps>({
     post: async () => ({}) as any,
     // eslint-disable-next-line
     remove: async () => ({}) as any,
+    // eslint-disable-next-line
+    patch: async () => ({}) as any,
   },
   metrics: {
     // eslint-disable-next-line

@@ -26,6 +26,7 @@ import { ImportFleetFormValues } from './types';
 import { useFetch } from '../../../hooks/useFetch';
 import { Repository, RepositoryList, ResourceSync } from '@flightctl/types';
 import {
+  getInitValues,
   getRepository,
   getResourceSync,
   handlePromises,
@@ -113,22 +114,13 @@ const ImportFleetWizard = () => {
       </Alert>
     );
   } else {
+    const repoInitValues = getInitValues();
     body = (
       <Formik<ImportFleetFormValues>
         initialValues={{
           useExistingRepo: false,
           existingRepo: '',
-          name: '',
-          isPrivate: false,
-          resourceSyncs: [
-            {
-              exists: false,
-              name: '',
-              path: '',
-              targetRevision: '',
-            },
-          ],
-          url: '',
+          ...repoInitValues,
         }}
         validationSchema={validationSchema(t)}
         validateOnMount

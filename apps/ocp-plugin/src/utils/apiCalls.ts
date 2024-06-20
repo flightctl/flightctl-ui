@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 
+import { PatchRequest } from '@flightctl/types';
+
 declare global {
   interface Window {
     FCTL_API_PORT?: string;
@@ -34,16 +36,9 @@ const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   throw new Error(`Error ${response.status}: ${response.statusText}${errorText}`);
 };
 
-export const fetchMetrics = async <R>(
-  metricQuery: string,
-  token: string | undefined,
-  abortSignal?: AbortSignal,
-): Promise<R> => {
+export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
     const response = await fetch(`${metricsAPI}/api/v1/query_range?${metricQuery}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       signal: abortSignal,
     });
     return handleApiJSONResponse(response);
@@ -53,11 +48,10 @@ export const fetchMetrics = async <R>(
   }
 };
 
-export const postData = async <R>(kind: string, token: string | undefined, data: R): Promise<R> => {
+export const postData = async <R>(kind: string, data: R): Promise<R> => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       method: 'POST',
@@ -70,11 +64,10 @@ export const postData = async <R>(kind: string, token: string | undefined, data:
   }
 };
 
-export const putData = async <R>(kind: string, token: string | undefined, data: R): Promise<R> => {
+export const putData = async <R>(kind: string, data: R): Promise<R> => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       method: 'PUT',
@@ -87,12 +80,9 @@ export const putData = async <R>(kind: string, token: string | undefined, data: 
   }
 };
 
-export const deleteData = async <R>(kind: string, token: string | undefined, abortSignal?: AbortSignal): Promise<R> => {
+export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       method: 'DELETE',
       signal: abortSignal,
     });
@@ -103,12 +93,26 @@ export const deleteData = async <R>(kind: string, token: string | undefined, abo
   }
 };
 
-export const fetchData = async <R>(kind: string, token: string | undefined, abortSignal?: AbortSignal): Promise<R> => {
+export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal?: AbortSignal): Promise<R> => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json-patch+json',
       },
+      method: 'PATCH',
+      body: JSON.stringify(data),
+      signal: abortSignal,
+    });
+    return handleApiJSONResponse(response);
+  } catch (error) {
+    console.error('Error making request:', error);
+    throw error;
+  }
+};
+
+export const fetchData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
+  try {
+    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
       signal: abortSignal,
     });
     return handleApiJSONResponse(response);
