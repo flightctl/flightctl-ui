@@ -54,6 +54,4 @@ const RadioField = ({ helperText, checkedValue, name, ...props }: RadioFieldrops
   );
 };
 
-RadioField.displayName = 'RadioField';
-
 export default RadioField;

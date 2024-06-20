@@ -52,6 +52,4 @@ const CheckboxField = ({ helperText, onChangeCustom, children, ...props }: Check
   );
 };
 
-CheckboxField.displayName = 'CheckboxField';
-
 export default CheckboxField;
