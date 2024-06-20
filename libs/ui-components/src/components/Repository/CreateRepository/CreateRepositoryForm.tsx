@@ -28,7 +28,7 @@ import RadioField from '../../form/RadioField';
 
 import './CreateRepositoryForm.css';
 
-const AdvacedSection = () => {
+const AdvancedSection = () => {
   const { t } = useTranslation();
   const { values } = useFormikContext<RepositoryFormValues>();
 
@@ -110,7 +110,7 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
           helperText={t('For example: https://github.com/flightctl/flightctl-demos')}
         />
       </FormGroup>
-      <CheckboxField name="useAdvancedConfig" label={t('Use advanced configurations')} body={<AdvacedSection />} />
+      <CheckboxField name="useAdvancedConfig" label={t('Use advanced configurations')} body={<AdvancedSection />} />
     </>
   );
 };
