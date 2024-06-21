@@ -185,17 +185,20 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
                     selectedFilters={filters.statuses}
                   />
                 </SelectGroup>
-                <SelectGroup label={t('Application status')}>
-                  <DeviceStatusFilterSelect
-                    type={FilterSearchParams.App}
-                    items={statusesItems}
-                    selectedFilters={filters.statuses}
-                  />
-                </SelectGroup>
+                {/*
+                  <SelectGroup label={t('Application status')}>
+                    <DeviceStatusFilterSelect
+                      type={FilterSearchParams.App}
+                      items={statusesItems}
+                      selectedFilters={filters.statuses}
+                    />
+                  </SelectGroup>
+                */}
               </SelectList>
             </Select>
           </ToolbarFilter>
         </ToolbarGroup>
+        {/*
         <ToolbarGroup variant="filter-group">
           <ToolbarItem variant="search-filter">
             <ToolbarFilter
@@ -211,6 +214,7 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
             </ToolbarFilter>
           </ToolbarItem>
         </ToolbarGroup>
+        */}
         <ToolbarGroup variant="filter-group">
           <ToolbarItem variant="search-filter">
             <ToolbarFilter

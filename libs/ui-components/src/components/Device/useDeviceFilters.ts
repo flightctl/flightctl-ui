@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Device, EnrollmentRequest } from '@flightctl/types';
+import { Device /*, DeviceWorkloadSummaryType*/, EnrollmentRequest } from '@flightctl/types';
 
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import { isEnrollmentRequest } from '../../types/extraTypes';
@@ -27,7 +27,14 @@ export const useDeviceFilters = (resources: Array<Device | EnrollmentRequest>, s
         statuses.push(`${FilterSearchParams.Current}#${status}`);
       }
     });
-    // TODO Replace "current" with the new statuses
+    // TODO do the same for the other statuses
+    // const appStatuses = searchParams.getAll(FilterSearchParams.App) || [];
+    // appStatuses.forEach((status) => {
+    //   if (validAppStatuses.includes(status)) {
+    //     statuses.push(`${FilterSearchParams.App}#${status}`);
+    //   }
+    // });
+
     return statuses;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParamValue]);
