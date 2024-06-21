@@ -1,18 +1,25 @@
 import * as React from 'react';
-import { Device /*, DeviceWorkloadSummaryType*/, EnrollmentRequest } from '@flightctl/types';
+import {
+  Device,
+  DeviceSystemSummaryStatusType,
+  DeviceUpdateStatusType,
+  DeviceWorkloadSummaryType,
+  EnrollmentRequest,
+} from '@flightctl/types';
 
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import { isEnrollmentRequest } from '../../types/extraTypes';
 import { getDeviceStatus } from '../../utils/status/device';
-import { CurrentStatusIds, FilterSearchParams } from '../../utils/status/devices';
+import { FilterSearchParams } from '../../utils/status/devices';
 
 const getSearchText = (resource: Device | EnrollmentRequest) => [
   resource.metadata.name,
   resource.metadata.labels?.displayName,
 ];
 
-const validCurrentStatuses = Object.values(CurrentStatusIds) as string[];
-// const validAppStatuses = Object.values(DeviceWorkloadSummaryType) as string[];
+const validDeviceStatuses = Object.values(DeviceSystemSummaryStatusType) as string[];
+const validAppStatuses = Object.values(DeviceWorkloadSummaryType) as string[];
+const validUpdateStatuses = Object.values(DeviceUpdateStatusType) as string[];
 
 export const useDeviceFilters = (resources: Array<Device | EnrollmentRequest>, searchParams: URLSearchParams) => {
   const fleetId = searchParams.get(FilterSearchParams.Fleet) || undefined;
@@ -21,19 +28,25 @@ export const useDeviceFilters = (resources: Array<Device | EnrollmentRequest>, s
 
   const statuses = React.useMemo(() => {
     const statuses: string[] = [];
-    const currentStatuses = searchParams.getAll(FilterSearchParams.Current) || [];
-    currentStatuses.forEach((status) => {
-      if (validCurrentStatuses.includes(status)) {
-        statuses.push(`${FilterSearchParams.Current}#${status}`);
+    const deviceStatuses = searchParams.getAll(FilterSearchParams.Device) || [];
+    deviceStatuses.forEach((status) => {
+      if (validDeviceStatuses.includes(status)) {
+        statuses.push(`${FilterSearchParams.Device}#${status}`);
       }
     });
-    // TODO do the same for the other statuses
-    // const appStatuses = searchParams.getAll(FilterSearchParams.App) || [];
-    // appStatuses.forEach((status) => {
-    //   if (validAppStatuses.includes(status)) {
-    //     statuses.push(`${FilterSearchParams.App}#${status}`);
-    //   }
-    // });
+    const appStatuses = searchParams.getAll(FilterSearchParams.App) || [];
+    appStatuses.forEach((status) => {
+      if (validAppStatuses.includes(status)) {
+        statuses.push(`${FilterSearchParams.App}#${status}`);
+      }
+    });
+
+    const updateStatuses = searchParams.getAll(FilterSearchParams.Update) || [];
+    updateStatuses.forEach((status) => {
+      if (validUpdateStatuses.includes(status)) {
+        statuses.push(`${FilterSearchParams.Update}#${status}`);
+      }
+    });
 
     return statuses;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,11 +59,11 @@ export const useDeviceFilters = (resources: Array<Device | EnrollmentRequest>, s
           return true;
         }
         if (isEnrollmentRequest(resource)) {
-          return statuses.includes(`${FilterSearchParams.Current}#Pending`);
+          return statuses.includes(`${FilterSearchParams.Device}#Pending`);
         }
 
         const deviceStatus = getDeviceStatus(resource);
-        return statuses.includes(`${FilterSearchParams.Current}#${deviceStatus}`);
+        return statuses.includes(`${FilterSearchParams.Device}#${deviceStatus}`);
       }),
     [resources, statuses],
   );

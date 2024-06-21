@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { TFunction } from 'react-i18next';
 import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons';
 import { SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
@@ -11,44 +12,20 @@ import { StatusLabelColor } from '../../components/common/StatusLabel';
 
 export enum FilterSearchParams {
   Fleet = 'fleetId',
-  Current = 'status',
   Device = 'devSt',
   App = 'appSt',
   Update = 'updSt',
 }
 
-// TODO Remove these statuses when the new status API is available
-export enum CurrentStatusIds {
-  Approved = 'Approved',
-  Available = 'Available',
-  Degraded = 'Degraded',
-  Denied = 'Denied',
-  Pending = 'Pending',
-  Progressing = 'Progressing',
-  Valid = 'SpecValid',
-  Unavailable = 'Unavailable',
-  Unknown = 'Unknown',
-}
-
 export interface StatusFilterItem {
   type: FilterSearchParams;
-  id: CurrentStatusIds | DeviceStatus | AppStatus | UpdateStatus;
+  id: DeviceStatus | AppStatus | UpdateStatus;
   label: string;
   iconType: StatusLabelColor;
   customIcon?: React.ComponentClass<SVGIconProps>;
 }
 
 export const getDeviceStatusItems = (t: TFunction): StatusFilterItem[] => [
-  // Soon to be deprecated statuses
-  { type: FilterSearchParams.Current, id: CurrentStatusIds.Approved, label: t('Approved'), iconType: 'success' },
-  { type: FilterSearchParams.Current, id: CurrentStatusIds.Available, label: t('Available'), iconType: 'success' },
-  { type: FilterSearchParams.Current, id: CurrentStatusIds.Valid, label: t('Valid'), iconType: 'success' },
-  { type: FilterSearchParams.Current, id: CurrentStatusIds.Unavailable, label: t('Unavailable'), iconType: 'danger' },
-  { type: FilterSearchParams.Current, id: CurrentStatusIds.Denied, label: t('Denied'), iconType: 'danger' },
-  { type: FilterSearchParams.Current, id: CurrentStatusIds.Degraded, label: t('Degraded'), iconType: 'warning' },
-  { type: FilterSearchParams.Current, id: CurrentStatusIds.Pending, label: t('Pending approval'), iconType: 'info' },
-  { type: FilterSearchParams.Current, id: CurrentStatusIds.Progressing, label: t('Progressing'), iconType: 'info' },
-  { type: FilterSearchParams.Current, id: CurrentStatusIds.Unknown, label: t('Unknown'), iconType: 'unknown' },
   // Device statuses
   {
     type: FilterSearchParams.Device,
