@@ -15,7 +15,7 @@ import TerminalTab from './TerminalTab';
 import NavItem from '../../NavItem/NavItem';
 import DeviceStatusDebugModal from './DeviceStatusDebugModal';
 
-const DeviceDetailsPage = () => {
+const DeviceDetailsPage = ({ children }: React.PropsWithChildren<Record<never, never>>) => {
   const { t } = useTranslation();
   const {
     router: { useParams, Routes, Route, Navigate },
@@ -79,7 +79,11 @@ const DeviceDetailsPage = () => {
           <Route index element={<Navigate to="details" replace />} />
           <Route
             path="details"
-            element={<DeviceDetailsTab device={device} errorTv={errorTv} tv={tv} refetch={refetch} />}
+            element={
+              <DeviceDetailsTab device={device} errorTv={errorTv} tv={tv} refetch={refetch}>
+                {children}
+              </DeviceDetailsTab>
+            }
           />
           <Route path="terminal" element={<TerminalTab device={device} />} />
         </Routes>
