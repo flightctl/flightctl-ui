@@ -32,7 +32,7 @@ import { getSourceItems } from '../../../utils/devices';
 import { useTemplateVersion } from '../../../hooks/useTemplateVersion';
 import { getErrorMessage } from '../../../utils/error';
 
-const DeviceDetails = () => {
+const DeviceDetails = ({ children }: React.PropsWithChildren) => {
   const { t } = useTranslation();
   const {
     router: { useParams },
@@ -91,6 +91,7 @@ const DeviceDetails = () => {
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 {device && <EditLabelsForm device={device} onDeviceUpdate={refetch} />}
+                {children}
               </DescriptionList>
             </DetailsPageCardBody>
           </DetailsPageCard>
