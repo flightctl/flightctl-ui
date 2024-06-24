@@ -7,6 +7,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 
 import TextField from '../../form/TextField';
 import WithHelperText from '../../common/WithHelperText';
+import { KubernetesLabelHelperText } from '../../common/HelperTextItems';
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
 import NameField from '../../form/NameField';
 
@@ -26,6 +27,7 @@ const CreateResourceSyncsForm = () => {
                   aria-label={t('Resource sync name')}
                   value={resourceSync.name}
                   isDisabled={resourceSync.exists}
+                  helperText={<KubernetesLabelHelperText />}
                   getExistsErrMsg={(name) => t(`A resource sync named "{{name}}" already exists`, { name })}
                   resourceType="resourcesyncs"
                 />
@@ -50,7 +52,9 @@ const CreateResourceSyncsForm = () => {
                 labelIcon={
                   <WithHelperText
                     ariaLabel={t('Path')}
-                    content={t('Absolute path to the file or directory holding the resource definitions.')}
+                    content={t(
+                      'The absolute path of a file or directory in the repository. If a directory, the directory should contain only resource definitions with no subdirectories.',
+                    )}
                   />
                 }
               >

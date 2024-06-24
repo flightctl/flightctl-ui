@@ -35,6 +35,7 @@ import FormSelect from '../../../form/FormSelect';
 import CreateRepositoryModal from '../../../modals/CreateRepositoryModal/CreateRepositoryModal';
 import { sortByName } from '../../../../utils/sort/generic';
 import WithTooltip from '../../../common/WithTooltip';
+import { IgnitionFileHelperText, KubernetesLabelHelperText } from '../../../common/HelperTextItems';
 
 import './ConfigTemplateForm.css';
 
@@ -151,7 +152,7 @@ const InlineConfigForm: React.FC<ConfigFormProps> = ({ index }) => {
   const { t } = useTranslation();
   return (
     <FormGroup label={t('Inline')} isRequired>
-      <TextAreaField name={`configTemplates.${index}.inline`} />
+      <TextAreaField name={`configTemplates.${index}.inline`} helperText={<IgnitionFileHelperText />} />
     </FormGroup>
   );
 };
@@ -199,7 +200,12 @@ const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionPr
     >
       <Grid hasGutter>
         <FormGroup label={t('Source name')} isRequired>
-          <TextField aria-label={t('Source name')} name={`${fieldName}.name`} value={ct.name} />
+          <TextField
+            aria-label={t('Source name')}
+            name={`${fieldName}.name`}
+            value={ct.name}
+            helperText={<KubernetesLabelHelperText />}
+          />
         </FormGroup>
         <FormGroup label={t('Source type')} isRequired>
           <FormSelect

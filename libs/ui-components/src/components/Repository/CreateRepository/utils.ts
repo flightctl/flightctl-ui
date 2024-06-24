@@ -15,6 +15,10 @@ import * as Yup from 'yup';
 import { TFunction } from 'i18next';
 import { isHttpRepoSpec, isSshRepoSpec } from '../../../types/extraTypes';
 import { appendJSONPatch } from '../../../utils/patch';
+import { maxLengthString, validKubernetesLabel } from '../../form/validations';
+
+const MAX_TARGET_REVISION_LENGTH = 244;
+const MAX_PATH_LENGTH = 2048;
 
 export const getInitValues = (
   repository?: Repository,
@@ -278,23 +282,25 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
 };
 
 const gitRegex = new RegExp(/^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/);
-const repoNameRegex = /^[a-zA-Z0-9-_\\.]+$/;
 const pathRegex = /\/.+/;
 
 export const repoSyncSchema = (t: TFunction, values: ResourceSyncFormValue[]) => {
   return Yup.array()
     .of(
       Yup.object().shape({
-        name: Yup.string()
-          .defined(t('Name is required.'))
-          .test('Must be unique', t('Must be unique'), (value) => {
-            if (!value) {
-              return true;
-            }
-            return values.filter((v) => v.name === value).length === 1;
-          }),
-        targetRevision: Yup.string().defined(t('Target revision is required.')),
-        path: Yup.string().matches(pathRegex, t('Must be an absolute path.')).defined(t('Path is required.')),
+        name: validKubernetesLabel(t, { isRequired: true }).test('Must be unique', t('Must be unique'), (value) => {
+          if (!value) {
+            return true;
+          }
+          return values.filter((v) => v.name === value).length === 1;
+        }),
+        targetRevision: maxLengthString(t, {
+          maxLength: MAX_TARGET_REVISION_LENGTH,
+          fieldName: t('Target revision'),
+        }).defined(t('Target revision is required.')),
+        path: maxLengthString(t, { maxLength: MAX_PATH_LENGTH, fieldName: t('Path') })
+          .matches(pathRegex, t('Must be an absolute path.'))
+          .defined(t('Path is required.')),
       }),
     )
     .required();
@@ -303,12 +309,7 @@ export const repoSyncSchema = (t: TFunction, values: ResourceSyncFormValue[]) =>
 export const repositorySchema =
   (t: TFunction, repository: Repository | undefined) => (values: RepositoryFormValues) => {
     return Yup.object({
-      name: repository
-        ? Yup.string()
-        : Yup.string()
-            .defined(t('Name is required'))
-            .matches(repoNameRegex, t('Name can only contain alphanumeric characters, and the characters ., -, and _.'))
-            .max(255, t('Name must not exceed 255 characters')),
+      name: validKubernetesLabel(t, { isRequired: !repository }),
       url: Yup.string()
         .matches(gitRegex, t('Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos'))
         .defined(t('Repository URL is required')),
