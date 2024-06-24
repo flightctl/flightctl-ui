@@ -28,7 +28,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const deviceName = device.metadata.name as string;
-  const displayName = device.metadata.labels?.['display-name'];
+  const displayName = device.metadata.labels?.displayName;
   return (
     <Tr>
       <Td
