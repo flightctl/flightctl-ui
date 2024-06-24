@@ -7,9 +7,9 @@ import { useTranslation } from '../../../hooks/useTranslation';
 
 import TextField from '../../form/TextField';
 import WithHelperText from '../../common/WithHelperText';
-import { KubernetesLabelHelperText } from '../../common/HelperTextItems';
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
 import NameField from '../../form/NameField';
+import { getDnsSubdomainValidations } from '../../form/validations';
 
 const CreateResourceSyncsForm = () => {
   const { t } = useTranslation();
@@ -21,17 +21,16 @@ const CreateResourceSyncsForm = () => {
         <>
           {values.resourceSyncs.map((resourceSync, index) => (
             <FormSection key={index}>
-              <FormGroup label={t('Resource sync name')} isRequired>
-                <NameField
-                  name={`resourceSyncs[${index}].name`}
-                  aria-label={t('Resource sync name')}
-                  value={resourceSync.name}
-                  isDisabled={resourceSync.exists}
-                  helperText={<KubernetesLabelHelperText />}
-                  getExistsErrMsg={(name) => t(`A resource sync named "{{name}}" already exists`, { name })}
-                  resourceType="resourcesyncs"
-                />
-              </FormGroup>
+              <NameField
+                name={`resourceSyncs[${index}].name`}
+                aria-label={t('Resource sync name')}
+                value={resourceSync.name}
+                isRequired
+                isDisabled={resourceSync.exists}
+                getExistsErrMsg={(name) => t(`A resource sync named "{{name}}" already exists`, { name })}
+                resourceType="resourcesyncs"
+                validations={getDnsSubdomainValidations(t)}
+              />
               <FormGroup
                 label={t('Target revision')}
                 isRequired

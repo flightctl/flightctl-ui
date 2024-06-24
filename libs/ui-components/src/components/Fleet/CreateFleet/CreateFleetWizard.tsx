@@ -65,7 +65,6 @@ const CreateFleetWizard = () => {
         initialValues={getInitialValues(fleet)}
         validationSchema={getValidationSchema(t)}
         validateOnMount
-        validateOnChange={false}
         onSubmit={async (values) => {
           setError(undefined);
           try {

@@ -5,7 +5,7 @@ import { FleetFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import NameField from '../../../form/NameField';
 import LabelsField from '../../../form/LabelsField';
-import { KubernetesLabelHelperText } from '../../../common/HelperTextItems';
+import { getDnsSubdomainValidations } from '../../../form/validations';
 
 export const generalInfoStepId = 'general-info';
 
@@ -15,19 +15,19 @@ export const isGeneralInfoStepValid = (errors: FormikErrors<FleetFormValues>) =>
 
 const GeneralInfoStep = ({ isEdit }: { isEdit: boolean }) => {
   const { t } = useTranslation();
+
   return (
-    <Grid span={8}>
+    <Grid lg={5} span={8}>
       <Form>
-        <FormGroup label={t('Name')} isRequired>
-          <NameField
-            name="name"
-            aria-label={t('Name')}
-            isDisabled={isEdit}
-            resourceType="fleets"
-            helperText={<KubernetesLabelHelperText />}
-            getExistsErrMsg={(name) => t(`A fleet named "{{name}}" already exists`, { name })}
-          />
-        </FormGroup>
+        <NameField
+          name="name"
+          aria-label={t('Name')}
+          isRequired
+          isDisabled={isEdit}
+          resourceType="fleets"
+          getExistsErrMsg={(name) => t(`A fleet named "{{name}}" already exists`, { name })}
+          validations={getDnsSubdomainValidations(t)}
+        />
         <FormGroup label={t('Fleet labels')}>
           <LabelsField name="fleetLabels" />
         </FormGroup>

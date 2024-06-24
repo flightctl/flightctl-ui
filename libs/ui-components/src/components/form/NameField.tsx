@@ -1,15 +1,25 @@
 import * as React from 'react';
-import TextField, { TextFieldProps } from './TextField';
 import { useField } from 'formik';
 import debounce from 'lodash/debounce';
+
 import { useFetch } from '../../hooks/useFetch';
+import RichValidationTextField, { RichValidationTextFieldProps } from './RichValidationTextField';
+import { TextFieldProps } from './TextField';
 
 type NameFieldProps = TextFieldProps & {
   getExistsErrMsg: (value: string) => string;
   resourceType: string;
+  validations: RichValidationTextFieldProps['validations'];
 };
 
-const NameField: React.FC<NameFieldProps> = ({ name, isDisabled, resourceType, getExistsErrMsg, ...rest }) => {
+const NameField: React.FC<NameFieldProps> = ({
+  name,
+  isDisabled,
+  validations,
+  resourceType,
+  getExistsErrMsg,
+  ...rest
+}) => {
   const { get } = useFetch();
   const [{ value }, { error }, { setError }] = useField<string>(name);
   const currentErrorRef = React.useRef<string>();
@@ -48,7 +58,7 @@ const NameField: React.FC<NameFieldProps> = ({ name, isDisabled, resourceType, g
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  return <TextField name={name} isDisabled={isDisabled} {...rest} />;
+  return <RichValidationTextField fieldName={name} validations={validations} isDisabled={isDisabled} {...rest} />;
 };
 
 export default NameField;
