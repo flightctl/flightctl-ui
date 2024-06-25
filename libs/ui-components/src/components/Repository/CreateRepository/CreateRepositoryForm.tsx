@@ -44,7 +44,7 @@ const AdvancedSection = () => {
       </Split>
       {values.configType === 'http' && (
         <Grid hasGutter className="fctl-create-repo__adv-section">
-          <CheckboxField name="httpConfig.basicAuth.use" label={t('Basic')}>
+          <CheckboxField name="httpConfig.basicAuth.use" label={t('Basic authentication')}>
             <FormGroup label={t('Username')} isRequired>
               <TextField name="httpConfig.basicAuth.username" aria-label={t('Username')} />
             </FormGroup>
@@ -52,7 +52,7 @@ const AdvancedSection = () => {
               <TextField name="httpConfig.basicAuth.password" aria-label={t('Password')} type="password" />
             </FormGroup>
           </CheckboxField>
-          <CheckboxField name="httpConfig.mTlsAuth.use" label={t('mTLS')}>
+          <CheckboxField name="httpConfig.mTlsAuth.use" label={t('mTLS authentication')}>
             <FormGroup label={t('Client TLS certificate')} isRequired>
               <TextAreaField name="httpConfig.mTlsAuth.tlsCrt" aria-label={t('Client TLS certificate')} />
             </FormGroup>
