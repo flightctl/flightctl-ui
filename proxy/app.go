@@ -29,7 +29,7 @@ func main() {
 
 	apiRouter.Use(bridge.AuthMiddleware)
 
-	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(utils.GetEnvVar("FLIGHTCTL_SERVER", "https://localhost:3333")))
+	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(utils.GetEnvVar("FLIGHTCTL_SERVER", "https://localhost:3443")))
 	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler(utils.GetEnvVar("FLIGHTCTL_METRICS_SERVER", "http://localhost:9090")))
 
 	spa := server.SpaHandler{}
