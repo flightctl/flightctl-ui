@@ -100,7 +100,6 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
         isRequired
         isDisabled={isEdit}
         resourceType="repositories"
-        getExistsErrMsg={(value) => t(`A repository named "{{value}}" already exists`, { value })}
         validations={getDnsSubdomainValidations(t)}
       />
       <FormGroup label={t('Repository URL')} isRequired>

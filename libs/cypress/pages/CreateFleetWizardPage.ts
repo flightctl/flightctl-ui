@@ -19,8 +19,12 @@ export class CreateFleetWizardPage {
     return cy.get('input[aria-label="Name"]');
   }
 
-  get newFleetNameErrorMessage() {
-    return cy.get('#form-control__textfield-name .pf-v5-c-helper-text__item.pf-m-error');
+  openFleetRichValidationsPopover() {
+    return cy.get('.rich-input__group button[aria-label="Validation"').click();
+  }
+
+  get newFleetRichValidationsPopoverError() {
+    return cy.get('.rich-input__rules .pf-m-error');
   }
 
   get newFleetSystemImageField() {

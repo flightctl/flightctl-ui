@@ -52,15 +52,13 @@ describe('Create fleet form', () => {
     createFleetWizardPage = new CreateFleetWizardPage();
 
     createFleetWizardPage.newFleetNameField.type(existingFleetName).blur();
-    createFleetWizardPage.newFleetNameErrorMessage.should(
-      'have.text',
-      'A fleet named "eu-west-prod-001" already exists'
-    );
+    createFleetWizardPage.openFleetRichValidationsPopover();
+    createFleetWizardPage.newFleetRichValidationsPopoverError.should('contain.text', 'Name must be unique');
     createFleetWizardPage.nextFleetWizardButton.should('be.disabled');
 
     // Fix the duplicate fleet name and check that the form could be submitted
     createFleetWizardPage.newFleetNameField.clear().type(`${existingFleetName}-2`);
-    createFleetWizardPage.newFleetNameErrorMessage.should('not.exist');
+    createFleetWizardPage.newFleetRichValidationsPopoverError.should('not.exist');
     createFleetWizardPage.nextFleetWizardButton.should('be.enabled');
   });
 });

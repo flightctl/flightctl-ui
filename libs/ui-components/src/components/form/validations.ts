@@ -18,26 +18,26 @@ const K8S_DNS_SUBDOMAIN_ALLOWED_CHARACTERS = /^[a-z0-9.-]*$/;
 const K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH = 253;
 
 export const getLabelValueValidations = (t: TFunction) => [
-  { key: 'labelValueStartAndEnd', message: t('Must start and end with an alphanumeric character.') },
+  { key: 'labelValueStartAndEnd', message: t('Starts and ends with a letter or a number.') },
   {
     key: 'labelValueAllowedChars',
-    message: t('Must contain only alphanumeric characters, dashes (-), dots (.), and underscores (_).'),
+    message: t('Contains only letters, numbers, dashes (-), dots (.), and underscores (_).'),
   },
   {
     key: 'labelValueMaxLength',
-    message: t('Must not exceed {{ maxCharacters }} characters', { maxCharacters: K8S_LABEL_VALUE_MAX_LENGTH }),
+    message: t('1-{{ maxCharacters }} characters', { maxCharacters: K8S_LABEL_VALUE_MAX_LENGTH }),
   },
 ];
 
 export const getDnsSubdomainValidations = (t: TFunction) => [
-  { key: 'dnsSubdomainStartAndEnd', message: t('Must start and end with a lowercase alphanumeric character.') },
+  { key: 'dnsSubdomainStartAndEnd', message: t('Starts and ends with a lowercase letter or a number.') },
   {
     key: 'dnsSubdomainAllowedChars',
-    message: t('Must contain only lowercase alphanumeric characters, dashes (-), and dots (.).'),
+    message: t('Contains only lowercase letters, numbers, dashes (-), and dots (.).'),
   },
   {
     key: 'dnsSubdomainMaxLength',
-    message: t('Must not exceed {{ maxCharacters }} characters', { maxCharacters: K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH }),
+    message: t('1-{{ maxCharacters }} characters', { maxCharacters: K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH }),
   },
 ];
 

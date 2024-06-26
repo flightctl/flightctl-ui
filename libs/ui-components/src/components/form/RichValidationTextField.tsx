@@ -23,8 +23,6 @@ import dangerColor from '@patternfly/react-tokens/dist/js/global_danger_color_10
 import infoColor from '@patternfly/react-tokens/dist/js/global_palette_blue_300';
 import { useField } from 'formik';
 
-import { useTranslation } from '../../hooks/useTranslation';
-
 interface RichValidationStatusProps {
   validations: RichValidationTextFieldProps['validations'];
   metaError?: string | Record<string, string>;
@@ -32,22 +30,9 @@ interface RichValidationStatusProps {
   hasValue: boolean;
 }
 const RichValidationStatus = ({ isRequired, hasValue, validations, metaError }: RichValidationStatusProps) => {
-  const { t } = useTranslation();
-
   const showRequiredError = isRequired && !hasValue;
   return (
     <HelperText component="ul" className="rich-input__rules">
-      {isRequired && (
-        <HelperTextItem
-          key="is-required"
-          isDynamic
-          component="li"
-          variant={showRequiredError ? 'error' : 'success'}
-          icon={showRequiredError ? <TimesIcon /> : <CheckIcon />}
-        >
-          {t('Field is required')}
-        </HelperTextItem>
-      )}
       {validations.map((validation) => {
         let hasError = false;
         // For each validation entry, we check if there's an error with the same key

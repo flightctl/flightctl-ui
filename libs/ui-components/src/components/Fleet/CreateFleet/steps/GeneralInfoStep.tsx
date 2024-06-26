@@ -25,7 +25,6 @@ const GeneralInfoStep = ({ isEdit }: { isEdit: boolean }) => {
           isRequired
           isDisabled={isEdit}
           resourceType="fleets"
-          getExistsErrMsg={(name) => t(`A fleet named "{{name}}" already exists`, { name })}
           validations={getDnsSubdomainValidations(t)}
         />
         <FormGroup label={t('Fleet labels')}>

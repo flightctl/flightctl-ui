@@ -27,7 +27,6 @@ const CreateResourceSyncsForm = () => {
                 value={resourceSync.name}
                 isRequired
                 isDisabled={resourceSync.exists}
-                getExistsErrMsg={(name) => t(`A resource sync named "{{name}}" already exists`, { name })}
                 resourceType="resourcesyncs"
                 validations={getDnsSubdomainValidations(t)}
               />
