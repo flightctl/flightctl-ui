@@ -229,7 +229,6 @@
   "{{ fieldName }} must not exceed {{ maxLength }} characters": "{{ fieldName }} must not exceed {{ maxLength }} characters",
   "Label keys are required. Invalid labels: {{invalidLabels}}": "Label keys are required. Invalid labels: {{invalidLabels}}",
   "Label keys must be unique": "Label keys must be unique",
-  "The following labels are not valid Kubernetes labels: {{invalidLabels}}": "The following labels are not valid Kubernetes labels: {{invalidLabels}}",
   "The maximum number of systemd units is {{maxSystemUnits}}.": "The maximum number of systemd units is {{maxSystemUnits}}.",
   "Invalid systemd unit names: {{invalidPatterns}}": "Invalid systemd unit names: {{invalidPatterns}}",
   "Systemd unit names must be unique": "Systemd unit names must be unique",

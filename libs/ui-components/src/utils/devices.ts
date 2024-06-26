@@ -1,7 +1,6 @@
-import { Device, DeviceSpec, ObjectMeta } from '@flightctl/types';
-import { DeviceAnnotation, FlightCtlLabel } from '../types/extraTypes';
+import { DeviceSpec, ObjectMeta } from '@flightctl/types';
+import { DeviceAnnotation } from '../types/extraTypes';
 import { TFunction } from 'i18next';
-import { toAPILabel } from './labels';
 import { getMetadataAnnotation } from './api';
 
 export type SourceItem = {
@@ -35,17 +34,6 @@ const getMissingFleetDetails = (t: TFunction, metadata: ObjectMeta): { message: 
   };
 };
 
-const getUpdatedDevice = (device: Device, newLabels: FlightCtlLabel[]): Device => {
-  const deviceLabels: ObjectMeta['labels'] = toAPILabel(newLabels);
-  return {
-    ...device,
-    metadata: {
-      ...device.metadata,
-      labels: deviceLabels,
-    },
-  };
-};
-
 const getSourceItems = (specConfigs: DeviceSpec['config'] | undefined): SourceItem[] => {
   return (specConfigs ?? [])
     .map((config) => {
@@ -66,4 +54,4 @@ const getSourceItems = (specConfigs: DeviceSpec['config'] | undefined): SourceIt
     .filter((repoName) => !!repoName);
 };
 
-export { getDeviceFleet, getUpdatedDevice, getMissingFleetDetails, getSourceItems };
+export { getDeviceFleet, getMissingFleetDetails, getSourceItems };

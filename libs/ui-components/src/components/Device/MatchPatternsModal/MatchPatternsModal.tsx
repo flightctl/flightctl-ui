@@ -13,20 +13,6 @@ type MatchPatternsModalProps = {
   device: Device;
 };
 
-const getDevice = (device: Device, matchPatterns: string[]) => {
-  const spec = device.spec || {};
-  return {
-    ...device,
-    spec: {
-      ...spec,
-      systemd: {
-        ...device.spec?.systemd,
-        matchPatterns,
-      },
-    },
-  };
-};
-
 /**
  * Modal for editing the Systemd units matchPatterns of a Device.
  * This operation is only supported for devices that are NOT bound to fleets, in which case
@@ -37,16 +23,16 @@ const getDevice = (device: Device, matchPatterns: string[]) => {
  */
 const MatchPatternsModal: React.FC<MatchPatternsModalProps> = ({ onClose, device }) => {
   const { t } = useTranslation();
-  const { put } = useFetch();
+  const { patch } = useFetch();
   const [error, setError] = React.useState<string>();
   return (
     <Modal title={t('Edit match patterns')} isOpen onClose={() => onClose()} variant="small">
       <Formik<MatchPatternsFormValues>
         validationSchema={deviceSystemdUnitsValidationSchema(t)}
         initialValues={{ matchPatterns: device.spec?.systemd?.matchPatterns || [] }}
-        onSubmit={async ({ matchPatterns }) => {
+        onSubmit={async () => {
           try {
-            await put(`devices/${device.metadata.name}`, getDevice(device, matchPatterns));
+            await patch(`devices/${device.metadata.name}`, []);
             onClose(true);
           } catch (err) {
             setError(getErrorMessage(err));

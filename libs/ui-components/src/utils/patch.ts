@@ -22,6 +22,7 @@ export const appendJSONPatch = <V = unknown>({
       op: 'remove',
       path,
     });
+    return;
   }
   const value = encodeB64 ? btoa(newValue as string) : newValue;
   patches.push({
