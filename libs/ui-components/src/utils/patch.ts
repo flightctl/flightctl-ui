@@ -1,5 +1,6 @@
 import { PatchRequest } from '@flightctl/types';
 import isNil from 'lodash/isNil';
+import uniq from 'lodash/uniq';
 
 export const appendJSONPatch = <V = unknown>({
   patches,
@@ -30,4 +31,40 @@ export const appendJSONPatch = <V = unknown>({
     path,
     value,
   });
+};
+
+export const getStringListPatches = (
+  path: string,
+  currentList: string[],
+  newList: string[],
+  valueBuilder: (value: string[]) => unknown,
+) => {
+  const patches: PatchRequest = [];
+
+  const newLen = newList.length;
+  const curLen = currentList.length;
+
+  if (newLen === 0 && curLen > 0) {
+    patches.push({
+      path,
+      op: 'remove',
+    });
+  } else if (newLen > 0 && curLen === 0) {
+    patches.push({
+      path,
+      op: 'add',
+      value: valueBuilder(newList),
+    });
+  } else {
+    const hasDifferentItems = uniq([...currentList, newList]).length !== curLen;
+    if (newLen !== curLen || hasDifferentItems) {
+      patches.push({
+        path,
+        op: 'replace',
+        value: valueBuilder(newList),
+      });
+    }
+  }
+
+  return patches;
 };

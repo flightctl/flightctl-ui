@@ -5,6 +5,7 @@ import * as React from 'react';
 import MatchPatternsForm, { MatchPatternsFormValues } from './MatchPatternsForm';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
+import { getStringListPatches } from '../../../utils/patch';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { deviceSystemdUnitsValidationSchema } from '../../form/validations';
 
@@ -25,14 +26,27 @@ const MatchPatternsModal: React.FC<MatchPatternsModalProps> = ({ onClose, device
   const { t } = useTranslation();
   const { patch } = useFetch();
   const [error, setError] = React.useState<string>();
+
+  const currentPatterns = device.spec?.systemd?.matchPatterns || [];
   return (
     <Modal title={t('Edit match patterns')} isOpen onClose={() => onClose()} variant="small">
       <Formik<MatchPatternsFormValues>
         validationSchema={deviceSystemdUnitsValidationSchema(t)}
-        initialValues={{ matchPatterns: device.spec?.systemd?.matchPatterns || [] }}
-        onSubmit={async () => {
+        initialValues={{ matchPatterns: currentPatterns }}
+        onSubmit={async ({ matchPatterns: updatedPatterns }) => {
           try {
-            await patch(`devices/${device.metadata.name}`, []);
+            const patternPatchBuilder = (value: string[]) => ({
+              matchPatterns: value,
+            });
+            const patches = getStringListPatches(
+              '/spec/systemd',
+              currentPatterns,
+              updatedPatterns,
+              patternPatchBuilder,
+            );
+            if (patches.length > 0) {
+              await patch(`devices/${device.metadata.name}`, patches);
+            }
             onClose(true);
           } catch (err) {
             setError(getErrorMessage(err));

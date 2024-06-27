@@ -33,7 +33,7 @@ import './CreateFleetWizard.css';
 
 const CreateFleetWizard = () => {
   const { t } = useTranslation();
-  const { post, patch } = useFetch();
+  const { post, put } = useFetch();
   const [error, setError] = React.useState<unknown>();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
@@ -69,7 +69,7 @@ const CreateFleetWizard = () => {
           setError(undefined);
           try {
             const result = await (isEdit
-              ? patch<Fleet>(`fleets/${fleetId}`, [])
+              ? put<Fleet>(`fleets/${fleetId}`, getFleetResource(values))
               : post<Fleet>('fleets', getFleetResource(values)));
             navigate({ route: ROUTE.FLEET_DETAILS, postfix: result.metadata.name });
           } catch (e) {
