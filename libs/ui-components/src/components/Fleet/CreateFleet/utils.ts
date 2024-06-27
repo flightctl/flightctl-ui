@@ -3,7 +3,7 @@ import {
   GitConfigProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
-  PatchRequest
+  PatchRequest,
 } from '@flightctl/types';
 import { TFunction } from 'i18next';
 import * as Yup from 'yup';
@@ -23,7 +23,7 @@ import {
 import { API_VERSION } from '../../../constants';
 import { toAPILabel } from '../../../utils/labels';
 import { maxLengthString, validKubernetesDnsSubdomain, validLabelsSchema } from '../../form/validations';
-import { getLabelPatches } from '../../../utils/patch';
+import { appendJSONPatch, getLabelPatches } from '../../../utils/patch';
 
 const absolutePathRegex = /^\/.*$/;
 
@@ -80,25 +80,73 @@ export const getValidationSchema = (t: TFunction) => {
 };
 
 export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValues) => {
-  const allPatches: PatchRequest = [];
+  let allPatches: PatchRequest = [];
 
   // Fleet labels
   const currentLabels = currentFleet.metadata.labels || {};
-  const updatedLabels = updatedFleet.labels || {};
+  const updatedLabels = updatedFleet.fleetLabels || {};
 
   const fleetLabelPatches = getLabelPatches('/metadata/labels', currentLabels, updatedLabels);
-  allPatches.concat(fleetLabelPatches);
+  allPatches = allPatches.concat(fleetLabelPatches);
 
   // Device label selector
-  const currentDeviceSelectLabels = currentFleet.metadata.labels || {};
+  const currentDeviceSelectLabels = currentFleet.spec.selector?.matchLabels || {};
   const updatedDeviceSelectLabels = updatedFleet.labels || {};
 
-  const deviceSelectLabelPatches = getLabelPatches('/spec/selector/matchLabels', currentDeviceSelectLabels, updatedDeviceSelectLabels);
-  allPatches.concat(deviceSelectLabelPatches);
+  const deviceSelectLabelPatches = getLabelPatches(
+    '/spec/selector/matchLabels',
+    currentDeviceSelectLabels,
+    updatedDeviceSelectLabels,
+  );
+  allPatches = allPatches.concat(deviceSelectLabelPatches);
 
-  // system image
+  // OS image
+  const currentOsImage = currentFleet.spec.template.spec.os?.image;
+  const newOsImage = updatedFleet.osImage;
+  if (!currentOsImage && newOsImage) {
+    allPatches.push({
+      path: '/spec/template/spec/os',
+      op: 'add',
+      value: { image: newOsImage },
+    });
+  } else if (!newOsImage && currentOsImage) {
+    allPatches.push({
+      path: '/spec/template/spec/os',
+      op: 'remove',
+    });
+  } else if (newOsImage && currentOsImage !== newOsImage) {
+    appendJSONPatch({
+      path: '/spec/template/spec/os/image',
+      patches: allPatches,
+      newValue: newOsImage,
+      originalValue: currentOsImage,
+    });
+  }
 
-  // configurations
+  // Configurations
+  const currentConfigs = currentFleet.spec.template.spec.config || [];
+  const newConfigs = updatedFleet.configTemplates.map(getAPIConfig);
+  if (currentConfigs.length === 0 && newConfigs.length > 0) {
+    allPatches.push({
+      path: '/spec/template/spec/config',
+      op: 'add',
+      value: newConfigs,
+    });
+  } else if (currentConfigs.length > 0 && newConfigs.length === 0) {
+    allPatches.push({
+      path: '/spec/template/spec/config',
+      op: 'remove',
+    });
+  } else {
+    // TODO CHECK FOR DIFFS
+    appendJSONPatch({
+      path: '/spec/template/spec/config',
+      patches: allPatches,
+      newValue: newConfigs,
+      originalValue: currentConfigs,
+    });
+  }
+
   return allPatches;
 };
 

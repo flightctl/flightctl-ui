@@ -1,6 +1,7 @@
 import { PatchRequest } from '@flightctl/types';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
+
 import { FlightCtlLabel } from '../types/extraTypes';
 
 export const appendJSONPatch = <V = unknown>({
@@ -70,7 +71,11 @@ export const getStringListPatches = (
   return patches;
 };
 
-export const getLabelPatches = (basePath: string, currentLabels: Record<string, string>, newLabels: FlightCtlLabel[]) => {
+export const getLabelPatches = (
+  basePath: string,
+  currentLabels: Record<string, string>,
+  newLabels: FlightCtlLabel[],
+) => {
   const patches: PatchRequest = [];
 
   const allKeys: string[] = Object.entries(currentLabels).map(([key]) => key);
@@ -80,36 +85,46 @@ export const getLabelPatches = (basePath: string, currentLabels: Record<string, 
     }
   });
 
+  const currentLen = Object.keys(currentLabels).length;
+  const newLen = newLabels.length;
 
-  // TODO do at the higher level object?
-  allKeys.forEach((labelKey) => {
-    const newLabel = newLabels.find((newLabel) => newLabel.key === labelKey);
+  const newLabelMap = newLabels.reduce((acc, label) => {
+    const newAcc = { ...acc };
+    newAcc[label.key] = label.value || '';
+    return newAcc;
+  }, {});
 
-    // Valueless labels need to be considered separately - "appendJSONPatch" identifies no value as deleted entry
-    const valuelessLabelRemoved = labelKey in currentLabels && !currentLabels[labelKey] && !newLabel;
-    const labelIsNowValueless = labelKey in currentLabels && currentLabels[labelKey] && newLabel && !newLabel.value;
-
-    const path = `${basePath}/${labelKey}`;
-    if (valuelessLabelRemoved) {
+  if (currentLen === 0 && newLen > 0) {
+    // First label(s) have been added
+    patches.push({
+      path: basePath,
+      op: 'add',
+      value: newLabelMap,
+    });
+  } else if (currentLen > 0 && newLen === 0) {
+    // Last label(s) have been removed
+    patches.push({
+      path: basePath,
+      op: 'remove',
+    });
+  } else {
+    let needsPatch = false;
+    Object.entries(newLabelMap).forEach(([key, value]) => {
+      if (!(key in currentLabels)) {
+        // A new label has been added
+        needsPatch = true;
+      } else if (currentLabels[key] !== value) {
+        // An existing label has changed its value
+        needsPatch = true;
+      }
+    });
+    if (needsPatch) {
       patches.push({
-        path,
-        op: 'remove',
-      });
-    } else if (labelIsNowValueless) {
-      patches.push({
-        path,
+        path: basePath,
         op: 'replace',
-        value: '',
-      });
-    } else {
-      appendJSONPatch({
-        path,
-        patches,
-        newValue: newLabel?.value || '',
-        originalValue: currentLabels[labelKey] || '',
+        value: newLabelMap,
       });
     }
-  });
-
+  }
   return patches;
 };
