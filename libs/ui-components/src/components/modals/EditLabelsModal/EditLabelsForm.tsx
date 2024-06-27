@@ -78,7 +78,7 @@ const EditLabelsForm = ({ device, onDeviceUpdate }: EditLabelsFormProps) => {
       }}
       onSubmit={async (values: EditLabelsFormValues) => {
         try {
-          const labelsPatch = getLabelPatches(values.labels, currentLabels);
+          const labelsPatch = getLabelPatches(currentLabels, values.labels);
           await patch(`devices/${device.metadata.name}`, labelsPatch);
           onDeviceUpdate();
           return null;
