@@ -20,11 +20,11 @@ export class CreateFleetWizardPage {
   }
 
   openFleetRichValidationsPopover() {
-    return cy.get('.rich-input__group button[aria-label="Validation"').click();
+    return cy.get('button[aria-label="Validation"').click();
   }
 
   get newFleetRichValidationsPopoverError() {
-    return cy.get('.rich-input__rules .pf-m-error');
+    return cy.get('.pf-v5-c-helper-text__item.pf-m-error');
   }
 
   get newFleetSystemImageField() {

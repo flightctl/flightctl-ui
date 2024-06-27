@@ -32,7 +32,7 @@ interface RichValidationStatusProps {
 const RichValidationStatus = ({ isRequired, hasValue, validations, metaError }: RichValidationStatusProps) => {
   const showRequiredError = isRequired && !hasValue;
   return (
-    <HelperText component="ul" className="rich-input__rules">
+    <HelperText component="ul">
       {validations.map((validation) => {
         let hasError = false;
         // For each validation entry, we check if there's an error with the same key
@@ -84,7 +84,7 @@ const RichValidationTextField = ({ fieldName, validations, isRequired, ...rest }
 
   return (
     <FormGroup label={rest?.['aria-label']} id={`form-control__${fieldId}`} fieldId={fieldId} isRequired={isRequired}>
-      <InputGroup className="rich-input__group">
+      <InputGroup>
         <InputGroupItem isFill>
           <TextInput
             {...field}
@@ -100,7 +100,6 @@ const RichValidationTextField = ({ fieldName, validations, isRequired, ...rest }
                 await setTouched(true, true);
               }
             }}
-            className="rich-input__text"
             onBlur={() => {
               setPopoverOpen(false);
               void setTouched(true, true);
