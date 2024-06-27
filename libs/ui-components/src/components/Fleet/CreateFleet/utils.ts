@@ -1,4 +1,10 @@
-import { Fleet, GitConfigProviderSpec, InlineConfigProviderSpec, KubernetesSecretProviderSpec } from '@flightctl/types';
+import {
+  Fleet,
+  GitConfigProviderSpec,
+  InlineConfigProviderSpec,
+  KubernetesSecretProviderSpec,
+  PatchRequest
+} from '@flightctl/types';
 import { TFunction } from 'i18next';
 import * as Yup from 'yup';
 import * as yaml from 'js-yaml';
@@ -17,6 +23,7 @@ import {
 import { API_VERSION } from '../../../constants';
 import { toAPILabel } from '../../../utils/labels';
 import { maxLengthString, validKubernetesDnsSubdomain, validLabelsSchema } from '../../form/validations';
+import { getLabelPatches } from '../../../utils/patch';
 
 const absolutePathRegex = /^\/.*$/;
 
@@ -70,6 +77,29 @@ export const getValidationSchema = (t: TFunction) => {
       }),
     ),
   });
+};
+
+export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValues) => {
+  const allPatches: PatchRequest = [];
+
+  // Fleet labels
+  const currentLabels = currentFleet.metadata.labels || {};
+  const updatedLabels = updatedFleet.labels || {};
+
+  const fleetLabelPatches = getLabelPatches('/metadata/labels', currentLabels, updatedLabels);
+  allPatches.concat(fleetLabelPatches);
+
+  // Device label selector
+  const currentDeviceSelectLabels = currentFleet.metadata.labels || {};
+  const updatedDeviceSelectLabels = updatedFleet.labels || {};
+
+  const deviceSelectLabelPatches = getLabelPatches('/spec/selector/matchLabels', currentDeviceSelectLabels, updatedDeviceSelectLabels);
+  allPatches.concat(deviceSelectLabelPatches);
+
+  // system image
+
+  // configurations
+  return allPatches;
 };
 
 export const getFleetResource = (values: FleetFormValues): Fleet => ({

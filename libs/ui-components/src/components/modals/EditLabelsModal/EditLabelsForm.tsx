@@ -13,7 +13,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { fromAPILabel } from '../../../utils/labels';
 import { validLabelsSchema } from '../../form/validations';
 import { getErrorMessage } from '../../../utils/error';
-import { getLabelPatches } from './utils';
+import { getLabelPatches } from '../../../utils/patch';
 
 type EditLabelsFormValues = {
   labels: FlightCtlLabel[];
@@ -78,7 +78,7 @@ const EditLabelsForm = ({ device, onDeviceUpdate }: EditLabelsFormProps) => {
       }}
       onSubmit={async (values: EditLabelsFormValues) => {
         try {
-          const labelsPatch = getLabelPatches(currentLabels, values.labels);
+          const labelsPatch = getLabelPatches('/metadata/labels', currentLabels, values.labels);
           await patch(`devices/${device.metadata.name}`, labelsPatch);
           onDeviceUpdate();
           return null;
