@@ -21,7 +21,8 @@ import { deviceApprovalValidationSchema } from '../../../form/validations';
 import DisplayName from '../../../common/DisplayName';
 import { isPromiseRejected } from '../../../../types/typeUtils';
 import { isEnrollmentRequest } from '../../../../types/extraTypes';
-import { ApprovalStatus, getApprovalStatus } from '../../../../utils/status/enrollmentRequest';
+import { getApprovalStatus } from '../../../../utils/status/enrollmentRequest';
+import { EnrollmentRequestStatus } from '../../../../utils/status/common';
 import { getErrorMessage } from '../../../../utils/error';
 import { useAppContext } from '../../../../hooks/useAppContext';
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -33,7 +34,7 @@ const templateToName = (index: number, nameTemplate: string) =>
   nameTemplate ? nameTemplate.replace(/{{n+}}/g, `${index + 1}`) : '-';
 
 const isPendingEnrollmentRequest = (r: Device | EnrollmentRequest): r is EnrollmentRequest => {
-  return isEnrollmentRequest(r) && getApprovalStatus(r) !== ApprovalStatus.Approved;
+  return isEnrollmentRequest(r) && getApprovalStatus(r) !== EnrollmentRequestStatus.Approved;
 };
 
 type DeviceEnrollmentFormValues = {

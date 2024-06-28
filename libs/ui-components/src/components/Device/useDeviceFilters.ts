@@ -1,25 +1,27 @@
 import * as React from 'react';
 import {
+  ApplicationsSummaryStatusType as AppStatus,
   Device,
-  DeviceSystemSummaryStatusType,
-  DeviceUpdateStatusType,
-  DeviceWorkloadSummaryType,
+  DeviceSummaryStatusType as DeviceStatus,
   EnrollmentRequest,
+  DeviceUpdatedStatusType as UpdatedStatus,
 } from '@flightctl/types';
 
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import { isEnrollmentRequest } from '../../types/extraTypes';
-import { getDeviceStatus } from '../../utils/status/device';
-import { FilterSearchParams } from '../../utils/status/devices';
+import { getDeviceSummaryStatus } from '../../utils/status/devices';
+import { getApprovalStatus } from '../../utils/status/enrollmentRequest';
+import { EnrollmentRequestStatus, FilterSearchParams } from '../../utils/status/common';
 
 const getSearchText = (resource: Device | EnrollmentRequest) => [
   resource.metadata.name,
   resource.metadata.labels?.displayName,
 ];
 
-const validDeviceStatuses = Object.values(DeviceSystemSummaryStatusType) as string[];
-const validAppStatuses = Object.values(DeviceWorkloadSummaryType) as string[];
-const validUpdateStatuses = Object.values(DeviceUpdateStatusType) as string[];
+const validAppStatuses = Object.values(AppStatus) as string[];
+const validUpdatedStatuses = Object.values(UpdatedStatus) as string[];
+const validDeviceStatuses = Object.values(DeviceStatus) as string[];
+validDeviceStatuses.push(EnrollmentRequestStatus.Pending);
 
 export const useDeviceFilters = (resources: Array<Device | EnrollmentRequest>, searchParams: URLSearchParams) => {
   const fleetId = searchParams.get(FilterSearchParams.Fleet) || undefined;
@@ -28,23 +30,23 @@ export const useDeviceFilters = (resources: Array<Device | EnrollmentRequest>, s
 
   const statuses = React.useMemo(() => {
     const statuses: string[] = [];
-    const deviceStatuses = searchParams.getAll(FilterSearchParams.Device) || [];
+    const deviceStatuses = searchParams.getAll(FilterSearchParams.DeviceStatus) || [];
     deviceStatuses.forEach((status) => {
       if (validDeviceStatuses.includes(status)) {
-        statuses.push(`${FilterSearchParams.Device}#${status}`);
+        statuses.push(`${FilterSearchParams.DeviceStatus}#${status}`);
       }
     });
-    const appStatuses = searchParams.getAll(FilterSearchParams.App) || [];
+    const appStatuses = searchParams.getAll(FilterSearchParams.AppStatus) || [];
     appStatuses.forEach((status) => {
       if (validAppStatuses.includes(status)) {
-        statuses.push(`${FilterSearchParams.App}#${status}`);
+        statuses.push(`${FilterSearchParams.AppStatus}#${status}`);
       }
     });
 
-    const updateStatuses = searchParams.getAll(FilterSearchParams.Update) || [];
+    const updateStatuses = searchParams.getAll(FilterSearchParams.UpdatedStatus) || [];
     updateStatuses.forEach((status) => {
-      if (validUpdateStatuses.includes(status)) {
-        statuses.push(`${FilterSearchParams.Update}#${status}`);
+      if (validUpdatedStatuses.includes(status)) {
+        statuses.push(`${FilterSearchParams.UpdatedStatus}#${status}`);
       }
     });
 
@@ -59,11 +61,15 @@ export const useDeviceFilters = (resources: Array<Device | EnrollmentRequest>, s
           return true;
         }
         if (isEnrollmentRequest(resource)) {
-          return statuses.includes(`${FilterSearchParams.Device}#Pending`);
+          const status = getApprovalStatus(resource);
+          return (
+            status === EnrollmentRequestStatus.Pending &&
+            statuses.includes(`${FilterSearchParams.DeviceStatus}#Pending`)
+          );
         }
 
-        const deviceStatus = getDeviceStatus(resource);
-        return statuses.includes(`${FilterSearchParams.Device}#${deviceStatus}`);
+        const deviceStatus = getDeviceSummaryStatus(resource.status);
+        return statuses.includes(`${FilterSearchParams.DeviceStatus}#${deviceStatus}`);
       }),
     [resources, statuses],
   );

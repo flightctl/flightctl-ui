@@ -1,112 +1,64 @@
-import * as React from 'react';
 import { TFunction } from 'react-i18next';
 import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons';
-import { SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
+import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-circle-icon';
 
 import {
-  DeviceWorkloadSummaryType as AppStatus,
-  DeviceSystemSummaryStatusType as DeviceStatus,
-  DeviceUpdateStatusType as UpdateStatus,
+  DeviceStatus,
+  DeviceSummaryStatusType as DeviceSummaryStatus,
+  DeviceSummaryStatusType,
 } from '@flightctl/types';
-import { StatusLabelColor } from '../../components/common/StatusLabel';
+import { EnrollmentRequestStatus, FilterSearchParams, StatusItem } from './common';
 
-export enum FilterSearchParams {
-  Fleet = 'fleetId',
-  Device = 'devSt',
-  App = 'appSt',
-  Update = 'updSt',
-}
+export const getDeviceSummaryStatus = (deviceStatus?: DeviceStatus): DeviceSummaryStatusType =>
+  deviceStatus?.summary.status || DeviceSummaryStatusType.DeviceSummaryStatusUnknown;
 
-export interface StatusFilterItem {
-  type: FilterSearchParams;
-  id: DeviceStatus | AppStatus | UpdateStatus;
-  label: string;
-  iconType: StatusLabelColor;
-  customIcon?: React.ComponentClass<SVGIconProps>;
-}
-
-export const getDeviceStatusItems = (t: TFunction): StatusFilterItem[] => [
+export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStatus | EnrollmentRequestStatus>[] => [
+  {
+    // For enrollment requests in pending state
+    type: FilterSearchParams.DeviceStatus,
+    id: EnrollmentRequestStatus.Pending,
+    label: t('Pending approval'),
+    level: 'info',
+    customIcon: PauseCircleIcon,
+  },
   // Device statuses
   {
-    type: FilterSearchParams.Device,
-    id: DeviceStatus.DeviceSystemSummaryStatusOnline,
+    type: FilterSearchParams.DeviceStatus,
+    id: DeviceSummaryStatus.DeviceSummaryStatusOnline,
     label: t('Online'),
-    iconType: 'success',
+    level: 'success',
   },
   {
-    type: FilterSearchParams.Device,
-    id: DeviceStatus.DeviceSystemSummaryStatusDegraded,
+    type: FilterSearchParams.DeviceStatus,
+    id: DeviceSummaryStatus.DeviceSummaryStatusDegraded,
     label: t('Degraded'),
-    iconType: 'warning',
+    level: 'warning',
   },
   {
-    type: FilterSearchParams.Device,
-    id: DeviceStatus.DeviceSystemSummaryStatusError,
+    type: FilterSearchParams.DeviceStatus,
+    id: DeviceSummaryStatus.DeviceSummaryStatusError,
     label: t('Error'),
-    iconType: 'danger',
+    level: 'danger',
   },
   {
-    type: FilterSearchParams.Device,
-    id: DeviceStatus.DeviceSystemSummaryStatusRebooting,
+    type: FilterSearchParams.DeviceStatus,
+    id: DeviceSummaryStatus.DeviceSummaryStatusRebooting,
     label: t('Rebooting'),
-    iconType: 'danger',
+    level: 'info',
   },
   {
-    type: FilterSearchParams.Device,
-    id: DeviceStatus.DeviceSystemSummaryStatusPoweredOff,
+    type: FilterSearchParams.DeviceStatus,
+    id: DeviceSummaryStatus.DeviceSummaryStatusPoweredOff,
     label: t('Powered Off'),
-    iconType: 'unknown',
+    level: 'unknown',
     customIcon: PowerOffIcon,
   },
   {
-    type: FilterSearchParams.Device,
-    id: DeviceStatus.DeviceSystemSummaryStatusUnknown,
+    type: FilterSearchParams.DeviceStatus,
+    id: DeviceSummaryStatus.DeviceSummaryStatusUnknown,
     label: t('Unknown'),
-    iconType: 'unknown',
-  },
-  // Application statuses
-  {
-    type: FilterSearchParams.App,
-    id: AppStatus.DeviceWorkloadSummaryHealthy,
-    label: t('Healthy'),
-    iconType: 'success',
-  },
-  {
-    type: FilterSearchParams.App,
-    id: AppStatus.DeviceWorkloadSummaryDegraded,
-    label: t('Degraded'),
-    iconType: 'warning',
-  },
-  { type: FilterSearchParams.App, id: AppStatus.DeviceWorkloadSummaryError, label: t('Error'), iconType: 'danger' },
-  {
-    type: FilterSearchParams.App,
-    id: AppStatus.DeviceWorkloadSummaryUnknown,
-    label: t('Unknown'),
-    iconType: 'unknown',
-  },
-  // System update statuses
-  {
-    type: FilterSearchParams.Update,
-    id: UpdateStatus.DeviceUpdateStatusUpToDate,
-    label: t('Up-to-date'),
-    iconType: 'success',
-  },
-  {
-    type: FilterSearchParams.Update,
-    id: UpdateStatus.DeviceUpdateStatusOutOfDate,
-    label: t('Out-of-date'),
-    iconType: 'warning',
-  },
-  {
-    type: FilterSearchParams.Update,
-    id: UpdateStatus.DeviceUpdateStatusUpdating,
-    label: t('Updating'),
-    iconType: 'info',
-  },
-  {
-    type: FilterSearchParams.Update,
-    id: UpdateStatus.DeviceUpdateStatusUnknown,
-    label: t('Unknown'),
-    iconType: 'unknown',
+    level: 'unknown',
   },
 ];
+
+export const deviceStatusOrder = getDeviceStatusItems((s: string) => s).map((item) => item.id);

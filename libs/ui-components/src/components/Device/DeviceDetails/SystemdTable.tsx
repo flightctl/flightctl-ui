@@ -27,7 +27,8 @@ const SystemdTable: React.FC<SystemdTableProps> = ({ device, templateVersion, on
   const matchPatterns = templateVersion
     ? templateVersion?.status?.systemd?.matchPatterns
     : device.spec?.systemd?.matchPatterns;
-  const systemdUnits = device.status?.systemdUnits;
+  // There is no status information for systemdunits
+  const systemdUnits = [];
 
   return (
     <>

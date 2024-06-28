@@ -1,7 +1,9 @@
-import { Device, EnrollmentRequest } from '@flightctl/types';
+import { Device, DeviceSummaryStatusType, EnrollmentRequest } from '@flightctl/types';
 import { getDeviceFleet } from '../devices';
-import { ApprovalStatus, getApprovalStatus } from '../status/enrollmentRequest';
-import { DeviceConditionStatus, deviceStatusOrder, getDeviceStatus } from '../status/device';
+import { getApprovalStatus } from '../status/enrollmentRequest';
+import { EnrollmentRequestStatus as EnrollmentRequestStatusType } from '../status/common';
+
+import { deviceStatusOrder, getDeviceSummaryStatus } from '../status/devices';
 import { isEnrollmentRequest } from '../../types/extraTypes';
 
 export const sortDevicesByStatus = (resources: Array<Device | EnrollmentRequest>) =>
@@ -9,16 +11,16 @@ export const sortDevicesByStatus = (resources: Array<Device | EnrollmentRequest>
     const isERa = isEnrollmentRequest(a);
     const isERb = isEnrollmentRequest(b);
 
-    const aStatus = isERa ? getApprovalStatus(a) : getDeviceStatus(a);
-    const bStatus = isERb ? getApprovalStatus(b) : getDeviceStatus(b);
+    const aStatus = isERa ? getApprovalStatus(a) : getDeviceSummaryStatus(a.status);
+    const bStatus = isERb ? getApprovalStatus(b) : getDeviceSummaryStatus(b.status);
 
     if (isERa && isERb) {
       // Sort when both are EnrollmentRequests
-      if (aStatus === ApprovalStatus.Pending || bStatus === ApprovalStatus.Pending) {
+      if (aStatus === EnrollmentRequestStatusType.Pending || bStatus === EnrollmentRequestStatusType.Pending) {
         if (aStatus === bStatus) {
           return 0;
         }
-        return aStatus === ApprovalStatus.Pending ? -1 : 1;
+        return aStatus === EnrollmentRequestStatusType.Pending ? -1 : 1;
       }
       return aStatus.localeCompare(bStatus);
     } else if (isERa || isERb) {
@@ -27,8 +29,8 @@ export const sortDevicesByStatus = (resources: Array<Device | EnrollmentRequest>
     }
 
     // Sort when both are devices
-    const aIndex = deviceStatusOrder.indexOf(aStatus as DeviceConditionStatus);
-    const bIndex = deviceStatusOrder.indexOf(bStatus as DeviceConditionStatus);
+    const aIndex = deviceStatusOrder.indexOf(aStatus as DeviceSummaryStatusType);
+    const bIndex = deviceStatusOrder.indexOf(bStatus as DeviceSummaryStatusType);
     return aIndex - bIndex;
   });
 
