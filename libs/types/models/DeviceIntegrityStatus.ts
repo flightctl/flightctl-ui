@@ -2,15 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DeviceIntegrityStatusType } from './DeviceIntegrityStatusType';
+import type { DeviceIntegrityStatusSummary } from './DeviceIntegrityStatusSummary';
 export type DeviceIntegrityStatus = {
   /**
-   * Status of the device system integrity.
+   * Summary status of the integrity of the device.
    */
-  status: DeviceIntegrityStatusType;
-  /**
-   * Human readable information about the last integrity transition.
-   */
-  info?: string;
+  summary: DeviceIntegrityStatusSummary;
 };
 

@@ -20,6 +20,6 @@ export type ResourceSyncStatus = {
   /**
    * Current state of a resourcesync.
    */
-  conditions?: Array<Condition>;
+  conditions: Array<Condition>;
 };
 

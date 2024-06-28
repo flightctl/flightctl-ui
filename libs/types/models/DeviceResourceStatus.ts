@@ -5,12 +5,16 @@
 import type { DeviceResourceStatusType } from './DeviceResourceStatusType';
 export type DeviceResourceStatus = {
   /**
-   * Status of the device resources.
+   * Status of the device CPU resources.
    */
-  status: DeviceResourceStatusType;
+  cpu: DeviceResourceStatusType;
   /**
-   * Human readable information about the last resource transition.
+   * Status of the device memory resources.
    */
-  info?: string;
+  memory: DeviceResourceStatusType;
+  /**
+   * Status of the device disk resources.
+   */
+  disk: DeviceResourceStatusType;
 };
 
