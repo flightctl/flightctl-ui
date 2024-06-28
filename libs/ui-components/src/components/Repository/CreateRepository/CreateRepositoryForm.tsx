@@ -13,6 +13,7 @@ import {
   getRepository,
   getRepositoryPatches,
   getResourceSync,
+  getResourceSyncEditPatch,
   handlePromises,
   repositorySchema,
 } from './utils';
@@ -209,7 +210,7 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
                       resourceSync.spec.targetRevision !== formRs.targetRevision)
                   );
                 })
-                .map((rs) => patch<ResourceSync>(`resourcesyncs/${rs.name}`, []));
+                .map((rs) => patch<ResourceSync>(`resourcesyncs/${rs.name}`, getResourceSyncEditPatch(rs)));
 
               const errors = await handlePromises([...rsToRemovePromises, ...rsToAddPromises, ...rsToUpdatePromises]);
               if (errors.length) {

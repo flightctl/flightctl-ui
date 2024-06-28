@@ -1,6 +1,7 @@
 import { PatchRequest } from '@flightctl/types';
 import isNil from 'lodash/isNil';
-import uniq from 'lodash/uniq';
+import isEqual from 'lodash/isEqual';
+import differenceWith from 'lodash/differenceWith';
 
 import { FlightCtlLabel } from '../types/extraTypes';
 
@@ -58,7 +59,8 @@ export const getStringListPatches = (
       value: valueBuilder(newList),
     });
   } else {
-    const hasDifferentItems = uniq([...currentList, newList]).length !== curLen;
+    const hasDifferentItems = differenceWith(currentList, newList, isEqual).length > 0;
+
     if (newLen !== curLen || hasDifferentItems) {
       patches.push({
         path,
@@ -106,6 +108,12 @@ export const getLabelPatches = (
     patches.push({
       path: basePath,
       op: 'remove',
+    });
+  } else if (currentLen !== newLen) {
+    patches.push({
+      path: basePath,
+      op: 'replace',
+      value: newLabelMap,
     });
   } else {
     let needsPatch = false;

@@ -7,6 +7,7 @@ import {
 } from '@flightctl/types';
 import { TFunction } from 'i18next';
 import * as Yup from 'yup';
+import isEqual from 'lodash/isEqual';
 import * as yaml from 'js-yaml';
 import {
   FleetConfigTemplate,
@@ -137,14 +138,40 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
       path: '/spec/template/spec/config',
       op: 'remove',
     });
-  } else {
-    // TODO CHECK FOR DIFFS
-    appendJSONPatch({
+  } else if (currentConfigs.length !== newConfigs.length) {
+    allPatches.push({
       path: '/spec/template/spec/config',
-      patches: allPatches,
-      newValue: newConfigs,
-      originalValue: currentConfigs,
+      op: 'replace',
+      value: newConfigs,
     });
+  } else {
+    const hasConfigChanges = newConfigs.some((newConfig) => {
+      // Attempts to find a new config which has been changed from "currentConfigs"
+      const isUnchanged = currentConfigs.some((conf) => {
+        if (conf.configType !== newConfig.configType) {
+          return false;
+        }
+        switch (conf.configType) {
+          case 'GitConfigProviderSpec':
+            return isSameGitConf(newConfig as GitConfigProviderSpec, conf as GitConfigProviderSpec);
+          case 'KubernetesSecretProviderSpec':
+            return isSameSecretConf(newConfig as KubernetesSecretProviderSpec, conf as KubernetesSecretProviderSpec);
+          case 'InlineConfigProviderSpec':
+            return isSameInlineConf(newConfig as InlineConfigProviderSpec, conf as InlineConfigProviderSpec);
+        }
+        return false;
+      });
+
+      return !isUnchanged;
+    });
+
+    if (hasConfigChanges) {
+      allPatches.push({
+        path: '/spec/template/spec/config',
+        op: 'replace',
+        value: newConfigs,
+      });
+    }
   }
 
   return allPatches;
@@ -174,6 +201,32 @@ export const getFleetResource = (values: FleetFormValues): Fleet => ({
     },
   },
 });
+
+const isSameGitConf = (a: GitConfigProviderSpec, b: GitConfigProviderSpec) => {
+  const aRef = a.gitRef;
+  const bRef = b.gitRef;
+  return (
+    a.name === b.name &&
+    aRef.path === bRef.path &&
+    aRef.repository === bRef.repository &&
+    aRef.targetRevision === bRef.targetRevision
+  );
+};
+
+const isSameSecretConf = (a: KubernetesSecretProviderSpec, b: KubernetesSecretProviderSpec) => {
+  const aRef = a.secretRef;
+  const bRef = b.secretRef;
+  return (
+    a.name === b.name &&
+    aRef.name === bRef.name &&
+    aRef.namespace === bRef.namespace &&
+    aRef.mountPath === bRef.mountPath
+  );
+};
+
+const isSameInlineConf = (a: InlineConfigProviderSpec, b: InlineConfigProviderSpec) => {
+  return a.name === b.name && isEqual(a.inline, b.inline);
+};
 
 export const getAPIConfig = (
   ct: FleetConfigTemplate,
