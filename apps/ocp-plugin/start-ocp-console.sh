@@ -62,7 +62,7 @@ if [ -x "$(command -v podman)" ]; then
           -v $PWD/ocp-console/ca.crt:/tmp/ca.crt:Z \
           --pull always \
           --rm --network=host \
-          --env BRIDGE_PLUGIN_PROXY='{"services": [{"consoleAPIPath": "/api/proxy/plugin/flightctl-plugin/api-proxy/", "endpoint":"http://localhost:3001","authorize":false},{"consoleAPIPath": "/api/proxy/plugin/mce/console/", "endpoint":"https://localhost:2000","authorize":true},{"consoleAPIPath": "/api/proxy/plugin/acm/console/", "endpoint":"https://localhost:2000","authorize":true}]}' \
+          --env BRIDGE_PLUGIN_PROXY='{"services": [{"consoleAPIPath": "/api/proxy/plugin/flightctl-plugin/api-proxy/", "endpoint":"http://localhost:3001","authorize":true},{"consoleAPIPath": "/api/proxy/plugin/mce/console/", "endpoint":"https://localhost:2000","authorize":true},{"consoleAPIPath": "/api/proxy/plugin/acm/console/", "endpoint":"https://localhost:2000","authorize":true}]}' \
           --env-file <(set | grep BRIDGE) \
           $CONSOLE_IMAGE
     else
