@@ -6,7 +6,8 @@ import { Formik } from 'formik';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
 import DeviceEnrollmentForm, { DeviceEnrollmentFormProps, DeviceEnrollmentFormValues } from './DeviceEnrollmentForm';
-import { ApprovalStatus, getApprovalStatus } from '../../../utils/status/enrollmentRequest';
+import { getApprovalStatus } from '../../../utils/status/enrollmentRequest';
+import { EnrollmentRequestStatus as EnrollmentRequestStatusType } from '../../../utils/status/common';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { deviceApprovalValidationSchema } from '../../form/validations';
 
@@ -47,7 +48,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
     >
       {({ isSubmitting }) => (
         <Modal title={t('Device enrollment request')} isOpen onClose={() => !isSubmitting && onClose()} variant="small">
-          {getApprovalStatus(enrollmentRequest) !== ApprovalStatus.Approved ? (
+          {getApprovalStatus(enrollmentRequest) !== EnrollmentRequestStatusType.Approved ? (
             <DeviceEnrollmentForm enrollmentRequest={enrollmentRequest} onClose={onClose} error={error} />
           ) : (
             <Alert isInline variant="info" title={t('Enrollment request is already approved.')} />

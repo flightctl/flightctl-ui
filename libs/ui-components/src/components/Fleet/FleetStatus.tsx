@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
-import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/question-circle-icon';
+import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 import { WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons/warning-triangle-icon';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progress-icon';
@@ -8,41 +8,47 @@ import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progres
 import { ConditionType, Fleet } from '@flightctl/types';
 import { fleetStatusLabels, getFleetSyncStatus } from '../../utils/status/fleet';
 import { useTranslation } from '../../hooks/useTranslation';
-import StatusLabel, { StatusLabelColor } from '../common/StatusLabel';
+import { StatusDisplayContent } from '../Status/StatusDisplay';
+import { StatusLevel } from '../../utils/status/common';
 
 const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
   const syncStatus = getFleetSyncStatus(fleet, t);
   const statusLabels = fleetStatusLabels(t);
 
-  let color: StatusLabelColor;
+  let level: StatusLevel;
   let icon: React.ReactNode;
 
   switch (syncStatus.status) {
     case ConditionType.FleetValid:
-      color = 'success';
+      level = 'success';
       icon = <CheckCircleIcon />;
       break;
     case ConditionType.FleetOverlappingSelectors:
-      color = 'warning';
+      level = 'warning';
       icon = <WarningTriangleIcon />;
       break;
     case 'SyncPending':
       icon = <InProgressIcon />;
-      color = 'info';
+      level = 'info';
       break;
     case 'Invalid':
-      color = 'danger';
+      level = 'danger';
       icon = <ExclamationCircleIcon />;
       break;
     default:
-      color = 'unknown';
-      icon = <QuestionCircleIcon />;
+      level = 'unknown';
+      icon = <OutlinedQuestionCircleIcon />;
       break;
   }
 
   return (
-    <StatusLabel label={statusLabels[syncStatus.status]} status={color} icon={icon} tooltip={syncStatus.message} />
+    <StatusDisplayContent
+      label={statusLabels[syncStatus.status]}
+      level={level}
+      icon={icon}
+      tooltip={syncStatus.message}
+    />
   );
 };
 
