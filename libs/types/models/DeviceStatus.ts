@@ -3,46 +3,51 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Condition } from './Condition';
-import type { ContainerStatus } from './ContainerStatus';
+import type { DeviceApplicationsStatus } from './DeviceApplicationsStatus';
 import type { DeviceConfigStatus } from './DeviceConfigStatus';
-import type { DeviceSystemdUnitStatus } from './DeviceSystemdUnitStatus';
+import type { DeviceIntegrityStatus } from './DeviceIntegrityStatus';
+import type { DeviceOSStatus } from './DeviceOSStatus';
+import type { DeviceResourceStatus } from './DeviceResourceStatus';
+import type { DeviceSummaryStatus } from './DeviceSummaryStatus';
 import type { DeviceSystemInfo } from './DeviceSystemInfo';
-import type { DeviceSystemStatus } from './DeviceSystemStatus';
-import type { DeviceUpdateStatus } from './DeviceUpdateStatus';
-import type { DeviceWorkloadStatus } from './DeviceWorkloadStatus';
+import type { DeviceUpdatedStatus } from './DeviceUpdatedStatus';
 /**
- * DeviceStatus represents information about the status of a device. Status may trail the actual state of a device, especially if the device has not contacted the management service in a while.
+ * DeviceStatus represents information about the status of a device. Status may trail the actual state of a device.
  */
 export type DeviceStatus = {
-  updatedAt?: string;
   /**
-   * Current state of the device.
+   * Conditions represent the observations of a the current state of a device.
    */
-  conditions?: Array<Condition>;
-  systemInfo?: DeviceSystemInfo;
+  conditions: Record<string, Condition>;
+  systemInfo: DeviceSystemInfo;
   /**
-   * Statuses of containers in the device.
+   * Current status of the system applications.
    */
-  containers?: Array<ContainerStatus>;
+  applications: DeviceApplicationsStatus;
   /**
-   * Current state of systemd units on the device.
+   * Current status of the resources of the device.
    */
-  systemdUnits?: Array<DeviceSystemdUnitStatus>;
+  resources: DeviceResourceStatus;
   /**
-   * Current status of the device workload.
+   * Current status of the integrity of the device.
    */
-  workload?: DeviceWorkloadStatus;
+  integrity: DeviceIntegrityStatus;
   /**
-   * Current status of the device system.
+   * Current status of the device config.
    */
-  system?: DeviceSystemStatus;
+  config: DeviceConfigStatus;
   /**
-   * Current device update status.
+   * Current status of the device OS.
    */
-  update?: DeviceUpdateStatus;
+  os: DeviceOSStatus;
   /**
-   * Current device config status.
+   * Current status of the device update.
    */
-  config?: DeviceConfigStatus;
+  updated: DeviceUpdatedStatus;
+  /**
+   * Summary status of the device.
+   */
+  summary: DeviceSummaryStatus;
+  updatedAt: string;
 };
 

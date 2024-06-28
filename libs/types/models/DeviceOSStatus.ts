@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type DeviceConfigStatus = {
+export type DeviceOSStatus = {
   /**
-   * Version of the device rendered config.
+   * Version of the OS image.
    */
-  renderedVersion: string;
+  image: string;
 };
 

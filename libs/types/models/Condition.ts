@@ -20,18 +20,17 @@ export type Condition = {
    * The .metadata.generation that the condition was set based upon.
    */
   observedGeneration?: number;
-  lastHeartbeatTime?: string;
   /**
    * The last time the condition transitioned from one status to another.
    */
-  lastTransitionTime?: string;
+  lastTransitionTime: string;
   /**
    * Human readable message indicating details about last transition.
    */
-  message?: string;
+  message: string;
   /**
    * (brief) reason for the condition's last transition.
    */
-  reason?: string;
+  reason: string;
 };
 

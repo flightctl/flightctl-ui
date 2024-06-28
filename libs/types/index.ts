@@ -3,34 +3,31 @@
 /* tslint:disable */
 /* eslint-disable */
 
+export type { ApplicationsSummaryStatus } from './models/ApplicationsSummaryStatus';
+export { ApplicationsSummaryStatusType } from './models/ApplicationsSummaryStatusType';
+export type { ApplicationStatus } from './models/ApplicationStatus';
+export { ApplicationStatusType } from './models/ApplicationStatusType';
 export type { Condition } from './models/Condition';
 export { ConditionStatus } from './models/ConditionStatus';
 export { ConditionType } from './models/ConditionType';
-export type { ContainerStatus } from './models/ContainerStatus';
 export type { Device } from './models/Device';
-export type { DeviceApplicationStatus } from './models/DeviceApplicationStatus';
-export { DeviceApplicationStatusType } from './models/DeviceApplicationStatusType';
+export type { DeviceApplicationsStatus } from './models/DeviceApplicationsStatus';
 export type { DeviceConfigStatus } from './models/DeviceConfigStatus';
 export type { DeviceIntegrityStatus } from './models/DeviceIntegrityStatus';
-export { DeviceIntegrityStatusType } from './models/DeviceIntegrityStatusType';
+export type { DeviceIntegrityStatusSummary } from './models/DeviceIntegrityStatusSummary';
+export { DeviceIntegrityStatusSummaryType } from './models/DeviceIntegrityStatusSummaryType';
 export type { DeviceList } from './models/DeviceList';
 export type { DeviceOSSpec } from './models/DeviceOSSpec';
+export type { DeviceOSStatus } from './models/DeviceOSStatus';
 export type { DeviceResourceStatus } from './models/DeviceResourceStatus';
 export { DeviceResourceStatusType } from './models/DeviceResourceStatusType';
-export type { DeviceResourceSummaryStatus } from './models/DeviceResourceSummaryStatus';
 export type { DeviceSpec } from './models/DeviceSpec';
 export type { DeviceStatus } from './models/DeviceStatus';
-export type { DeviceSystemdUnitStatus } from './models/DeviceSystemdUnitStatus';
+export type { DeviceSummaryStatus } from './models/DeviceSummaryStatus';
+export { DeviceSummaryStatusType } from './models/DeviceSummaryStatusType';
 export type { DeviceSystemInfo } from './models/DeviceSystemInfo';
-export type { DeviceSystemStatus } from './models/DeviceSystemStatus';
-export type { DeviceSystemSummaryStatus } from './models/DeviceSystemSummaryStatus';
-export { DeviceSystemSummaryStatusType } from './models/DeviceSystemSummaryStatusType';
-export type { DeviceUpdateStatus } from './models/DeviceUpdateStatus';
-export { DeviceUpdateStatusType } from './models/DeviceUpdateStatusType';
-export type { DeviceUpdateSummaryStatus } from './models/DeviceUpdateSummaryStatus';
-export type { DeviceWorkloadStatus } from './models/DeviceWorkloadStatus';
-export type { DeviceWorkloadSummaryStatus } from './models/DeviceWorkloadSummaryStatus';
-export { DeviceWorkloadSummaryType } from './models/DeviceWorkloadSummaryType';
+export type { DeviceUpdatedStatus } from './models/DeviceUpdatedStatus';
+export { DeviceUpdatedStatusType } from './models/DeviceUpdatedStatusType';
 export type { EnrollmentRequest } from './models/EnrollmentRequest';
 export type { EnrollmentRequestApproval } from './models/EnrollmentRequestApproval';
 export type { EnrollmentRequestList } from './models/EnrollmentRequestList';

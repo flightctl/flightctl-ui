@@ -15,7 +15,7 @@ export type EnrollmentRequestStatus = {
   /**
    * Current state of the EnrollmentRequest.
    */
-  conditions?: Array<Condition>;
+  conditions: Array<Condition>;
   approval?: EnrollmentRequestApproval;
 };
 

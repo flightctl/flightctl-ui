@@ -10,6 +10,6 @@ export type FleetStatus = {
   /**
    * Current state of the fleet.
    */
-  conditions?: Array<Condition>;
+  conditions: Array<Condition>;
 };
 
