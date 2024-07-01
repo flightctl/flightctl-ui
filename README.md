@@ -19,9 +19,9 @@ npm run build
 ### Copy the flightctl-server certs to proxy the API requests
 ```
 mkdir certs
-cp ~/.flightctl/certs/client-enrollment.crt certs/front-cli.crt
-cp ~/.flightctl/certs/client-enrollment.key certs/front-cli.key
-cp ~/.flightctl/certs/ca.crt certs
+cat ~/.flightctl/client.yaml | yq '.authentication.client-key-data' | base64 -d > certs/front-cli.key
+cat ~/.flightctl/client.yaml | yq '.authentication.client-certificate-data' | base64 -d > certs/front-cli.crt
+cat ~/.flightctl/client.yaml | yq '.service.certificate-authority-data' | base64 -d > certs/ca.crt
 ```
 
 ### Running Standalone UI
