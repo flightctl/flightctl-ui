@@ -1,10 +1,11 @@
+import * as React from 'react';
 import {
   Badge,
   MenuToggle,
   SearchInput,
   Select,
+  SelectGroup,
   SelectList,
-  SelectOption,
   SelectProps,
   Toolbar,
   ToolbarChip,
@@ -14,16 +15,15 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import * as React from 'react';
+
 import TableTextSearch, { TableTextSearchProps } from '../Table/TableTextSearch';
-import { ApprovalStatus } from '../../utils/status/enrollmentRequest';
-import { DeviceConditionStatus } from '../../utils/status/device';
-import { combinedDevicesStatuses } from '../../utils/status/devices';
+import { FilterSearchParams, StatusFilterItem, getDeviceStatusItems } from '../../utils/status/devices';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
+import DeviceStatusFilterSelect from './DeviceStatusFilterSelect';
 
 type FilterCategory = {
-  key: 'status' | 'id' | 'fleet';
+  key: 'id' | FilterSearchParams;
 };
 
 type DeviceTableToolbarProps = {
@@ -31,12 +31,9 @@ type DeviceTableToolbarProps = {
   setSearch: TableTextSearchProps['setValue'];
   fleetName: string | undefined;
   setFleetName: (fleetName: string) => void;
-  filters: { status: Array<DeviceConditionStatus | ApprovalStatus> };
-  setFilters: React.Dispatch<
-    React.SetStateAction<{
-      status: Array<DeviceConditionStatus | ApprovalStatus>;
-    }>
-  >;
+  filters: {
+    statuses: Array<string>; // statuses formed by statusType#statusId (eg. deviceStatusPending)
+  };
   children: React.ReactNode;
 };
 
@@ -46,7 +43,6 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
   search,
   setSearch,
   filters,
-  setFilters,
   children,
 }) => {
   const { t } = useTranslation();
@@ -55,46 +51,90 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
     router: { useSearchParams },
   } = useAppContext();
   const [searchParams, setSearchParams] = useSearchParams();
-  const fleetNameFilter = searchParams.get('fleetId');
+  const fleetNameFilter = searchParams.get(FilterSearchParams.Fleet);
+
+  const statusesItems = React.useMemo(() => {
+    return getDeviceStatusItems(t);
+  }, [t]);
 
   const onStatusSelect: SelectProps['onSelect'] = (e, selection) => {
     const checked = (e?.target as HTMLInputElement)?.checked;
-    setFilters((filters) => ({
-      ...filters,
-      status: checked
-        ? [...filters.status, selection as ApprovalStatus]
-        : filters.status.filter((s) => s !== selection),
-    }));
+    const [paramName, value] = (selection as string).split('#');
+    setSearchParams((prev) => {
+      if (checked) {
+        prev.append(paramName, value);
+      } else {
+        prev.delete(paramName, value);
+      }
+      return prev;
+    });
   };
 
   const clearFleetFilter = () => {
-    setSearchParams('');
+    setSearchParams((prev) => {
+      prev.set(FilterSearchParams.Fleet, '');
+      return prev;
+    });
   };
 
   const onApplyFleetFilter = () => {
     // The change in the URL is detected by DeviceList. It will change the query to filter by fleet
-    setSearchParams({ fleetId: fleetName || '' });
+    setSearchParams((prev) => {
+      prev.set(FilterSearchParams.Fleet, fleetName || '');
+      return prev;
+    });
   };
+
+  const getStatusChips = (statusList: Array<StatusFilterItem>, type: StatusFilterItem['type']) =>
+    statusList
+      .filter((statusItem) => {
+        return statusItem.type === type && filters.statuses.includes(`${statusItem.type}#${statusItem.id}`);
+      })
+      .map((a) => {
+        return {
+          key: `${a.type}#${a.id}`,
+          node: <>{a.label}</>,
+        };
+      });
 
   const onDeleteFilterGroup = (category: string | ToolbarChipGroup) => {
     const { key } = category as FilterCategory;
-    if (key === 'status') {
-      setFilters({ status: [] });
+    if (
+      [FilterSearchParams.Device, FilterSearchParams.App, FilterSearchParams.Update].includes(key as FilterSearchParams)
+    ) {
+      const [paramName, value] = (key as string).split('#');
+      setSearchParams((prev: URLSearchParams) => {
+        prev.delete(paramName, value);
+        return prev;
+      });
     } else {
-      setFilters({ status: [] });
+      // Clear all filters
+      setSearchParams((prev: URLSearchParams) => {
+        prev.delete(FilterSearchParams.Fleet);
+        prev.delete(FilterSearchParams.Device);
+        prev.delete(FilterSearchParams.App);
+        prev.delete(FilterSearchParams.Update);
+        return prev;
+      });
       setSearch('');
-      clearFleetFilter();
     }
   };
 
   const onDeleteFilterChip = (category: string | ToolbarChipGroup, chip: ToolbarChip | string) => {
-    if (category === 'status') {
-      const id = chip as string;
-      setFilters({ status: filters.status.filter((fil: string) => fil !== id) });
-    } else if (category === 'id') {
+    const filterName = category as string;
+    if (filterName === 'id') {
       setSearch('');
-    } else if (category === 'fleet') {
-      clearFleetFilter();
+    } else if (filterName === FilterSearchParams.Fleet) {
+      setSearchParams((prev: URLSearchParams) => {
+        prev.delete(FilterSearchParams.Fleet);
+        return prev;
+      });
+    } else {
+      const [paramName, value] = (chip as ToolbarChip).key.split('#');
+      setSearchParams((prev) => {
+        prev.delete(paramName, value);
+        return prev;
+      });
     }
   };
 
@@ -105,18 +145,103 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
       clearAllFilters={() => onDeleteFilterGroup({ key: '', name: '' })}
     >
       <ToolbarContent>
-        <ToolbarItem variant="search-filter">
+        <ToolbarGroup variant="filter-group">
           <ToolbarFilter
-            chips={search ? [search] : []}
+            chips={getStatusChips(statusesItems, FilterSearchParams.Device)}
             deleteChip={onDeleteFilterChip}
+            deleteChipGroup={onDeleteFilterGroup}
             categoryName={{
-              key: 'id',
-              name: t('Name / ID'),
+              key: FilterSearchParams.Device,
+              name: t('Device status'),
             }}
           >
-            <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name or fingerprint')} />
+            <Select
+              aria-label={t('Filters')}
+              role="menu"
+              toggle={(toggleRef) => (
+                <MenuToggle
+                  ref={toggleRef}
+                  onClick={() => setIsStatusExpanded(!isStatusExpanded)}
+                  isExpanded={isStatusExpanded}
+                >
+                  {t('Filters')}
+                  {filters.statuses.length > 0 && <Badge isRead>{filters.statuses.length}</Badge>}
+                </MenuToggle>
+              )}
+              onSelect={onStatusSelect}
+              isOpen={isStatusExpanded}
+              onOpenChange={setIsStatusExpanded}
+            >
+              <SelectList>
+                <SelectGroup label={t('Device status')}>
+                  <DeviceStatusFilterSelect
+                    type={FilterSearchParams.Device}
+                    items={statusesItems}
+                    selectedFilters={filters.statuses}
+                  />
+                </SelectGroup>
+                <SelectGroup label={t('Application status')}>
+                  <DeviceStatusFilterSelect
+                    type={FilterSearchParams.App}
+                    items={statusesItems}
+                    selectedFilters={filters.statuses}
+                  />
+                </SelectGroup>
+                <SelectGroup label={t('Update status')}>
+                  <DeviceStatusFilterSelect
+                    type={FilterSearchParams.Update}
+                    items={statusesItems}
+                    selectedFilters={filters.statuses}
+                  />
+                </SelectGroup>
+              </SelectList>
+            </Select>
           </ToolbarFilter>
-        </ToolbarItem>
+        </ToolbarGroup>
+        <ToolbarGroup variant="filter-group">
+          <ToolbarItem variant="search-filter">
+            <ToolbarFilter
+              chips={getStatusChips(statusesItems, FilterSearchParams.App)}
+              deleteChip={onDeleteFilterChip}
+              deleteChipGroup={onDeleteFilterGroup}
+              categoryName={{
+                key: FilterSearchParams.App,
+                name: t('Application status'),
+              }}
+            >
+              {' '}
+            </ToolbarFilter>
+          </ToolbarItem>
+        </ToolbarGroup>
+        <ToolbarGroup variant="filter-group">
+          <ToolbarItem variant="search-filter">
+            <ToolbarFilter
+              chips={getStatusChips(statusesItems, FilterSearchParams.Update)}
+              deleteChip={onDeleteFilterChip}
+              deleteChipGroup={onDeleteFilterGroup}
+              categoryName={{
+                key: FilterSearchParams.Update,
+                name: t('Update status'),
+              }}
+            >
+              {' '}
+            </ToolbarFilter>
+          </ToolbarItem>
+        </ToolbarGroup>
+        <ToolbarGroup variant="filter-group">
+          <ToolbarItem variant="search-filter">
+            <ToolbarFilter
+              chips={search ? [search] : []}
+              deleteChip={onDeleteFilterChip}
+              categoryName={{
+                key: 'id',
+                name: t('Name / ID'),
+              }}
+            >
+              <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name or fingerprint')} />
+            </ToolbarFilter>
+          </ToolbarItem>
+        </ToolbarGroup>
         <ToolbarItem variant="search-filter">
           <ToolbarFilter
             chips={fleetNameFilter ? [fleetNameFilter] : []}
@@ -136,49 +261,6 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
             />
           </ToolbarFilter>
         </ToolbarItem>
-        <ToolbarGroup variant="filter-group">
-          <ToolbarFilter
-            chips={filters.status}
-            deleteChip={onDeleteFilterChip}
-            deleteChipGroup={onDeleteFilterGroup}
-            categoryName={{
-              key: 'status',
-              name: t('Status'),
-            }}
-          >
-            <Select
-              aria-label={t('Status')}
-              role="menu"
-              toggle={(toggleRef) => (
-                <MenuToggle
-                  ref={toggleRef}
-                  onClick={() => setIsStatusExpanded(!isStatusExpanded)}
-                  isExpanded={isStatusExpanded}
-                >
-                  {t('Status')}
-                  {filters.status.length > 0 && <Badge isRead>{filters.status.length}</Badge>}
-                </MenuToggle>
-              )}
-              onSelect={onStatusSelect}
-              selected={filters.status}
-              isOpen={isStatusExpanded}
-              onOpenChange={setIsStatusExpanded}
-            >
-              <SelectList>
-                {combinedDevicesStatuses.map((status) => (
-                  <SelectOption
-                    key={status.key}
-                    hasCheckbox
-                    value={status.label}
-                    isSelected={filters.status.includes(status.label)}
-                  >
-                    {status.label}
-                  </SelectOption>
-                ))}
-              </SelectList>
-            </Select>
-          </ToolbarFilter>
-        </ToolbarGroup>
         {children}
       </ToolbarContent>
     </Toolbar>
