@@ -1,19 +1,30 @@
 import * as React from 'react';
-import TextField, { TextFieldProps } from './TextField';
 import { useField } from 'formik';
 import debounce from 'lodash/debounce';
+
 import { useFetch } from '../../hooks/useFetch';
+import { useTranslation } from '../../hooks/useTranslation';
+import RichValidationTextField, { RichValidationTextFieldProps } from './RichValidationTextField';
+import { TextFieldProps } from './TextField';
 
 type NameFieldProps = TextFieldProps & {
-  getExistsErrMsg: (value: string) => string;
   resourceType: string;
+  validations: RichValidationTextFieldProps['validations'];
 };
 
-const NameField: React.FC<NameFieldProps> = ({ name, isDisabled, resourceType, getExistsErrMsg, ...rest }) => {
+const NameField: React.FC<NameFieldProps> = ({ name, isDisabled, validations, resourceType, ...rest }) => {
+  const { t } = useTranslation();
   const { get } = useFetch();
   const [{ value }, { error }, { setError }] = useField<string>(name);
-  const currentErrorRef = React.useRef<string>();
+  const currentErrorRef = React.useRef<boolean>();
   const abortControllerRef = React.useRef<AbortController>();
+
+  const setValidationError = () => {
+    // @ts-expect-error Sets format used by RichValidationTextField
+    setError({
+      duplicateName: 'failed',
+    });
+  };
 
   const validateExistingName = async (value: string) => {
     if (abortControllerRef.current) {
@@ -21,15 +32,15 @@ const NameField: React.FC<NameFieldProps> = ({ name, isDisabled, resourceType, g
     }
     abortControllerRef.current = new AbortController();
     if (isDisabled || !value) {
-      currentErrorRef.current = undefined;
+      currentErrorRef.current = false;
       return;
     }
     try {
       await get(`${resourceType}/${value}`, abortControllerRef.current.signal);
-      currentErrorRef.current = getExistsErrMsg(value);
-      setError(currentErrorRef.current);
+      currentErrorRef.current = true;
+      setValidationError();
     } catch (e) {
-      currentErrorRef.current = undefined;
+      currentErrorRef.current = false;
     }
   };
 
@@ -43,12 +54,20 @@ const NameField: React.FC<NameFieldProps> = ({ name, isDisabled, resourceType, g
 
   React.useEffect(() => {
     if (!error && currentErrorRef.current) {
-      setError(currentErrorRef.current);
+      setValidationError();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
-  return <TextField name={name} isDisabled={isDisabled} {...rest} />;
+  const allValidations = [
+    {
+      key: 'duplicateName',
+      message: t('Name must be unique'),
+    },
+    ...validations,
+  ];
+
+  return <RichValidationTextField fieldName={name} validations={allValidations} isDisabled={isDisabled} {...rest} />;
 };
 
 export default NameField;

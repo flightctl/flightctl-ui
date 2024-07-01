@@ -15,7 +15,7 @@ import * as Yup from 'yup';
 import { TFunction } from 'i18next';
 import { isHttpRepoSpec, isSshRepoSpec } from '../../../types/extraTypes';
 import { appendJSONPatch } from '../../../utils/patch';
-import { maxLengthString, validKubernetesLabel } from '../../form/validations';
+import { maxLengthString, validKubernetesDnsSubdomain } from '../../form/validations';
 
 const MAX_TARGET_REVISION_LENGTH = 244;
 const MAX_PATH_LENGTH = 2048;
@@ -288,12 +288,16 @@ export const repoSyncSchema = (t: TFunction, values: ResourceSyncFormValue[]) =>
   return Yup.array()
     .of(
       Yup.object().shape({
-        name: validKubernetesLabel(t, { isRequired: true }).test('Must be unique', t('Must be unique'), (value) => {
-          if (!value) {
-            return true;
-          }
-          return values.filter((v) => v.name === value).length === 1;
-        }),
+        name: validKubernetesDnsSubdomain(t, { isRequired: true }).test(
+          'Must be unique',
+          t('Must be unique'),
+          (value) => {
+            if (!value) {
+              return true;
+            }
+            return values.filter((v) => v.name === value).length === 1;
+          },
+        ),
         targetRevision: maxLengthString(t, {
           maxLength: MAX_TARGET_REVISION_LENGTH,
           fieldName: t('Target revision'),
@@ -309,7 +313,7 @@ export const repoSyncSchema = (t: TFunction, values: ResourceSyncFormValue[]) =>
 export const repositorySchema =
   (t: TFunction, repository: Repository | undefined) => (values: RepositoryFormValues) => {
     return Yup.object({
-      name: validKubernetesLabel(t, { isRequired: !repository }),
+      name: validKubernetesDnsSubdomain(t, { isRequired: !repository }),
       url: Yup.string()
         .matches(gitRegex, t('Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos'))
         .defined(t('Repository URL is required')),

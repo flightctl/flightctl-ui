@@ -124,7 +124,6 @@ const ImportFleetWizard = () => {
         }}
         validationSchema={validationSchema(t)}
         validateOnMount
-        validateOnChange={false}
         onSubmit={async (values) => {
           setErrors(undefined);
           if (!values.useExistingRepo) {

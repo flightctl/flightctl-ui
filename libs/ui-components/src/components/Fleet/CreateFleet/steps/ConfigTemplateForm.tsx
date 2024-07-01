@@ -35,7 +35,9 @@ import FormSelect from '../../../form/FormSelect';
 import CreateRepositoryModal from '../../../modals/CreateRepositoryModal/CreateRepositoryModal';
 import { sortByName } from '../../../../utils/sort/generic';
 import WithTooltip from '../../../common/WithTooltip';
-import { IgnitionFileHelperText, KubernetesLabelHelperText } from '../../../common/HelperTextItems';
+import { IgnitionFileHelperText } from '../../../common/HelperTextItems';
+import { getDnsSubdomainValidations } from '../../../form/validations';
+import RichValidationTextField from '../../../form/RichValidationTextField';
 
 import './ConfigTemplateForm.css';
 
@@ -199,14 +201,13 @@ const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionPr
       }}
     >
       <Grid hasGutter>
-        <FormGroup label={t('Source name')} isRequired>
-          <TextField
-            aria-label={t('Source name')}
-            name={`${fieldName}.name`}
-            value={ct.name}
-            helperText={<KubernetesLabelHelperText />}
-          />
-        </FormGroup>
+        <RichValidationTextField
+          fieldName={`${fieldName}.name`}
+          aria-label={t('Source name')}
+          validations={getDnsSubdomainValidations(t)}
+          isRequired
+        />
+
         <FormGroup label={t('Source type')} isRequired>
           <FormSelect
             items={{

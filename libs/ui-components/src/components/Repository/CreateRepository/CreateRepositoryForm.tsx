@@ -19,12 +19,12 @@ import {
 import { Repository, ResourceSync } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
-import { KubernetesLabelHelperText } from '../../common/HelperTextItems';
 import NameField from '../../form/NameField';
 import TextAreaField from '../../form/TextAreaField';
 import CheckboxField from '../../form/CheckboxField';
 import RadioField from '../../form/RadioField';
 import TextField from '../../form/TextField';
+import { getDnsSubdomainValidations } from '../../form/validations';
 
 import './CreateRepositoryForm.css';
 
@@ -94,16 +94,14 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
 
   return (
     <>
-      <FormGroup label={t('Repository name')} isRequired>
-        <NameField
-          name="name"
-          aria-label={t('Repository name')}
-          isDisabled={isEdit}
-          helperText={<KubernetesLabelHelperText />}
-          resourceType="repositories"
-          getExistsErrMsg={(value) => t(`A repository named "{{value}}" already exists`, { value })}
-        />
-      </FormGroup>
+      <NameField
+        name="name"
+        aria-label={t('Repository name')}
+        isRequired
+        isDisabled={isEdit}
+        resourceType="repositories"
+        validations={getDnsSubdomainValidations(t)}
+      />
       <FormGroup label={t('Repository URL')} isRequired>
         <TextField
           name="url"
@@ -184,7 +182,6 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
     <Formik<RepositoryFormValues>
       initialValues={getInitValues(repository, resourceSyncs, hideResourceSyncs)}
       validationSchema={Yup.lazy(repositorySchema(t, repository))}
-      validateOnChange={false}
       onSubmit={async (values) => {
         setErrors(undefined);
         if (repository) {

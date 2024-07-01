@@ -3,13 +3,14 @@ import { EnrollmentRequest } from '@flightctl/types';
 import { Alert, Button, Form, FormGroup } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
+import RichValidationTextField from '../../form/RichValidationTextField';
 import LabelsField from '../../form/LabelsField';
+import TextField from '../../form/TextField';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
-import TextField from '../../form/TextField';
 import DisplayName from '../../common/DisplayName';
-import { KubernetesLabelHelperText } from '../../common/HelperTextItems';
+import { getLabelValueValidations } from '../../../components/form/validations';
 
 export type DeviceEnrollmentFormValues = {
   labels: FlightCtlLabel[];
@@ -41,9 +42,12 @@ const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentR
       <FormGroup label={t('Region')} isRequired>
         <TextField name="region" aria-label={t('Region')} />
       </FormGroup>
-      <FormGroup label={t('Name')} isRequired>
-        <TextField name="displayName" aria-label={t('Display name')} helperText={<KubernetesLabelHelperText />} />
-      </FormGroup>
+      <RichValidationTextField
+        fieldName="displayName"
+        aria-label={t('Display name')}
+        validations={getLabelValueValidations(t)}
+        isRequired
+      />
       {children}
       {error && <Alert isInline title={error} variant="danger" />}
       <FlightCtlActionGroup>

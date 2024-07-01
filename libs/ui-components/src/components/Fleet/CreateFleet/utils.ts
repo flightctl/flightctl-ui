@@ -16,13 +16,13 @@ import {
 } from './types';
 import { API_VERSION } from '../../../constants';
 import { toAPILabel } from '../../../utils/labels';
-import { maxLengthString, validKubernetesLabel, validLabelsSchema } from '../../form/validations';
+import { maxLengthString, validKubernetesDnsSubdomain, validLabelsSchema } from '../../form/validations';
 
 const absolutePathRegex = /^\/.*$/;
 
 export const getValidationSchema = (t: TFunction) => {
   return Yup.object<FleetFormValues>({
-    name: validKubernetesLabel(t, { isRequired: true }),
+    name: validKubernetesDnsSubdomain(t, { isRequired: true }),
     osImage: maxLengthString(t, { fieldName: t('System image'), maxLength: 2048 }),
     fleetLabels: validLabelsSchema(t),
     labels: validLabelsSchema(t),
@@ -31,7 +31,7 @@ export const getValidationSchema = (t: TFunction) => {
         if (isGitConfigTemplate(value)) {
           return Yup.object<GitConfigTemplate>().shape({
             type: Yup.string().required(t('Provider type is required.')),
-            name: validKubernetesLabel(t, { isRequired: true }),
+            name: validKubernetesDnsSubdomain(t, { isRequired: true }),
             path: Yup.string().required(t('Path is required.')).matches(absolutePathRegex, t('Path must be absolute.')),
             repository: Yup.string().required(t('Repository is required.')),
             targetRevision: Yup.string().required(t('Branch/tag/commit is required.')),
@@ -39,7 +39,7 @@ export const getValidationSchema = (t: TFunction) => {
         } else if (isKubeSecretTemplate(value)) {
           return Yup.object<KubeSecretTemplate>().shape({
             type: Yup.string().required(t('Provider type is required.')),
-            name: validKubernetesLabel(t, { isRequired: true }),
+            name: validKubernetesDnsSubdomain(t, { isRequired: true }),
             secretName: Yup.string().required(t('Secret name is required.')),
             secretNs: Yup.string().required(t('Secret namespace is required.')),
             mountPath: Yup.string()
@@ -49,7 +49,7 @@ export const getValidationSchema = (t: TFunction) => {
         } else if (isInlineConfigTemplate(value)) {
           return Yup.object<InlineConfigTemplate>().shape({
             type: Yup.string().required(t('Provider type is required.')),
-            name: validKubernetesLabel(t, { isRequired: true }),
+            name: validKubernetesDnsSubdomain(t, { isRequired: true }),
             inline: maxLengthString(t, { fieldName: t('Inline config'), maxLength: 65535 })
               .required(t('Inline config is required.'))
               .test('yaml object', t('Inline config must be a valid yaml object.'), (value) => {
