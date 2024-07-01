@@ -61,7 +61,6 @@ export type AppContextProps = {
   };
   fetch: {
     get: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
-    put: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
     post: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
     remove: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
     patch: <R>(kind: string, patches: PatchRequest, abortSignal?: AbortSignal) => Promise<R>;
@@ -91,22 +90,17 @@ export const AppContext = React.createContext<AppContextProps>({
   i18n: {
     transNamespace: undefined,
   },
+  /* eslint-disable */
   fetch: {
-    // eslint-disable-next-line
     get: async () => ({}) as any,
-    // eslint-disable-next-line
-    put: async () => ({}) as any,
-    // eslint-disable-next-line
     post: async () => ({}) as any,
-    // eslint-disable-next-line
     remove: async () => ({}) as any,
-    // eslint-disable-next-line
     patch: async () => ({}) as any,
   },
   metrics: {
-    // eslint-disable-next-line
     get: async () => ({}) as any,
   },
+  /* eslint-enable */
 });
 
 export const useAppContext = () => React.useContext(AppContext);

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { deleteData, fetchData, patchData, postData, putData } from '../utils/apiCalls';
+import { deleteData, fetchData, patchData, postData } from '../utils/apiCalls';
 import { PatchRequest } from '@flightctl/types';
 
 export const useFetch = () => {
@@ -9,8 +9,6 @@ export const useFetch = () => {
   );
 
   const post = React.useCallback(async <R>(kind: string, obj: R): Promise<R> => postData(kind, obj), []);
-
-  const put = React.useCallback(async <R>(kind: string, obj: R): Promise<R> => putData(kind, obj), []);
 
   const remove = React.useCallback(
     async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => deleteData(kind, abortSignal),
@@ -26,7 +24,6 @@ export const useFetch = () => {
   return {
     get,
     post,
-    put,
     remove,
     patch,
   };

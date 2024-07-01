@@ -23,7 +23,7 @@ import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import GeneralInfoStep, { generalInfoStepId, isGeneralInfoStepValid } from './steps/GeneralInfoStep';
 
 import DeviceTemplateStep, { deviceTemplateStepId, isDeviceTemplateStepValid } from './steps/DeviceTemplateStep';
-import { getFleetResource, getInitialValues, getValidationSchema } from './utils';
+import { getFleetPatches, getFleetResource, getInitialValues, getValidationSchema } from './utils';
 import CreateFleetWizardFooter from './CreateFleetWizardFooter';
 import { useEditFleet } from './useEditFleet';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
@@ -33,7 +33,7 @@ import './CreateFleetWizard.css';
 
 const CreateFleetWizard = () => {
   const { t } = useTranslation();
-  const { post, put } = useFetch();
+  const { post, patch } = useFetch();
   const [error, setError] = React.useState<unknown>();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
@@ -69,7 +69,7 @@ const CreateFleetWizard = () => {
           setError(undefined);
           try {
             const result = await (isEdit
-              ? put<Fleet>(`fleets/${fleetId}`, getFleetResource(values))
+              ? patch<Fleet>(`fleets/${fleetId}`, getFleetPatches(fleet as Fleet, values))
               : post<Fleet>('fleets', getFleetResource(values)));
             navigate({ route: ROUTE.FLEET_DETAILS, postfix: result.metadata.name });
           } catch (e) {

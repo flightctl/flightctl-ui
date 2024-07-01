@@ -5,26 +5,13 @@ import * as React from 'react';
 import MatchPatternsForm, { MatchPatternsFormValues } from './MatchPatternsForm';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
+import { getStringListPatches } from '../../../utils/patch';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { deviceSystemdUnitsValidationSchema } from '../../form/validations';
 
 type MatchPatternsModalProps = {
   onClose: (reload?: boolean) => void;
   device: Device;
-};
-
-const getDevice = (device: Device, matchPatterns: string[]) => {
-  const spec = device.spec || {};
-  return {
-    ...device,
-    spec: {
-      ...spec,
-      systemd: {
-        ...device.spec?.systemd,
-        matchPatterns,
-      },
-    },
-  };
 };
 
 /**
@@ -37,16 +24,29 @@ const getDevice = (device: Device, matchPatterns: string[]) => {
  */
 const MatchPatternsModal: React.FC<MatchPatternsModalProps> = ({ onClose, device }) => {
   const { t } = useTranslation();
-  const { put } = useFetch();
+  const { patch } = useFetch();
   const [error, setError] = React.useState<string>();
+
+  const currentPatterns = device.spec?.systemd?.matchPatterns || [];
   return (
     <Modal title={t('Edit match patterns')} isOpen onClose={() => onClose()} variant="small">
       <Formik<MatchPatternsFormValues>
         validationSchema={deviceSystemdUnitsValidationSchema(t)}
-        initialValues={{ matchPatterns: device.spec?.systemd?.matchPatterns || [] }}
-        onSubmit={async ({ matchPatterns }) => {
+        initialValues={{ matchPatterns: currentPatterns }}
+        onSubmit={async ({ matchPatterns: updatedPatterns }) => {
           try {
-            await put(`devices/${device.metadata.name}`, getDevice(device, matchPatterns));
+            const patternPatchBuilder = (value: string[]) => ({
+              matchPatterns: value,
+            });
+            const patches = getStringListPatches(
+              '/spec/systemd',
+              currentPatterns,
+              updatedPatterns,
+              patternPatchBuilder,
+            );
+            if (patches.length > 0) {
+              await patch(`devices/${device.metadata.name}`, patches);
+            }
             onClose(true);
           } catch (err) {
             setError(getErrorMessage(err));

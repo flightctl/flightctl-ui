@@ -64,22 +64,6 @@ export const postData = async <R>(kind: string, data: R): Promise<R> => {
   }
 };
 
-export const putData = async <R>(kind: string, data: R): Promise<R> => {
-  try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-    return handleApiJSONResponse(response);
-  } catch (error) {
-    console.error('Error making request:', error);
-    throw error;
-  }
-};
-
 export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
