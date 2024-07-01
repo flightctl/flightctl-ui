@@ -17,10 +17,13 @@ import {
 } from '@patternfly/react-core';
 
 import TableTextSearch, { TableTextSearchProps } from '../Table/TableTextSearch';
-import { FilterSearchParams, StatusFilterItem, getDeviceStatusItems } from '../../utils/status/devices';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
 import DeviceStatusFilterSelect from './DeviceStatusFilterSelect';
+import { FilterSearchParams, StatusItem, StatusItemType } from '../../utils/status/common';
+import { getDeviceStatusItems } from '../../utils/status/devices';
+import { getApplicationSummaryStatusItems } from '../../utils/status/applications';
+import { getSystemUpdateStatusItems } from '../../utils/status/system';
 
 type FilterCategory = {
   key: 'id' | FilterSearchParams;
@@ -32,7 +35,7 @@ type DeviceTableToolbarProps = {
   fleetName: string | undefined;
   setFleetName: (fleetName: string) => void;
   filters: {
-    statuses: Array<string>; // statuses formed by statusType#statusId (eg. deviceStatusPending)
+    statuses: Array<string>; // statuses formed by statusType#statusId (eg. devSt#Pending)
   };
   children: React.ReactNode;
 };
@@ -54,7 +57,11 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
   const fleetNameFilter = searchParams.get(FilterSearchParams.Fleet);
 
   const statusesItems = React.useMemo(() => {
-    return getDeviceStatusItems(t);
+    return {
+      device: getDeviceStatusItems(t),
+      app: getApplicationSummaryStatusItems(t),
+      update: getSystemUpdateStatusItems(t),
+    };
   }, [t]);
 
   const onStatusSelect: SelectProps['onSelect'] = (e, selection) => {
@@ -84,11 +91,10 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
       return prev;
     });
   };
-
-  const getStatusChips = (statusList: Array<StatusFilterItem>, type: StatusFilterItem['type']) =>
+  const getStatusChips = <T extends StatusItemType>(statusList: Array<StatusItem<T>>) =>
     statusList
       .filter((statusItem) => {
-        return statusItem.type === type && filters.statuses.includes(`${statusItem.type}#${statusItem.id}`);
+        return filters.statuses.includes(`${statusItem.type}#${statusItem.id}`);
       })
       .map((a) => {
         return {
@@ -100,7 +106,9 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
   const onDeleteFilterGroup = (category: string | ToolbarChipGroup) => {
     const { key } = category as FilterCategory;
     if (
-      [FilterSearchParams.Device, FilterSearchParams.App, FilterSearchParams.Update].includes(key as FilterSearchParams)
+      [FilterSearchParams.DeviceStatus, FilterSearchParams.AppStatus, FilterSearchParams.UpdatedStatus].includes(
+        key as FilterSearchParams,
+      )
     ) {
       const [paramName, value] = (key as string).split('#');
       setSearchParams((prev: URLSearchParams) => {
@@ -111,9 +119,9 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
       // Clear all filters
       setSearchParams((prev: URLSearchParams) => {
         prev.delete(FilterSearchParams.Fleet);
-        prev.delete(FilterSearchParams.Device);
-        prev.delete(FilterSearchParams.App);
-        prev.delete(FilterSearchParams.Update);
+        prev.delete(FilterSearchParams.DeviceStatus);
+        prev.delete(FilterSearchParams.AppStatus);
+        prev.delete(FilterSearchParams.UpdatedStatus);
         return prev;
       });
       setSearch('');
@@ -147,12 +155,12 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
       <ToolbarContent>
         <ToolbarGroup variant="filter-group">
           <ToolbarFilter
-            chips={getStatusChips(statusesItems, FilterSearchParams.Device)}
+            chips={getStatusChips(statusesItems.app)}
             deleteChip={onDeleteFilterChip}
             deleteChipGroup={onDeleteFilterGroup}
             categoryName={{
-              key: FilterSearchParams.Device,
-              name: t('Device status'),
+              key: FilterSearchParams.AppStatus,
+              name: t('Application status'),
             }}
           >
             <Select
@@ -173,24 +181,24 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
               onOpenChange={setIsStatusExpanded}
             >
               <SelectList>
-                <SelectGroup label={t('Device status')}>
-                  <DeviceStatusFilterSelect
-                    type={FilterSearchParams.Device}
-                    items={statusesItems}
-                    selectedFilters={filters.statuses}
-                  />
-                </SelectGroup>
                 <SelectGroup label={t('Application status')}>
                   <DeviceStatusFilterSelect
-                    type={FilterSearchParams.App}
-                    items={statusesItems}
+                    type={FilterSearchParams.AppStatus}
+                    items={statusesItems.app}
                     selectedFilters={filters.statuses}
                   />
                 </SelectGroup>
-                <SelectGroup label={t('Update status')}>
+                <SelectGroup label={t('Device status')}>
                   <DeviceStatusFilterSelect
-                    type={FilterSearchParams.Update}
-                    items={statusesItems}
+                    type={FilterSearchParams.DeviceStatus}
+                    items={statusesItems.device}
+                    selectedFilters={filters.statuses}
+                  />
+                </SelectGroup>
+                <SelectGroup label={t('System update status')}>
+                  <DeviceStatusFilterSelect
+                    type={FilterSearchParams.UpdatedStatus}
+                    items={statusesItems.update}
                     selectedFilters={filters.statuses}
                   />
                 </SelectGroup>
@@ -201,12 +209,12 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
         <ToolbarGroup variant="filter-group">
           <ToolbarItem variant="search-filter">
             <ToolbarFilter
-              chips={getStatusChips(statusesItems, FilterSearchParams.App)}
+              chips={getStatusChips(statusesItems.device)}
               deleteChip={onDeleteFilterChip}
               deleteChipGroup={onDeleteFilterGroup}
               categoryName={{
-                key: FilterSearchParams.App,
-                name: t('Application status'),
+                key: FilterSearchParams.DeviceStatus,
+                name: t('Device status'),
               }}
             >
               {' '}
@@ -216,11 +224,11 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
         <ToolbarGroup variant="filter-group">
           <ToolbarItem variant="search-filter">
             <ToolbarFilter
-              chips={getStatusChips(statusesItems, FilterSearchParams.Update)}
+              chips={getStatusChips(statusesItems.update)}
               deleteChip={onDeleteFilterChip}
               deleteChipGroup={onDeleteFilterGroup}
               categoryName={{
-                key: FilterSearchParams.Update,
+                key: FilterSearchParams.UpdatedStatus,
                 name: t('Update status'),
               }}
             >

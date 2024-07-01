@@ -9,6 +9,6 @@ export type TemplateVersionStatus = (DeviceSpec & {
   /**
    * Current state of the device.
    */
-  conditions?: Array<Condition>;
+  conditions: Array<Condition>;
 });
 

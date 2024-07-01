@@ -2,16 +2,16 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DeviceApplication } from './DeviceApplication';
-import type { DeviceApplicationSummary } from './DeviceApplicationSummary';
+import type { ApplicationsSummaryStatus } from './ApplicationsSummaryStatus';
+import type { ApplicationStatus } from './ApplicationStatus';
 export type DeviceApplicationsStatus = {
   /**
-   * Summary status of device applications.
+   * Map of system application statuses.
    */
-  status?: DeviceApplicationSummary;
+  data: Record<string, ApplicationStatus>;
   /**
-   * Status of device applications.
+   * Summary status of system applications.
    */
-  applications?: Array<DeviceApplication>;
+  summary: ApplicationsSummaryStatus;
 };
 

@@ -18,7 +18,7 @@ import { useFetch } from '../../../hooks/useFetch';
 import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
-import DeviceStatus from './DeviceStatus';
+import DeviceStatus from '../../Status/DeviceStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -31,6 +31,8 @@ import RepositorySourceList from '../../Repository/RepositoryDetails/RepositoryS
 import { getSourceItems } from '../../../utils/devices';
 import { useTemplateVersion } from '../../../hooks/useTemplateVersion';
 import { getErrorMessage } from '../../../utils/error';
+import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
+import WithHelperText from '../../common/WithHelperText';
 
 const DeviceDetails = () => {
   const { t } = useTranslation();
@@ -95,15 +97,47 @@ const DeviceDetails = () => {
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
-        <GridItem md={6}>
+        <GridItem md={12} lg={6}>
           <DetailsPageCard>
             <CardTitle>{t('System status')}</CardTitle>
             <DetailsPageCardBody>
               <DescriptionList columnModifier={{ default: '3Col' }}>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Device status')}</DescriptionListTerm>
+                  <DescriptionListTerm>
+                    <WithHelperText
+                      content={t('Indicates the overall status of application workloads on the device.')}
+                      ariaLabel={t('Application status')}
+                      showLabel
+                    />
+                  </DescriptionListTerm>
                   <DescriptionListDescription>
-                    <DeviceStatus device={device} />
+                    <ApplicationSummaryStatus status={device?.status?.applications.summary?.status} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>
+                    <WithHelperText
+                      content={t('Indicates the overall status of the device hardware and operating system.')}
+                      ariaLabel={t('Device status')}
+                      showLabel
+                    />{' '}
+                  </DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <DeviceStatus deviceStatus={device?.status} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>
+                    <WithHelperText
+                      content={t(
+                        'Indicates whether a system is running the latest target configuration or is updating towards it.',
+                      )}
+                      ariaLabel={t('Update status')}
+                      showLabel
+                    />
+                  </DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <DeviceStatus deviceStatus={device?.status} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
@@ -116,7 +150,7 @@ const DeviceDetails = () => {
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
-        <GridItem md={6}>
+        <GridItem md={12} lg={6}>
           <DetailsPageCard>
             <CardTitle>{t('Configurations')}</CardTitle>
             <DetailsPageCardBody>
@@ -143,15 +177,15 @@ const DeviceDetails = () => {
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
-        <GridItem md={6}>
+        <GridItem md={12} lg={6}>
           <DetailsPageCard>
             <CardTitle>{t('Applications')}</CardTitle>
             <DetailsPageCardBody>
-              {device && <ApplicationsTable containers={device.status.containers} />}
+              {device && <ApplicationsTable appsStatus={device.status.applications} />}
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
-        <GridItem md={6}>
+        <GridItem md={12} lg={6}>
           <DetailsPageCard>
             <CardTitle>{t('System services')}</CardTitle>
             <DetailsPageCardBody>

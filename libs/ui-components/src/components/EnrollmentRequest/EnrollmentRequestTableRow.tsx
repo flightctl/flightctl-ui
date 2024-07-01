@@ -2,12 +2,13 @@ import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 import { EnrollmentRequest } from '@flightctl/types';
 import * as React from 'react';
 import { getDateDisplay } from '../../utils/dates';
-import EnrollmentRequestStatus from './EnrollmentRequestStatus';
 import { DeleteListActionResult } from '../ListPage/types';
-import { ApprovalStatus, getApprovalStatus } from '../../utils/status/enrollmentRequest';
+import { getApprovalStatus } from '../../utils/status/enrollmentRequest';
+import { EnrollmentRequestStatus as EnrollmentRequestStatusType } from '../../utils/status/common';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE } from '../../hooks/useNavigate';
 import DisplayName from '../common/DisplayName';
+import EnrollmentRequestStatus from '../Status/EnrollmentRequestStatus';
 
 type EnrollmentRequestTableRow = {
   rowIndex: number;
@@ -53,7 +54,7 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
             {
               title: t('Approve'),
               onClick: () => er.metadata.name && onApprove(er.metadata.name),
-              isDisabled: approvalStatus !== ApprovalStatus.Pending,
+              isDisabled: approvalStatus !== EnrollmentRequestStatusType.Pending,
             },
             deleteAction({ resourceId: er.metadata.name || '' }),
           ]}

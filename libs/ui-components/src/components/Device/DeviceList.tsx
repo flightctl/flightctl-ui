@@ -30,7 +30,6 @@ import { useDeviceFilters } from './useDeviceFilters';
 import DeviceTableRow from './DeviceTableRow';
 import TableActions from '../Table/TableActions';
 import { getResourceId } from '../../utils/resource';
-import { FilterSearchParams } from '../../utils/status/devices';
 import { isEnrollmentRequest } from '../../types/extraTypes';
 import MassDeleteDeviceModal from '../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
 import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
@@ -41,6 +40,7 @@ import { useTableSelect } from '../../hooks/useTableSelect';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
 import { Link, ROUTE } from '../../hooks/useNavigate';
+import { FilterSearchParams } from '../../utils/status/common';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;

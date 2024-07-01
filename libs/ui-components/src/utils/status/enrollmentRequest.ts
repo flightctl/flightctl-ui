@@ -1,32 +1,50 @@
 import { TFunction } from 'i18next';
-import { ConditionType, EnrollmentRequest } from '@flightctl/types';
+import { ConditionType, DeviceSummaryStatusType as DeviceSummaryStatus, EnrollmentRequest } from '@flightctl/types';
+import { EnrollmentRequestStatus, FilterSearchParams, StatusItem } from './common';
+import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-circle-icon';
 
-export enum ApprovalStatus {
-  Pending = 'Pending approval',
-  Approved = 'Approved',
-  Denied = 'Denied',
-  Unknown = 'Unknown',
-}
+export const getEnrollmentRequestsStatusItems = (
+  t: TFunction,
+): StatusItem<DeviceSummaryStatus | EnrollmentRequestStatus>[] => [
+  {
+    type: FilterSearchParams.DeviceStatus,
+    id: EnrollmentRequestStatus.Pending,
+    label: t('Pending approval'),
+    level: 'info',
+    customIcon: PauseCircleIcon,
+  },
+  {
+    type: FilterSearchParams.DeviceStatus,
+    id: EnrollmentRequestStatus.Approved,
+    label: t('Approved'),
+    level: 'success',
+  },
+  {
+    type: FilterSearchParams.DeviceStatus,
+    id: EnrollmentRequestStatus.Denied,
+    label: t('Denied'),
+    level: 'warning',
+  },
+  {
+    type: FilterSearchParams.DeviceStatus,
+    id: EnrollmentRequestStatus.Unknown,
+    label: t('Unknown'),
+    level: 'unknown',
+  },
+];
 
-export const approvalStatusLabels = (t: TFunction): Record<ApprovalStatus, string> => ({
-  [ApprovalStatus.Pending]: t('Pending approval'),
-  [ApprovalStatus.Approved]: t('Approved'),
-  [ApprovalStatus.Denied]: t('Denied'),
-  [ApprovalStatus.Unknown]: t('Unknown'),
-});
-
-export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): ApprovalStatus => {
+export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): EnrollmentRequestStatus => {
   const approvedCondition = enrollmentRequest.status?.conditions?.find(
     (c) => c.type === ConditionType.EnrollmentRequestApproved,
   );
   if (!approvedCondition) {
-    return ApprovalStatus.Pending;
+    return EnrollmentRequestStatus.Pending;
   }
   if (approvedCondition.status === 'True') {
-    return ApprovalStatus.Approved;
+    return EnrollmentRequestStatus.Approved;
   }
   if (approvedCondition.status === 'False') {
-    return ApprovalStatus.Denied;
+    return EnrollmentRequestStatus.Denied;
   }
-  return ApprovalStatus.Unknown;
+  return EnrollmentRequestStatus.Unknown;
 };
