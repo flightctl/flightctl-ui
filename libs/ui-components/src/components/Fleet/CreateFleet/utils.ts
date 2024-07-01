@@ -94,12 +94,21 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
   const currentDeviceSelectLabels = currentFleet.spec.selector?.matchLabels || {};
   const updatedDeviceSelectLabels = updatedFleet.labels || {};
 
-  const deviceSelectLabelPatches = getLabelPatches(
-    '/spec/selector/matchLabels',
-    currentDeviceSelectLabels,
-    updatedDeviceSelectLabels,
-  );
-  allPatches = allPatches.concat(deviceSelectLabelPatches);
+  if (currentFleet.spec.selector) {
+    const deviceSelectLabelPatches = getLabelPatches(
+      '/spec/selector/matchLabels',
+      currentDeviceSelectLabels,
+      updatedDeviceSelectLabels,
+    );
+    allPatches = allPatches.concat(deviceSelectLabelPatches);
+  } else {
+    const newLabelMap = toAPILabel(updatedDeviceSelectLabels);
+    allPatches.push({
+      path: '/spec/selector',
+      op: 'add',
+      value: { matchLabels: newLabelMap },
+    });
+  }
 
   // OS image
   const currentOsImage = currentFleet.spec.template.spec.os?.image;

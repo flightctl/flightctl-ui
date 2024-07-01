@@ -4,6 +4,7 @@ import isEqual from 'lodash/isEqual';
 import differenceWith from 'lodash/differenceWith';
 
 import { FlightCtlLabel } from '../types/extraTypes';
+import { toAPILabel } from './labels';
 
 export const appendJSONPatch = <V = unknown>({
   patches,
@@ -79,22 +80,10 @@ export const getLabelPatches = (
   newLabels: FlightCtlLabel[],
 ) => {
   const patches: PatchRequest = [];
-
-  const allKeys: string[] = Object.entries(currentLabels).map(([key]) => key);
-  newLabels.forEach((newLabel) => {
-    if (!allKeys.includes(newLabel.key)) {
-      allKeys.push(newLabel.key);
-    }
-  });
-
   const currentLen = Object.keys(currentLabels).length;
   const newLen = newLabels.length;
 
-  const newLabelMap = newLabels.reduce((acc, label) => {
-    const newAcc = { ...acc };
-    newAcc[label.key] = label.value || '';
-    return newAcc;
-  }, {});
+  const newLabelMap = toAPILabel(newLabels);
 
   if (currentLen === 0 && newLen > 0) {
     // First label(s) have been added
@@ -116,15 +105,15 @@ export const getLabelPatches = (
       value: newLabelMap,
     });
   } else {
-    let needsPatch = false;
-    Object.entries(newLabelMap).forEach(([key, value]) => {
+    const needsPatch = Object.entries(newLabelMap).some(([key, value]) => {
       if (!(key in currentLabels)) {
         // A new label has been added
-        needsPatch = true;
+        return true;
       } else if (currentLabels[key] !== value) {
         // An existing label has changed its value
-        needsPatch = true;
+        return true;
       }
+      return false;
     });
     if (needsPatch) {
       patches.push({
