@@ -281,6 +281,22 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
   return patches;
 };
 
+export const getResourceSyncEditPatch = (rs: ResourceSyncFormValue) => {
+  // The patch is always an edition because adding / deleting RS can only be done via POST / DELETE api calls.
+  return [
+    {
+      op: 'replace',
+      path: '/spec/path',
+      value: rs.path,
+    },
+    {
+      op: 'replace',
+      path: '/spec/targetRevision',
+      value: rs.targetRevision,
+    },
+  ] as PatchRequest;
+};
+
 const gitRegex = new RegExp(/^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/);
 const pathRegex = /\/.+/;
 

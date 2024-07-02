@@ -1,6 +1,13 @@
-import { Fleet, GitConfigProviderSpec, InlineConfigProviderSpec, KubernetesSecretProviderSpec } from '@flightctl/types';
+import {
+  Fleet,
+  GitConfigProviderSpec,
+  InlineConfigProviderSpec,
+  KubernetesSecretProviderSpec,
+  PatchRequest,
+} from '@flightctl/types';
 import { TFunction } from 'i18next';
 import * as Yup from 'yup';
+import isEqual from 'lodash/isEqual';
 import * as yaml from 'js-yaml';
 import {
   FleetConfigTemplate,
@@ -17,6 +24,7 @@ import {
 import { API_VERSION } from '../../../constants';
 import { toAPILabel } from '../../../utils/labels';
 import { maxLengthString, validKubernetesDnsSubdomain, validLabelsSchema } from '../../form/validations';
+import { appendJSONPatch, getLabelPatches } from '../../../utils/patch';
 
 const absolutePathRegex = /^\/.*$/;
 
@@ -72,6 +80,112 @@ export const getValidationSchema = (t: TFunction) => {
   });
 };
 
+export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValues) => {
+  let allPatches: PatchRequest = [];
+
+  // Fleet labels
+  const currentLabels = currentFleet.metadata.labels || {};
+  const updatedLabels = updatedFleet.fleetLabels || {};
+
+  const fleetLabelPatches = getLabelPatches('/metadata/labels', currentLabels, updatedLabels);
+  allPatches = allPatches.concat(fleetLabelPatches);
+
+  // Device label selector
+  const currentDeviceSelectLabels = currentFleet.spec.selector?.matchLabels || {};
+  const updatedDeviceSelectLabels = updatedFleet.labels || {};
+
+  if (currentFleet.spec.selector) {
+    const deviceSelectLabelPatches = getLabelPatches(
+      '/spec/selector/matchLabels',
+      currentDeviceSelectLabels,
+      updatedDeviceSelectLabels,
+    );
+    allPatches = allPatches.concat(deviceSelectLabelPatches);
+  } else {
+    const newLabelMap = toAPILabel(updatedDeviceSelectLabels);
+    allPatches.push({
+      path: '/spec/selector',
+      op: 'add',
+      value: { matchLabels: newLabelMap },
+    });
+  }
+
+  // OS image
+  const currentOsImage = currentFleet.spec.template.spec.os?.image;
+  const newOsImage = updatedFleet.osImage;
+  if (!currentOsImage && newOsImage) {
+    allPatches.push({
+      path: '/spec/template/spec/os',
+      op: 'add',
+      value: { image: newOsImage },
+    });
+  } else if (!newOsImage && currentOsImage) {
+    allPatches.push({
+      path: '/spec/template/spec/os',
+      op: 'remove',
+    });
+  } else if (newOsImage && currentOsImage !== newOsImage) {
+    appendJSONPatch({
+      path: '/spec/template/spec/os/image',
+      patches: allPatches,
+      newValue: newOsImage,
+      originalValue: currentOsImage,
+    });
+  }
+
+  // Configurations
+  const currentConfigs = currentFleet.spec.template.spec.config || [];
+  const newConfigs = updatedFleet.configTemplates.map(getAPIConfig);
+  if (currentConfigs.length === 0 && newConfigs.length > 0) {
+    allPatches.push({
+      path: '/spec/template/spec/config',
+      op: 'add',
+      value: newConfigs,
+    });
+  } else if (currentConfigs.length > 0 && newConfigs.length === 0) {
+    allPatches.push({
+      path: '/spec/template/spec/config',
+      op: 'remove',
+    });
+  } else if (currentConfigs.length !== newConfigs.length) {
+    allPatches.push({
+      path: '/spec/template/spec/config',
+      op: 'replace',
+      value: newConfigs,
+    });
+  } else {
+    const hasConfigChanges = newConfigs.some((newConfig) => {
+      // Attempts to find a new config which has been changed from "currentConfigs"
+      const isUnchanged = currentConfigs.some((conf) => {
+        if (conf.configType !== newConfig.configType) {
+          return false;
+        }
+        switch (conf.configType) {
+          case 'GitConfigProviderSpec':
+            return isSameGitConf(newConfig as GitConfigProviderSpec, conf as GitConfigProviderSpec);
+          case 'KubernetesSecretProviderSpec':
+            return isSameSecretConf(newConfig as KubernetesSecretProviderSpec, conf as KubernetesSecretProviderSpec);
+          case 'InlineConfigProviderSpec':
+            return isSameInlineConf(newConfig as InlineConfigProviderSpec, conf as InlineConfigProviderSpec);
+        }
+        return false;
+      });
+
+      return !isUnchanged;
+    });
+
+    if (hasConfigChanges) {
+      allPatches.push({
+        path: '/spec/template/spec/config',
+        op: 'replace',
+        value: newConfigs,
+      });
+    }
+  }
+
+  return allPatches;
+};
+
 export const getFleetResource = (values: FleetFormValues): Fleet => ({
   apiVersion: API_VERSION,
   kind: 'Fleet',
@@ -96,6 +210,32 @@ export const getFleetResource = (values: FleetFormValues): Fleet => ({
     },
   },
 });
+
+const isSameGitConf = (a: GitConfigProviderSpec, b: GitConfigProviderSpec) => {
+  const aRef = a.gitRef;
+  const bRef = b.gitRef;
+  return (
+    a.name === b.name &&
+    aRef.path === bRef.path &&
+    aRef.repository === bRef.repository &&
+    aRef.targetRevision === bRef.targetRevision
+  );
+};
+
+const isSameSecretConf = (a: KubernetesSecretProviderSpec, b: KubernetesSecretProviderSpec) => {
+  const aRef = a.secretRef;
+  const bRef = b.secretRef;
+  return (
+    a.name === b.name &&
+    aRef.name === bRef.name &&
+    aRef.namespace === bRef.namespace &&
+    aRef.mountPath === bRef.mountPath
+  );
+};
+
+const isSameInlineConf = (a: InlineConfigProviderSpec, b: InlineConfigProviderSpec) => {
+  return a.name === b.name && isEqual(a.inline, b.inline);
+};
 
 export const getAPIConfig = (
   ct: FleetConfigTemplate,

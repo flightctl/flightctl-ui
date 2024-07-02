@@ -12,8 +12,8 @@ import { useFetch } from '../../../hooks/useFetch';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { fromAPILabel } from '../../../utils/labels';
 import { validLabelsSchema } from '../../form/validations';
-import { getUpdatedDevice } from '../../../utils/devices';
 import { getErrorMessage } from '../../../utils/error';
+import { getLabelPatches } from '../../../utils/patch';
 
 type EditLabelsFormValues = {
   labels: FlightCtlLabel[];
@@ -67,17 +67,19 @@ type EditLabelsFormProps = {
 
 const EditLabelsForm = ({ device, onDeviceUpdate }: EditLabelsFormProps) => {
   const { t } = useTranslation();
-  const { put } = useFetch();
+  const { patch } = useFetch();
+
+  const currentLabels = device.metadata.labels || {};
 
   return (
     <Formik<EditLabelsFormValues>
       initialValues={{
-        labels: fromAPILabel(device.metadata.labels || {}),
+        labels: fromAPILabel(currentLabels),
       }}
       onSubmit={async (values: EditLabelsFormValues) => {
         try {
-          const updatedData = getUpdatedDevice(device, values.labels);
-          await put(`devices/${device.metadata.name}`, updatedData);
+          const labelsPatch = getLabelPatches('/metadata/labels', currentLabels, values.labels);
+          await patch(`devices/${device.metadata.name}`, labelsPatch);
           onDeviceUpdate();
           return null;
         } catch (e) {
