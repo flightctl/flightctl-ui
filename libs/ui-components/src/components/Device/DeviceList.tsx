@@ -15,14 +15,14 @@ import { TFunction } from 'i18next';
 
 import { useFetch } from '../../hooks/useFetch';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { Device, DeviceList, EnrollmentRequest, EnrollmentRequestList } from '@flightctl/types';
+import { DeviceList, EnrollmentRequest, EnrollmentRequestList } from '@flightctl/types';
 
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import AddDeviceModal from './AddDeviceModal/AddDeviceModal';
 import { sortByCreationTimestamp, sortByDisplayName, sortByName } from '../../utils/sort/generic';
-import { sortDevicesByFleet, sortDevicesByStatus } from '../../utils/sort/device';
+import { sortDeviceStatus, sortDevicesByFleet } from '../../utils/sort/device';
 import Table, { TableColumn } from '../Table/Table';
 import EnrollmentRequestTableRow from '../EnrollmentRequest/EnrollmentRequestTableRow';
 import DeviceTableToolbar from './DeviceTableToolbar';
@@ -30,7 +30,7 @@ import { useDeviceFilters } from './useDeviceFilters';
 import DeviceTableRow from './DeviceTableRow';
 import TableActions from '../Table/TableActions';
 import { getResourceId } from '../../utils/resource';
-import { isEnrollmentRequest } from '../../types/extraTypes';
+import { DeviceLikeResource, isEnrollmentRequest } from '../../types/extraTypes';
 import MassDeleteDeviceModal from '../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
 import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
 import DeviceEnrollmentModal from '../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
@@ -65,7 +65,7 @@ const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => {
   );
 };
 
-const getDeviceColumns = (t: TFunction): TableColumn<Device | EnrollmentRequest>[] => [
+const getDeviceColumns = (t: TFunction): TableColumn<DeviceLikeResource>[] => [
   {
     name: t('Name'),
     onSort: sortByDisplayName,
@@ -79,9 +79,20 @@ const getDeviceColumns = (t: TFunction): TableColumn<Device | EnrollmentRequest>
     onSort: sortDevicesByFleet,
   },
   {
-    name: t('Status'),
-    onSort: sortDevicesByStatus,
+    name: t('Application status'),
+    helperText: t('Indicates the overall status of application workloads on the device.'),
+    onSort: (resources: Array<DeviceLikeResource>) => sortDeviceStatus(resources, 'ApplicationStatus'),
+  },
+  {
+    name: t('Device status'),
+    helperText: t('Indicates the overall status of the device hardware and operating system.'),
+    onSort: (resources: Array<DeviceLikeResource>) => sortDeviceStatus(resources, 'DeviceStatus'),
     defaultSort: true,
+  },
+  {
+    name: t('Update status'),
+    helperText: t('Indicates whether a system is running the latest target configuration or is updating towards it.'),
+    onSort: (resources: Array<DeviceLikeResource>) => sortDeviceStatus(resources, 'SystemUpdateStatus'),
   },
   {
     name: t('Created at'),
@@ -91,7 +102,7 @@ const getDeviceColumns = (t: TFunction): TableColumn<Device | EnrollmentRequest>
 
 interface DeviceTableProps {
   searchParams: URLSearchParams;
-  resources: Array<Device | EnrollmentRequest>;
+  resources: Array<DeviceLikeResource>;
   refetch: VoidFunction;
 }
 

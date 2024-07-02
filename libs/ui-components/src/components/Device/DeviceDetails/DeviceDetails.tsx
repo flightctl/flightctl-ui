@@ -33,6 +33,8 @@ import { useTemplateVersion } from '../../../hooks/useTemplateVersion';
 import { getErrorMessage } from '../../../utils/error';
 import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
 import WithHelperText from '../../common/WithHelperText';
+import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
+import DeviceResourceStatus from '../../Status/DeviceResourceStatus';
 
 const DeviceDetails = () => {
   const { t } = useTranslation();
@@ -137,13 +139,40 @@ const DeviceDetails = () => {
                     />
                   </DescriptionListTerm>
                   <DescriptionListDescription>
-                    <DeviceStatus deviceStatus={device?.status} />
+                    <SystemUpdateStatus status={device?.status?.updated.status} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Created at')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     {getDateDisplay(device?.metadata.creationTimestamp)}
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+              </DescriptionList>
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+        <GridItem md={12} lg={6}>
+          <DetailsPageCard>
+            <CardTitle>{t('Resource status')}</CardTitle>
+            <DetailsPageCardBody>
+              <DescriptionList columnModifier={{ default: '3Col' }}>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('CPU pressure')}</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <DeviceResourceStatus status={device?.status.resources?.cpu} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('Disk pressure')}</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <DeviceResourceStatus status={device?.status.resources?.disk} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('Memory pressure')}</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <DeviceResourceStatus status={device?.status.resources?.memory} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               </DescriptionList>

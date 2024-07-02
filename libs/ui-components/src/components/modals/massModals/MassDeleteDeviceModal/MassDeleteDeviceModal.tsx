@@ -1,17 +1,16 @@
 import { Alert, Button, Modal, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
-import { Device, EnrollmentRequest } from '@flightctl/types';
 import * as React from 'react';
 import { getErrorMessage } from '../../../../utils/error';
 import { useFetch } from '../../../../hooks/useFetch';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { isEnrollmentRequest } from '../../../../types/extraTypes';
+import { DeviceLikeResource, isEnrollmentRequest } from '../../../../types/extraTypes';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { isPromiseRejected } from '../../../../types/typeUtils';
 import DisplayName from '../../../common/DisplayName';
 
 type MassDeleteDeviceModalProps = {
   onClose: VoidFunction;
-  resources: Array<Device | EnrollmentRequest>;
+  resources: Array<DeviceLikeResource>;
   onDeleteSuccess: VoidFunction;
 };
 

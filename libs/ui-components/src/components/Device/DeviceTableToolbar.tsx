@@ -255,7 +255,7 @@ const DeviceTableToolbar: React.FC<DeviceTableToolbarProps> = ({
             chips={fleetNameFilter ? [fleetNameFilter] : []}
             deleteChip={onDeleteFilterChip}
             categoryName={{
-              key: 'fleet',
+              key: FilterSearchParams.Fleet,
               name: t('Fleet'),
             }}
           >

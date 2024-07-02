@@ -63,3 +63,5 @@ export const getApplicationStatusItems = (t: TFunction): StatusItem<AppStatus>[]
     level: 'unknown',
   },
 ];
+
+export const applicationSummaryStatusOrder = getApplicationSummaryStatusItems((s: string) => s).map((item) => item.id);

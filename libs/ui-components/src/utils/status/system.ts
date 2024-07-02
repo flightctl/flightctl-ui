@@ -29,3 +29,4 @@ export const getSystemUpdateStatusItems = (t: TFunction): StatusItem<UpdatedStat
     level: 'unknown',
   },
 ];
+export const systemUpdateStatusOrder = getSystemUpdateStatusItems((s: string) => s).map((item) => item.id);

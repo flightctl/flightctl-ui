@@ -44,9 +44,11 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
         <DisplayName name={erName} routeLink={ROUTE.ENROLLMENT_REQUEST_DETAILS} />
       </Td>
       <Td dataLabel={t('Fleet')}>-</Td>
-      <Td dataLabel={t('Status')}>
+      <Td dataLabel={t('Application status')}>-</Td>
+      <Td dataLabel={t('Device status')}>
         <EnrollmentRequestStatus er={er} />
       </Td>
+      <Td dataLabel={t('System update status')}>-</Td>
       <Td dataLabel={t('Created at')}>{getDateDisplay(er.metadata.creationTimestamp)}</Td>
       <Td isActionCell>
         <ActionsColumn

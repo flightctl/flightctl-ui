@@ -1,29 +1,24 @@
 import * as React from 'react';
 import {
   ApplicationsSummaryStatusType as AppStatus,
-  Device,
   DeviceSummaryStatusType as DeviceStatus,
-  EnrollmentRequest,
   DeviceUpdatedStatusType as UpdatedStatus,
 } from '@flightctl/types';
 
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
-import { isEnrollmentRequest } from '../../types/extraTypes';
+import { DeviceLikeResource, isEnrollmentRequest } from '../../types/extraTypes';
 import { getDeviceSummaryStatus } from '../../utils/status/devices';
 import { getApprovalStatus } from '../../utils/status/enrollmentRequest';
 import { EnrollmentRequestStatus, FilterSearchParams } from '../../utils/status/common';
 
-const getSearchText = (resource: Device | EnrollmentRequest) => [
-  resource.metadata.name,
-  resource.metadata.labels?.displayName,
-];
+const getSearchText = (resource: DeviceLikeResource) => [resource.metadata.name, resource.metadata.labels?.displayName];
 
 const validAppStatuses = Object.values(AppStatus) as string[];
 const validUpdatedStatuses = Object.values(UpdatedStatus) as string[];
 const validDeviceStatuses = Object.values(DeviceStatus) as string[];
 validDeviceStatuses.push(EnrollmentRequestStatus.Pending);
 
-export const useDeviceFilters = (resources: Array<Device | EnrollmentRequest>, searchParams: URLSearchParams) => {
+export const useDeviceFilters = (resources: Array<DeviceLikeResource>, searchParams: URLSearchParams) => {
   const fleetId = searchParams.get(FilterSearchParams.Fleet) || undefined;
   const searchParamValue = searchParams.toString();
   const [fleetName, setFleetName] = React.useState<string | undefined>(fleetId);
@@ -68,7 +63,7 @@ export const useDeviceFilters = (resources: Array<Device | EnrollmentRequest>, s
           );
         }
 
-        const deviceStatus = getDeviceSummaryStatus(resource.status);
+        const deviceStatus = getDeviceSummaryStatus(resource.status?.summary);
         return statuses.includes(`${FilterSearchParams.DeviceStatus}#${deviceStatus}`);
       }),
     [resources, statuses],
