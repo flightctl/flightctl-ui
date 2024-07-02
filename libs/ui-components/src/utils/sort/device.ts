@@ -13,15 +13,22 @@ import { DeviceLikeResource, isEnrollmentRequest } from '../../types/extraTypes'
 import { applicationSummaryStatusOrder } from '../status/applications';
 import { systemUpdateStatusOrder } from '../status/system';
 
-const sortEnrollmentRequests = (aStatus: EnrollmentRequestStatus, bStatus: EnrollmentRequestStatus) => {
-  // Sort when both are EnrollmentRequests
+const sortEnrollmentRequests = (a: EnrollmentRequest, b: EnrollmentRequest) => {
+  const aStatus = getApprovalStatus(a);
+  const bStatus = getApprovalStatus(b);
   if (aStatus === EnrollmentRequestStatus.Pending || bStatus === EnrollmentRequestStatus.Pending) {
     if (aStatus === bStatus) {
       return 0;
     }
     return aStatus === EnrollmentRequestStatus.Pending ? -1 : 1;
   }
-  return aStatus.localeCompare(bStatus);
+  const order = aStatus.localeCompare(bStatus);
+  if (order === 0) {
+    const aName = a.metadata.name || '';
+    const bName = b.metadata.name || '';
+    return aName.localeCompare(bName);
+  }
+  return order;
 };
 
 const sortByApplicationStatus = (a: Device, b: Device) => {
@@ -61,9 +68,7 @@ export const sortDeviceStatus = (
 
     if (isERa && isERb) {
       // Both are Enrollment requests
-      const aStatus = getApprovalStatus(a);
-      const bStatus = getApprovalStatus(b);
-      return sortEnrollmentRequests(aStatus as EnrollmentRequestStatus, bStatus as EnrollmentRequestStatus);
+      return sortEnrollmentRequests(a, b);
     } else if (isERa || isERb) {
       // Only one is an EnrollmentRequest
       return isERa ? -1 : 1;
