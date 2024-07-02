@@ -48,13 +48,13 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
         <DeviceFleet deviceMetadata={device.metadata} />
       </Td>
       <Td dataLabel={t('Application status')}>
-        <ApplicationSummaryStatus status={device.status?.applications.summary.status} />
+        <ApplicationSummaryStatus statusSummary={device.status?.applications.summary} />
       </Td>
       <Td dataLabel={t('Device status')}>
         <DeviceStatus deviceStatus={device.status} />
       </Td>
       <Td dataLabel={t('System update status')}>
-        <SystemUpdateStatus status={device.status?.updated.status} />
+        <SystemUpdateStatus updateStatus={device.status?.updated} />
       </Td>
       <Td dataLabel={t('Created at')}>{getDateDisplay(device.metadata.creationTimestamp)}</Td>
       <Td isActionCell>

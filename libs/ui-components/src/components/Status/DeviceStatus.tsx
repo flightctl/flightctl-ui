@@ -14,7 +14,7 @@ const DeviceStatus = ({ deviceStatus }: { deviceStatus?: DeviceStatus }) => {
   const item = statusItems.find((statusItem) => {
     return statusItem.id === status;
   });
-  return <StatusDisplay item={item} />;
+  return <StatusDisplay item={item} message={deviceStatus?.summary.info} />;
 };
 
 export default DeviceStatus;

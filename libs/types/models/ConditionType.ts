@@ -5,12 +5,10 @@
 export enum ConditionType {
   EnrollmentRequestApproved = 'Approved',
   RepositoryAccessible = 'Accessible',
-  ResourceSyncAccessible = 'Accessible',
-  ResourceSyncResourceParsed = 'ResourceParsed',
-  ResourceSyncSynced = 'Synced',
-  FleetOverlappingSelectors = 'OverlappingSelectors',
-  FleetValid = 'Valid',
-  DeviceUpdating = 'Updating',
-  DeviceSpecValid = 'SpecValid',
-  TemplateVersionValid = 'Valid',
+  ResourceSyncAccessible = 'ResourceParsed',
+  ResourceSyncResourceParsed = 'Synced',
+  ResourceSyncSynced = 'OverlappingSelectors',
+  FleetOverlappingSelectors = 'Valid',
+  FleetValid = 'Updating',
+  DeviceUpdating = 'SpecValid',
 }

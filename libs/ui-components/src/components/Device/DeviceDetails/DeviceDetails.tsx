@@ -113,7 +113,7 @@ const DeviceDetails = () => {
                     />
                   </DescriptionListTerm>
                   <DescriptionListDescription>
-                    <ApplicationSummaryStatus status={device?.status?.applications.summary?.status} />
+                    <ApplicationSummaryStatus statusSummary={device?.status?.applications.summary} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
@@ -139,7 +139,7 @@ const DeviceDetails = () => {
                     />
                   </DescriptionListTerm>
                   <DescriptionListDescription>
-                    <SystemUpdateStatus status={device?.status?.updated.status} />
+                    <SystemUpdateStatus updateStatus={device?.status?.updated} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>

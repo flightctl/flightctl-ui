@@ -1,19 +1,19 @@
 import * as React from 'react';
 
-import { DeviceUpdatedStatusType } from '@flightctl/types';
+import { DeviceUpdatedStatus } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import StatusDisplay from './StatusDisplay';
 import { getSystemUpdateStatusItems } from '../../utils/status/system';
 
-const SystemUpdateStatus = ({ status }: { status: DeviceUpdatedStatusType | undefined }) => {
+const SystemUpdateStatus = ({ updateStatus }: { updateStatus: DeviceUpdatedStatus | undefined }) => {
   const { t } = useTranslation();
 
   const statusItems = getSystemUpdateStatusItems(t);
 
   const item = statusItems.find((statusItem) => {
-    return statusItem.id === status;
+    return statusItem.id === updateStatus?.status;
   });
-  return <StatusDisplay item={item} />;
+  return <StatusDisplay item={item} message={updateStatus?.info} />;
 };
 
 export default SystemUpdateStatus;

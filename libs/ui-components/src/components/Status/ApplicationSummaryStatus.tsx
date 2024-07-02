@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { ApplicationsSummaryStatusType } from '@flightctl/types';
+import { type ApplicationsSummaryStatus } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getApplicationSummaryStatusItems } from '../../utils/status/applications';
 import StatusDisplay from './StatusDisplay';
@@ -11,14 +11,14 @@ import StatusDisplay from './StatusDisplay';
  * @param status the summary application status
  * @constructor
  */
-const ApplicationSummaryStatus = ({ status }: { status?: ApplicationsSummaryStatusType }) => {
+const ApplicationSummaryStatus = ({ statusSummary }: { statusSummary?: ApplicationsSummaryStatus }) => {
   const { t } = useTranslation();
 
   const statusItems = getApplicationSummaryStatusItems(t);
 
   const item = statusItems.find((statusItem) => {
-    return statusItem.id === status;
+    return statusItem.id === statusSummary?.status;
   });
-  return <StatusDisplay item={item} />;
+  return <StatusDisplay item={item} message={statusSummary?.info} />;
 };
 export default ApplicationSummaryStatus;

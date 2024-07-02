@@ -47,7 +47,7 @@ const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
       label={statusLabels[syncStatus.status]}
       level={level}
       icon={icon}
-      tooltip={syncStatus.message}
+      message={syncStatus.message}
     />
   );
 };

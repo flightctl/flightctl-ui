@@ -43,7 +43,7 @@ const RepositoryStatus = ({ statusInfo }: { statusInfo: { status: RepositorySync
   }
 
   return (
-    <StatusDisplayContent label={statusLabels[statusType]} level={status} icon={icon} tooltip={statusInfo.message} />
+    <StatusDisplayContent label={statusLabels[statusType]} level={status} icon={icon} message={statusInfo.message} />
   );
 };
 
