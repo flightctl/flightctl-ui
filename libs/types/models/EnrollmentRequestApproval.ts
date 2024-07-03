@@ -8,10 +8,6 @@ export type EnrollmentRequestApproval = {
    */
   labels?: Record<string, string>;
   /**
-   * region is the region in which the device should be enrolled.
-   */
-  region?: string;
-  /**
    * approved indicates whether the request has been approved.
    */
   approved: boolean;

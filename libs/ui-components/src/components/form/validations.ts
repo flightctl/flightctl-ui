@@ -215,6 +215,5 @@ export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDev
       : Yup.string()
           .matches(/{{n}}/, t('Device names must be unique. Add a number to the template to generate unique names.'))
           .required(t('Name is required.')),
-    region: Yup.string().required(t('Region is required.')),
     labels: validLabelsSchema(t),
   });

@@ -39,7 +39,6 @@ const isPendingEnrollmentRequest = (r: DeviceLikeResource): r is EnrollmentReque
 
 type DeviceEnrollmentFormValues = {
   labels: { key: string; value: string }[];
-  region: string;
   displayName: string;
 };
 type MassApproveDeviceModalProps = {
@@ -123,7 +122,6 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
       labels.displayName = templateToName(index, values.displayName);
       await post<EnrollmentRequestApproval>(`enrollmentrequests/${r.metadata.name}/approval`, {
         approved: true,
-        region: values.region,
         labels,
         approvedBy: user,
       });
@@ -144,7 +142,6 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
     <Formik<DeviceEnrollmentFormValues>
       initialValues={{
         labels: [],
-        region: '',
         displayName: '',
       }}
       validationSchema={deviceApprovalValidationSchema(t, { isSingleDevice: false })}
@@ -202,9 +199,6 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
               <Form>
                 <FormGroup label={t('Labels')}>
                   <LabelsField name="labels" />
-                </FormGroup>
-                <FormGroup label={t('Region')} isRequired>
-                  <TextField name="region" aria-label={t('Region')} />
                 </FormGroup>
                 <FormGroup label={t('Name')} isRequired>
                   <TextField

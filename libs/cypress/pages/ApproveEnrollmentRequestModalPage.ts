@@ -31,10 +31,6 @@ export class ApproveEnrollmentRequestModalPage {
     return cy.get('[aria-label="Fingerprint"]');
   }
 
-  get regionField() {
-    return cy.get('input[aria-label="Region"]');
-  }
-
   get displayNameField() {
     return cy.get('input[aria-label="Display name"]');
   }

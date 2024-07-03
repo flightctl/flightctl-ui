@@ -32,7 +32,6 @@ describe('Enrollment requests approval', () => {
     cy.focused().should('have.value', 'key=value').clear().type('this-is-a-test=yes');
 
     // Fill in the rest of the form
-    approveERModalPage.regionField.type('spain');
     approveERModalPage.displayNameField.type('new-device');
 
     // Submit and verify that the modal closes without an error

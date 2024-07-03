@@ -5,7 +5,6 @@ import { useFormikContext } from 'formik';
 
 import RichValidationTextField from '../../form/RichValidationTextField';
 import LabelsField from '../../form/LabelsField';
-import TextField from '../../form/TextField';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -14,7 +13,6 @@ import { getLabelValueValidations } from '../../../components/form/validations';
 
 export type DeviceEnrollmentFormValues = {
   labels: FlightCtlLabel[];
-  region: string;
   displayName: string;
 };
 
@@ -38,9 +36,6 @@ const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentR
       )}
       <FormGroup label={t('Labels')}>
         <LabelsField name="labels" />
-      </FormGroup>
-      <FormGroup label={t('Region')} isRequired>
-        <TextField name="region" aria-label={t('Region')} />
       </FormGroup>
       <RichValidationTextField
         fieldName="displayName"
