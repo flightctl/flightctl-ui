@@ -10,6 +10,6 @@ export type RepositoryStatus = {
   /**
    * Current state of the repository.
    */
-  conditions?: Array<Condition>;
+  conditions: Array<Condition>;
 };
 

@@ -15,16 +15,8 @@ export type DeviceSystemInfo = {
    */
   bootID: string;
   /**
-   * MachineID reported by the device.
-   */
-  machineID: string;
-  /**
    * The Operating System reported by the device.
    */
   operatingSystem: string;
-  /**
-   * The integrity measurements of the system.
-   */
-  measurements: Record<string, string>;
 };
 

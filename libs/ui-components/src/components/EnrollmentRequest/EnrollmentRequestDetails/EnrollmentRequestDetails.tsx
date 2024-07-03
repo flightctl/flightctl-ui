@@ -1,12 +1,11 @@
 import ConditionsTable from '../../DetailsPage/Tables/ConditionsTable';
-import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
 import DetailsPage from '../../DetailsPage/DetailsPage';
-import IntegrityTable from '../../DetailsPage/Tables/IntegrityTable';
-import SystemdDetailsTable from '../../DetailsPage/Tables/SystemdDetailsTable';
+import IntegrityDetails from '../../DetailsPage/Tables/IntegrityDetails';
 import LabelsView from '../../common/LabelsView';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { getDateDisplay } from '../../../utils/dates';
-import { ApprovalStatus, getApprovalStatus } from '../../../utils/status/enrollmentRequest';
+import { getApprovalStatus } from '../../../utils/status/enrollmentRequest';
+import { EnrollmentRequestStatus as EnrollmentRequestStatusType } from '../../../utils/status/common';
 import {
   Bullseye,
   Card,
@@ -29,7 +28,7 @@ import { useFetch } from '../../../hooks/useFetch';
 import DeviceEnrollmentModal from '../DeviceEnrollmentModal/DeviceEnrollmentModal';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
-import EnrollmentRequestStatus from '../../EnrollmentRequest/EnrollmentRequestStatus';
+import EnrollmentRequestStatus from '../../Status/EnrollmentRequestStatus';
 import WithHelperText from '../../common/WithHelperText';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
@@ -60,6 +59,7 @@ const EnrollmentRequestDetails = () => {
   });
 
   const approvalStatus = er ? getApprovalStatus(er) : '-';
+  const isPendingApproval = approvalStatus === EnrollmentRequestStatusType.Pending;
 
   return (
     <DetailsPage
@@ -72,10 +72,7 @@ const EnrollmentRequestDetails = () => {
       actions={
         <DetailsPageActions>
           <DropdownList>
-            <DropdownItem
-              onClick={() => setIsApprovalModalOpen(true)}
-              isDisabled={approvalStatus !== ApprovalStatus.Pending}
-            >
+            <DropdownItem onClick={() => setIsApprovalModalOpen(true)} isDisabled={!isPendingApproval}>
               {t('Approve')}
             </DropdownItem>
             {deleteAction}
@@ -184,43 +181,31 @@ const EnrollmentRequestDetails = () => {
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
-        <GridItem md={6}>
-          <DetailsPageCard>
-            <CardTitle>{t('Device conditions')}</CardTitle>
-            <DetailsPageCardBody>
-              {er && (
-                <ConditionsTable
-                  ariaLabel={t('Device conditions table')}
-                  conditions={er.spec.deviceStatus?.conditions}
-                />
-              )}
-            </DetailsPageCardBody>
-          </DetailsPageCard>
-        </GridItem>
-        <GridItem md={6}>
-          <DetailsPageCard>
-            <CardTitle>{t('Systemd units')}</CardTitle>
-            <DetailsPageCardBody>
-              {er && <SystemdDetailsTable systemdUnits={er?.spec.deviceStatus?.systemdUnits} />}
-            </DetailsPageCardBody>
-          </DetailsPageCard>
-        </GridItem>
-        <GridItem md={6}>
-          <DetailsPageCard>
-            <CardTitle>{t('Containers')}</CardTitle>
-            <DetailsPageCardBody>
-              {er && <ApplicationsTable containers={er.spec.deviceStatus?.containers} />}
-            </DetailsPageCardBody>
-          </DetailsPageCard>
-        </GridItem>
-        <GridItem md={6}>
-          <DetailsPageCard>
-            <CardTitle>{t('System integrity measurements')}</CardTitle>
-            <DetailsPageCardBody>
-              {er && <IntegrityTable measurements={er.spec.deviceStatus?.systemInfo?.measurements} />}
-            </DetailsPageCardBody>
-          </DetailsPageCard>
-        </GridItem>
+        {!isPendingApproval && (
+          <GridItem md={6}>
+            <DetailsPageCard>
+              <CardTitle>{t('Device conditions')}</CardTitle>
+              <DetailsPageCardBody>
+                {er && (
+                  <ConditionsTable
+                    ariaLabel={t('Device conditions table')}
+                    conditions={Object.values(er.spec.deviceStatus?.conditions || {})}
+                  />
+                )}
+              </DetailsPageCardBody>
+            </DetailsPageCard>
+          </GridItem>
+        )}
+        {!isPendingApproval && (
+          <GridItem md={6}>
+            <DetailsPageCard>
+              <CardTitle>{t('System integrity details')}</CardTitle>
+              <DetailsPageCardBody>
+                {er && <IntegrityDetails integrity={er.spec.deviceStatus?.integrity} />}
+              </DetailsPageCardBody>
+            </DetailsPageCard>
+          </GridItem>
+        )}
       </Grid>
       {er && isApprovalModalOpen && (
         <DeviceEnrollmentModal

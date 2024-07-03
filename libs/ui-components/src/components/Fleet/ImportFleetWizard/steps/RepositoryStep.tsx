@@ -1,12 +1,14 @@
-import { Form, FormGroup, FormSection, Grid, Radio } from '@patternfly/react-core';
 import * as React from 'react';
-import { ImportFleetFormValues } from '../types';
+import { Form, FormGroup, FormSection, Grid, Radio } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
-import { Repository } from '@flightctl/types';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+
+import { Repository } from '@flightctl/types';
+import { ImportFleetFormValues } from '../types';
+
 import { RepositoryForm } from '../../../Repository/CreateRepository/CreateRepositoryForm';
+import RepositoryStatus from '../../../Status/RepositoryStatus';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../../utils/status/repository';
-import RepositoryStatusInfo from '../../../common/RepositoryStatusInfo';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelect from '../../../form/FormSelect';
 
@@ -56,7 +58,7 @@ const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
             <Tr>
               <Td dataLabel={t('URL')}>{currentRepo.spec.repo}</Td>
               <Td dataLabel={t('Sync status')}>
-                <RepositoryStatusInfo statusInfo={getRepositorySyncStatus(currentRepo)} />
+                <RepositoryStatus statusInfo={getRepositorySyncStatus(currentRepo)} />
               </Td>
               <Td dataLabel={t('Last transition')}>{getRepositoryLastTransitionTime(currentRepo, t).text}</Td>
             </Tr>

@@ -2,9 +2,13 @@ import * as React from 'react';
 import { Bullseye } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import { DeviceSystemdUnitStatus } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
-import SystemdStatus from '../../Device/DeviceDetails/SystemdStatus';
+import SystemdStatus from '../../Status/SystemdStatus';
+
+interface DeviceSystemdUnitStatus {
+  name: string;
+  status: string;
+}
 
 type SystemdDetailsTableProps = {
   matchPatterns?: Array<string>;
@@ -24,12 +28,11 @@ const SystemdDetailsTable = ({ matchPatterns, systemdUnits }: SystemdDetailsTabl
   matchPatterns?.forEach((pattern) => {
     patterns[pattern] = {
       name: pattern,
-      loadState: '',
-      activeState: '',
+      status: '',
     };
   });
   systemdUnits?.forEach((unit) => {
-    const name = unit.name as string;
+    const name = unit.name;
     patterns[name] = unit;
   });
 
@@ -47,7 +50,7 @@ const SystemdDetailsTable = ({ matchPatterns, systemdUnits }: SystemdDetailsTabl
             <Tr key={patternName}>
               <Td dataLabel={t('Name')}>{patternName}</Td>
               <Td dataLabel={t('Status')}>
-                <SystemdStatus status={systemUnitState.activeState} />
+                <SystemdStatus status={systemUnitState.status} />
               </Td>
             </Tr>
           );
