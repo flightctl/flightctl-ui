@@ -160,19 +160,19 @@ const DeviceDetails = () => {
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('CPU pressure')}</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <DeviceResourceStatus status={device?.status.resources?.cpu} />
+                    <DeviceResourceStatus device={device} monitorType="cpu" />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Disk pressure')}</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <DeviceResourceStatus status={device?.status.resources?.disk} />
+                    <DeviceResourceStatus device={device} monitorType="disk" />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Memory pressure')}</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <DeviceResourceStatus status={device?.status.resources?.memory} />
+                    <DeviceResourceStatus device={device} monitorType="memory" />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               </DescriptionList>
