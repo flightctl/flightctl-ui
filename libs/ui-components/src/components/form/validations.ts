@@ -156,14 +156,11 @@ export const validLabelsSchema = (t: TFunction) =>
         }
 
         // Value validations
-        if (
-          value.length > K8S_LABEL_VALUE_MAX_LENGTH ||
-          !K8S_LABEL_VALUE_START_END.test(value) ||
-          !K8S_LABEL_VALUE_ALLOWED_CHARACTERS.test(value)
-        ) {
-          return true;
-        }
-        return false;
+        return value.length === 0
+          ? false
+          : value.length > K8S_LABEL_VALUE_MAX_LENGTH ||
+              !K8S_LABEL_VALUE_START_END.test(value) ||
+              !K8S_LABEL_VALUE_ALLOWED_CHARACTERS.test(value);
       });
 
       if (invalidLabels.length === 0) {
