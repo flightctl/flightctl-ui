@@ -10,7 +10,17 @@ export enum ConditionType {
   ResourceSyncSynced = 'Synced',
   FleetOverlappingSelectors = 'OverlappingSelectors',
   FleetValid = 'Valid',
-  DeviceUpdating = 'Updating',
+  DeviceReady = 'Ready',
+  DeviceDiskPressure = 'DiskPressure',
+  DeviceMemoryPressure = 'MemoryPressure',
+  DevicePIDPressure = 'PIDPressure',
+  DeviceCPUPressure = 'CPUPressure',
+  DeviceAvailable = 'Available',
+  DeviceProgressing = 'Progressing',
+  DeviceDegraded = 'Degraded',
   DeviceSpecValid = 'SpecValid',
+  DeviceSystemdUnitsRunning = 'SystemdUnitsRunning',
+  DeviceContainersRunning = 'ContainersRunning',
   TemplateVersionValid = 'Valid',
 }
+

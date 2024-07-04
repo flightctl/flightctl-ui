@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { StatusLevel, getDefaultStatusIcon } from '../../utils/status/common';
+import { StatusLevel } from '../../utils/status/common';
 import { StatusDisplayContent } from './StatusDisplay';
 
 const SystemdStatus = ({ status }: { status: string | undefined }) => {
@@ -16,8 +16,7 @@ const SystemdStatus = ({ status }: { status: string | undefined }) => {
       level = 'unknown';
       break;
   }
-  const IconComponent = getDefaultStatusIcon(level);
-  return <StatusDisplayContent level={level} icon={<IconComponent />} label={status || t('Unknown')} />;
+  return <StatusDisplayContent level={level} label={status || t('Unknown')} />;
 };
 
 export default SystemdStatus;

@@ -8,13 +8,13 @@ import StatusDisplay from './StatusDisplay';
 const DeviceStatus = ({ deviceStatus }: { deviceStatus?: DeviceStatus }) => {
   const { t } = useTranslation();
 
-  const status = getDeviceSummaryStatus(deviceStatus);
+  const status = getDeviceSummaryStatus(deviceStatus?.summary);
   const statusItems = getDeviceStatusItems(t);
 
   const item = statusItems.find((statusItem) => {
     return statusItem.id === status;
   });
-  return <StatusDisplay item={item} />;
+  return <StatusDisplay item={item} message={deviceStatus?.summary.info} />;
 };
 
 export default DeviceStatus;

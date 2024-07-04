@@ -5,7 +5,9 @@ import { Device } from '@flightctl/types';
 import DeviceFleet from './DeviceDetails/DeviceFleet';
 import { getDateDisplay } from '../../utils/dates';
 import { DeleteListActionResult } from '../ListPage/types';
+import ApplicationSummaryStatus from '../Status/ApplicationSummaryStatus';
 import DeviceStatus from '../Status/DeviceStatus';
+import SystemUpdateStatus from '../Status/SystemUpdateStatus';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import DisplayName from '../common/DisplayName';
@@ -45,8 +47,14 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
       <Td dataLabel={t('Fleet')}>
         <DeviceFleet deviceMetadata={device.metadata} />
       </Td>
-      <Td dataLabel={t('Status')}>
+      <Td dataLabel={t('Application status')}>
+        <ApplicationSummaryStatus statusSummary={device.status?.applications.summary} />
+      </Td>
+      <Td dataLabel={t('Device status')}>
         <DeviceStatus deviceStatus={device.status} />
+      </Td>
+      <Td dataLabel={t('System update status')}>
+        <SystemUpdateStatus updateStatus={device.status?.updated} />
       </Td>
       <Td dataLabel={t('Created at')}>{getDateDisplay(device.metadata.creationTimestamp)}</Td>
       <Td isActionCell>

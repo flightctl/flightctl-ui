@@ -2,8 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export enum DeviceSystemType {
-  DeviceSystemCPU = 'CPU',
-  DeviceSystemMemory = 'Memory',
-  DeviceSystemDisk = 'Disk',
-}
+import type { ResourceMonitorSpec } from './ResourceMonitorSpec';
+export type MemoryResourceMonitorSpec = ResourceMonitorSpec;
+

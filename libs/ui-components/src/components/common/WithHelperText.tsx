@@ -8,7 +8,7 @@ type WithHelperTextProps = {
   content: React.ReactNode;
 };
 
-const WithHelperText = ({ ariaLabel, showLabel, content }: React.PropsWithChildren<WithHelperTextProps>) => (
+const WithHelperText = ({ ariaLabel, showLabel, content }: WithHelperTextProps) => (
   <>
     {showLabel && ariaLabel}
     <Tooltip content={content}>

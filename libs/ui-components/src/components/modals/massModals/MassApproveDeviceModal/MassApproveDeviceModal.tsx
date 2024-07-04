@@ -20,7 +20,7 @@ import LabelsField from '../../../form/LabelsField';
 import { deviceApprovalValidationSchema } from '../../../form/validations';
 import DisplayName from '../../../common/DisplayName';
 import { isPromiseRejected } from '../../../../types/typeUtils';
-import { isEnrollmentRequest } from '../../../../types/extraTypes';
+import { DeviceLikeResource, isEnrollmentRequest } from '../../../../types/extraTypes';
 import { getApprovalStatus } from '../../../../utils/status/enrollmentRequest';
 import { EnrollmentRequestStatus } from '../../../../utils/status/common';
 import { getErrorMessage } from '../../../../utils/error';
@@ -33,8 +33,8 @@ import './MassApproveDeviceModal.css';
 const templateToName = (index: number, nameTemplate: string) =>
   nameTemplate ? nameTemplate.replace(/{{n+}}/g, `${index + 1}`) : '-';
 
-const isPendingEnrollmentRequest = (r: Device | EnrollmentRequest): r is EnrollmentRequest => {
-  return isEnrollmentRequest(r) && getApprovalStatus(r) !== EnrollmentRequestStatus.Approved;
+const isPendingEnrollmentRequest = (r: DeviceLikeResource): r is EnrollmentRequest => {
+  return isEnrollmentRequest(r) && getApprovalStatus(r) === EnrollmentRequestStatus.Approved;
 };
 
 type DeviceEnrollmentFormValues = {
@@ -44,7 +44,7 @@ type DeviceEnrollmentFormValues = {
 };
 type MassApproveDeviceModalProps = {
   onClose: VoidFunction;
-  resources: Array<Device | EnrollmentRequest>;
+  resources: Array<DeviceLikeResource>;
   onApproveSuccess: VoidFunction;
 };
 

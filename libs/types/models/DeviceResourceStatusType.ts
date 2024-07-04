@@ -6,5 +6,6 @@ export enum DeviceResourceStatusType {
   DeviceResourceStatusHealthy = 'Healthy',
   DeviceResourceStatusWarning = 'Warning',
   DeviceResourceStatusCritical = 'Critical',
+  DeviceResourceStatusError = 'Error',
   DeviceResourceStatusUnknown = 'Unknown',
 }
