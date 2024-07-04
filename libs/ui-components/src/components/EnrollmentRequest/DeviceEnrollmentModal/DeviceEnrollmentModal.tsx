@@ -31,7 +31,10 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
       onSubmit={async ({ labels, displayName }) => {
         setError(undefined);
         const deviceLabels: EnrollmentRequestApproval['labels'] = toAPILabel(labels);
-        deviceLabels.displayName = displayName;
+        if (displayName) {
+          deviceLabels.displayName = displayName;
+        }
+
         try {
           await post<EnrollmentRequestApproval>(`enrollmentrequests/${enrollmentRequest.metadata.name}/approval`, {
             approved: true,

@@ -25,8 +25,8 @@ export type DeviceEnrollmentFormProps = {
 
 const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentRequest, onClose, error, children }) => {
   const { t } = useTranslation();
-  const { submitForm, isSubmitting, errors: formErrors, dirty } = useFormikContext<DeviceEnrollmentFormValues>();
-  const disableSubmit = !dirty || Object.keys(formErrors).length > 0;
+  const { submitForm, isSubmitting, errors: formErrors } = useFormikContext<DeviceEnrollmentFormValues>();
+  const disableSubmit = Object.keys(formErrors).length > 0;
   return (
     <Form onSubmit={(ev) => ev.preventDefault()}>
       {enrollmentRequest && (
@@ -41,7 +41,6 @@ const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentR
         fieldName="displayName"
         aria-label={t('Display name')}
         validations={getLabelValueValidations(t)}
-        isRequired
       />
       {children}
       {error && <Alert isInline title={error} variant="danger" />}

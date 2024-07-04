@@ -31,7 +31,7 @@ import { toAPILabel } from '../../../../utils/labels';
 import './MassApproveDeviceModal.css';
 
 const templateToName = (index: number, nameTemplate: string) =>
-  nameTemplate ? nameTemplate.replace(/{{n+}}/g, `${index + 1}`) : '-';
+  nameTemplate ? nameTemplate.replace(/{{n+}}/g, `${index + 1}`) : '';
 
 const isPendingEnrollmentRequest = (r: DeviceLikeResource): r is EnrollmentRequest => {
   return isEnrollmentRequest(r) && getApprovalStatus(r) === EnrollmentRequestStatus.Approved;
@@ -119,7 +119,11 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
     setErrors(undefined);
     const promises = pendingEnrollments.map(async (r, index) => {
       const labels = toAPILabel(values.labels);
-      labels.displayName = templateToName(index, values.displayName);
+      const nameLabel = templateToName(index, values.displayName);
+      if (nameLabel) {
+        labels.displayName = nameLabel;
+      }
+
       await post<EnrollmentRequestApproval>(`enrollmentrequests/${r.metadata.name}/approval`, {
         approved: true,
         labels,
@@ -147,7 +151,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
       validationSchema={deviceApprovalValidationSchema(t, { isSingleDevice: false })}
       onSubmit={approveResources}
     >
-      {({ isSubmitting, values, submitForm, isValid, dirty }) => (
+      {({ isSubmitting, values, submitForm, isValid }) => (
         <Modal
           title={t('Approve pending devices')}
           isOpen
@@ -160,7 +164,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
               variant="primary"
               onClick={submitForm}
               isLoading={isSubmitting}
-              isDisabled={isSubmitting || !isValid || !dirty}
+              isDisabled={isSubmitting || !isValid}
             >
               {t('Approve')}
             </Button>,
@@ -200,7 +204,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
                 <FormGroup label={t('Labels')}>
                   <LabelsField name="labels" />
                 </FormGroup>
-                <FormGroup label={t('Name')} isRequired>
+                <FormGroup label={t('Name')}>
                   <TextField
                     name="displayName"
                     aria-label={t('Name')}
