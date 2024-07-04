@@ -28,7 +28,6 @@ export const appRoutes = {
   [ROUTE.REPO_EDIT]: '/devicemanagement/repositories/edit',
   [ROUTE.REPO_DETAILS]: '/devicemanagement/repositories',
   [ROUTE.REPOSITORIES]: '/devicemanagement/repositories',
-  [ROUTE.RESOURCE_SYNCS]: '/devicemanagement/resourcesyncs',
   [ROUTE.RESOURCE_SYNC_DETAILS]: '/devicemanagement/resourcesyncs',
   [ROUTE.ENROLLMENT_REQUESTS]: '/devicemanagement/enrollmentrequests',
   [ROUTE.ENROLLMENT_REQUEST_DETAILS]: '/devicemanagement/enrollmentrequests',

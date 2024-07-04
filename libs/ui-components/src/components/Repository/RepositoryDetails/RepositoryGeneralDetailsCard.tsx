@@ -7,8 +7,6 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
-  Grid,
-  GridItem,
   Icon,
 } from '@patternfly/react-core';
 import { LockedIcon } from '@patternfly/react-icons/dist/js/icons/locked-icon';
@@ -54,42 +52,38 @@ const RepoPrivacy = ({ repo }: { repo: Repository }) => {
 const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
   const { t } = useTranslation();
   return (
-    <Grid hasGutter>
-      <GridItem>
-        <Card>
-          <CardTitle>{t('Details')}</CardTitle>
-          <CardBody>
-            <DescriptionList columnModifier={{ lg: '2Col' }}>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Url')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  <RepositorySource sourceDetails={{ url: repoDetails.spec.repo, type: 'git' }} />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {' '}
-                  {repoDetails ? <RepositoryStatus statusInfo={getRepositorySyncStatus(repoDetails)} /> : '-'}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Last transition')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {repoDetails ? getRepositoryLastTransitionTime(repoDetails, t).text : '-'}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Privacy')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  <RepoPrivacy repo={repoDetails} />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-            </DescriptionList>
-          </CardBody>
-        </Card>
-      </GridItem>
-    </Grid>
+    <Card>
+      <CardTitle>{t('Details')}</CardTitle>
+      <CardBody>
+        <DescriptionList columnModifier={{ lg: '2Col' }}>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Url')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              <RepositorySource sourceDetails={{ url: repoDetails.spec.repo, type: 'git' }} />
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {' '}
+              {repoDetails ? <RepositoryStatus statusInfo={getRepositorySyncStatus(repoDetails)} /> : '-'}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Last transition')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {repoDetails ? getRepositoryLastTransitionTime(repoDetails, t).text : '-'}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Privacy')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              <RepoPrivacy repo={repoDetails} />
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+        </DescriptionList>
+      </CardBody>
+    </Card>
   );
 };
 

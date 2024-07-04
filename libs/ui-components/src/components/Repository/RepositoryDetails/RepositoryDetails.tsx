@@ -1,14 +1,13 @@
 import * as React from 'react';
-import { DropdownItem, DropdownList, Nav, NavList } from '@patternfly/react-core';
+import { DropdownItem, DropdownList, Grid, GridItem } from '@patternfly/react-core';
 
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { Repository } from '@flightctl/types';
 
-import NavItem from '../../NavItem/NavItem';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
-import DetailsTab from './DetailsTab';
-import ResourceSyncsTab from './ResourceSyncsTab';
+import RepositoryGeneralDetailsCard from './RepositoryGeneralDetailsCard';
+import RepositoryResourceSyncsCard from './RepositoryResourceSyncsCard';
 import DeleteRepositoryModal from './DeleteRepositoryModal';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
@@ -17,7 +16,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 const RepositoryDetails = () => {
   const { t } = useTranslation();
   const {
-    router: { useParams, Navigate, Route, Routes },
+    router: { useParams },
   } = useAppContext();
   const { repositoryId } = useParams() as { repositoryId: string };
   const [repoDetails, isLoading, error] = useFetchPeriodically<Required<Repository>>({
@@ -50,22 +49,17 @@ const RepositoryDetails = () => {
           </DropdownList>
         </DetailsPageActions>
       }
-      nav={
-        <Nav variant="tertiary">
-          <NavList>
-            <NavItem to="details">{t('Details')}</NavItem>
-            <NavItem to="resourcesyncs">{t('Resource syncs')}</NavItem>
-          </NavList>
-        </Nav>
-      }
     >
       {repoDetails && (
         <>
-          <Routes>
-            <Route index element={<Navigate to="details" replace />} />
-            <Route path="details" element={<DetailsTab repoDetails={repoDetails} />} />
-            <Route path="resourcesyncs" element={<ResourceSyncsTab repositoryId={repositoryId} />} />
-          </Routes>
+          <Grid hasGutter>
+            <GridItem>
+              <RepositoryGeneralDetailsCard repoDetails={repoDetails} />
+            </GridItem>
+            <GridItem>
+              <RepositoryResourceSyncsCard repositoryId={repositoryId} />
+            </GridItem>
+          </Grid>
           {isDeleteModalOpen && (
             <DeleteRepositoryModal
               onClose={() => setIsDeleteModalOpen(false)}
