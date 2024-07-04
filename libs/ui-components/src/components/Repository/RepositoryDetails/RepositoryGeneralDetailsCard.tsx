@@ -14,12 +14,12 @@ import {
 import { LockedIcon } from '@patternfly/react-icons/dist/js/icons/locked-icon';
 import { LockOpenIcon } from '@patternfly/react-icons/dist/js/icons/lock-open-icon';
 
-import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../../utils/status/repository';
+import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../utils/status/repository';
 import { Repository } from '@flightctl/types';
-import { useTranslation } from '../../../../hooks/useTranslation';
-import RepositorySource from '../RepositorySource';
-import RepositoryStatus from '../../../Status/RepositoryStatus';
-import { isHttpRepoSpec, isSshRepoSpec } from '../../../../types/extraTypes';
+import { useTranslation } from '../../../hooks/useTranslation';
+import RepositorySource from './RepositorySource';
+import RepositoryStatus from '../../Status/RepositoryStatus';
+import { isHttpRepoSpec, isSshRepoSpec } from '../../../types/extraTypes';
 
 const RepoPrivacy = ({ repo }: { repo: Repository }) => {
   const { t } = useTranslation();
