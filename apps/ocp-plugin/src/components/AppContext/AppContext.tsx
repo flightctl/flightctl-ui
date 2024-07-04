@@ -32,7 +32,6 @@ const appRoutes = {
   [ROUTE.REPO_EDIT]: '/edge/repositories/edit',
   [ROUTE.REPO_DETAILS]: '/edge/repositories',
   [ROUTE.REPOSITORIES]: '/edge/repositories',
-  [ROUTE.RESOURCE_SYNCS]: '/edge/resourcesyncs',
   [ROUTE.RESOURCE_SYNC_DETAILS]: '/edge/resourcesyncs',
   [ROUTE.ENROLLMENT_REQUESTS]: '/edge/enrollmentrequests',
   [ROUTE.ENROLLMENT_REQUEST_DETAILS]: '/edge/enrollmentrequests',

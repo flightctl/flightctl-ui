@@ -34,7 +34,7 @@ const ResourceSyncToRepository = () => {
         const repository = rsDetails.spec.repository;
         if (repository) {
           setError(undefined);
-          navigate({ route: ROUTE.REPO_DETAILS, postfix: `${repository}/resourcesyncs#${rsId}` });
+          navigate({ route: ROUTE.REPO_DETAILS, postfix: `${repository}#${rsId}` });
         } else {
           setError(t('Resource sync {{rsId}} is not linked to a repository', { rsId }));
         }
