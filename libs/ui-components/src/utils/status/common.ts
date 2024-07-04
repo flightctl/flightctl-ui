@@ -6,6 +6,13 @@ import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/e
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 
+import { global_warning_color_100 as warningColor } from '@patternfly/react-tokens/dist/js/global_warning_color_100';
+import { global_danger_color_100 as dangerColor } from '@patternfly/react-tokens/dist/js/global_danger_color_100';
+import { global_success_color_100 as successColor } from '@patternfly/react-tokens/dist/js/global_success_color_100';
+import { global_disabled_color_100 as unknownColor } from '@patternfly/react-tokens/dist/js/global_disabled_color_100';
+import { global_active_color_100 as activeColor } from '@patternfly/react-tokens/dist/js/global_active_color_100';
+import { global_palette_black_1000 as blackColor } from '@patternfly/react-tokens/dist/js/global_palette_black_1000';
+
 import {
   ApplicationStatusType as AppStatus,
   ApplicationsSummaryStatusType as AppSummaryStatus,
@@ -67,4 +74,29 @@ export const getDefaultStatusIcon = (level: StatusLevel) => {
       break;
   }
   return iconClass;
+};
+
+export const getDefaultStatusColor = (level: StatusLevel) => {
+  let color: string;
+  switch (level) {
+    case 'info':
+      color = activeColor.value;
+      break;
+    case 'danger':
+      color = dangerColor.value;
+      break;
+    case 'warning':
+      color = warningColor.value;
+      break;
+    case 'success':
+      color = successColor.value;
+      break;
+    case 'custom':
+      color = blackColor.value;
+      break;
+    default:
+      color = unknownColor.value;
+      break;
+  }
+  return color;
 };

@@ -44,6 +44,8 @@ const FleetDetails = React.lazy(
   () => import('@flightctl/ui-components/src/components/Fleet/FleetDetails/FleetDetails'),
 );
 
+const OverviewPage = React.lazy(() => import('@flightctl/ui-components/src/components/OverviewPage/OverviewPage'));
+
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
   showInNav?: boolean;
@@ -93,7 +95,17 @@ const RedirectToEnrollmentDetails = () => {
 const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
   {
     path: '/',
-    element: <Navigate to="/devicemanagement/fleets" replace />,
+    element: <Navigate to="/overview" replace />,
+  },
+  {
+    path: '/overview',
+    title: t('Overview'),
+    showInNav: true,
+    element: (
+      <TitledRoute title={t('Overview')}>
+        <OverviewPage />
+      </TitledRoute>
+    ),
   },
   {
     path: '/devicemanagement/enrollmentrequests/:enrollmentRequestId',

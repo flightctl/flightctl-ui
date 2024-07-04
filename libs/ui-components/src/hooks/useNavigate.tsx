@@ -63,7 +63,7 @@ export const useNavigate = () => {
   );
 };
 
-type LinkProps = Omit<RouterLinkProps, 'to'> & {
+export type LinkProps = Omit<RouterLinkProps, 'to'> & {
   to: Route | ToObj;
   query?: string;
 };

@@ -3,14 +3,16 @@ import * as React from 'react';
 import { Button, Flex, FlexItem, Icon, Popover } from '@patternfly/react-core';
 import { SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
 
-import { StatusItem, StatusItemType, StatusLevel, getDefaultStatusIcon } from '../../utils/status/common';
+import {
+  StatusItem,
+  StatusItemType,
+  StatusLevel,
+  getDefaultStatusColor,
+  getDefaultStatusIcon,
+} from '../../utils/status/common';
 import { useTranslation } from '../../hooks/useTranslation';
 
 import './StatusDisplay.css';
-
-const colorClass: Partial<Record<StatusLevel, string>> = {
-  unknown: '--pf-v5-global--Color--100',
-};
 
 type StatusLabelProps = {
   label: string;
@@ -22,10 +24,8 @@ type StatusLabelProps = {
 
 export const StatusDisplayContent = ({ label, messageTitle, message, level, customIcon }: StatusLabelProps) => {
   const iconLevel = level === 'unknown' ? undefined : level;
-  const statusColor = colorClass[level];
   const IconComponent = customIcon || getDefaultStatusIcon(level);
 
-  const style = statusColor ? ({ '--pf-v5-c-icon__content--Color': statusColor } as React.CSSProperties) : undefined;
   if (message) {
     return (
       <Popover aria-label="status popover" headerContent={messageTitle || label} bodyContent={message}>
@@ -33,7 +33,10 @@ export const StatusDisplayContent = ({ label, messageTitle, message, level, cust
           variant="link"
           isInline
           icon={
-            <Icon status={iconLevel} style={style}>
+            <Icon
+              status={iconLevel}
+              style={{ '--pf-v5-c-icon__content--Color': getDefaultStatusColor(level) } as React.CSSProperties}
+            >
               <IconComponent />
             </Icon>
           }
@@ -47,7 +50,10 @@ export const StatusDisplayContent = ({ label, messageTitle, message, level, cust
   return (
     <Flex className="ftcl_status-label">
       <FlexItem>
-        <Icon status={iconLevel} style={style}>
+        <Icon
+          status={iconLevel}
+          style={{ '--pf-v5-c-icon__content--Color': getDefaultStatusColor(level) } as React.CSSProperties}
+        >
           <IconComponent />
         </Icon>
       </FlexItem>

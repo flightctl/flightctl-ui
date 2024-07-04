@@ -61,7 +61,7 @@ export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStat
     type: FilterSearchParams.DeviceStatus,
     id: DeviceSummaryStatusType.DeviceSummaryStatusPoweredOff,
     label: t('Powered Off'),
-    level: 'unknown',
+    level: 'custom',
     customIcon: PowerOffIcon,
   },
   {
