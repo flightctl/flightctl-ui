@@ -27,7 +27,7 @@ const CreateFleetWizardFooter = ({ isEdit }: CreateFleetWizardFooterProps) => {
   }
   const primaryBtn = isReviewStep ? (
     <Button variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
-      {isEdit ? t('Update fleet') : t('Create fleet')}
+      {isEdit ? t('Save') : t('Create fleet')}
     </Button>
   ) : (
     <Button variant="primary" onClick={goToNextStep} isDisabled={!isStepValid}>
