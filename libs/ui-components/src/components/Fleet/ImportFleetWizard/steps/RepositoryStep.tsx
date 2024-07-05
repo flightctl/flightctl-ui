@@ -43,6 +43,7 @@ const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
             acc[curr.metadata.name || ''] = curr.metadata.name || '';
             return acc;
           }, {})}
+          placeholderText={t('Select a repository')}
         />
       </FormGroup>
       {currentRepo && (

@@ -74,6 +74,7 @@ const GitConfigForm: React.FC<ConfigFormProps & Pick<ConfigSectionProps, 'reposi
             acc[curr.metadata.name || ''] = curr.metadata.name;
             return acc;
           }, {})}
+          placeholderText={t('Select a repository')}
         >
           <MenuFooter>
             <Button
@@ -216,6 +217,7 @@ const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionPr
               inline: t('Inline config provider'),
             }}
             name={`${fieldName}.type`}
+            placeholderText={t('Select a source type')}
           />
         </FormGroup>
         {ct.type === 'git' && <GitConfigForm index={index} repositories={repositories} repoRefetch={repoRefetch} />}
