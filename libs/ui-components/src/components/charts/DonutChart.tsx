@@ -1,8 +1,8 @@
-import { ChartDonut, ChartLabel } from '@patternfly/react-charts';
+import { ChartDonut } from '@patternfly/react-charts';
 import { Flex, FlexItem, Stack, StackItem } from '@patternfly/react-core';
-import { global_Color_200 as titleColor } from '@patternfly/react-tokens/dist/js/global_Color_200';
 import * as React from 'react';
 import { Link, LinkProps } from '../../hooks/useNavigate';
+import WithHelperText from '../common/WithHelperText';
 
 import './DonutChart.css';
 
@@ -57,7 +57,7 @@ const LegendItem = ({ children, color }: { children: React.ReactNode; color: str
   );
 };
 
-const DonutChart = ({ data, title }: { data: Data[]; title: string }) => {
+const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; helperText?: string }) => {
   const firstRow = data.slice(0, Math.floor(data.length / 2));
   const secondRow = data.slice(Math.floor(data.length / 2), data.length);
 
@@ -76,7 +76,27 @@ const DonutChart = ({ data, title }: { data: Data[]; title: string }) => {
             }))}
             name={title}
             title={title}
-            titleComponent={<ChartLabel style={{ fontSize: '14px', fill: titleColor.value }} />}
+            titleComponent={
+              <foreignObject x="0" y="0" width="230px" height="230px">
+                <Flex
+                  alignItems={{ default: 'alignItemsCenter' }}
+                  justifyContent={{ default: 'justifyContentCenter' }}
+                  alignContent={{ default: 'alignContentCenter' }}
+                  className="fctl-charts__title"
+                >
+                  {helperText ? (
+                    <WithHelperText
+                      className="fctl-charts__title-helper"
+                      showLabel
+                      ariaLabel={title}
+                      content={helperText}
+                    />
+                  ) : (
+                    title
+                  )}
+                </Flex>
+              </foreignObject>
+            }
           />
         </div>
       </StackItem>

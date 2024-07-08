@@ -41,6 +41,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
 import { Link, ROUTE } from '../../hooks/useNavigate';
 import { FilterSearchParams } from '../../utils/status/common';
+import { getApplicatioStatusHelperText, getDeviceStatusHelperText, getUpdateStatusHelperText } from '../Status/utils';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -80,18 +81,18 @@ const getDeviceColumns = (t: TFunction): TableColumn<DeviceLikeResource>[] => [
   },
   {
     name: t('Application status'),
-    helperText: t('Indicates the overall status of application workloads on the device.'),
+    helperText: getApplicatioStatusHelperText(t),
     onSort: (resources: Array<DeviceLikeResource>) => sortDeviceStatus(resources, 'ApplicationStatus'),
   },
   {
     name: t('Device status'),
-    helperText: t('Indicates the overall status of the device hardware and operating system.'),
+    helperText: getDeviceStatusHelperText(t),
     onSort: (resources: Array<DeviceLikeResource>) => sortDeviceStatus(resources, 'DeviceStatus'),
     defaultSort: true,
   },
   {
     name: t('Update status'),
-    helperText: t('Indicates whether a system is running the latest target configuration or is updating towards it.'),
+    helperText: getUpdateStatusHelperText(t),
     onSort: (resources: Array<DeviceLikeResource>) => sortDeviceStatus(resources, 'SystemUpdateStatus'),
   },
   {

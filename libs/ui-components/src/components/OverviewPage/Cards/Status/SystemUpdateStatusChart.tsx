@@ -5,6 +5,7 @@ import { getSystemUpdateStatusItems } from '../../../../utils/status/system';
 import { StatusMap, toChartData } from './utils';
 import { FilterSearchParams } from '../../../../utils/status/common';
 import DonutChart from '../../../charts/DonutChart';
+import { getUpdateStatusHelperText } from '../../../Status/utils';
 
 type UpdateStatusMap = StatusMap<DeviceUpdatedStatusType>;
 
@@ -29,7 +30,9 @@ const SystemUpdateStatusChart = ({ resources }: { resources: Device[] }) => {
 
   const updateStatusData = toChartData(data, statusItems, FilterSearchParams.UpdatedStatus);
 
-  return <DonutChart title={t('System update status')} data={updateStatusData} />;
+  return (
+    <DonutChart title={t('System update status')} data={updateStatusData} helperText={getUpdateStatusHelperText(t)} />
+  );
 };
 
 export default SystemUpdateStatusChart;

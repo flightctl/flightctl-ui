@@ -5,6 +5,7 @@ import { getApplicationSummaryStatusItems } from '../../../../utils/status/appli
 import { StatusMap, toChartData } from './utils';
 import { FilterSearchParams } from '../../../../utils/status/common';
 import DonutChart from '../../../charts/DonutChart';
+import { getApplicatioStatusHelperText } from '../../../Status/utils';
 
 type AppStatusMap = StatusMap<ApplicationsSummaryStatusType>;
 
@@ -30,7 +31,9 @@ const ApplicationStatusChart = ({ resources }: { resources: Device[] }) => {
 
   const appStatusData = toChartData(data, statusItems, FilterSearchParams.AppStatus);
 
-  return <DonutChart title={t('Application status')} data={appStatusData} />;
+  return (
+    <DonutChart title={t('Application status')} data={appStatusData} helperText={getApplicatioStatusHelperText(t)} />
+  );
 };
 
 export default ApplicationStatusChart;
