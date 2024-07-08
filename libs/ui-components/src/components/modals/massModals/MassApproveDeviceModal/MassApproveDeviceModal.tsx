@@ -18,7 +18,7 @@ import { Formik } from 'formik';
 import TextField from '../../../form/TextField';
 import LabelsField from '../../../form/LabelsField';
 import { deviceApprovalValidationSchema } from '../../../form/validations';
-import DisplayName from '../../../common/DisplayName';
+import ResourceLink from '../../../common/ResourceLink';
 import { isPromiseRejected } from '../../../../types/typeUtils';
 import { DeviceLikeResource, isEnrollmentRequest } from '../../../../types/extraTypes';
 import { EnrollmentRequestStatus, getApprovalStatus } from '../../../../utils/status/enrollmentRequest';
@@ -60,7 +60,7 @@ const ApprovedDevicesTable = ({ devices }: { devices: Array<EnrollmentRequest | 
         {devices.map((device) => (
           <Tr key={device.metadata.name}>
             <Td dataLabel={t('Fingerprint')}>
-              <DisplayName name={device.metadata.name} />
+              <ResourceLink id={device.metadata.name as string} />
             </Td>
             <Td dataLabel={t('Name')}>{device.metadata.labels?.displayName || '-'}</Td>
           </Tr>
@@ -190,7 +190,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
                   {pendingEnrollments.map((pendingEr, index) => (
                     <Tr key={pendingEr.metadata.name}>
                       <Td dataLabel={t('Fingerprint')}>
-                        <DisplayName name={pendingEr.metadata.name} />
+                        <ResourceLink id={pendingEr.metadata.name as string} />
                       </Td>
                       <Td dataLabel={t('Name')}>{templateToName(index, values.displayName)}</Td>
                     </Tr>

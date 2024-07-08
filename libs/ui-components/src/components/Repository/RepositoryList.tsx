@@ -37,7 +37,7 @@ import MassDeleteRepositoryModal from '../modals/massModals/MassDeleteRepository
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
-import DisplayName from '../common/DisplayName';
+import ResourceLink from '../common/ResourceLink';
 import RepositoryStatus from '../Status/RepositoryStatus';
 
 const CreateRepositoryButton = ({ buttonText }: { buttonText?: string }) => {
@@ -155,7 +155,7 @@ const RepositoryTable = () => {
                 }}
               />
               <Td dataLabel={t('Name')}>
-                <DisplayName name={repository.metadata.name} routeLink={ROUTE.REPO_DETAILS} />
+                <ResourceLink id={repository.metadata.name as string} routeLink={ROUTE.REPO_DETAILS} />
               </Td>
               <Td dataLabel={t('Url')}>{repository.spec.repo || '-'}</Td>
               <Td dataLabel={t('Sync status')}>

@@ -23,7 +23,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import EditLabelsForm from '../../modals/EditLabelsModal/EditLabelsForm';
-import DisplayName from '../../common/DisplayName';
+import ResourceLink from '../../common/ResourceLink';
 import DeviceFleet from './DeviceFleet';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
 import SystemdTable from './SystemdTable';
@@ -91,7 +91,7 @@ const DeviceDetails = () => {
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Fingerprint')}</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <DisplayName name={device?.metadata.name || '-'} />
+                    <ResourceLink id={device?.metadata.name || '-'} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 {device && <EditLabelsForm device={device} onDeviceUpdate={refetch} />}

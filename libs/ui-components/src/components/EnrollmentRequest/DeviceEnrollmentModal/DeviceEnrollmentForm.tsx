@@ -8,7 +8,7 @@ import LabelsField from '../../form/LabelsField';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
-import DisplayName from '../../common/DisplayName';
+import ResourceLink from '../../common/ResourceLink';
 import { getLabelValueValidations } from '../../../components/form/validations';
 
 export type DeviceEnrollmentFormValues = {
@@ -31,7 +31,7 @@ const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentR
     <Form onSubmit={(ev) => ev.preventDefault()}>
       {enrollmentRequest && (
         <FormGroup label={t('Fingerprint')} aria-label={t('Fingerprint')}>
-          <DisplayName name={enrollmentRequest.metadata.name} variant="full" />
+          <ResourceLink id={enrollmentRequest.metadata.name as string} variant="full" />
         </FormGroup>
       )}
       <FormGroup label={t('Labels')}>
