@@ -26,7 +26,7 @@ const basicFleets: Fleet[] = [
             {
               configType: 'GitConfigProviderSpec',
               gitRef: {
-                path: '/inverter-fleet/deployment-manifests/',
+                path: '/demos/inverter-fleet/configuration/',
                 repository: 'defaultRepo',
                 targetRevision: 'main',
               },
@@ -46,19 +46,7 @@ const basicFleets: Fleet[] = [
       },
     },
     status: {
-      conditions: [
-        {
-          lastTransitionTime: '2024-04-10T12:11:54Z',
-          reason: 'Valid',
-          status: ConditionStatus.ConditionStatusTrue,
-          type: ConditionType.FleetValid,
-        },
-        {
-          lastTransitionTime: '2024-04-10T12:11:56Z',
-          status: ConditionStatus.ConditionStatusFalse,
-          type: ConditionType.FleetOverlappingSelectors,
-        },
-      ],
+      conditions: [],
     },
   },
   {
@@ -115,20 +103,7 @@ const basicFleets: Fleet[] = [
       },
     },
     status: {
-      conditions: [
-        {
-          lastTransitionTime: '2024-04-10T12:13:58Z',
-          message: "Fleet has 2 invalid configurations: 'nginx-server','auth-server'",
-          reason: 'Invalid',
-          status: ConditionStatus.ConditionStatusTrue,
-          type: ConditionType.FleetValid,
-        },
-        {
-          lastTransitionTime: '2024-04-10T12:13:58Z',
-          status: ConditionStatus.ConditionStatusFalse,
-          type: ConditionType.FleetOverlappingSelectors,
-        },
-      ],
+      conditions: [],
     },
   },
 ];
