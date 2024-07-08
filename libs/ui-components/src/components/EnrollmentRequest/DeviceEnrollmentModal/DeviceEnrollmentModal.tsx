@@ -25,18 +25,19 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
     <Formik<DeviceEnrollmentFormValues>
       initialValues={{
         labels: [],
-        region: '',
         displayName: '',
       }}
       validationSchema={deviceApprovalValidationSchema(t, { isSingleDevice: true })}
-      onSubmit={async ({ region, labels, displayName }) => {
+      onSubmit={async ({ labels, displayName }) => {
         setError(undefined);
         const deviceLabels: EnrollmentRequestApproval['labels'] = toAPILabel(labels);
-        deviceLabels.displayName = displayName;
+        if (displayName) {
+          deviceLabels.displayName = displayName;
+        }
+
         try {
           await post<EnrollmentRequestApproval>(`enrollmentrequests/${enrollmentRequest.metadata.name}/approval`, {
             approved: true,
-            region,
             labels: deviceLabels,
             approvedBy: user,
           });

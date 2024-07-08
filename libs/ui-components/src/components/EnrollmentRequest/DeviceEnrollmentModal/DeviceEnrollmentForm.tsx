@@ -5,7 +5,6 @@ import { useFormikContext } from 'formik';
 
 import RichValidationTextField from '../../form/RichValidationTextField';
 import LabelsField from '../../form/LabelsField';
-import TextField from '../../form/TextField';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -14,7 +13,6 @@ import { getLabelValueValidations } from '../../../components/form/validations';
 
 export type DeviceEnrollmentFormValues = {
   labels: FlightCtlLabel[];
-  region: string;
   displayName: string;
 };
 
@@ -27,8 +25,8 @@ export type DeviceEnrollmentFormProps = {
 
 const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentRequest, onClose, error, children }) => {
   const { t } = useTranslation();
-  const { submitForm, isSubmitting, errors: formErrors, dirty } = useFormikContext<DeviceEnrollmentFormValues>();
-  const disableSubmit = !dirty || Object.keys(formErrors).length > 0;
+  const { submitForm, isSubmitting, errors: formErrors } = useFormikContext<DeviceEnrollmentFormValues>();
+  const disableSubmit = Object.keys(formErrors).length > 0;
   return (
     <Form onSubmit={(ev) => ev.preventDefault()}>
       {enrollmentRequest && (
@@ -39,14 +37,10 @@ const DeviceEnrollmentForm: React.FC<DeviceEnrollmentFormProps> = ({ enrollmentR
       <FormGroup label={t('Labels')}>
         <LabelsField name="labels" />
       </FormGroup>
-      <FormGroup label={t('Region')} isRequired>
-        <TextField name="region" aria-label={t('Region')} />
-      </FormGroup>
       <RichValidationTextField
         fieldName="displayName"
         aria-label={t('Display name')}
         validations={getLabelValueValidations(t)}
-        isRequired
       />
       {children}
       {error && <Alert isInline title={error} variant="danger" />}
