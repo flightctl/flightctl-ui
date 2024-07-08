@@ -6,13 +6,20 @@ type WithHelperTextProps = {
   ariaLabel: string;
   showLabel?: boolean;
   content: React.ReactNode;
+  className?: string;
 };
 
-const WithHelperText = ({ ariaLabel, showLabel, content }: WithHelperTextProps) => (
+const WithHelperText = ({ ariaLabel, showLabel, content, className }: WithHelperTextProps) => (
   <>
     {showLabel && ariaLabel}
     <Tooltip content={content}>
-      <Button isInline variant="plain" aria-label={`${ariaLabel} help text`} icon={<OutlinedQuestionCircleIcon />} />
+      <Button
+        className={className}
+        isInline
+        variant="plain"
+        aria-label={`${ariaLabel} help text`}
+        icon={<OutlinedQuestionCircleIcon />}
+      />
     </Tooltip>
   </>
 );

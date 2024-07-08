@@ -6,6 +6,7 @@ import { EnrollmentRequestStatus } from '../../../../utils/status/common';
 import { getDeviceStatusItems } from '../../../../utils/status/devices';
 import { StatusMap, toChartData } from './utils';
 import { FilterSearchParams } from '../../../../utils/status/common';
+import { getDeviceStatusHelperText } from '../../../Status/utils';
 
 type DeviceStatusMap = StatusMap<DeviceSummaryStatusType | EnrollmentRequestStatus>;
 
@@ -32,7 +33,7 @@ const DeviceStatusChart = ({ resources }: { resources: Device[] }) => {
 
   const devStatusData = toChartData(data, statusItems, FilterSearchParams.DeviceStatus);
 
-  return <DonutChart title={t('Device status')} data={devStatusData} />;
+  return <DonutChart title={t('Device status')} data={devStatusData} helperText={getDeviceStatusHelperText(t)} />;
 };
 
 export default DeviceStatusChart;
