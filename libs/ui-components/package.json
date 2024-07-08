@@ -24,9 +24,11 @@
     "formik": "^2.4.5",
     "fuzzysearch": "^1.0.3",
     "js-yaml": "^4.1.0",
+    "percent-round": "^2.3.1",
     "yup": "^1.3.3"
   },
   "peerDependencies": {
+    "@patternfly/react-charts": "^7.2.2",
     "@patternfly/react-core": "^5.0.0",
     "@patternfly/react-icons": "^5.0.0",
     "@patternfly/react-styles": "^5.1.2",

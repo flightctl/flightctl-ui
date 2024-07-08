@@ -23,7 +23,8 @@
       "CreateRepositoryPage": "./src/components/Repositories/CreateRepositoryPage.tsx",
       "ResourceSyncToRepositoryPage": "./src/components/ResourceSyncs/ResourceSyncToRepositoryPage.tsx",
       "EnrollmentRequestDetailsPage": "./src/components/EnrollmentRequests/EnrollmentRequestDetailsPage.tsx",
-      "appContext": "./src/components/AppContext/AppContext.tsx"
+      "appContext": "./src/components/AppContext/AppContext.tsx",
+      "OverviewTab": "./src/components/OverviewTab/OverviewTab.tsx"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
@@ -67,6 +68,7 @@
     "@patternfly/react-icons": "^5.0.0",
     "@patternfly/react-styles": "^5.1.2",
     "@patternfly/react-table": "^5.0.0",
+    "@patternfly/react-charts": "7.2.2",
     "@types/react-redux": "^7.1.33",
     "formik": "^2.4.5",
     "fuzzysearch": "^1.0.3",

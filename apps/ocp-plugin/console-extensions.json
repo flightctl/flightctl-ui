@@ -132,5 +132,12 @@
       "path": ["/edge/enrollmentrequests/:enrollmentRequestId"],
       "component": { "$codeRef": "EnrollmentRequestDetailsPage" }
     }
+  },
+  {
+    "type": "acm.overview/tab",
+    "properties": {
+      "tabTitle": "Edge",
+      "component": { "$codeRef": "OverviewTab" }
+    }
   }
 ]
