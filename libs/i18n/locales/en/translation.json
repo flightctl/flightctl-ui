@@ -296,7 +296,7 @@
   "Name of a branch or a tag.": "Name of a branch or a tag.",
   "For example: main": "For example: main",
   "The absolute path of a file or directory in the repository. If a directory, the directory should contain only resource definitions with no subdirectories.": "The absolute path of a file or directory in the repository. If a directory, the directory should contain only resource definitions with no subdirectories.",
-  "For example: /inverter-fleet/fleets/eu-west-prod-001/fleet.yaml": "For example: /inverter-fleet/fleets/eu-west-prod-001/fleet.yaml",
+  "For example: {{exampleFile}}": "For example: {{exampleFile}}",
   "Remove resource sync": "Remove resource sync",
   "Add another resource sync": "Add another resource sync",
   "Must be unique": "Must be unique",
