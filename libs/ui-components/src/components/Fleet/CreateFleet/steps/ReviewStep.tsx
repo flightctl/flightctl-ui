@@ -43,7 +43,7 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('Device label selector')}</DescriptionListTerm>
+            <DescriptionListTerm>{t('Device selector')}</DescriptionListTerm>
             <DescriptionListDescription>
               <LabelsView prefix="device" labels={toAPILabel(values.labels)} />
             </DescriptionListDescription>
