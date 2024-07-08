@@ -112,7 +112,7 @@ const CreateFleetWizard = () => {
     );
   }
 
-  const title = isEdit ? t('Update fleet') : t('Create fleet');
+  const title = isEdit ? t('Edit fleet') : t('Create fleet');
 
   return (
     <>

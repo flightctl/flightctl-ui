@@ -19,9 +19,10 @@ type FormSelectProps = {
   items: Record<string, React.ReactNode>;
   helperText?: React.ReactNode;
   children?: React.ReactNode;
+  placeholderText?: string;
 };
 
-const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, children }) => {
+const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeholderText, children }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [field, meta, { setValue, setTouched }] = useField<string>({
     name: name,
@@ -29,13 +30,15 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, childr
 
   const fieldId = `selectfield-${name}`;
   const hasError = meta.touched && !!meta.error;
+  const itemKeys = Object.keys(items);
 
   React.useEffect(() => {
-    const hasOneItem = Object.keys(items).length === 1;
+    const hasOneItem = itemKeys.length === 1;
     if (hasOneItem && !field.value) {
-      setValue(Object.keys(items)[0], true);
+      setValue(itemKeys[0], true);
     }
-  }, [items, field.value, setValue]);
+  }, [itemKeys, field.value, setValue]);
+
   return (
     <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId}>
       <Select
@@ -58,7 +61,7 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, childr
             className="fctl-form-select__toggle"
             id={`${fieldId}-menu`}
           >
-            {items[field.value] || ''}
+            {items[field.value] || placeholderText}
           </MenuToggle>
         )}
         isOpen={isOpen}
@@ -69,9 +72,9 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, childr
           setIsOpen(open);
         }}
       >
-        {!!Object.keys(items).length && (
+        {itemKeys.length && (
           <SelectList className="fctl-form-select__menu">
-            {Object.keys(items).map((key) => (
+            {itemKeys.map((key) => (
               <SelectOption key={key} value={key}>
                 {items[key]}
               </SelectOption>

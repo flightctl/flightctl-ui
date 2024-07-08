@@ -1,9 +1,13 @@
-import { Form, FormGroup, Grid } from '@patternfly/react-core';
 import * as React from 'react';
-import { FleetFormValues } from '../types';
+
+import { Form, FormGroup, Grid } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
+
 import { useTranslation } from '../../../../hooks/useTranslation';
+import WithHelperText from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
+import { FleetFormValues } from '../types';
+
 import ConfigTemplateForm from './ConfigTemplateForm';
 
 export const deviceTemplateStepId = 'device-template';
@@ -19,7 +23,15 @@ const DeviceTemplateStep = () => {
   return (
     <Grid span={8}>
       <Form>
-        <FormGroup label={t('System image')}>
+        <FormGroup
+          label={
+            <WithHelperText
+              ariaLabel={t('System image')}
+              content={t("The target system image for this fleet's devices.")}
+              showLabel
+            />
+          }
+        >
           <TextField
             name="osImage"
             aria-label={t('System image')}

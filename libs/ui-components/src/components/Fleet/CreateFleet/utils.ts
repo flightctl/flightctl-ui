@@ -38,7 +38,7 @@ export const getValidationSchema = (t: TFunction) => {
       Yup.lazy((value: FleetConfigTemplate) => {
         if (isGitConfigTemplate(value)) {
           return Yup.object<GitConfigTemplate>().shape({
-            type: Yup.string().required(t('Provider type is required.')),
+            type: Yup.string().required(t('Source type is required.')),
             name: validKubernetesDnsSubdomain(t, { isRequired: true }),
             path: Yup.string().required(t('Path is required.')).matches(absolutePathRegex, t('Path must be absolute.')),
             repository: Yup.string().required(t('Repository is required.')),
@@ -46,7 +46,7 @@ export const getValidationSchema = (t: TFunction) => {
           });
         } else if (isKubeSecretTemplate(value)) {
           return Yup.object<KubeSecretTemplate>().shape({
-            type: Yup.string().required(t('Provider type is required.')),
+            type: Yup.string().required(t('Source type is required.')),
             name: validKubernetesDnsSubdomain(t, { isRequired: true }),
             secretName: Yup.string().required(t('Secret name is required.')),
             secretNs: Yup.string().required(t('Secret namespace is required.')),
@@ -56,7 +56,7 @@ export const getValidationSchema = (t: TFunction) => {
           });
         } else if (isInlineConfigTemplate(value)) {
           return Yup.object<InlineConfigTemplate>().shape({
-            type: Yup.string().required(t('Provider type is required.')),
+            type: Yup.string().required(t('Source type is required.')),
             name: validKubernetesDnsSubdomain(t, { isRequired: true }),
             inline: maxLengthString(t, { fieldName: t('Inline config'), maxLength: 65535 })
               .required(t('Inline config is required.'))
@@ -72,7 +72,7 @@ export const getValidationSchema = (t: TFunction) => {
         }
 
         return Yup.object<InlineConfigTemplate>().shape({
-          type: Yup.string().required(t('Provider type is required.')),
+          type: Yup.string().required(t('Source type is required.')),
           name: Yup.string().required(t('Name is required.')),
         });
       }),
