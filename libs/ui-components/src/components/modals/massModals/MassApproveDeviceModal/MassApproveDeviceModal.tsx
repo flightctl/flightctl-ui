@@ -34,7 +34,7 @@ const templateToName = (index: number, nameTemplate: string) =>
   nameTemplate ? nameTemplate.replace(/{{n+}}/g, `${index + 1}`) : '';
 
 const isPendingEnrollmentRequest = (r: DeviceLikeResource): r is EnrollmentRequest => {
-  return isEnrollmentRequest(r) && getApprovalStatus(r) === EnrollmentRequestStatus.Approved;
+  return isEnrollmentRequest(r) && getApprovalStatus(r) === EnrollmentRequestStatus.Pending;
 };
 
 type DeviceEnrollmentFormValues = {
