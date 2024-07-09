@@ -3,8 +3,11 @@ import {
   Device,
   EnrollmentRequest,
   Fleet,
+  GitConfigProviderSpec,
   GitHttpRepoSpec,
   GitSshRepoSpec,
+  InlineConfigProviderSpec,
+  KubernetesSecretProviderSpec,
   RepositorySpec,
   ResourceSync,
 } from '@flightctl/types';
@@ -56,6 +59,8 @@ export enum DeviceAnnotation {
 export type AnnotationType = DeviceAnnotation; // Add more types when they are added to the API
 
 export type DeviceLikeResource = Device | EnrollmentRequest;
+
+export type ConfigSourceProvider = GitConfigProviderSpec | KubernetesSecretProviderSpec | InlineConfigProviderSpec;
 
 export const isEnrollmentRequest = (resource: DeviceLikeResource): resource is EnrollmentRequest =>
   resource.kind === 'EnrollmentRequest';

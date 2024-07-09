@@ -6,19 +6,19 @@ import { FormikErrors, useFormikContext } from 'formik';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import WithHelperText from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
-import { FleetFormValues } from '../types';
 
 import ConfigTemplateForm from './ConfigTemplateForm';
+import { DeviceSpecConfigFormValues } from '../types';
 
 export const deviceTemplateStepId = 'device-template';
 
-export const isDeviceTemplateStepValid = (errors: FormikErrors<FleetFormValues>) => {
+export const isDeviceTemplateStepValid = (errors: FormikErrors<DeviceSpecConfigFormValues>) => {
   return !errors.osImage && !errors.configTemplates;
 };
 
 const DeviceTemplateStep = () => {
   const { t } = useTranslation();
-  const { values } = useFormikContext<FleetFormValues>();
+  const { values } = useFormikContext<DeviceSpecConfigFormValues>();
 
   return (
     <Grid span={8}>

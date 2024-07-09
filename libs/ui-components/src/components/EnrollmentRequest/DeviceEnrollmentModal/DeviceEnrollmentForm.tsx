@@ -5,11 +5,11 @@ import { useFormikContext } from 'formik';
 
 import RichValidationTextField from '../../form/RichValidationTextField';
 import LabelsField from '../../form/LabelsField';
+import { getLabelValueValidations } from '../../form/validations';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
 import ResourceLink from '../../common/ResourceLink';
-import { getLabelValueValidations } from '../../../components/form/validations';
 
 export type DeviceEnrollmentFormValues = {
   labels: FlightCtlLabel[];

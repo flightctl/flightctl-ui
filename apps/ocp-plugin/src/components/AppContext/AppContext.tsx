@@ -28,6 +28,7 @@ const appRoutes = {
   [ROUTE.FLEET_IMPORT]: '/edge/fleets/import',
   [ROUTE.DEVICES]: '/edge/devices',
   [ROUTE.DEVICE_DETAILS]: '/edge/devices',
+  [ROUTE.DEVICE_EDIT]: '/edge/devices/edit',
   [ROUTE.REPO_CREATE]: '/edge/repositories/create',
   [ROUTE.REPO_EDIT]: '/edge/repositories/edit',
   [ROUTE.REPO_DETAILS]: '/edge/repositories',

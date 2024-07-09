@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { Button, FormHelperText, HelperText, HelperTextItem, Label, LabelGroup } from '@patternfly/react-core';
-import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { Button, Label, LabelGroup } from '@patternfly/react-core';
 import { TimesIcon } from '@patternfly/react-icons/dist/js/icons/times-icon';
 
 import { FlightCtlLabel } from '../../types/extraTypes';
 import EditableLabelControl from '../common/EditableLabelControl';
 import { useTranslation } from '../../hooks/useTranslation';
+import ErrorHelperText from './FieldHelperText';
 
 type LabelsFieldProps = {
   name: string;
@@ -89,15 +89,7 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addBu
           </Label>
         ))}
       </LabelGroup>
-      {meta.error && (
-        <FormHelperText>
-          <HelperText>
-            <HelperTextItem icon={<ExclamationCircleIcon />} variant="error">
-              {meta.error}
-            </HelperTextItem>
-          </HelperText>
-        </FormHelperText>
-      )}
+      <ErrorHelperText meta={meta} touchRequired={false} />
     </>
   );
 };

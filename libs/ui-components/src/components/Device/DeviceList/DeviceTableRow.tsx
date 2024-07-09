@@ -4,6 +4,7 @@ import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 import { Device } from '@flightctl/types';
 import DeviceFleet from '../DeviceDetails/DeviceFleet';
 import { getDateDisplay } from '../../../utils/dates';
+import { getDeviceFleet } from '../../../utils/devices';
 import { DeleteListActionResult } from '../../ListPage/types';
 import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
 import DeviceStatus from '../../Status/DeviceStatus';
@@ -31,6 +32,15 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
   const navigate = useNavigate();
   const deviceName = device.metadata.name as string;
   const displayName = device.metadata.labels?.displayName;
+  const editActionProps = getDeviceFleet(device?.metadata)
+    ? {
+        isAriaDisabled: true,
+        tooltipProps: {
+          content: t('Devices bound to a fleet cannot be edited'),
+        },
+      }
+    : undefined;
+
   return (
     <Tr>
       <Td
@@ -64,7 +74,8 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
           items={[
             {
               title: t('Edit device'),
-              onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
+              onClick: () => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceName }),
+              ...editActionProps,
             },
             deleteAction({
               resourceId: deviceName,

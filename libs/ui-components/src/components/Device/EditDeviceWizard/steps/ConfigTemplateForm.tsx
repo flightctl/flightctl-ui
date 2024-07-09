@@ -16,17 +16,17 @@ import {
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import { Repository, RepositoryList } from '@flightctl/types';
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
+import { Repository, RepositoryList } from '@flightctl/types';
 import TextField from '../../../form/TextField';
 import {
-  FleetConfigTemplate,
-  FleetFormValues,
   GitConfigTemplate,
   InlineConfigTemplate,
   KubeSecretTemplate,
-} from '../types';
+  SpecConfigTemplate,
+} from '../../../../types/deviceSpec';
+
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';
@@ -37,12 +37,14 @@ import { sortByName } from '../../../../utils/sort/generic';
 import WithTooltip from '../../../common/WithTooltip';
 import { IgnitionFileHelperText } from '../../../common/HelperTextItems';
 import { getDnsSubdomainValidations } from '../../../form/validations';
+import ErrorHelperText from '../../../form/FieldHelperText';
 import RichValidationTextField from '../../../form/RichValidationTextField';
+import { DeviceSpecConfigFormValues } from '../types';
 
 import './ConfigTemplateForm.css';
 
 const useValidateOnMount = () => {
-  const { validateForm } = useFormikContext<FleetFormValues>();
+  const { validateForm } = useFormikContext<DeviceSpecConfigFormValues>();
 
   // validate new config section on mount
   React.useEffect(() => {
@@ -62,7 +64,7 @@ const GitConfigForm: React.FC<ConfigFormProps & Pick<ConfigSectionProps, 'reposi
 }) => {
   const [createRepoModalOpen, setCreateRepoModalOpen] = React.useState(false);
   const { t } = useTranslation();
-  const { values, setFieldValue } = useFormikContext<FleetFormValues>();
+  const { values, setFieldValue } = useFormikContext<DeviceSpecConfigFormValues>();
   const template = values.configTemplates[index] as GitConfigTemplate;
 
   return (
@@ -121,7 +123,7 @@ const GitConfigForm: React.FC<ConfigFormProps & Pick<ConfigSectionProps, 'reposi
 
 const KubeConfigForm: React.FC<ConfigFormProps> = ({ index }) => {
   const { t } = useTranslation();
-  const { values } = useFormikContext<FleetFormValues>();
+  const { values } = useFormikContext<DeviceSpecConfigFormValues>();
   const template = values.configTemplates[index] as KubeSecretTemplate;
   return (
     <>
@@ -171,8 +173,8 @@ const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionPr
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = React.useState(true);
   const fieldName = `configTemplates[${index}]`;
-  const { setFieldTouched } = useFormikContext<FleetFormValues>();
-  const [{ value: template }, { error }, { setTouched }] = useField<FleetConfigTemplate>(fieldName);
+  const { setFieldTouched } = useFormikContext<DeviceSpecConfigFormValues>();
+  const [{ value: template }, { error }, { setTouched }] = useField<SpecConfigTemplate>(fieldName);
 
   useValidateOnMount();
 
@@ -230,12 +232,13 @@ const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionPr
 
 const ConfigTemplateForm = () => {
   const { t } = useTranslation();
-  const { values } = useFormikContext<FleetFormValues>();
+  const { values, errors } = useFormikContext<DeviceSpecConfigFormValues>();
   const [repositoryList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>({
     endpoint: 'repositories',
   });
 
   const repositories = React.useMemo(() => sortByName(repositoryList?.items || []), [repositoryList]);
+  const generalError = typeof errors.configTemplates === 'string' ? errors.configTemplates : undefined;
 
   if (error) {
     return (
@@ -289,6 +292,7 @@ const ConfigTemplateForm = () => {
               </Button>
             </FormGroup>
           </FormSection>
+          <ErrorHelperText error={generalError} />
         </>
       )}
     </FieldArray>

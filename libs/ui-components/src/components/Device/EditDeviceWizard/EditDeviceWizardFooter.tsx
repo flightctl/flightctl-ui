@@ -1,36 +1,32 @@
 import * as React from 'react';
-import { useTranslation } from '../../../hooks/useTranslation';
-import { Button, WizardFooterWrapper, useWizardContext } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
-import { FleetFormValues } from './types';
+import { Button, WizardFooterWrapper, useWizardContext } from '@patternfly/react-core';
+
+import { EditDeviceFormValues } from './types';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { reviewStepId } from './steps/ReviewStep';
 import { generalInfoStepId, isGeneralInfoStepValid } from './steps/GeneralInfoStep';
-import {
-  deviceTemplateStepId,
-  isDeviceTemplateStepValid,
-} from '../../Device/EditDeviceWizard/steps/DeviceTemplateStep';
+import { deviceTemplateStepId, isDeviceTemplateStepValid } from './steps/DeviceTemplateStep';
+import { reviewDeviceStepId } from './steps/ReviewDeviceStep';
 
-type CreateFleetWizardFooterProps = {
-  isEdit: boolean;
-};
-
-const CreateFleetWizardFooter = ({ isEdit }: CreateFleetWizardFooterProps) => {
+const EditDeviceWizardFooter = () => {
   const { t } = useTranslation();
   const { goToNextStep, goToPrevStep, activeStep } = useWizardContext();
-  const { submitForm, isSubmitting, errors } = useFormikContext<FleetFormValues>();
+  const { submitForm, isSubmitting, errors } = useFormikContext<EditDeviceFormValues>();
   const navigate = useNavigate();
 
-  const isReviewStep = activeStep.id === reviewStepId;
+  const isSubmitStep = activeStep.id === reviewDeviceStepId;
+
   let isStepValid = true;
   if (activeStep.id === generalInfoStepId) {
     isStepValid = isGeneralInfoStepValid(errors);
   } else if (activeStep.id === deviceTemplateStepId) {
     isStepValid = isDeviceTemplateStepValid(errors);
   }
-  const primaryBtn = isReviewStep ? (
+
+  const primaryBtn = isSubmitStep ? (
     <Button variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
-      {isEdit ? t('Save') : t('Create fleet')}
+      {t('Edit')}
     </Button>
   ) : (
     <Button variant="primary" onClick={goToNextStep} isDisabled={!isStepValid}>
@@ -53,4 +49,4 @@ const CreateFleetWizardFooter = ({ isEdit }: CreateFleetWizardFooterProps) => {
   );
 };
 
-export default CreateFleetWizardFooter;
+export default EditDeviceWizardFooter;

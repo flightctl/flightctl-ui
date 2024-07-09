@@ -62,6 +62,7 @@ export type { RepositorySpec } from './models/RepositorySpec';
 export type { RepositoryStatus } from './models/RepositoryStatus';
 export type { ResourceAlertRule } from './models/ResourceAlertRule';
 export { ResourceAlertSeverityType } from './models/ResourceAlertSeverityType';
+export type { ResourceMonitor } from './models/ResourceMonitor';
 export type { ResourceMonitorSpec } from './models/ResourceMonitorSpec';
 export type { ResourceSync } from './models/ResourceSync';
 export type { ResourceSyncList } from './models/ResourceSyncList';

@@ -2,11 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CPUResourceMonitorSpec } from './CPUResourceMonitorSpec';
-import type { CustomResourceMonitorSpec } from './CustomResourceMonitorSpec';
 import type { DeviceOSSpec } from './DeviceOSSpec';
-import type { DiskResourceMonitorSpec } from './DiskResourceMonitorSpec';
-import type { MemoryResourceMonitorSpec } from './MemoryResourceMonitorSpec';
+import type { ResourceMonitor } from './ResourceMonitor';
 export type RenderedDeviceSpec = {
   renderedVersion: string;
   os?: DeviceOSSpec;
@@ -20,6 +17,6 @@ export type RenderedDeviceSpec = {
   /**
    * Array of resource monitor configurations.
    */
-  resources: Array<(CPUResourceMonitorSpec | MemoryResourceMonitorSpec | DiskResourceMonitorSpec | CustomResourceMonitorSpec)>;
+  resources?: Array<ResourceMonitor>;
 };
 

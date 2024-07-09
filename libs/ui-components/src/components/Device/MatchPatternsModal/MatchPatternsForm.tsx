@@ -1,20 +1,11 @@
 import * as React from 'react';
-import {
-  Alert,
-  Button,
-  Form,
-  FormHelperText,
-  HelperText,
-  HelperTextItem,
-  Label,
-  LabelGroup,
-} from '@patternfly/react-core';
-import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { Alert, Button, Form, Label, LabelGroup } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { useTranslation } from '../../../hooks/useTranslation';
 import EditableLabelControl from '../../common/EditableLabelControl';
+import ErrorHelperText from '../../form/FieldHelperText';
 
 export type MatchPatternsFormValues = {
   matchPatterns: string[];
@@ -81,15 +72,7 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
           </Label>
         ))}
       </LabelGroup>
-      {hasFormErrors && (
-        <FormHelperText>
-          <HelperText>
-            <HelperTextItem icon={<ExclamationCircleIcon />} variant={'error'}>
-              {formErrors.matchPatterns}
-            </HelperTextItem>
-          </HelperText>
-        </FormHelperText>
-      )}
+      <ErrorHelperText error={formErrors.matchPatterns} />
       {error && <Alert isInline title={error} variant="danger" />}
       <FlightCtlActionGroup>
         <Button
