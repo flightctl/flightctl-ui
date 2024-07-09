@@ -37,14 +37,12 @@ export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): Enrollm
   const approvedCondition = enrollmentRequest.status?.conditions?.find(
     (c) => c.type === ConditionType.EnrollmentRequestApproved,
   );
-  if (!approvedCondition) {
-    return EnrollmentRequestStatus.Pending;
+
+  switch (approvedCondition?.status) {
+    case 'True':
+      return EnrollmentRequestStatus.Approved;
+    case 'False':
+      return EnrollmentRequestStatus.Denied;
   }
-  if (approvedCondition.status === 'True') {
-    return EnrollmentRequestStatus.Approved;
-  }
-  if (approvedCondition.status === 'False') {
-    return EnrollmentRequestStatus.Denied;
-  }
-  return EnrollmentRequestStatus.Unknown;
+  return EnrollmentRequestStatus.Pending;
 };
