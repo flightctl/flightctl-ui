@@ -62,8 +62,12 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
   const secondRow = data.slice(Math.floor(data.length / 2), data.length);
 
   return (
-    <Stack hasGutter>
-      <StackItem className="fctl-charts__donut">
+    <Flex
+      justifyContent={{ default: 'justifyContentCenter' }}
+      direction={{ default: 'column' }}
+      alignItems={{ default: 'alignItemsCenter' }}
+    >
+      <FlexItem className="fctl-charts__donut">
         <div style={{ height: '230px', width: '230px' }}>
           <ChartDonut
             ariaDesc={title}
@@ -84,26 +88,17 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
                   alignContent={{ default: 'alignContentCenter' }}
                   className="fctl-charts__title"
                 >
-                  {helperText ? (
-                    <WithHelperText
-                      className="fctl-charts__title-helper"
-                      showLabel
-                      ariaLabel={title}
-                      content={helperText}
-                    />
-                  ) : (
-                    title
-                  )}
+                  {helperText ? <WithHelperText showLabel ariaLabel={title} content={helperText} /> : title}
                 </Flex>
               </foreignObject>
             }
           />
         </div>
-      </StackItem>
-      <StackItem>
+      </FlexItem>
+      <FlexItem>
         <Legend rows={[firstRow, secondRow]} />
-      </StackItem>
-    </Stack>
+      </FlexItem>
+    </Flex>
   );
 };
 

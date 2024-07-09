@@ -8,6 +8,7 @@ import {
   Spinner,
   Toolbar,
   ToolbarContent,
+  ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
 import { TFunction } from 'i18next';
@@ -110,11 +111,13 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
 
   return (
     <>
-      <Toolbar id="resource-sync-toolbar">
+      <Toolbar id="resource-sync-toolbar" inset={{ default: 'insetNone' }}>
         <ToolbarContent>
-          <ToolbarItem variant="search-filter">
-            <TableTextSearch value={search} setValue={setSearch} />
-          </ToolbarItem>
+          <ToolbarGroup>
+            <ToolbarItem variant="search-filter">
+              <TableTextSearch value={search} setValue={setSearch} />
+            </ToolbarItem>
+          </ToolbarGroup>
           <ToolbarItem>
             <TableActions>
               <SelectList>

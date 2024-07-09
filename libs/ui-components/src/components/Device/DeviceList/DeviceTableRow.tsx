@@ -2,15 +2,15 @@ import * as React from 'react';
 import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@flightctl/types';
-import DeviceFleet from './DeviceDetails/DeviceFleet';
-import { getDateDisplay } from '../../utils/dates';
-import { DeleteListActionResult } from '../ListPage/types';
-import ApplicationSummaryStatus from '../Status/ApplicationSummaryStatus';
-import DeviceStatus from '../Status/DeviceStatus';
-import SystemUpdateStatus from '../Status/SystemUpdateStatus';
-import { useTranslation } from '../../hooks/useTranslation';
-import { ROUTE, useNavigate } from '../../hooks/useNavigate';
-import DisplayName from '../common/DisplayName';
+import DeviceFleet from '../DeviceDetails/DeviceFleet';
+import { getDateDisplay } from '../../../utils/dates';
+import { DeleteListActionResult } from '../../ListPage/types';
+import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
+import DeviceStatus from '../../Status/DeviceStatus';
+import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
+import { useTranslation } from '../../../hooks/useTranslation';
+import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
+import DisplayName from '../../common/DisplayName';
 
 type DeviceTableRowProps = {
   device: Device;

@@ -2,13 +2,13 @@ import * as React from 'react';
 import DonutChart from '../../../charts/DonutChart';
 import { Device, DeviceSummaryStatusType } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { EnrollmentRequestStatus } from '../../../../utils/status/common';
 import { getDeviceStatusItems } from '../../../../utils/status/devices';
 import { StatusMap, toChartData } from './utils';
-import { FilterSearchParams } from '../../../../utils/status/common';
+import { FilterSearchParams } from '../../../../utils/status/devices';
 import { getDeviceStatusHelperText } from '../../../Status/utils';
+import { EnrollmentRequestStatus } from '../../../../utils/status/enrollmentRequest';
 
-type DeviceStatusMap = StatusMap<DeviceSummaryStatusType | EnrollmentRequestStatus>;
+type DeviceStatusMap = StatusMap<DeviceSummaryStatusType | EnrollmentRequestStatus.Pending>;
 
 const DeviceStatusChart = ({ resources }: { resources: Device[] }) => {
   const { t } = useTranslation();

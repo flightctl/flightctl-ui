@@ -8,8 +8,3 @@
     color: var(--pf-v5-global--Color--200);
     font-size: 14px;
 }
-
-.fctl-charts__title-helper {
-    padding-left: var(--pf-v5-global--spacer--xs);
-    padding-right: 0;
-}

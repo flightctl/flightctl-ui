@@ -1,8 +1,11 @@
 import * as React from 'react';
 
 import { EnrollmentRequest } from '@flightctl/types';
-import { getApprovalStatus, getEnrollmentRequestsStatusItems } from '../../utils/status/enrollmentRequest';
-import { EnrollmentRequestStatus as EnrollmentRequestStatusType } from '../../utils/status/common';
+import {
+  EnrollmentRequestStatus as EnrollmentRequestStatusType,
+  getApprovalStatus,
+  getEnrollmentRequestsStatusItems,
+} from '../../utils/status/enrollmentRequest';
 import { useTranslation } from '../../hooks/useTranslation';
 import StatusDisplay from './StatusDisplay';
 

@@ -3,8 +3,10 @@ import { EnrollmentRequest } from '@flightctl/types';
 import * as React from 'react';
 import { getDateDisplay } from '../../utils/dates';
 import { DeleteListActionResult } from '../ListPage/types';
-import { getApprovalStatus } from '../../utils/status/enrollmentRequest';
-import { EnrollmentRequestStatus as EnrollmentRequestStatusType } from '../../utils/status/common';
+import {
+  EnrollmentRequestStatus as EnrollmentRequestStatusType,
+  getApprovalStatus,
+} from '../../utils/status/enrollmentRequest';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE } from '../../hooks/useNavigate';
 import DisplayName from '../common/DisplayName';

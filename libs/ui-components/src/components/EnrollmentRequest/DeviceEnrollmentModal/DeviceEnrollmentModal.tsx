@@ -6,8 +6,10 @@ import { Formik } from 'formik';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
 import DeviceEnrollmentForm, { DeviceEnrollmentFormProps, DeviceEnrollmentFormValues } from './DeviceEnrollmentForm';
-import { getApprovalStatus } from '../../../utils/status/enrollmentRequest';
-import { EnrollmentRequestStatus as EnrollmentRequestStatusType } from '../../../utils/status/common';
+import {
+  EnrollmentRequestStatus as EnrollmentRequestStatusType,
+  getApprovalStatus,
+} from '../../../utils/status/enrollmentRequest';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { deviceApprovalValidationSchema } from '../../form/validations';
 

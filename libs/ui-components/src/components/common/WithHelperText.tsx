@@ -2,19 +2,20 @@ import * as React from 'react';
 import { Button, Tooltip } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 
+import './WithHelperText.css';
+
 type WithHelperTextProps = {
   ariaLabel: string;
   showLabel?: boolean;
   content: React.ReactNode;
-  className?: string;
 };
 
-const WithHelperText = ({ ariaLabel, showLabel, content, className }: WithHelperTextProps) => (
+const WithHelperText = ({ ariaLabel, showLabel, content }: WithHelperTextProps) => (
   <>
     {showLabel && ariaLabel}
     <Tooltip content={content}>
       <Button
-        className={className}
+        className="fctl-helper-text__icon"
         isInline
         variant="plain"
         aria-label={`${ariaLabel} help text`}

@@ -1,11 +1,12 @@
 import percentRound from 'percent-round';
 import { ROUTE } from '../../../../hooks/useNavigate';
-import { FilterSearchParams, StatusItem, StatusItemType, getDefaultStatusColor } from '../../../../utils/status/common';
+import { StatusItem, getDefaultStatusColor } from '../../../../utils/status/common';
 import { Data } from '../../../charts/DonutChart';
+import { FilterSearchParams } from '../../../../utils/status/devices';
 
-export type StatusMap<T extends StatusItemType> = Record<T, number>;
+export type StatusMap<T extends string> = Record<T, number>;
 
-export const toChartData = <T extends StatusItemType>(
+export const toChartData = <T extends string>(
   map: StatusMap<T>,
   statusItems: StatusItem<T>[],
   filterName: FilterSearchParams,
@@ -24,3 +25,6 @@ export const toChartData = <T extends StatusItemType>(
     };
   });
 };
+
+export const labelToString = (label: { key: string; value: string }) =>
+  `${label.key}${label.value ? `=${label.value}` : ''}`;
