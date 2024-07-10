@@ -4,8 +4,10 @@ import IntegrityDetails from '../../DetailsPage/Tables/IntegrityDetails';
 import LabelsView from '../../common/LabelsView';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { getDateDisplay } from '../../../utils/dates';
-import { getApprovalStatus } from '../../../utils/status/enrollmentRequest';
-import { EnrollmentRequestStatus as EnrollmentRequestStatusType } from '../../../utils/status/common';
+import {
+  EnrollmentRequestStatus as EnrollmentRequestStatusType,
+  getApprovalStatus,
+} from '../../../utils/status/enrollmentRequest';
 import {
   Bullseye,
   Card,

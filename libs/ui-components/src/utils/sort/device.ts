@@ -1,7 +1,7 @@
 import { Device, EnrollmentRequest } from '@flightctl/types';
 import { getDeviceFleet } from '../devices';
 import { getApprovalStatus } from '../status/enrollmentRequest';
-import { EnrollmentRequestStatus } from '../status/common';
+import { EnrollmentRequestStatus } from '../status/enrollmentRequest';
 
 import {
   deviceStatusOrder,

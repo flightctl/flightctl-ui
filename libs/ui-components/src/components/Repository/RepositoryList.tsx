@@ -8,6 +8,7 @@ import {
   SelectOption,
   Toolbar,
   ToolbarContent,
+  ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
 import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
@@ -114,11 +115,13 @@ const RepositoryTable = () => {
 
   return (
     <ListPageBody error={error} loading={loading}>
-      <Toolbar>
+      <Toolbar inset={{ default: 'insetNone' }}>
         <ToolbarContent>
-          <ToolbarItem variant="search-filter">
-            <TableTextSearch value={search} setValue={setSearch} />
-          </ToolbarItem>
+          <ToolbarGroup>
+            <ToolbarItem variant="search-filter">
+              <TableTextSearch value={search} setValue={setSearch} />
+            </ToolbarItem>
+          </ToolbarGroup>
           <ToolbarItem>
             <CreateRepositoryButton buttonText={t('Create repository')} />
           </ToolbarItem>

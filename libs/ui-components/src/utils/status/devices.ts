@@ -5,14 +5,29 @@ import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-cir
 import {
   ApplicationsSummaryStatus,
   ApplicationsSummaryStatusType,
-  DeviceSummaryStatus,
+  DeviceSummaryStatus as BEDeviceSummaryStatus,
+  DeviceIntegrityStatusSummaryType,
   DeviceSummaryStatusType,
   DeviceUpdatedStatus,
   DeviceUpdatedStatusType,
 } from '@flightctl/types';
-import { EnrollmentRequestStatus, FilterSearchParams, StatusItem } from './common';
+import { StatusItem } from './common';
+import { EnrollmentRequestStatus } from './enrollmentRequest';
 
-export const getDeviceSummaryStatus = (deviceStatus?: DeviceSummaryStatus): DeviceSummaryStatusType =>
+export enum FilterSearchParams {
+  Fleet = 'fleetId',
+  DeviceStatus = 'devSt',
+  AppStatus = 'appSt',
+  UpdatedStatus = 'updSt',
+}
+
+export type DeviceSummaryStatus =
+  | ApplicationsSummaryStatusType
+  | DeviceUpdatedStatusType
+  | (DeviceSummaryStatusType | EnrollmentRequestStatus.Pending)
+  | DeviceIntegrityStatusSummaryType;
+
+export const getDeviceSummaryStatus = (deviceStatus?: BEDeviceSummaryStatus): DeviceSummaryStatusType =>
   deviceStatus?.status || DeviceSummaryStatusType.DeviceSummaryStatusUnknown;
 
 export const getApplicationSummaryStatus = (
@@ -23,10 +38,11 @@ export const getApplicationSummaryStatus = (
 export const getSystemUpdateStatus = (updatedStatus?: DeviceUpdatedStatus): DeviceUpdatedStatusType =>
   updatedStatus?.status || DeviceUpdatedStatusType.DeviceUpdatedStatusUnknown;
 
-export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStatusType | EnrollmentRequestStatus>[] => [
+export const getDeviceStatusItems = (
+  t: TFunction,
+): StatusItem<DeviceSummaryStatusType | EnrollmentRequestStatus.Pending>[] => [
   {
     // For enrollment requests in pending state
-    type: FilterSearchParams.DeviceStatus,
     id: EnrollmentRequestStatus.Pending,
     label: t('Pending approval'),
     level: 'info',
@@ -34,38 +50,32 @@ export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStat
   },
   // Device statuses
   {
-    type: FilterSearchParams.DeviceStatus,
     id: DeviceSummaryStatusType.DeviceSummaryStatusOnline,
     label: t('Online'),
     level: 'success',
   },
   {
-    type: FilterSearchParams.DeviceStatus,
     id: DeviceSummaryStatusType.DeviceSummaryStatusDegraded,
     label: t('Degraded'),
     level: 'warning',
   },
   {
-    type: FilterSearchParams.DeviceStatus,
     id: DeviceSummaryStatusType.DeviceSummaryStatusError,
     label: t('Error'),
     level: 'danger',
   },
   {
-    type: FilterSearchParams.DeviceStatus,
     id: DeviceSummaryStatusType.DeviceSummaryStatusRebooting,
     label: t('Rebooting'),
     level: 'info',
   },
   {
-    type: FilterSearchParams.DeviceStatus,
     id: DeviceSummaryStatusType.DeviceSummaryStatusPoweredOff,
     label: t('Powered Off'),
     level: 'custom',
     customIcon: PowerOffIcon,
   },
   {
-    type: FilterSearchParams.DeviceStatus,
     id: DeviceSummaryStatusType.DeviceSummaryStatusUnknown,
     label: t('Unknown'),
     level: 'unknown',

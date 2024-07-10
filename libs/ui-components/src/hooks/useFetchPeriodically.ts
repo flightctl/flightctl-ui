@@ -10,11 +10,12 @@ export const useFetchPeriodically = <R>(
   query: FlightControlQuery,
 ): [R | undefined, boolean, unknown, VoidFunction, boolean] => {
   const [isLoading, setIsLoading] = React.useState(true);
-  const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [isUpdating, setIsUpdating] = React.useState(false);
   const [data, setData] = React.useState<R>();
   const [error, setError] = React.useState<unknown>();
   const [forceUpdate, setForceUpdate] = React.useState(0);
   const ref = React.useRef(0);
+  const prevResolvedQueryHash = React.useRef<string>();
 
   const { get, getMetrics } = useFetch();
 
@@ -34,8 +35,8 @@ export const useFetchPeriodically = <R>(
         if (requestQuery) {
           try {
             abortController = new AbortController();
-            if (id > 0) {
-              setIsRefreshing(true);
+            if (id > 0 && prevResolvedQueryHash.current !== queryStringHash) {
+              setIsUpdating(true);
             }
 
             const fetchFn = isAPI ? get : getMetrics;
@@ -43,7 +44,7 @@ export const useFetchPeriodically = <R>(
             if (isLoading) {
               setIsLoading(false);
             }
-            setIsRefreshing(false);
+            setIsUpdating(false);
             // eslint-disable-next-line
             setData(isAPI ? data : (data as any).data.result);
             setError(undefined);
@@ -54,9 +55,14 @@ export const useFetchPeriodically = <R>(
             }
             setError(err);
             setIsLoading(false);
-            setIsRefreshing(false);
+            setIsUpdating(false);
           }
+        } else {
+          setIsLoading(false);
+          setError(undefined);
+          setData(undefined);
         }
+        prevResolvedQueryHash.current = queryStringHash;
         await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
       }
     };
@@ -72,5 +78,5 @@ export const useFetchPeriodically = <R>(
 
   const refetch = React.useCallback(() => setForceUpdate((val) => val + 1), []);
 
-  return [data, isLoading, error, refetch, isRefreshing];
+  return [data, isLoading, error, refetch, isUpdating];
 };

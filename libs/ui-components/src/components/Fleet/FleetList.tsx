@@ -10,6 +10,7 @@ import {
   SplitItem,
   Toolbar,
   ToolbarContent,
+  ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
@@ -137,11 +138,13 @@ const FleetTable = () => {
 
   return (
     <ListPageBody error={error || rsError} loading={loading || rsLoading}>
-      <Toolbar>
+      <Toolbar inset={{ default: 'insetNone' }}>
         <ToolbarContent>
-          <ToolbarItem variant="search-filter">
-            <TableTextSearch value={search} setValue={setSearch} />
-          </ToolbarItem>
+          <ToolbarGroup>
+            <ToolbarItem variant="search-filter">
+              <TableTextSearch value={search} setValue={setSearch} />
+            </ToolbarItem>
+          </ToolbarGroup>
           <ToolbarItem>
             <FleetPageActions createText={t('Create fleet')} />
           </ToolbarItem>

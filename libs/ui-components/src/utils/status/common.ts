@@ -13,41 +13,9 @@ import { global_disabled_color_100 as unknownColor } from '@patternfly/react-tok
 import { global_active_color_100 as activeColor } from '@patternfly/react-tokens/dist/js/global_active_color_100';
 import { global_palette_black_1000 as blackColor } from '@patternfly/react-tokens/dist/js/global_palette_black_1000';
 
-import {
-  ApplicationStatusType as AppStatus,
-  ApplicationsSummaryStatusType as AppSummaryStatus,
-  DeviceSummaryStatusType as DeviceSummaryStatus,
-  DeviceIntegrityStatusSummaryType as IntegritySummaryStatus,
-  DeviceUpdatedStatusType as UpdatedStatus,
-} from '@flightctl/types';
-
 export type StatusLevel = 'custom' | 'info' | 'success' | 'warning' | 'danger' | 'unknown';
 
-export enum EnrollmentRequestStatus {
-  Pending = 'Pending',
-  Approved = 'Approved',
-  Denied = 'Denied',
-  Unknown = 'Unknown',
-}
-
-export type StatusItemType =
-  | DeviceSummaryStatus
-  | AppSummaryStatus
-  | AppStatus
-  | UpdatedStatus
-  | EnrollmentRequestStatus
-  | IntegritySummaryStatus;
-
-export enum FilterSearchParams {
-  Fleet = 'fleetId',
-  DeviceStatus = 'devSt',
-  AppStatus = 'appSt',
-  UpdatedStatus = 'updSt',
-  Noop = 'noop', // Not used in filters
-}
-
-export interface StatusItem<T extends StatusItemType> {
-  type: FilterSearchParams;
+export interface StatusItem<T extends string> {
   id: T;
   label: string;
   level: StatusLevel;
@@ -64,6 +32,7 @@ export const getDefaultStatusIcon = (level: StatusLevel) => {
       iconClass = ExclamationCircleIcon;
       break;
     case 'warning':
+    case 'unknown':
       iconClass = ExclamationTriangleIcon;
       break;
     case 'success':

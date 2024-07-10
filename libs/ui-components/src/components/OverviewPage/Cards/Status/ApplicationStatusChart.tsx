@@ -3,7 +3,7 @@ import { ApplicationsSummaryStatusType, Device } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getApplicationSummaryStatusItems } from '../../../../utils/status/applications';
 import { StatusMap, toChartData } from './utils';
-import { FilterSearchParams } from '../../../../utils/status/common';
+import { FilterSearchParams } from '../../../../utils/status/devices';
 import DonutChart from '../../../charts/DonutChart';
 import { getApplicatioStatusHelperText } from '../../../Status/utils';
 

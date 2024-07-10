@@ -3,7 +3,7 @@ import { Device, DeviceUpdatedStatusType } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getSystemUpdateStatusItems } from '../../../../utils/status/system';
 import { StatusMap, toChartData } from './utils';
-import { FilterSearchParams } from '../../../../utils/status/common';
+import { FilterSearchParams } from '../../../../utils/status/devices';
 import DonutChart from '../../../charts/DonutChart';
 import { getUpdateStatusHelperText } from '../../../Status/utils';
 

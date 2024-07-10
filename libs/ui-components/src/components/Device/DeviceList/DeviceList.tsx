@@ -13,35 +13,39 @@ import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons/microchip-i
 import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
 
-import { useFetch } from '../../hooks/useFetch';
-import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { DeviceList, EnrollmentRequest, EnrollmentRequestList } from '@flightctl/types';
+import { useFetch } from '../../../hooks/useFetch';
+import { DeviceList, EnrollmentRequest } from '@flightctl/types';
 
-import ListPage from '../ListPage/ListPage';
-import ListPageBody from '../ListPage/ListPageBody';
-import { useDeleteListAction } from '../ListPage/ListPageActions';
-import AddDeviceModal from './AddDeviceModal/AddDeviceModal';
-import { sortByCreationTimestamp, sortByDisplayName, sortByName } from '../../utils/sort/generic';
-import { sortDeviceStatus, sortDevicesByFleet } from '../../utils/sort/device';
-import Table, { TableColumn } from '../Table/Table';
-import EnrollmentRequestTableRow from '../EnrollmentRequest/EnrollmentRequestTableRow';
+import ListPage from '../../ListPage/ListPage';
+import ListPageBody from '../../ListPage/ListPageBody';
+import { useDeleteListAction } from '../../ListPage/ListPageActions';
+import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
+import { sortByCreationTimestamp, sortByDisplayName, sortByName } from '../../../utils/sort/generic';
+import { sortDeviceStatus, sortDevicesByFleet } from '../../../utils/sort/device';
+import Table, { TableColumn } from '../../Table/Table';
+import EnrollmentRequestTableRow from '../../EnrollmentRequest/EnrollmentRequestTableRow';
 import DeviceTableToolbar from './DeviceTableToolbar';
 import { useDeviceFilters } from './useDeviceFilters';
 import DeviceTableRow from './DeviceTableRow';
-import TableActions from '../Table/TableActions';
-import { getResourceId } from '../../utils/resource';
-import { DeviceLikeResource, isEnrollmentRequest } from '../../types/extraTypes';
-import MassDeleteDeviceModal from '../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
-import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
-import DeviceEnrollmentModal from '../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
-import ResourceListEmptyState from '../common/ResourceListEmptyState';
-import { useTableSort } from '../../hooks/useTableSort';
-import { useTableSelect } from '../../hooks/useTableSelect';
-import { useTranslation } from '../../hooks/useTranslation';
-import { useAppContext } from '../../hooks/useAppContext';
-import { Link, ROUTE } from '../../hooks/useNavigate';
-import { FilterSearchParams } from '../../utils/status/common';
-import { getApplicatioStatusHelperText, getDeviceStatusHelperText, getUpdateStatusHelperText } from '../Status/utils';
+import TableActions from '../../Table/TableActions';
+import { getResourceId } from '../../../utils/resource';
+import { DeviceLikeResource, isEnrollmentRequest } from '../../../types/extraTypes';
+import MassDeleteDeviceModal from '../../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
+import MassApproveDeviceModal from '../../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
+import DeviceEnrollmentModal from '../../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
+import ResourceListEmptyState from '../../common/ResourceListEmptyState';
+import { useTableSort } from '../../../hooks/useTableSort';
+import { useTableSelect } from '../../../hooks/useTableSelect';
+import { useTranslation } from '../../../hooks/useTranslation';
+import { Link, ROUTE } from '../../../hooks/useNavigate';
+import { useDeviceLikeResources } from './useDeviceLikeResources';
+import { useDeviceBackendFilters } from './useDeviceBackendFilters';
+import {
+  getApplicatioStatusHelperText,
+  getDeviceStatusHelperText,
+  getUpdateStatusHelperText,
+} from '../../Status/utils';
+import { FilterStatusMap } from './types';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -102,12 +106,24 @@ const getDeviceColumns = (t: TFunction): TableColumn<DeviceLikeResource>[] => [
 ];
 
 interface DeviceTableProps {
-  searchParams: URLSearchParams;
   resources: Array<DeviceLikeResource>;
   refetch: VoidFunction;
+  fleetId?: string;
+  activeStatuses: FilterStatusMap;
+  hasFiltersEnabled: boolean;
+  setFleetId: (fleedId: string) => void;
+  setActiveStatuses: (activeStatuses: FilterStatusMap) => void;
 }
 
-export const DeviceTable = ({ resources, searchParams, refetch }: DeviceTableProps) => {
+export const DeviceTable = ({
+  resources,
+  refetch,
+  fleetId,
+  setFleetId,
+  activeStatuses,
+  setActiveStatuses,
+  hasFiltersEnabled,
+}: DeviceTableProps) => {
   const { t } = useTranslation();
   const [requestId, setRequestId] = React.useState<string>();
   const [addDeviceModal, setAddDeviceModal] = React.useState(false);
@@ -117,7 +133,7 @@ export const DeviceTable = ({ resources, searchParams, refetch }: DeviceTablePro
 
   const deviceColumns = React.useMemo(() => getDeviceColumns(t), [t]);
 
-  const { filteredData, ...rest } = useDeviceFilters(resources, searchParams);
+  const { filteredData, hasFiltersEnabled: hasUIFiltersEnabled, ...rest } = useDeviceFilters(resources);
   const { getSortParams, sortedData } = useTableSort(filteredData, deviceColumns);
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
@@ -144,7 +160,13 @@ export const DeviceTable = ({ resources, searchParams, refetch }: DeviceTablePro
 
   return (
     <>
-      <DeviceTableToolbar {...rest}>
+      <DeviceTableToolbar
+        {...rest}
+        fleetId={fleetId}
+        setFleetId={setFleetId}
+        activeStatuses={activeStatuses}
+        setActiveStatuses={setActiveStatuses}
+      >
         <ToolbarItem>
           <Button onClick={() => setAddDeviceModal(true)}>{t('Add devices')}</Button>
         </ToolbarItem>
@@ -164,7 +186,7 @@ export const DeviceTable = ({ resources, searchParams, refetch }: DeviceTablePro
       <Table
         aria-label={t('Devices table')}
         columns={deviceColumns}
-        emptyFilters={filteredData.length === 0 && resources.length > 0}
+        emptyFilters={filteredData.length === 0 && (hasFiltersEnabled || hasUIFiltersEnabled)}
         getSortParams={getSortParams}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
@@ -194,7 +216,9 @@ export const DeviceTable = ({ resources, searchParams, refetch }: DeviceTablePro
           )}
         </Tbody>
       </Table>
-      {resources.length === 0 && <DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />}
+      {!hasFiltersEnabled && !hasUIFiltersEnabled && resources.length === 0 && (
+        <DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />
+      )}
       {deleteDeviceModal}
       {deleteErModal}
       {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}
@@ -234,45 +258,22 @@ export const DeviceTable = ({ resources, searchParams, refetch }: DeviceTablePro
 
 const DeviceList = () => {
   const { t } = useTranslation();
-  const {
-    router: { useSearchParams },
-  } = useAppContext();
-  const [searchParams] = useSearchParams();
-  const filterByFleetId = searchParams.get(FilterSearchParams.Fleet) || undefined;
-
-  const [devicesList, devicesLoading, devicesError, devicesRefetch] = useFetchPeriodically<DeviceList>({
-    endpoint: `devices${filterByFleetId ? `?owner=Fleet/${filterByFleetId}` : ''}`,
-  });
-
-  const [erList, erLoading, erError, erRefetch] = useFetchPeriodically<EnrollmentRequestList>({
-    endpoint: filterByFleetId ? '' : 'enrollmentrequests',
-  });
-
-  const data = React.useMemo(() => {
-    const devices = devicesList?.items || [];
-    if (filterByFleetId) {
-      return devices;
-    }
-
-    const deviceIds = devices.reduce((acc, curr) => {
-      acc[curr.metadata.name || ''] = {};
-      return acc;
-    }, {});
-
-    const ers = erList?.items || [];
-    return [...devices, ...ers.filter((er) => !deviceIds[er.metadata.name || ''])];
-  }, [devicesList?.items, erList?.items, filterByFleetId]);
-
-  const refetch = () => {
-    devicesRefetch();
-    erRefetch();
-  };
+  const { fleetId, activeStatuses, hasFiltersEnabled, setFleetId, setActiveStatuses } = useDeviceBackendFilters();
+  const [data, loading, error, updating, refetch] = useDeviceLikeResources({ fleetId, activeStatuses });
 
   return (
     <>
       <ListPage title={t('Devices')}>
-        <ListPageBody error={devicesError || erError} loading={devicesLoading || (erLoading && !filterByFleetId)}>
-          <DeviceTable resources={data} refetch={refetch} searchParams={searchParams} />
+        <ListPageBody error={error} loading={loading}>
+          <DeviceTable
+            resources={data}
+            refetch={refetch}
+            hasFiltersEnabled={hasFiltersEnabled || updating}
+            fleetId={fleetId}
+            activeStatuses={activeStatuses}
+            setFleetId={setFleetId}
+            setActiveStatuses={setActiveStatuses}
+          />
         </ListPageBody>
       </ListPage>
     </>

@@ -3,13 +3,7 @@ import * as React from 'react';
 import { Button, Flex, FlexItem, Icon, Popover } from '@patternfly/react-core';
 import { SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
 
-import {
-  StatusItem,
-  StatusItemType,
-  StatusLevel,
-  getDefaultStatusColor,
-  getDefaultStatusIcon,
-} from '../../utils/status/common';
+import { StatusLevel, getDefaultStatusColor, getDefaultStatusIcon } from '../../utils/status/common';
 import { useTranslation } from '../../hooks/useTranslation';
 
 import './StatusDisplay.css';
@@ -62,12 +56,16 @@ export const StatusDisplayContent = ({ label, messageTitle, message, level, cust
   );
 };
 
-type StatusDisplayProps<T extends StatusItemType> = {
-  item?: StatusItem<T>;
+type StatusDisplayProps = {
+  item?: {
+    label: string;
+    level: StatusLevel;
+    customIcon?: React.ComponentClass<SVGIconProps>;
+  };
   message?: string;
 };
 
-const StatusDisplay = <T extends StatusItemType>({ item, message }: StatusDisplayProps<T>) => {
+const StatusDisplay = ({ item, message }: StatusDisplayProps) => {
   const { t } = useTranslation();
   if (!item) {
     return <StatusDisplayContent level="unknown" label={t('Unknown')} />;

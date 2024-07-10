@@ -17,7 +17,7 @@ const EnrollmentRequestDetails = React.lazy(
       '@flightctl/ui-components/src/components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails'
     ),
 );
-const DeviceList = React.lazy(() => import('@flightctl/ui-components/src/components/Device/DeviceList'));
+const DeviceList = React.lazy(() => import('@flightctl/ui-components/src/components/Device/DeviceList/DeviceList'));
 const DeviceDetails = React.lazy(
   () => import('@flightctl/ui-components/src/components/Device/DeviceDetails/DeviceDetails'),
 );
