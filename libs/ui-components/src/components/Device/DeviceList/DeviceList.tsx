@@ -29,7 +29,7 @@ import { useDeviceFilters } from './useDeviceFilters';
 import DeviceTableRow from './DeviceTableRow';
 import TableActions from '../../Table/TableActions';
 import { getResourceId } from '../../../utils/resource';
-import { DeviceLikeResource, isEnrollmentRequest } from '../../../types/extraTypes';
+import { DeviceLikeResource, FlightCtlLabel, isEnrollmentRequest } from '../../../types/extraTypes';
 import MassDeleteDeviceModal from '../../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
 import MassApproveDeviceModal from '../../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
 import DeviceEnrollmentModal from '../../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
@@ -113,6 +113,8 @@ interface DeviceTableProps {
   hasFiltersEnabled: boolean;
   setFleetId: (fleedId: string) => void;
   setActiveStatuses: (activeStatuses: FilterStatusMap) => void;
+  selectedLabels: FlightCtlLabel[];
+  setSelectedLabels: (labels: FlightCtlLabel[]) => void;
 }
 
 export const DeviceTable = ({
@@ -122,6 +124,8 @@ export const DeviceTable = ({
   setFleetId,
   activeStatuses,
   setActiveStatuses,
+  selectedLabels,
+  setSelectedLabels,
   hasFiltersEnabled,
 }: DeviceTableProps) => {
   const { t } = useTranslation();
@@ -166,6 +170,9 @@ export const DeviceTable = ({
         setFleetId={setFleetId}
         activeStatuses={activeStatuses}
         setActiveStatuses={setActiveStatuses}
+        selectedLabels={selectedLabels}
+        setSelectedLabels={setSelectedLabels}
+        resources={resources}
       >
         <ToolbarItem>
           <Button onClick={() => setAddDeviceModal(true)}>{t('Add devices')}</Button>
@@ -258,8 +265,20 @@ export const DeviceTable = ({
 
 const DeviceList = () => {
   const { t } = useTranslation();
-  const { fleetId, activeStatuses, hasFiltersEnabled, setFleetId, setActiveStatuses } = useDeviceBackendFilters();
-  const [data, loading, error, updating, refetch] = useDeviceLikeResources({ fleetId, activeStatuses });
+  const {
+    fleetId,
+    activeStatuses,
+    hasFiltersEnabled,
+    setFleetId,
+    setActiveStatuses,
+    selectedLabels,
+    setSelectedLabels,
+  } = useDeviceBackendFilters();
+  const [data, loading, error, updating, refetch] = useDeviceLikeResources({
+    fleetId,
+    activeStatuses,
+    labels: selectedLabels,
+  });
 
   return (
     <>
@@ -273,6 +292,8 @@ const DeviceList = () => {
             activeStatuses={activeStatuses}
             setFleetId={setFleetId}
             setActiveStatuses={setActiveStatuses}
+            selectedLabels={selectedLabels}
+            setSelectedLabels={setSelectedLabels}
           />
         </ListPageBody>
       </ListPage>

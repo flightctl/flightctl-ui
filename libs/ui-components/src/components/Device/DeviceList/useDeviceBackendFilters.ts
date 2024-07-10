@@ -5,6 +5,8 @@ import { FilterSearchParams } from '../../../utils/status/devices';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { EnrollmentRequestStatus } from '../../../utils/status/enrollmentRequest';
 import { FilterStatusMap } from './types';
+import { FlightCtlLabel } from '../../../types/extraTypes';
+import { labelToString } from '../../../utils/labels';
 
 const validAppStatuses = Object.values(ApplicationsSummaryStatusType) as string[];
 const validUpdatedStatuses = Object.values(DeviceUpdatedStatusType) as string[];
@@ -59,6 +61,20 @@ export const useDeviceBackendFilters = () => {
     return activeStatuses;
   }, [searchParams]);
 
+  const selectedLabels = (searchParams.getAll(FilterSearchParams.Label) || []).map<FlightCtlLabel>((l) => {
+    const labelParts = l.split('=');
+    if (labelParts.length === 1) {
+      return {
+        key: labelParts[0],
+        value: '',
+      };
+    }
+    return {
+      key: labelParts[0],
+      value: labelParts[1],
+    };
+  });
+
   const setFleetId = React.useCallback(
     (fleedId: string) => {
       setSearchParams(getNewParams(paramsRef.current, { [FilterSearchParams.Fleet]: [fleedId] }));
@@ -73,11 +89,23 @@ export const useDeviceBackendFilters = () => {
     [setSearchParams],
   );
 
+  const setSelectedLabels = React.useCallback(
+    (labels: FlightCtlLabel[]) => {
+      setSearchParams(getNewParams(paramsRef.current, { [FilterSearchParams.Label]: labels.map(labelToString) }));
+    },
+    [setSearchParams],
+  );
+
+  const hasFiltersEnabled =
+    !!selectedLabels.length || !!fleetId || !!Object.values(activeStatuses).some((s) => !!s.length);
+
   return {
     activeStatuses,
     setActiveStatuses,
     fleetId,
     setFleetId,
-    hasFiltersEnabled: !!fleetId || !!Object.values(activeStatuses).some((s) => !!s.length),
+    selectedLabels,
+    setSelectedLabels,
+    hasFiltersEnabled,
   };
 };

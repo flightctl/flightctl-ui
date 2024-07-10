@@ -9,25 +9,39 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import debounce from 'lodash/debounce';
 
 import TableTextSearch, { TableTextSearchProps } from '../../Table/TableTextSearch';
 import { useTranslation } from '../../../hooks/useTranslation';
-import DeviceStatusFilterSelect, { getStatusItem } from './DeviceStatusFilterSelect';
+import DeviceFilterSelect, { getStatusItem } from './DeviceFilterSelect';
 import { FilterStatusMap, UpdateStatus } from './types';
+import { DeviceLikeResource, FlightCtlLabel } from '../../../types/extraTypes';
+import { labelToString } from '../../../utils/labels';
 
 type DeviceTableToolbarProps = {
+  resources: DeviceLikeResource[];
   search: TableTextSearchProps['value'];
   setSearch: TableTextSearchProps['setValue'];
   fleetId: string | undefined;
   setFleetId: (fleetId: string) => void;
   activeStatuses: FilterStatusMap;
   setActiveStatuses: (statuses: FilterStatusMap) => void;
+  selectedLabels: FlightCtlLabel[];
+  setSelectedLabels: (labels: FlightCtlLabel[]) => void;
 };
 
 const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarProps>> = ({ children, ...rest }) => {
   const { t } = useTranslation();
-  const { fleetId, setFleetId, search, setSearch, activeStatuses, setActiveStatuses } = rest;
+  const {
+    resources,
+    fleetId,
+    setFleetId,
+    search,
+    setSearch,
+    activeStatuses,
+    setActiveStatuses,
+    selectedLabels,
+    setSelectedLabels,
+  } = rest;
 
   const updateStatus: UpdateStatus = (statusType, status) => {
     if (!status) {
@@ -43,27 +57,24 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const updateFleet = React.useCallback(debounce(setFleetId, 1000), []);
-
   return (
     <>
       <Toolbar id="devices-toolbar" inset={{ default: 'insetNone' }}>
         <ToolbarContent>
           <ToolbarGroup>
             <ToolbarItem variant="search-filter">
-              <DeviceStatusFilterSelect activeStatuses={activeStatuses} updateStatus={updateStatus} />
+              <DeviceFilterSelect
+                resources={resources}
+                selectedLabels={selectedLabels}
+                setSelectedLabels={setSelectedLabels}
+                selectedFleets={fleetId ? [fleetId] : []}
+                setSelectedFleets={(fleets) => setFleetId(fleets[0])}
+                activeStatuses={activeStatuses}
+                updateStatus={updateStatus}
+              />
             </ToolbarItem>
             <ToolbarItem variant="search-filter">
               <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name or fingerprint')} />
-            </ToolbarItem>
-            <ToolbarItem variant="search-filter">
-              <TableTextSearch
-                value={fleetId}
-                setValue={updateFleet}
-                onClear={() => setFleetId('')}
-                placeholder={t('Fleet name (exact match)')}
-              />
             </ToolbarItem>
           </ToolbarGroup>
           {children}
@@ -85,6 +96,8 @@ const DeviceToolbarChips = ({
   search,
   setFleetId,
   setSearch,
+  selectedLabels,
+  setSelectedLabels,
 }: DeviceToolbarChipsProps) => {
   const { t } = useTranslation();
   return (
@@ -117,6 +130,23 @@ const DeviceToolbarChips = ({
         <SplitItem>
           <ChipGroup categoryName={t('Name / ID')} isClosable onClick={() => setSearch('')}>
             <Chip onClick={() => setSearch('')}>{search}</Chip>
+          </ChipGroup>
+        </SplitItem>
+      )}
+      {!!selectedLabels.length && (
+        <SplitItem>
+          <ChipGroup categoryName={t('Labels')} isClosable onClick={() => setSelectedLabels([])}>
+            {selectedLabels.map((label) => {
+              const labelStr = labelToString(label);
+              return (
+                <Chip
+                  key={labelStr}
+                  onClick={() => setSelectedLabels(selectedLabels.filter((l) => labelToString(l) !== labelStr))}
+                >
+                  {labelStr}
+                </Chip>
+              );
+            })}
           </ChipGroup>
         </SplitItem>
       )}

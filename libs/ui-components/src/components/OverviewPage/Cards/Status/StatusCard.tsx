@@ -23,11 +23,12 @@ import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getDevicesEndpoint } from '../../../Device/DeviceList/useDeviceLikeResources';
 import StatusCardFilters from './StatusCardFilters';
 import ErrorAlert from '../../../ErrorAlert/ErrorAlert';
+import { FlightCtlLabel } from '../../../../types/extraTypes';
 
 const StatusCard = () => {
   const { t } = useTranslation();
   const [fleets, setFleets] = React.useState<string[]>([]);
-  const [labels, setLabels] = React.useState<{ key: string; value: string }[]>([]);
+  const [labels, setLabels] = React.useState<FlightCtlLabel[]>([]);
 
   const [devicesList, loading, error] = useFetchPeriodically<DeviceList>({
     endpoint: getDevicesEndpoint({
@@ -63,13 +64,13 @@ const StatusCard = () => {
           <StackItem>
             <Flex justifyContent={{ default: 'justifyContentSpaceAround' }}>
               <FlexItem>
-                <ApplicationStatusChart resources={devices} />
+                <ApplicationStatusChart resources={devices} labels={labels} fleets={fleets} />
               </FlexItem>
               <FlexItem>
-                <DeviceStatusChart resources={devices} />
+                <DeviceStatusChart resources={devices} labels={labels} fleets={fleets} />
               </FlexItem>
               <FlexItem>
-                <SystemUpdateStatusChart resources={devices} />
+                <SystemUpdateStatusChart resources={devices} labels={labels} fleets={fleets} />
               </FlexItem>
             </Flex>
           </StackItem>
