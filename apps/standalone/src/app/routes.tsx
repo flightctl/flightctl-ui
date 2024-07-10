@@ -21,6 +21,9 @@ const DeviceList = React.lazy(() => import('@flightctl/ui-components/src/compone
 const DeviceDetails = React.lazy(
   () => import('@flightctl/ui-components/src/components/Device/DeviceDetails/DeviceDetails'),
 );
+const DeviceTerminal = React.lazy(
+  () => import('@flightctl/ui-components/src/components/Device/DeviceTerminal/DeviceTerminal'),
+);
 const CreateRepository = React.lazy(
   () => import('@flightctl/ui-components/src/components/Repository/CreateRepository/CreateRepository'),
 );
@@ -83,6 +86,11 @@ const TitledRoute = ({ title, children }: React.PropsWithChildren<{ title: strin
 const RedirectToDeviceDetails = () => {
   const { deviceId } = useParams() as { deviceId: string };
   return <Navigate to={`/devicemanagement/devices/${deviceId}`} replace />;
+};
+
+const RedirectToDeviceTerminal = () => {
+  const { deviceId } = useParams() as { deviceId: string };
+  return <Navigate to={`/devicemanagement/devices/terminal/${deviceId}`} replace />;
 };
 
 const RedirectToEnrollmentDetails = () => {
@@ -167,6 +175,11 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
     element: <RedirectToDeviceDetails />,
   },
   {
+    path: '/terminal/:deviceId',
+    title: t('Terminal'),
+    element: <RedirectToDeviceTerminal />,
+  },
+  {
     path: '/devicemanagement/devices',
     title: t('Devices'),
     showInNav: true,
@@ -186,6 +199,15 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         element: (
           <TitledRoute title={t('Device')}>
             <DeviceDetails />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'terminal/:deviceId',
+        title: t('Terminal'),
+        element: (
+          <TitledRoute title={t('Terminal')}>
+            <DeviceTerminal />
           </TitledRoute>
         ),
       },

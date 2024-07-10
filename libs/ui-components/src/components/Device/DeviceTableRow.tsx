@@ -56,6 +56,10 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
               title: t('Edit device'),
               onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
             },
+            {
+              title: t('Terminal'),
+              onClick: () => navigate({ route: ROUTE.DEVICE_TERMINAL, postfix: deviceName }),
+            },
             deleteAction({
               resourceId: deviceName,
               resourceName: displayName,

@@ -24,6 +24,7 @@ export const appRoutes = {
   [ROUTE.FLEET_IMPORT]: '/devicemanagement/fleets/import',
   [ROUTE.DEVICES]: '/devicemanagement/devices',
   [ROUTE.DEVICE_DETAILS]: '/devicemanagement/devices',
+  [ROUTE.DEVICE_TERMINAL]: '/devicemanagement/devices/terminal',
   [ROUTE.REPO_CREATE]: '/devicemanagement/repositories/create',
   [ROUTE.REPO_EDIT]: '/devicemanagement/repositories/edit',
   [ROUTE.REPO_DETAILS]: '/devicemanagement/repositories',
