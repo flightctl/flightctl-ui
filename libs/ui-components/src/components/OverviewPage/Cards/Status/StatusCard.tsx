@@ -20,7 +20,7 @@ import ApplicationStatusChart from './ApplicationStatusChart';
 import DeviceStatusChart from './DeviceStatusChart';
 import SystemUpdateStatusChart from './SystemUpdateStatusChart';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
-import { getDevicesEndpoint } from '../../../Device/DeviceList/useDeviceLikeResources';
+import { useDevicesEndpoint } from '../../../Device/DeviceList/useDeviceLikeResources';
 import StatusCardFilters from './StatusCardFilters';
 import ErrorAlert from '../../../ErrorAlert/ErrorAlert';
 import { FlightCtlLabel } from '../../../../types/extraTypes';
@@ -30,11 +30,12 @@ const StatusCard = () => {
   const [fleets, setFleets] = React.useState<string[]>([]);
   const [labels, setLabels] = React.useState<FlightCtlLabel[]>([]);
 
+  const devicesEndpoint = useDevicesEndpoint({
+    fleetId: fleets.length ? fleets[0] : undefined,
+    labels,
+  });
   const [devicesList, loading, error] = useFetchPeriodically<DeviceList>({
-    endpoint: getDevicesEndpoint({
-      fleetId: fleets.length ? fleets[0] : undefined,
-      labels,
-    }),
+    endpoint: devicesEndpoint,
   });
 
   const [fleetsList, flLoading, flError] = useFetchPeriodically<FleetList>({

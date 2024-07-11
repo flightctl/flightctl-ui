@@ -25,6 +25,7 @@
     "fuzzysearch": "^1.0.3",
     "js-yaml": "^4.1.0",
     "percent-round": "^2.3.1",
+    "use-debounce": "^10.0.1",
     "yup": "^1.3.3"
   },
   "peerDependencies": {
