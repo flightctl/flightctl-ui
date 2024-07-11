@@ -1,3 +1,7 @@
 .fctl-rslist-row--selected {
   background-color: var(--pf-v5-global--palette--blue-50);
 }
+
+.pf-v5-theme-dark .fctl-rslist-row--selected {
+  background-color: var(--pf-v5-global--palette--blue-400);
+}
