@@ -30,7 +30,7 @@ const StatusCard = () => {
   const [fleets, setFleets] = React.useState<string[]>([]);
   const [labels, setLabels] = React.useState<FlightCtlLabel[]>([]);
 
-  const devicesEndpoint = useDevicesEndpoint({
+  const [devicesEndpoint] = useDevicesEndpoint({
     fleetId: fleets.length ? fleets[0] : undefined,
     labels,
   });
@@ -61,21 +61,19 @@ const StatusCard = () => {
             <Text component={TextVariants.small}>{t('{{count}} Devices', { count: devices.length || 0 })}</Text>
           </TextContent>
         </StackItem>
-        {!!devices.length && (
-          <StackItem>
-            <Flex justifyContent={{ default: 'justifyContentSpaceAround' }}>
-              <FlexItem>
-                <ApplicationStatusChart resources={devices} labels={labels} fleets={fleets} />
-              </FlexItem>
-              <FlexItem>
-                <DeviceStatusChart resources={devices} labels={labels} fleets={fleets} />
-              </FlexItem>
-              <FlexItem>
-                <SystemUpdateStatusChart resources={devices} labels={labels} fleets={fleets} />
-              </FlexItem>
-            </Flex>
-          </StackItem>
-        )}
+        <StackItem>
+          <Flex justifyContent={{ default: 'justifyContentSpaceAround' }}>
+            <FlexItem>
+              <ApplicationStatusChart resources={devices} labels={labels} fleets={fleets} />
+            </FlexItem>
+            <FlexItem>
+              <DeviceStatusChart resources={devices} labels={labels} fleets={fleets} />
+            </FlexItem>
+            <FlexItem>
+              <SystemUpdateStatusChart resources={devices} labels={labels} fleets={fleets} />
+            </FlexItem>
+          </Flex>
+        </StackItem>
       </Stack>
     );
   }

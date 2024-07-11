@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  Button,
   Chip,
   ChipGroup,
   Split,
@@ -44,15 +45,24 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
   } = rest;
 
   const updateStatus: UpdateStatus = (statusType, status) => {
-    if (!status) {
-      setActiveStatuses({ ...activeStatuses, [statusType]: [] });
+    if (!statusType) {
+      setActiveStatuses(
+        Object.keys(activeStatuses).reduce((acc, curr) => {
+          acc[curr] = [];
+          return acc;
+        }, {} as FilterStatusMap),
+      );
     } else {
-      if (activeStatuses[statusType].find((s) => s === status)) {
-        const newStatuses = activeStatuses[statusType].filter((s) => s !== status);
-        setActiveStatuses({ ...activeStatuses, [statusType]: newStatuses });
+      if (!status) {
+        setActiveStatuses({ ...activeStatuses, [statusType]: [] });
       } else {
-        const newValue = [...activeStatuses[statusType], status];
-        setActiveStatuses({ ...activeStatuses, [statusType]: newValue });
+        if (activeStatuses[statusType].find((s) => s === status)) {
+          const newStatuses = activeStatuses[statusType].filter((s) => s !== status);
+          setActiveStatuses({ ...activeStatuses, [statusType]: newStatuses });
+        } else {
+          const newValue = [...activeStatuses[statusType], status];
+          setActiveStatuses({ ...activeStatuses, [statusType]: newValue });
+        }
       }
     }
   };
@@ -100,25 +110,24 @@ const DeviceToolbarChips = ({
   setSelectedLabels,
 }: DeviceToolbarChipsProps) => {
   const { t } = useTranslation();
+  const statusKeys = Object.keys(activeStatuses).filter((k) => !!activeStatuses[k as keyof FilterStatusMap].length);
   return (
     <Split hasGutter>
-      {Object.keys(activeStatuses)
-        .filter((k) => !!activeStatuses[k as keyof FilterStatusMap].length)
-        .map((k) => {
-          const key = k as keyof FilterStatusMap;
-          const { title, items } = getStatusItem(t, key);
-          return (
-            <SplitItem key={key}>
-              <ChipGroup categoryName={title} isClosable onClick={() => updateStatus(key)}>
-                {activeStatuses[key].map((status: string) => (
-                  <Chip key={status} onClick={() => updateStatus(key, status)}>
-                    {items.find(({ id }) => id === status)?.label}
-                  </Chip>
-                ))}
-              </ChipGroup>
-            </SplitItem>
-          );
-        })}
+      {statusKeys.map((k) => {
+        const key = k as keyof FilterStatusMap;
+        const { title, items } = getStatusItem(t, key);
+        return (
+          <SplitItem key={key}>
+            <ChipGroup categoryName={title} isClosable onClick={() => updateStatus(key)}>
+              {activeStatuses[key].map((status: string) => (
+                <Chip key={status} onClick={() => updateStatus(key, status)}>
+                  {items.find(({ id }) => id === status)?.label}
+                </Chip>
+              ))}
+            </ChipGroup>
+          </SplitItem>
+        );
+      })}
       {fleetId && (
         <SplitItem>
           <ChipGroup categoryName={t('Fleet')} isClosable onClick={() => setFleetId('')}>
@@ -148,6 +157,21 @@ const DeviceToolbarChips = ({
               );
             })}
           </ChipGroup>
+        </SplitItem>
+      )}
+      {(!!statusKeys.length || !!fleetId || !!search || !!selectedLabels.length) && (
+        <SplitItem>
+          <Button
+            variant="link"
+            onClick={() => {
+              updateStatus();
+              setFleetId('');
+              setSearch('');
+              setSelectedLabels([]);
+            }}
+          >
+            {t('Clear all filters')}
+          </Button>
         </SplitItem>
       )}
     </Split>

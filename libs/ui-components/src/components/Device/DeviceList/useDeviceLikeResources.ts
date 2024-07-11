@@ -80,16 +80,16 @@ const getDevicesEndpoint = ({ fleetId, activeStatuses, labels }: DevicesEndpoint
   return params.size ? `devices?${params.toString()}` : 'devices';
 };
 
-export const useDevicesEndpoint = (args: DevicesEndpointArgs) => {
+export const useDevicesEndpoint = (args: DevicesEndpointArgs): [string, boolean] => {
   const endpoint = getDevicesEndpoint(args);
   const [devicesEndpointDebounced] = useDebounce(endpoint, 1000);
-  return devicesEndpointDebounced;
+  return [devicesEndpointDebounced, endpoint !== devicesEndpointDebounced];
 };
 
-const useERsEndpoint = (args: EREndpointArgs) => {
+const useERsEndpoint = (args: EREndpointArgs): [string, boolean] => {
   const endpoint = getERsEndpoint(args);
   const [ersEndpointDebounced] = useDebounce(endpoint, 1000);
-  return ersEndpointDebounced;
+  return [ersEndpointDebounced, endpoint !== ersEndpointDebounced];
 };
 
 export const useDeviceLikeResources = ({
@@ -101,12 +101,12 @@ export const useDeviceLikeResources = ({
   activeStatuses: FilterStatusMap;
   labels?: FlightCtlLabel[];
 }): [DeviceLikeResource[], boolean, unknown, boolean, VoidFunction] => {
-  const devicesEndpoint = useDevicesEndpoint({ fleetId, activeStatuses, labels });
+  const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint({ fleetId, activeStatuses, labels });
   const [devicesList, devicesLoading, devicesError, devicesRefetch, erUpdating] = useFetchPeriodically<DeviceList>({
     endpoint: devicesEndpoint,
   });
 
-  const ersEndpoint = useERsEndpoint({ fleetId, activeStatuses, labels });
+  const [ersEndpoint, ersDebouncing] = useERsEndpoint({ fleetId, activeStatuses, labels });
   const [erList, erLoading, erError, erRefetch, updating] = useFetchPeriodically<EnrollmentRequestList>({
     endpoint: ersEndpoint,
   });
@@ -122,5 +122,11 @@ export const useDeviceLikeResources = ({
     erRefetch();
   }, [devicesRefetch, erRefetch]);
 
-  return [data, devicesLoading || erLoading, devicesError || erError, updating || erUpdating, refetch];
+  return [
+    data,
+    devicesLoading || erLoading,
+    devicesError || erError,
+    updating || erUpdating || devicesDebouncing || ersDebouncing,
+    refetch,
+  ];
 };

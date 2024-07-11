@@ -20,4 +20,4 @@ export type FilterStatusMap = {
   [FilterSearchParams.UpdatedStatus]: DeviceUpdatedStatusType[];
 };
 
-export type UpdateStatus = (statusType: keyof FilterStatusMap, status?: string) => void;
+export type UpdateStatus = (statusType?: keyof FilterStatusMap, status?: string) => void;

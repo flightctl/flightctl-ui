@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  Button,
   Chip,
   ChipGroup,
   Flex,
@@ -147,6 +148,19 @@ const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
               );
             })}
           </ChipGroup>
+        </FlexItem>
+      )}
+      {(!!selectedFleets.length || !!selectedLabels.length) && (
+        <FlexItem>
+          <Button
+            variant="link"
+            onClick={() => {
+              setSelectedLabels([]);
+              setSelectedFleets([]);
+            }}
+          >
+            {t('Clear all filters')}
+          </Button>
         </FlexItem>
       )}
     </Flex>

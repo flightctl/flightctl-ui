@@ -29,8 +29,16 @@ export const useDeviceBackendFilters = () => {
   } = useAppContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const paramsRef = React.useRef(searchParams);
-  paramsRef.current = searchParams;
   const fleetId = searchParams.get(FilterSearchParams.Fleet) || undefined;
+
+  const updateSearchParams = React.useCallback(
+    (params: [string, string][]) => {
+      const urlParams = new URLSearchParams(params);
+      paramsRef.current = urlParams;
+      setSearchParams(urlParams);
+    },
+    [setSearchParams],
+  );
 
   const activeStatuses = React.useMemo(() => {
     const activeStatuses: FilterStatusMap = {
@@ -77,23 +85,23 @@ export const useDeviceBackendFilters = () => {
 
   const setFleetId = React.useCallback(
     (fleedId: string) => {
-      setSearchParams(getNewParams(paramsRef.current, { [FilterSearchParams.Fleet]: [fleedId] }));
+      updateSearchParams(getNewParams(paramsRef.current, { [FilterSearchParams.Fleet]: [fleedId] }));
     },
-    [setSearchParams],
+    [updateSearchParams],
   );
 
   const setActiveStatuses = React.useCallback(
     (activeStatuses: FilterStatusMap) => {
-      setSearchParams(getNewParams(paramsRef.current, activeStatuses));
+      updateSearchParams(getNewParams(paramsRef.current, activeStatuses));
     },
-    [setSearchParams],
+    [updateSearchParams],
   );
 
   const setSelectedLabels = React.useCallback(
     (labels: FlightCtlLabel[]) => {
-      setSearchParams(getNewParams(paramsRef.current, { [FilterSearchParams.Label]: labels.map(labelToString) }));
+      updateSearchParams(getNewParams(paramsRef.current, { [FilterSearchParams.Label]: labels.map(labelToString) }));
     },
-    [setSearchParams],
+    [updateSearchParams],
   );
 
   const hasFiltersEnabled =
