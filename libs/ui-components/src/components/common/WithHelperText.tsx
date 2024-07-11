@@ -9,15 +9,14 @@ type WithHelperTextProps = {
   showLabel?: boolean;
   triggerAction?: 'click' | 'hover';
   content: React.ReactNode;
-  className?: string;
 };
 
-const WithHelperText = ({ ariaLabel, showLabel, content, triggerAction, className }: WithHelperTextProps) => (
+const WithHelperText = ({ ariaLabel, showLabel, content, triggerAction }: WithHelperTextProps) => (
   <>
     {showLabel && ariaLabel}
     <Popover aria-label={ariaLabel} bodyContent={content} withFocusTrap triggerAction={triggerAction}>
       <Button
-        className={className}
+        className="fctl-helper-text__icon"
         isInline
         variant="plain"
         aria-label={`${ariaLabel} help text`}
