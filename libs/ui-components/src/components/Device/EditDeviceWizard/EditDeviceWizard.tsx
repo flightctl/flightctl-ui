@@ -42,7 +42,7 @@ const EditDeviceWizard = () => {
   const displayName = device?.metadata.labels?.displayName || '';
   const displayNameText = device ? displayName || t('Untitled') : deviceId;
 
-  let body;
+  let body: React.ReactNode;
   if (isLoading) {
     body = (
       <Bullseye>
@@ -75,8 +75,11 @@ const EditDeviceWizard = () => {
         onSubmit={async (values) => {
           setSubmitError(undefined);
           try {
-            const result = await patch<Device>(`devices/${deviceId}`, getDevicePatches(device, values));
-            navigate({ route: ROUTE.DEVICE_DETAILS, postfix: result.metadata.name });
+            const patches = getDevicePatches(device, values);
+            if (patches.length > 0) {
+              await patch<Device>(`devices/${deviceId}`, getDevicePatches(device, values));
+            }
+            navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceId });
           } catch (e) {
             setSubmitError(getErrorMessage(e));
           }

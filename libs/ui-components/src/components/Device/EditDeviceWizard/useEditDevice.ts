@@ -17,7 +17,8 @@ export const useEditDevice = (): [string | undefined, Device | undefined, boolea
   React.useEffect(() => {
     const fetch = async () => {
       try {
-        const result = await get<Device>(`device/${deviceId}`);
+        const result = await get<Device>(`devices/${deviceId}`);
+
         setDevice(result);
       } catch (err) {
         setError(err);
