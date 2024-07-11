@@ -17,6 +17,7 @@ import DeviceFilterSelect, { getStatusItem } from './DeviceFilterSelect';
 import { FilterStatusMap, UpdateStatus } from './types';
 import { DeviceLikeResource, FlightCtlLabel } from '../../../types/extraTypes';
 import { labelToString } from '../../../utils/labels';
+import { Fleet } from '@flightctl/types';
 
 type DeviceTableToolbarProps = {
   resources: DeviceLikeResource[];
@@ -28,6 +29,7 @@ type DeviceTableToolbarProps = {
   setActiveStatuses: (statuses: FilterStatusMap) => void;
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
+  fleets: Fleet[];
 };
 
 const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarProps>> = ({ children, ...rest }) => {
@@ -42,6 +44,7 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
     setActiveStatuses,
     selectedLabels,
     setSelectedLabels,
+    fleets,
   } = rest;
 
   const updateStatus: UpdateStatus = (statusType, status) => {
@@ -81,6 +84,7 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
                 setSelectedFleets={(fleets) => setFleetId(fleets[0])}
                 activeStatuses={activeStatuses}
                 updateStatus={updateStatus}
+                fleets={fleets}
               />
             </ToolbarItem>
             <ToolbarItem variant="search-filter">

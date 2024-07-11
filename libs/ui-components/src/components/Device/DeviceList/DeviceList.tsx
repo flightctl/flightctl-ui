@@ -14,7 +14,7 @@ import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
 
 import { useFetch } from '../../../hooks/useFetch';
-import { DeviceList, EnrollmentRequest } from '@flightctl/types';
+import { DeviceList, EnrollmentRequest, Fleet, FleetList } from '@flightctl/types';
 
 import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';
@@ -46,6 +46,7 @@ import {
   getUpdateStatusHelperText,
 } from '../../Status/utils';
 import { FilterStatusMap } from './types';
+import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -115,6 +116,7 @@ interface DeviceTableProps {
   setActiveStatuses: (activeStatuses: FilterStatusMap) => void;
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
+  fleets: Fleet[];
 }
 
 export const DeviceTable = ({
@@ -127,6 +129,7 @@ export const DeviceTable = ({
   selectedLabels,
   setSelectedLabels,
   hasFiltersEnabled,
+  fleets,
 }: DeviceTableProps) => {
   const { t } = useTranslation();
   const [requestId, setRequestId] = React.useState<string>();
@@ -173,6 +176,7 @@ export const DeviceTable = ({
         selectedLabels={selectedLabels}
         setSelectedLabels={setSelectedLabels}
         resources={resources}
+        fleets={fleets}
       >
         <ToolbarItem>
           <Button onClick={() => setAddDeviceModal(true)}>{t('Add devices')}</Button>
@@ -280,10 +284,14 @@ const DeviceList = () => {
     labels: selectedLabels,
   });
 
+  const [fleetsList, flLoading, flError] = useFetchPeriodically<FleetList>({
+    endpoint: 'fleets',
+  });
+
   return (
     <>
       <ListPage title={t('Devices')}>
-        <ListPageBody error={error} loading={loading}>
+        <ListPageBody error={error || flError} loading={loading || flLoading}>
           <DeviceTable
             resources={data}
             refetch={refetch}
@@ -294,6 +302,7 @@ const DeviceList = () => {
             setActiveStatuses={setActiveStatuses}
             selectedLabels={selectedLabels}
             setSelectedLabels={setSelectedLabels}
+            fleets={fleetsList?.items || []}
           />
         </ListPageBody>
       </ListPage>

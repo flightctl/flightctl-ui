@@ -1,7 +1,6 @@
 import { Grid, GridItem, Label, SelectList, SelectOption } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { getDeviceFleet } from '../../../utils/devices';
 import FilterSelect, { FilterSelectGroup } from '../../form/FilterSelect';
 import { DeviceLikeResource, FlightCtlLabel } from '../../../types/extraTypes';
 import { filterDevicesLabels, labelToString, stringToLabel } from '../../../utils/labels';
@@ -13,6 +12,7 @@ import { DeviceSummaryStatus, FilterSearchParams, getDeviceStatusItems } from '.
 import { StatusItem } from '../../../utils/status/common';
 import { getApplicationSummaryStatusItems } from '../../../utils/status/applications';
 import { getSystemUpdateStatusItems } from '../../../utils/status/system';
+import { Fleet } from '@flightctl/types';
 
 export const getStatusItem = (
   t: TFunction,
@@ -71,6 +71,7 @@ type DeviceFilterSelectProps = {
   setSelectedFleets: (fleets: string[]) => void;
   activeStatuses: FilterStatusMap;
   updateStatus: UpdateStatus;
+  fleets: Fleet[];
 };
 
 const DeviceFilterSelect: React.FC<DeviceFilterSelectProps> = ({
@@ -81,18 +82,14 @@ const DeviceFilterSelect: React.FC<DeviceFilterSelectProps> = ({
   setSelectedFleets,
   activeStatuses,
   updateStatus,
+  fleets,
 }) => {
   const { t } = useTranslation();
   const [filter, setFilter] = React.useState('');
 
   const availableFleets = [
     ...new Set([
-      ...resources
-        .filter((d) => {
-          const fleet = getDeviceFleet(d.metadata);
-          return fleet ? fuzzySeach(filter, fleet) : false;
-        })
-        .map((d) => getDeviceFleet(d.metadata) as string),
+      ...fleets.filter((f) => fuzzySeach(filter, f.metadata.name)).map((f) => f.metadata.name || ''),
       ...selectedFleets,
     ]),
   ];
