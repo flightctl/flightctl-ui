@@ -97,6 +97,14 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
+      "path": ["/edge/devices/edit/:deviceId"],
+      "component": { "$codeRef": "EditDeviceWizardPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
       "path": ["/edge/repositories"],
       "component": { "$codeRef": "RepositoriesPage" }
     }

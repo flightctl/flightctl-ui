@@ -21,6 +21,9 @@ const DeviceList = React.lazy(() => import('@flightctl/ui-components/src/compone
 const DeviceDetails = React.lazy(
   () => import('@flightctl/ui-components/src/components/Device/DeviceDetails/DeviceDetails'),
 );
+const EditDeviceWizard = React.lazy(
+  () => import('@flightctl/ui-components/src/components/Device/EditDeviceWizard/EditDeviceWizard'),
+);
 const CreateRepository = React.lazy(
   () => import('@flightctl/ui-components/src/components/Repository/CreateRepository/CreateRepository'),
 );
@@ -198,6 +201,15 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         element: (
           <TitledRoute title={t('Device')}>
             <DeviceDetails />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'edit/:deviceId',
+        title: t('Edit device'),
+        element: (
+          <TitledRoute title={t('Edit device')}>
+            <EditDeviceWizard />
           </TitledRoute>
         ),
       },

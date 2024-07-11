@@ -10,8 +10,8 @@ export type ResourceMonitorSpec = {
    */
   alertRules: Array<ResourceAlertRule>;
   /**
-   * Duration between monitor samples. Format: number followed by 's' for seconds, 'm' for minutes, 'h' for hours, 'd' for days.
+   * Duration between monitor samples. Format: number followed by 's' for seconds, 'm' for minutes, 'h' for hours, 'd' for days. Must be a positive integer.
    */
-  samplingInterval?: string;
+  samplingInterval: string;
 };
 

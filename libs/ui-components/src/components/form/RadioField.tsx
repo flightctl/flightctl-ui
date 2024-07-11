@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { FormGroup, FormHelperText, HelperText, HelperTextItem, Radio, RadioProps } from '@patternfly/react-core';
-import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { FormGroup, Radio, RadioProps } from '@patternfly/react-core';
+import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
-export interface RadioFieldrops extends Omit<RadioProps, 'onChange' | 'ref' | 'checked'> {
+export interface RadioFieldProps extends Omit<RadioProps, 'onChange' | 'ref' | 'checked'> {
   checkedValue?: unknown;
   name: string;
   helperText?: React.ReactNode;
 }
 
-const RadioField = ({ helperText, checkedValue, name, ...props }: RadioFieldrops) => {
+const RadioField = ({ helperText, checkedValue, name, ...props }: RadioFieldProps) => {
   const [field, meta, { setValue, setTouched }] = useField({
     name,
   });
@@ -22,7 +22,6 @@ const RadioField = ({ helperText, checkedValue, name, ...props }: RadioFieldrops
   };
 
   const fieldId = `radiofield-${props.id}`;
-  const hasError = meta.touched && !!meta.error;
 
   return (
     <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId}>
@@ -34,22 +33,8 @@ const RadioField = ({ helperText, checkedValue, name, ...props }: RadioFieldrops
         isChecked={checkedValue ? field.value === checkedValue : !!field.value}
       />
 
-      {helperText && (
-        <FormHelperText>
-          <HelperText>
-            <HelperTextItem variant={'default'}>{helperText}</HelperTextItem>
-          </HelperText>
-        </FormHelperText>
-      )}
-      {hasError && (
-        <FormHelperText>
-          <HelperText>
-            <HelperTextItem icon={<ExclamationCircleIcon />} variant={'error'}>
-              {meta.error}
-            </HelperTextItem>
-          </HelperText>
-        </FormHelperText>
-      )}
+      <DefaultHelperText helperText={helperText} />
+      <ErrorHelperText meta={meta} />
     </FormGroup>
   );
 };

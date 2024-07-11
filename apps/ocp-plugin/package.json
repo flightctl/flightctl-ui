@@ -18,6 +18,7 @@
       "FleetDetailsPage": "./src/components/Fleets/FleetDetailsPage.tsx",
       "DevicesPage": "./src/components/Devices/DevicesPage.tsx",
       "DeviceDetailsPage": "./src/components/Devices/DeviceDetailsPage.tsx",
+      "EditDeviceWizardPage": "./src/components/Devices/EditDeviceWizardPage.tsx",
       "RepositoriesPage": "./src/components/Repositories/RepositoriesPage.tsx",
       "RepositoryDetailsPage": "./src/components/Repositories/RepositoryDetailsPage.tsx",
       "CreateRepositoryPage": "./src/components/Repositories/CreateRepositoryPage.tsx",

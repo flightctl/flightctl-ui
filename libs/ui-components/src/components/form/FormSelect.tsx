@@ -1,16 +1,8 @@
-import {
-  FormGroup,
-  FormHelperText,
-  HelperText,
-  HelperTextItem,
-  MenuToggle,
-  Select,
-  SelectList,
-  SelectOption,
-} from '@patternfly/react-core';
-import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
-import { useField } from 'formik';
 import * as React from 'react';
+
+import { FormGroup, MenuToggle, Select, SelectList, SelectOption } from '@patternfly/react-core';
+import { useField } from 'formik';
+import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 import './FormSelect.css';
 
@@ -29,7 +21,6 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeh
   });
 
   const fieldId = `selectfield-${name}`;
-  const hasError = meta.touched && !!meta.error;
   const itemKeys = Object.keys(items);
 
   React.useEffect(() => {
@@ -72,7 +63,7 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeh
           setIsOpen(open);
         }}
       >
-        {itemKeys.length && (
+        {!!itemKeys.length && (
           <SelectList className="fctl-form-select__menu">
             {itemKeys.map((key) => (
               <SelectOption key={key} value={key}>
@@ -83,22 +74,9 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeh
         )}
         {children}
       </Select>
-      {helperText && (
-        <FormHelperText>
-          <HelperText>
-            <HelperTextItem variant={'default'}>{helperText}</HelperTextItem>
-          </HelperText>
-        </FormHelperText>
-      )}
-      {hasError && (
-        <FormHelperText>
-          <HelperText>
-            <HelperTextItem icon={<ExclamationCircleIcon />} variant={'error'}>
-              {meta.error}
-            </HelperTextItem>
-          </HelperText>
-        </FormHelperText>
-      )}
+
+      <DefaultHelperText helperText={helperText} />
+      <ErrorHelperText meta={meta} />
     </FormGroup>
   );
 };

@@ -1,3 +1,5 @@
+import * as React from 'react';
+import { useFormikContext } from 'formik';
 import {
   Alert,
   DescriptionList,
@@ -7,22 +9,21 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import * as React from 'react';
+
+import { EditDeviceFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { useFormikContext } from 'formik';
-import { FleetFormValues } from '../types';
 import LabelsView from '../../../common/LabelsView';
 import { toAPILabel } from '../../../../utils/labels';
-import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
-import { getErrorMessage } from '../../../../utils/error';
 import { getSourceItems } from '../../../../utils/devices';
-import { getAPIConfig } from '../../../Device/EditDeviceWizard/deviceSpecUtils';
+import { getErrorMessage } from '../../../../utils/error';
+import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
+import { getAPIConfig } from '../deviceSpecUtils';
 
-export const reviewStepId = 'review';
+export const reviewDeviceStepId = 'review-device';
 
-const ReviewStep = ({ error }: { error?: unknown }) => {
+const ReviewStep = ({ error }: { error?: string }) => {
   const { t } = useTranslation();
-  const { values } = useFormikContext<FleetFormValues>();
+  const { values } = useFormikContext<EditDeviceFormValues>();
   return (
     <Stack hasGutter>
       <StackItem isFilled>
@@ -33,17 +34,11 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
           }}
         >
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
-            <DescriptionListDescription>{values.name}</DescriptionListDescription>
+            <DescriptionListTerm>{t('Display name')}</DescriptionListTerm>
+            <DescriptionListDescription>{values.displayName || t('Untitled')}</DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('Fleet labels')}</DescriptionListTerm>
-            <DescriptionListDescription>
-              <LabelsView prefix="fleet" labels={toAPILabel(values.fleetLabels)} />
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>{t('Device label selector')}</DescriptionListTerm>
+            <DescriptionListTerm>{t('Device labels')}</DescriptionListTerm>
             <DescriptionListDescription>
               <LabelsView prefix="device" labels={toAPILabel(values.labels)} />
             </DescriptionListDescription>
@@ -51,7 +46,7 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
             <DescriptionListDescription>
-              {values.osImage || t(`The fleet will not manage system image`)}
+              {values.osImage || t(`Flight Control will not manage system image`)}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>

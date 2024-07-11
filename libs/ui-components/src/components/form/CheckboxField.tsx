@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { Checkbox, CheckboxProps, FormGroup, FormHelperText, HelperText, HelperTextItem } from '@patternfly/react-core';
-import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { Checkbox, CheckboxProps, FormGroup } from '@patternfly/react-core';
+import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 export interface CheckboxFieldProps extends Omit<CheckboxProps, 'onChange' | 'id' | 'ref'> {
   name: string;
@@ -23,29 +23,13 @@ const CheckboxField = ({ helperText, onChangeCustom, children, ...props }: Check
   };
 
   const fieldId = `checkboxfield-${props.name}`;
-  const hasError = meta.touched && !!meta.error;
-
   return (
     <>
       <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId}>
         <Checkbox {...rest} {...props} isChecked={value} id={fieldId} onChange={onChange} body={value && props.body} />
 
-        {helperText && (
-          <FormHelperText>
-            <HelperText>
-              <HelperTextItem variant={'default'}>{helperText}</HelperTextItem>
-            </HelperText>
-          </FormHelperText>
-        )}
-        {hasError && (
-          <FormHelperText>
-            <HelperText>
-              <HelperTextItem icon={<ExclamationCircleIcon />} variant={'error'}>
-                {meta.error}
-              </HelperTextItem>
-            </HelperText>
-          </FormHelperText>
-        )}
+        <DefaultHelperText helperText={helperText} />
+        <ErrorHelperText meta={meta} />
       </FormGroup>
       {value && children}
     </>

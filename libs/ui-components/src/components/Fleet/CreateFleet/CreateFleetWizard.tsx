@@ -14,15 +14,17 @@ import {
 import * as React from 'react';
 import { Fleet } from '@flightctl/types';
 import { Formik } from 'formik';
-import ReviewStep, { reviewStepId } from './steps/ReviewStep';
 import { FleetFormValues } from './types';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import GeneralInfoStep, { generalInfoStepId, isGeneralInfoStepValid } from './steps/GeneralInfoStep';
-
-import DeviceTemplateStep, { deviceTemplateStepId, isDeviceTemplateStepValid } from './steps/DeviceTemplateStep';
+import DeviceTemplateStep, {
+  deviceTemplateStepId,
+  isDeviceTemplateStepValid,
+} from '../../Device/EditDeviceWizard/steps/DeviceTemplateStep';
+import ReviewStep, { reviewStepId } from './steps/ReviewStep';
 import { getFleetPatches, getFleetResource, getInitialValues, getValidationSchema } from './utils';
 import CreateFleetWizardFooter from './CreateFleetWizardFooter';
 import { useEditFleet } from './useEditFleet';

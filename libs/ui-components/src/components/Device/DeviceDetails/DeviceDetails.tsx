@@ -6,6 +6,7 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
+  DropdownItem,
   DropdownList,
   Grid,
   GridItem,
@@ -48,7 +49,7 @@ const DeviceDetails = () => {
   const navigate = useNavigate();
   const { remove } = useFetch();
 
-  const name = (device?.metadata.labels?.displayName || device?.metadata.name) as string;
+  const name = device?.metadata.labels?.displayName || deviceId;
 
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {
@@ -71,7 +72,12 @@ const DeviceDetails = () => {
       resourceTypeLabel={t('Devices')}
       actions={
         <DetailsPageActions>
-          <DropdownList>{deleteAction}</DropdownList>
+          <DropdownList>
+            <DropdownItem onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}>
+              {t('Edit device')}
+            </DropdownItem>
+            {deleteAction}
+          </DropdownList>
         </DetailsPageActions>
       }
     >
