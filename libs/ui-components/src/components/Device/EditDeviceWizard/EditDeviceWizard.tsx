@@ -23,7 +23,7 @@ import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
 import GeneralInfoStep, { generalInfoStepId, isGeneralInfoStepValid } from './steps/GeneralInfoStep';
-import DeviceTemplateStep, { deviceTemplateStepId } from './steps/DeviceTemplateStep';
+import DeviceTemplateStep, { deviceTemplateStepId, isDeviceTemplateStepValid } from './steps/DeviceTemplateStep';
 import ReviewDeviceStep, { reviewDeviceStepId } from './steps/ReviewDeviceStep';
 import { getDevicePatches, getValidationSchema } from './utils';
 import { getConfigTemplatesValues } from './deviceSpecUtils';
@@ -87,17 +87,22 @@ const EditDeviceWizard = () => {
       >
         {({ errors: formikErrors }) => {
           const generalStepValid = isGeneralInfoStepValid(formikErrors);
+          const templateStepValid = isDeviceTemplateStepValid(formikErrors);
           return (
             <>
               <LeaveFormConfirmation />
               <Wizard footer={<EditDeviceWizardFooter />} onStepChange={(_, step) => setCurrentStep(step)}>
-                <WizardStep name={t('General info')} id={generalInfoStepId} isDisabled={false}>
+                <WizardStep name={t('General info')} id={generalInfoStepId}>
                   {(!currentStep || currentStep?.id === generalInfoStepId) && <GeneralInfoStep />}
                 </WizardStep>
                 <WizardStep name={t('Device template')} id={deviceTemplateStepId} isDisabled={!generalStepValid}>
                   {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep />}
                 </WizardStep>
-                <WizardStep name={t('Review and update')} id={reviewDeviceStepId} isDisabled={!generalStepValid}>
+                <WizardStep
+                  name={t('Review and update')}
+                  id={reviewDeviceStepId}
+                  isDisabled={!(generalStepValid && templateStepValid)}
+                >
                   {currentStep?.id === reviewDeviceStepId && <ReviewDeviceStep error={submitError} />}
                 </WizardStep>
               </Wizard>
