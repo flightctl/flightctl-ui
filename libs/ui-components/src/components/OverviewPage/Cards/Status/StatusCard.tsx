@@ -20,20 +20,22 @@ import ApplicationStatusChart from './ApplicationStatusChart';
 import DeviceStatusChart from './DeviceStatusChart';
 import SystemUpdateStatusChart from './SystemUpdateStatusChart';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
-import { getDevicesEndpoint } from '../../../Device/DeviceList/useDeviceLikeResources';
+import { useDevicesEndpoint } from '../../../Device/DeviceList/useDeviceLikeResources';
 import StatusCardFilters from './StatusCardFilters';
 import ErrorAlert from '../../../ErrorAlert/ErrorAlert';
+import { FlightCtlLabel } from '../../../../types/extraTypes';
 
 const StatusCard = () => {
   const { t } = useTranslation();
   const [fleets, setFleets] = React.useState<string[]>([]);
-  const [labels, setLabels] = React.useState<{ key: string; value: string }[]>([]);
+  const [labels, setLabels] = React.useState<FlightCtlLabel[]>([]);
 
-  const [devicesList, loading, error] = useFetchPeriodically<DeviceList>({
-    endpoint: getDevicesEndpoint({
-      fleetId: fleets.length ? fleets[0] : undefined,
-      labels,
-    }),
+  const [devicesEndpoint, isDebounced] = useDevicesEndpoint({
+    fleetId: fleets.length ? fleets[0] : undefined,
+    labels,
+  });
+  const [devicesList, loading, error, , isUpdating] = useFetchPeriodically<DeviceList>({
+    endpoint: devicesEndpoint,
   });
 
   const [fleetsList, flLoading, flError] = useFetchPeriodically<FleetList>({
@@ -59,21 +61,19 @@ const StatusCard = () => {
             <Text component={TextVariants.small}>{t('{{count}} Devices', { count: devices.length || 0 })}</Text>
           </TextContent>
         </StackItem>
-        {!!devices.length && (
-          <StackItem>
-            <Flex justifyContent={{ default: 'justifyContentSpaceAround' }}>
-              <FlexItem>
-                <ApplicationStatusChart resources={devices} />
-              </FlexItem>
-              <FlexItem>
-                <DeviceStatusChart resources={devices} />
-              </FlexItem>
-              <FlexItem>
-                <SystemUpdateStatusChart resources={devices} />
-              </FlexItem>
-            </Flex>
-          </StackItem>
-        )}
+        <StackItem>
+          <Flex justifyContent={{ default: 'justifyContentSpaceAround' }}>
+            <FlexItem>
+              <ApplicationStatusChart resources={devices} labels={labels} fleets={fleets} />
+            </FlexItem>
+            <FlexItem>
+              <DeviceStatusChart resources={devices} labels={labels} fleets={fleets} />
+            </FlexItem>
+            <FlexItem>
+              <SystemUpdateStatusChart resources={devices} labels={labels} fleets={fleets} />
+            </FlexItem>
+          </Flex>
+        </StackItem>
       </Stack>
     );
   }
@@ -93,6 +93,7 @@ const StatusCard = () => {
               setSelectedFleets={setFleets}
               selectedLabels={labels}
               setSelectedLabels={setLabels}
+              isFilterUpdating={isUpdating || isDebounced}
             />
           </FlexItem>
         </Flex>

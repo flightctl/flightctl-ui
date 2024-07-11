@@ -4,12 +4,15 @@ import { ApplicationsSummaryStatusType, DeviceSummaryStatusType, DeviceUpdatedSt
 import { EnrollmentRequestStatus } from '../../../utils/status/enrollmentRequest';
 
 type FilterOptionsProps<T extends DeviceSummaryStatus> = {
+  filter: string;
   items: Array<StatusItem<T>>;
   selectedFilters: Array<T>;
   onClick: (value: string) => void;
 };
 
-export type FilterOptionsFC = <T extends DeviceSummaryStatus>(props: FilterOptionsProps<T>) => JSX.Element[];
+export type FilterOptionsFC = <T extends DeviceSummaryStatus>(
+  props: FilterOptionsProps<T>,
+) => JSX.Element | JSX.Element[];
 
 export type FilterStatusMap = {
   [FilterSearchParams.AppStatus]: ApplicationsSummaryStatusType[];
@@ -17,4 +20,4 @@ export type FilterStatusMap = {
   [FilterSearchParams.UpdatedStatus]: DeviceUpdatedStatusType[];
 };
 
-export type UpdateStatus = (statusType: keyof FilterStatusMap, status?: string) => void;
+export type UpdateStatus = (statusType?: keyof FilterStatusMap, status?: string) => void;

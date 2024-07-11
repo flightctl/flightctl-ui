@@ -1,8 +1,10 @@
 import { ChartDonut } from '@patternfly/react-charts';
-import { Flex, FlexItem, Stack, StackItem } from '@patternfly/react-core';
+import { Flex, FlexItem, Stack, StackItem, Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { Link, LinkProps } from '../../hooks/useNavigate';
 import WithHelperText from '../common/WithHelperText';
+import { useTranslation } from '../../hooks/useTranslation';
+import { getDefaultStatusColor } from '../../utils/status/common';
 
 import './DonutChart.css';
 
@@ -58,8 +60,11 @@ const LegendItem = ({ children, color }: { children: React.ReactNode; color: str
 };
 
 const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; helperText?: string }) => {
+  const { t } = useTranslation();
   const firstRow = data.slice(0, Math.floor(data.length / 2));
   const secondRow = data.slice(Math.floor(data.length / 2), data.length);
+
+  const isEmpty = !data.some(({ y }) => !!y);
 
   return (
     <Flex
@@ -73,11 +78,15 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
             ariaDesc={title}
             ariaTitle={title}
             constrainToVisibleArea
-            colorScale={data.map((datum) => datum.color)}
-            data={data.map((datum) => ({
-              x: `${datum.y}% ${datum.x}`,
-              y: datum.y,
-            }))}
+            colorScale={isEmpty ? [getDefaultStatusColor('unknown')] : data.map((datum) => datum.color)}
+            data={
+              isEmpty
+                ? [{ x: '', y: 100 }]
+                : data.map((datum) => ({
+                    x: `${datum.y}% ${datum.x}`,
+                    y: datum.y,
+                  }))
+            }
             name={title}
             title={title}
             titleComponent={
@@ -96,7 +105,13 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
         </div>
       </FlexItem>
       <FlexItem>
-        <Legend rows={[firstRow, secondRow]} />
+        {isEmpty ? (
+          <TextContent>
+            <Text component={TextVariants.small}>{t('No devices')}</Text>
+          </TextContent>
+        ) : (
+          <Legend rows={[firstRow, secondRow]} />
+        )}
       </FlexItem>
     </Flex>
   );

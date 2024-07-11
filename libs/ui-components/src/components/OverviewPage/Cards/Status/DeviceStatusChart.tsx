@@ -7,10 +7,19 @@ import { StatusMap, toChartData } from './utils';
 import { FilterSearchParams } from '../../../../utils/status/devices';
 import { getDeviceStatusHelperText } from '../../../Status/utils';
 import { EnrollmentRequestStatus } from '../../../../utils/status/enrollmentRequest';
+import { FlightCtlLabel } from '../../../../types/extraTypes';
 
 type DeviceStatusMap = StatusMap<DeviceSummaryStatusType | EnrollmentRequestStatus.Pending>;
 
-const DeviceStatusChart = ({ resources }: { resources: Device[] }) => {
+const DeviceStatusChart = ({
+  resources,
+  labels,
+  fleets,
+}: {
+  resources: Device[];
+  labels: FlightCtlLabel[];
+  fleets: string[];
+}) => {
   const { t } = useTranslation();
 
   const statusItems = getDeviceStatusItems(t);
@@ -31,7 +40,7 @@ const DeviceStatusChart = ({ resources }: { resources: Device[] }) => {
     } as DeviceStatusMap,
   );
 
-  const devStatusData = toChartData(data, statusItems, FilterSearchParams.DeviceStatus);
+  const devStatusData = toChartData(data, statusItems, FilterSearchParams.DeviceStatus, labels, fleets);
 
   return <DonutChart title={t('Device status')} data={devStatusData} helperText={getDeviceStatusHelperText(t)} />;
 };

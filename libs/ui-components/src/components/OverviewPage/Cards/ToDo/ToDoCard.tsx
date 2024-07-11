@@ -1,5 +1,18 @@
 import * as React from 'react';
-import { Bullseye, Card, CardBody, CardTitle, List, ListItem, Spinner, Split, SplitItem } from '@patternfly/react-core';
+import {
+  Bullseye,
+  Card,
+  CardBody,
+  CardTitle,
+  List,
+  ListItem,
+  Spinner,
+  Split,
+  SplitItem,
+  Text,
+  TextContent,
+  TextVariants,
+} from '@patternfly/react-core';
 import { EnrollmentRequestList } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
@@ -44,7 +57,13 @@ const ToDoCard = () => {
         </List>
       );
     } else {
-      content = <Bullseye>{t('All good!')}</Bullseye>;
+      content = (
+        <Bullseye>
+          <TextContent>
+            <Text component={TextVariants.small}>{t('All good!')}</Text>
+          </TextContent>
+        </Bullseye>
+      );
     }
   }
 

@@ -14,7 +14,7 @@ import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
 
 import { useFetch } from '../../../hooks/useFetch';
-import { DeviceList, EnrollmentRequest } from '@flightctl/types';
+import { DeviceList, EnrollmentRequest, Fleet, FleetList } from '@flightctl/types';
 
 import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';
@@ -29,7 +29,7 @@ import { useDeviceFilters } from './useDeviceFilters';
 import DeviceTableRow from './DeviceTableRow';
 import TableActions from '../../Table/TableActions';
 import { getResourceId } from '../../../utils/resource';
-import { DeviceLikeResource, isEnrollmentRequest } from '../../../types/extraTypes';
+import { DeviceLikeResource, FlightCtlLabel, isEnrollmentRequest } from '../../../types/extraTypes';
 import MassDeleteDeviceModal from '../../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
 import MassApproveDeviceModal from '../../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
 import DeviceEnrollmentModal from '../../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
@@ -46,6 +46,7 @@ import {
   getUpdateStatusHelperText,
 } from '../../Status/utils';
 import { FilterStatusMap } from './types';
+import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -113,6 +114,10 @@ interface DeviceTableProps {
   hasFiltersEnabled: boolean;
   setFleetId: (fleedId: string) => void;
   setActiveStatuses: (activeStatuses: FilterStatusMap) => void;
+  selectedLabels: FlightCtlLabel[];
+  setSelectedLabels: (labels: FlightCtlLabel[]) => void;
+  fleets: Fleet[];
+  isFilterUpdating: boolean;
 }
 
 export const DeviceTable = ({
@@ -122,7 +127,11 @@ export const DeviceTable = ({
   setFleetId,
   activeStatuses,
   setActiveStatuses,
+  selectedLabels,
+  setSelectedLabels,
   hasFiltersEnabled,
+  fleets,
+  isFilterUpdating,
 }: DeviceTableProps) => {
   const { t } = useTranslation();
   const [requestId, setRequestId] = React.useState<string>();
@@ -166,6 +175,11 @@ export const DeviceTable = ({
         setFleetId={setFleetId}
         activeStatuses={activeStatuses}
         setActiveStatuses={setActiveStatuses}
+        selectedLabels={selectedLabels}
+        setSelectedLabels={setSelectedLabels}
+        resources={resources}
+        fleets={fleets}
+        isFilterUpdating={isFilterUpdating}
       >
         <ToolbarItem>
           <Button onClick={() => setAddDeviceModal(true)}>{t('Add devices')}</Button>
@@ -258,13 +272,29 @@ export const DeviceTable = ({
 
 const DeviceList = () => {
   const { t } = useTranslation();
-  const { fleetId, activeStatuses, hasFiltersEnabled, setFleetId, setActiveStatuses } = useDeviceBackendFilters();
-  const [data, loading, error, updating, refetch] = useDeviceLikeResources({ fleetId, activeStatuses });
+  const {
+    fleetId,
+    activeStatuses,
+    hasFiltersEnabled,
+    setFleetId,
+    setActiveStatuses,
+    selectedLabels,
+    setSelectedLabels,
+  } = useDeviceBackendFilters();
+  const [data, loading, error, updating, refetch] = useDeviceLikeResources({
+    fleetId,
+    activeStatuses,
+    labels: selectedLabels,
+  });
+
+  const [fleetsList, flLoading, flError] = useFetchPeriodically<FleetList>({
+    endpoint: 'fleets',
+  });
 
   return (
     <>
       <ListPage title={t('Devices')}>
-        <ListPageBody error={error} loading={loading}>
+        <ListPageBody error={error || flError} loading={loading || flLoading}>
           <DeviceTable
             resources={data}
             refetch={refetch}
@@ -273,6 +303,10 @@ const DeviceList = () => {
             activeStatuses={activeStatuses}
             setFleetId={setFleetId}
             setActiveStatuses={setActiveStatuses}
+            selectedLabels={selectedLabels}
+            setSelectedLabels={setSelectedLabels}
+            fleets={fleetsList?.items || []}
+            isFilterUpdating={updating}
           />
         </ListPageBody>
       </ListPage>

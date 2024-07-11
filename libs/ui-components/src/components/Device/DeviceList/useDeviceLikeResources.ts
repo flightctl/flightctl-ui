@@ -2,12 +2,33 @@ import * as React from 'react';
 import { DeviceList, EnrollmentRequestList } from '@flightctl/types';
 import { FilterSearchParams } from '../../../utils/status/devices';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { DeviceLikeResource } from '../../../types/extraTypes';
+import { DeviceLikeResource, FlightCtlLabel } from '../../../types/extraTypes';
 import { EnrollmentRequestStatus, getApprovalStatus } from '../../../utils/status/enrollmentRequest';
 import { FilterStatusMap } from './types';
+import { useDebounce } from 'use-debounce';
 
-const getERsEndpoint = (fleedId: string | undefined, activeStatuses: FilterStatusMap) => {
-  if (fleedId) {
+const setLabelParams = (params: URLSearchParams, labels?: FlightCtlLabel[]) => {
+  if (labels?.length) {
+    const labelSelector = labels.reduce((acc, curr) => {
+      if (!acc) {
+        acc = `${curr.key}=${curr.value || ''}`;
+      } else {
+        acc += `,${curr.key}=${curr.value || ''}`;
+      }
+      return acc;
+    }, '');
+    params.append('labelSelector', labelSelector);
+  }
+};
+
+type EREndpointArgs = {
+  fleetId: string | undefined;
+  activeStatuses: FilterStatusMap;
+  labels?: FlightCtlLabel[];
+};
+
+const getERsEndpoint = ({ fleetId, activeStatuses, labels }: EREndpointArgs) => {
+  if (fleetId) {
     return '';
   }
   if (
@@ -17,21 +38,19 @@ const getERsEndpoint = (fleedId: string | undefined, activeStatuses: FilterStatu
     return '';
   }
 
-  return 'enrollmentrequests';
+  const params = new URLSearchParams();
+  setLabelParams(params, labels);
+
+  return params.size ? `enrollmentrequests?${params.toString()}` : 'enrollmentrequests';
 };
 
-export const getDevicesEndpoint = ({
-  fleetId,
-  activeStatuses,
-  labels,
-}: {
+type DevicesEndpointArgs = {
   fleetId?: string;
   activeStatuses?: FilterStatusMap;
-  labels?: {
-    key: string;
-    value: string;
-  }[];
-}) => {
+  labels?: FlightCtlLabel[];
+};
+
+const getDevicesEndpoint = ({ fleetId, activeStatuses, labels }: DevicesEndpointArgs) => {
   const filterByAppStatus = activeStatuses?.[FilterSearchParams.AppStatus];
   const filterByDevStatus = activeStatuses?.[FilterSearchParams.DeviceStatus];
   const filterByUpdateStatus = activeStatuses?.[FilterSearchParams.UpdatedStatus];
@@ -56,33 +75,40 @@ export const getDevicesEndpoint = ({
     }
   });
   filterByUpdateStatus?.forEach((updSt) => params.append('statusFilter', `updated.status=${updSt}`));
-  if (labels?.length) {
-    const labelSelector = labels.reduce((acc, curr) => {
-      if (!acc) {
-        acc = `${curr.key}=${curr.value}`;
-      } else {
-        acc += `,${curr.key}=${curr.value}`;
-      }
-      return acc;
-    }, '');
-    params.append('labelSelector', labelSelector);
-  }
+
+  setLabelParams(params, labels);
   return params.size ? `devices?${params.toString()}` : 'devices';
+};
+
+export const useDevicesEndpoint = (args: DevicesEndpointArgs): [string, boolean] => {
+  const endpoint = getDevicesEndpoint(args);
+  const [devicesEndpointDebounced] = useDebounce(endpoint, 1000);
+  return [devicesEndpointDebounced, endpoint !== devicesEndpointDebounced];
+};
+
+const useERsEndpoint = (args: EREndpointArgs): [string, boolean] => {
+  const endpoint = getERsEndpoint(args);
+  const [ersEndpointDebounced] = useDebounce(endpoint, 1000);
+  return [ersEndpointDebounced, endpoint !== ersEndpointDebounced];
 };
 
 export const useDeviceLikeResources = ({
   fleetId,
   activeStatuses,
+  labels,
 }: {
   fleetId?: string;
   activeStatuses: FilterStatusMap;
+  labels?: FlightCtlLabel[];
 }): [DeviceLikeResource[], boolean, unknown, boolean, VoidFunction] => {
+  const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint({ fleetId, activeStatuses, labels });
   const [devicesList, devicesLoading, devicesError, devicesRefetch, erUpdating] = useFetchPeriodically<DeviceList>({
-    endpoint: getDevicesEndpoint({ fleetId, activeStatuses }),
+    endpoint: devicesEndpoint,
   });
 
+  const [ersEndpoint, ersDebouncing] = useERsEndpoint({ fleetId, activeStatuses, labels });
   const [erList, erLoading, erError, erRefetch, updating] = useFetchPeriodically<EnrollmentRequestList>({
-    endpoint: getERsEndpoint(fleetId, activeStatuses),
+    endpoint: ersEndpoint,
   });
 
   const data = React.useMemo(() => {
@@ -96,5 +122,11 @@ export const useDeviceLikeResources = ({
     erRefetch();
   }, [devicesRefetch, erRefetch]);
 
-  return [data, devicesLoading || erLoading, devicesError || erError, updating || erUpdating, refetch];
+  return [
+    data,
+    devicesLoading || erLoading,
+    devicesError || erError,
+    updating || erUpdating || devicesDebouncing || ersDebouncing,
+    refetch,
+  ];
 };

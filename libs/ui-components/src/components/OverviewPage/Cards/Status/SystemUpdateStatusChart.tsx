@@ -6,10 +6,19 @@ import { StatusMap, toChartData } from './utils';
 import { FilterSearchParams } from '../../../../utils/status/devices';
 import DonutChart from '../../../charts/DonutChart';
 import { getUpdateStatusHelperText } from '../../../Status/utils';
+import { FlightCtlLabel } from '../../../../types/extraTypes';
 
 type UpdateStatusMap = StatusMap<DeviceUpdatedStatusType>;
 
-const SystemUpdateStatusChart = ({ resources }: { resources: Device[] }) => {
+const SystemUpdateStatusChart = ({
+  resources,
+  labels,
+  fleets,
+}: {
+  resources: Device[];
+  labels: FlightCtlLabel[];
+  fleets: string[];
+}) => {
   const { t } = useTranslation();
 
   const statusItems = getSystemUpdateStatusItems(t);
@@ -28,7 +37,7 @@ const SystemUpdateStatusChart = ({ resources }: { resources: Device[] }) => {
     },
   );
 
-  const updateStatusData = toChartData(data, statusItems, FilterSearchParams.UpdatedStatus);
+  const updateStatusData = toChartData(data, statusItems, FilterSearchParams.UpdatedStatus, labels, fleets);
 
   return (
     <DonutChart title={t('System update status')} data={updateStatusData} helperText={getUpdateStatusHelperText(t)} />

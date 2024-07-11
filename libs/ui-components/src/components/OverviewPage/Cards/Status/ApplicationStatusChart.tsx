@@ -6,10 +6,19 @@ import { StatusMap, toChartData } from './utils';
 import { FilterSearchParams } from '../../../../utils/status/devices';
 import DonutChart from '../../../charts/DonutChart';
 import { getApplicatioStatusHelperText } from '../../../Status/utils';
+import { FlightCtlLabel } from '../../../../types/extraTypes';
 
 type AppStatusMap = StatusMap<ApplicationsSummaryStatusType>;
 
-const ApplicationStatusChart = ({ resources }: { resources: Device[] }) => {
+const ApplicationStatusChart = ({
+  resources,
+  labels,
+  fleets,
+}: {
+  resources: Device[];
+  labels: FlightCtlLabel[];
+  fleets: string[];
+}) => {
   const { t } = useTranslation();
 
   const statusItems = getApplicationSummaryStatusItems(t);
@@ -29,7 +38,7 @@ const ApplicationStatusChart = ({ resources }: { resources: Device[] }) => {
     },
   );
 
-  const appStatusData = toChartData(data, statusItems, FilterSearchParams.AppStatus);
+  const appStatusData = toChartData(data, statusItems, FilterSearchParams.AppStatus, labels, fleets);
 
   return (
     <DonutChart title={t('Application status')} data={appStatusData} helperText={getApplicatioStatusHelperText(t)} />
