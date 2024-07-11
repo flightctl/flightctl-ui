@@ -63,7 +63,7 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeh
           setIsOpen(open);
         }}
       >
-        {itemKeys.length ? (
+        {!!itemKeys.length && (
           <SelectList className="fctl-form-select__menu">
             {itemKeys.map((key) => (
               <SelectOption key={key} value={key}>
@@ -71,8 +71,6 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeh
               </SelectOption>
             ))}
           </SelectList>
-        ) : (
-          ''
         )}
         {children}
       </Select>

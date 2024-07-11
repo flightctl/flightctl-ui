@@ -77,7 +77,7 @@ const EditDeviceWizard = () => {
           try {
             const patches = getDevicePatches(device, values);
             if (patches.length > 0) {
-              await patch<Device>(`devices/${deviceId}`, getDevicePatches(device, values));
+              await patch<Device>(`devices/${deviceId}`, patches);
             }
             navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceId });
           } catch (e) {
