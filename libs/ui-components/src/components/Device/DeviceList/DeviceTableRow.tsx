@@ -10,7 +10,7 @@ import DeviceStatus from '../../Status/DeviceStatus';
 import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
-import DisplayName from '../../common/DisplayName';
+import ResourceLink from '../../common/ResourceLink';
 
 type DeviceTableRowProps = {
   device: Device;
@@ -40,9 +40,11 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
           isSelected: isRowSelected(device),
         }}
       />
-      <Td dataLabel={t('Name')}>{displayName || '-'}</Td>
+      <Td dataLabel={t('Name')}>
+        <ResourceLink id={deviceName} name={displayName || t('Untitled')} routeLink={ROUTE.DEVICE_DETAILS} />
+      </Td>
       <Td dataLabel={t('Fingerprint')}>
-        <DisplayName name={deviceName} routeLink={ROUTE.DEVICE_DETAILS} />
+        <ResourceLink id={deviceName} />
       </Td>
       <Td dataLabel={t('Fleet')}>
         <DeviceFleet deviceMetadata={device.metadata} />

@@ -50,7 +50,11 @@ const Table: TableFC = ({ columns, children, emptyFilters, getSortParams, onSele
           )}
           {columns.map((c, index) => (
             <Th key={c.name} sort={getSortParams(index)} {...c.thProps}>
-              {c.helperText ? <WithHelperText ariaLabel={c.name} showLabel content={c.helperText} /> : c.name}
+              {c.helperText ? (
+                <WithHelperText ariaLabel={c.name} showLabel content={c.helperText} triggerAction="hover" />
+              ) : (
+                c.name
+              )}
             </Th>
           ))}
           <Td />

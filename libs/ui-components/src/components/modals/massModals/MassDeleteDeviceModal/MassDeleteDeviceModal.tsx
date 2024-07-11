@@ -6,7 +6,7 @@ import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { DeviceLikeResource, isEnrollmentRequest } from '../../../../types/extraTypes';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { isPromiseRejected } from '../../../../types/typeUtils';
-import DisplayName from '../../../common/DisplayName';
+import ResourceLink from '../../../common/ResourceLink';
 
 type MassDeleteDeviceModalProps = {
   onClose: VoidFunction;
@@ -72,7 +72,7 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
                 return (
                   <Tr key={resource.metadata.name}>
                     <Td dataLabel={t('Fingerprint')}>
-                      <DisplayName name={resource.metadata.name} />
+                      <ResourceLink id={resource.metadata.name as string} />
                     </Td>
                     <Td dataLabel={t('Name')}>{resource.metadata.labels?.displayName || '-'}</Td>
                   </Tr>

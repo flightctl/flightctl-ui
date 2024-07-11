@@ -5,12 +5,13 @@ import { Button, Icon, Tooltip } from '@patternfly/react-core';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Link, type RouteWithPostfix } from '../../hooks/useNavigate';
 
-import './DisplayName.css';
+import './ResourceLink.css';
 
 const maxDisplayLength = 50;
 
-type DisplayNameProps = {
-  name: string | undefined;
+type ResourceDisplayLinkProps = {
+  id: string;
+  name?: string;
   variant?: 'shortened' | 'full';
   routeLink?: RouteWithPostfix;
 };
@@ -48,18 +49,19 @@ const CopyNameButton = ({ name }: { name: string }) => {
   );
 };
 
-const DisplayName = ({ name, variant = 'shortened', routeLink }: DisplayNameProps) => {
-  const displayText = getDisplayName(name);
-  const showCopy = name !== displayText;
+const ResourceLink = ({ id, name, variant = 'shortened', routeLink }: ResourceDisplayLinkProps) => {
+  const nameOrId = name || id;
+  const displayText = getDisplayName(nameOrId);
+  const showCopy = nameOrId !== displayText;
 
-  const textEl = <span className="fctl-display-name__text">{variant === 'full' ? name : displayText}</span>;
+  const textEl = <span className="fctl-resource-link__text">{variant === 'full' ? nameOrId : displayText}</span>;
 
   return (
-    <span className={`fctl-display-name fctl-display-name__${variant}`}>
-      {routeLink ? <Link to={{ route: routeLink, postfix: name }}>{textEl}</Link> : <>{textEl}</>}
-      {showCopy && name && <CopyNameButton name={name} />}
+    <span className={`fctl-resource-link fctl-resource-link__${variant}`}>
+      {routeLink ? <Link to={{ route: routeLink, postfix: id }}>{textEl}</Link> : <>{textEl}</>}
+      {showCopy && nameOrId && <CopyNameButton name={nameOrId} />}
     </span>
   );
 };
 
-export default DisplayName;
+export default ResourceLink;

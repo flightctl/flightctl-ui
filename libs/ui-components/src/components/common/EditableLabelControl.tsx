@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Label, TextInput } from '@patternfly/react-core';
+import { Button, TextInput } from '@patternfly/react-core';
 
 import { useTranslation } from '../../hooks/useTranslation';
 
@@ -53,20 +53,16 @@ const EditableLabelControl = ({
       }}
     />
   ) : (
-    // TODO Improve UX when Patternfly is at or above 5.3.x and we can directly use "isDisabled"
-    <Label
-      color={isEditable ? 'blue' : 'grey'}
-      variant="outline"
-      isOverflowLabel={isEditable}
+    <Button
+      variant="link"
+      isDisabled={!isEditable}
       onClick={() => {
-        if (isEditable) {
-          setIsEditing(true);
-          setLabel(defaultLabel);
-        }
+        setIsEditing(true);
+        setLabel(defaultLabel);
       }}
     >
       {addButtonText || t('Add label')}
-    </Label>
+    </Button>
   );
 };
 

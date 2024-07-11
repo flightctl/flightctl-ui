@@ -1,27 +1,26 @@
-.fctl-display-name {
+.fctl-resource-link {
   display: inline-flex;
   align-items: center;
 }
 
-.fctl-display-name.fctl-display-name__full {
+.fctl-resource-link.fctl-resource-link__full {
   display: flex;
 }
 
-
-.fctl-display-name .fctl-display-name__text {
+.fctl-resource-link .fctl-resource-link__text {
   text-wrap: nowrap;
   overflow-x: hidden;
 }
 
-.fctl-display-name .pf-v5-c-button {
+.fctl-resource-link .pf-v5-c-button {
   /* The copy name button is hidden by default */
   clip: rect(0 0 0 0);
-  clip-path: inset(50%); 
+  clip-path: inset(50%);
   overflow: hidden;
-  white-space: nowrap; 
+  white-space: nowrap;
 }
 
-.fctl-display-name:hover .pf-v5-c-button {
+.fctl-resource-link:hover .pf-v5-c-button {
   /* Makes the copy name button visible when hovering over the name */
   clip: initial;
   clip-path: initial;

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Tooltip } from '@patternfly/react-core';
+import { Button, Popover } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 
 import './WithHelperText.css';
@@ -7,21 +7,23 @@ import './WithHelperText.css';
 type WithHelperTextProps = {
   ariaLabel: string;
   showLabel?: boolean;
+  triggerAction?: 'click' | 'hover';
   content: React.ReactNode;
+  className?: string;
 };
 
-const WithHelperText = ({ ariaLabel, showLabel, content }: WithHelperTextProps) => (
+const WithHelperText = ({ ariaLabel, showLabel, content, triggerAction, className }: WithHelperTextProps) => (
   <>
     {showLabel && ariaLabel}
-    <Tooltip content={content}>
+    <Popover aria-label={ariaLabel} bodyContent={content} withFocusTrap triggerAction={triggerAction}>
       <Button
-        className="fctl-helper-text__icon"
+        className={className}
         isInline
         variant="plain"
         aria-label={`${ariaLabel} help text`}
         icon={<OutlinedQuestionCircleIcon />}
       />
-    </Tooltip>
+    </Popover>
   </>
 );
 

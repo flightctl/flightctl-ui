@@ -9,7 +9,7 @@ import {
 } from '../../utils/status/enrollmentRequest';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE } from '../../hooks/useNavigate';
-import DisplayName from '../common/DisplayName';
+import ResourceLink from '../common/ResourceLink';
 import EnrollmentRequestStatus from '../Status/EnrollmentRequestStatus';
 
 type EnrollmentRequestTableRow = {
@@ -43,7 +43,7 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
       />
       <Td dataLabel={t('Name')}>-</Td>
       <Td dataLabel={t('Fingerprint')}>
-        <DisplayName name={erName} routeLink={ROUTE.ENROLLMENT_REQUEST_DETAILS} />
+        <ResourceLink id={erName} routeLink={ROUTE.ENROLLMENT_REQUEST_DETAILS} />
       </Td>
       <Td dataLabel={t('Fleet')}>-</Td>
       <Td dataLabel={t('Application status')}>-</Td>
