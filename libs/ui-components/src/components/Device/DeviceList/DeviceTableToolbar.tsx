@@ -23,8 +23,8 @@ type DeviceTableToolbarProps = {
   resources: DeviceLikeResource[];
   search: TableTextSearchProps['value'];
   setSearch: TableTextSearchProps['setValue'];
-  fleetId: string | undefined;
-  setFleetId: (fleetId: string) => void;
+  ownerFleets: string[];
+  setOwnerFleets: (ownerFleets: string[]) => void;
   activeStatuses: FilterStatusMap;
   setActiveStatuses: (statuses: FilterStatusMap) => void;
   selectedLabels: FlightCtlLabel[];
@@ -37,8 +37,8 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
   const { t } = useTranslation();
   const {
     resources,
-    fleetId,
-    setFleetId,
+    ownerFleets,
+    setOwnerFleets,
     search,
     setSearch,
     activeStatuses,
@@ -82,8 +82,8 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
                 resources={resources}
                 selectedLabels={selectedLabels}
                 setSelectedLabels={setSelectedLabels}
-                selectedFleets={fleetId ? [fleetId] : []}
-                setSelectedFleets={(fleets) => setFleetId(fleets[0])}
+                selectedFleets={ownerFleets}
+                setSelectedFleets={setOwnerFleets}
                 activeStatuses={activeStatuses}
                 updateStatus={updateStatus}
                 fleets={fleets}
@@ -109,9 +109,9 @@ type DeviceToolbarChipsProps = Omit<DeviceTableToolbarProps, 'setActiveStatuses'
 const DeviceToolbarChips = ({
   activeStatuses,
   updateStatus,
-  fleetId,
+  ownerFleets,
   search,
-  setFleetId,
+  setOwnerFleets,
   setSearch,
   selectedLabels,
   setSelectedLabels,
@@ -135,10 +135,14 @@ const DeviceToolbarChips = ({
           </SplitItem>
         );
       })}
-      {fleetId && (
+      {!!ownerFleets.length && (
         <SplitItem>
-          <ChipGroup categoryName={t('Fleet')} isClosable onClick={() => setFleetId('')}>
-            <Chip onClick={() => setFleetId('')}>{fleetId}</Chip>
+          <ChipGroup categoryName={t('Fleet')} isClosable onClick={() => setOwnerFleets([])}>
+            {ownerFleets.map((fleetId) => (
+              <Chip key={fleetId} onClick={() => setOwnerFleets(ownerFleets.filter((f) => f !== fleetId))}>
+                {fleetId}
+              </Chip>
+            ))}
           </ChipGroup>
         </SplitItem>
       )}
@@ -166,13 +170,13 @@ const DeviceToolbarChips = ({
           </ChipGroup>
         </SplitItem>
       )}
-      {(!!statusKeys.length || !!fleetId || !!search || !!selectedLabels.length) && (
+      {(!!statusKeys.length || !!ownerFleets.length || !!search || !!selectedLabels.length) && (
         <SplitItem>
           <Button
             variant="link"
             onClick={() => {
               updateStatus();
-              setFleetId('');
+              setOwnerFleets([]);
               setSearch('');
               setSelectedLabels([]);
             }}

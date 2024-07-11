@@ -109,10 +109,10 @@ const getDeviceColumns = (t: TFunction): TableColumn<DeviceLikeResource>[] => [
 interface DeviceTableProps {
   resources: Array<DeviceLikeResource>;
   refetch: VoidFunction;
-  fleetId?: string;
+  ownerFleets: string[];
   activeStatuses: FilterStatusMap;
   hasFiltersEnabled: boolean;
-  setFleetId: (fleedId: string) => void;
+  setOwnerFleets: (ownerFleets: string[]) => void;
   setActiveStatuses: (activeStatuses: FilterStatusMap) => void;
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
@@ -123,8 +123,8 @@ interface DeviceTableProps {
 export const DeviceTable = ({
   resources,
   refetch,
-  fleetId,
-  setFleetId,
+  ownerFleets,
+  setOwnerFleets,
   activeStatuses,
   setActiveStatuses,
   selectedLabels,
@@ -171,8 +171,8 @@ export const DeviceTable = ({
     <>
       <DeviceTableToolbar
         {...rest}
-        fleetId={fleetId}
-        setFleetId={setFleetId}
+        ownerFleets={ownerFleets}
+        setOwnerFleets={setOwnerFleets}
         activeStatuses={activeStatuses}
         setActiveStatuses={setActiveStatuses}
         selectedLabels={selectedLabels}
@@ -273,16 +273,16 @@ export const DeviceTable = ({
 const DeviceList = () => {
   const { t } = useTranslation();
   const {
-    fleetId,
+    ownerFleets,
     activeStatuses,
     hasFiltersEnabled,
-    setFleetId,
+    setOwnerFleets,
     setActiveStatuses,
     selectedLabels,
     setSelectedLabels,
   } = useDeviceBackendFilters();
   const [data, loading, error, updating, refetch] = useDeviceLikeResources({
-    fleetId,
+    ownerFleets,
     activeStatuses,
     labels: selectedLabels,
   });
@@ -299,9 +299,9 @@ const DeviceList = () => {
             resources={data}
             refetch={refetch}
             hasFiltersEnabled={hasFiltersEnabled || updating}
-            fleetId={fleetId}
+            ownerFleets={ownerFleets}
             activeStatuses={activeStatuses}
-            setFleetId={setFleetId}
+            setOwnerFleets={setOwnerFleets}
             setActiveStatuses={setActiveStatuses}
             selectedLabels={selectedLabels}
             setSelectedLabels={setSelectedLabels}

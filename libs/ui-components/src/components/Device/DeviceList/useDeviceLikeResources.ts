@@ -21,19 +21,13 @@ const setLabelParams = (params: URLSearchParams, labels?: FlightCtlLabel[]) => {
   }
 };
 
-type EREndpointArgs = {
-  fleetId: string | undefined;
-  activeStatuses: FilterStatusMap;
-  labels?: FlightCtlLabel[];
-};
-
-const getERsEndpoint = ({ fleetId, activeStatuses, labels }: EREndpointArgs) => {
-  if (fleetId) {
+const getERsEndpoint = ({ ownerFleets, activeStatuses, labels }: DevicesEndpointArgs) => {
+  if (ownerFleets?.length) {
     return '';
   }
   if (
-    Object.values(activeStatuses).some((s) => s.length) &&
-    !activeStatuses[FilterSearchParams.DeviceStatus].includes(EnrollmentRequestStatus.Pending)
+    Object.values(activeStatuses || {}).some((s) => s.length) &&
+    !activeStatuses?.[FilterSearchParams.DeviceStatus].includes(EnrollmentRequestStatus.Pending)
   ) {
     return '';
   }
@@ -45,12 +39,12 @@ const getERsEndpoint = ({ fleetId, activeStatuses, labels }: EREndpointArgs) => 
 };
 
 type DevicesEndpointArgs = {
-  fleetId?: string;
+  ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
 };
 
-const getDevicesEndpoint = ({ fleetId, activeStatuses, labels }: DevicesEndpointArgs) => {
+const getDevicesEndpoint = ({ ownerFleets, activeStatuses, labels }: DevicesEndpointArgs) => {
   const filterByAppStatus = activeStatuses?.[FilterSearchParams.AppStatus];
   const filterByDevStatus = activeStatuses?.[FilterSearchParams.DeviceStatus];
   const filterByUpdateStatus = activeStatuses?.[FilterSearchParams.UpdatedStatus];
@@ -65,8 +59,8 @@ const getDevicesEndpoint = ({ fleetId, activeStatuses, labels }: DevicesEndpoint
   }
 
   const params = new URLSearchParams();
-  if (fleetId) {
-    params.set('owner', `Fleet/${fleetId}`);
+  if (ownerFleets?.length) {
+    params.set('owner', ownerFleets.map((fleet) => `Fleet/${fleet}`).join(','));
   }
   filterByAppStatus?.forEach((appSt) => params.append('statusFilter', `applications.summary.status=${appSt}`));
   filterByDevStatus?.forEach((devSt) => {
@@ -86,27 +80,27 @@ export const useDevicesEndpoint = (args: DevicesEndpointArgs): [string, boolean]
   return [devicesEndpointDebounced, endpoint !== devicesEndpointDebounced];
 };
 
-const useERsEndpoint = (args: EREndpointArgs): [string, boolean] => {
+const useERsEndpoint = (args: DevicesEndpointArgs): [string, boolean] => {
   const endpoint = getERsEndpoint(args);
   const [ersEndpointDebounced] = useDebounce(endpoint, 1000);
   return [ersEndpointDebounced, endpoint !== ersEndpointDebounced];
 };
 
 export const useDeviceLikeResources = ({
-  fleetId,
+  ownerFleets,
   activeStatuses,
   labels,
 }: {
-  fleetId?: string;
+  ownerFleets?: string[];
   activeStatuses: FilterStatusMap;
   labels?: FlightCtlLabel[];
 }): [DeviceLikeResource[], boolean, unknown, boolean, VoidFunction] => {
-  const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint({ fleetId, activeStatuses, labels });
+  const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint({ ownerFleets, activeStatuses, labels });
   const [devicesList, devicesLoading, devicesError, devicesRefetch, erUpdating] = useFetchPeriodically<DeviceList>({
     endpoint: devicesEndpoint,
   });
 
-  const [ersEndpoint, ersDebouncing] = useERsEndpoint({ fleetId, activeStatuses, labels });
+  const [ersEndpoint, ersDebouncing] = useERsEndpoint({ ownerFleets, activeStatuses, labels });
   const [erList, erLoading, erError, erRefetch, updating] = useFetchPeriodically<EnrollmentRequestList>({
     endpoint: ersEndpoint,
   });
