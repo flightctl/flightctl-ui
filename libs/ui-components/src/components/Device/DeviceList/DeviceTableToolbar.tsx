@@ -30,6 +30,7 @@ type DeviceTableToolbarProps = {
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
   fleets: Fleet[];
+  isFilterUpdating: boolean;
 };
 
 const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarProps>> = ({ children, ...rest }) => {
@@ -45,6 +46,7 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
     selectedLabels,
     setSelectedLabels,
     fleets,
+    isFilterUpdating,
   } = rest;
 
   const updateStatus: UpdateStatus = (statusType, status) => {
@@ -85,6 +87,7 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
                 activeStatuses={activeStatuses}
                 updateStatus={updateStatus}
                 fleets={fleets}
+                isFilterUpdating={isFilterUpdating}
               />
             </ToolbarItem>
             <ToolbarItem variant="search-filter">

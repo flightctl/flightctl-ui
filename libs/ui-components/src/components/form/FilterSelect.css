@@ -2,3 +2,7 @@
     height: 18rem;
     overflow: auto;
 }
+
+.fclt-filter-select__badge {
+    margin-left: var(--pf-v5-global--spacer--sm);
+}

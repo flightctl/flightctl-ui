@@ -117,6 +117,7 @@ interface DeviceTableProps {
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
   fleets: Fleet[];
+  isFilterUpdating: boolean;
 }
 
 export const DeviceTable = ({
@@ -130,6 +131,7 @@ export const DeviceTable = ({
   setSelectedLabels,
   hasFiltersEnabled,
   fleets,
+  isFilterUpdating,
 }: DeviceTableProps) => {
   const { t } = useTranslation();
   const [requestId, setRequestId] = React.useState<string>();
@@ -177,6 +179,7 @@ export const DeviceTable = ({
         setSelectedLabels={setSelectedLabels}
         resources={resources}
         fleets={fleets}
+        isFilterUpdating={isFilterUpdating}
       >
         <ToolbarItem>
           <Button onClick={() => setAddDeviceModal(true)}>{t('Add devices')}</Button>
@@ -303,6 +306,7 @@ const DeviceList = () => {
             selectedLabels={selectedLabels}
             setSelectedLabels={setSelectedLabels}
             fleets={fleetsList?.items || []}
+            isFilterUpdating={updating}
           />
         </ListPageBody>
       </ListPage>

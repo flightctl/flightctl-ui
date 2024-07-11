@@ -72,6 +72,7 @@ type DeviceFilterSelectProps = {
   activeStatuses: FilterStatusMap;
   updateStatus: UpdateStatus;
   fleets: Fleet[];
+  isFilterUpdating: boolean;
 };
 
 const DeviceFilterSelect: React.FC<DeviceFilterSelectProps> = ({
@@ -83,6 +84,7 @@ const DeviceFilterSelect: React.FC<DeviceFilterSelectProps> = ({
   activeStatuses,
   updateStatus,
   fleets,
+  isFilterUpdating,
 }) => {
   const { t } = useTranslation();
   const [filter, setFilter] = React.useState('');
@@ -102,7 +104,13 @@ const DeviceFilterSelect: React.FC<DeviceFilterSelectProps> = ({
   }, selectedFleets.length + selectedLabels.length);
 
   return (
-    <FilterSelect selectedFilters={selectedFilters} placeholder={t('Filters')} filter={filter} setFilter={setFilter}>
+    <FilterSelect
+      selectedFilters={selectedFilters}
+      placeholder={t('Filters')}
+      filter={filter}
+      setFilter={setFilter}
+      isFilterUpdating={isFilterUpdating}
+    >
       <SelectList>
         <Grid hasGutter>
           {Object.keys(activeStatuses).map((k) => {

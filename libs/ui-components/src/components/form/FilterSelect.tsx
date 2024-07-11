@@ -3,6 +3,7 @@ import {
   MenuToggle,
   Select,
   SelectGroup,
+  Spinner,
   TextInputGroup,
   TextInputGroupMain,
   TextInputGroupUtilities,
@@ -26,9 +27,17 @@ type FilterSelectProps = React.PropsWithChildren<{
   filter: string;
   setFilter: (filter: string) => void;
   selectedFilters: number;
+  isFilterUpdating: boolean;
 }>;
 
-const FilterSelect: React.FC<FilterSelectProps> = ({ placeholder, filter, setFilter, children, selectedFilters }) => {
+const FilterSelect: React.FC<FilterSelectProps> = ({
+  placeholder,
+  filter,
+  setFilter,
+  children,
+  selectedFilters,
+  isFilterUpdating,
+}) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const textInputRef = React.useRef<HTMLInputElement>();
 
@@ -64,9 +73,16 @@ const FilterSelect: React.FC<FilterSelectProps> = ({ placeholder, filter, setFil
               innerRef={textInputRef}
             />
           </TextInputGroup>
+          {isFilterUpdating && (
+            <TextInputGroupUtilities onClick={toggleExpand}>
+              <Spinner size="sm" />
+            </TextInputGroupUtilities>
+          )}
           {!!selectedFilters && (
             <TextInputGroupUtilities onClick={toggleExpand}>
-              <Badge isRead>{selectedFilters}</Badge>
+              <Badge isRead className="fclt-filter-select__badge">
+                {selectedFilters}
+              </Badge>
             </TextInputGroupUtilities>
           )}
         </MenuToggle>

@@ -25,6 +25,7 @@ type StatusCardFiltersProps = {
   setSelectedFleets: (fleets: string[]) => void;
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
+  isFilterUpdating: boolean;
 };
 
 const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
@@ -34,6 +35,7 @@ const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
   setSelectedFleets,
   selectedLabels,
   setSelectedLabels,
+  isFilterUpdating,
 }) => {
   const { t } = useTranslation();
   const [filter, setFilter] = React.useState('');
@@ -51,6 +53,7 @@ const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
           placeholder={t('Filter by fleets or labels')}
           filter={filter}
           setFilter={setFilter}
+          isFilterUpdating={isFilterUpdating}
         >
           <SelectList>
             <Grid hasGutter>

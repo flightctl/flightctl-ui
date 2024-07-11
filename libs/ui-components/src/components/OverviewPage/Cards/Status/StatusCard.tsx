@@ -30,11 +30,11 @@ const StatusCard = () => {
   const [fleets, setFleets] = React.useState<string[]>([]);
   const [labels, setLabels] = React.useState<FlightCtlLabel[]>([]);
 
-  const [devicesEndpoint] = useDevicesEndpoint({
+  const [devicesEndpoint, isDebounced] = useDevicesEndpoint({
     fleetId: fleets.length ? fleets[0] : undefined,
     labels,
   });
-  const [devicesList, loading, error] = useFetchPeriodically<DeviceList>({
+  const [devicesList, loading, error, , isUpdating] = useFetchPeriodically<DeviceList>({
     endpoint: devicesEndpoint,
   });
 
@@ -93,6 +93,7 @@ const StatusCard = () => {
               setSelectedFleets={setFleets}
               selectedLabels={labels}
               setSelectedLabels={setLabels}
+              isFilterUpdating={isUpdating || isDebounced}
             />
           </FlexItem>
         </Flex>
