@@ -29,7 +29,7 @@ export const useDeviceBackendFilters = () => {
   } = useAppContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const paramsRef = React.useRef(searchParams);
-  const fleetId = searchParams.get(FilterSearchParams.Fleet) || undefined;
+  const ownerFleets = searchParams.getAll(FilterSearchParams.Fleet) || undefined;
 
   const updateSearchParams = React.useCallback(
     (params: [string, string][]) => {
@@ -83,9 +83,9 @@ export const useDeviceBackendFilters = () => {
     };
   });
 
-  const setFleetId = React.useCallback(
-    (fleedId: string) => {
-      updateSearchParams(getNewParams(paramsRef.current, { [FilterSearchParams.Fleet]: [fleedId] }));
+  const setOwnerFleets = React.useCallback(
+    (ownerFleets: string[]) => {
+      updateSearchParams(getNewParams(paramsRef.current, { [FilterSearchParams.Fleet]: ownerFleets }));
     },
     [updateSearchParams],
   );
@@ -105,13 +105,13 @@ export const useDeviceBackendFilters = () => {
   );
 
   const hasFiltersEnabled =
-    !!selectedLabels.length || !!fleetId || !!Object.values(activeStatuses).some((s) => !!s.length);
+    !!selectedLabels.length || !!ownerFleets.length || !!Object.values(activeStatuses).some((s) => !!s.length);
 
   return {
     activeStatuses,
     setActiveStatuses,
-    fleetId,
-    setFleetId,
+    ownerFleets,
+    setOwnerFleets,
     selectedLabels,
     setSelectedLabels,
     hasFiltersEnabled,

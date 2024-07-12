@@ -31,9 +31,10 @@ const StatusCard = () => {
   const [labels, setLabels] = React.useState<FlightCtlLabel[]>([]);
 
   const [devicesEndpoint, isDebounced] = useDevicesEndpoint({
-    fleetId: fleets.length ? fleets[0] : undefined,
+    ownerFleets: fleets,
     labels,
   });
+
   const [devicesList, loading, error, , isUpdating] = useFetchPeriodically<DeviceList>({
     endpoint: devicesEndpoint,
   });
