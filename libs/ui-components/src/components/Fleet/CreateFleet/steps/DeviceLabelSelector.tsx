@@ -83,7 +83,7 @@ const DeviceLabelSelector = () => {
             reloadDeviceSelection(labels);
           }}
         >
-          Try again
+          {t('Try again')}
         </Button>
       </Alert>
     );
