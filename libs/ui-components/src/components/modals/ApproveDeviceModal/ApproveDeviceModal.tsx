@@ -5,7 +5,7 @@ import { Formik } from 'formik';
 
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
-import DeviceEnrollmentForm, { DeviceEnrollmentFormProps, DeviceEnrollmentFormValues } from './DeviceEnrollmentForm';
+import ApproveDeviceForm, { ApproveDeviceFormProps, ApproveDeviceFormValues } from './ApproveDeviceForm';
 import {
   EnrollmentRequestStatus as EnrollmentRequestStatusType,
   getApprovalStatus,
@@ -16,7 +16,7 @@ import { deviceApprovalValidationSchema } from '../../form/validations';
 import { toAPILabel } from '../../../utils/labels';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-type DeviceEnrollmentModalProps = Omit<DeviceEnrollmentFormProps, 'error'>;
+type DeviceEnrollmentModalProps = Omit<ApproveDeviceFormProps, 'error'>;
 
 const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmentRequest, onClose }) => {
   const { t } = useTranslation();
@@ -24,7 +24,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
   const [error, setError] = React.useState<string>();
   const { user } = useAppContext();
   return (
-    <Formik<DeviceEnrollmentFormValues>
+    <Formik<ApproveDeviceFormValues>
       initialValues={{
         labels: [],
         displayName: '',
@@ -52,7 +52,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
       {({ isSubmitting }) => (
         <Modal title={t('Device enrollment request')} isOpen onClose={() => !isSubmitting && onClose()} variant="small">
           {getApprovalStatus(enrollmentRequest) !== EnrollmentRequestStatusType.Approved ? (
-            <DeviceEnrollmentForm enrollmentRequest={enrollmentRequest} onClose={onClose} error={error} />
+            <ApproveDeviceForm enrollmentRequest={enrollmentRequest} onClose={onClose} error={error} />
           ) : (
             <Alert isInline variant="info" title={t('Enrollment request is already approved.')} />
           )}

@@ -36,7 +36,7 @@ const isPendingEnrollmentRequest = (r: DeviceLikeResource): r is EnrollmentReque
   return isEnrollmentRequest(r) && getApprovalStatus(r) === EnrollmentRequestStatus.Pending;
 };
 
-type DeviceEnrollmentFormValues = {
+type MassApproveDeviceFormValues = {
   labels: { key: string; value: string }[];
   displayName: string;
 };
@@ -113,7 +113,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
     );
   }
 
-  const approveResources = async (values: DeviceEnrollmentFormValues) => {
+  const approveResources = async (values: MassApproveDeviceFormValues) => {
     setProgress(0);
     setErrors(undefined);
     const promises = pendingEnrollments.map(async (r, index) => {
@@ -142,7 +142,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
   };
 
   return (
-    <Formik<DeviceEnrollmentFormValues>
+    <Formik<MassApproveDeviceFormValues>
       initialValues={{
         labels: [],
         displayName: '',

@@ -27,7 +27,7 @@ import { EnrollmentRequest } from '@flightctl/types';
 import * as React from 'react';
 
 import { useFetch } from '../../../hooks/useFetch';
-import DeviceEnrollmentModal from '../DeviceEnrollmentModal/DeviceEnrollmentModal';
+import ApproveDeviceModal from '../../modals/ApproveDeviceModal/ApproveDeviceModal';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import EnrollmentRequestStatus from '../../Status/EnrollmentRequestStatus';
@@ -210,7 +210,7 @@ const EnrollmentRequestDetails = () => {
         )}
       </Grid>
       {er && isApprovalModalOpen && (
-        <DeviceEnrollmentModal
+        <ApproveDeviceModal
           enrollmentRequest={er}
           onClose={(updateList) => {
             setIsApprovalModalOpen(false);

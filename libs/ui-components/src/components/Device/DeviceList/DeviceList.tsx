@@ -32,7 +32,7 @@ import { getResourceId } from '../../../utils/resource';
 import { DeviceLikeResource, FlightCtlLabel, isEnrollmentRequest } from '../../../types/extraTypes';
 import MassDeleteDeviceModal from '../../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
 import MassApproveDeviceModal from '../../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
-import DeviceEnrollmentModal from '../../EnrollmentRequest/DeviceEnrollmentModal/DeviceEnrollmentModal';
+import ApproveDeviceModal from '../../modals/ApproveDeviceModal/ApproveDeviceModal';
 import ResourceListEmptyState from '../../common/ResourceListEmptyState';
 import { useTableSort } from '../../../hooks/useTableSort';
 import { useTableSelect } from '../../../hooks/useTableSelect';
@@ -237,7 +237,7 @@ export const DeviceTable = ({
       {deleteErModal}
       {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}
       {currentEnrollmentRequest && (
-        <DeviceEnrollmentModal
+        <ApproveDeviceModal
           enrollmentRequest={currentEnrollmentRequest}
           onClose={(updateList) => {
             setRequestId(undefined);
