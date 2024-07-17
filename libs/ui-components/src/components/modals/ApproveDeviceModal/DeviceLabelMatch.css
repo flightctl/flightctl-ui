@@ -1,16 +1,16 @@
 /* Style to get the appearance of a disabled Input with messages spanning multiple lines */
-.fctl_approve-device__fleetname {
+.fctl-device-label-match {
   display: flex;
   align-items: center;
   background-color: var(--pf-v5-global--disabled-color--300);
   padding: 0.5rem;
 }
 
-.fctl_approve-device__fleetname__icon  {
+.fctl-device-label-match__icon  {
   margin-right: 0.5rem;
 }
 
-.fctl_approve-device__fleetname .fctl_approve-device__fleetname__placeholder {
+.fctl-device-label-match__placeholder {
   color: var(--pf-v5-global--disabled-color--100);
 }
 

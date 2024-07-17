@@ -10,10 +10,9 @@ import { getLabelValueValidations } from '../../form/validations';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
-import useDeviceLabelMatch, { DeviceLabelMatch } from '../../../hooks/useDeviceLabelMatch';
+import useDeviceLabelMatch from '../../../hooks/useDeviceLabelMatch';
 import ResourceLink from '../../common/ResourceLink';
-
-import './ApproveDeviceForm.css';
+import DeviceLabelMatch from './DeviceLabelMatch';
 
 export type ApproveDeviceFormValues = {
   labels: FlightCtlLabel[];
