@@ -8,12 +8,13 @@ declare global {
   }
 }
 
-const apiServer = `${window.location.protocol}//${window.location.hostname}${
+const apiServer = `${window.location.hostname}${
   window.FCTL_API_PORT ? `:${window.FCTL_API_PORT}` : ''
 }/api/proxy/plugin/flightctl-plugin/api-proxy`;
 
-const flightCtlAPI = `${apiServer}/api/flightctl`;
-const metricsAPI = `${apiServer}/api/metrics`;
+const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
+const metricsAPI = `${window.location.protocol}//${apiServer}/api/metrics`;
+export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
 const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   if (response.ok) {

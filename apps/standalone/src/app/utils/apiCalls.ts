@@ -1,12 +1,11 @@
 /* eslint-disable no-console */
 import { PatchRequest } from '@flightctl/types';
 
-const apiServer = `${window.location.protocol}//${window.location.hostname}${
-  window.API_PORT ? `:${window.API_PORT}` : ''
-}`;
+const apiServer = `${window.location.hostname}${window.API_PORT ? `:${window.API_PORT}` : ''}`;
 
-const flightCtlAPI = `${apiServer}/api/flightctl`;
-const metricsAPI = `${apiServer}/api/metrics`;
+const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
+const metricsAPI = `${window.location.protocol}//${apiServer}/api/metrics`;
+export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
 const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   if (response.ok) {

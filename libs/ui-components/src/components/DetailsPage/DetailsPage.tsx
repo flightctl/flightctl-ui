@@ -17,6 +17,8 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { Link, Route } from '../../hooks/useNavigate';
 import ErrorBoundary from '../common/ErrorBoundary';
 
+import './DetailsPage.css';
+
 export type DetailsPageProps = {
   id: string;
   title?: string;
@@ -83,7 +85,7 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
         </Split>
       </PageSection>
       {nav && (
-        <PageSection variant="light" type="nav">
+        <PageSection variant="light" type="nav" className="fctl-details-page__nav">
           {nav}
         </PageSection>
       )}
