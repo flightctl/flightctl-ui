@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { DeviceConsole } from './DeviceConsole';
 import type { DeviceOSSpec } from './DeviceOSSpec';
 import type { ResourceMonitor } from './ResourceMonitor';
 export type RenderedDeviceSpec = {
@@ -18,5 +19,6 @@ export type RenderedDeviceSpec = {
    * Array of resource monitor configurations.
    */
   resources?: Array<ResourceMonitor>;
+  console?: DeviceConsole;
 };
 

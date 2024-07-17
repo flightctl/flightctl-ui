@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type GitSshConfig = {
+export type SshConfig = {
   /**
    * Base64 encoded private SSH key
    */

@@ -2,12 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { GitHttpConfig } from './GitHttpConfig';
-export type GitHttpRepoSpec = {
+import type { HttpConfig } from './HttpConfig';
+export type HttpRepoSpec = {
   /**
    * The HTTP Git repository URL to clone from
    */
   repo: string;
-  httpConfig: GitHttpConfig;
+  httpConfig: HttpConfig;
 };
 

@@ -6,4 +6,5 @@ export enum TemplateDiscriminators {
   TemplateDiscriminatorGitConfig = 'GitConfigProviderSpec',
   TemplateDiscriminatorKubernetesSec = 'KubernetesSecretProviderSpec',
   TemplateDiscriminatorInlineConfig = 'InlineConfigProviderSpec',
+  TemplateDiscriminatorHttpConfig = 'HttpConfigProviderSpec',
 }
