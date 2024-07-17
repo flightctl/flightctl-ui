@@ -1,24 +1,26 @@
 import {
-  GitHttpConfig,
-  GitHttpRepoSpec,
-  GitSshConfig,
-  GitSshRepoSpec,
+  HttpConfig,
+  HttpRepoSpec,
   PatchRequest,
   Repository,
   RepositorySpec,
   ResourceSync,
+  SshConfig,
+  SshRepoSpec,
 } from '@flightctl/types';
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
 import { API_VERSION } from '../../../constants';
 import { getErrorMessage } from '../../../utils/error';
 import * as Yup from 'yup';
 import { TFunction } from 'i18next';
-import { isHttpRepoSpec, isSshRepoSpec } from '../../../types/extraTypes';
 import { appendJSONPatch } from '../../../utils/patch';
 import { maxLengthString, validKubernetesDnsSubdomain } from '../../form/validations';
 
 const MAX_TARGET_REVISION_LENGTH = 244;
 const MAX_PATH_LENGTH = 2048;
+
+export const isHttpRepoSpec = (repoSpec: RepositorySpec): repoSpec is HttpRepoSpec => !!repoSpec['httpConfig'];
+export const isSshRepoSpec = (repoSpec: RepositorySpec): repoSpec is SshRepoSpec => !!repoSpec['sshConfig'];
 
 export const getInitValues = (
   repository?: Repository,
@@ -125,7 +127,7 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
       });
     }
     if (!isHttpRepoSpec(repository.spec)) {
-      const value: GitHttpConfig = {
+      const value: HttpConfig = {
         skipServerVerification: values.httpConfig?.skipServerVerification,
       };
 
@@ -240,7 +242,7 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
       });
     }
     if (!isSshRepoSpec(repository.spec)) {
-      const value: GitSshConfig = {
+      const value: SshConfig = {
         privateKeyPassphrase: values.sshConfig?.privateKeyPassphrase,
         skipServerVerification: values.sshConfig?.skipServerVerification,
       };
@@ -358,37 +360,40 @@ export const getRepository = (values: Omit<RepositoryFormValues, 'useResourceSyn
     repo: values.url,
   };
   if (values.configType === 'http' && values.httpConfig) {
-    (spec as GitHttpRepoSpec).httpConfig = {
+    const httpRepoSpec = spec as HttpRepoSpec;
+    httpRepoSpec.httpConfig = {
       skipServerVerification: values.httpConfig.skipServerVerification,
     };
     const caCrt = values.httpConfig.caCrt;
     if (caCrt && !values.httpConfig.skipServerVerification) {
-      (spec as GitHttpRepoSpec).httpConfig['ca.crt'] = btoa(caCrt);
+      httpRepoSpec.httpConfig['ca.crt'] = btoa(caCrt);
     }
     if (values.httpConfig.basicAuth?.use) {
-      (spec as GitHttpRepoSpec).httpConfig.username = values.httpConfig.basicAuth.username;
-      (spec as GitHttpRepoSpec).httpConfig.password = values.httpConfig.basicAuth.password;
+      httpRepoSpec.httpConfig.username = values.httpConfig.basicAuth.username;
+      httpRepoSpec.httpConfig.password = values.httpConfig.basicAuth.password;
     }
 
     if (values.httpConfig.mTlsAuth?.use) {
       const tlsCrt = values.httpConfig.mTlsAuth.tlsCrt;
       if (tlsCrt) {
-        (spec as GitHttpRepoSpec).httpConfig['tls.crt'] = btoa(tlsCrt);
+        httpRepoSpec.httpConfig['tls.crt'] = btoa(tlsCrt);
       }
       const tlsKey = values.httpConfig.mTlsAuth.tlsKey;
       if (tlsKey) {
-        (spec as GitHttpRepoSpec).httpConfig['tls.key'] = btoa(tlsKey);
+        httpRepoSpec.httpConfig['tls.key'] = btoa(tlsKey);
       }
     }
   } else if (values.configType === 'ssh' && values.sshConfig) {
-    (spec as GitSshRepoSpec).sshConfig = {
+    const sshRepoSpec = spec as SshRepoSpec;
+
+    sshRepoSpec.sshConfig = {
       privateKeyPassphrase: values.sshConfig.privateKeyPassphrase,
       skipServerVerification: values.sshConfig.skipServerVerification,
     };
 
     const sshPrivateKey = values.sshConfig.sshPrivateKey;
     if (sshPrivateKey) {
-      (spec as GitSshRepoSpec).sshConfig.sshPrivateKey = btoa(sshPrivateKey);
+      sshRepoSpec.sshConfig.sshPrivateKey = btoa(sshPrivateKey);
     }
   }
 

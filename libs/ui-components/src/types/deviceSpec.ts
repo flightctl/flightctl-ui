@@ -1,12 +1,13 @@
 import {
   GenericConfigSpec,
   GitConfigProviderSpec,
+  HttpConfigProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
 } from '@flightctl/types';
 
 export type ConfigTemplate = {
-  type: 'git' | 'secret' | 'inline';
+  type: 'git' | 'http' | 'secret' | 'inline';
   name: string;
 };
 
@@ -47,4 +48,17 @@ export const isInlineConfigTemplate = (configTemplate: ConfigTemplate): configTe
 export const isInlineProviderSpec = (providerSpec: GenericConfigSpec): providerSpec is InlineConfigProviderSpec =>
   providerSpec.configType === 'InlineConfigProviderSpec';
 
-export type SpecConfigTemplate = GitConfigTemplate | KubeSecretTemplate | InlineConfigTemplate;
+export type HttpConfigTemplate = ConfigTemplate & {
+  type: 'http';
+  repository: string;
+  suffix: string;
+  filePath: string;
+};
+
+export const isHttpConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is HttpConfigTemplate =>
+  configTemplate.type === 'http';
+
+export const isHttpConfigProviderSpec = (providerSpec: GenericConfigSpec): providerSpec is HttpConfigProviderSpec =>
+  providerSpec.configType === 'HttpConfigProviderSpec';
+
+export type SpecConfigTemplate = GitConfigTemplate | HttpConfigTemplate | KubeSecretTemplate | InlineConfigTemplate;

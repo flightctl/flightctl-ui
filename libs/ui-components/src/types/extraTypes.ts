@@ -1,16 +1,4 @@
-import {
-  ConditionType,
-  Device,
-  EnrollmentRequest,
-  Fleet,
-  GitConfigProviderSpec,
-  GitHttpRepoSpec,
-  GitSshRepoSpec,
-  InlineConfigProviderSpec,
-  KubernetesSecretProviderSpec,
-  RepositorySpec,
-  ResourceSync,
-} from '@flightctl/types';
+import { ConditionType, Device, EnrollmentRequest, Fleet, ResourceSync } from '@flightctl/types';
 
 export enum FlightControlMetrics {
   ACTIVE_AGENT_COUNT_METRIC = 'flightctl_devicesimulator_active_agent_count',
@@ -60,12 +48,7 @@ export type AnnotationType = DeviceAnnotation; // Add more types when they are a
 
 export type DeviceLikeResource = Device | EnrollmentRequest;
 
-export type ConfigSourceProvider = GitConfigProviderSpec | KubernetesSecretProviderSpec | InlineConfigProviderSpec;
-
 export const isEnrollmentRequest = (resource: DeviceLikeResource): resource is EnrollmentRequest =>
   resource.kind === 'EnrollmentRequest';
 
 export const isFleet = (resource: ResourceSync | Fleet): resource is Fleet => resource.kind === 'Fleet';
-
-export const isHttpRepoSpec = (repoSpec: RepositorySpec): repoSpec is GitHttpRepoSpec => !!repoSpec['httpConfig'];
-export const isSshRepoSpec = (repoSpec: RepositorySpec): repoSpec is GitSshRepoSpec => !!repoSpec['sshConfig'];

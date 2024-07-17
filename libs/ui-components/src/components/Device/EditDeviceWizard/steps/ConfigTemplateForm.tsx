@@ -20,12 +20,7 @@ import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclama
 
 import { Repository, RepositoryList } from '@flightctl/types';
 import TextField from '../../../form/TextField';
-import {
-  GitConfigTemplate,
-  InlineConfigTemplate,
-  KubeSecretTemplate,
-  SpecConfigTemplate,
-} from '../../../../types/deviceSpec';
+import { GitConfigTemplate, KubeSecretTemplate, SpecConfigTemplate } from '../../../../types/deviceSpec';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
@@ -163,7 +158,7 @@ const InlineConfigForm: React.FC<ConfigFormProps> = ({ index }) => {
 };
 
 type ConfigSectionProps = {
-  ct: KubeSecretTemplate | InlineConfigTemplate | GitConfigTemplate;
+  ct: SpecConfigTemplate;
   index: number;
   repositories: Repository[];
   repoRefetch: VoidFunction;

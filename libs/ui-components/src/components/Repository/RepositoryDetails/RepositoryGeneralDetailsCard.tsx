@@ -17,7 +17,7 @@ import { Repository } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import RepositorySource from './RepositorySource';
 import RepositoryStatus from '../../Status/RepositoryStatus';
-import { isHttpRepoSpec, isSshRepoSpec } from '../../../types/extraTypes';
+import { isHttpRepoSpec, isSshRepoSpec } from '../CreateRepository/utils';
 
 const RepoPrivacy = ({ repo }: { repo: Repository }) => {
   const { t } = useTranslation();
