@@ -53,21 +53,28 @@ const useDeviceLabelMatch = (): [MatchLabelsFn, DeviceMatchStatus] => {
   const matchLabelsFn = React.useCallback(
     (newLabels: FlightCtlLabel[], hasErrors: boolean) => {
       const matchDeviceLabels = async () => {
-        if (abortControllerRef.current) {
-          abortControllerRef.current.abort();
-        }
-        abortControllerRef.current = new AbortController();
-
         // TODO PoC implementation, we're missing the ability of filtering in the "fleets" endpoint.
-        let result: DeviceMatchStatus;
+        let result: DeviceMatchStatus = {
+          status: 'unchecked',
+          detail: '',
+        };
+
         try {
+          if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+          }
+          abortControllerRef.current = new AbortController();
+
           const allFleets = await get<FleetList>('fleets', abortControllerRef.current.signal);
           currentErrorRef.current = true;
 
           result = getMatchResult(allFleets.items ?? [], newLabels);
         } catch (e) {
-          currentErrorRef.current = false;
-          result = { status: 'checked--error', detail: getErrorMessage(e) };
+          // aborting fetch trows 'AbortError', we can ignore it
+          if (!abortControllerRef.current?.signal.aborted) {
+            currentErrorRef.current = false;
+            result = { status: 'checked--error', detail: getErrorMessage(e) };
+          }
         }
         setMatchStatus(result);
       };
