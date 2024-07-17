@@ -1,38 +1,50 @@
+import * as Yup from 'yup';
+import { TFunction } from 'i18next';
 import {
-  GitHttpConfig,
-  GitHttpRepoSpec,
-  GitSshConfig,
-  GitSshRepoSpec,
+  HttpConfig,
+  HttpRepoSpec,
   PatchRequest,
+  RepoSpecType,
   Repository,
   RepositorySpec,
   ResourceSync,
+  SshConfig,
+  SshRepoSpec,
 } from '@flightctl/types';
+
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
 import { API_VERSION } from '../../../constants';
 import { getErrorMessage } from '../../../utils/error';
-import * as Yup from 'yup';
-import { TFunction } from 'i18next';
-import { isHttpRepoSpec, isSshRepoSpec } from '../../../types/extraTypes';
 import { appendJSONPatch } from '../../../utils/patch';
-import { maxLengthString, validKubernetesDnsSubdomain } from '../../form/validations';
+import { MAX_TARGET_REVISION_LENGTH, maxLengthString, validKubernetesDnsSubdomain } from '../../form/validations';
 
-const MAX_TARGET_REVISION_LENGTH = 244;
 const MAX_PATH_LENGTH = 2048;
+const gitRepoUrlRegex = new RegExp(
+  /^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/,
+);
+const httpRepoUrlRegex = /^(http|https)/;
+const pathRegex = /\/.+/;
+const jwtTokenRegexp = /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/;
+
+export const isHttpRepoSpec = (repoSpec: RepositorySpec): repoSpec is HttpRepoSpec => !!repoSpec['httpConfig'];
+export const isSshRepoSpec = (repoSpec: RepositorySpec): repoSpec is SshRepoSpec => !!repoSpec['sshConfig'];
 
 export const getInitValues = (
   repository?: Repository,
   resourceSyncs?: ResourceSync[],
-  hideResourceSyncs?: boolean,
+  canUseResourceSyncs?: boolean,
 ): RepositoryFormValues => {
+  const useRSs = canUseResourceSyncs ?? true;
   if (!repository) {
     return {
       exists: false,
+      repoType: RepoSpecType.GIT,
       name: '',
       url: '',
       useAdvancedConfig: false,
       configType: 'http',
-      useResourceSyncs: !hideResourceSyncs,
+      canUseResourceSyncs: useRSs,
+      useResourceSyncs: useRSs,
       resourceSyncs: [
         {
           name: '',
@@ -46,10 +58,12 @@ export const getInitValues = (
   const formValues: RepositoryFormValues = {
     exists: true,
     name: repository.metadata.name || '',
-    url: repository.spec.repo || '',
+    url: repository.spec.url || '',
+    repoType: repository.spec.type,
     useResourceSyncs: !!resourceSyncs?.length,
     useAdvancedConfig: false,
     configType: 'http',
+    canUseResourceSyncs: useRSs,
     resourceSyncs: resourceSyncs?.length
       ? resourceSyncs
           .filter((rs) => rs.spec.repository === repository.metadata.name)
@@ -78,6 +92,7 @@ export const getInitValues = (
         use: !!repository.spec.httpConfig['tls.crt'] || !!repository.spec.httpConfig['tls.key'],
       },
       skipServerVerification: repository.spec.httpConfig.skipServerVerification,
+      token: repository.spec.httpConfig.token,
     };
   } else if (isSshRepoSpec(repository.spec)) {
     formValues.useAdvancedConfig = true;
@@ -96,9 +111,15 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
   const patches: PatchRequest = [];
   appendJSONPatch({
     patches,
+    newValue: values.repoType,
+    originalValue: repository.spec.type,
+    path: '/spec/type',
+  });
+  appendJSONPatch({
+    patches,
     newValue: values.url,
-    originalValue: repository.spec.repo,
-    path: '/spec/repo',
+    originalValue: repository.spec.url,
+    path: '/spec/url',
   });
 
   if (!values.useAdvancedConfig) {
@@ -125,7 +146,7 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
       });
     }
     if (!isHttpRepoSpec(repository.spec)) {
-      const value: GitHttpConfig = {
+      const value: HttpConfig = {
         skipServerVerification: values.httpConfig?.skipServerVerification,
       };
 
@@ -144,6 +165,9 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
         if (values.httpConfig.mTlsAuth.tlsKey) {
           value['tls.key'] = btoa(values.httpConfig.mTlsAuth.tlsKey);
         }
+      }
+      if (values.httpConfig?.token) {
+        value.token = values.httpConfig.token;
       }
       patches.push({
         op: 'add',
@@ -231,6 +255,22 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
           encodeB64: true,
         });
       }
+
+      if (!values.httpConfig?.token) {
+        if (repository.spec.httpConfig.token) {
+          patches.push({
+            op: 'remove',
+            path: '/spec/httpConfig/token',
+          });
+        }
+      } else {
+        appendJSONPatch({
+          patches,
+          newValue: values.httpConfig?.token,
+          originalValue: repository.spec.httpConfig.token,
+          path: '/spec/httpConfig/token',
+        });
+      }
     }
   } else if (values.configType === 'ssh') {
     if (isHttpRepoSpec(repository.spec)) {
@@ -240,7 +280,7 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
       });
     }
     if (!isSshRepoSpec(repository.spec)) {
-      const value: GitSshConfig = {
+      const value: SshConfig = {
         privateKeyPassphrase: values.sshConfig?.privateKeyPassphrase,
         skipServerVerification: values.sshConfig?.skipServerVerification,
       };
@@ -297,9 +337,6 @@ export const getResourceSyncEditPatch = (rs: ResourceSyncFormValue) => {
   ] as PatchRequest;
 };
 
-const gitRegex = new RegExp(/^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/);
-const pathRegex = /\/.+/;
-
 export const repoSyncSchema = (t: TFunction, values: ResourceSyncFormValue[]) => {
   return Yup.array()
     .of(
@@ -330,9 +367,20 @@ export const repositorySchema =
   (t: TFunction, repository: Repository | undefined) => (values: RepositoryFormValues) => {
     return Yup.object({
       name: validKubernetesDnsSubdomain(t, { isRequired: !repository }),
-      url: Yup.string()
-        .matches(gitRegex, t('Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos'))
-        .defined(t('Repository URL is required')),
+      url: Yup.string().when('repoType', {
+        is: (repoType: RepoSpecType) => repoType === RepoSpecType.GIT,
+        then: () =>
+          Yup.string()
+            .matches(
+              gitRepoUrlRegex,
+              t('Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos'),
+            )
+            .defined(t('Repository URL is required')),
+        otherwise: () =>
+          Yup.string()
+            .matches(httpRepoUrlRegex, t('Enter a valid HTTP service URL. Example: https://my-service-url'))
+            .defined(t('HTTP service URL is required')),
+      }),
       configType: values.useAdvancedConfig ? Yup.string().required(t('Repository type is required')) : Yup.string(),
       httpConfig: Yup.object({
         basicAuth: Yup.object({
@@ -347,6 +395,7 @@ export const repositorySchema =
             ? Yup.string().required(t('Client TLS key is required'))
             : Yup.string(),
         }),
+        token: Yup.string().matches(jwtTokenRegexp, t('Must be a valid JWT token')),
       }),
       useResourceSyncs: Yup.boolean(),
       resourceSyncs: values.useResourceSyncs ? repoSyncSchema(t, values.resourceSyncs) : Yup.array(),
@@ -355,40 +404,47 @@ export const repositorySchema =
 
 export const getRepository = (values: Omit<RepositoryFormValues, 'useResourceSyncs' | 'resourceSyncs'>): Repository => {
   const spec: RepositorySpec = {
-    repo: values.url,
+    url: values.url,
+    type: values.repoType,
   };
   if (values.configType === 'http' && values.httpConfig) {
-    (spec as GitHttpRepoSpec).httpConfig = {
+    const httpRepoSpec = spec as HttpRepoSpec;
+    httpRepoSpec.httpConfig = {
       skipServerVerification: values.httpConfig.skipServerVerification,
     };
     const caCrt = values.httpConfig.caCrt;
     if (caCrt && !values.httpConfig.skipServerVerification) {
-      (spec as GitHttpRepoSpec).httpConfig['ca.crt'] = btoa(caCrt);
+      httpRepoSpec.httpConfig['ca.crt'] = btoa(caCrt);
     }
     if (values.httpConfig.basicAuth?.use) {
-      (spec as GitHttpRepoSpec).httpConfig.username = values.httpConfig.basicAuth.username;
-      (spec as GitHttpRepoSpec).httpConfig.password = values.httpConfig.basicAuth.password;
+      httpRepoSpec.httpConfig.username = values.httpConfig.basicAuth.username;
+      httpRepoSpec.httpConfig.password = values.httpConfig.basicAuth.password;
     }
 
     if (values.httpConfig.mTlsAuth?.use) {
       const tlsCrt = values.httpConfig.mTlsAuth.tlsCrt;
       if (tlsCrt) {
-        (spec as GitHttpRepoSpec).httpConfig['tls.crt'] = btoa(tlsCrt);
+        httpRepoSpec.httpConfig['tls.crt'] = btoa(tlsCrt);
       }
       const tlsKey = values.httpConfig.mTlsAuth.tlsKey;
       if (tlsKey) {
-        (spec as GitHttpRepoSpec).httpConfig['tls.key'] = btoa(tlsKey);
+        httpRepoSpec.httpConfig['tls.key'] = btoa(tlsKey);
       }
     }
+    if (spec.type === RepoSpecType.HTTP && values.httpConfig.token) {
+      httpRepoSpec.httpConfig.token = values.httpConfig.token;
+    }
   } else if (values.configType === 'ssh' && values.sshConfig) {
-    (spec as GitSshRepoSpec).sshConfig = {
+    const sshRepoSpec = spec as SshRepoSpec;
+
+    sshRepoSpec.sshConfig = {
       privateKeyPassphrase: values.sshConfig.privateKeyPassphrase,
       skipServerVerification: values.sshConfig.skipServerVerification,
     };
 
     const sshPrivateKey = values.sshConfig.sshPrivateKey;
     if (sshPrivateKey) {
-      (spec as GitSshRepoSpec).sshConfig.sshPrivateKey = btoa(sshPrivateKey);
+      sshRepoSpec.sshConfig.sshPrivateKey = btoa(sshPrivateKey);
     }
   }
 

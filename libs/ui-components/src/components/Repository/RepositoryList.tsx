@@ -15,18 +15,14 @@ import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 import { RepositoryIcon } from '@patternfly/react-icons/dist/js/icons/repository-icon';
 import { TFunction } from 'i18next';
 
-import { Repository, RepositoryList } from '@flightctl/types';
+import { RepoSpecType, Repository, RepositoryList } from '@flightctl/types';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import ListPageBody from '../ListPage/ListPageBody';
 import ListPage from '../ListPage/ListPage';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../utils/status/repository';
 import { useTableSort } from '../../hooks/useTableSort';
 import { sortByName } from '../../utils/sort/generic';
-import {
-  sortRepositoriesByLastTransition,
-  sortRepositoriesBySyncStatus,
-  sortRepositoriesByUrl,
-} from '../../utils/sort/repository';
+import * as repoSort from '../../utils/sort/repository';
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import DeleteRepositoryModal from './RepositoryDetails/DeleteRepositoryModal';
 import TableTextSearch from '../Table/TableTextSearch';
@@ -78,16 +74,20 @@ const getColumns = (t: TFunction): TableColumn<Repository>[] => [
     onSort: sortByName,
   },
   {
+    name: t('Type'),
+    onSort: repoSort.sortRepositoriesByType,
+  },
+  {
     name: t('Url'),
-    onSort: sortRepositoriesByUrl,
+    onSort: repoSort.sortRepositoriesByUrl,
   },
   {
     name: t('Sync status'),
-    onSort: sortRepositoriesBySyncStatus,
+    onSort: repoSort.sortRepositoriesBySyncStatus,
   },
   {
     name: t('Last transition'),
-    onSort: sortRepositoriesByLastTransition,
+    onSort: repoSort.sortRepositoriesByLastTransition,
   },
 ];
 
@@ -157,7 +157,10 @@ const RepositoryTable = () => {
               <Td dataLabel={t('Name')}>
                 <ResourceLink id={repository.metadata.name as string} routeLink={ROUTE.REPO_DETAILS} />
               </Td>
-              <Td dataLabel={t('Url')}>{repository.spec.repo || '-'}</Td>
+              <Td dataLabel={t('Type')}>
+                {repository.spec.type === RepoSpecType.HTTP ? t('HTTP service') : t('Git repository')}
+              </Td>
+              <Td dataLabel={t('Url')}>{repository.spec.url || '-'}</Td>
               <Td dataLabel={t('Sync status')}>
                 <RepositoryStatus statusInfo={getRepositorySyncStatus(repository)} />
               </Td>

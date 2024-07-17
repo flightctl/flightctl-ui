@@ -18,14 +18,9 @@ import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-cir
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
-import { Repository, RepositoryList } from '@flightctl/types';
+import { RepoSpecType, Repository, RepositoryList } from '@flightctl/types';
 import TextField from '../../../form/TextField';
-import {
-  GitConfigTemplate,
-  InlineConfigTemplate,
-  KubeSecretTemplate,
-  SpecConfigTemplate,
-} from '../../../../types/deviceSpec';
+import { GitConfigTemplate, KubeSecretTemplate, SpecConfigTemplate } from '../../../../types/deviceSpec';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
@@ -67,15 +62,18 @@ const GitConfigForm: React.FC<ConfigFormProps & Pick<ConfigSectionProps, 'reposi
   const { values, setFieldValue } = useFormikContext<DeviceSpecConfigFormValues>();
   const template = values.configTemplates[index] as GitConfigTemplate;
 
+  const repositoryItems = repositories.reduce((acc, curr) => {
+    if (curr.spec.type === RepoSpecType.GIT) {
+      acc[curr.metadata.name || ''] = curr.metadata.name;
+    }
+    return acc;
+  }, {});
   return (
     <>
       <FormGroup label={t('Repository')} isRequired>
         <FormSelect
           name={`configTemplates[${index}].repository`}
-          items={repositories.reduce((acc, curr) => {
-            acc[curr.metadata.name || ''] = curr.metadata.name;
-            return acc;
-          }, {})}
+          items={repositoryItems}
           placeholderText={t('Select a repository')}
         >
           <MenuFooter>
@@ -163,7 +161,7 @@ const InlineConfigForm: React.FC<ConfigFormProps> = ({ index }) => {
 };
 
 type ConfigSectionProps = {
-  ct: KubeSecretTemplate | InlineConfigTemplate | GitConfigTemplate;
+  ct: SpecConfigTemplate;
   index: number;
   repositories: Repository[];
   repoRefetch: VoidFunction;

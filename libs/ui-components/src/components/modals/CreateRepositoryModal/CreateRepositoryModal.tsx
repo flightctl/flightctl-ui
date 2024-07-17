@@ -13,7 +13,7 @@ const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({ onClose, 
   const { t } = useTranslation();
   return (
     <Modal variant="medium" isOpen title={t('Create repository')} showClose={false}>
-      <CreateRepositoryForm onClose={onClose} onSuccess={onSuccess} hideResourceSyncs />
+      <CreateRepositoryForm onClose={onClose} onSuccess={onSuccess} canUseResourceSyncs={false} />
     </Modal>
   );
 };
