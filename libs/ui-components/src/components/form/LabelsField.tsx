@@ -6,16 +6,23 @@ import { TimesIcon } from '@patternfly/react-icons/dist/js/icons/times-icon';
 import { FlightCtlLabel } from '../../types/extraTypes';
 import EditableLabelControl from '../common/EditableLabelControl';
 import { useTranslation } from '../../hooks/useTranslation';
-import ErrorHelperText from './FieldHelperText';
+import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 type LabelsFieldProps = {
   name: string;
   isEditable?: boolean;
   addButtonText?: string;
+  helperText?: React.ReactNode;
   onChangeCallback?: (newLabels: FlightCtlLabel[], hasErrors: boolean) => void;
 };
 
-const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addButtonText, isEditable = true }) => {
+const LabelsField: React.FC<LabelsFieldProps> = ({
+  name,
+  onChangeCallback,
+  addButtonText,
+  helperText,
+  isEditable = true,
+}) => {
   const [{ value: labels }, meta, { setValue: setLabels }] = useField<FlightCtlLabel[]>(name);
   const { t } = useTranslation();
 
@@ -89,6 +96,7 @@ const LabelsField: React.FC<LabelsFieldProps> = ({ name, onChangeCallback, addBu
           </Label>
         ))}
       </LabelGroup>
+      <DefaultHelperText helperText={helperText} />
       <ErrorHelperText meta={meta} touchRequired={false} />
     </>
   );

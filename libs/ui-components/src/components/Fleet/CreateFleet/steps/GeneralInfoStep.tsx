@@ -6,6 +6,8 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import NameField from '../../../form/NameField';
 import LabelsField from '../../../form/LabelsField';
 import { getDnsSubdomainValidations } from '../../../form/validations';
+import WithHelperText from '../../../common/WithHelperText';
+import DeviceLabelSelector from './DeviceLabelSelector';
 
 export const generalInfoStepId = 'general-info';
 
@@ -30,8 +32,18 @@ const GeneralInfoStep = ({ isEdit }: { isEdit: boolean }) => {
         <FormGroup label={t('Fleet labels')}>
           <LabelsField name="fleetLabels" />
         </FormGroup>
-        <FormGroup label={t('Device label selector')}>
-          <LabelsField name="labels" />
+        <FormGroup
+          label={
+            <WithHelperText
+              content={t(
+                'Devices matching these labels will be selected by the fleet. If left empty, no devices will be selected.',
+              )}
+              ariaLabel={t('Device selector')}
+              showLabel
+            />
+          }
+        >
+          <DeviceLabelSelector />
         </FormGroup>
       </Form>
     </Grid>

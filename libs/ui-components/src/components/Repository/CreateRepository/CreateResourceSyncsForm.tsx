@@ -61,7 +61,7 @@ const CreateResourceSyncsForm = () => {
                   aria-label={t('Path')}
                   value={resourceSync.path}
                   helperText={t('For example: {{exampleFile}}', {
-                    exampleFile: '/demos/inverter-fleet/deployment/eu-west-prod-001/fleet.yaml',
+                    exampleFile: '/demos/basic-nginx-demo/deployment/fleet.yaml',
                   })}
                 />
               </FormGroup>

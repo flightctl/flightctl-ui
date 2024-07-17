@@ -53,6 +53,80 @@ export const getDnsSubdomainValidations = (t: TFunction) => [
   },
 ];
 
+export const getKubernetesLabelValueErrors = (labelValue: string) => {
+  const errorKeys: Record<string, string> = {};
+  if (!K8S_LABEL_VALUE_START_END.test(labelValue)) {
+    errorKeys.labelValueStartAndEnd = 'failed';
+  }
+  if (!K8S_LABEL_VALUE_ALLOWED_CHARACTERS.test(labelValue)) {
+    errorKeys.labelValueAllowedChars = 'failed';
+  }
+  if (labelValue?.length > K8S_LABEL_VALUE_MAX_LENGTH) {
+    errorKeys.labelValueMaxLength = 'failed';
+  }
+  return errorKeys;
+};
+
+export const getKubernetesDnsSubdomainErrors = (value: string) => {
+  const errorKeys: Record<string, string> = {};
+  if (!K8S_DNS_SUBDOMAIN_START_END.test(value)) {
+    errorKeys.dnsSubdomainStartAndEnd = 'failed';
+  }
+  if (!K8S_DNS_SUBDOMAIN_ALLOWED_CHARACTERS.test(value)) {
+    errorKeys.dnsSubdomainAllowedChars = 'failed';
+  }
+  if (value?.length > K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH) {
+    errorKeys.dnsSubdomainMaxLength = 'failed';
+  }
+  return errorKeys;
+};
+
+export const hasUniqueLabelKeys = (labels: UnvalidatedLabel[]) => {
+  const uniqueKeys = new Set(labels.map((label) => label.key));
+  return uniqueKeys.size === labels.length;
+};
+
+export const getInvalidKubernetesLabels = (labels: UnvalidatedLabel[]) => {
+  return labels.filter((unvalidatedLabel) => {
+    const key = unvalidatedLabel.key || '';
+    const value = unvalidatedLabel.value || '';
+
+    const keyParts = key.split('/');
+    if (keyParts.length > 2) {
+      return true;
+    }
+
+    // Key prefix validations
+    const keyPrefix = keyParts.length === 2 ? keyParts[0] : '';
+    if (keyPrefix) {
+      if (
+        keyPrefix.length > K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH ||
+        !K8S_DNS_SUBDOMAIN_START_END.test(keyPrefix) ||
+        !K8S_DNS_SUBDOMAIN_ALLOWED_CHARACTERS.test(keyPrefix)
+      ) {
+        return true;
+      }
+    }
+
+    // Key name validations
+    const keyName = keyPrefix ? keyParts[1] : key;
+    if (
+      keyName.length > K8S_LABEL_VALUE_MAX_LENGTH ||
+      !K8S_LABEL_VALUE_START_END.test(keyName) ||
+      !K8S_LABEL_VALUE_ALLOWED_CHARACTERS.test(keyName)
+    ) {
+      return true;
+    }
+
+    // Value validations
+    return value.length === 0
+      ? false
+      : value.length > K8S_LABEL_VALUE_MAX_LENGTH ||
+          !K8S_LABEL_VALUE_START_END.test(value) ||
+          !K8S_LABEL_VALUE_ALLOWED_CHARACTERS.test(value);
+  });
+};
+
 export const validKubernetesDnsSubdomain = (
   t: TFunction,
   { isRequired, fieldName }: { isRequired: boolean; fieldName?: string },
@@ -61,22 +135,12 @@ export const validKubernetesDnsSubdomain = (
     ? Yup.string()
         .defined(t('{{ fieldName }} is required', { fieldName: fieldName || t('Name') }))
         .test('k8sDnsSubdomainFormat', (value: string, testContext) => {
-          const errorKeys: Partial<Record<string, string>> = {};
-          if (!K8S_DNS_SUBDOMAIN_START_END.test(value)) {
-            errorKeys.dnsSubdomainStartAndEnd = 'failed';
-          }
-          if (!K8S_DNS_SUBDOMAIN_ALLOWED_CHARACTERS.test(value)) {
-            errorKeys.dnsSubdomainAllowedChars = 'failed';
-          }
-          if (value?.length > K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH) {
-            errorKeys.dnsSubdomainMaxLength = 'failed';
-          }
-          if (Object.keys(errorKeys).length === 0) {
-            return true;
-          }
-          return testContext.createError({
-            message: errorKeys,
-          });
+          const errorKeys = getKubernetesDnsSubdomainErrors(value);
+          return Object.keys(errorKeys).length > 0
+            ? testContext.createError({
+                message: errorKeys,
+              })
+            : true;
         })
     : Yup.string();
 
@@ -127,73 +191,30 @@ export const validLabelsSchema = (t: TFunction) =>
     .required()
     .test('missing keys', (labels: UnvalidatedLabel[], testContext) => {
       const missingKeyLabels = labels.filter((label) => !label.key).map((label) => label.value);
-      if (missingKeyLabels.length > 0) {
-        return testContext.createError({
-          message: t('Label keys are required. Invalid labels: {{invalidLabels}}', {
-            invalidLabels: `=${missingKeyLabels.join(', =')}`,
-          }),
-        });
-      }
-      return true;
+      return missingKeyLabels.length > 0
+        ? testContext.createError({
+            message: t('Label keys are required. Invalid labels: {{invalidLabels}}', {
+              invalidLabels: `=${missingKeyLabels.join(', =')}`,
+            }),
+          })
+        : true;
     })
-    .test('unique keys', t('Label keys must be unique'), (labels: UnvalidatedLabel[]) => {
-      const uniqueKeys = new Set(labels.map((label) => label.key));
-      return uniqueKeys.size === labels.length;
-    })
+    .test('unique keys', t('Label keys must be unique'), hasUniqueLabelKeys)
     .test('invalid-labels', (labels: UnvalidatedLabel[], testContext) => {
-      const invalidLabels = labels.filter((unvalidatedLabel) => {
-        const key = unvalidatedLabel.key || '';
-        const value = unvalidatedLabel.value || '';
+      const invalidLabels = getInvalidKubernetesLabels(labels);
 
-        const keyParts = key.split('/');
-        if (keyParts.length > 2) {
-          return true;
-        }
-
-        // Key prefix validations
-        const keyPrefix = keyParts.length === 2 ? keyParts[0] : '';
-        if (keyPrefix) {
-          if (
-            keyPrefix.length > K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH ||
-            !K8S_DNS_SUBDOMAIN_START_END.test(keyPrefix) ||
-            !K8S_DNS_SUBDOMAIN_ALLOWED_CHARACTERS.test(keyPrefix)
-          ) {
-            return true;
-          }
-        }
-
-        // Key name validations
-        const keyName = keyPrefix ? keyParts[1] : key;
-        if (
-          keyName.length > K8S_LABEL_VALUE_MAX_LENGTH ||
-          !K8S_LABEL_VALUE_START_END.test(keyName) ||
-          !K8S_LABEL_VALUE_ALLOWED_CHARACTERS.test(keyName)
-        ) {
-          return true;
-        }
-
-        // Value validations
-        return value.length === 0
-          ? false
-          : value.length > K8S_LABEL_VALUE_MAX_LENGTH ||
-              !K8S_LABEL_VALUE_START_END.test(value) ||
-              !K8S_LABEL_VALUE_ALLOWED_CHARACTERS.test(value);
-      });
-
-      if (invalidLabels.length === 0) {
-        return true;
-      }
-
-      return testContext.createError({
-        message: t('The following labels are not valid Kubernetes labels: {{invalidLabels}}', {
-          invalidLabels: `${invalidLabels
-            .map((label) => {
-              const suffix = label.value ? `=${label.value}` : '';
-              return `${label.key}${suffix}`;
-            })
-            .join(', ')}`,
-        }),
-      });
+      return invalidLabels.length > 0
+        ? testContext.createError({
+            message: t('The following labels are not valid Kubernetes labels: {{invalidLabels}}', {
+              invalidLabels: `${invalidLabels
+                .map((label) => {
+                  const suffix = label.value ? `=${label.value}` : '';
+                  return `${label.key}${suffix}`;
+                })
+                .join(', ')}`,
+            }),
+          })
+        : true;
     });
 
 export const validConfigTemplatesSchema = (t: TFunction) =>
