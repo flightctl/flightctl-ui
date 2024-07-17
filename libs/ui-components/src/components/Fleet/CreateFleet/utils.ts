@@ -40,20 +40,28 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
   // Device label selector
   const currentDeviceSelectLabels = currentFleet.spec.selector?.matchLabels || {};
   const updatedDeviceSelectLabels = updatedFleet.labels || {};
+  const updatedDeviceSelectLabelCount = Object.keys(updatedDeviceSelectLabels).length;
 
-  if (currentFleet.spec.selector) {
-    const deviceSelectLabelPatches = getLabelPatches(
-      '/spec/selector/matchLabels',
-      currentDeviceSelectLabels,
-      updatedDeviceSelectLabels,
-    );
-    allPatches = allPatches.concat(deviceSelectLabelPatches);
-  } else {
-    const newLabelMap = toAPILabel(updatedDeviceSelectLabels);
+  if (updatedDeviceSelectLabelCount > 0) {
+    if (currentFleet.spec.selector) {
+      const deviceSelectLabelPatches = getLabelPatches(
+        '/spec/selector/matchLabels',
+        currentDeviceSelectLabels,
+        updatedDeviceSelectLabels,
+      );
+      allPatches = allPatches.concat(deviceSelectLabelPatches);
+    } else {
+      const newLabelMap = toAPILabel(updatedDeviceSelectLabels);
+      allPatches.push({
+        path: '/spec/selector',
+        op: 'add',
+        value: { matchLabels: newLabelMap },
+      });
+    }
+  } else if (currentFleet.spec.selector) {
     allPatches.push({
       path: '/spec/selector',
-      op: 'add',
-      value: { matchLabels: newLabelMap },
+      op: 'remove',
     });
   }
 
