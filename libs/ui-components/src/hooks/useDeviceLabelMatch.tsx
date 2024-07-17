@@ -124,7 +124,7 @@ export const DeviceLabelMatch = ({ matchStatus }: { matchStatus: DeviceMatchStat
         />
       );
     case 'checked--error': {
-      const text = t('Failed to obtain matching fleet(s): {{errorMessage}}', {
+      const text = t('Check for matching fleet(s) failed. {{errorMessage}}', {
         errorMessage: matchStatus.detail || t('Unknown error'),
       });
       return <DeviceLabelMatchContent iconStatus="danger" text={text} />;

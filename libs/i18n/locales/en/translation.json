@@ -388,7 +388,7 @@
   "Fleet label match cannot cannot be evaluated when there are invalid labels.": "Fleet label match cannot cannot be evaluated when there are invalid labels.",
   "No fleet is matching the selected labels.": "No fleet is matching the selected labels.",
   "More than one fleet is matching the selected labels. The device will ignore the fleets' configurations.": "More than one fleet is matching the selected labels. The device will ignore the fleets' configurations.",
-  "Failed to obtain matching fleet(s): {{errorMessage}}": "Failed to obtain matching fleet(s): {{errorMessage}}",
+  "Check for matching fleet(s) failed. {{errorMessage}}": "Check for matching fleet(s) failed. {{errorMessage}}",
   "Websocket error occured": "Websocket error occured",
   "{{count}} years ago_one": "{{count}} year ago",
   "{{count}} years ago_other": "{{count}} years ago",
