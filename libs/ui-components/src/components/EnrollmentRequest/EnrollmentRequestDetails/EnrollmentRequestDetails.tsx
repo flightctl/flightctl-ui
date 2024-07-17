@@ -191,7 +191,7 @@ const EnrollmentRequestDetails = () => {
                 {er && (
                   <ConditionsTable
                     ariaLabel={t('Device conditions table')}
-                    conditions={Object.values(er.spec.deviceStatus?.conditions || {})}
+                    conditions={er.spec.deviceStatus?.conditions}
                   />
                 )}
               </DetailsPageCardBody>

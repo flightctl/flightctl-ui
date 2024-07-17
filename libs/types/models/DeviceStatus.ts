@@ -18,7 +18,7 @@ export type DeviceStatus = {
   /**
    * Conditions represent the observations of a the current state of a device.
    */
-  conditions: Record<string, Condition>;
+  conditions: Array<Condition>;
   systemInfo: DeviceSystemInfo;
   /**
    * Current status of the system applications.
