@@ -6,7 +6,7 @@ import type { ObjectMeta } from './ObjectMeta';
 import type { RepositorySpec } from './RepositorySpec';
 import type { RepositoryStatus } from './RepositoryStatus';
 /**
- * Repository represents a git repository
+ * Repository represents a git repository or an Http endpoint
  */
 export type Repository = {
   /**

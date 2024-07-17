@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { GitGenericRepoSpec } from './GitGenericRepoSpec';
-import type { GitHttpRepoSpec } from './GitHttpRepoSpec';
-import type { GitSshRepoSpec } from './GitSshRepoSpec';
-export type RepositorySpec = (GitGenericRepoSpec | GitHttpRepoSpec | GitSshRepoSpec);
+import type { GenericRepoSpec } from './GenericRepoSpec';
+import type { HttpRepoSpec } from './HttpRepoSpec';
+import type { SshRepoSpec } from './SshRepoSpec';
+export type RepositorySpec = (GenericRepoSpec | HttpRepoSpec | SshRepoSpec);
 
