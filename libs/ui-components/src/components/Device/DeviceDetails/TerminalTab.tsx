@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Alert, AlertActionLink, Stack, StackItem } from '@patternfly/react-core';
 import { Device } from '@flightctl/types';
 
-import { useWebSocket } from '../../../hooks/use-ws';
+import { useWebSocket } from '../../../hooks/useWebSocket';
 import ErrorAlert from '../../ErrorAlert/ErrorAlert';
 import { useTranslation } from '../../../hooks/useTranslation';
 import Terminal, { ImperativeTerminalType } from '../../Terminal/Terminal';
