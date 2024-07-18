@@ -16,6 +16,12 @@ flightctl-ui:
     apiSigkey: |
       -----BEGIN
       -----END
+    frontRouter: |
+      -----BEGIN
+      -----END
+    frontRouterKey: |
+      -----BEGIN
+      -----END
 keycloak:
   rootUrl: https://flightctl.example.com:443
   redirectUris:
