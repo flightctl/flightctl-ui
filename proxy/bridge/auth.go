@@ -1,7 +1,10 @@
 package bridge
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -41,4 +44,24 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func GetTlsConfig() (*tls.Config, error) {
+	caCert, err := os.ReadFile("../certs/ca.crt")
+	if err != nil {
+		return nil, err
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+	cert, err := tls.LoadX509KeyPair("../certs/front-cli.crt", "../certs/front-cli.key")
+	if err != nil {
+		return nil, err
+	}
+
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: true,
+		RootCAs:            caCertPool,
+		Certificates:       []tls.Certificate{cert},
+	}
+	return tlsConfig, nil
 }

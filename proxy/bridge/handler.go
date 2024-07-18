@@ -2,11 +2,9 @@ package bridge
 
 import (
 	"crypto/tls"
-	"crypto/x509"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -46,27 +44,11 @@ func createReverseProxy(apiURL string) (*url.URL, *httputil.ReverseProxy) {
 	return target, proxy
 }
 
-func NewFlightCtlHandler(apiURL string) handler {
+func NewFlightCtlHandler(apiURL string, tlsConfig *tls.Config) handler {
 	target, proxy := createReverseProxy(apiURL)
 
-	caCert, err := os.ReadFile("../certs/ca.crt")
-	if err != nil {
-		panic(err)
-	}
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
-	cert, err := tls.LoadX509KeyPair("../certs/front-cli.crt", "../certs/front-cli.key")
-	if err != nil {
-		panic(err)
-	}
-
 	proxy.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-			RootCAs:            caCertPool,
-			Certificates:       []tls.Certificate{cert},
-		},
+		TLSClientConfig: tlsConfig,
 	}
 
 	return handler{target: target, proxy: proxy}

@@ -19,7 +19,7 @@ const EnrollmentRequestDetails = React.lazy(
 );
 const DeviceList = React.lazy(() => import('@flightctl/ui-components/src/components/Device/DeviceList/DeviceList'));
 const DeviceDetails = React.lazy(
-  () => import('@flightctl/ui-components/src/components/Device/DeviceDetails/DeviceDetails'),
+  () => import('@flightctl/ui-components/src/components/Device/DeviceDetails/DeviceDetailsPage'),
 );
 const EditDeviceWizard = React.lazy(
   () => import('@flightctl/ui-components/src/components/Device/EditDeviceWizard/EditDeviceWizard'),
@@ -196,7 +196,7 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         ),
       },
       {
-        path: ':deviceId',
+        path: ':deviceId/*',
         title: t('Device'),
         element: (
           <TitledRoute title={t('Device')}>

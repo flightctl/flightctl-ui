@@ -29,8 +29,17 @@ func main() {
 
 	apiRouter.Use(bridge.AuthMiddleware)
 
-	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(utils.GetEnvVar("FLIGHTCTL_SERVER", "https://localhost:3443")))
+	tlsConfig, err := bridge.GetTlsConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	fctlApiUrl := utils.GetEnvVar("FLIGHTCTL_SERVER", "https://localhost:3443")
+	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(fctlApiUrl, tlsConfig))
 	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler(utils.GetEnvVar("FLIGHTCTL_METRICS_SERVER", "http://localhost:9090")))
+
+	terminalBridge := bridge.TerminalBridge{ApiUrl: fctlApiUrl, TlsConfig: tlsConfig}
+	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
 
 	spa := server.SpaHandler{}
 	router.PathPrefix("/").Handler(server.GzipHandler(spa))
@@ -45,8 +54,7 @@ func main() {
 	if tlsKeyPath != "" && tlsCertPath != "" {
 		cert, err := tls.LoadX509KeyPair(tlsCertPath, tlsKeyPath)
 		if err != nil {
-			log.Println(err)
-			return
+			panic(err)
 		}
 		config = &tls.Config{
 			Certificates: []tls.Certificate{cert},

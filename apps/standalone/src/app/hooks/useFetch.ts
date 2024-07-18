@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { deleteData, fetchData, patchData, postData } from '../utils/apiCalls';
+import { deleteData, fetchData, patchData, postData, wsEndpoint } from '../utils/apiCalls';
 import { useAuth } from './useAuth';
 import { PatchRequest } from '@flightctl/types';
 
@@ -30,6 +30,7 @@ export const useFetch = () => {
   );
 
   return {
+    wsEndpoint,
     get,
     post,
     remove,
