@@ -3,7 +3,7 @@ import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@flightctl/types';
 import DeviceFleet from '../DeviceDetails/DeviceFleet';
-import { getDateDisplay } from '../../../utils/dates';
+import { timeSinceText } from '../../../utils/dates';
 import { getDeviceFleet } from '../../../utils/devices';
 import { DeleteListActionResult } from '../../ListPage/types';
 import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
@@ -68,7 +68,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
       <Td dataLabel={t('System update status')}>
         <SystemUpdateStatus updateStatus={device.status?.updated} />
       </Td>
-      <Td dataLabel={t('Created at')}>{getDateDisplay(device.metadata.creationTimestamp)}</Td>
+      <Td dataLabel={t('Last seen')}>{timeSinceText(t, device.status?.updatedAt)}</Td>
       <Td isActionCell>
         <ActionsColumn
           items={[

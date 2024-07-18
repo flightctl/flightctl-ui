@@ -11,7 +11,7 @@ import {
 } from '@patternfly/react-core';
 
 import { Device, TemplateVersion } from '@flightctl/types';
-import { getDateDisplay } from '../../../utils/dates';
+import { timeSinceText } from '../../../utils/dates';
 import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
 import DeviceStatus from '../../Status/DeviceStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -111,10 +111,8 @@ const DeviceDetailsTab = ({
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('Created at')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {getDateDisplay(device?.metadata.creationTimestamp)}
-                </DescriptionListDescription>
+                <DescriptionListTerm>{t('Last seen')}</DescriptionListTerm>
+                <DescriptionListDescription>{timeSinceText(t, device?.status.updatedAt)}</DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>
           </DetailsPageCardBody>
