@@ -40,7 +40,6 @@ export type FlightControlQuery = ApiQuery | MetricsQuery;
 
 export enum DeviceAnnotation {
   TemplateVersion = 'fleet-controller/templateVersion',
-  MultipleOwners = 'fleet-controller/multipleOwners',
   RenderedVersion = 'device-controller/renderedVersion',
 }
 

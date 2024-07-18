@@ -1,4 +1,4 @@
-import { ListMeta, ObjectMeta } from '@flightctl/types';
+import { Condition, ConditionStatus, ConditionType, ListMeta, ObjectMeta } from '@flightctl/types';
 
 import { AnnotationType, ApiQuery, FlightControlQuery, MetricsQuery } from '../types/extraTypes';
 import { getPeriodTimestamps } from '../utils/metrics';
@@ -63,6 +63,18 @@ const getMetadataAnnotation = (metadata: ObjectMeta | undefined, annotation: Ann
   return undefined;
 };
 
+const getCondition = (
+  conditions: Condition[] | undefined,
+  type: ConditionType,
+  status: ConditionStatus = ConditionStatus.ConditionStatusTrue,
+) => {
+  const typeCond = conditions?.filter((c) => c.type === type);
+  if (typeCond) {
+    return typeCond.find((tc) => tc.status === status);
+  }
+  return undefined;
+};
+
 export {
   isApiQuery,
   getRequestQueryString,
@@ -71,4 +83,5 @@ export {
   getApiQueryString,
   getMetricsQueryString,
   getApiListCount,
+  getCondition,
 };
