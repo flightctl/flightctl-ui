@@ -27,7 +27,7 @@ const DeviceLabelSelector = () => {
 
   const updateDeviceCount = async (matchLabels: FlightCtlLabel[]) => {
     const labelSelector = matchLabels.map((label) => {
-      const valueStr = label.value ? `=${label.value}` : label.value;
+      const valueStr = label.value ? `=${label.value}` : '';
       return `${label.key}${valueStr}`;
     }, '');
 
