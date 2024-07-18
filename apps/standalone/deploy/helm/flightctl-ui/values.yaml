@@ -3,6 +3,8 @@ flightctl-ui:
   image: quay.io/flightctl/flightctl-ui:latest
   flightctlServer: https://flightctl-api:3443
   flightctlMetricsServer: https://flightctl-api:9090
+  bootc-img-url: quay.io/flightctl/flightctl-agent-centos:bootstrap
+  qcow2-img-url: https://fctl-ui-img.s3.amazonaws.com/disk.qcow2
   certs:
     ca: |
       -----BEGIN
