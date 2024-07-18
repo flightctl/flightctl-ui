@@ -26,7 +26,7 @@ export const useWebSocket = <T extends string>(
     wsRef.current?.send(data);
   }, []);
 
-  React.useMemo(() => {
+  React.useEffect(() => {
     try {
       setIsConnecting(true);
       setIsClosed(false);
@@ -43,15 +43,11 @@ export const useWebSocket = <T extends string>(
       setIsConnecting(false);
       setError(err);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [endpoint, t, reset, wsEndpoint]);
-
-  React.useEffect(() => {
     return () => {
       wsRef.current?.close();
       wsRef.current = undefined;
     };
-  }, [endpoint]);
+  }, [endpoint, t, wsEndpoint, reset]);
 
   const reconnect = React.useCallback(() => {
     wsRef.current?.close();
@@ -65,7 +61,7 @@ export const useWebSocket = <T extends string>(
     return () => {
       wsRef.current?.removeEventListener('message', listener);
     };
-  }, [onMsgReceived]);
+  }, [onMsgReceived, reset]);
 
   return {
     sendMessage,

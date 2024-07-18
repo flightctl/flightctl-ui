@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, AlertActionLink, Bullseye, Spinner, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, AlertActionLink, Stack, StackItem } from '@patternfly/react-core';
 import { Device } from '@flightctl/types';
 
 import { useWebSocket } from '../../../hooks/use-ws';
@@ -15,18 +15,10 @@ const TerminalTab = ({ device }: { device: Device }) => {
     terminal.current?.onDataReceived(message);
   }, []);
 
-  const { sendMessage, isConnecting, isClosed, error, reconnect } = useWebSocket(
+  const { sendMessage, isClosed, error, reconnect } = useWebSocket(
     `/api/terminal/${device.metadata.name}`,
     onMsgReceived,
   );
-
-  if (isConnecting) {
-    return (
-      <Bullseye>
-        <Spinner />
-      </Bullseye>
-    );
-  }
 
   if (error) {
     return <ErrorAlert error={error} />;
@@ -39,7 +31,16 @@ const TerminalTab = ({ device }: { device: Device }) => {
           isInline
           variant="info"
           title={t('Connection was closed')}
-          actionLinks={<AlertActionLink onClick={reconnect}>{t('Reconnect')}</AlertActionLink>}
+          actionLinks={
+            <AlertActionLink
+              onClick={() => {
+                terminal.current?.reset();
+                reconnect();
+              }}
+            >
+              {t('Reconnect')}
+            </AlertActionLink>
+          }
         />
       )}
       <StackItem>

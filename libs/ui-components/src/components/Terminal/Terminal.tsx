@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { ITerminalAddon, ITerminalInitOnlyOptions, ITerminalOptions, Terminal as XTerminal } from 'xterm';
 import { FitAddon } from '@xterm/addon-fit';
+import { Spinner, Stack, StackItem } from '@patternfly/react-core';
+
+import { useTranslation } from '../../hooks/useTranslation';
 
 import './Terminal.css';
 
@@ -17,12 +20,15 @@ type TerminalProps = {
 };
 
 export type ImperativeTerminalType = {
-  focus: () => void;
+  focus: VoidFunction;
   onDataReceived: (data: string) => void;
   loadAttachAddon: (addOn: ITerminalAddon) => void;
+  reset: VoidFunction;
 };
 
 const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onData }, ref) => {
+  const { t } = useTranslation();
+  const [receivedData, setReceivedData] = React.useState(false);
   const terminal = React.useRef<XTerminal>();
   const terminalRef = React.useRef<HTMLDivElement>(null);
 
@@ -63,14 +69,30 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
       terminal.current?.focus();
     },
     onDataReceived: (data) => {
+      setReceivedData(true);
       terminal.current?.write(data);
     },
     loadAttachAddon: (addOn) => {
       terminal.current?.loadAddon(addOn);
     },
+    reset: () => {
+      terminal.current?.reset();
+      setReceivedData(false);
+    },
   }));
 
-  return <div style={{ width: '100%' }} ref={terminalRef} />;
+  return (
+    <Stack hasGutter>
+      {!receivedData && (
+        <StackItem>
+          <Spinner size="md" /> {t('Waiting for terminal session to open...')}
+        </StackItem>
+      )}
+      <StackItem>
+        <div style={{ width: '100%' }} ref={terminalRef} />
+      </StackItem>
+    </Stack>
+  );
 });
 
 Terminal.displayName = 'Terminal';
