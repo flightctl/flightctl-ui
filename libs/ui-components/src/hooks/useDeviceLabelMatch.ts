@@ -42,7 +42,6 @@ const getMatchResult = (fleets: Fleet[], deviceLabels: FlightCtlLabel[]): Device
 
 const useDeviceLabelMatch = (): [MatchLabelsFn, DeviceMatchStatus] => {
   const { get } = useFetch();
-  const currentErrorRef = React.useRef<boolean>();
   const abortControllerRef = React.useRef<AbortController>();
 
   const [matchStatus, setMatchStatus] = React.useState<DeviceMatchStatus>({
@@ -66,13 +65,11 @@ const useDeviceLabelMatch = (): [MatchLabelsFn, DeviceMatchStatus] => {
           abortControllerRef.current = new AbortController();
 
           const allFleets = await get<FleetList>('fleets', abortControllerRef.current.signal);
-          currentErrorRef.current = true;
 
           result = getMatchResult(allFleets.items ?? [], newLabels);
         } catch (e) {
           // aborting fetch trows 'AbortError', we can ignore it
           if (!abortControllerRef.current?.signal.aborted) {
-            currentErrorRef.current = false;
             result = { status: 'checked--error', detail: getErrorMessage(e) };
           }
         }
