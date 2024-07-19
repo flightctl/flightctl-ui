@@ -15,12 +15,6 @@ import { StatusDisplayContent } from './StatusDisplay';
 
 type MonitorType = keyof DeviceResourceStatus; /* cpu / disk / memory */
 
-const resourceTypeOrder = [
-  ResourceAlertSeverityType.ResourceAlertSeverityTypeCritical,
-  ResourceAlertSeverityType.ResourceAlertSeverityTypeWarning,
-  ResourceAlertSeverityType.ResourceAlertSeverityTypeInfo,
-];
-
 const getMonitorTypeLabel = (monitorType: MonitorType, t: TFunction) => {
   switch (monitorType) {
     case 'cpu':
@@ -32,19 +26,35 @@ const getMonitorTypeLabel = (monitorType: MonitorType, t: TFunction) => {
   }
 };
 
-const getResourceErrorDetails = (resourcesInfo: Array<ResourceMonitorSpec>, monitorType: MonitorType) => {
+const getTriggeredResourceAlert = (
+  resourcesInfo: Array<ResourceMonitorSpec>,
+  monitorType: MonitorType,
+  monitorStatus?: DeviceResourceStatusType,
+) => {
+  if (
+    !monitorStatus ||
+    [
+      DeviceResourceStatusType.DeviceResourceStatusHealthy,
+      DeviceResourceStatusType.DeviceResourceStatusUnknown,
+    ].includes(monitorStatus)
+  ) {
+    return null;
+  }
   const monitorDetails = resourcesInfo.find((item) => item.monitorType === monitorType && item.alertRules.length > 0);
   if (!monitorDetails) {
     return null;
   }
-  const highestSeverityRule = monitorDetails.alertRules
-    .filter((rule) => rule.severity !== ResourceAlertSeverityType.ResourceAlertSeverityTypeInfo)
-    .sort((a, b) => {
-      const aIndex = resourceTypeOrder.indexOf(a.severity);
-      const bIndex = resourceTypeOrder.indexOf(b.severity);
-      return aIndex - bIndex;
-    });
-  return highestSeverityRule.length > 0 ? highestSeverityRule[0] : null;
+
+  // Attempt to find the rule matching exactly the monitor's status
+  return monitorDetails.alertRules.find((alertRule) => {
+    switch (monitorStatus) {
+      case DeviceResourceStatusType.DeviceResourceStatusWarning:
+        return alertRule.severity === ResourceAlertSeverityType.ResourceAlertSeverityTypeWarning;
+      case DeviceResourceStatusType.DeviceResourceStatusCritical:
+        return alertRule.severity === ResourceAlertSeverityType.ResourceAlertSeverityTypeCritical;
+    }
+    return false;
+  });
 };
 
 const DeviceResourceStatus = ({ device, monitorType }: { device: Device | undefined; monitorType: MonitorType }) => {
@@ -58,10 +68,10 @@ const DeviceResourceStatus = ({ device, monitorType }: { device: Device | undefi
   let label: string;
   let messageTitle: string = '';
   const status = device.status?.resources[monitorType];
-  const errorDetails = getResourceErrorDetails(device.spec?.resources ?? [], monitorType);
+  const triggeredAlert = getTriggeredResourceAlert(device.spec?.resources ?? [], monitorType, status);
 
-  if (errorDetails) {
-    label = t('Past threshold ({{ percent }}%)', { percent: errorDetails.percentage });
+  if (triggeredAlert) {
+    label = t('Past threshold ({{ percent }}%)', { percent: triggeredAlert.percentage });
     messageTitle = t('{{ monitorType }} pressure - {{ status }}', {
       monitorType: getMonitorTypeLabel(monitorType, t),
       status,
@@ -90,7 +100,12 @@ const DeviceResourceStatus = ({ device, monitorType }: { device: Device | undefi
   }
 
   return (
-    <StatusDisplayContent level={level} label={label} messageTitle={messageTitle} message={errorDetails?.description} />
+    <StatusDisplayContent
+      level={level}
+      label={label}
+      messageTitle={messageTitle}
+      message={triggeredAlert?.description}
+    />
   );
 };
 
