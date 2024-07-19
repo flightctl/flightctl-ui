@@ -14,13 +14,13 @@ import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
 
 import { useFetch } from '../../../hooks/useFetch';
-import { DeviceList, EnrollmentRequest, Fleet, FleetList } from '@flightctl/types';
+import { EnrollmentRequest, Fleet, FleetList } from '@flightctl/types';
 
 import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';
 import { useDeleteListAction } from '../../ListPage/ListPageActions';
 import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
-import { sortByCreationTimestamp, sortByDisplayName, sortByName } from '../../../utils/sort/generic';
+import { sortByDisplayName, sortByLastSeenDate, sortByName } from '../../../utils/sort/generic';
 import { sortDeviceStatus, sortDevicesByFleet } from '../../../utils/sort/device';
 import Table, { TableColumn } from '../../Table/Table';
 import EnrollmentRequestTableRow from '../../EnrollmentRequest/EnrollmentRequestTableRow';
@@ -101,8 +101,8 @@ const getDeviceColumns = (t: TFunction): TableColumn<DeviceLikeResource>[] => [
     onSort: (resources: Array<DeviceLikeResource>) => sortDeviceStatus(resources, 'SystemUpdateStatus'),
   },
   {
-    name: t('Created at'),
-    onSort: sortByCreationTimestamp,
+    name: t('Last seen'),
+    onSort: sortByLastSeenDate,
   },
 ];
 

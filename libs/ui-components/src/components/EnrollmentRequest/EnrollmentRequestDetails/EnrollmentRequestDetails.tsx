@@ -3,7 +3,7 @@ import DetailsPage from '../../DetailsPage/DetailsPage';
 import IntegrityDetails from '../../DetailsPage/Tables/IntegrityDetails';
 import LabelsView from '../../common/LabelsView';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { getDateDisplay } from '../../../utils/dates';
+import { timeSinceText } from '../../../utils/dates';
 import {
   EnrollmentRequestStatus as EnrollmentRequestStatusType,
   getApprovalStatus,
@@ -93,9 +93,9 @@ const EnrollmentRequestDetails = () => {
                   <DescriptionListDescription>{er?.metadata.name || '-'}</DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Last seen')}</DescriptionListTerm>
                   <DescriptionListDescription>
-                    {getDateDisplay(er?.metadata.creationTimestamp)}
+                    {timeSinceText(t, er?.metadata.creationTimestamp)}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>

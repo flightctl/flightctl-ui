@@ -64,6 +64,7 @@ export type ConfigSourceProvider = GitConfigProviderSpec | KubernetesSecretProvi
 
 export const isEnrollmentRequest = (resource: DeviceLikeResource): resource is EnrollmentRequest =>
   resource.kind === 'EnrollmentRequest';
+export const isDevice = (resource: DeviceLikeResource): resource is Device => resource.kind === 'Device';
 
 export const isFleet = (resource: ResourceSync | Fleet): resource is Fleet => resource.kind === 'Fleet';
 

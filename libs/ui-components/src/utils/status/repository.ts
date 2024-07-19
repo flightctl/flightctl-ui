@@ -100,7 +100,7 @@ const getRepositoryLastTransitionTime = (
   });
 
   return {
-    text: lastTime ? timeSinceText(t, new Date(lastTime).getTime()) : '-',
+    text: lastTime ? timeSinceText(t, lastTime) : 'N/A',
     timestamp: lastTime || '0',
   };
 };

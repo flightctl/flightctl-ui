@@ -1,7 +1,8 @@
-import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
-import { EnrollmentRequest } from '@flightctl/types';
 import * as React from 'react';
-import { getDateDisplay } from '../../utils/dates';
+import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
+
+import { EnrollmentRequest } from '@flightctl/types';
+import { timeSinceText } from '../../utils/dates';
 import { DeleteListActionResult } from '../ListPage/types';
 import {
   EnrollmentRequestStatus as EnrollmentRequestStatusType,
@@ -51,7 +52,7 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
         <EnrollmentRequestStatus er={er} />
       </Td>
       <Td dataLabel={t('System update status')}>-</Td>
-      <Td dataLabel={t('Created at')}>{getDateDisplay(er.metadata.creationTimestamp)}</Td>
+      <Td dataLabel={t('Last seen')}>{timeSinceText(t, er.metadata.creationTimestamp)}</Td>
       <Td isActionCell>
         <ActionsColumn
           items={[
