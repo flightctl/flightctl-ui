@@ -106,7 +106,7 @@ const DeviceFilterSelect: React.FC<DeviceFilterSelectProps> = ({
   return (
     <FilterSelect
       selectedFilters={selectedFilters}
-      placeholder={t('Filters')}
+      placeholder={t('Filter by status, fleets or labels')}
       filter={filter}
       setFilter={setFilter}
       isFilterUpdating={isFilterUpdating}

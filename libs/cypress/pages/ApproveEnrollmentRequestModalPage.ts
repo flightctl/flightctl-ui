@@ -32,7 +32,7 @@ export class ApproveEnrollmentRequestModalPage {
   }
 
   get displayNameField() {
-    return cy.get('input[aria-label="Display name"]');
+    return cy.get('input[aria-label="Device name"]');
   }
 
   get approveSubmitButton() {

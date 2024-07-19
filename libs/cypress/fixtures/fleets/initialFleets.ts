@@ -26,7 +26,7 @@ const basicFleets: Fleet[] = [
             {
               configType: 'GitConfigProviderSpec',
               gitRef: {
-                path: '/demos/inverter-fleet/configuration/',
+                path: '/demos/basic-nginx-fleet/configuration/',
                 repository: 'defaultRepo',
                 targetRevision: 'main',
               },
