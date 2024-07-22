@@ -91,7 +91,7 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
               />
             </ToolbarItem>
             <ToolbarItem variant="search-filter">
-              <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name or fingerprint')} />
+              <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by alias or name')} />
             </ToolbarItem>
           </ToolbarGroup>
           {children}

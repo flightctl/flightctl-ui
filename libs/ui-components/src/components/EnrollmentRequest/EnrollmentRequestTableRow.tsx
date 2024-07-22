@@ -42,8 +42,8 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
           isSelected: isRowSelected(er),
         }}
       />
-      <Td dataLabel={t('Name')}>-</Td>
-      <Td dataLabel={t('Fingerprint')}>
+      <Td dataLabel={t('Alias')}>-</Td>
+      <Td dataLabel={t('Name')}>
         <ResourceLink id={erName} routeLink={ROUTE.ENROLLMENT_REQUEST_DETAILS} />
       </Td>
       <Td dataLabel={t('Fleet')}>-</Td>

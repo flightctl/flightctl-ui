@@ -16,7 +16,7 @@ import DeviceLabelMatch from './DeviceLabelMatch';
 
 export type ApproveDeviceFormValues = {
   labels: FlightCtlLabel[];
-  displayName: string;
+  deviceAlias: string;
 };
 
 export type ApproveDeviceFormProps = {
@@ -36,12 +36,12 @@ const ApproveDeviceForm: React.FC<ApproveDeviceFormProps> = ({ enrollmentRequest
   return (
     <Form onSubmit={(ev) => ev.preventDefault()}>
       <RichValidationTextField
-        fieldName="displayName"
-        aria-label={t('Device name')}
+        fieldName="deviceAlias"
+        aria-label={t('Alias')}
         validations={getLabelValueValidations(t)}
       />
       {enrollmentRequest && (
-        <FormGroup label={t('Fingerprint')} aria-label={t('Fingerprint')}>
+        <FormGroup label={t('Name')} aria-label={t('Name')}>
           <ResourceLink id={enrollmentRequest.metadata.name as string} variant="full" />
         </FormGroup>
       )}

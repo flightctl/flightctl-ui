@@ -34,8 +34,8 @@ const ReviewStep = ({ error }: { error?: string }) => {
           }}
         >
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('Display name')}</DescriptionListTerm>
-            <DescriptionListDescription>{values.displayName || t('Untitled')}</DescriptionListDescription>
+            <DescriptionListTerm>{t('Alias')}</DescriptionListTerm>
+            <DescriptionListDescription>{values.deviceAlias || t('Untitled')}</DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Device labels')}</DescriptionListTerm>

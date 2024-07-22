@@ -43,6 +43,4 @@ const TextAreaField = ({ helperText, onChangeCustom, minHeight = '10rem', ...pro
   );
 };
 
-TextAreaField.displayName = 'TextAreaField';
-
 export default TextAreaField;

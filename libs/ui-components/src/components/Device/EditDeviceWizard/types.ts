@@ -7,6 +7,6 @@ export type DeviceSpecConfigFormValues = {
 };
 
 export type EditDeviceFormValues = DeviceSpecConfigFormValues & {
-  displayName: string;
+  deviceAlias: string;
   labels: FlightCtlLabel[];
 };

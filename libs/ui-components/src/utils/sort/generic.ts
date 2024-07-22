@@ -3,9 +3,9 @@ import { DeviceLikeResource, isDevice } from '../../types/extraTypes';
 
 export const sortByName = <R extends { metadata: ObjectMeta }>(resources: R[]) =>
   resources.sort((a, b) => {
-    const aFingerprint = a.metadata.name || '-';
-    const bFingerprint = b.metadata.name || '-';
-    return aFingerprint.localeCompare(bFingerprint);
+    const aName = a.metadata.name || '-';
+    const bName = b.metadata.name || '-';
+    return aName.localeCompare(bName);
   });
 
 export const sortByLastSeenDate = (resources: DeviceLikeResource[]) =>
@@ -25,9 +25,9 @@ export const sortByLastSeenDate = (resources: DeviceLikeResource[]) =>
     return new Date(aDate).getTime() - new Date(bDate).getTime();
   });
 
-export const sortByDisplayName = <R extends { metadata: ObjectMeta }>(resources: R[]) =>
+export const sortByAlias = <R extends { metadata: ObjectMeta }>(resources: R[]) =>
   resources.sort((a, b) => {
-    const aName = a.metadata.labels?.displayName || '-';
-    const bName = b.metadata.labels?.displayName || '-';
-    return aName.localeCompare(bName);
+    const aAlias = a.metadata.labels?.alias || '-';
+    const bAlias = b.metadata.labels?.alias || '-';
+    return aAlias.localeCompare(bAlias);
   });

@@ -301,11 +301,11 @@ export const deviceSystemdUnitsValidationSchema = (t: TFunction) =>
 
 export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDevice: boolean }) =>
   Yup.object({
-    displayName: conf.isSingleDevice
-      ? validKubernetesLabelValue(t, { isRequired: false, fieldName: t('Name') })
+    deviceAlias: conf.isSingleDevice
+      ? validKubernetesLabelValue(t, { isRequired: false, fieldName: t('Alias') })
       : Yup.string().matches(
           /{{n}}/,
-          t('Device names must be unique. Add a number to the template to generate unique names.'),
+          t('Device aliases must be unique. Add a number to the template to generate unique aliases.'),
         ),
     labels: validLabelsSchema(t),
   });

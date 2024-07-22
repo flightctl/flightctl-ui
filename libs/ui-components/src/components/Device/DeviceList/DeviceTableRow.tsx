@@ -31,7 +31,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const deviceName = device.metadata.name as string;
-  const displayName = device.metadata.labels?.displayName;
+  const deviceAlias = device.metadata.labels?.alias;
   const editActionProps = getDeviceFleet(device?.metadata)
     ? {
         isAriaDisabled: true,
@@ -50,10 +50,10 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
           isSelected: isRowSelected(device),
         }}
       />
-      <Td dataLabel={t('Name')}>
-        <ResourceLink id={deviceName} name={displayName || t('Untitled')} routeLink={ROUTE.DEVICE_DETAILS} />
+      <Td dataLabel={t('Alias')}>
+        <ResourceLink id={deviceName} name={deviceAlias || t('Untitled')} routeLink={ROUTE.DEVICE_DETAILS} />
       </Td>
-      <Td dataLabel={t('Fingerprint')}>
+      <Td dataLabel={t('Name')}>
         <ResourceLink id={deviceName} />
       </Td>
       <Td dataLabel={t('Fleet')}>
@@ -79,7 +79,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
             },
             deleteAction({
               resourceId: deviceName,
-              resourceName: displayName,
+              resourceName: deviceAlias,
             }),
           ]}
         />

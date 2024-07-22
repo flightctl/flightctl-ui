@@ -57,7 +57,7 @@ const DeviceDetailsTab = ({
           <DetailsPageCardBody>
             <DescriptionList isAutoColumnWidths columnModifier={{ default: '3Col' }}>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('Fingerprint')}</DescriptionListTerm>
+                <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
                 <DescriptionListDescription>
                   <ResourceLink id={device?.metadata.name || '-'} />
                 </DescriptionListDescription>

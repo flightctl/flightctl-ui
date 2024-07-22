@@ -27,14 +27,14 @@ const DeviceDetailsPage = () => {
   const navigate = useNavigate();
   const { remove } = useFetch();
 
-  const name = device?.metadata.labels?.displayName || deviceId;
+  const deviceAlias = device?.metadata.labels?.alias || deviceId;
 
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {
       await remove(`devices/${deviceId}`);
       navigate(ROUTE.DEVICES);
     },
-    resourceName: name,
+    resourceName: deviceAlias,
     resourceType: 'Device',
   });
   return (
@@ -42,7 +42,7 @@ const DeviceDetailsPage = () => {
       loading={loading || loadingTv}
       error={error}
       id={deviceId}
-      title={name}
+      title={deviceAlias}
       resourceLink={ROUTE.DEVICES}
       resourceType="Devices"
       resourceTypeLabel={t('Devices')}
