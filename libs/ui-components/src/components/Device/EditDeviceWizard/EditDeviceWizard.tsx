@@ -39,8 +39,8 @@ const EditDeviceWizard = () => {
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
 
   const [deviceId, device, isLoading, loadError] = useEditDevice();
-  const displayName = device?.metadata.labels?.displayName || '';
-  const displayNameText = device ? displayName || t('Untitled') : deviceId;
+  const deviceAlias = device?.metadata.labels?.alias || '';
+  const displayText = device ? deviceAlias || t('Untitled') : deviceId;
 
   let body: React.ReactNode;
   if (isLoading) {
@@ -65,9 +65,9 @@ const EditDeviceWizard = () => {
     body = (
       <Formik<EditDeviceFormValues>
         initialValues={{
-          displayName,
+          deviceAlias,
           osImage: device.spec?.os?.image,
-          labels: fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'displayName'),
+          labels: fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias'),
           configTemplates: getConfigTemplatesValues(device.spec),
         }}
         validationSchema={getValidationSchema(t)}
@@ -122,7 +122,7 @@ const EditDeviceWizard = () => {
           </BreadcrumbItem>
           {deviceId && (
             <BreadcrumbItem>
-              <Link to={{ route: ROUTE.DEVICE_DETAILS, postfix: deviceId }}>{displayNameText}</Link>
+              <Link to={{ route: ROUTE.DEVICE_DETAILS, postfix: deviceId }}>{displayText}</Link>
             </BreadcrumbItem>
           )}
           <BreadcrumbItem isActive>{t('Edit device')}</BreadcrumbItem>

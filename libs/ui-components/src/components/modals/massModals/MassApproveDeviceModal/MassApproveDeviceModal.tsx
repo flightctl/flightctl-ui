@@ -38,7 +38,7 @@ const isPendingEnrollmentRequest = (r: DeviceLikeResource): r is EnrollmentReque
 
 type MassApproveDeviceFormValues = {
   labels: { key: string; value: string }[];
-  displayName: string;
+  deviceAlias: string;
 };
 type MassApproveDeviceModalProps = {
   onClose: VoidFunction;
@@ -52,17 +52,17 @@ const ApprovedDevicesTable = ({ devices }: { devices: Array<EnrollmentRequest | 
     <Table>
       <Thead>
         <Tr>
-          <Th width={25}>{t('Fingerprint')}</Th>
-          <Th width={50}>{t('Name')}</Th>
+          <Th width={25}>{t('Name')}</Th>
+          <Th width={50}>{t('Alias')}</Th>
         </Tr>
       </Thead>
       <Tbody>
         {devices.map((device) => (
           <Tr key={device.metadata.name}>
-            <Td dataLabel={t('Fingerprint')}>
+            <Td dataLabel={t('Name')}>
               <ResourceLink id={device.metadata.name as string} />
             </Td>
-            <Td dataLabel={t('Name')}>{device.metadata.labels?.displayName || '-'}</Td>
+            <Td dataLabel={t('Alias')}>{device.metadata.labels?.alias || '-'}</Td>
           </Tr>
         ))}
       </Tbody>
@@ -118,9 +118,9 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
     setErrors(undefined);
     const promises = pendingEnrollments.map(async (r, index) => {
       const labels = toAPILabel(values.labels);
-      const nameLabel = templateToName(index, values.displayName);
-      if (nameLabel) {
-        labels.displayName = nameLabel;
+      const aliasLabel = templateToName(index, values.deviceAlias);
+      if (aliasLabel) {
+        labels.alias = aliasLabel;
       }
 
       await post<EnrollmentRequestApproval>(`enrollmentrequests/${r.metadata.name}/approval`, {
@@ -145,7 +145,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
     <Formik<MassApproveDeviceFormValues>
       initialValues={{
         labels: [],
-        displayName: '',
+        deviceAlias: '',
       }}
       validationSchema={deviceApprovalValidationSchema(t, { isSingleDevice: false })}
       onSubmit={approveResources}
@@ -182,17 +182,17 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
               <Table>
                 <Thead>
                   <Tr>
-                    <Th width={60}>{t('Fingerprint')}</Th>
-                    <Th width={40}>{t('Name')}</Th>
+                    <Th width={60}>{t('Name')}</Th>
+                    <Th width={40}>{t('Alias')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {pendingEnrollments.map((pendingEr, index) => (
                     <Tr key={pendingEr.metadata.name}>
-                      <Td dataLabel={t('Fingerprint')}>
+                      <Td dataLabel={t('Name')}>
                         <ResourceLink id={pendingEr.metadata.name as string} />
                       </Td>
-                      <Td dataLabel={t('Name')}>{templateToName(index, values.displayName)}</Td>
+                      <Td dataLabel={t('Alias')}>{templateToName(index, values.deviceAlias)}</Td>
                     </Tr>
                   ))}
                 </Tbody>
@@ -203,14 +203,14 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
                 <FormGroup label={t('Labels')}>
                   <LabelsField name="labels" />
                 </FormGroup>
-                <FormGroup label={t('Name')}>
+                <FormGroup label={t('Alias')}>
                   <TextField
-                    name="displayName"
-                    aria-label={t('Name')}
+                    name="deviceAlias"
+                    aria-label={t('Alias')}
                     placeholder="device-{{n}}"
                     helperText={
                       <>
-                        {t('Name devices using a custom template. Add a number using')}
+                        {t('Alias devices using a custom template. Add a number using')}
                         <strong> {`{{n}}`}</strong>
                       </>
                     }

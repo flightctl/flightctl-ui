@@ -15,7 +15,7 @@ import { getAPIConfig, getDeviceSpecConfigPatches } from './deviceSpecUtils';
 export const getValidationSchema = (t: TFunction) =>
   Yup.lazy(() =>
     Yup.object({
-      displayName: validKubernetesLabelValue(t, { isRequired: false, fieldName: t('Display name') }),
+      deviceAlias: validKubernetesLabelValue(t, { isRequired: false, fieldName: t('Alias') }),
       osImage: maxLengthString(t, { fieldName: t('System image'), maxLength: 2048 }),
       labels: validLabelsSchema(t),
       configTemplates: validConfigTemplatesSchema(t),
@@ -28,8 +28,8 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
   // Device labels
   const currentLabels = currentDevice.metadata.labels || {};
   const updatedLabels = updatedDevice.labels || [];
-  if (updatedDevice.displayName) {
-    updatedLabels.push({ key: 'displayName', value: updatedDevice.displayName });
+  if (updatedDevice.deviceAlias) {
+    updatedLabels.push({ key: 'alias', value: updatedDevice.deviceAlias });
   }
 
   const fleetLabelPatches = getLabelPatches('/metadata/labels', currentLabels, updatedLabels);

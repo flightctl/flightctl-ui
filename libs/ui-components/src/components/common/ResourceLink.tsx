@@ -16,7 +16,7 @@ type ResourceDisplayLinkProps = {
   routeLink?: RouteWithPostfix;
 };
 
-export const getDisplayName = (name: string | undefined) => {
+export const getDisplayText = (name: string | undefined) => {
   if (!name) {
     return '-';
   }
@@ -51,7 +51,7 @@ const CopyNameButton = ({ name }: { name: string }) => {
 
 const ResourceLink = ({ id, name, variant = 'shortened', routeLink }: ResourceDisplayLinkProps) => {
   const nameOrId = name || id;
-  const displayText = getDisplayName(nameOrId);
+  const displayText = getDisplayText(nameOrId);
   const showCopy = nameOrId !== displayText;
 
   const textEl = <span className="fctl-resource-link__text">{variant === 'full' ? nameOrId : displayText}</span>;

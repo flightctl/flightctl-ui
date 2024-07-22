@@ -11,7 +11,7 @@ import { EditDeviceFormValues } from '../types';
 export const generalInfoStepId = 'general-info';
 
 export const isGeneralInfoStepValid = (errors: FormikErrors<EditDeviceFormValues>) => {
-  return !errors.displayName && !errors.labels;
+  return !errors.deviceAlias && !errors.labels;
 };
 
 const GeneralInfoStep = () => {
@@ -21,8 +21,8 @@ const GeneralInfoStep = () => {
     <Grid lg={5} span={8}>
       <Form>
         <RichValidationTextField
-          fieldName="displayName"
-          aria-label={t('Display name')}
+          fieldName="deviceAlias"
+          aria-label={t('Alias')}
           validations={getLabelValueValidations(t)}
         />
         <FormGroup label={t('Device labels')}>

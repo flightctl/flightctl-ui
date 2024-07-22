@@ -20,7 +20,7 @@ import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';
 import { useDeleteListAction } from '../../ListPage/ListPageActions';
 import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
-import { sortByDisplayName, sortByLastSeenDate, sortByName } from '../../../utils/sort/generic';
+import { sortByAlias, sortByLastSeenDate, sortByName } from '../../../utils/sort/generic';
 import { sortDeviceStatus, sortDevicesByFleet } from '../../../utils/sort/device';
 import Table, { TableColumn } from '../../Table/Table';
 import EnrollmentRequestTableRow from '../../EnrollmentRequest/EnrollmentRequestTableRow';
@@ -73,11 +73,11 @@ const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => {
 
 const getDeviceColumns = (t: TFunction): TableColumn<DeviceLikeResource>[] => [
   {
-    name: t('Name'),
-    onSort: sortByDisplayName,
+    name: t('Alias'),
+    onSort: sortByAlias,
   },
   {
-    name: t('Fingerprint'),
+    name: t('Name'),
     onSort: sortByName,
   },
   {
