@@ -168,20 +168,20 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
       </Split>
       {showConfirmChangeType && (
         <Modal
-          title={'Change repository type ?'}
+          title={'Change repository type?'}
           titleIconVariant="warning"
           variant="small"
           isOpen
           actions={[
             <Button
-              key="confirm"
+              key="change"
               variant={ButtonVariant.primary}
               onClick={() => {
                 setShowConfirmChangeType(false);
                 doChangeRepoType();
               }}
             >
-              {t('Confirm')}
+              {t('Change')}
             </Button>,
             <Button
               key="cancel"
@@ -194,7 +194,8 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
             </Button>,
           ]}
         >
-          {t('Settings related to the current repository type will be lost.')}
+          {t('Switching the repository type will cause dome data to be lost.')}
+          {t('Are you sure you want to change the repository type?')}
         </Modal>
       )}
     </>
