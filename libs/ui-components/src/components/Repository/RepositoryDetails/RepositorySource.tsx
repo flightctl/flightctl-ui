@@ -5,12 +5,15 @@ import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/exter
 import { LockIcon } from '@patternfly/react-icons/dist/js/icons/lock-icon';
 import { CodeBranchIcon } from '@patternfly/react-icons/dist/js/icons/code-branch-icon';
 import { CodeIcon } from '@patternfly/react-icons/dist/js/icons/code-icon';
+import { ServerIcon } from '@patternfly/react-icons/dist/js/icons/server-icon';
+
+import { ConfigTemplate } from '../../../types/deviceSpec';
 
 export type RepositorySourceDetails = {
   name?: string;
-  url?: string;
+  details?: string;
   errorMessage?: string;
-  type: 'git' | 'inline' | 'secret';
+  type: ConfigTemplate['type'];
 };
 
 const RepositorySource = ({ sourceDetails }: { sourceDetails: RepositorySourceDetails }) => {
@@ -30,7 +33,7 @@ const RepositorySource = ({ sourceDetails }: { sourceDetails: RepositorySourceDe
     );
   }
 
-  // Git configs
+  // Git configs and Http configs (both use repositories with an URL)
   return sourceDetails.errorMessage ? (
     <>
       <CodeBranchIcon /> {sourceDetails.name}{' '}
@@ -45,12 +48,12 @@ const RepositorySource = ({ sourceDetails }: { sourceDetails: RepositorySourceDe
       component="a"
       variant="link"
       isInline
-      href={sourceDetails.url}
+      href={sourceDetails.details}
       target="_blank"
       icon={<ExternalLinkAltIcon />}
       iconPosition="end"
     >
-      <CodeBranchIcon /> {sourceDetails.name || sourceDetails.url}
+      {sourceDetails.type === 'git' ? <CodeBranchIcon /> : <ServerIcon />} {sourceDetails.name || sourceDetails.details}
     </Button>
   );
 };

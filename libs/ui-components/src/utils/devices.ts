@@ -1,12 +1,14 @@
+import { TFunction } from 'i18next';
+
 import { DeviceSpec, ObjectMeta } from '@flightctl/types';
 import { DeviceAnnotation } from '../types/extraTypes';
-import { TFunction } from 'i18next';
+import { ConfigTemplate, isGitProviderSpec, isHttpProviderSpec, isKubeProviderSpec } from '../types/deviceSpec';
 import { getMetadataAnnotation } from './api';
 
 export type SourceItem = {
-  type: 'git' | 'inline' | 'secret';
+  type: ConfigTemplate['type'];
   name: string;
-  displayText: string;
+  details: string;
 };
 
 const deviceFleetRegExp = /^Fleet\/(?<fleetName>.*)$/;
@@ -38,16 +40,18 @@ const getSourceItems = (specConfigs: DeviceSpec['config'] | undefined): SourceIt
   return (specConfigs ?? [])
     .map((config) => {
       let sourceItem: SourceItem;
-      if ('gitRef' in config) {
-        sourceItem = { type: 'git', name: config.gitRef.repository, displayText: config.name };
-      } else if ('secretRef' in config) {
+      if (isGitProviderSpec(config)) {
+        sourceItem = { type: 'git', name: config.name, details: config.gitRef.repository };
+      } else if (isHttpProviderSpec(config)) {
+        sourceItem = { type: 'http', name: config.name, details: config.httpRef.repository };
+      } else if (isKubeProviderSpec(config)) {
         sourceItem = {
           type: 'secret',
           name: config.name,
-          displayText: `${config.secretRef.namespace || ''}/${config.secretRef.name || ''}`,
+          details: `${config.secretRef.namespace || ''}/${config.secretRef.name || ''}`,
         };
       } else {
-        sourceItem = { type: 'inline', name: config.name, displayText: config.name };
+        sourceItem = { type: 'inline', name: config.name, details: '' };
       }
       return sourceItem;
     })

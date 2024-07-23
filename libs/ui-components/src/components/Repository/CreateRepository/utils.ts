@@ -29,20 +29,34 @@ const jwtTokenRegexp = /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/
 export const isHttpRepoSpec = (repoSpec: RepositorySpec): repoSpec is HttpRepoSpec => !!repoSpec['httpConfig'];
 export const isSshRepoSpec = (repoSpec: RepositorySpec): repoSpec is SshRepoSpec => !!repoSpec['sshConfig'];
 
-export const getInitValues = (
-  repository?: Repository,
-  resourceSyncs?: ResourceSync[],
-  canUseResourceSyncs?: boolean,
-): RepositoryFormValues => {
-  const useRSs = canUseResourceSyncs ?? true;
+export const getInitValues = ({
+  repository,
+  resourceSyncs,
+  options,
+}: {
+  repository?: Repository;
+  resourceSyncs?: ResourceSync[];
+  options?: {
+    canUseResourceSyncs?: boolean;
+    allowedRepoTypes?: RepoSpecType[];
+    showRepoTypes?: boolean;
+  };
+}): RepositoryFormValues => {
+  const useRSs = options?.canUseResourceSyncs ?? true;
+
   if (!repository) {
+    const selectedRepoType = options?.allowedRepoTypes?.length === 1 ? options.allowedRepoTypes[0] : RepoSpecType.GIT;
+
     return {
       exists: false,
-      repoType: RepoSpecType.GIT,
+      repoType: selectedRepoType,
+      allowedRepoTypes: options?.allowedRepoTypes,
+      showRepoTypes: options?.showRepoTypes ?? true,
       name: '',
       url: '',
       useAdvancedConfig: false,
       configType: 'http',
+
       canUseResourceSyncs: useRSs,
       useResourceSyncs: useRSs,
       resourceSyncs: [
@@ -60,6 +74,8 @@ export const getInitValues = (
     name: repository.metadata.name || '',
     url: repository.spec.url || '',
     repoType: repository.spec.type,
+    allowedRepoTypes: options?.allowedRepoTypes,
+    showRepoTypes: options?.showRepoTypes ?? true,
     useResourceSyncs: !!resourceSyncs?.length,
     useAdvancedConfig: false,
     configType: 'http',

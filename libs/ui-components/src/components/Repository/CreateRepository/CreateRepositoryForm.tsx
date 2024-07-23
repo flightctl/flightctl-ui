@@ -119,6 +119,12 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
   const { values, setFieldValue, validateForm } = useFormikContext<RepositoryFormValues>();
   const [showConfirmChangeType, setShowConfirmChangeType] = React.useState<boolean>();
 
+  if (!values.showRepoTypes) {
+    return null;
+  }
+
+  const isRepoTypeChangeDisabled = values.allowedRepoTypes?.length === 1;
+
   const doChangeRepoType = (toType?: RepoSpecType) => {
     if (!toType) {
       toType = values.repoType === RepoSpecType.GIT ? RepoSpecType.HTTP : RepoSpecType.GIT;
@@ -153,6 +159,7 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
             checkedValue={RepoSpecType.GIT}
             onChangeCustom={onRepoTypeChange}
             noDefaultOnChange
+            isDisabled={isRepoTypeChangeDisabled}
           />
         </SplitItem>
         <SplitItem>
@@ -163,6 +170,7 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
             checkedValue={RepoSpecType.HTTP}
             onChangeCustom={onRepoTypeChange}
             noDefaultOnChange
+            isDisabled={isRepoTypeChangeDisabled}
           />
         </SplitItem>
       </Split>
@@ -270,18 +278,22 @@ const CreateRepositoryFormContent = ({ isEdit, children, onClose }: CreateReposi
   );
 };
 
-type CreateRepositoryFormProps = {
+export type CreateRepositoryFormProps = {
   onClose: VoidFunction;
   onSuccess: (repository: Repository) => void;
   repository?: Repository;
   resourceSyncs?: ResourceSync[];
-  canUseResourceSyncs?: boolean;
+  options?: {
+    canUseResourceSyncs?: boolean;
+    showRepoTypes?: boolean;
+    allowedRepoTypes?: RepoSpecType[];
+  };
 };
 
 const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
   repository,
   resourceSyncs,
-  canUseResourceSyncs = true,
+  options,
   onClose,
   onSuccess,
 }) => {
@@ -291,7 +303,11 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
 
   return (
     <Formik<RepositoryFormValues>
-      initialValues={getInitValues(repository, resourceSyncs, canUseResourceSyncs)}
+      initialValues={getInitValues({
+        repository,
+        resourceSyncs,
+        options,
+      })}
       validationSchema={Yup.lazy(repositorySchema(t, repository))}
       onSubmit={async (values) => {
         setErrors(undefined);

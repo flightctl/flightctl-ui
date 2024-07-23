@@ -70,10 +70,16 @@ const CreateFleetWizard = () => {
         onSubmit={async (values) => {
           setError(undefined);
           try {
-            const result = await (isEdit
-              ? patch<Fleet>(`fleets/${fleetId}`, getFleetPatches(fleet as Fleet, values))
-              : post<Fleet>('fleets', getFleetResource(values)));
-            navigate({ route: ROUTE.FLEET_DETAILS, postfix: result.metadata.name });
+            if (isEdit) {
+              const fleetPatches = getFleetPatches(fleet as Fleet, values);
+              if (fleetPatches.length > 0) {
+                await patch<Fleet>(`fleets/${fleetId}`, fleetPatches);
+              }
+            } else {
+              await post<Fleet>('fleets', getFleetResource(values));
+            }
+
+            navigate({ route: ROUTE.FLEET_DETAILS, postfix: values.name });
           } catch (e) {
             setError(e);
           }

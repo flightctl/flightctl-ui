@@ -59,7 +59,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Url')}</DescriptionListTerm>
             <DescriptionListDescription>
-              <RepositorySource sourceDetails={{ url: repoDetails.spec.url, type: 'git' }} />
+              <RepositorySource sourceDetails={{ type: 'git', details: repoDetails.spec.url }} />
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>

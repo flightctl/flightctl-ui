@@ -17,8 +17,8 @@ import {
   SpecConfigTemplate,
   isGitConfigTemplate,
   isGitProviderSpec,
-  isHttpConfigProviderSpec,
   isHttpConfigTemplate,
+  isHttpProviderSpec,
   isKubeProviderSpec,
   isKubeSecretTemplate,
 } from '../../../types/deviceSpec';
@@ -37,6 +37,17 @@ const isSameGitConf = (a: GitConfigProviderSpec, b: GitConfigProviderSpec) => {
     aRef.path === bRef.path &&
     aRef.repository === bRef.repository &&
     aRef.targetRevision === bRef.targetRevision
+  );
+};
+
+const isSameHttpConf = (a: HttpConfigProviderSpec, b: HttpConfigProviderSpec) => {
+  const aRef = a.httpRef;
+  const bRef = b.httpRef;
+  return (
+    a.name === b.name &&
+    aRef.filePath === bRef.filePath &&
+    aRef.repository === bRef.repository &&
+    (aRef.suffix || '') === (bRef.suffix || '')
   );
 };
 
@@ -89,6 +100,8 @@ export const getDeviceSpecConfigPatches = (
         switch (conf.configType) {
           case 'GitConfigProviderSpec':
             return isSameGitConf(newConfig as GitConfigProviderSpec, conf as GitConfigProviderSpec);
+          case 'HttpConfigProviderSpec':
+            return isSameHttpConf(newConfig as HttpConfigProviderSpec, conf as HttpConfigProviderSpec);
           case 'KubernetesSecretProviderSpec':
             return isSameSecretConf(newConfig as KubernetesSecretProviderSpec, conf as KubernetesSecretProviderSpec);
           case 'InlineConfigProviderSpec':
@@ -136,7 +149,6 @@ export const getAPIConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
     };
   }
   if (isHttpConfigTemplate(ct)) {
-    // TODO EDM-192 Form for this config type not implemented
     return {
       configType: 'HttpConfigProviderSpec',
       name: ct.name,
@@ -174,14 +186,13 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec) =>
         secretNs: c.secretRef.namespace,
       } as KubeSecretTemplate;
     }
-    if (isHttpConfigProviderSpec(c)) {
-      // TODO EDM-192 Not implemented
+    if (isHttpProviderSpec(c)) {
       return {
         type: 'http',
         name: c.name,
-        repository: '',
-        suffix: '',
-        filePath: '',
+        repository: c.httpRef.repository,
+        suffix: c.httpRef.suffix,
+        filePath: c.httpRef.filePath,
       } as HttpConfigTemplate;
     }
     return {
