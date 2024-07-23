@@ -2,12 +2,14 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { GitSshConfig } from './GitSshConfig';
-export type GitSshRepoSpec = {
+import type { RepoSpecType } from './RepoSpecType';
+import type { SshConfig } from './SshConfig';
+export type SshRepoSpec = {
   /**
    * The SSH Git repository URL to clone from
    */
-  repo: string;
-  sshConfig: GitSshConfig;
+  url: string;
+  type: RepoSpecType;
+  sshConfig: SshConfig;
 };
 

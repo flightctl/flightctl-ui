@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { DeviceOSSpec } from './DeviceOSSpec';
 import type { GitConfigProviderSpec } from './GitConfigProviderSpec';
+import type { HttpConfigProviderSpec } from './HttpConfigProviderSpec';
 import type { InlineConfigProviderSpec } from './InlineConfigProviderSpec';
 import type { KubernetesSecretProviderSpec } from './KubernetesSecretProviderSpec';
 import type { ResourceMonitor } from './ResourceMonitor';
@@ -12,7 +13,7 @@ export type DeviceSpec = {
   /**
    * List of config resources.
    */
-  config?: Array<(GitConfigProviderSpec | KubernetesSecretProviderSpec | InlineConfigProviderSpec)>;
+  config?: Array<(GitConfigProviderSpec | KubernetesSecretProviderSpec | InlineConfigProviderSpec | HttpConfigProviderSpec)>;
   containers?: {
     matchPatterns?: Array<string>;
   };

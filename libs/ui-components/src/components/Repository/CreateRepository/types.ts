@@ -1,3 +1,5 @@
+import { RepoSpecType } from '@flightctl/types';
+
 export type ResourceSyncFormValue = {
   name: string;
   targetRevision: string;
@@ -9,6 +11,7 @@ export type RepositoryFormValues = {
   exists: boolean;
   name: string;
   url: string;
+  repoType: RepoSpecType;
   useAdvancedConfig: boolean;
   configType: 'http' | 'ssh';
   httpConfig?: {
@@ -24,12 +27,14 @@ export type RepositoryFormValues = {
     };
     caCrt?: string;
     skipServerVerification?: boolean;
+    token?: string;
   };
   sshConfig?: {
     sshPrivateKey?: string;
     privateKeyPassphrase?: string;
     skipServerVerification?: boolean;
   };
+  canUseResourceSyncs: boolean;
   useResourceSyncs: boolean;
   resourceSyncs: ResourceSyncFormValue[];
 };

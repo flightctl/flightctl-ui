@@ -1,5 +1,17 @@
 import * as React from 'react';
-import { Alert, Button, Checkbox, Form, FormGroup, FormSection, Grid, Split, SplitItem } from '@patternfly/react-core';
+import {
+  Alert,
+  Button,
+  ButtonVariant,
+  Checkbox,
+  Form,
+  FormGroup,
+  FormSection,
+  Grid,
+  Modal,
+  Split,
+  SplitItem,
+} from '@patternfly/react-core';
 import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -17,7 +29,7 @@ import {
   handlePromises,
   repositorySchema,
 } from './utils';
-import { Repository, ResourceSync } from '@flightctl/types';
+import { RepoSpecType, Repository, ResourceSync } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import NameField from '../../form/NameField';
@@ -32,19 +44,22 @@ import './CreateRepositoryForm.css';
 const AdvancedSection = () => {
   const { t } = useTranslation();
   const { values } = useFormikContext<RepositoryFormValues>();
+  const showConfigTypeRadios = values.repoType === RepoSpecType.GIT;
 
   return (
     <FormSection>
-      <Split hasGutter>
-        <SplitItem>
-          <RadioField id="http-radio" name="configType" label="HTTP" checkedValue="http" />
-        </SplitItem>
-        <SplitItem>
-          <RadioField id="ssh-radio" name="configType" label="SSH" checkedValue="ssh" />
-        </SplitItem>
-      </Split>
+      {showConfigTypeRadios && (
+        <Split hasGutter>
+          <SplitItem>
+            <RadioField id="http-config-radio" name="configType" label={t('HTTP')} checkedValue="http" />
+          </SplitItem>
+          <SplitItem>
+            <RadioField id="ssh-config-radio" name="configType" label={t('SSH')} checkedValue="ssh" />
+          </SplitItem>
+        </Split>
+      )}
       {values.configType === 'http' && (
-        <Grid hasGutter className="fctl-create-repo__adv-section">
+        <Grid hasGutter className={showConfigTypeRadios ? 'fctl-create-repo__adv-section--nested' : ''}>
           <CheckboxField name="httpConfig.basicAuth.use" label={t('Basic authentication')}>
             <FormGroup label={t('Username')} isRequired>
               <TextField name="httpConfig.basicAuth.username" aria-label={t('Username')} />
@@ -71,10 +86,19 @@ const AdvancedSection = () => {
               isDisabled={values.httpConfig?.skipServerVerification}
             />
           </FormGroup>
+          {values.repoType === RepoSpecType.HTTP && (
+            <FormGroup label={t('Token')}>
+              <TextField
+                name="httpConfig.token"
+                aria-label={t('Token')}
+                helperText={t('JWT authentication token for the HTTP service')}
+              />
+            </FormGroup>
+          )}
         </Grid>
       )}
       {values.configType === 'ssh' && (
-        <Grid hasGutter className="fctl-create-repo__adv-section">
+        <Grid hasGutter className={showConfigTypeRadios ? 'fctl-create-repo__adv-section--nested' : ''}>
           <FormGroup label={t('SSH private key')}>
             <TextAreaField name="sshConfig.sshPrivateKey" aria-label={t('SSH private key')} />
           </FormGroup>
@@ -87,6 +111,94 @@ const AdvancedSection = () => {
         </Grid>
       )}
     </FormSection>
+  );
+};
+
+const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
+  const { t } = useTranslation();
+  const { values, setFieldValue, validateForm } = useFormikContext<RepositoryFormValues>();
+  const [showConfirmChangeType, setShowConfirmChangeType] = React.useState<boolean>();
+
+  const doChangeRepoType = (toType?: RepoSpecType) => {
+    if (!toType) {
+      toType = values.repoType === RepoSpecType.GIT ? RepoSpecType.HTTP : RepoSpecType.GIT;
+    }
+    if (toType === RepoSpecType.HTTP) {
+      void setFieldValue('repoType', RepoSpecType.HTTP);
+      void setFieldValue('configType', 'http');
+      void setFieldValue('useResourceSyncs', false);
+    } else {
+      void setFieldValue('repoType', RepoSpecType.GIT);
+      void setFieldValue('httpConfig.token', undefined);
+    }
+    void validateForm();
+  };
+
+  const onRepoTypeChange = (repoType: unknown) => {
+    if (isEdit) {
+      setShowConfirmChangeType(true);
+    } else {
+      doChangeRepoType(repoType as RepoSpecType);
+    }
+  };
+
+  return (
+    <>
+      <Split hasGutter>
+        <SplitItem>
+          <RadioField
+            id="git-repo-radio"
+            name="repoType"
+            label={t('Use Git repository')}
+            checkedValue={RepoSpecType.GIT}
+            onChangeCustom={onRepoTypeChange}
+            noDefaultOnChange
+          />
+        </SplitItem>
+        <SplitItem>
+          <RadioField
+            id="http-repo-radio"
+            name="repoType"
+            label={t('Use HTTP service')}
+            checkedValue={RepoSpecType.HTTP}
+            onChangeCustom={onRepoTypeChange}
+            noDefaultOnChange
+          />
+        </SplitItem>
+      </Split>
+      {showConfirmChangeType && (
+        <Modal
+          title={'Change repository type?'}
+          titleIconVariant="warning"
+          variant="small"
+          isOpen
+          actions={[
+            <Button
+              key="change"
+              variant={ButtonVariant.primary}
+              onClick={() => {
+                setShowConfirmChangeType(false);
+                doChangeRepoType();
+              }}
+            >
+              {t('Change')}
+            </Button>,
+            <Button
+              key="cancel"
+              variant="link"
+              onClick={() => {
+                setShowConfirmChangeType(false);
+              }}
+            >
+              {t('Cancel')}
+            </Button>,
+          ]}
+        >
+          {t('Switching the repository type will cause dome data to be lost.')}
+          {t('Are you sure you want to change the repository type?')}
+        </Modal>
+      )}
+    </>
   );
 };
 
@@ -110,31 +222,29 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
           helperText={t('For example: https://github.com/flightctl/flightctl-demos')}
         />
       </FormGroup>
+
+      <RepositoryType isEdit={isEdit} />
       <CheckboxField name="useAdvancedConfig" label={t('Use advanced configurations')} body={<AdvancedSection />} />
     </>
   );
 };
 
 type CreateRepositoryFormContentProps = React.PropsWithChildren<Record<never, never>> &
-  Pick<CreateRepositoryFormProps, 'hideResourceSyncs' | 'onClose'> & {
+  Pick<CreateRepositoryFormProps, 'onClose'> & {
     isEdit: boolean;
   };
 
-const CreateRepositoryFormContent = ({
-  isEdit,
-  children,
-  hideResourceSyncs,
-  onClose,
-}: CreateRepositoryFormContentProps) => {
+const CreateRepositoryFormContent = ({ isEdit, children, onClose }: CreateRepositoryFormContentProps) => {
   const { t } = useTranslation();
   const { values, setFieldValue, isValid, dirty, submitForm, isSubmitting } = useFormikContext<RepositoryFormValues>();
   const isSubmitDisabled = isSubmitting || !dirty || !isValid;
 
+  const showResourceSyncs = values.canUseResourceSyncs && values.repoType === RepoSpecType.GIT;
   return (
     <Form>
       <Grid hasGutter span={8}>
         <RepositoryForm isEdit={isEdit} />
-        {!hideResourceSyncs && (
+        {showResourceSyncs && (
           <Checkbox
             id="use-resource-syncs"
             label={t('Use resource syncs')}
@@ -165,13 +275,13 @@ type CreateRepositoryFormProps = {
   onSuccess: (repository: Repository) => void;
   repository?: Repository;
   resourceSyncs?: ResourceSync[];
-  hideResourceSyncs?: boolean;
+  canUseResourceSyncs?: boolean;
 };
 
 const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
   repository,
   resourceSyncs,
-  hideResourceSyncs,
+  canUseResourceSyncs = true,
   onClose,
   onSuccess,
 }) => {
@@ -181,7 +291,7 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
 
   return (
     <Formik<RepositoryFormValues>
-      initialValues={getInitValues(repository, resourceSyncs, hideResourceSyncs)}
+      initialValues={getInitValues(repository, resourceSyncs, canUseResourceSyncs)}
       validationSchema={Yup.lazy(repositorySchema(t, repository))}
       onSubmit={async (values) => {
         setErrors(undefined);
@@ -250,7 +360,7 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
         }
       }}
     >
-      <CreateRepositoryFormContent isEdit={!!repository} hideResourceSyncs={hideResourceSyncs} onClose={onClose}>
+      <CreateRepositoryFormContent isEdit={!!repository} onClose={onClose}>
         {errors?.length && (
           <Alert isInline variant="danger" title={t('An error occurred')}>
             {errors.map((e, index) => (

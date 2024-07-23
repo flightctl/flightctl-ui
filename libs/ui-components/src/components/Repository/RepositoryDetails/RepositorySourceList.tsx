@@ -50,7 +50,7 @@ const RepositorySourceList = ({ sourceItems }: { sourceItems: SourceItem[] }) =>
               name: repositoryNames[index],
             })} ${getErrorMessage(result.reason)}`
           : undefined;
-        const url = isRepoMissing ? undefined : result.value.spec.repo;
+        const url = isRepoMissing ? undefined : result.value.spec.url;
         return {
           name,
           url,

@@ -28,6 +28,7 @@ const K8S_DNS_SUBDOMAIN_ALLOWED_CHARACTERS = /^[a-z0-9.-]*$/;
 const K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH = 253;
 
 const absolutePathRegex = /^\/.*$/;
+export const MAX_TARGET_REVISION_LENGTH = 244;
 
 export const getLabelValueValidations = (t: TFunction) => [
   { key: 'labelValueStartAndEnd', message: t('Starts and ends with a letter or a number.') },
@@ -234,7 +235,10 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
             name: validKubernetesDnsSubdomain(t, { isRequired: true }),
             path: Yup.string().required(t('Path is required.')).matches(absolutePathRegex, t('Path must be absolute.')),
             repository: Yup.string().required(t('Repository is required.')),
-            targetRevision: Yup.string().required(t('Branch/tag/commit is required.')),
+            targetRevision: maxLengthString(t, {
+              maxLength: MAX_TARGET_REVISION_LENGTH,
+              fieldName: t('Target revision'),
+            }).required(t('Branch/tag/commit is required.')),
           });
         } else if (isKubeSecretTemplate(value)) {
           return Yup.object<KubeSecretTemplate>().shape({

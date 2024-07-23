@@ -13,11 +13,11 @@ import { LockedIcon } from '@patternfly/react-icons/dist/js/icons/locked-icon';
 import { LockOpenIcon } from '@patternfly/react-icons/dist/js/icons/lock-open-icon';
 
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../utils/status/repository';
-import { Repository } from '@flightctl/types';
+import { RepoSpecType, Repository } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import RepositorySource from './RepositorySource';
 import RepositoryStatus from '../../Status/RepositoryStatus';
-import { isHttpRepoSpec, isSshRepoSpec } from '../../../types/extraTypes';
+import { isHttpRepoSpec, isSshRepoSpec } from '../CreateRepository/utils';
 
 const RepoPrivacy = ({ repo }: { repo: Repository }) => {
   const { t } = useTranslation();
@@ -59,7 +59,13 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Url')}</DescriptionListTerm>
             <DescriptionListDescription>
-              <RepositorySource sourceDetails={{ url: repoDetails.spec.repo, type: 'git' }} />
+              <RepositorySource sourceDetails={{ url: repoDetails.spec.url, type: 'git' }} />
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Type')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {repoDetails?.spec.type === RepoSpecType.HTTP ? t('HTTP service') : t('Git repository')}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>

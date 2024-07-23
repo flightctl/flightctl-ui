@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type GitHttpConfig = {
+export type HttpConfig = {
   /**
    * The username for auth with HTTP transport
    */
@@ -27,5 +27,9 @@ export type GitHttpConfig = {
    * Skip remote server verification
    */
   skipServerVerification?: boolean;
+  /**
+   * The token for auth with HTTP transport
+   */
+  token?: string;
 };
 

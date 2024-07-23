@@ -1,4 +1,4 @@
-import { ConditionStatus, ConditionType, Repository } from '@flightctl/types';
+import { ConditionStatus, ConditionType, RepoSpecType, Repository } from '@flightctl/types';
 
 const repoList: Repository[] = [
   {
@@ -7,10 +7,11 @@ const repoList: Repository[] = [
     metadata: {
       creationTimestamp: '2024-04-30T14:05:53Z',
       labels: {},
-      name: 'init-repo',
+      name: 'git-init-repo',
     },
     spec: {
-      repo: 'https://github.com/flightctl/flightctl-demos',
+      url: 'https://github.com/flightctl/flightctl-demos',
+      type: RepoSpecType.GIT,
     },
     status: {
       conditions: [

@@ -4,21 +4,30 @@ import isEqual from 'lodash/isEqual';
 import {
   DeviceSpec,
   GitConfigProviderSpec,
+  HttpConfigProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
   PatchRequest,
 } from '@flightctl/types';
-import { ConfigSourceProvider } from '../../../types/extraTypes';
 import {
   GitConfigTemplate,
+  HttpConfigTemplate,
   InlineConfigTemplate,
   KubeSecretTemplate,
   SpecConfigTemplate,
   isGitConfigTemplate,
   isGitProviderSpec,
+  isHttpConfigProviderSpec,
+  isHttpConfigTemplate,
   isKubeProviderSpec,
   isKubeSecretTemplate,
 } from '../../../types/deviceSpec';
+
+export type ConfigSourceProvider =
+  | GitConfigProviderSpec
+  | KubernetesSecretProviderSpec
+  | InlineConfigProviderSpec
+  | HttpConfigProviderSpec;
 
 const isSameGitConf = (a: GitConfigProviderSpec, b: GitConfigProviderSpec) => {
   const aRef = a.gitRef;
@@ -126,6 +135,18 @@ export const getAPIConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
       },
     };
   }
+  if (isHttpConfigTemplate(ct)) {
+    // TODO EDM-192 Form for this config type not implemented
+    return {
+      configType: 'HttpConfigProviderSpec',
+      name: ct.name,
+      httpRef: {
+        repository: ct.repository,
+        suffix: ct.suffix,
+        filePath: ct.filePath,
+      },
+    };
+  }
   return {
     configType: 'InlineConfigProviderSpec',
     inline: yaml.load(ct.inline) as InlineConfigProviderSpec['inline'],
@@ -152,6 +173,16 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec) =>
         secretName: c.secretRef.name,
         secretNs: c.secretRef.namespace,
       } as KubeSecretTemplate;
+    }
+    if (isHttpConfigProviderSpec(c)) {
+      // TODO EDM-192 Not implemented
+      return {
+        type: 'http',
+        name: c.name,
+        repository: '',
+        suffix: '',
+        filePath: '',
+      } as HttpConfigTemplate;
     }
     return {
       type: 'inline',

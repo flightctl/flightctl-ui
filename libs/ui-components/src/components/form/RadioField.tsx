@@ -7,15 +7,30 @@ export interface RadioFieldProps extends Omit<RadioProps, 'onChange' | 'ref' | '
   checkedValue?: unknown;
   name: string;
   helperText?: React.ReactNode;
+  onChangeCustom?: (checkedValue: unknown) => void;
+  noDefaultOnChange?: boolean;
 }
 
-const RadioField = ({ helperText, checkedValue, name, ...props }: RadioFieldProps) => {
+const RadioField = ({
+  helperText,
+  checkedValue,
+  name,
+  onChangeCustom,
+  noDefaultOnChange,
+  ...props
+}: RadioFieldProps) => {
   const [field, meta, { setValue, setTouched }] = useField({
     name,
   });
 
   const onChange: RadioProps['onChange'] = async (_, checked) => {
     if (checked) {
+      if (onChangeCustom) {
+        onChangeCustom(checkedValue);
+      }
+      if (noDefaultOnChange) {
+        return;
+      }
       await setValue(checkedValue || true, true);
       await setTouched(true);
     }

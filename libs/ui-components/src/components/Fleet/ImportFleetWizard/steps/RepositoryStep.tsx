@@ -57,7 +57,7 @@ const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
           </Thead>
           <Tbody>
             <Tr>
-              <Td dataLabel={t('URL')}>{currentRepo.spec.repo}</Td>
+              <Td dataLabel={t('URL')}>{currentRepo.spec.url}</Td>
               <Td dataLabel={t('Sync status')}>
                 <RepositoryStatus statusInfo={getRepositorySyncStatus(currentRepo)} />
               </Td>
