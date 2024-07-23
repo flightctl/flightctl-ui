@@ -16,13 +16,9 @@ type FormSelectProps = {
   placeholderText?: string;
 };
 
-const getItemLabel = (item: string | SelectItem) => {
-  if (typeof item === 'string') {
-    return item;
-  } else {
-    return item.label || '';
-  }
-};
+const isItemObject = (item: string | SelectItem): item is SelectItem => typeof item === 'object';
+
+const getItemLabel = (item: string | SelectItem) => (isItemObject(item) ? item.label : item);
 
 const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeholderText, children }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -79,7 +75,7 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeh
           <SelectList className="fctl-form-select__menu">
             {itemKeys.map((key) => {
               const item = items[key];
-              const desc = typeof item === 'string' ? '' : item.description;
+              const desc = isItemObject(item) ? item.description : undefined;
               return (
                 <SelectOption key={key} value={key} description={desc}>
                   {getItemLabel(item)}

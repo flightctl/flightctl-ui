@@ -202,7 +202,7 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
             </Button>,
           ]}
         >
-          {t('Switching the repository type will cause dome data to be lost.')}
+          {t('Switching the repository type will cause some data to be lost.')}
           {t('Are you sure you want to change the repository type?')}
         </Modal>
       )}

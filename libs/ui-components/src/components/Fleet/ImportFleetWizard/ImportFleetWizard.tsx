@@ -125,7 +125,7 @@ const ImportFleetWizard = () => {
     body = (
       <Formik<ImportFleetFormValues>
         initialValues={{
-          useExistingRepo: false,
+          useExistingRepo: true,
           existingRepo: '',
           ...repoInitValues,
         }}

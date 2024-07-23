@@ -74,7 +74,9 @@ const HttpConfigForm = ({
         labelIcon={
           <WithHelperText
             ariaLabel={t('Suffix')}
-            content={t("Suffix to add to the repository's URL to obtain the full HTTP service URL.")}
+            content={t(
+              "Suffix that will be combined with the repository's base URL to invoke the HTTP service. Can include query parameters.",
+            )}
           />
         }
       >
@@ -90,7 +92,7 @@ const HttpConfigForm = ({
         labelIcon={
           <WithHelperText
             ariaLabel={t('File path')}
-            content={t('Path where to store the file in the device filesystem.')}
+            content={t('Path of the file where the response will be stored in the device filesystem.')}
           />
         }
         isRequired
@@ -120,7 +122,7 @@ const ConfigWithRepositoryTemplateForm = ({
     if (curr.spec.type === repoType) {
       acc[curr.metadata.name || ''] = {
         label: curr.metadata.name,
-        description: t('Service URL: {{ serviceURL }}', { serviceURL: curr.spec.url }),
+        description: curr.spec.url,
       };
     }
     return acc;
