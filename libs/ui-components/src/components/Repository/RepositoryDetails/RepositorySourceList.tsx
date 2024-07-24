@@ -1,5 +1,5 @@
 import React from 'react';
-import { Spinner, Stack, StackItem } from '@patternfly/react-core';
+import { List, ListItem, Spinner } from '@patternfly/react-core';
 
 import { Repository } from '@flightctl/types';
 import { useFetch } from '../../../hooks/useFetch';
@@ -72,13 +72,13 @@ const RepositorySourceList = ({ sourceItems }: { sourceItems: SourceItem[] }) =>
     ? repoDetailItems.concat(nonRepoItems)
     : nonRepoItems;
   return allItems.length > 0 ? (
-    <Stack>
+    <List>
       {allItems.map((sourceDetails) => (
-        <StackItem key={sourceDetails.name || sourceDetails.details}>
+        <ListItem key={sourceDetails.name || sourceDetails.details}>
           <RepositorySource sourceDetails={sourceDetails} />
-        </StackItem>
+        </ListItem>
       ))}
-    </Stack>
+    </List>
   ) : (
     '-'
   );
