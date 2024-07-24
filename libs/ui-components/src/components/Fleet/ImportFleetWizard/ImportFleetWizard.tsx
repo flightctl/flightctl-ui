@@ -24,7 +24,7 @@ import ReviewStep, { reviewStepId } from './steps/ReviewStep';
 import ResourceSyncStep, { isResourceSyncStepValid, resourceSyncStepId } from './steps/ResourceSyncStep';
 import { ImportFleetFormValues } from './types';
 import { useFetch } from '../../../hooks/useFetch';
-import { Repository, RepositoryList, ResourceSync } from '@flightctl/types';
+import { RepoSpecType, Repository, RepositoryList, ResourceSync } from '@flightctl/types';
 import {
   getInitValues,
   getRepository,
@@ -99,6 +99,8 @@ const ImportFleetWizard = () => {
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
   const [repoList, isLoading, error] = useFetchPeriodically<RepositoryList>({ endpoint: 'repositories' });
 
+  const gitRepositories = (repoList?.items || []).filter((repo) => repo.spec.type === RepoSpecType.GIT);
+
   let body;
 
   if (isLoading) {
@@ -114,11 +116,16 @@ const ImportFleetWizard = () => {
       </Alert>
     );
   } else {
-    const repoInitValues = getInitValues();
+    const repoInitValues = getInitValues({
+      options: {
+        allowedRepoTypes: [RepoSpecType.GIT],
+        showRepoTypes: false,
+      },
+    });
     body = (
       <Formik<ImportFleetFormValues>
         initialValues={{
-          useExistingRepo: false,
+          useExistingRepo: true,
           existingRepo: '',
           ...repoInitValues,
         }}
@@ -158,7 +165,7 @@ const ImportFleetWizard = () => {
             >
               <WizardStep name={t('Select or create repository')} id={repositoryStepId}>
                 {(!currentStep || currentStep?.id === repositoryStepId) && (
-                  <RepositoryStep repositories={repoList?.items || []} />
+                  <RepositoryStep repositories={gitRepositories} />
                 )}
               </WizardStep>
               <WizardStep

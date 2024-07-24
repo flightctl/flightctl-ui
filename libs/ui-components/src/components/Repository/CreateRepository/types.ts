@@ -12,6 +12,8 @@ export type RepositoryFormValues = {
   name: string;
   url: string;
   repoType: RepoSpecType;
+  allowedRepoTypes?: RepoSpecType[];
+  showRepoTypes: boolean;
   useAdvancedConfig: boolean;
   configType: 'http' | 'ssh';
   httpConfig?: {

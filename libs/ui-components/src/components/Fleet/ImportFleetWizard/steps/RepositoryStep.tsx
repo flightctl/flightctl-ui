@@ -84,7 +84,7 @@ const RepositoryStep = ({ repositories }: { repositories: Repository[] }) => {
               onChange={() => setFieldValue('useExistingRepo', true, true)}
               id="existing-repo"
               name="repo"
-              label={t('Use an existing repository')}
+              label={t('Use an existing Git repository')}
               isDisabled={!repositories.length}
             />
             <Radio
@@ -92,7 +92,7 @@ const RepositoryStep = ({ repositories }: { repositories: Repository[] }) => {
               onChange={() => setFieldValue('useExistingRepo', false, true)}
               id="new-repo"
               name="repo"
-              label={t('Use a new repository')}
+              label={t('Use a new Git repository')}
             />
           </FormGroup>
         </FormSection>

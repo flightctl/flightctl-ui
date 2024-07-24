@@ -1,56 +1,45 @@
 import React from 'react';
-import { Button, Icon, StackItem, Tooltip } from '@patternfly/react-core';
+import { Button, Icon, Tooltip } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
-import { LockIcon } from '@patternfly/react-icons/dist/js/icons/lock-icon';
-import { CodeBranchIcon } from '@patternfly/react-icons/dist/js/icons/code-branch-icon';
-import { CodeIcon } from '@patternfly/react-icons/dist/js/icons/code-icon';
+
+import { ConfigTemplate } from '../../../types/deviceSpec';
 
 export type RepositorySourceDetails = {
   name?: string;
-  url?: string;
+  details?: string;
   errorMessage?: string;
-  type: 'git' | 'inline' | 'secret';
+  type: ConfigTemplate['type'];
 };
 
 const RepositorySource = ({ sourceDetails }: { sourceDetails: RepositorySourceDetails }) => {
-  if (sourceDetails.type === 'secret') {
+  if (sourceDetails.errorMessage) {
     return (
-      <StackItem>
-        <LockIcon /> {sourceDetails.name}
-      </StackItem>
+      <>
+        {sourceDetails.name}{' '}
+        <Tooltip content={sourceDetails.errorMessage}>
+          <Icon status="danger">
+            <ExclamationCircleIcon />
+          </Icon>
+        </Tooltip>
+      </>
     );
   }
-
-  if (sourceDetails.type === 'inline') {
-    return (
-      <StackItem>
-        <CodeIcon /> {sourceDetails.name}
-      </StackItem>
-    );
+  if (['secret', 'inline'].includes(sourceDetails.type)) {
+    return <>{sourceDetails.name}</>;
   }
-
-  // Git configs
-  return sourceDetails.errorMessage ? (
-    <>
-      <CodeBranchIcon /> {sourceDetails.name}{' '}
-      <Tooltip content={sourceDetails.errorMessage}>
-        <Icon status="danger">
-          <ExclamationCircleIcon />
-        </Icon>
-      </Tooltip>
-    </>
-  ) : (
+  // Configurations related to a repository whose details could be obtained
+  return (
     <Button
       component="a"
       variant="link"
       isInline
-      href={sourceDetails.url}
+      href={sourceDetails.details}
       target="_blank"
       icon={<ExternalLinkAltIcon />}
       iconPosition="end"
     >
-      <CodeBranchIcon /> {sourceDetails.name || sourceDetails.url}
+      {sourceDetails.name || sourceDetails.details}
     </Button>
   );
 };

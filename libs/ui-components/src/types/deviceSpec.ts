@@ -58,7 +58,7 @@ export type HttpConfigTemplate = ConfigTemplate & {
 export const isHttpConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is HttpConfigTemplate =>
   configTemplate.type === 'http';
 
-export const isHttpConfigProviderSpec = (providerSpec: GenericConfigSpec): providerSpec is HttpConfigProviderSpec =>
+export const isHttpProviderSpec = (providerSpec: GenericConfigSpec): providerSpec is HttpConfigProviderSpec =>
   providerSpec.configType === 'HttpConfigProviderSpec';
 
 export type SpecConfigTemplate = GitConfigTemplate | HttpConfigTemplate | KubeSecretTemplate | InlineConfigTemplate;

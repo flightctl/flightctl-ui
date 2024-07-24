@@ -3,10 +3,12 @@ import { TFunction } from 'i18next';
 import { FlightCtlLabel } from '../../types/extraTypes';
 import {
   GitConfigTemplate,
+  HttpConfigTemplate,
   InlineConfigTemplate,
   KubeSecretTemplate,
   SpecConfigTemplate,
   isGitConfigTemplate,
+  isHttpConfigTemplate,
   isInlineConfigTemplate,
   isKubeSecretTemplate,
 } from '../../types/deviceSpec';
@@ -239,6 +241,15 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
               maxLength: MAX_TARGET_REVISION_LENGTH,
               fieldName: t('Target revision'),
             }).required(t('Branch/tag/commit is required.')),
+          });
+        } else if (isHttpConfigTemplate(value)) {
+          return Yup.object<HttpConfigTemplate>().shape({
+            type: Yup.string().required(t('Source type is required.')),
+            name: validKubernetesDnsSubdomain(t, { isRequired: true }),
+            filePath: Yup.string()
+              .required(t('File path is required.'))
+              .matches(absolutePathRegex, t('Path must be absolute.')),
+            suffix: Yup.string(),
           });
         } else if (isKubeSecretTemplate(value)) {
           return Yup.object<KubeSecretTemplate>().shape({

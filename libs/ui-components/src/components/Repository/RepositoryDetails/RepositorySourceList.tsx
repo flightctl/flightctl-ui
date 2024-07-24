@@ -1,5 +1,5 @@
 import React from 'react';
-import { Spinner, Stack, StackItem } from '@patternfly/react-core';
+import { List, ListItem, Spinner } from '@patternfly/react-core';
 
 import { Repository } from '@flightctl/types';
 import { useFetch } from '../../../hooks/useFetch';
@@ -19,23 +19,22 @@ const useArrayEq = (array: string[]) => {
   return prevArrayRef.current;
 };
 
+const repoConfigTypes = ['git', 'http'];
+
 const RepositorySourceList = ({ sourceItems }: { sourceItems: SourceItem[] }) => {
   const { get } = useFetch();
   const { t } = useTranslation();
 
-  const nonRepoItems = sourceItems
-    .filter((item) => item.type !== 'git')
-    .map((item) => ({
-      name: item.displayText || item.name,
-      type: item.type,
-    }));
+  const nonRepoItems = sourceItems.filter((item) => !repoConfigTypes.includes(item.type));
 
   const [repoDetailItems, setRepoDetailItems] = React.useState<RepositorySourceDetails[]>();
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
-  const gitRepoItems = sourceItems.filter((item) => item.type === 'git');
-  const repositoryNames = useArrayEq(gitRepoItems.map((item) => item.name));
-  const repositorySourceNames = useArrayEq(gitRepoItems.map((item) => item.displayText));
+  const repositoryItems = sourceItems.filter((item) => repoConfigTypes.includes(item.type));
+
+  const configNames = useArrayEq(repositoryItems.map((item) => item.name));
+  const repositoryNames = useArrayEq(repositoryItems.map((item) => item.details));
+  const repositoryTypes = useArrayEq(repositoryItems.map((item) => item.type));
 
   React.useEffect(() => {
     const fetch = async () => {
@@ -44,7 +43,7 @@ const RepositorySourceList = ({ sourceItems }: { sourceItems: SourceItem[] }) =>
 
       const repoSourceItems: RepositorySourceDetails[] = results.map((result, index) => {
         const isRepoMissing = isPromiseRejected(result);
-        const name = repositorySourceNames[index];
+        const configName = configNames[index];
         const errorMessage = isRepoMissing
           ? `${t('The repository "{{name}}" defined for this source failed to load.', {
               name: repositoryNames[index],
@@ -52,9 +51,9 @@ const RepositorySourceList = ({ sourceItems }: { sourceItems: SourceItem[] }) =>
           : undefined;
         const url = isRepoMissing ? undefined : result.value.spec.url;
         return {
-          name,
-          url,
-          type: 'git' as RepositorySourceDetails['type'],
+          name: configName,
+          details: url,
+          type: repositoryTypes[index] as 'git' | 'http',
           errorMessage,
         };
       });
@@ -63,7 +62,7 @@ const RepositorySourceList = ({ sourceItems }: { sourceItems: SourceItem[] }) =>
     };
 
     void fetch();
-  }, [t, get, repositoryNames, repositorySourceNames]);
+  }, [t, get, repositoryNames, configNames, repositoryTypes]);
 
   if (isLoading) {
     return <Spinner size="sm" />;
@@ -73,13 +72,13 @@ const RepositorySourceList = ({ sourceItems }: { sourceItems: SourceItem[] }) =>
     ? repoDetailItems.concat(nonRepoItems)
     : nonRepoItems;
   return allItems.length > 0 ? (
-    <Stack>
+    <List>
       {allItems.map((sourceDetails) => (
-        <StackItem key={sourceDetails.name || sourceDetails.url}>
+        <ListItem key={sourceDetails.name || sourceDetails.details}>
           <RepositorySource sourceDetails={sourceDetails} />
-        </StackItem>
+        </ListItem>
       ))}
-    </Stack>
+    </List>
   ) : (
     '-'
   );

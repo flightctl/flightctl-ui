@@ -59,7 +59,7 @@ const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => {
       <EmptyStateBody>
         <Trans t={t}>
           You can add devices and label them to match fleets, or your can{' '}
-          <Link to={ROUTE.FLEETS}>start with a fleet</Link> and add devices into it.
+          <Link to={ROUTE.FLEET_CREATE}>start with a fleet</Link> and add devices into it.
         </Trans>
       </EmptyStateBody>
       <EmptyStateFooter>

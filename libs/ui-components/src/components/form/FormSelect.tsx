@@ -6,13 +6,19 @@ import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 import './FormSelect.css';
 
+type SelectItem = { label: string; description?: string };
+
 type FormSelectProps = {
   name: string;
-  items: Record<string, React.ReactNode>;
+  items: Record<string, string | SelectItem>;
   helperText?: React.ReactNode;
   children?: React.ReactNode;
   placeholderText?: string;
 };
+
+const isItemObject = (item: string | SelectItem): item is SelectItem => typeof item === 'object';
+
+const getItemLabel = (item: string | SelectItem) => (isItemObject(item) ? item.label : item);
 
 const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeholderText, children }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -29,6 +35,8 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeh
       setValue(itemKeys[0], true);
     }
   }, [itemKeys, field.value, setValue]);
+
+  const selectedText = field.value ? getItemLabel(items[field.value]) : placeholderText;
 
   return (
     <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId}>
@@ -52,7 +60,7 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeh
             className="fctl-form-select__toggle"
             id={`${fieldId}-menu`}
           >
-            {items[field.value] || placeholderText}
+            {selectedText}
           </MenuToggle>
         )}
         isOpen={isOpen}
@@ -65,11 +73,15 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeh
       >
         {!!itemKeys.length && (
           <SelectList className="fctl-form-select__menu">
-            {itemKeys.map((key) => (
-              <SelectOption key={key} value={key}>
-                {items[key]}
-              </SelectOption>
-            ))}
+            {itemKeys.map((key) => {
+              const item = items[key];
+              const desc = isItemObject(item) ? item.description : undefined;
+              return (
+                <SelectOption key={key} value={key} description={desc}>
+                  {getItemLabel(item)}
+                </SelectOption>
+              );
+            })}
           </SelectList>
         )}
         {children}
