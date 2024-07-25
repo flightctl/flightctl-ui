@@ -402,7 +402,6 @@
   "Past threshold ({{ percent }}%)": "Past threshold ({{ percent }}%)",
   "{{ monitorType }} pressure - {{ status }}": "{{ monitorType }} pressure - {{ status }}",
   "Within limits": "Within limits",
-  "Invalid device spec": "Invalid device spec",
   "No resources are matching the current filters.": "No resources are matching the current filters.",
   "Search by name": "Search by name",
   "Waiting for terminal session to open...": "Waiting for terminal session to open...",
