@@ -26,7 +26,7 @@ export const useDeleteAction = ({ resourceType, resourceName, onDelete, disabled
           }
         : undefined)}
     >
-      {t('Delete')}
+      {t('Delete {{ resourceType }}', { resourceType })}
     </DropdownItem>
   );
   const deleteModal = isDeleteModalOpen && (
@@ -52,6 +52,7 @@ const DetailsPageActions: React.FC<DetailsPageActionsProps> = ({ children }) => 
     <Dropdown
       isOpen={actionsOpen}
       onSelect={() => setActionsOpen(false)}
+      popperProps={{ position: 'left', preventOverflow: true }}
       toggle={(toggleRef) => (
         <MenuToggle
           ref={toggleRef}

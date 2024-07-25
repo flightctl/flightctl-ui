@@ -49,10 +49,10 @@ const FleetDetails = () => {
               }
               onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}
             >
-              {t('Edit')}
+              {t('Edit fleet')}
             </DropdownItem>
             <DropdownItem
-              title={t('Delete')}
+              title={t('Delete fleet')}
               onClick={() => {
                 setIsDeleteModalOpen(true);
               }}
@@ -67,7 +67,7 @@ const FleetDetails = () => {
                   : undefined
               }
             >
-              {t('Delete')}
+              {t('Delete fleet')}
             </DropdownItem>
           </DropdownList>
         </DetailsPageActions>

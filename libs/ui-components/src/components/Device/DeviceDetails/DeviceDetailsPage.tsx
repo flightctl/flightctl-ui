@@ -35,7 +35,7 @@ const DeviceDetailsPage = () => {
       navigate(ROUTE.DEVICES);
     },
     resourceName: deviceAlias,
-    resourceType: 'Device',
+    resourceType: 'device',
   });
   return (
     <DetailsPage
