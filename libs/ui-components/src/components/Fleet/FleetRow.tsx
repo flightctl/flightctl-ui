@@ -29,7 +29,7 @@ const useFleetActions = (fleetName: string, isManaged: boolean) => {
     });
   } else {
     actions.push({
-      title: t('Edit'),
+      title: t('Edit fleet'),
       onClick: () => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetName }),
     });
   }
@@ -43,7 +43,7 @@ const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRow
   const isManaged = !!fleet.metadata?.owner;
   const actions = useFleetActions(fleetName, !!fleet.metadata?.owner);
   actions.push({
-    title: t('Delete'),
+    title: t('Delete fleet'),
     onClick: onDeleteClick,
     tooltipProps: isManaged
       ? {

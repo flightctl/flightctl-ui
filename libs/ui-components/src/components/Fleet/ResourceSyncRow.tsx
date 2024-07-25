@@ -44,7 +44,7 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
         <ActionsColumn
           items={[
             {
-              title: t('Edit'),
+              title: t('Edit fleet'),
               tooltipProps: t('Fleets managed by a resource sync cannot be edited'),
               isAriaDisabled: true,
             },

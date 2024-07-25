@@ -148,7 +148,7 @@ export const DeviceTable = ({
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
   const { deleteAction: deleteDeviceAction, deleteModal: deleteDeviceModal } = useDeleteListAction({
-    resourceType: 'Device',
+    resourceType: 'device',
     onDelete: async (resourceId: string) => {
       await remove(`devices/${resourceId}`);
       refetch();
@@ -156,7 +156,7 @@ export const DeviceTable = ({
   });
 
   const { deleteAction: deleteErAction, deleteModal: deleteErModal } = useDeleteListAction({
-    resourceType: 'Enrollment request',
+    resourceType: 'enrollment request',
     onDelete: async (resourceId: string) => {
       await remove(`enrollmentrequests/${resourceId}`);
       refetch();

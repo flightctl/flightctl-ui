@@ -20,7 +20,7 @@ export const useDeleteListAction = ({ resourceType, onDelete }: DeleteListAction
   const deleteAction: DeleteListActionResult['deleteAction'] = ({ resourceId, resourceName, disabledReason }) => {
     const popperProps = disabledReason ? { tooltipProps: { content: disabledReason } } : undefined;
     return {
-      title: t('Delete'),
+      title: t('Delete {{ resourceType }}', { resourceType }),
       isAriaDisabled: !!disabledReason,
       ...popperProps,
       onClick: () => {
