@@ -36,7 +36,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
     ? {
         isAriaDisabled: true,
         tooltipProps: {
-          content: t('Devices bound to a fleet cannot be edited'),
+          content: t('Device is bound to a fleet. Its configurations cannot be edited'),
         },
       }
     : undefined;
@@ -73,9 +73,13 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
         <ActionsColumn
           items={[
             {
-              title: t('Edit device'),
+              title: t('Edit device configurations'),
               onClick: () => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceName }),
               ...editActionProps,
+            },
+            {
+              title: t('View device details'),
+              onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
             },
             deleteAction({
               resourceId: deviceName,

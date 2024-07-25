@@ -58,7 +58,10 @@ const DeviceDetailsPage = () => {
         <DetailsPageActions>
           <DropdownList>
             <DropdownItem onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}>
-              {t('Edit device')}
+              {t('Edit device configurations')}
+            </DropdownItem>
+            <DropdownItem onClick={() => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceId })}>
+              {t('View device details')}
             </DropdownItem>
             {deleteAction}
           </DropdownList>

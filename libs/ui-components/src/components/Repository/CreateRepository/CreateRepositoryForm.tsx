@@ -32,6 +32,7 @@ import {
 import { RepoSpecType, Repository, ResourceSync } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
+import WithHelperText from '../../common/WithHelperText';
 import NameField from '../../form/NameField';
 import TextAreaField from '../../form/TextAreaField';
 import CheckboxField from '../../form/CheckboxField';
@@ -87,12 +88,16 @@ const AdvancedSection = () => {
             />
           </FormGroup>
           {values.repoType === RepoSpecType.HTTP && (
-            <FormGroup label={t('Token')}>
-              <TextField
-                name="httpConfig.token"
-                aria-label={t('Token')}
-                helperText={t('JWT authentication token for the HTTP service')}
-              />
+            <FormGroup
+              label={
+                <WithHelperText
+                  content={t('JWT authentication token for the HTTP service')}
+                  ariaLabel={t('Token')}
+                  showLabel
+                />
+              }
+            >
+              <TextField name="httpConfig.token" aria-label={t('Token')} />
             </FormGroup>
           )}
         </Grid>

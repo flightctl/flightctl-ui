@@ -26,7 +26,7 @@ const EditDeviceWizardFooter = () => {
 
   const primaryBtn = isSubmitStep ? (
     <Button variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
-      {t('Edit')}
+      {t('Save')}
     </Button>
   ) : (
     <Button variant="primary" onClick={goToNextStep} isDisabled={!isStepValid}>
