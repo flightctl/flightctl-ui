@@ -15,8 +15,14 @@ const SystemUpdateStatus = ({ deviceStatus }: { deviceStatus?: DeviceStatus }) =
   );
 
   if (invalidSpec) {
-    const title = t('Invalid configuration');
-    return <StatusDisplayContent level="danger" label={title} messageTitle={title} message={invalidSpec.message} />;
+    return (
+      <StatusDisplayContent
+        level="danger"
+        label={t('Updates blocked')}
+        messageTitle={t('Invalid configuration')}
+        message={invalidSpec.message}
+      />
+    );
   }
 
   const item = statusItems.find((statusItem) => {
