@@ -18,5 +18,7 @@ export const getErrorMessage = (error: unknown): string => {
 
 const uppercaseSentence = (s: string | undefined) => (s ? upperFirst(toLower(s)) : '');
 
-export const getConditionMessage = (condition: Condition): string =>
-  [uppercaseSentence(condition.reason), uppercaseSentence(condition.message)].filter((msg) => !!msg).join('. ');
+export const getConditionMessage = (condition: Condition, reason?: string): string =>
+  [uppercaseSentence(reason || condition.reason), uppercaseSentence(condition.message)]
+    .filter((msg) => !!msg)
+    .join('. ');

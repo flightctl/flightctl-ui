@@ -107,7 +107,7 @@ const DeviceDetailsTab = ({
                   />
                 </DescriptionListTerm>
                 <DescriptionListDescription>
-                  <SystemUpdateStatus updateStatus={device?.status?.updated} />
+                  <SystemUpdateStatus deviceStatus={device?.status} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
