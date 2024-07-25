@@ -1,0 +1,4 @@
+.fctl-device-details-tab__label {
+  font-weight: var(--pf-v5-global--FontWeight--bold, bold);
+  font-size: var(--pf-v5-c-form__label--FontSize, 13px);
+}
