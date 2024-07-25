@@ -198,7 +198,7 @@ const ImportFleetWizard = () => {
           <BreadcrumbItem>
             <Link to={ROUTE.FLEETS}>{t('Fleets')}</Link>
           </BreadcrumbItem>
-          <BreadcrumbItem isActive>{t('Create fleet')}</BreadcrumbItem>
+          <BreadcrumbItem isActive>{t('Import fleets')}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
       <PageSection variant={PageSectionVariants.light}>
