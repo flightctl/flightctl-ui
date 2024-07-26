@@ -16,6 +16,7 @@ const WithHelperText = ({ ariaLabel, showLabel, content, triggerAction }: WithHe
     {showLabel && ariaLabel}
     <Popover aria-label={ariaLabel} bodyContent={content} withFocusTrap triggerAction={triggerAction}>
       <Button
+        component="a"
         className="fctl-helper-text__icon"
         isInline
         variant="plain"
