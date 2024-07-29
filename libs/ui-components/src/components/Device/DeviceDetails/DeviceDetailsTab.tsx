@@ -6,12 +6,8 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
-  Flex,
-  FlexItem,
   Grid,
   GridItem,
-  Stack,
-  StackItem,
 } from '@patternfly/react-core';
 
 import { Device, TemplateVersion } from '@flightctl/types';
@@ -31,7 +27,6 @@ import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
 import WithHelperText from '../../common/WithHelperText';
 import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
 import DeviceResourceStatus from '../../Status/DeviceResourceStatus';
-import DeviceStatusDebug from './DeviceStatusDebug';
 
 import './DeviceDetailsTab.css';
 
@@ -62,28 +57,15 @@ const DeviceDetailsTab = ({
       <GridItem md={12}>
         <DetailsPageCard>
           <DetailsPageCardBody>
-            <Flex
-              alignItems={{ default: 'alignItemsFlexStart' }}
-              justifyContent={{ default: 'justifyContentSpaceBetween' }}
-            >
-              <FlexItem>
-                <Stack>
-                  <StackItem className="fctl-device-details-tab__label">{t('Name')}</StackItem>
-                </Stack>
-                <StackItem>
+            <DescriptionList isAutoColumnWidths columnModifier={{ default: '3Col' }}>
+              <DescriptionListGroup>
+                <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
+                <DescriptionListDescription>
                   <ResourceLink id={device?.metadata.name || '-'} />
-                </StackItem>
-              </FlexItem>
-              <FlexItem flex={{ default: 'flex_1' }}>
-                {device && <EditLabelsForm device={device} onDeviceUpdate={refetch} />}
-              </FlexItem>
-              <FlexItem alignSelf={{ default: 'alignSelfFlexEnd' }}>
-                <Stack>
-                  <StackItem className="fctl-device-details-tab__label">{t('Debug info')}</StackItem>
-                </Stack>
-                <StackItem>{device && <DeviceStatusDebug status={device.status} />}</StackItem>
-              </FlexItem>
-            </Flex>
+                </DescriptionListDescription>
+              </DescriptionListGroup>
+              {device && <EditLabelsForm device={device} onDeviceUpdate={refetch} />}
+            </DescriptionList>
           </DetailsPageCardBody>
         </DetailsPageCard>
       </GridItem>

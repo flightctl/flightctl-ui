@@ -13,6 +13,7 @@ import DeviceDetailsTab from './DeviceDetailsTab';
 import { useTemplateVersion } from '../../../hooks/useTemplateVersion';
 import TerminalTab from './TerminalTab';
 import NavItem from '../../NavItem/NavItem';
+import DeviceStatusDebugModal from './DeviceStatusDebugModal';
 
 const DeviceDetailsPage = () => {
   const { t } = useTranslation();
@@ -21,6 +22,7 @@ const DeviceDetailsPage = () => {
   } = useAppContext();
   const { deviceId } = useParams() as { deviceId: string };
   const [device, loading, error, refetch] = useFetchPeriodically<Required<Device>>({ endpoint: `devices/${deviceId}` });
+  const [showDebugInfo, setShowDebugInfo] = React.useState<boolean>(false);
 
   const [, /* useTv */ tv, loadingTv, errorTv] = useTemplateVersion(device);
 
@@ -60,6 +62,13 @@ const DeviceDetailsPage = () => {
             <DropdownItem onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}>
               {t('Edit device configurations')}
             </DropdownItem>
+            <DropdownItem
+              onClick={() => {
+                setShowDebugInfo(!showDebugInfo);
+              }}
+            >
+              {t('View debug information')}
+            </DropdownItem>
             {deleteAction}
           </DropdownList>
         </DetailsPageActions>
@@ -76,6 +85,14 @@ const DeviceDetailsPage = () => {
         </Routes>
       )}
       {deleteModal}
+      {device && showDebugInfo && (
+        <DeviceStatusDebugModal
+          status={device.status}
+          onClose={() => {
+            setShowDebugInfo(false);
+          }}
+        />
+      )}
     </DetailsPage>
   );
 };

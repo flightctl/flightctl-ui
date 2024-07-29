@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { Button, CodeBlock, CodeBlockCode, Modal, Stack, StackItem } from '@patternfly/react-core';
 import { CopyIcon } from '@patternfly/react-icons/dist/js/icons/copy-icon';
+import { RedoIcon } from '@patternfly/react-icons/dist/js/icons/redo-icon';
 
 import { DeviceStatus } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 
-import './DeviceStatusDebug.css';
-import { RedoIcon } from '@patternfly/react-icons/dist/js/icons';
+import './DeviceStatusDebugModal.css';
 
-const DeviceStatusDebugInfo = ({ status, onClose }: { status: DeviceStatus; onClose: VoidFunction }) => {
+const DeviceStatusDebugModal = ({ status, onClose }: { status: DeviceStatus; onClose: VoidFunction }) => {
   const { t } = useTranslation();
   const [refreshVersion, setRefreshVersion] = React.useState<string>(status.updatedAt);
 
@@ -57,23 +57,4 @@ const DeviceStatusDebugInfo = ({ status, onClose }: { status: DeviceStatus; onCl
   );
 };
 
-const DeviceStatusDebug = ({ status }: { status: DeviceStatus }) => {
-  const { t } = useTranslation();
-  const [showDebugInfo, setShowDebugInfo] = React.useState<boolean>();
-
-  const toggleShow = () => {
-    setShowDebugInfo(!showDebugInfo);
-  };
-
-  return (
-    <div className="container">
-      <Button variant="link" onClick={toggleShow}>
-        {t('View')}
-      </Button>
-
-      {showDebugInfo && <DeviceStatusDebugInfo status={status} onClose={toggleShow} />}
-    </div>
-  );
-};
-
-export default DeviceStatusDebug;
+export default DeviceStatusDebugModal;
