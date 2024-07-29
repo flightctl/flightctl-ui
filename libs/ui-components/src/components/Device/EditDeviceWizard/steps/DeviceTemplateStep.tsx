@@ -15,7 +15,7 @@ export const isDeviceTemplateStepValid = (errors: FormikErrors<DeviceSpecConfigF
   return !errors.osImage && !errors.configTemplates;
 };
 
-const templateCode = 'device.metadata.labels[key]';
+const templateCode = '{{ device.metadata.labels[key] }}';
 
 const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
             <Trans t={t}>
               Add a variable using <strong>{templateCode}</strong> and it will be applied based on the devices labels.
               Template variables can only be used in Inline and Git configurations.
-            </Trans>{' '}
+            </Trans>
           </Alert>
         )}
         <FormGroup
