@@ -1,4 +1,4 @@
-import { ChartDonut } from '@patternfly/react-charts';
+import { ChartContainer, ChartDonut } from '@patternfly/react-charts';
 import { Flex, FlexItem, Stack, StackItem, Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { Link, LinkProps } from '../../hooks/useNavigate';
@@ -74,34 +74,28 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
     >
       <FlexItem className="fctl-charts__donut">
         <div style={{ height: '230px', width: '230px' }}>
-          <ChartDonut
-            ariaDesc={title}
-            ariaTitle={title}
-            constrainToVisibleArea
-            colorScale={isEmpty ? [getDefaultStatusColor('unknown')] : data.map((datum) => datum.color)}
-            data={
-              isEmpty
-                ? [{ x: '', y: 100 }]
-                : data.map((datum) => ({
-                    x: `${datum.y}% ${datum.x}`,
-                    y: datum.y,
-                  }))
-            }
-            name={title}
-            title={title}
-            titleComponent={
-              <foreignObject x="0" y="0" width="230px" height="230px">
-                <Flex
-                  alignItems={{ default: 'alignItemsCenter' }}
-                  justifyContent={{ default: 'justifyContentCenter' }}
-                  alignContent={{ default: 'alignContentCenter' }}
-                  className="fctl-charts__title"
-                >
-                  {helperText ? <WithHelperText showLabel ariaLabel={title} content={helperText} /> : title}
-                </Flex>
-              </foreignObject>
-            }
-          />
+          <ChartContainer>
+            <foreignObject x="0" y="0" width="230px" height="230px">
+              <Flex
+                alignItems={{ default: 'alignItemsCenter' }}
+                justifyContent={{ default: 'justifyContentCenter' }}
+                alignContent={{ default: 'alignContentCenter' }}
+                className="fctl-charts__title"
+              >
+                {helperText ? <WithHelperText showLabel ariaLabel={title} content={helperText} /> : title}
+              </Flex>
+            </foreignObject>
+            <ChartDonut
+              ariaDesc={title}
+              ariaTitle={title}
+              constrainToVisibleArea
+              colorScale={isEmpty ? [getDefaultStatusColor('unknown')] : data.map((datum) => datum.color)}
+              data={isEmpty ? [{ y: 100 }] : data}
+              name={title}
+              standalone={false}
+              labels={isEmpty ? [] : data.map((datum) => `${datum.y}% ${datum.x}`)}
+            />
+          </ChartContainer>
         </div>
       </FlexItem>
       <FlexItem>
