@@ -179,7 +179,7 @@ const DeviceDetailsTab = ({
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Fleet name')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <DeviceFleet deviceMetadata={device?.metadata || {}} />
+                  <DeviceFleet device={device} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>

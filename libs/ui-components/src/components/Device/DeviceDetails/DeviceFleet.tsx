@@ -1,17 +1,28 @@
 import * as React from 'react';
 import { Button, List, ListItem, Popover } from '@patternfly/react-core';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
-import { ObjectMeta } from '@flightctl/types';
-import { getDeviceFleet, getMissingFleetDetails } from '../../../utils/devices';
+
+import { Condition, ConditionType, Device } from '@flightctl/types';
+import { getDeviceFleet } from '../../../utils/devices';
+import { getCondition } from '../../../utils/api';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
 
 import './DeviceFleet.css';
 
-const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => {
+const FleetLessDevice = ({ multipleOwnersCondition }: { multipleOwnersCondition?: Condition }) => {
   const { t } = useTranslation();
-  const details = getMissingFleetDetails(t, deviceMetadata);
-  const hasMultipleOwners = details.owners.length > 1;
+
+  let message = '';
+  let owners: string[] = [];
+  if (multipleOwnersCondition) {
+    message = t('Device is owned by more than one fleet');
+    owners = (multipleOwnersCondition.message || '').split(',');
+  } else {
+    message = t("Device labels don't match any fleet's label selector");
+  }
+
+  const hasMultipleOwners = owners.length > 1;
 
   return (
     <div className="fctl-device-fleet">
@@ -21,12 +32,12 @@ const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => 
         aria-label={t('Missing fleet detail')}
         bodyContent={
           <span>
-            {details.message}
+            {message}
             {hasMultipleOwners && (
               <span>
                 {': '}
                 <List>
-                  {details.owners.map((ownerFleet) => {
+                  {owners.map((ownerFleet) => {
                     return (
                       <ListItem key={ownerFleet}>
                         <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: ownerFleet }}>{ownerFleet}</Link>
@@ -45,18 +56,18 @@ const FleetLessDevice = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => 
   );
 };
 
-const DeviceFleet = ({ deviceMetadata }: { deviceMetadata: ObjectMeta }) => {
-  const fleetName = getDeviceFleet(deviceMetadata);
+const DeviceFleet = ({ device }: { device?: Device }) => {
+  if (!device) {
+    return '-';
+  }
 
-  return (
-    <div>
-      {fleetName ? (
-        <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: fleetName }}>{fleetName}</Link>
-      ) : (
-        <FleetLessDevice deviceMetadata={deviceMetadata} />
-      )}
-    </div>
-  );
+  const fleetName = getDeviceFleet(device.metadata);
+  if (fleetName) {
+    return <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: fleetName }}>{fleetName}</Link>;
+  }
+
+  const multipleOwnersCondition = getCondition(device.status?.conditions, ConditionType.DeviceMultipleOwners);
+  return <FleetLessDevice multipleOwnersCondition={multipleOwnersCondition} />;
 };
 
 export default DeviceFleet;

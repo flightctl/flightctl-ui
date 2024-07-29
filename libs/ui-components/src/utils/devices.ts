@@ -1,9 +1,5 @@
-import { TFunction } from 'i18next';
-
 import { DeviceSpec, ObjectMeta } from '@flightctl/types';
-import { DeviceAnnotation } from '../types/extraTypes';
 import { ConfigTemplate, isGitProviderSpec, isHttpProviderSpec, isKubeProviderSpec } from '../types/deviceSpec';
-import { getMetadataAnnotation } from './api';
 
 export type SourceItem = {
   type: ConfigTemplate['type'];
@@ -16,24 +12,6 @@ const deviceFleetRegExp = /^Fleet\/(?<fleetName>.*)$/;
 const getDeviceFleet = (metadata: ObjectMeta) => {
   const match = deviceFleetRegExp.exec(metadata.owner || '');
   return match?.groups?.fleetName || null;
-};
-
-const getMissingFleetDetails = (t: TFunction, metadata: ObjectMeta): { message: string; owners: string[] } => {
-  const multipleOwnersInfo = getMetadataAnnotation(metadata, DeviceAnnotation.MultipleOwners);
-  if (multipleOwnersInfo) {
-    // When the multiple owners issue is resolved, the annotation is still present
-    const owners = multipleOwnersInfo || '';
-    if (owners.length > 0) {
-      return {
-        message: t('Device is owned by more than one fleet'),
-        owners: owners.split(','),
-      };
-    }
-  }
-  return {
-    message: t("Device labels don't match any fleet's label selector"),
-    owners: [],
-  };
 };
 
 const getSourceItems = (specConfigs: DeviceSpec['config'] | undefined): SourceItem[] => {
@@ -58,4 +36,4 @@ const getSourceItems = (specConfigs: DeviceSpec['config'] | undefined): SourceIt
     .filter((repoName) => !!repoName);
 };
 
-export { getDeviceFleet, getMissingFleetDetails, getSourceItems };
+export { getDeviceFleet, getSourceItems };

@@ -57,7 +57,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
         <ResourceLink id={deviceName} />
       </Td>
       <Td dataLabel={t('Fleet')}>
-        <DeviceFleet deviceMetadata={device.metadata} />
+        <DeviceFleet device={device} />
       </Td>
       <Td dataLabel={t('Application status')}>
         <ApplicationSummaryStatus statusSummary={device.status?.applications.summary} />
