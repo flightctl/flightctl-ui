@@ -96,7 +96,7 @@ const EditDeviceWizard = () => {
                   {(!currentStep || currentStep?.id === generalInfoStepId) && <GeneralInfoStep />}
                 </WizardStep>
                 <WizardStep name={t('Device template')} id={deviceTemplateStepId} isDisabled={!generalStepValid}>
-                  {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep />}
+                  {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep isFleet={false} />}
                 </WizardStep>
                 <WizardStep
                   name={t('Review and update')}

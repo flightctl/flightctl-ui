@@ -103,7 +103,7 @@ const CreateFleetWizard = () => {
                   id={deviceTemplateStepId}
                   isDisabled={(!currentStep || currentStep?.id === generalInfoStepId) && !generalStepValid}
                 >
-                  {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep />}
+                  {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep isFleet />}
                 </WizardStep>
                 <WizardStep
                   name={isEdit ? t('Review and update') : t('Review and create')}

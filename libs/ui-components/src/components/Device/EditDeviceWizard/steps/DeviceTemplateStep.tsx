@@ -1,14 +1,13 @@
 import * as React from 'react';
-
-import { Form, FormGroup, Grid } from '@patternfly/react-core';
+import { Alert, Form, FormGroup, Grid } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
+import { Trans } from 'react-i18next';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import WithHelperText from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
-
-import ConfigTemplateForm from './ConfigTemplateForm';
 import { DeviceSpecConfigFormValues } from '../types';
+import ConfigTemplateForm from './ConfigTemplateForm';
 
 export const deviceTemplateStepId = 'device-template';
 
@@ -16,13 +15,23 @@ export const isDeviceTemplateStepValid = (errors: FormikErrors<DeviceSpecConfigF
   return !errors.osImage && !errors.configTemplates;
 };
 
-const DeviceTemplateStep = () => {
+const templateCode = '{{ device.metadata.labels[key] }}';
+
+const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
 
   return (
     <Grid span={8}>
       <Form>
+        {isFleet && (
+          <Alert isInline variant="info" title={t('Using template variables')}>
+            <Trans t={t}>
+              Add a variable using <strong>{templateCode}</strong> and it will be applied based on the devices labels.
+              Template variables can only be used in Inline and Git configurations.
+            </Trans>
+          </Alert>
+        )}
         <FormGroup
           label={
             <WithHelperText
