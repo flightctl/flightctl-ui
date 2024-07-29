@@ -40,7 +40,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ onDelete, onClose, resourceTy
             }
           }}
         >
-          {t('Delete')}
+          {t('Delete {{ resourceType }}', { resourceType })}
         </Button>,
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
           {t('Cancel')}

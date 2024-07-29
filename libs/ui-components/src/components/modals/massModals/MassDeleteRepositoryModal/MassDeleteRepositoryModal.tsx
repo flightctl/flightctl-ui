@@ -86,11 +86,12 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
 
   return (
     <Modal
-      title={t('Delete repositories')}
+      title={t('Delete repositories ?')}
       isOpen
       onClose={onClose}
       showClose={!isDeleting}
       variant="medium"
+      titleIconVariant="warning"
       actions={[
         <Button
           key="delete"
@@ -99,7 +100,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
           isLoading={isLoading || isDeleting}
           isDisabled={isLoading || isDeleting}
         >
-          {t('Delete')}
+          {t('Delete repositories')}
         </Button>,
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
           {t('Cancel')}
