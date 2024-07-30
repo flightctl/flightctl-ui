@@ -26,6 +26,13 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
   const [{ value: labels }, meta, { setValue: setLabels }] = useField<FlightCtlLabel[]>(name);
   const { t } = useTranslation();
 
+  React.useEffect(() => {
+    if (labels && onChangeCallback) {
+      onChangeCallback(labels, false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const updateLabels = async (newLabels: FlightCtlLabel[]) => {
     const errors = await setLabels(newLabels, true);
     const hasErrors = Object.keys(errors || {}).length > 0;

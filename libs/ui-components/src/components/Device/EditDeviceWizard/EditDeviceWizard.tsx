@@ -69,6 +69,7 @@ const EditDeviceWizard = () => {
           osImage: device.spec?.os?.image,
           labels: fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias'),
           configTemplates: getConfigTemplatesValues(device.spec),
+          fleetMatch: '', // Initially this is always a fleetless device
         }}
         validationSchema={getValidationSchema(t)}
         validateOnMount
@@ -88,21 +89,26 @@ const EditDeviceWizard = () => {
         {({ errors: formikErrors }) => {
           const generalStepValid = isGeneralInfoStepValid(formikErrors);
           const templateStepValid = isDeviceTemplateStepValid(formikErrors);
+
+          const isTemplateStepDisabled = !generalInfoStepId;
+          const isReviewStepDisabled = !(generalStepValid && templateStepValid);
+
           return (
             <>
               <LeaveFormConfirmation />
-              <Wizard footer={<EditDeviceWizardFooter />} onStepChange={(_, step) => setCurrentStep(step)}>
+              <Wizard
+                footer={<EditDeviceWizardFooter />}
+                onStepChange={(_, step) => {
+                  setCurrentStep(step);
+                }}
+              >
                 <WizardStep name={t('General info')} id={generalInfoStepId}>
                   {(!currentStep || currentStep?.id === generalInfoStepId) && <GeneralInfoStep />}
                 </WizardStep>
-                <WizardStep name={t('Device template')} id={deviceTemplateStepId} isDisabled={!generalStepValid}>
+                <WizardStep name={t('Device template')} id={deviceTemplateStepId} isDisabled={isTemplateStepDisabled}>
                   {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep isFleet={false} />}
                 </WizardStep>
-                <WizardStep
-                  name={t('Review and update')}
-                  id={reviewDeviceStepId}
-                  isDisabled={!(generalStepValid && templateStepValid)}
-                >
+                <WizardStep name={t('Review and update')} id={reviewDeviceStepId} isDisabled={isReviewStepDisabled}>
                   {currentStep?.id === reviewDeviceStepId && <ReviewDeviceStep error={submitError} />}
                 </WizardStep>
               </Wizard>
