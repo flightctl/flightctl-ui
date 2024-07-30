@@ -107,6 +107,7 @@ jobs:
         run: |
           echo packaging "${VERSION}"
           helm package ./apps/standalone/deploy/helm/flightctl-ui --version "${VERSION}" --app-version "${VERSION}"
+          helm package ./apps/ocp-plugin/deploy/helm/flightctl-ocp-ui --version "${VERSION}" --app-version "${VERSION}"
 
       - name: Login helm
         env:
@@ -117,3 +118,4 @@ jobs:
       - name: Push helm charts
         run: |
           helm push flightctl-ui-*.tgz oci://${{ env.QUAY_ORG }}/
+          helm push flightctl-ocp-ui-*.tgz oci://${{ env.QUAY_ORG }}/
