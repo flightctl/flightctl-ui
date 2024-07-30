@@ -32,6 +32,7 @@ export const toChartData = <T extends string>(
         to: ROUTE.DEVICES,
         query: query.toString(),
       },
+      tooltip: `${map[key]} ${item?.label}`,
     };
   });
 };
