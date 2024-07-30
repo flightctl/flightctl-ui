@@ -13,6 +13,7 @@ export type Data = {
   y: number;
   color: string;
   link: LinkProps;
+  tooltip: string;
 };
 
 const Legend = ({ rows }: { rows: Data[][] }) => {
@@ -93,7 +94,7 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
               data={isEmpty ? [{ y: 100 }] : data}
               name={title}
               standalone={false}
-              labels={isEmpty ? [] : data.map((datum) => `${datum.y}% ${datum.x}`)}
+              labels={isEmpty ? [] : data.map((datum) => datum.tooltip)}
             />
           </ChartContainer>
         </div>
