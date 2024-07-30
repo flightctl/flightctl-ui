@@ -62,14 +62,14 @@ const DeviceDetailsPage = () => {
             <DropdownItem onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}>
               {t('Edit device configurations')}
             </DropdownItem>
+            {deleteAction}
             <DropdownItem
               onClick={() => {
                 setShowDebugInfo(!showDebugInfo);
               }}
             >
-              {t('View debug information')}
+              {t('View status debug information')}
             </DropdownItem>
-            {deleteAction}
           </DropdownList>
         </DetailsPageActions>
       }

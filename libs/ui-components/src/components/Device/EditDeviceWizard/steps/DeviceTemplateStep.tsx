@@ -19,7 +19,7 @@ const templateCode = '{{ device.metadata.labels[key] }}';
 
 const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
   const { t } = useTranslation();
-  const { values } = useFormikContext<DeviceSpecConfigFormValues & { fleetMatch: string }>();
+  const { values } = useFormikContext<DeviceSpecConfigFormValues>();
 
   return (
     <Grid span={8}>
