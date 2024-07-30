@@ -29,8 +29,16 @@ export const useFetch = () => {
     [userToken],
   );
 
+  const getWsEndpoint = React.useCallback(
+    () => ({
+      wsEndpoint,
+      protocols: ['flightctl.standalone.auth', userToken || ''],
+    }),
+    [userToken],
+  );
+
   return {
-    wsEndpoint,
+    getWsEndpoint,
     get,
     post,
     remove,

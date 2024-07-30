@@ -60,7 +60,7 @@ export type AppContextProps = {
     Prompt?: PromptFC;
   };
   fetch: {
-    wsEndpoint: string;
+    getWsEndpoint: () => { wsEndpoint: string; protocols: string[] };
     get: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
     post: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
     remove: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
@@ -93,7 +93,7 @@ export const AppContext = React.createContext<AppContextProps>({
   },
   /* eslint-disable */
   fetch: {
-    wsEndpoint: '',
+    getWsEndpoint: () => ({ wsEndpoint: '', protocols: [''] }),
     get: async () => ({}) as any,
     post: async () => ({}) as any,
     remove: async () => ({}) as any,

@@ -17,6 +17,11 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+const (
+	wsStandaloneSubprotocol = "flightctl.standalone.auth"
+	wsOcpSubprotocol        = "flightctl.ocp.auth"
+)
+
 var upgrader = websocket.Upgrader{} // use default options
 
 type TerminalBridge struct {
@@ -88,6 +93,7 @@ func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	upgrader.Subprotocols = []string{wsStandaloneSubprotocol, wsOcpSubprotocol}
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
