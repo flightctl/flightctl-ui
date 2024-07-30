@@ -8,6 +8,7 @@ on:
 env:
   QUAY_ORG: quay.io/flightctl
   QUAY_REPO: flightctl-ui
+  QUAY_OCP_REPO: flightctl-ocp-ui
 
 jobs:
   publish-flightctl-ui:
@@ -37,6 +38,45 @@ jobs:
           extra-args: |
             --ulimit nofile=10000:10000
           containerfiles: Containerfile
+          context: .
+
+      - name: Push to Quay.io
+        id: push
+        uses: redhat-actions/push-to-registry@v2.7
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+          registry: ${{ env.QUAY_ORG }}
+          username: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_USERNAME }}
+          password: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_PASSWORD }}
+
+  publish-flightctl-ocp-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Generate tags
+        id: generate-tags
+        run: |
+          tags=( latest-${GITHUB_SHA} latest )
+          echo "tags=${tags[@]}" >> $GITHUB_OUTPUT
+          echo "tags=${tags[@]}"
+
+      - name: Build
+        id: build
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.QUAY_OCP_REPO }}
+          tags: ${{ steps.generate-tags.outputs.tags }}
+          labels: |
+            org.flightctl.flightctl-ui.github.repository=${{ github.repository }}
+            org.flightctl.flightctl-ui.github.actor=${{ github.actor }}
+            org.flightctl.flightctl-ui.github.run_id=${{ github.run_id }}
+            org.flightctl.flightctl-ui.github.sha=${{ github.sha }}
+            org.flightctl.flightctl-ui.github.ref_name=${{ github.ref_name }}
+          extra-args: |
+            --ulimit nofile=10000:10000
+          containerfiles: Containerfile.ocp
           context: .
 
       - name: Push to Quay.io
