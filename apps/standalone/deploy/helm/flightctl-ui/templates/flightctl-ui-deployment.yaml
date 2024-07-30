@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.flightctlUi.namespace }}
   labels:
     app: flightctl-ui
+    role: frontend
 spec:
   replicas: 1
   selector:
@@ -15,6 +16,7 @@ spec:
       creationTimestamp: null
       labels:
         app: flightctl-ui
+        role: frontend
     spec:
       containers:
         - env:
