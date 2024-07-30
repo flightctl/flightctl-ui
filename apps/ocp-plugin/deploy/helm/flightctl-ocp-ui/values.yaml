@@ -1,6 +1,6 @@
 flightctl-ui:
   namespace: flightctl
-  image: quay.io/rawagner/fctl-ocp:tls6
+  image: quay.io/flightctl/flightctl-ocp-ui:latest
   flightctlServer: https://flightctl-api:3443
   flightctlMetricsServer: https://flightctl-api:9090
   certs:
