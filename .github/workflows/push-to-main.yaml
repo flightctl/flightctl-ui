@@ -7,7 +7,7 @@ on:
 
 env:
   QUAY_ORG: quay.io/flightctl
-  QUAY_REPO: flightctl-ui
+  QUAY_STANDALONE_REPO: flightctl-ui
   QUAY_OCP_REPO: flightctl-ocp-ui
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
         id: build
         uses: redhat-actions/buildah-build@v2
         with:
-          image: ${{ env.QUAY_REPO }}
+          image: ${{ env.QUAY_STANDALONE_REPO }}
           tags: ${{ steps.generate-tags.outputs.tags }}
           labels: |
             org.flightctl.flightctl-ui.github.repository=${{ github.repository }}
