@@ -48,7 +48,7 @@ const DeleteFleetModal = ({ fleetId, onClose }: { fleetId: string; onClose: (has
             }
           }}
         >
-          {t('Delete')}
+          {t('Delete fleet')}
         </Button>,
         <Button
           key="cancel"

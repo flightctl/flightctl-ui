@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import { Alert, Button, Icon, Modal, Spinner, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
-import { WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons/warning-triangle-icon';
+import { Alert, Button, Modal, Spinner, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
 
 import { getErrorMessage } from '../../../utils/error';
 import { useFetch } from '../../../hooks/useFetch';
@@ -85,6 +84,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
     <Modal
       title={t('Delete repository ?')}
       isOpen
+      titleIconVariant="warning"
       onClose={onClose}
       variant={hasResourceSyncs ? 'medium' : 'small'}
       actions={[
@@ -101,7 +101,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
             isLoading={isLoadingRSs || isDeleting}
             onClick={deleteAction}
           >
-            {hasResourceSyncs ? t('Delete the repository and resource syncs') : t('Delete the repository')}
+            {t('Delete repository')}
           </Button>
         ),
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
@@ -114,14 +114,9 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
           <StackItem>
             <TextContent>
               <Text>
-                <Icon status="warning" size="md">
-                  <WarningTriangleIcon />
-                </Icon>{' '}
                 {t(
                   'This repository defines resource syncs. By deleting the repository, its resource syncs will also be deleted.',
                 )}
-              </Text>
-              <Text>
                 {t(
                   `Any fleet that is being managed by this repository's resource syncs, will stop being managed by the service.`,
                 )}

@@ -120,14 +120,15 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
 
   return (
     <Modal
-      title={t('Delete fleets')}
+      title={t('Delete fleets ?')}
       isOpen
       onClose={onClose}
       showClose={!isDeleting}
       variant="medium"
+      titleIconVariant="warning"
       actions={[
         <Button key="delete" variant="danger" onClick={deleteResources} isLoading={isDeleting} isDisabled={isDeleting}>
-          {t('Delete')}
+          {t('Delete fleets')}
         </Button>,
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
           {t('Cancel')}
