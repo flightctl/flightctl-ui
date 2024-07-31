@@ -168,6 +168,7 @@
   "Select a source type": "Select a source type",
   "Failed to load repositories": "Failed to load repositories",
   "Add configurations/applications": "Add configurations/applications",
+  "Missing repository": "Missing repository",
   "Branch/tag/commit": "Branch/tag/commit",
   "Path": "Path",
   "Full HTTP service URL: <1>{fullURL}</1>": "Full HTTP service URL: <1>{fullURL}</1>",
