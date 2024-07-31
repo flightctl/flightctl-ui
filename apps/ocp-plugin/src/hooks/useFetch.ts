@@ -21,8 +21,16 @@ export const useFetch = () => {
     [],
   );
 
+  const getWsEndpoint = React.useCallback(
+    () => ({
+      wsEndpoint,
+      protocols: ['flightctl.ocp.auth'],
+    }),
+    [],
+  );
+
   return {
-    wsEndpoint,
+    getWsEndpoint,
     get,
     post,
     remove,

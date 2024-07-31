@@ -13,7 +13,7 @@ export const useWebSocket = <T extends string>(
   reconnect: VoidFunction;
 } => {
   const {
-    fetch: { wsEndpoint },
+    fetch: { getWsEndpoint },
   } = useAppContext();
   const { t } = useTranslation();
   const wsRef = React.useRef<WebSocket>();
@@ -30,7 +30,8 @@ export const useWebSocket = <T extends string>(
     try {
       setIsConnecting(true);
       setIsClosed(false);
-      const ws = new WebSocket(`${wsEndpoint}${endpoint}`);
+      const { wsEndpoint, protocols } = getWsEndpoint();
+      const ws = new WebSocket(`${wsEndpoint}${endpoint}`, protocols);
       ws.addEventListener('open', () => setIsConnecting(false));
       ws.addEventListener('close', () => setIsClosed(true));
       ws.addEventListener('error', (evt) => {
@@ -47,7 +48,7 @@ export const useWebSocket = <T extends string>(
       wsRef.current?.close();
       wsRef.current = undefined;
     };
-  }, [endpoint, t, wsEndpoint, reset]);
+  }, [endpoint, t, getWsEndpoint, reset]);
 
   const reconnect = React.useCallback(() => {
     wsRef.current?.close();
