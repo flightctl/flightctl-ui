@@ -82,8 +82,15 @@ func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 
 	router := grpc_v1.NewRouterServiceClient(grpcClient)
 
+	token := ""
+	authHeader := r.Header["Authorization"]
+	if len(authHeader) > 0 {
+		token = authHeader[0]
+	}
+
 	ctx := metadata.AppendToOutgoingContext(r.Context(), "session-id", response.SessionID)
 	ctx = metadata.AppendToOutgoingContext(ctx, "client-name", "flightctl-ui")
+	ctx = metadata.AppendToOutgoingContext(ctx, "Authorization", token)
 	g, ctx := errgroup.WithContext(ctx)
 
 	stream, err := router.Stream(ctx)
