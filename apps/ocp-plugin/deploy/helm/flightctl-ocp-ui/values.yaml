@@ -1,8 +1,10 @@
-flightctl-ui:
+flightctlUi:
   namespace: flightctl
   image: quay.io/flightctl/flightctl-ocp-ui:latest
   flightctlServer: https://flightctl-api:3443
   flightctlMetricsServer: https://flightctl-api:9090
+  bootcImgUrl: quay.io/example/example-agent-centos:bootstrap
+  qcow2ImgUrl: https://example.com/disk.qcow2
   certs:
     ca: |
       -----BEGIN
