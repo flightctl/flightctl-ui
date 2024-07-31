@@ -41,7 +41,7 @@ spec:
                 name: flightctl-ui
                 key: QCOW2_IMG_URL
           - name: TLS_KEY
-              value: /app/console-certs/tls.key
+            value: /app/console-certs/tls.key
           - name: TLS_CERT
             value: /app/console-certs/tls.crt
           image: {{ .Values.flightctlUi.image }}
@@ -50,8 +50,8 @@ spec:
             - containerPort: 8080
               protocol: TCP
           volumeMounts:
-            - mountPath: /app/certs
-              name: flightctl-ui-certs
+            - name: flightctl-ui-certs
+              mountPath: /app/certs
             - name: console-serving-cert
               mountPath: /app/console-certs
       restartPolicy: Always
@@ -72,4 +72,4 @@ spec:
         - name: console-serving-cert
           secret:
             secretName: console-serving-cert
-            defaultMode: 420y
+            defaultMode: 420
