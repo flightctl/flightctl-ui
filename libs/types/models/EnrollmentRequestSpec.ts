@@ -12,5 +12,9 @@ export type EnrollmentRequestSpec = {
    */
   csr: string;
   deviceStatus?: DeviceStatus;
+  /**
+   * A set of labels that the service will apply to this device when its enrollment is approved
+   */
+  labels?: Record<string, string>;
 };
 

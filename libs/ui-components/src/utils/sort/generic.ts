@@ -12,9 +12,9 @@ export const sortByLastSeenDate = (resources: DeviceLikeResource[]) =>
   resources.sort((a, b) => {
     const getDate = (resource: DeviceLikeResource) => {
       if (isDevice(resource)) {
-        const updatedAt = resource.status?.updatedAt;
-        if (updatedAt) {
-          return updatedAt;
+        const lastSeen = resource.status?.lastSeen;
+        if (lastSeen) {
+          return lastSeen;
         }
       }
       return resource.metadata.creationTimestamp || 0;

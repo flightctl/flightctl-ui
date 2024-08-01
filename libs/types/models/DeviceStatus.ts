@@ -48,6 +48,6 @@ export type DeviceStatus = {
    * Summary status of the device.
    */
   summary: DeviceSummaryStatus;
-  updatedAt: string;
+  lastSeen: string;
 };
 
