@@ -22,6 +22,11 @@ type MatchLabelsFn = (labels: FlightCtlLabel[], hasErrors: boolean) => void;
 const getMatchResult = (fleets: Fleet[], deviceLabels: FlightCtlLabel[]): DeviceMatchStatus => {
   const matchingFleets = fleets.filter((fleet) => {
     const fleetMatch = fleet.spec.selector?.matchLabels || {};
+
+    if (Object.keys(fleetMatch).length === 0) {
+      // Fleets with no label selector don't match any devices
+      return false;
+    }
     return Object.entries(fleetMatch).every(([fleetMatchKey, fleetMatchValue]) => {
       const matchingDeviceLabel = deviceLabels.find((dLabel) => dLabel.key === fleetMatchKey);
       return matchingDeviceLabel && (matchingDeviceLabel.value || '') === (fleetMatchValue || '');
