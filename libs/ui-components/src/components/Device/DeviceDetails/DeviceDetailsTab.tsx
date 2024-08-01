@@ -6,8 +6,12 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
+  Flex,
+  FlexItem,
   Grid,
   GridItem,
+  Stack,
+  StackItem,
 } from '@patternfly/react-core';
 
 import { Device, TemplateVersion } from '@flightctl/types';
@@ -57,15 +61,34 @@ const DeviceDetailsTab = ({
       <GridItem md={12}>
         <DetailsPageCard>
           <DetailsPageCardBody>
-            <DescriptionList isAutoColumnWidths columnModifier={{ default: '3Col' }}>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  <ResourceLink id={device?.metadata.name || '-'} />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              {device && <EditLabelsForm device={device} onDeviceUpdate={refetch} />}
-            </DescriptionList>
+            <Flex
+              alignItems={{ default: 'alignItemsFlexStart' }}
+              justifyContent={{ default: 'justifyContentSpaceBetween' }}
+            >
+              <FlexItem>
+                <Stack>
+                  <StackItem className="fctl-device-details-tab__label">{t('Name')}</StackItem>
+                </Stack>
+                <StackItem>
+                  <ResourceLink id={device.metadata.name || '-'} />
+                </StackItem>
+              </FlexItem>
+              <FlexItem flex={{ default: 'flex_3' }}>
+                <EditLabelsForm device={device} onDeviceUpdate={refetch} />
+              </FlexItem>
+              <FlexItem flex={{ default: 'flex_1' }}>
+                <Flex justifyContent={{ default: 'justifyContentFlexEnd' }}>
+                  <FlexItem>
+                    <Stack>
+                      <StackItem className="fctl-device-details-tab__label">{t('Fleet name')}</StackItem>
+                      <StackItem>
+                        <DeviceFleet device={device} />
+                      </StackItem>
+                    </Stack>
+                  </FlexItem>
+                </Flex>
+              </FlexItem>
+            </Flex>
           </DetailsPageCardBody>
         </DetailsPageCard>
       </GridItem>
@@ -83,7 +106,7 @@ const DeviceDetailsTab = ({
                   />
                 </DescriptionListTerm>
                 <DescriptionListDescription>
-                  <ApplicationSummaryStatus statusSummary={device?.status?.applications.summary} />
+                  <ApplicationSummaryStatus statusSummary={device.status?.applications.summary} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
@@ -95,7 +118,7 @@ const DeviceDetailsTab = ({
                   />{' '}
                 </DescriptionListTerm>
                 <DescriptionListDescription>
-                  <DeviceStatus deviceStatus={device?.status} />
+                  <DeviceStatus deviceStatus={device.status} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
@@ -109,12 +132,12 @@ const DeviceDetailsTab = ({
                   />
                 </DescriptionListTerm>
                 <DescriptionListDescription>
-                  <SystemUpdateStatus deviceStatus={device?.status} />
+                  <SystemUpdateStatus deviceStatus={device.status} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Last seen')}</DescriptionListTerm>
-                <DescriptionListDescription>{timeSinceText(t, device?.status.lastSeen)}</DescriptionListDescription>
+                <DescriptionListDescription>{timeSinceText(t, device.status.lastSeen)}</DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>
           </DetailsPageCardBody>
@@ -155,13 +178,7 @@ const DeviceDetailsTab = ({
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {tv?.status?.os?.image || device?.status?.systemInfo?.operatingSystem || '-'}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Fleet name')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  <DeviceFleet device={device} />
+                  {tv?.status?.os?.image || device.status?.systemInfo?.operatingSystem || '-'}
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
@@ -178,7 +195,7 @@ const DeviceDetailsTab = ({
         <DetailsPageCard>
           <CardTitle>{t('Applications')}</CardTitle>
           <DetailsPageCardBody>
-            {device && <ApplicationsTable appsStatus={device.status.applications} />}
+            <ApplicationsTable appsStatus={device.status.applications} />
           </DetailsPageCardBody>
         </DetailsPageCard>
       </GridItem>
@@ -186,7 +203,7 @@ const DeviceDetailsTab = ({
         <DetailsPageCard>
           <CardTitle>{t('System services')}</CardTitle>
           <DetailsPageCardBody>
-            {device && <SystemdTable device={device} templateVersion={tv} onSystemdUnitsUpdate={refetch} />}
+            <SystemdTable device={device} templateVersion={tv} onSystemdUnitsUpdate={refetch} />
           </DetailsPageCardBody>
         </DetailsPageCard>
       </GridItem>
