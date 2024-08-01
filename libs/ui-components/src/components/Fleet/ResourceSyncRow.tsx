@@ -36,7 +36,7 @@ const ResourceSyncRow: React.FC<ResourceSyncRowProps> = ({
         <CodeBranchIcon />
       </Td>
       <Td dataLabel={t('System image')}>-</Td>
-      <Td dataLabel={t('Label selector')}>-</Td>
+      <Td dataLabel={t('Device selector')}>-</Td>
       <Td dataLabel={t('Status')}>
         <ResourceSyncStatus resourceSync={resourceSync} showLinksOnError />
       </Td>

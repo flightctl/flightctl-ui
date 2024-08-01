@@ -91,7 +91,7 @@ const getColumns = (t: TFunction): TableColumn<Fleet | ResourceSync>[] => [
     onSort: sortFleetsByOSImg,
   },
   {
-    name: t('Label selector'),
+    name: t('Device selector'),
   },
   {
     name: t('Status'),

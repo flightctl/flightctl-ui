@@ -19,7 +19,7 @@ const FleetLessDevice = ({ multipleOwnersCondition }: { multipleOwnersCondition?
     message = t('Device is owned by more than one fleet');
     owners = (multipleOwnersCondition.message || '').split(',');
   } else {
-    message = t("Device labels don't match any fleet's label selector");
+    message = t("Device labels don't match any fleet's selector labels");
   }
 
   const hasMultipleOwners = owners.length > 1;
