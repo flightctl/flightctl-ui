@@ -20,7 +20,7 @@ const GeneralInfoStep = () => {
   const { t } = useTranslation();
   const [matchLabelsOnChange, matchStatus] = useDeviceLabelMatch();
 
-  const { setFieldValue } = useFormikContext<EditDeviceFormValues>();
+  const { values, setFieldValue } = useFormikContext<EditDeviceFormValues>();
 
   React.useEffect(() => {
     if (matchStatus.status === 'checked--unique') {
@@ -29,6 +29,14 @@ const GeneralInfoStep = () => {
       setFieldValue('fleetMatch', '');
     }
   }, [matchStatus, setFieldValue]);
+
+  // When users go back to the General info step, we trigger the fleet match check
+  React.useEffect(() => {
+    if (values.labels) {
+      matchLabelsOnChange(values.labels, false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchLabelsOnChange]);
 
   return (
     <Grid lg={5} span={8}>
