@@ -2,3 +2,8 @@
   /* Reduce the space between the icon and the label, caused by the table rules */
   --pf-v5-l-flex--spacer--column: 0.5rem;
 }
+
+.fctl-status-display-content__popover .pf-v5-c-popover__body {
+  overflow-y: scroll;
+  max-height: 30vh;
+}
