@@ -10,7 +10,7 @@ import './DeviceStatusDebugModal.css';
 
 const DeviceStatusDebugModal = ({ status, onClose }: { status: DeviceStatus; onClose: VoidFunction }) => {
   const { t } = useTranslation();
-  const [refreshVersion, setRefreshVersion] = React.useState<string>(status.updatedAt);
+  const [refreshVersion, setRefreshVersion] = React.useState<string>(status.lastSeen);
 
   const statusJson = React.useMemo(() => {
     return JSON.stringify({ deviceStatus: status }, null, 3);
@@ -39,9 +39,9 @@ const DeviceStatusDebugModal = ({ status, onClose }: { status: DeviceStatus; onC
           <Button
             variant="link"
             icon={<RedoIcon />}
-            isDisabled={status.updatedAt === refreshVersion}
+            isDisabled={status.lastSeen === refreshVersion}
             onClick={() => {
-              setRefreshVersion(status.updatedAt);
+              setRefreshVersion(status.lastSeen);
             }}
           >
             {t('Load updated status')}

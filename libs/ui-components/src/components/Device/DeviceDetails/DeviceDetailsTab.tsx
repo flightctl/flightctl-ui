@@ -114,7 +114,7 @@ const DeviceDetailsTab = ({
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Last seen')}</DescriptionListTerm>
-                <DescriptionListDescription>{timeSinceText(t, device?.status.updatedAt)}</DescriptionListDescription>
+                <DescriptionListDescription>{timeSinceText(t, device?.status.lastSeen)}</DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>
           </DetailsPageCardBody>

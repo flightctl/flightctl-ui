@@ -68,7 +68,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
       <Td dataLabel={t('System update status')}>
         <SystemUpdateStatus deviceStatus={device.status} />
       </Td>
-      <Td dataLabel={t('Last seen')}>{timeSinceText(t, device.status?.updatedAt)}</Td>
+      <Td dataLabel={t('Last seen')}>{timeSinceText(t, device.status?.lastSeen)}</Td>
       <Td isActionCell>
         <ActionsColumn
           items={[
