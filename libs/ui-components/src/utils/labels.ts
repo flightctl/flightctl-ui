@@ -1,16 +1,23 @@
 import { DeviceLikeResource, FlightCtlLabel } from '../types/extraTypes';
 import { fuzzySeach } from './search';
 
-export const fromAPILabel = (labels: Record<string, string>): FlightCtlLabel[] =>
+type LabelOptions = {
+  isDefault?: boolean;
+};
+
+export const fromAPILabel = (labels: Record<string, string>, options?: LabelOptions): FlightCtlLabel[] =>
   Object.entries(labels).map((labelEntry) => ({
     key: labelEntry[0],
     value: labelEntry[1],
+    isDefault: options?.isDefault || false,
   }));
 
 export const toAPILabel = (labels: FlightCtlLabel[]): Record<string, string> =>
   labels.reduce(
     (acc, curr) => {
-      acc[curr.key] = curr.value || '';
+      if (!curr.isDefault) {
+        acc[curr.key] = curr.value || '';
+      }
       return acc;
     },
     {} as Record<string, string>,

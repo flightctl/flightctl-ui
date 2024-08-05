@@ -19,6 +19,7 @@ export interface PrometheusMetric {
 export interface FlightCtlLabel {
   key: string;
   value?: string;
+  isDefault?: boolean;
 }
 
 export interface ApiQuery {

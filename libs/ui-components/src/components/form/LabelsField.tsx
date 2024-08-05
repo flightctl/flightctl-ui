@@ -1,11 +1,9 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { Button, Label, LabelGroup } from '@patternfly/react-core';
-import { TimesIcon } from '@patternfly/react-icons/dist/js/icons/times-icon';
+import { Label, LabelGroup } from '@patternfly/react-core';
 
 import { FlightCtlLabel } from '../../types/extraTypes';
 import EditableLabelControl from '../common/EditableLabelControl';
-import { useTranslation } from '../../hooks/useTranslation';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 type LabelsFieldProps = {
@@ -24,7 +22,6 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
   isEditable = true,
 }) => {
   const [{ value: labels }, meta, { setValue: setLabels }] = useField<FlightCtlLabel[]>(name);
-  const { t } = useTranslation();
   const updateLabels = async (newLabels: FlightCtlLabel[]) => {
     const errors = await setLabels(newLabels, true);
     const hasErrors = Object.keys(errors || {}).length > 0;
@@ -77,23 +74,28 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
           />
         }
       >
-        {labels.map(({ key, value }, index) => (
-          <Label
-            key={index}
-            id={`${index}`}
-            closeBtn={
-              isEditable ? undefined : (
-                <Button variant="plain" aria-label={t('Delete')} isDisabled icon={<TimesIcon />} />
-              )
-            }
-            onClose={(e) => onDelete(e, index)}
-            onEditCancel={(_, prevText) => onEdit(index, prevText)}
-            onEditComplete={(_, newText) => onEdit(index, newText)}
-            isEditable={isEditable}
-          >
-            {value ? `${key}=${value}` : key}
-          </Label>
-        ))}
+        {labels.map(({ key, value, isDefault }, index) => {
+          const text = value ? `${key}=${value}` : key;
+          const elKey = `${key}__${index}`;
+          if (isDefault || !isEditable) {
+            return (
+              <Label key={elKey} textMaxWidth="18ch">
+                {text}
+              </Label>
+            );
+          }
+          return (
+            <Label
+              key={elKey}
+              onClose={(e) => onDelete(e, index)}
+              onEditCancel={(_, prevText) => onEdit(index, prevText)}
+              onEditComplete={(_, newText) => onEdit(index, newText)}
+              isEditable
+            >
+              {text}
+            </Label>
+          );
+        })}
       </LabelGroup>
       <DefaultHelperText helperText={helperText} />
       <ErrorHelperText meta={meta} touchRequired={false} />

@@ -13,7 +13,7 @@ import {
 import { useTranslation } from '../../../hooks/useTranslation';
 import { deviceApprovalValidationSchema } from '../../form/validations';
 
-import { toAPILabel } from '../../../utils/labels';
+import { fromAPILabel, toAPILabel } from '../../../utils/labels';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 type DeviceEnrollmentModalProps = Omit<ApproveDeviceFormProps, 'error'>;
@@ -26,7 +26,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
   return (
     <Formik<ApproveDeviceFormValues>
       initialValues={{
-        labels: [],
+        labels: fromAPILabel(enrollmentRequest.spec.labels || {}, { isDefault: true }),
         deviceAlias: '',
       }}
       validationSchema={deviceApprovalValidationSchema(t, { isSingleDevice: true })}
