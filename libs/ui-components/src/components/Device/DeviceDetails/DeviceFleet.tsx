@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, List, ListItem, Popover } from '@patternfly/react-core';
+import { Button, List, ListItem, Tooltip } from '@patternfly/react-core';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
 import { Condition, ConditionType, Device } from '@flightctl/types';
@@ -27,10 +27,8 @@ const FleetLessDevice = ({ multipleOwnersCondition }: { multipleOwnersCondition?
   return (
     <div className="fctl-device-fleet">
       {hasMultipleOwners ? t('Multiple owners') : t('None')}
-      <Popover
-        triggerAction="hover"
-        aria-label={t('Missing fleet detail')}
-        bodyContent={
+      <Tooltip
+        content={
           <span>
             {message}
             {hasMultipleOwners && (
@@ -51,7 +49,7 @@ const FleetLessDevice = ({ multipleOwnersCondition }: { multipleOwnersCondition?
         }
       >
         <Button isInline variant="plain" icon={<InfoCircleIcon />} aria-label={t('Ownership information')} />
-      </Popover>
+      </Tooltip>
     </div>
   );
 };
