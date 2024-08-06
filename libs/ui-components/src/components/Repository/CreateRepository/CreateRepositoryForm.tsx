@@ -260,7 +260,15 @@ const CreateRepositoryFormContent = ({ isEdit, children, onClose }: CreateReposi
         {showResourceSyncs && (
           <Checkbox
             id="use-resource-syncs"
-            label={t('Use resource syncs')}
+            label={
+              <WithHelperText
+                showLabel
+                ariaLabel={t('Use resource syncs')}
+                content={t(
+                  "A resource sync is an automated Gitops way to manage imported fleets. The resource sync monitors changes made to the source repository and update the fleet's configurations accordingly.",
+                )}
+              />
+            }
             isChecked={values.useResourceSyncs}
             onChange={(_, checked) => {
               // Trigger validation of the resource syncs items
