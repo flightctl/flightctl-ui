@@ -70,9 +70,16 @@ const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
   );
 };
 
-const RepositoryStep = ({ repositories }: { repositories: Repository[] }) => {
+const RepositoryStep = ({ repositories, hasLoaded }: { repositories: Repository[]; hasLoaded: boolean }) => {
   const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<ImportFleetFormValues>();
+
+  const noRepositoriesExist = hasLoaded && repositories.length === 0;
+  React.useEffect(() => {
+    if (values.useExistingRepo && noRepositoriesExist) {
+      void setFieldValue('useExistingRepo', false);
+    }
+  }, [setFieldValue, values.useExistingRepo, noRepositoriesExist]);
 
   return (
     <Form>
@@ -85,7 +92,7 @@ const RepositoryStep = ({ repositories }: { repositories: Repository[] }) => {
               id="existing-repo"
               name="repo"
               label={t('Use an existing Git repository')}
-              isDisabled={!repositories.length}
+              isDisabled={noRepositoriesExist}
             />
             <Radio
               isChecked={!values.useExistingRepo}
