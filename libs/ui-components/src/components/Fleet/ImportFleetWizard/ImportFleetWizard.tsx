@@ -165,7 +165,7 @@ const ImportFleetWizard = () => {
             >
               <WizardStep name={t('Select or create repository')} id={repositoryStepId}>
                 {(!currentStep || currentStep?.id === repositoryStepId) && (
-                  <RepositoryStep repositories={gitRepositories} />
+                  <RepositoryStep repositories={gitRepositories} hasLoaded={!!repoList} />
                 )}
               </WizardStep>
               <WizardStep
