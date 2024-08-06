@@ -22,7 +22,13 @@ export const StatusDisplayContent = ({ label, messageTitle, message, level, cust
 
   if (message) {
     return (
-      <Popover aria-label="status popover" headerContent={messageTitle || label} bodyContent={message}>
+      <Popover
+        aria-label="status popover"
+        headerContent={messageTitle || label}
+        bodyContent={message}
+        className="fctl-status-display-content__popover"
+        hasAutoWidth={false}
+      >
         <Button
           variant="link"
           isInline
