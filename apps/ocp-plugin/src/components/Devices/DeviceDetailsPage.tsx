@@ -1,64 +1,68 @@
 import * as React from 'react';
-import DeviceDetails from '@flightctl/ui-components/src/components/Device/DeviceDetails/DeviceDetailsPage';
 import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
+import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { Icon, Popover, Spinner, Stack, StackItem } from '@patternfly/react-core';
 import { useAppContext } from '@flightctl/ui-components/src/hooks/useAppContext';
-import {
-  Alert,
-  Button,
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
-  Spinner,
-} from '@patternfly/react-core';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
-import { getDisplayText } from '@flightctl/ui-components/src/components/common/ResourceLink';
+import DeviceDetails from '@flightctl/ui-components/src/components/Device/DeviceDetails/DeviceDetailsPage';
+import WithTooltip from '@flightctl/ui-components/src/components/common/WithTooltip';
+import { getWatchK8sResourceResult, isMicroShiftCluster } from '../../utils/clusters';
 import { ManagedCluster } from '../../types/k8s';
 
-import './DeviceDetailsPage.css';
-
-const isMicroShiftCluster = (mc: ManagedCluster) =>
-  mc?.status?.clusterClaims?.some(
-    (claim) =>
-      claim.name === 'product.open-cluster-management.io' && (claim.value || '').toUpperCase() === 'MICROSHIFT',
-  );
+type K8sWatchResourceError = string | object;
 
 const DeviceDetailsPage = () => {
   const { t } = useTranslation();
   const {
     router: { useParams, Link },
   } = useAppContext();
-  const { deviceId } = useParams() as { deviceId: string };
+  const { deviceId: clusterName } = useParams() as { deviceId: string };
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const [mc, loaded, error] = useK8sWatchResource<ManagedCluster>({
+  const [mc, loaded, k8sError] = useK8sWatchResource<ManagedCluster>({
     groupVersionKind: {
       kind: 'ManagedCluster',
       group: 'cluster.open-cluster-management.io',
       version: 'v1',
     },
-    name: deviceId,
+    name: clusterName,
   });
 
+  const watchResultError = getWatchK8sResourceResult(k8sError as K8sWatchResourceError, true);
+  if (k8sError && !watchResultError) {
+    return <DeviceDetails />;
+  }
+
   let mcContent: React.ReactNode = <Spinner size="sm" />;
-  if (error) {
-    mcContent = <Alert isInline title={error as string} />;
+  if (watchResultError) {
+    mcContent = (
+      <Popover
+        aria-label={t('The cluster details failed to load')}
+        headerContent={t('The cluster details failed to load')}
+        bodyContent={watchResultError}
+      >
+        <>
+          <Icon size="sm" status="danger">
+            <ExclamationCircleIcon />
+          </Icon>{' '}
+          {t('Failed to load')}
+        </>
+      </Popover>
+    );
   } else if (loaded && mc) {
-    const displayText = getDisplayText(mc.metadata?.name);
     mcContent = isMicroShiftCluster(mc) ? (
-      <Button variant="plain" className="fctl-device-details__mc-btn">
-        <Link to={`/multicloud/infrastructure/clusters/details/${mc.metadata?.name}/${mc.metadata?.name}`}>
-          {displayText}
-        </Link>
-      </Button>
+      <WithTooltip content={clusterName} showTooltip>
+        <Link to={`/multicloud/infrastructure/clusters/details/${clusterName}/${clusterName}`}>{t('View')}</Link>
+      </WithTooltip>
     ) : (
       '-'
     );
   }
   return (
     <DeviceDetails>
-      <DescriptionListGroup>
-        <DescriptionListTerm>{t('MicroShift cluster')}</DescriptionListTerm>
-        <DescriptionListDescription>{mcContent}</DescriptionListDescription>
-      </DescriptionListGroup>
+      <Stack>
+        <StackItem className="fctl-device-details-tab__label">{t('MicroShift cluster')}</StackItem>
+        <StackItem>{mcContent}</StackItem>
+      </Stack>
     </DeviceDetails>
   );
 };
