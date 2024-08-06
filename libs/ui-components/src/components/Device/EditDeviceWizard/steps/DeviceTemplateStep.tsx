@@ -36,7 +36,11 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
           label={
             <WithHelperText
               ariaLabel={t('System image')}
-              content={t("The target system image for this fleet's devices.")}
+              content={
+                isFleet
+                  ? t("The target system image for this fleet's devices.")
+                  : t('The target system image for this device.')
+              }
               showLabel
             />
           }
@@ -46,7 +50,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
             aria-label={t('System image')}
             value={values.osImage}
             helperText={t(
-              'Must be either an OCI image ref (e.g. "quay.io/redhat/rhde:9.3") or ostree ref (e.g. "https://ostree.fedoraproject.org/iot?ref=fedora/stable/x86_64/iot"). Keep this empty if you do not want to manage your OS from fleet.',
+              'Must be either an OCI image ref (e.g. "quay.io/redhat/rhde:9.3") or ostree ref (e.g. "https://ostree.fedoraproject.org/iot?ref=fedora/stable/x86_64/iot"). Keep this empty if you do not want to manage your OS from Flight Control.',
             )}
           />
         </FormGroup>

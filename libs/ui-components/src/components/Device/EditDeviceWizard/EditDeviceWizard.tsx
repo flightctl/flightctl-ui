@@ -11,7 +11,6 @@ import {
   Title,
   Wizard,
   WizardStep,
-  WizardStepType,
 } from '@patternfly/react-core';
 
 import { Device } from '@flightctl/types';
@@ -29,14 +28,17 @@ import { getDevicePatches, getValidationSchema } from './utils';
 import { getConfigTemplatesValues } from './deviceSpecUtils';
 import { useFetch } from '../../../hooks/useFetch';
 import { useEditDevice } from './useEditDevice';
+import EditDeviceWizardNav from './EditDeviceWizardNav';
 import EditDeviceWizardFooter from './EditDeviceWizardFooter';
+
+import './EditDeviceWizard.css';
 
 const EditDeviceWizard = () => {
   const { t } = useTranslation();
   const [submitError, setSubmitError] = React.useState<string | undefined>();
   const navigate = useNavigate();
+
   const { patch } = useFetch();
-  const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
 
   const [deviceId, device, isLoading, loadError] = useEditDevice();
   const deviceAlias = device?.metadata.labels?.alias || '';
@@ -69,6 +71,7 @@ const EditDeviceWizard = () => {
           osImage: device.spec?.os?.image,
           labels: fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias'),
           configTemplates: getConfigTemplatesValues(device.spec),
+          fleetMatch: '', // Initially this is always a fleetless device
         }}
         validationSchema={getValidationSchema(t)}
         validateOnMount
@@ -85,25 +88,28 @@ const EditDeviceWizard = () => {
           }
         }}
       >
-        {({ errors: formikErrors }) => {
+        {({ values, errors: formikErrors }) => {
           const generalStepValid = isGeneralInfoStepValid(formikErrors);
           const templateStepValid = isDeviceTemplateStepValid(formikErrors);
+
+          const canEditTemplate = !values.fleetMatch;
+          const isTemplateStepDisabled = !(generalStepValid && canEditTemplate);
           return (
             <>
               <LeaveFormConfirmation />
-              <Wizard footer={<EditDeviceWizardFooter />} onStepChange={(_, step) => setCurrentStep(step)}>
+              <Wizard
+                className="fctl-edit-device__wizard"
+                footer={<EditDeviceWizardFooter />}
+                nav={<EditDeviceWizardNav />}
+              >
                 <WizardStep name={t('General info')} id={generalInfoStepId}>
-                  {(!currentStep || currentStep?.id === generalInfoStepId) && <GeneralInfoStep />}
+                  <GeneralInfoStep />
                 </WizardStep>
-                <WizardStep name={t('Device template')} id={deviceTemplateStepId} isDisabled={!generalStepValid}>
-                  {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep isFleet={false} />}
+                <WizardStep name={t('Device template')} id={deviceTemplateStepId} isDisabled={isTemplateStepDisabled}>
+                  <DeviceTemplateStep isFleet={false} />
                 </WizardStep>
-                <WizardStep
-                  name={t('Review and update')}
-                  id={reviewDeviceStepId}
-                  isDisabled={!(generalStepValid && templateStepValid)}
-                >
-                  {currentStep?.id === reviewDeviceStepId && <ReviewDeviceStep error={submitError} />}
+                <WizardStep name={t('Review and update')} id={reviewDeviceStepId} isDisabled={!templateStepValid}>
+                  <ReviewDeviceStep error={submitError} />
                 </WizardStep>
               </Wizard>
             </>

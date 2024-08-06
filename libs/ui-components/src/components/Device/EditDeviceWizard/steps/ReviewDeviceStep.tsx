@@ -43,6 +43,12 @@ const ReviewStep = ({ error }: { error?: string }) => {
               <LabelsView prefix="device" labels={toAPILabel(values.labels)} />
             </DescriptionListDescription>
           </DescriptionListGroup>
+          {values.fleetMatch && (
+            <DescriptionListGroup>
+              <DescriptionListTerm>{t('Device fleet')}</DescriptionListTerm>
+              <DescriptionListDescription>{values.fleetMatch}</DescriptionListDescription>
+            </DescriptionListGroup>
+          )}
           <DescriptionListGroup>
             <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
             <DescriptionListDescription>

@@ -32,8 +32,13 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
     updatedLabels.push({ key: 'alias', value: updatedDevice.deviceAlias });
   }
 
-  const fleetLabelPatches = getLabelPatches('/metadata/labels', currentLabels, updatedLabels);
-  allPatches = allPatches.concat(fleetLabelPatches);
+  const deviceLabelPatches = getLabelPatches('/metadata/labels', currentLabels, updatedLabels);
+  allPatches = allPatches.concat(deviceLabelPatches);
+
+  if (updatedDevice.fleetMatch) {
+    // The change in device labels makes the device bound to a fleet. Only the labels can be updated.
+    return allPatches;
+  }
 
   // OS image
   const currentOsImage = currentDevice.spec?.os?.image;

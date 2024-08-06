@@ -25,7 +25,6 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
 }) => {
   const [{ value: labels }, meta, { setValue: setLabels }] = useField<FlightCtlLabel[]>(name);
   const { t } = useTranslation();
-
   const updateLabels = async (newLabels: FlightCtlLabel[]) => {
     const errors = await setLabels(newLabels, true);
     const hasErrors = Object.keys(errors || {}).length > 0;
