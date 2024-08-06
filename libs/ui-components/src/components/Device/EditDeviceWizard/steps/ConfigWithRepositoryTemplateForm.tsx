@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useFormikContext } from 'formik';
-import { Button, FormGroup, MenuFooter } from '@patternfly/react-core';
+import { Button, FormGroup, Icon, MenuFooter } from '@patternfly/react-core';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import { Trans } from 'react-i18next';
+import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { TFunction, Trans } from 'react-i18next';
 
 import { RepoSpecType, Repository } from '@flightctl/types';
 import { GitConfigTemplate, HttpConfigTemplate } from '../../../../types/deviceSpec';
@@ -18,6 +19,38 @@ type ConfigWithRepositoryTemplateFormProps = {
   index: number;
   repositories: Repository[];
   repoRefetch: VoidFunction;
+};
+
+const getRepositoryItems = (
+  t: TFunction,
+  repositories: Repository[],
+  repoType: RepoSpecType,
+  forcedRepoName?: string,
+) => {
+  const repositoryItems = repositories.reduce((acc, curr) => {
+    if (curr.spec.type === repoType) {
+      acc[curr.metadata.name || ''] = {
+        label: curr.metadata.name,
+        description: curr.spec.url,
+      };
+    }
+    return acc;
+  }, {});
+  // If there's a broken reference to a repository, we must add an item so the name shows in the dropdown
+  if (forcedRepoName && !repositoryItems[forcedRepoName]) {
+    repositoryItems[forcedRepoName] = {
+      label: forcedRepoName,
+      description: (
+        <>
+          <Icon size="sm" status="danger">
+            <ExclamationCircleIcon />
+          </Icon>{' '}
+          {t('Missing repository')}
+        </>
+      ),
+    };
+  }
+  return repositoryItems;
 };
 
 const GitConfigForm = ({ template, index }: { template: GitConfigTemplate; index: number }) => {
@@ -118,17 +151,10 @@ const ConfigWithRepositoryTemplateForm = ({
   const { values, setFieldValue } = useFormikContext<DeviceSpecConfigFormValues>();
   const [createRepoModalOpen, setCreateRepoModalOpen] = React.useState(false);
 
-  const repositoryItems = repositories.reduce((acc, curr) => {
-    if (curr.spec.type === repoType) {
-      acc[curr.metadata.name || ''] = {
-        label: curr.metadata.name,
-        description: curr.spec.url,
-      };
-    }
-    return acc;
-  }, {});
+  const ct = values.configTemplates[index] as HttpConfigTemplate | GitConfigTemplate;
+  const selectedRepoName = ct?.repository;
 
-  const selectedRepoName = (values.configTemplates[index] as HttpConfigTemplate | GitConfigTemplate)?.repository;
+  const repositoryItems = getRepositoryItems(t, repositories, repoType, selectedRepoName);
   const selectedRepo = repositories.find((repo) => repo.metadata.name === selectedRepoName);
   return (
     <>
@@ -152,15 +178,9 @@ const ConfigWithRepositoryTemplateForm = ({
           </MenuFooter>
         </FormSelect>
       </FormGroup>
-      {repoType === RepoSpecType.GIT && (
-        <GitConfigForm template={values.configTemplates[index] as GitConfigTemplate} index={index} />
-      )}
+      {repoType === RepoSpecType.GIT && <GitConfigForm template={ct as GitConfigTemplate} index={index} />}
       {repoType === RepoSpecType.HTTP && (
-        <HttpConfigForm
-          template={values.configTemplates[index] as HttpConfigTemplate}
-          index={index}
-          baseURL={selectedRepo?.spec.url}
-        />
+        <HttpConfigForm template={ct as HttpConfigTemplate} index={index} baseURL={selectedRepo?.spec.url} />
       )}
       {createRepoModalOpen && (
         <CreateRepositoryModal
