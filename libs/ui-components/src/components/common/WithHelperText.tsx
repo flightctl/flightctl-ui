@@ -20,6 +20,10 @@ const WithHelperText = ({ ariaLabel, showLabel, content, triggerAction }: WithHe
         className="fctl-helper-text__icon"
         isInline
         variant="plain"
+        onClick={(ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+        }}
         aria-label={`${ariaLabel} help text`}
         icon={<OutlinedQuestionCircleIcon />}
       />
