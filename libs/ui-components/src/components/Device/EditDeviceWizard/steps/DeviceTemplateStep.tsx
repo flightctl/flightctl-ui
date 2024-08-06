@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Form, FormGroup, Grid } from '@patternfly/react-core';
+import { Alert, CodeBlock, CodeBlockCode, ExpandableSection, Form, FormGroup, Grid } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 import { Trans } from 'react-i18next';
 
@@ -15,7 +15,9 @@ export const isDeviceTemplateStepValid = (errors: FormikErrors<DeviceSpecConfigF
   return !errors.osImage && !errors.configTemplates;
 };
 
-const templateCode = '{{ device.metadata.labels[key] }}';
+const templateOption1 = '{{ device.metadata.labels[key] }}';
+const templateOption2 = '{{ device.metadata.name }}';
+const exampleCode = `/device-configs/factory-floors/floor-{{ device.metadata.labels[factory-floor] }}`;
 
 const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
   const { t } = useTranslation();
@@ -26,10 +28,16 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
       <Form>
         {isFleet && (
           <Alert isInline variant="info" title={t('Using template variables')}>
-            <Trans t={t}>
-              Add a variable using <strong>{templateCode}</strong> and it will be applied based on the devices labels.
-              Template variables can only be used in Inline and Git configurations.
-            </Trans>
+            <ExpandableSection toggleTextCollapsed={t('Show more')} toggleTextExpanded={t('Show less')}>
+              <Trans t={t}>
+                Add a variable by using <strong>{templateOption1}</strong> or <strong>{templateOption2}</strong> and it
+                will be applied based each device&rsquo;s details. For example, you could set the following value to
+                apply different files in a Git configuration:
+              </Trans>
+              <CodeBlock className="pf-v5-u-mt-md">
+                <CodeBlockCode>{exampleCode}</CodeBlockCode>
+              </CodeBlock>
+            </ExpandableSection>
           </Alert>
         )}
         <FormGroup

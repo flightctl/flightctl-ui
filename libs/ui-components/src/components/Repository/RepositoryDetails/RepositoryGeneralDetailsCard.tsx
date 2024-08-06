@@ -9,7 +9,7 @@ import {
   DescriptionListTerm,
   Icon,
 } from '@patternfly/react-core';
-import { LockedIcon } from '@patternfly/react-icons/dist/js/icons/locked-icon';
+import { LockIcon } from '@patternfly/react-icons/dist/js/icons/lock-icon';
 import { LockOpenIcon } from '@patternfly/react-icons/dist/js/icons/lock-open-icon';
 
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../utils/status/repository';
@@ -35,7 +35,7 @@ const RepoPrivacy = ({ repo }: { repo: Repository }) => {
   return isPrivate ? (
     <>
       <Icon status="success">
-        <LockedIcon />
+        <LockIcon />
       </Icon>{' '}
       {t('Repository is private')}
     </>
