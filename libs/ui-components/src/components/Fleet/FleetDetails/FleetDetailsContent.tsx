@@ -63,7 +63,7 @@ const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCou
                 <DescriptionListDescription>{fleet.spec.template.spec.os?.image}</DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('Label selector')}</DescriptionListTerm>
+                <DescriptionListTerm>{t('Device selector')}</DescriptionListTerm>
                 <DescriptionListDescription>
                   <LabelsView prefix="device" labels={fleet.spec.selector?.matchLabels} />
                 </DescriptionListDescription>
