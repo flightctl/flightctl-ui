@@ -30,6 +30,8 @@ const getValidationSchema = (t: TFunction) => {
   });
 };
 
+const delayResponse = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormContentProps) => {
   const { t } = useTranslation();
   const [submitError, setSubmitError] = React.useState<string>();
@@ -51,7 +53,7 @@ const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormConte
         <LabelsField
           name="labels"
           addButtonText={isSubmitting ? t('Saving...') : undefined}
-          isEditable={!isSubmitting}
+          isFormEditable={!isSubmitting}
           onChangeCallback={debouncedSubmit}
         />
       </FormGroup>
@@ -81,6 +83,8 @@ const EditLabelsForm = ({ device, onDeviceUpdate }: EditLabelsFormProps) => {
           const labelsPatch = getLabelPatches('/metadata/labels', currentLabels, values.labels);
           if (labelsPatch.length > 0) {
             await patch(`devices/${device.metadata.name}`, labelsPatch);
+            // The API call is "too" quick, allow the "Saving" button to be briefly seen
+            await delayResponse(150);
             onDeviceUpdate();
           }
           return null;
