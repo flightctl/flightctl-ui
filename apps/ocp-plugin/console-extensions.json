@@ -18,6 +18,16 @@
   {
     "type": "console.navigation/href",
     "properties": {
+      "id": "fctl-overviewpage",
+      "name": "%plugin__flightctl-plugin~Overview%",
+      "href": "/edge/overview",
+      "perspective": "acm",
+      "section": "fctl"
+    }
+  },
+  {
+    "type": "console.navigation/href",
+    "properties": {
       "id": "fctl-fleets",
       "name": "%plugin__flightctl-plugin~Fleets%",
       "href": "/edge/fleets",
@@ -139,6 +149,14 @@
       "exact": true,
       "path": ["/edge/enrollmentrequests/:enrollmentRequestId"],
       "component": { "$codeRef": "EnrollmentRequestDetailsPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/overview"],
+      "component": { "$codeRef": "OverviewTab" }
     }
   },
   {
