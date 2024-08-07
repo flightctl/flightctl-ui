@@ -1,12 +1,23 @@
 /* eslint-disable no-console */
 
 import { PatchRequest } from '@flightctl/types';
+import { getCSRFToken } from '@openshift-console/dynamic-plugin-sdk/lib/utils/fetch/console-fetch-utils';
 
 declare global {
   interface Window {
     FCTL_API_PORT?: string;
   }
 }
+
+export const applyConsoleHeaders = (options: RequestInit) => {
+  const token = getCSRFToken();
+  if (options.headers) {
+    options.headers['X-CSRFToken'] = token;
+  } else {
+    options.headers = { 'X-CSRFToken': token };
+  }
+  return options;
+};
 
 const apiServer = `${window.location.hostname}${
   window.FCTL_API_PORT ? `:${window.FCTL_API_PORT}` : ''
@@ -50,14 +61,16 @@ export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSi
 };
 
 export const postData = async <R>(kind: string, data: R): Promise<R> => {
+  const options: RequestInit = {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
+    body: JSON.stringify(data),
+  };
+  applyConsoleHeaders(options);
   try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, options);
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making request:', error);
@@ -66,11 +79,13 @@ export const postData = async <R>(kind: string, data: R): Promise<R> => {
 };
 
 export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
+  const options: RequestInit = {
+    method: 'DELETE',
+    signal: abortSignal,
+  };
+  applyConsoleHeaders(options);
   try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
-      method: 'DELETE',
-      signal: abortSignal,
-    });
+    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, options);
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making request:', error);
@@ -79,15 +94,17 @@ export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Pr
 };
 
 export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal?: AbortSignal): Promise<R> => {
+  const options: RequestInit = {
+    headers: {
+      'Content-Type': 'application/json-patch+json',
+    },
+    method: 'PATCH',
+    body: JSON.stringify(data),
+    signal: abortSignal,
+  };
+  applyConsoleHeaders(options);
   try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
-      headers: {
-        'Content-Type': 'application/json-patch+json',
-      },
-      method: 'PATCH',
-      body: JSON.stringify(data),
-      signal: abortSignal,
-    });
+    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, options);
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making request:', error);
