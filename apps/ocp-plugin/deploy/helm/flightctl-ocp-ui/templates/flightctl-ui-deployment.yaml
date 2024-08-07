@@ -60,14 +60,8 @@ spec:
           secret:
             secretName: flightctl-ui-certs
             items:
-              - key: api-sig.key
-                path: api-sig.key
               - key: ca.crt
                 path: ca.crt
-              - key: front-cli.crt
-                path: front-cli.crt
-              - key: front-cli.key
-                path: front-cli.key
             defaultMode: 420
         - name: console-serving-cert
           secret:

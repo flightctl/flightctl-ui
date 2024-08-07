@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	wsStandaloneSubprotocol = "flightctl.standalone.auth"
-	wsOcpSubprotocol        = "flightctl.ocp.auth"
+	WsStandaloneSubprotocol = "flightctl.standalone.auth"
+	WsOcpSubprotocol        = "flightctl.ocp.auth"
 )
 
 var upgrader = websocket.Upgrader{} // use default options
@@ -46,7 +46,22 @@ func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 	}}
 
 	consoleUrl := b.ApiUrl + "/api/v1/devices/" + deviceId + "/console"
-	resp, err := client.Get(consoleUrl)
+
+	req, err := http.NewRequest(http.MethodGet, consoleUrl, nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Could not create request: " + err.Error()))
+		return
+	}
+
+	token := ""
+	authHeader, ok := r.Header["Authorization"]
+	if ok && len(authHeader) == 1 {
+		token = authHeader[0]
+		req.Header.Set("Authorization", authHeader[0])
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("Failed to get gRPC session: " + err.Error()))
@@ -82,12 +97,6 @@ func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 
 	router := grpc_v1.NewRouterServiceClient(grpcClient)
 
-	token := ""
-	authHeader := r.Header["Authorization"]
-	if len(authHeader) > 0 {
-		token = authHeader[0]
-	}
-
 	ctx := metadata.AppendToOutgoingContext(r.Context(), "session-id", response.SessionID)
 	ctx = metadata.AppendToOutgoingContext(ctx, "client-name", "flightctl-ui")
 	ctx = metadata.AppendToOutgoingContext(ctx, "Authorization", token)
@@ -100,7 +109,7 @@ func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	upgrader.Subprotocols = []string{wsStandaloneSubprotocol, wsOcpSubprotocol}
+	upgrader.Subprotocols = []string{WsStandaloneSubprotocol, WsOcpSubprotocol}
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

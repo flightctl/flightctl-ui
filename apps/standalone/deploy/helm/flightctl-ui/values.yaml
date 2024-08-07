@@ -9,15 +9,6 @@ flightctlUi:
     ca: |
       -----BEGIN
       -----END
-    frontClicrt: |
-      -----BEGIN
-      -----END
-    frontClikey: |
-      -----BE
-      -----END
-    apiSigkey: |
-      -----BEGIN
-      -----END
     frontRouter: |
       -----BEGIN
       -----END
