@@ -25,7 +25,8 @@
       "ResourceSyncToRepositoryPage": "./src/components/ResourceSyncs/ResourceSyncToRepositoryPage.tsx",
       "EnrollmentRequestDetailsPage": "./src/components/EnrollmentRequests/EnrollmentRequestDetailsPage.tsx",
       "appContext": "./src/components/AppContext/AppContext.tsx",
-      "OverviewTab": "./src/components/OverviewTab/OverviewTab.tsx"
+      "OverviewTab": "./src/components/Overview/OverviewTab.tsx",
+      "OverviewPage": "./src/components/Overview/OverviewPage.tsx"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
