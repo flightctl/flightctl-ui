@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
-import { Icon, Popover, Spinner, Stack, StackItem } from '@patternfly/react-core';
+import { Icon, Popover, Stack, StackItem } from '@patternfly/react-core';
 import { useAppContext } from '@flightctl/ui-components/src/hooks/useAppContext';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import DeviceDetails from '@flightctl/ui-components/src/components/Device/DeviceDetails/DeviceDetailsPage';
@@ -28,11 +28,11 @@ const DeviceDetailsPage = () => {
   });
 
   const watchResultError = getWatchK8sResourceResult(k8sError as K8sWatchResourceError, true);
-  if (k8sError && !watchResultError) {
+  if (!loaded || (k8sError && !watchResultError)) {
     return <DeviceDetails />;
   }
 
-  let mcContent: React.ReactNode = <Spinner size="sm" />;
+  let mcContent: React.ReactNode;
   if (watchResultError) {
     mcContent = (
       <Popover
