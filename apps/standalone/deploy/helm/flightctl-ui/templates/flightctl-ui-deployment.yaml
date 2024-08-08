@@ -20,11 +20,6 @@ spec:
     spec:
       containers:
         - env:
-          - name: BACKEND_KEYCLOAK_AUTHORITY
-            valueFrom:
-              secretKeyRef:
-                name: flightctl-ui
-                key: BACKEND_KEYCLOAK_AUTHORITY
           - name: KEYCLOAK_AUTHORITY
             valueFrom:
               secretKeyRef:
@@ -81,11 +76,5 @@ spec:
           secret:
             secretName: flightctl-ui-certs
             items:
-              - key: api-sig.key
-                path: api-sig.key
               - key: ca.crt
                 path: ca.crt
-              - key: front-cli.crt
-                path: front-cli.crt
-              - key: front-cli.key
-                path: front-cli.key

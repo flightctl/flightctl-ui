@@ -10,8 +10,17 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/flightctl/flightctl-ui/bridge"
+	"github.com/flightctl/flightctl-ui/middleware"
 	"github.com/flightctl/flightctl-ui/server"
 	"github.com/flightctl/flightctl-ui/utils"
+)
+
+var (
+	bridgePort    = ":" + utils.GetEnvVar("API_PORT", "3001")
+	fctlApiUrl    = utils.GetEnvVar("FLIGHTCTL_SERVER", "https://localhost:3443")
+	metricsApiUrl = utils.GetEnvVar("FLIGHTCTL_METRICS_SERVER", "http://localhost:9090")
+	tlsKeyPath    = utils.GetEnvVar("TLS_KEY", "")
+	tlsCertPath   = utils.GetEnvVar("TLS_CERT", "")
 )
 
 func corsHandler(router *mux.Router) http.Handler {
@@ -24,30 +33,22 @@ func corsHandler(router *mux.Router) http.Handler {
 
 func main() {
 	router := mux.NewRouter()
-
 	apiRouter := router.PathPrefix("/api").Subrouter()
-
-	apiRouter.Use(bridge.AuthMiddleware)
+	apiRouter.Use(middleware.WsAuthMiddleware)
 
 	tlsConfig, err := bridge.GetTlsConfig()
 	if err != nil {
 		panic(err)
 	}
 
-	fctlApiUrl := utils.GetEnvVar("FLIGHTCTL_SERVER", "https://localhost:3443")
 	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(fctlApiUrl, tlsConfig))
-	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler(utils.GetEnvVar("FLIGHTCTL_METRICS_SERVER", "http://localhost:9090")))
+	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler(metricsApiUrl))
 
 	terminalBridge := bridge.TerminalBridge{ApiUrl: fctlApiUrl, TlsConfig: tlsConfig}
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
 
 	spa := server.SpaHandler{}
 	router.PathPrefix("/").Handler(server.GzipHandler(spa))
-
-	addr := ":" + utils.GetEnvVar("API_PORT", "3001")
-
-	tlsKeyPath := utils.GetEnvVar("TLS_KEY", "")
-	tlsCertPath := utils.GetEnvVar("TLS_CERT", "")
 
 	var config *tls.Config
 
@@ -64,12 +65,12 @@ func main() {
 
 	srv := &http.Server{
 		Handler:      corsHandler(router),
-		Addr:         addr,
+		Addr:         bridgePort,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Println("Proxy running at", addr)
+	log.Println("Proxy running at", bridgePort)
 
 	if config != nil {
 		srv.TLSConfig = config
