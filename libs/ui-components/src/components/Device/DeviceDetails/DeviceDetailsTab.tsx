@@ -34,17 +34,20 @@ import DeviceResourceStatus from '../../Status/DeviceResourceStatus';
 
 import './DeviceDetailsTab.css';
 
+type DeviceDetailsTabProps = {
+  device: Required<Device>;
+  refetch: VoidFunction;
+  tv: TemplateVersion | undefined;
+  errorTv: unknown;
+};
+
 const DeviceDetailsTab = ({
   device,
   refetch,
   tv,
   errorTv,
-}: {
-  device: Required<Device>;
-  refetch: VoidFunction;
-  tv: TemplateVersion | undefined;
-  errorTv: unknown;
-}) => {
+  children,
+}: React.PropsWithChildren<DeviceDetailsTabProps>) => {
   const { t } = useTranslation();
 
   const sourceItems = getSourceItems(device.spec.config);
@@ -78,6 +81,7 @@ const DeviceDetailsTab = ({
               </FlexItem>
               <FlexItem flex={{ default: 'flex_1' }}>
                 <Flex justifyContent={{ default: 'justifyContentFlexEnd' }}>
+                  {children}
                   <FlexItem>
                     <Stack>
                       <StackItem className="fctl-device-details-tab__label">{t('Fleet name')}</StackItem>
