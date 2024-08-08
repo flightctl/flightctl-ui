@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/tls"
-	"log"
 	"net/http"
 	"time"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/flightctl/flightctl-ui/bridge"
+	"github.com/flightctl/flightctl-ui/log"
 	"github.com/flightctl/flightctl-ui/middleware"
 	"github.com/flightctl/flightctl-ui/server"
 	"github.com/flightctl/flightctl-ui/utils"
@@ -32,6 +32,7 @@ func corsHandler(router *mux.Router) http.Handler {
 }
 
 func main() {
+	log := log.InitLogs()
 	router := mux.NewRouter()
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	apiRouter.Use(middleware.WsAuthMiddleware)
@@ -44,7 +45,7 @@ func main() {
 	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(fctlApiUrl, tlsConfig))
 	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler(metricsApiUrl))
 
-	terminalBridge := bridge.TerminalBridge{ApiUrl: fctlApiUrl, TlsConfig: tlsConfig}
+	terminalBridge := bridge.TerminalBridge{ApiUrl: fctlApiUrl, TlsConfig: tlsConfig, Log: log}
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
 
 	spa := server.SpaHandler{}
@@ -70,11 +71,11 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Println("Proxy running at", bridgePort)
+	log.Info("Proxy running at", bridgePort)
 
 	if config != nil {
 		srv.TLSConfig = config
-		log.Println("Running as HTTPS")
+		log.Info("Running as HTTPS")
 		log.Fatal(srv.ListenAndServeTLS("", ""))
 	} else {
 		log.Fatal(srv.ListenAndServe())
