@@ -10,6 +10,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const AuthHeaderKey = "Authorization"
+
 func GetTlsConfig(log *logrus.Logger) (*tls.Config, error) {
 	tlsConfig := &tls.Config{}
 
