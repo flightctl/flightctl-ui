@@ -18,6 +18,8 @@
     "prebuild": "rimraf **/dist",
     "dev": "npm run -w @flightctl/standalone dev",
     "dev:ocp": "npm run -w @flightctl/ocp-plugin dev",
+    "dev:kind": "npm run -w @flightctl/standalone dev:kind",
+    "dev:kind:auth": "npm run -w @flightctl/standalone dev:kind:auth",
     "build": "npm run -w @flightctl/standalone build",
     "build:ocp": "npm run -w @flightctl/ocp-plugin build",
     "build:libs": "npm run -w @flightctl/types build && npm run -w @flightctl/ui-components build",

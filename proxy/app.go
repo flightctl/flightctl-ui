@@ -37,7 +37,7 @@ func main() {
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	apiRouter.Use(middleware.WsAuthMiddleware)
 
-	tlsConfig, err := bridge.GetTlsConfig()
+	tlsConfig, err := bridge.GetTlsConfig(log)
 	if err != nil {
 		panic(err)
 	}
