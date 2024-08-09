@@ -61,10 +61,10 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := ""
-	authHeader, ok := r.Header["Authorization"]
+	authHeader, ok := r.Header[AuthHeaderKey]
 	if ok && len(authHeader) == 1 {
 		token = authHeader[0]
-		req.Header.Set("Authorization", authHeader[0])
+		req.Header.Set(AuthHeaderKey, authHeader[0])
 	}
 
 	resp, err := client.Do(req)
@@ -114,7 +114,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 
 	ctx := metadata.AppendToOutgoingContext(r.Context(), "session-id", response.SessionID)
 	ctx = metadata.AppendToOutgoingContext(ctx, "client-name", "flightctl-ui")
-	ctx = metadata.AppendToOutgoingContext(ctx, "Authorization", token)
+	ctx = metadata.AppendToOutgoingContext(ctx, AuthHeaderKey, token)
 	g, ctx := errgroup.WithContext(ctx)
 
 	stream, err := router.Stream(ctx)

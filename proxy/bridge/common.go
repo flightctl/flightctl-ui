@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+const AuthHeaderKey = "Authorization"
+
 func GetTlsConfig() (*tls.Config, error) {
 	caCert, err := os.ReadFile("../certs/ca.crt")
 	if err != nil {
