@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -13,6 +14,7 @@ import (
 
 	grpc_v1 "github.com/flightctl/flightctl/api/grpc/v1"
 	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -27,6 +29,7 @@ var upgrader = websocket.Upgrader{} // use default options
 type TerminalBridge struct {
 	ApiUrl    string
 	TlsConfig *tls.Config
+	Log       *logrus.Logger
 }
 
 type GRPCEndpoint struct {
@@ -34,23 +37,26 @@ type GRPCEndpoint struct {
 	SessionID    string `json:"sessionID"`
 }
 
-func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
+func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 	deviceId, found := strings.CutPrefix(r.URL.Path, "/api/terminal/")
 	if !found {
+		t.Log.Warnf("Failed to get deviceId: %s", deviceId)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	client := &http.Client{Transport: &http.Transport{
-		TLSClientConfig: b.TlsConfig,
+		TLSClientConfig: t.TlsConfig,
 	}}
 
-	consoleUrl := b.ApiUrl + "/api/v1/devices/" + deviceId + "/console"
+	consoleUrl := t.ApiUrl + "/api/v1/devices/" + deviceId + "/console"
 
 	req, err := http.NewRequest(http.MethodGet, consoleUrl, nil)
 	if err != nil {
+		errMsg := fmt.Sprintf("Could not create request: %s", err.Error())
+		t.Log.Warnf(errMsg)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Could not create request: " + err.Error()))
+		w.Write([]byte(errMsg))
 		return
 	}
 
@@ -63,35 +69,44 @@ func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := client.Do(req)
 	if err != nil {
+		errMsg := fmt.Sprintf("Failed to get terminal session for device %s", deviceId)
+		t.Log.Warnf(errMsg)
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Failed to get gRPC session: " + err.Error()))
+		w.Write([]byte(errMsg))
 		return
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		errMsg := fmt.Sprintf("Failed to read terminal session response %s", err.Error())
+		t.Log.Warnf(errMsg)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to read response: " + err.Error()))
+		w.Write([]byte(errMsg))
 		return
 	}
 	if resp.StatusCode != http.StatusOK {
+		t.Log.Warnf("Unexpected terminal session response code %d", resp.StatusCode)
 		w.WriteHeader(resp.StatusCode)
 		w.Write(body)
 		return
 	}
 	response := GRPCEndpoint{}
 	if err := json.Unmarshal(body, &response); err != nil {
+		errMsg := fmt.Sprintf("Failed to unmarshall response json: %s", err.Error())
+		t.Log.Warnf(errMsg)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to unmarshall response json: " + err.Error()))
+		w.Write([]byte(errMsg))
 		return
 	}
 
 	grpcEndpoint := strings.TrimPrefix(response.GRPCEndpoint, "grpcs://")
 	grpcEndpoint = strings.TrimPrefix(grpcEndpoint, "grpc://")
 
-	grpcClient, err := grpc.NewClient(grpcEndpoint, grpc.WithTransportCredentials(credentials.NewTLS(b.TlsConfig)))
+	grpcClient, err := grpc.NewClient(grpcEndpoint, grpc.WithTransportCredentials(credentials.NewTLS(t.TlsConfig)))
 	if err != nil {
+		errMsg := fmt.Sprintf("Failed to create gRPC client: %s", err.Error())
+		t.Log.Warnf(errMsg)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to create gRPC client: " + err.Error()))
+		w.Write([]byte(errMsg))
 		return
 	}
 
@@ -104,16 +119,20 @@ func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 
 	stream, err := router.Stream(ctx)
 	if err != nil {
+		errMsg := fmt.Sprintf("Failed to create gRPC stream: %s", err.Error())
+		t.Log.Warnf(errMsg)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to create gRPC stream: " + err.Error()))
+		w.Write([]byte(errMsg))
 		return
 	}
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	upgrader.Subprotocols = []string{WsStandaloneSubprotocol, WsOcpSubprotocol}
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
+		errMsg := fmt.Sprintf("Failed to update websocket: %s", err.Error())
+		t.Log.Warnf(errMsg)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to update websocket: " + err.Error()))
+		w.Write([]byte(errMsg))
 		return
 	}
 	defer func() {
@@ -122,8 +141,10 @@ func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 			Closed: true,
 		})
 		_ = stream.CloseSend()
+		t.Log.Infof("Terminal session for device %s closed", deviceId)
 	}()
 
+	t.Log.Infof("Terminal session for device %s started", deviceId)
 	g.Go(func() error {
 		for {
 			frame, err := stream.Recv()
@@ -137,6 +158,7 @@ func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if err != nil {
+				t.Log.Warnf("Error recieving grpc stream input: %s", err.Error())
 				return err
 			}
 			str := string(frame.Payload)
@@ -145,8 +167,10 @@ func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 			str = strings.ReplaceAll(str, "\n", "\n\r")
 			err = c.WriteMessage(1, []byte(str))
 			if err != nil {
+				errMsg := fmt.Sprintf("Failed writing to ws: %s", err.Error())
+				t.Log.Warnf(errMsg)
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed to write to ws: " + err.Error()))
+				w.Write([]byte(errMsg))
 				return err
 			}
 		}
@@ -163,8 +187,10 @@ func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 				return io.EOF
 			}
 			if err != nil {
+				errMsg := fmt.Sprintf("Failed to read from ws: %s", err.Error())
+				t.Log.Warnf(errMsg)
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed to read from ws: " + err.Error()))
+				w.Write([]byte(errMsg))
 				return err
 			}
 
@@ -174,8 +200,10 @@ func (b TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 				})
 
 				if err != nil {
+					errMsg := fmt.Sprintf("Failed to send to gRPC: %s", err.Error())
+					t.Log.Warn(errMsg)
 					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte("Failed to send to gRPC: " + err.Error()))
+					w.Write([]byte(errMsg))
 					return err
 				}
 			}
