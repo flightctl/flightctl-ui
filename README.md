@@ -16,22 +16,29 @@ npm run build
 
 ## Running
 
-### Running Standalone UI
-
-If FCTL backend is running in kind
-
+First, copy the flightctl-server certs to proxy the API requests
 ```
-npm run dev:kind
+mkdir certs
+cat ~/.flightctl/client.yaml | yq '.service.certificate-authority-data' | base64 -d > certs/ca.crt
 ```
 
-With auth enabled:
+### Running Standalone UI with backend running in Kind
 
-```
-npm run dev:kind:auth
-```
+Choose one of the two options to run the UI application
 
+1. With auth disabled:
+  ```
+  npm run dev:kind
+  ```
 
-If backend is not running in your Kind cluster, you need to specify the API endpoint
+2. With auth enabled:
+
+  ```
+  npm run dev:kind:auth
+  ```
+
+### Running Standalone UI with backend not running in Kind
+- If backend is not running in your Kind cluster, you need to specify the API endpoint
 
 ```
 FLIGHTCTL_SERVER=<api_server_url> npm run dev

@@ -4,6 +4,9 @@
 /* eslint-disable */
 export enum ConditionType {
   EnrollmentRequestApproved = 'Approved',
+  CertificateSigningRequestApproved = 'Approved',
+  CertificateSigningRequestDenied = 'Denied',
+  CertificateSigningRequestFailed = 'Failed',
   RepositoryAccessible = 'Accessible',
   ResourceSyncAccessible = 'Accessible',
   ResourceSyncResourceParsed = 'ResourceParsed',
@@ -12,6 +15,6 @@ export enum ConditionType {
   FleetValid = 'Valid',
   DeviceUpdating = 'Updating',
   DeviceSpecValid = 'SpecValid',
-  TemplateVersionValid = 'Valid',
-  DeviceMultipleOwners = 'MultipleOwners'
+  DeviceMultipleOwners = 'MultipleOwners',
+  TemplateVersionValid = 'Valid'
 }

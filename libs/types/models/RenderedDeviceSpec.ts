@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { DeviceConsole } from './DeviceConsole';
+import type { DeviceHooksSpec } from './DeviceHooksSpec';
 import type { DeviceOSSpec } from './DeviceOSSpec';
 import type { ResourceMonitor } from './ResourceMonitor';
 export type RenderedDeviceSpec = {
@@ -12,6 +13,7 @@ export type RenderedDeviceSpec = {
     matchPatterns?: Array<string>;
   };
   config?: string;
+  hooks?: DeviceHooksSpec;
   systemd?: {
     matchPatterns?: Array<string>;
   };
