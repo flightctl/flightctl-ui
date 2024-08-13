@@ -7,6 +7,7 @@ on:
 
 env:
   QUAY_ORG: quay.io/flightctl
+  QUAY_CHARTS: quay.io/flightctl/charts
   QUAY_STANDALONE_REPO: flightctl-ui
   QUAY_OCP_REPO: flightctl-ocp-ui
 
@@ -117,5 +118,5 @@ jobs:
 
       - name: Push helm charts
         run: |
-          helm push flightctl-ui-*.tgz oci://${{ env.QUAY_ORG }}/
-          helm push flightctl-ocp-ui-*.tgz oci://${{ env.QUAY_ORG }}/
+          helm push flightctl-ui-*.tgz oci://${{ env.QUAY_CHARTS }}/
+          helm push flightctl-ocp-ui-*.tgz oci://${{ env.QUAY_CHARTS }}/
