@@ -1,23 +1,21 @@
-flightctlUi:
-  namespace: flightctl
-  image: quay.io/flightctl/flightctl-ui:latest
-  flightctlServer: https://flightctl-api:3443
-  flightctlMetricsServer: https://flightctl-api:9090
-  bootcImgUrl: quay.io/example/example-agent-centos:bootstrap
-  qcow2ImgUrl: https://example.com/disk.qcow2
-  certs:
-    ca: |
-      -----BEGIN
-      -----END
-    frontRouter: |
-      -----BEGIN
-      -----END
-    frontRouterKey: |
-      -----BEGIN
-      -----END
-keycloak:
-  authority: http://keycloak:8080/realms/flightctl
-  clientid: flightctl-ui
-  redirect: https://ui.flightctl.example.com:443
-  secret: CHANGE_ME
+
+namespace: flightctl
+image:
+  image: quay.io/flightctl/flightctl-ui
+  tag: ""
+flightctlServer: https://flightctl-api:3443
+flightctlMetricsServer: https://flightctl-api:9090
+bootcImgUrl: quay.io/example/example-agent-centos:bootstrap
+qcow2ImgUrl: https://example.com/disk.qcow2
+certs:
+  ca: |
+    -----BEGIN
+    -----END
+  frontRouter: |
+    -----BEGIN
+    -----END
+  frontRouterKey: |
+    -----BEGIN
+    -----END
+
 
