@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - main
-
+    tags:
+      - '**'
 env:
   QUAY_ORG: quay.io/flightctl
   QUAY_CHARTS: quay.io/flightctl/charts
