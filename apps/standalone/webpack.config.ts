@@ -204,8 +204,6 @@ if (NODE_ENV === 'production') {
       'window.KEYCLOAK_CLIENTID': JSON.stringify(process.env.KEYCLOAK_CLIENTID),
       'window.KEYCLOAK_REDIRECT': JSON.stringify(process.env.KEYCLOAK_REDIRECT),
       'window.API_PORT': JSON.stringify(process.env.API_PORT) || '3001',
-      'window.QCOW2_IMG_URL': JSON.stringify(process.env.QCOW2_IMG_URL),
-      'window.BOOTC_IMG_URL': JSON.stringify(process.env.BOOTC_IMG_URL),
     }),
   );
 }

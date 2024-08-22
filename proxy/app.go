@@ -47,6 +47,7 @@ func main() {
 
 	terminalBridge := bridge.TerminalBridge{ApiUrl: fctlApiUrl, TlsConfig: tlsConfig, Log: log}
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
+	apiRouter.HandleFunc("/device-images", bridge.HandleDeviceImages)
 
 	spa := server.SpaHandler{}
 	router.PathPrefix("/").Handler(server.GzipHandler(spa))

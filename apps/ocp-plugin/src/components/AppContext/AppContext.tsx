@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { AppContext, AppContextProps, NavLinkFC, PromptFC } from '@flightctl/ui-components/src/hooks/useAppContext';
 import { ROUTE } from '@flightctl/ui-components/src/hooks/useNavigate';
 import {
@@ -16,6 +17,7 @@ import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/redu
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
 import { useMetrics } from '../../hooks/useMetrics';
+import { DeviceImages, fetchImages } from '../../utils/apiCalls';
 
 export const OCPPluginAppContext = AppContext.Provider;
 
@@ -42,11 +44,32 @@ export const useValuesAppContext = (): AppContextProps => {
   const fetch = useFetch();
   const metrics = useMetrics();
   const userInfo = useSelector(getUser);
+
+  const [deviceImages, setDeviceImages] = React.useState<DeviceImages>({
+    qcow2: '',
+    bootc: '',
+  });
+
+  React.useEffect(() => {
+    const getImages = async () => {
+      try {
+        const imgs = await fetchImages();
+        setDeviceImages(imgs);
+      } catch (err) {
+        // eslint-disable-next-line
+        console.warn('Failed to fetch device images');
+        // eslint-disable-next-line
+        console.error(err);
+      }
+    };
+    getImages();
+  }, []);
+
   return {
     appType: 'ocp',
     user: userInfo?.username || '',
-    bootcImgUrl: '1',
-    qcow2ImgUrl: '',
+    bootcImgUrl: deviceImages.bootc,
+    qcow2ImgUrl: deviceImages.qcow2,
     router: {
       Link,
       appRoutes,

@@ -3,8 +3,8 @@ flightctlUi:
   image: quay.io/flightctl/flightctl-ui:latest
   flightctlServer: https://flightctl-api:3443
   flightctlMetricsServer: https://flightctl-api:9090
-  bootcImgUrl: quay.io/example/example-agent-centos:bootstrap
-  qcow2ImgUrl: https://example.com/disk.qcow2
+  bootcImgUrl: "" #Bootc device image. Example: quay.io/example/example-agent-centos:bootstrap
+  qcow2ImgUrl: "" #Qcow2 device image. Example: https://example.com/disk.qcow2
   certs:
     ca: |
       -----BEGIN
