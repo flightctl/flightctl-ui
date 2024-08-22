@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: flightctl-ui
-  namespace: {{ .Values.flightctlUi.namespace }}
+  namespace: {{ default .Release.Namespace .Values.namespace }}
   labels:
     app: flightctl-ui
     role: frontend
@@ -62,7 +62,7 @@ spec:
               secretKeyRef:
                 name: flightctl-ui
                 key: QCOW2_IMG_URL
-          image: {{ .Values.flightctlUi.image }}
+          image:  {{ .Values.image }}:{{ default .Chart.AppVersion .Values.imageTag }}
           name: flightctl-ui
           ports:
             - containerPort: 8080

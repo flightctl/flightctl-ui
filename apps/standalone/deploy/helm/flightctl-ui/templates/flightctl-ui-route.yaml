@@ -2,7 +2,7 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: flightctl-ui
-  namespace: {{ .Values.flightctlUi.namespace }}
+  namespace: {{ default .Release.Namespace .Values.namespace }}
   labels:
     external-exposed: 'true'
     paas.redhat.com/appcode: {{ .Values.appCode }}
