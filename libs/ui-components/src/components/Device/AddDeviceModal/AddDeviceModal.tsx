@@ -18,11 +18,20 @@ import {
 import * as React from 'react';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
 
 const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
   const { t } = useTranslation();
   const { qcow2ImgUrl, bootcImgUrl } = useAppContext();
-  const [imgType, setImgType] = React.useState<'bootc' | 'qcow2'>('bootc');
+  const [imgType, setImgType] = React.useState<'bootc' | 'qcow2'>();
+
+  React.useEffect(() => {
+    if (!!bootcImgUrl) {
+      setImgType('bootc');
+    } else if (!!qcow2ImgUrl) {
+      setImgType('qcow2');
+    }
+  }, [qcow2ImgUrl, bootcImgUrl]);
 
   const actions = [
     <Button key="close" variant="secondary" onClick={onClose}>
@@ -40,6 +49,21 @@ const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
   return (
     <Modal variant="medium" title={t('Add device')} onClose={onClose} isOpen actions={actions}>
       <Grid hasGutter>
+        <GridItem>
+          <Alert variant="info" isInline title={t('Learn how to build a bootable container image')}>
+            <Button
+              component="a"
+              variant="link"
+              isInline
+              href="https://github.com/flightctl/flightctl/blob/main/docs/user/getting-started.md#building-a-bootable-container-image-including-the-flight-control-agent"
+              target="_blank"
+              icon={<ExternalLinkAltIcon />}
+              iconPosition="end"
+            >
+              {t('View documentation')}
+            </Button>
+          </Alert>
+        </GridItem>
         <GridItem>
           <Radio
             isChecked={imgType === 'bootc'}

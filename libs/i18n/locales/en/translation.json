@@ -75,6 +75,8 @@
   "Close": "Close",
   "Download disk": "Download disk",
   "Add device": "Add device",
+  "Learn how to build a bootable container image": "Learn how to build a bootable container image",
+  "View documentation": "View documentation",
   "Use a container image (bootc)": "Use a container image (bootc)",
   "Use a container image (bootc) (Not available)": "Use a container image (bootc) (Not available)",
   "Use a disk image (qcow2)": "Use a disk image (qcow2)",

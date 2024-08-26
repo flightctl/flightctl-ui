@@ -24,8 +24,6 @@ func serveIndexPage(w http.ResponseWriter, r *http.Request) {
 		"window.KEYCLOAK_AUTHORITY = \"" + utils.GetEnvVar("KEYCLOAK_AUTHORITY", "") + "\"\n" +
 		"window.KEYCLOAK_CLIENTID = \"" + utils.GetEnvVar("KEYCLOAK_CLIENTID", "") + "\"\n" +
 		"window.KEYCLOAK_REDIRECT = \"" + utils.GetEnvVar("KEYCLOAK_REDIRECT", "") + "\"\n" +
-		"window.QCOW2_IMG_URL = \"" + utils.GetEnvVar("QCOW2_IMG_URL", "") + "\"\n" +
-		"window.BOOTC_IMG_URL = \"" + utils.GetEnvVar("BOOTC_IMG_URL", "") + "\"\n" +
 		"</script>"
 	index := strings.Replace(strContent, "<head>", "<head>"+script, 1)
 	http.ServeContent(w, r, "index.html", time.Time{}, bytes.NewReader([]byte(index)))

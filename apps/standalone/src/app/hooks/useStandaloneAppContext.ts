@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { AppContextProps, NavLinkFC, appRoutes } from '@flightctl/ui-components/src/hooks/useAppContext';
 import {
   Link,
@@ -14,14 +15,13 @@ import {
 import { useFetch } from './useFetch';
 import { useMetrics } from './useMetrics';
 import { useAuth } from './useAuth';
+import { DeviceImages, fetchImages } from '../utils/apiCalls';
 
-const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics'> = {
+const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics' | 'bootcImgUrl' | 'qcow2ImgUrl'> = {
   appType: 'standalone',
   i18n: {
     transNamespace: undefined,
   },
-  bootcImgUrl: window.BOOTC_IMG_URL,
-  qcow2ImgUrl: window.QCOW2_IMG_URL,
   router: {
     useNavigate,
     Link,
@@ -42,8 +42,30 @@ export const useStandaloneAppContext = (): AppContextProps => {
   const fetch = useFetch();
   const metrics = useMetrics();
 
+  const [deviceImages, setDeviceImages] = React.useState<DeviceImages>({
+    qcow2: '',
+    bootc: '',
+  });
+
+  React.useEffect(() => {
+    const getImages = async () => {
+      try {
+        const imgs = await fetchImages();
+        setDeviceImages(imgs);
+      } catch (err) {
+        // eslint-disable-next-line
+        console.warn('Failed to fetch device images');
+        // eslint-disable-next-line
+        console.error(err);
+      }
+    };
+    getImages();
+  }, []);
+
   return {
     ...standaloneAppContext,
+    bootcImgUrl: deviceImages.bootc,
+    qcow2ImgUrl: deviceImages.qcow2,
     user: auth?.user?.profile.preferred_username,
     fetch,
     metrics,
