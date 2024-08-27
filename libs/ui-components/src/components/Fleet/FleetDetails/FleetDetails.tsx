@@ -1,6 +1,6 @@
 import React from 'react';
 import { DropdownItem, DropdownList } from '@patternfly/react-core';
-import { DeviceList, Fleet } from '@flightctl/types';
+import { Fleet } from '@flightctl/types';
 
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import DetailsPage from '../../DetailsPage/DetailsPage';
@@ -10,7 +10,6 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import DeleteFleetModal from '../DeleteFleetModal/DeleteFleetModal';
-import { getApiListCount } from '../../../utils/api';
 
 const FleetDetails = () => {
   const { t } = useTranslation();
@@ -19,8 +18,9 @@ const FleetDetails = () => {
     router: { useParams },
   } = useAppContext();
   const { fleetId } = useParams() as { fleetId: string };
-  const [fleet, isLoading, error, refetch] = useFetchPeriodically<Required<Fleet>>({ endpoint: `fleets/${fleetId}` });
-  const [fleetDevicesResp] = useFetchPeriodically<DeviceList>({ endpoint: `devices?owner=Fleet/${fleetId}&limit=1` });
+  const [fleet, isLoading, error, refetch] = useFetchPeriodically<Required<Fleet>>({
+    endpoint: `fleets/${fleetId}?addDevicesSummary=true`,
+  });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>();
 
   const navigate = useNavigate();
@@ -75,7 +75,7 @@ const FleetDetails = () => {
     >
       {fleet && (
         <>
-          <FleetDetailsContent fleet={fleet} devicesCount={getApiListCount(fleetDevicesResp)} />
+          <FleetDetailsContent fleet={fleet} />
           {isDeleteModalOpen && (
             <DeleteFleetModal
               fleetId={fleetId}

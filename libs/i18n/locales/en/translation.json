@@ -236,6 +236,7 @@
   "Created": "Created",
   "Associated devices": "Associated devices",
   "Managed by": "Managed by",
+  "Fleet devices": "Fleet devices",
   "Managed by the resource sync {{resourceSyncName}}": "Managed by the resource sync {{resourceSyncName}}",
   "Create a fleet": "Create a fleet",
   "Import fleets": "Import fleets",

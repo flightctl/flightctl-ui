@@ -41,7 +41,7 @@ import { Link, ROUTE } from '../../../hooks/useNavigate';
 import { useDeviceLikeResources } from './useDeviceLikeResources';
 import { useDeviceBackendFilters } from './useDeviceBackendFilters';
 import {
-  getApplicatioStatusHelperText,
+  getApplicationStatusHelperText,
   getDeviceStatusHelperText,
   getUpdateStatusHelperText,
 } from '../../Status/utils';
@@ -86,7 +86,7 @@ const getDeviceColumns = (t: TFunction): TableColumn<DeviceLikeResource>[] => [
   },
   {
     name: t('Application status'),
-    helperText: getApplicatioStatusHelperText(t),
+    helperText: getApplicationStatusHelperText(t),
     onSort: (resources: Array<DeviceLikeResource>) => sortDeviceStatus(resources, 'ApplicationStatus'),
   },
   {

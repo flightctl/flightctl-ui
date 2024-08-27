@@ -17,7 +17,7 @@ export const toChartData = <T extends string>(
 ) => {
   const percentages = percentRound(Object.values(map));
   return Object.keys(map).map<Data>((key, index) => {
-    const item = statusItems.find(({ id }) => id === key);
+    const item = statusItems.find(({ id }) => id === key) as StatusItem<T>;
 
     const query = new URLSearchParams();
     query.append(filterName, key);
@@ -25,14 +25,14 @@ export const toChartData = <T extends string>(
     fleets.forEach((f) => query.append(FilterSearchParams.Fleet, f));
 
     return {
-      x: `${item?.label}`,
+      x: `${item.label}`,
       y: percentages[index],
-      color: getDefaultStatusColor(item!.level),
+      color: getDefaultStatusColor(item.level),
       link: {
         to: ROUTE.DEVICES,
         query: query.toString(),
       },
-      tooltip: `${map[key]} ${item?.label}`,
+      tooltip: `${map[key]} ${item.label}`,
     };
   });
 };

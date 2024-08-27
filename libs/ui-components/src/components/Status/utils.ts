@@ -1,6 +1,6 @@
 import { TFunction } from 'i18next';
 
-export const getApplicatioStatusHelperText = (t: TFunction) =>
+export const getApplicationStatusHelperText = (t: TFunction) =>
   t('Indicates the overall status of application workloads on the device.');
 export const getDeviceStatusHelperText = (t: TFunction) =>
   t('Indicates the overall status of the device hardware and operating system.');
