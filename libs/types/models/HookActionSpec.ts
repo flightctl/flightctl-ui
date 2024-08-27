@@ -2,9 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { FileOperation } from './FileOperation';
 export type HookActionSpec = {
-  on?: Array<FileOperation>;
   /**
    * The maximum duration allowed for the action to complete.
    * The duration should be specified as a positive integer

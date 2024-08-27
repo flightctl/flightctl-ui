@@ -9,4 +9,5 @@ export enum FileOperation {
   FileOperationCreate = 'Create',
   FileOperationRemove = 'Remove',
   FileOperationUpdate = 'Update',
+  FileOperationReboot = 'Reboot',
 }

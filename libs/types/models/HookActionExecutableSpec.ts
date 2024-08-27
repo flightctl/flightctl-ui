@@ -4,7 +4,5 @@
 /* eslint-disable */
 import type { HookActionExecutable } from './HookActionExecutable';
 import type { HookActionSpec } from './HookActionSpec';
-export type HookActionExecutableSpec = (HookActionSpec & {
-  executable: HookActionExecutable;
-});
+export type HookActionExecutableSpec = (HookActionSpec & HookActionExecutable);
 
