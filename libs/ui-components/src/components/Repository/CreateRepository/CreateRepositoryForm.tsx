@@ -313,7 +313,6 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
   const [errors, setErrors] = React.useState<string[]>();
   const { patch, remove, post } = useFetch();
   const { t } = useTranslation();
-
   return (
     <Formik<RepositoryFormValues>
       initialValues={getInitValues({

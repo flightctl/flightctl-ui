@@ -4,6 +4,7 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   Bullseye,
+  ExpandableSection,
   PageSection,
   PageSectionVariants,
   Spinner,
@@ -16,7 +17,7 @@ import { useFetch } from '../../../hooks/useFetch';
 
 import CreateRepositoryForm from './CreateRepositoryForm';
 
-import { isPromiseRejected } from '../../../types/typeUtils';
+import { isPromiseFulfilled } from '../../../types/typeUtils';
 import { Repository, ResourceSync, ResourceSyncList } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
@@ -29,7 +30,8 @@ const CreateRepository = () => {
   } = useAppContext();
   const { repositoryId } = useParams<{ repositoryId: string }>();
   const { get } = useFetch();
-  const [errors, setErrors] = React.useState<string[]>();
+  const [repoError, setRepoError] = React.useState<string>();
+  const [rsError, setRsError] = React.useState<string>();
   const [isLoading, setIsLoading] = React.useState(!!repositoryId);
   const [repositoryDetails, setRepositoryDetails] = React.useState<Repository>();
   const [resourceSyncs, setResourceSyncs] = React.useState<ResourceSync[]>();
@@ -40,23 +42,19 @@ const CreateRepository = () => {
       setIsLoading(true);
       try {
         const results = await Promise.allSettled([
-          await get<Repository>(`repositories/${repositoryId}`),
-          await get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${repositoryId}`),
+          get<Repository>(`repositories/${repositoryId}`),
+          get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${repositoryId}`),
         ]);
 
-        const rejectedPromises = results.filter(isPromiseRejected);
-        if (rejectedPromises.length === 0) {
-          setRepositoryDetails((results[0] as PromiseFulfilledResult<Repository>).value);
-          setResourceSyncs((results[1] as PromiseFulfilledResult<ResourceSyncList>).value.items);
+        if (isPromiseFulfilled(results[0])) {
+          setRepositoryDetails(results[0].value);
+          if (isPromiseFulfilled(results[1])) {
+            setResourceSyncs(results[1].value.items);
+          } else {
+            setRsError(`${t('Failed to fetch resource syncs')} ${getErrorMessage(results[1].reason)}}`);
+          }
         } else {
-          const errors: string[] = [];
-          if (isPromiseRejected(results[0])) {
-            errors.push(`${t('Failed to fetch repository')} ${getErrorMessage(results[0].reason)}}`);
-          }
-          if (isPromiseRejected(results[1])) {
-            errors.push(`${t('Failed to fetch resource syncs')} ${getErrorMessage(results[1].reason)}}`);
-          }
-          setErrors(errors);
+          setRepoError(`${t('Failed to fetch repository')} ${getErrorMessage(results[0].reason)}}`);
         }
       } finally {
         setIsLoading(false);
@@ -69,12 +67,10 @@ const CreateRepository = () => {
 
   let content;
 
-  if (errors?.length) {
+  if (repoError) {
     content = (
       <Alert isInline variant="danger" title={t('An error occurred')}>
-        {errors.map((e, index) => (
-          <div key={index}>{e}</div>
-        ))}
+        <div>{repoError}</div>
       </Alert>
     );
   } else if (isLoading) {
@@ -90,6 +86,9 @@ const CreateRepository = () => {
         onSuccess={(repo) => navigate({ route: ROUTE.REPO_DETAILS, postfix: repo.metadata.name })}
         repository={repositoryDetails}
         resourceSyncs={resourceSyncs}
+        options={{
+          canUseResourceSyncs: !rsError,
+        }}
       />
     );
   }
@@ -108,6 +107,14 @@ const CreateRepository = () => {
             {repositoryId ? t('Edit repository') : t('Create repository')}
           </Title>
         </StackItem>
+        {rsError && (
+          <Alert isInline variant="warning" title={t('Failed to retrieve the resource syncs')}>
+            {t(
+              'We could not verify if this repository contains resource syncs. Changes to resource syncs are not available at the moment for this reason.',
+            )}
+            <ExpandableSection toggleText={t('Details')}>{rsError}</ExpandableSection>
+          </Alert>
+        )}
         <StackItem>{content}</StackItem>
       </Stack>
     </PageSection>
