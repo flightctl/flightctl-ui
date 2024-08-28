@@ -16,13 +16,14 @@ import * as React from 'react';
 
 import { Fleet } from '@flightctl/types';
 import FleetOwnerLink from './FleetOwnerLink';
+import FleetDevices from './FleetDevices';
 import FleetStatus from '../FleetStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
 import { getSourceItems } from '../../../utils/devices';
 
-const FleetDevices = ({ fleetId, count }: { fleetId: string; count: number | undefined }) => {
+const FleetDevicesLink = ({ fleetId, count }: { fleetId: string; count: number | undefined }) => {
   if (count === undefined) {
     return <Spinner size="sm" />;
   }
@@ -36,9 +37,11 @@ const FleetDevices = ({ fleetId, count }: { fleetId: string; count: number | und
   );
 };
 
-const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCount: number | undefined }) => {
+const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
   const sourceItems = getSourceItems(fleet.spec.template.spec.config);
+  const fleetId = fleet.metadata.name as string;
+  const devicesSummary = fleet.status?.devicesSummary;
   return (
     <Grid hasGutter>
       <GridItem md={12}>
@@ -60,7 +63,7 @@ const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCou
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
-                <DescriptionListDescription>{fleet.spec.template.spec.os?.image}</DescriptionListDescription>
+                <DescriptionListDescription>{fleet.spec.template.spec.os?.image || '-'}</DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Device selector')}</DescriptionListTerm>
@@ -71,7 +74,7 @@ const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCou
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Associated devices')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <FleetDevices fleetId={fleet.metadata.name as string} count={devicesCount} />
+                  <FleetDevicesLink fleetId={fleetId} count={devicesSummary?.total || 0} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
@@ -90,6 +93,17 @@ const FleetDetailsContent = ({ fleet, devicesCount }: { fleet: Fleet; devicesCou
           </CardBody>
         </Card>
       </GridItem>
+      {devicesSummary && (
+        <GridItem md={12}>
+          <Card>
+            <CardTitle>{t('Fleet devices')}</CardTitle>
+
+            <CardBody>
+              <FleetDevices fleetId={fleetId} devicesSummary={devicesSummary} />
+            </CardBody>
+          </Card>
+        </GridItem>
+      )}
     </Grid>
   );
 };

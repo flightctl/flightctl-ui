@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Device } from './Device';
+import type { DevicesSummary } from './DevicesSummary';
 import type { ListMeta } from './ListMeta';
 /**
  * DeviceList is a list of Devices.
@@ -21,5 +22,6 @@ export type DeviceList = {
    * List of Devices.
    */
   items: Array<Device>;
+  summary?: DevicesSummary;
 };
 

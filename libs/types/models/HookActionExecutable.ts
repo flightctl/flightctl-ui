@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type HookActionExecutable = {
   /**
-   * The path or name of the executable file to run. This can be the name of a binary located in $PATH, or a full path to the binary.
+   * The command to be executed, including any arguments using standard shell syntax. This field supports multiple commands piped together, as if they were executed under a bash -c context.
    */
   run: string;
   /**
