@@ -3,7 +3,7 @@ module github.com/flightctl/flightctl-ui
 go 1.21
 
 require (
-	github.com/flightctl/flightctl v0.0.0-20240715160134-b1970fbc75b8
+	github.com/flightctl/flightctl v0.1.0
 	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/websocket v1.5.3

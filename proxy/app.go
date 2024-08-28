@@ -19,6 +19,7 @@ var (
 	bridgePort    = ":" + utils.GetEnvVar("API_PORT", "3001")
 	fctlApiUrl    = utils.GetEnvVar("FLIGHTCTL_SERVER", "https://localhost:3443")
 	metricsApiUrl = utils.GetEnvVar("FLIGHTCTL_METRICS_SERVER", "http://localhost:9090")
+	grpcUrl       = utils.GetEnvVar("FLIGHTCTL_GRPC_SERVER", "localhost:7444")
 	tlsKeyPath    = utils.GetEnvVar("TLS_KEY", "")
 	tlsCertPath   = utils.GetEnvVar("TLS_CERT", "")
 )
@@ -45,7 +46,7 @@ func main() {
 	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(fctlApiUrl, tlsConfig))
 	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler(metricsApiUrl))
 
-	terminalBridge := bridge.TerminalBridge{ApiUrl: fctlApiUrl, TlsConfig: tlsConfig, Log: log}
+	terminalBridge := bridge.TerminalBridge{ApiUrl: fctlApiUrl, TlsConfig: tlsConfig, Log: log, GrpcEndpoint: grpcUrl}
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
 	apiRouter.HandleFunc("/device-images", bridge.HandleDeviceImages)
 

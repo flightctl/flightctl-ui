@@ -27,14 +27,14 @@ const (
 var upgrader = websocket.Upgrader{} // use default options
 
 type TerminalBridge struct {
-	ApiUrl    string
-	TlsConfig *tls.Config
-	Log       *logrus.Logger
+	ApiUrl       string
+	GrpcEndpoint string
+	TlsConfig    *tls.Config
+	Log          *logrus.Logger
 }
 
 type GRPCEndpoint struct {
-	GRPCEndpoint string `json:"gRPCEndpoint"`
-	SessionID    string `json:"sessionID"`
+	SessionID string `json:"sessionID"`
 }
 
 func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
@@ -98,10 +98,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	grpcEndpoint := strings.TrimPrefix(response.GRPCEndpoint, "grpcs://")
-	grpcEndpoint = strings.TrimPrefix(grpcEndpoint, "grpc://")
-
-	grpcClient, err := grpc.NewClient(grpcEndpoint, grpc.WithTransportCredentials(credentials.NewTLS(t.TlsConfig)))
+	grpcClient, err := grpc.NewClient(t.GrpcEndpoint, grpc.WithTransportCredentials(credentials.NewTLS(t.TlsConfig)))
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to create gRPC client: %s", err.Error())
 		t.Log.Warnf(errMsg)
@@ -109,9 +106,9 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(errMsg))
 		return
 	}
-
 	router := grpc_v1.NewRouterServiceClient(grpcClient)
 
+	t.Log.Printf("Connecting to %s with session id %s\n", t.GrpcEndpoint, response.SessionID)
 	ctx := metadata.AppendToOutgoingContext(r.Context(), "session-id", response.SessionID)
 	ctx = metadata.AppendToOutgoingContext(ctx, "client-name", "flightctl-ui")
 	ctx = metadata.AppendToOutgoingContext(ctx, AuthHeaderKey, token)
@@ -125,6 +122,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(errMsg))
 		return
 	}
+
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	upgrader.Subprotocols = []string{WsStandaloneSubprotocol, WsOcpSubprotocol}
 	c, err := upgrader.Upgrade(w, r, nil)
@@ -135,6 +133,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(errMsg))
 		return
 	}
+
 	defer func() {
 		c.Close()
 		_ = stream.Send(&grpc_v1.StreamRequest{
@@ -180,6 +179,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		for {
 			msgType, message, err := c.ReadMessage()
 			if msgType == -1 {
+				t.Log.Infof("WS connection for device %s closed by client", deviceId)
 				_ = stream.Send(&grpc_v1.StreamRequest{
 					Closed: true,
 				})
