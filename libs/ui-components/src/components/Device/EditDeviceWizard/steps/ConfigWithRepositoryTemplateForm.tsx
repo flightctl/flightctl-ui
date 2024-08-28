@@ -65,11 +65,37 @@ const GitConfigForm = ({ template, index }: { template: GitConfigTemplate; index
           value={template.targetRevision}
         />
       </FormGroup>
-      <FormGroup label={t('Path')} isRequired>
+      <FormGroup
+        label={
+          <WithHelperText
+            ariaLabel={t('Path')}
+            content={t('Path in the repository where the configuration file(s) are located')}
+            showLabel
+          />
+        }
+        isRequired
+      >
         <TextField
           aria-label={t('Path')}
           name={`configTemplates[${index}].path`}
           value={template.path}
+          placeholder={t('/absolute/path')}
+        />
+      </FormGroup>
+      <FormGroup
+        isRequired
+        label={
+          <WithHelperText
+            ariaLabel={t('Mount path')}
+            content={t('Path in the device where the configurations will be stored')}
+            showLabel
+          />
+        }
+      >
+        <TextField
+          aria-label={t('Mount path')}
+          name={`configTemplates[${index}].mountPath`}
+          value={template.mountPath}
           placeholder={t('/absolute/path')}
         />
       </FormGroup>

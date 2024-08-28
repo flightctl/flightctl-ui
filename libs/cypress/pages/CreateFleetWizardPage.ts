@@ -51,6 +51,10 @@ export class CreateFleetWizardPage {
     return cy.get('input[aria-label="Path"]');
   }
 
+  get newFleetRepositoryMountPathField() {
+    return cy.get('input[aria-label="Mount path"]');
+  }
+
   get newFleetRepositoryField() {
     return cy.get('select[aria-label="Repository select input"]');
   }

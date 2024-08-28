@@ -36,7 +36,8 @@ const isSameGitConf = (a: GitConfigProviderSpec, b: GitConfigProviderSpec) => {
     a.name === b.name &&
     aRef.path === bRef.path &&
     aRef.repository === bRef.repository &&
-    aRef.targetRevision === bRef.targetRevision
+    aRef.targetRevision === bRef.targetRevision &&
+    (aRef.mountPath || '') === (bRef.mountPath || '')
   );
 };
 
@@ -134,6 +135,7 @@ export const getAPIConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
         path: ct.path,
         repository: ct.repository,
         targetRevision: ct.targetRevision,
+        mountPath: ct.mountPath,
       },
     };
   }
@@ -173,6 +175,7 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec) =>
         type: 'git',
         name: c.name,
         path: c.gitRef.path,
+        mountPath: c.gitRef.mountPath,
         repository: c.gitRef.repository,
         targetRevision: c.gitRef.targetRevision,
       } as GitConfigTemplate;

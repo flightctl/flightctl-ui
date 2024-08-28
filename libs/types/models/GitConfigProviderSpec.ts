@@ -12,6 +12,10 @@ export type GitConfigProviderSpec = (GenericConfigSpec & {
     repository: string;
     targetRevision: string;
     path: string;
+    /**
+     * Path to config in device
+     */
+    mountPath?: string;
   };
 });
 

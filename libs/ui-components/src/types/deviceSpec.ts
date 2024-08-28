@@ -16,6 +16,7 @@ export type GitConfigTemplate = ConfigTemplate & {
   repository: string;
   targetRevision: string;
   path: string;
+  mountPath?: string;
 };
 
 export const isGitConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is GitConfigTemplate =>
