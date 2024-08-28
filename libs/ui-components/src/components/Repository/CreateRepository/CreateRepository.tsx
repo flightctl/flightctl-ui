@@ -4,6 +4,7 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   Bullseye,
+  Button,
   ExpandableSection,
   PageSection,
   PageSectionVariants,
@@ -51,10 +52,10 @@ const CreateRepository = () => {
           if (isPromiseFulfilled(results[1])) {
             setResourceSyncs(results[1].value.items);
           } else {
-            setRsError(`${t('Failed to fetch resource syncs')} ${getErrorMessage(results[1].reason)}}`);
+            setRsError(getErrorMessage(results[1].reason));
           }
         } else {
-          setRepoError(`${t('Failed to fetch repository')} ${getErrorMessage(results[0].reason)}}`);
+          setRepoError(getErrorMessage(results[0].reason));
         }
       } finally {
         setIsLoading(false);
@@ -63,14 +64,32 @@ const CreateRepository = () => {
     if (repositoryId) {
       void fetchResources();
     }
-  }, [get, repositoryId, t]);
+  }, [get, repositoryId]);
 
-  let content;
+  const reloadResourceSyncs = React.useCallback(() => {
+    const reload = async () => {
+      try {
+        setIsLoading(true);
+        const rsList = await get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${repositoryId}`);
+        setResourceSyncs(rsList.items);
+        setRsError(undefined);
+      } catch (e) {
+        setRsError(getErrorMessage(e));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    void reload();
+  }, [get, repositoryId]);
+
+  let content: React.ReactNode;
 
   if (repoError) {
     content = (
       <Alert isInline variant="danger" title={t('An error occurred')}>
-        <div>{repoError}</div>
+        <div>
+          {t('Failed to retrieve repository details')}:{repoError}
+        </div>
       </Alert>
     );
   } else if (isLoading) {
@@ -112,6 +131,9 @@ const CreateRepository = () => {
             {t(
               'We could not verify if this repository contains resource syncs. Changes to resource syncs are not available at the moment for this reason.',
             )}
+            <Button variant="link" onClick={reloadResourceSyncs}>
+              {t('Try again')}
+            </Button>
             <ExpandableSection toggleText={t('Details')}>{rsError}</ExpandableSection>
           </Alert>
         )}
