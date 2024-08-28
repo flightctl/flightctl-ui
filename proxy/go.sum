@@ -4,8 +4,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/felixge/httpsnoop v1.0.3 h1:s/nj+GCswXYzN5v2DpNMuMQYe+0DDwt5WVCU6CWBdXk=
 github.com/felixge/httpsnoop v1.0.3/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
-github.com/flightctl/flightctl v0.0.0-20240715160134-b1970fbc75b8 h1:B8cVGEmSlood3o5THBQyov2vX4Uvv1RUIQJKpUiTjc0=
-github.com/flightctl/flightctl v0.0.0-20240715160134-b1970fbc75b8/go.mod h1:YvTv+hx1dpU0RuQ5OJERX2MVBBsAOMu0P3+eR9CGY2s=
+github.com/flightctl/flightctl v0.1.0 h1:23ng7eAhfRIBkYbbnH7KtQPqVvPdTJPzOTyjxnxqYhM=
+github.com/flightctl/flightctl v0.1.0/go.mod h1:/9+xPfv0N+lxcljYOwZOfHjhCyTzr0ynNSWDFxy967Y=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/gorilla/handlers v1.5.2 h1:cLTUSsNkgcwhgRqvCNmdbRWG0A3N4F+M2nWKdScwyEE=

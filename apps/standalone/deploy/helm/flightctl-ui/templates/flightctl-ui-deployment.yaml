@@ -52,6 +52,11 @@ spec:
               secretKeyRef:
                 name: flightctl-ui
                 key: FLIGHTCTL_METRICS_SERVER
+          - name: FLIGHTCTL_GRPC_SERVER
+            valueFrom:
+              secretKeyRef:
+                name: flightctl-ui
+                key: FLIGHTCTL_GRPC_SERVER
           - name: BOOTC_IMG_URL
             valueFrom:
               secretKeyRef:
