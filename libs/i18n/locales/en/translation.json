@@ -339,7 +339,7 @@
   "To do": "To do",
   "Failed to retrieve repository details": "Failed to retrieve repository details",
   "Failed to retrieve the resource syncs": "Failed to retrieve the resource syncs",
-  "We could not verify if this repository contains resource syncs. Changes to resource syncs are not available at the moment for this reason.": "We could not verify if this repository contains resource syncs. Changes to resource syncs are not available at the moment for this reason.",
+  "The repository cannot be modified at the moment because some of its details could not be obtained.": "The repository cannot be modified at the moment because some of its details could not be obtained.",
   "HTTP": "HTTP",
   "SSH": "SSH",
   "Basic authentication": "Basic authentication",

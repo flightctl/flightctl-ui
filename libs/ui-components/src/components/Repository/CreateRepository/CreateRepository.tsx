@@ -106,7 +106,7 @@ const CreateRepository = () => {
         repository={repositoryDetails}
         resourceSyncs={resourceSyncs}
         options={{
-          canUseResourceSyncs: !rsError,
+          isReadOnly: !!rsError,
         }}
       />
     );
@@ -128,9 +128,7 @@ const CreateRepository = () => {
         </StackItem>
         {rsError && (
           <Alert isInline variant="warning" title={t('Failed to retrieve the resource syncs')}>
-            {t(
-              'We could not verify if this repository contains resource syncs. Changes to resource syncs are not available at the moment for this reason.',
-            )}
+            {t('The repository cannot be modified at the moment because some of its details could not be obtained.')}
             <Button variant="link" onClick={reloadResourceSyncs}>
               {t('Try again')}
             </Button>
