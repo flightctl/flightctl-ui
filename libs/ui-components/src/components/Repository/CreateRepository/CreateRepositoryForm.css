@@ -1,3 +1,7 @@
+.fctl-create-repo fieldset {
+  border: none;
+}
+
 .fctl-create-repo__adv-section--nested {
     margin-left: 1.5rem;
 }

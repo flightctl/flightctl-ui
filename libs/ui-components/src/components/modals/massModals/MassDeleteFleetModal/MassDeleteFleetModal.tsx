@@ -157,7 +157,7 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
               />
             </StackItem>
             <StackItem>
-              <ExpandableSection toggleText="Show fleets">
+              <ExpandableSection toggleText={t('Show fleets')}>
                 <MassDeleteFleetTable resources={resourcesToSkip} />
               </ExpandableSection>
             </StackItem>

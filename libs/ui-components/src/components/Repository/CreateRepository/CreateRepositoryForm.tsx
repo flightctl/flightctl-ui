@@ -245,39 +245,42 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
 type CreateRepositoryFormContentProps = React.PropsWithChildren<Record<never, never>> &
   Pick<CreateRepositoryFormProps, 'onClose'> & {
     isEdit: boolean;
+    isReadOnly: boolean;
   };
 
-const CreateRepositoryFormContent = ({ isEdit, children, onClose }: CreateRepositoryFormContentProps) => {
+const CreateRepositoryFormContent = ({ isEdit, isReadOnly, onClose, children }: CreateRepositoryFormContentProps) => {
   const { t } = useTranslation();
   const { values, setFieldValue, isValid, dirty, submitForm, isSubmitting } = useFormikContext<RepositoryFormValues>();
   const isSubmitDisabled = isSubmitting || !dirty || !isValid;
 
   const showResourceSyncs = values.canUseResourceSyncs && values.repoType === RepoSpecType.GIT;
   return (
-    <Form>
-      <Grid hasGutter span={8}>
-        <RepositoryForm isEdit={isEdit} />
-        {showResourceSyncs && (
-          <Checkbox
-            id="use-resource-syncs"
-            label={
-              <WithHelperText
-                showLabel
-                ariaLabel={t('Use resource syncs')}
-                content={t(
-                  "A resource sync is an automated Gitops way to manage imported fleets. The resource sync monitors changes made to the source repository and update the fleet's configurations accordingly.",
-                )}
-              />
-            }
-            isChecked={values.useResourceSyncs}
-            onChange={(_, checked) => {
-              // Trigger validation of the resource syncs items
-              return setFieldValue('useResourceSyncs', checked, true);
-            }}
-            body={values.useResourceSyncs && <CreateResourceSyncsForm />}
-          />
-        )}
-      </Grid>
+    <Form className="fctl-create-repo">
+      <fieldset disabled={isReadOnly}>
+        <Grid hasGutter span={8}>
+          <RepositoryForm isEdit={isEdit} />
+          {showResourceSyncs && (
+            <Checkbox
+              id="use-resource-syncs"
+              label={
+                <WithHelperText
+                  showLabel
+                  ariaLabel={t('Use resource syncs')}
+                  content={t(
+                    "A resource sync is an automated Gitops way to manage imported fleets. The resource sync monitors changes made to the source repository and update the fleet's configurations accordingly.",
+                  )}
+                />
+              }
+              isChecked={values.useResourceSyncs}
+              onChange={(_, checked) => {
+                // Trigger validation of the resource syncs items
+                return setFieldValue('useResourceSyncs', checked, true);
+              }}
+              body={values.useResourceSyncs && <CreateResourceSyncsForm />}
+            />
+          )}
+        </Grid>
+      </fieldset>
       {children}
       <FlightCtlActionGroup>
         <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
@@ -297,6 +300,7 @@ export type CreateRepositoryFormProps = {
   repository?: Repository;
   resourceSyncs?: ResourceSync[];
   options?: {
+    isReadOnly?: boolean;
     canUseResourceSyncs?: boolean;
     showRepoTypes?: boolean;
     allowedRepoTypes?: RepoSpecType[];
@@ -313,7 +317,6 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
   const [errors, setErrors] = React.useState<string[]>();
   const { patch, remove, post } = useFetch();
   const { t } = useTranslation();
-
   return (
     <Formik<RepositoryFormValues>
       initialValues={getInitValues({
@@ -389,7 +392,7 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
         }
       }}
     >
-      <CreateRepositoryFormContent isEdit={!!repository} onClose={onClose}>
+      <CreateRepositoryFormContent isEdit={!!repository} onClose={onClose} isReadOnly={!!options?.isReadOnly}>
         {errors?.length && (
           <Alert isInline variant="danger" title={t('An error occurred')}>
             {errors.map((e, index) => (
