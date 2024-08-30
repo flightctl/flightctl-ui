@@ -35,7 +35,8 @@ describe('Create fleet form', () => {
     createFleetWizardPage.newFleetGitSourceTypeField.click();
 
     createFleetWizardPage.newFleetTargetReferenceField.type('main');
-    createFleetWizardPage.newFleetRepositoryPathField.type('/some-path');
+    createFleetWizardPage.newFleetRepositoryPathField.type('/file-path');
+    createFleetWizardPage.newFleetRepositoryMountPathField.type('/mount-path');
     createFleetWizardPage.nextFleetWizardButton.should('be.enabled').click();
 
     createFleetWizardPage.createFleetFormSubmitButton.should('be.enabled').click();
