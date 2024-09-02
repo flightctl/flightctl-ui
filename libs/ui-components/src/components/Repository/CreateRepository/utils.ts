@@ -480,7 +480,6 @@ export const getResourceSync = (repositoryId: string, values: ResourceSyncFormVa
     kind: 'ResourceSync',
     metadata: {
       name: values.name,
-      labels: { repository: repositoryId },
     },
     spec: {
       repository: repositoryId,

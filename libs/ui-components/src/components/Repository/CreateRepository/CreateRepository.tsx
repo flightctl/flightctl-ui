@@ -44,7 +44,7 @@ const CreateRepository = () => {
       try {
         const results = await Promise.allSettled([
           get<Repository>(`repositories/${repositoryId}`),
-          get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${repositoryId}`),
+          get<ResourceSyncList>(`resourcesyncs?repository=${repositoryId}`),
         ]);
 
         if (isPromiseFulfilled(results[0])) {

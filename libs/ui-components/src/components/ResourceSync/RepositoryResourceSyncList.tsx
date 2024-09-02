@@ -203,7 +203,7 @@ const ResourceSyncEmptyState = ({ isLoading, error }: { isLoading: boolean; erro
 
 const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) => {
   const [rsList, isLoading, error, refetch] = useFetchPeriodically<ResourceSyncList>({
-    endpoint: `resourcesyncs?labelSelector=repository=${repositoryId}`,
+    endpoint: `resourcesyncs?repository=${repositoryId}`,
   });
 
   const items = rsList?.items || [];

@@ -13,10 +13,10 @@ export type DevicesSummary = {
   /**
    * A breakdown of the devices in the fleet by "summary" status.
    */
-  summaryStatus: Record<string, number>;
+  summaryStatus?: Record<string, number>;
   /**
    * A breakdown of the devices in the fleet by "updated" status.
    */
-  updateStatus: Record<string, number>;
+  updateStatus?: Record<string, number>;
 };
 
