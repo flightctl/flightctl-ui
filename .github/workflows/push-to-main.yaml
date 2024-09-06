@@ -13,24 +13,51 @@ env:
   QUAY_OCP_REPO: flightctl-ocp-ui
 
 jobs:
-  publish-flightctl-ui:
+  generate-tags:
     runs-on: ubuntu-latest
+    outputs:
+      image_tags: ${{ steps.get-tags.outputs.image_tags }}
+      helm_tags: ${{ steps.get-tags.outputs.helm_tags }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
-      - name: Generate tags
-        id: generate-tags
+      - name: Generate image tags
+        id: get-tags
         run: |
-          tags=( latest-${GITHUB_SHA} latest )
-          echo "tags=${tags[@]}" >> $GITHUB_OUTPUT
-          echo "tags=${tags[@]}"
+          if ${{ github.ref_type == 'tag' }}; then
+            # The images tags will match the Release tag
+            image_tags=( ${{ github.ref_name }} )
+            image_tags=${image_tags#v} # remove the leading v prefix for version
+
+            echo "image_tags=${image_tags[@]}" >> $GITHUB_OUTPUT
+            echo "image_tags=${image_tags[@]}"
+            echo "helm_tags=${image_tags[@]}"
+          else
+            # The images tags are taken from git
+            image_tags=( latest-${GITHUB_SHA} latest )
+            echo "image_tags=${image_tags[@]}" >> $GITHUB_OUTPUT
+            echo "image_tags=${image_tags[@]}"
+
+            helm_tags=$(git describe --long --tags)
+            echo "helm_tags=${helm_tags}" >> $GITHUB_OUTPUT
+            echo "helm_tags=${helm_tags}"
+          fi
+
+  publish-flightctl-ui:
+    runs-on: ubuntu-latest
+    needs: [generate-tags]
+    steps:
+      - uses: actions/checkout@v3
 
       - name: Build
         id: build
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.QUAY_STANDALONE_REPO }}
-          tags: ${{ steps.generate-tags.outputs.tags }}
+          tags: ${{ needs.generate-tags.outputs.image_tags }}
           labels: |
             org.flightctl.flightctl-ui.github.repository=${{ github.repository }}
             org.flightctl.flightctl-ui.github.actor=${{ github.actor }}
@@ -47,29 +74,23 @@ jobs:
         uses: redhat-actions/push-to-registry@v2.7
         with:
           image: ${{ steps.build.outputs.image }}
-          tags: ${{ steps.build.outputs.tags }}
+          tags: ${{ needs.generate-tags.outputs.image_tags }}
           registry: ${{ env.QUAY_ORG }}
           username: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_USERNAME }}
           password: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_PASSWORD }}
 
   publish-flightctl-ocp-ui:
     runs-on: ubuntu-latest
+    needs: [generate-tags]
     steps:
       - uses: actions/checkout@v3
-
-      - name: Generate tags
-        id: generate-tags
-        run: |
-          tags=( latest-${GITHUB_SHA} latest )
-          echo "tags=${tags[@]}" >> $GITHUB_OUTPUT
-          echo "tags=${tags[@]}"
 
       - name: Build
         id: build
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.QUAY_OCP_REPO }}
-          tags: ${{ steps.generate-tags.outputs.tags }}
+          tags: ${{ needs.generate-tags.outputs.image_tags }}
           labels: |
             org.flightctl.flightctl-ui.github.repository=${{ github.repository }}
             org.flightctl.flightctl-ui.github.actor=${{ github.actor }}
@@ -86,30 +107,23 @@ jobs:
         uses: redhat-actions/push-to-registry@v2.7
         with:
           image: ${{ steps.build.outputs.image }}
-          tags: ${{ steps.build.outputs.tags }}
+          tags: ${{ needs.generate-tags.outputs.image_tags }}
           registry: ${{ env.QUAY_ORG }}
           username: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_USERNAME }}
           password: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_PASSWORD }}
 
   publish-helm-charts:
     runs-on: ubuntu-latest
+    needs: [generate-tags]
+
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Get version
-        run: |
-          VERSION=$(git describe --long --tags)
-          VERSION=${VERSION#v} # remove the leading v prefix for version
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "VERSION=${VERSION}"
 
       - name: Build helm charts
         run: |
-          echo packaging "${VERSION}"
-          helm package ./apps/standalone/deploy/helm/flightctl-ui --version "${VERSION}" --app-version "${VERSION}"
-          helm package ./apps/ocp-plugin/deploy/helm/flightctl-ocp-ui --version "${VERSION}" --app-version "${VERSION}"
+          echo packaging "${{ needs.generate-tags.outputs.helm_tags }}"
+          helm package ./apps/standalone/deploy/helm/flightctl-ui --version "${{ needs.generate-tags.outputs.helm_tags }}" --app-version "${{ needs.generate-tags.outputs.helm_tags }}"
+          helm package ./apps/ocp-plugin/deploy/helm/flightctl-ocp-ui --version "${{ needs.generate-tags.outputs.helm_tags }}" --app-version "${{ needs.generate-tags.outputs.helm_tags }}"
 
       - name: Login helm
         env:
