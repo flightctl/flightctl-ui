@@ -20,7 +20,7 @@ const GeneralInfoStep = ({ isEdit }: { isEdit: boolean }) => {
 
   return (
     <Grid lg={5} span={8}>
-      <Form>
+      <Form onSubmit={(ev) => ev.preventDefault()}>
         <NameField
           name="name"
           aria-label={t('Name')}

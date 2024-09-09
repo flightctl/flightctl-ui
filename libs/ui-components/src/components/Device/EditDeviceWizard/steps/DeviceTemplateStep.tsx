@@ -25,7 +25,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
 
   return (
     <Grid span={8}>
-      <Form>
+      <Form onSubmit={(ev) => ev.preventDefault()}>
         {isFleet && (
           <Alert isInline variant="info" title={t('Using template variables')}>
             <ExpandableSection toggleTextCollapsed={t('Show more')} toggleTextExpanded={t('Show less')}>

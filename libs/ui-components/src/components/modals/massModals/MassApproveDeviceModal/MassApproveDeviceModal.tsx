@@ -199,7 +199,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
               </Table>
             </StackItem>
             <StackItem>
-              <Form>
+              <Form onSubmit={(ev) => ev.preventDefault()}>
                 <FormGroup label={t('Labels')}>
                   <LabelsField name="labels" />
                 </FormGroup>
