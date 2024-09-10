@@ -4,7 +4,6 @@ import {
   Button,
   ButtonVariant,
   Checkbox,
-  Form,
   FormGroup,
   FormSection,
   Grid,
@@ -14,6 +13,7 @@ import {
 } from '@patternfly/react-core';
 import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
+
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
@@ -38,6 +38,8 @@ import TextAreaField from '../../form/TextAreaField';
 import CheckboxField from '../../form/CheckboxField';
 import RadioField from '../../form/RadioField';
 import TextField from '../../form/TextField';
+import FlightCtlForm from '../../form/FlightCtlForm';
+
 import { getDnsSubdomainValidations } from '../../form/validations';
 
 import './CreateRepositoryForm.css';
@@ -255,7 +257,7 @@ const CreateRepositoryFormContent = ({ isEdit, isReadOnly, onClose, children }: 
 
   const showResourceSyncs = values.canUseResourceSyncs && values.repoType === RepoSpecType.GIT;
   return (
-    <Form className="fctl-create-repo">
+    <FlightCtlForm className="fctl-create-repo">
       <fieldset disabled={isReadOnly}>
         <Grid hasGutter span={8}>
           <RepositoryForm isEdit={isEdit} />
@@ -290,7 +292,7 @@ const CreateRepositoryFormContent = ({ isEdit, isReadOnly, onClose, children }: 
           {t('Cancel')}
         </Button>
       </FlightCtlActionGroup>
-    </Form>
+    </FlightCtlForm>
   );
 };
 

@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { Formik, FormikProps } from 'formik';
-import { Alert, Form, FormGroup } from '@patternfly/react-core';
+import { Alert, FormGroup } from '@patternfly/react-core';
 import { TFunction } from 'i18next';
 import * as Yup from 'yup';
 import debounce from 'lodash/debounce';
 
 import { Device } from '@flightctl/types';
 import LabelsField from '../../form/LabelsField';
+import FlightCtlForm from '../../form/FlightCtlForm';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useFetch } from '../../../hooks/useFetch';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -48,7 +49,7 @@ const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormConte
   const debouncedSubmit = React.useCallback(debounce(onChangedLabels, 2000), []);
 
   return (
-    <Form onSubmit={(ev) => ev.preventDefault()}>
+    <FlightCtlForm>
       <FormGroup label={t('Device labels')}>
         <LabelsField
           name="labels"
@@ -58,7 +59,7 @@ const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormConte
         />
       </FormGroup>
       {submitError && <Alert isInline title={submitError} variant="danger" />}
-    </Form>
+    </FlightCtlForm>
   );
 };
 

@@ -74,6 +74,11 @@ module.exports = {
             message: 'Use FlightCtlActionGroup to wrap the footer actions',
           },
           {
+            name: '@patternfly/react-core',
+            importNames: ['Form'],
+            message: 'Use FlightCtlForm to wrap forms',
+          },
+          {
             name: 'react-i18next',
             importNames: ['useTranslation'],
             message: 'Import useTranslation from @flightctl/ui-components/hooks/useTranslation instead',

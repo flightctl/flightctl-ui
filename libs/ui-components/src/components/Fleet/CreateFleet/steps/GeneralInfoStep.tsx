@@ -1,10 +1,12 @@
-import { Form, FormGroup, Grid } from '@patternfly/react-core';
 import * as React from 'react';
+import { FormGroup, Grid } from '@patternfly/react-core';
 import { FormikErrors } from 'formik';
+
 import { FleetFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import NameField from '../../../form/NameField';
 import LabelsField from '../../../form/LabelsField';
+import FlightCtlForm from '../../../form/FlightCtlForm';
 import { getDnsSubdomainValidations } from '../../../form/validations';
 import WithHelperText from '../../../common/WithHelperText';
 import DeviceLabelSelector from './DeviceLabelSelector';
@@ -20,7 +22,7 @@ const GeneralInfoStep = ({ isEdit }: { isEdit: boolean }) => {
 
   return (
     <Grid lg={5} span={8}>
-      <Form onSubmit={(ev) => ev.preventDefault()}>
+      <FlightCtlForm>
         <NameField
           name="name"
           aria-label={t('Name')}
@@ -45,7 +47,7 @@ const GeneralInfoStep = ({ isEdit }: { isEdit: boolean }) => {
         >
           <DeviceLabelSelector />
         </FormGroup>
-      </Form>
+      </FlightCtlForm>
     </Grid>
   );
 };
