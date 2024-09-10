@@ -42,6 +42,7 @@ jobs:
             echo "image_tags=${image_tags[@]}"
 
             helm_tags=$(git describe --long --tags)
+            helm_tags=${helm_tags#v} # remove the leading v prefix for version
             echo "helm_tags=${helm_tags}" >> $GITHUB_OUTPUT
             echo "helm_tags=${helm_tags}"
           fi
