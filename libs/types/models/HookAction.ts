@@ -4,5 +4,8 @@
 /* eslint-disable */
 import type { HookActionExecutableSpec } from './HookActionExecutableSpec';
 import type { HookActionSystemdSpec } from './HookActionSystemdSpec';
-export type HookAction = (Record<string, any> | HookActionSystemdSpec | HookActionExecutableSpec);
+export type HookAction = {
+  executable?: HookActionExecutableSpec;
+  systemd?: HookActionSystemdSpec;
+};
 
