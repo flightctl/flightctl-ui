@@ -18,6 +18,7 @@ type TableProps<D> = {
   columns: TableColumn<D>[];
   children: React.ReactNode;
   emptyFilters: boolean;
+  emptyData: boolean;
   'aria-label': string;
   getSortParams: (columnIndex: number) => ThProps['sort'];
   onSelectAll?: (isSelected: boolean) => void;
@@ -26,9 +27,18 @@ type TableProps<D> = {
 
 type TableFC = <D>(props: TableProps<D>) => JSX.Element;
 
-const Table: TableFC = ({ columns, children, emptyFilters, getSortParams, onSelectAll, isAllSelected, ...rest }) => {
+const Table: TableFC = ({
+  columns,
+  children,
+  emptyFilters,
+  emptyData,
+  getSortParams,
+  onSelectAll,
+  isAllSelected,
+  ...rest
+}) => {
   const { t } = useTranslation();
-  if (emptyFilters) {
+  if (emptyFilters && !emptyData) {
     return (
       <PageSection variant="light">
         <Bullseye>{t('No resources are matching the current filters.')}</Bullseye>
@@ -40,7 +50,7 @@ const Table: TableFC = ({ columns, children, emptyFilters, getSortParams, onSele
     <PFTable {...rest}>
       <Thead>
         <Tr>
-          {onSelectAll && (
+          {!emptyData && onSelectAll && (
             <Th
               select={{
                 onSelect: (_event, isSelecting) => onSelectAll(isSelecting),

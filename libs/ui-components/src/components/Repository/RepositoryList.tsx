@@ -138,7 +138,8 @@ const RepositoryTable = () => {
       </Toolbar>
       <Table
         aria-label={t('Repositories table')}
-        emptyFilters={filteredData.length === 0 && (repositoryList?.items.length || 0) > 0}
+        emptyFilters={filteredData.length === 0}
+        emptyData={(repositoryList?.items.length || 0) === 0}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
         columns={columns}

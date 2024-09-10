@@ -201,6 +201,7 @@ export const DeviceTable = ({
         aria-label={t('Devices table')}
         columns={deviceColumns}
         emptyFilters={filteredData.length === 0 && (hasFiltersEnabled || hasUIFiltersEnabled)}
+        emptyData={resources.length === 0}
         getSortParams={getSortParams}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
