@@ -358,13 +358,16 @@ export const repoSyncSchema = (t: TFunction, values: ResourceSyncFormValue[]) =>
     .of(
       Yup.object().shape({
         name: validKubernetesDnsSubdomain(t, { isRequired: true }).test(
-          'Must be unique',
-          t('Must be unique'),
-          (value) => {
-            if (!value) {
-              return true;
-            }
-            return values.filter((v) => v.name === value).length === 1;
+          'unique name',
+          (value: string | undefined, testContext) => {
+            const hasError = value && values.filter((v) => v.name === value).length !== 1;
+            return hasError
+              ? testContext.createError({
+                  message: {
+                    duplicateName: 'failed',
+                  },
+                })
+              : true;
           },
         ),
         targetRevision: maxLengthString(t, {
@@ -377,6 +380,28 @@ export const repoSyncSchema = (t: TFunction, values: ResourceSyncFormValue[]) =>
       }),
     )
     .required();
+};
+
+export type SingleResourceSyncValues = { resourceSyncs: ResourceSyncFormValue[] };
+
+export const singleResourceSyncSchema = (t: TFunction, existingRSs: ResourceSync[]) => {
+  return Yup.lazy((values: SingleResourceSyncValues) => {
+    // We combine the existing RSs with the one being created, to validate that the new name is unique
+    const combinedRSs = values.resourceSyncs.concat(
+      existingRSs.map(
+        (rs) =>
+          ({
+            name: rs.metadata.name, // Only the name is relevant
+            path: '',
+            targetRevision: '',
+          }) as ResourceSyncFormValue,
+      ),
+    );
+
+    return Yup.object({
+      resourceSyncs: repoSyncSchema(t, combinedRSs),
+    });
+  });
 };
 
 export const repositorySchema =

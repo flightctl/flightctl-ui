@@ -11,6 +11,56 @@ import { RepositoryFormValues, ResourceSyncFormValue } from './types';
 import NameField from '../../form/NameField';
 import { getDnsSubdomainValidations } from '../../form/validations';
 
+export const CreateResourceSyncForm = ({ rs, index }: { rs: ResourceSyncFormValue; index: number }) => {
+  const { t } = useTranslation();
+  return (
+    <FormSection key={index}>
+      <NameField
+        name={`resourceSyncs[${index}].name`}
+        aria-label={t('Resource sync name')}
+        value={rs.name}
+        isRequired
+        isDisabled={rs.exists}
+        resourceType="resourcesyncs"
+        validations={getDnsSubdomainValidations(t)}
+      />
+      <FormGroup
+        label={t('Target revision')}
+        isRequired
+        labelIcon={<WithHelperText ariaLabel={t('Target revision')} content={t('Name of a branch or a tag.')} />}
+      >
+        <TextField
+          name={`resourceSyncs[${index}].targetRevision`}
+          aria-label={t('Target revision')}
+          value={rs.targetRevision}
+          helperText={t('For example: main')}
+        />
+      </FormGroup>
+      <FormGroup
+        label={t('Path')}
+        isRequired
+        labelIcon={
+          <WithHelperText
+            ariaLabel={t('Path')}
+            content={t(
+              'The absolute path of a file or directory in the repository. If a directory, the directory should contain only resource definitions with no subdirectories.',
+            )}
+          />
+        }
+      >
+        <TextField
+          name={`resourceSyncs[${index}].path`}
+          aria-label={t('Path')}
+          value={rs.path}
+          helperText={t('For example: {{exampleFile}}', {
+            exampleFile: '/demos/basic-nginx-demo/deployment/fleet.yaml',
+          })}
+        />
+      </FormGroup>
+    </FormSection>
+  );
+};
+
 const CreateResourceSyncsForm = () => {
   const { t } = useTranslation();
   const { values } = useFormikContext<RepositoryFormValues>();
@@ -20,70 +70,25 @@ const CreateResourceSyncsForm = () => {
       {({ remove, push }) => (
         <>
           {values.resourceSyncs.map((resourceSync, index) => (
-            <FormSection key={index}>
-              <NameField
-                name={`resourceSyncs[${index}].name`}
-                aria-label={t('Resource sync name')}
-                value={resourceSync.name}
-                isRequired
-                isDisabled={resourceSync.exists}
-                resourceType="resourcesyncs"
-                validations={getDnsSubdomainValidations(t)}
-              />
-              <FormGroup
-                label={t('Target revision')}
-                isRequired
-                labelIcon={
-                  <WithHelperText ariaLabel={t('Target revision')} content={t('Name of a branch or a tag.')} />
-                }
-              >
-                <TextField
-                  name={`resourceSyncs[${index}].targetRevision`}
-                  aria-label={t('Target revision')}
-                  value={resourceSync.targetRevision}
-                  helperText={t('For example: main')}
-                />
-              </FormGroup>
-              <FormGroup
-                label={t('Path')}
-                isRequired
-                labelIcon={
-                  <WithHelperText
-                    ariaLabel={t('Path')}
-                    content={t(
-                      'The absolute path of a file or directory in the repository. If a directory, the directory should contain only resource definitions with no subdirectories.',
-                    )}
-                  />
-                }
-              >
-                <TextField
-                  name={`resourceSyncs[${index}].path`}
-                  aria-label={t('Path')}
-                  value={resourceSync.path}
-                  helperText={t('For example: {{exampleFile}}', {
-                    exampleFile: '/demos/basic-nginx-demo/deployment/fleet.yaml',
-                  })}
-                />
-              </FormGroup>
-              <FormGroup isInline>
-                {values.resourceSyncs.length > 1 && (
+            <React.Fragment key={index}>
+              <CreateResourceSyncForm rs={resourceSync} index={index} />
+              {values.resourceSyncs.length > 1 && (
+                <FormGroup isInline>
                   <Button variant="link" icon={<MinusCircleIcon />} iconPosition="left" onClick={() => remove(index)}>
                     {t('Remove resource sync')}
                   </Button>
-                )}
-              </FormGroup>
-            </FormSection>
+                </FormGroup>
+              )}
+            </React.Fragment>
           ))}
-          <div>
-            <Button
-              variant="link"
-              icon={<PlusCircleIcon />}
-              iconPosition="left"
-              onClick={() => push({ name: '', path: '', targetRevision: '' } as ResourceSyncFormValue)}
-            >
-              {t('Add another resource sync')}
-            </Button>
-          </div>
+          <Button
+            variant="link"
+            icon={<PlusCircleIcon />}
+            iconPosition="left"
+            onClick={() => push({ name: '', path: '', targetRevision: '' } as ResourceSyncFormValue)}
+          >
+            {t('Add another resource sync')}
+          </Button>
         </>
       )}
     </FieldArray>

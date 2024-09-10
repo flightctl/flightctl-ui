@@ -2,7 +2,7 @@ import * as React from 'react';
 import { DropdownItem, DropdownList, Grid, GridItem } from '@patternfly/react-core';
 
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { Repository } from '@flightctl/types';
+import { RepoSpecType, Repository } from '@flightctl/types';
 
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
@@ -56,9 +56,11 @@ const RepositoryDetails = () => {
             <GridItem>
               <RepositoryGeneralDetailsCard repoDetails={repoDetails} />
             </GridItem>
-            <GridItem>
-              <RepositoryResourceSyncsCard repositoryId={repositoryId} />
-            </GridItem>
+            {repoDetails.spec.type !== RepoSpecType.HTTP && (
+              <GridItem>
+                <RepositoryResourceSyncsCard repositoryId={repositoryId} />
+              </GridItem>
+            )}
           </Grid>
           {isDeleteModalOpen && (
             <DeleteRepositoryModal

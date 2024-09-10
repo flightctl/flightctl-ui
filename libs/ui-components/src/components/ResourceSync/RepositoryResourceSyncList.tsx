@@ -1,17 +1,23 @@
 import * as React from 'react';
 import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 import {
-  EmptyState,
+  Alert,
+  Button,
+  EmptyStateActions,
   EmptyStateBody,
+  EmptyStateFooter,
+  Modal,
   SelectList,
   SelectOption,
-  Spinner,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
 import { TFunction } from 'i18next';
+import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
+import { CodeBranchIcon } from '@patternfly/react-icons/dist/js/icons/code-branch-icon';
+import { Formik, useFormikContext } from 'formik';
 
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { useFetch } from '../../hooks/useFetch';
@@ -36,6 +42,18 @@ import MassDeleteResourceSyncModal from '../modals/massModals/MassDeleteResource
 import ResourceSyncStatus from './ResourceSyncStatus';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
+import { getErrorMessage } from '../../utils/error';
+
+import {
+  SingleResourceSyncValues,
+  getResourceSync,
+  singleResourceSyncSchema,
+} from '../Repository/CreateRepository/utils';
+import { CreateResourceSyncForm } from '../Repository/CreateRepository/CreateResourceSyncsForm';
+import FlightCtlActionGroup from '../form/FlightCtlActionGroup';
+import FlightCtlForm from '../form/FlightCtlForm';
+import ResourceListEmptyState from '../common/ResourceListEmptyState';
+import ListPageBody from '../ListPage/ListPageBody';
 
 import './RepositoryResourceSyncList.css';
 
@@ -74,7 +92,96 @@ const createRefs = (rsList: ResourceSync[]): { [key: string]: React.RefObject<HT
 
 const getSearchText = (resourceSync: ResourceSync) => [resourceSync.metadata.name];
 
-const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: ResourceSync[]; refetch: VoidFunction }) => {
+const ResourceSyncEmptyState = ({ addResourceSync }: { addResourceSync: VoidFunction }) => {
+  const { t } = useTranslation();
+  return (
+    <ResourceListEmptyState icon={CodeBranchIcon} titleText={t('No resource syncs here!')}>
+      <EmptyStateBody>
+        {t(
+          "A resource sync is an automated Gitops way to manage imported fleets. The resource syncs monitors changes made to the source repository and updates the fleets' configurations accordingly.",
+        )}
+      </EmptyStateBody>
+      <EmptyStateFooter>
+        <EmptyStateActions>
+          <Button variant="secondary" onClick={addResourceSync}>
+            {t('Add a resource sync')}
+          </Button>
+        </EmptyStateActions>
+      </EmptyStateFooter>
+    </ResourceListEmptyState>
+  );
+};
+
+const CreateResourceSyncModalForm = ({ onClose }: { onClose: VoidFunction }) => {
+  const { t } = useTranslation();
+  const { values, submitForm, errors, dirty, isSubmitting } = useFormikContext<SingleResourceSyncValues>();
+  const rsToAdd = values.resourceSyncs[0];
+  const isSubmitDisabled = !dirty || Object.keys(errors).length > 0;
+
+  return (
+    <FlightCtlForm>
+      <CreateResourceSyncForm rs={rsToAdd} index={0} />
+      <FlightCtlActionGroup>
+        <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
+          {t('Add a resource sync')}
+        </Button>
+        <Button variant="link" isDisabled={isSubmitting} onClick={onClose}>
+          {t('Cancel')}
+        </Button>
+      </FlightCtlActionGroup>
+    </FlightCtlForm>
+  );
+};
+
+const CreateResourceSyncModal = ({
+  repositoryId,
+  storedRSs,
+  onClose,
+}: {
+  repositoryId: string;
+  storedRSs: ResourceSync[];
+  onClose: (isAdded?: boolean) => void;
+}) => {
+  const { t } = useTranslation();
+  const { post } = useFetch();
+  const [submitError, setSubmitError] = React.useState<string | undefined>();
+
+  return (
+    <Modal variant="medium" title={t('Add a resource sync')} onClose={() => onClose()} isOpen>
+      <Formik<SingleResourceSyncValues>
+        initialValues={{ resourceSyncs: [{ name: '', targetRevision: '', path: '' }] }}
+        validationSchema={singleResourceSyncSchema(t, storedRSs)}
+        onSubmit={async (values: SingleResourceSyncValues) => {
+          const rsToAdd = getResourceSync(repositoryId, values.resourceSyncs[0]);
+          try {
+            await post<ResourceSync>('resourcesyncs', rsToAdd);
+            setSubmitError(undefined);
+            onClose(true);
+          } catch (e) {
+            setSubmitError(getErrorMessage(e));
+          }
+        }}
+      >
+        <>
+          <CreateResourceSyncModalForm onClose={onClose} />
+          {submitError && (
+            <Alert variant="danger" title={t('Unexpected error occurred')} isInline>
+              {submitError}
+            </Alert>
+          )}
+        </>
+      </Formik>
+    </Modal>
+  );
+};
+
+const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) => {
+  const [rsList, isLoading, error, refetch] = useFetchPeriodically<ResourceSyncList>({
+    endpoint: `resourcesyncs?repository=${repositoryId}`,
+  });
+
+  const resourceSyncs = rsList?.items || [];
+
   const { t } = useTranslation();
   const { remove } = useFetch();
   const {
@@ -108,9 +215,10 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
     },
   });
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
+  const [isAddRsModalOpen, setIsAddRsModalOpen] = React.useState(false);
 
   return (
-    <>
+    <ListPageBody error={error} loading={isLoading}>
       <Toolbar id="resource-sync-toolbar" inset={{ default: 'insetNone' }}>
         <ToolbarContent>
           <ToolbarGroup>
@@ -129,6 +237,18 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
+      {resourceSyncs.length > 0 && (
+        <Button
+          variant="link"
+          icon={<PlusCircleIcon />}
+          className="fctl-rslist__addrsbutton"
+          onClick={() => {
+            setIsAddRsModalOpen(true);
+          }}
+        >
+          {t('Add a resource sync')}
+        </Button>
+      )}
       <Table
         aria-label={t('Resource syncs table')}
         isAllSelected={isAllSelected}
@@ -167,6 +287,13 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
           })}
         </Tbody>
       </Table>
+      {resourceSyncs.length === 0 && (
+        <ResourceSyncEmptyState
+          addResourceSync={() => {
+            setIsAddRsModalOpen(true);
+          }}
+        />
+      )}
       {deleteModal}
       {isMassDeleteModalOpen && (
         <MassDeleteResourceSyncModal
@@ -178,41 +305,19 @@ const ResourceSyncTable = ({ resourceSyncs, refetch }: { resourceSyncs: Resource
           }}
         />
       )}
-    </>
-  );
-};
-
-const ResourceSyncEmptyState = ({ isLoading, error }: { isLoading: boolean; error: string }) => {
-  const { t } = useTranslation();
-  let content: React.JSX.Element | string = t('This repository does not have associated resource syncs yet');
-  if (isLoading) {
-    content = <Spinner />;
-  } else if (error) {
-    content = (
-      <span style={{ color: 'var(--pf-v5-global--danger-color--100)' }}>
-        {t(`Failed to load the repository's resource syncs`)}
-      </span>
-    );
-  }
-
-  return (
-    <EmptyState>
-      <EmptyStateBody>{content}</EmptyStateBody>
-    </EmptyState>
-  );
-};
-
-const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) => {
-  const [rsList, isLoading, error, refetch] = useFetchPeriodically<ResourceSyncList>({
-    endpoint: `resourcesyncs?repository=${repositoryId}`,
-  });
-
-  const items = rsList?.items || [];
-
-  return items.length === 0 ? (
-    <ResourceSyncEmptyState isLoading={isLoading} error={error as string} />
-  ) : (
-    <ResourceSyncTable resourceSyncs={items} refetch={refetch} />
+      {isAddRsModalOpen && (
+        <CreateResourceSyncModal
+          repositoryId={repositoryId}
+          storedRSs={resourceSyncs}
+          onClose={(isAdded?: boolean) => {
+            setIsAddRsModalOpen(false);
+            if (isAdded) {
+              refetch();
+            }
+          }}
+        />
+      )}
+    </ListPageBody>
   );
 };
 
