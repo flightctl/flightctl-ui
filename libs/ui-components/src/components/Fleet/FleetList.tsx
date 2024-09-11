@@ -162,7 +162,8 @@ const FleetTable = () => {
       <Table
         aria-label={t('Fleets table')}
         columns={columns}
-        emptyFilters={filteredData.length === 0 && data.length > 0}
+        emptyFilters={filteredData.length === 0}
+        emptyData={data.length === 0}
         getSortParams={getSortParams}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
