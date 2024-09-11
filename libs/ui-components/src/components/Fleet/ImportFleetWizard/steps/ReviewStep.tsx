@@ -1,8 +1,11 @@
-import { Alert, Form, FormGroup, Stack, StackItem, TextInput } from '@patternfly/react-core';
-import { useFormikContext } from 'formik';
 import * as React from 'react';
-import { ImportFleetFormValues } from '../types';
+import { Alert, FormGroup, Stack, StackItem, TextInput } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { useFormikContext } from 'formik';
+
+import { ImportFleetFormValues } from '../types';
+import FlightCtlForm from '../../../form/FlightCtlForm';
+
 import { useTranslation } from '../../../../hooks/useTranslation';
 
 export const reviewStepId = 'review';
@@ -13,7 +16,7 @@ const ReviewStep = ({ errors }: { errors?: string[] }) => {
   return (
     <Stack hasGutter>
       <StackItem isFilled>
-        <Form>
+        <FlightCtlForm>
           <FormGroup label={t('Repository')}>
             <TextInput
               value={values.useExistingRepo ? values.existingRepo : values.name}
@@ -42,7 +45,7 @@ const ReviewStep = ({ errors }: { errors?: string[] }) => {
               </Tbody>
             </Table>
           </FormGroup>
-        </Form>
+        </FlightCtlForm>
       </StackItem>
       <StackItem>
         <Alert

@@ -1,6 +1,7 @@
+import * as React from 'react';
+import { TFunction } from 'i18next';
 import {
   Button,
-  Form,
   FormGroup,
   MenuToggle,
   MenuToggleElement,
@@ -10,12 +11,12 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import * as React from 'react';
-import { UserPreferencesContext } from './UserPreferencesProvider';
+
 import { Theme } from '../../hooks/useThemePreferences';
-import FlightCtlActionGroup from '../form/FlightCtlActionGroup';
 import { useTranslation } from '../../hooks/useTranslation';
-import { TFunction } from 'i18next';
+import FlightCtlActionGroup from '../form/FlightCtlActionGroup';
+import FlightCtlForm from '../form/FlightCtlForm';
+import { UserPreferencesContext } from './UserPreferencesProvider';
 
 const getThemeLabels = (t: TFunction): { [key in Theme]: string } => ({
   system: t('System default'),
@@ -38,7 +39,7 @@ const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) 
     <Modal title={t('User preferences')} isOpen variant="small" onClose={onClose}>
       <Stack hasGutter>
         <StackItem>
-          <Form>
+          <FlightCtlForm>
             <FormGroup label={t('Theme')}>
               <Select
                 toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
@@ -67,7 +68,7 @@ const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) 
                 ))}
               </Select>
             </FormGroup>
-          </Form>
+          </FlightCtlForm>
         </StackItem>
         <StackItem>
           <FlightCtlActionGroup>

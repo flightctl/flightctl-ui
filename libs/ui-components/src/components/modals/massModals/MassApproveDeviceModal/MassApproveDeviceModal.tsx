@@ -1,10 +1,9 @@
-import { Device, EnrollmentRequest, EnrollmentRequestApproval } from '@flightctl/types';
 import * as React from 'react';
+import { Device, EnrollmentRequest, EnrollmentRequestApproval } from '@flightctl/types';
 import {
   Alert,
   Button,
   ExpandableSection,
-  Form,
   FormGroup,
   Modal,
   Progress,
@@ -17,6 +16,7 @@ import { Formik } from 'formik';
 
 import TextField from '../../../form/TextField';
 import LabelsField from '../../../form/LabelsField';
+import FlightCtlForm from '../../../form/FlightCtlForm';
 import { deviceApprovalValidationSchema } from '../../../form/validations';
 import ResourceLink from '../../../common/ResourceLink';
 import { isPromiseRejected } from '../../../../types/typeUtils';
@@ -199,7 +199,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
               </Table>
             </StackItem>
             <StackItem>
-              <Form>
+              <FlightCtlForm>
                 <FormGroup label={t('Labels')}>
                   <LabelsField name="labels" />
                 </FormGroup>
@@ -216,7 +216,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
                     }
                   />
                 </FormGroup>
-              </Form>
+              </FlightCtlForm>
             </StackItem>
             {resourcesToSkip.length > 0 && (
               <>

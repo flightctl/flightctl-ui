@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { Alert, CodeBlock, CodeBlockCode, ExpandableSection, Form, FormGroup, Grid } from '@patternfly/react-core';
+import { Alert, CodeBlock, CodeBlockCode, ExpandableSection, FormGroup, Grid } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 import { Trans } from 'react-i18next';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import WithHelperText from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
+import FlightCtlForm from '../../../form/FlightCtlForm';
 import { DeviceSpecConfigFormValues } from '../types';
 import ConfigTemplateForm from './ConfigTemplateForm';
 
@@ -25,7 +26,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
 
   return (
     <Grid span={8}>
-      <Form>
+      <FlightCtlForm>
         {isFleet && (
           <Alert isInline variant="info" title={t('Using template variables')}>
             <ExpandableSection toggleTextCollapsed={t('Show more')} toggleTextExpanded={t('Show less')}>
@@ -65,7 +66,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
         <FormGroup>
           <ConfigTemplateForm />
         </FormGroup>
-      </Form>
+      </FlightCtlForm>
     </Grid>
   );
 };

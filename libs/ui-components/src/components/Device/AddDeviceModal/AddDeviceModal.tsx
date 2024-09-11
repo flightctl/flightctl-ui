@@ -1,8 +1,8 @@
+import * as React from 'react';
 import {
   Alert,
   Button,
   ClipboardCopy,
-  Form,
   FormGroup,
   Grid,
   GridItem,
@@ -15,10 +15,11 @@ import {
   TextList,
   TextListItem,
 } from '@patternfly/react-core';
-import * as React from 'react';
+import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
+import FlightCtlForm from '../../form/FlightCtlForm';
+
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
 
 const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
   const { t } = useTranslation();
@@ -121,7 +122,7 @@ const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
                 </Alert>
               </StackItem>
               <StackItem>
-                <Form>
+                <FlightCtlForm>
                   <FormGroup label={t('Disk URL')}>
                     <ClipboardCopy isReadOnly hoverTip={t('Copy')} clickTip={t('Copied')}>
                       {qcow2ImgUrl}
@@ -132,7 +133,7 @@ const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
                       {`wget -O disk.qcow2 ${qcow2ImgUrl}`}
                     </ClipboardCopy>
                   </FormGroup>
-                </Form>
+                </FlightCtlForm>
               </StackItem>
             </Stack>
           )}

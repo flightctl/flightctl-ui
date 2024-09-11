@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { Form, FormGroup, Grid } from '@patternfly/react-core';
+import { FormGroup, Grid } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import useDeviceLabelMatch from '../../../../hooks/useDeviceLabelMatch';
+import FlightCtlForm from '../../../form/FlightCtlForm';
 import LabelsField from '../../../form/LabelsField';
 import RichValidationTextField from '../../../form/RichValidationTextField';
 import { getLabelValueValidations } from '../../../form/validations';
@@ -40,7 +41,7 @@ const GeneralInfoStep = () => {
 
   return (
     <Grid lg={5} span={8}>
-      <Form>
+      <FlightCtlForm>
         <RichValidationTextField
           fieldName="deviceAlias"
           aria-label={t('Alias')}
@@ -52,7 +53,7 @@ const GeneralInfoStep = () => {
         <FormGroup label={t('Fleet name')}>
           <DeviceLabelMatch matchStatus={matchStatus} />
         </FormGroup>
-      </Form>
+      </FlightCtlForm>
     </Grid>
   );
 };

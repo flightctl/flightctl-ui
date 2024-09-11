@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Form, FormGroup, FormSection, Grid, Radio } from '@patternfly/react-core';
+import { FormGroup, FormSection, Grid, Radio } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
@@ -11,6 +11,7 @@ import RepositoryStatus from '../../../Status/RepositoryStatus';
 import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../../utils/status/repository';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelect from '../../../form/FormSelect';
+import FlightCtlForm from '../../../form/FlightCtlForm';
 
 export const repositoryStepId = 'repository';
 
@@ -82,7 +83,7 @@ const RepositoryStep = ({ repositories, hasLoaded }: { repositories: Repository[
   }, [setFieldValue, values.useExistingRepo, noRepositoriesExist]);
 
   return (
-    <Form>
+    <FlightCtlForm>
       <Grid span={8}>
         <FormSection>
           <FormGroup isInline>
@@ -107,7 +108,7 @@ const RepositoryStep = ({ repositories, hasLoaded }: { repositories: Repository[
           {values.useExistingRepo ? <ExistingRepoForm repositories={repositories} /> : <RepositoryForm />}
         </FormSection>
       </Grid>
-    </Form>
+    </FlightCtlForm>
   );
 };
 

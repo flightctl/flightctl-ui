@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { useFormikContext } from 'formik';
-
-import { Alert, Button, Form, FormGroup } from '@patternfly/react-core';
+import { Alert, Button, FormGroup } from '@patternfly/react-core';
 
 import { EnrollmentRequest } from '@flightctl/types';
 import RichValidationTextField from '../../form/RichValidationTextField';
 import LabelsField from '../../form/LabelsField';
 import { getLabelValueValidations } from '../../form/validations';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
+import FlightCtlForm from '../../form/FlightCtlForm';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
 import useDeviceLabelMatch from '../../../hooks/useDeviceLabelMatch';
@@ -34,7 +34,7 @@ const ApproveDeviceForm: React.FC<ApproveDeviceFormProps> = ({ enrollmentRequest
   const [matchLabelsOnChange, matchStatus] = useDeviceLabelMatch();
 
   return (
-    <Form onSubmit={(ev) => ev.preventDefault()}>
+    <FlightCtlForm>
       <RichValidationTextField
         fieldName="deviceAlias"
         aria-label={t('Alias')}
@@ -67,7 +67,7 @@ const ApproveDeviceForm: React.FC<ApproveDeviceFormProps> = ({ enrollmentRequest
           {t('Cancel')}
         </Button>
       </FlightCtlActionGroup>
-    </Form>
+    </FlightCtlForm>
   );
 };
 

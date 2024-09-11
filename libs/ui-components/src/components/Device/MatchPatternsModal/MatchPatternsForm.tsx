@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { Alert, Button, Form, Label, LabelGroup } from '@patternfly/react-core';
+import { Alert, Button, Label, LabelGroup } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
+import ErrorHelperText from '../../form/FieldHelperText';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
+import FlightCtlForm from '../../form/FlightCtlForm';
 import { useTranslation } from '../../../hooks/useTranslation';
 import EditableLabelControl from '../../common/EditableLabelControl';
-import ErrorHelperText from '../../form/FieldHelperText';
 
 export type MatchPatternsFormValues = {
   matchPatterns: string[];
@@ -46,11 +47,7 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
   const hasFormErrors = !!formErrors.matchPatterns;
 
   return (
-    <Form
-      onSubmit={(e) => {
-        e.preventDefault();
-      }}
-    >
+    <FlightCtlForm>
       <LabelGroup
         isEditable
         addLabelControl={
@@ -88,7 +85,7 @@ const MatchPatternsForm: React.FC<MatchPatternsFormProps> = ({ onClose, error })
           {t('Cancel')}
         </Button>
       </FlightCtlActionGroup>
-    </Form>
+    </FlightCtlForm>
   );
 };
 

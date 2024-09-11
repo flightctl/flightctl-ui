@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { Form, Grid, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
+import { Grid, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
 import { FormikErrors } from 'formik';
-import { useTranslation } from '../../../../hooks/useTranslation';
 
+import { useTranslation } from '../../../../hooks/useTranslation';
+import FlightControlForm from '../../../form/FlightCtlForm';
 import CreateResourceSyncsForm from '../../../Repository/CreateRepository/CreateResourceSyncsForm';
 import { ImportFleetFormValues } from '../types';
 
@@ -28,11 +29,11 @@ const ResourceSyncStep = () => {
         </TextContent>
       </StackItem>
       <StackItem>
-        <Form>
+        <FlightControlForm>
           <Grid span={8}>
             <CreateResourceSyncsForm />
           </Grid>
-        </Form>
+        </FlightControlForm>
       </StackItem>
     </Stack>
   );
