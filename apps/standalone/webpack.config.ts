@@ -200,9 +200,6 @@ if (NODE_ENV === 'production') {
 } else {
   config.plugins?.push(
     new DefinePlugin({
-      'window.KEYCLOAK_AUTHORITY': JSON.stringify(process.env.KEYCLOAK_AUTHORITY),
-      'window.KEYCLOAK_CLIENTID': JSON.stringify(process.env.KEYCLOAK_CLIENTID),
-      'window.KEYCLOAK_REDIRECT': JSON.stringify(process.env.KEYCLOAK_REDIRECT),
       'window.API_PORT': JSON.stringify(process.env.API_PORT) || '3001',
     }),
   );

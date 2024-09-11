@@ -3,8 +3,10 @@ import { loadInterceptors as loadEnrollmentRequestsInterceptors } from './interc
 import { loadInterceptors as loadResourceSyncsInterceptors } from './interceptors/resouceSyncs';
 import { loadInterceptors as loadDeviceInterceptors } from './interceptors/devices';
 import { loadInterceptors as loadRepositoryInterceptors } from './interceptors/repositories';
+import { loadInterceptors as loadAuthInterceptors } from './interceptors/auth';
 
 const loadApiInterceptors = () => {
+  loadAuthInterceptors();
   loadFleetInterceptors();
   loadDeviceInterceptors();
   loadEnrollmentRequestsInterceptors();

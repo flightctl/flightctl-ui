@@ -1,55 +1,35 @@
 import * as React from 'react';
-import { AppRouter } from './routes';
-
+import { Bullseye, Spinner } from '@patternfly/react-core';
 import { AppContext } from '@flightctl/ui-components/src/hooks/useAppContext';
-import { useAuth } from './hooks/useAuth';
+
+import { AppRouter } from './routes';
 import { useStandaloneAppContext } from './hooks/useStandaloneAppContext';
+import { AuthContext, useAuthContext } from './context/AuthContext';
 
 import '@patternfly/react-core/dist/styles/base.css';
 import './app.css';
 
 const App: React.FunctionComponent = () => {
-  const auth = useAuth();
-
   const appContextValue = useStandaloneAppContext();
+  const authContextValue = useAuthContext();
 
-  if (!auth) {
+  if (authContextValue.loading) {
     return (
-      <React.Suspense fallback={<div />}>
-        <AppContext.Provider value={appContextValue}>
-          <AppRouter />
-        </AppContext.Provider>
-      </React.Suspense>
+      <Bullseye>
+        <Spinner />
+      </Bullseye>
     );
   }
 
-  switch (auth.activeNavigator) {
-    case 'signinSilent':
-      return <div>Signing you in...</div>;
-    case 'signoutRedirect':
-      return <div>Signing you out...</div>;
-  }
-
-  if (auth.isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (auth.error) {
-    console.log(auth.error); // eslint-disable-line no-console
-    return <div>Auth Error: {auth.error.toString() as React.ReactNode}</div>;
-  }
-
-  if (auth.isAuthenticated) {
-    return (
-      <React.Suspense fallback={<div />}>
+  return (
+    <React.Suspense fallback={<div />}>
+      <AuthContext.Provider value={authContextValue}>
         <AppContext.Provider value={appContextValue}>
           <AppRouter />
         </AppContext.Provider>
-      </React.Suspense>
-    );
-  }
-  void auth.signinRedirect();
-  return <div>Redirecting...</div>;
+      </AuthContext.Provider>
+    </React.Suspense>
+  );
 };
 
 export default App;

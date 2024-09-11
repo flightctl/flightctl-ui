@@ -6,6 +6,10 @@ flightctlUi:
   flightctlGrpcServer: flightctl-api-agent-grpc:7444
   bootcImgUrl: "" #Bootc device image. Example: quay.io/example/example-agent-centos:bootstrap
   qcow2ImgUrl: "" #Qcow2 device image. Example: https://example.com/disk.qcow2
+  internalOidcUrl: ""
+  baseUiUrl: ""
+  oidcInsecure: false
+  apiInsecure: false
   certs:
     ca: |
       -----BEGIN
@@ -16,9 +20,4 @@ flightctlUi:
     frontRouterKey: |
       -----BEGIN
       -----END
-keycloak:
-  authority: http://keycloak:8080/realms/flightctl
-  clientid: flightctl-ui
-  redirect: https://ui.flightctl.example.com:443
-  secret: CHANGE_ME
 

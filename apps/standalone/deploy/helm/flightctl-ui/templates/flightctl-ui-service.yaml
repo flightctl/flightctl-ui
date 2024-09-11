@@ -5,6 +5,8 @@ metadata:
   namespace: {{ .Values.flightctlUi.namespace }}
   labels:
     app: flightctl-ui
+  annotations:
+    service.alpha.openshift.io/serving-cert-secret-name: flightctl-ui-serving-cert
 spec:
   ports:
     - name: 8080-tcp

@@ -8,27 +8,20 @@ import (
 	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 
+	"github.com/flightctl/flightctl-ui/auth"
 	"github.com/flightctl/flightctl-ui/bridge"
+	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
 	"github.com/flightctl/flightctl-ui/middleware"
 	"github.com/flightctl/flightctl-ui/server"
-	"github.com/flightctl/flightctl-ui/utils"
-)
-
-var (
-	bridgePort    = ":" + utils.GetEnvVar("API_PORT", "3001")
-	fctlApiUrl    = utils.GetEnvVar("FLIGHTCTL_SERVER", "https://localhost:3443")
-	metricsApiUrl = utils.GetEnvVar("FLIGHTCTL_METRICS_SERVER", "http://localhost:9090")
-	grpcUrl       = utils.GetEnvVar("FLIGHTCTL_GRPC_SERVER", "localhost:7444")
-	tlsKeyPath    = utils.GetEnvVar("TLS_KEY", "")
-	tlsCertPath   = utils.GetEnvVar("TLS_CERT", "")
 )
 
 func corsHandler(router *mux.Router) http.Handler {
 	return gorillaHandlers.CORS(
-		gorillaHandlers.AllowedOrigins([]string{"*"}),
+		gorillaHandlers.AllowedOrigins([]string{"http://localhost:9000"}),
 		gorillaHandlers.AllowedMethods([]string{"GET", "POST", "DELETE", "PATCH"}),
 		gorillaHandlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+		gorillaHandlers.AllowCredentials(),
 	)(router)
 }
 
@@ -38,29 +31,42 @@ func main() {
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	apiRouter.Use(middleware.WsAuthMiddleware)
 
-	tlsConfig, err := bridge.GetTlsConfig(log)
+	tlsConfig, err := bridge.GetTlsConfig()
 	if err != nil {
 		panic(err)
 	}
 
-	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(fctlApiUrl, tlsConfig))
-	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler(metricsApiUrl))
+	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(tlsConfig))
+	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler())
 
-	terminalBridge := bridge.TerminalBridge{ApiUrl: fctlApiUrl, TlsConfig: tlsConfig, Log: log, GrpcEndpoint: grpcUrl}
+	terminalBridge := bridge.TerminalBridge{TlsConfig: tlsConfig, Log: log}
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
 	apiRouter.HandleFunc("/device-images", bridge.HandleDeviceImages)
+
+	oidcTlsConfig, err := bridge.GetOIDCTlsConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	oidcHandler, err := auth.NewOIDCAuth(oidcTlsConfig, tlsConfig)
+	if err != nil {
+		panic(err)
+	}
+	apiRouter.HandleFunc("/login", oidcHandler.Login)
+	apiRouter.HandleFunc("/login/info", oidcHandler.GetUserInfo)
+	apiRouter.HandleFunc("/logout", oidcHandler.Logout)
 
 	spa := server.SpaHandler{}
 	router.PathPrefix("/").Handler(server.GzipHandler(spa))
 
-	var config *tls.Config
+	var serverTlsconfig *tls.Config
 
-	if tlsKeyPath != "" && tlsCertPath != "" {
-		cert, err := tls.LoadX509KeyPair(tlsCertPath, tlsKeyPath)
+	if config.TlsKeyPath != "" && config.TlsCertPath != "" {
+		cert, err := tls.LoadX509KeyPair(config.TlsCertPath, config.TlsKeyPath)
 		if err != nil {
 			panic(err)
 		}
-		config = &tls.Config{
+		serverTlsconfig = &tls.Config{
 			Certificates: []tls.Certificate{cert},
 		}
 
@@ -68,15 +74,15 @@ func main() {
 
 	srv := &http.Server{
 		Handler:      corsHandler(router),
-		Addr:         bridgePort,
+		Addr:         config.BridgePort,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Info("Proxy running at", bridgePort)
+	log.Info("Proxy running at", config.BridgePort)
 
-	if config != nil {
-		srv.TLSConfig = config
+	if serverTlsconfig != nil {
+		srv.TLSConfig = serverTlsconfig
 		log.Info("Running as HTTPS")
 		log.Fatal(srv.ListenAndServeTLS("", ""))
 	} else {

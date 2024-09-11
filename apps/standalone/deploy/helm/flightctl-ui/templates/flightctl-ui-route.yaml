@@ -16,9 +16,6 @@ spec:
   port:
     targetPort: 8080-tcp
   tls:
-    termination: edge
-    certificate: {{ .Values.flightctlUi.certs.frontRouter | quote }}
-    key: {{ .Values.flightctlUi.certs.frontRouterKey | quote }}
-    insecureEdgeTerminationPolicy: None
+    termination: passthrough
   wildcardPolicy: None
     

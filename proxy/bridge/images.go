@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/flightctl/flightctl-ui/utils"
+	"github.com/flightctl/flightctl-ui/config"
 )
 
 type DeviceImages struct {
@@ -14,8 +14,8 @@ type DeviceImages struct {
 
 func HandleDeviceImages(w http.ResponseWriter, r *http.Request) {
 	deviceImages := DeviceImages{
-		Bootc: utils.GetEnvVar("BOOTC_IMG_URL", ""),
-		Qcow2: utils.GetEnvVar("QCOW2_IMG_URL", ""),
+		Bootc: config.BootcImg,
+		Qcow2: config.Qcow2Img,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

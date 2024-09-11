@@ -1,4 +1,5 @@
 import {
+  Alert,
   Avatar,
   Button,
   Dropdown,
@@ -6,16 +7,20 @@ import {
   DropdownList,
   MenuToggle,
   MenuToggleElement,
+  Modal,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
 import * as React from 'react';
-import { useAuth } from '../../hooks/useAuth';
 
-import './AppToolbar.css';
 import UserPreferencesModal from '@flightctl/ui-components/src/components/UserPreferences/UserPreferencesModal';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
+import { getErrorMessage } from '@flightctl/ui-components/src/utils/error';
+import { AuthContext } from '../../context/AuthContext';
+import { logout } from '../../utils/apiCalls';
+
+import './AppToolbar.css';
 
 type UserDropdownProps = {
   children?: React.ReactNode;
@@ -59,25 +64,32 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ children, username = 'User'
 const AppToolbar = () => {
   const { t } = useTranslation();
   const [preferencesModalOpen, setPreferencesModalOpen] = React.useState(false);
-  const auth = useAuth();
+  const { username, authEnabled } = React.useContext(AuthContext);
+  const [logoutLoading, setLogoutLoading] = React.useState(false);
+  const [logoutErr, setLogoutErr] = React.useState<string>();
   const onUserPreferences = () => setPreferencesModalOpen(true);
 
   let userDropdown = <UserDropdown onUserPreferences={onUserPreferences} />;
 
-  if (auth) {
-    if (auth.user) {
+  if (authEnabled) {
+    if (username) {
       userDropdown = (
-        <UserDropdown username={auth.user.profile.preferred_username} onUserPreferences={onUserPreferences}>
-          <DropdownItem key="logout" onClick={() => void auth.signoutRedirect()}>
+        <UserDropdown username={username} onUserPreferences={onUserPreferences}>
+          <DropdownItem
+            onClick={async () => {
+              try {
+                setLogoutErr(undefined);
+                setLogoutLoading(true);
+                await logout();
+              } catch (err) {
+                setLogoutErr(getErrorMessage(err));
+              }
+            }}
+            isLoading={logoutLoading}
+          >
             {t('Logout')}
           </DropdownItem>
         </UserDropdown>
-      );
-    } else {
-      userDropdown = (
-        <Button variant="link" onClick={() => void auth.signinRedirect()}>
-          {t('Log in')}
-        </Button>
       );
     }
   }
@@ -88,6 +100,20 @@ const AppToolbar = () => {
         <ToolbarItem>{userDropdown}</ToolbarItem>
       </ToolbarContent>
       {preferencesModalOpen && <UserPreferencesModal onClose={() => setPreferencesModalOpen(!preferencesModalOpen)} />}
+      {logoutErr && (
+        <Modal
+          title={t('Failed to logout')}
+          isOpen
+          onClose={() => setLogoutErr(undefined)}
+          actions={[
+            <Button key="cancel" variant="link" onClick={() => setLogoutErr(undefined)}>
+              Close
+            </Button>,
+          ]}
+        >
+          <Alert isInline variant="danger" title={logoutErr} />
+        </Modal>
+      )}
     </Toolbar>
   );
 };

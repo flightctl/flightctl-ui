@@ -20,26 +20,16 @@ spec:
     spec:
       containers:
         - env:
-          - name: KEYCLOAK_AUTHORITY
+          - name: INTERNAL_OIDC_URL
             valueFrom:
               secretKeyRef:
                 name: flightctl-ui
-                key: KEYCLOAK_AUTHORITY
-          - name: KEYCLOAK_CLIENTID
+                key: INTERNAL_OIDC_URL
+          - name: BASE_UI_URL
             valueFrom:
               secretKeyRef:
                 name: flightctl-ui
-                key: KEYCLOAK_CLIENTID
-          - name: KEYCLOAK_REDIRECT
-            valueFrom:
-              secretKeyRef:
-                name: flightctl-ui
-                key: KEYCLOAK_REDIRECT
-          - name: KEYCLOAK_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: flightctl-ui
-                key: KEYCLOAK_SECRET
+                key: BASE_UI_URL
           - name: API_PORT
             value: '8080'
           - name: FLIGHTCTL_SERVER
@@ -67,6 +57,14 @@ spec:
               secretKeyRef:
                 name: flightctl-ui
                 key: QCOW2_IMG_URL
+          - name: TLS_KEY
+            value: /app/serving-cert/tls.key
+          - name: TLS_CERT
+            value: /app/serving-cert/tls.crt
+          - name: OIDC_INSECURE_SKIP_VERIFY
+            value: "{{ .Values.flightctlUi.oidcInsecure }}"
+          - name: FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY
+            value: "{{ .Values.flightctlUi.apiInsecure }}"
           image: {{ .Values.flightctlUi.image }}
           name: flightctl-ui
           ports:
@@ -75,6 +73,8 @@ spec:
           volumeMounts:
             - mountPath: /app/certs
               name: flightctl-ui-certs
+            - mountPath: /app/serving-cert
+              name: flightctl-ui-serving-cert
       restartPolicy: Always
       volumes:
         - name: flightctl-ui-certs
@@ -83,3 +83,7 @@ spec:
             items:
               - key: ca.crt
                 path: ca.crt
+        - name: flightctl-ui-serving-cert
+          secret:
+            secretName: flightctl-ui-serving-cert
+            defaultMode: 420

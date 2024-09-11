@@ -5,7 +5,7 @@ import (
 	"net/textproto"
 	"strings"
 
-	"github.com/flightctl/flightctl-ui/bridge"
+	"github.com/flightctl/flightctl-ui/common"
 )
 
 var protocolHeader = textproto.CanonicalMIMEHeaderKey("Sec-WebSocket-Protocol")
@@ -15,19 +15,20 @@ func WsAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.RequestURI, "/api/terminal/") {
 			protocolHeaderVal, ok := r.Header[protocolHeader]
-			if !ok || len(protocolHeaderVal) != 1 {
-				http.Error(w, "Missing protocol header", http.StatusBadRequest)
+			if !ok {
+				http.Error(w, "Failed to get protocol header", http.StatusBadRequest)
 				return
 			}
 			protocols := strings.Split(protocolHeaderVal[0], ",")
-			if protocols[0] == bridge.WsStandaloneSubprotocol {
+			if protocols[0] == common.WsStandaloneSubprotocol {
 				// UI can not specify headers for WS connection.
 				// We need to move the token from protocol to the header.
-				if len(protocols) == 2 {
-					r.Header[bridge.AuthHeaderKey] = []string{"Bearer " + strings.TrimSpace(protocols[1])}
-				} else {
+				cookie, _ := r.Cookie(common.CookieSessionName)
+				if cookie == nil {
 					// no auth
-					r.Header[bridge.AuthHeaderKey] = []string{"Bearer "}
+					r.Header[common.AuthHeaderKey] = []string{"Bearer "}
+				} else {
+					r.Header[common.AuthHeaderKey] = []string{"Bearer " + cookie.Value}
 				}
 			}
 		}
