@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/flightctl/flightctl-ui/utils"
 )
 
 type SpaHandler struct{}
@@ -19,14 +17,7 @@ func serveIndexPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	strContent := string(content)
-	script := "<script>\n" +
-		"window.KEYCLOAK_AUTHORITY = \"" + utils.GetEnvVar("KEYCLOAK_AUTHORITY", "") + "\"\n" +
-		"window.KEYCLOAK_CLIENTID = \"" + utils.GetEnvVar("KEYCLOAK_CLIENTID", "") + "\"\n" +
-		"window.KEYCLOAK_REDIRECT = \"" + utils.GetEnvVar("KEYCLOAK_REDIRECT", "") + "\"\n" +
-		"</script>"
-	index := strings.Replace(strContent, "<head>", "<head>"+script, 1)
-	http.ServeContent(w, r, "index.html", time.Time{}, bytes.NewReader([]byte(index)))
+	http.ServeContent(w, r, "index.html", time.Time{}, bytes.NewReader(content))
 
 }
 

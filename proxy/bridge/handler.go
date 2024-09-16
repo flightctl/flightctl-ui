@@ -2,11 +2,16 @@ package bridge
 
 import (
 	"crypto/tls"
+	"errors"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 
 	"github.com/gorilla/mux"
+
+	"github.com/flightctl/flightctl-ui/common"
+	"github.com/flightctl/flightctl-ui/config"
+	log "github.com/sirupsen/logrus"
 )
 
 type handler struct {
@@ -41,11 +46,22 @@ func createReverseProxy(apiURL string) (*url.URL, *httputil.ReverseProxy) {
 		}
 		return nil
 	}
+	originalDirector := proxy.Director
+	proxy.Director = func(r *http.Request) {
+		originalDirector(r)
+		cookie, err := r.Cookie(common.CookieSessionName)
+		if err != nil && !errors.Is(err, http.ErrNoCookie) {
+			log.Warnf("Failed to get session cookie: %s", err.Error())
+		}
+		if cookie != nil {
+			r.Header.Add("Authorization", "Bearer "+cookie.Value)
+		}
+	}
 	return target, proxy
 }
 
-func NewFlightCtlHandler(apiURL string, tlsConfig *tls.Config) handler {
-	target, proxy := createReverseProxy(apiURL)
+func NewFlightCtlHandler(tlsConfig *tls.Config) handler {
+	target, proxy := createReverseProxy(config.FctlApiUrl)
 
 	proxy.Transport = &http.Transport{
 		TLSClientConfig: tlsConfig,
@@ -54,7 +70,7 @@ func NewFlightCtlHandler(apiURL string, tlsConfig *tls.Config) handler {
 	return handler{target: target, proxy: proxy}
 }
 
-func NewMetricsHandler(apiURL string) handler {
-	target, proxy := createReverseProxy(apiURL)
+func NewMetricsHandler() handler {
+	target, proxy := createReverseProxy(config.MetricsApiUrl)
 	return handler{target: target, proxy: proxy}
 }

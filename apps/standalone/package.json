@@ -11,8 +11,7 @@
     "build": "NODE_ENV=production npm run ts-node ../../node_modules/.bin/webpack --mode=production",
     "start-prod": "npm run ts-node ../../node_modules/.bin/webpack serve --mode=production --color --progress",
     "dev": "concurrently \"npm run dev:proxy\" \"npm run dev:ui\"",
-    "dev:kind": "FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY='true' npm run dev",
-    "dev:kind:auth": "KEYCLOAK_CLIENTID=flightctl KEYCLOAK_REDIRECT=http://localhost:9000 KEYCLOAK_AUTHORITY=http://$(sh ./scripts/get_ext_ip.sh):8080/realms/flightctl FLIGHTCTL_SERVER=https://$(sh ./scripts/get_ext_ip.sh):3443 npm run dev:kind",
+    "dev:kind": "FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY='true' FLIGHTCTL_SERVER=https://$(sh ./scripts/get_ext_ip.sh):3443 npm run dev",
     "dev:proxy": "cd ../../proxy && nodemon --watch 'proxy/**/*' --exec 'go run' app.go --signal SIGTERM",
     "dev:ui": "npm run ts-node ../../node_modules/.bin/webpack serve --mode=development --color --progress",
     "lint": "eslint --ext .tsx,.ts ./src/ && prettier --check './src/**/*.{tsx,ts}' && npm run i18n",
@@ -56,7 +55,6 @@
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-i18next": "^11.7.3",
-    "react-oidc-context": "^3.0.0",
     "react-router-dom": "^6.22.0",
     "yup": "^1.3.3"
   }

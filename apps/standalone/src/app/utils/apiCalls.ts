@@ -4,9 +4,23 @@ import { PatchRequest } from '@flightctl/types';
 const apiServer = `${window.location.hostname}${window.API_PORT ? `:${window.API_PORT}` : ''}`;
 
 const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
+export const loginAPI = `${window.location.protocol}//${apiServer}/api/login`;
+const logoutAPI = `${window.location.protocol}//${apiServer}/api/logout`;
 const metricsAPI = `${window.location.protocol}//${apiServer}/api/metrics`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 const deviceImagesAPI = `${window.location.protocol}//${apiServer}/api/device-images`;
+
+export const logout = async () => {
+  const response = await fetch(logoutAPI);
+  const { url } = (await response.json()) as { url: string };
+  window.location.href = url;
+};
+
+export const redirectToLogin = async () => {
+  const response = await fetch(loginAPI);
+  const { url } = (await response.json()) as { url: string };
+  window.location.href = url;
+};
 
 const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   if (response.ok) {
@@ -19,6 +33,10 @@ const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
     throw new Error(`Error ${response.status}: ${response.statusText}`);
   }
 
+  if (response.status === 401) {
+    await redirectToLogin();
+  }
+
   let errorText = '';
   try {
     const json = (await response.json()) as { message: string } | string;
@@ -29,16 +47,9 @@ const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   throw new Error(`Error ${response.status}: ${response.statusText}${errorText}`);
 };
 
-export const fetchMetrics = async <R>(
-  metricQuery: string,
-  token: string | undefined,
-  abortSignal?: AbortSignal,
-): Promise<R> => {
+export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
     const response = await fetch(`${metricsAPI}/api/v1/query_range?${metricQuery}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       signal: abortSignal,
     });
     return handleApiJSONResponse(response);
@@ -48,13 +59,13 @@ export const fetchMetrics = async <R>(
   }
 };
 
-export const postData = async <R>(kind: string, token: string | undefined, data: R): Promise<R> => {
+export const postData = async <R>(kind: string, data: R): Promise<R> => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -65,13 +76,11 @@ export const postData = async <R>(kind: string, token: string | undefined, data:
   }
 };
 
-export const deleteData = async <R>(kind: string, token: string | undefined, abortSignal?: AbortSignal): Promise<R> => {
+export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       method: 'DELETE',
+      credentials: 'include',
       signal: abortSignal,
     });
     return handleApiJSONResponse(response);
@@ -81,19 +90,14 @@ export const deleteData = async <R>(kind: string, token: string | undefined, abo
   }
 };
 
-export const patchData = async <R>(
-  kind: string,
-  token: string | undefined,
-  data: PatchRequest,
-  abortSignal?: AbortSignal,
-): Promise<R> => {
+export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal?: AbortSignal): Promise<R> => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json-patch+json',
       },
       method: 'PATCH',
+      credentials: 'include',
       body: JSON.stringify(data),
       signal: abortSignal,
     });
@@ -104,12 +108,10 @@ export const patchData = async <R>(
   }
 };
 
-export const fetchData = async <R>(kind: string, token: string | undefined, abortSignal?: AbortSignal): Promise<R> => {
+export const fetchData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: 'include',
       signal: abortSignal,
     });
     return handleApiJSONResponse(response);

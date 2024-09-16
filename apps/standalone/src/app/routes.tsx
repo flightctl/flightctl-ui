@@ -101,6 +101,10 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
     element: <Navigate to="/overview" replace />,
   },
   {
+    path: '/callback',
+    element: <Navigate to="/overview" replace />,
+  },
+  {
     path: '/overview',
     title: t('Overview'),
     showInNav: true,

@@ -14,8 +14,8 @@ import {
 } from 'react-router-dom';
 import { useFetch } from './useFetch';
 import { useMetrics } from './useMetrics';
-import { useAuth } from './useAuth';
 import { DeviceImages, fetchImages } from '../utils/apiCalls';
+import { AuthContext } from '../context/AuthContext';
 
 const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics' | 'bootcImgUrl' | 'qcow2ImgUrl'> = {
   appType: 'standalone',
@@ -38,7 +38,7 @@ const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics' | 'bootcIm
 };
 
 export const useStandaloneAppContext = (): AppContextProps => {
-  const auth = useAuth();
+  const { username } = React.useContext(AuthContext);
   const fetch = useFetch();
   const metrics = useMetrics();
 
@@ -66,7 +66,7 @@ export const useStandaloneAppContext = (): AppContextProps => {
     ...standaloneAppContext,
     bootcImgUrl: deviceImages.bootc,
     qcow2ImgUrl: deviceImages.qcow2,
-    user: auth?.user?.profile.preferred_username,
+    user: username,
     fetch,
     metrics,
   };

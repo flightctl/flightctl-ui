@@ -12,6 +12,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc/metadata"
 
+	"github.com/flightctl/flightctl-ui/common"
+	"github.com/flightctl/flightctl-ui/config"
 	grpc_v1 "github.com/flightctl/flightctl/api/grpc/v1"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
@@ -19,18 +21,11 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-const (
-	WsStandaloneSubprotocol = "flightctl.standalone.auth"
-	WsOcpSubprotocol        = "flightctl.ocp.auth"
-)
-
 var upgrader = websocket.Upgrader{} // use default options
 
 type TerminalBridge struct {
-	ApiUrl       string
-	GrpcEndpoint string
-	TlsConfig    *tls.Config
-	Log          *logrus.Logger
+	TlsConfig *tls.Config
+	Log       *logrus.Logger
 }
 
 type GRPCEndpoint struct {
@@ -49,7 +44,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		TLSClientConfig: t.TlsConfig,
 	}}
 
-	consoleUrl := t.ApiUrl + "/api/v1/devices/" + deviceId + "/console"
+	consoleUrl := config.FctlApiUrl + "/api/v1/devices/" + deviceId + "/console"
 
 	req, err := http.NewRequest(http.MethodGet, consoleUrl, nil)
 	if err != nil {
@@ -61,10 +56,10 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := ""
-	authHeader, ok := r.Header[AuthHeaderKey]
+	authHeader, ok := r.Header[common.AuthHeaderKey]
 	if ok && len(authHeader) == 1 {
 		token = authHeader[0]
-		req.Header.Set(AuthHeaderKey, authHeader[0])
+		req.Header.Set(common.AuthHeaderKey, authHeader[0])
 	}
 
 	resp, err := client.Do(req)
@@ -98,7 +93,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	grpcClient, err := grpc.NewClient(t.GrpcEndpoint, grpc.WithTransportCredentials(credentials.NewTLS(t.TlsConfig)))
+	grpcClient, err := grpc.NewClient(config.GrpcUrl, grpc.WithTransportCredentials(credentials.NewTLS(t.TlsConfig)))
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to create gRPC client: %s", err.Error())
 		t.Log.Warnf(errMsg)
@@ -108,10 +103,10 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 	}
 	router := grpc_v1.NewRouterServiceClient(grpcClient)
 
-	t.Log.Printf("Connecting to %s with session id %s\n", t.GrpcEndpoint, response.SessionID)
+	t.Log.Printf("Connecting to %s with session id %s\n", config.GrpcUrl, response.SessionID)
 	ctx := metadata.AppendToOutgoingContext(r.Context(), "session-id", response.SessionID)
 	ctx = metadata.AppendToOutgoingContext(ctx, "client-name", "flightctl-ui")
-	ctx = metadata.AppendToOutgoingContext(ctx, AuthHeaderKey, token)
+	ctx = metadata.AppendToOutgoingContext(ctx, common.AuthHeaderKey, token)
 	g, ctx := errgroup.WithContext(ctx)
 
 	stream, err := router.Stream(ctx)
@@ -124,7 +119,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	upgrader.Subprotocols = []string{WsStandaloneSubprotocol, WsOcpSubprotocol}
+	upgrader.Subprotocols = []string{common.WsStandaloneSubprotocol, common.WsOcpSubprotocol}
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to update websocket: %s", err.Error())
