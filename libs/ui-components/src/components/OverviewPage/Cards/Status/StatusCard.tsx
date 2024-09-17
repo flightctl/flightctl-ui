@@ -20,7 +20,7 @@ import ApplicationStatusChart from './ApplicationStatusChart';
 import DeviceStatusChart from './DeviceStatusChart';
 import SystemUpdateStatusChart from './SystemUpdateStatusChart';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
-import { useDevicesEndpoint } from '../../../Device/DeviceList/useDeviceLikeResources';
+import { useDevicesEndpoint } from '../../../Device/DevicesPage/useDevices';
 import StatusCardFilters from './StatusCardFilters';
 import ErrorAlert from '../../../ErrorAlert/ErrorAlert';
 import { FlightCtlLabel } from '../../../../types/extraTypes';

@@ -50,7 +50,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
       }}
     >
       {({ isSubmitting }) => (
-        <Modal title={t('Device enrollment request')} isOpen onClose={() => !isSubmitting && onClose()} variant="small">
+        <Modal title={t('Approve pending device')} isOpen onClose={() => !isSubmitting && onClose()} variant="small">
           {getApprovalStatus(enrollmentRequest) !== EnrollmentRequestStatusType.Approved ? (
             <ApproveDeviceForm enrollmentRequest={enrollmentRequest} onClose={onClose} error={error} />
           ) : (

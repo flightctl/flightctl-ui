@@ -1,17 +1,13 @@
 import * as React from 'react';
 import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { Button } from '@patternfly/react-core';
 
 import { EnrollmentRequest } from '@flightctl/types';
 import { timeSinceText } from '../../utils/dates';
 import { DeleteListActionResult } from '../ListPage/types';
-import {
-  EnrollmentRequestStatus as EnrollmentRequestStatusType,
-  getApprovalStatus,
-} from '../../utils/status/enrollmentRequest';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE } from '../../hooks/useNavigate';
 import ResourceLink from '../common/ResourceLink';
-import EnrollmentRequestStatus from '../Status/EnrollmentRequestStatus';
 
 type EnrollmentRequestTableRow = {
   rowIndex: number;
@@ -31,8 +27,12 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
   onApprove,
 }) => {
   const { t } = useTranslation();
-  const approvalStatus = getApprovalStatus(er);
   const erName = er.metadata.name as string;
+
+  const approveEnrollment = () => {
+    onApprove(erName);
+  };
+
   return (
     <Tr data-testid={`enrollment-request-${rowIndex}`}>
       <Td
@@ -42,26 +42,23 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
           isSelected: isRowSelected(er),
         }}
       />
-      <Td dataLabel={t('Alias')}>-</Td>
       <Td dataLabel={t('Name')}>
         <ResourceLink id={erName} routeLink={ROUTE.ENROLLMENT_REQUEST_DETAILS} />
       </Td>
-      <Td dataLabel={t('Fleet')}>-</Td>
-      <Td dataLabel={t('Application status')}>-</Td>
-      <Td dataLabel={t('Device status')}>
-        <EnrollmentRequestStatus er={er} />
+      <Td dataLabel={t('Created')}>{timeSinceText(t, er.metadata.creationTimestamp)}</Td>
+      <Td dataLabel={t('Approve')}>
+        <Button variant="link" onClick={approveEnrollment}>
+          {t('Approve')}
+        </Button>
       </Td>
-      <Td dataLabel={t('System update status')}>-</Td>
-      <Td dataLabel={t('Last seen')}>{timeSinceText(t, er.metadata.creationTimestamp)}</Td>
       <Td isActionCell>
         <ActionsColumn
           items={[
             {
               title: t('Approve'),
-              onClick: () => er.metadata.name && onApprove(er.metadata.name),
-              isDisabled: approvalStatus !== EnrollmentRequestStatusType.Pending,
+              onClick: approveEnrollment,
             },
-            deleteAction({ resourceId: er.metadata.name || '' }),
+            deleteAction({ resourceId: erName }),
           ]}
         />
       </Td>

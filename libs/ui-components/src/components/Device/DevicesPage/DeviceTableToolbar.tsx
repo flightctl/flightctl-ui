@@ -15,12 +15,12 @@ import TableTextSearch, { TableTextSearchProps } from '../../Table/TableTextSear
 import { useTranslation } from '../../../hooks/useTranslation';
 import DeviceFilterSelect, { getStatusItem } from './DeviceFilterSelect';
 import { FilterStatusMap, UpdateStatus } from './types';
-import { DeviceLikeResource, FlightCtlLabel } from '../../../types/extraTypes';
+import { FlightCtlLabel } from '../../../types/extraTypes';
 import { labelToString } from '../../../utils/labels';
-import { Fleet } from '@flightctl/types';
+import { Device, Fleet } from '@flightctl/types';
 
 type DeviceTableToolbarProps = {
-  resources: DeviceLikeResource[];
+  devices: Device[];
   search: TableTextSearchProps['value'];
   setSearch: TableTextSearchProps['setValue'];
   ownerFleets: string[];
@@ -36,7 +36,7 @@ type DeviceTableToolbarProps = {
 const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarProps>> = ({ children, ...rest }) => {
   const { t } = useTranslation();
   const {
-    resources,
+    devices,
     ownerFleets,
     setOwnerFleets,
     search,
@@ -79,7 +79,7 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
           <ToolbarGroup>
             <ToolbarItem variant="search-filter">
               <DeviceFilterSelect
-                resources={resources}
+                devices={devices}
                 selectedLabels={selectedLabels}
                 setSelectedLabels={setSelectedLabels}
                 selectedFleets={ownerFleets}

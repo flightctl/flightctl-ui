@@ -4,8 +4,8 @@ import {
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  SelectList,
-  SelectOption,
+  PageSection,
+  PageSectionVariants,
   ToolbarItem,
 } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
@@ -14,7 +14,7 @@ import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
 
 import { useFetch } from '../../../hooks/useFetch';
-import { EnrollmentRequest, Fleet, FleetList } from '@flightctl/types';
+import { Device, Fleet, FleetList } from '@flightctl/types';
 
 import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';
@@ -23,22 +23,17 @@ import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
 import { sortByAlias, sortByLastSeenDate, sortByName } from '../../../utils/sort/generic';
 import { sortDeviceStatus, sortDevicesByFleet } from '../../../utils/sort/device';
 import Table, { TableColumn } from '../../Table/Table';
-import EnrollmentRequestTableRow from '../../EnrollmentRequest/EnrollmentRequestTableRow';
 import DeviceTableToolbar from './DeviceTableToolbar';
 import { useDeviceFilters } from './useDeviceFilters';
 import DeviceTableRow from './DeviceTableRow';
-import TableActions from '../../Table/TableActions';
-import { getResourceId } from '../../../utils/resource';
-import { DeviceLikeResource, FlightCtlLabel, isEnrollmentRequest } from '../../../types/extraTypes';
+import { FlightCtlLabel } from '../../../types/extraTypes';
 import MassDeleteDeviceModal from '../../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
-import MassApproveDeviceModal from '../../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
-import ApproveDeviceModal from '../../modals/ApproveDeviceModal/ApproveDeviceModal';
 import ResourceListEmptyState from '../../common/ResourceListEmptyState';
 import { useTableSort } from '../../../hooks/useTableSort';
 import { useTableSelect } from '../../../hooks/useTableSelect';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
-import { useDeviceLikeResources } from './useDeviceLikeResources';
+import { useDevices } from './useDevices';
 import { useDeviceBackendFilters } from './useDeviceBackendFilters';
 import {
   getApplicationStatusHelperText,
@@ -47,6 +42,7 @@ import {
 } from '../../Status/utils';
 import { FilterStatusMap } from './types';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
+import EnrollmentRequestList from './EnrollmentRequestList';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -71,7 +67,7 @@ const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => {
   );
 };
 
-const getDeviceColumns = (t: TFunction): TableColumn<DeviceLikeResource>[] => [
+const getDeviceColumns = (t: TFunction): TableColumn<Device>[] => [
   {
     name: t('Alias'),
     onSort: sortByAlias,
@@ -87,18 +83,18 @@ const getDeviceColumns = (t: TFunction): TableColumn<DeviceLikeResource>[] => [
   {
     name: t('Application status'),
     helperText: getApplicationStatusHelperText(t),
-    onSort: (resources: Array<DeviceLikeResource>) => sortDeviceStatus(resources, 'ApplicationStatus'),
+    onSort: (devices: Array<Device>) => sortDeviceStatus(devices, 'ApplicationStatus'),
   },
   {
     name: t('Device status'),
     helperText: getDeviceStatusHelperText(t),
-    onSort: (resources: Array<DeviceLikeResource>) => sortDeviceStatus(resources, 'DeviceStatus'),
+    onSort: (devices: Array<Device>) => sortDeviceStatus(devices, 'DeviceStatus'),
     defaultSort: true,
   },
   {
     name: t('Update status'),
     helperText: getUpdateStatusHelperText(t),
-    onSort: (resources: Array<DeviceLikeResource>) => sortDeviceStatus(resources, 'SystemUpdateStatus'),
+    onSort: (devices: Array<Device>) => sortDeviceStatus(devices, 'SystemUpdateStatus'),
   },
   {
     name: t('Last seen'),
@@ -107,7 +103,7 @@ const getDeviceColumns = (t: TFunction): TableColumn<DeviceLikeResource>[] => [
 ];
 
 interface DeviceTableProps {
-  resources: Array<DeviceLikeResource>;
+  devices: Array<Device>;
   refetch: VoidFunction;
   ownerFleets: string[];
   activeStatuses: FilterStatusMap;
@@ -121,7 +117,7 @@ interface DeviceTableProps {
 }
 
 export const DeviceTable = ({
-  resources,
+  devices,
   refetch,
   ownerFleets,
   setOwnerFleets,
@@ -134,38 +130,24 @@ export const DeviceTable = ({
   isFilterUpdating,
 }: DeviceTableProps) => {
   const { t } = useTranslation();
-  const [requestId, setRequestId] = React.useState<string>();
   const [addDeviceModal, setAddDeviceModal] = React.useState(false);
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
-  const [isMassApproveModalOpen, setIsMassApproveModalOpen] = React.useState(false);
   const { remove } = useFetch();
 
   const deviceColumns = React.useMemo(() => getDeviceColumns(t), [t]);
 
-  const { filteredData, hasFiltersEnabled: hasUIFiltersEnabled, ...rest } = useDeviceFilters(resources);
+  const { filteredData, hasFiltersEnabled: hasUIFiltersEnabled, ...rest } = useDeviceFilters(devices);
   const { getSortParams, sortedData } = useTableSort(filteredData, deviceColumns);
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
   const { deleteAction: deleteDeviceAction, deleteModal: deleteDeviceModal } = useDeleteListAction({
-    resourceType: 'device',
+    resourceType: 'Device',
     onDelete: async (resourceId: string) => {
       await remove(`devices/${resourceId}`);
       refetch();
     },
   });
-
-  const { deleteAction: deleteErAction, deleteModal: deleteErModal } = useDeleteListAction({
-    resourceType: 'enrollment request',
-    onDelete: async (resourceId: string) => {
-      await remove(`enrollmentrequests/${resourceId}`);
-      refetch();
-    },
-  });
-
-  const currentEnrollmentRequest = resources.find(
-    (res) => res.metadata.name === requestId && isEnrollmentRequest(res),
-  ) as EnrollmentRequest | undefined;
 
   return (
     <>
@@ -177,7 +159,7 @@ export const DeviceTable = ({
         setActiveStatuses={setActiveStatuses}
         selectedLabels={selectedLabels}
         setSelectedLabels={setSelectedLabels}
-        resources={resources}
+        devices={devices}
         fleets={fleets}
         isFilterUpdating={isFilterUpdating}
       >
@@ -185,67 +167,38 @@ export const DeviceTable = ({
           <Button onClick={() => setAddDeviceModal(true)}>{t('Add devices')}</Button>
         </ToolbarItem>
         <ToolbarItem>
-          <TableActions>
-            <SelectList>
-              <SelectOption isDisabled={!hasSelectedRows} onClick={() => setIsMassApproveModalOpen(true)}>
-                {t('Approve')}
-              </SelectOption>
-              <SelectOption isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)}>
-                {t('Delete')}
-              </SelectOption>
-            </SelectList>
-          </TableActions>
+          <Button isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)} variant="secondary">
+            {t('Delete devices')}
+          </Button>
         </ToolbarItem>
       </DeviceTableToolbar>
       <Table
         aria-label={t('Devices table')}
         columns={deviceColumns}
         emptyFilters={filteredData.length === 0 && (hasFiltersEnabled || hasUIFiltersEnabled)}
-        emptyData={resources.length === 0}
+        emptyData={devices.length === 0}
         getSortParams={getSortParams}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
       >
         <Tbody>
-          {sortedData.map((resource, index) =>
-            isEnrollmentRequest(resource) ? (
-              <EnrollmentRequestTableRow
-                key={getResourceId(resource)}
-                er={resource}
-                deleteAction={deleteErAction}
-                onRowSelect={onRowSelect}
-                isRowSelected={isRowSelected}
-                rowIndex={index}
-                onApprove={setRequestId}
-              />
-            ) : (
-              <DeviceTableRow
-                key={getResourceId(resource)}
-                device={resource}
-                deleteAction={deleteDeviceAction}
-                onRowSelect={onRowSelect}
-                isRowSelected={isRowSelected}
-                rowIndex={index}
-              />
-            ),
-          )}
+          {sortedData.map((device, index) => (
+            <DeviceTableRow
+              key={device.metadata.name || ''}
+              device={device}
+              deleteAction={deleteDeviceAction}
+              onRowSelect={onRowSelect}
+              isRowSelected={isRowSelected}
+              rowIndex={index}
+            />
+          ))}
         </Tbody>
       </Table>
-      {!hasFiltersEnabled && !hasUIFiltersEnabled && resources.length === 0 && (
+      {!hasFiltersEnabled && !hasUIFiltersEnabled && devices.length === 0 && (
         <DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />
       )}
       {deleteDeviceModal}
-      {deleteErModal}
       {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}
-      {currentEnrollmentRequest && (
-        <ApproveDeviceModal
-          enrollmentRequest={currentEnrollmentRequest}
-          onClose={(updateList) => {
-            setRequestId(undefined);
-            updateList && refetch();
-          }}
-        />
-      )}
       {isMassDeleteModalOpen && (
         <MassDeleteDeviceModal
           onClose={() => setIsMassDeleteModalOpen(false)}
@@ -256,22 +209,11 @@ export const DeviceTable = ({
           }}
         />
       )}
-      {isMassApproveModalOpen && (
-        <MassApproveDeviceModal
-          onClose={() => setIsMassApproveModalOpen(false)}
-          resources={sortedData.filter(isRowSelected)}
-          onApproveSuccess={() => {
-            setAllSelected(false);
-            setIsMassApproveModalOpen(false);
-            refetch();
-          }}
-        />
-      )}
     </>
   );
 };
 
-const DeviceList = () => {
+const DevicesPage = () => {
   const { t } = useTranslation();
   const {
     ownerFleets,
@@ -282,7 +224,7 @@ const DeviceList = () => {
     selectedLabels,
     setSelectedLabels,
   } = useDeviceBackendFilters();
-  const [data, loading, error, updating, refetch] = useDeviceLikeResources({
+  const [data, loading, error, updating, refetch] = useDevices({
     ownerFleets,
     activeStatuses,
     labels: selectedLabels,
@@ -293,11 +235,13 @@ const DeviceList = () => {
   });
 
   return (
-    <>
+    <PageSection variant={PageSectionVariants.light}>
+      <EnrollmentRequestList refetchDevices={refetch} />
+
       <ListPage title={t('Devices')}>
         <ListPageBody error={error || flError} loading={loading || flLoading}>
           <DeviceTable
-            resources={data}
+            devices={data}
             refetch={refetch}
             hasFiltersEnabled={hasFiltersEnabled || updating}
             ownerFleets={ownerFleets}
@@ -311,8 +255,8 @@ const DeviceList = () => {
           />
         </ListPageBody>
       </ListPage>
-    </>
+    </PageSection>
   );
 };
 
-export default DeviceList;
+export default DevicesPage;
