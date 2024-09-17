@@ -33,8 +33,9 @@ jobs:
             image_tags=${image_tags#v} # remove the leading v prefix for version
 
             echo "image_tags=${image_tags[@]}" >> $GITHUB_OUTPUT
-            echo "image_tags=${image_tags[@]}"
-            echo "helm_tags=${image_tags[@]}"
+            echo "helm_tags=${image_tags[@]}" >> $GITHUB_OUTPUT
+            echo "image_tags,helm_tags=${image_tags[@]}"
+
           else
             # The images tags are taken from git
             image_tags=( latest-${GITHUB_SHA} latest )
