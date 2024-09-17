@@ -19,6 +19,7 @@ var (
 	OIDCInsecure    = getEnvVar("OIDC_INSECURE_SKIP_VERIFY", "false")
 	BootcImg        = getEnvVar("BOOTC_IMG_URL", "")
 	Qcow2Img        = getEnvVar("QCOW2_IMG_URL", "")
+	OcpPlugin       = getEnvVar("IS_OCP_PLUGIN", "false")
 )
 
 func getEnvUrlVar(key string, defaultValue string) string {

@@ -2,13 +2,19 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: flightctl-ui
-  namespace: {{ .Values.flightctlUi.namespace }}
+  namespace: {{ .Release.Namespace }}
+  {{- if (.Values.global).appCode }}
   labels:
     external-exposed: 'true'
-    paas.redhat.com/appcode: {{ .Values.appCode }}
+    paas.redhat.com/appcode: {{ .Values.global.appCode }}
     shard: external
+  {{ end }}
 spec:
-  host: {{ .Values.flightctlUi.hostName }}
+  {{- if .Values.baseURL }}
+  host:  {{ .Values.baseURL }}
+  {{- else }}
+  host:  ui.{{ (.Values.global).baseDomain }}
+  {{- end }}
   to:
     kind: Service
     name: flightctl-ui

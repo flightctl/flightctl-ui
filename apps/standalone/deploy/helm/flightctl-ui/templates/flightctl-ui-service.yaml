@@ -2,11 +2,13 @@ kind: Service
 apiVersion: v1
 metadata:
   name: flightctl-ui
-  namespace: {{ .Values.flightctlUi.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: flightctl-ui
+  {{- if not ((.Values.global).baseDomainTls).cert }}
   annotations:
     service.alpha.openshift.io/serving-cert-secret-name: flightctl-ui-serving-cert
+  {{- end }}
 spec:
   ports:
     - name: 8080-tcp

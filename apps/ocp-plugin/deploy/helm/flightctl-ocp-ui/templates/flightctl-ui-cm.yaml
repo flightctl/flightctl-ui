@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flightctl-ui
+  namespace: {{ .Release.Namespace }}
+data:
+  FLIGHTCTL_SERVER: {{ .Values.api.url | quote }}
+  FLIGHTCTL_GRPC_SERVER: {{ .Values.api.grpcUrl | quote }}
+  FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY: {{ .Values.api.insecureSkipTlsVerify  | quote }}

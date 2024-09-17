@@ -7,7 +7,7 @@ spec:
     service:
       basePath: /
       name: flightctl-ui
-      namespace: {{ .Values.flightctlUi.namespace }}
+      namespace: {{ .Release.Namespace }}
       port: 443
     type: Service
   displayName: FCTL Plugin
@@ -19,6 +19,6 @@ spec:
       endpoint:
         service:
           name: flightctl-ui
-          namespace: {{ .Values.flightctlUi.namespace }}
+          namespace: {{ .Release.Namespace }}
           port: 443
         type: Service

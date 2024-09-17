@@ -2,7 +2,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: flightctl-ui
-  namespace: {{ .Values.flightctlUi.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: flightctl-ui
   annotations:

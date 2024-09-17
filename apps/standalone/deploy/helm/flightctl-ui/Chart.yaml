@@ -1,6 +1,6 @@
 apiVersion: v2
 name: flightctl-ui
-description: A helm chart for flightctl-ui and keycloak
+description: A helm chart for flightctl UI
 type: application
 version: 0.0.1
 appVersion: 0.0.1

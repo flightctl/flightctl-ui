@@ -1,12 +1,17 @@
-flightctlUi:
-  namespace: flightctl
-  image: quay.io/flightctl/flightctl-ocp-ui:latest
-  flightctlServer: https://flightctl-api:3443
-  flightctlMetricsServer: https://flightctl-api:9090
-  flightctlGrpcServer: flightctl-api-agent-grpc:7444
-  bootcImgUrl: "" #Bootc device image. Example: quay.io/example/example-agent-centos:bootstrap
-  qcow2ImgUrl: "" #Qcow2 device image. Example: https://example.com/disk.qcow2
-  certs:
-    ca: |
-      -----BEGIN
-      -----END
+## @param image.image Image to deploy.
+## @param image.tag Image tag to pull.
+## @param image.pullPolicy K8s pull policy for pulling the image.
+image:
+  image: quay.io/flightctl/flightctl-ocp-ui
+  pullPolicy: Always
+  tag: ""
+## @param api.url URL of Flightctl API endpoint accessible by UI backend.
+## @param api.grpcUrl URL of Flightctl GRPC endpoint accessible by UI backend.
+## @param api.insecureSkipTlsVerify Set to true if Flightctl TLS certificate validation should be skipped.
+## @param api.caCert A custom CA cert for Flightctl TLS.
+api:
+  url: https://flightctl-api:3443/
+  grpcUrl: grpcs://flightctl-api-agent-grpc:7444/
+  insecureSkipTlsVerify: false
+  caCert: ""
+

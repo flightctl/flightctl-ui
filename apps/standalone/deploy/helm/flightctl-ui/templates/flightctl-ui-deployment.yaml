@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: flightctl-ui
-  namespace: {{ .Values.flightctlUi.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: flightctl-ui
     role: frontend
@@ -22,50 +22,42 @@ spec:
         - env:
           - name: INTERNAL_OIDC_URL
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: flightctl-ui
                 key: INTERNAL_OIDC_URL
           - name: BASE_UI_URL
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: flightctl-ui
                 key: BASE_UI_URL
           - name: API_PORT
             value: '8080'
           - name: FLIGHTCTL_SERVER
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: flightctl-ui
                 key: FLIGHTCTL_SERVER
-          - name: FLIGHTCTL_METRICS_SERVER
-            valueFrom:
-              secretKeyRef:
-                name: flightctl-ui
-                key: FLIGHTCTL_METRICS_SERVER
           - name: FLIGHTCTL_GRPC_SERVER
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: flightctl-ui
                 key: FLIGHTCTL_GRPC_SERVER
-          - name: BOOTC_IMG_URL
+          - name: OIDC_INSECURE_SKIP_VERIFY
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: flightctl-ui
-                key: BOOTC_IMG_URL
-          - name: QCOW2_IMG_URL
+                key: OIDC_INSECURE_SKIP_VERIFY
+          - name: FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: flightctl-ui
-                key: QCOW2_IMG_URL
+                key: FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY
           - name: TLS_KEY
             value: /app/serving-cert/tls.key
           - name: TLS_CERT
             value: /app/serving-cert/tls.crt
-          - name: OIDC_INSECURE_SKIP_VERIFY
-            value: "{{ .Values.flightctlUi.oidcInsecure }}"
-          - name: FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY
-            value: "{{ .Values.flightctlUi.apiInsecure }}"
-          image: {{ .Values.flightctlUi.image }}
+          image: {{ .Values.image.image }}:{{ default .Chart.AppVersion .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           name: flightctl-ui
           ports:
             - containerPort: 8080
@@ -83,6 +75,8 @@ spec:
             items:
               - key: ca.crt
                 path: ca.crt
+              - key: ca_oidc.crt
+                path: ca_oidc.crt
         - name: flightctl-ui-serving-cert
           secret:
             secretName: flightctl-ui-serving-cert

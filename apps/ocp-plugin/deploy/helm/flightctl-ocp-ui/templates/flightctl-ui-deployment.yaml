@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: flightctl-ui
-  namespace: {{ .Values.flightctlUi.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: flightctl-ui
 spec:
@@ -22,34 +22,27 @@ spec:
             value: '8080'
           - name: FLIGHTCTL_SERVER
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: flightctl-ui
                 key: FLIGHTCTL_SERVER
-          - name: FLIGHTCTL_METRICS_SERVER
-            valueFrom:
-              secretKeyRef:
-                name: flightctl-ui
-                key: FLIGHTCTL_METRICS_SERVER
           - name: FLIGHTCTL_GRPC_SERVER
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: flightctl-ui
                 key: FLIGHTCTL_GRPC_SERVER
-          - name: BOOTC_IMG_URL
+          - name: FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: flightctl-ui
-                key: BOOTC_IMG_URL
-          - name: QCOW2_IMG_URL
-            valueFrom:
-              secretKeyRef:
-                name: flightctl-ui
-                key: QCOW2_IMG_URL
+                key: FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY
           - name: TLS_KEY
             value: /app/console-certs/tls.key
           - name: TLS_CERT
             value: /app/console-certs/tls.crt
-          image: {{ .Values.flightctlUi.image }}
+          - name: IS_OCP_PLUGIN
+            value: "true"
+          image: {{ .Values.image.image }}:{{ default .Chart.AppVersion .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           name: flightctl-ui
           ports:
             - containerPort: 8080
