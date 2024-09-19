@@ -2,7 +2,6 @@ import * as React from 'react';
 import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Fleet } from '@flightctl/types';
-import LabelsView from '../common/LabelsView';
 import { useTranslation } from '../../hooks/useTranslation';
 import { FleetOwnerLinkIcon, getOwnerName } from './FleetDetails/FleetOwnerLink';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
@@ -70,9 +69,6 @@ const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRow
         </FleetOwnerLinkIcon>
       </Td>
       <Td dataLabel={t('System image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>
-      <Td dataLabel={t('Device selector')}>
-        <LabelsView prefix={fleetName} labels={fleet.spec.selector?.matchLabels} variant="collapsed" />
-      </Td>
       <Td dataLabel={t('Status')}>
         <FleetStatus fleet={fleet} />
       </Td>
