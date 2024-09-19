@@ -42,6 +42,7 @@ export const FleetOwnerLinkIcon = ({
       >
         <CodeBranchIcon />
       </WithTooltip>
+      &nbsp;
       {children}
     </span>
   );

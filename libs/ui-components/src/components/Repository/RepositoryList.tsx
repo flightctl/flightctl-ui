@@ -19,7 +19,7 @@ import { RepoSpecType, Repository, RepositoryList } from '@flightctl/types';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import ListPageBody from '../ListPage/ListPageBody';
 import ListPage from '../ListPage/ListPage';
-import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../utils/status/repository';
+import { getLastTransitionTimeText, getRepositorySyncStatus } from '../../utils/status/repository';
 import { useTableSort } from '../../hooks/useTableSort';
 import { sortByName } from '../../utils/sort/generic';
 import * as repoSort from '../../utils/sort/repository';
@@ -165,7 +165,7 @@ const RepositoryTable = () => {
               <Td dataLabel={t('Sync status')}>
                 <RepositoryStatus statusInfo={getRepositorySyncStatus(repository)} />
               </Td>
-              <Td dataLabel={t('Last transition')}>{getRepositoryLastTransitionTime(repository, t).text}</Td>
+              <Td dataLabel={t('Last transition')}>{getLastTransitionTimeText(repository, t).text}</Td>
               <Td isActionCell>
                 <ActionsColumn
                   items={[

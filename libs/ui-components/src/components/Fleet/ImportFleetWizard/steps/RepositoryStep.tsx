@@ -8,7 +8,7 @@ import { ImportFleetFormValues } from '../types';
 
 import { RepositoryForm } from '../../../Repository/CreateRepository/CreateRepositoryForm';
 import RepositoryStatus from '../../../Status/RepositoryStatus';
-import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../../utils/status/repository';
+import { getLastTransitionTimeText, getRepositorySyncStatus } from '../../../../utils/status/repository';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelect from '../../../form/FormSelect';
 import FlightCtlForm from '../../../form/FlightCtlForm';
@@ -62,7 +62,7 @@ const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
               <Td dataLabel={t('Sync status')}>
                 <RepositoryStatus statusInfo={getRepositorySyncStatus(currentRepo)} />
               </Td>
-              <Td dataLabel={t('Last transition')}>{getRepositoryLastTransitionTime(currentRepo, t).text}</Td>
+              <Td dataLabel={t('Last transition')}>{getLastTransitionTimeText(currentRepo, t).text}</Td>
             </Tr>
           </Tbody>
         </Table>

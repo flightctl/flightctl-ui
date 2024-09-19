@@ -40,7 +40,7 @@ const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRow
   const fleetName = fleet.metadata.name || '';
 
   const isManaged = !!fleet.metadata?.owner;
-  const actions = useFleetActions(fleetName, !!fleet.metadata?.owner);
+  const actions = useFleetActions(fleetName, isManaged);
   actions.push({
     title: t('Delete fleet'),
     onClick: onDeleteClick,

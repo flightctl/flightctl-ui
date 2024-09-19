@@ -12,7 +12,7 @@ import {
 import { LockIcon } from '@patternfly/react-icons/dist/js/icons/lock-icon';
 import { LockOpenIcon } from '@patternfly/react-icons/dist/js/icons/lock-open-icon';
 
-import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../../../utils/status/repository';
+import { getLastTransitionTimeText, getRepositorySyncStatus } from '../../../utils/status/repository';
 import { RepoSpecType, Repository } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import RepositorySource from './RepositorySource';
@@ -85,7 +85,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Last transition')}</DescriptionListTerm>
             <DescriptionListDescription>
-              {repoDetails ? getRepositoryLastTransitionTime(repoDetails, t).text : '-'}
+              {repoDetails ? getLastTransitionTimeText(repoDetails, t).text : '-'}
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>
