@@ -1,16 +1,13 @@
 import * as React from 'react';
-import { Label, LabelProps, Popover, Stack, StackItem } from '@patternfly/react-core';
-import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
-import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progress-icon';
-import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
-import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { Trans } from 'react-i18next';
+import { LabelProps, Popover, Stack, StackItem } from '@patternfly/react-core';
 
 import { ConditionType, ResourceSync } from '@flightctl/types';
-import WithTooltip from '../common/WithTooltip';
 import { getRepositorySyncStatus, repositoryStatusLabels } from '../../utils/status/repository';
+import { StatusLevel } from '../../utils/status/common';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Link, ROUTE } from '../../hooks/useNavigate';
-import { Trans } from 'react-i18next';
+import { StatusDisplayContent } from '../Status/StatusDisplay';
 
 type ResourceSyncStatusProps = {
   resourceSync: ResourceSync;
@@ -23,28 +20,24 @@ const ResourceSyncStatus = ({ resourceSync, showLinksOnError = false }: Resource
   const statusLabels = repositoryStatusLabels(t);
 
   let color: LabelProps['color'];
-  let icon: React.ReactNode;
+  let status: StatusLevel;
 
   switch (statusType.status) {
     case ConditionType.ResourceSyncResourceParsed:
     case 'Sync pending':
-      color = 'orange';
-      icon = <InProgressIcon />;
+      status = 'warning';
       break;
     case ConditionType.ResourceSyncSynced:
     case ConditionType.RepositoryAccessible:
-      color = 'green';
-      icon = <CheckCircleIcon />;
+      status = 'success';
       break;
     case 'Not parsed':
     case 'Not synced':
     case 'Not accessible':
-      color = 'red';
-      icon = <ExclamationCircleIcon />;
+      status = 'danger';
       break;
     default:
-      color = 'grey';
-      icon = <OutlinedQuestionCircleIcon />;
+      status = 'unknown';
       break;
   }
 
@@ -73,20 +66,12 @@ const ResourceSyncStatus = ({ resourceSync, showLinksOnError = false }: Resource
           </Stack>
         }
       >
-        <Label color={color} icon={icon}>
-          {statusLabels[statusType.status]}
-        </Label>
+        <StatusDisplayContent label={statusLabels[statusType.status]} level={status} message={statusType.message} />
       </Popover>
     );
   }
 
-  return (
-    <WithTooltip showTooltip={!!statusType.message} content={statusType.message}>
-      <Label color={color} icon={icon}>
-        {statusLabels[statusType.status]}
-      </Label>
-    </WithTooltip>
-  );
+  return <StatusDisplayContent label={statusLabels[statusType.status]} level={status} message={statusType.message} />;
 };
 
 export default ResourceSyncStatus;

@@ -34,17 +34,17 @@ const RepoPrivacy = ({ repo }: { repo: Repository }) => {
 
   return isPrivate ? (
     <>
-      <Icon status="success">
+      <Icon>
         <LockIcon />
       </Icon>{' '}
-      {t('Repository is private')}
+      {t('Private repository')}
     </>
   ) : (
     <>
-      <Icon status="success">
+      <Icon>
         <LockOpenIcon />
       </Icon>{' '}
-      {t('Repository is public')}
+      {t('Public repository')}
     </>
   );
 };
@@ -55,7 +55,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
     <Card>
       <CardTitle>{t('Details')}</CardTitle>
       <CardBody>
-        <DescriptionList columnModifier={{ lg: '2Col' }}>
+        <DescriptionList columnModifier={{ lg: '3Col' }}>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Url')}</DescriptionListTerm>
             <DescriptionListDescription>
@@ -68,6 +68,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
               {repoDetails?.spec.type === RepoSpecType.HTTP ? t('HTTP service') : t('Git repository')}
             </DescriptionListDescription>
           </DescriptionListGroup>
+          <DescriptionListGroup />
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
             <DescriptionListDescription>
@@ -76,15 +77,15 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('Last transition')}</DescriptionListTerm>
-            <DescriptionListDescription>
-              {repoDetails ? getRepositoryLastTransitionTime(repoDetails, t).text : '-'}
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
             <DescriptionListTerm>{t('Privacy')}</DescriptionListTerm>
             <DescriptionListDescription>
               <RepoPrivacy repo={repoDetails} />
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Last transition')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              {repoDetails ? getRepositoryLastTransitionTime(repoDetails, t).text : '-'}
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>
