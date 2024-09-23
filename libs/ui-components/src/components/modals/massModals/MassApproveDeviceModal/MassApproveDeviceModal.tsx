@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { Device, EnrollmentRequest, EnrollmentRequestApproval } from '@flightctl/types';
+import { EnrollmentRequest, EnrollmentRequestApproval } from '@flightctl/types';
 import {
   Alert,
   Button,
-  ExpandableSection,
   FormGroup,
   Modal,
   Progress,
@@ -20,8 +19,6 @@ import FlightCtlForm from '../../../form/FlightCtlForm';
 import { deviceApprovalValidationSchema } from '../../../form/validations';
 import ResourceLink from '../../../common/ResourceLink';
 import { isPromiseRejected } from '../../../../types/typeUtils';
-import { DeviceLikeResource, isEnrollmentRequest } from '../../../../types/extraTypes';
-import { EnrollmentRequestStatus, getApprovalStatus } from '../../../../utils/status/enrollmentRequest';
 import { getErrorMessage } from '../../../../utils/error';
 import { useAppContext } from '../../../../hooks/useAppContext';
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -32,45 +29,21 @@ import './MassApproveDeviceModal.css';
 const templateToName = (index: number, nameTemplate: string) =>
   nameTemplate ? nameTemplate.replace(/{{n+}}/g, `${index + 1}`) : '';
 
-const isPendingEnrollmentRequest = (r: DeviceLikeResource): r is EnrollmentRequest => {
-  return isEnrollmentRequest(r) && getApprovalStatus(r) === EnrollmentRequestStatus.Pending;
-};
-
 type MassApproveDeviceFormValues = {
   labels: { key: string; value: string }[];
   deviceAlias: string;
 };
 type MassApproveDeviceModalProps = {
   onClose: VoidFunction;
-  resources: Array<DeviceLikeResource>;
+  pendingEnrollments: Array<EnrollmentRequest>;
   onApproveSuccess: VoidFunction;
 };
 
-const ApprovedDevicesTable = ({ devices }: { devices: Array<EnrollmentRequest | Device> }) => {
-  const { t } = useTranslation();
-  return (
-    <Table>
-      <Thead>
-        <Tr>
-          <Th width={25}>{t('Name')}</Th>
-          <Th width={50}>{t('Alias')}</Th>
-        </Tr>
-      </Thead>
-      <Tbody>
-        {devices.map((device) => (
-          <Tr key={device.metadata.name}>
-            <Td dataLabel={t('Name')}>
-              <ResourceLink id={device.metadata.name as string} />
-            </Td>
-            <Td dataLabel={t('Alias')}>{device.metadata.labels?.alias || '-'}</Td>
-          </Tr>
-        ))}
-      </Tbody>
-    </Table>
-  );
-};
-
-const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose, onApproveSuccess, resources }) => {
+const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({
+  onClose,
+  onApproveSuccess,
+  pendingEnrollments,
+}) => {
   const { t } = useTranslation();
   const [progress, setProgress] = React.useState(0);
   const [totalProgress, setTotalProgress] = React.useState(0);
@@ -80,40 +53,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
     fetch: { post },
   } = useAppContext();
 
-  const pendingEnrollments = resources.filter(isPendingEnrollmentRequest);
-  const resourcesToSkip = resources.filter((r) => !isPendingEnrollmentRequest(r));
-
-  if (pendingEnrollments.length === 0) {
-    return (
-      <Modal
-        title={t('Approve pending devices')}
-        isOpen
-        onClose={onClose}
-        showClose
-        variant="medium"
-        actions={[
-          <Button key="close" variant="primary" onClick={onClose}>
-            {t('Close')}
-          </Button>,
-        ]}
-      >
-        <Stack hasGutter>
-          <StackItem>
-            <Alert
-              variant="info"
-              isInline
-              title={t('All the devices you selected are already approved and cannot be approved again.')}
-            />
-          </StackItem>
-          <StackItem>
-            <ApprovedDevicesTable devices={resourcesToSkip} />
-          </StackItem>
-        </Stack>
-      </Modal>
-    );
-  }
-
-  const approveResources = async (values: MassApproveDeviceFormValues) => {
+  const approveEnrollments = async (values: MassApproveDeviceFormValues) => {
     setProgress(0);
     setErrors(undefined);
     const promises = pendingEnrollments.map(async (r, index) => {
@@ -148,7 +88,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
         deviceAlias: '',
       }}
       validationSchema={deviceApprovalValidationSchema(t, { isSingleDevice: false })}
-      onSubmit={approveResources}
+      onSubmit={approveEnrollments}
     >
       {({ isSubmitting, values, submitForm, isValid }) => (
         <Modal
@@ -218,22 +158,6 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({ onClose
                 </FormGroup>
               </FlightCtlForm>
             </StackItem>
-            {resourcesToSkip.length > 0 && (
-              <>
-                <StackItem>
-                  <Alert
-                    variant="info"
-                    isInline
-                    title={t('Some devices you selected are already approved and will be excluded.')}
-                  />
-                </StackItem>
-                <StackItem>
-                  <ExpandableSection toggleText={t('Show already approved devices')}>
-                    <ApprovedDevicesTable devices={resourcesToSkip} />
-                  </ExpandableSection>
-                </StackItem>
-              </>
-            )}
             {isSubmitting && (
               <StackItem>
                 <Progress

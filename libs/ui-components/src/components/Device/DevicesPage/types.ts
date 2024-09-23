@@ -1,7 +1,6 @@
 import { DeviceSummaryStatus, FilterSearchParams } from '../../../utils/status/devices';
 import { StatusItem } from '../../../utils/status/common';
 import { ApplicationsSummaryStatusType, DeviceSummaryStatusType, DeviceUpdatedStatusType } from '@flightctl/types';
-import { EnrollmentRequestStatus } from '../../../utils/status/enrollmentRequest';
 
 type FilterOptionsProps<T extends DeviceSummaryStatus> = {
   filter: string;
@@ -16,7 +15,7 @@ export type FilterOptionsFC = <T extends DeviceSummaryStatus>(
 
 export type FilterStatusMap = {
   [FilterSearchParams.AppStatus]: ApplicationsSummaryStatusType[];
-  [FilterSearchParams.DeviceStatus]: (DeviceSummaryStatusType | EnrollmentRequestStatus.Pending)[];
+  [FilterSearchParams.DeviceStatus]: DeviceSummaryStatusType[];
   [FilterSearchParams.UpdatedStatus]: DeviceUpdatedStatusType[];
 };
 

@@ -1,18 +1,20 @@
-import { Grid, GridItem, Label, SelectList, SelectOption } from '@patternfly/react-core';
 import * as React from 'react';
+import { Grid, GridItem, Label, SelectList, SelectOption } from '@patternfly/react-core';
+import { TFunction } from 'i18next';
+
+import { Device, Fleet } from '@flightctl/types';
+import { FlightCtlLabel } from '../../../types/extraTypes';
+
 import { useTranslation } from '../../../hooks/useTranslation';
 import FilterSelect, { FilterSelectGroup } from '../../form/FilterSelect';
-import { DeviceLikeResource, FlightCtlLabel } from '../../../types/extraTypes';
 import { filterDevicesLabels, labelToString, stringToLabel } from '../../../utils/labels';
 import { fuzzySeach } from '../../../utils/search';
 import { FilterOptionsFC, FilterStatusMap, UpdateStatus } from './types';
 import StatusDisplay from '../../Status/StatusDisplay';
-import { TFunction } from 'i18next';
 import { DeviceSummaryStatus, FilterSearchParams, getDeviceStatusItems } from '../../../utils/status/devices';
 import { StatusItem } from '../../../utils/status/common';
 import { getApplicationSummaryStatusItems } from '../../../utils/status/applications';
 import { getSystemUpdateStatusItems } from '../../../utils/status/system';
-import { Fleet } from '@flightctl/types';
 
 export const getStatusItem = (
   t: TFunction,
@@ -64,7 +66,7 @@ const FilterOption: FilterOptionsFC = ({ items, selectedFilters, onClick, filter
 };
 
 type DeviceFilterSelectProps = {
-  resources: DeviceLikeResource[];
+  devices: Device[];
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
   selectedFleets: string[];
@@ -76,7 +78,7 @@ type DeviceFilterSelectProps = {
 };
 
 const DeviceFilterSelect: React.FC<DeviceFilterSelectProps> = ({
-  resources,
+  devices,
   selectedFleets,
   selectedLabels,
   setSelectedLabels,
@@ -96,7 +98,7 @@ const DeviceFilterSelect: React.FC<DeviceFilterSelectProps> = ({
     ]),
   ];
 
-  const filteredLabels = filterDevicesLabels(resources, selectedLabels, filter);
+  const filteredLabels = filterDevicesLabels(devices, selectedLabels, filter);
 
   const selectedFilters = Object.values(activeStatuses).reduce((acc, curr) => {
     acc += curr.length;

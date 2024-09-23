@@ -129,7 +129,7 @@ const FleetTable = () => {
   const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
 
   const { deleteAction: deleteRsAction, deleteModal: deleteRsModal } = useDeleteListAction({
-    resourceType: 'resource sync',
+    resourceType: 'ResourceSync',
     onDelete: async (resourceId) => {
       await remove(`resourcesyncs/${resourceId}`);
       rsRefetch();

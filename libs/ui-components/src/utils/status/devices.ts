@@ -1,6 +1,5 @@
 import { TFunction } from 'react-i18next';
 import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons';
-import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-circle-icon';
 
 import {
   ApplicationsSummaryStatus,
@@ -12,7 +11,6 @@ import {
   DeviceUpdatedStatusType,
 } from '@flightctl/types';
 import { StatusItem } from './common';
-import { EnrollmentRequestStatus } from './enrollmentRequest';
 
 export enum FilterSearchParams {
   Fleet = 'fleetId',
@@ -25,7 +23,7 @@ export enum FilterSearchParams {
 export type DeviceSummaryStatus =
   | ApplicationsSummaryStatusType
   | DeviceUpdatedStatusType
-  | (DeviceSummaryStatusType | EnrollmentRequestStatus.Pending)
+  | DeviceSummaryStatusType
   | DeviceIntegrityStatusSummaryType;
 
 export const getDeviceSummaryStatus = (deviceStatus?: BEDeviceSummaryStatus): DeviceSummaryStatusType =>
@@ -39,17 +37,7 @@ export const getApplicationSummaryStatus = (
 export const getSystemUpdateStatus = (updatedStatus?: DeviceUpdatedStatus): DeviceUpdatedStatusType =>
   updatedStatus?.status || DeviceUpdatedStatusType.DeviceUpdatedStatusUnknown;
 
-export const getDeviceStatusItems = (
-  t: TFunction,
-): StatusItem<DeviceSummaryStatusType | EnrollmentRequestStatus.Pending>[] => [
-  {
-    // For enrollment requests in pending state
-    id: EnrollmentRequestStatus.Pending,
-    label: t('Pending approval'),
-    level: 'info',
-    customIcon: PauseCircleIcon,
-  },
-  // Device statuses
+export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStatusType>[] => [
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusOnline,
     label: t('Online'),

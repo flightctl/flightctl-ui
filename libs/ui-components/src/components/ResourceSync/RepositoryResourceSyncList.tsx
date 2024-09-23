@@ -208,7 +208,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
   const { deleteAction, deleteModal } = useDeleteListAction({
-    resourceType: 'Resource Sync',
+    resourceType: 'ResourceSync',
     onDelete: async (resourceId: string) => {
       await remove(`resourcesyncs/${resourceId}`);
       refetch();

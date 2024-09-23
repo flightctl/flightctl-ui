@@ -1,4 +1,5 @@
-import { DeviceLikeResource, FlightCtlLabel } from '../types/extraTypes';
+import { Device } from '@flightctl/types';
+import { FlightCtlLabel } from '../types/extraTypes';
 import { fuzzySeach } from './search';
 
 type LabelOptions = {
@@ -32,15 +33,11 @@ export const stringToLabel = (labelStr: string): FlightCtlLabel => {
   };
 };
 
-export const filterDevicesLabels = (
-  resources: DeviceLikeResource[],
-  additionalLabels: FlightCtlLabel[],
-  filter: string,
-) => {
+export const filterDevicesLabels = (devices: Device[], additionalLabels: FlightCtlLabel[], filter: string) => {
   const filteredLabels = [
     ...new Set(
       [
-        ...resources.reduce((acc, curr) => {
+        ...devices.reduce((acc, curr) => {
           const deviceLabels = curr.metadata.labels || {};
           acc.push(...fromAPILabel(deviceLabels));
           return acc;

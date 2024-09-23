@@ -1,16 +1,19 @@
-import { Alert, Button, Modal, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
 import * as React from 'react';
+import { Alert, Button, Modal, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
+import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+
+import { Device, EnrollmentRequest } from '@flightctl/types';
+import { isEnrollmentRequest } from '../../../../types/extraTypes';
+
 import { getErrorMessage } from '../../../../utils/error';
 import { useFetch } from '../../../../hooks/useFetch';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { DeviceLikeResource, isEnrollmentRequest } from '../../../../types/extraTypes';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { isPromiseRejected } from '../../../../types/typeUtils';
 import ResourceLink from '../../../common/ResourceLink';
 
 type MassDeleteDeviceModalProps = {
   onClose: VoidFunction;
-  resources: Array<DeviceLikeResource>;
+  resources: Array<Device | EnrollmentRequest>;
   onDeleteSuccess: VoidFunction;
 };
 
@@ -88,7 +91,7 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
               value={progress}
               min={0}
               max={totalProgress}
-              title={t('Approving...')}
+              title={t('Deleting...')}
               measureLocation={ProgressMeasureLocation.top}
               label={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
               valueText={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}

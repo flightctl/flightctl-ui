@@ -49,7 +49,7 @@ export const useDeviceBackendFilters = () => {
     const deviceStatuses = searchParams.getAll(FilterSearchParams.DeviceStatus) || [];
     deviceStatuses.forEach((status) => {
       if (validDeviceStatuses.includes(status)) {
-        activeStatuses[FilterSearchParams.DeviceStatus].push(status as FilterStatusMap['devSt'][0]);
+        activeStatuses[FilterSearchParams.DeviceStatus].push(status as DeviceSummaryStatusType);
       }
     });
     const appStatuses = searchParams.getAll(FilterSearchParams.AppStatus) || [];
@@ -105,7 +105,7 @@ export const useDeviceBackendFilters = () => {
   );
 
   const hasFiltersEnabled =
-    !!selectedLabels.length || !!ownerFleets.length || !!Object.values(activeStatuses).some((s) => !!s.length);
+    !!selectedLabels.length || !!ownerFleets.length || Object.values(activeStatuses).some((s) => !!s.length);
 
   return {
     activeStatuses,

@@ -44,12 +44,9 @@ export enum DeviceAnnotation {
   RenderedVersion = 'device-controller/renderedVersion',
 }
 
-export type AnnotationType = DeviceAnnotation; // Add more types when they are added to the API
-
-export type DeviceLikeResource = Device | EnrollmentRequest;
-
-export const isEnrollmentRequest = (resource: DeviceLikeResource): resource is EnrollmentRequest =>
+export const isEnrollmentRequest = (resource: Device | EnrollmentRequest): resource is EnrollmentRequest =>
   resource.kind === 'EnrollmentRequest';
-export const isDevice = (resource: DeviceLikeResource): resource is Device => resource.kind === 'Device';
+
+export type AnnotationType = DeviceAnnotation; // Add more types when they are added to the API
 
 export const isFleet = (resource: ResourceSync | Fleet): resource is Fleet => resource.kind === 'Fleet';

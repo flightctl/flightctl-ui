@@ -1,8 +1,8 @@
 import * as React from 'react';
-import DeviceList from '@flightctl/ui-components/src/components/Device/DeviceList/DeviceList';
+import DevicesPage from '@flightctl/ui-components/src/components/Device/DevicesPage/DevicesPage';
 
-const DevicesPage = () => {
-  return <DeviceList />;
+const OcpDevicesPage = () => {
+  return <DevicesPage />;
 };
 
-export default DevicesPage;
+export default OcpDevicesPage;

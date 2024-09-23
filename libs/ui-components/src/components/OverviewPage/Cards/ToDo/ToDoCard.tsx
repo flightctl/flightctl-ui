@@ -17,7 +17,6 @@ import { EnrollmentRequestList } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { EnrollmentRequestStatus, getApprovalStatus } from '../../../../utils/status/enrollmentRequest';
-import { FilterSearchParams } from '../../../../utils/status/devices';
 import { Link, ROUTE } from '../../../../hooks/useNavigate';
 import ErrorAlert from '../../../ErrorAlert/ErrorAlert';
 
@@ -43,14 +42,9 @@ const ToDoCard = () => {
         <List>
           <ListItem>
             <Split hasGutter>
-              <SplitItem isFilled>{t('{{ count }} pending approval devices', { count: pendingErs.length })}</SplitItem>
+              <SplitItem isFilled>{t('{{ count }} devices pending approval', { count: pendingErs.length })}</SplitItem>
               <SplitItem>
-                <Link
-                  to={ROUTE.DEVICES}
-                  query={`${FilterSearchParams.DeviceStatus}=${EnrollmentRequestStatus.Pending}`}
-                >
-                  {t('Review pending devices', { count: pendingErs.length })}
-                </Link>
+                <Link to={ROUTE.DEVICES}>{t('Review pending devices', { count: pendingErs.length })}</Link>
               </SplitItem>
             </Split>
           </ListItem>
