@@ -14,36 +14,30 @@ import {
   TextContent,
   TextVariants,
 } from '@patternfly/react-core';
-import { DeviceList, FleetList } from '@flightctl/types';
+import { FleetList } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import ApplicationStatusChart from './ApplicationStatusChart';
 import DeviceStatusChart from './DeviceStatusChart';
 import SystemUpdateStatusChart from './SystemUpdateStatusChart';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
-import { useDevicesEndpoint } from '../../../Device/DevicesPage/useDevices';
 import StatusCardFilters from './StatusCardFilters';
 import ErrorAlert from '../../../ErrorAlert/ErrorAlert';
 import { FlightCtlLabel } from '../../../../types/extraTypes';
+import { useDevices } from '../../../Device/DevicesPage/useDevices';
 
 const StatusCard = () => {
   const { t } = useTranslation();
   const [fleets, setFleets] = React.useState<string[]>([]);
   const [labels, setLabels] = React.useState<FlightCtlLabel[]>([]);
 
-  const [devicesEndpoint, isDebounced] = useDevicesEndpoint({
+  const [devices, loading, error, , , allLabels] = useDevices({
     ownerFleets: fleets,
     labels,
-  });
-
-  const [devicesList, loading, error, , isUpdating] = useFetchPeriodically<DeviceList>({
-    endpoint: devicesEndpoint,
   });
 
   const [fleetsList, flLoading, flError] = useFetchPeriodically<FleetList>({
     endpoint: 'fleets',
   });
-
-  const devices = devicesList?.items || [];
 
   let content: React.ReactNode;
   if (loading || flLoading) {
@@ -88,17 +82,17 @@ const StatusCard = () => {
           </FlexItem>
           <FlexItem>
             <StatusCardFilters
-              devices={devices}
               fleets={fleetsList?.items || []}
               selectedFleets={fleets}
               setSelectedFleets={setFleets}
+              allLabels={allLabels}
               selectedLabels={labels}
               setSelectedLabels={setLabels}
-              isFilterUpdating={isUpdating || isDebounced}
             />
           </FlexItem>
         </Flex>
       </CardHeader>
+
       <CardBody>{content}</CardBody>
     </Card>
   );

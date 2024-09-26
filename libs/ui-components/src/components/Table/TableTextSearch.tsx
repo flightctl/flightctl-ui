@@ -1,6 +1,6 @@
-import { SearchInput, SearchInputProps } from '@patternfly/react-core';
 import * as React from 'react';
-import { useTranslation } from '../../hooks/useTranslation';
+
+import { SearchInput, SearchInputProps } from '@patternfly/react-core';
 
 export type TableTextSearchProps = Omit<SearchInputProps, 'onChange' | 'aria-label'> & {
   setValue: (val: string) => void;
@@ -8,13 +8,12 @@ export type TableTextSearchProps = Omit<SearchInputProps, 'onChange' | 'aria-lab
 };
 
 const TableTextSearch: React.FC<TableTextSearchProps> = ({ value, setValue, placeholder, onClear, ...rest }) => {
-  const { t } = useTranslation();
   return (
     <SearchInput
-      aria-label={placeholder || t('Search by name')}
+      aria-label={placeholder}
       onChange={(_event, value) => (value === '' && onClear ? onClear() : setValue(value))}
       value={value}
-      placeholder={placeholder || t('Search by name')}
+      placeholder={placeholder}
       onClear={() => (onClear ? onClear() : setValue(''))}
       {...rest}
     />

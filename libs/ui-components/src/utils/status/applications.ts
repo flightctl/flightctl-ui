@@ -7,31 +7,42 @@ import {
 import { StatusItem } from './common';
 
 export const getApplicationSummaryStatusItems = (t: TFunction): StatusItem<AppSummaryStatus>[] => [
-  // Application summary statuses
-  {
-    id: AppSummaryStatus.ApplicationsSummaryStatusHealthy,
-    label: t('Healthy'),
-    level: 'success',
-  },
-  {
-    id: AppSummaryStatus.ApplicationsSummaryStatusDegraded,
-    label: t('Degraded'),
-    level: 'warning',
-  },
   {
     id: AppSummaryStatus.ApplicationsSummaryStatusError,
     label: t('Error'),
     level: 'danger',
   },
   {
+    id: AppSummaryStatus.ApplicationsSummaryStatusDegraded,
+    label: t('Degraded'),
+    level: 'warning',
+  },
+
+  {
     id: AppSummaryStatus.ApplicationsSummaryStatusUnknown,
     label: t('Unknown'),
     level: 'unknown',
   },
+  {
+    id: AppSummaryStatus.ApplicationsSummaryStatusHealthy,
+    label: t('Healthy'),
+    level: 'success',
+  },
 ];
 
 export const getApplicationStatusItems = (t: TFunction): StatusItem<AppStatus>[] => [
-  // Application statuses
+  { id: AppStatus.ApplicationStatusError, label: t('Error'), level: 'danger' },
+  {
+    id: AppStatus.ApplicationStatusPreparing,
+    label: t('Preparing'),
+    level: 'info',
+  },
+  { id: AppStatus.ApplicationStatusStarting, label: t('Starting'), level: 'info' },
+  {
+    id: AppStatus.ApplicationStatusUnknown,
+    label: t('Unknown'),
+    level: 'unknown',
+  },
   {
     id: AppStatus.ApplicationStatusRunning,
     label: t('Running'),
@@ -41,18 +52,6 @@ export const getApplicationStatusItems = (t: TFunction): StatusItem<AppStatus>[]
     id: AppStatus.ApplicationStatusCompleted,
     label: t('Completed'),
     level: 'success',
-  },
-  {
-    id: AppStatus.ApplicationStatusPreparing,
-    label: t('Preparing'),
-    level: 'info',
-  },
-  { id: AppStatus.ApplicationStatusStarting, label: t('Starting'), level: 'info' },
-  { id: AppStatus.ApplicationStatusError, label: t('Error'), level: 'danger' },
-  {
-    id: AppStatus.ApplicationStatusUnknown,
-    label: t('Unknown'),
-    level: 'unknown',
   },
 ];
 
