@@ -3,6 +3,11 @@
     justify-content: center;
 }
 
+.fctl-charts__donut-container {
+    width: 100%;
+    height: 100%;
+}
+
 .fctl-charts__title {
     height: 100%;
     color: var(--pf-v5-global--Color--200);

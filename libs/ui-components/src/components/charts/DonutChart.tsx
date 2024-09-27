@@ -75,7 +75,7 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
     >
       <FlexItem className="fctl-charts__donut">
         <div style={{ height: '230px', width: '230px' }}>
-          <ChartContainer>
+          <ChartContainer className="fctl-charts__donut-container">
             <foreignObject x="0" y="0" width="230px" height="230px">
               <Flex
                 alignItems={{ default: 'alignItemsCenter' }}

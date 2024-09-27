@@ -22,6 +22,8 @@
     "skipLibCheck": true,
     "paths": {
       "@fctl-assets/*": ["src/assets/*"],
+      "@flightctl/ui-components/*": ["../../libs/ui-components/*"],
+      "@flightctl/types": ["../../libs/types"],
     },
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js", "**/*.json"],

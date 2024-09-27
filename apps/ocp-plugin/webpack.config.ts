@@ -1,5 +1,6 @@
 import { Configuration, DefinePlugin } from 'webpack';
 import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
+import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 import CopyPlugin from 'copy-webpack-plugin';
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -69,6 +70,11 @@ const config: Configuration & {
     new ConsoleRemotePlugin(),
   ],
   resolve: {
+    plugins: [
+      new TsconfigPathsPlugin({
+        configFile: path.resolve(__dirname, './tsconfig.json'),
+      }),
+    ],
     extensions: ['.js', '.ts', '.tsx', '.jsx'],
     symlinks: false,
     cacheWithContext: false,

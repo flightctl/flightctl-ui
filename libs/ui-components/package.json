@@ -5,7 +5,18 @@
   "repository": "https://github.com/flightctl/flightctl-ui.git",
   "homepage": "https://github.com/flightctl/flightctl-ui.git",
   "license": "MIT",
-  "private": true,
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    "./*": {
+      "source": "./*",
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*"
+    }
+  },
+  "private": false,
   "scripts": {
     "prebuild": "tsc --noEmit && rimraf dist",
     "build": "tsc --build && npm run copy:css",
@@ -36,10 +47,10 @@
     "@patternfly/react-icons": "^5.0.0",
     "@patternfly/react-styles": "^5.1.2",
     "@patternfly/react-table": "^5.0.0",
-    "i18next": "^21.8.14",
-    "react": "17.0.1",
-    "react-dom": "17.0.1",
-    "react-i18next": "^11.7.3",
+    "i18next": ">=21.8.14",
+    "react": ">=17.0.1",
+    "react-dom": ">=17.0.1",
+    "react-i18next": ">=11.7.3",
     "react-router-dom": "^6.22.0"
   }
 }

@@ -20,6 +20,10 @@
     "strict": true,
     "importHelpers": true,
     "skipLibCheck": true,
+    "paths": {
+      "@flightctl/ui-components/*": ["../../libs/ui-components/*"],
+      "@flightctl/types": ["../../libs/types"],
+    },
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js", "**/*.json"],
   "exclude": ["node_modules", "dist"],
