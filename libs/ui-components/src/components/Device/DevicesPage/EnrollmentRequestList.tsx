@@ -168,7 +168,7 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
   }
 
   return (
-    <ListPage title={t('Devices pending approval')}>
+    <ListPage title={t('Devices pending approval')} headingLevel="h2">
       <ListPageBody error={error} loading={isLoading}>
         <EnrollmentRequestTable
           pendingEnrollments={pendingEnrollments}

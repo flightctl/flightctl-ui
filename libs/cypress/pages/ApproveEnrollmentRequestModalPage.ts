@@ -32,10 +32,10 @@ export class ApproveEnrollmentRequestModalPage {
   }
 
   get deviceAliasField() {
-    return cy.get('input[aria-label="Alias"]');
+    return this.body.get('input[aria-label="Alias"]');
   }
 
   get approveSubmitButton() {
-    return cy.contains('button', 'Approve');
+    return this.body.contains('button', 'Approve');
   }
 }
