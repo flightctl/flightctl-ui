@@ -1,17 +1,1 @@
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-ui-from-router
-  namespace: {{ .Values.flightctlUi.namespace }}
-spec:
-  ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          policy-group.network.openshift.io/ingress: ""
-      podSelector: {}
-  podSelector:
-    matchLabels:
-      role: frontend
-  policyTypes:
-  - Ingress
+../../../../../ocp-plugin/deploy/helm/flightctl-ocp-ui/templates/flightctl-ui-network-policy.yaml
