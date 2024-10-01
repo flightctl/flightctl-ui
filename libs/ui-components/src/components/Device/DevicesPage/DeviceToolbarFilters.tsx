@@ -33,10 +33,9 @@ type LabelFleetSelectorProps = {
   allLabels: FlightCtlLabel[];
   selectedFleetNames: string[];
   selectedLabels: FlightCtlLabel[];
-  onSelect: (item: LabelFleetSelectItem) => void;
+  onSelect: (type: 'fleet' | 'label', value: string) => void;
+  placeholder?: string;
 };
-
-type LabelFleetSelectItem = { type: 'fleet' | 'label'; id: string };
 
 const LabelFleetResults = ({
   allLabels,
@@ -65,7 +64,7 @@ const LabelFleetResults = ({
               .filter((_, index) => index < visibleLabels)
               .map((labelStr) => {
                 return (
-                  <SelectOption key={`label__${labelStr}`} value={{ type: 'label', id: labelStr }}>
+                  <SelectOption key={`label@@${labelStr}`} value={`label@@${labelStr}`}>
                     {labelStr}
                   </SelectOption>
                 );
@@ -79,7 +78,7 @@ const LabelFleetResults = ({
             {availableFleetNames
               .filter((_, index) => index < visibleFleets)
               .map((fleetName) => (
-                <SelectOption key={`fleet__${fleetName}`} value={{ type: 'fleet', id: fleetName }}>
+                <SelectOption key={`fleet@@${fleetName}`} value={`fleet@@${fleetName}`}>
                   {fleetName}
                 </SelectOption>
               ))}
@@ -96,6 +95,7 @@ const LabelFleetSelector = ({
   allLabels,
   selectedLabels,
   onSelect,
+  placeholder,
 }: LabelFleetSelectorProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [filterText, setFilterText] = React.useState<string>('');
@@ -131,8 +131,8 @@ const LabelFleetSelector = ({
   };
 
   const selectedIds = selectedFleetNames
-    .map((fleetName) => ({ type: 'fleet', id: fleetName }))
-    .concat(selectedLabels.map((label) => ({ type: 'label', id: labelToString(label) })));
+    .map((fleetName) => `fleet@@${fleetName}`)
+    .concat(selectedLabels.map((label) => `label@@${labelToString(label)}`));
 
   const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
     <MenuToggle
@@ -159,6 +159,7 @@ const LabelFleetSelector = ({
           innerRef={textInputRef}
           role="combobox"
           isExpanded={isOpen}
+          placeholder={placeholder}
           aria-controls="fleet-label-typeahead-select-listbox"
         />
 
@@ -177,7 +178,13 @@ const LabelFleetSelector = ({
       isOpen={isOpen}
       selected={selectedIds}
       onSelect={(_event, value) => {
-        onSelect(value as unknown as LabelFleetSelectItem);
+        const valStr = value as string;
+        const id = valStr.split('@@')[1];
+        if (valStr.startsWith('fleet@@')) {
+          onSelect('fleet', id);
+        } else {
+          onSelect('label', id);
+        }
         setIsOpen(false);
         setFilterText('');
       }}
@@ -234,10 +241,9 @@ const DeviceToolbarFilter = ({
     setIsSearchTypeExpanded(false);
   };
 
-  const onSelectFleetOrLabel = (item: LabelFleetSelectItem) => {
+  const onSelectFleetOrLabel = (type: 'fleet' | 'label', id: string) => {
     // Selecting a previously selected label does nothing. Labels can only be removed from the chips.
-    const { id } = item;
-    if (item.type === 'fleet') {
+    if (type === 'fleet') {
       const isSelected = selectedFleetNames.includes(id);
       if (!isSelected) {
         setSelectedFleets(selectedFleetNames.concat([id]));
@@ -284,6 +290,7 @@ const DeviceToolbarFilter = ({
         <TableTextSearch value={search} setValue={setSearch} />
       ) : (
         <LabelFleetSelector
+          placeholder={setSearch ? undefined : t('Filter by labels and fleets')}
           allLabels={allLabels}
           fleets={fleets}
           selectedFleetNames={selectedFleetNames}

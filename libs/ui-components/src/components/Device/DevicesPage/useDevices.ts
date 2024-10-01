@@ -61,28 +61,25 @@ export const useDevices = ({
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
 }): [Device[], boolean, unknown, boolean, VoidFunction, FlightCtlLabel[]] => {
-  // Assumes the initial request does not have fleet / label filters
-  // TODO remove when the API filters for fetching labels exist
-  const [allLabels, setAllLabels] = React.useState<FlightCtlLabel[]>();
+  const [deviceLabelList] = useFetchPeriodically<DeviceList>({
+    endpoint: 'devices',
+  });
   const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint({ ownerFleets, activeStatuses, labels });
   const [devicesList, devicesLoading, devicesError, devicesRefetch, updating] = useFetchPeriodically<DeviceList>({
     endpoint: devicesEndpoint,
   });
 
-  React.useEffect(() => {
-    if (allLabels === undefined && devicesList?.items && devicesList.items.length > 0) {
-      const set = new Set<FlightCtlLabel>();
+  const allLabels = React.useMemo(() => {
+    const labelsSet = new Set<FlightCtlLabel>();
 
-      devicesList.items.forEach((device) => {
-        const deviceLabels = fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias');
-        deviceLabels.forEach((label) => {
-          set.add(label);
-        });
+    deviceLabelList?.items.forEach((device) => {
+      const deviceLabels = fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias');
+      deviceLabels.forEach((label) => {
+        labelsSet.add(label);
       });
-
-      setAllLabels(Array.from(set));
-    }
-  }, [allLabels, devicesList]);
+    });
+    return Array.from(labelsSet);
+  }, [deviceLabelList]);
 
   return [
     devicesList?.items || [],
