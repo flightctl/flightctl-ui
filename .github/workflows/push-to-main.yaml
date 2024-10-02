@@ -114,18 +114,17 @@ jobs:
           username: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_USERNAME }}
           password: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_PASSWORD }}
 
-  publish-helm-charts:
+  publish-helm-chart:
     runs-on: ubuntu-latest
     needs: [generate-tags]
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build helm charts
+      - name: Build helm chart
         run: |
           echo packaging "${{ needs.generate-tags.outputs.helm_tags }}"
-          helm package ./apps/standalone/deploy/helm/flightctl-ui --version "${{ needs.generate-tags.outputs.helm_tags }}" --app-version "${{ needs.generate-tags.outputs.helm_tags }}"
-          helm package ./apps/ocp-plugin/deploy/helm/flightctl-ocp-ui --version "${{ needs.generate-tags.outputs.helm_tags }}" --app-version "${{ needs.generate-tags.outputs.helm_tags }}"
+          helm package ./deploy/helm/flightctl-ui --version "${{ needs.generate-tags.outputs.helm_tags }}" --app-version "${{ needs.generate-tags.outputs.helm_tags }}"
 
       - name: Login helm
         env:
@@ -133,7 +132,6 @@ jobs:
           USER: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_USERNAME }}
         run: helm registry login quay.io -u ${USER} -p ${PASSWORD}
 
-      - name: Push helm charts
+      - name: Push helm chart
         run: |
           helm push flightctl-ui-*.tgz oci://${{ env.QUAY_CHARTS }}/
-          helm push flightctl-ocp-ui-*.tgz oci://${{ env.QUAY_CHARTS }}/

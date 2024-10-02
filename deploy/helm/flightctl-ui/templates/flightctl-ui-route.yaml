@@ -1,3 +1,4 @@
+{{ if not (eq (.Values.global).target "acm") }}
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
@@ -13,7 +14,7 @@ spec:
   {{- if .Values.baseURL }}
   host:  {{ .Values.baseURL }}
   {{- else }}
-  host:  ui.{{ (.Values.global).baseDomain }}
+  host:  ui.{{ include "flightctl.getBaseDomain" . }}
   {{- end }}
   to:
     kind: Service
@@ -24,4 +25,5 @@ spec:
   tls:
     termination: passthrough
   wildcardPolicy: None
+{{ end }}
     
