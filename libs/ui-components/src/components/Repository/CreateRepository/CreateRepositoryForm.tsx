@@ -286,7 +286,7 @@ const CreateRepositoryFormContent = ({ isEdit, isReadOnly, onClose, children }: 
       {children}
       <FlightCtlActionGroup>
         <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
-          {isEdit ? t('Edit repository') : t('Create repository')}
+          {isEdit ? t('Save') : t('Create repository')}
         </Button>
         <Button variant="link" isDisabled={isSubmitting} onClick={onClose}>
           {t('Cancel')}
