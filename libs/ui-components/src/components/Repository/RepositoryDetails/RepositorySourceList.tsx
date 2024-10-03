@@ -3,11 +3,10 @@ import { List, ListItem, Spinner } from '@patternfly/react-core';
 
 import { Repository } from '@flightctl/types';
 import { useFetch } from '../../../hooks/useFetch';
+import { ConfigSourceProvider, getRepoName, isRepoConfig } from '../../../types/deviceSpec';
 import { isPromiseRejected } from '../../../types/typeUtils';
 import { getErrorMessage } from '../../../utils/error';
-import RepositorySource, { RepositorySourceDetails } from './RepositorySource';
-import { useTranslation } from '../../../hooks/useTranslation';
-import { SourceItem } from '../../../utils/devices';
+import { getConfigDetails } from './RepositorySource';
 
 const useArrayEq = (array: string[]) => {
   const prevArrayRef = React.useRef(array);
@@ -19,65 +18,58 @@ const useArrayEq = (array: string[]) => {
   return prevArrayRef.current;
 };
 
-const repoConfigTypes = ['git', 'http'];
+type RepoLoadDetails = { url?: string; errorMsg?: string };
 
-const RepositorySourceList = ({ sourceItems }: { sourceItems: SourceItem[] }) => {
+const RepositorySourceList = ({ configs }: { configs: Array<ConfigSourceProvider> }) => {
   const { get } = useFetch();
-  const { t } = useTranslation();
+  const repoConfigs = configs.filter(isRepoConfig);
 
-  const nonRepoItems = sourceItems.filter((item) => !repoConfigTypes.includes(item.type));
+  // Map indexed by repository name, with the result of fetching the repository details
+  const [repoDetailsMap, setRepoDetailsMap] = React.useState<Record<string, Record<string, RepoLoadDetails>>>({});
 
-  const [repoDetailItems, setRepoDetailItems] = React.useState<RepositorySourceDetails[]>();
+  const repoConfigNames = useArrayEq(repoConfigs.map((config) => config.name));
+  const repositoryNames = useArrayEq(repoConfigs.map(getRepoName));
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
-
-  const repositoryItems = sourceItems.filter((item) => repoConfigTypes.includes(item.type));
-
-  const configNames = useArrayEq(repositoryItems.map((item) => item.name));
-  const repositoryNames = useArrayEq(repositoryItems.map((item) => item.details));
-  const repositoryTypes = useArrayEq(repositoryItems.map((item) => item.type));
 
   React.useEffect(() => {
     const fetch = async () => {
-      const promises = repositoryNames.map((r) => get<Repository>(`repositories/${r}`));
+      const promises = repositoryNames.map((repoName) => get<Repository>(`repositories/${repoName}`));
       const results = await Promise.allSettled(promises);
 
-      const repoSourceItems: RepositorySourceDetails[] = results.map((result, index) => {
+      const map = {};
+      results.forEach((result, index) => {
         const isRepoMissing = isPromiseRejected(result);
-        const configName = configNames[index];
-        const errorMessage = isRepoMissing
-          ? `${t('The repository "{{name}}" defined for this source failed to load.', {
-              name: repositoryNames[index],
-            })} ${getErrorMessage(result.reason)}`
-          : undefined;
-        const url = isRepoMissing ? undefined : result.value.spec.url;
-        return {
-          name: configName,
-          details: url,
-          type: repositoryTypes[index] as 'git' | 'http',
-          errorMessage,
-        };
+        const repoName = repositoryNames[index];
+
+        const repoInfo: { url?: string; errorMsg?: string } = {};
+        if (isRepoMissing) {
+          repoInfo.errorMsg = getErrorMessage(result.reason);
+        } else {
+          repoInfo.url = result.value.spec.url;
+        }
+        map[repoName] = repoInfo;
       });
-      setRepoDetailItems(repoSourceItems);
+      setRepoDetailsMap(map);
       setIsLoading(false);
     };
 
     void fetch();
-  }, [t, get, repositoryNames, configNames, repositoryTypes]);
+  }, [get, repoConfigNames, repositoryNames]);
 
   if (isLoading) {
     return <Spinner size="sm" />;
   }
 
-  const allItems: RepositorySourceDetails[] = repoDetailItems?.length
-    ? repoDetailItems.concat(nonRepoItems)
-    : nonRepoItems;
-  return allItems.length > 0 ? (
+  return configs.length > 0 ? (
     <List>
-      {allItems.map((sourceDetails) => (
-        <ListItem key={sourceDetails.name || sourceDetails.details}>
-          <RepositorySource sourceDetails={sourceDetails} />
-        </ListItem>
-      ))}
+      {configs.map((config) => {
+        let extraArgs = {};
+        if (isRepoConfig(config)) {
+          const repoName = getRepoName(config);
+          extraArgs = repoDetailsMap[repoName] || {};
+        }
+        return <ListItem key={config.name}>{getConfigDetails(config, extraArgs)}</ListItem>;
+      })}
     </List>
   ) : (
     '-'

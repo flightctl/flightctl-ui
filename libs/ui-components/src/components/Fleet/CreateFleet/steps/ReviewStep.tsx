@@ -15,7 +15,6 @@ import LabelsView from '../../../common/LabelsView';
 import { toAPILabel } from '../../../../utils/labels';
 import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
 import { getErrorMessage } from '../../../../utils/error';
-import { getSourceItems } from '../../../../utils/devices';
 import { getAPIConfig } from '../../../Device/EditDeviceWizard/deviceSpecUtils';
 
 export const reviewStepId = 'review';
@@ -57,7 +56,7 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Configurations/applications')}</DescriptionListTerm>
             <DescriptionListDescription>
-              <RepositorySourceList sourceItems={getSourceItems(values.configTemplates.map(getAPIConfig))} />
+              <RepositorySourceList configs={values.configTemplates.map(getAPIConfig)} />
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>

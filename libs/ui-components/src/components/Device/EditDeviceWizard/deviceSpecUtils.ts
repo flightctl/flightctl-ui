@@ -10,6 +10,7 @@ import {
   PatchRequest,
 } from '@flightctl/types';
 import {
+  ConfigSourceProvider,
   GitConfigTemplate,
   HttpConfigTemplate,
   InlineConfigTemplate,
@@ -22,12 +23,6 @@ import {
   isKubeProviderSpec,
   isKubeSecretTemplate,
 } from '../../../types/deviceSpec';
-
-export type ConfigSourceProvider =
-  | GitConfigProviderSpec
-  | KubernetesSecretProviderSpec
-  | InlineConfigProviderSpec
-  | HttpConfigProviderSpec;
 
 const isSameGitConf = (a: GitConfigProviderSpec, b: GitConfigProviderSpec) => {
   const aRef = a.gitRef;
