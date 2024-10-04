@@ -34,7 +34,7 @@
   "scripts": {
     "prebuild": "tsc --noEmit && rimraf dist",
     "build": "NODE_ENV=production npm run ts-node ../../node_modules/.bin/webpack --mode=production",
-    "dev": "concurrently \"npm run dev:proxy\" \"npm run dev:ocp\" \"npm run dev:ui\"",
+    "dev": "IS_OCP_PLUGIN='true' concurrently \"npm run dev:proxy\" \"npm run dev:ocp\" \"npm run dev:ui\"",
     "dev:proxy": "cd ../../proxy && nodemon --watch 'proxy/**/*' --exec 'go run' app.go --signal SIGTERM",
     "dev:ui": "npm run ts-node ../../node_modules/.bin/webpack serve --mode=development --color --progress",
     "dev:ocp": "./start-ocp-console.sh",
