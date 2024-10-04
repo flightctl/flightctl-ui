@@ -146,11 +146,9 @@ const FleetTable = () => {
             <FleetPageActions createText={t('Create fleet')} />
           </ToolbarItem>
           <ToolbarItem>
-            <TableActions>
+            <TableActions isDisabled={!hasSelectedRows}>
               <SelectList>
-                <SelectOption isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)}>
-                  {t('Delete')}
-                </SelectOption>
+                <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
               </SelectList>
             </TableActions>
           </ToolbarItem>

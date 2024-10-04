@@ -126,11 +126,9 @@ const RepositoryTable = () => {
             <CreateRepositoryButton buttonText={t('Create repository')} />
           </ToolbarItem>
           <ToolbarItem>
-            <TableActions>
+            <TableActions isDisabled={!hasSelectedRows}>
               <DropdownList>
-                <SelectOption isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)}>
-                  {t('Delete')}
-                </SelectOption>
+                <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
               </DropdownList>
             </TableActions>
           </ToolbarItem>
