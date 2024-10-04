@@ -7,6 +7,7 @@ oc process -f ocp-console-oauth-client.yaml | oc apply -f -
 
 oc get oauthclient console-oauth-client -o jsonpath='{.secret}' > ocp-console/console-client-secret
 
+oc apply -f ocp-console-sa-secrets.yaml
 oc get secrets -n default --field-selector type=kubernetes.io/service-account-token -o json | \
     jq '.items[0].data."ca.crt"' -r | python -m base64 -d > ocp-console/ca.crt
 
@@ -32,7 +33,6 @@ set +e
 BRIDGE_K8S_MODE_OFF_CLUSTER_THANOS=$(oc -n openshift-config-managed get configmap monitoring-shared-config -o jsonpath='{.data.thanosPublicURL}' 2>/dev/null)
 BRIDGE_K8S_MODE_OFF_CLUSTER_ALERTMANAGER=$(oc -n openshift-config-managed get configmap monitoring-shared-config -o jsonpath='{.data.alertmanagerPublicURL}' 2>/dev/null)
 set -e
-BRIDGE_K8S_AUTH_BEARER_TOKEN=$(oc whoami --show-token 2>/dev/null)
 BRIDGE_USER_SETTINGS_LOCATION="localstorage"
 
 # Don't fail if the cluster doesn't have gitops.
