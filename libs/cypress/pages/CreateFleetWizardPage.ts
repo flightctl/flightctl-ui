@@ -40,7 +40,7 @@ export class CreateFleetWizardPage {
   }
 
   get newFleetGitSourceTypeField() {
-    return cy.contains('button', 'Git config provider');
+    return cy.contains('button', 'Git configuration');
   }
 
   get newFleetTargetReferenceField() {

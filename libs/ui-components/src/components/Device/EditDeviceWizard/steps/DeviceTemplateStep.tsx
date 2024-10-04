@@ -32,7 +32,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
             <ExpandableSection toggleTextCollapsed={t('Show more')} toggleTextExpanded={t('Show less')}>
               <Trans t={t}>
                 Add a variable by using <strong>{templateOption1}</strong> or <strong>{templateOption2}</strong> and it
-                will be applied based each device&rsquo;s details. For example, you could set the following value to
+                will be applied based on each device&rsquo;s details. For example, you could set the following value to
                 apply different files in a Git configuration:
               </Trans>
               <CodeBlock className="pf-v5-u-mt-md">
