@@ -1,0 +1,29 @@
+{{ if not (eq (.Values.global).target "acm") }}
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: flightctl-ui
+  namespace: {{ .Release.Namespace }}
+  {{- if (.Values.global).appCode }}
+  labels:
+    external-exposed: 'true'
+    paas.redhat.com/appcode: {{ .Values.global.appCode }}
+    shard: external
+  {{ end }}
+spec:
+  {{- if .Values.baseURL }}
+  host:  {{ .Values.baseURL }}
+  {{- else }}
+  host:  ui.{{ include "flightctl.getBaseDomain" . }}
+  {{- end }}
+  to:
+    kind: Service
+    name: flightctl-ui
+    weight: 100
+  port:
+    targetPort: 8080-tcp
+  tls:
+    termination: passthrough
+  wildcardPolicy: None
+{{ end }}
+    

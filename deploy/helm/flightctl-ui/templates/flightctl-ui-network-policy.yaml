@@ -1,8 +1,9 @@
+{{ if not (eq (.Values.global).target "acm") }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-ui-from-router
-  namespace: {{ .Values.flightctlUi.namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   ingress:
   - from:
@@ -15,3 +16,4 @@ spec:
       role: frontend
   policyTypes:
   - Ingress
+{{ end }}

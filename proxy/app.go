@@ -43,18 +43,20 @@ func main() {
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
 	apiRouter.HandleFunc("/device-images", bridge.HandleDeviceImages)
 
-	oidcTlsConfig, err := bridge.GetOIDCTlsConfig()
-	if err != nil {
-		panic(err)
-	}
+	if config.OcpPlugin != "true" {
+		oidcTlsConfig, err := bridge.GetOIDCTlsConfig()
+		if err != nil {
+			panic(err)
+		}
 
-	oidcHandler, err := auth.NewOIDCAuth(oidcTlsConfig, tlsConfig)
-	if err != nil {
-		panic(err)
+		oidcHandler, err := auth.NewOIDCAuth(oidcTlsConfig, tlsConfig)
+		if err != nil {
+			panic(err)
+		}
+		apiRouter.HandleFunc("/login", oidcHandler.Login)
+		apiRouter.HandleFunc("/login/info", oidcHandler.GetUserInfo)
+		apiRouter.HandleFunc("/logout", oidcHandler.Logout)
 	}
-	apiRouter.HandleFunc("/login", oidcHandler.Login)
-	apiRouter.HandleFunc("/login/info", oidcHandler.GetUserInfo)
-	apiRouter.HandleFunc("/logout", oidcHandler.Logout)
 
 	spa := server.SpaHandler{}
 	router.PathPrefix("/").Handler(server.GzipHandler(spa))
