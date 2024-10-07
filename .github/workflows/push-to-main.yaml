@@ -44,9 +44,9 @@ jobs:
             echo "image_tags=${image_tags[@]}" >> $GITHUB_OUTPUT
             echo "image_tags=${image_tags[@]}"
 
-            helm_tag=${version} # remove the leading v prefix for version
-            echo "helm_tag=${helm_tag}" >> $GITHUB_OUTPUT
-            echo "helm_tag=${helm_tag}"
+            helm_tags=${version} # remove the leading v prefix for version
+            echo "helm_tags=${helm_tags}" >> $GITHUB_OUTPUT
+            echo "helm_tags=${helm_tags}"
           fi
 
   publish-flightctl-ui:
