@@ -37,15 +37,16 @@ jobs:
             echo "image_tags,helm_tags=${image_tags[@]}"
 
           else
+            version=$(git describe --long --tags --exclude latest)
+            version=${version#v} # remove the leading v prefix for version
             # The images tags are taken from git
-            image_tags=( latest-${GITHUB_SHA} latest )
+            image_tags=( latest-${GITHUB_SHA} latest ${version} )
             echo "image_tags=${image_tags[@]}" >> $GITHUB_OUTPUT
             echo "image_tags=${image_tags[@]}"
 
-            helm_tags=$(git describe --long --tags)
-            helm_tags=${helm_tags#v} # remove the leading v prefix for version
-            echo "helm_tags=${helm_tags}" >> $GITHUB_OUTPUT
-            echo "helm_tags=${helm_tags}"
+            helm_tag=${version} # remove the leading v prefix for version
+            echo "helm_tag=${helm_tag}" >> $GITHUB_OUTPUT
+            echo "helm_tag=${helm_tag}"
           fi
 
   publish-flightctl-ui:
