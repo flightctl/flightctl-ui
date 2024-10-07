@@ -18,7 +18,7 @@
 ## @param image.tag Image tag to pull.
 ## @param image.pullPolicy K8s pull policy for pulling the image.
 image:
-  image: quay.io/flightctl/flightctl-ui
+  image: ""
   tag: ""
   pullPolicy: Always
 ## @param baseURL Base URL of UI.
