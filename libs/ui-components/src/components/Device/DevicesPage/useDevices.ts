@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDebounce } from 'use-debounce';
 
-import { Device, DeviceList } from '@flightctl/types';
+import { Device, DeviceList, DevicesSummary } from '@flightctl/types';
 import { FilterSearchParams } from '../../../utils/status/devices';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { FlightCtlLabel } from '../../../types/extraTypes';
@@ -27,9 +27,10 @@ type DevicesEndpointArgs = {
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
+  summaryOnly?: boolean;
 };
 
-const getDevicesEndpoint = ({ ownerFleets, activeStatuses, labels }: DevicesEndpointArgs) => {
+const getDevicesEndpoint = ({ ownerFleets, activeStatuses, labels, summaryOnly }: DevicesEndpointArgs) => {
   const filterByAppStatus = activeStatuses?.[FilterSearchParams.AppStatus];
   const filterByDevStatus = activeStatuses?.[FilterSearchParams.DeviceStatus];
   const filterByUpdateStatus = activeStatuses?.[FilterSearchParams.UpdatedStatus];
@@ -43,6 +44,10 @@ const getDevicesEndpoint = ({ ownerFleets, activeStatuses, labels }: DevicesEndp
   filterByUpdateStatus?.forEach((updSt) => params.append('statusFilter', `updated.status=${updSt}`));
 
   setLabelParams(params, labels);
+
+  if (summaryOnly) {
+    params.set('summaryOnly', 'true');
+  }
   return params.size ? `devices?${params.toString()}` : 'devices';
 };
 
@@ -50,6 +55,21 @@ export const useDevicesEndpoint = (args: DevicesEndpointArgs): [string, boolean]
   const endpoint = getDevicesEndpoint(args);
   const [devicesEndpointDebounced] = useDebounce(endpoint, 1000);
   return [devicesEndpointDebounced, endpoint !== devicesEndpointDebounced];
+};
+
+export const useDevicesSummary = ({
+  ownerFleets,
+  labels,
+}: {
+  ownerFleets?: string[];
+  labels?: FlightCtlLabel[];
+}): [DevicesSummary | undefined, boolean] => {
+  const [devicesEndpoint] = useDevicesEndpoint({ ownerFleets, labels, summaryOnly: true });
+  const [deviceList, listLoading] = useFetchPeriodically<DeviceList>({
+    endpoint: devicesEndpoint,
+  });
+
+  return [deviceList?.summary, listLoading];
 };
 
 export const useDevices = ({

@@ -1,38 +1,19 @@
-import percentRound from 'percent-round';
-import { ROUTE } from '../../../../hooks/useNavigate';
-import { StatusItem, getDefaultStatusColor } from '../../../../utils/status/common';
-import { Data } from '../../../charts/DonutChart';
-import { FilterSearchParams } from '../../../../utils/status/devices';
 import { FlightCtlLabel } from '../../../../types/extraTypes';
 import { labelToString } from '../../../../utils/labels';
+import { FilterSearchParams } from '../../../../utils/status/devices';
+import { StatusItem } from '../../../../utils/status/common';
+import { StatusMap, toChartData } from '../../../charts/utils';
 
-export type StatusMap<T extends string> = Record<T, number>;
-
-export const toChartData = <T extends string>(
-  map: StatusMap<T>,
+export const toOverviewChartData = <T extends string>(
+  map: StatusMap,
   statusItems: StatusItem<T>[],
-  filterName: FilterSearchParams,
   labels: FlightCtlLabel[],
-  fleets: string[],
+  fleetNames: string[],
+  filterName: FilterSearchParams,
 ) => {
-  const percentages = percentRound(Object.values(map));
-  return Object.keys(map).map<Data>((key, index) => {
-    const item = statusItems.find(({ id }) => id === key) as StatusItem<T>;
+  const baseQuery = new URLSearchParams();
+  labels.forEach((l) => baseQuery.append(FilterSearchParams.Label, labelToString(l)));
+  fleetNames.forEach((f) => baseQuery.append(FilterSearchParams.Fleet, f));
 
-    const query = new URLSearchParams();
-    query.append(filterName, key);
-    labels.forEach((l) => query.append(FilterSearchParams.Label, labelToString(l)));
-    fleets.forEach((f) => query.append(FilterSearchParams.Fleet, f));
-
-    return {
-      x: `${item.label}`,
-      y: percentages[index],
-      color: getDefaultStatusColor(item.level),
-      link: {
-        to: ROUTE.DEVICES,
-        query: query.toString(),
-      },
-      tooltip: `${map[key]} ${item.label}`,
-    };
-  });
+  return toChartData<T>(map, statusItems, baseQuery, filterName);
 };

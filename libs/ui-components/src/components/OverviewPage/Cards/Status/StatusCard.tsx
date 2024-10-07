@@ -23,13 +23,19 @@ import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import StatusCardFilters from './StatusCardFilters';
 import ErrorAlert from '../../../ErrorAlert/ErrorAlert';
 import { FlightCtlLabel } from '../../../../types/extraTypes';
-import { useDevices } from '../../../Device/DevicesPage/useDevices';
+import { useDevices, useDevicesSummary } from '../../../Device/DevicesPage/useDevices';
 
 const StatusCard = () => {
   const { t } = useTranslation();
   const [fleets, setFleets] = React.useState<string[]>([]);
   const [labels, setLabels] = React.useState<FlightCtlLabel[]>([]);
 
+  const [devicesSummary, summaryLoading] = useDevicesSummary({
+    ownerFleets: fleets,
+    labels,
+  });
+
+  // TODO remove "useDevices" (to fetch labels), and fetching of fleets when the new API endpoints are available
   const [devices, loading, error, , , allLabels] = useDevices({
     ownerFleets: fleets,
     labels,
@@ -40,7 +46,7 @@ const StatusCard = () => {
   });
 
   let content: React.ReactNode;
-  if (loading || flLoading) {
+  if (loading || flLoading || summaryLoading) {
     content = (
       <Bullseye>
         <Spinner />
@@ -59,13 +65,21 @@ const StatusCard = () => {
         <StackItem>
           <Flex justifyContent={{ default: 'justifyContentSpaceAround' }}>
             <FlexItem>
-              <ApplicationStatusChart resources={devices} labels={labels} fleets={fleets} />
+              <ApplicationStatusChart
+                applicationStatus={devicesSummary?.applicationStatus || {}}
+                labels={labels}
+                fleets={fleets}
+              />
             </FlexItem>
             <FlexItem>
-              <DeviceStatusChart resources={devices} labels={labels} fleets={fleets} />
+              <DeviceStatusChart deviceStatus={devicesSummary?.summaryStatus || {}} labels={labels} fleets={fleets} />
             </FlexItem>
             <FlexItem>
-              <SystemUpdateStatusChart resources={devices} labels={labels} fleets={fleets} />
+              <SystemUpdateStatusChart
+                updatedStatus={devicesSummary?.updateStatus || {}}
+                labels={labels}
+                fleets={fleets}
+              />
             </FlexItem>
           </Flex>
         </StackItem>
