@@ -88,6 +88,9 @@ const getColumns = (t: TFunction): TableColumn<Fleet>[] => [
     onSort: sortFleetsByOSImg,
   },
   {
+    name: t('Devices'),
+  },
+  {
     name: t('Status'),
     onSort: sortByStatus,
   },
@@ -187,7 +190,7 @@ const FleetsPage = () => {
   const { t } = useTranslation();
 
   // TODO move the fetch down to FleetTable when the API includes the filter for pending / errored resource syncs
-  const fleetLoad = useFetchPeriodically<FleetList>({ endpoint: 'fleets' });
+  const fleetLoad = useFetchPeriodically<FleetList>({ endpoint: 'fleets?addDevicesCount=true' });
 
   return (
     <>
