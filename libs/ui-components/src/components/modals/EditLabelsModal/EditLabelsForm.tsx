@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Formik, FormikProps } from 'formik';
-import { Alert, FormGroup } from '@patternfly/react-core';
+import { Alert } from '@patternfly/react-core';
 import { TFunction } from 'i18next';
 import * as Yup from 'yup';
 import debounce from 'lodash/debounce';
@@ -50,14 +50,12 @@ const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormConte
 
   return (
     <FlightCtlForm>
-      <FormGroup label={t('Device labels')}>
-        <LabelsField
-          name="labels"
-          addButtonText={isSubmitting ? t('Saving...') : undefined}
-          isFormEditable={!isSubmitting}
-          onChangeCallback={debouncedSubmit}
-        />
-      </FormGroup>
+      <LabelsField
+        name="labels"
+        addButtonText={isSubmitting ? t('Saving...') : undefined}
+        isFormEditable={!isSubmitting}
+        onChangeCallback={debouncedSubmit}
+      />
       {submitError && <Alert isInline title={submitError} variant="danger" />}
     </FlightCtlForm>
   );
