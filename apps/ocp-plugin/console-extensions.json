@@ -137,7 +137,7 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
-      "path": ["/edge/enrollmentrequests/:enrollmentRequestId"],
+      "path": ["/edge/enroll/:enrollmentRequestId", "/edge/enrollmentrequests/:enrollmentRequestId"],
       "component": { "$codeRef": "EnrollmentRequestDetailsPage" }
     }
   },
