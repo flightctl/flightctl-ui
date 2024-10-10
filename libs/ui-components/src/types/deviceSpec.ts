@@ -25,6 +25,43 @@ export const isGitConfigTemplate = (configTemplate: ConfigTemplate): configTempl
 export const isGitProviderSpec = (providerSpec: GenericConfigSpec): providerSpec is GitConfigProviderSpec =>
   providerSpec.configType === 'GitConfigProviderSpec';
 
+export type ConfigSourceProvider =
+  | GitConfigProviderSpec
+  | KubernetesSecretProviderSpec
+  | InlineConfigProviderSpec
+  | HttpConfigProviderSpec;
+
+export type RepoConfig = GitConfigProviderSpec | HttpConfigProviderSpec;
+
+export const isRepoConfig = (config: ConfigSourceProvider): config is RepoConfig =>
+  isGitProviderSpec(config) || isHttpProviderSpec(config);
+
+const hasTemplateVariables = (str: string) => /device.metadata/.test(str);
+
+export const getConfigFullRepoUrl = (config: RepoConfig, repositoryUrl: string) => {
+  let relativePath: string = '';
+  if (isHttpProviderSpec(config)) {
+    relativePath = config.httpRef.suffix || '';
+  } else if (isGitProviderSpec(config) && /github|gitlab/.test(repositoryUrl)) {
+    const configPath = config.gitRef.path.replace(/^\//g, ''); // remove the leading slash
+    const configParts = configPath.split('/');
+    const lastPart = configParts[configParts.length - 1];
+
+    // Extension-less files cannot be identified as such. Github and Gitlab both redirect to the correct URL to show the file contents
+    const fileOrDir = lastPart.includes('.') ? 'blob' : 'tree';
+    relativePath = `${fileOrDir}/${config.gitRef.targetRevision}/${configPath}`;
+  }
+
+  if (relativePath && !hasTemplateVariables(relativePath)) {
+    return `${repositoryUrl}/${relativePath}`;
+  }
+  // We return just the base repository URL as a fallback
+  return repositoryUrl;
+};
+
+export const getRepoName = (config: RepoConfig) =>
+  isGitProviderSpec(config) ? config.gitRef.repository : config.httpRef.repository;
+
 export type KubeSecretTemplate = ConfigTemplate & {
   type: 'secret';
   secretName: string;

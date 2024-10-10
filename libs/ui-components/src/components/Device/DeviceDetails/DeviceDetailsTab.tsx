@@ -25,7 +25,6 @@ import DeviceFleet from './DeviceFleet';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
 import SystemdTable from './SystemdTable';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
-import { getSourceItems } from '../../../utils/devices';
 import { getErrorMessage } from '../../../utils/error';
 import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
 import WithHelperText from '../../common/WithHelperText';
@@ -50,7 +49,6 @@ const DeviceDetailsTab = ({
 }: React.PropsWithChildren<DeviceDetailsTabProps>) => {
   const { t } = useTranslation();
 
-  const sourceItems = getSourceItems(device.spec.config);
   return (
     <Grid hasGutter>
       {!!errorTv && (
@@ -186,9 +184,11 @@ const DeviceDetailsTab = ({
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('Sources ({{size}})', { size: sourceItems.length })}</DescriptionListTerm>
+                <DescriptionListTerm>
+                  {t('Sources ({{size}})', { size: device.spec?.config?.length || 0 })}
+                </DescriptionListTerm>
                 <DescriptionListDescription>
-                  <RepositorySourceList sourceItems={sourceItems} />
+                  <RepositorySourceList configs={device.spec.config || []} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>

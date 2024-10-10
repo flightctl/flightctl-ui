@@ -19,12 +19,10 @@ import FleetDevices from './FleetDevices';
 import FleetStatus from '../FleetStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
-import { getSourceItems } from '../../../utils/devices';
 import FleetDevicesLink from './FleetDevicesLink';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
-  const sourceItems = getSourceItems(fleet.spec.template.spec.config);
   const fleetId = fleet.metadata.name as string;
   const devicesSummary = fleet.status?.devicesSummary;
   return (
@@ -69,9 +67,11 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('Sources ({{size}})', { size: sourceItems.length })}</DescriptionListTerm>
+                <DescriptionListTerm>
+                  {t('Sources ({{size}})', { size: fleet.spec.template.spec.config?.length || 0 })}
+                </DescriptionListTerm>
                 <DescriptionListDescription>
-                  <RepositorySourceList sourceItems={sourceItems} />
+                  <RepositorySourceList configs={fleet.spec.template.spec.config || []} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>
