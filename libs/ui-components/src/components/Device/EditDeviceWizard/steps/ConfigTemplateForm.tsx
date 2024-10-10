@@ -98,10 +98,10 @@ const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionPr
         <FormGroup label={t('Source type')} isRequired>
           <FormSelect
             items={{
-              git: t('Git config provider'),
-              http: t('Http config provider'),
+              git: t('Git configuration'),
+              http: t('Http configuration'),
               // secret: t('Kubernetes secret provider'), not supported yet
-              inline: t('Inline config provider'),
+              inline: t('Inline configuration'),
             }}
             name={`${fieldName}.type`}
             placeholderText={t('Select a source type')}
