@@ -110,6 +110,7 @@ interface DeviceTableProps {
   hasFiltersEnabled: boolean;
   setOwnerFleets: (ownerFleets: string[]) => void;
   setActiveStatuses: (activeStatuses: FilterStatusMap) => void;
+  allLabels: FlightCtlLabel[];
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
   fleets: Fleet[];
@@ -123,6 +124,7 @@ export const DeviceTable = ({
   setOwnerFleets,
   activeStatuses,
   setActiveStatuses,
+  allLabels,
   selectedLabels,
   setSelectedLabels,
   hasFiltersEnabled,
@@ -157,9 +159,9 @@ export const DeviceTable = ({
         setOwnerFleets={setOwnerFleets}
         activeStatuses={activeStatuses}
         setActiveStatuses={setActiveStatuses}
+        allLabels={allLabels}
         selectedLabels={selectedLabels}
         setSelectedLabels={setSelectedLabels}
-        devices={devices}
         fleets={fleets}
         isFilterUpdating={isFilterUpdating}
       >
@@ -224,7 +226,7 @@ const DevicesPage = () => {
     selectedLabels,
     setSelectedLabels,
   } = useDeviceBackendFilters();
-  const [data, loading, error, updating, refetch] = useDevices({
+  const [data, loading, error, updating, refetch, allLabels] = useDevices({
     ownerFleets,
     activeStatuses,
     labels: selectedLabels,
@@ -242,6 +244,7 @@ const DevicesPage = () => {
         <ListPageBody error={error || flError} loading={loading || flLoading}>
           <DeviceTable
             devices={data}
+            allLabels={allLabels}
             refetch={refetch}
             hasFiltersEnabled={hasFiltersEnabled || updating}
             ownerFleets={ownerFleets}

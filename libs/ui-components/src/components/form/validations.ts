@@ -1,5 +1,7 @@
 import * as Yup from 'yup';
 import { TFunction } from 'i18next';
+import * as yaml from 'js-yaml';
+
 import { FlightCtlLabel } from '../../types/extraTypes';
 import {
   GitConfigTemplate,
@@ -12,7 +14,8 @@ import {
   isInlineConfigTemplate,
   isKubeSecretTemplate,
 } from '../../types/deviceSpec';
-import * as yaml from 'js-yaml';
+
+import { labelToString } from '../../utils/labels';
 
 type UnvalidatedLabel = Partial<FlightCtlLabel>;
 
@@ -209,12 +212,7 @@ export const validLabelsSchema = (t: TFunction) =>
       return invalidLabels.length > 0
         ? testContext.createError({
             message: t('The following labels are not valid Kubernetes labels: {{invalidLabels}}', {
-              invalidLabels: `${invalidLabels
-                .map((label) => {
-                  const suffix = label.value ? `=${label.value}` : '';
-                  return `${label.key}${suffix}`;
-                })
-                .join(', ')}`,
+              invalidLabels: `${invalidLabels.map((label) => labelToString(label as FlightCtlLabel)).join(', ')}`,
             }),
           })
         : true;

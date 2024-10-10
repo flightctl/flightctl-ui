@@ -1,3 +1,6 @@
+.ftcl_status-label {
+  flex-wrap: nowrap;
+}
 .ftcl_status-label > div {
   /* Reduce the space between the icon and the label, caused by the table rules */
   --pf-v5-l-flex--spacer--column: 0.5rem;

@@ -1,22 +1,21 @@
 import * as React from 'react';
-import DonutChart from '../../../charts/DonutChart';
-import { Device, DeviceSummaryStatusType } from '@flightctl/types';
-import { useTranslation } from '../../../../hooks/useTranslation';
-import { getDeviceStatusItems } from '../../../../utils/status/devices';
-import { StatusMap, toChartData } from './utils';
-import { FilterSearchParams } from '../../../../utils/status/devices';
-import { getDeviceStatusHelperText } from '../../../Status/utils';
-import { EnrollmentRequestStatus } from '../../../../utils/status/enrollmentRequest';
+
+import { DeviceSummaryStatusType } from '@flightctl/types';
 import { FlightCtlLabel } from '../../../../types/extraTypes';
 
-type DeviceStatusMap = StatusMap<DeviceSummaryStatusType | EnrollmentRequestStatus.Pending>;
+import { useTranslation } from '../../../../hooks/useTranslation';
+import { getDeviceStatusHelperText } from '../../../Status/utils';
+import { getDeviceStatusItems } from '../../../../utils/status/devices';
+import { FilterSearchParams } from '../../../../utils/status/devices';
+import { toOverviewChartData } from './utils';
+import DonutChart from '../../../charts/DonutChart';
 
 const DeviceStatusChart = ({
-  resources,
+  deviceStatus,
   labels,
   fleets,
 }: {
-  resources: Device[];
+  deviceStatus: Record<string, number>;
   labels: FlightCtlLabel[];
   fleets: string[];
 }) => {
@@ -24,23 +23,14 @@ const DeviceStatusChart = ({
 
   const statusItems = getDeviceStatusItems(t);
 
-  const data = resources.reduce(
-    (all, curr) => {
-      const devStatus = curr.status?.summary.status || DeviceSummaryStatusType.DeviceSummaryStatusUnknown;
-      all[devStatus]++;
-      return all;
-    },
-    {
-      [DeviceSummaryStatusType.DeviceSummaryStatusOnline]: 0,
-      [DeviceSummaryStatusType.DeviceSummaryStatusDegraded]: 0,
-      [DeviceSummaryStatusType.DeviceSummaryStatusError]: 0,
-      [DeviceSummaryStatusType.DeviceSummaryStatusRebooting]: 0,
-      [DeviceSummaryStatusType.DeviceSummaryStatusPoweredOff]: 0,
-      [DeviceSummaryStatusType.DeviceSummaryStatusUnknown]: 0,
-    } as DeviceStatusMap,
+  // TODO should we add the "Pending" devices, now that the Device table does not contain ERs?
+  const devStatusData = toOverviewChartData<DeviceSummaryStatusType>(
+    deviceStatus,
+    statusItems,
+    labels,
+    fleets,
+    FilterSearchParams.DeviceStatus,
   );
-
-  const devStatusData = toChartData(data, statusItems, FilterSearchParams.DeviceStatus, labels, fleets);
 
   return <DonutChart title={t('Device status')} data={devStatusData} helperText={getDeviceStatusHelperText(t)} />;
 };

@@ -1,14 +1,16 @@
+import * as React from 'react';
 import {
   Badge,
+  Flex,
+  FlexItem,
+  Icon,
   MenuToggle,
   Select,
   SelectGroup,
   Spinner,
-  TextInputGroup,
-  TextInputGroupMain,
   TextInputGroupUtilities,
 } from '@patternfly/react-core';
-import * as React from 'react';
+import { FilterIcon } from '@patternfly/react-icons/dist/js/icons/filter-icon';
 
 import './FilterSelect.css';
 
@@ -30,17 +32,9 @@ type FilterSelectProps = React.PropsWithChildren<{
   isFilterUpdating: boolean;
 }>;
 
-const FilterSelect: React.FC<FilterSelectProps> = ({
-  placeholder,
-  filter,
-  setFilter,
-  children,
-  selectedFilters,
-  isFilterUpdating,
-}) => {
+const FilterSelect: React.FC<FilterSelectProps> = ({ placeholder, selectedFilters, isFilterUpdating, children }) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const textInputRef = React.useRef<HTMLInputElement>();
-
   const toggleExpand = () => {
     if (!isExpanded) {
       textInputRef?.current?.focus();
@@ -54,37 +48,37 @@ const FilterSelect: React.FC<FilterSelectProps> = ({
       toggle={(toggleRef) => (
         <MenuToggle
           ref={toggleRef}
-          variant="typeahead"
           aria-label={placeholder}
           onClick={toggleExpand}
           isExpanded={isExpanded}
           isFullWidth
+          icon={
+            <Icon>
+              <FilterIcon />
+            </Icon>
+          }
         >
-          <TextInputGroup isPlain>
-            <TextInputGroupMain
-              value={filter}
-              onClick={() => !isExpanded && setIsExpanded(true)}
-              onChange={(_, value) => setFilter(value)}
-              onKeyDown={() => !isExpanded && setIsExpanded(true)}
-              autoComplete="off"
-              placeholder={placeholder}
-              role="combobox"
-              isExpanded={isExpanded}
-              innerRef={textInputRef}
-            />
-          </TextInputGroup>
-          {isFilterUpdating && (
-            <TextInputGroupUtilities onClick={toggleExpand}>
-              <Spinner size="sm" />
-            </TextInputGroupUtilities>
-          )}
-          {!!selectedFilters && (
-            <TextInputGroupUtilities onClick={toggleExpand}>
-              <Badge isRead className="fclt-filter-select__badge">
-                {selectedFilters}
-              </Badge>
-            </TextInputGroupUtilities>
-          )}
+          <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
+            <FlexItem>
+              <span>{placeholder}</span>
+            </FlexItem>
+            <FlexItem className="fctl-toggle-content">
+              {!!selectedFilters && (
+                <TextInputGroupUtilities onClick={toggleExpand}>
+                  <Badge isRead className="fctl-toggle-content__badge">
+                    {selectedFilters}
+                  </Badge>
+                </TextInputGroupUtilities>
+              )}
+              {isFilterUpdating && (
+                <span className="fctl-toggle-content__loader">
+                  <TextInputGroupUtilities onClick={toggleExpand}>
+                    <Spinner size="sm" />
+                  </TextInputGroupUtilities>
+                </span>
+              )}
+            </FlexItem>
+          </Flex>
         </MenuToggle>
       )}
       isOpen={isExpanded}

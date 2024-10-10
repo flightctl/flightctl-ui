@@ -5,11 +5,6 @@ import { StatusItem } from './common';
 
 export const getSystemUpdateStatusItems = (t: TFunction): StatusItem<UpdatedStatus>[] => [
   {
-    id: UpdatedStatus.DeviceUpdatedStatusUpToDate,
-    label: t('Up-to-date'),
-    level: 'success',
-  },
-  {
     id: UpdatedStatus.DeviceUpdatedStatusOutOfDate,
     label: t('Out-of-date'),
     level: 'warning',
@@ -23,6 +18,11 @@ export const getSystemUpdateStatusItems = (t: TFunction): StatusItem<UpdatedStat
     id: UpdatedStatus.DeviceUpdatedStatusUnknown,
     label: t('Unknown'),
     level: 'unknown',
+  },
+  {
+    id: UpdatedStatus.DeviceUpdatedStatusUpToDate,
+    label: t('Up-to-date'),
+    level: 'success',
   },
 ];
 export const systemUpdateStatusOrder = getSystemUpdateStatusItems((s: string) => s).map((item) => item.id);

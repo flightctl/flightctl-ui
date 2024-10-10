@@ -1,44 +1,70 @@
 import * as React from 'react';
 import { Grid, GridItem } from '@patternfly/react-core';
 
-import {
-  DeviceSummaryStatusType as DeviceStatus,
-  DevicesSummary,
-  DeviceUpdatedStatusType as UpdateStatus,
-} from '@flightctl/types';
+import { DevicesSummary } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { FilterSearchParams, getDeviceStatusItems } from '../../../utils/status/devices';
 import { getSystemUpdateStatusItems } from '../../../utils/status/system';
-import { getDeviceStatusHelperText, getUpdateStatusHelperText } from '../../Status/utils';
+import {
+  getApplicationStatusHelperText,
+  getDeviceStatusHelperText,
+  getUpdateStatusHelperText,
+} from '../../Status/utils';
 import DonutChart from '../../charts/DonutChart';
-import { toChartData } from './chartUtils';
-import { EnrollmentRequestStatus } from '../../../utils/status/enrollmentRequest';
+import { getApplicationSummaryStatusItems } from '../../../utils/status/applications';
+import { toChartData } from '../../../components/charts/utils';
 
 interface FleetDevicesProps {
   fleetId: string;
   devicesSummary: DevicesSummary;
 }
 
+const getBaseFleetQuery = (fleetId: string) => {
+  const baseQuery = new URLSearchParams();
+  baseQuery.set(FilterSearchParams.Fleet, fleetId);
+  return baseQuery;
+};
+
+const DevicesByAppStatusChart = ({
+  fleetId,
+  applicationStatus,
+}: {
+  fleetId: string;
+  applicationStatus: DevicesSummary['applicationStatus'];
+}) => {
+  const { t } = useTranslation();
+
+  const statusItems = getApplicationSummaryStatusItems(t);
+
+  const appStatusData = toChartData(
+    applicationStatus,
+    statusItems,
+    getBaseFleetQuery(fleetId),
+    FilterSearchParams.DeviceStatus,
+  );
+
+  return (
+    <DonutChart title={t('Application status')} data={appStatusData} helperText={getApplicationStatusHelperText(t)} />
+  );
+};
+
 const DevicesByUpdateStatusChart = ({
   fleetId,
   updateStatus,
 }: {
   fleetId: string;
-  updateStatus: Record<string, number>;
+  updateStatus: DevicesSummary['updateStatus'];
 }) => {
   const { t } = useTranslation();
 
   const statusItems = getSystemUpdateStatusItems(t);
 
-  const data = statusItems.reduce(
-    (acc, currStatus) => {
-      acc[currStatus.id] = updateStatus[currStatus.id] || 0;
-      return acc;
-    },
-    {} as Record<UpdateStatus, number>,
+  const updateStatusData = toChartData(
+    updateStatus,
+    statusItems,
+    getBaseFleetQuery(fleetId),
+    FilterSearchParams.UpdatedStatus,
   );
-
-  const updateStatusData = toChartData(fleetId, data, statusItems, FilterSearchParams.UpdatedStatus);
 
   return <DonutChart title={t('Update status')} data={updateStatusData} helperText={getUpdateStatusHelperText(t)} />;
 };
@@ -48,27 +74,30 @@ const DevicesByDeviceStatusChart = ({
   deviceStatus,
 }: {
   fleetId: string;
-  deviceStatus: Record<string, number>;
+  deviceStatus: DevicesSummary['summaryStatus'];
 }) => {
   const { t } = useTranslation();
 
   const statusItems = getDeviceStatusItems(t);
-  const data = statusItems.reduce(
-    (acc, currStatus) => {
-      acc[currStatus.id] = deviceStatus[currStatus.id] || 0;
-      return acc;
-    },
-    {} as Record<DeviceStatus | EnrollmentRequestStatus.Pending, number>,
+
+  const deviceStatusData = toChartData(
+    deviceStatus,
+    statusItems,
+    getBaseFleetQuery(fleetId),
+    FilterSearchParams.DeviceStatus,
   );
 
-  const appStatusData = toChartData(fleetId, data, statusItems, FilterSearchParams.DeviceStatus);
-
-  return <DonutChart title={t('Device status')} data={appStatusData} helperText={getDeviceStatusHelperText(t)} />;
+  return <DonutChart title={t('Device status')} data={deviceStatusData} helperText={getDeviceStatusHelperText(t)} />;
 };
 
 const FleetDevices = ({ devicesSummary, fleetId }: FleetDevicesProps) => {
   return (
     <Grid hasGutter>
+      {devicesSummary.applicationStatus && (
+        <GridItem md={6}>
+          <DevicesByAppStatusChart fleetId={fleetId} applicationStatus={devicesSummary.applicationStatus} />
+        </GridItem>
+      )}
       {devicesSummary.summaryStatus && (
         <GridItem md={6}>
           <DevicesByDeviceStatusChart fleetId={fleetId} deviceStatus={devicesSummary.summaryStatus} />

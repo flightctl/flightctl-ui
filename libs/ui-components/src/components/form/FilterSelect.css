@@ -3,6 +3,16 @@
     overflow: auto;
 }
 
-.fclt-filter-select__badge {
+.fctl-toggle-content {
+  position: relative;
+}
+
+.fctl-toggle-content__badge {
     margin-left: var(--pf-v5-global--spacer--sm);
+}
+
+.fctl-toggle-content__loader {
+  position: absolute;
+  top: 0;
+  right: 2.5rem;
 }

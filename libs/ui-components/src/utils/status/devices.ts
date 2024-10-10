@@ -39,9 +39,9 @@ export const getSystemUpdateStatus = (updatedStatus?: DeviceUpdatedStatus): Devi
 
 export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStatusType>[] => [
   {
-    id: DeviceSummaryStatusType.DeviceSummaryStatusOnline,
-    label: t('Online'),
-    level: 'success',
+    id: DeviceSummaryStatusType.DeviceSummaryStatusError,
+    label: t('Error'),
+    level: 'danger',
   },
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusDegraded,
@@ -49,9 +49,9 @@ export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStat
     level: 'warning',
   },
   {
-    id: DeviceSummaryStatusType.DeviceSummaryStatusError,
-    label: t('Error'),
-    level: 'danger',
+    id: DeviceSummaryStatusType.DeviceSummaryStatusUnknown,
+    label: t('Unknown'),
+    level: 'unknown',
   },
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusRebooting,
@@ -65,9 +65,9 @@ export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStat
     customIcon: PowerOffIcon,
   },
   {
-    id: DeviceSummaryStatusType.DeviceSummaryStatusUnknown,
-    label: t('Unknown'),
-    level: 'unknown',
+    id: DeviceSummaryStatusType.DeviceSummaryStatusOnline,
+    label: t('Online'),
+    level: 'success',
   },
 ];
 
