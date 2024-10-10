@@ -18,12 +18,10 @@ import { TopologyIcon } from '@patternfly/react-icons/dist/js/icons/topology-ico
 import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
 
-import { Fleet, FleetList, ResourceSync, ResourceSyncList } from '@flightctl/types';
-import { useFetch } from '../../hooks/useFetch';
+import { Fleet, FleetList } from '@flightctl/types';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
-import { useDeleteListAction } from '../ListPage/ListPageActions';
 import { sortByName } from '../../utils/sort/generic';
 import { sortByStatus, sortFleetsByOSImg } from '../../utils/sort/fleet';
 import TableTextSearch from '../Table/TableTextSearch';
@@ -34,13 +32,12 @@ import { useTableSelect } from '../../hooks/useTableSelect';
 import TableActions from '../Table/TableActions';
 import { getResourceId } from '../../utils/resource';
 import MassDeleteFleetModal from '../modals/massModals/MassDeleteFleetModal/MassDeleteFleetModal';
-import { isFleet } from '../../types/extraTypes';
 import FleetRow from './FleetRow';
-import ResourceSyncRow from './ResourceSyncRow';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import DeleteFleetModal from './DeleteFleetModal/DeleteFleetModal';
+import FleetResourceSyncs from './FleetResourceSyncs';
 
 const FleetPageActions = ({ createText }: { createText?: string }) => {
   const { t } = useTranslation();
@@ -81,7 +78,7 @@ const FleetEmptyState = () => {
   );
 };
 
-const getColumns = (t: TFunction): TableColumn<Fleet | ResourceSync>[] => [
+const getColumns = (t: TFunction): TableColumn<Fleet>[] => [
   {
     name: t('Name'),
     onSort: sortByName,
@@ -91,50 +88,31 @@ const getColumns = (t: TFunction): TableColumn<Fleet | ResourceSync>[] => [
     onSort: sortFleetsByOSImg,
   },
   {
+    name: t('Devices'),
+  },
+  {
     name: t('Status'),
     onSort: sortByStatus,
   },
 ];
 
-const getSearchText = (resource: Fleet | ResourceSync) => [resource.metadata.name];
+const getSearchText = (fleet: Fleet) => [fleet.metadata.name];
 
-const FleetTable = () => {
+const FleetTable = ({ fleetLoad }: { fleetLoad: FleetLoad }) => {
   const { t } = useTranslation();
-  const [fleetList, loading, error, refetch] = useFetchPeriodically<FleetList>({ endpoint: 'fleets' });
-  const [rsList, rsLoading, rsError, rsRefetch] = useFetchPeriodically<ResourceSyncList>({ endpoint: 'resourcesyncs' });
-  const { remove } = useFetch();
 
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
   const [fleetToDeleteId, setFleetToDeleteId] = React.useState<string>();
 
-  const data = React.useMemo(
-    () => [
-      ...(fleetList?.items || []),
-      ...(rsList?.items || []).filter(
-        (rs) => !(fleetList?.items || []).some((fleet) => fleet.metadata.owner === `ResourceSync/${rs.metadata.name}`),
-      ),
-    ],
-    [fleetList, rsList],
-  );
-
-  const { search, setSearch, filteredData } = useTableTextSearch(data, getSearchText);
-
+  const [fleetList, loading, error, refetch] = fleetLoad;
   const columns = React.useMemo(() => getColumns(t), [t]);
-
-  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
-
+  const fleets = fleetList?.items || [];
+  const { search, setSearch, filteredData } = useTableTextSearch(fleets, getSearchText);
+  const { getSortParams, sortedData: sortedFleets } = useTableSort(filteredData, columns);
   const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
 
-  const { deleteAction: deleteRsAction, deleteModal: deleteRsModal } = useDeleteListAction({
-    resourceType: 'ResourceSync',
-    onDelete: async (resourceId) => {
-      await remove(`resourcesyncs/${resourceId}`);
-      rsRefetch();
-    },
-  });
-
   return (
-    <ListPageBody error={error || rsError} loading={loading || rsLoading}>
+    <ListPageBody error={error} loading={loading}>
       <Toolbar inset={{ default: 'insetNone' }}>
         <ToolbarContent>
           <ToolbarGroup>
@@ -160,60 +138,45 @@ const FleetTable = () => {
         aria-label={t('Fleets table')}
         columns={columns}
         emptyFilters={filteredData.length === 0}
-        emptyData={data.length === 0}
+        emptyData={fleets.length === 0}
         getSortParams={getSortParams}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
       >
         <Tbody>
-          {sortedData.map((resource, rowIndex) =>
-            isFleet(resource) ? (
-              <FleetRow
-                key={getResourceId(resource)}
-                fleet={resource}
-                rowIndex={rowIndex}
-                onDeleteClick={() => {
-                  setFleetToDeleteId(resource.metadata.name || '');
-                }}
-                isRowSelected={isRowSelected}
-                onRowSelect={onRowSelect}
-              />
-            ) : (
-              <ResourceSyncRow
-                key={getResourceId(resource)}
-                resourceSync={resource}
-                rowIndex={rowIndex}
-                isRowSelected={isRowSelected}
-                onRowSelect={onRowSelect}
-                deleteAction={deleteRsAction}
-              />
-            ),
-          )}
+          {sortedFleets.map((fleet, rowIndex) => (
+            <FleetRow
+              key={getResourceId(fleet)}
+              fleet={fleet}
+              rowIndex={rowIndex}
+              onDeleteClick={() => {
+                setFleetToDeleteId(fleet.metadata.name || '');
+              }}
+              isRowSelected={isRowSelected}
+              onRowSelect={onRowSelect}
+            />
+          ))}
         </Tbody>
       </Table>
-      {data.length === 0 && <FleetEmptyState />}
+      {fleets.length === 0 && <FleetEmptyState />}
       {fleetToDeleteId && (
         <DeleteFleetModal
           fleetId={fleetToDeleteId}
           onClose={(hasDeleted?: boolean) => {
             if (hasDeleted) {
-              // Both lists are linked, so they both need to be refreshed
-              rsRefetch();
               refetch();
             }
             setFleetToDeleteId(undefined);
           }}
         />
       )}
-      {deleteRsModal}
       {isMassDeleteModalOpen && (
         <MassDeleteFleetModal
           onClose={() => setIsMassDeleteModalOpen(false)}
-          resources={sortedData.filter(isRowSelected)}
+          fleets={sortedFleets.filter(isRowSelected)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
             refetch();
-            rsRefetch();
           }}
         />
       )}
@@ -221,13 +184,23 @@ const FleetTable = () => {
   );
 };
 
-const FleetList = () => {
+type FleetLoad = [FleetList | undefined, boolean, unknown, VoidFunction, boolean];
+
+const FleetsPage = () => {
   const { t } = useTranslation();
+
+  // TODO move the fetch down to FleetTable when the API includes the filter for pending / errored resource syncs
+  const fleetLoad = useFetchPeriodically<FleetList>({ endpoint: 'fleets?addDevicesCount=true' });
+
   return (
-    <ListPage title={t('Fleets')}>
-      <FleetTable />
-    </ListPage>
+    <>
+      <FleetResourceSyncs fleets={fleetLoad[0]?.items || []} />
+
+      <ListPage title={t('Fleets')}>
+        <FleetTable fleetLoad={fleetLoad} />
+      </ListPage>
+    </>
   );
 };
 
-export default FleetList;
+export default FleetsPage;

@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   Alert,
   Button,
@@ -8,23 +9,22 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import { Fleet, ResourceSync } from '@flightctl/types';
-import * as React from 'react';
+import { Fleet } from '@flightctl/types';
+import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+
 import { getErrorMessage } from '../../../../utils/error';
 import { useFetch } from '../../../../hooks/useFetch';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import FleetOwnerLink, { RSLink } from '../../../Fleet/FleetDetails/FleetOwnerLink';
-import { isFleet } from '../../../../types/extraTypes';
+import FleetOwnerLink from '../../../Fleet/FleetDetails/FleetOwnerLink';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { isPromiseRejected } from '../../../../types/typeUtils';
 
 type MassDeleteFleetModalProps = {
   onClose: VoidFunction;
-  resources: Array<Fleet | ResourceSync>;
+  fleets: Array<Fleet>;
   onDeleteSuccess: VoidFunction;
 };
 
-const MassDeleteFleetTable = ({ resources }: { resources: Array<Fleet | ResourceSync> }) => {
+const MassDeleteFleetTable = ({ fleets }: { fleets: Array<Fleet> }) => {
   const { t } = useTranslation();
   return (
     <Table>
@@ -35,16 +35,13 @@ const MassDeleteFleetTable = ({ resources }: { resources: Array<Fleet | Resource
         </Tr>
       </Thead>
       <Tbody>
-        {resources.map((resource) => {
+        {fleets.map((fleet) => {
+          const name = fleet.metadata.name as string;
           return (
-            <Tr key={resource.metadata.name}>
-              <Td dataLabel={t('Name')}>{(isFleet(resource) && resource.metadata.name) || '-'}</Td>
+            <Tr key={name}>
+              <Td dataLabel={t('Name')}>{name}</Td>
               <Td dataLabel={t('Managed by')}>
-                {isFleet(resource) ? (
-                  <FleetOwnerLink owner={resource.metadata.owner} />
-                ) : (
-                  <RSLink rsName={resource.metadata.name || ''} />
-                )}
+                <FleetOwnerLink owner={fleet.metadata.owner} />
               </Td>
             </Tr>
           );
@@ -54,7 +51,7 @@ const MassDeleteFleetTable = ({ resources }: { resources: Array<Fleet | Resource
   );
 };
 
-const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, resources, onDeleteSuccess }) => {
+const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, fleets, onDeleteSuccess }) => {
   const { t } = useTranslation();
   const [progress, setProgress] = React.useState(0);
   const [progressTotal, setProgressTotal] = React.useState(0);
@@ -62,14 +59,14 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
   const [errors, setErrors] = React.useState<string[]>();
   const { remove } = useFetch();
 
-  const resourcesToDelete = resources.filter((r) => !r.metadata.owner);
-  const resourcesToSkip = resources.filter((r) => r.metadata.owner);
+  const fleetsToDelete = fleets.filter((r) => !r.metadata.owner);
+  const fleetsToSkip = fleets.filter((r) => r.metadata.owner);
 
-  const deleteResources = async () => {
+  const deleteFleets = async () => {
     setProgress(0);
     setIsDeleting(true);
-    const promises = resourcesToDelete.map(async (r) => {
-      await remove(`${isFleet(r) ? 'fleets' : 'resourcesyncs'}/${r.metadata.name}`);
+    const promises = fleetsToDelete.map(async (r) => {
+      await remove(`fleets/${r.metadata.name}`);
       setProgress((p) => p + 1);
     });
 
@@ -86,7 +83,7 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
     }
   };
 
-  if (resourcesToDelete.length === 0) {
+  if (fleetsToDelete.length === 0) {
     return (
       <Modal
         title={t('Delete fleets')}
@@ -111,7 +108,7 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
             />
           </StackItem>
           <StackItem>
-            <MassDeleteFleetTable resources={resources} />
+            <MassDeleteFleetTable fleets={fleets} />
           </StackItem>
         </Stack>
       </Modal>
@@ -127,7 +124,7 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
       variant="medium"
       titleIconVariant="warning"
       actions={[
-        <Button key="delete" variant="danger" onClick={deleteResources} isLoading={isDeleting} isDisabled={isDeleting}>
+        <Button key="delete" variant="danger" onClick={deleteFleets} isLoading={isDeleting} isDisabled={isDeleting}>
           {t('Delete fleets')}
         </Button>,
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
@@ -142,10 +139,10 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
           )}
         </StackItem>
         <StackItem>
-          <MassDeleteFleetTable resources={resourcesToDelete} />
+          <MassDeleteFleetTable fleets={fleetsToDelete} />
         </StackItem>
 
-        {resourcesToSkip.length > 0 && (
+        {fleetsToSkip.length > 0 && (
           <>
             <StackItem>
               <Alert
@@ -158,7 +155,7 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, re
             </StackItem>
             <StackItem>
               <ExpandableSection toggleText={t('Show fleets')}>
-                <MassDeleteFleetTable resources={resourcesToSkip} />
+                <MassDeleteFleetTable fleets={fleetsToSkip} />
               </ExpandableSection>
             </StackItem>
           </>

@@ -1,5 +1,5 @@
 import { RepoSpecType, Repository } from '@flightctl/types';
-import { getRepositoryLastTransitionTime, getRepositorySyncStatus } from '../status/repository';
+import { getLastTransitionTimeText, getRepositorySyncStatus } from '../status/repository';
 
 export const sortRepositoriesByUrl = (resources: Repository[]) =>
   resources.sort((a, b) => {
@@ -17,8 +17,8 @@ export const sortRepositoriesBySyncStatus = (resources: Repository[]) =>
 
 export const sortRepositoriesByLastTransition = (resources: Repository[]) =>
   resources.sort((a, b) => {
-    const aTransition = getRepositoryLastTransitionTime(a).timestamp;
-    const bTransition = getRepositoryLastTransitionTime(b).timestamp;
+    const aTransition = getLastTransitionTimeText(a).timestamp;
+    const bTransition = getLastTransitionTimeText(b).timestamp;
     return new Date(bTransition).getTime() - new Date(aTransition).getTime();
   });
 

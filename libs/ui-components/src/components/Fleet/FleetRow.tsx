@@ -7,6 +7,7 @@ import { FleetOwnerLinkIcon, getOwnerName } from './FleetDetails/FleetOwnerLink'
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import FleetStatus from './FleetStatus';
 import ResourceLink from '../common/ResourceLink';
+import FleetDevicesLink from './FleetDetails/FleetDevicesLink';
 
 type FleetRowProps = {
   fleet: Fleet;
@@ -40,7 +41,7 @@ const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRow
   const fleetName = fleet.metadata.name || '';
 
   const isManaged = !!fleet.metadata?.owner;
-  const actions = useFleetActions(fleetName, !!fleet.metadata?.owner);
+  const actions = useFleetActions(fleetName, isManaged);
   actions.push({
     title: t('Delete fleet'),
     onClick: onDeleteClick,
@@ -69,6 +70,9 @@ const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRow
         </FleetOwnerLinkIcon>
       </Td>
       <Td dataLabel={t('System image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>
+      <Td dataLabel={t('Devices')}>
+        <FleetDevicesLink fleetId={fleetName} count={fleet.status?.devicesSummary?.total} />
+      </Td>
       <Td dataLabel={t('Status')}>
         <FleetStatus fleet={fleet} />
       </Td>

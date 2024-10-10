@@ -42,7 +42,7 @@ const CreateFleetWizard = React.lazy(
   () => import('@flightctl/ui-components/src/components/Fleet/CreateFleet/CreateFleetWizard'),
 );
 
-const FleetList = React.lazy(() => import('@flightctl/ui-components/src/components/Fleet/FleetList'));
+const FleetsPage = React.lazy(() => import('@flightctl/ui-components/src/components/Fleet/FleetsPage'));
 const FleetDetails = React.lazy(
   () => import('@flightctl/ui-components/src/components/Fleet/FleetDetails/FleetDetails'),
 );
@@ -138,7 +138,7 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         title: t('Fleets'),
         element: (
           <TitledRoute title={t('Fleets')}>
-            <FleetList />
+            <FleetsPage />
           </TitledRoute>
         ),
       },

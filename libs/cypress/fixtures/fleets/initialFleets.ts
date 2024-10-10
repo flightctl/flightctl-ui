@@ -1,4 +1,4 @@
-import { ConditionStatus, ConditionType, Fleet } from '@flightctl/types';
+import { Fleet } from '@flightctl/types';
 
 const basicFleets: Fleet[] = [
   {
@@ -47,6 +47,9 @@ const basicFleets: Fleet[] = [
     },
     status: {
       conditions: [],
+      devicesSummary: {
+        total: 0,
+      }
     },
   },
   {
@@ -104,6 +107,9 @@ const basicFleets: Fleet[] = [
     },
     status: {
       conditions: [],
+      devicesSummary: {
+        total: 0,
+      }
     },
   },
 ];

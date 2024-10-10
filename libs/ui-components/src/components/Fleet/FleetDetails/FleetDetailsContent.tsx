@@ -10,7 +10,6 @@ import {
   DescriptionListTerm,
   Grid,
   GridItem,
-  Spinner,
 } from '@patternfly/react-core';
 import * as React from 'react';
 
@@ -19,23 +18,9 @@ import FleetOwnerLink from './FleetOwnerLink';
 import FleetDevices from './FleetDevices';
 import FleetStatus from '../FleetStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { Link, ROUTE } from '../../../hooks/useNavigate';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
 import { getSourceItems } from '../../../utils/devices';
-
-const FleetDevicesLink = ({ fleetId, count }: { fleetId: string; count: number | undefined }) => {
-  if (count === undefined) {
-    return <Spinner size="sm" />;
-  }
-  if (count === 0) {
-    return <>0</>;
-  }
-  return (
-    <Link to={ROUTE.DEVICES} query={`fleetId=${fleetId}`}>
-      {count}
-    </Link>
-  );
-};
+import FleetDevicesLink from './FleetDevicesLink';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
@@ -74,7 +59,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Associated devices')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <FleetDevicesLink fleetId={fleetId} count={devicesSummary?.total || 0} />
+                  <FleetDevicesLink fleetId={fleetId} count={devicesSummary?.total} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>

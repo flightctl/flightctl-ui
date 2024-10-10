@@ -1,8 +1,8 @@
 import * as React from 'react';
-import FleetList from '@flightctl/ui-components/src/components/Fleet/FleetList';
+import FleetsPage from '@flightctl/ui-components/src/components/Fleet/FleetsPage';
 
-const FleetsPage = () => {
-  return <FleetList />;
+const OcpFleetsPage = () => {
+  return <FleetsPage />;
 };
 
-export default FleetsPage;
+export default OcpFleetsPage;

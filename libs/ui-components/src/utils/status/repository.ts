@@ -1,5 +1,5 @@
 import { TFunction } from 'i18next';
-import { ConditionStatus, ConditionType, Repository, ResourceSync } from '@flightctl/types';
+import { Condition, ConditionStatus, ConditionType, Repository, ResourceSync } from '@flightctl/types';
 import { timeSinceText } from '../dates';
 import { getConditionMessage } from '../error';
 
@@ -82,15 +82,7 @@ const getRepositorySyncStatus = (
   };
 };
 
-const getRepositoryLastTransitionTime = (
-  repository: Repository,
-  t: TFunction = (s: string) => s,
-): {
-  text: string;
-  timestamp: string;
-} => {
-  const conditions = repository.status?.conditions;
-
+export const getLastTransitionTime = (conditions?: Condition[]): string | undefined => {
   let lastTime: string | undefined = undefined;
 
   conditions?.forEach((condition) => {
@@ -98,6 +90,18 @@ const getRepositoryLastTransitionTime = (
       lastTime = condition.lastTransitionTime;
     }
   });
+
+  return lastTime;
+};
+
+const getLastTransitionTimeText = (
+  repository: Repository,
+  t: TFunction = (s: string) => s,
+): {
+  text: string;
+  timestamp: string;
+} => {
+  const lastTime = getLastTransitionTime(repository.status?.conditions);
 
   return {
     text: lastTime ? timeSinceText(t, lastTime) : 'N/A',
@@ -110,4 +114,4 @@ const getObservedHash = (resourceSync: ResourceSync): string | undefined => {
   return lastHash ? lastHash.substring(0, 7) : '-';
 };
 
-export { getRepositorySyncStatus, getRepositoryLastTransitionTime, getObservedHash, repositoryStatusLabels };
+export { getRepositorySyncStatus, getLastTransitionTimeText, getObservedHash, repositoryStatusLabels };
