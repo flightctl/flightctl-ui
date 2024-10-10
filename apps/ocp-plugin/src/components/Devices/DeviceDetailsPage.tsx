@@ -50,9 +50,14 @@ const DeviceDetailsPage = () => {
     );
   } else if (loaded && mc) {
     mcContent = isMicroShiftCluster(mc) ? (
-      <WithTooltip content={clusterName} showTooltip>
-        <Link to={`/multicloud/infrastructure/clusters/details/${clusterName}/${clusterName}`}>{t('View')}</Link>
-      </WithTooltip>
+      <Stack>
+        <StackItem className="fctl-device-details-tab__label">{t('MicroShift cluster')}</StackItem>
+        <StackItem>
+          <WithTooltip content={clusterName} showTooltip>
+            <Link to={`/multicloud/infrastructure/clusters/details/${clusterName}/${clusterName}`}>{t('View')}</Link>
+          </WithTooltip>
+        </StackItem>
+      </Stack>
     ) : (
       '-'
     );
