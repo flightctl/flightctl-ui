@@ -31,7 +31,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const deviceName = device.metadata.name as string;
-  const deviceAlias = device.metadata.labels?.alias;
+  const deviceAlias = device.metadata.alias;
   const editActionProps = getDeviceFleet(device?.metadata)
     ? {
         isAriaDisabled: true,

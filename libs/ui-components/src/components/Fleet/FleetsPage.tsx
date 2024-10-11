@@ -133,9 +133,10 @@ const FleetTable = ({ fleetLoad }: { fleetLoad: FleetLoad }) => {
         </ToolbarContent>
       </Toolbar>
       <Table
+        loading={loading}
         aria-label={t('Fleets table')}
         columns={columns}
-        emptyFilters={filteredData.length === 0}
+        emptyUiFilters={filteredData.length === 0}
         emptyData={fleets.length === 0}
         getSortParams={getSortParams}
         isAllSelected={isAllSelected}

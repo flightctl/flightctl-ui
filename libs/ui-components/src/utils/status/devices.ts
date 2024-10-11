@@ -18,6 +18,7 @@ export enum FilterSearchParams {
   AppStatus = 'appSt',
   UpdatedStatus = 'updSt',
   Label = 'label',
+  NameOrAlias = 'nameOrAlias',
 }
 
 export type DeviceSummaryStatus =

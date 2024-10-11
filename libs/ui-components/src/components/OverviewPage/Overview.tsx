@@ -9,7 +9,7 @@ const Overview = () => {
       <GridItem>
         <StatusCard />
       </GridItem>
-      <GridItem span={4}>
+      <GridItem md={6} lg={4}>
         <ToDoCard />
       </GridItem>
     </Grid>

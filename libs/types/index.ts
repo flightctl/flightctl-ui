@@ -30,6 +30,7 @@ export type { DeviceIntegrityStatus } from './models/DeviceIntegrityStatus';
 export type { DeviceIntegrityStatusSummary } from './models/DeviceIntegrityStatusSummary';
 export { DeviceIntegrityStatusSummaryType } from './models/DeviceIntegrityStatusSummaryType';
 export type { DeviceList } from './models/DeviceList';
+export type { DeviceMetadata } from './models/DeviceMetadata';
 export type { DeviceOSSpec } from './models/DeviceOSSpec';
 export type { DeviceOSStatus } from './models/DeviceOSStatus';
 export type { DeviceRebootHookSpec } from './models/DeviceRebootHookSpec';

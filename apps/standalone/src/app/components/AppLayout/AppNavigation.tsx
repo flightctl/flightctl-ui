@@ -13,11 +13,13 @@ const AppNavigation = () => {
       <NavList id="flightclt-navlist">
         {getAppRoutes(t)
           .filter((route) => route.showInNav)
-          .map((route) => (
-            <NavItem key={route.path} to={route.path || ''}>
-              {route.title}
-            </NavItem>
-          ))}
+          .map((route) => {
+            return (
+              <NavItem key={route.path} to={route.path || ''}>
+                {route.title} {route.navContent}
+              </NavItem>
+            );
+          })}
       </NavList>
     </Nav>
   );

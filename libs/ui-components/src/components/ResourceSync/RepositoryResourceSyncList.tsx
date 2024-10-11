@@ -249,10 +249,11 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
       )}
       <Table
         aria-label={t('Resource syncs table')}
+        loading={isLoading}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
         columns={columns}
-        emptyFilters={filteredData.length === 0}
+        emptyUiFilters={filteredData.length === 0}
         emptyData={resourceSyncs.length === 0}
         getSortParams={getSortParams}
       >

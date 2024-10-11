@@ -24,7 +24,6 @@ import { sortByAlias, sortByLastSeenDate, sortByName } from '../../../utils/sort
 import { sortDeviceStatus, sortDevicesByFleet } from '../../../utils/sort/device';
 import Table, { TableColumn } from '../../Table/Table';
 import DeviceTableToolbar from './DeviceTableToolbar';
-import { useDeviceFilters } from './useDeviceFilters';
 import DeviceTableRow from './DeviceTableRow';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import MassDeleteDeviceModal from '../../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
@@ -108,6 +107,8 @@ interface DeviceTableProps {
   ownerFleets: string[];
   activeStatuses: FilterStatusMap;
   hasFiltersEnabled: boolean;
+  nameOrAlias: string | undefined;
+  setNameOrAlias: (text: string) => void;
   setOwnerFleets: (ownerFleets: string[]) => void;
   setActiveStatuses: (activeStatuses: FilterStatusMap) => void;
   allLabels: FlightCtlLabel[];
@@ -120,6 +121,8 @@ interface DeviceTableProps {
 export const DeviceTable = ({
   devices,
   refetch,
+  nameOrAlias,
+  setNameOrAlias,
   ownerFleets,
   setOwnerFleets,
   activeStatuses,
@@ -138,8 +141,7 @@ export const DeviceTable = ({
 
   const deviceColumns = React.useMemo(() => getDeviceColumns(t), [t]);
 
-  const { filteredData, hasFiltersEnabled: hasUIFiltersEnabled, ...rest } = useDeviceFilters(devices);
-  const { getSortParams, sortedData } = useTableSort(filteredData, deviceColumns);
+  const { getSortParams, sortedData } = useTableSort(devices, deviceColumns);
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
@@ -154,7 +156,8 @@ export const DeviceTable = ({
   return (
     <>
       <DeviceTableToolbar
-        {...rest}
+        nameOrAlias={nameOrAlias}
+        setNameOrAlias={setNameOrAlias}
         ownerFleets={ownerFleets}
         setOwnerFleets={setOwnerFleets}
         activeStatuses={activeStatuses}
@@ -176,8 +179,9 @@ export const DeviceTable = ({
       </DeviceTableToolbar>
       <Table
         aria-label={t('Devices table')}
+        loading={isFilterUpdating}
         columns={deviceColumns}
-        emptyFilters={filteredData.length === 0 && (hasFiltersEnabled || hasUIFiltersEnabled)}
+        hasBackendFilters={hasFiltersEnabled}
         emptyData={devices.length === 0}
         getSortParams={getSortParams}
         isAllSelected={isAllSelected}
@@ -196,7 +200,7 @@ export const DeviceTable = ({
           ))}
         </Tbody>
       </Table>
-      {!hasFiltersEnabled && !hasUIFiltersEnabled && devices.length === 0 && (
+      {!hasFiltersEnabled && /* TODO FIGURE OUT !hasUIFiltersEnabled && */ devices.length === 0 && (
         <DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />
       )}
       {deleteDeviceModal}
@@ -218,6 +222,8 @@ export const DeviceTable = ({
 const DevicesPage = () => {
   const { t } = useTranslation();
   const {
+    nameOrAlias,
+    setNameOrAlias,
     ownerFleets,
     activeStatuses,
     hasFiltersEnabled,
@@ -227,6 +233,7 @@ const DevicesPage = () => {
     setSelectedLabels,
   } = useDeviceBackendFilters();
   const [data, loading, error, updating, refetch, allLabels] = useDevices({
+    nameOrAlias,
     ownerFleets,
     activeStatuses,
     labels: selectedLabels,
@@ -246,6 +253,8 @@ const DevicesPage = () => {
             devices={data}
             allLabels={allLabels}
             refetch={refetch}
+            nameOrAlias={nameOrAlias}
+            setNameOrAlias={setNameOrAlias}
             hasFiltersEnabled={hasFiltersEnabled || updating}
             ownerFleets={ownerFleets}
             activeStatuses={activeStatuses}

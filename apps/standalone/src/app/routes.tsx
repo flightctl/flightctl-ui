@@ -48,11 +48,15 @@ const FleetDetails = React.lazy(
 );
 
 const OverviewPage = React.lazy(() => import('@flightctl/ui-components/src/components/OverviewPage/OverviewPage'));
+const PendingEnrollmentRequestsBadge = React.lazy(
+  () => import('@flightctl/ui-components/src/components/EnrollmentRequest/PendingEnrollmentRequestsBadge'),
+);
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
   showInNav?: boolean;
   children?: ExtendedRouteObject[];
+  navContent?: React.ReactNode;
 };
 
 const ErrorPage = () => {
@@ -189,6 +193,7 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
     path: '/devicemanagement/devices',
     title: t('Devices'),
     showInNav: true,
+    navContent: <PendingEnrollmentRequestsBadge />,
     children: [
       {
         index: true,

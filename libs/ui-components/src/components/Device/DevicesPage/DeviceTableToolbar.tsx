@@ -21,8 +21,8 @@ import { labelToString } from '../../../utils/labels';
 import DeviceTableToolbarFilters from './DeviceToolbarFilters';
 
 type DeviceTableToolbarProps = {
-  search: TableTextSearchProps['value'];
-  setSearch: TableTextSearchProps['setValue'];
+  nameOrAlias: TableTextSearchProps['value'];
+  setNameOrAlias: TableTextSearchProps['setValue'];
   allLabels: FlightCtlLabel[];
   ownerFleets: string[];
   setOwnerFleets: (ownerFleets: string[]) => void;
@@ -38,8 +38,8 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
   const {
     ownerFleets,
     setOwnerFleets,
-    search,
-    setSearch,
+    nameOrAlias,
+    setNameOrAlias,
     activeStatuses,
     setActiveStatuses,
     allLabels,
@@ -92,8 +92,8 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
                 setSelectedLabels={setSelectedLabels}
                 setSelectedFleets={setOwnerFleets}
                 fleets={fleets}
-                search={search}
-                setSearch={setSearch}
+                nameOrAlias={nameOrAlias}
+                setNameOrAlias={setNameOrAlias}
               />
             </ToolbarItem>
           </ToolbarGroup>
@@ -112,10 +112,10 @@ type DeviceToolbarChipsProps = Omit<DeviceTableToolbarProps, 'setActiveStatuses'
 const DeviceToolbarChips = ({
   activeStatuses,
   updateStatus,
+  nameOrAlias,
+  setNameOrAlias,
   ownerFleets,
-  search,
   setOwnerFleets,
-  setSearch,
   selectedLabels,
   setSelectedLabels,
 }: DeviceToolbarChipsProps) => {
@@ -149,10 +149,10 @@ const DeviceToolbarChips = ({
           </ChipGroup>
         </SplitItem>
       )}
-      {search && (
+      {nameOrAlias && (
         <SplitItem>
-          <ChipGroup categoryName={t('Name / Alias')} isClosable onClick={() => setSearch('')}>
-            <Chip onClick={() => setSearch('')}>{search}</Chip>
+          <ChipGroup categoryName={t('Name / Alias')} isClosable onClick={() => setNameOrAlias('')}>
+            <Chip onClick={() => setNameOrAlias('')}>{nameOrAlias}</Chip>
           </ChipGroup>
         </SplitItem>
       )}
@@ -173,14 +173,14 @@ const DeviceToolbarChips = ({
           </ChipGroup>
         </SplitItem>
       )}
-      {(!!statusKeys.length || !!ownerFleets.length || !!search || !!selectedLabels.length) && (
+      {(!!statusKeys.length || !!ownerFleets.length || !!nameOrAlias || !!selectedLabels.length) && (
         <SplitItem>
           <Button
             variant="link"
             onClick={() => {
               updateStatus();
               setOwnerFleets([]);
-              setSearch('');
+              setNameOrAlias('');
               setSelectedLabels([]);
             }}
           >
