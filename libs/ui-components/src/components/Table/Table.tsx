@@ -4,6 +4,16 @@ import { Table as PFTable, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-
 import { useTranslation } from '../../hooks/useTranslation';
 import WithHelperText from '../common/WithHelperText';
 
+export type ApiSortTableColumn = {
+  name: string;
+  sortableField?: string;
+  defaultSort?: boolean;
+  helperText?: string;
+  thProps?: Omit<ThProps, 'sort'> & {
+    ref?: React.Ref<HTMLTableCellElement> | undefined;
+  };
+};
+
 export type TableColumn<D> = {
   name: string;
   onSort?: (data: D[]) => D[];
