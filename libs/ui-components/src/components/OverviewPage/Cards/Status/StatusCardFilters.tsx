@@ -5,166 +5,104 @@ import {
   ChipGroup,
   Flex,
   FlexItem,
-  Grid,
-  GridItem,
-  Label,
-  SelectList,
-  SelectOption,
+  StackItem,
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
 } from '@patternfly/react-core';
-import { Device, Fleet } from '@flightctl/types';
+import { Fleet } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import FilterSelect, { FilterSelectGroup } from '../../../form/FilterSelect';
-import { filterDevicesLabels, labelToString } from '../../../../utils/labels';
+import { labelToString } from '../../../../utils/labels';
 import { FlightCtlLabel } from '../../../../types/extraTypes';
-import { fuzzySeach } from '../../../../utils/search';
+import DeviceTableToolbarFilters from '../../../Device/DevicesPage/DeviceToolbarFilters';
 
 type StatusCardFiltersProps = {
   fleets: Fleet[];
-  devices: Device[];
   selectedFleets: string[];
   setSelectedFleets: (fleets: string[]) => void;
+  allLabels: FlightCtlLabel[];
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
-  isFilterUpdating: boolean;
 };
 
 const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
   fleets,
-  devices,
   selectedFleets,
   setSelectedFleets,
+  allLabels,
   selectedLabels,
   setSelectedLabels,
-  isFilterUpdating,
 }) => {
   const { t } = useTranslation();
-  const [filter, setFilter] = React.useState('');
 
-  const filteredLabels = filterDevicesLabels(devices, selectedLabels, filter);
-  const filteredFleets = fleets.map((f) => f.metadata.name || '').filter((f) => fuzzySeach(filter, f));
-
-  const selectedFilters = selectedFleets.length + selectedLabels.length;
+  const hasFilters = selectedFleets.length + selectedLabels.length > 0;
 
   return (
     <Flex>
       <FlexItem>
-        <FilterSelect
-          selectedFilters={selectedFilters}
-          placeholder={t('Filter by fleets or labels')}
-          filter={filter}
-          setFilter={setFilter}
-          isFilterUpdating={isFilterUpdating}
-        >
-          <SelectList>
-            <Grid hasGutter>
-              <GridItem span={6}>
-                <FilterSelectGroup label={t('Fleets')}>
-                  {!filteredFleets.length ? (
-                    <SelectOption isDisabled>{t('No fleets available')}</SelectOption>
-                  ) : (
-                    filteredFleets.map((f) => (
-                      <SelectOption
-                        key={f}
-                        hasCheckbox
-                        value={f}
-                        isSelected={selectedFleets.includes(f)}
-                        onClick={() =>
-                          setSelectedFleets(
-                            selectedFleets.includes(f)
-                              ? selectedFleets.filter((fleet) => fleet !== f)
-                              : [...selectedFleets, f],
-                          )
-                        }
-                      >
-                        {f}
-                      </SelectOption>
-                    ))
-                  )}
-                </FilterSelectGroup>
-              </GridItem>
-              <GridItem span={6}>
-                <FilterSelectGroup label={t('Labels')}>
-                  {!filteredLabels.length ? (
-                    <SelectOption isDisabled>{t('No labels available')}</SelectOption>
-                  ) : (
-                    filteredLabels.map((label) => (
-                      <SelectOption
-                        key={label}
-                        hasCheckbox
-                        value={label}
-                        isSelected={selectedLabels.some((l) => labelToString(l) === label)}
-                        onClick={() => {
-                          const newLabels = selectedLabels.filter((l) => labelToString(l) !== label);
-                          if (newLabels.length !== selectedLabels.length) {
-                            setSelectedLabels(newLabels);
-                          } else {
-                            const labelParts = label.split('=');
-                            let labelObj: { key: string; value: string };
-                            if (labelParts.length === 1) {
-                              labelObj = {
-                                key: labelParts[0],
-                                value: '',
-                              };
-                            } else {
-                              labelObj = {
-                                key: labelParts[0],
-                                value: labelParts[1],
-                              };
-                            }
-                            setSelectedLabels([...selectedLabels, labelObj]);
-                          }
-                        }}
-                      >
-                        <Label id={label}>{label}</Label>
-                      </SelectOption>
-                    ))
-                  )}
-                </FilterSelectGroup>
-              </GridItem>
-            </Grid>
-          </SelectList>
-        </FilterSelect>
+        <Toolbar id="overview-toolbar" inset={{ default: 'insetNone' }}>
+          <ToolbarContent>
+            <ToolbarGroup>
+              <ToolbarItem variant="search-filter">
+                <DeviceTableToolbarFilters
+                  fleets={fleets}
+                  selectedFleetNames={selectedFleets}
+                  setSelectedFleets={setSelectedFleets}
+                  allLabels={allLabels}
+                  selectedLabels={selectedLabels}
+                  setSelectedLabels={setSelectedLabels}
+                />
+              </ToolbarItem>
+            </ToolbarGroup>
+          </ToolbarContent>
+        </Toolbar>
       </FlexItem>
-      {!!selectedFleets.length && (
-        <FlexItem>
-          <ChipGroup categoryName={t('Fleets')} isClosable onClick={() => setSelectedFleets([])}>
-            {selectedFleets.map((fleet) => (
-              <Chip key={fleet} onClick={() => setSelectedFleets(selectedFleets.filter((f) => f !== fleet))}>
-                {fleet}
-              </Chip>
-            ))}
-          </ChipGroup>
-        </FlexItem>
-      )}
-      {!!selectedLabels.length && (
-        <FlexItem>
-          <ChipGroup categoryName={t('Labels')} isClosable onClick={() => setSelectedLabels([])}>
-            {selectedLabels.map((l) => {
-              const label = labelToString(l);
-              return (
-                <Chip
-                  key={label}
-                  onClick={() => setSelectedLabels(selectedLabels.filter((l) => labelToString(l) !== label))}
-                >
-                  {label}
-                </Chip>
-              );
-            })}
-          </ChipGroup>
-        </FlexItem>
-      )}
-      {(!!selectedFleets.length || !!selectedLabels.length) && (
-        <FlexItem>
-          <Button
-            variant="link"
-            onClick={() => {
-              setSelectedLabels([]);
-              setSelectedFleets([]);
-            }}
-          >
-            {t('Clear all filters')}
-          </Button>
-        </FlexItem>
+
+      {hasFilters && (
+        <StackItem>
+          <Flex>
+            {!!selectedFleets.length && (
+              <FlexItem>
+                <ChipGroup categoryName={t('Fleets')} isClosable onClick={() => setSelectedFleets([])}>
+                  {selectedFleets.map((fleet) => (
+                    <Chip key={fleet} onClick={() => setSelectedFleets(selectedFleets.filter((f) => f !== fleet))}>
+                      {fleet}
+                    </Chip>
+                  ))}
+                </ChipGroup>
+              </FlexItem>
+            )}
+            {!!selectedLabels.length && (
+              <FlexItem>
+                <ChipGroup categoryName={t('Labels')} isClosable onClick={() => setSelectedLabels([])}>
+                  {selectedLabels.map((l) => {
+                    const label = labelToString(l);
+                    return (
+                      <Chip
+                        key={label}
+                        onClick={() => setSelectedLabels(selectedLabels.filter((l) => labelToString(l) !== label))}
+                      >
+                        {label}
+                      </Chip>
+                    );
+                  })}
+                </ChipGroup>
+              </FlexItem>
+            )}
+            <FlexItem>
+              <Button
+                variant="link"
+                onClick={() => {
+                  setSelectedLabels([]);
+                  setSelectedFleets([]);
+                }}
+              >
+                {t('Clear all filters')}
+              </Button>
+            </FlexItem>
+          </Flex>
+        </StackItem>
       )}
     </Flex>
   );

@@ -1,13 +1,9 @@
 import * as React from 'react';
-import { Grid, GridItem, Label, SelectList, SelectOption } from '@patternfly/react-core';
+import { Grid, GridItem, SelectList, SelectOption } from '@patternfly/react-core';
 import { TFunction } from 'i18next';
-
-import { Device, Fleet } from '@flightctl/types';
-import { FlightCtlLabel } from '../../../types/extraTypes';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import FilterSelect, { FilterSelectGroup } from '../../form/FilterSelect';
-import { filterDevicesLabels, labelToString, stringToLabel } from '../../../utils/labels';
 import { fuzzySeach } from '../../../utils/search';
 import { FilterOptionsFC, FilterStatusMap, UpdateStatus } from './types';
 import StatusDisplay from '../../Status/StatusDisplay';
@@ -65,50 +61,25 @@ const FilterOption: FilterOptionsFC = ({ items, selectedFilters, onClick, filter
   ));
 };
 
-type DeviceFilterSelectProps = {
-  devices: Device[];
-  selectedLabels: FlightCtlLabel[];
-  setSelectedLabels: (labels: FlightCtlLabel[]) => void;
-  selectedFleets: string[];
-  setSelectedFleets: (fleets: string[]) => void;
+type DeviceStatusFilterProps = {
   activeStatuses: FilterStatusMap;
   updateStatus: UpdateStatus;
-  fleets: Fleet[];
   isFilterUpdating: boolean;
 };
 
-const DeviceFilterSelect: React.FC<DeviceFilterSelectProps> = ({
-  devices,
-  selectedFleets,
-  selectedLabels,
-  setSelectedLabels,
-  setSelectedFleets,
-  activeStatuses,
-  updateStatus,
-  fleets,
-  isFilterUpdating,
-}) => {
+const DeviceStatusFilter = ({ activeStatuses, updateStatus, isFilterUpdating }: DeviceStatusFilterProps) => {
   const { t } = useTranslation();
   const [filter, setFilter] = React.useState('');
-
-  const availableFleets = [
-    ...new Set([
-      ...fleets.filter((f) => fuzzySeach(filter, f.metadata.name)).map((f) => f.metadata.name || ''),
-      ...selectedFleets,
-    ]),
-  ];
-
-  const filteredLabels = filterDevicesLabels(devices, selectedLabels, filter);
 
   const selectedFilters = Object.values(activeStatuses).reduce((acc, curr) => {
     acc += curr.length;
     return acc;
-  }, selectedFleets.length + selectedLabels.length);
+  }, 0);
 
   return (
     <FilterSelect
       selectedFilters={selectedFilters}
-      placeholder={t('Filter by status, fleets or labels')}
+      placeholder={t('Filter by status')}
       filter={filter}
       setFilter={setFilter}
       isFilterUpdating={isFilterUpdating}
@@ -119,7 +90,7 @@ const DeviceFilterSelect: React.FC<DeviceFilterSelectProps> = ({
             const key = k as keyof FilterStatusMap;
             const { title, items } = getStatusItem(t, key);
             return (
-              <GridItem key={key} span={2}>
+              <GridItem key={key} span={4}>
                 <FilterSelectGroup label={title}>
                   <FilterOption
                     filter={filter}
@@ -131,63 +102,10 @@ const DeviceFilterSelect: React.FC<DeviceFilterSelectProps> = ({
               </GridItem>
             );
           })}
-          <GridItem span={3}>
-            <FilterSelectGroup label={t('Fleets')}>
-              {!availableFleets.length ? (
-                <SelectOption isDisabled>{t('No fleets available')}</SelectOption>
-              ) : (
-                availableFleets.map((f) => (
-                  <SelectOption
-                    key={f}
-                    hasCheckbox
-                    value={f}
-                    isSelected={selectedFleets.includes(f)}
-                    onClick={() =>
-                      setSelectedFleets(
-                        selectedFleets.includes(f)
-                          ? selectedFleets.filter((fleet) => fleet !== f)
-                          : [...selectedFleets, f],
-                      )
-                    }
-                  >
-                    {f}
-                  </SelectOption>
-                ))
-              )}
-            </FilterSelectGroup>
-          </GridItem>
-          <GridItem span={3}>
-            <FilterSelectGroup label={t('Labels')}>
-              {!filteredLabels.length ? (
-                <SelectOption isDisabled>{t('No labels available')}</SelectOption>
-              ) : (
-                filteredLabels.map((label) => {
-                  return (
-                    <SelectOption
-                      key={label}
-                      hasCheckbox
-                      value={label}
-                      isSelected={selectedLabels.some((l) => labelToString(l) === label)}
-                      onClick={() => {
-                        const newLabels = selectedLabels.filter((l) => labelToString(l) !== label);
-                        if (newLabels.length !== selectedLabels.length) {
-                          setSelectedLabels(newLabels);
-                        } else {
-                          setSelectedLabels([...selectedLabels, stringToLabel(label)]);
-                        }
-                      }}
-                    >
-                      <Label id={label}>{label}</Label>
-                    </SelectOption>
-                  );
-                })
-              )}
-            </FilterSelectGroup>
-          </GridItem>
         </Grid>
       </SelectList>
     </FilterSelect>
   );
 };
 
-export default DeviceFilterSelect;
+export default DeviceStatusFilter;

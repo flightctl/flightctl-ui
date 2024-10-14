@@ -1,6 +1,4 @@
-import { Device } from '@flightctl/types';
 import { FlightCtlLabel } from '../types/extraTypes';
-import { fuzzySeach } from './search';
 
 type LabelOptions = {
   isDefault?: boolean;
@@ -25,6 +23,7 @@ export const toAPILabel = (labels: FlightCtlLabel[]): Record<string, string> =>
   );
 
 export const labelToString = (label: FlightCtlLabel) => `${label.key}${label.value ? `=${label.value}` : ''}`;
+
 export const stringToLabel = (labelStr: string): FlightCtlLabel => {
   const labelParts = labelStr.split('=');
   return {
@@ -33,20 +32,9 @@ export const stringToLabel = (labelStr: string): FlightCtlLabel => {
   };
 };
 
-export const filterDevicesLabels = (devices: Device[], additionalLabels: FlightCtlLabel[], filter: string) => {
-  const filteredLabels = [
-    ...new Set(
-      [
-        ...devices.reduce((acc, curr) => {
-          const deviceLabels = curr.metadata.labels || {};
-          acc.push(...fromAPILabel(deviceLabels));
-          return acc;
-        }, [] as FlightCtlLabel[]),
-        ...additionalLabels,
-      ].map(labelToString),
-    ),
-  ]
-    .sort()
-    .filter((label) => fuzzySeach(filter, label));
+export const filterDevicesLabels = (allLabels: FlightCtlLabel[], selectedLabels: FlightCtlLabel[], filter: string) => {
+  const filteredLabels = [...new Set(allLabels.concat(selectedLabels).map(labelToString))]
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })) // ignore case
+    .filter((label) => label.includes(filter));
   return filteredLabels;
 };

@@ -223,7 +223,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
         <ToolbarContent>
           <ToolbarGroup>
             <ToolbarItem variant="search-filter">
-              <TableTextSearch value={search} setValue={setSearch} />
+              <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name')} />
             </ToolbarItem>
           </ToolbarGroup>
           <ToolbarItem>

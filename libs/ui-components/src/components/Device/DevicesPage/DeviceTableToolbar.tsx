@@ -11,18 +11,19 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 
-import TableTextSearch, { TableTextSearchProps } from '../../Table/TableTextSearch';
+import { Fleet } from '@flightctl/types';
+import { TableTextSearchProps } from '../../Table/TableTextSearch';
 import { useTranslation } from '../../../hooks/useTranslation';
-import DeviceFilterSelect, { getStatusItem } from './DeviceFilterSelect';
+import DeviceStatusFilter, { getStatusItem } from './DeviceFilterSelect';
 import { FilterStatusMap, UpdateStatus } from './types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { labelToString } from '../../../utils/labels';
-import { Device, Fleet } from '@flightctl/types';
+import DeviceTableToolbarFilters from './DeviceToolbarFilters';
 
 type DeviceTableToolbarProps = {
-  devices: Device[];
   search: TableTextSearchProps['value'];
   setSearch: TableTextSearchProps['setValue'];
+  allLabels: FlightCtlLabel[];
   ownerFleets: string[];
   setOwnerFleets: (ownerFleets: string[]) => void;
   activeStatuses: FilterStatusMap;
@@ -34,15 +35,14 @@ type DeviceTableToolbarProps = {
 };
 
 const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarProps>> = ({ children, ...rest }) => {
-  const { t } = useTranslation();
   const {
-    devices,
     ownerFleets,
     setOwnerFleets,
     search,
     setSearch,
     activeStatuses,
     setActiveStatuses,
+    allLabels,
     selectedLabels,
     setSelectedLabels,
     fleets,
@@ -78,20 +78,23 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
         <ToolbarContent>
           <ToolbarGroup>
             <ToolbarItem variant="search-filter">
-              <DeviceFilterSelect
-                devices={devices}
-                selectedLabels={selectedLabels}
-                setSelectedLabels={setSelectedLabels}
-                selectedFleets={ownerFleets}
-                setSelectedFleets={setOwnerFleets}
+              <DeviceStatusFilter
                 activeStatuses={activeStatuses}
                 updateStatus={updateStatus}
-                fleets={fleets}
                 isFilterUpdating={isFilterUpdating}
               />
             </ToolbarItem>
             <ToolbarItem variant="search-filter">
-              <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by alias or name')} />
+              <DeviceTableToolbarFilters
+                allLabels={allLabels}
+                selectedLabels={selectedLabels}
+                selectedFleetNames={ownerFleets}
+                setSelectedLabels={setSelectedLabels}
+                setSelectedFleets={setOwnerFleets}
+                fleets={fleets}
+                search={search}
+                setSearch={setSearch}
+              />
             </ToolbarItem>
           </ToolbarGroup>
           {children}
@@ -148,7 +151,7 @@ const DeviceToolbarChips = ({
       )}
       {search && (
         <SplitItem>
-          <ChipGroup categoryName={t('Name / ID')} isClosable onClick={() => setSearch('')}>
+          <ChipGroup categoryName={t('Name / Alias')} isClosable onClick={() => setSearch('')}>
             <Chip onClick={() => setSearch('')}>{search}</Chip>
           </ChipGroup>
         </SplitItem>
