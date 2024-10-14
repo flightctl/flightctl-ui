@@ -60,7 +60,7 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
         <DeviceFleet device={device} />
       </Td>
       <Td dataLabel={t('Application status')}>
-        <ApplicationSummaryStatus statusSummary={device.status?.applications.summary} />
+        <ApplicationSummaryStatus statusSummary={device.status?.applicationsSummary} />
       </Td>
       <Td dataLabel={t('Device status')}>
         <DeviceStatus deviceStatus={device.status} />

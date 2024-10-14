@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ApplicationStatusType } from './ApplicationStatusType';
-export type ApplicationStatus = {
+export type DeviceApplicationStatus = {
   /**
    * Human readable name of the application.
    */

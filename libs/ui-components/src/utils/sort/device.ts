@@ -11,8 +11,8 @@ import { applicationSummaryStatusOrder } from '../status/applications';
 import { systemUpdateStatusOrder } from '../status/system';
 
 const sortByApplicationStatus = (a: Device, b: Device) => {
-  const aStatus = getApplicationSummaryStatus(a.status?.applications.summary);
-  const bStatus = getApplicationSummaryStatus(b.status?.applications.summary);
+  const aStatus = getApplicationSummaryStatus(a.status?.applicationsSummary);
+  const bStatus = getApplicationSummaryStatus(b.status?.applicationsSummary);
 
   const aIndex = applicationSummaryStatusOrder.indexOf(aStatus);
   const bIndex = applicationSummaryStatusOrder.indexOf(bStatus);

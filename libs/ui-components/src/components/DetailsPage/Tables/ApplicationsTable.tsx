@@ -2,20 +2,18 @@ import * as React from 'react';
 import { Bullseye } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import { DeviceApplicationsStatus } from '@flightctl/types';
+import { DeviceApplicationStatus } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import ApplicationStatus from '../../Status/ApplicationStatus';
 
 type ApplicationsTableProps = {
-  appsStatus: DeviceApplicationsStatus;
+  appsStatus: DeviceApplicationStatus[];
 };
 
 const ApplicationsTable = ({ appsStatus }: ApplicationsTableProps) => {
   const { t } = useTranslation();
 
-  const apps = Object.values(appsStatus.data);
-
-  return apps.length ? (
+  return appsStatus.length ? (
     <Table aria-label={t('Device applications table')}>
       <Thead>
         <Tr>
@@ -26,7 +24,7 @@ const ApplicationsTable = ({ appsStatus }: ApplicationsTableProps) => {
         </Tr>
       </Thead>
       <Tbody>
-        {apps.map((appData) => (
+        {appsStatus.map((appData) => (
           <Tr key={appData.name}>
             <Td dataLabel={t('Name')}>{appData.name}</Td>
             <Td dataLabel={t('Status')}>

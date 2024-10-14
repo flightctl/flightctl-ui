@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ApplicationsSummaryStatusType } from './ApplicationsSummaryStatusType';
-export type ApplicationsSummaryStatus = {
+export type DeviceApplicationsSummaryStatus = {
   /**
    * Summary status of the system applications.
    */

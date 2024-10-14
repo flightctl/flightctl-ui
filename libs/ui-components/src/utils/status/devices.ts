@@ -2,9 +2,9 @@ import { TFunction } from 'react-i18next';
 import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons';
 
 import {
-  ApplicationsSummaryStatus,
   ApplicationsSummaryStatusType,
   DeviceSummaryStatus as BEDeviceSummaryStatus,
+  DeviceApplicationsSummaryStatus,
   DeviceIntegrityStatusSummaryType,
   DeviceSummaryStatusType,
   DeviceUpdatedStatus,
@@ -30,7 +30,7 @@ export const getDeviceSummaryStatus = (deviceStatus?: BEDeviceSummaryStatus): De
   deviceStatus?.status || DeviceSummaryStatusType.DeviceSummaryStatusUnknown;
 
 export const getApplicationSummaryStatus = (
-  appSummaryStatus?: ApplicationsSummaryStatus,
+  appSummaryStatus?: DeviceApplicationsSummaryStatus,
 ): ApplicationsSummaryStatusType =>
   appSummaryStatus?.status || ApplicationsSummaryStatusType.ApplicationsSummaryStatusUnknown;
 

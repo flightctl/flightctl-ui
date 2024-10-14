@@ -3,7 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Condition } from './Condition';
-import type { DeviceApplicationsStatus } from './DeviceApplicationsStatus';
+import type { DeviceApplicationsSummaryStatus } from './DeviceApplicationsSummaryStatus';
+import type { DeviceApplicationStatus } from './DeviceApplicationStatus';
 import type { DeviceConfigStatus } from './DeviceConfigStatus';
 import type { DeviceIntegrityStatus } from './DeviceIntegrityStatus';
 import type { DeviceOSStatus } from './DeviceOSStatus';
@@ -21,9 +22,13 @@ export type DeviceStatus = {
   conditions: Array<Condition>;
   systemInfo: DeviceSystemInfo;
   /**
-   * Current status of the system applications.
+   * List of device application status.
    */
-  applications: DeviceApplicationsStatus;
+  applications: Array<DeviceApplicationStatus>;
+  /**
+   * Summary status of the device applications.
+   */
+  applicationsSummary: DeviceApplicationsSummaryStatus;
   /**
    * Current status of the resources of the device.
    */

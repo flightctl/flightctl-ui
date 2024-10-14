@@ -3,9 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type { ApplicationsSummaryStatus } from './models/ApplicationsSummaryStatus';
 export { ApplicationsSummaryStatusType } from './models/ApplicationsSummaryStatusType';
-export type { ApplicationStatus } from './models/ApplicationStatus';
 export { ApplicationStatusType } from './models/ApplicationStatusType';
 export type { AuthConfig } from './models/AuthConfig';
 export type { CertificateSigningRequest } from './models/CertificateSigningRequest';
@@ -18,7 +16,8 @@ export { ConditionType } from './models/ConditionType';
 export type { CPUResourceMonitorSpec } from './models/CPUResourceMonitorSpec';
 export type { CustomResourceMonitorSpec } from './models/CustomResourceMonitorSpec';
 export type { Device } from './models/Device';
-export type { DeviceApplicationsStatus } from './models/DeviceApplicationsStatus';
+export type { DeviceApplicationsSummaryStatus } from './models/DeviceApplicationsSummaryStatus';
+export type { DeviceApplicationStatus } from './models/DeviceApplicationStatus';
 export type { DeviceConfigStatus } from './models/DeviceConfigStatus';
 export type { DeviceConsole } from './models/DeviceConsole';
 export type { DeviceHooksSpec } from './models/DeviceHooksSpec';
