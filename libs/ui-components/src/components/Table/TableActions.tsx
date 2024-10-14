@@ -1,12 +1,13 @@
-import { MenuToggle, Select } from '@patternfly/react-core';
 import * as React from 'react';
+import { MenuToggle, Select } from '@patternfly/react-core';
+
 import { useTranslation } from '../../hooks/useTranslation';
 
 type TableActionsProps = {
-  children: React.ReactNode;
+  isDisabled: boolean;
 };
 
-const TableActions: React.FC<TableActionsProps> = ({ children }) => {
+const TableActions = ({ isDisabled, children }: React.PropsWithChildren<TableActionsProps>) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = React.useState(false);
   const onToggle = () => {
@@ -16,9 +17,10 @@ const TableActions: React.FC<TableActionsProps> = ({ children }) => {
     <Select
       isOpen={isOpen}
       onSelect={onToggle}
+      aria-disabled={isDisabled}
       onOpenChange={setIsOpen}
       toggle={(toggleRef) => (
-        <MenuToggle ref={toggleRef} onClick={onToggle} id="actions" isExpanded={isOpen}>
+        <MenuToggle ref={toggleRef} onClick={onToggle} id="actions" isExpanded={isOpen} isDisabled={isDisabled}>
           {t('Actions')}
         </MenuToggle>
       )}

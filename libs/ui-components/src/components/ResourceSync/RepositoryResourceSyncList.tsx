@@ -227,11 +227,9 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
             </ToolbarItem>
           </ToolbarGroup>
           <ToolbarItem>
-            <TableActions>
+            <TableActions isDisabled={!hasSelectedRows}>
               <SelectList>
-                <SelectOption isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)}>
-                  {t('Delete')}
-                </SelectOption>
+                <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
               </SelectList>
             </TableActions>
           </ToolbarItem>

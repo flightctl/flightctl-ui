@@ -76,14 +76,10 @@ export const EnrollmentRequestTable = ({
     <>
       <EnrollmentRequestTableToolbar search={search} setSearch={setSearch} enrollments={pendingEnrollments}>
         <ToolbarItem>
-          <TableActions>
+          <TableActions isDisabled={!hasSelectedRows}>
             <SelectList>
-              <SelectOption isDisabled={!hasSelectedRows} onClick={() => setIsMassApproveModalOpen(true)}>
-                {t('Approve')}
-              </SelectOption>
-              <SelectOption isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)}>
-                {t('Delete')}
-              </SelectOption>
+              <SelectOption onClick={() => setIsMassApproveModalOpen(true)}>{t('Approve')}</SelectOption>
+              <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
             </SelectList>
           </TableActions>
         </ToolbarItem>
