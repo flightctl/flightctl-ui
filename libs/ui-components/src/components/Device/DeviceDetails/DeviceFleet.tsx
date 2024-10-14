@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Button, List, ListItem, Tooltip } from '@patternfly/react-core';
-import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
+import { Button, List, ListItem, Popover } from '@patternfly/react-core';
+import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 
 import { Condition, ConditionType, Device } from '@flightctl/types';
 import { getDeviceFleet } from '../../../utils/devices';
@@ -27,8 +27,8 @@ const FleetLessDevice = ({ multipleOwnersCondition }: { multipleOwnersCondition?
   return (
     <div className="fctl-device-fleet">
       {hasMultipleOwners ? t('Multiple owners') : t('None')}
-      <Tooltip
-        content={
+      <Popover
+        bodyContent={
           <span>
             {message}
             {hasMultipleOwners && (
@@ -48,8 +48,13 @@ const FleetLessDevice = ({ multipleOwnersCondition }: { multipleOwnersCondition?
           </span>
         }
       >
-        <Button isInline variant="plain" icon={<InfoCircleIcon />} aria-label={t('Ownership information')} />
-      </Tooltip>
+        <Button
+          isInline
+          variant="plain"
+          icon={<OutlinedQuestionCircleIcon />}
+          aria-label={t('Ownership information')}
+        />
+      </Popover>
     </div>
   );
 };
