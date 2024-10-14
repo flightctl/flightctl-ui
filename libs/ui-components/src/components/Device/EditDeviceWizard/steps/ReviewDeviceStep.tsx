@@ -14,7 +14,6 @@ import { EditDeviceFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import LabelsView from '../../../common/LabelsView';
 import { toAPILabel } from '../../../../utils/labels';
-import { getSourceItems } from '../../../../utils/devices';
 import { getErrorMessage } from '../../../../utils/error';
 import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
 import { getAPIConfig } from '../deviceSpecUtils';
@@ -58,7 +57,7 @@ const ReviewStep = ({ error }: { error?: string }) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Configurations/applications')}</DescriptionListTerm>
             <DescriptionListDescription>
-              <RepositorySourceList sourceItems={getSourceItems(values.configTemplates.map(getAPIConfig))} />
+              <RepositorySourceList configs={values.configTemplates.map(getAPIConfig)} />
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>
