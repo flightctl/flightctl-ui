@@ -49,7 +49,7 @@ func main() {
 			panic(err)
 		}
 
-		oidcHandler, err := auth.NewOIDCAuth(oidcTlsConfig, tlsConfig)
+		oidcHandler, err := auth.NewOIDCAuth(oidcTlsConfig, tlsConfig, config.TlsCertPath != "")
 		if err != nil {
 			panic(err)
 		}

@@ -11,7 +11,7 @@ data:
   {{- if .Values.baseURL }}
   BASE_UI_URL:  {{ .Values.baseURL | quote }}
   {{- else }}
-  BASE_UI_URL:  https://ui.{{ include "flightctl.getBaseDomain" . }}/
+  BASE_UI_URL:  {{ include "flightctl.getUIUrl" . }}
   {{- end }}
   {{- if eq (.Values.global).target "standalone" }}
   {{- if eq ((.Values.global).auth).type "builtin" }}

@@ -1,4 +1,4 @@
-{{ if not (eq (.Values.global).target "acm") }}
+{{ if and (not (eq .Values.global.target "acm")) (eq (include "flightctl.getServiceExposeMethod" .) "route") }}
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
@@ -22,8 +22,14 @@ spec:
     weight: 100
   port:
     targetPort: 8080-tcp
+  {{- if eq (include "flightctl.getUIHttpScheme" .) "https" }}
   tls:
+    {{- if ((.Values.global).baseDomainTls).cert }}
     termination: passthrough
+    {{- else }}
+    termination: edge
+    {{- end }}
+  {{- end }}
   wildcardPolicy: None
 {{ end }}
     
