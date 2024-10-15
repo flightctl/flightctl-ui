@@ -77,7 +77,7 @@ export const isKubeProviderSpec = (providerSpec: GenericConfigSpec): providerSpe
 
 export type InlineConfigTemplate = ConfigTemplate & {
   type: 'inline';
-  inline: string;
+  files: Array<{ path: string; content: string; base64: boolean; permissions?: string; user?: string; group?: string }>;
 };
 
 export const isInlineConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is InlineConfigTemplate =>

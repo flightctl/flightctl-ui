@@ -4,7 +4,6 @@ import {
   Alert,
   Bullseye,
   Button,
-  ExpandableSection,
   FormGroup,
   FormSection,
   Grid,
@@ -15,17 +14,14 @@ import {
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 import { RepoSpecType, Repository, RepositoryList } from '@flightctl/types';
 import { SpecConfigTemplate } from '../../../../types/deviceSpec';
 import { DeviceSpecConfigFormValues } from '../types';
-
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';
 import { sortByName } from '../../../../utils/sort/generic';
-import WithTooltip from '../../../common/WithTooltip';
 import { getDnsSubdomainValidations } from '../../../form/validations';
 import ErrorHelperText from '../../../form/FieldHelperText';
 import FormSelect from '../../../form/FormSelect';
@@ -33,8 +29,7 @@ import RichValidationTextField from '../../../form/RichValidationTextField';
 import ConfigWithRepositoryTemplateForm from './ConfigWithRepositoryTemplateForm';
 import ConfigK8sSecretTemplateForm from './ConfigK8sSecretTemplateForm';
 import ConfigInlineTemplateForm from './ConfigInlineTemplateForm';
-
-import './ConfigTemplateForm.css';
+import ExpandableFormSection from '../../../form/ExpandableFormSection';
 
 const useValidateOnMount = () => {
   const { validateForm } = useFormikContext<DeviceSpecConfigFormValues>();
@@ -55,38 +50,13 @@ type ConfigSectionProps = {
 
 const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionProps) => {
   const { t } = useTranslation();
-  const [isExpanded, setIsExpanded] = React.useState(true);
   const fieldName = `configTemplates[${index}]`;
-  const { setFieldTouched } = useFormikContext<DeviceSpecConfigFormValues>();
-  const [{ value: template }, { error }, { setTouched }] = useField<SpecConfigTemplate>(fieldName);
+  const [{ value: template }] = useField<SpecConfigTemplate>(fieldName);
 
   useValidateOnMount();
 
   return (
-    <ExpandableSection
-      toggleContent={
-        <Split hasGutter>
-          <SplitItem>{t('Configurations/applications')}</SplitItem>
-          {!isExpanded && !!template.name && <SplitItem style={{ color: 'black' }}>{template.name}</SplitItem>}
-          {!isExpanded && error && (
-            <SplitItem>
-              <WithTooltip showTooltip content={t('Invalid configuration')}>
-                <ExclamationCircleIcon className="fctl-config-template--error" />
-              </WithTooltip>
-            </SplitItem>
-          )}
-        </Split>
-      }
-      isIndented
-      isExpanded={isExpanded}
-      onToggle={(_, expanded) => {
-        setTouched(true);
-        Object.keys((error as unknown as object) || {}).forEach((key) => {
-          setFieldTouched(`${fieldName}.${key}`, true);
-        });
-        setIsExpanded(expanded);
-      }}
-    >
+    <ExpandableFormSection title={t('Configurations/applications')} fieldName={fieldName} description={template.name}>
       <Grid hasGutter>
         <RichValidationTextField
           fieldName={`${fieldName}.name`}
@@ -118,7 +88,7 @@ const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionPr
           />
         )}
       </Grid>
-    </ExpandableSection>
+    </ExpandableFormSection>
   );
 };
 

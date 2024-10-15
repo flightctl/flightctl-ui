@@ -48,6 +48,7 @@ export type { EnrollmentRequestSpec } from './models/EnrollmentRequestSpec';
 export type { EnrollmentRequestStatus } from './models/EnrollmentRequestStatus';
 export type { Error } from './models/Error';
 export { FileOperation } from './models/FileOperation';
+export { FileSpec } from './models/FileSpec';
 export type { Fleet } from './models/Fleet';
 export type { FleetList } from './models/FleetList';
 export type { FleetSpec } from './models/FleetSpec';

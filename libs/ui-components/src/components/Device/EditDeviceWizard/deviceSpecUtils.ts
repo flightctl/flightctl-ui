@@ -1,8 +1,6 @@
-import * as yaml from 'js-yaml';
-import isEqual from 'lodash/isEqual';
-
 import {
   DeviceSpec,
+  FileSpec,
   GitConfigProviderSpec,
   HttpConfigProviderSpec,
   InlineConfigProviderSpec,
@@ -59,7 +57,23 @@ const isSameSecretConf = (a: KubernetesSecretProviderSpec, b: KubernetesSecretPr
 };
 
 const isSameInlineConf = (a: InlineConfigProviderSpec, b: InlineConfigProviderSpec) => {
-  return a.name === b.name && isEqual(a.inline, b.inline);
+  return (
+    a.name === b.name &&
+    a.inline.length === b.inline.length &&
+    a.inline.every((aInline, index) => {
+      const bInline = b.inline[index];
+      return (
+        aInline.content === bInline.content &&
+        (aInline.contentEncoding === bInline.contentEncoding ||
+          (aInline.contentEncoding === undefined && bInline.contentEncoding === FileSpec.contentEncoding.PLAIN) ||
+          (bInline.contentEncoding === undefined && aInline.contentEncoding === FileSpec.contentEncoding.PLAIN)) &&
+        aInline.group === bInline.group &&
+        aInline.user === bInline.user &&
+        aInline.path === bInline.path &&
+        aInline.mode === bInline.mode
+      );
+    })
+  );
 };
 
 export const getDeviceSpecConfigPatches = (
@@ -158,7 +172,16 @@ export const getAPIConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
   }
   return {
     configType: 'InlineConfigProviderSpec',
-    inline: yaml.load(ct.inline) as InlineConfigProviderSpec['inline'],
+    inline: ct.files.map((file) => {
+      return {
+        path: file.path,
+        content: file.content,
+        group: file.group,
+        user: file.user,
+        mode: file.permissions ? parseInt(file.permissions, 8) : undefined,
+        contentEncoding: file.base64 ? FileSpec.contentEncoding.BASE64 : undefined,
+      };
+    }),
     name: ct.name,
   };
 };
@@ -193,9 +216,19 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec) =>
         filePath: c.httpRef.filePath,
       } as HttpConfigTemplate;
     }
+
     return {
       type: 'inline',
       name: c.name,
-      inline: yaml.dump(c.inline),
+      files: c.inline.map((inline) => {
+        return {
+          user: inline.user,
+          group: inline.group,
+          path: inline.path,
+          permissions: inline.mode !== undefined ? inline.mode.toString(8) : undefined,
+          content: inline.content,
+          base64: inline.contentEncoding === FileSpec.contentEncoding.BASE64,
+        } as InlineConfigTemplate['files'][0];
+      }),
     } as InlineConfigTemplate;
   }) || [];
