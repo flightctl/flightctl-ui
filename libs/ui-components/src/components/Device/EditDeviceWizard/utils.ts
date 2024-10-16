@@ -3,11 +3,12 @@ import * as Yup from 'yup';
 
 import {
   maxLengthString,
+  validApplicationsSchema,
   validConfigTemplatesSchema,
   validKubernetesLabelValue,
   validLabelsSchema,
 } from '../../form/validations';
-import { appendJSONPatch, getLabelPatches } from '../../../utils/patch';
+import { appendJSONPatch, getApplicationPatches, getLabelPatches } from '../../../utils/patch';
 import { Device, PatchRequest } from '@flightctl/types';
 import { EditDeviceFormValues } from './types';
 import { getAPIConfig, getDeviceSpecConfigPatches } from './deviceSpecUtils';
@@ -19,6 +20,7 @@ export const getValidationSchema = (t: TFunction) =>
       osImage: maxLengthString(t, { fieldName: t('System image'), maxLength: 2048 }),
       labels: validLabelsSchema(t),
       configTemplates: validConfigTemplatesSchema(t),
+      applications: validApplicationsSchema(t),
     }),
   );
 
@@ -67,8 +69,11 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
   const currentConfigs = currentDevice.spec?.config || [];
   const newConfigs = updatedDevice.configTemplates.map(getAPIConfig);
   const configPatches = getDeviceSpecConfigPatches(currentConfigs, newConfigs, '/spec/config');
-  if (configPatches.length > 0) {
-    return allPatches.concat(configPatches);
-  }
+  allPatches = allPatches.concat(configPatches);
+
+  // Applications
+  const appPatches = getApplicationPatches('/spec', currentDevice.spec?.applications || [], updatedDevice.applications);
+  allPatches = allPatches.concat(appPatches);
+
   return allPatches;
 };

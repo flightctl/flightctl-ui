@@ -42,21 +42,24 @@ const useValidateOnMount = () => {
 };
 
 type ConfigSectionProps = {
-  ct: SpecConfigTemplate;
   index: number;
   repositories: Repository[];
   repoRefetch: VoidFunction;
 };
 
-const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionProps) => {
+const ConfigSection = ({ index, repositories, repoRefetch }: ConfigSectionProps) => {
   const { t } = useTranslation();
   const fieldName = `configTemplates[${index}]`;
-  const [{ value: template }] = useField<SpecConfigTemplate>(fieldName);
+  const [
+    {
+      value: { name, type },
+    },
+  ] = useField<SpecConfigTemplate>(fieldName);
 
   useValidateOnMount();
 
   return (
-    <ExpandableFormSection title={t('Configurations/applications')} fieldName={fieldName} description={template.name}>
+    <ExpandableFormSection title={t('Configurations')} fieldName={fieldName} description={name}>
       <Grid hasGutter>
         <RichValidationTextField
           fieldName={`${fieldName}.name`}
@@ -77,11 +80,11 @@ const ConfigSection = ({ ct, index, repositories, repoRefetch }: ConfigSectionPr
             placeholderText={t('Select a source type')}
           />
         </FormGroup>
-        {ct.type === 'secret' && <ConfigK8sSecretTemplateForm index={index} />}
-        {ct.type === 'inline' && <ConfigInlineTemplateForm index={index} />}
-        {(ct.type === 'http' || ct.type === 'git') && (
+        {type === 'secret' && <ConfigK8sSecretTemplateForm index={index} />}
+        {type === 'inline' && <ConfigInlineTemplateForm index={index} />}
+        {(type === 'http' || type === 'git') && (
           <ConfigWithRepositoryTemplateForm
-            repoType={ct.type as RepoSpecType}
+            repoType={type as RepoSpecType}
             index={index}
             repositories={repositories}
             repoRefetch={repoRefetch}
@@ -124,7 +127,7 @@ const ConfigTemplateForm = () => {
             <FormSection key={index}>
               <Split hasGutter>
                 <SplitItem isFilled>
-                  <ConfigSection ct={ct} index={index} repositories={repositories} repoRefetch={refetch} />
+                  <ConfigSection index={index} repositories={repositories} repoRefetch={refetch} />
                 </SplitItem>
                 <SplitItem>
                   <Button
@@ -150,7 +153,7 @@ const ConfigTemplateForm = () => {
                   });
                 }}
               >
-                {t('Add configurations/applications')}
+                {t('Add configuration')}
               </Button>
             </FormGroup>
           </FormSection>

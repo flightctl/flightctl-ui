@@ -17,6 +17,7 @@ import { toAPILabel } from '../../../../utils/labels';
 import { getErrorMessage } from '../../../../utils/error';
 import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
 import { getAPIConfig } from '../deviceSpecUtils';
+import ReviewApplications from './ReviewApplications';
 
 export const reviewDeviceStepId = 'review-device';
 
@@ -55,9 +56,15 @@ const ReviewStep = ({ error }: { error?: string }) => {
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('Configurations/applications')}</DescriptionListTerm>
+            <DescriptionListTerm>{t('Configurations')}</DescriptionListTerm>
             <DescriptionListDescription>
               <RepositorySourceList configs={values.configTemplates.map(getAPIConfig)} />
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Applications')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              <ReviewApplications apps={values.applications} />
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>

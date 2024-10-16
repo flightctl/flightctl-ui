@@ -21,6 +21,7 @@ import {
   isKubeProviderSpec,
   isKubeSecretTemplate,
 } from '../../../types/deviceSpec';
+import { ApplicationFormSpec } from './types';
 
 const isSameGitConf = (a: GitConfigProviderSpec, b: GitConfigProviderSpec) => {
   const aRef = a.gitRef;
@@ -184,6 +185,17 @@ export const getAPIConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
     }),
     name: ct.name,
   };
+};
+
+export const getApplicationValues = (deviceSpec?: DeviceSpec): ApplicationFormSpec[] => {
+  const map = deviceSpec?.applications || [];
+  return map.map((app) => {
+    return {
+      name: app.name || '',
+      image: app.image,
+      variables: Object.entries(app.envVars || {}).map(([varName, varValue]) => ({ name: varName, value: varValue })),
+    };
+  });
 };
 
 export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec) =>

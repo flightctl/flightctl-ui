@@ -1,0 +1,8 @@
+.fctl-application-template--error {
+  color: var(--pf-v5-global--danger-color--100)
+}
+
+.fctl-application-template__variable-name {
+  display: flex;
+  align-items: flex-end;
+}
