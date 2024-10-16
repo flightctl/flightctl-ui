@@ -25,7 +25,7 @@ import GeneralInfoStep, { generalInfoStepId, isGeneralInfoStepValid } from './st
 import DeviceTemplateStep, { deviceTemplateStepId, isDeviceTemplateStepValid } from './steps/DeviceTemplateStep';
 import ReviewDeviceStep, { reviewDeviceStepId } from './steps/ReviewDeviceStep';
 import { getDevicePatches, getValidationSchema } from './utils';
-import { getConfigTemplatesValues } from './deviceSpecUtils';
+import { getApplicationValues, getConfigTemplatesValues } from './deviceSpecUtils';
 import { useFetch } from '../../../hooks/useFetch';
 import { useEditDevice } from './useEditDevice';
 import EditDeviceWizardNav from './EditDeviceWizardNav';
@@ -72,6 +72,7 @@ const EditDeviceWizard = () => {
           labels: fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias'),
           configTemplates: getConfigTemplatesValues(device.spec),
           fleetMatch: '', // Initially this is always a fleetless device
+          applications: getApplicationValues(device.spec),
         }}
         validationSchema={getValidationSchema(t)}
         validateOnMount

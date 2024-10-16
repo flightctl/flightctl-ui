@@ -216,6 +216,21 @@ export const validLabelsSchema = (t: TFunction) =>
         : true;
     });
 
+export const validApplicationsSchema = (t: TFunction) => {
+  return Yup.array().of(
+    Yup.object().shape({
+      name: Yup.string(),
+      image: Yup.string().required(t('Image is required.')),
+      variables: Yup.array().of(
+        Yup.object().shape({
+          name: Yup.string().required(t('Variable name is required.')),
+          value: Yup.string().required(t('Variable value is required.')),
+        }),
+      ),
+    }),
+  );
+};
+
 export const validConfigTemplatesSchema = (t: TFunction) =>
   Yup.array()
     .test('unique-names', t('Source names must be unique'), (templates: SpecConfigTemplate[] | undefined) => {

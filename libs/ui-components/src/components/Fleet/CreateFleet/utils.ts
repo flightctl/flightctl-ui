@@ -6,13 +6,15 @@ import { API_VERSION } from '../../../constants';
 import { toAPILabel } from '../../../utils/labels';
 import {
   maxLengthString,
+  validApplicationsSchema,
   validConfigTemplatesSchema,
   validKubernetesDnsSubdomain,
   validLabelsSchema,
 } from '../../form/validations';
-import { appendJSONPatch, getLabelPatches } from '../../../utils/patch';
+import { appendJSONPatch, getApplicationPatches, getLabelPatches, toAPIApplication } from '../../../utils/patch';
 import {
   getAPIConfig,
+  getApplicationValues,
   getConfigTemplatesValues,
   getDeviceSpecConfigPatches,
 } from '../../Device/EditDeviceWizard/deviceSpecUtils';
@@ -24,6 +26,7 @@ export const getValidationSchema = (t: TFunction) => {
     fleetLabels: validLabelsSchema(t),
     labels: validLabelsSchema(t),
     configTemplates: validConfigTemplatesSchema(t),
+    applications: validApplicationsSchema(t),
   });
 };
 
@@ -92,9 +95,16 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
   const currentConfigs = currentFleet.spec.template.spec.config || [];
   const newConfigs = updatedFleet.configTemplates.map(getAPIConfig);
   const configPatches = getDeviceSpecConfigPatches(currentConfigs, newConfigs, '/spec/template/spec/config');
-  if (configPatches.length > 0) {
-    return allPatches.concat(configPatches);
-  }
+  allPatches = allPatches.concat(configPatches);
+
+  // Applications
+  const appPatches = getApplicationPatches(
+    '/spec/template/spec',
+    currentFleet.spec.template.spec.applications || [],
+    updatedFleet.applications,
+  );
+  allPatches = allPatches.concat(appPatches);
+
   return allPatches;
 };
 
@@ -118,6 +128,7 @@ export const getFleetResource = (values: FleetFormValues): Fleet => ({
       spec: {
         os: values.osImage ? { image: values.osImage || '' } : undefined,
         config: values.configTemplates.map(getAPIConfig),
+        applications: values.applications.map(toAPIApplication),
       },
     },
   },
@@ -137,6 +148,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues =>
         })),
         osImage: fleet.spec.template.spec.os?.image || '',
         configTemplates: getConfigTemplatesValues(fleet.spec.template.spec),
+        applications: getApplicationValues(fleet.spec.template.spec),
       }
     : {
         name: '',
@@ -144,4 +156,5 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues =>
         fleetLabels: [],
         osImage: '',
         configTemplates: [],
+        applications: [],
       };

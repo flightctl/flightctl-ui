@@ -9,7 +9,7 @@ export type ResourceAlertRule = {
    */
   severity: ResourceAlertSeverityType;
   /**
-   * Duration is the time over which the average usage is observed before alerting. Format: number followed by 's' for seconds, 'm' for minutes, 'h' for hours, 'd' for days.
+   * Duration is the time over which the average usage is observed before alerting. Format: positive integer followed by 's' for seconds, 'm' for minutes, 'h' for hours.
    */
   duration: string;
   /**
