@@ -182,6 +182,7 @@
   "Content is base64 encoded": "Content is base64 encoded",
   "Permissions": "Permissions",
   "Select permissions": "Select permissions",
+  "Select from the list or type in the permission code in octal notation": "Select from the list or type in the permission code in octal notation",
   "Invalid permissions": "Invalid permissions",
   "User": "User",
   "Group": "Group",
