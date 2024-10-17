@@ -24,7 +24,7 @@ type FormSelectProps = {
   children?: React.ReactNode;
   placeholderText?: string;
   validateNewItem?: (value: string) => string | undefined;
-  optionExists?: (value: string) => boolean;
+  transformNewItem?: (value: string) => string;
 };
 
 const isItemObject = (item: string | SelectItem): item is SelectItem => typeof item === 'object';
@@ -40,7 +40,7 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
   placeholderText,
   children,
   validateNewItem,
-  optionExists,
+  transformNewItem,
 }) => {
   const { t } = useTranslation();
   const [field, meta, { setValue, setTouched }] = useField<string>({
@@ -62,22 +62,18 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
     }
   }, [itemKeys, field.value, setValue]);
 
-  const selectedText =
-    inputValue !== undefined
-      ? inputValue
-      : field.value
-        ? getItemLabel(items[field.value]) || field.value
-        : placeholderText;
+  const selectedText = isOpen ? inputValue : field.value ? getItemLabel(items[field.value]) || field.value : undefined;
 
   const itemValidation = inputValue ? validateNewItem?.(inputValue) : undefined;
 
   let alreadyAdded = false;
+  const inputTransformed = inputValue && transformNewItem ? transformNewItem(inputValue) : inputValue;
   const addedItemsFiltered = addedItems.filter((item) => {
     if (!inputValue) {
       return true;
     }
-    if (inputValue === item) {
-      alreadyAdded = true;
+    if (!alreadyAdded) {
+      alreadyAdded = item === inputTransformed;
     }
     return item.includes(inputValue);
   });
@@ -85,6 +81,9 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
   const itemKeysFiltered = itemKeys.filter((key) => {
     if (!inputValue) {
       return true;
+    }
+    if (!alreadyAdded) {
+      alreadyAdded = key === inputTransformed;
     }
     return getItemLabel(items[key]).includes(inputValue);
   });
@@ -113,14 +112,13 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
         className="fctl-form-select"
         selected={field.value}
         onSelect={(_, value) => {
-          if (value === CREATE_NEW) {
-            setAddedItems([...addedItems, inputValue as string]);
-            setValue(inputValue as string, true);
-            setInputValue(undefined);
-          } else {
-            setValue(value as string, true);
-            setInputValue(undefined);
+          let newValue: string = value as string;
+          if (value === CREATE_NEW && inputTransformed) {
+            setAddedItems([...addedItems, inputTransformed]);
+            newValue = inputTransformed;
           }
+          setValue(newValue, true);
+          setInputValue(undefined);
           setIsOpen(false);
         }}
         toggle={(toggleRef) => (
@@ -139,7 +137,7 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
           >
             <TextInputGroup isPlain>
               <TextInputGroupMain
-                value={inputValue || selectedText}
+                value={selectedText}
                 onClick={() => {
                   if (isOpen && !meta.touched) {
                     setTouched(true);
@@ -157,6 +155,7 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
                 role="combobox"
                 isExpanded={isOpen}
                 aria-controls="select-create-typeahead-listbox"
+                placeholder={placeholderText}
               />
             </TextInputGroup>
           </MenuToggle>
@@ -175,14 +174,16 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
         }}
       >
         <SelectList className="fctl-form-select__menu">
-          {inputValue && !alreadyAdded && (optionExists ? !optionExists(inputValue) : false) && (
+          {inputValue && !alreadyAdded && (
             <SelectOption
               className="fctl-form-select__item"
               isDisabled={!!itemValidation}
               description={itemValidation}
               value={CREATE_NEW}
             >
-              {t(`Create new option '{{ value }}'`, { value: inputValue })}
+              {t(`Create new option '{{ value }}'`, {
+                value: itemValidation ? inputValue : inputTransformed,
+              })}
             </SelectOption>
           )}
           {selectOptions}

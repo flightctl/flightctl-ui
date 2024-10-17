@@ -225,10 +225,16 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec) =>
           user: inline.user,
           group: inline.group,
           path: inline.path,
-          permissions: inline.mode !== undefined ? inline.mode.toString(8) : undefined,
+          permissions: inline.mode !== undefined ? formatFileMode(inline.mode) : undefined,
           content: inline.content,
           base64: inline.contentEncoding === FileSpec.contentEncoding.BASE64,
         } as InlineConfigTemplate['files'][0];
       }),
     } as InlineConfigTemplate;
   }) || [];
+
+export const formatFileMode = (mode: string | number): string => {
+  const modeStr = typeof mode === 'number' ? mode.toString(8) : mode;
+  const prefixSize = 4 - modeStr.length;
+  return prefixSize > 0 ? `${'0'.repeat(prefixSize)}${modeStr}` : modeStr;
+};

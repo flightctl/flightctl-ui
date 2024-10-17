@@ -12,6 +12,7 @@ import { DeviceSpecConfigFormValues } from '../types';
 import { InlineConfigTemplate } from '../../../../types/deviceSpec';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import SwitchField from '../../../form/SwitchField';
+import { formatFileMode } from '../deviceSpecUtils';
 
 const FileForm = ({ fieldName }: { fieldName: string }) => {
   const { t } = useTranslation();
@@ -19,21 +20,21 @@ const FileForm = ({ fieldName }: { fieldName: string }) => {
 
   const permissions = React.useMemo(
     () => ({
-      '777': t('(0777) Read, write, and execute permissions for all users.'),
-      '755': t("(0755) Read and execute permission for all users. The file's owner also has write permission."),
-      '750': t(
+      '0777': t('(0777) Read, write, and execute permissions for all users.'),
+      '0755': t("(0755) Read and execute permission for all users. The file's owner also has write permission."),
+      '0750': t(
         "(0750) Read and execute permission for the owner and group. The file's owner also has write permission. Users who aren't the file's owner or members of the group have no access to the file.",
       ),
-      '700': t("(0700) Read, write, and execute permissions for the file's owner only; all others have no access."),
-      '666': t('(0666) Read and write permissions for all users. No execute permissions for anybody.'),
-      '664': t('(0664) Read and write permissions for the owner and group. Read- only permission for all others.'),
-      '660': t('(0660) Read and write permissions for the owner and group. No world permissions.'),
-      '644': t('(0644) Read and write permissions for the owner. Read-only permission for all others.'),
-      '640': t(
+      '0700': t("(0700) Read, write, and execute permissions for the file's owner only; all others have no access."),
+      '0666': t('(0666) Read and write permissions for all users. No execute permissions for anybody.'),
+      '0664': t('(0664) Read and write permissions for the owner and group. Read-only permission for all others.'),
+      '0660': t('(0660) Read and write permissions for the owner and group. No world permissions.'),
+      '0644': t('(0644) Read and write permissions for the owner. Read-only permission for all others.'),
+      '0640': t(
         '(0640) Read and write permissions for the owner, and read-only permission for the group. No permission for others.',
       ),
-      '600': t('(0600) Read and write permissions for the owner. No permission for anybody else.'),
-      '400': t('(0400) Read permission for the owner. No permission for anybody else.'),
+      '0600': t('(0600) Read and write permissions for the owner. No permission for anybody else.'),
+      '0400': t('(0400) Read permission for the owner. No permission for anybody else.'),
     }),
     [t],
   );
@@ -66,14 +67,14 @@ const FileForm = ({ fieldName }: { fieldName: string }) => {
               }
               return t('Invalid permissions');
             }}
-            optionExists={(value) => Object.keys(permissions).some((k) => k === value || `0${k}` === value)}
+            transformNewItem={formatFileMode}
           />
         </FormGroup>
         <FormGroup label={t('User')}>
-          <TextField name={`${fieldName}.user`} />
+          <TextField name={`${fieldName}.user`} placeholder="root" />
         </FormGroup>
         <FormGroup label={t('Group')}>
-          <TextField name={`${fieldName}.group`} />
+          <TextField name={`${fieldName}.group`} placeholder="root" />
         </FormGroup>
       </Grid>
     </ExpandableFormSection>
