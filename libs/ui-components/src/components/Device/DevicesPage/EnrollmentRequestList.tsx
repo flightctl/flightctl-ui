@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { TFunction } from 'react-i18next';
 import { Tbody } from '@patternfly/react-table';
-import { SelectList, SelectOption, ToolbarItem } from '@patternfly/react-core';
+import { SelectList, SelectOption, Spinner, ToolbarItem } from '@patternfly/react-core';
 
 import { EnrollmentRequest, EnrollmentRequestList as EnrollmentRequestListType } from '@flightctl/types';
 
@@ -151,21 +151,25 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
     endpoint: 'enrollmentrequests',
   });
 
+  if (isLoading) {
+    return <Spinner size="md" />;
+  }
+
+  // The content only appears if there are pending enrollment requests
   // TODO move the filter as part of the query once it's available via the API
   const pendingEnrollments = (erList?.items || []).filter((er) => er.status?.approval?.approved !== true);
+
+  if (pendingEnrollments.length === 0) {
+    return null;
+  }
 
   const approveRefetch = () => {
     refetch();
     refetchDevices();
   };
-
-  if (!isLoading && pendingEnrollments.length === 0) {
-    return null;
-  }
-
   return (
     <ListPage title={t('Devices pending approval')} headingLevel="h2">
-      <ListPageBody error={error} loading={isLoading}>
+      <ListPageBody error={error} loading={false}>
         <EnrollmentRequestTable
           pendingEnrollments={pendingEnrollments}
           approveRefetch={approveRefetch}
