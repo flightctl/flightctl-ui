@@ -1,7 +1,7 @@
 import { Device } from '@flightctl/types';
 import { useTableTextSearch } from '../../../hooks/useTableTextSearch';
 
-const getSearchText = (device: Device) => [device.metadata.name, device.metadata.labels?.alias];
+const getSearchText = (device: Device) => [device.metadata.name, device.metadata.alias];
 
 export const useDeviceFilters = (devices: Array<Device>) => {
   const { search, setSearch, filteredData } = useTableTextSearch(devices, getSearchText);
