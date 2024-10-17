@@ -24,7 +24,7 @@ export const sortByLastSeenDate = (devices: Device[]) =>
 
 export const sortByAlias = (devices: Device[]) =>
   devices.sort((a, b) => {
-    const aAlias = a.metadata.labels?.alias || '-';
-    const bAlias = b.metadata.labels?.alias || '-';
+    const aAlias = a.metadata.alias || '-';
+    const bAlias = b.metadata.alias || '-';
     return aAlias.localeCompare(bAlias);
   });
