@@ -23,23 +23,3 @@ export const KubernetesLabelHelperText = () => {
     </>
   );
 };
-
-export const IgnitionFileHelperText = () => {
-  const { t } = useTranslation();
-  return (
-    <>
-      {t('Must be a valid Ignition file in YAML format')}{' '}
-      <Button
-        component="a"
-        variant="link"
-        isInline
-        icon={<ExternalLinkAltIcon />}
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://coreos.github.io/ignition/specs/"
-      >
-        {t('Learn more')}
-      </Button>
-    </>
-  );
-};

@@ -1,6 +1,5 @@
 import * as Yup from 'yup';
 import { TFunction } from 'i18next';
-import * as yaml from 'js-yaml';
 
 import { FlightCtlLabel } from '../../types/extraTypes';
 import {
@@ -14,7 +13,6 @@ import {
   isInlineConfigTemplate,
   isKubeSecretTemplate,
 } from '../../types/deviceSpec';
-
 import { labelToString } from '../../utils/labels';
 
 type UnvalidatedLabel = Partial<FlightCtlLabel>;
@@ -266,16 +264,19 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
           return Yup.object<InlineConfigTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
             name: validKubernetesDnsSubdomain(t, { isRequired: true }),
-            inline: maxLengthString(t, { fieldName: t('Inline config'), maxLength: 65535 })
-              .required(t('Inline config is required.'))
-              .test('yaml object', t('Inline config must be a valid yaml object.'), (value) => {
-                try {
-                  const yamlResult = yaml.load(value);
-                  return typeof yamlResult === 'object';
-                } catch (err) {
-                  return false;
-                }
+            files: Yup.array().of(
+              Yup.object<InlineConfigTemplate['files'][0]>().shape({
+                path: Yup.string()
+                  .required(t('Path is required.'))
+                  .matches(absolutePathRegex, t('File path must be absolute.'))
+                  .test(
+                    'unique-paths',
+                    t('File path must be unique'),
+                    (path) => !path || value.files.filter((file) => file.path === path).length == 1,
+                  ),
+                content: Yup.string().required(t('File content is required.')),
               }),
+            ),
           });
         }
 
