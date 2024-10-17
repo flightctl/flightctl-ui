@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
 import { PatchRequest } from '@flightctl/types';
 
-const apiServer = `${window.location.hostname}${window.API_PORT ? `:${window.API_PORT}` : ''}`;
+const apiPort = window.API_PORT || window.location.port;
+const apiServer = `${window.location.hostname}${apiPort ? `:${apiPort}` : ''}`;
 
 const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
 export const loginAPI = `${window.location.protocol}//${apiServer}/api/login`;

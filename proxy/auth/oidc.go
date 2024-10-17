@@ -23,6 +23,7 @@ type OIDCAuth struct {
 	authConfig         *v1alpha1.AuthConfig
 	oidcClient         *osincli.Client
 	internalOidcClient *osincli.Client
+	secureOnly         bool
 }
 
 type oauthServerInfo struct {
@@ -45,7 +46,7 @@ type LoginParameters struct {
 	Code string `json:"code"`
 }
 
-func NewOIDCAuth(oidcTlsConfig *tls.Config, apiTlsConfig *tls.Config) (*OIDCAuth, error) {
+func NewOIDCAuth(oidcTlsConfig *tls.Config, apiTlsConfig *tls.Config, secureOnly bool) (*OIDCAuth, error) {
 	oauthInfo, authConfig, err := getOIDCInfo(oidcTlsConfig, apiTlsConfig)
 	if err != nil {
 		return nil, err
@@ -75,6 +76,7 @@ func NewOIDCAuth(oidcTlsConfig *tls.Config, apiTlsConfig *tls.Config) (*OIDCAuth
 		clientId:           config.OidcClientId,
 		oidcClient:         oidcClient,
 		internalOidcClient: internalOidcClient,
+		secureOnly:         secureOnly,
 	}, nil
 }
 
@@ -240,7 +242,7 @@ func (o *OIDCAuth) exchangeToken(w http.ResponseWriter, r *http.Request) {
 	cookie := http.Cookie{
 		Name:     common.CookieSessionName,
 		Value:    ad.AccessToken,
-		Secure:   true,
+		Secure:   o.secureOnly,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 		Path:     "/",
