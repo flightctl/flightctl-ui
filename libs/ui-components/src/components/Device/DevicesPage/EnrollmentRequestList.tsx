@@ -45,11 +45,9 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
   const { getSortParams, activeSortQuery } = useApiTableSort(enrollmentColumns);
 
   const [erList, isLoading, error, refetch] = useFetchPeriodically<EnrollmentRequestListType>({
-    endpoint: `enrollmentrequests${activeSortQuery ? `?${activeSortQuery}` : ''}`,
+    endpoint: `enrollmentrequests?fieldSelector=!status.approval.approved${activeSortQuery ? `&${activeSortQuery}` : ''}`,
   });
-
-  // TODO move the filter as part of the query once it's available via the API
-  const pendingEnrollments = (erList?.items || []).filter((er) => er.status?.approval?.approved !== true);
+  const pendingEnrollments = erList?.items || [];
 
   const refetchWithDevices = () => {
     refetch();
