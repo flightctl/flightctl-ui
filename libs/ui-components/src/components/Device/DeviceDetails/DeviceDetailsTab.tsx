@@ -106,7 +106,7 @@ const DeviceDetailsTab = ({
                   />
                 </DescriptionListTerm>
                 <DescriptionListDescription>
-                  <ApplicationSummaryStatus statusSummary={device.status?.applications.summary} />
+                  <ApplicationSummaryStatus statusSummary={device.status?.applicationsSummary} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
