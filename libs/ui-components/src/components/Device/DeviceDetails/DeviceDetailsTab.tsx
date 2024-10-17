@@ -22,6 +22,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import EditLabelsForm from '../../modals/EditLabelsModal/EditLabelsForm';
 import ResourceLink from '../../common/ResourceLink';
 import DeviceFleet from './DeviceFleet';
+import DeviceOs from './DeviceOs';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
 import SystemdTable from './SystemdTable';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
@@ -58,15 +59,11 @@ const DeviceDetailsTab = ({
           </Alert>
         </GridItem>
       )}
-
       <GridItem md={12}>
         <DetailsPageCard>
           <DetailsPageCardBody>
-            <Flex
-              alignItems={{ default: 'alignItemsFlexStart' }}
-              justifyContent={{ default: 'justifyContentSpaceBetween' }}
-            >
-              <FlexItem>
+            <Flex alignItems={{ default: 'alignItemsFlexStart' }}>
+              <FlexItem flex={{ default: 'flex_1' }}>
                 <Stack>
                   <StackItem className="fctl-device-details-tab__label">{t('Name')}</StackItem>
                 </Stack>
@@ -74,21 +71,22 @@ const DeviceDetailsTab = ({
                   <ResourceLink id={device.metadata.name || '-'} />
                 </StackItem>
               </FlexItem>
-              <FlexItem flex={{ default: 'flex_3' }}>
-                <EditLabelsForm device={device} onDeviceUpdate={refetch} />
-              </FlexItem>
+              {!!children && <FlexItem flex={{ default: 'flex_1' }}>{children}</FlexItem>}
               <FlexItem flex={{ default: 'flex_1' }}>
-                <Flex justifyContent={{ default: 'justifyContentFlexEnd' }}>
-                  {children}
-                  <FlexItem>
-                    <Stack>
-                      <StackItem className="fctl-device-details-tab__label">{t('Fleet name')}</StackItem>
-                      <StackItem>
-                        <DeviceFleet device={device} />
-                      </StackItem>
-                    </Stack>
-                  </FlexItem>
-                </Flex>
+                <Stack>
+                  <StackItem className="fctl-device-details-tab__label">{t('Fleet name')}</StackItem>
+                  <StackItem>
+                    <DeviceFleet device={device} />
+                  </StackItem>
+                </Stack>
+              </FlexItem>
+              <FlexItem flex={{ default: 'flex_4' }}>
+                <Stack>
+                  <StackItem className="fctl-device-details-tab__label">{t('Labels')}</StackItem>
+                </Stack>
+                <StackItem>
+                  <EditLabelsForm device={device} onDeviceUpdate={refetch} />
+                </StackItem>
               </FlexItem>
             </Flex>
           </DetailsPageCardBody>
@@ -178,9 +176,9 @@ const DeviceDetailsTab = ({
           <DetailsPageCardBody>
             <DescriptionList columnModifier={{ default: '2Col' }}>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
+                <DescriptionListTerm>{t('System image (running)')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {tv?.status?.os?.image || device.status?.systemInfo?.operatingSystem || '-'}
+                  <DeviceOs desiredOsImage={device.spec?.os?.image} renderedOsImage={device.status?.os?.image} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
