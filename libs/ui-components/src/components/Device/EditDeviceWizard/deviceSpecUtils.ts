@@ -63,14 +63,14 @@ const isSameInlineConf = (a: InlineConfigProviderSpec, b: InlineConfigProviderSp
     a.inline.every((aInline, index) => {
       const bInline = b.inline[index];
       return (
-        aInline.content === bInline.content &&
-        (aInline.contentEncoding === bInline.contentEncoding ||
-          (aInline.contentEncoding === undefined && bInline.contentEncoding === FileSpec.contentEncoding.PLAIN) ||
-          (bInline.contentEncoding === undefined && aInline.contentEncoding === FileSpec.contentEncoding.PLAIN)) &&
         aInline.group === bInline.group &&
         aInline.user === bInline.user &&
         aInline.path === bInline.path &&
-        aInline.mode === bInline.mode
+        aInline.mode === bInline.mode &&
+        (aInline.contentEncoding === bInline.contentEncoding ||
+          (aInline.contentEncoding === undefined && bInline.contentEncoding === FileSpec.contentEncoding.PLAIN) ||
+          (bInline.contentEncoding === undefined && aInline.contentEncoding === FileSpec.contentEncoding.PLAIN)) &&
+        aInline.content === bInline.content
       );
     })
   );
