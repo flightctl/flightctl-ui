@@ -29,10 +29,12 @@ const ExpandableFormSection = ({
       toggleContent={
         <Split hasGutter>
           <SplitItem>{title}</SplitItem>
-          {!isExpanded && !!description && <SplitItem style={{ color: 'black' }}>{description}</SplitItem>}
+          {!isExpanded && !!description && (
+            <SplitItem style={{ color: 'var(--pf-v5-global--Color--100)' }}>{description}</SplitItem>
+          )}
           {!isExpanded && error && (
             <SplitItem>
-              <WithTooltip showTooltip content={t('Invalid configuration')}>
+              <WithTooltip showTooltip content={t('Invalid {{ itemType }}', { itemType: title })}>
                 <ExclamationCircleIcon className="fctl-expandable-section--error" />
               </WithTooltip>
             </SplitItem>
