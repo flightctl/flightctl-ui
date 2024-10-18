@@ -1,4 +1,5 @@
 import * as React from 'react';
+import debounce from 'lodash/debounce';
 import {
   Button,
   Icon,
@@ -211,8 +212,8 @@ type DeviceToolbarFilterProps = {
   allLabels: FlightCtlLabel[];
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
-  search?: TableTextSearchProps['value'];
-  setSearch?: TableTextSearchProps['setValue'];
+  nameOrAlias?: TableTextSearchProps['value'];
+  setNameOrAlias?: TableTextSearchProps['setValue'];
 };
 
 const DeviceToolbarFilter = ({
@@ -222,12 +223,35 @@ const DeviceToolbarFilter = ({
   allLabels,
   selectedLabels,
   setSelectedLabels,
-  search,
-  setSearch,
+  nameOrAlias,
+  setNameOrAlias,
 }: DeviceToolbarFilterProps) => {
   const { t } = useTranslation();
   const [isSearchTypeExpanded, setIsSearchTypeExpanded] = React.useState(false);
   const [selectedSearchType, setSelectedSearchType] = React.useState(LABEL_SEARCH);
+
+  const [typingText, setTypingText] = React.useState<string>('');
+  const debouncedSetParam = React.useMemo(
+    () =>
+      debounce((setValue: TableTextSearchProps['setValue'], value: string) => {
+        setValue(value || '');
+      }, 500),
+    [],
+  );
+
+  React.useEffect(() => {
+    if (setNameOrAlias) {
+      debouncedSetParam(setNameOrAlias, typingText);
+    }
+  }, [typingText, setNameOrAlias, debouncedSetParam]);
+
+  React.useEffect(() => {
+    if (!nameOrAlias && typingText) {
+      setTypingText('');
+    }
+    // When the filter is cleared from the chips, clear the "typingText" too
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nameOrAlias, setTypingText]);
 
   const onToggle = () => {
     setIsSearchTypeExpanded(!isSearchTypeExpanded);
@@ -239,6 +263,9 @@ const DeviceToolbarFilter = ({
   ) => {
     setSelectedSearchType(selection as string);
     setIsSearchTypeExpanded(false);
+    if (selection === LABEL_SEARCH) {
+      setTypingText('');
+    }
   };
 
   const onSelectFleetOrLabel = (type: 'fleet' | 'label', id: string) => {
@@ -259,7 +286,7 @@ const DeviceToolbarFilter = ({
 
   return (
     <>
-      {setSearch && (
+      {setNameOrAlias && (
         <Select
           toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
             <MenuToggle
@@ -286,11 +313,11 @@ const DeviceToolbarFilter = ({
           </SelectOption>
         </Select>
       )}
-      {setSearch && selectedSearchType === NAME_SEARCH ? (
-        <TableTextSearch value={search} setValue={setSearch} />
+      {setNameOrAlias && selectedSearchType === NAME_SEARCH ? (
+        <TableTextSearch value={typingText} setValue={setTypingText} />
       ) : (
         <LabelFleetSelector
-          placeholder={setSearch ? undefined : t('Filter by labels and fleets')}
+          placeholder={setNameOrAlias ? undefined : t('Filter by labels and fleets')}
           allLabels={allLabels}
           fleets={fleets}
           selectedFleetNames={selectedFleetNames}
