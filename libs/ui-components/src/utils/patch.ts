@@ -127,16 +127,23 @@ export const getLabelPatches = (
   return patches;
 };
 
-const toAPIApplication = (app: ApplicationFormSpec): ApplicationSpec => {
+export const toAPIApplication = (app: ApplicationFormSpec): ApplicationSpec => {
   const envVars = app.variables.reduce((acc, variable) => {
     acc[variable.name] = variable.value;
     return acc;
   }, {});
-  return {
-    name: app.name,
-    image: app.image,
-    envVars,
-  };
+
+  return app.name
+    ? {
+        name: app.name,
+        image: app.image,
+        envVars,
+      }
+    : {
+        // Name must not be sent, otherwise the API expects it to have a value
+        image: app.image,
+        envVars,
+      };
 };
 
 export const getApplicationPatches = (
