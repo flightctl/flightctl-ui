@@ -1,51 +1,25 @@
 import * as React from 'react';
 
-import { Button, ExpandableSection, FormGroup, FormSection, Grid, Split, SplitItem } from '@patternfly/react-core';
+import { Button, FormGroup, FormSection, Grid, Split, SplitItem } from '@patternfly/react-core';
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 import { ApplicationFormSpec, DeviceSpecConfigFormValues } from '../types';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import WithTooltip from '../../../common/WithTooltip';
 import TextField from '../../../form/TextField';
+import ExpandableFormSection from '../../../form/ExpandableFormSection';
 
 import './ApplicationsForm.css';
 
 const ApplicationSection = ({ index }: { index: number }) => {
   const { t } = useTranslation();
-  const [isExpanded, setIsExpanded] = React.useState(true);
   const fieldName = `applications[${index}]`;
-  const { setFieldTouched } = useFormikContext<DeviceSpecConfigFormValues>();
-  const [{ value: app }, { error }, { setTouched }] = useField<ApplicationFormSpec>(fieldName);
+  const [{ value: app }] = useField<ApplicationFormSpec>(fieldName);
 
   return (
-    <ExpandableSection
-      toggleContent={
-        <Split hasGutter>
-          <SplitItem>{t('Application')}</SplitItem>
-          {!isExpanded && !!app && <SplitItem style={{ color: 'black' }}>{app.name || app.image}</SplitItem>}
-          {!isExpanded && error && (
-            <SplitItem>
-              <WithTooltip showTooltip content={t('Invalid application')}>
-                <ExclamationCircleIcon className="fctl-application-template--error" />
-              </WithTooltip>
-            </SplitItem>
-          )}
-        </Split>
-      }
-      isIndented
-      isExpanded={isExpanded}
-      onToggle={(_, expanded) => {
-        setTouched(true);
-        Object.keys((error as unknown as object) || {}).forEach((key) => {
-          setFieldTouched(`${fieldName}.${key}`, true);
-        });
-        setIsExpanded(expanded);
-      }}
-    >
+    <ExpandableFormSection title={t('Application')} fieldName={fieldName} description={app.name || app.image}>
       <Grid hasGutter>
         <FormGroup label={t('Image')} isRequired>
           <TextField aria-label={t('Image')} name={`applications.${index}.image`} value={app.image} />
@@ -110,7 +84,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
           )}
         </FieldArray>
       </Grid>
-    </ExpandableSection>
+    </ExpandableFormSection>
   );
 };
 
