@@ -10,13 +10,14 @@ import { FilterStatusMap } from './types';
 import { fromAPILabel } from '../../../utils/labels';
 
 type DevicesEndpointArgs = {
+  nameOrAlias?: string;
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
   summaryOnly?: boolean;
 };
 
-const getDevicesEndpoint = ({ ownerFleets, activeStatuses, labels, summaryOnly }: DevicesEndpointArgs) => {
+const getDevicesEndpoint = ({ nameOrAlias, ownerFleets, activeStatuses, labels, summaryOnly }: DevicesEndpointArgs) => {
   const filterByAppStatus = activeStatuses?.[FilterSearchParams.AppStatus];
   const filterByDevStatus = activeStatuses?.[FilterSearchParams.DeviceStatus];
   const filterByUpdateStatus = activeStatuses?.[FilterSearchParams.UpdatedStatus];
@@ -31,6 +32,10 @@ const getDevicesEndpoint = ({ ownerFleets, activeStatuses, labels, summaryOnly }
       'metadata.owner',
       ownerFleets.map((fleet) => `Fleet/${fleet}`),
     );
+  }
+  if (nameOrAlias) {
+    // Partial string match
+    fieldSelectors.push(`metadata.nameoralias~=%${nameOrAlias}%`);
   }
 
   const params = new URLSearchParams();
@@ -66,10 +71,12 @@ export const useDevicesSummary = ({
 };
 
 export const useDevices = ({
+  nameOrAlias,
   ownerFleets,
   activeStatuses,
   labels,
 }: {
+  nameOrAlias?: string;
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
@@ -77,7 +84,7 @@ export const useDevices = ({
   const [deviceLabelList] = useFetchPeriodically<DeviceList>({
     endpoint: 'devices',
   });
-  const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint({ ownerFleets, activeStatuses, labels });
+  const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint({ nameOrAlias, ownerFleets, activeStatuses, labels });
   const [devicesList, devicesLoading, devicesError, devicesRefetch, updating] = useFetchPeriodically<DeviceList>({
     endpoint: devicesEndpoint,
   });

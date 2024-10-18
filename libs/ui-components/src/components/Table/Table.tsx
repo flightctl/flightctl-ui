@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Bullseye, PageSection } from '@patternfly/react-core';
+import { Bullseye, PageSection, Spinner } from '@patternfly/react-core';
 import { Table as PFTable, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
 import { useTranslation } from '../../hooks/useTranslation';
 import WithHelperText from '../common/WithHelperText';
@@ -27,8 +27,12 @@ export type TableColumn<D> = {
 type TableProps<D> = {
   columns: TableColumn<D>[];
   children: React.ReactNode;
-  emptyFilters: boolean;
-  emptyData: boolean;
+  loading: boolean;
+  // "hasBackendFilters" used when only Backend filters are used
+  // "emptyUiFilters used when some UI filters are used (To be removed when all filters are applied via the API)
+  hasBackendFilters?: boolean;
+  emptyUiFilters?: boolean;
+  emptyData?: boolean;
   'aria-label': string;
   getSortParams: (columnIndex: number) => ThProps['sort'];
   onSelectAll?: (isSelected: boolean) => void;
@@ -40,7 +44,9 @@ type TableFC = <D>(props: TableProps<D>) => JSX.Element;
 const Table: TableFC = ({
   columns,
   children,
-  emptyFilters,
+  loading,
+  hasBackendFilters,
+  emptyUiFilters,
   emptyData,
   getSortParams,
   onSelectAll,
@@ -48,7 +54,11 @@ const Table: TableFC = ({
   ...rest
 }) => {
   const { t } = useTranslation();
-  if (emptyFilters && !emptyData) {
+  if (loading && emptyData) {
+    return <Spinner size="md" />;
+  }
+
+  if ((emptyData && hasBackendFilters) || (emptyUiFilters && !emptyData)) {
     return (
       <PageSection variant="light">
         <Bullseye>{t('No resources are matching the current filters.')}</Bullseye>

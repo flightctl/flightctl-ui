@@ -91,8 +91,9 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
         </EnrollmentRequestTableToolbar>
         <Table
           aria-label={t('Table for devices pending approval')}
+          loading={isLoading}
           columns={enrollmentColumns}
-          emptyFilters={filteredData.length === 0}
+          emptyUiFilters={filteredData.length === 0}
           emptyData={false}
           getSortParams={getSortParams}
           isAllSelected={isAllSelected}
