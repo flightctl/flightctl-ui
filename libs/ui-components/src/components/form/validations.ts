@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import { TFunction } from 'i18next';
+import countBy from 'lodash/countBy';
 
 import { FlightCtlLabel } from '../../types/extraTypes';
 import {
@@ -14,6 +15,7 @@ import {
   isKubeSecretTemplate,
 } from '../../types/deviceSpec';
 import { labelToString } from '../../utils/labels';
+import { ApplicationFormSpec } from '../Device/EditDeviceWizard/types';
 
 type UnvalidatedLabel = Partial<FlightCtlLabel>;
 
@@ -216,6 +218,62 @@ export const validLabelsSchema = (t: TFunction) =>
         : true;
     });
 
+export const validApplicationsSchema = (t: TFunction) => {
+  return Yup.array()
+    .of(
+      Yup.object().shape({
+        name: Yup.string(),
+        image: Yup.string().required(t('Image is required.')),
+        variables: Yup.array()
+          .of(
+            Yup.object().shape({
+              name: Yup.string().required(t('Variable name is required.')),
+              value: Yup.string().required(t('Variable value is required.')),
+            }),
+          )
+          .required(),
+      }),
+    )
+    .test('unique-app-ids', (apps: ApplicationFormSpec[] | undefined, testContext) => {
+      if (!apps?.length) {
+        return true;
+      }
+
+      // App name is optional, in which case the ID is the app image.
+      // Apps should have different names or images
+      const getAppId = (app: ApplicationFormSpec) => app.name || app.image;
+
+      const appIds = apps.map(getAppId);
+      const duplicateIds = Object.entries(countBy(appIds))
+        .filter(([, count]) => {
+          return count > 1;
+        })
+        .map(([id]) => id);
+      if (duplicateIds.length === 0) {
+        return true;
+      }
+
+      const errors = apps.reduce((errors, app, appIndex) => {
+        if (duplicateIds.includes(getAppId(app))) {
+          const error = app.name
+            ? new Yup.ValidationError(t('Application name must be unique.'), '', `applications[${appIndex}].name`)
+            : new Yup.ValidationError(
+                t('Name is required, another application uses the same image.'),
+                '',
+                `applications[${appIndex}].name`,
+              );
+
+          errors.push(error);
+        }
+        return errors;
+      }, [] as Yup.ValidationError[]);
+
+      return testContext.createError({
+        message: () => errors,
+      });
+    });
+};
+
 export const validConfigTemplatesSchema = (t: TFunction) =>
   Yup.array()
     .test('unique-names', t('Source names must be unique'), (templates: SpecConfigTemplate[] | undefined) => {
@@ -271,7 +329,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
                   .matches(absolutePathRegex, t('File path must be absolute.'))
                   .test(
                     'unique-paths',
-                    t('File path must be unique'),
+                    t('File path must be unique.'),
                     (path) => !path || value.files.filter((file) => file.path === path).length == 1,
                   ),
                 content: Yup.string().required(t('File content is required.')),

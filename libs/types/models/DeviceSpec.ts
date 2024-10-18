@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ApplicationSpec } from './ApplicationSpec';
 import type { DeviceHooksSpec } from './DeviceHooksSpec';
 import type { DeviceOSSpec } from './DeviceOSSpec';
 import type { GitConfigProviderSpec } from './GitConfigProviderSpec';
@@ -16,6 +17,10 @@ export type DeviceSpec = {
    */
   config?: Array<(GitConfigProviderSpec | KubernetesSecretProviderSpec | InlineConfigProviderSpec | HttpConfigProviderSpec)>;
   hooks?: DeviceHooksSpec;
+  /**
+   * List of applications.
+   */
+  applications?: Array<ApplicationSpec>;
   containers?: {
     matchPatterns?: Array<string>;
   };

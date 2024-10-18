@@ -9,11 +9,12 @@ import TextField from '../../../form/TextField';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { DeviceSpecConfigFormValues } from '../types';
 import ConfigTemplateForm from './ConfigTemplateForm';
+import ApplicationsForm from './ApplicationsForm';
 
 export const deviceTemplateStepId = 'device-template';
 
 export const isDeviceTemplateStepValid = (errors: FormikErrors<DeviceSpecConfigFormValues>) => {
-  return !errors.osImage && !errors.configTemplates;
+  return !errors.osImage && !errors.configTemplates && !errors.applications;
 };
 
 const templateOption1 = '{{ device.metadata.labels[key] }}';
@@ -65,6 +66,9 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
         </FormGroup>
         <FormGroup>
           <ConfigTemplateForm />
+        </FormGroup>
+        <FormGroup>
+          <ApplicationsForm />
         </FormGroup>
       </FlightCtlForm>
     </Grid>

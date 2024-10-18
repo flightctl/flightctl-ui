@@ -29,7 +29,7 @@ describe('Create fleet form', () => {
 
     createFleetWizardPage.newFleetSystemImageField.type('os-image');
 
-    createFleetWizardPage.addTemplateButton.should('be.enabled').click();
+    createFleetWizardPage.addConfigurationButton.should('be.enabled').click();
     createFleetWizardPage.newFleetSourceNameField.type('my-source');
     createFleetWizardPage.newFleetSourceTypeField.click();
     createFleetWizardPage.newFleetGitSourceTypeField.click();

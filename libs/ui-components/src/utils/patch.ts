@@ -1,10 +1,11 @@
-import { PatchRequest } from '@flightctl/types';
+import { ApplicationSpec, PatchRequest } from '@flightctl/types';
 import isNil from 'lodash/isNil';
 import isEqual from 'lodash/isEqual';
 import differenceWith from 'lodash/differenceWith';
 
 import { FlightCtlLabel } from '../types/extraTypes';
 import { toAPILabel } from './labels';
+import { ApplicationFormSpec } from '../components/Device/EditDeviceWizard/types';
 
 export const appendJSONPatch = <V = unknown>({
   patches,
@@ -123,5 +124,79 @@ export const getLabelPatches = (
       });
     }
   }
+  return patches;
+};
+
+export const toAPIApplication = (app: ApplicationFormSpec): ApplicationSpec => {
+  const envVars = app.variables.reduce((acc, variable) => {
+    acc[variable.name] = variable.value;
+    return acc;
+  }, {});
+
+  return app.name
+    ? {
+        name: app.name,
+        image: app.image,
+        envVars,
+      }
+    : {
+        // Name must not be sent, otherwise the API expects it to have a value
+        image: app.image,
+        envVars,
+      };
+};
+
+export const getApplicationPatches = (
+  basePath: string,
+  currentApps: ApplicationSpec[],
+  updatedApps: ApplicationFormSpec[],
+) => {
+  const patches: PatchRequest = [];
+
+  const currentLen = currentApps.length;
+  const newLen = updatedApps.length;
+  if (currentLen === 0 && newLen > 0) {
+    // First apps(s) have been added
+    patches.push({
+      path: `${basePath}/applications`,
+      op: 'add',
+      value: updatedApps.map(toAPIApplication),
+    });
+  } else if (currentLen > 0 && newLen === 0) {
+    // Last app(s) have been removed
+    patches.push({
+      path: `${basePath}/applications`,
+      op: 'remove',
+    });
+  } else if (currentLen !== newLen) {
+    patches.push({
+      path: `${basePath}/applications`,
+      op: 'replace',
+      value: updatedApps.map(toAPIApplication),
+    });
+  } else {
+    const needsPatch = currentApps.some((currentApp, index) => {
+      const updatedApp = updatedApps[index];
+      if (updatedApp.name !== currentApp.name || updatedApp.image !== currentApp.image) {
+        return true;
+      }
+      const currentVars = Object.entries(currentApp.envVars || {});
+      if (currentVars.length !== updatedApp.variables.length) {
+        return true;
+      }
+      return updatedApp.variables.some((variable) => {
+        const currentValue = currentApp.envVars ? currentApp.envVars[variable.name] : undefined;
+        return !currentValue || currentValue !== variable.value;
+      });
+    });
+    if (needsPatch) {
+      patches.push({
+        path: `${basePath}/applications`,
+        op: 'replace',
+        value: updatedApps.map(toAPIApplication),
+      });
+    }
+  }
+
   return patches;
 };

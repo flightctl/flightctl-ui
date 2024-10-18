@@ -55,10 +55,6 @@ export class CreateFleetWizardPage {
     return cy.get('input[aria-label="Mount path"]');
   }
 
-  get newFleetRepositoryField() {
-    return cy.get('select[aria-label="Repository select input"]');
-  }
-
   get createFleetFormSubmitButton() {
     return cy.contains('button', 'Create fleet');
   }
@@ -67,7 +63,7 @@ export class CreateFleetWizardPage {
     return cy.contains('button', 'Next');
   }
 
-  get addTemplateButton() {
-    return cy.contains('button', 'Add configurations/applications');
+  get addConfigurationButton() {
+    return cy.contains('button', 'Add configuration');
   }
 }
