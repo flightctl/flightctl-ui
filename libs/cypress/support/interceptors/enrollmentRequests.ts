@@ -1,4 +1,4 @@
-import { erList } from '../../fixtures';
+import { getErList } from '../../fixtures';
 import { EnrollmentRequest } from '@flightctl/types';
 
 const buildErResponse = (enrollmentRequests: EnrollmentRequest[]) => ({
@@ -9,11 +9,17 @@ const buildErResponse = (enrollmentRequests: EnrollmentRequest[]) => ({
 });
 
 const loadInterceptors = () => {
-  cy.intercept('GET', '/api/flightctl/api/v1/enrollmentrequests', (req) => {
+  cy.intercept('GET', /^\/api\/flightctl\/api\/v1\/enrollmentrequests$/, (req) => {
     req.reply({
-      body: buildErResponse(erList),
+      body: buildErResponse(getErList(false)),
     });
-  }).as('enrollment-requests');
+  }).as('all-enrollment-requests');
+
+  cy.intercept('GET', '/api/flightctl/api/v1/enrollmentrequests?fieldSelector=!status.approval.approved*', (req) => {
+    req.reply({
+      body: buildErResponse(getErList(true)),
+    });
+  }).as('pending-enrollment-requests');
 
   cy.intercept('POST', '/api/flightctl/api/v1/enrollmentrequests/*/approval', (req) => {
     // Approving an ER converts it into a device, we're skipping mocking it for now.
