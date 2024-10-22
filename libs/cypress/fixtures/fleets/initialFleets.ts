@@ -33,9 +33,6 @@ const basicFleets: Fleet[] = [
               name: 'example-server',
             },
           ],
-          containers: {
-            matchPatterns: ['*ai-optimizer-model-server*', '*web-interface*', '*control-loop*'],
-          },
           os: {
             image: 'quay.io/solar-farms/ai-inverter:1.5.0',
           },
@@ -93,9 +90,6 @@ const basicFleets: Fleet[] = [
               },
             },
           ],
-          containers: {
-            matchPatterns: ['*ai-optimizer-model-server*', '*web-interface*', '*control-loop*'],
-          },
           os: {
             image: 'quay.io/solar-farms/ai-inverter:1.5.0',
           },

@@ -10,9 +10,6 @@ import type { ResourceMonitor } from './ResourceMonitor';
 export type RenderedDeviceSpec = {
   renderedVersion: string;
   os?: DeviceOSSpec;
-  containers?: {
-    matchPatterns?: Array<string>;
-  };
   config?: string;
   applications?: Array<RenderedApplicationSpec>;
   hooks?: DeviceHooksSpec;
