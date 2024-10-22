@@ -21,9 +21,6 @@ export type DeviceSpec = {
    * List of applications.
    */
   applications?: Array<ApplicationSpec>;
-  containers?: {
-    matchPatterns?: Array<string>;
-  };
   systemd?: {
     matchPatterns?: Array<string>;
   };
