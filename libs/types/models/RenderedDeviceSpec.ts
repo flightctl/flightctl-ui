@@ -5,6 +5,7 @@
 import type { DeviceConsole } from './DeviceConsole';
 import type { DeviceHooksSpec } from './DeviceHooksSpec';
 import type { DeviceOSSpec } from './DeviceOSSpec';
+import type { RenderedApplicationSpec } from './RenderedApplicationSpec';
 import type { ResourceMonitor } from './ResourceMonitor';
 export type RenderedDeviceSpec = {
   renderedVersion: string;
@@ -13,6 +14,7 @@ export type RenderedDeviceSpec = {
     matchPatterns?: Array<string>;
   };
   config?: string;
+  applications?: Array<RenderedApplicationSpec>;
   hooks?: DeviceHooksSpec;
   systemd?: {
     matchPatterns?: Array<string>;
