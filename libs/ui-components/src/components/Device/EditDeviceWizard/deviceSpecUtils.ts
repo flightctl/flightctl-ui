@@ -9,6 +9,7 @@ import {
 } from '@flightctl/types';
 import {
   ConfigSourceProvider,
+  ConfigType,
   GitConfigTemplate,
   HttpConfigTemplate,
   InlineConfigTemplate,
@@ -18,10 +19,25 @@ import {
   isGitProviderSpec,
   isHttpConfigTemplate,
   isHttpProviderSpec,
+  isInlineProviderSpec,
   isKubeProviderSpec,
   isKubeSecretTemplate,
 } from '../../../types/deviceSpec';
 import { ApplicationFormSpec } from './types';
+
+export const getConfigType = (config: ConfigSourceProvider): ConfigType | undefined => {
+  if (isGitProviderSpec(config)) {
+    return ConfigType.GIT;
+  } else if (isInlineProviderSpec(config)) {
+    return ConfigType.INLINE;
+  } else if (isHttpProviderSpec(config)) {
+    return ConfigType.HTTP;
+  } else if (isKubeProviderSpec(config)) {
+    return ConfigType.K8S_SECRET;
+  }
+  // Fallback in case a new configType is added to the Backend which the UI doesn't support yet
+  return undefined;
+};
 
 const isSameGitConf = (a: GitConfigProviderSpec, b: GitConfigProviderSpec) => {
   const aRef = a.gitRef;
@@ -105,17 +121,19 @@ export const getDeviceSpecConfigPatches = (
     const hasConfigChanges = newConfigs.some((newConfig) => {
       // Attempts to find a new config which has been changed from "currentConfigs"
       const isUnchanged = currentConfigs.some((conf) => {
-        if (conf.configType !== newConfig.configType) {
+        const currentType = getConfigType(conf);
+        const newType = getConfigType(newConfig);
+        if (currentType !== newType) {
           return false;
         }
-        switch (conf.configType) {
-          case 'GitConfigProviderSpec':
+        switch (newType) {
+          case ConfigType.GIT:
             return isSameGitConf(newConfig as GitConfigProviderSpec, conf as GitConfigProviderSpec);
-          case 'HttpConfigProviderSpec':
+          case ConfigType.HTTP:
             return isSameHttpConf(newConfig as HttpConfigProviderSpec, conf as HttpConfigProviderSpec);
-          case 'KubernetesSecretProviderSpec':
+          case ConfigType.K8S_SECRET:
             return isSameSecretConf(newConfig as KubernetesSecretProviderSpec, conf as KubernetesSecretProviderSpec);
-          case 'InlineConfigProviderSpec':
+          case ConfigType.INLINE:
             return isSameInlineConf(newConfig as InlineConfigProviderSpec, conf as InlineConfigProviderSpec);
         }
         return false;
@@ -139,7 +157,6 @@ export const getDeviceSpecConfigPatches = (
 export const getAPIConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
   if (isGitConfigTemplate(ct)) {
     return {
-      configType: 'GitConfigProviderSpec',
       name: ct.name,
       gitRef: {
         path: ct.path,
@@ -151,7 +168,6 @@ export const getAPIConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
   }
   if (isKubeSecretTemplate(ct)) {
     return {
-      configType: 'KubernetesSecretProviderSpec',
       name: ct.name,
       secretRef: {
         mountPath: ct.mountPath,
@@ -162,7 +178,6 @@ export const getAPIConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
   }
   if (isHttpConfigTemplate(ct)) {
     return {
-      configType: 'HttpConfigProviderSpec',
       name: ct.name,
       httpRef: {
         repository: ct.repository,
@@ -172,7 +187,7 @@ export const getAPIConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
     };
   }
   return {
-    configType: 'InlineConfigProviderSpec',
+    name: ct.name,
     inline: ct.files.map((file) => {
       return {
         path: file.path,
@@ -183,7 +198,6 @@ export const getAPIConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
         contentEncoding: file.base64 ? FileSpec.contentEncoding.BASE64 : undefined,
       };
     }),
-    name: ct.name,
   };
 };
 
@@ -202,7 +216,7 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec) =>
   deviceSpec?.config?.map<SpecConfigTemplate>((c) => {
     if (isGitProviderSpec(c)) {
       return {
-        type: 'git',
+        type: ConfigType.GIT,
         name: c.name,
         path: c.gitRef.path,
         mountPath: c.gitRef.mountPath,
@@ -212,7 +226,7 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec) =>
     }
     if (isKubeProviderSpec(c)) {
       return {
-        type: 'secret',
+        type: ConfigType.K8S_SECRET,
         name: c.name,
         mountPath: c.secretRef.mountPath,
         secretName: c.secretRef.name,
@@ -221,7 +235,7 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec) =>
     }
     if (isHttpProviderSpec(c)) {
       return {
-        type: 'http',
+        type: ConfigType.HTTP,
         name: c.name,
         repository: c.httpRef.repository,
         suffix: c.httpRef.suffix,
@@ -230,7 +244,7 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec) =>
     }
 
     return {
-      type: 'inline',
+      type: ConfigType.INLINE,
       name: c.name,
       files: c.inline.map((inline) => {
         return {

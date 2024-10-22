@@ -3,19 +3,16 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ApplicationSpec } from './ApplicationSpec';
+import type { ConfigProviderSpec } from './ConfigProviderSpec';
 import type { DeviceHooksSpec } from './DeviceHooksSpec';
 import type { DeviceOSSpec } from './DeviceOSSpec';
-import type { GitConfigProviderSpec } from './GitConfigProviderSpec';
-import type { HttpConfigProviderSpec } from './HttpConfigProviderSpec';
-import type { InlineConfigProviderSpec } from './InlineConfigProviderSpec';
-import type { KubernetesSecretProviderSpec } from './KubernetesSecretProviderSpec';
 import type { ResourceMonitor } from './ResourceMonitor';
 export type DeviceSpec = {
   os?: DeviceOSSpec;
   /**
-   * List of config resources.
+   * List of config providers.
    */
-  config?: Array<(GitConfigProviderSpec | KubernetesSecretProviderSpec | InlineConfigProviderSpec | HttpConfigProviderSpec)>;
+  config?: Array<ConfigProviderSpec>;
   hooks?: DeviceHooksSpec;
   /**
    * List of applications.

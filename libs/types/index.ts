@@ -17,6 +17,7 @@ export type { CertificateSigningRequestStatus } from './models/CertificateSignin
 export type { Condition } from './models/Condition';
 export { ConditionStatus } from './models/ConditionStatus';
 export { ConditionType } from './models/ConditionType';
+export type { ConfigProviderSpec } from './models/ConfigProviderSpec';
 export type { CPUResourceMonitorSpec } from './models/CPUResourceMonitorSpec';
 export type { CustomResourceMonitorSpec } from './models/CustomResourceMonitorSpec';
 export type { Device } from './models/Device';
@@ -63,7 +64,6 @@ export type { FleetList } from './models/FleetList';
 export type { FleetRolloutStatus } from './models/FleetRolloutStatus';
 export type { FleetSpec } from './models/FleetSpec';
 export type { FleetStatus } from './models/FleetStatus';
-export type { GenericConfigSpec } from './models/GenericConfigSpec';
 export type { GenericRepoSpec } from './models/GenericRepoSpec';
 export type { GitConfigProviderSpec } from './models/GitConfigProviderSpec';
 export type { HookAction } from './models/HookAction';

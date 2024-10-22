@@ -24,7 +24,6 @@ const basicFleets: Fleet[] = [
         spec: {
           config: [
             {
-              configType: 'GitConfigProviderSpec',
               gitRef: {
                 path: '/demos/basic-nginx-fleet/configuration/',
                 repository: 'defaultRepo',
@@ -49,6 +48,9 @@ const basicFleets: Fleet[] = [
       conditions: [],
       devicesSummary: {
         total: 0,
+        applicationStatus: {},
+        summaryStatus: {},
+        updateStatus: {},
       }
     },
   },
@@ -75,7 +77,6 @@ const basicFleets: Fleet[] = [
         spec: {
           config: [
             {
-              configType: 'GitConfigProviderSpec',
               gitRef: {
                 path: '/etc/microshift/manifests',
                 targetRevision: 'main',
@@ -85,7 +86,6 @@ const basicFleets: Fleet[] = [
             },
             {
               name: 'pull-secret',
-              configType: 'KubernetesSecretProviderSpec',
               secretRef: {
                 mountPath: '/etc/crio/pull-secret',
                 name: 'device-pull-secret',
@@ -109,6 +109,9 @@ const basicFleets: Fleet[] = [
       conditions: [],
       devicesSummary: {
         total: 0,
+        applicationStatus: {},
+        summaryStatus: {},
+        updateStatus: {},
       }
     },
   },

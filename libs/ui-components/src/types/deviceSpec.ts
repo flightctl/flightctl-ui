@@ -1,18 +1,25 @@
 import {
-  GenericConfigSpec,
+  ConfigProviderSpec,
   GitConfigProviderSpec,
   HttpConfigProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
 } from '@flightctl/types';
 
+export enum ConfigType {
+  GIT = 'git',
+  HTTP = 'http',
+  K8S_SECRET = 'secret',
+  INLINE = 'inline',
+}
+
 export type ConfigTemplate = {
-  type: 'git' | 'http' | 'secret' | 'inline';
+  type: ConfigType;
   name: string;
 };
 
 export type GitConfigTemplate = ConfigTemplate & {
-  type: 'git';
+  type: ConfigType.GIT;
   repository: string;
   targetRevision: string;
   path: string;
@@ -20,10 +27,10 @@ export type GitConfigTemplate = ConfigTemplate & {
 };
 
 export const isGitConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is GitConfigTemplate =>
-  configTemplate.type === 'git';
+  configTemplate.type === ConfigType.GIT;
 
-export const isGitProviderSpec = (providerSpec: GenericConfigSpec): providerSpec is GitConfigProviderSpec =>
-  providerSpec.configType === 'GitConfigProviderSpec';
+export const isGitProviderSpec = (providerSpec: ConfigProviderSpec): providerSpec is GitConfigProviderSpec =>
+  'gitRef' in providerSpec;
 
 export type ConfigSourceProvider =
   | GitConfigProviderSpec
@@ -41,13 +48,13 @@ const hasTemplateVariables = (str: string) => /device.metadata/.test(str);
 export const getConfigFullRepoUrl = (config: RepoConfig, repositoryUrl: string) => {
   let relativePath: string = '';
   if (isHttpProviderSpec(config)) {
-    relativePath = config.httpRef.suffix || '';
+    relativePath = (config.httpRef.suffix || '').replace(/^\//g, ''); // remove the leading slash
   } else if (isGitProviderSpec(config) && /github|gitlab/.test(repositoryUrl)) {
     const configPath = config.gitRef.path.replace(/^\//g, ''); // remove the leading slash
     const configParts = configPath.split('/');
     const lastPart = configParts[configParts.length - 1];
 
-    // Extension-less files cannot be identified as such. Github and Gitlab both redirect to the correct URL to show the file contents
+    // Extension-less files cannot be identified as such. GitHub and Gitlab both redirect to the correct URL to show the file contents
     const fileOrDir = lastPart.includes('.') ? 'blob' : 'tree';
     relativePath = `${fileOrDir}/${config.gitRef.targetRevision}/${configPath}`;
   }
@@ -63,40 +70,40 @@ export const getRepoName = (config: RepoConfig) =>
   isGitProviderSpec(config) ? config.gitRef.repository : config.httpRef.repository;
 
 export type KubeSecretTemplate = ConfigTemplate & {
-  type: 'secret';
+  type: ConfigType.K8S_SECRET;
   secretName: string;
   secretNs: string;
   mountPath: string;
 };
 
 export const isKubeSecretTemplate = (configTemplate: ConfigTemplate): configTemplate is KubeSecretTemplate =>
-  configTemplate.type === 'secret';
+  configTemplate.type === ConfigType.K8S_SECRET;
 
-export const isKubeProviderSpec = (providerSpec: GenericConfigSpec): providerSpec is KubernetesSecretProviderSpec =>
-  providerSpec.configType === 'KubernetesSecretProviderSpec';
+export const isKubeProviderSpec = (providerSpec: ConfigProviderSpec): providerSpec is KubernetesSecretProviderSpec =>
+  'secretRef' in providerSpec;
 
 export type InlineConfigTemplate = ConfigTemplate & {
-  type: 'inline';
+  type: ConfigType.INLINE;
   files: Array<{ path: string; content: string; base64: boolean; permissions?: string; user?: string; group?: string }>;
 };
 
 export const isInlineConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is InlineConfigTemplate =>
-  configTemplate.type === 'inline';
+  configTemplate.type === ConfigType.INLINE;
 
-export const isInlineProviderSpec = (providerSpec: GenericConfigSpec): providerSpec is InlineConfigProviderSpec =>
-  providerSpec.configType === 'InlineConfigProviderSpec';
+export const isInlineProviderSpec = (providerSpec: ConfigProviderSpec): providerSpec is InlineConfigProviderSpec =>
+  'inline' in providerSpec;
 
 export type HttpConfigTemplate = ConfigTemplate & {
-  type: 'http';
+  type: ConfigType.HTTP;
   repository: string;
   suffix: string;
   filePath: string;
 };
 
 export const isHttpConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is HttpConfigTemplate =>
-  configTemplate.type === 'http';
+  configTemplate.type === ConfigType.HTTP;
 
-export const isHttpProviderSpec = (providerSpec: GenericConfigSpec): providerSpec is HttpConfigProviderSpec =>
-  providerSpec.configType === 'HttpConfigProviderSpec';
+export const isHttpProviderSpec = (providerSpec: ConfigProviderSpec): providerSpec is HttpConfigProviderSpec =>
+  'httpRef' in providerSpec;
 
 export type SpecConfigTemplate = GitConfigTemplate | HttpConfigTemplate | KubeSecretTemplate | InlineConfigTemplate;
