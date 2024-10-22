@@ -9,8 +9,15 @@ import {
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
 } from '@flightctl/types';
-import { ConfigSourceProvider, RepoConfig, getConfigFullRepoUrl, getRepoName } from '../../../types/deviceSpec';
+import {
+  ConfigSourceProvider,
+  ConfigType,
+  RepoConfig,
+  getConfigFullRepoUrl,
+  getRepoName,
+} from '../../../types/deviceSpec';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { getConfigType } from '../../Device/EditDeviceWizard/deviceSpecUtils';
 
 type ExtraArgs = Record<string, string>;
 
@@ -58,9 +65,9 @@ export const RepositoryConfigDetails = ({ config, extraArgs }: { config: RepoCon
 };
 
 export const getConfigDetails = (config: ConfigSourceProvider, extraArgs: ExtraArgs) => {
-  switch (config.configType) {
-    case 'GitConfigProviderSpec':
-    case 'HttpConfigProviderSpec':
+  switch (getConfigType(config)) {
+    case ConfigType.GIT:
+    case ConfigType.HTTP:
       return (
         <RepositoryConfigDetails
           config={config as GitConfigProviderSpec | HttpConfigProviderSpec}

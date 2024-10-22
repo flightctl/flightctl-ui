@@ -2,8 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { GenericConfigSpec } from './GenericConfigSpec';
-export type HttpConfigProviderSpec = (GenericConfigSpec & {
+export type HttpConfigProviderSpec = {
+  /**
+   * The name of the config provider
+   */
+  name: string;
   httpRef: {
     /**
      * The name of the repository resource to use as the sync source
@@ -22,5 +25,5 @@ export type HttpConfigProviderSpec = (GenericConfigSpec & {
      */
     filePath: string;
   };
-});
+};
 

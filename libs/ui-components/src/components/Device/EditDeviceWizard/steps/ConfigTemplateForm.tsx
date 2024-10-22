@@ -16,7 +16,7 @@ import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-cir
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
 import { RepoSpecType, Repository, RepositoryList } from '@flightctl/types';
-import { SpecConfigTemplate } from '../../../../types/deviceSpec';
+import { ConfigType, SpecConfigTemplate } from '../../../../types/deviceSpec';
 import { DeviceSpecConfigFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
@@ -80,11 +80,12 @@ const ConfigSection = ({ index, repositories, repoRefetch }: ConfigSectionProps)
             placeholderText={t('Select a source type')}
           />
         </FormGroup>
-        {type === 'secret' && <ConfigK8sSecretTemplateForm index={index} />}
-        {type === 'inline' && <ConfigInlineTemplateForm index={index} />}
-        {(type === 'http' || type === 'git') && (
+
+        {type === ConfigType.K8S_SECRET && <ConfigK8sSecretTemplateForm index={index} />}
+        {type === ConfigType.INLINE && <ConfigInlineTemplateForm index={index} />}
+        {(type === ConfigType.GIT || type === ConfigType.HTTP) && (
           <ConfigWithRepositoryTemplateForm
-            repoType={type as RepoSpecType}
+            repoType={type === ConfigType.HTTP ? RepoSpecType.HTTP : RepoSpecType.GIT}
             index={index}
             repositories={repositories}
             repoRefetch={repoRefetch}

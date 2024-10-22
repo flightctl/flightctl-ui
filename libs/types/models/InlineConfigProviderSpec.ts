@@ -3,8 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { FileSpec } from './FileSpec';
-import type { GenericConfigSpec } from './GenericConfigSpec';
-export type InlineConfigProviderSpec = (GenericConfigSpec & {
+export type InlineConfigProviderSpec = {
+  /**
+   * The name of the config provider
+   */
+  name: string;
   inline: Array<FileSpec>;
-});
+};
 

@@ -2,8 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { GenericConfigSpec } from './GenericConfigSpec';
-export type GitConfigProviderSpec = (GenericConfigSpec & {
+export type GitConfigProviderSpec = {
+  /**
+   * The name of the config provider
+   */
+  name: string;
   gitRef: {
     /**
      * The name of the repository resource to use as the sync source
@@ -17,5 +20,5 @@ export type GitConfigProviderSpec = (GenericConfigSpec & {
      */
     mountPath?: string;
   };
-});
+};
 
