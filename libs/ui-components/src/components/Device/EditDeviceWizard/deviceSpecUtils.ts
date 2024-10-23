@@ -25,6 +25,10 @@ import {
 } from '../../../types/deviceSpec';
 import { ApplicationFormSpec } from './types';
 
+const DEFAULT_INLINE_FILE_MODE = 420; // In Octal: 0644
+const DEFAULT_INLINE_FILE_USER = 'root';
+const DEFAULT_INLINE_FILE_GROUP = 'root';
+
 export const getConfigType = (config: ConfigSourceProvider): ConfigType | undefined => {
   if (isGitProviderSpec(config)) {
     return ConfigType.GIT;
@@ -73,6 +77,12 @@ const isSameSecretConf = (a: KubernetesSecretProviderSpec, b: KubernetesSecretPr
   );
 };
 
+const isSameInlineConfigValue = <T extends string | number>(a: T | undefined, b: T | undefined, defaultValue: T) => {
+  const aValue = a === undefined ? defaultValue : a;
+  const bValue = b === undefined ? defaultValue : b;
+  return aValue === bValue;
+};
+
 const isSameInlineConf = (a: InlineConfigProviderSpec, b: InlineConfigProviderSpec) => {
   return (
     a.name === b.name &&
@@ -80,14 +90,16 @@ const isSameInlineConf = (a: InlineConfigProviderSpec, b: InlineConfigProviderSp
     a.inline.every((aInline, index) => {
       const bInline = b.inline[index];
       return (
-        aInline.group === bInline.group &&
-        aInline.user === bInline.user &&
         aInline.path === bInline.path &&
-        aInline.mode === bInline.mode &&
-        (aInline.contentEncoding === bInline.contentEncoding ||
-          (aInline.contentEncoding === undefined && bInline.contentEncoding === FileSpec.contentEncoding.PLAIN) ||
-          (bInline.contentEncoding === undefined && aInline.contentEncoding === FileSpec.contentEncoding.PLAIN)) &&
-        aInline.content === bInline.content
+          isSameInlineConfigValue<string>(aInline.user, bInline.user, DEFAULT_INLINE_FILE_USER),
+        isSameInlineConfigValue<string>(aInline.group, bInline.group, DEFAULT_INLINE_FILE_GROUP),
+        isSameInlineConfigValue<number>(aInline.mode, bInline.mode, DEFAULT_INLINE_FILE_MODE) &&
+          isSameInlineConfigValue<string>(
+            aInline.contentEncoding,
+            bInline.contentEncoding,
+            FileSpec.contentEncoding.PLAIN,
+          ) &&
+          aInline.content === bInline.content
       );
     })
   );
