@@ -52,6 +52,7 @@ const FileForm = ({ fieldName }: { fieldName: string }) => {
             name={`${fieldName}.permissions`}
             placeholderText={t('Select permissions')}
             helperText={t('Select from the list or type in the permission code in octal notation')}
+            defaultId="0644"
             items={permissions}
             validateNewItem={(value) => {
               try {

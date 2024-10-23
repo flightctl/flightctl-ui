@@ -20,6 +20,7 @@ type SelectItem = { label: string; description?: string };
 type FormSelectProps = {
   name: string;
   items: Record<string, string | SelectItem>;
+  defaultId?: string;
   helperText?: React.ReactNode;
   children?: React.ReactNode;
   placeholderText?: string;
@@ -36,6 +37,7 @@ const CREATE_NEW = 'create';
 const FormSelectTypeahead: React.FC<FormSelectProps> = ({
   name,
   items,
+  defaultId,
   helperText,
   placeholderText,
   children,
@@ -55,6 +57,12 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
   const fieldId = `selectfield-${name}`;
   const itemKeys = Object.keys(items);
 
+  let defaultValue = '';
+  if (defaultId) {
+    const defaultItem = items[defaultId];
+    defaultValue = isItemObject(defaultItem) ? defaultItem.description || '' : defaultItem;
+  }
+
   React.useEffect(() => {
     const hasOneItem = itemKeys.length === 1;
     if (hasOneItem && !field.value) {
@@ -62,7 +70,11 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
     }
   }, [itemKeys, field.value, setValue]);
 
-  const selectedText = isOpen ? inputValue : field.value ? getItemLabel(items[field.value]) || field.value : undefined;
+  const selectedText = isOpen
+    ? inputValue
+    : field.value
+      ? getItemLabel(items[field.value]) || field.value
+      : defaultValue;
 
   const itemValidation = inputValue ? validateNewItem?.(inputValue) : undefined;
 
@@ -110,7 +122,7 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
       <Select
         id={fieldId}
         className="fctl-form-select"
-        selected={field.value}
+        selected={field.value || defaultId}
         onSelect={(_, value) => {
           let newValue: string = value as string;
           if (value === CREATE_NEW && inputTransformed) {
