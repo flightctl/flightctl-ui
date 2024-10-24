@@ -13,7 +13,6 @@ import {
   Card,
   CardBody,
   CardTitle,
-  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -32,6 +31,7 @@ import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsP
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import EnrollmentRequestStatus from '../../Status/EnrollmentRequestStatus';
 import WithHelperText from '../../common/WithHelperText';
+import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -87,7 +87,7 @@ const EnrollmentRequestDetails = () => {
           <Card>
             <CardTitle>{t('Details')}</CardTitle>
             <CardBody>
-              <DescriptionList columnModifier={{ lg: '3Col' }}>
+              <FlightControlDescriptionList columnModifier={{ lg: '3Col' }}>
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
                   <DescriptionListDescription>{er?.metadata.name || '-'}</DescriptionListDescription>
@@ -122,7 +122,7 @@ const EnrollmentRequestDetails = () => {
                     <EnrollmentRequestStatus er={er} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
-              </DescriptionList>
+              </FlightControlDescriptionList>
             </CardBody>
           </Card>
         </GridItem>

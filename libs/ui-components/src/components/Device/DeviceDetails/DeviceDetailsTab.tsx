@@ -2,7 +2,6 @@ import * as React from 'react';
 import {
   Alert,
   CardTitle,
-  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -25,6 +24,7 @@ import DeviceFleet from './DeviceFleet';
 import DeviceOs from './DeviceOs';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
 import SystemdTable from './SystemdTable';
+import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
 import { getErrorMessage } from '../../../utils/error';
 import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
@@ -96,7 +96,7 @@ const DeviceDetailsTab = ({
         <DetailsPageCard>
           <CardTitle>{t('System status')}</CardTitle>
           <DetailsPageCardBody>
-            <DescriptionList columnModifier={{ default: '3Col' }}>
+            <FlightControlDescriptionList columnModifier={{ default: '3Col' }}>
               <DescriptionListGroup>
                 <DescriptionListTerm>
                   <WithHelperText
@@ -139,7 +139,7 @@ const DeviceDetailsTab = ({
                 <DescriptionListTerm>{t('Last seen')}</DescriptionListTerm>
                 <DescriptionListDescription>{timeSinceText(t, device.status.lastSeen)}</DescriptionListDescription>
               </DescriptionListGroup>
-            </DescriptionList>
+            </FlightControlDescriptionList>
           </DetailsPageCardBody>
         </DetailsPageCard>
       </GridItem>
@@ -147,7 +147,7 @@ const DeviceDetailsTab = ({
         <DetailsPageCard>
           <CardTitle>{t('Resource status')}</CardTitle>
           <DetailsPageCardBody>
-            <DescriptionList columnModifier={{ default: '3Col' }}>
+            <FlightControlDescriptionList columnModifier={{ default: '3Col' }}>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('CPU pressure')}</DescriptionListTerm>
                 <DescriptionListDescription>
@@ -166,7 +166,7 @@ const DeviceDetailsTab = ({
                   <DeviceResourceStatus device={device} monitorType="memory" />
                 </DescriptionListDescription>
               </DescriptionListGroup>
-            </DescriptionList>
+            </FlightControlDescriptionList>
           </DetailsPageCardBody>
         </DetailsPageCard>
       </GridItem>
@@ -174,7 +174,7 @@ const DeviceDetailsTab = ({
         <DetailsPageCard>
           <CardTitle>{t('Configurations')}</CardTitle>
           <DetailsPageCardBody>
-            <DescriptionList columnModifier={{ default: '2Col' }}>
+            <FlightControlDescriptionList columnModifier={{ default: '2Col' }}>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('System image (running)')}</DescriptionListTerm>
                 <DescriptionListDescription>
@@ -189,7 +189,7 @@ const DeviceDetailsTab = ({
                   <RepositorySourceList configs={device.spec.config || []} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
-            </DescriptionList>
+            </FlightControlDescriptionList>
           </DetailsPageCardBody>
         </DetailsPageCard>
       </GridItem>

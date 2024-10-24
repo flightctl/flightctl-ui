@@ -1,25 +1,26 @@
-import LabelsView from '../../common/LabelsView';
-import { getDateDisplay } from '../../../utils/dates';
+import * as React from 'react';
+
 import {
   Card,
   CardBody,
   CardTitle,
-  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
   Grid,
   GridItem,
 } from '@patternfly/react-core';
-import * as React from 'react';
 
 import { Fleet } from '@flightctl/types';
 import FleetOwnerLink from './FleetOwnerLink';
 import FleetDevices from './FleetDevices';
 import FleetStatus from '../FleetStatus';
+import FleetDevicesLink from './FleetDevicesLink';
+import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
+import LabelsView from '../../common/LabelsView';
+import { getDateDisplay } from '../../../utils/dates';
 import { useTranslation } from '../../../hooks/useTranslation';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
-import FleetDevicesLink from './FleetDevicesLink';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
@@ -31,7 +32,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
         <Card>
           <CardTitle>{t('Details')}</CardTitle>
           <CardBody>
-            <DescriptionList columnModifier={{ lg: '3Col' }}>
+            <FlightControlDescriptionList columnModifier={{ lg: '3Col' }}>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
                 <DescriptionListDescription>
@@ -74,7 +75,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
                   <RepositorySourceList configs={fleet.spec.template.spec.config || []} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
-            </DescriptionList>
+            </FlightControlDescriptionList>
           </CardBody>
         </Card>
       </GridItem>

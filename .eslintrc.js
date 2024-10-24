@@ -71,12 +71,17 @@ module.exports = {
           {
             name: '@patternfly/react-core',
             importNames: ['ActionGroup'],
-            message: 'Use FlightCtlActionGroup to wrap the footer actions',
+            message: 'Use FlightCtlActionGroup wrapper',
+          },
+          {
+            name: '@patternfly/react-core',
+            importNames: ['DescriptionList'],
+            message: 'Use FlightCtlDescriptionList wrapper',
           },
           {
             name: '@patternfly/react-core',
             importNames: ['Form'],
-            message: 'Use FlightCtlForm to wrap forms',
+            message: 'Use FlightCtlForm wrapper',
           },
           {
             name: 'react-i18next',
