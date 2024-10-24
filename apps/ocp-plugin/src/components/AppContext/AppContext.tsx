@@ -18,6 +18,8 @@ import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
 import { useMetrics } from '../../hooks/useMetrics';
 import { DeviceImages, fetchImages } from '../../utils/apiCalls';
+// CSS for DescriptionList not included in the PF5 CSS bundle
+import '@patternfly/react-styles/css/components/DescriptionList/description-list.css';
 
 export const OCPPluginAppContext = AppContext.Provider;
 
