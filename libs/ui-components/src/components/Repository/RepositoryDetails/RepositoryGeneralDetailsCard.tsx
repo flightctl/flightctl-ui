@@ -3,7 +3,6 @@ import {
   Card,
   CardBody,
   CardTitle,
-  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -12,9 +11,11 @@ import {
 import { LockIcon } from '@patternfly/react-icons/dist/js/icons/lock-icon';
 import { LockOpenIcon } from '@patternfly/react-icons/dist/js/icons/lock-open-icon';
 
-import { getLastTransitionTimeText, getRepositorySyncStatus } from '../../../utils/status/repository';
 import { RepoSpecType, Repository } from '@flightctl/types';
+
+import { getLastTransitionTimeText, getRepositorySyncStatus } from '../../../utils/status/repository';
 import { useTranslation } from '../../../hooks/useTranslation';
+import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import RepositoryStatus from '../../Status/RepositoryStatus';
 import { isHttpRepoSpec, isSshRepoSpec } from '../CreateRepository/utils';
 import { RepositoryLink } from './RepositorySource';
@@ -55,7 +56,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
     <Card>
       <CardTitle>{t('Details')}</CardTitle>
       <CardBody>
-        <DescriptionList columnModifier={{ lg: '3Col' }}>
+        <FlightControlDescriptionList columnModifier={{ lg: '3Col' }}>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Url')}</DescriptionListTerm>
             <DescriptionListDescription>
@@ -88,7 +89,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
               {repoDetails ? getLastTransitionTimeText(repoDetails, t).text : '-'}
             </DescriptionListDescription>
           </DescriptionListGroup>
-        </DescriptionList>
+        </FlightControlDescriptionList>
       </CardBody>
     </Card>
   );

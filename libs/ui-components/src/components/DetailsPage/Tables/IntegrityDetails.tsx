@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   Bullseye,
-  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -10,6 +9,7 @@ import {
 import { DeviceIntegrityStatus } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import IntegrityStatus from '../../Status/IntegrityStatus';
+import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 
 type IntegrityDetailsProps = {
   integrity?: DeviceIntegrityStatus;
@@ -20,7 +20,7 @@ const IntegrityDetails = ({ integrity }: IntegrityDetailsProps) => {
   const info = integrity?.summary.info;
   const status = integrity?.summary.status;
   return info || status ? (
-    <DescriptionList columnModifier={{ lg: '3Col' }}>
+    <FlightControlDescriptionList columnModifier={{ lg: '3Col' }}>
       {status && (
         <DescriptionListGroup>
           <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
@@ -35,7 +35,7 @@ const IntegrityDetails = ({ integrity }: IntegrityDetailsProps) => {
           <DescriptionListDescription>{info}</DescriptionListDescription>
         </DescriptionListGroup>
       )}
-    </DescriptionList>
+    </FlightControlDescriptionList>
   ) : (
     <Bullseye>{t('No system integrity details found.')}</Bullseye>
   );
