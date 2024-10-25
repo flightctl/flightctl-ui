@@ -5,14 +5,17 @@ import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-cir
 import { FieldArray, useField, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import TextAreaField from '../../../form/TextAreaField';
 import FormSelectTypeahead from '../../../form/FormSelectTypeahead';
+import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import TextField from '../../../form/TextField';
+import SwitchField from '../../../form/SwitchField';
+import UploadField from '../../../form/UploadField';
 import { DeviceSpecConfigFormValues } from '../types';
 import { InlineConfigTemplate } from '../../../../types/deviceSpec';
-import ExpandableFormSection from '../../../form/ExpandableFormSection';
-import SwitchField from '../../../form/SwitchField';
+
 import { formatFileMode } from '../deviceSpecUtils';
+
+const MAX_INLINE_FILE_SIZE_BYTES = 1024 * 1024;
 
 const FileForm = ({ fieldName }: { fieldName: string }) => {
   const { t } = useTranslation();
@@ -43,9 +46,12 @@ const FileForm = ({ fieldName }: { fieldName: string }) => {
         <FormGroup label={t('File path on the device')} isRequired>
           <TextField name={`${fieldName}.path`} />
         </FormGroup>
-        <FormGroup label={t('Content')} isRequired>
-          <TextAreaField name={`${fieldName}.content`} />
-        </FormGroup>
+        <UploadField
+          label={t('Content')}
+          name={`${fieldName}.content`}
+          maxFileBytes={MAX_INLINE_FILE_SIZE_BYTES}
+          isRequired
+        />
         <SwitchField label={t('Content is base64 encoded')} name={`${fieldName}.base64`} />
         <FormGroup label={t('Permissions')}>
           <FormSelectTypeahead
