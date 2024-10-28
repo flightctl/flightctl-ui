@@ -1,17 +1,18 @@
+import * as React from 'react';
 import {
   Alert,
-  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import * as React from 'react';
-import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFormikContext } from 'formik';
+
+import { useTranslation } from '../../../../hooks/useTranslation';
 import { FleetFormValues } from '../types';
 import LabelsView from '../../../common/LabelsView';
+import FlightControlDescriptionList from '../../../common/FlightCtlDescriptionList';
 import { toAPILabel } from '../../../../utils/labels';
 import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
 import { getErrorMessage } from '../../../../utils/error';
@@ -26,7 +27,7 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
   return (
     <Stack hasGutter>
       <StackItem isFilled>
-        <DescriptionList
+        <FlightControlDescriptionList
           isHorizontal
           horizontalTermWidthModifier={{
             default: '25ch',
@@ -66,7 +67,7 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
               <ReviewApplications apps={values.applications} />
             </DescriptionListDescription>
           </DescriptionListGroup>
-        </DescriptionList>
+        </FlightControlDescriptionList>
       </StackItem>
       {!!error && (
         <StackItem>
