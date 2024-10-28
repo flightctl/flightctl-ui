@@ -30,7 +30,10 @@ const DeviceLabelSelector = () => {
     const labelSelector = matchLabels.map(labelToString);
 
     try {
-      const deviceListResp = await get<DeviceList>(`devices?labelSelector=${labelSelector.join(',')}&limit=1`);
+      // TODO remove sortBy when https://issues.redhat.com/browse/EDM-624 is fixed. Otherwise the device count can be wrong.
+      const deviceListResp = await get<DeviceList>(
+        `devices?labelSelector=${labelSelector.join(',')}&limit=1&sortBy=metadata.name`,
+      );
       const num = getApiListCount(deviceListResp);
       setDeviceCount(num || 0);
     } catch (e) {
