@@ -43,6 +43,7 @@ export const useApiTableSort = (columns: ApiSortTableColumn[]) => {
 
   return {
     getSortParams,
-    activeSortQuery: activeSortField ? `sortBy=${activeSortField}&sortOrder=${activeSortDirection}` : '',
+    sortField: activeSortField,
+    direction: activeSortField ? activeSortDirection : '',
   };
 };

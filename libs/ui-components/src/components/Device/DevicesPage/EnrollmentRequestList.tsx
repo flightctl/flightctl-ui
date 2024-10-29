@@ -31,8 +31,7 @@ const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
   },
   {
     name: t('Created'),
-    // Missing support for sorting by this field
-    // sortableField: 'metadata.creationTimestamp',
+    sortableField: 'metadata.creationTimestamp',
   },
 ];
 
@@ -42,10 +41,10 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
   const { t } = useTranslation();
   const { remove } = useFetch();
   const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
-  const { getSortParams, activeSortQuery } = useApiTableSort(enrollmentColumns);
+  const { getSortParams, sortField, direction } = useApiTableSort(enrollmentColumns);
 
   const [erList, isLoading, error, refetch] = useFetchPeriodically<EnrollmentRequestListType>({
-    endpoint: `enrollmentrequests?fieldSelector=!status.approval.approved${activeSortQuery ? `&${activeSortQuery}` : ''}`,
+    endpoint: `enrollmentrequests?fieldSelector=!status.approval.approved${sortField ? `&sortBy=${sortField}&sortOrder=${direction}` : ''}`,
   });
   const pendingEnrollments = erList?.items || [];
 
@@ -97,7 +96,7 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
           aria-label={t('Table for devices pending approval')}
           loading={isLoading}
           columns={enrollmentColumns}
-          emptyUiFilters={filteredData.length === 0}
+          emptyFilters={filteredData.length === 0}
           emptyData={false}
           getSortParams={getSortParams}
           isAllSelected={isAllSelected}

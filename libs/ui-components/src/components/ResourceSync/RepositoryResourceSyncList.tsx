@@ -177,7 +177,7 @@ const CreateResourceSyncModal = ({
 
 const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) => {
   const [rsList, isLoading, error, refetch] = useFetchPeriodically<ResourceSyncList>({
-    endpoint: `resourcesyncs?repository=${repositoryId}`,
+    endpoint: `resourcesyncs?fieldSelector=spec.repository=${repositoryId}`,
   });
 
   const resourceSyncs = rsList?.items || [];
@@ -253,7 +253,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
         columns={columns}
-        emptyUiFilters={filteredData.length === 0}
+        emptyFilters={filteredData.length === 0}
         emptyData={resourceSyncs.length === 0}
         getSortParams={getSortParams}
       >

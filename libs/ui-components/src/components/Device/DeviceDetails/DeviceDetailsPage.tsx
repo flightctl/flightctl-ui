@@ -30,7 +30,7 @@ const DeviceDetailsPage = ({ children }: React.PropsWithChildren<Record<never, n
   const navigate = useNavigate();
   const { remove } = useFetch();
 
-  const deviceAlias = device?.metadata.alias || deviceId;
+  const deviceAlias = device?.metadata.labels?.alias || deviceId;
 
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {

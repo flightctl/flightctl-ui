@@ -46,7 +46,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
 
   const loadRS = React.useCallback(async () => {
     try {
-      const resourceSyncs = await get<ResourceSyncList>(`resourcesyncs?repository=${repositoryId}`);
+      const resourceSyncs = await get<ResourceSyncList>(`resourcesyncs?fieldSelector=spec.repository=${repositoryId}`);
       setResourceSyncIds(resourceSyncs.items.map((rs) => rs.metadata.name || ''));
       setRsError(undefined);
     } catch (e) {

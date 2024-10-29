@@ -30,21 +30,15 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
   // Device labels
   const currentLabels = currentDevice.metadata.labels || {};
   const updatedLabels = updatedDevice.labels || [];
+  if (updatedDevice.deviceAlias) {
+    updatedLabels.push({ key: 'alias', value: updatedDevice.deviceAlias });
+  }
 
   const deviceLabelPatches = getLabelPatches('/metadata/labels', currentLabels, updatedLabels);
   allPatches = allPatches.concat(deviceLabelPatches);
 
-  if (updatedDevice.deviceAlias) {
-    appendJSONPatch({
-      path: '/metadata/alias',
-      patches: allPatches,
-      newValue: updatedDevice.deviceAlias,
-      originalValue: currentDevice.metadata.alias,
-    });
-  }
-
   if (updatedDevice.fleetMatch) {
-    // The change in device labels makes the device bound to a fleet. Only the labels and device alias can be updated.
+    // The change in device labels makes the device bound to a fleet. Only the labels can be updated.
     return allPatches;
   }
 

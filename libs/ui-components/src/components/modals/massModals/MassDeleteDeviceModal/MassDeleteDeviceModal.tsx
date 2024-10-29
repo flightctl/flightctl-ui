@@ -73,13 +73,12 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
             </Thead>
             <Tbody>
               {resources.map((resource) => {
-                const alias = isEnrollmentRequest(resource) ? '' : resource.metadata.alias;
                 return (
                   <Tr key={resource.metadata.name}>
                     <Td dataLabel={t('Name')}>
                       <ResourceLink id={resource.metadata.name as string} />
                     </Td>
-                    <Td dataLabel={t('Alias')}>{alias || '-'}</Td>
+                    <Td dataLabel={t('Alias')}>{resource.metadata.labels?.alias || '-'}</Td>
                   </Tr>
                 );
               })}

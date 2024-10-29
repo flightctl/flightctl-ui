@@ -8,6 +8,10 @@ const addQueryConditions = (fieldSelectors: string[], fieldSelector: string, val
   }
 };
 
+const addTextContainsCondition = (fieldSelectors: string[], fieldSelector: string, value: string) => {
+  fieldSelectors.push(`${fieldSelector} contains ${value}`); // contains operator
+};
+
 const setLabelParams = (params: URLSearchParams, labels?: FlightCtlLabel[]) => {
   if (labels?.length) {
     const labelSelector = labels.reduce((acc, curr) => {
@@ -22,4 +26,4 @@ const setLabelParams = (params: URLSearchParams, labels?: FlightCtlLabel[]) => {
   }
 };
 
-export { addQueryConditions, setLabelParams };
+export { addQueryConditions, addTextContainsCondition, setLabelParams };

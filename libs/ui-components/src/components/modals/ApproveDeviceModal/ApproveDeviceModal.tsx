@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DeviceSpec, EnrollmentRequestApproval } from '@flightctl/types';
+import { EnrollmentRequestApproval } from '@flightctl/types';
 import { Alert, Modal } from '@patternfly/react-core';
 import { Formik } from 'formik';
 
@@ -20,7 +20,7 @@ type DeviceEnrollmentModalProps = Omit<ApproveDeviceFormProps, 'error'>;
 
 const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmentRequest, onClose }) => {
   const { t } = useTranslation();
-  const { post, patch } = useFetch();
+  const { post } = useFetch();
   const [error, setError] = React.useState<string>();
   const { user } = useAppContext();
   return (
@@ -32,20 +32,17 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
       validationSchema={deviceApprovalValidationSchema(t, { isSingleDevice: true })}
       onSubmit={async ({ labels, deviceAlias }) => {
         setError(undefined);
+        const deviceLabels: EnrollmentRequestApproval['labels'] = toAPILabel(labels);
+        if (deviceAlias) {
+          deviceLabels.alias = deviceAlias;
+        }
+
         try {
           await post<EnrollmentRequestApproval>(`enrollmentrequests/${enrollmentRequest.metadata.name}/approval`, {
             approved: true,
-            labels: toAPILabel(labels),
+            labels: deviceLabels,
             approvedBy: user,
           });
-          // Workaround until EDM-607 allows us to specify the alias in the approval request
-          await patch<DeviceSpec>(`devices/${enrollmentRequest.metadata.name}`, [
-            {
-              op: 'add',
-              path: '/metadata/alias',
-              value: deviceAlias,
-            },
-          ]);
           onClose(true);
         } catch (e) {
           setError(getErrorMessage(e));

@@ -1,51 +1,62 @@
 import * as React from 'react';
 import { useDebounce } from 'use-debounce';
 
-import { Device, DeviceList, DevicesSummary } from '@flightctl/types';
+import { Device, DeviceList, DevicesSummary, SortOrder } from '@flightctl/types';
 import { FilterSearchParams } from '../../../utils/status/devices';
-import { addQueryConditions, setLabelParams } from '../../../utils/query';
+import * as queryUtils from '../../../utils/query';
+import { fromAPILabel } from '../../../utils/labels';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { FilterStatusMap } from './types';
-import { fromAPILabel } from '../../../utils/labels';
 
 type DevicesEndpointArgs = {
   nameOrAlias?: string;
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
+  sortField?: string;
+  direction?: string;
   summaryOnly?: boolean;
 };
 
-const getDevicesEndpoint = ({ nameOrAlias, ownerFleets, activeStatuses, labels, summaryOnly }: DevicesEndpointArgs) => {
+const getDevicesEndpoint = ({ nameOrAlias, ownerFleets, activeStatuses, labels, sortField, direction, summaryOnly }: DevicesEndpointArgs) => {
   const filterByAppStatus = activeStatuses?.[FilterSearchParams.AppStatus];
   const filterByDevStatus = activeStatuses?.[FilterSearchParams.DeviceStatus];
   const filterByUpdateStatus = activeStatuses?.[FilterSearchParams.UpdatedStatus];
 
   const fieldSelectors: string[] = [];
-  addQueryConditions(fieldSelectors, 'status.applications.summary.status', filterByAppStatus);
-  addQueryConditions(fieldSelectors, 'status.summary.status', filterByDevStatus);
-  addQueryConditions(fieldSelectors, 'status.updated.status', filterByUpdateStatus);
-  if (ownerFleets?.length) {
-    addQueryConditions(
-      fieldSelectors,
-      'metadata.owner',
-      ownerFleets.map((fleet) => `Fleet/${fleet}`),
-    );
-  }
+  queryUtils.addQueryConditions(fieldSelectors, 'status.applicationsSummary.status', filterByAppStatus);
+  queryUtils.addQueryConditions(fieldSelectors, 'status.summary.status', filterByDevStatus);
+  queryUtils.addQueryConditions(fieldSelectors, 'status.updated.status', filterByUpdateStatus);
+
   if (nameOrAlias) {
-    // Partial string match
-    fieldSelectors.push(`metadata.nameoralias~=%${nameOrAlias}%`);
+    queryUtils.addTextContainsCondition(fieldSelectors, 'metadata.nameoralias', nameOrAlias);
   }
 
   const params = new URLSearchParams();
+  if (ownerFleets?.length) {
+    if (summaryOnly) {
+      // TODO https://issues.redhat.com/browse/EDM-681 filtering not implemented for summaryOnly+field-selector
+      params.set('owner', ownerFleets.map((fleet) => `Fleet/${fleet}`).join(','));
+    } else {
+      queryUtils.addQueryConditions(
+        fieldSelectors,
+        'metadata.owner',
+        ownerFleets.map((fleet) => `Fleet/${fleet}`),
+      );
+    }
+  }
   if (fieldSelectors.length > 0) {
     params.set('fieldSelector', fieldSelectors.join(','));
   }
+  queryUtils.setLabelParams(params, labels);
   if (summaryOnly) {
     params.set('summaryOnly', 'true');
   }
-  setLabelParams(params, labels);
+  if (sortField) {
+    params.set('sortBy', sortField);
+    params.set('sortOrder', direction || SortOrder.ASC);
+  }
   return params.size ? `devices?${params.toString()}` : 'devices';
 };
 
@@ -70,21 +81,18 @@ export const useDevicesSummary = ({
   return [deviceList?.summary, listLoading];
 };
 
-export const useDevices = ({
-  nameOrAlias,
-  ownerFleets,
-  activeStatuses,
-  labels,
-}: {
+export const useDevices = (args: {
   nameOrAlias?: string;
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
+  sortField?: string;
+  direction?: string;
 }): [Device[], boolean, unknown, boolean, VoidFunction, FlightCtlLabel[]] => {
   const [deviceLabelList] = useFetchPeriodically<DeviceList>({
     endpoint: 'devices',
   });
-  const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint({ nameOrAlias, ownerFleets, activeStatuses, labels });
+  const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint(args);
   const [devicesList, devicesLoading, devicesError, devicesRefetch, updating] = useFetchPeriodically<DeviceList>({
     endpoint: devicesEndpoint,
   });

@@ -41,7 +41,7 @@ const EditDeviceWizard = () => {
   const { patch } = useFetch();
 
   const [deviceId, device, isLoading, loadError] = useEditDevice();
-  const deviceAlias = device?.metadata.alias || '';
+  const deviceAlias = device?.metadata.labels?.alias || '';
   const displayText = device ? deviceAlias || t('Untitled') : deviceId;
 
   let body: React.ReactNode;

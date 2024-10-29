@@ -28,10 +28,7 @@ type TableProps<D> = {
   columns: TableColumn<D>[];
   children: React.ReactNode;
   loading: boolean;
-  // "hasBackendFilters" used when only Backend filters are used
-  // "emptyUiFilters used when some UI filters are used (To be removed when all filters are applied via the API)
-  hasBackendFilters?: boolean;
-  emptyUiFilters?: boolean;
+  emptyFilters?: boolean;
   emptyData?: boolean;
   'aria-label': string;
   getSortParams: (columnIndex: number) => ThProps['sort'];
@@ -44,9 +41,8 @@ type TableFC = <D>(props: TableProps<D>) => JSX.Element;
 const Table: TableFC = ({
   columns,
   children,
-  loading,
-  hasBackendFilters,
-  emptyUiFilters,
+                          loading,
+                          emptyFilters,
   emptyData,
   getSortParams,
   onSelectAll,
@@ -54,12 +50,9 @@ const Table: TableFC = ({
   ...rest
 }) => {
   const { t } = useTranslation();
-  if (loading && emptyData) {
-    return <Spinner size="md" />;
-  }
-
-  if ((emptyData && hasBackendFilters) || (emptyUiFilters && !emptyData)) {
-    return (
+  if (emptyData && !emptyFilters) {
+    return loading ? <Spinner size="md" />:
+    (
       <PageSection variant="light">
         <Bullseye>{t('No resources are matching the current filters.')}</Bullseye>
       </PageSection>

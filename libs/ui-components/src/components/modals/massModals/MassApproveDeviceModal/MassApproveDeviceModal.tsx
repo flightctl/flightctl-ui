@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DeviceSpec, EnrollmentRequest, EnrollmentRequestApproval } from '@flightctl/types';
+import { EnrollmentRequest, EnrollmentRequestApproval } from '@flightctl/types';
 import {
   Alert,
   Button,
@@ -50,7 +50,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({
   const [errors, setErrors] = React.useState<string[]>();
   const {
     user,
-    fetch: { post, patch },
+    fetch: { post },
   } = useAppContext();
 
   const approveEnrollments = async (values: MassApproveDeviceFormValues) => {
@@ -58,21 +58,16 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({
     setErrors(undefined);
     const promises = pendingEnrollments.map(async (r, index) => {
       const labels = toAPILabel(values.labels);
-      const deviceAlias = templateToName(index, values.deviceAlias);
+      const aliasLabel = templateToName(index, values.deviceAlias);
+      if (aliasLabel) {
+        labels.alias = aliasLabel;
+      }
 
       await post<EnrollmentRequestApproval>(`enrollmentrequests/${r.metadata.name}/approval`, {
         approved: true,
         labels,
         approvedBy: user,
       });
-      // Workaround until EDM-607 allows us to specify the alias in the approval request
-      await patch<DeviceSpec>(`devices/${r.metadata.name}`, [
-        {
-          op: 'add',
-          path: '/metadata/alias',
-          value: deviceAlias,
-        },
-      ]);
       setProgress((p) => p + 1);
     });
     setTotalProgress(promises.length);

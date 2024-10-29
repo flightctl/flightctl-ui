@@ -137,7 +137,7 @@ const RepositoryTable = () => {
       <Table
         aria-label={t('Repositories table')}
         loading={loading}
-        emptyUiFilters={filteredData.length === 0}
+        emptyFilters={filteredData.length === 0}
         emptyData={(repositoryList?.items.length || 0) === 0}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
