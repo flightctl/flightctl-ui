@@ -14,12 +14,24 @@ type UploadFieldProps = {
   maxFileBytes?: number;
 };
 
-const UploadHelperText = ({ meta, isUploading, isRejected, maxFileBytes }: { meta?: FieldMetaProps<unknown>;isUploading:boolean; isRejected:boolean; maxFileBytes?: number }) => {
-  const {t} = useTranslation();
+const UploadHelperText = ({
+  meta,
+  isUploading,
+  isRejected,
+  maxFileBytes,
+}: {
+  meta?: FieldMetaProps<unknown>;
+  isUploading: boolean;
+  isRejected: boolean;
+  maxFileBytes?: number;
+}) => {
+  const { t } = useTranslation();
 
   const maxFileMB = (maxFileBytes || 0) / (1024 * 1024);
 
-  const defaultContent = maxFileBytes ?  <DefaultHelperText helperText={t('Max file size {{ maxFileSize }} MB', { maxFileSize: maxFileMB})} /> : null;
+  const defaultContent = maxFileBytes ? (
+    <DefaultHelperText helperText={t('Max file size {{ maxFileSize }} MB', { maxFileSize: maxFileMB })} />
+  ) : null;
   if (isRejected) {
     return (
       <>
@@ -30,17 +42,17 @@ const UploadHelperText = ({ meta, isUploading, isRejected, maxFileBytes }: { met
           })}
         />
       </>
-    )
+    );
   } else if (!isUploading && !!meta?.error) {
     return (
       <>
         {defaultContent}
         <ErrorHelperText meta={meta} />
       </>
-    )
+    );
   }
   return defaultContent;
-}
+};
 
 const UploadField = ({ label, maxFileBytes, isRequired, name }: UploadFieldProps) => {
   const { t } = useTranslation();
@@ -103,8 +115,7 @@ const UploadField = ({ label, maxFileBytes, isRequired, name }: UploadFieldProps
         }}
       />
 
-      <UploadHelperText maxFileBytes={maxFileBytes} meta={meta} isUploading={isFileUploading} isRejected={isRejected}  />
-
+      <UploadHelperText maxFileBytes={maxFileBytes} meta={meta} isUploading={isFileUploading} isRejected={isRejected} />
     </FormGroup>
   );
 };

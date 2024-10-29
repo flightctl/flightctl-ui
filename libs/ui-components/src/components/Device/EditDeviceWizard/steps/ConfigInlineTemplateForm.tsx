@@ -8,8 +8,8 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelectTypeahead from '../../../form/FormSelectTypeahead';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import TextField from '../../../form/TextField';
-import SwitchField from '../../../form/SwitchField';
 import UploadField from '../../../form/UploadField';
+import CheckboxField from '../../../form/CheckboxField';
 import { DeviceSpecConfigFormValues } from '../types';
 import { InlineConfigTemplate } from '../../../../types/deviceSpec';
 
@@ -52,7 +52,9 @@ const FileForm = ({ fieldName }: { fieldName: string }) => {
           maxFileBytes={MAX_INLINE_FILE_SIZE_BYTES}
           isRequired
         />
-        <SwitchField label={t('Content is base64 encoded')} name={`${fieldName}.base64`} />
+        <FormGroup>
+          <CheckboxField name={`${fieldName}.base64`} label={t('Content is base64 encoded')} />
+        </FormGroup>
         <FormGroup label={t('Permissions')}>
           <FormSelectTypeahead
             name={`${fieldName}.permissions`}
