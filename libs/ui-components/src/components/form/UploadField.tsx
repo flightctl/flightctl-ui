@@ -65,13 +65,23 @@ const UploadField = ({ label, maxFileBytes, isRequired, name }: UploadFieldProps
   const [field, meta, { setValue, setTouched }] = useField<string | File>(name);
   const isValid = !isRejected && !((meta.touched || filename) && meta.error);
 
-  const handleFileRejected = () => {
+  const handleFileRejected = (clearValue: boolean) => {
     setIsRejected(true);
     void setTouched(true);
-    void setValue('');
+    if (clearValue) {
+      void setValue('');
+    }
   };
 
   const handleFileChange = (_event, file: string) => {
+    if (maxFileBytes) {
+      const contentFile = new TextEncoder().encode(file);
+      if (contentFile.length > maxFileBytes) {
+        handleFileRejected(false);
+        return;
+      }
+    }
+
     void setValue(file);
     void setTouched(true);
     setIsRejected(false);
@@ -106,7 +116,7 @@ const UploadField = ({ label, maxFileBytes, isRequired, name }: UploadFieldProps
         isLoading={isFileUploading}
         dropzoneProps={{
           maxSize: maxFileBytes,
-          onDropRejected: handleFileRejected,
+          onDropRejected: () => handleFileRejected(true),
         }}
         onClearClick={() => {
           setFilename('');
