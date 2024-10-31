@@ -10,7 +10,7 @@ var (
 	FctlApiUrl      = getEnvUrlVar("FLIGHTCTL_SERVER", "https://localhost:3443")
 	FctlApiInsecure = getEnvVar("FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY", "false")
 	MetricsApiUrl   = getEnvUrlVar("FLIGHTCTL_METRICS_SERVER", "http://localhost:9090")
-	GrpcUrl         = getEnvUrlVar("FLIGHTCTL_GRPC_SERVER", "localhost:7444")
+	GrpcUrl         = getEnvDomainVar("FLIGHTCTL_GRPC_SERVER", []string{"grpcs://", "grpc://"},  "localhost:7444")
 	TlsKeyPath      = getEnvVar("TLS_KEY", "")
 	TlsCertPath     = getEnvVar("TLS_CERT", "")
 	OidcClientId    = getEnvVar("OIDC_CLIENT_ID", "flightctl")
@@ -25,6 +25,15 @@ var (
 func getEnvUrlVar(key string, defaultValue string) string {
 	urlValue := getEnvVar(key, defaultValue)
 	return strings.TrimSuffix(urlValue, "/")
+}
+
+func getEnvDomainVar(key string, protocols []string, defaultValue string) string {
+	finalUrl := getEnvUrlVar(key, defaultValue)
+
+	for i := 0; i < len(protocols); i++ {
+		finalUrl = strings.TrimPrefix(finalUrl, protocols[i])
+	}
+	return finalUrl
 }
 
 func getEnvVar(key string, defaultValue string) string {
