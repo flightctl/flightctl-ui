@@ -23,6 +23,7 @@ const ConfigK8sSecretTemplateForm = ({ index }: ConfigK8sSecretTemplateFormProps
           aria-label={t('Secret name')}
           value={template.secretName}
           name={`configTemplates.${index}.secretName`}
+          isDisabled
         />
       </FormGroup>
       <FormGroup label={t('Secret namespace')} isRequired>
@@ -30,6 +31,7 @@ const ConfigK8sSecretTemplateForm = ({ index }: ConfigK8sSecretTemplateFormProps
           aria-label={t('Secret namespace')}
           name={`configTemplates.${index}.secretNs`}
           value={template.secretNs}
+          isDisabled
         />
       </FormGroup>
       <FormGroup label={t('Mount path')} isRequired>
@@ -38,6 +40,7 @@ const ConfigK8sSecretTemplateForm = ({ index }: ConfigK8sSecretTemplateFormProps
           name={`configTemplates.${index}.mountPath`}
           value={template.mountPath}
           placeholder={t('/absolute/path')}
+          isDisabled
         />
       </FormGroup>
     </>
