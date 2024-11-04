@@ -14,6 +14,7 @@ import { useTemplateVersion } from '../../../hooks/useTemplateVersion';
 import TerminalTab from './TerminalTab';
 import NavItem from '../../NavItem/NavItem';
 import DeviceStatusDebugModal from './DeviceStatusDebugModal';
+import { getDeviceFleet } from '../../../utils/devices';
 
 const DeviceDetailsPage = ({ children }: React.PropsWithChildren<Record<never, never>>) => {
   const { t } = useTranslation();
@@ -39,6 +40,15 @@ const DeviceDetailsPage = ({ children }: React.PropsWithChildren<Record<never, n
     resourceName: deviceAlias,
     resourceType: 'device',
   });
+  const editActionProps = getDeviceFleet(device?.metadata || {})
+    ? {
+        isAriaDisabled: true,
+        tooltipProps: {
+          content: t('Device is bound to a fleet. Its configurations cannot be edited'),
+        },
+      }
+    : undefined;
+
   return (
     <DetailsPage
       loading={loading || loadingTv}
@@ -59,7 +69,10 @@ const DeviceDetailsPage = ({ children }: React.PropsWithChildren<Record<never, n
       actions={
         <DetailsPageActions>
           <DropdownList>
-            <DropdownItem onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}>
+            <DropdownItem
+              onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}
+              {...editActionProps}
+            >
               {t('Edit device configurations')}
             </DropdownItem>
             {deleteAction}
