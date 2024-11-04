@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, CodeBlock, CodeBlockCode, ExpandableSection, FormGroup, Grid } from '@patternfly/react-core';
+import { Alert, CodeBlock, CodeBlockCode, FormGroup, Grid } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 import { Trans } from 'react-i18next';
 
@@ -24,22 +24,19 @@ const exampleCode = `/device-configs/factory-floors/floor-{{ device.metadata.lab
 const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
-
   return (
     <Grid span={8}>
       <FlightCtlForm>
         {isFleet && (
-          <Alert isInline variant="info" title={t('Using template variables')}>
-            <ExpandableSection toggleTextCollapsed={t('Show more')} toggleTextExpanded={t('Show less')}>
-              <Trans t={t}>
-                Add a variable by using <strong>{templateOption1}</strong> or <strong>{templateOption2}</strong> and it
-                will be applied based on each device&rsquo;s details. For example, you could set the following value to
-                apply different files in a Git configuration:
-              </Trans>
-              <CodeBlock className="pf-v5-u-mt-md">
-                <CodeBlockCode>{exampleCode}</CodeBlockCode>
-              </CodeBlock>
-            </ExpandableSection>
+          <Alert isInline variant="info" title={t('Using template variables')} isExpandable>
+            <Trans t={t}>
+              Add a variable by using <strong>{templateOption1}</strong> or <strong>{templateOption2}</strong> and it
+              will be applied based on each device&rsquo;s details. For example, you could set the following value to
+              apply different files in a Git configuration:
+            </Trans>
+            <CodeBlock className="pf-v5-u-mt-md">
+              <CodeBlockCode>{exampleCode}</CodeBlockCode>
+            </CodeBlock>
           </Alert>
         )}
         <FormGroup
