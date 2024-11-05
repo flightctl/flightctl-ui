@@ -4,7 +4,13 @@ import { Button, ButtonProps, Icon, Tooltip } from '@patternfly/react-core';
 
 import { useTranslation } from '../../hooks/useTranslation';
 
-const CopyButton = ({ text, variant }: { text: string; variant?: ButtonProps['variant'] }) => {
+interface CopyButtonProps {
+  text: string;
+  variant?: ButtonProps['variant'];
+  ariaLabel?: string;
+}
+
+const CopyButton = ({ ariaLabel, text, variant }: CopyButtonProps) => {
   const { t } = useTranslation();
 
   const onCopy = () => {
@@ -12,7 +18,7 @@ const CopyButton = ({ text, variant }: { text: string; variant?: ButtonProps['va
   };
 
   return (
-    <Tooltip content={t('Copy text')}>
+    <Tooltip content={ariaLabel || t('Copy text')}>
       <Button
         variant={variant || 'plain'}
         isInline={variant === 'link'}
@@ -21,7 +27,7 @@ const CopyButton = ({ text, variant }: { text: string; variant?: ButtonProps['va
             <CopyIcon onClick={onCopy} />
           </Icon>
         }
-        aria-label={t('Copy text')}
+        aria-label={ariaLabel || t('Copy text')}
       />
     </Tooltip>
   );

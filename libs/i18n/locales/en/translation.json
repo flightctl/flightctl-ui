@@ -449,6 +449,7 @@
   "Git repository": "Git repository",
   "Privacy": "Privacy",
   "Device management service will monitor the specified paths, import the defined fleets and synchronise devices": "Device management service will monitor the specified paths, import the defined fleets and synchronise devices",
+  "Copy Url": "Copy Url",
   "The repository \"{{name}}\" defined for this source failed to load.": "The repository \"{{name}}\" defined for this source failed to load.",
   "Create a repository": "Create a repository",
   "No repositories here!": "No repositories here!",

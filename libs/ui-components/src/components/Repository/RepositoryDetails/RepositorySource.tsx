@@ -15,7 +15,9 @@ import {
   RepoConfig,
   getConfigFullRepoUrl,
   getRepoName,
+  isHttpProviderSpec,
 } from '../../../types/deviceSpec';
+import CopyButton from '../../common/CopyButton';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { getConfigType } from '../../Device/EditDeviceWizard/deviceSpecUtils';
 
@@ -29,7 +31,17 @@ export const DefaultConfigDetails = ({
   return <>{config.name}</>;
 };
 
-export const RepositoryLink = ({ name, url }: { name?: string; url: string }) => (
+export const HttpRepositoryUrl = ({ name, url }: { name?: string; url: string }) => {
+  const { t } = useTranslation();
+  return (
+    <>
+      {name || url}
+      <CopyButton text={url} ariaLabel={t('Copy Url')} />
+    </>
+  );
+};
+
+export const GitRepositoryLink = ({ name, url }: { name?: string; url: string }) => (
   <Button
     component="a"
     variant="link"
@@ -61,7 +73,11 @@ export const RepositoryConfigDetails = ({ config, extraArgs }: { config: RepoCon
     );
   }
 
-  return <RepositoryLink name={config.name} url={getConfigFullRepoUrl(config, extraArgs.url)} />;
+  const url = getConfigFullRepoUrl(config, extraArgs.url);
+  if (isHttpProviderSpec(config)) {
+    return <HttpRepositoryUrl name={config.name} url={url} />;
+  }
+  return <GitRepositoryLink name={config.name} url={url} />;
 };
 
 export const getConfigDetails = (config: ConfigSourceProvider, extraArgs: ExtraArgs) => {
