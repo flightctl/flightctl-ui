@@ -22,6 +22,7 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';
 import { sortByName } from '../../../../utils/sort/generic';
+import WithHelperText from '../../../common/WithHelperText';
 import { getDnsSubdomainValidations } from '../../../form/validations';
 import ErrorHelperText from '../../../form/FieldHelperText';
 import FormSelect from '../../../form/FormSelect';
@@ -42,12 +43,11 @@ const useValidateOnMount = () => {
 };
 
 type ConfigSectionProps = {
-  index: number;
   repositories: Repository[];
   repoRefetch: VoidFunction;
 };
 
-const ConfigSection = ({ index, repositories, repoRefetch }: ConfigSectionProps) => {
+const ConfigSection = ({ index, repositories, repoRefetch }: ConfigSectionProps & { index: number }) => {
   const { t } = useTranslation();
   const fieldName = `configTemplates[${index}]`;
   const [
@@ -73,7 +73,11 @@ const ConfigSection = ({ index, repositories, repoRefetch }: ConfigSectionProps)
   }, [t]);
 
   return (
-    <ExpandableFormSection title={t('Configurations')} fieldName={fieldName} description={name}>
+    <ExpandableFormSection
+      title={t('Configuration {{ configNum }}', { configNum: index + 1 })}
+      fieldName={fieldName}
+      description={name}
+    >
       <Grid hasGutter>
         <RichValidationTextField
           fieldName={`${fieldName}.name`}
@@ -101,30 +105,11 @@ const ConfigSection = ({ index, repositories, repoRefetch }: ConfigSectionProps)
   );
 };
 
-const ConfigTemplateForm = () => {
+const ConfigurationTemplatesForm = ({ repositories, repoRefetch }: ConfigSectionProps) => {
   const { t } = useTranslation();
   const { values, errors } = useFormikContext<DeviceSpecConfigFormValues>();
-  const [repositoryList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>({
-    endpoint: 'repositories',
-  });
-
-  const repositories = React.useMemo(() => sortByName(repositoryList?.items || []), [repositoryList]);
 
   const generalError = typeof errors.configTemplates === 'string' ? errors.configTemplates : undefined;
-
-  if (error) {
-    return (
-      <Alert isInline variant="danger" title={t('Failed to load repositories')}>
-        {getErrorMessage(error)}
-      </Alert>
-    );
-  } else if (isLoading) {
-    return (
-      <Bullseye>
-        <Spinner />
-      </Bullseye>
-    );
-  }
 
   return (
     <FieldArray name="configTemplates">
@@ -134,7 +119,7 @@ const ConfigTemplateForm = () => {
             <FormSection key={index}>
               <Split hasGutter>
                 <SplitItem isFilled>
-                  <ConfigSection index={index} repositories={repositories} repoRefetch={refetch} />
+                  <ConfigSection index={index} repositories={repositories} repoRefetch={repoRefetch} />
                 </SplitItem>
                 <SplitItem>
                   <Button
@@ -171,4 +156,42 @@ const ConfigTemplateForm = () => {
   );
 };
 
-export default ConfigTemplateForm;
+const ConfigurationTemplates = () => {
+  const [repositoryList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>({
+    endpoint: 'repositories',
+  });
+
+  const repositories = React.useMemo(() => sortByName(repositoryList?.items || []), [repositoryList]);
+
+  const { t } = useTranslation();
+
+  if (error) {
+    return (
+      <Alert isInline variant="danger" title={t('Failed to load repositories')}>
+        {getErrorMessage(error)}
+      </Alert>
+    );
+  } else if (isLoading) {
+    return (
+      <Bullseye>
+        <Spinner />
+      </Bullseye>
+    );
+  }
+
+  return (
+    <FormGroup
+      label={
+        <WithHelperText
+          ariaLabel={t('Configurations')}
+          content={t("Define configuration files that shall be present on the device's file system.")}
+          showLabel
+        />
+      }
+    >
+      <ConfigurationTemplatesForm repositories={repositories} repoRefetch={refetch} />
+    </FormGroup>
+  );
+};
+
+export default ConfigurationTemplates;

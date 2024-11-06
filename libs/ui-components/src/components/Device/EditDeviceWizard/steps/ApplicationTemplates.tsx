@@ -4,12 +4,14 @@ import { Button, FormGroup, FormSection, Grid, Split, SplitItem } from '@pattern
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
+import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
 
 import { ApplicationFormSpec, DeviceSpecConfigFormValues } from '../types';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
+import WithHelperText from '../../../common/WithHelperText';
 
 import './ApplicationsForm.css';
 
@@ -19,22 +21,55 @@ const ApplicationSection = ({ index }: { index: number }) => {
   const [{ value: app }] = useField<ApplicationFormSpec>(fieldName);
 
   return (
-    <ExpandableFormSection title={t('Application')} fieldName={fieldName} description={app.name || app.image}>
+    <ExpandableFormSection
+      title={t('Application {{ appNum }}', { appNum: index + 1 })}
+      fieldName={fieldName}
+      description={app.name || app.image}
+    >
       <Grid hasGutter>
-        <FormGroup label={t('Image')} isRequired>
+        <FormGroup
+          label={
+            <WithHelperText
+              ariaLabel={t('Image')}
+              content={
+                <span>
+                  {t('The application image. Learn how to create one')}{' '}
+                  <Button
+                    component="a"
+                    variant="link"
+                    isInline
+                    icon={<ExternalLinkAltIcon />}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://github.com/flightctl/flightctl/blob/main/docs/user/managing-devices.md#creating-applications"
+                  >
+                    {t('here')}
+                  </Button>
+                </span>
+              }
+              showLabel
+            />
+          }
+          isRequired
+        >
           <TextField aria-label={t('Image')} name={`applications.${index}.image`} value={app.image} />
         </FormGroup>
-        <FormGroup label={t('Application name')}>
-          <TextField
-            aria-label={t('Application name')}
-            name={`applications.${index}.name`}
-            value={app.name}
-            helperText={t('The image name will be used if no name is specified')}
-          />
+        <FormGroup
+          label={
+            <WithHelperText
+              ariaLabel={t('Application name')}
+              content={t(
+                'Required when other applications use the same image. If left blank, the image will be used as name. ',
+              )}
+              showLabel
+            />
+          }
+        >
+          <TextField aria-label={t('Application name')} name={`applications.${index}.name`} value={app.name} />
         </FormGroup>
         <FieldArray name={`applications.${index}.variables`}>
           {({ push, remove }) => (
-            <FormSection>
+            <>
               {app.variables.map((variable, varIndex) => (
                 <Split hasGutter key={varIndex}>
                   <SplitItem className="fctl-application-template__variable-name">
@@ -80,7 +115,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
                   {t('Add a variable')}
                 </Button>
               </FormGroup>
-            </FormSection>
+            </>
           )}
         </FieldArray>
       </Grid>
@@ -88,53 +123,63 @@ const ApplicationSection = ({ index }: { index: number }) => {
   );
 };
 
-const ApplicationsForm = () => {
+const ApplicationTemplates = () => {
   const { t } = useTranslation();
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
 
   return (
-    <FieldArray name="applications">
-      {({ push, remove }) => (
-        <>
-          {values.applications.map((_app, index) => (
-            <FormSection key={index}>
-              <Split hasGutter>
-                <SplitItem isFilled>
-                  <ApplicationSection index={index} />
-                </SplitItem>
-                <SplitItem>
-                  <Button
-                    variant="link"
-                    icon={<MinusCircleIcon />}
-                    iconPosition="start"
-                    onClick={() => remove(index)}
-                  />
-                </SplitItem>
-              </Split>
+    <FormGroup
+      label={
+        <WithHelperText
+          ariaLabel={t('Applications')}
+          content={t('Define the application workloads that shall run on the device.')}
+          showLabel
+        />
+      }
+    >
+      <FieldArray name="applications">
+        {({ push, remove }) => (
+          <>
+            {values.applications.map((_app, index) => (
+              <FormSection key={index}>
+                <Split hasGutter>
+                  <SplitItem isFilled>
+                    <ApplicationSection index={index} />
+                  </SplitItem>
+                  <SplitItem>
+                    <Button
+                      variant="link"
+                      icon={<MinusCircleIcon />}
+                      iconPosition="start"
+                      onClick={() => remove(index)}
+                    />
+                  </SplitItem>
+                </Split>
+              </FormSection>
+            ))}
+            <FormSection>
+              <FormGroup>
+                <Button
+                  variant="link"
+                  icon={<PlusCircleIcon />}
+                  iconPosition="start"
+                  onClick={() => {
+                    push({
+                      name: '',
+                      image: '',
+                      variables: [],
+                    });
+                  }}
+                >
+                  {t('Add application')}
+                </Button>
+              </FormGroup>
             </FormSection>
-          ))}
-          <FormSection>
-            <FormGroup>
-              <Button
-                variant="link"
-                icon={<PlusCircleIcon />}
-                iconPosition="start"
-                onClick={() => {
-                  push({
-                    name: '',
-                    image: '',
-                    variables: [],
-                  });
-                }}
-              >
-                {t('Add application')}
-              </Button>
-            </FormGroup>
-          </FormSection>
-        </>
-      )}
-    </FieldArray>
+          </>
+        )}
+      </FieldArray>
+    </FormGroup>
   );
 };
 
-export default ApplicationsForm;
+export default ApplicationTemplates;
