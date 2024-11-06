@@ -24,10 +24,11 @@ spec:
     targetPort: 8080-tcp
   {{- if eq (include "flightctl.getUIHttpScheme" .) "https" }}
   tls:
-    {{- if ((.Values.global).baseDomainTls).cert }}
-    termination: passthrough
-    {{- else }}
     termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+    {{- if (.Values.global.baseDomainTls).cert }}
+    certificate: {{ .Values.global.baseDomainTls.cert | quote }}
+    key: {{ .Values.global.baseDomainTls.key | quote }}
     {{- end }}
   {{- end }}
   wildcardPolicy: None
