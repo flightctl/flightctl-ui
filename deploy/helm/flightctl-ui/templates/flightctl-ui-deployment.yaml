@@ -37,13 +37,11 @@ spec:
               configMapKeyRef:
                 name: flightctl-ui
                 key: FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY
-          {{- if or (eq .Values.global.target "acm") (((.Values.global).baseDomainTls).cert) }}
+          {{- if eq .Values.global.target "acm" }}
           - name: TLS_KEY
             value: /app/serving-cert/tls.key
           - name: TLS_CERT
             value: /app/serving-cert/tls.crt
-          {{- end }}
-          {{- if eq (.Values.global).target "acm" }}
           - name: IS_OCP_PLUGIN
             value: "true"
           {{- else }}
@@ -78,7 +76,7 @@ spec:
           volumeMounts:
             - mountPath: /app/certs
               name: flightctl-ui-certs
-            {{- if or (eq .Values.global.target "acm") (((.Values.global).baseDomainTls).cert) }}
+            {{- if eq .Values.global.target "acm" }}
             - mountPath: /app/serving-cert
               name: flightctl-ui-serving-cert
             {{- end }}
@@ -94,7 +92,7 @@ spec:
               - key: ca_oidc.crt
                 path: ca_oidc.crt
               {{ end }}
-        {{- if or (eq .Values.global.target "acm") (((.Values.global).baseDomainTls).cert) }}
+        {{- if eq .Values.global.target "acm" }}
         - name: flightctl-ui-serving-cert
           secret:
             secretName: flightctl-ui-serving-cert
