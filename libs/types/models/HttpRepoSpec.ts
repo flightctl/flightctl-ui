@@ -11,5 +11,9 @@ export type HttpRepoSpec = {
   url: string;
   type: RepoSpecType;
   httpConfig: HttpConfig;
+  /**
+   * URL suffix used only for validating access to the repository. Users might use the URL field as a root URL to be used by config sources adding suffixes. This will help with the validation of the http endpoint.
+   */
+  validationSuffix?: string;
 };
 

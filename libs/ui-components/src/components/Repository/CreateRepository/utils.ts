@@ -26,7 +26,8 @@ const httpRepoUrlRegex = /^(http|https)/;
 const pathRegex = /\/.+/;
 const jwtTokenRegexp = /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/;
 
-export const isHttpRepoSpec = (repoSpec: RepositorySpec): repoSpec is HttpRepoSpec => !!repoSpec['httpConfig'];
+export const isHttpRepoSpec = (repoSpec: RepositorySpec): repoSpec is HttpRepoSpec =>
+  !!(repoSpec['httpConfig'] || (repoSpec as HttpRepoSpec).validationSuffix);
 export const isSshRepoSpec = (repoSpec: RepositorySpec): repoSpec is SshRepoSpec => !!repoSpec['sshConfig'];
 
 export const getInitValues = ({
@@ -74,6 +75,7 @@ export const getInitValues = ({
     name: repository.metadata.name || '',
     url: repository.spec.url || '',
     repoType: repository.spec.type,
+    validationSuffix: 'validationSuffix' in repository.spec ? repository.spec.validationSuffix : '',
     allowedRepoTypes: options?.allowedRepoTypes,
     showRepoTypes: options?.showRepoTypes ?? true,
     useResourceSyncs: !!resourceSyncs?.length,
@@ -136,6 +138,13 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
     newValue: values.url,
     originalValue: repository.spec.url,
     path: '/spec/url',
+  });
+  appendJSONPatch({
+    patches,
+    newValue: values.repoType === RepoSpecType.HTTP ? values.validationSuffix : undefined,
+    originalValue:
+      repository.spec.type === RepoSpecType.HTTP ? (repository.spec as HttpRepoSpec).validationSuffix : undefined,
+    path: '/spec/validationSuffix',
   });
 
   if (!values.useAdvancedConfig) {
@@ -448,6 +457,15 @@ export const getRepository = (values: Omit<RepositoryFormValues, 'useResourceSyn
     url: values.url,
     type: values.repoType,
   };
+  if (values.configType === 'http' && values.validationSuffix) {
+    const httpRepoSpec = spec as HttpRepoSpec;
+    httpRepoSpec.validationSuffix = values.validationSuffix;
+    // httpConfig must be included as "validationSuffix" is only allowed for HttpRepoSpec
+    httpRepoSpec.httpConfig = {
+      skipServerVerification: false,
+    };
+  }
+
   if (values.configType === 'http' && values.httpConfig) {
     const httpRepoSpec = spec as HttpRepoSpec;
     httpRepoSpec.httpConfig = {

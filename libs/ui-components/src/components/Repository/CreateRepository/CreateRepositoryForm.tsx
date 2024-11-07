@@ -13,6 +13,7 @@ import {
 } from '@patternfly/react-core';
 import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
+import { Trans } from 'react-i18next';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
@@ -63,6 +64,35 @@ const AdvancedSection = () => {
       )}
       {values.configType === 'http' && (
         <Grid hasGutter className={showConfigTypeRadios ? 'fctl-create-repo__adv-section--nested' : ''}>
+          {values.repoType === RepoSpecType.HTTP && (
+            <FormSection>
+              <FormGroup
+                label={t('Validation suffix')}
+                labelIcon={
+                  <WithHelperText
+                    ariaLabel={t('Validation suffix')}
+                    content={t(
+                      "Suffix to the repository's base URL used to validate if the HTTP service is accessible.",
+                    )}
+                  />
+                }
+              >
+                <TextField
+                  aria-label={t('Validation suffix')}
+                  name="validationSuffix"
+                  helperText={
+                    values.validationSuffix &&
+                    values.url && (
+                      <Trans t={t}>
+                        Full validation URL: <strong>{`${values.url}${values.validationSuffix || ''}`}</strong>
+                      </Trans>
+                    )
+                  }
+                />
+              </FormGroup>
+            </FormSection>
+          )}
+
           <CheckboxField name="httpConfig.basicAuth.use" label={t('Basic authentication')}>
             <FormGroup label={t('Username')} isRequired>
               <TextField name="httpConfig.basicAuth.username" aria-label={t('Username')} />
