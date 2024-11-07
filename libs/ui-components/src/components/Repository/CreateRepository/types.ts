@@ -10,8 +10,9 @@ export type ResourceSyncFormValue = {
 export type RepositoryFormValues = {
   exists: boolean;
   name: string;
-  url: string;
   repoType: RepoSpecType;
+  url: string;
+  validationSuffix?: string;
   allowedRepoTypes?: RepoSpecType[];
   showRepoTypes: boolean;
   useAdvancedConfig: boolean;
