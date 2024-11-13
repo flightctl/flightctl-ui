@@ -96,6 +96,7 @@ export const isInlineProviderSpec = (providerSpec: ConfigProviderSpec): provider
 export type HttpConfigTemplate = ConfigTemplate & {
   type: ConfigType.HTTP;
   repository: string;
+  validationSuffix: string;
   suffix: string;
   filePath: string;
 };
