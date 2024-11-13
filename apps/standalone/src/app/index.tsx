@@ -7,6 +7,7 @@ import { useStandaloneAppContext } from './hooks/useStandaloneAppContext';
 import { AuthContext, useAuthContext } from './context/AuthContext';
 
 import '@patternfly/react-core/dist/styles/base.css';
+import '@patternfly/react-styles/css/utilities/Spacing/spacing.css';
 import './app.css';
 
 const App: React.FunctionComponent = () => {

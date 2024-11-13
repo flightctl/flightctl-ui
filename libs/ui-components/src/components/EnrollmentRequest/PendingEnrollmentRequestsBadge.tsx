@@ -16,7 +16,7 @@ const PendingEnrollmentRequestsBadge = () => {
 
   const text = t('{{ count }} devices pending approval', { count });
   return (
-    <Badge className="fctl-separator--left" screenReaderText={text}>
+    <Badge className="fctl-pending-ers-badge pf-v5-u-ml-lg" screenReaderText={text}>
       <WithTooltip showTooltip content={text}>
         <span>{count}</span>
       </WithTooltip>
