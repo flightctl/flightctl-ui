@@ -58,6 +58,20 @@ const ConfigSection = ({ index, repositories, repoRefetch }: ConfigSectionProps)
 
   useValidateOnMount();
 
+  const items = React.useMemo(() => {
+    const options = {
+      [ConfigType.GIT]: { label: t('Git configuration') },
+      [ConfigType.HTTP]: { label: t('Http configuration') },
+      [ConfigType.INLINE]: { label: t('Inline configuration') },
+    };
+    if (type === ConfigType.K8S_SECRET) {
+      options[ConfigType.K8S_SECRET] = { label: t('Kubernetes secret provider') };
+    }
+    return options;
+    // The k8s secret option must remain active for this config even when the users switch the configType to a different one
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]);
+
   return (
     <ExpandableFormSection title={t('Configurations')} fieldName={fieldName} description={name}>
       <Grid hasGutter>
@@ -69,16 +83,7 @@ const ConfigSection = ({ index, repositories, repoRefetch }: ConfigSectionProps)
         />
 
         <FormGroup label={t('Source type')} isRequired>
-          <FormSelect
-            items={{
-              git: t('Git configuration'),
-              http: t('Http configuration'),
-              // secret: t('Kubernetes secret provider'), not supported yet
-              inline: t('Inline configuration'),
-            }}
-            name={`${fieldName}.type`}
-            placeholderText={t('Select a source type')}
-          />
+          <FormSelect items={items} name={`${fieldName}.type`} placeholderText={t('Select a source type')} />
         </FormGroup>
 
         {type === ConfigType.K8S_SECRET && <ConfigK8sSecretTemplateForm index={index} />}
@@ -104,6 +109,7 @@ const ConfigTemplateForm = () => {
   });
 
   const repositories = React.useMemo(() => sortByName(repositoryList?.items || []), [repositoryList]);
+
   const generalError = typeof errors.configTemplates === 'string' ? errors.configTemplates : undefined;
 
   if (error) {
@@ -124,7 +130,7 @@ const ConfigTemplateForm = () => {
     <FieldArray name="configTemplates">
       {({ push, remove }) => (
         <>
-          {values.configTemplates.map((ct, index) => (
+          {values.configTemplates.map((_, index) => (
             <FormSection key={index}>
               <Split hasGutter>
                 <SplitItem isFilled>
