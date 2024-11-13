@@ -18,7 +18,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import RepositoryStatus from '../../Status/RepositoryStatus';
 import { isHttpRepoSpec, isSshRepoSpec } from '../CreateRepository/utils';
-import { RepositoryLink } from './RepositorySource';
+import { GitRepositoryLink, HttpRepositoryUrl } from './RepositorySource';
 
 const RepoPrivacy = ({ repo }: { repo: Repository }) => {
   const { t } = useTranslation();
@@ -60,7 +60,11 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Url')}</DescriptionListTerm>
             <DescriptionListDescription>
-              <RepositoryLink url={repoDetails.spec.url} />
+              {repoDetails?.spec.type === RepoSpecType.HTTP ? (
+                <HttpRepositoryUrl url={repoDetails.spec.url} />
+              ) : (
+                <GitRepositoryLink url={repoDetails.spec.url} />
+              )}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
