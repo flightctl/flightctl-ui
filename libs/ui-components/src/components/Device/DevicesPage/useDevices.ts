@@ -19,7 +19,15 @@ type DevicesEndpointArgs = {
   summaryOnly?: boolean;
 };
 
-const getDevicesEndpoint = ({ nameOrAlias, ownerFleets, activeStatuses, labels, sortField, direction, summaryOnly }: DevicesEndpointArgs) => {
+const getDevicesEndpoint = ({
+  nameOrAlias,
+  ownerFleets,
+  activeStatuses,
+  labels,
+  sortField,
+  direction,
+  summaryOnly,
+}: DevicesEndpointArgs) => {
   const filterByAppStatus = activeStatuses?.[FilterSearchParams.AppStatus];
   const filterByDevStatus = activeStatuses?.[FilterSearchParams.DeviceStatus];
   const filterByUpdateStatus = activeStatuses?.[FilterSearchParams.UpdatedStatus];

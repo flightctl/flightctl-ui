@@ -41,8 +41,8 @@ type TableFC = <D>(props: TableProps<D>) => JSX.Element;
 const Table: TableFC = ({
   columns,
   children,
-                          loading,
-                          emptyFilters,
+  loading,
+  emptyFilters,
   emptyData,
   getSortParams,
   onSelectAll,
@@ -51,8 +51,9 @@ const Table: TableFC = ({
 }) => {
   const { t } = useTranslation();
   if (emptyData && !emptyFilters) {
-    return loading ? <Spinner size="md" />:
-    (
+    return loading ? (
+      <Spinner size="md" />
+    ) : (
       <PageSection variant="light">
         <Bullseye>{t('No resources are matching the current filters.')}</Bullseye>
       </PageSection>
