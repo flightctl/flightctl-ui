@@ -91,15 +91,15 @@ const isSameInlineConf = (a: InlineConfigProviderSpec, b: InlineConfigProviderSp
       const bInline = b.inline[index];
       return (
         aInline.path === bInline.path &&
-          isSameInlineConfigValue<string>(aInline.user, bInline.user, DEFAULT_INLINE_FILE_USER),
-        isSameInlineConfigValue<string>(aInline.group, bInline.group, DEFAULT_INLINE_FILE_GROUP),
+        isSameInlineConfigValue<string>(aInline.user, bInline.user, DEFAULT_INLINE_FILE_USER) &&
+        isSameInlineConfigValue<string>(aInline.group, bInline.group, DEFAULT_INLINE_FILE_GROUP) &&
         isSameInlineConfigValue<number>(aInline.mode, bInline.mode, DEFAULT_INLINE_FILE_MODE) &&
-          isSameInlineConfigValue<string>(
-            aInline.contentEncoding,
-            bInline.contentEncoding,
-            FileSpec.contentEncoding.PLAIN,
-          ) &&
-          aInline.content === bInline.content
+        isSameInlineConfigValue<string>(
+          aInline.contentEncoding,
+          bInline.contentEncoding,
+          FileSpec.contentEncoding.PLAIN,
+        ) &&
+        aInline.content === bInline.content
       );
     })
   );
