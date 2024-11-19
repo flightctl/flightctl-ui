@@ -1,0 +1,10 @@
+
+/* The default color is too light */
+.fctl-pendingdevices-badge {
+  --pf-v5-c-badge--m-unread--BackgroundColor: var(--pf-v5-global--active-color--100)
+}
+
+/* For the dark theme, we need to put it back to the correct value */
+.pf-v5-theme-dark .fctl-pendingdevices-badge {
+  --pf-v5-c-badge--m-unread--BackgroundColor: var(--pf-v5-global--active-color--300)
+}

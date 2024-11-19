@@ -3,7 +3,6 @@ import { ApplicationsSummaryStatusType, DeviceSummaryStatusType, DeviceUpdatedSt
 
 import { FilterSearchParams } from '../../../utils/status/devices';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { EnrollmentRequestStatus } from '../../../utils/status/enrollmentRequest';
 import { FilterStatusMap } from './types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { labelToString } from '../../../utils/labels';
@@ -11,7 +10,6 @@ import { labelToString } from '../../../utils/labels';
 const validAppStatuses = Object.values(ApplicationsSummaryStatusType) as string[];
 const validUpdatedStatuses = Object.values(DeviceUpdatedStatusType) as string[];
 const validDeviceStatuses = Object.values(DeviceSummaryStatusType) as string[];
-validDeviceStatuses.push(EnrollmentRequestStatus.Pending);
 
 const getNewParams = (currentParams: URLSearchParams, newValues: { [key: string]: string[] }) => {
   let newParams = [...currentParams.entries()];
@@ -30,6 +28,7 @@ export const useDeviceBackendFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const paramsRef = React.useRef(searchParams);
   const ownerFleets = searchParams.getAll(FilterSearchParams.Fleet) || undefined;
+  const nameOrAlias = searchParams.get(FilterSearchParams.NameOrAlias) || undefined;
 
   const updateSearchParams = React.useCallback(
     (params: [string, string][]) => {
@@ -104,10 +103,22 @@ export const useDeviceBackendFilters = () => {
     [updateSearchParams],
   );
 
+  const setNameOrAlias = React.useCallback(
+    (nameOrAlias: string) => {
+      updateSearchParams(getNewParams(paramsRef.current, { [FilterSearchParams.NameOrAlias]: [nameOrAlias] }));
+    },
+    [updateSearchParams],
+  );
+
   const hasFiltersEnabled =
-    !!selectedLabels.length || !!ownerFleets.length || Object.values(activeStatuses).some((s) => !!s.length);
+    !!nameOrAlias ||
+    !!selectedLabels.length ||
+    !!ownerFleets.length ||
+    Object.values(activeStatuses).some((s) => !!s.length);
 
   return {
+    nameOrAlias,
+    setNameOrAlias,
     activeStatuses,
     setActiveStatuses,
     ownerFleets,

@@ -35,12 +35,13 @@ const StatusCard = () => {
     labels,
   });
 
-  // TODO remove "useDevices" (to fetch labels), and fetching of fleets when the new API endpoints are available
-  const [devices, loading, error, , , allLabels] = useDevices({
+  // TODO https://issues.redhat.com/browse/EDM-684 Use the new API endpoint to retrieve device labels
+  const [, /* devices */ loading, error, , , allLabels] = useDevices({
     ownerFleets: fleets,
     labels,
   });
 
+  // TODO https://issues.redhat.com/browse/EDM-683 Use the new API endpoint to retrieve fleet names
   const [fleetsList, flLoading, flError] = useFetchPeriodically<FleetList>({
     endpoint: 'fleets',
   });
@@ -59,7 +60,7 @@ const StatusCard = () => {
       <Stack>
         <StackItem>
           <TextContent>
-            <Text component={TextVariants.small}>{t('{{count}} Devices', { count: devices.length || 0 })}</Text>
+            <Text component={TextVariants.small}>{t('{{count}} Devices', { count: devicesSummary?.total || 0 })}</Text>
           </TextContent>
         </StackItem>
         <StackItem>

@@ -44,7 +44,7 @@ const CreateRepository = () => {
       try {
         const results = await Promise.allSettled([
           get<Repository>(`repositories/${repositoryId}`),
-          get<ResourceSyncList>(`resourcesyncs?repository=${repositoryId}`),
+          get<ResourceSyncList>(`resourcesyncs?fieldSelector=spec.repository=${repositoryId}`),
         ]);
 
         if (isPromiseFulfilled(results[0])) {
@@ -70,7 +70,7 @@ const CreateRepository = () => {
     const reload = async () => {
       try {
         setIsLoading(true);
-        const rsList = await get<ResourceSyncList>(`resourcesyncs?labelSelector=repository=${repositoryId}`);
+        const rsList = await get<ResourceSyncList>(`resourcesyncs?fieldSelector=spec.repository${repositoryId}`);
         setResourceSyncs(rsList.items);
         setRsError(undefined);
       } catch (e) {

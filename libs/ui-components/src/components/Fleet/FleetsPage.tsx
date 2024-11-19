@@ -13,21 +13,16 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { Tbody } from '@patternfly/react-table';
+import { Tbody, ThProps } from '@patternfly/react-table';
 import { TopologyIcon } from '@patternfly/react-icons/dist/js/icons/topology-icon';
 import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
 
-import { Fleet, FleetList } from '@flightctl/types';
-import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
+import { Fleet } from '@flightctl/types';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
-import { sortByName } from '../../utils/sort/generic';
-import { sortByStatus, sortFleetsByOSImg } from '../../utils/sort/fleet';
 import TableTextSearch from '../Table/TableTextSearch';
-import Table, { TableColumn } from '../Table/Table';
-import { useTableTextSearch } from '../../hooks/useTableTextSearch';
-import { useTableSort } from '../../hooks/useTableSort';
+import Table, { ApiSortTableColumn } from '../Table/Table';
 import { useTableSelect } from '../../hooks/useTableSelect';
 import TableActions from '../Table/TableActions';
 import { getResourceId } from '../../utils/resource';
@@ -38,6 +33,8 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import DeleteFleetModal from './DeleteFleetModal/DeleteFleetModal';
 import FleetResourceSyncs from './FleetResourceSyncs';
+import { useApiTableSort } from '../../hooks/useApiTableSort';
+import { useFleetBackendFilters, useFleets } from './useFleets';
 
 const FleetPageActions = ({ createText }: { createText?: string }) => {
   const { t } = useTranslation();
@@ -78,37 +75,40 @@ const FleetEmptyState = () => {
   );
 };
 
-const getColumns = (t: TFunction): TableColumn<Fleet>[] => [
+const getColumns = (t: TFunction): ApiSortTableColumn[] => [
   {
     name: t('Name'),
-    onSort: sortByName,
+    sortableField: 'metadata.name',
+    defaultSort: true,
   },
   {
     name: t('System image'),
-    onSort: sortFleetsByOSImg,
+    sortableField: 'spec.template.spec.os.image',
   },
   {
     name: t('Devices'),
   },
   {
     name: t('Status'),
-    onSort: sortByStatus,
   },
 ];
 
-const getSearchText = (fleet: Fleet) => [fleet.metadata.name];
+type FleetTableProps = {
+  fleetColumns: ApiSortTableColumn[];
+  fleetLoad: FleetLoad;
+  getSortParams: (columnIndex: number) => ThProps['sort'];
+  hasFiltersEnabled: boolean;
+  name: string | undefined;
+  setName: (name: string) => void;
+};
 
-const FleetTable = ({ fleetLoad }: { fleetLoad: FleetLoad }) => {
+const FleetTable = ({ name, setName, hasFiltersEnabled, getSortParams, fleetColumns, fleetLoad }: FleetTableProps) => {
   const { t } = useTranslation();
 
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
   const [fleetToDeleteId, setFleetToDeleteId] = React.useState<string>();
+  const [fleets, loading, error, isFilterUpdating, refetch] = fleetLoad;
 
-  const [fleetList, loading, error, refetch] = fleetLoad;
-  const columns = React.useMemo(() => getColumns(t), [t]);
-  const fleets = fleetList?.items || [];
-  const { search, setSearch, filteredData } = useTableTextSearch(fleets, getSearchText);
-  const { getSortParams, sortedData: sortedFleets } = useTableSort(filteredData, columns);
   const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
 
   return (
@@ -117,7 +117,7 @@ const FleetTable = ({ fleetLoad }: { fleetLoad: FleetLoad }) => {
         <ToolbarContent>
           <ToolbarGroup>
             <ToolbarItem variant="search-filter">
-              <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name')} />
+              <TableTextSearch value={name} setValue={setName} placeholder={t('Search by name')} />
             </ToolbarItem>
           </ToolbarGroup>
           <ToolbarItem>
@@ -134,15 +134,16 @@ const FleetTable = ({ fleetLoad }: { fleetLoad: FleetLoad }) => {
       </Toolbar>
       <Table
         aria-label={t('Fleets table')}
-        columns={columns}
-        emptyFilters={filteredData.length === 0}
+        loading={isFilterUpdating}
+        columns={fleetColumns}
+        emptyFilters={!hasFiltersEnabled}
         emptyData={fleets.length === 0}
         getSortParams={getSortParams}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
       >
         <Tbody>
-          {sortedFleets.map((fleet, rowIndex) => (
+          {fleets.map((fleet, rowIndex) => (
             <FleetRow
               key={getResourceId(fleet)}
               fleet={fleet}
@@ -171,7 +172,7 @@ const FleetTable = ({ fleetLoad }: { fleetLoad: FleetLoad }) => {
       {isMassDeleteModalOpen && (
         <MassDeleteFleetModal
           onClose={() => setIsMassDeleteModalOpen(false)}
-          fleets={sortedFleets.filter(isRowSelected)}
+          fleets={fleets.filter(isRowSelected)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
             refetch();
@@ -182,20 +183,30 @@ const FleetTable = ({ fleetLoad }: { fleetLoad: FleetLoad }) => {
   );
 };
 
-type FleetLoad = [FleetList | undefined, boolean, unknown, VoidFunction, boolean];
+type FleetLoad = [Fleet[], boolean, unknown, boolean, VoidFunction];
 
 const FleetsPage = () => {
   const { t } = useTranslation();
 
   // TODO move the fetch down to FleetTable when the API includes the filter for pending / errored resource syncs
-  const fleetLoad = useFetchPeriodically<FleetList>({ endpoint: 'fleets?addDevicesCount=true' });
+  const columns = React.useMemo(() => getColumns(t), [t]);
+  const { name, setName, hasFiltersEnabled } = useFleetBackendFilters();
+  const { getSortParams, sortField, direction } = useApiTableSort(columns);
+  const fleetLoad = useFleets({ name, addDevicesCount: true, sortField, direction });
 
   return (
     <>
-      <FleetResourceSyncs fleets={fleetLoad[0]?.items || []} />
+      <FleetResourceSyncs fleets={fleetLoad[0] || []} />
 
       <ListPage title={t('Fleets')}>
-        <FleetTable fleetLoad={fleetLoad} />
+        <FleetTable
+          name={name}
+          setName={setName}
+          hasFiltersEnabled={hasFiltersEnabled}
+          getSortParams={getSortParams}
+          fleetLoad={fleetLoad}
+          fleetColumns={columns}
+        />
       </ListPage>
     </>
   );
