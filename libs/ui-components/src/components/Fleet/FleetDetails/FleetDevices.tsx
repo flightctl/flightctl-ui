@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Grid, GridItem } from '@patternfly/react-core';
+import { Flex, FlexItem } from '@patternfly/react-core';
 
 import { DevicesSummary } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -92,23 +92,17 @@ const DevicesByDeviceStatusChart = ({
 
 const FleetDevices = ({ devicesSummary, fleetId }: FleetDevicesProps) => {
   return (
-    <Grid hasGutter>
-      {devicesSummary.applicationStatus && (
-        <GridItem md={6}>
-          <DevicesByAppStatusChart fleetId={fleetId} applicationStatus={devicesSummary.applicationStatus} />
-        </GridItem>
-      )}
-      {devicesSummary.summaryStatus && (
-        <GridItem md={6}>
-          <DevicesByDeviceStatusChart fleetId={fleetId} deviceStatus={devicesSummary.summaryStatus} />
-        </GridItem>
-      )}
-      {devicesSummary.updateStatus && (
-        <GridItem md={6}>
-          <DevicesByUpdateStatusChart fleetId={fleetId} updateStatus={devicesSummary.updateStatus} />
-        </GridItem>
-      )}
-    </Grid>
+    <Flex justifyContent={{ default: 'justifyContentSpaceAround' }}>
+      <FlexItem>
+        <DevicesByAppStatusChart fleetId={fleetId} applicationStatus={devicesSummary.applicationStatus} />
+      </FlexItem>
+      <FlexItem>
+        <DevicesByDeviceStatusChart fleetId={fleetId} deviceStatus={devicesSummary.summaryStatus} />
+      </FlexItem>
+      <FlexItem>
+        <DevicesByUpdateStatusChart fleetId={fleetId} updateStatus={devicesSummary.updateStatus} />
+      </FlexItem>
+    </Flex>
   );
 };
 
