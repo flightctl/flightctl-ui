@@ -40,20 +40,15 @@ const getDevicesEndpoint = ({
   if (nameOrAlias) {
     queryUtils.addTextContainsCondition(fieldSelectors, 'metadata.nameoralias', nameOrAlias);
   }
+  if (ownerFleets?.length) {
+    queryUtils.addQueryConditions(
+      fieldSelectors,
+      'metadata.owner',
+      ownerFleets.map((fleet) => `Fleet/${fleet}`),
+    );
+  }
 
   const params = new URLSearchParams();
-  if (ownerFleets?.length) {
-    if (summaryOnly) {
-      // TODO https://issues.redhat.com/browse/EDM-681 filtering not implemented for summaryOnly+field-selector
-      params.set('owner', ownerFleets.map((fleet) => `Fleet/${fleet}`).join(','));
-    } else {
-      queryUtils.addQueryConditions(
-        fieldSelectors,
-        'metadata.owner',
-        ownerFleets.map((fleet) => `Fleet/${fleet}`),
-      );
-    }
-  }
   if (fieldSelectors.length > 0) {
     params.set('fieldSelector', fieldSelectors.join(','));
   }
