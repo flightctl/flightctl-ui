@@ -1,0 +1,90 @@
+name: Release a new version
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+
+env:
+  NODE_OPTIONS: '--max-old-space-size=8192'
+
+jobs:
+  publish-to-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check workflow runs in a release branch
+        run: |
+          if [[ "${{ github.event.release.target_commitish }}" != *releases* ]]; then
+            echo "Expecting to be in a release branch, but we are in: ${{ github.event.release.target_commitish }}"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.release.target_commitish }}
+          fetch-depth: 0
+
+      - name: Lookup for workspaces to be published
+        run: |
+          declare -a LIBS=()
+          for pkg in libs/*/package.json; do
+            if [[ "$(jq '.publishConfig.access == "public"' "${pkg}")" = "true" ]]; then
+              LIBS+=("${pkg:5:-13}")
+            fi
+          done
+          echo "LIBS=${LIBS[@]}" >> $GITHUB_ENV
+          (IFS=,; printf 'The following workspaces will be published: [%s]\n' "${LIBS[*]}")
+
+      - name: Configuring git
+        run: |
+          git config user.name '${{ github.actor }}'
+          git config user.email '${{ github.actor }}@users.noreply.github.com'
+
+      - uses: actions/setup-node@v3
+        with:
+          cache: npm
+          node-version: ${{ vars.NODEJS_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bump workspaces to ${{ github.ref_name }}
+        run: |
+          for LIB in $(echo ${LIBS}); do
+            echo Bumping @flightctl/"${LIB}"
+            npm -w @flightctl/"${LIB}" version "${GITHUB_REF_NAME:1}"
+          done
+
+      - name: Build
+        run: npm run build:libs
+
+      - name: Publish workspaces to NPM
+        env:
+          NPM_TOKEN: ${{ secrets.NPMJS_FLIGHTCTL_RELEASE_TOKEN }}
+        run: |
+          npm config set @scope:registry //registry.npmjs.org/
+          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          for LIB in $(echo ${LIBS}); do
+            printf 'Publishing @flightctl/%s\n' "${LIB}"
+            npm -w @flightctl/${LIB} publish --access public
+            # Verify the package has been published before publishing another one.
+            until [[ "$(npm npm info @flightctl/${LIB} --fields version --json | jq -r '.version')" = "${GITHUB_REF_NAME:1}" ]]; do
+              printf '@flightctl/%s has not ben published yet\n' "${LIB}"
+              sleep ${{ vars.NPM_PUBLISH_DELAY }}
+              echo "Retrying..."
+            done
+          done
+
+      - name: Update the repo
+        run: |
+          git add package-lock.json
+          for LIB in $(echo ${LIBS}); do
+            git add libs/"${LIB}"/package.json
+          done
+          git commit -m "Version ${GITHUB_REF_NAME}"
+          git tag -f -a ${GITHUB_REF_NAME} -m "${GITHUB_REF_NAME}"
+          git push origin ${GITHUB_REF_NAME} --force
+          git push origin ${{ github.event.release.target_commitish }} --force
