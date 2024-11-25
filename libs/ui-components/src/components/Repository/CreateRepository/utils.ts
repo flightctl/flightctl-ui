@@ -139,19 +139,16 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
     originalValue: repository.spec.url,
     path: '/spec/url',
   });
-  appendJSONPatch({
-    patches,
-    newValue: values.repoType === RepoSpecType.HTTP ? values.validationSuffix : undefined,
-    originalValue:
-      repository.spec.type === RepoSpecType.HTTP ? (repository.spec as HttpRepoSpec).validationSuffix : undefined,
-    path: '/spec/validationSuffix',
-  });
 
   if (!values.useAdvancedConfig) {
     if (isHttpRepoSpec(repository.spec)) {
       patches.push({
         op: 'remove',
         path: '/spec/httpConfig',
+      });
+      patches.push({
+        op: 'remove',
+        path: '/spec/validationSuffix',
       });
     }
     if (isSshRepoSpec(repository.spec)) {
@@ -199,7 +196,20 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
         path: '/spec/httpConfig',
         value,
       });
+      appendJSONPatch({
+        patches,
+        newValue: values.validationSuffix,
+        originalValue: undefined,
+        path: '/spec/validationSuffix',
+      });
     } else {
+      appendJSONPatch({
+        patches,
+        newValue: values.repoType === RepoSpecType.HTTP ? values.validationSuffix : undefined,
+        originalValue: repository.spec.validationSuffix,
+        path: '/spec/validationSuffix',
+      });
+
       appendJSONPatch({
         patches,
         newValue: values.httpConfig?.skipServerVerification,
@@ -303,6 +313,12 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
         op: 'remove',
         path: '/spec/httpConfig',
       });
+      if (repository.spec.validationSuffix) {
+        patches.push({
+          op: 'remove',
+          path: '/spec/validationSuffix',
+        });
+      }
     }
     if (!isSshRepoSpec(repository.spec)) {
       const value: SshConfig = {
