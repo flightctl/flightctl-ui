@@ -125,7 +125,7 @@ export function useFctlNavigation() {
           path: ':deviceId/*',
           element: (
             <ScrollablePage>
-              <DeviceDetails />
+              <DeviceDetails hideTerminal />
             </ScrollablePage>
           ),
         },

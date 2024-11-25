@@ -16,7 +16,7 @@ import NavItem from '../../NavItem/NavItem';
 import DeviceStatusDebugModal from './DeviceStatusDebugModal';
 import { getDeviceFleet } from '../../../utils/devices';
 
-const DeviceDetailsPage = ({ children }: React.PropsWithChildren<Record<never, never>>) => {
+const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{ hideTerminal?: boolean }>) => {
   const { t } = useTranslation();
   const {
     router: { useParams, Routes, Route, Navigate },
@@ -98,7 +98,7 @@ const DeviceDetailsPage = ({ children }: React.PropsWithChildren<Record<never, n
               </DeviceDetailsTab>
             }
           />
-          <Route path="terminal" element={<TerminalTab device={device} />} />
+          {!hideTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
         </Routes>
       )}
       {deleteModal}
