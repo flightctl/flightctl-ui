@@ -7,6 +7,9 @@
     "target": "es5",
     "sourceMap": false,
     "lib": ["es5", "dom", "ES2015"],
-    "types": ["cypress"]
-  }
+    "types": ["cypress"],
+    "paths": {
+      "@flightctl/types": ["../types"],
+    },
+  },
 }

@@ -38,7 +38,7 @@ export type NavLinkFC = React.FC<{ to: string; children: (props: { isActive: boo
 export type PromptFC = React.FC<{ message: string }>;
 
 export type AppContextProps = {
-  appType: 'standalone' | 'ocp';
+  appType: 'standalone' | 'ocp' | 'aap';
   qcow2ImgUrl: string | undefined;
   bootcImgUrl: string | undefined;
   user?: string; // auth?.user?.profile.preferred_username

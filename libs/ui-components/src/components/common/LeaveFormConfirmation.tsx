@@ -79,10 +79,15 @@ const BrowserBlocker = ({ lock }: { lock: boolean }) => {
 const LeaveFormConfirmation = () => {
   const { dirty, isSubmitting } = useFormikContext();
   const {
+    appType,
     router: { useBlocker },
   } = useAppContext();
 
   const lock = !isSubmitting && dirty;
+
+  if (appType === 'aap') {
+    return null;
+  }
 
   // workaround for OCP plugin where useBlocker is not yet available due to older react-router-dom version
   return useBlocker ? <RouterBlocker lock={lock} /> : <BrowserBlocker lock={lock} />;

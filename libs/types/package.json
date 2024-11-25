@@ -5,10 +5,18 @@
   "repository": "https://github.com/flightctl/flightctl-ui.git",
   "homepage": "https://github.com/flightctl/flightctl-ui.git",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "exports": {
-    ".": "./index.ts"
+    ".": {
+      "source": "./index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
+  "files": [
+    "dist",
+    "index.ts"
+  ],
   "scripts": {
     "prebuild": "tsc --noEmit && rimraf dist",
     "build": "tsc --build",
