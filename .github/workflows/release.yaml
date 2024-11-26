@@ -71,7 +71,7 @@ jobs:
             printf 'Publishing @flightctl/%s\n' "${LIB}"
             npm -w @flightctl/${LIB} publish --access public
             # Verify the package has been published before publishing another one.
-            until [[ "$(npm npm info @flightctl/${LIB} --fields version --json | jq -r '.version')" = "${GITHUB_REF_NAME:1}" ]]; do
+            until [[ "$(npm show @flightctl/${LIB} --json | jq -r '.version')" = "${GITHUB_REF_NAME:1}" ]]; do
               printf '@flightctl/%s has not ben published yet\n' "${LIB}"
               sleep ${{ vars.NPM_PUBLISH_DELAY }}
               echo "Retrying..."
