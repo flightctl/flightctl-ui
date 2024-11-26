@@ -31,7 +31,7 @@ jobs:
         run: |
           declare -a LIBS=()
           for pkg in libs/*/package.json; do
-            if [[ "$(jq '.publishConfig.access == "public"' "${pkg}")" = "true" ]]; then
+            if [[ "$(jq '.private != true' "${pkg}")" = "true" ]]; then
               LIBS+=("${pkg:5:-13}")
             fi
           done
