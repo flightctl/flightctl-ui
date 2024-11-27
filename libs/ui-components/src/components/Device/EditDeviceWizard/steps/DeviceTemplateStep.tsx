@@ -8,8 +8,8 @@ import WithHelperText from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { DeviceSpecConfigFormValues } from '../types';
-import ConfigTemplateForm from './ConfigTemplateForm';
-import ApplicationsForm from './ApplicationsForm';
+import ConfigurationTemplates from './ConfigurationTemplates';
+import ApplicationsForm from './ApplicationTemplates';
 
 export const deviceTemplateStepId = 'device-template';
 
@@ -62,7 +62,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
           />
         </FormGroup>
         <FormGroup>
-          <ConfigTemplateForm />
+          <ConfigurationTemplates />
         </FormGroup>
         <FormGroup>
           <ApplicationsForm />

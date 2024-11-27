@@ -6,18 +6,17 @@ import { FieldArray, useField, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelectTypeahead from '../../../form/FormSelectTypeahead';
-import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import TextField from '../../../form/TextField';
 import UploadField from '../../../form/UploadField';
 import CheckboxField from '../../../form/CheckboxField';
+import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import { DeviceSpecConfigFormValues } from '../types';
 import { InlineConfigTemplate } from '../../../../types/deviceSpec';
-
 import { formatFileMode } from '../deviceSpecUtils';
 
 const MAX_INLINE_FILE_SIZE_BYTES = 1024 * 1024;
 
-const FileForm = ({ fieldName }: { fieldName: string }) => {
+const FileForm = ({ fieldName, index }: { fieldName: string; index: number }) => {
   const { t } = useTranslation();
   const [{ value: file }] = useField<InlineConfigTemplate['files'][0]>(fieldName);
 
@@ -41,7 +40,11 @@ const FileForm = ({ fieldName }: { fieldName: string }) => {
   );
 
   return (
-    <ExpandableFormSection title={t('File')} fieldName={fieldName} description={file.path}>
+    <ExpandableFormSection
+      title={t('File {{ fileNum }}', { fileNum: index + 1 })}
+      fieldName={fieldName}
+      description={file.path}
+    >
       <Grid hasGutter>
         <FormGroup label={t('File path on the device')} isRequired>
           <TextField name={`${fieldName}.path`} />
@@ -116,23 +119,21 @@ const ConfigInlineTemplateForm = ({ index }: ConfigInlineTemplateFormProps) => {
           {inlineConfig.files?.map((_, fileIndex) => {
             const fieldName = `configTemplates[${index}].files[${fileIndex}]`;
             return (
-              <FormSection key={fileIndex}>
-                <Split hasGutter>
-                  <SplitItem isFilled>
-                    <FileForm fieldName={fieldName} />
+              <Split key={fileIndex} hasGutter>
+                <SplitItem isFilled>
+                  <FileForm index={fileIndex} fieldName={fieldName} />
+                </SplitItem>
+                {inlineConfig.files.length > 1 && (
+                  <SplitItem>
+                    <Button
+                      variant="link"
+                      icon={<MinusCircleIcon />}
+                      iconPosition="start"
+                      onClick={() => remove(fileIndex)}
+                    />
                   </SplitItem>
-                  {inlineConfig.files.length > 1 && (
-                    <SplitItem>
-                      <Button
-                        variant="link"
-                        icon={<MinusCircleIcon />}
-                        iconPosition="start"
-                        onClick={() => remove(fileIndex)}
-                      />
-                    </SplitItem>
-                  )}
-                </Split>
-              </FormSection>
+                )}
+              </Split>
             );
           })}
           <FormSection>
