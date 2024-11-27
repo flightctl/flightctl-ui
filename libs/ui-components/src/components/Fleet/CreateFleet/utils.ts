@@ -6,12 +6,19 @@ import { API_VERSION } from '../../../constants';
 import { toAPILabel } from '../../../utils/labels';
 import {
   maxLengthString,
+  systemdUnitListValidationSchema,
   validApplicationsSchema,
   validConfigTemplatesSchema,
   validKubernetesDnsSubdomain,
   validLabelsSchema,
 } from '../../form/validations';
-import { appendJSONPatch, getApplicationPatches, getLabelPatches, toAPIApplication } from '../../../utils/patch';
+import {
+  appendJSONPatch,
+  getApplicationPatches,
+  getLabelPatches,
+  getStringListPatches,
+  toAPIApplication,
+} from '../../../utils/patch';
 import {
   getAPIConfig,
   getApplicationValues,
@@ -27,6 +34,7 @@ export const getValidationSchema = (t: TFunction) => {
     labels: validLabelsSchema(t),
     configTemplates: validConfigTemplatesSchema(t),
     applications: validApplicationsSchema(t),
+    systemdUnits: systemdUnitListValidationSchema(t),
   });
 };
 
@@ -105,34 +113,54 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
   );
   allPatches = allPatches.concat(appPatches);
 
+  // Systemd services
+  const unitPatches = getStringListPatches(
+    '/spec/template/spec/systemd',
+    currentFleet.spec.template.spec.systemd?.matchPatterns || [],
+    updatedFleet.systemdUnits.map((unit) => unit.pattern),
+    (list) => ({ matchPatterns: list }),
+  );
+  allPatches = allPatches.concat(unitPatches);
+
   return allPatches;
 };
 
-export const getFleetResource = (values: FleetFormValues): Fleet => ({
-  apiVersion: API_VERSION,
-  kind: 'Fleet',
-  metadata: {
-    name: values.name,
-    labels: toAPILabel(values.fleetLabels),
-  },
-  spec: {
-    selector: {
-      matchLabels: toAPILabel(values.labels),
+export const getFleetResource = (values: FleetFormValues): Fleet => {
+  const systemdPatterns =
+    values.systemdUnits.length === 0
+      ? undefined
+      : {
+          systemd: {
+            matchPatterns: values.systemdUnits.map((unit) => unit.pattern),
+          },
+        };
+  return {
+    apiVersion: API_VERSION,
+    kind: 'Fleet',
+    metadata: {
+      name: values.name,
+      labels: toAPILabel(values.fleetLabels),
     },
-    template: {
-      metadata: {
-        labels: {
-          fleet: values.name,
+    spec: {
+      selector: {
+        matchLabels: toAPILabel(values.labels),
+      },
+      template: {
+        metadata: {
+          labels: {
+            fleet: values.name,
+          },
+        },
+        spec: {
+          os: values.osImage ? { image: values.osImage || '' } : undefined,
+          config: values.configTemplates.map(getAPIConfig),
+          applications: values.applications.map(toAPIApplication),
+          ...systemdPatterns,
         },
       },
-      spec: {
-        os: values.osImage ? { image: values.osImage || '' } : undefined,
-        config: values.configTemplates.map(getAPIConfig),
-        applications: values.applications.map(toAPIApplication),
-      },
     },
-  },
-});
+  };
+};
 
 export const getInitialValues = (fleet?: Fleet): FleetFormValues =>
   fleet
@@ -149,6 +177,10 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues =>
         osImage: fleet.spec.template.spec.os?.image || '',
         configTemplates: getConfigTemplatesValues(fleet.spec.template.spec),
         applications: getApplicationValues(fleet.spec.template.spec),
+        systemdUnits: (fleet.spec.template.spec.systemd?.matchPatterns || []).map((p) => ({
+          pattern: p,
+          exists: true,
+        })),
       }
     : {
         name: '',
@@ -157,4 +189,5 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues =>
         osImage: '',
         configTemplates: [],
         applications: [],
+        systemdUnits: [],
       };

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  Alert,
   CardTitle,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -13,52 +12,35 @@ import {
   StackItem,
 } from '@patternfly/react-core';
 
-import { Device, TemplateVersion } from '@flightctl/types';
+import { Device } from '@flightctl/types';
 import { timeSinceText } from '../../../utils/dates';
-import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
 import DeviceStatus from '../../Status/DeviceStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
 import EditLabelsForm from '../../modals/EditLabelsModal/EditLabelsForm';
 import ResourceLink from '../../common/ResourceLink';
-import DeviceFleet from './DeviceFleet';
-import DeviceOs from './DeviceOs';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
-import SystemdTable from './SystemdTable';
 import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
-import { getErrorMessage } from '../../../utils/error';
 import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
 import WithHelperText from '../../common/WithHelperText';
 import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
 import DeviceResourceStatus from '../../Status/DeviceResourceStatus';
+import DeviceFleet from './DeviceFleet';
+import DeviceOs from './DeviceOs';
+import DeviceApplications from './DeviceApplications';
 
 import './DeviceDetailsTab.css';
 
 type DeviceDetailsTabProps = {
   device: Required<Device>;
   refetch: VoidFunction;
-  tv: TemplateVersion | undefined;
-  errorTv: unknown;
 };
 
-const DeviceDetailsTab = ({
-  device,
-  refetch,
-  tv,
-  errorTv,
-  children,
-}: React.PropsWithChildren<DeviceDetailsTabProps>) => {
+const DeviceDetailsTab = ({ device, refetch, children }: React.PropsWithChildren<DeviceDetailsTabProps>) => {
   const { t } = useTranslation();
 
   return (
     <Grid hasGutter>
-      {!!errorTv && (
-        <GridItem md={12}>
-          <Alert isInline variant="warning" title={t('Some device details could not be loaded.')}>
-            {getErrorMessage(errorTv)}
-          </Alert>
-        </GridItem>
-      )}
       <GridItem md={12}>
         <DetailsPageCard>
           <DetailsPageCardBody>
@@ -194,20 +176,7 @@ const DeviceDetailsTab = ({
         </DetailsPageCard>
       </GridItem>
       <GridItem md={12} lg={6}>
-        <DetailsPageCard>
-          <CardTitle>{t('Applications')}</CardTitle>
-          <DetailsPageCardBody>
-            <ApplicationsTable appsStatus={device.status.applications} />
-          </DetailsPageCardBody>
-        </DetailsPageCard>
-      </GridItem>
-      <GridItem md={12} lg={6}>
-        <DetailsPageCard>
-          <CardTitle>{t('System services')}</CardTitle>
-          <DetailsPageCardBody>
-            <SystemdTable device={device} templateVersion={tv} onSystemdUnitsUpdate={refetch} />
-          </DetailsPageCardBody>
-        </DetailsPageCard>
+        <DeviceApplications device={device} refetch={refetch} />
       </GridItem>
     </Grid>
   );

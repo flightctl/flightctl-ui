@@ -10,7 +10,6 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import DeviceDetailsTab from './DeviceDetailsTab';
-import { useTemplateVersion } from '../../../hooks/useTemplateVersion';
 import TerminalTab from './TerminalTab';
 import NavItem from '../../NavItem/NavItem';
 import DeviceStatusDebugModal from './DeviceStatusDebugModal';
@@ -24,8 +23,6 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
   const { deviceId } = useParams() as { deviceId: string };
   const [device, loading, error, refetch] = useFetchPeriodically<Required<Device>>({ endpoint: `devices/${deviceId}` });
   const [showDebugInfo, setShowDebugInfo] = React.useState<boolean>(false);
-
-  const [, /* useTv */ tv, loadingTv, errorTv] = useTemplateVersion(device);
 
   const navigate = useNavigate();
   const { remove } = useFetch();
@@ -51,7 +48,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
 
   return (
     <DetailsPage
-      loading={loading || loadingTv}
+      loading={loading}
       error={error}
       id={deviceId}
       title={deviceAlias}
@@ -93,7 +90,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
           <Route
             path="details"
             element={
-              <DeviceDetailsTab device={device} errorTv={errorTv} tv={tv} refetch={refetch}>
+              <DeviceDetailsTab device={device} refetch={refetch}>
                 {children}
               </DeviceDetailsTab>
             }

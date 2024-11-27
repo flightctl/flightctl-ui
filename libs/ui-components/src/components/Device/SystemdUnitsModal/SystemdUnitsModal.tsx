@@ -1,15 +1,16 @@
+import * as React from 'react';
+import { Formik } from 'formik';
 import { Modal } from '@patternfly/react-core';
 import { Device } from '@flightctl/types';
-import { Formik } from 'formik';
-import * as React from 'react';
-import MatchPatternsForm, { MatchPatternsFormValues } from './MatchPatternsForm';
+
 import { useFetch } from '../../../hooks/useFetch';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { getErrorMessage } from '../../../utils/error';
 import { getStringListPatches } from '../../../utils/patch';
-import { useTranslation } from '../../../hooks/useTranslation';
 import { deviceSystemdUnitsValidationSchema } from '../../form/validations';
+import TrackSystemdUnitsForm, { SystemdUnitFormValue, SystemdUnitsFormValues } from './TrackSystemdUnitsForm';
 
-type MatchPatternsModalProps = {
+type SystemdUnitsModalProps = {
   onClose: (reload?: boolean) => void;
   device: Device;
 };
@@ -22,41 +23,46 @@ type MatchPatternsModalProps = {
  * @param device FlightCtl device
  * @param onClose on close callback
  */
-const MatchPatternsModal: React.FC<MatchPatternsModalProps> = ({ onClose, device }) => {
+const SystemdUnitsModal: React.FC<SystemdUnitsModalProps> = ({ onClose, device }) => {
   const { t } = useTranslation();
   const { patch } = useFetch();
   const [error, setError] = React.useState<string>();
 
-  const currentPatterns = device.spec?.systemd?.matchPatterns || [];
+  const currentSystemdUnits: SystemdUnitFormValue[] = (device.spec?.systemd?.matchPatterns || []).map((p) => ({
+    pattern: p,
+    exists: true,
+  }));
   return (
-    <Modal title={t('Edit match patterns')} isOpen onClose={() => onClose()} variant="small">
-      <Formik<MatchPatternsFormValues>
+    <Modal title={t('Track systemd services')} isOpen onClose={() => onClose()} variant="small">
+      <Formik<SystemdUnitsFormValues>
         validationSchema={deviceSystemdUnitsValidationSchema(t)}
-        initialValues={{ matchPatterns: currentPatterns }}
-        onSubmit={async ({ matchPatterns: updatedPatterns }) => {
+        initialValues={{ systemdUnits: currentSystemdUnits }}
+        onSubmit={async ({ systemdUnits: updatedSystemdUnits }) => {
           try {
             const patternPatchBuilder = (value: string[]) => ({
               matchPatterns: value,
             });
             const patches = getStringListPatches(
               '/spec/systemd',
-              currentPatterns,
-              updatedPatterns,
+              currentSystemdUnits.map((p) => p.pattern),
+              updatedSystemdUnits.map((p) => p.pattern),
               patternPatchBuilder,
             );
             if (patches.length > 0) {
               await patch(`devices/${device.metadata.name}`, patches);
+              onClose(true);
+            } else {
+              onClose(false);
             }
-            onClose(true);
           } catch (err) {
             setError(getErrorMessage(err));
           }
         }}
       >
-        <MatchPatternsForm onClose={onClose} error={error} />
+        <TrackSystemdUnitsForm onClose={onClose} error={error} />
       </Formik>
     </Modal>
   );
 };
 
-export default MatchPatternsModal;
+export default SystemdUnitsModal;
