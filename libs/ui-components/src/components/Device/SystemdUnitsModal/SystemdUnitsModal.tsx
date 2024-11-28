@@ -11,7 +11,7 @@ import { deviceSystemdUnitsValidationSchema } from '../../form/validations';
 import TrackSystemdUnitsForm, { SystemdUnitFormValue, SystemdUnitsFormValues } from './TrackSystemdUnitsForm';
 
 type SystemdUnitsModalProps = {
-  onClose: (reload?: boolean) => void;
+  onClose: (hasChanges?: boolean, addedSystemdUnits?: string[]) => void;
   device: Device;
 };
 
@@ -32,6 +32,7 @@ const SystemdUnitsModal: React.FC<SystemdUnitsModalProps> = ({ onClose, device }
     pattern: p,
     exists: true,
   }));
+
   return (
     <Modal title={t('Track systemd services')} isOpen onClose={() => onClose()} variant="small">
       <Formik<SystemdUnitsFormValues>
@@ -39,20 +40,30 @@ const SystemdUnitsModal: React.FC<SystemdUnitsModalProps> = ({ onClose, device }
         initialValues={{ systemdUnits: currentSystemdUnits }}
         onSubmit={async ({ systemdUnits: updatedSystemdUnits }) => {
           try {
-            const patternPatchBuilder = (value: string[]) => ({
-              matchPatterns: value,
-            });
+            const currentPatterns = currentSystemdUnits.map((p) => p.pattern);
+            const updatedPatterns = updatedSystemdUnits.map((p) => p.pattern);
+
             const patches = getStringListPatches(
               '/spec/systemd',
-              currentSystemdUnits.map((p) => p.pattern),
-              updatedSystemdUnits.map((p) => p.pattern),
-              patternPatchBuilder,
+              currentPatterns,
+              updatedPatterns,
+              (value: string[]) => ({
+                matchPatterns: value,
+              }),
             );
             if (patches.length > 0) {
               await patch(`devices/${device.metadata.name}`, patches);
-              onClose(true);
+
+              const addedServices: string[] = [];
+              updatedPatterns.forEach((newSystemd) => {
+                if (!currentPatterns.includes(newSystemd)) {
+                  addedServices.push(newSystemd);
+                }
+              });
+
+              onClose(true, addedServices);
             } else {
-              onClose(false);
+              onClose();
             }
           } catch (err) {
             setError(getErrorMessage(err));

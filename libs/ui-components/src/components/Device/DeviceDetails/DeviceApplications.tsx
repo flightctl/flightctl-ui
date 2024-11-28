@@ -20,10 +20,19 @@ const DeviceApplications = ({ device, refetch }: React.PropsWithChildren<DeviceD
   const { patch } = useFetch();
   const [showSystemdModal, setShowSystemdModal] = React.useState<boolean>(false);
   const [isUpdating, setIsUpdating] = React.useState<boolean>(false);
+  const [addedSystemdDates, setAddedSystemdDates] = React.useState<Record<string, number>>({});
 
-  const onClose = (hasUpdated?: boolean) => {
-    if (hasUpdated) {
+  const onClose = (hasChanges?: boolean, addedUnits?: string[]) => {
+    if (hasChanges) {
       refetch();
+    }
+    if (addedUnits?.length) {
+      const allAddedUnitDates = { ...addedSystemdDates };
+      const addedDate = Date.now();
+      addedUnits.forEach((newUnit) => {
+        allAddedUnitDates[newUnit] = addedDate;
+      });
+      setAddedSystemdDates(allAddedUnitDates);
     }
     setShowSystemdModal(false);
   };
@@ -78,6 +87,7 @@ const DeviceApplications = ({ device, refetch }: React.PropsWithChildren<DeviceD
           systemdUnits={trackedSystemdUnits}
           onSystemdDelete={deleteSystemdUnit}
           isUpdating={isUpdating}
+          addedSystemdUnitDates={addedSystemdDates}
         />
         {showSystemdModal && <SystemdUnitsModal device={device} onClose={onClose} />}
       </DetailsPageCardBody>
