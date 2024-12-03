@@ -14,10 +14,9 @@ import {
 } from 'react-router-dom';
 import { useFetch } from './useFetch';
 import { useMetrics } from './useMetrics';
-import { DeviceImages, fetchImages } from '../utils/apiCalls';
 import { AuthContext } from '../context/AuthContext';
 
-const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics' | 'bootcImgUrl' | 'qcow2ImgUrl'> = {
+const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics'> = {
   appType: 'standalone',
   i18n: {
     transNamespace: undefined,
@@ -42,30 +41,8 @@ export const useStandaloneAppContext = (): AppContextProps => {
   const fetch = useFetch();
   const metrics = useMetrics();
 
-  const [deviceImages, setDeviceImages] = React.useState<DeviceImages>({
-    qcow2: '',
-    bootc: '',
-  });
-
-  React.useEffect(() => {
-    const getImages = async () => {
-      try {
-        const imgs = await fetchImages();
-        setDeviceImages(imgs);
-      } catch (err) {
-        // eslint-disable-next-line
-        console.warn('Failed to fetch device images');
-        // eslint-disable-next-line
-        console.error(err);
-      }
-    };
-    getImages();
-  }, []);
-
   return {
     ...standaloneAppContext,
-    bootcImgUrl: deviceImages.bootc,
-    qcow2ImgUrl: deviceImages.qcow2,
     user: username,
     fetch,
     metrics,

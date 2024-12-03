@@ -28,8 +28,6 @@ export const useValuesAppContext = (getCookie: GetCookie, serviceUrl: string | u
   return {
     appType: 'aap',
     user: '',
-    bootcImgUrl: undefined,
-    qcow2ImgUrl: undefined,
     router: {
       useNavigate,
       Link,
