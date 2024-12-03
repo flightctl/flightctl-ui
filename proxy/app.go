@@ -41,7 +41,6 @@ func main() {
 
 	terminalBridge := bridge.TerminalBridge{TlsConfig: tlsConfig, Log: log}
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
-	apiRouter.HandleFunc("/device-images", bridge.HandleDeviceImages)
 
 	if config.OcpPlugin != "true" {
 		oidcTlsConfig, err := bridge.GetOIDCTlsConfig()
