@@ -10,6 +10,7 @@ export type DeviceSpecConfigFormValues = {
   osImage?: string;
   configTemplates: SpecConfigTemplate[];
   applications: ApplicationFormSpec[];
+  registerMicroShift: boolean;
 };
 
 export type EditDeviceFormValues = DeviceSpecConfigFormValues & {
