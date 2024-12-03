@@ -20,9 +20,6 @@ import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import ListPageBody from '../ListPage/ListPageBody';
 import ListPage from '../ListPage/ListPage';
 import { getLastTransitionTimeText, getRepositorySyncStatus } from '../../utils/status/repository';
-import { useTableSort } from '../../hooks/useTableSort';
-import { sortByName } from '../../utils/sort/generic';
-import * as repoSort from '../../utils/sort/repository';
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import DeleteRepositoryModal from './RepositoryDetails/DeleteRepositoryModal';
 import TableTextSearch from '../Table/TableTextSearch';
@@ -71,23 +68,18 @@ const RepositoryEmptyState = () => {
 const getColumns = (t: TFunction): TableColumn<Repository>[] => [
   {
     name: t('Name'),
-    onSort: sortByName,
   },
   {
     name: t('Type'),
-    onSort: repoSort.sortRepositoriesByType,
   },
   {
     name: t('Url'),
-    onSort: repoSort.sortRepositoriesByUrl,
   },
   {
     name: t('Sync status'),
-    onSort: repoSort.sortRepositoriesBySyncStatus,
   },
   {
     name: t('Last transition'),
-    onSort: repoSort.sortRepositoriesByLastTransition,
   },
 ];
 
@@ -95,7 +87,9 @@ const getSearchText = (repo: Repository) => [repo.metadata.name];
 
 const RepositoryTable = () => {
   const { t } = useTranslation();
-  const [repositoryList, loading, error, refetch] = useFetchPeriodically<RepositoryList>({ endpoint: 'repositories' });
+  const [repositoryList, loading, error, refetch] = useFetchPeriodically<RepositoryList>({
+    endpoint: 'repositories?sortBy=metadata.name&sortOrder=Asc',
+  });
   const [deleteModalRepoId, setDeleteModalRepoId] = React.useState<string>();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
 
@@ -107,9 +101,7 @@ const RepositoryTable = () => {
   };
 
   const { search, setSearch, filteredData } = useTableTextSearch(repositoryList?.items || [], getSearchText);
-
   const columns = React.useMemo(() => getColumns(t), [t]);
-  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
@@ -142,10 +134,9 @@ const RepositoryTable = () => {
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
         columns={columns}
-        getSortParams={getSortParams}
       >
         <Tbody>
-          {sortedData.map((repository, rowIndex) => (
+          {filteredData.map((repository, rowIndex) => (
             <Tr key={repository.metadata.name}>
               <Td
                 select={{
@@ -198,7 +189,7 @@ const RepositoryTable = () => {
             setIsMassDeleteModalOpen(false);
             refetch();
           }}
-          repositories={sortedData.filter(isRowSelected)}
+          repositories={filteredData.filter(isRowSelected)}
         />
       )}
     </ListPageBody>

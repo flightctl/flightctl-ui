@@ -43,7 +43,7 @@ const StatusCard = () => {
 
   // TODO https://issues.redhat.com/browse/EDM-683 Use the new API endpoint to retrieve fleet names
   const [fleetsList, flLoading, flError] = useFetchPeriodically<FleetList>({
-    endpoint: 'fleets',
+    endpoint: 'fleets?sortBy=metadata.name&sortOrder=Asc',
   });
 
   let content: React.ReactNode;

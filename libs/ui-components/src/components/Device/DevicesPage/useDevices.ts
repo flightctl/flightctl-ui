@@ -14,20 +14,10 @@ type DevicesEndpointArgs = {
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
-  sortField?: string;
-  direction?: string;
   summaryOnly?: boolean;
 };
 
-const getDevicesEndpoint = ({
-  nameOrAlias,
-  ownerFleets,
-  activeStatuses,
-  labels,
-  sortField,
-  direction,
-  summaryOnly,
-}: DevicesEndpointArgs) => {
+const getDevicesEndpoint = ({ nameOrAlias, ownerFleets, activeStatuses, labels, summaryOnly }: DevicesEndpointArgs) => {
   const filterByAppStatus = activeStatuses?.[FilterSearchParams.AppStatus];
   const filterByDevStatus = activeStatuses?.[FilterSearchParams.DeviceStatus];
   const filterByUpdateStatus = activeStatuses?.[FilterSearchParams.UpdatedStatus];
@@ -48,7 +38,10 @@ const getDevicesEndpoint = ({
     );
   }
 
-  const params = new URLSearchParams();
+  const params = new URLSearchParams({
+    sortBy: 'metadata.name',
+    sortOrder: SortOrder.ASC,
+  });
   if (fieldSelectors.length > 0) {
     params.set('fieldSelector', fieldSelectors.join(','));
   }
@@ -56,11 +49,7 @@ const getDevicesEndpoint = ({
   if (summaryOnly) {
     params.set('summaryOnly', 'true');
   }
-  if (sortField) {
-    params.set('sortBy', sortField);
-    params.set('sortOrder', direction || SortOrder.ASC);
-  }
-  return params.size ? `devices?${params.toString()}` : 'devices';
+  return `devices?${params.toString()}`;
 };
 
 export const useDevicesEndpoint = (args: DevicesEndpointArgs): [string, boolean] => {
@@ -89,11 +78,9 @@ export const useDevices = (args: {
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
-  sortField?: string;
-  direction?: string;
 }): [Device[], boolean, unknown, boolean, VoidFunction, FlightCtlLabel[]] => {
   const [deviceLabelList] = useFetchPeriodically<DeviceList>({
-    endpoint: 'devices',
+    endpoint: 'devices?sortBy=metadata.name&sortOrder=Asc',
   });
   const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint(args);
   const [devicesList, devicesLoading, devicesError, devicesRefetch, updating] = useFetchPeriodically<DeviceList>({

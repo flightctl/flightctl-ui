@@ -21,7 +21,6 @@ import { DeviceSpecConfigFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';
-import { sortByName } from '../../../../utils/sort/generic';
 import WithHelperText from '../../../common/WithHelperText';
 import { getDnsSubdomainValidations } from '../../../form/validations';
 import ErrorHelperText from '../../../form/FieldHelperText';
@@ -158,10 +157,10 @@ const ConfigurationTemplatesForm = ({ repositories, repoRefetch }: ConfigSection
 
 const ConfigurationTemplates = () => {
   const [repositoryList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>({
-    endpoint: 'repositories',
+    endpoint: 'repositories?sortBy=metadata.name&sortOrder=Asc',
   });
 
-  const repositories = React.useMemo(() => sortByName(repositoryList?.items || []), [repositoryList]);
+  const repositories = repositoryList?.items || [];
 
   const { t } = useTranslation();
 

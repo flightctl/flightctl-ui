@@ -111,7 +111,9 @@ const ResourceSyncErrorAlert = ({ rs, refetch }: { rs: ResourceSync; refetch: Vo
 const FleetResourceSyncs = ({ fleets }: { fleets: Fleet[] }) => {
   const { t } = useTranslation();
 
-  const [rsList, , , rsRefetch] = useFetchPeriodically<ResourceSyncList>({ endpoint: 'resourcesyncs' });
+  const [rsList, , , rsRefetch] = useFetchPeriodically<ResourceSyncList>({
+    endpoint: 'resourcesyncs?sortBy=metadata.name&sortOrder=Asc',
+  });
 
   // TODO Remove the client-side filtering once the API filter is available
   const pendingResourceSyncs = React.useMemo(
