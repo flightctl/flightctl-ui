@@ -14,7 +14,6 @@ import { useFetch } from '../../../hooks/useFetch';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { useTableSelect } from '../../../hooks/useTableSelect';
-import { useApiTableSort } from '../../../hooks/useApiTableSort';
 import { useTableTextSearch } from '../../../hooks/useTableTextSearch';
 
 import ApproveDeviceModal from '../../modals/ApproveDeviceModal/ApproveDeviceModal';
@@ -26,12 +25,9 @@ import EnrollmentRequestTableToolbar from './EnrollmentRequestTableToolbar';
 const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
   {
     name: t('Name'),
-    sortableField: 'metadata.name',
-    defaultSort: true,
   },
   {
     name: t('Created'),
-    sortableField: 'metadata.creationTimestamp',
   },
 ];
 
@@ -41,10 +37,9 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
   const { t } = useTranslation();
   const { remove } = useFetch();
   const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
-  const { getSortParams, sortField, direction } = useApiTableSort(enrollmentColumns);
 
   const [erList, isLoading, error, refetch] = useFetchPeriodically<EnrollmentRequestListType>({
-    endpoint: `enrollmentrequests?fieldSelector=!status.approval.approved${sortField ? `&sortBy=${sortField}&sortOrder=${direction}` : ''}`,
+    endpoint: 'enrollmentrequests?fieldSelector=!status.approval.approved&sortBy=metadata.name&sortOrderAsc',
   });
   const pendingEnrollments = erList?.items || [];
 
@@ -98,7 +93,6 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
           columns={enrollmentColumns}
           emptyFilters={filteredData.length === 0}
           emptyData={false}
-          getSortParams={getSortParams}
           isAllSelected={isAllSelected}
           onSelectAll={setAllSelected}
         >

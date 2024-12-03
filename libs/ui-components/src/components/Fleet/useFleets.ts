@@ -12,8 +12,6 @@ export enum FleetSearchParams {
 type FleetsEndpointArgs = {
   name?: string;
   addDevicesCount?: boolean;
-  sortField?: string;
-  direction?: string;
 };
 
 export const useFleetBackendFilters = () => {
@@ -44,30 +42,18 @@ export const useFleetBackendFilters = () => {
   };
 };
 
-const getFleetsEndpoint = ({
-  addDevicesCount,
-  name,
-  sortField,
-  direction,
-}: {
-  addDevicesCount?: boolean;
-  name?: string;
-  sortField?: string;
-  direction?: string;
-}) => {
-  const params = new URLSearchParams();
+const getFleetsEndpoint = ({ addDevicesCount, name }: { addDevicesCount?: boolean; name?: string }) => {
+  const params = new URLSearchParams({
+    sortBy: 'metadata.name',
+    sortOrder: SortOrder.ASC,
+  });
   if (name) {
     params.set('fieldSelector', `metadata.name contains ${name}`);
   }
   if (addDevicesCount) {
     params.set('addDevicesCount', 'true');
   }
-
-  if (sortField) {
-    params.set('sortBy', sortField);
-    params.set('sortOrder', direction || SortOrder.ASC);
-  }
-  return params.size ? `fleets?${params.toString()}` : 'fleets';
+  return `fleets?${params.toString()}`;
 };
 
 const useFleetsEndpoint = (args: FleetsEndpointArgs): [string, boolean] => {

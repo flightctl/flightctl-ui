@@ -13,7 +13,7 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { Tbody, ThProps } from '@patternfly/react-table';
+import { Tbody } from '@patternfly/react-table';
 import { TopologyIcon } from '@patternfly/react-icons/dist/js/icons/topology-icon';
 import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
@@ -33,7 +33,6 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import DeleteFleetModal from './DeleteFleetModal/DeleteFleetModal';
 import FleetResourceSyncs from './FleetResourceSyncs';
-import { useApiTableSort } from '../../hooks/useApiTableSort';
 import { useFleetBackendFilters, useFleets } from './useFleets';
 
 const FleetPageActions = ({ createText }: { createText?: string }) => {
@@ -78,12 +77,9 @@ const FleetEmptyState = () => {
 const getColumns = (t: TFunction): ApiSortTableColumn[] => [
   {
     name: t('Name'),
-    sortableField: 'metadata.name',
-    defaultSort: true,
   },
   {
     name: t('System image'),
-    sortableField: 'spec.template.spec.os.image',
   },
   {
     name: t('Devices'),
@@ -96,13 +92,13 @@ const getColumns = (t: TFunction): ApiSortTableColumn[] => [
 type FleetTableProps = {
   fleetColumns: ApiSortTableColumn[];
   fleetLoad: FleetLoad;
-  getSortParams: (columnIndex: number) => ThProps['sort'];
+  // getSortParams: (columnIndex: number) => ThProps['sort'];
   hasFiltersEnabled: boolean;
   name: string | undefined;
   setName: (name: string) => void;
 };
 
-const FleetTable = ({ name, setName, hasFiltersEnabled, getSortParams, fleetColumns, fleetLoad }: FleetTableProps) => {
+const FleetTable = ({ name, setName, hasFiltersEnabled, fleetColumns, fleetLoad }: FleetTableProps) => {
   const { t } = useTranslation();
 
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
@@ -138,7 +134,6 @@ const FleetTable = ({ name, setName, hasFiltersEnabled, getSortParams, fleetColu
         columns={fleetColumns}
         emptyFilters={!hasFiltersEnabled}
         emptyData={fleets.length === 0}
-        getSortParams={getSortParams}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
       >
@@ -191,8 +186,7 @@ const FleetsPage = () => {
   // TODO move the fetch down to FleetTable when the API includes the filter for pending / errored resource syncs
   const columns = React.useMemo(() => getColumns(t), [t]);
   const { name, setName, hasFiltersEnabled } = useFleetBackendFilters();
-  const { getSortParams, sortField, direction } = useApiTableSort(columns);
-  const fleetLoad = useFleets({ name, addDevicesCount: true, sortField, direction });
+  const fleetLoad = useFleets({ name, addDevicesCount: true });
 
   return (
     <>
@@ -203,7 +197,6 @@ const FleetsPage = () => {
           name={name}
           setName={setName}
           hasFiltersEnabled={hasFiltersEnabled}
-          getSortParams={getSortParams}
           fleetLoad={fleetLoad}
           fleetColumns={columns}
         />

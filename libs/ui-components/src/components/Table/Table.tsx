@@ -31,7 +31,7 @@ type TableProps<D> = {
   emptyFilters?: boolean;
   emptyData?: boolean;
   'aria-label': string;
-  getSortParams: (columnIndex: number) => ThProps['sort'];
+  // getSortParams: (columnIndex: number) => ThProps['sort'];
   onSelectAll?: (isSelected: boolean) => void;
   isAllSelected?: boolean;
 };
@@ -44,7 +44,6 @@ const Table: TableFC = ({
   loading,
   emptyFilters,
   emptyData,
-  getSortParams,
   onSelectAll,
   isAllSelected,
   ...rest
@@ -72,8 +71,8 @@ const Table: TableFC = ({
               }}
             />
           )}
-          {columns.map((c, index) => (
-            <Th key={c.name} sort={getSortParams(index)} {...c.thProps}>
+          {columns.map((c) => (
+            <Th key={c.name} {...c.thProps}>
               {c.helperText ? (
                 <WithHelperText ariaLabel={c.name} showLabel content={c.helperText} triggerAction="hover" />
               ) : (

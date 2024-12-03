@@ -8,7 +8,7 @@ import {
   PageSectionVariants,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { Tbody, ThProps } from '@patternfly/react-table';
+import { Tbody } from '@patternfly/react-table';
 import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons/microchip-icon';
 import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
@@ -39,7 +39,6 @@ import {
 import EnrollmentRequestList from './EnrollmentRequestList';
 import { FilterStatusMap } from './types';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { useApiTableSort } from '../../../hooks/useApiTableSort';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -67,36 +66,27 @@ const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => {
 const getDeviceColumns = (t: TFunction): ApiSortTableColumn[] => [
   {
     name: t('Alias'),
-    // Sorting works on this field even though "alias" is actually a label
-    sortableField: 'metadata.alias',
   },
   {
     name: t('Name'),
-    sortableField: 'metadata.name',
   },
   {
     name: t('Fleet'),
-    sortableField: 'metadata.owner',
   },
   {
     name: t('Application status'),
     helperText: getApplicationStatusHelperText(t),
-    sortableField: 'status.applicationsSummary.status',
   },
   {
     name: t('Device status'),
     helperText: getDeviceStatusHelperText(t),
-    sortableField: 'status.summary.status',
-    defaultSort: true,
   },
   {
     name: t('Update status'),
     helperText: getUpdateStatusHelperText(t),
-    sortableField: 'status.updated.status',
   },
   {
     name: t('Last seen'),
-    sortableField: 'status.lastSeen',
   },
 ];
 
@@ -116,7 +106,7 @@ interface DeviceTableProps {
   fleets: Fleet[];
   isFilterUpdating: boolean;
   deviceColumns: ApiSortTableColumn[];
-  getSortParams: (columnIndex: number) => ThProps['sort'];
+  // getSortParams: (columnIndex: number) => ThProps['sort'];
 }
 
 export const DeviceTable = ({
@@ -135,7 +125,6 @@ export const DeviceTable = ({
   fleets,
   isFilterUpdating,
   deviceColumns,
-  getSortParams,
 }: DeviceTableProps) => {
   const { t } = useTranslation();
   const [addDeviceModal, setAddDeviceModal] = React.useState(false);
@@ -182,7 +171,6 @@ export const DeviceTable = ({
         columns={deviceColumns}
         emptyFilters={!hasFiltersEnabled}
         emptyData={devices.length === 0}
-        getSortParams={getSortParams}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
       >
@@ -231,19 +219,15 @@ const DevicesPage = () => {
     selectedLabels,
     setSelectedLabels,
   } = useDeviceBackendFilters();
-  const { getSortParams, sortField, direction } = useApiTableSort(deviceColumns);
-
   const [data, loading, error, updating, refetch, allLabels] = useDevices({
     nameOrAlias,
     ownerFleets,
     activeStatuses,
     labels: selectedLabels,
-    sortField,
-    direction,
   });
 
   const [fleetsList, flLoading, flError] = useFetchPeriodically<FleetList>({
-    endpoint: 'fleets',
+    endpoint: 'fleets?sortBy=metadata.name&sortOrder=Asc',
   });
 
   return (
@@ -268,7 +252,6 @@ const DevicesPage = () => {
             fleets={fleetsList?.items || []}
             isFilterUpdating={updating}
             deviceColumns={deviceColumns}
-            getSortParams={getSortParams}
           />
         </ListPageBody>
       </ListPage>

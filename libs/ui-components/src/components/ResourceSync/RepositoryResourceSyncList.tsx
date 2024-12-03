@@ -24,14 +24,6 @@ import { useFetch } from '../../hooks/useFetch';
 import { ResourceSync, ResourceSyncList } from '@flightctl/types';
 import { getObservedHash } from '../../utils/status/repository';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
-import { useTableSort } from '../../hooks/useTableSort';
-import { sortByName } from '../../utils/sort/generic';
-import {
-  sortResourceSyncsByHash,
-  sortResourceSyncsByPath,
-  sortResourceSyncsByRevision,
-  sortResourceSyncsByStatus,
-} from '../../utils/sort/resourceSync';
 import Table, { TableColumn } from '../Table/Table';
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import TableTextSearch from '../Table/TableTextSearch';
@@ -60,23 +52,18 @@ import './RepositoryResourceSyncList.css';
 const getColumns = (t: TFunction): TableColumn<ResourceSync>[] => [
   {
     name: t('Name'),
-    onSort: sortByName,
   },
   {
     name: t('Path'),
-    onSort: sortResourceSyncsByPath,
   },
   {
     name: t('Target revision'),
-    onSort: sortResourceSyncsByRevision,
   },
   {
     name: t('Status'),
-    onSort: sortResourceSyncsByStatus,
   },
   {
     name: t('Observed hash'),
-    onSort: sortResourceSyncsByHash,
   },
 ];
 
@@ -177,7 +164,7 @@ const CreateResourceSyncModal = ({
 
 const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) => {
   const [rsList, isLoading, error, refetch] = useFetchPeriodically<ResourceSyncList>({
-    endpoint: `resourcesyncs?fieldSelector=spec.repository=${repositoryId}`,
+    endpoint: `resourcesyncs?fieldSelector=spec.repository=${repositoryId}&sortBy=metadata.name&sortOrder=Asc`,
   });
 
   const resourceSyncs = rsList?.items || [];
@@ -203,7 +190,6 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
   const { filteredData, search, setSearch } = useTableTextSearch(resourceSyncs, getSearchText);
 
   const columns = React.useMemo(() => getColumns(t), [t]);
-  const { getSortParams, sortedData } = useTableSort(filteredData, columns);
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
@@ -255,10 +241,9 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
         columns={columns}
         emptyFilters={filteredData.length === 0}
         emptyData={resourceSyncs.length === 0}
-        getSortParams={getSortParams}
       >
         <Tbody>
-          {sortedData.map((resourceSync, rowIndex) => {
+          {filteredData.map((resourceSync, rowIndex) => {
             const rsName = resourceSync.metadata.name as string;
             const rsRef = rsRefs[rsName];
             const isSelected = rsName === selectedRs;
@@ -297,7 +282,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
       {isMassDeleteModalOpen && (
         <MassDeleteResourceSyncModal
           onClose={() => setIsMassDeleteModalOpen(false)}
-          resources={sortedData.filter(isRowSelected)}
+          resources={filteredData.filter(isRowSelected)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
             refetch();
