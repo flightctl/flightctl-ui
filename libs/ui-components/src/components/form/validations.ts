@@ -16,6 +16,7 @@ import {
 } from '../../types/deviceSpec';
 import { labelToString } from '../../utils/labels';
 import { ApplicationFormSpec } from '../Device/EditDeviceWizard/types';
+import { SystemdUnitFormValue } from '../Device/SystemdUnitsModal/TrackSystemdUnitsForm';
 
 type UnvalidatedLabel = Partial<FlightCtlLabel>;
 
@@ -345,33 +346,47 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
       }),
     );
 
-export const deviceSystemdUnitsValidationSchema = (t: TFunction) =>
-  Yup.object({
-    matchPatterns: Yup.array()
-      .max(
-        SYSTEMD_UNITS_MAX_PATTERNS,
-        t('The maximum number of systemd units is {{maxSystemUnits}}.', { maxSystemUnits: SYSTEMD_UNITS_MAX_PATTERNS }),
-      )
-      .of(Yup.string().required('Unit name is required.'))
-      .test('invalid patterns', (patterns: string[] | undefined, testContext) => {
-        // TODO analyze https://github.com/systemd/systemd/blob/9cebda59e818cdb89dc1e53ab5bb51b91b3dc3ff/src/basic/unit-name.c#L42
-        // and adjust the regular expression and / or the validation to accommodate for it
-        const invalidPatterns = (patterns || []).filter((pattern) => {
+export const systemdUnitListValidationSchema = (t: TFunction) =>
+  Yup.array()
+    .max(
+      SYSTEMD_UNITS_MAX_PATTERNS,
+      t('The maximum number of systemd units is {{maxSystemUnits}}.', { maxSystemUnits: SYSTEMD_UNITS_MAX_PATTERNS }),
+    )
+    .of(
+      Yup.object<SystemdUnitFormValue>().shape({
+        pattern: Yup.string().required('Service name is required'),
+        exists: Yup.boolean().required(),
+      }),
+    )
+    .test('invalid patterns', (systemdUnits: SystemdUnitFormValue[] | undefined, testContext) => {
+      // TODO analyze https://github.com/systemd/systemd/blob/9cebda59e818cdb89dc1e53ab5bb51b91b3dc3ff/src/basic/unit-name.c#L42
+      // and adjust the regular expression and / or the validation to accommodate for it
+      const invalidSystemdUnits = (systemdUnits || [])
+        .map((unit) => unit.pattern)
+        .filter((pattern) => {
           return pattern.length > SYSTEMD_UNITS_MAX_PATTERNS || !SYSTEMD_PATTERNS_REGEXP.test(pattern);
         });
-        if (invalidPatterns.length === 0) {
-          return true;
-        }
-        return testContext.createError({
-          message: t('Invalid systemd unit names: {{invalidPatterns}}', {
-            invalidPatterns: invalidPatterns.join(', '),
-          }),
-        });
-      })
-      .test('unique patterns', t('Systemd unit names must be unique'), (patterns: string[] | undefined) => {
-        const uniqueKeys = new Set(patterns || []);
+      if (invalidSystemdUnits.length === 0) {
+        return true;
+      }
+      return testContext.createError({
+        message: t('Invalid systemd service names: {{invalidPatterns}}', {
+          invalidPatterns: invalidSystemdUnits.join(', '),
+        }),
+      });
+    })
+    .test(
+      'unique patterns',
+      t('Systemd service names must be unique'),
+      (patterns: SystemdUnitFormValue[] | undefined) => {
+        const uniqueKeys = new Set(patterns?.map((p) => p.pattern) || []);
         return uniqueKeys.size === (patterns?.length || 0);
-      }),
+      },
+    );
+
+export const deviceSystemdUnitsValidationSchema = (t: TFunction) =>
+  Yup.object({
+    systemdUnits: systemdUnitListValidationSchema(t),
   });
 
 export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDevice: boolean }) =>

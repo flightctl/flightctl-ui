@@ -73,6 +73,7 @@ const EditDeviceWizard = () => {
           configTemplates: getConfigTemplatesValues(device.spec),
           fleetMatch: '', // Initially this is always a fleetless device
           applications: getApplicationValues(device.spec),
+          systemdUnits: [],
         }}
         validationSchema={getValidationSchema(t)}
         validateOnMount

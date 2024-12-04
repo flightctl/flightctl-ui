@@ -1,6 +1,7 @@
 import { ApplicationSpec } from '@flightctl/types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { SpecConfigTemplate } from '../../../types/deviceSpec';
+import { SystemdUnitFormValue } from '../SystemdUnitsModal/TrackSystemdUnitsForm';
 
 export type ApplicationFormSpec = Omit<ApplicationSpec, 'envVars'> & {
   variables: { name: string; value: string }[];
@@ -10,6 +11,7 @@ export type DeviceSpecConfigFormValues = {
   osImage?: string;
   configTemplates: SpecConfigTemplate[];
   applications: ApplicationFormSpec[];
+  systemdUnits: SystemdUnitFormValue[];
 };
 
 export type EditDeviceFormValues = DeviceSpecConfigFormValues & {

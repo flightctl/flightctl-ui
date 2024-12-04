@@ -10,12 +10,12 @@ import FlightCtlForm from '../../../form/FlightCtlForm';
 import { DeviceSpecConfigFormValues } from '../types';
 import ConfigurationTemplates from './ConfigurationTemplates';
 import ApplicationsForm from './ApplicationTemplates';
+import SystemdUnitsForm from './SystemdUnitsForm';
 
 export const deviceTemplateStepId = 'device-template';
 
-export const isDeviceTemplateStepValid = (errors: FormikErrors<DeviceSpecConfigFormValues>) => {
-  return !errors.osImage && !errors.configTemplates && !errors.applications;
-};
+export const isDeviceTemplateStepValid = (errors: FormikErrors<DeviceSpecConfigFormValues>) =>
+  !errors.osImage && !errors.configTemplates && !errors.applications && !errors.systemdUnits;
 
 const templateOption1 = '{{ device.metadata.labels[key] }}';
 const templateOption2 = '{{ device.metadata.name }}';
@@ -67,6 +67,11 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
         <FormGroup>
           <ApplicationsForm />
         </FormGroup>
+        {isFleet && (
+          <FormGroup label={t('Tracked systemd services')}>
+            <SystemdUnitsForm />
+          </FormGroup>
+        )}
       </FlightCtlForm>
     </Grid>
   );

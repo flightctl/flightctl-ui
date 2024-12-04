@@ -18,6 +18,7 @@ import RepositorySourceList from '../../../Repository/RepositoryDetails/Reposito
 import { getErrorMessage } from '../../../../utils/error';
 import { getAPIConfig } from '../../../Device/EditDeviceWizard/deviceSpecUtils';
 import ReviewApplications from '../../../Device/EditDeviceWizard/steps/ReviewApplications';
+import ReviewTrackedSystemdServices from '../../../Device/EditDeviceWizard/steps/ReviewTrackedSystemdServices';
 
 export const reviewStepId = 'review';
 
@@ -65,6 +66,12 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
             <DescriptionListTerm>{t('Applications')}</DescriptionListTerm>
             <DescriptionListDescription>
               <ReviewApplications apps={values.applications} />
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Tracked systemd services')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              <ReviewTrackedSystemdServices systemdUnits={values.systemdUnits} />
             </DescriptionListDescription>
           </DescriptionListGroup>
         </FlightControlDescriptionList>

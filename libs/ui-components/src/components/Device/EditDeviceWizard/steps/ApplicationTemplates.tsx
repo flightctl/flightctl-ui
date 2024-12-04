@@ -39,6 +39,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
                     variant="link"
                     isInline
                     icon={<ExternalLinkAltIcon />}
+                    iconPosition="end"
                     target="_blank"
                     rel="noopener noreferrer"
                     href="https://github.com/flightctl/flightctl/blob/main/docs/user/managing-devices.md#creating-applications"
@@ -59,7 +60,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
             <WithHelperText
               ariaLabel={t('Application name')}
               content={t(
-                'Required when other applications use the same image. If left blank, the image will be used as name. ',
+                'The image name will be used instead of when application name is not specified. Application name must be unique.',
               )}
               showLabel
             />
@@ -131,7 +132,7 @@ const ApplicationTemplates = () => {
     <FormGroup
       label={
         <WithHelperText
-          ariaLabel={t('Applications')}
+          ariaLabel={t('Application workloads')}
           content={t('Define the application workloads that shall run on the device.')}
           showLabel
         />

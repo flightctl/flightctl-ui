@@ -182,8 +182,10 @@ const ConfigurationTemplates = () => {
     <FormGroup
       label={
         <WithHelperText
-          ariaLabel={t('Configurations')}
-          content={t("Define configuration files that shall be present on the device's file system.")}
+          ariaLabel={t('Host configurations (files)')}
+          content={t(
+            "Define configuration files that shall be present on the device's file system. For example: systemd service config, network config, firewall config, etc.",
+          )}
           showLabel
         />
       }

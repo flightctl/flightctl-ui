@@ -1,0 +1,7 @@
+.fctl-applications-table__row .pf-v5-c-button {
+  visibility: hidden;
+}
+
+.fctl-applications-table__row:hover .pf-v5-c-button {
+  visibility: visible;
+}
