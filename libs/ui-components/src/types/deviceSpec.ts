@@ -1,6 +1,7 @@
 import {
   ConfigProviderSpec,
   GitConfigProviderSpec,
+  HookAction,
   HttpConfigProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
@@ -108,3 +109,12 @@ export const isHttpProviderSpec = (providerSpec: ConfigProviderSpec): providerSp
   'httpRef' in providerSpec;
 
 export type SpecConfigTemplate = GitConfigTemplate | HttpConfigTemplate | KubeSecretTemplate | InlineConfigTemplate;
+
+export type ExecutableHookAction = {
+  executable: {
+    run?: string;
+    envVars?: string[];
+  };
+};
+
+export const isExecutableHook = (hook: HookAction): hook is ExecutableHookAction => 'executable' in hook;

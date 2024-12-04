@@ -8,10 +8,15 @@ import {
   validKubernetesLabelValue,
   validLabelsSchema,
 } from '../../form/validations';
-import { appendJSONPatch, getApplicationPatches, getLabelPatches } from '../../../utils/patch';
+import {
+  appendJSONPatch,
+  getApplicationPatches,
+  getLabelPatches,
+  getMicroShiftHookPatches,
+} from '../../../utils/patch';
 import { Device, PatchRequest } from '@flightctl/types';
 import { EditDeviceFormValues } from './types';
-import { getAPIConfig, getDeviceSpecConfigPatches } from './deviceSpecUtils';
+import { ACMCrdConfig, ACMImportConfig, getAPIConfig, getDeviceSpecConfigPatches } from './deviceSpecUtils';
 
 export const getValidationSchema = (t: TFunction) =>
   Yup.lazy(() =>
@@ -68,12 +73,19 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
   // Configurations
   const currentConfigs = currentDevice.spec?.config || [];
   const newConfigs = updatedDevice.configTemplates.map(getAPIConfig);
+  if (updatedDevice.registerMicroShift) {
+    newConfigs.push(ACMCrdConfig, ACMImportConfig);
+  }
   const configPatches = getDeviceSpecConfigPatches(currentConfigs, newConfigs, '/spec/config');
   allPatches = allPatches.concat(configPatches);
 
   // Applications
   const appPatches = getApplicationPatches('/spec', currentDevice.spec?.applications || [], updatedDevice.applications);
   allPatches = allPatches.concat(appPatches);
+
+  // Hooks
+  const msHookPatches = getMicroShiftHookPatches(currentDevice.spec?.hooks, updatedDevice.registerMicroShift, '/spec');
+  allPatches = allPatches.concat(msHookPatches);
 
   return allPatches;
 };

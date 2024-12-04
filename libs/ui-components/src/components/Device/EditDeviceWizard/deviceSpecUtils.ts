@@ -1,5 +1,8 @@
 import {
+  ConfigProviderSpec,
   DeviceSpec,
+  DeviceUpdateHookSpec,
+  FileOperation,
   FileSpec,
   GitConfigProviderSpec,
   HttpConfigProviderSpec,
@@ -15,6 +18,7 @@ import {
   InlineConfigTemplate,
   KubeSecretTemplate,
   SpecConfigTemplate,
+  isExecutableHook,
   isGitConfigTemplate,
   isGitProviderSpec,
   isHttpConfigTemplate,
@@ -28,6 +32,11 @@ import { ApplicationFormSpec } from './types';
 const DEFAULT_INLINE_FILE_MODE = 420; // In Octal: 0644
 const DEFAULT_INLINE_FILE_USER = 'root';
 const DEFAULT_INLINE_FILE_GROUP = 'root';
+
+const CRD_YAML_PATH = '/var/local/acm-import/crd.yaml';
+const IMPORT_YAML_PATH = '/var/local/acm-import/import.yaml';
+const KUBECONFIG_PATH = 'KUBECONFIG=/var/lib/microshift/resources/kubeadmin/kubeconfig';
+export const ACM_REPO_NAME = 'acm-registration';
 
 export const getConfigType = (config: ConfigSourceProvider): ConfigType | undefined => {
   if (isGitProviderSpec(config)) {
@@ -224,55 +233,171 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): ApplicationFormSp
   });
 };
 
-export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec) =>
-  deviceSpec?.config?.map<SpecConfigTemplate>((c) => {
-    if (isGitProviderSpec(c)) {
-      return {
-        type: ConfigType.GIT,
-        name: c.name,
-        path: c.gitRef.path,
-        mountPath: c.gitRef.mountPath,
-        repository: c.gitRef.repository,
-        targetRevision: c.gitRef.targetRevision,
-      } as GitConfigTemplate;
-    }
-    if (isKubeProviderSpec(c)) {
-      return {
-        type: ConfigType.K8S_SECRET,
-        name: c.name,
-        mountPath: c.secretRef.mountPath,
-        secretName: c.secretRef.name,
-        secretNs: c.secretRef.namespace,
-      } as KubeSecretTemplate;
-    }
-    if (isHttpProviderSpec(c)) {
-      return {
-        type: ConfigType.HTTP,
-        name: c.name,
-        repository: c.httpRef.repository,
-        suffix: c.httpRef.suffix,
-        filePath: c.httpRef.filePath,
-      } as HttpConfigTemplate;
-    }
-
-    return {
-      type: ConfigType.INLINE,
-      name: c.name,
-      files: c.inline.map((inline) => {
+export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec, registerMicroShift?: boolean) => {
+  const deviceConfig = registerMicroShift
+    ? deviceSpec?.config?.filter((c) => !isConfigACMCrd(c) && !isConfigACMImport(c))
+    : deviceSpec?.config;
+  return (
+    deviceConfig?.map<SpecConfigTemplate>((c) => {
+      if (isGitProviderSpec(c)) {
         return {
-          user: inline.user,
-          group: inline.group,
-          path: inline.path,
-          permissions: inline.mode !== undefined ? formatFileMode(inline.mode) : undefined,
-          content: inline.content,
-          base64: inline.contentEncoding === FileSpec.contentEncoding.BASE64,
-        } as InlineConfigTemplate['files'][0];
-      }),
-    } as InlineConfigTemplate;
-  }) || [];
+          type: ConfigType.GIT,
+          name: c.name,
+          path: c.gitRef.path,
+          mountPath: c.gitRef.mountPath,
+          repository: c.gitRef.repository,
+          targetRevision: c.gitRef.targetRevision,
+        } as GitConfigTemplate;
+      }
+      if (isKubeProviderSpec(c)) {
+        return {
+          type: ConfigType.K8S_SECRET,
+          name: c.name,
+          mountPath: c.secretRef.mountPath,
+          secretName: c.secretRef.name,
+          secretNs: c.secretRef.namespace,
+        } as KubeSecretTemplate;
+      }
+      if (isHttpProviderSpec(c)) {
+        return {
+          type: ConfigType.HTTP,
+          name: c.name,
+          repository: c.httpRef.repository,
+          suffix: c.httpRef.suffix,
+          filePath: c.httpRef.filePath,
+        } as HttpConfigTemplate;
+      }
+
+      return {
+        type: ConfigType.INLINE,
+        name: c.name,
+        files: c.inline.map((inline) => {
+          return {
+            user: inline.user,
+            group: inline.group,
+            path: inline.path,
+            permissions: inline.mode !== undefined ? formatFileMode(inline.mode) : undefined,
+            content: inline.content,
+            base64: inline.contentEncoding === FileSpec.contentEncoding.BASE64,
+          } as InlineConfigTemplate['files'][0];
+        }),
+      } as InlineConfigTemplate;
+    }) || []
+  );
+};
 
 export const formatFileMode = (mode: string | number): string => {
   const modeStr = typeof mode === 'number' ? mode.toString(8) : mode;
   const prefixSize = 4 - modeStr.length;
   return prefixSize > 0 ? `${'0'.repeat(prefixSize)}${modeStr}` : modeStr;
+};
+
+export const ACMCrdConfig: HttpConfigProviderSpec = {
+  name: 'acm-crd',
+  httpRef: {
+    filePath: CRD_YAML_PATH,
+    repository: ACM_REPO_NAME,
+    suffix: '/agent-registration/crds/v1',
+  },
+};
+
+export const ACMImportConfig: HttpConfigProviderSpec = {
+  name: 'acm-registration',
+  httpRef: {
+    filePath: IMPORT_YAML_PATH,
+    repository: ACM_REPO_NAME,
+    suffix: '/agent-registration/manifests/{{ device.metadata.name }}',
+  },
+};
+
+const isConfigACMCrd = (c: ConfigProviderSpec) => {
+  if (!isHttpProviderSpec(c)) {
+    return false;
+  }
+  return (
+    c.name === ACMCrdConfig.name &&
+    c.httpRef.filePath === ACMCrdConfig.httpRef.filePath &&
+    c.httpRef.repository === ACMCrdConfig.httpRef.repository &&
+    c.httpRef.suffix === ACMCrdConfig.httpRef.suffix
+  );
+};
+
+const isConfigACMImport = (c: ConfigProviderSpec) => {
+  if (!isHttpProviderSpec(c)) {
+    return false;
+  }
+  return (
+    c.name === ACMImportConfig.name &&
+    c.httpRef.filePath === ACMImportConfig.httpRef.filePath &&
+    c.httpRef.repository === ACMImportConfig.httpRef.repository &&
+    c.httpRef.suffix === ACMImportConfig.httpRef.suffix
+  );
+};
+
+export const ACMCrdHook: DeviceUpdateHookSpec = {
+  path: CRD_YAML_PATH,
+  onFile: [FileOperation.FileOperationCreate],
+  actions: [
+    {
+      executable: {
+        envVars: [KUBECONFIG_PATH],
+        run: `kubectl apply -f ${CRD_YAML_PATH}`,
+      },
+    },
+  ],
+};
+
+export const ACMImportHook: DeviceUpdateHookSpec = {
+  path: IMPORT_YAML_PATH,
+  onFile: [FileOperation.FileOperationCreate],
+  actions: [
+    {
+      executable: {
+        envVars: [KUBECONFIG_PATH],
+        run: `kubectl apply -f ${IMPORT_YAML_PATH}`,
+      },
+    },
+  ],
+};
+
+export const isAcmCrdHook = (h: DeviceUpdateHookSpec) => {
+  const action = h.actions.length === 1 ? h.actions[0] : undefined;
+  if (action && isExecutableHook(action)) {
+    return (
+      h.path === CRD_YAML_PATH &&
+      h.onFile?.length === 1 &&
+      h.onFile[0] === FileOperation.FileOperationCreate &&
+      action.executable.run === `kubectl apply -f ${CRD_YAML_PATH}` &&
+      action.executable.envVars?.length === 1 &&
+      action.executable.envVars[0] === KUBECONFIG_PATH
+    );
+  }
+  return false;
+};
+
+export const isAcmImportHook = (h: DeviceUpdateHookSpec) => {
+  const action = h.actions.length === 1 ? h.actions[0] : undefined;
+  if (action && isExecutableHook(action)) {
+    return (
+      h.path === IMPORT_YAML_PATH &&
+      h.onFile?.length === 1 &&
+      h.onFile[0] === FileOperation.FileOperationCreate &&
+      action.executable.run === `kubectl apply -f ${IMPORT_YAML_PATH}` &&
+      action.executable.envVars?.length === 1 &&
+      action.executable.envVars[0] === KUBECONFIG_PATH
+    );
+  }
+  return false;
+};
+
+export const hasMicroshiftRegistrationConfig = (deviceSpec?: DeviceSpec): boolean => {
+  if (!deviceSpec) {
+    return false;
+  }
+  const hasCrdsSpec = deviceSpec.config?.some(isConfigACMCrd);
+  const hasImportSpec = deviceSpec.config?.some(isConfigACMImport);
+  const hasCrdHook = deviceSpec.hooks?.afterUpdating?.some(isAcmCrdHook);
+  const hasImportHook = deviceSpec.hooks?.afterUpdating?.some(isAcmImportHook);
+
+  return !!hasCrdsSpec && !!hasImportSpec && !!hasCrdHook && !!hasImportHook;
 };

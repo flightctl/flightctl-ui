@@ -1,4 +1,4 @@
-import { ApplicationSpec, PatchRequest } from '@flightctl/types';
+import { ApplicationSpec, DeviceHooksSpec, PatchRequest } from '@flightctl/types';
 import isNil from 'lodash/isNil';
 import isEqual from 'lodash/isEqual';
 import differenceWith from 'lodash/differenceWith';
@@ -6,6 +6,12 @@ import differenceWith from 'lodash/differenceWith';
 import { FlightCtlLabel } from '../types/extraTypes';
 import { toAPILabel } from './labels';
 import { ApplicationFormSpec } from '../components/Device/EditDeviceWizard/types';
+import {
+  ACMCrdHook,
+  ACMImportHook,
+  isAcmCrdHook,
+  isAcmImportHook,
+} from '../components/Device/EditDeviceWizard/deviceSpecUtils';
 
 export const appendJSONPatch = <V = unknown>({
   patches,
@@ -194,6 +200,57 @@ export const getApplicationPatches = (
         path: `${basePath}/applications`,
         op: 'replace',
         value: updatedApps.map(toAPIApplication),
+      });
+    }
+  }
+
+  return patches;
+};
+
+export const getMicroShiftHookPatches = (
+  currentHooks: DeviceHooksSpec | undefined,
+  registerMicroShift: boolean,
+  basePath: string,
+) => {
+  const patches: PatchRequest = [];
+  if (registerMicroShift) {
+    if (!currentHooks) {
+      patches.push({
+        op: 'add',
+        path: `${basePath}/hooks`,
+        value: {
+          afterUpdating: [ACMCrdHook, ACMImportHook],
+        },
+      });
+    } else if (!currentHooks.afterUpdating?.length) {
+      patches.push({
+        op: 'add',
+        path: `${basePath}/hooks/afterUpdating`,
+        value: [ACMCrdHook, ACMImportHook],
+      });
+    } else {
+      if (!currentHooks.afterUpdating.some(isAcmCrdHook)) {
+        patches.push({
+          op: 'add',
+          path: `${basePath}/hooks/afterUpdating/-`,
+          value: ACMCrdHook,
+        });
+      }
+      if (!currentHooks.afterUpdating.some(isAcmImportHook)) {
+        patches.push({
+          op: 'add',
+          path: `${basePath}/hooks/afterUpdating/-`,
+          value: ACMImportHook,
+        });
+      }
+    }
+  } else if (currentHooks?.afterUpdating) {
+    const newAfterUpdatingHooks = currentHooks.afterUpdating.filter((h) => !isAcmCrdHook(h) && !isAcmImportHook(h));
+    if (newAfterUpdatingHooks.length !== currentHooks.afterUpdating.length) {
+      patches.push({
+        op: 'replace',
+        path: `${basePath}/hooks/afterUpdating`,
+        value: newAfterUpdatingHooks,
       });
     }
   }
