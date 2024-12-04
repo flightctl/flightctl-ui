@@ -9,7 +9,6 @@ export const loginAPI = `${window.location.protocol}//${apiServer}/api/login`;
 const logoutAPI = `${window.location.protocol}//${apiServer}/api/logout`;
 const metricsAPI = `${window.location.protocol}//${apiServer}/api/metrics`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
-const deviceImagesAPI = `${window.location.protocol}//${apiServer}/api/device-images`;
 
 export const logout = async () => {
   const response = await fetch(logoutAPI);
@@ -116,21 +115,6 @@ export const fetchData = async <R>(kind: string, abortSignal?: AbortSignal): Pro
       signal: abortSignal,
     });
     return handleApiJSONResponse(response);
-  } catch (error) {
-    console.error('Error making request:', error);
-    throw error;
-  }
-};
-
-export type DeviceImages = {
-  bootc: string;
-  qcow2: string;
-};
-
-export const fetchImages = async () => {
-  try {
-    const response = await fetch(deviceImagesAPI);
-    return handleApiJSONResponse<DeviceImages>(response);
   } catch (error) {
     console.error('Error making request:', error);
     throw error;

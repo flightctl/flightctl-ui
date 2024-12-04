@@ -7,8 +7,6 @@ import './i18n';
 declare global {
   interface Window {
     API_PORT?: string;
-    QCOW2_IMG_URL?: string;
-    BOOTC_IMG_URL?: string;
   }
 }
 

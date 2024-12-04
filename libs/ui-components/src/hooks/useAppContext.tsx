@@ -39,8 +39,6 @@ export type PromptFC = React.FC<{ message: string }>;
 
 export type AppContextProps = {
   appType: 'standalone' | 'ocp' | 'aap';
-  qcow2ImgUrl: string | undefined;
-  bootcImgUrl: string | undefined;
   user?: string; // auth?.user?.profile.preferred_username
   i18n: {
     transNamespace?: string;
@@ -73,8 +71,6 @@ export type AppContextProps = {
 
 export const AppContext = React.createContext<AppContextProps>({
   appType: 'standalone',
-  qcow2ImgUrl: undefined,
-  bootcImgUrl: undefined,
   router: {
     useNavigate,
     Link,
