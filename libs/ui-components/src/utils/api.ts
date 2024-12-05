@@ -42,12 +42,12 @@ const getRequestQueryString = (queryObj: FlightControlQuery) => {
   return getMetricsQueryString(queryObj);
 };
 
-interface ApiList {
-  items: Array<unknown>;
+export interface ApiList<R> {
+  items: Array<R>;
   metadata: ListMeta;
 }
 
-const getApiListCount = (listResponse: ApiList | undefined): number | undefined => {
+const getApiListCount = <T>(listResponse: ApiList<T> | undefined): number | undefined => {
   if (listResponse === undefined) {
     return undefined;
   }
