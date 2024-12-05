@@ -9,6 +9,7 @@ import {
   SelectGroup,
   SelectList,
   SelectOption,
+  Spinner,
   TextInputGroup,
   TextInputGroupMain,
   TextInputGroupUtilities,
@@ -16,13 +17,15 @@ import {
 import { TimesIcon } from '@patternfly/react-icons/dist/js/icons/times-icon';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
 
-import { Fleet } from '@flightctl/types';
+import { DeviceList, Fleet, FleetList } from '@flightctl/types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
+import { isPromiseFulfilled } from '../../../types/typeUtils';
 
 import TableTextSearch, { TableTextSearchProps } from '../../Table/TableTextSearch';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { fuzzySeach, getSearchResultsCount } from '../../../utils/search';
-import { filterDevicesLabels, labelToString } from '../../../utils/labels';
+import { useFetch } from '../../../hooks/useFetch';
+import { getSearchResultsCount } from '../../../utils/search';
+import { labelToString, stringToLabel } from '../../../utils/labels';
 
 import './DeviceToolbarFilters.css';
 
@@ -30,8 +33,6 @@ const NAME_SEARCH = 'NameAndAlias';
 const LABEL_SEARCH = 'LabelsAndFleets';
 
 type LabelFleetSelectorProps = {
-  fleets: Fleet[];
-  allLabels: FlightCtlLabel[];
   selectedFleetNames: string[];
   selectedLabels: FlightCtlLabel[];
   onSelect: (type: 'fleet' | 'label', value: string) => void;
@@ -40,18 +41,25 @@ type LabelFleetSelectorProps = {
 
 const LabelFleetResults = ({
   allLabels,
-  fleets,
-  selectedLabels,
-  filterText,
-}: Omit<LabelFleetSelectorProps, 'onSelect' | 'devices'> & { filterText: string }) => {
+  fleetNames,
+  isUpdating,
+}: {
+  isUpdating: boolean;
+  fleetNames: string[];
+  allLabels: FlightCtlLabel[];
+}) => {
   const { t } = useTranslation();
 
-  const availableFleetNames = fleets
-    .filter((f) => fuzzySeach(filterText, f.metadata.name))
-    .map((f) => f.metadata.name || '');
+  if (isUpdating) {
+    return (
+      <div className="fctl-device-toolbar-filters__hint">
+        <Spinner size="md" className="pf-v5-u-mr-sm" />
+        {t('Searching...')}
+      </div>
+    );
+  }
 
-  const filteredLabels = filterDevicesLabels(allLabels, selectedLabels, filterText);
-  const [visibleLabels, visibleFleets] = getSearchResultsCount(filteredLabels.length, availableFleetNames.length);
+  const [visibleLabels, visibleFleets] = getSearchResultsCount(allLabels.length, fleetNames.length);
   if (visibleLabels + visibleFleets === 0) {
     return <div className="fctl-device-toolbar-filters__hint">{t('No results')}</div>;
   }
@@ -61,9 +69,10 @@ const LabelFleetResults = ({
       {visibleLabels > 0 && (
         <SelectGroup label={t('Labels')}>
           <SelectList id="select-typeahead-labels-listbox">
-            {filteredLabels
+            {allLabels
               .filter((_, index) => index < visibleLabels)
-              .map((labelStr) => {
+              .map((label) => {
+                const labelStr = labelToString(label);
                 return (
                   <SelectOption key={`label@@${labelStr}`} value={`label@@${labelStr}`}>
                     {labelStr}
@@ -76,7 +85,7 @@ const LabelFleetResults = ({
       {visibleFleets > 0 && (
         <SelectGroup label={t('Fleets')}>
           <SelectList id="select-typeahead-fleets-listbox">
-            {availableFleetNames
+            {fleetNames
               .filter((_, index) => index < visibleFleets)
               .map((fleetName) => (
                 <SelectOption key={`fleet@@${fleetName}`} value={`fleet@@${fleetName}`}>
@@ -90,24 +99,24 @@ const LabelFleetResults = ({
   );
 };
 
-const LabelFleetSelector = ({
-  fleets,
-  selectedFleetNames,
-  allLabels,
-  selectedLabels,
-  onSelect,
-  placeholder,
-}: LabelFleetSelectorProps) => {
+const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, placeholder }: LabelFleetSelectorProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [filterText, setFilterText] = React.useState<string>('');
+  const [fleetNameResults, setFleetNameResults] = React.useState<string[]>([]);
+  const [labelResults, setLabelResults] = React.useState<FlightCtlLabel[]>([]);
+  const [isUpdating, setIsUpdating] = React.useState<boolean>(false);
+
+  const { get } = useFetch();
 
   const textInputRef = React.useRef<HTMLInputElement>();
 
   const { t } = useTranslation();
 
   const onToggleClick = () => {
+    if (!isOpen) {
+      textInputRef?.current?.focus();
+    }
     setIsOpen(!isOpen);
-    textInputRef?.current?.focus();
   };
 
   const onClearButtonClick = () => {
@@ -127,8 +136,51 @@ const LabelFleetSelector = ({
     }
   };
 
+  const fetchTextMatches = async (val: string) => {
+    // Matches for labels are always exact matches
+    const labelMatches = get<DeviceList>(`devices?labelSelector=${val}&limit=1&sortBy=metadata.name&sortOrder=Asc`);
+
+    // Matches for names can be partial
+    const fleetMatches = get<FleetList>(
+      `fleets?fieldSelector=metadata.name contains ${val}&sortBy=metadata.name&sortOrder=Asc`,
+    );
+
+    const [labelMatchResult, fleetMatchResult] = await Promise.allSettled([labelMatches, fleetMatches]);
+
+    let newLabels: FlightCtlLabel[] = [];
+    if (isPromiseFulfilled(labelMatchResult)) {
+      if (labelMatchResult.value.items?.length) {
+        newLabels = [stringToLabel(val)];
+      }
+    }
+    let newFleets: string[] = [];
+    if (isPromiseFulfilled(fleetMatchResult)) {
+      newFleets = fleetMatchResult.value.items?.map((fleet: Fleet) => fleet.metadata.name || '') || [];
+    }
+    setLabelResults(newLabels);
+    setFleetNameResults(newFleets);
+    setIsUpdating(false);
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedUpdate = React.useCallback(
+    debounce((val: string) => {
+      fetchTextMatches(val);
+    }, 800),
+    [],
+  );
+
   const onTextInputChange = (_event: React.FormEvent<HTMLInputElement>, value: string) => {
-    setFilterText(value);
+    if (value) {
+      setFilterText(value);
+      if (!isUpdating) {
+        // Start showing the spinner before the debounced function is triggered
+        setIsUpdating(true);
+      }
+      void debouncedUpdate(value);
+    } else {
+      setFilterText('');
+    }
   };
 
   const selectedIds = selectedFleetNames
@@ -194,22 +246,16 @@ const LabelFleetSelector = ({
       }}
       toggle={toggle}
     >
-      <LabelFleetResults
-        fleets={fleets}
-        filterText={filterText}
-        selectedFleetNames={selectedFleetNames}
-        allLabels={allLabels}
-        selectedLabels={selectedLabels}
-      />
+      {filterText && (
+        <LabelFleetResults isUpdating={isUpdating} fleetNames={fleetNameResults} allLabels={labelResults} />
+      )}
     </Select>
   );
 };
 
 type DeviceToolbarFilterProps = {
-  fleets: Fleet[];
   selectedFleetNames: string[];
   setSelectedFleets: (ownerFleets: string[]) => void;
-  allLabels: FlightCtlLabel[];
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
   nameOrAlias?: TableTextSearchProps['value'];
@@ -217,10 +263,8 @@ type DeviceToolbarFilterProps = {
 };
 
 const DeviceToolbarFilter = ({
-  fleets,
   selectedFleetNames,
   setSelectedFleets,
-  allLabels,
   selectedLabels,
   setSelectedLabels,
   nameOrAlias,
@@ -318,8 +362,6 @@ const DeviceToolbarFilter = ({
       ) : (
         <LabelFleetSelector
           placeholder={setNameOrAlias ? undefined : t('Filter by labels and fleets')}
-          allLabels={allLabels}
-          fleets={fleets}
           selectedFleetNames={selectedFleetNames}
           selectedLabels={selectedLabels}
           onSelect={onSelectFleetOrLabel}

@@ -4,8 +4,7 @@ import { TFunction } from 'i18next';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import FilterSelect, { FilterSelectGroup } from '../../form/FilterSelect';
-import { fuzzySeach } from '../../../utils/search';
-import { FilterOptionsFC, FilterStatusMap, UpdateStatus } from './types';
+import { FilterStatusMap, UpdateStatus } from './types';
 import StatusDisplay from '../../Status/StatusDisplay';
 import { DeviceSummaryStatus, FilterSearchParams, getDeviceStatusItems } from '../../../utils/status/devices';
 import { StatusItem } from '../../../utils/status/common';
@@ -38,29 +37,6 @@ export const getStatusItem = (
   }
 };
 
-const FilterOption: FilterOptionsFC = ({ items, selectedFilters, onClick, filter }) => {
-  const { t } = useTranslation();
-  const filteredItems = items.filter((statusItem) => fuzzySeach(filter, statusItem.label));
-  if (!filteredItems.length) {
-    return (
-      <SelectOption key="no-option" isDisabled>
-        {t('No status available')}
-      </SelectOption>
-    );
-  }
-  return filteredItems.map((statusItem) => (
-    <SelectOption
-      onClick={() => onClick(statusItem.id)}
-      key={statusItem.id}
-      hasCheckbox
-      value={statusItem.id}
-      isSelected={selectedFilters.includes(statusItem.id)}
-    >
-      <StatusDisplay item={statusItem} />
-    </SelectOption>
-  ));
-};
-
 type DeviceStatusFilterProps = {
   activeStatuses: FilterStatusMap;
   updateStatus: UpdateStatus;
@@ -69,7 +45,6 @@ type DeviceStatusFilterProps = {
 
 const DeviceStatusFilter = ({ activeStatuses, updateStatus, isFilterUpdating }: DeviceStatusFilterProps) => {
   const { t } = useTranslation();
-  const [filter, setFilter] = React.useState('');
 
   const selectedFilters = Object.values(activeStatuses).reduce((acc, curr) => {
     acc += curr.length;
@@ -80,8 +55,6 @@ const DeviceStatusFilter = ({ activeStatuses, updateStatus, isFilterUpdating }: 
     <FilterSelect
       selectedFilters={selectedFilters}
       placeholder={t('Filter by status')}
-      filter={filter}
-      setFilter={setFilter}
       isFilterUpdating={isFilterUpdating}
     >
       <SelectList>
@@ -89,15 +62,21 @@ const DeviceStatusFilter = ({ activeStatuses, updateStatus, isFilterUpdating }: 
           {Object.keys(activeStatuses).map((k) => {
             const key = k as keyof FilterStatusMap;
             const { title, items } = getStatusItem(t, key);
+            const currentItems = activeStatuses[key] as unknown as DeviceSummaryStatus[];
             return (
               <GridItem key={key} span={4}>
                 <FilterSelectGroup label={title}>
-                  <FilterOption
-                    filter={filter}
-                    items={items}
-                    selectedFilters={activeStatuses[key]}
-                    onClick={(value) => updateStatus(key, value)}
-                  />
+                  {items.map((statusItem) => (
+                    <SelectOption
+                      onClick={() => updateStatus(key, statusItem.id)}
+                      key={statusItem.id}
+                      hasCheckbox
+                      value={statusItem.id}
+                      isSelected={currentItems.includes(statusItem.id)}
+                    >
+                      <StatusDisplay item={statusItem} />
+                    </SelectOption>
+                  ))}
                 </FilterSelectGroup>
               </GridItem>
             );

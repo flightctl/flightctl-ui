@@ -18,7 +18,7 @@ type FilterSelectGroupProps = React.PropsWithChildren<{
   label: string;
 }>;
 
-export const FilterSelectGroup: React.FC<FilterSelectGroupProps> = ({ label, children }) => (
+export const FilterSelectGroup = ({ label, children }: FilterSelectGroupProps) => (
   <SelectGroup label={label}>
     <div className="fctl-filter-select__group">{children}</div>
   </SelectGroup>
@@ -26,13 +26,11 @@ export const FilterSelectGroup: React.FC<FilterSelectGroupProps> = ({ label, chi
 
 type FilterSelectProps = React.PropsWithChildren<{
   placeholder: string;
-  filter: string;
-  setFilter: (filter: string) => void;
   selectedFilters: number;
   isFilterUpdating: boolean;
 }>;
 
-const FilterSelect: React.FC<FilterSelectProps> = ({ placeholder, selectedFilters, isFilterUpdating, children }) => {
+const FilterSelect = ({ placeholder, selectedFilters, isFilterUpdating, children }: FilterSelectProps) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const textInputRef = React.useRef<HTMLInputElement>();
   const toggleExpand = () => {
