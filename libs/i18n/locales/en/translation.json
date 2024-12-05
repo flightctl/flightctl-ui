@@ -495,7 +495,7 @@
   "Updates blocked": "Updates blocked",
   "Invalid configuration": "Invalid configuration",
   "No resources are matching the current filters.": "No resources are matching the current filters.",
-  "{currentPage} of <2>{totalPages}</2>": "{currentPage} of <2>{totalPages}</2>",
+  "{pageNum} of <2>{totalPages}</2>": "{pageNum} of <2>{totalPages}</2>",
   "{{ numberOfItems }} items": "{{ numberOfItems }} items",
   "Waiting for terminal session to open...": "Waiting for terminal session to open...",
   "System default": "System default",
