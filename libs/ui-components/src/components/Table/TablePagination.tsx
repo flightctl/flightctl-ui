@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trans } from 'react-i18next';
-import { Pagination, PaginationToggleTemplateProps, PaginationVariant, Spinner } from '@patternfly/react-core';
+import { Pagination, PaginationVariant, Spinner } from '@patternfly/react-core';
 
 import { PAGE_SIZE } from '../../constants';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -13,27 +13,40 @@ type TablePaginationProps = {
 };
 
 const PaginationTemplate = ({
-  isUpdating,
-  firstIndex,
+  currentPage,
   itemCount,
-}: PaginationToggleTemplateProps & { isUpdating: boolean }) => {
+  isUpdating,
+}: {
+  currentPage: number;
+  itemCount: number;
+  isUpdating: boolean;
+}) => {
   const { t } = useTranslation();
-
-  if (isUpdating) {
-    return <Spinner size="sm" />;
-  }
-
   const totalPages = String(Math.ceil((itemCount || 0) / PAGE_SIZE));
-  const currentPage = String(Math.ceil((firstIndex || 0) / PAGE_SIZE));
+
+  const pageNum = `${currentPage}`;
   return (
-    <Trans t={t}>
-      {currentPage} of <strong>{totalPages}</strong>
-    </Trans>
+    <>
+      {isUpdating && <Spinner size="sm" />}{' '}
+      <Trans t={t}>
+        {pageNum} of <strong>{totalPages}</strong>
+      </Trans>
+    </>
   );
 };
 
 const TablePagination = ({ isUpdating, itemCount, currentPage, setCurrentPage }: TablePaginationProps) => {
   const { t } = useTranslation();
+
+  const [prevCount, setPrevCount] = React.useState<number>(0);
+  const [prevCurrentPage, setPrevCurrentPage] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    if (!isUpdating) {
+      setPrevCount(itemCount || 0);
+      setPrevCurrentPage(currentPage);
+    }
+  }, [isUpdating, itemCount, currentPage]);
 
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
     setCurrentPage(newPage);
@@ -41,13 +54,16 @@ const TablePagination = ({ isUpdating, itemCount, currentPage, setCurrentPage }:
 
   return (
     <Pagination
+      isDisabled={isUpdating}
       widgetId="table-pagination"
       isCompact
       variant={PaginationVariant.top}
-      toggleTemplate={(props) => <PaginationTemplate isUpdating={isUpdating} {...props} />}
-      itemCount={itemCount || 0}
+      toggleTemplate={() => (
+        <PaginationTemplate isUpdating={isUpdating} itemCount={prevCount} currentPage={currentPage} />
+      )}
+      itemCount={prevCount}
       perPage={PAGE_SIZE}
-      page={currentPage}
+      page={prevCurrentPage}
       perPageOptions={[{ title: t(`{{ numberOfItems }} items`, { numberOfItems: PAGE_SIZE }), value: PAGE_SIZE }]}
       onSetPage={onSetPage}
     />
