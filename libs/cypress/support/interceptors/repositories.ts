@@ -9,7 +9,7 @@ const buildRepositoriesResponse = (repositories: Repository[]) => ({
 });
 
 const loadInterceptors = () => {
-  cy.intercept('GET', '/api/flightctl/api/v1/repositories', (req) => {
+  cy.intercept('GET', '/api/flightctl/api/v1/repositories?*', (req) => {
     req.reply({
       body: buildRepositoriesResponse(repoList),
     });

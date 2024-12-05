@@ -201,14 +201,20 @@ export const getAPIConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
   return {
     name: ct.name,
     inline: ct.files.map((file) => {
-      return {
+      const baseProps: FileSpec = {
         path: file.path,
         content: file.content,
-        group: file.group,
-        user: file.user,
         mode: file.permissions ? parseInt(file.permissions, 8) : undefined,
         contentEncoding: file.base64 ? FileSpec.contentEncoding.BASE64 : undefined,
       };
+      // user / group fields cannot be sent as empty in PATCH operations
+      if (file.user) {
+        baseProps.user = file.user;
+      }
+      if (file.group) {
+        baseProps.group = file.group;
+      }
+      return baseProps;
     }),
   };
 };
