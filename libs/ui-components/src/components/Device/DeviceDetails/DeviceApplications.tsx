@@ -39,6 +39,7 @@ const DeviceApplications = ({ device, refetch }: React.PropsWithChildren<DeviceD
 
   const isManagedDevice = !!getDeviceFleet(device.metadata);
   const trackedSystemdUnits = device.spec?.systemd?.matchPatterns || [];
+  const specApps = device.spec?.applications?.map((app) => app.name || app.image) || [];
   const apps = device.status.applications; // includes available systemdUnits
 
   const deleteSystemdUnit = isManagedDevice
@@ -84,7 +85,8 @@ const DeviceApplications = ({ device, refetch }: React.PropsWithChildren<DeviceD
       <DetailsPageCardBody>
         <ApplicationsTable
           appsStatus={apps}
-          systemdUnits={trackedSystemdUnits}
+          specApps={specApps}
+          specSystemdUnits={trackedSystemdUnits}
           onSystemdDelete={deleteSystemdUnit}
           isUpdating={isUpdating}
           addedSystemdUnitDates={addedSystemdDates}
