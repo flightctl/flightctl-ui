@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { useAppContext } from '../../hooks/useAppContext';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { Fleet, FleetList, SortOrder } from '@flightctl/types';
+import { Fleet, FleetList } from '@flightctl/types';
 import { useDebounce } from 'use-debounce';
 
 export enum FleetSearchParams {
@@ -43,17 +43,14 @@ export const useFleetBackendFilters = () => {
 };
 
 const getFleetsEndpoint = ({ addDevicesCount, name }: { addDevicesCount?: boolean; name?: string }) => {
-  const params = new URLSearchParams({
-    sortBy: 'metadata.name',
-    sortOrder: SortOrder.ASC,
-  });
+  const params = new URLSearchParams();
   if (name) {
     params.set('fieldSelector', `metadata.name contains ${name}`);
   }
   if (addDevicesCount) {
     params.set('addDevicesCount', 'true');
   }
-  return `fleets?${params.toString()}`;
+  return params.size ? `fleets?${params.toString()}` : 'fleets';
 };
 
 const useFleetsEndpoint = (args: FleetsEndpointArgs): [string, boolean] => {

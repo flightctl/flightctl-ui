@@ -39,7 +39,7 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
   const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
 
   const [erList, isLoading, error, refetch] = useFetchPeriodically<EnrollmentRequestListType>({
-    endpoint: 'enrollmentrequests?fieldSelector=!status.approval.approved&sortBy=metadata.name&sortOrderAsc',
+    endpoint: 'enrollmentrequests?fieldSelector=!status.approval.approved',
   });
   const pendingEnrollments = erList?.items || [];
 

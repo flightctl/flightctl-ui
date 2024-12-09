@@ -157,7 +157,7 @@ const ConfigurationTemplatesForm = ({ repositories, repoRefetch }: ConfigSection
 
 const ConfigurationTemplates = () => {
   const [repositoryList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>({
-    endpoint: 'repositories?sortBy=metadata.name&sortOrder=Asc',
+    endpoint: 'repositories',
   });
 
   const repositories = repositoryList?.items || [];

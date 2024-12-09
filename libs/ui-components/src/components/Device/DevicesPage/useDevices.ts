@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useDebounce } from 'use-debounce';
 
-import { Device, DeviceList, DevicesSummary, SortOrder } from '@flightctl/types';
+import { Device, DeviceList, DevicesSummary } from '@flightctl/types';
 import { FilterSearchParams } from '../../../utils/status/devices';
 import * as queryUtils from '../../../utils/query';
 import { fromAPILabel } from '../../../utils/labels';
@@ -38,10 +38,7 @@ const getDevicesEndpoint = ({ nameOrAlias, ownerFleets, activeStatuses, labels, 
     );
   }
 
-  const params = new URLSearchParams({
-    sortBy: 'metadata.name',
-    sortOrder: SortOrder.ASC,
-  });
+  const params = new URLSearchParams();
   if (fieldSelectors.length > 0) {
     params.set('fieldSelector', fieldSelectors.join(','));
   }
@@ -49,7 +46,7 @@ const getDevicesEndpoint = ({ nameOrAlias, ownerFleets, activeStatuses, labels, 
   if (summaryOnly) {
     params.set('summaryOnly', 'true');
   }
-  return `devices?${params.toString()}`;
+  return params.size ? `devices?${params.toString()}` : 'devices';
 };
 
 export const useDevicesEndpoint = (args: DevicesEndpointArgs): [string, boolean] => {
@@ -80,7 +77,7 @@ export const useDevices = (args: {
   labels?: FlightCtlLabel[];
 }): [Device[], boolean, unknown, boolean, VoidFunction, FlightCtlLabel[]] => {
   const [deviceLabelList] = useFetchPeriodically<DeviceList>({
-    endpoint: 'devices?sortBy=metadata.name&sortOrder=Asc',
+    endpoint: 'devices',
   });
   const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint(args);
   const [devicesList, devicesLoading, devicesError, devicesRefetch, updating] = useFetchPeriodically<DeviceList>({

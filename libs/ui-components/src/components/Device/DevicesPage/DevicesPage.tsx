@@ -227,7 +227,7 @@ const DevicesPage = () => {
   });
 
   const [fleetsList, flLoading, flError] = useFetchPeriodically<FleetList>({
-    endpoint: 'fleets?sortBy=metadata.name&sortOrder=Asc',
+    endpoint: 'fleets',
   });
 
   return (

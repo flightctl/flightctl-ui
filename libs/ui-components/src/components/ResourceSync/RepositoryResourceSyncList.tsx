@@ -164,7 +164,7 @@ const CreateResourceSyncModal = ({
 
 const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) => {
   const [rsList, isLoading, error, refetch] = useFetchPeriodically<ResourceSyncList>({
-    endpoint: `resourcesyncs?fieldSelector=spec.repository=${repositoryId}&sortBy=metadata.name&sortOrder=Asc`,
+    endpoint: `resourcesyncs?fieldSelector=spec.repository=${repositoryId}`,
   });
 
   const resourceSyncs = rsList?.items || [];
