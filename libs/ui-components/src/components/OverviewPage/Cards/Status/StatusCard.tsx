@@ -14,16 +14,14 @@ import {
   TextContent,
   TextVariants,
 } from '@patternfly/react-core';
-import { FleetList } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import ApplicationStatusChart from './ApplicationStatusChart';
 import DeviceStatusChart from './DeviceStatusChart';
 import SystemUpdateStatusChart from './SystemUpdateStatusChart';
-import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import StatusCardFilters from './StatusCardFilters';
 import ErrorAlert from '../../../ErrorAlert/ErrorAlert';
 import { FlightCtlLabel } from '../../../../types/extraTypes';
-import { useDevices, useDevicesSummary } from '../../../Device/DevicesPage/useDevices';
+import { useDevicesSummary } from '../../../Device/DevicesPage/useDevices';
 
 const StatusCard = () => {
   const { t } = useTranslation();
@@ -35,26 +33,17 @@ const StatusCard = () => {
     labels,
   });
 
-  // TODO https://issues.redhat.com/browse/EDM-684 Use the new API endpoint to retrieve device labels
-  const [, /* devices */ loading, error, , , allLabels] = useDevices({
-    ownerFleets: fleets,
-    labels,
-  });
-
-  // TODO https://issues.redhat.com/browse/EDM-683 Use the new API endpoint to retrieve fleet names
-  const [fleetsList, flLoading, flError] = useFetchPeriodically<FleetList>({
-    endpoint: 'fleets',
-  });
+  const error = false;
 
   let content: React.ReactNode;
-  if (loading || flLoading || summaryLoading) {
+  if (summaryLoading) {
     content = (
       <Bullseye>
         <Spinner />
       </Bullseye>
     );
-  } else if (error || flError) {
-    content = <ErrorAlert error={error || flError} />;
+  } else if (error) {
+    content = <ErrorAlert error={error} />;
   } else {
     content = (
       <Stack>
@@ -97,10 +86,8 @@ const StatusCard = () => {
           </FlexItem>
           <FlexItem>
             <StatusCardFilters
-              fleets={fleetsList?.items || []}
               selectedFleets={fleets}
               setSelectedFleets={setFleets}
-              allLabels={allLabels}
               selectedLabels={labels}
               setSelectedLabels={setLabels}
             />
