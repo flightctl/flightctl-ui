@@ -11,8 +11,12 @@ import WithTooltip from '../../common/WithTooltip';
 import './ApplicationsTable.css';
 
 type ApplicationsTableProps = {
+  // Contains the statuses of all detected applications and systemdUnits
   appsStatus: DeviceApplicationStatus[];
-  systemdUnits: string[];
+  // List of apps as defined the device / fleet spec
+  specApps: string[];
+  // List of systemd units as defined in the device / fleet spec
+  specSystemdUnits: string[];
   // Map: (systemdUnitName, timeItWasAdded)
   addedSystemdUnitDates: Record<string, number>;
   onSystemdDelete?: (deletedUnit: string) => void;
@@ -23,7 +27,8 @@ const DELETE_SYSTED_TIMEOUT = 30000; // 30 seconds
 
 const ApplicationsTable = ({
   appsStatus,
-  systemdUnits,
+  specApps,
+  specSystemdUnits,
   addedSystemdUnitDates,
   onSystemdDelete,
   isUpdating,
@@ -49,12 +54,15 @@ const ApplicationsTable = ({
   }, [addedSystemdUnitDates]);
 
   const appsAndSystemdUnits: string[] = [];
-  appsStatus.forEach((app) => {
-    appsAndSystemdUnits.push(app.name);
+  specApps.forEach((app) => {
+    appsAndSystemdUnits.push(app);
   });
-  systemdUnits.forEach((systemdUnit) => {
-    if (!appsAndSystemdUnits.includes(systemdUnit)) {
-      appsAndSystemdUnits.push(systemdUnit);
+  specSystemdUnits.forEach((systemdUnit) => {
+    appsAndSystemdUnits.push(systemdUnit);
+  });
+  appsStatus.forEach((appStatus) => {
+    if (!appsAndSystemdUnits.includes(appStatus.name)) {
+      appsAndSystemdUnits.push(appStatus.name);
     }
   });
 
@@ -74,6 +82,9 @@ const ApplicationsTable = ({
           const appDetails = appsStatus.find((app) => app.name === appName);
           const isDeletedSystemdUnit = deletedSystemdUnits.includes(appName);
           const isAddedSystemdUnit = !!addedSystemdUnitDates[appName];
+          const isApp =
+            specApps.includes(appName) ||
+            !(specSystemdUnits.includes(appName) || isDeletedSystemdUnit || isAddedSystemdUnit);
 
           const deleteSystemdUnit = !isDeletedSystemdUnit && onSystemdDelete && (
             <Button
@@ -89,9 +100,10 @@ const ApplicationsTable = ({
           );
 
           if (!appDetails) {
-            // It's a systemd unit which has not been reported yet
+            // It's an app or a systemd unit which has not been reported yet
             const appAddedTime = addedSystemdUnitDates[appName] || 0;
-            const showSpinner = Date.now() - appAddedTime < DELETE_SYSTED_TIMEOUT;
+            // For apps there are is no spinner since we don't when the app was added to the spec
+            const showSpinner = !isApp && Date.now() - appAddedTime < DELETE_SYSTED_TIMEOUT;
             return (
               <Tr key={appName} className="applications-table__row">
                 <Td dataLabel={t('Name')}>{appName}</Td>
@@ -101,18 +113,24 @@ const ApplicationsTable = ({
                       <Spinner size="sm" /> {t('Waiting for service to be reported...')}
                     </>
                   ) : (
-                    t('Information not available')
+                    t('Information not available yet')
                   )}
                 </Td>
                 <Td dataLabel={t('Type')}>
-                  {t('Systemd')} {deleteSystemdUnit}
+                  {isApp ? (
+                    <>{t('App')}</>
+                  ) : (
+                    <>
+                      {t('Systemd')} {deleteSystemdUnit}
+                    </>
+                  )}
                 </Td>
               </Tr>
             );
           }
 
           let typeColumnContent: React.ReactNode;
-          const isApp = !systemdUnits.includes(appName) && !isDeletedSystemdUnit && !isAddedSystemdUnit;
+
           if (isApp) {
             typeColumnContent = t('App');
           } else if (onSystemdDelete) {
