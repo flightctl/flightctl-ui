@@ -112,7 +112,7 @@ const FleetResourceSyncs = ({ fleets }: { fleets: Fleet[] }) => {
   const { t } = useTranslation();
 
   const [rsList, , , rsRefetch] = useFetchPeriodically<ResourceSyncList>({
-    endpoint: 'resourcesyncs?sortBy=metadata.name&sortOrder=Asc',
+    endpoint: 'resourcesyncs',
   });
 
   // TODO Remove the client-side filtering once the API filter is available

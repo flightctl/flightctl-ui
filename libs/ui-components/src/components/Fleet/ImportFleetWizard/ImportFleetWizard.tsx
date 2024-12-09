@@ -98,7 +98,7 @@ const ImportFleetWizard = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
   const [repoList, isLoading, error] = useFetchPeriodically<RepositoryList>({
-    endpoint: 'repositories?sortBy=metadata.name&sortOrder=Asc',
+    endpoint: 'repositories',
   });
 
   const gitRepositories = (repoList?.items || []).filter((repo) => repo.spec.type === RepoSpecType.GIT);

@@ -5,7 +5,7 @@ import { getApiListCount } from '../utils/api';
 
 export const usePendingEnrollmentRequestsCount = (): [number, boolean, unknown] => {
   const [erList, loading, error] = useFetchPeriodically<EnrollmentRequestList>({
-    endpoint: 'enrollmentrequests?fieldSelector=!status.approval.approved&limit=1&sortBy=metadata.name&sortOrder=Asc',
+    endpoint: 'enrollmentrequests?fieldSelector=!status.approval.approved&limit=1',
   });
 
   return [getApiListCount(erList) || 0, loading, error];

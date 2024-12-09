@@ -88,7 +88,7 @@ const getSearchText = (repo: Repository) => [repo.metadata.name];
 const RepositoryTable = () => {
   const { t } = useTranslation();
   const [repositoryList, loading, error, refetch] = useFetchPeriodically<RepositoryList>({
-    endpoint: 'repositories?sortBy=metadata.name&sortOrder=Asc',
+    endpoint: 'repositories',
   });
   const [deleteModalRepoId, setDeleteModalRepoId] = React.useState<string>();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
