@@ -2,208 +2,144 @@ package bridge
 
 import (
 	"crypto/tls"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
-
-	"golang.org/x/sync/errgroup"
-	"google.golang.org/grpc/metadata"
+	"sync"
+	"time"
 
 	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
-	grpc_v1 "github.com/flightctl/flightctl/api/grpc/v1"
 	"github.com/gorilla/websocket"
-	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
+	log "github.com/sirupsen/logrus"
 )
 
-var upgrader = websocket.Upgrader{} // use default options
+var (
+	websocketPingInterval = 30 * time.Second
+	websocketTimeout      = 30 * time.Second
+)
 
 type TerminalBridge struct {
 	TlsConfig *tls.Config
-	Log       *logrus.Logger
 }
 
-type GRPCEndpoint struct {
-	SessionID string `json:"sessionID"`
+func copyMsgs(writeMutex *sync.Mutex, dest, src *websocket.Conn) error {
+	for {
+		messageType, msg, err := src.ReadMessage()
+		if err != nil {
+			return err
+		}
+
+		if writeMutex == nil {
+			err = dest.WriteMessage(messageType, msg)
+		} else {
+			writeMutex.Lock()
+			err = dest.WriteMessage(messageType, msg)
+			writeMutex.Unlock()
+		}
+
+		if err != nil {
+			return err
+		}
+	}
 }
 
 func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
+	isWebsocket := false
+	upgrades := r.Header["Upgrade"]
+
+	for _, upgrade := range upgrades {
+		if strings.ToLower(upgrade) == "websocket" {
+			isWebsocket = true
+			break
+		}
+	}
+
+	if !isWebsocket {
+		errMsg := "not a websocket connection"
+		log.Warn(errMsg)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(errMsg))
+	}
+
 	deviceId, found := strings.CutPrefix(r.URL.Path, "/api/terminal/")
 	if !found {
-		t.Log.Warnf("Failed to get deviceId: %s", deviceId)
+		log.Warnf("Failed to get deviceId: %s", deviceId)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	client := &http.Client{Transport: &http.Transport{
+	log.Infof("Starting terminal session for device: %s", deviceId)
+	wsApi, _ := strings.CutPrefix(config.FctlApiUrl, "https://")
+	consoleUrl := fmt.Sprintf("wss://%s/ws/v1/devices/%s/console", wsApi, deviceId)
+
+	dialer := &websocket.Dialer{
 		TLSClientConfig: t.TlsConfig,
-	}}
+	}
 
-	consoleUrl := config.FctlApiUrl + "/api/v1/devices/" + deviceId + "/console"
+	headers := http.Header{}
+	if authHeaderValue := r.Header.Get(common.AuthHeaderKey); authHeaderValue != "" {
+		headers.Add(common.AuthHeaderKey, authHeaderValue)
+	}
 
-	req, err := http.NewRequest(http.MethodGet, consoleUrl, nil)
+	backend, resp, err := dialer.Dial(consoleUrl, headers)
 	if err != nil {
-		errMsg := fmt.Sprintf("Could not create request: %s", err.Error())
-		t.Log.Warnf(errMsg)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(errMsg))
+		errMsg := fmt.Sprintf("Failed to dial backend: '%v'", err)
+		statusCode := http.StatusBadGateway
+		if resp == nil || resp.StatusCode == 0 {
+			log.Warn(errMsg)
+		} else {
+			statusCode = resp.StatusCode
+			if resp.Request == nil {
+				log.Warnf("%s Status: '%v' (no request object)", errMsg, resp.Status)
+			} else {
+				log.Warnf("%s Status: '%v' URL: '%v'", errMsg, resp.Status, resp.Request.URL)
+			}
+		}
+		http.Error(w, errMsg, statusCode)
 		return
 	}
+	defer backend.Close()
 
-	token := ""
-	authHeader, ok := r.Header[common.AuthHeaderKey]
-	if ok && len(authHeader) == 1 {
-		token = authHeader[0]
-		req.Header.Set(common.AuthHeaderKey, authHeader[0])
+	upgrader := &websocket.Upgrader{
+		Subprotocols: []string{common.WsStandaloneSubprotocol, common.WsOcpSubprotocol},
+		CheckOrigin:  func(r *http.Request) bool { return true },
 	}
 
-	resp, err := client.Do(req)
+	frontend, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to get terminal session for device %s", deviceId)
-		t.Log.Warnf(errMsg)
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(errMsg))
-		return
-	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		errMsg := fmt.Sprintf("Failed to read terminal session response %s", err.Error())
-		t.Log.Warnf(errMsg)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(errMsg))
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		t.Log.Warnf("Unexpected terminal session response code %d", resp.StatusCode)
-		w.WriteHeader(resp.StatusCode)
-		w.Write(body)
-		return
-	}
-	response := GRPCEndpoint{}
-	if err := json.Unmarshal(body, &response); err != nil {
-		errMsg := fmt.Sprintf("Failed to unmarshall response json: %s", err.Error())
-		t.Log.Warnf(errMsg)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(errMsg))
+		log.Warnf("Failed to upgrade websocket to client: '%v'", err)
 		return
 	}
 
-	grpcClient, err := grpc.NewClient(config.GrpcUrl, grpc.WithTransportCredentials(credentials.NewTLS(t.TlsConfig)))
-	if err != nil {
-		errMsg := fmt.Sprintf("Failed to create gRPC client: %s", err.Error())
-		t.Log.Warnf(errMsg)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(errMsg))
-		return
-	}
-	router := grpc_v1.NewRouterServiceClient(grpcClient)
-
-	t.Log.Printf("Connecting to %s with session id %s\n", config.GrpcUrl, response.SessionID)
-	ctx := metadata.AppendToOutgoingContext(r.Context(), "session-id", response.SessionID)
-	ctx = metadata.AppendToOutgoingContext(ctx, "client-name", "flightctl-ui")
-	ctx = metadata.AppendToOutgoingContext(ctx, common.AuthHeaderKey, token)
-	g, ctx := errgroup.WithContext(ctx)
-
-	stream, err := router.Stream(ctx)
-	if err != nil {
-		errMsg := fmt.Sprintf("Failed to create gRPC stream: %s", err.Error())
-		t.Log.Warnf(errMsg)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(errMsg))
-		return
-	}
-
-	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	upgrader.Subprotocols = []string{common.WsStandaloneSubprotocol, common.WsOcpSubprotocol}
-	c, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		errMsg := fmt.Sprintf("Failed to update websocket: %s", err.Error())
-		t.Log.Warnf(errMsg)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(errMsg))
-		return
-	}
+	ticker := time.NewTicker(websocketPingInterval)
+	var writeMutex sync.Mutex // Needed because ticker & copy are writing to frontend in separate goroutines
 
 	defer func() {
-		c.Close()
-		_ = stream.Send(&grpc_v1.StreamRequest{
-			Closed: true,
-		})
-		_ = stream.CloseSend()
-		t.Log.Infof("Terminal session for device %s closed", deviceId)
+		log.Infof("Closing terminal session for device: %s", deviceId)
+		ticker.Stop()
+		frontend.Close()
 	}()
 
-	t.Log.Infof("Terminal session for device %s started", deviceId)
-	g.Go(func() error {
-		for {
-			frame, err := stream.Recv()
-			if errors.Is(err, io.EOF) || frame != nil && frame.Closed {
-				_ = stream.Send(&grpc_v1.StreamRequest{
-					Closed: true,
-				})
-				_ = stream.CloseSend()
-				c.Close()
-				return io.EOF
-			}
+	errc := make(chan error, 2)
 
+	// Can't just use io.Copy here since browsers care about frame headers.
+	go func() { errc <- copyMsgs(nil, frontend, backend) }()
+	go func() { errc <- copyMsgs(&writeMutex, backend, frontend) }()
+
+	for {
+		select {
+		case <-errc:
+			// Only wait for a single error and let the defers close both connections.
+			return
+		case <-ticker.C:
+			writeMutex.Lock()
+			// Send pings to client to prevent load balancers and other middlemen from closing the connection early
+			err := frontend.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(websocketTimeout))
+			writeMutex.Unlock()
 			if err != nil {
-				t.Log.Warnf("Error recieving grpc stream input: %s", err.Error())
-				return err
-			}
-			str := string(frame.Payload)
-			// Probably we should use a pseudo tty on the other side
-			// but this is good for now
-			str = strings.ReplaceAll(str, "\n", "\n\r")
-			err = c.WriteMessage(1, []byte(str))
-			if err != nil {
-				errMsg := fmt.Sprintf("Failed writing to ws: %s", err.Error())
-				t.Log.Warnf(errMsg)
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(errMsg))
-				return err
+				return
 			}
 		}
-	})
-
-	g.Go(func() error {
-		for {
-			msgType, message, err := c.ReadMessage()
-			if msgType == -1 {
-				t.Log.Infof("WS connection for device %s closed by client", deviceId)
-				_ = stream.Send(&grpc_v1.StreamRequest{
-					Closed: true,
-				})
-				_ = stream.CloseSend()
-				return io.EOF
-			}
-			if err != nil {
-				errMsg := fmt.Sprintf("Failed to read from ws: %s", err.Error())
-				t.Log.Warnf(errMsg)
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(errMsg))
-				return err
-			}
-
-			for _, b := range message {
-				err = stream.Send(&grpc_v1.StreamRequest{
-					Payload: []byte{b},
-				})
-
-				if err != nil {
-					errMsg := fmt.Sprintf("Failed to send to gRPC: %s", err.Error())
-					t.Log.Warn(errMsg)
-					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte(errMsg))
-					return err
-				}
-			}
-		}
-	})
-
-	g.Wait()
+	}
 }

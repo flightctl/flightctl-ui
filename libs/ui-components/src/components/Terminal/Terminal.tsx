@@ -13,6 +13,7 @@ const terminalOptions: ITerminalOptions & ITerminalInitOnlyOptions = {
   cursorBlink: false,
   cols: 80,
   rows: 25,
+  convertEol: true,
 };
 
 type TerminalProps = {

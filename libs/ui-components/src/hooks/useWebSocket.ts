@@ -2,11 +2,11 @@ import * as React from 'react';
 import { useTranslation } from './useTranslation';
 import { useAppContext } from './useAppContext';
 
-export const useWebSocket = <T extends string>(
+export const useWebSocket = <T>(
   endpoint: string,
-  onMsgReceived: (msg: T) => void,
+  onMsgReceived: (msg: T) => Promise<void>,
 ): {
-  sendMessage: (msg: T) => void;
+  sendMessage: (msg: string) => void;
   isConnecting: boolean;
   isClosed: boolean;
   error: unknown;
@@ -22,7 +22,7 @@ export const useWebSocket = <T extends string>(
   const [error, setError] = React.useState<unknown>();
   const [reset, setReset] = React.useState<number>(0);
 
-  const sendMessage = React.useCallback((data: T) => {
+  const sendMessage = React.useCallback((data: string) => {
     wsRef.current?.send(data);
   }, []);
 

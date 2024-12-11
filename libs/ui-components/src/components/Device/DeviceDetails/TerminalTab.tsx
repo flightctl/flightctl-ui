@@ -11,8 +11,9 @@ const TerminalTab = ({ device }: { device: Device }) => {
   const { t } = useTranslation();
   const terminal = React.useRef<ImperativeTerminalType>(null);
 
-  const onMsgReceived = React.useCallback((message: string) => {
-    terminal.current?.onDataReceived(message);
+  const onMsgReceived = React.useCallback(async (message: Blob) => {
+    const msg = await message.text();
+    terminal.current?.onDataReceived(msg);
   }, []);
 
   const { sendMessage, isClosed, error, reconnect } = useWebSocket(
