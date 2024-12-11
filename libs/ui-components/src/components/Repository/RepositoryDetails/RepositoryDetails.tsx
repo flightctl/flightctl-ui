@@ -12,6 +12,8 @@ import DeleteRepositoryModal from './DeleteRepositoryModal';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { useAccessReview } from '../../../hooks/useAccessReview';
+import { RESOURCE, VERB } from '../../../types/rbac';
 
 const RepositoryDetails = () => {
   const { t } = useTranslation();
@@ -30,6 +32,10 @@ const RepositoryDetails = () => {
     navigate(ROUTE.REPOSITORIES);
   };
 
+  const [canDelete] = useAccessReview(RESOURCE.REPOSITORY, VERB.DELETE);
+  const [canEdit] = useAccessReview(RESOURCE.REPOSITORY, VERB.PATCH);
+  const [canListRS] = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.LIST);
+
   return (
     <DetailsPage
       loading={isLoading}
@@ -40,14 +46,20 @@ const RepositoryDetails = () => {
       resourceType="Repositories"
       resourceTypeLabel={t('Repositories')}
       actions={
-        <DetailsPageActions>
-          <DropdownList>
-            <DropdownItem onClick={() => navigate({ route: ROUTE.REPO_EDIT, postfix: repositoryId })}>
-              {t('Edit repository')}
-            </DropdownItem>
-            <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete repository')}</DropdownItem>
-          </DropdownList>
-        </DetailsPageActions>
+        (canDelete || canEdit) && (
+          <DetailsPageActions>
+            <DropdownList>
+              {canEdit && (
+                <DropdownItem onClick={() => navigate({ route: ROUTE.REPO_EDIT, postfix: repositoryId })}>
+                  {t('Edit repository')}
+                </DropdownItem>
+              )}
+              {canDelete && (
+                <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete repository')}</DropdownItem>
+              )}
+            </DropdownList>
+          </DetailsPageActions>
+        )
       }
     >
       {repoDetails && (
@@ -56,7 +68,7 @@ const RepositoryDetails = () => {
             <GridItem>
               <RepositoryGeneralDetailsCard repoDetails={repoDetails} />
             </GridItem>
-            {repoDetails.spec.type !== RepoSpecType.HTTP && (
+            {canListRS && repoDetails.spec.type !== RepoSpecType.HTTP && (
               <GridItem>
                 <RepositoryResourceSyncsCard repositoryId={repositoryId} />
               </GridItem>

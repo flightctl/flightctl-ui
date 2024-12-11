@@ -40,8 +40,9 @@ import CheckboxField from '../../form/CheckboxField';
 import RadioField from '../../form/RadioField';
 import TextField from '../../form/TextField';
 import FlightCtlForm from '../../form/FlightCtlForm';
-
 import { getDnsSubdomainValidations } from '../../form/validations';
+import { useAccessReview } from '../../../hooks/useAccessReview';
+import { RESOURCE, VERB } from '../../../types/rbac';
 
 import './CreateRepositoryForm.css';
 
@@ -285,13 +286,15 @@ const CreateRepositoryFormContent = ({ isEdit, isReadOnly, onClose, children }: 
   const { values, setFieldValue, isValid, dirty, submitForm, isSubmitting } = useFormikContext<RepositoryFormValues>();
   const isSubmitDisabled = isSubmitting || !dirty || !isValid;
 
+  const [canCreateRS] = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.CREATE);
+
   const showResourceSyncs = values.canUseResourceSyncs && values.repoType === RepoSpecType.GIT;
   return (
     <FlightCtlForm className="fctl-create-repo">
       <fieldset disabled={isReadOnly}>
         <Grid hasGutter span={8}>
           <RepositoryForm isEdit={isEdit} />
-          {showResourceSyncs && (
+          {showResourceSyncs && canCreateRS && (
             <Checkbox
               id="use-resource-syncs"
               label={

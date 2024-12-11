@@ -34,9 +34,10 @@ import './DeviceDetailsTab.css';
 type DeviceDetailsTabProps = {
   device: Required<Device>;
   refetch: VoidFunction;
+  canEdit: boolean;
 };
 
-const DeviceDetailsTab = ({ device, refetch, children }: React.PropsWithChildren<DeviceDetailsTabProps>) => {
+const DeviceDetailsTab = ({ device, refetch, children, canEdit }: React.PropsWithChildren<DeviceDetailsTabProps>) => {
   const { t } = useTranslation();
 
   return (
@@ -67,7 +68,7 @@ const DeviceDetailsTab = ({ device, refetch, children }: React.PropsWithChildren
                   <StackItem className="fctl-device-details-tab__label">{t('Labels')}</StackItem>
                 </Stack>
                 <StackItem>
-                  <EditLabelsForm device={device} onDeviceUpdate={refetch} />
+                  <EditLabelsForm device={device} onDeviceUpdate={refetch} canEdit={canEdit} />
                 </StackItem>
               </FlexItem>
             </Flex>
@@ -176,7 +177,7 @@ const DeviceDetailsTab = ({ device, refetch, children }: React.PropsWithChildren
         </DetailsPageCard>
       </GridItem>
       <GridItem md={12} lg={6}>
-        <DeviceApplications device={device} refetch={refetch} />
+        <DeviceApplications device={device} refetch={refetch} canEdit={canEdit} />
       </GridItem>
     </Grid>
   );

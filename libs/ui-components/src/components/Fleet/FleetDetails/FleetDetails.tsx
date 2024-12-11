@@ -10,6 +10,8 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import DeleteFleetModal from '../DeleteFleetModal/DeleteFleetModal';
+import { useAccessReview } from '../../../hooks/useAccessReview';
+import { RESOURCE, VERB } from '../../../types/rbac';
 
 const FleetDetails = () => {
   const { t } = useTranslation();
@@ -25,6 +27,9 @@ const FleetDetails = () => {
 
   const navigate = useNavigate();
 
+  const [canDelete] = useAccessReview(RESOURCE.FLEET, VERB.DELETE);
+  const [canEdit] = useAccessReview(RESOURCE.FLEET, VERB.PATCH);
+
   const isManaged = !!fleet?.metadata?.owner;
 
   return (
@@ -36,41 +41,47 @@ const FleetDetails = () => {
       resourceType="Fleets"
       resourceTypeLabel={t('Fleets')}
       actions={
-        <DetailsPageActions>
-          <DropdownList>
-            <DropdownItem
-              isAriaDisabled={isManaged}
-              tooltipProps={
-                isManaged
-                  ? {
-                      content: t('Fleets managed by a resource sync cannot be edited'),
-                    }
-                  : undefined
-              }
-              onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}
-            >
-              {t('Edit fleet')}
-            </DropdownItem>
-            <DropdownItem
-              title={t('Delete fleet')}
-              onClick={() => {
-                setIsDeleteModalOpen(true);
-              }}
-              isAriaDisabled={isManaged}
-              tooltipProps={
-                isManaged
-                  ? {
-                      content: t(
-                        "This fleet is managed by a resource sync and cannot be directly deleted. Either remove this fleet's definition from the resource sync configuration, or delete the resource sync first.",
-                      ),
-                    }
-                  : undefined
-              }
-            >
-              {t('Delete fleet')}
-            </DropdownItem>
-          </DropdownList>
-        </DetailsPageActions>
+        (canDelete || canEdit) && (
+          <DetailsPageActions>
+            <DropdownList>
+              {canEdit && (
+                <DropdownItem
+                  isAriaDisabled={isManaged}
+                  tooltipProps={
+                    isManaged
+                      ? {
+                          content: t('Fleets managed by a resource sync cannot be edited'),
+                        }
+                      : undefined
+                  }
+                  onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}
+                >
+                  {t('Edit fleet')}
+                </DropdownItem>
+              )}
+              {canDelete && (
+                <DropdownItem
+                  title={t('Delete fleet')}
+                  onClick={() => {
+                    setIsDeleteModalOpen(true);
+                  }}
+                  isAriaDisabled={isManaged}
+                  tooltipProps={
+                    isManaged
+                      ? {
+                          content: t(
+                            "This fleet is managed by a resource sync and cannot be directly deleted. Either remove this fleet's definition from the resource sync configuration, or delete the resource sync first.",
+                          ),
+                        }
+                      : undefined
+                  }
+                >
+                  {t('Delete fleet')}
+                </DropdownItem>
+              )}
+            </DropdownList>
+          </DetailsPageActions>
+        )
       }
     >
       {fleet && (

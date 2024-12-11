@@ -14,6 +14,8 @@ import TerminalTab from './TerminalTab';
 import NavItem from '../../NavItem/NavItem';
 import DeviceStatusDebugModal from './DeviceStatusDebugModal';
 import { getDeviceFleet } from '../../../utils/devices';
+import { RESOURCE, VERB } from '../../../types/rbac';
+import { useAccessReview } from '../../../hooks/useAccessReview';
 
 const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{ hideTerminal?: boolean }>) => {
   const { t } = useTranslation();
@@ -28,6 +30,9 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
   const { remove } = useFetch();
 
   const deviceAlias = device?.metadata.labels?.alias || deviceId;
+
+  const [canDelete] = useAccessReview(RESOURCE.DEVICE, VERB.DELETE);
+  const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
 
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {
@@ -66,13 +71,15 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
       actions={
         <DetailsPageActions>
           <DropdownList>
-            <DropdownItem
-              onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}
-              {...editActionProps}
-            >
-              {t('Edit device configurations')}
-            </DropdownItem>
-            {deleteAction}
+            {canEdit && (
+              <DropdownItem
+                onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}
+                {...editActionProps}
+              >
+                {t('Edit device configurations')}
+              </DropdownItem>
+            )}
+            {canDelete && deleteAction}
             <DropdownItem
               onClick={() => {
                 setShowDebugInfo(!showDebugInfo);
@@ -90,7 +97,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
           <Route
             path="details"
             element={
-              <DeviceDetailsTab device={device} refetch={refetch}>
+              <DeviceDetailsTab device={device} refetch={refetch} canEdit={canEdit}>
                 {children}
               </DeviceDetailsTab>
             }

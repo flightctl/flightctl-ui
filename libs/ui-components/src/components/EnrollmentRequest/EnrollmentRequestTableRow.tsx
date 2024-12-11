@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
 import { Button } from '@patternfly/react-core';
 
 import { EnrollmentRequest } from '@flightctl/types';
@@ -16,6 +16,8 @@ type EnrollmentRequestTableRow = {
   er: EnrollmentRequest;
   onApprove: (id: string) => void;
   deleteAction: DeleteListActionResult['deleteAction'];
+  canApprove: boolean;
+  canDelete: boolean;
 };
 
 const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
@@ -25,6 +27,8 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
   onRowSelect,
   isRowSelected,
   onApprove,
+  canApprove,
+  canDelete,
 }) => {
   const { t } = useTranslation();
   const erName = er.metadata.name as string;
@@ -32,6 +36,17 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
   const approveEnrollment = () => {
     onApprove(erName);
   };
+
+  const actionItems: IAction[] = [];
+  if (canApprove) {
+    actionItems.push({
+      title: t('Approve'),
+      onClick: approveEnrollment,
+    });
+  }
+  if (canDelete) {
+    actionItems.push(deleteAction({ resourceId: erName }));
+  }
 
   return (
     <Tr data-testid={`enrollment-request-${rowIndex}`}>
@@ -46,22 +61,18 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
         <ResourceLink id={erName} routeLink={ROUTE.ENROLLMENT_REQUEST_DETAILS} />
       </Td>
       <Td dataLabel={t('Created')}>{timeSinceText(t, er.metadata.creationTimestamp)}</Td>
-      <Td dataLabel={t('Approve')}>
-        <Button variant="link" onClick={approveEnrollment}>
-          {t('Approve')}
-        </Button>
-      </Td>
-      <Td isActionCell>
-        <ActionsColumn
-          items={[
-            {
-              title: t('Approve'),
-              onClick: approveEnrollment,
-            },
-            deleteAction({ resourceId: erName }),
-          ]}
-        />
-      </Td>
+      {canApprove && (
+        <Td dataLabel={t('Approve')}>
+          <Button variant="link" onClick={approveEnrollment}>
+            {t('Approve')}
+          </Button>
+        </Td>
+      )}
+      {!!actionItems.length && (
+        <Td isActionCell>
+          <ActionsColumn items={actionItems} />
+        </Td>
+      )}
     </Tr>
   );
 };

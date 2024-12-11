@@ -21,6 +21,7 @@ type ApplicationsTableProps = {
   addedSystemdUnitDates: Record<string, number>;
   onSystemdDelete?: (deletedUnit: string) => void;
   isUpdating: boolean;
+  canEdit: boolean;
 };
 
 const DELETE_SYSTED_TIMEOUT = 30000; // 30 seconds
@@ -32,6 +33,7 @@ const ApplicationsTable = ({
   addedSystemdUnitDates,
   onSystemdDelete,
   isUpdating,
+  canEdit,
 }: ApplicationsTableProps) => {
   const { t } = useTranslation();
 
@@ -86,7 +88,7 @@ const ApplicationsTable = ({
             specApps.includes(appName) ||
             !(specSystemdUnits.includes(appName) || isDeletedSystemdUnit || isAddedSystemdUnit);
 
-          const deleteSystemdUnit = !isDeletedSystemdUnit && onSystemdDelete && (
+          const deleteSystemdUnit = canEdit && !isDeletedSystemdUnit && onSystemdDelete && (
             <Button
               aria-label={t('Delete')}
               isDisabled={isUpdating}

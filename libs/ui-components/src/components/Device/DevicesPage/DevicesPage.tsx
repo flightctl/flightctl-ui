@@ -30,6 +30,9 @@ import {
 } from '../../Status/utils';
 import EnrollmentRequestList from './EnrollmentRequestList';
 import { FilterStatusMap } from './types';
+import PageWithPermissions from '../../common/PageWithPermissions';
+import { RESOURCE, VERB } from '../../../types/rbac';
+import { useAccessReview } from '../../../hooks/useAccessReview';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -37,13 +40,18 @@ type DeviceEmptyStateProps = {
 
 const DeviceEmptyState: React.FC<DeviceEmptyStateProps> = ({ onAddDevice }) => {
   const { t } = useTranslation();
+  const [canCreateFleet] = useAccessReview(RESOURCE.FLEET, VERB.CREATE);
   return (
     <ResourceListEmptyState icon={MicrochipIcon} titleText={t('No devices here!')}>
       <EmptyStateBody>
-        <Trans t={t}>
-          You can add devices and label them to match fleets, or your can{' '}
-          <Link to={ROUTE.FLEET_CREATE}>start with a fleet</Link> and add devices into it.
-        </Trans>
+        {canCreateFleet ? (
+          <Trans t={t}>
+            You can add devices and label them to match fleets, or your can{' '}
+            <Link to={ROUTE.FLEET_CREATE}>start with a fleet</Link> and add devices into it.
+          </Trans>
+        ) : (
+          t('You can add devices and label them to match fleets')
+        )}
       </EmptyStateBody>
       <EmptyStateFooter>
         <EmptyStateActions>
@@ -128,6 +136,9 @@ export const DeviceTable = ({
     },
   });
 
+  const [canDelete] = useAccessReview(RESOURCE.DEVICE, VERB.DELETE);
+  const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
+
   return (
     <>
       <DeviceTableToolbar
@@ -144,11 +155,13 @@ export const DeviceTable = ({
         <ToolbarItem>
           <Button onClick={() => setAddDeviceModal(true)}>{t('Add devices')}</Button>
         </ToolbarItem>
-        <ToolbarItem>
-          <Button isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)} variant="secondary">
-            {t('Delete devices')}
-          </Button>
-        </ToolbarItem>
+        {canDelete && (
+          <ToolbarItem>
+            <Button isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)} variant="secondary">
+              {t('Delete devices')}
+            </Button>
+          </ToolbarItem>
+        )}
       </DeviceTableToolbar>
       <Table
         aria-label={t('Devices table')}
@@ -168,6 +181,8 @@ export const DeviceTable = ({
               onRowSelect={onRowSelect}
               isRowSelected={isRowSelected}
               rowIndex={index}
+              canDelete={canDelete}
+              canEdit={canEdit}
             />
           ))}
         </Tbody>
@@ -189,7 +204,7 @@ export const DeviceTable = ({
   );
 };
 
-const DevicesPage = () => {
+const DevicesPage = ({ canListER }: { canListER: boolean }) => {
   const { t } = useTranslation();
   const deviceColumns = React.useMemo(() => getDeviceColumns(t), [t]);
 
@@ -213,7 +228,7 @@ const DevicesPage = () => {
 
   return (
     <>
-      <EnrollmentRequestList refetchDevices={refetch} />
+      {canListER && <EnrollmentRequestList refetchDevices={refetch} />}
 
       <ListPage title={t('Devices')}>
         <ListPageBody error={error} loading={loading}>
@@ -238,4 +253,15 @@ const DevicesPage = () => {
   );
 };
 
-export default DevicesPage;
+const DevicesPageWithPermissions = () => {
+  const [canListDevice, deviceLoading] = useAccessReview(RESOURCE.DEVICE, VERB.LIST);
+  const [canListER, erLoading] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.LIST);
+
+  return (
+    <PageWithPermissions loading={deviceLoading || erLoading} allowed={canListDevice || canListER}>
+      {canListDevice ? <DevicesPage canListER={canListER} /> : <EnrollmentRequestList isStandalone />}
+    </PageWithPermissions>
+  );
+};
+
+export default DevicesPageWithPermissions;

@@ -103,7 +103,7 @@ const ImportFleetWizard = () => {
 
   const gitRepositories = (repoList?.items || []).filter((repo) => repo.spec.type === RepoSpecType.GIT);
 
-  let body;
+  let body: React.ReactNode;
 
   if (isLoading) {
     body = (

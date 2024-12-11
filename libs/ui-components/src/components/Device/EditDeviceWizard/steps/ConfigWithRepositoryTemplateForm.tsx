@@ -19,6 +19,7 @@ type ConfigWithRepositoryTemplateFormProps = {
   index: number;
   repositories: Repository[];
   repoRefetch: VoidFunction;
+  canCreateRepo: boolean;
 };
 
 const getRepositoryItems = (
@@ -172,6 +173,7 @@ const ConfigWithRepositoryTemplateForm = ({
   index,
   repositories,
   repoRefetch,
+  canCreateRepo,
 }: ConfigWithRepositoryTemplateFormProps) => {
   const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<DeviceSpecConfigFormValues>();
@@ -190,18 +192,20 @@ const ConfigWithRepositoryTemplateForm = ({
           items={repositoryItems}
           placeholderText={t('Select a repository')}
         >
-          <MenuFooter>
-            <Button
-              variant="link"
-              isInline
-              icon={<PlusCircleIcon />}
-              onClick={() => {
-                setCreateRepoModalOpen(true);
-              }}
-            >
-              {t('Create repository')}
-            </Button>
-          </MenuFooter>
+          {canCreateRepo && (
+            <MenuFooter>
+              <Button
+                variant="link"
+                isInline
+                icon={<PlusCircleIcon />}
+                onClick={() => {
+                  setCreateRepoModalOpen(true);
+                }}
+              >
+                {t('Create repository')}
+              </Button>
+            </MenuFooter>
+          )}
         </FormSelect>
       </FormGroup>
       {repoType === RepoSpecType.GIT && <GitConfigForm template={ct as GitConfigTemplate} index={index} />}

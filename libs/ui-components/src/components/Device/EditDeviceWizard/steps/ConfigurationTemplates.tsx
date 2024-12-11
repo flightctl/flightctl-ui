@@ -30,6 +30,8 @@ import ConfigWithRepositoryTemplateForm from './ConfigWithRepositoryTemplateForm
 import ConfigK8sSecretTemplateForm from './ConfigK8sSecretTemplateForm';
 import ConfigInlineTemplateForm from './ConfigInlineTemplateForm';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
+import { useAccessReview } from '../../../../hooks/useAccessReview';
+import { RESOURCE, VERB } from '../../../../types/rbac';
 
 const useValidateOnMount = () => {
   const { validateForm } = useFormikContext<DeviceSpecConfigFormValues>();
@@ -44,9 +46,17 @@ const useValidateOnMount = () => {
 type ConfigSectionProps = {
   repositories: Repository[];
   repoRefetch: VoidFunction;
+  canCreateRepo: boolean;
+  canListRepo: boolean;
 };
 
-const ConfigSection = ({ index, repositories, repoRefetch }: ConfigSectionProps & { index: number }) => {
+const ConfigSection = ({
+  index,
+  repositories,
+  repoRefetch,
+  canCreateRepo,
+  canListRepo,
+}: ConfigSectionProps & { index: number }) => {
   const { t } = useTranslation();
   const fieldName = `configTemplates[${index}]`;
   const [
@@ -59,17 +69,19 @@ const ConfigSection = ({ index, repositories, repoRefetch }: ConfigSectionProps 
 
   const items = React.useMemo(() => {
     const options = {
-      [ConfigType.GIT]: { label: t('Git configuration') },
-      [ConfigType.HTTP]: { label: t('Http configuration') },
       [ConfigType.INLINE]: { label: t('Inline configuration') },
     };
+    if (canListRepo && (canCreateRepo || repositories.length > 0)) {
+      options[ConfigType.GIT] = { label: t('Git configuration') };
+      options[ConfigType.HTTP] = { label: t('Http configuration') };
+    }
     if (type === ConfigType.K8S_SECRET) {
       options[ConfigType.K8S_SECRET] = { label: t('Kubernetes secret provider') };
     }
     return options;
     // The k8s secret option must remain active for this config even when the users switch the configType to a different one
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t]);
+  }, [t, canListRepo]);
 
   return (
     <ExpandableFormSection
@@ -95,6 +107,7 @@ const ConfigSection = ({ index, repositories, repoRefetch }: ConfigSectionProps 
           <ConfigWithRepositoryTemplateForm
             repoType={type === ConfigType.HTTP ? RepoSpecType.HTTP : RepoSpecType.GIT}
             index={index}
+            canCreateRepo={canCreateRepo}
             repositories={repositories}
             repoRefetch={repoRefetch}
           />
@@ -104,58 +117,77 @@ const ConfigSection = ({ index, repositories, repoRefetch }: ConfigSectionProps 
   );
 };
 
-const ConfigurationTemplatesForm = ({ repositories, repoRefetch }: ConfigSectionProps) => {
+const ConfigurationTemplatesForm = ({ repositories, repoRefetch, canCreateRepo, canListRepo }: ConfigSectionProps) => {
   const { t } = useTranslation();
   const { values, errors } = useFormikContext<DeviceSpecConfigFormValues>();
 
   const generalError = typeof errors.configTemplates === 'string' ? errors.configTemplates : undefined;
 
   return (
-    <FieldArray name="configTemplates">
-      {({ push, remove }) => (
-        <>
-          {values.configTemplates.map((_, index) => (
-            <FormSection key={index}>
-              <Split hasGutter>
-                <SplitItem isFilled>
-                  <ConfigSection index={index} repositories={repositories} repoRefetch={repoRefetch} />
-                </SplitItem>
-                <SplitItem>
-                  <Button
-                    variant="link"
-                    icon={<MinusCircleIcon />}
-                    iconPosition="start"
-                    onClick={() => remove(index)}
-                  />
-                </SplitItem>
-              </Split>
+    <FormGroup
+      label={
+        <WithHelperText
+          ariaLabel={t('Host configurations (files)')}
+          content={t(
+            "Define configuration files that shall be present on the device's file system. For example: systemd service config, network config, firewall config, etc.",
+          )}
+          showLabel
+        />
+      }
+    >
+      <FieldArray name="configTemplates">
+        {({ push, remove }) => (
+          <>
+            {values.configTemplates.map((_, index) => (
+              <FormSection key={index}>
+                <Split hasGutter>
+                  <SplitItem isFilled>
+                    <ConfigSection
+                      index={index}
+                      canCreateRepo={canCreateRepo}
+                      repositories={repositories}
+                      repoRefetch={repoRefetch}
+                      canListRepo={canListRepo}
+                    />
+                  </SplitItem>
+                  <SplitItem>
+                    <Button
+                      variant="link"
+                      icon={<MinusCircleIcon />}
+                      iconPosition="start"
+                      onClick={() => remove(index)}
+                    />
+                  </SplitItem>
+                </Split>
+              </FormSection>
+            ))}
+            <FormSection>
+              <FormGroup>
+                <Button
+                  variant="link"
+                  icon={<PlusCircleIcon />}
+                  iconPosition="start"
+                  onClick={() => {
+                    push({
+                      name: '',
+                      type: '',
+                    });
+                  }}
+                >
+                  {t('Add configuration')}
+                </Button>
+              </FormGroup>
             </FormSection>
-          ))}
-          <FormSection>
-            <FormGroup>
-              <Button
-                variant="link"
-                icon={<PlusCircleIcon />}
-                iconPosition="start"
-                onClick={() => {
-                  push({
-                    name: '',
-                    type: '',
-                  });
-                }}
-              >
-                {t('Add configuration')}
-              </Button>
-            </FormGroup>
-          </FormSection>
-          <ErrorHelperText error={generalError} />
-        </>
-      )}
-    </FieldArray>
+            <ErrorHelperText error={generalError} />
+          </>
+        )}
+      </FieldArray>
+    </FormGroup>
   );
 };
 
 const ConfigurationTemplates = () => {
+  const [canCreateRepo] = useAccessReview(RESOURCE.REPOSITORY, VERB.CREATE);
   const [repositoryList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>({
     endpoint: 'repositories',
   });
@@ -179,20 +211,22 @@ const ConfigurationTemplates = () => {
   }
 
   return (
-    <FormGroup
-      label={
-        <WithHelperText
-          ariaLabel={t('Host configurations (files)')}
-          content={t(
-            "Define configuration files that shall be present on the device's file system. For example: systemd service config, network config, firewall config, etc.",
-          )}
-          showLabel
-        />
-      }
-    >
-      <ConfigurationTemplatesForm repositories={repositories} repoRefetch={refetch} />
-    </FormGroup>
+    <ConfigurationTemplatesForm
+      canListRepo
+      canCreateRepo={canCreateRepo}
+      repositories={repositories}
+      repoRefetch={refetch}
+    />
   );
 };
 
-export default ConfigurationTemplates;
+const ConfigurationTemplatesWithPermissions = () => {
+  const [canListRepo] = useAccessReview(RESOURCE.REPOSITORY, VERB.LIST);
+  return canListRepo ? (
+    <ConfigurationTemplates />
+  ) : (
+    <ConfigurationTemplatesForm canListRepo={false} canCreateRepo={false} repositories={[]} repoRefetch={() => {}} />
+  );
+};
+
+export default ConfigurationTemplatesWithPermissions;

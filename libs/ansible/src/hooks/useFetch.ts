@@ -48,11 +48,14 @@ export const useFetch = (getCookie: (name: string) => string | undefined, servic
     [],
   );
 
+  const checkPermissions = React.useCallback(() => Promise.resolve(true), []);
+
   return {
     getWsEndpoint,
     get,
     post,
     remove,
     patch,
+    checkPermissions,
   };
 };

@@ -15,6 +15,8 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { Link, ROUTE } from '../../hooks/useNavigate';
 import { getLastTransitionTime, getRepositorySyncStatus } from '../../utils/status/repository';
+import { useAccessReview } from '../../hooks/useAccessReview';
+import { RESOURCE, VERB } from '../../types/rbac';
 
 // Entries format: <rs0Name>@@<rs0LastSync>,<rs1Name>@@<rs1LastSync>,...
 const RS_DISMISS_STORAGE_KEY = 'FC_DISMISS_SYNCS';
@@ -163,4 +165,9 @@ const FleetResourceSyncs = () => {
   );
 };
 
-export default FleetResourceSyncs;
+const FleetResourceSyncsWithPermissions = () => {
+  const [allowed] = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.LIST);
+  return allowed && <FleetResourceSyncs />;
+};
+
+export default FleetResourceSyncsWithPermissions;

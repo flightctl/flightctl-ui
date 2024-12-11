@@ -19,6 +19,8 @@ type DeviceTableRowProps = {
   rowIndex: number;
   onRowSelect: (device: Device) => OnSelect;
   isRowSelected: (device: Device) => boolean;
+  canDelete: boolean;
+  canEdit: boolean;
 };
 
 const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
@@ -27,6 +29,8 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
   rowIndex,
   onRowSelect,
   isRowSelected,
+  canDelete,
+  canEdit,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -72,19 +76,27 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
       <Td isActionCell>
         <ActionsColumn
           items={[
-            {
-              title: t('Edit device configurations'),
-              onClick: () => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceName }),
-              ...editActionProps,
-            },
+            ...(canEdit
+              ? [
+                  {
+                    title: t('Edit device configurations'),
+                    onClick: () => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceName }),
+                    ...editActionProps,
+                  },
+                ]
+              : []),
             {
               title: t('View device details'),
               onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
             },
-            deleteAction({
-              resourceId: deviceName,
-              resourceName: deviceAlias,
-            }),
+            ...(canDelete
+              ? [
+                  deleteAction({
+                    resourceId: deviceName,
+                    resourceName: deviceAlias,
+                  }),
+                ]
+              : []),
           ]}
         />
       </Td>

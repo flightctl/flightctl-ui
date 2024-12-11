@@ -13,9 +13,10 @@ import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsP
 type DeviceDetailsTabProps = {
   device: Required<Device>;
   refetch: VoidFunction;
+  canEdit: boolean;
 };
 
-const DeviceApplications = ({ device, refetch }: React.PropsWithChildren<DeviceDetailsTabProps>) => {
+const DeviceApplications = ({ device, refetch, canEdit }: React.PropsWithChildren<DeviceDetailsTabProps>) => {
   const { t } = useTranslation();
   const { patch } = useFetch();
   const [showSystemdModal, setShowSystemdModal] = React.useState<boolean>(false);
@@ -67,7 +68,7 @@ const DeviceApplications = ({ device, refetch }: React.PropsWithChildren<DeviceD
       <CardTitle>
         <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
           <FlexItem>{t('Applications')}</FlexItem>
-          {!isManagedDevice && (
+          {!isManagedDevice && canEdit && (
             <FlexItem>
               <Button
                 variant="link"
@@ -90,6 +91,7 @@ const DeviceApplications = ({ device, refetch }: React.PropsWithChildren<DeviceD
           onSystemdDelete={deleteSystemdUnit}
           isUpdating={isUpdating}
           addedSystemdUnitDates={addedSystemdDates}
+          canEdit={canEdit}
         />
         {showSystemdModal && <SystemdUnitsModal device={device} onClose={onClose} />}
       </DetailsPageCardBody>

@@ -21,6 +21,15 @@ import MassDeleteDeviceModal from '../../modals/massModals/MassDeleteDeviceModal
 import MassApproveDeviceModal from '../../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
 import EnrollmentRequestTableRow from '../../EnrollmentRequest/EnrollmentRequestTableRow';
 import EnrollmentRequestTableToolbar from './EnrollmentRequestTableToolbar';
+import { RESOURCE, VERB } from '../../../types/rbac';
+import { useAccessReview } from '../../../hooks/useAccessReview';
+import ResourceListEmptyState from '../../common/ResourceListEmptyState';
+import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons';
+
+const ErEmptyState = () => {
+  const { t } = useTranslation();
+  return <ResourceListEmptyState icon={MicrochipIcon} titleText={t('No enrollment requests here!')} />;
+};
 
 const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
   {
@@ -33,8 +42,12 @@ const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
 
 const getSearchText = (er: EnrollmentRequest) => [er.metadata.name];
 
-const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunction }) => {
+type EnrollmentRequestListProps = { refetchDevices?: VoidFunction; isStandalone?: boolean };
+
+const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentRequestListProps) => {
   const { t } = useTranslation();
+  const [canApprove] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST_APPROVAL, VERB.POST);
+  const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
   const { remove } = useFetch();
   const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
 
@@ -45,7 +58,7 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
 
   const refetchWithDevices = () => {
     refetch();
-    refetchDevices();
+    refetchDevices?.();
   };
 
   const [approvingErId, setApprovingErId] = React.useState<string>();
@@ -69,7 +82,7 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
   }
 
   if (pendingEnrollments.length === 0) {
-    return null;
+    return isStandalone ? <ErEmptyState /> : null;
   }
 
   const currentEnrollmentRequest = pendingEnrollments.find((er) => er.metadata.name === approvingErId);
@@ -78,14 +91,20 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
     <ListPage title={t('Devices pending approval')} headingLevel="h2">
       <ListPageBody error={error} loading={isLoading}>
         <EnrollmentRequestTableToolbar search={search} setSearch={setSearch} enrollments={pendingEnrollments}>
-          <ToolbarItem>
-            <TableActions isDisabled={!hasSelectedRows}>
-              <SelectList>
-                <SelectOption onClick={() => setIsMassApproveModalOpen(true)}>{t('Approve')}</SelectOption>
-                <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
-              </SelectList>
-            </TableActions>
-          </ToolbarItem>
+          {(canApprove || canDelete) && (
+            <ToolbarItem>
+              <TableActions isDisabled={!hasSelectedRows}>
+                <SelectList>
+                  {canApprove && (
+                    <SelectOption onClick={() => setIsMassApproveModalOpen(true)}>{t('Approve')}</SelectOption>
+                  )}
+                  {canDelete && (
+                    <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
+                  )}
+                </SelectList>
+              </TableActions>
+            </ToolbarItem>
+          )}
         </EnrollmentRequestTableToolbar>
         <Table
           aria-label={t('Table for devices pending approval')}
@@ -108,6 +127,8 @@ const EnrollmentRequestList = ({ refetchDevices }: { refetchDevices: VoidFunctio
                 onApprove={() => {
                   setApprovingErId(er.metadata.name as string);
                 }}
+                canApprove={canApprove}
+                canDelete={canDelete}
               />
             ))}
           </Tbody>
