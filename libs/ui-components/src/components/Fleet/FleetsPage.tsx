@@ -18,7 +18,6 @@ import { TopologyIcon } from '@patternfly/react-icons/dist/js/icons/topology-ico
 import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
 
-import { Fleet } from '@flightctl/types';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import TableTextSearch from '../Table/TableTextSearch';
@@ -34,6 +33,7 @@ import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import DeleteFleetModal from './DeleteFleetModal/DeleteFleetModal';
 import FleetResourceSyncs from './FleetResourceSyncs';
 import { useFleetBackendFilters, useFleets } from './useFleets';
+import TablePagination from '../Table/TablePagination';
 
 const FleetPageActions = ({ createText }: { createText?: string }) => {
   const { t } = useTranslation();
@@ -89,26 +89,22 @@ const getColumns = (t: TFunction): ApiSortTableColumn[] => [
   },
 ];
 
-type FleetTableProps = {
-  fleetColumns: ApiSortTableColumn[];
-  fleetLoad: FleetLoad;
-  // getSortParams: (columnIndex: number) => ThProps['sort'];
-  hasFiltersEnabled: boolean;
-  name: string | undefined;
-  setName: (name: string) => void;
-};
-
-const FleetTable = ({ name, setName, hasFiltersEnabled, fleetColumns, fleetLoad }: FleetTableProps) => {
+const FleetTable = () => {
   const { t } = useTranslation();
+
+  const fleetColumns = React.useMemo(() => getColumns(t), [t]);
+  const { name, setName, hasFiltersEnabled } = useFleetBackendFilters();
+
+  const fleetLoad = useFleets({ name, addDevicesCount: true });
 
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
   const [fleetToDeleteId, setFleetToDeleteId] = React.useState<string>();
-  const [fleets, loading, error, isFilterUpdating, refetch] = fleetLoad;
+  const { fleets, isLoading, error, isUpdating, refetch } = fleetLoad;
 
   const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
 
   return (
-    <ListPageBody error={error} loading={loading}>
+    <ListPageBody error={error} loading={isLoading}>
       <Toolbar inset={{ default: 'insetNone' }}>
         <ToolbarContent>
           <ToolbarGroup>
@@ -130,7 +126,7 @@ const FleetTable = ({ name, setName, hasFiltersEnabled, fleetColumns, fleetLoad 
       </Toolbar>
       <Table
         aria-label={t('Fleets table')}
-        loading={isFilterUpdating}
+        loading={isUpdating}
         columns={fleetColumns}
         emptyFilters={!hasFiltersEnabled}
         emptyData={fleets.length === 0}
@@ -152,6 +148,12 @@ const FleetTable = ({ name, setName, hasFiltersEnabled, fleetColumns, fleetLoad 
           ))}
         </Tbody>
       </Table>
+      <TablePagination
+        isUpdating={fleetLoad.isUpdating}
+        itemCount={fleetLoad.itemCount}
+        currentPage={fleetLoad.currentPage}
+        setCurrentPage={fleetLoad.setCurrentPage}
+      />
       {fleets.length === 0 && <FleetEmptyState />}
       {fleetToDeleteId && (
         <DeleteFleetModal
@@ -178,28 +180,15 @@ const FleetTable = ({ name, setName, hasFiltersEnabled, fleetColumns, fleetLoad 
   );
 };
 
-type FleetLoad = [Fleet[], boolean, unknown, boolean, VoidFunction];
-
 const FleetsPage = () => {
   const { t } = useTranslation();
 
-  // TODO move the fetch down to FleetTable when the API includes the filter for pending / errored resource syncs
-  const columns = React.useMemo(() => getColumns(t), [t]);
-  const { name, setName, hasFiltersEnabled } = useFleetBackendFilters();
-  const fleetLoad = useFleets({ name, addDevicesCount: true });
-
   return (
     <>
-      <FleetResourceSyncs fleets={fleetLoad[0] || []} />
+      <FleetResourceSyncs />
 
       <ListPage title={t('Fleets')}>
-        <FleetTable
-          name={name}
-          setName={setName}
-          hasFiltersEnabled={hasFiltersEnabled}
-          fleetLoad={fleetLoad}
-          fleetColumns={columns}
-        />
+        <FleetTable />
       </ListPage>
     </>
   );

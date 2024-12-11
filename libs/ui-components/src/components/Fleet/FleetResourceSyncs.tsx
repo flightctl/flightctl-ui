@@ -7,9 +7,9 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import { TFunction, Trans } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
-import { Fleet, ResourceSync, ResourceSyncList } from '@flightctl/types';
+import { ConditionType, ResourceSync, ResourceSyncList } from '@flightctl/types';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
@@ -39,9 +39,14 @@ const isDismissed = (rs: ResourceSync) => {
   return dismissedEntries.includes(rsDismissKey);
 };
 
-const hasError = (rs: ResourceSync, t: TFunction) => {
-  const rsStatus = getRepositorySyncStatus(rs, t);
+const hasError = (rs: ResourceSync) => {
+  const rsStatus = getRepositorySyncStatus(rs, (msg: string) => msg);
   return ['Not parsed', 'Not synced', 'Not accessible'].includes(rsStatus.status);
+};
+
+const isPending = (rs: ResourceSync) => {
+  const rsStatus = getRepositorySyncStatus(rs, (msg: string) => msg);
+  return rsStatus?.status !== ConditionType.ResourceSyncSynced;
 };
 
 const ResourceSyncInfoAlert = ({ rs }: { rs: ResourceSync }) => {
@@ -108,53 +113,51 @@ const ResourceSyncErrorAlert = ({ rs, refetch }: { rs: ResourceSync; refetch: Vo
   );
 };
 
-const FleetResourceSyncs = ({ fleets }: { fleets: Fleet[] }) => {
-  const { t } = useTranslation();
+const getVisibleResourceSyncs = (rsList: ResourceSync[]) => {
+  const pendingRs: ResourceSync[] = [];
+  const errorRs: ResourceSync[] = [];
 
+  rsList.forEach((rs) => {
+    if (isDismissed(rs)) {
+      return;
+    }
+    if (hasError(rs)) {
+      errorRs.push(rs);
+    } else if (isPending(rs)) {
+      pendingRs.push(rs);
+    }
+  });
+  return { pendingRs, errorRs };
+};
+
+const FleetResourceSyncs = () => {
   const [rsList, , , rsRefetch] = useFetchPeriodically<ResourceSyncList>({
     endpoint: 'resourcesyncs',
   });
 
   // TODO Remove the client-side filtering once the API filter is available
-  const pendingResourceSyncs = React.useMemo(
-    () => [
-      ...(rsList?.items || []).filter((rs) => {
-        if (isDismissed(rs)) {
-          return false;
-        }
-        if (hasError(rs, t)) {
-          return true;
-        }
-        return !fleets.some((fleet) => fleet.metadata.owner === `ResourceSync/${rs.metadata.name}`);
-      }),
-    ],
-    [fleets, rsList, t],
-  );
+  const { pendingRs, errorRs } = React.useMemo(() => getVisibleResourceSyncs(rsList?.items || []), [rsList]);
 
-  if (pendingResourceSyncs.length === 0) {
+  if (pendingRs.length === 0 && errorRs.length === 0) {
     return null;
   }
   return (
     <PageSection variant={PageSectionVariants.light}>
       <Stack hasGutter>
-        {pendingResourceSyncs
-          .filter((rs) => !hasError(rs, t))
-          .map((rs) => {
-            return (
-              <StackItem key={rs.metadata.name as string}>
-                <ResourceSyncInfoAlert rs={rs} />
-              </StackItem>
-            );
-          })}
-        {pendingResourceSyncs
-          .filter((rs) => hasError(rs, t))
-          .map((rs) => {
-            return (
-              <StackItem key={rs.metadata.name as string}>
-                <ResourceSyncErrorAlert rs={rs} refetch={rsRefetch} />
-              </StackItem>
-            );
-          })}
+        {errorRs.map((rs) => {
+          return (
+            <StackItem key={rs.metadata.name as string}>
+              <ResourceSyncInfoAlert rs={rs} />
+            </StackItem>
+          );
+        })}
+        {pendingRs.map((rs) => {
+          return (
+            <StackItem key={rs.metadata.name as string}>
+              <ResourceSyncErrorAlert rs={rs} refetch={rsRefetch} />
+            </StackItem>
+          );
+        })}
       </Stack>
     </PageSection>
   );

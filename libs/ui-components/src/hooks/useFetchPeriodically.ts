@@ -8,6 +8,7 @@ const TIMEOUT = 10000;
 
 export const useFetchPeriodically = <R>(
   query: FlightControlQuery,
+  onFetchComplete?: (data: R) => void,
 ): [R | undefined, boolean, unknown, VoidFunction, boolean] => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isUpdating, setIsUpdating] = React.useState(false);
@@ -48,6 +49,9 @@ export const useFetchPeriodically = <R>(
             // eslint-disable-next-line
             setData(isAPI ? data : (data as any).data.result);
             setError(undefined);
+            if (isAPI && onFetchComplete) {
+              onFetchComplete(data as R);
+            }
           } catch (err) {
             // aborting fetch trows 'AbortError', we can ignore it
             if (abortController.signal.aborted) {
