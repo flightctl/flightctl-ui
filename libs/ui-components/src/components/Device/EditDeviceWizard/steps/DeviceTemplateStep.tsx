@@ -5,8 +5,10 @@ import { Trans } from 'react-i18next';
 import { Repository } from '@flightctl/types';
 import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
 
+import { USING_TEMPLATE_VARIABLES_LINK } from '../../../../links';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import WithHelperText from '../../../common/WithHelperText';
+import LearnMoreLink from '../../../common/LearnMoreLink';
 import TextField from '../../../form/TextField';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { DeviceSpecConfigFormValues } from '../types';
@@ -23,9 +25,9 @@ export const deviceTemplateStepId = 'device-template';
 export const isDeviceTemplateStepValid = (errors: FormikErrors<DeviceSpecConfigFormValues>) =>
   !errors.osImage && !errors.configTemplates && !errors.applications && !errors.systemdUnits;
 
-const templateOption1 = '{{ device.metadata.labels[key] }}';
-const templateOption2 = '{{ device.metadata.name }}';
-const exampleCode = `/device-configs/factory-floors/floor-{{ device.metadata.labels[factory-floor] }}`;
+const templateOption1 = '{{ .metadata.labels.key }}';
+const templateOption2 = '{{ .metadata.name }}';
+const exampleCode = `/device-configs/deployment-sites/site-{{ .metadata.labels.site }}`;
 
 const MicroShiftCheckbox = ({ isFleet }: { isFleet: boolean }) => {
   const { initialValues } = useFormikContext<DeviceSpecConfigFormValues>();
@@ -125,6 +127,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
             <CodeBlock className="pf-v5-u-mt-md">
               <CodeBlockCode>{exampleCode}</CodeBlockCode>
             </CodeBlock>
+            <LearnMoreLink link={USING_TEMPLATE_VARIABLES_LINK} />
           </Alert>
         )}
         <FormGroup
