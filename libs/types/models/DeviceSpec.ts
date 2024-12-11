@@ -4,16 +4,16 @@
 /* eslint-disable */
 import type { ApplicationSpec } from './ApplicationSpec';
 import type { ConfigProviderSpec } from './ConfigProviderSpec';
-import type { DeviceHooksSpec } from './DeviceHooksSpec';
 import type { DeviceOSSpec } from './DeviceOSSpec';
+import type { DeviceUpdatePolicySpec } from './DeviceUpdatePolicySpec';
 import type { ResourceMonitor } from './ResourceMonitor';
 export type DeviceSpec = {
+  updatePolicy?: DeviceUpdatePolicySpec;
   os?: DeviceOSSpec;
   /**
    * List of config providers.
    */
   config?: Array<ConfigProviderSpec>;
-  hooks?: DeviceHooksSpec;
   /**
    * List of applications.
    */

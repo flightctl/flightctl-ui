@@ -20,10 +20,14 @@ import {
   toAPIApplication,
 } from '../../../utils/patch';
 import {
+  ACMCrdConfig,
+  ACMImportConfig,
+  MicroshiftRegistrationHook,
   getAPIConfig,
   getApplicationValues,
   getConfigTemplatesValues,
   getDeviceSpecConfigPatches,
+  hasMicroshiftRegistrationConfig,
 } from '../../Device/EditDeviceWizard/deviceSpecUtils';
 
 export const getValidationSchema = (t: TFunction) => {
@@ -102,6 +106,9 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
   // Configurations
   const currentConfigs = currentFleet.spec.template.spec.config || [];
   const newConfigs = updatedFleet.configTemplates.map(getAPIConfig);
+  if (updatedFleet.registerMicroShift) {
+    newConfigs.push(ACMCrdConfig, ACMImportConfig, MicroshiftRegistrationHook);
+  }
   const configPatches = getDeviceSpecConfigPatches(currentConfigs, newConfigs, '/spec/template/spec/config');
   allPatches = allPatches.concat(configPatches);
 
@@ -134,7 +141,7 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
             matchPatterns: values.systemdUnits.map((unit) => unit.pattern),
           },
         };
-  return {
+  const fleet: Fleet = {
     apiVersion: API_VERSION,
     kind: 'Fleet',
     metadata: {
@@ -160,34 +167,46 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
       },
     },
   };
+
+  if (values.registerMicroShift) {
+    fleet.spec.template.spec.config?.push(ACMCrdConfig, ACMImportConfig, MicroshiftRegistrationHook);
+  }
+
+  return fleet;
 };
 
-export const getInitialValues = (fleet?: Fleet): FleetFormValues =>
-  fleet
-    ? {
-        name: fleet.metadata.name || '',
-        labels: Object.keys(fleet.spec.selector?.matchLabels || {}).map((key) => ({
-          key,
-          value: fleet.spec.selector?.matchLabels?.[key],
-        })),
-        fleetLabels: Object.keys(fleet.metadata.labels || {}).map((key) => ({
-          key,
-          value: fleet.metadata.labels?.[key],
-        })),
-        osImage: fleet.spec.template.spec.os?.image || '',
-        configTemplates: getConfigTemplatesValues(fleet.spec.template.spec),
-        applications: getApplicationValues(fleet.spec.template.spec),
-        systemdUnits: (fleet.spec.template.spec.systemd?.matchPatterns || []).map((p) => ({
-          pattern: p,
-          exists: true,
-        })),
-      }
-    : {
-        name: '',
-        labels: [],
-        fleetLabels: [],
-        osImage: '',
-        configTemplates: [],
-        applications: [],
-        systemdUnits: [],
-      };
+export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
+  if (fleet) {
+    const registerMicroShift = hasMicroshiftRegistrationConfig(fleet.spec.template.spec);
+    return {
+      name: fleet.metadata.name || '',
+      labels: Object.keys(fleet.spec.selector?.matchLabels || {}).map((key) => ({
+        key,
+        value: fleet.spec.selector?.matchLabels?.[key],
+      })),
+      fleetLabels: Object.keys(fleet.metadata.labels || {}).map((key) => ({
+        key,
+        value: fleet.metadata.labels?.[key],
+      })),
+      osImage: fleet.spec.template.spec.os?.image || '',
+      configTemplates: getConfigTemplatesValues(fleet.spec.template.spec, registerMicroShift),
+      applications: getApplicationValues(fleet.spec.template.spec),
+      systemdUnits: (fleet.spec.template.spec.systemd?.matchPatterns || []).map((p) => ({
+        pattern: p,
+        exists: true,
+      })),
+      registerMicroShift,
+    };
+  }
+
+  return {
+    name: '',
+    labels: [],
+    fleetLabels: [],
+    osImage: '',
+    configTemplates: [],
+    applications: [],
+    systemdUnits: [],
+    registerMicroShift: false,
+  };
+};

@@ -12,6 +12,7 @@ export type DeviceSpecConfigFormValues = {
   configTemplates: SpecConfigTemplate[];
   applications: ApplicationFormSpec[];
   systemdUnits: SystemdUnitFormValue[];
+  registerMicroShift: boolean;
 };
 
 export type EditDeviceFormValues = DeviceSpecConfigFormValues & {

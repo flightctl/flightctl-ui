@@ -3,9 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Specifies the sort order.
+ * An expression that must evaluate to true as condition for the action to be performed.
  */
-export enum SortOrder {
-  ASC = 'Asc',
-  DESC = 'Desc',
-}
+export type HookConditionExpression = string;
