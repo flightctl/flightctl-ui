@@ -25,7 +25,7 @@ import GeneralInfoStep, { generalInfoStepId, isGeneralInfoStepValid } from './st
 import DeviceTemplateStep, { deviceTemplateStepId, isDeviceTemplateStepValid } from './steps/DeviceTemplateStep';
 import ReviewDeviceStep, { reviewDeviceStepId } from './steps/ReviewDeviceStep';
 import { getDevicePatches, getValidationSchema } from './utils';
-import { getApplicationValues, getConfigTemplatesValues } from './deviceSpecUtils';
+import { getApplicationValues, getConfigTemplatesValues, hasMicroshiftRegistrationConfig } from './deviceSpecUtils';
 import { useFetch } from '../../../hooks/useFetch';
 import { useEditDevice } from './useEditDevice';
 import EditDeviceWizardNav from './EditDeviceWizardNav';
@@ -64,16 +64,18 @@ const EditDeviceWizard = () => {
       </Alert>
     );
   } else if (device) {
+    const registerMicroShift = hasMicroshiftRegistrationConfig(device.spec);
     body = (
       <Formik<EditDeviceFormValues>
         initialValues={{
           deviceAlias,
           osImage: device.spec?.os?.image,
           labels: fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias'),
-          configTemplates: getConfigTemplatesValues(device.spec),
+          configTemplates: getConfigTemplatesValues(device.spec, registerMicroShift),
           fleetMatch: '', // Initially this is always a fleetless device
           applications: getApplicationValues(device.spec),
           systemdUnits: [],
+          registerMicroShift,
         }}
         validationSchema={getValidationSchema(t)}
         validateOnMount

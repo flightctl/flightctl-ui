@@ -3,16 +3,16 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { DeviceConsole } from './DeviceConsole';
-import type { DeviceHooksSpec } from './DeviceHooksSpec';
 import type { DeviceOSSpec } from './DeviceOSSpec';
+import type { DeviceUpdatePolicySpec } from './DeviceUpdatePolicySpec';
 import type { RenderedApplicationSpec } from './RenderedApplicationSpec';
 import type { ResourceMonitor } from './ResourceMonitor';
 export type RenderedDeviceSpec = {
   renderedVersion: string;
+  updatePolicy?: DeviceUpdatePolicySpec;
   os?: DeviceOSSpec;
   config?: string;
   applications?: Array<RenderedApplicationSpec>;
-  hooks?: DeviceHooksSpec;
   systemd?: {
     matchPatterns?: Array<string>;
   };
