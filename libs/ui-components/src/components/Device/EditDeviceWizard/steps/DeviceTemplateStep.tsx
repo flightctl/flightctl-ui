@@ -98,7 +98,7 @@ const MicroShiftCheckbox = ({ isFleet }: { isFleet: boolean }) => {
                 icon={<ExternalLinkAltIcon />}
                 iconPosition="end"
               >
-                {t('View documentation')}
+                View documentation
               </Button>
             </Trans>
           </Alert>

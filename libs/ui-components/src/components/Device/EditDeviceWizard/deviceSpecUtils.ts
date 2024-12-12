@@ -30,8 +30,10 @@ const DEFAULT_INLINE_FILE_MODE = 420; // In Octal: 0644
 const DEFAULT_INLINE_FILE_USER = 'root';
 const DEFAULT_INLINE_FILE_GROUP = 'root';
 
+export const ACM_REPO_NAME = 'acm-registration';
 const ACM_CRD_YAML_PATH = '/var/local/acm-import/crd.yaml';
 const ACM_IMPORT_YAML_PATH = '/var/local/acm-import/import.yaml';
+const ACM_REPO_SUFFIX = `/agent-registration/manifests/`;
 
 const MICROSHIFT_REGISTRAION_HOOK_NAME = 'apply-acm-manifests';
 const MICROSHIFT_REGISTRAION_HOOK_FILE = '/etc/flightctl/hooks.d/afterupdating/50-acm-registration.yaml';
@@ -48,8 +50,6 @@ const MICROSHIFT_REGISTRAION_HOOK = `- if:
   envVars:
     KUBECONFIG: /var/lib/microshift/resources/kubeadmin/kubeconfig
 `;
-
-export const ACM_REPO_NAME = 'acm-registration';
 
 export const getConfigType = (config: ConfigSourceProvider): ConfigType | undefined => {
   if (isGitProviderSpec(config)) {
@@ -319,7 +319,7 @@ export const ACMImportConfig: HttpConfigProviderSpec = {
   httpRef: {
     filePath: ACM_IMPORT_YAML_PATH,
     repository: ACM_REPO_NAME,
-    suffix: '/agent-registration/manifests/{{ device.metadata.name }}',
+    suffix: `${ACM_REPO_SUFFIX}{{ device.metadata.name }}`,
   },
 };
 
@@ -343,7 +343,7 @@ const isConfigACMImport = (c: ConfigProviderSpec) => {
     c.name === ACMImportConfig.name &&
     c.httpRef.filePath === ACMImportConfig.httpRef.filePath &&
     c.httpRef.repository === ACMImportConfig.httpRef.repository &&
-    c.httpRef.suffix === ACMImportConfig.httpRef.suffix
+    c.httpRef.suffix?.startsWith(ACM_REPO_SUFFIX)
   );
 };
 
