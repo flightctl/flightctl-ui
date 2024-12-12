@@ -1,13 +1,5 @@
 import * as React from 'react';
-import {
-  Button,
-  EmptyStateActions,
-  EmptyStateBody,
-  EmptyStateFooter,
-  PageSection,
-  PageSectionVariants,
-  ToolbarItem,
-} from '@patternfly/react-core';
+import { Button, EmptyStateActions, EmptyStateBody, EmptyStateFooter, ToolbarItem } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons/microchip-icon';
 import { Trans } from 'react-i18next';
@@ -231,7 +223,7 @@ const DevicesPage = () => {
   });
 
   return (
-    <PageSection variant={PageSectionVariants.light}>
+    <>
       <EnrollmentRequestList refetchDevices={refetch} />
 
       <ListPage title={t('Devices')}>
@@ -255,7 +247,7 @@ const DevicesPage = () => {
           />
         </ListPageBody>
       </ListPage>
-    </PageSection>
+    </>
   );
 };
 
