@@ -69,7 +69,7 @@ const EditDeviceWizard = () => {
       <Formik<EditDeviceFormValues>
         initialValues={{
           deviceAlias,
-          osImage: device.spec?.os?.image,
+          osImage: device.spec?.os?.image || '',
           labels: fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias'),
           configTemplates: getConfigTemplatesValues(device.spec, registerMicroShift),
           fleetMatch: '', // Initially this is always a fleetless device
@@ -105,6 +105,11 @@ const EditDeviceWizard = () => {
                 className="fctl-edit-device__wizard"
                 footer={<EditDeviceWizardFooter />}
                 nav={<EditDeviceWizardNav />}
+                onStepChange={() => {
+                  if (submitError) {
+                    setSubmitError(undefined);
+                  }
+                }}
               >
                 <WizardStep name={t('General info')} id={generalInfoStepId}>
                   <GeneralInfoStep />

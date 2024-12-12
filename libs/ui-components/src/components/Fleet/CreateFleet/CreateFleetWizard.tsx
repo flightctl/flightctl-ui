@@ -92,7 +92,12 @@ const CreateFleetWizard = () => {
               <LeaveFormConfirmation />
               <Wizard
                 footer={<CreateFleetWizardFooter isEdit={isEdit} />}
-                onStepChange={(_, step) => setCurrentStep(step)}
+                onStepChange={(_, step) => {
+                  if (error) {
+                    setError(undefined);
+                  }
+                  setCurrentStep(step);
+                }}
                 className="fctl-create-fleet"
               >
                 <WizardStep name={t('General info')} id={generalInfoStepId}>
