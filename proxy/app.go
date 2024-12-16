@@ -39,7 +39,7 @@ func main() {
 	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(tlsConfig))
 	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler())
 
-	terminalBridge := bridge.TerminalBridge{TlsConfig: tlsConfig, Log: log}
+	terminalBridge := bridge.TerminalBridge{TlsConfig: tlsConfig}
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
 
 	if config.OcpPlugin != "true" {
