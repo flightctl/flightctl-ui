@@ -4,7 +4,7 @@ import { useDebounce } from 'use-debounce';
 import { Fleet, FleetList } from '@flightctl/types';
 import { useAppContext } from '../../hooks/useAppContext';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { useTablePagination } from '../../hooks/useTablePagination';
+import { PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
 import { PAGE_SIZE } from '../../constants';
 
 export enum FleetSearchParams {
@@ -77,32 +77,28 @@ const useFleetsEndpoint = (args: FleetsEndpointArgs): [string, boolean] => {
 
 export type FleetLoad = {
   fleets: Fleet[];
-  itemCount: number;
   isLoading: boolean;
   error: unknown;
   isUpdating: boolean;
   refetch: VoidFunction;
-  currentPage: number;
-  setCurrentPage: (page: number) => void;
+  pagination: PaginationDetails;
 };
 
 export const useFleets = (args: FleetsEndpointArgs): FleetLoad => {
-  const { currentPage, setCurrentPage, onPageFetched, nextContinue, itemCount } = useTablePagination();
-  const [fleetsEndpoint, fleetsDebouncing] = useFleetsEndpoint({ ...args, nextContinue });
+  const pagination = useTablePagination();
+  const [fleetsEndpoint, fleetsDebouncing] = useFleetsEndpoint({ ...args, nextContinue: pagination.nextContinue });
   const [fleetsList, isLoading, error, refetch, updating] = useFetchPeriodically<FleetList>(
     {
       endpoint: fleetsEndpoint,
     },
-    onPageFetched,
+    pagination.onPageFetched,
   );
   return {
     fleets: fleetsList?.items || [],
-    itemCount,
     isLoading,
     error,
     isUpdating: updating || fleetsDebouncing,
     refetch,
-    currentPage,
-    setCurrentPage,
+    pagination,
   };
 };

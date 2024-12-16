@@ -11,6 +11,7 @@ import { Device } from '@flightctl/types';
 import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';
 import { useDeleteListAction } from '../../ListPage/ListPageActions';
+import TablePagination from '../../Table/TablePagination';
 import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
 import Table, { ApiSortTableColumn } from '../../Table/Table';
 import DeviceTableToolbar from './DeviceTableToolbar';
@@ -21,6 +22,7 @@ import ResourceListEmptyState from '../../common/ResourceListEmptyState';
 import { useTableSelect } from '../../../hooks/useTableSelect';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
+import { PaginationDetails, useTablePagination } from '../../../hooks/useTablePagination';
 import { useDevices } from './useDevices';
 import { useDeviceBackendFilters } from './useDeviceBackendFilters';
 import {
@@ -28,7 +30,7 @@ import {
   getDeviceStatusHelperText,
   getUpdateStatusHelperText,
 } from '../../Status/utils';
-import EnrollmentRequestList from './EnrollmentRequestList';
+import EnrollmentRequestList from '../../EnrollmentRequest/EnrollmentRequestList';
 import { FilterStatusMap } from './types';
 
 type DeviceEmptyStateProps = {
@@ -95,6 +97,7 @@ interface DeviceTableProps {
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
   isFilterUpdating: boolean;
   deviceColumns: ApiSortTableColumn[];
+  pagination: Pick<PaginationDetails, 'currentPage' | 'setCurrentPage' | 'itemCount'>;
   // getSortParams: (columnIndex: number) => ThProps['sort'];
 }
 
@@ -112,6 +115,7 @@ export const DeviceTable = ({
   hasFiltersEnabled,
   isFilterUpdating,
   deviceColumns,
+  pagination,
 }: DeviceTableProps) => {
   const { t } = useTranslation();
   const [addDeviceModal, setAddDeviceModal] = React.useState(false);
@@ -172,6 +176,7 @@ export const DeviceTable = ({
           ))}
         </Tbody>
       </Table>
+      <TablePagination isUpdating={isFilterUpdating} pagination={pagination} />
       {!hasFiltersEnabled && devices.length === 0 && <DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />}
       {deleteDeviceModal}
       {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}
@@ -204,12 +209,21 @@ const DevicesPage = () => {
     selectedLabels,
     setSelectedLabels,
   } = useDeviceBackendFilters();
+  const { currentPage, setCurrentPage, onPageFetched, nextContinue, itemCount } = useTablePagination();
   const [data, loading, error, updating, refetch] = useDevices({
     nameOrAlias,
     ownerFleets,
     activeStatuses,
     labels: selectedLabels,
+    nextContinue,
+    onPageFetched,
   });
+
+  const pagination = {
+    currentPage,
+    setCurrentPage,
+    itemCount,
+  };
 
   return (
     <>
@@ -231,6 +245,7 @@ const DevicesPage = () => {
             setSelectedLabels={setSelectedLabels}
             isFilterUpdating={updating}
             deviceColumns={deviceColumns}
+            pagination={pagination}
           />
         </ListPageBody>
       </ListPage>
