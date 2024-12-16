@@ -1,8 +1,17 @@
 import * as React from 'react';
+
 import { ApiList } from '../utils/api';
 import { PAGE_SIZE } from '../constants';
 
-export const useTablePagination = () => {
+export type PaginationDetails = {
+  onPageFetched: (list: ApiList<unknown>) => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  nextContinue: string;
+  itemCount: number;
+};
+
+export const useTablePagination = (): PaginationDetails => {
   const [currentPage, setCurrentPage] = React.useState<number>(1);
   const [continueTokens, setContinueTokens] = React.useState<string[]>([]);
   const [itemCount, setItemCount] = React.useState<number>(0);

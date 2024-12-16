@@ -2,34 +2,37 @@ import * as React from 'react';
 import { TFunction } from 'react-i18next';
 import { Tbody } from '@patternfly/react-table';
 import { SelectList, SelectOption, Spinner, ToolbarItem } from '@patternfly/react-core';
-
-import { EnrollmentRequest, EnrollmentRequestList as EnrollmentRequestListType } from '@flightctl/types';
-
-import Table, { ApiSortTableColumn } from '../../Table/Table';
-import TableActions from '../../Table/TableActions';
-import ListPage from '../../ListPage/ListPage';
-import ListPageBody from '../../ListPage/ListPageBody';
-import { useDeleteListAction } from '../../ListPage/ListPageActions';
-import { useFetch } from '../../../hooks/useFetch';
-import { useTranslation } from '../../../hooks/useTranslation';
-import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { useTableSelect } from '../../../hooks/useTableSelect';
-import { useTableTextSearch } from '../../../hooks/useTableTextSearch';
-
-import ApproveDeviceModal from '../../modals/ApproveDeviceModal/ApproveDeviceModal';
-import MassDeleteDeviceModal from '../../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
-import MassApproveDeviceModal from '../../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
-import EnrollmentRequestTableRow from '../../EnrollmentRequest/EnrollmentRequestTableRow';
-import EnrollmentRequestTableToolbar from './EnrollmentRequestTableToolbar';
-import { RESOURCE, VERB } from '../../../types/rbac';
-import { useAccessReview } from '../../../hooks/useAccessReview';
-import ResourceListEmptyState from '../../common/ResourceListEmptyState';
 import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons';
+
+import { EnrollmentRequest, EnrollmentRequestList } from '@flightctl/types';
+
+import Table, { ApiSortTableColumn } from '../Table/Table';
+import TableActions from '../Table/TableActions';
+import ListPage from '../ListPage/ListPage';
+import ListPageBody from '../ListPage/ListPageBody';
+import { useDeleteListAction } from '../ListPage/ListPageActions';
+import { useFetch } from '../../hooks/useFetch';
+import { useTranslation } from '../../hooks/useTranslation';
+import { useTableSelect } from '../../hooks/useTableSelect';
+import { useAccessReview } from '../../hooks/useAccessReview';
+import { useTableTextSearch } from '../../hooks/useTableTextSearch';
+import { usePendingEnrollments } from './useEnrollmentRequests';
+
+import ApproveDeviceModal from '../modals/ApproveDeviceModal/ApproveDeviceModal';
+import MassDeleteDeviceModal from '../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
+import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
+import EnrollmentRequestTableRow from './EnrollmentRequestTableRow';
+import EnrollmentRequestTableToolbar from './EnrollmentRequestTableToolbar';
+import { RESOURCE, VERB } from '../../types/rbac';
+import ResourceListEmptyState from '../common/ResourceListEmptyState';
+import TablePagination from '../Table/TablePagination';
 
 const ErEmptyState = () => {
   const { t } = useTranslation();
   return <ResourceListEmptyState icon={MicrochipIcon} titleText={t('No enrollment requests here!')} />;
 };
+
+
 
 const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
   {
@@ -50,11 +53,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
   const { remove } = useFetch();
   const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
-
-  const [erList, isLoading, error, refetch] = useFetchPeriodically<EnrollmentRequestListType>({
-    endpoint: 'enrollmentrequests?fieldSelector=!status.approval.approved',
-  });
-  const pendingEnrollments = erList?.items || [];
+  const [pendingEnrollments, isLoading, error, refetch, pagination] = usePendingEnrollments();
 
   const refetchWithDevices = () => {
     refetch();
@@ -77,11 +76,10 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
     },
   });
 
-  if (isLoading) {
-    return <Spinner size="md" />;
-  }
-
   if (pendingEnrollments.length === 0) {
+    if (isLoading) {
+      return <Spinner size="md" />;
+    }
     return isStandalone ? <ErEmptyState /> : null;
   }
 
@@ -89,7 +87,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
 
   return (
     <ListPage title={t('Devices pending approval')} headingLevel="h2">
-      <ListPageBody error={error} loading={isLoading}>
+      <ListPageBody error={error} loading={false}>
         <EnrollmentRequestTableToolbar search={search} setSearch={setSearch} enrollments={pendingEnrollments}>
           {(canApprove || canDelete) && (
             <ToolbarItem>
@@ -108,7 +106,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
         </EnrollmentRequestTableToolbar>
         <Table
           aria-label={t('Table for devices pending approval')}
-          loading={isLoading}
+          loading={false}
           columns={enrollmentColumns}
           emptyFilters={filteredData.length === 0}
           emptyData={false}
@@ -133,7 +131,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
             ))}
           </Tbody>
         </Table>
-
+        <TablePagination pagination={pagination} isUpdating={isLoading} />
         {deleteModal}
         {currentEnrollmentRequest && (
           <ApproveDeviceModal
