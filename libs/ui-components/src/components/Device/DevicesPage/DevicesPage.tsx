@@ -6,7 +6,7 @@ import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
 
 import { useFetch } from '../../../hooks/useFetch';
-import { Device, Fleet, FleetList } from '@flightctl/types';
+import { Device } from '@flightctl/types';
 
 import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';
@@ -30,7 +30,6 @@ import {
 } from '../../Status/utils';
 import EnrollmentRequestList from './EnrollmentRequestList';
 import { FilterStatusMap } from './types';
-import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 
 type DeviceEmptyStateProps = {
   onAddDevice: VoidFunction;
@@ -92,10 +91,8 @@ interface DeviceTableProps {
   setNameOrAlias: (text: string) => void;
   setOwnerFleets: (ownerFleets: string[]) => void;
   setActiveStatuses: (activeStatuses: FilterStatusMap) => void;
-  allLabels: FlightCtlLabel[];
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
-  fleets: Fleet[];
   isFilterUpdating: boolean;
   deviceColumns: ApiSortTableColumn[];
   // getSortParams: (columnIndex: number) => ThProps['sort'];
@@ -110,11 +107,9 @@ export const DeviceTable = ({
   setOwnerFleets,
   activeStatuses,
   setActiveStatuses,
-  allLabels,
   selectedLabels,
   setSelectedLabels,
   hasFiltersEnabled,
-  fleets,
   isFilterUpdating,
   deviceColumns,
 }: DeviceTableProps) => {
@@ -142,10 +137,8 @@ export const DeviceTable = ({
         setOwnerFleets={setOwnerFleets}
         activeStatuses={activeStatuses}
         setActiveStatuses={setActiveStatuses}
-        allLabels={allLabels}
         selectedLabels={selectedLabels}
         setSelectedLabels={setSelectedLabels}
-        fleets={fleets}
         isFilterUpdating={isFilterUpdating}
       >
         <ToolbarItem>
@@ -211,15 +204,11 @@ const DevicesPage = () => {
     selectedLabels,
     setSelectedLabels,
   } = useDeviceBackendFilters();
-  const [data, loading, error, updating, refetch, allLabels] = useDevices({
+  const [data, loading, error, updating, refetch] = useDevices({
     nameOrAlias,
     ownerFleets,
     activeStatuses,
     labels: selectedLabels,
-  });
-
-  const [fleetsList, flLoading, flError] = useFetchPeriodically<FleetList>({
-    endpoint: 'fleets',
   });
 
   return (
@@ -227,10 +216,9 @@ const DevicesPage = () => {
       <EnrollmentRequestList refetchDevices={refetch} />
 
       <ListPage title={t('Devices')}>
-        <ListPageBody error={error || flError} loading={loading || flLoading}>
+        <ListPageBody error={error} loading={loading}>
           <DeviceTable
             devices={data}
-            allLabels={allLabels}
             refetch={refetch}
             nameOrAlias={nameOrAlias}
             setNameOrAlias={setNameOrAlias}
@@ -241,7 +229,6 @@ const DevicesPage = () => {
             setActiveStatuses={setActiveStatuses}
             selectedLabels={selectedLabels}
             setSelectedLabels={setSelectedLabels}
-            fleets={fleetsList?.items || []}
             isFilterUpdating={updating}
             deviceColumns={deviceColumns}
           />

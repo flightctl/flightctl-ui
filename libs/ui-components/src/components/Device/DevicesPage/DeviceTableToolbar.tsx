@@ -11,7 +11,6 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 
-import { Fleet } from '@flightctl/types';
 import { TableTextSearchProps } from '../../Table/TableTextSearch';
 import { useTranslation } from '../../../hooks/useTranslation';
 import DeviceStatusFilter, { getStatusItem } from './DeviceFilterSelect';
@@ -23,14 +22,12 @@ import DeviceTableToolbarFilters from './DeviceToolbarFilters';
 type DeviceTableToolbarProps = {
   nameOrAlias: TableTextSearchProps['value'];
   setNameOrAlias: TableTextSearchProps['setValue'];
-  allLabels: FlightCtlLabel[];
   ownerFleets: string[];
   setOwnerFleets: (ownerFleets: string[]) => void;
   activeStatuses: FilterStatusMap;
   setActiveStatuses: (statuses: FilterStatusMap) => void;
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
-  fleets: Fleet[];
   isFilterUpdating: boolean;
 };
 
@@ -42,10 +39,8 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
     setNameOrAlias,
     activeStatuses,
     setActiveStatuses,
-    allLabels,
     selectedLabels,
     setSelectedLabels,
-    fleets,
     isFilterUpdating,
   } = rest;
 
@@ -86,12 +81,10 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
             </ToolbarItem>
             <ToolbarItem variant="search-filter">
               <DeviceTableToolbarFilters
-                allLabels={allLabels}
                 selectedLabels={selectedLabels}
                 selectedFleetNames={ownerFleets}
                 setSelectedLabels={setSelectedLabels}
                 setSelectedFleets={setOwnerFleets}
-                fleets={fleets}
                 nameOrAlias={nameOrAlias}
                 setNameOrAlias={setNameOrAlias}
               />

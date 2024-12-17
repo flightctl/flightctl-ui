@@ -1,10 +1,8 @@
-import * as React from 'react';
 import { useDebounce } from 'use-debounce';
 
 import { Device, DeviceList, DevicesSummary } from '@flightctl/types';
 import { FilterSearchParams } from '../../../utils/status/devices';
 import * as queryUtils from '../../../utils/query';
-import { fromAPILabel } from '../../../utils/labels';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { FilterStatusMap } from './types';
@@ -75,33 +73,11 @@ export const useDevices = (args: {
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
-}): [Device[], boolean, unknown, boolean, VoidFunction, FlightCtlLabel[]] => {
-  const [deviceLabelList] = useFetchPeriodically<DeviceList>({
-    endpoint: 'devices',
-  });
+}): [Device[], boolean, unknown, boolean, VoidFunction] => {
   const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint(args);
   const [devicesList, devicesLoading, devicesError, devicesRefetch, updating] = useFetchPeriodically<DeviceList>({
     endpoint: devicesEndpoint,
   });
 
-  const allLabels = React.useMemo(() => {
-    const labelsSet = new Set<FlightCtlLabel>();
-
-    deviceLabelList?.items.forEach((device) => {
-      const deviceLabels = fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias');
-      deviceLabels.forEach((label) => {
-        labelsSet.add(label);
-      });
-    });
-    return Array.from(labelsSet);
-  }, [deviceLabelList]);
-
-  return [
-    devicesList?.items || [],
-    devicesLoading,
-    devicesError,
-    updating || devicesDebouncing,
-    devicesRefetch,
-    allLabels || [],
-  ];
+  return [devicesList?.items || [], devicesLoading, devicesError, updating || devicesDebouncing, devicesRefetch];
 };

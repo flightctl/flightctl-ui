@@ -11,26 +11,21 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { Fleet } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { labelToString } from '../../../../utils/labels';
 import { FlightCtlLabel } from '../../../../types/extraTypes';
 import DeviceTableToolbarFilters from '../../../Device/DevicesPage/DeviceToolbarFilters';
 
 type StatusCardFiltersProps = {
-  fleets: Fleet[];
   selectedFleets: string[];
   setSelectedFleets: (fleets: string[]) => void;
-  allLabels: FlightCtlLabel[];
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
 };
 
 const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
-  fleets,
   selectedFleets,
   setSelectedFleets,
-  allLabels,
   selectedLabels,
   setSelectedLabels,
 }) => {
@@ -46,10 +41,8 @@ const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
             <ToolbarGroup>
               <ToolbarItem variant="search-filter">
                 <DeviceTableToolbarFilters
-                  fleets={fleets}
                   selectedFleetNames={selectedFleets}
                   setSelectedFleets={setSelectedFleets}
-                  allLabels={allLabels}
                   selectedLabels={selectedLabels}
                   setSelectedLabels={setSelectedLabels}
                 />
