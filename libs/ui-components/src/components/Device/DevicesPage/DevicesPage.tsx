@@ -123,12 +123,9 @@ export const DeviceTable = ({
   const { action: decommissionDeviceAction, modal: decommissionDeviceModal } = useDecommissionListAction({
     resourceType: 'Device',
     onConfirm: async (deviceId, { target }) => {
-      // TODO Is it a PUT??
       const result = await post<DeviceDecommission>(`devices/${deviceId}/decommission`, {
         decommissionTarget: target,
       });
-
-      console.log('%c result', 'color: red; font-size:18px', result);
 
       refetch();
     },

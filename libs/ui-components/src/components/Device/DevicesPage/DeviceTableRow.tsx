@@ -28,7 +28,8 @@ const DeviceTableRow = ({ device, decommissionAction, rowIndex, onRowSelect, isR
   const deviceName = device.metadata.name as string;
   const deviceAlias = device.metadata.labels?.alias;
 
-  const editActionProps = getDisabledTooltipProps(getEditDisabledReason(device, t));
+  const decomissionDisabledReason = getDecommissionDisabledReason(device, t);
+  const editActionProps = getDisabledTooltipProps(decomissionDisabledReason || getEditDisabledReason(device, t));
 
   return (
     <Tr>
@@ -73,7 +74,7 @@ const DeviceTableRow = ({ device, decommissionAction, rowIndex, onRowSelect, isR
             decommissionAction({
               resourceId: deviceName,
               resourceName: deviceAlias,
-              disabledReason: getDecommissionDisabledReason(device, t),
+              disabledReason: decomissionDisabledReason,
             }),
           ]}
         />

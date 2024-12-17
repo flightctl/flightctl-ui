@@ -1,15 +1,40 @@
 import * as React from 'react';
 import { Dropdown, DropdownItem, MenuToggle } from '@patternfly/react-core';
-import { getDisabledTooltipProps } from '../../utils/tooltip';
 
+import { DeviceDecommission } from '@flightctl/types';
+
+import { getDisabledTooltipProps } from '../../utils/tooltip';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import { useTranslation } from '../../hooks/useTranslation';
+import DecommissionModal from '../modals/DecommissionModal/DecommissionModal';
 
 type DeleteActionProps = {
   onDelete: () => Promise<unknown>;
   resourceType: string;
   resourceName: string;
   disabledReason?: string;
+};
+
+type DecommissionActionProps = {
+  onConfirm: (target: DeviceDecommission.decommissionTarget) => Promise<unknown>;
+  disabledReason?: string;
+};
+
+export const useDecommissionAction = ({ onConfirm, disabledReason }: DecommissionActionProps) => {
+  const { t } = useTranslation();
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  const decommissionProps = getDisabledTooltipProps(disabledReason);
+  const decommissionAction = (
+    <DropdownItem onClick={() => setIsModalOpen(true)} {...decommissionProps}>
+      {t('Decommission device')}
+    </DropdownItem>
+  );
+  const decommissionModal = isModalOpen && (
+    <DecommissionModal onClose={() => setIsModalOpen(false)} onDecommission={onConfirm} />
+  );
+
+  return { decommissionAction, decommissionModal };
 };
 
 export const useDeleteAction = ({ resourceType, resourceName, onDelete, disabledReason }: DeleteActionProps) => {

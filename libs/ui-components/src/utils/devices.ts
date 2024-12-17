@@ -8,25 +8,30 @@ export const getDeviceFleet = (metadata: ObjectMeta) => {
   return match?.groups?.fleetName || null;
 };
 
+const hasDecommissioningStarted = (device: Device) => {
+  const lifeCycleStatus = device.status?.lifecycle?.status;
+  return lifeCycleStatus
+    ? [
+        DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioned,
+        DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
+      ].includes(lifeCycleStatus)
+    : false;
+};
+
 export const getEditDisabledReason = (device: Device, t: TFunction) => {
   if (getDeviceFleet(device.metadata)) {
-    return t('Device is bound to a fleet. Its configurations cannot be edited');
+    return t('Device is bound to a fleet and its configurations cannot be edited.');
+  }
+  if (hasDecommissioningStarted(device)) {
+    return t('Device configurations cannot be modified after device started decommissioning.');
   }
 
   return undefined;
 };
 
-const hasDecommissioningStarted = (device: Device) => {
-  const lifeCycleStatus = device.status?.lifecycle?.status;
-  return lifeCycleStatus ? [
-    DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioned,
-    DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
-  ].includes(lifeCycleStatus) : false
-}
-
-export const getDecommissionDisabledReason = (device: Device, t: TFunction) => {
-  if (hasDecommissioningStarted(device)) {
-    return t('Device already started decommissioning');
+export const getDecommissionDisabledReason = (device: Device | undefined, t: TFunction) => {
+  if (device && hasDecommissioningStarted(device)) {
+    return t('Device decommissioning already started.');
   }
   return undefined;
 };

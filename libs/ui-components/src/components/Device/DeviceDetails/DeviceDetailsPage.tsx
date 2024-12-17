@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { DropdownItem, DropdownList, Nav, NavList } from '@patternfly/react-core';
 
-import { Device } from '@flightctl/types';
+import { Device, DeviceDecommission } from '@flightctl/types';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { useFetch } from '../../../hooks/useFetch';
 import { getDisabledTooltipProps } from '../../../utils/tooltip';
-import { getEditDisabledReason } from '../../../utils/devices';
+import { getDecommissionDisabledReason, getEditDisabledReason } from '../../../utils/devices';
 import DetailsPage from '../../DetailsPage/DetailsPage';
-import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
+import DetailsPageActions, { useDecommissionAction } from '../../DetailsPage/DetailsPageActions';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -26,18 +26,21 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
   const [showDebugInfo, setShowDebugInfo] = React.useState<boolean>(false);
 
   const navigate = useNavigate();
-  const { remove } = useFetch();
+  const { post } = useFetch();
 
   const deviceAlias = device?.metadata.labels?.alias || deviceId;
 
-  const { deleteAction, deleteModal } = useDeleteAction({
-    onDelete: async () => {
-      await remove(`devices/${deviceId}`);
-      navigate(ROUTE.DEVICES);
+  const { decommissionAction, decommissionModal } = useDecommissionAction({
+    onConfirm: async (target: DeviceDecommission.decommissionTarget) => {
+      const result = await post<DeviceDecommission>(`devices/${deviceId}/decommission`, {
+        decommissionTarget: target,
+      });
+
+      refetch();
     },
-    resourceName: deviceAlias,
-    resourceType: 'device',
+    disabledReason: getDecommissionDisabledReason(device, t),
   });
+
   const editActionProps = device ? getDisabledTooltipProps(getEditDisabledReason(device, t)) : undefined;
 
   return (
@@ -66,7 +69,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
             >
               {t('Edit device configurations')}
             </DropdownItem>
-            {deleteAction}
+            {decommissionAction}
             <DropdownItem
               onClick={() => {
                 setShowDebugInfo(!showDebugInfo);
@@ -92,7 +95,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
           {!hideTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
         </Routes>
       )}
-      {deleteModal}
+      {decommissionModal}
       {device && showDebugInfo && (
         <DeviceStatusDebugModal
           status={device.status}

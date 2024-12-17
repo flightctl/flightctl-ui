@@ -1,6 +1,7 @@
 import {
   ConditionType,
   Device,
+  DeviceLifecycleStatusType,
   DeviceSummaryStatusType,
   EnrollmentRequest,
   Fleet,
@@ -51,7 +52,9 @@ export enum DeviceAnnotation {
   RenderedVersion = 'device-controller/renderedVersion',
 }
 
-export type AllDeviceSummaryStatusType = DeviceSummaryStatusType | 'Decommissioning';
+export type AllDeviceSummaryStatusType =
+  | DeviceSummaryStatusType
+  | DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning;
 
 export const isEnrollmentRequest = (resource: Device | EnrollmentRequest): resource is EnrollmentRequest =>
   resource.kind === 'EnrollmentRequest';

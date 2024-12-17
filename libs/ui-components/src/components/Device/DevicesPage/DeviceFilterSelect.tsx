@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Grid, GridItem, SelectList, SelectOption } from '@patternfly/react-core';
 import { TFunction } from 'i18next';
 
-import { ApplicationsSummaryStatusType, DeviceUpdatedStatusType } from '@flightctl/types';
+import { ApplicationsSummaryStatusType, DeviceLifecycleStatusType, DeviceUpdatedStatusType } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { AllDeviceSummaryStatusType } from '../../../types/extraTypes';
 import FilterSelect, { FilterSelectGroup } from '../../form/FilterSelect';
@@ -31,7 +31,9 @@ export const getStatusItem = (
     case FilterSearchParams.DeviceStatus:
       return {
         title: t('Device status'),
-        items: getDeviceStatusItems(t),
+        items: getDeviceStatusItems(t).filter(
+          (item) => item.id !== DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
+        ),
       };
     default:
       return {

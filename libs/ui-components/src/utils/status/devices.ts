@@ -4,6 +4,7 @@ import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons';
 import {
   ApplicationsSummaryStatusType,
   DeviceApplicationsSummaryStatus,
+  DeviceLifecycleStatusType,
   DeviceSummaryStatus,
   DeviceSummaryStatusType,
   DeviceUpdatedStatus,
@@ -54,7 +55,7 @@ export const getDeviceStatusItems = (t: TFunction): StatusItem<AllDeviceSummaryS
     level: 'info',
   },
   {
-    id: 'Decommissioning',
+    id: DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
     label: t('Decommissioning'),
     level: 'info',
   },
