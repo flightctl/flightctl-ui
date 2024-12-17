@@ -31,6 +31,8 @@ export type { DeviceIntegrityStatus } from './models/DeviceIntegrityStatus';
 export type { DeviceIntegrityStatusSummary } from './models/DeviceIntegrityStatusSummary';
 export { DeviceIntegrityStatusSummaryType } from './models/DeviceIntegrityStatusSummaryType';
 export { DeviceLifecycleHookType } from './models/DeviceLifecycleHookType';
+export type { DeviceLifecycleStatus } from './models/DeviceLifecycleStatus';
+export { DeviceLifecycleStatusType } from './models/DeviceLifecycleStatusType';
 export type { DeviceList } from './models/DeviceList';
 export type { DeviceOSSpec } from './models/DeviceOSSpec';
 export type { DeviceOSStatus } from './models/DeviceOSStatus';
