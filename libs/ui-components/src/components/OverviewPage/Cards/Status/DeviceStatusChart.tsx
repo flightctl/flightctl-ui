@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { DeviceSummaryStatusType } from '@flightctl/types';
-import { FlightCtlLabel } from '../../../../types/extraTypes';
+import { AllDeviceSummaryStatusType, FlightCtlLabel } from '../../../../types/extraTypes';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getDeviceStatusHelperText } from '../../../Status/utils';
@@ -24,7 +23,7 @@ const DeviceStatusChart = ({
   const statusItems = getDeviceStatusItems(t);
 
   // TODO should we add the "Pending" devices, now that the Device table does not contain ERs?
-  const devStatusData = toOverviewChartData<DeviceSummaryStatusType>(
+  const devStatusData = toOverviewChartData<AllDeviceSummaryStatusType>(
     deviceStatus,
     statusItems,
     labels,

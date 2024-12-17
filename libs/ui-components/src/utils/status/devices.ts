@@ -3,13 +3,13 @@ import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons';
 
 import {
   ApplicationsSummaryStatusType,
-  DeviceSummaryStatus as BEDeviceSummaryStatus,
   DeviceApplicationsSummaryStatus,
-  DeviceIntegrityStatusSummaryType,
+  DeviceSummaryStatus,
   DeviceSummaryStatusType,
   DeviceUpdatedStatus,
   DeviceUpdatedStatusType,
 } from '@flightctl/types';
+import { AllDeviceSummaryStatusType } from '../../types/extraTypes';
 import { StatusItem } from './common';
 
 export enum FilterSearchParams {
@@ -21,13 +21,7 @@ export enum FilterSearchParams {
   NameOrAlias = 'nameOrAlias',
 }
 
-export type DeviceSummaryStatus =
-  | ApplicationsSummaryStatusType
-  | DeviceUpdatedStatusType
-  | DeviceSummaryStatusType
-  | DeviceIntegrityStatusSummaryType;
-
-export const getDeviceSummaryStatus = (deviceStatus?: BEDeviceSummaryStatus): DeviceSummaryStatusType =>
+export const getDeviceSummaryStatus = (deviceStatus?: DeviceSummaryStatus): DeviceSummaryStatusType =>
   deviceStatus?.status || DeviceSummaryStatusType.DeviceSummaryStatusUnknown;
 
 export const getApplicationSummaryStatus = (
@@ -38,7 +32,7 @@ export const getApplicationSummaryStatus = (
 export const getSystemUpdateStatus = (updatedStatus?: DeviceUpdatedStatus): DeviceUpdatedStatusType =>
   updatedStatus?.status || DeviceUpdatedStatusType.DeviceUpdatedStatusUnknown;
 
-export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStatusType>[] => [
+export const getDeviceStatusItems = (t: TFunction): StatusItem<AllDeviceSummaryStatusType>[] => [
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusError,
     label: t('Error'),
@@ -57,6 +51,11 @@ export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStat
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusRebooting,
     label: t('Rebooting'),
+    level: 'info',
+  },
+  {
+    id: 'Decommissioning',
+    label: t('Decommissioning'),
     level: 'info',
   },
   {

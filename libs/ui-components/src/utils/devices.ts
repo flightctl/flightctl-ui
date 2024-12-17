@@ -16,10 +16,16 @@ export const getEditDisabledReason = (device: Device, t: TFunction) => {
   return undefined;
 };
 
-export const getDecommissionDisabledReason = (device: Device, t: TFunction) => {
-  const lifeCycleStatus = device.status?.lifecycle?.status || DeviceLifecycleStatusType.ENROLLED;
+const hasDecommissioningStarted = (device: Device) => {
+  const lifeCycleStatus = device.status?.lifecycle?.status;
+  return lifeCycleStatus ? [
+    DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioned,
+    DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
+  ].includes(lifeCycleStatus) : false
+}
 
-  if (lifeCycleStatus !== DeviceLifecycleStatusType.ENROLLED) {
+export const getDecommissionDisabledReason = (device: Device, t: TFunction) => {
+  if (hasDecommissioningStarted(device)) {
     return t('Device already started decommissioning');
   }
   return undefined;

@@ -1,4 +1,11 @@
-import { ConditionType, Device, EnrollmentRequest, Fleet, ResourceSync } from '@flightctl/types';
+import {
+  ConditionType,
+  Device,
+  DeviceSummaryStatusType,
+  EnrollmentRequest,
+  Fleet,
+  ResourceSync,
+} from '@flightctl/types';
 
 export enum FlightControlMetrics {
   ACTIVE_AGENT_COUNT_METRIC = 'flightctl_devicesimulator_active_agent_count',
@@ -43,6 +50,8 @@ export enum DeviceAnnotation {
   TemplateVersion = 'fleet-controller/templateVersion',
   RenderedVersion = 'device-controller/renderedVersion',
 }
+
+export type AllDeviceSummaryStatusType = DeviceSummaryStatusType | 'Decommissioning';
 
 export const isEnrollmentRequest = (resource: Device | EnrollmentRequest): resource is EnrollmentRequest =>
   resource.kind === 'EnrollmentRequest';
