@@ -4,7 +4,7 @@ import { Button } from '@patternfly/react-core';
 
 import { EnrollmentRequest } from '@flightctl/types';
 import { timeSinceText } from '../../utils/dates';
-import { DeleteListActionResult } from '../ListPage/types';
+import { ListAction } from '../ListPage/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE } from '../../hooks/useNavigate';
 import ResourceLink from '../common/ResourceLink';
@@ -15,17 +15,17 @@ type EnrollmentRequestTableRow = {
   isRowSelected: (er: EnrollmentRequest) => boolean;
   er: EnrollmentRequest;
   onApprove: (id: string) => void;
-  deleteAction: DeleteListActionResult['deleteAction'];
+  deleteAction: ListAction;
 };
 
-const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
+const EnrollmentRequestTableRow = ({
   er,
   deleteAction,
   rowIndex,
   onRowSelect,
   isRowSelected,
   onApprove,
-}) => {
+}: EnrollmentRequestTableRow) => {
   const { t } = useTranslation();
   const erName = er.metadata.name as string;
 

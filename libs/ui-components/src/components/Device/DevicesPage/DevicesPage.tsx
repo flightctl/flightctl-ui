@@ -5,12 +5,11 @@ import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons/microchip-i
 import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
 
-import { useFetch } from '../../../hooks/useFetch';
-import { Device } from '@flightctl/types';
+import { Device, DeviceDecommission } from '@flightctl/types';
 
 import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';
-import { useDeleteListAction } from '../../ListPage/ListPageActions';
+import { useDecommissionListAction } from '../../ListPage/ListPageActions';
 import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
 import Table, { ApiSortTableColumn } from '../../Table/Table';
 import DeviceTableToolbar from './DeviceTableToolbar';
@@ -20,6 +19,7 @@ import MassDeleteDeviceModal from '../../modals/massModals/MassDeleteDeviceModal
 import ResourceListEmptyState from '../../common/ResourceListEmptyState';
 import { useTableSelect } from '../../../hooks/useTableSelect';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { useFetch } from '../../../hooks/useFetch';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
 import { useDevices } from './useDevices';
 import { useDeviceBackendFilters } from './useDeviceBackendFilters';
@@ -114,16 +114,22 @@ export const DeviceTable = ({
   deviceColumns,
 }: DeviceTableProps) => {
   const { t } = useTranslation();
+  const { post } = useFetch();
   const [addDeviceModal, setAddDeviceModal] = React.useState(false);
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
-  const { remove } = useFetch();
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
-  const { deleteAction: deleteDeviceAction, deleteModal: deleteDeviceModal } = useDeleteListAction({
+  const { action: decommissionDeviceAction, modal: decommissionDeviceModal } = useDecommissionListAction({
     resourceType: 'Device',
-    onDelete: async (resourceId: string) => {
-      await remove(`devices/${resourceId}`);
+    onConfirm: async (deviceId, { target }) => {
+      // TODO Is it a PUT??
+      const result = await post<DeviceDecommission>(`devices/${deviceId}/decommission`, {
+        decommissionTarget: target,
+      });
+
+      console.log('%c result', 'color: red; font-size:18px', result);
+
       refetch();
     },
   });
@@ -164,7 +170,7 @@ export const DeviceTable = ({
             <DeviceTableRow
               key={device.metadata.name || ''}
               device={device}
-              deleteAction={deleteDeviceAction}
+              decommissionAction={decommissionDeviceAction}
               onRowSelect={onRowSelect}
               isRowSelected={isRowSelected}
               rowIndex={index}
@@ -173,7 +179,7 @@ export const DeviceTable = ({
         </Tbody>
       </Table>
       {!hasFiltersEnabled && devices.length === 0 && <DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />}
-      {deleteDeviceModal}
+      {decommissionDeviceModal}
       {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}
       {isMassDeleteModalOpen && (
         <MassDeleteDeviceModal

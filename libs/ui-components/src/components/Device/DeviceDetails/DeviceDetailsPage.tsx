@@ -4,6 +4,8 @@ import { DropdownItem, DropdownList, Nav, NavList } from '@patternfly/react-core
 import { Device } from '@flightctl/types';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { useFetch } from '../../../hooks/useFetch';
+import { getDisabledTooltipProps } from '../../../utils/tooltip';
+import { getEditDisabledReason } from '../../../utils/devices';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -13,7 +15,6 @@ import DeviceDetailsTab from './DeviceDetailsTab';
 import TerminalTab from './TerminalTab';
 import NavItem from '../../NavItem/NavItem';
 import DeviceStatusDebugModal from './DeviceStatusDebugModal';
-import { getDeviceFleet } from '../../../utils/devices';
 
 const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{ hideTerminal?: boolean }>) => {
   const { t } = useTranslation();
@@ -37,14 +38,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
     resourceName: deviceAlias,
     resourceType: 'device',
   });
-  const editActionProps = getDeviceFleet(device?.metadata || {})
-    ? {
-        isAriaDisabled: true,
-        tooltipProps: {
-          content: t('Device is bound to a fleet. Its configurations cannot be edited'),
-        },
-      }
-    : undefined;
+  const editActionProps = device ? getDisabledTooltipProps(getEditDisabledReason(device, t)) : undefined;
 
   return (
     <DetailsPage

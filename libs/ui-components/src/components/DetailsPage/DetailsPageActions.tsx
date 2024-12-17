@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Dropdown, DropdownItem, MenuToggle } from '@patternfly/react-core';
+import { getDisabledTooltipProps } from '../../utils/tooltip';
 
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -8,24 +9,16 @@ type DeleteActionProps = {
   onDelete: () => Promise<unknown>;
   resourceType: string;
   resourceName: string;
-  disabledReason?: string | boolean;
+  disabledReason?: string;
 };
 
 export const useDeleteAction = ({ resourceType, resourceName, onDelete, disabledReason }: DeleteActionProps) => {
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+
+  const deleteProps = getDisabledTooltipProps(disabledReason);
   const deleteAction = (
-    <DropdownItem
-      onClick={() => setIsDeleteModalOpen(true)}
-      {...(disabledReason
-        ? {
-            isAriaDisabled: true,
-            tooltipProps: {
-              content: disabledReason,
-            },
-          }
-        : undefined)}
-    >
+    <DropdownItem onClick={() => setIsDeleteModalOpen(true)} {...deleteProps}>
       {t('Delete {{ resourceType }}', { resourceType })}
     </DropdownItem>
   );
