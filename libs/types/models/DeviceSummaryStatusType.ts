@@ -2,6 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+/**
+ * Status of the device.
+ */
 export enum DeviceSummaryStatusType {
   DeviceSummaryStatusOnline = 'Online',
   DeviceSummaryStatusDegraded = 'Degraded',

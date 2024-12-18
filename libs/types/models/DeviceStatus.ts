@@ -25,34 +25,16 @@ export type DeviceStatus = {
    * List of device application status.
    */
   applications: Array<DeviceApplicationStatus>;
-  /**
-   * Summary status of the device applications.
-   */
   applicationsSummary: DeviceApplicationsSummaryStatus;
-  /**
-   * Current status of the resources of the device.
-   */
   resources: DeviceResourceStatus;
-  /**
-   * Current status of the integrity of the device.
-   */
   integrity: DeviceIntegrityStatus;
-  /**
-   * Current status of the device config.
-   */
   config: DeviceConfigStatus;
-  /**
-   * Current status of the device OS.
-   */
   os: DeviceOSStatus;
-  /**
-   * Current status of the device update.
-   */
   updated: DeviceUpdatedStatus;
-  /**
-   * Summary status of the device.
-   */
   summary: DeviceSummaryStatus;
+  /**
+   * The last time the device was seen by the service.
+   */
   lastSeen: string;
 };
 

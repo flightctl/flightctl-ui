@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type Error = {
   /**
-   * Error message
+   * Error message.
    */
   message: string;
 };

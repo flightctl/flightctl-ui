@@ -4,15 +4,15 @@
 /* eslint-disable */
 import type { Condition } from './Condition';
 /**
- * Indicates approval/denial/failure status of the CSR, and contains the issued certifiate if any exists
+ * Indicates approval/denial/failure status of the CSR, and contains the issued certifiate if any exists.
  */
 export type CertificateSigningRequestStatus = {
   /**
-   * The issued signed certificate, immutable once populated
+   * The issued signed certificate, immutable once populated.
    */
   certificate?: string;
   /**
-   * Conditions applied to the request. Known conditions are Approved, Denied, and Failed
+   * Conditions applied to the request. Known conditions are Approved, Denied, and Failed.
    */
   conditions: Array<Condition>;
 };

@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type ApplicationEnvVars = {
   /**
-   * Environment variable key-value pairs, injected during runtime
+   * Environment variable key-value pairs, injected during runtime.
    */
   envVars?: Record<string, string>;
 };

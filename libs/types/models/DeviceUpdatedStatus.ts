@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { DeviceUpdatedStatusType } from './DeviceUpdatedStatusType';
+/**
+ * Current status of the device update.
+ */
 export type DeviceUpdatedStatus = {
-  /**
-   * Status type of the device update.
-   */
   status: DeviceUpdatedStatusType;
   /**
    * Human readable information about the last device update transition.

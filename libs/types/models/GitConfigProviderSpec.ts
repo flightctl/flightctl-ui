@@ -4,19 +4,27 @@
 /* eslint-disable */
 export type GitConfigProviderSpec = {
   /**
-   * The name of the config provider
+   * The name of the config provider.
    */
   name: string;
+  /**
+   * The reference to a Git configuration server.
+   */
   gitRef: {
     /**
-     * The name of the repository resource to use as the sync source
-     *
+     * The name of the Repository resource.
      */
     repository: string;
+    /**
+     * The revision to use from the Repository.
+     */
     targetRevision: string;
+    /**
+     * The path to the config in the Repository.
+     */
     path: string;
     /**
-     * Path to config in device
+     * Path in the device's file system at which the repository's path should be mounted.
      */
     mountPath?: string;
   };

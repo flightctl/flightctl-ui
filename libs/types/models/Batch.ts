@@ -10,6 +10,9 @@ import type { Percentage } from './Percentage';
 export type Batch = {
   selector?: LabelSelector;
   successThreshold?: Percentage;
+  /**
+   * The maximum number or percentage of devices to update in the batch.
+   */
   limit?: (Percentage | number);
 };
 

@@ -7,6 +7,9 @@ import type { ConfigProviderSpec } from './ConfigProviderSpec';
 import type { DeviceOSSpec } from './DeviceOSSpec';
 import type { DeviceUpdatePolicySpec } from './DeviceUpdatePolicySpec';
 import type { ResourceMonitor } from './ResourceMonitor';
+/**
+ * DeviceSpec describes a device.
+ */
 export type DeviceSpec = {
   updatePolicy?: DeviceUpdatePolicySpec;
   os?: DeviceOSSpec;
@@ -18,7 +21,13 @@ export type DeviceSpec = {
    * List of applications.
    */
   applications?: Array<ApplicationSpec>;
+  /**
+   * The systemd services to monitor.
+   */
   systemd?: {
+    /**
+     * A list of match patterns.
+     */
     matchPatterns?: Array<string>;
   };
   /**

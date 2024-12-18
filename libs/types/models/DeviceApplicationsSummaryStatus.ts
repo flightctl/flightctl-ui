@@ -3,13 +3,13 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ApplicationsSummaryStatusType } from './ApplicationsSummaryStatusType';
+/**
+ * A summary of the health of applications on the device.
+ */
 export type DeviceApplicationsSummaryStatus = {
-  /**
-   * Summary status of the system applications.
-   */
   status: ApplicationsSummaryStatusType;
   /**
-   * Human readable information detailing the last system application transition.
+   * Human readable information detailing the last application transition.
    */
   info?: string;
 };

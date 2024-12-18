@@ -2,17 +2,20 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+/**
+ * Configuration for SSH transport.
+ */
 export type SshConfig = {
   /**
-   * Base64 encoded private SSH key
+   * Base64 encoded private SSH key.
    */
   sshPrivateKey?: string;
   /**
-   * The passphrase for sshPrivateKey
+   * The passphrase for sshPrivateKey.
    */
   privateKeyPassphrase?: string;
   /**
-   * Skip remote server verification
+   * Skip remote server verification.
    */
   skipServerVerification?: boolean;
 };

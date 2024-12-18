@@ -16,10 +16,7 @@ export type FileSpec = {
    */
   contentEncoding?: FileSpec.contentEncoding;
   /**
-   * The file’s permission mode. You may specify the more familiar octal with a leading zero (e.g., 0644) or as
-   * a decimal without a leading zero (e.g., 420). Setuid/setgid/sticky bits are supported. If not specified,
-   * the permission mode for files defaults to 0644.
-   *
+   * The file's permission mode. You may specify the more familiar octal with a leading zero (e.g., 0644) or as a decimal without a leading zero (e.g., 420). Setuid/setgid/sticky bits are supported. If not specified, the permission mode for files defaults to 0644.
    */
   mode?: number;
   /**

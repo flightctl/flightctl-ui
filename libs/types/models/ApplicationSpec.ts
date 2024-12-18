@@ -6,7 +6,7 @@ import type { ApplicationEnvVars } from './ApplicationEnvVars';
 import type { ImageApplicationProvider } from './ImageApplicationProvider';
 export type ApplicationSpec = (ApplicationEnvVars & {
   /**
-   * The name of the application
+   * The name of the application.
    */
   name?: string;
 } & ImageApplicationProvider);

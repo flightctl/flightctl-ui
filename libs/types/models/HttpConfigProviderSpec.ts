@@ -4,24 +4,23 @@
 /* eslint-disable */
 export type HttpConfigProviderSpec = {
   /**
-   * The name of the config provider
+   * The name of the config provider.
    */
   name: string;
+  /**
+   * The reference to an HTTP configuration server.
+   */
   httpRef: {
     /**
-     * The name of the repository resource to use as the sync source
-     *
+     * The name of the repository resource to use as the sync source.
      */
     repository: string;
     /**
-     * Part of the URL that comes after the base URL. It can include query parameters such as:
-     * /path/to/endpoint?query=param
-     *
+     * Part of the URL that comes after the base URL. It can include query parameters such as: "/path/to/endpoint?query=param".
      */
     suffix?: string;
     /**
-     * The path of the file where the response is stored in the filesystem of the device.
-     *
+     * Path in the device's file system to which the content returned by the HTTP sever should be written.
      */
     filePath: string;
   };

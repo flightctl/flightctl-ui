@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * RepoSpecType is the type of the repository
+ * RepoSpecType is the type of the repository.
  */
 export enum RepoSpecType {
   GIT = 'git',

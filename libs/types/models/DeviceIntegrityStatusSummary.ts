@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { DeviceIntegrityStatusSummaryType } from './DeviceIntegrityStatusSummaryType';
+/**
+ * Summary status of the integrity of the device.
+ */
 export type DeviceIntegrityStatusSummary = {
-  /**
-   * Summary status of the integrity of the device.
-   */
   status: DeviceIntegrityStatusSummaryType;
   /**
    * Human readable information about the last integrity transition.

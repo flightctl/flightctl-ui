@@ -4,13 +4,13 @@
 /* eslint-disable */
 export type DeviceDecommission = {
   /**
-   * Specifies the desired decommissioning method of the device
+   * Specifies the desired decommissioning method of the device.
    */
   decommissionTarget: DeviceDecommission.decommissionTarget;
 };
 export namespace DeviceDecommission {
   /**
-   * Specifies the desired decommissioning method of the device
+   * Specifies the desired decommissioning method of the device.
    */
   export enum decommissionTarget {
     UNENROLL = 'Unenroll',

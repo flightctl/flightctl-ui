@@ -2,9 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+/**
+ * DeviceOSSpec describes the target OS for the device.
+ */
 export type DeviceOSSpec = {
   /**
-   * ostree image name or URL.
+   * The target OS image name or URL.
    */
   image: string;
 };

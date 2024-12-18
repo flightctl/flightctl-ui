@@ -2,6 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+/**
+ * Current status of the device config.
+ */
 export type DeviceConfigStatus = {
   /**
    * Version of the device rendered config.

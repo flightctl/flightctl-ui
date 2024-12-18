@@ -8,13 +8,7 @@ import type { ConditionType } from './ConditionType';
  * Condition contains details for one aspect of the current state of this API Resource.
  */
 export type Condition = {
-  /**
-   * Type of condition in CamelCase
-   */
   type: ConditionType;
-  /**
-   * Status of the condition, one of True, False, Unknown.
-   */
   status: ConditionStatus;
   /**
    * The .metadata.generation that the condition was set based upon.
@@ -29,7 +23,7 @@ export type Condition = {
    */
   message: string;
   /**
-   * (brief) reason for the condition's last transition.
+   * A (brief) reason for the condition's last transition.
    */
   reason: string;
 };

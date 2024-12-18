@@ -4,17 +4,15 @@
 /* eslint-disable */
 import type { Condition } from './Condition';
 /**
- * ResourceSyncStatus represents information about the status of a resourcesync
+ * ResourceSyncStatus represents information about the status of a ResourceSync.
  */
 export type ResourceSyncStatus = {
   /**
-   * The last commit hash that was synced
-   *
+   * The last commit hash that was synced.
    */
   observedCommit?: string;
   /**
-   * The last generation that was synced
-   *
+   * The last generation that was synced.
    */
   observedGeneration?: number;
   /**

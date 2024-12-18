@@ -8,7 +8,7 @@ export type HookActionRun = {
    */
   run: string;
   /**
-   * Environment variable key-value pairs, injected during runtime
+   * Environment variable key-value pairs, injected during runtime.
    */
   envVars?: Record<string, string>;
   /**

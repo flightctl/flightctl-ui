@@ -2,6 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+/**
+ * The types of resource statuses.
+ */
 export enum DeviceResourceStatusType {
   DeviceResourceStatusHealthy = 'Healthy',
   DeviceResourceStatusWarning = 'Warning',

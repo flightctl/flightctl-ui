@@ -4,9 +4,6 @@
 /* eslint-disable */
 import type { ResourceAlertSeverityType } from './ResourceAlertSeverityType';
 export type ResourceAlertRule = {
-  /**
-   * Severity of the alert.
-   */
   severity: ResourceAlertSeverityType;
   /**
    * Duration is the time over which the average usage is observed before alerting. Format: positive integer followed by 's' for seconds, 'm' for minutes, 'h' for hours.
