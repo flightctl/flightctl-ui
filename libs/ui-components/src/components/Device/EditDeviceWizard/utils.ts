@@ -35,7 +35,8 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
 
   // Device labels
   const currentLabels = currentDevice.metadata.labels || {};
-  const updatedLabels = updatedDevice.labels || [];
+  const updatedLabels = [...updatedDevice.labels];
+
   if (updatedDevice.deviceAlias) {
     updatedLabels.push({ key: 'alias', value: updatedDevice.deviceAlias });
   }
