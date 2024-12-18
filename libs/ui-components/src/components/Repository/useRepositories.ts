@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useDebounce } from 'use-debounce';
 
 import { Repository, RepositoryList } from '@flightctl/types';
@@ -46,12 +47,11 @@ export const useRepositories = (): [
     },
     onPageFetched,
   );
-
-  const pagination = {
+  const pagination = React.useMemo(() => ({
     currentPage,
     setCurrentPage,
     itemCount,
-  };
+  }), [currentPage, setCurrentPage, itemCount]);
 
   return [repoList?.items || [], isLoading, error, isLoading || isDebouncing, refetch, pagination];
 };

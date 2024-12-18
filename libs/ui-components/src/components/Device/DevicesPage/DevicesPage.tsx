@@ -219,11 +219,11 @@ const DevicesPage = () => {
     onPageFetched,
   });
 
-  const pagination = {
+  const pagination = React.useMemo(() => ({
     currentPage,
     setCurrentPage,
     itemCount,
-  };
+  }), [currentPage, setCurrentPage, itemCount]);
 
   return (
     <>
