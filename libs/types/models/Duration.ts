@@ -3,13 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * The maximum duration allowed for the action to complete.
- * The duration should be specified as a positive integer
- * followed by a time unit. Supported time units are:
- * - 's' for seconds
- * - 'm' for minutes
- * - 'h' for hours
- * - 'd' for days
- *
+ * The maximum duration allowed for the action to complete. The duration should be specified as a positive integer followed by a time unit. Supported time units are: `s` for seconds, `m` for minutes, `h` for hours.
  */
 export type Duration = string;

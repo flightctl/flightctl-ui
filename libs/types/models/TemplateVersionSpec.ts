@@ -2,6 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+/**
+ * TemplateVersionSpec describes a version of a device template.
+ */
 export type TemplateVersionSpec = {
   /**
    * The fleet whose template this refers to.

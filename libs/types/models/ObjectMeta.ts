@@ -6,10 +6,16 @@
  * ObjectMeta is metadata that all persisted resources must have, which includes all objects users must create.
  */
 export type ObjectMeta = {
+  /**
+   * The time the object was created.
+   */
   creationTimestamp?: string;
+  /**
+   * The time the object will be deleted.
+   */
   deletionTimestamp?: string;
   /**
-   * name of the object
+   * The name of the object.
    */
   name?: string;
   /**

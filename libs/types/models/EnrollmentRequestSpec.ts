@@ -8,12 +8,12 @@ import type { DeviceStatus } from './DeviceStatus';
  */
 export type EnrollmentRequestSpec = {
   /**
-   * csr is a PEM-encoded PKCS#10 certificate signing request.
+   * The PEM-encoded PKCS#10 certificate signing request.
    */
   csr: string;
   deviceStatus?: DeviceStatus;
   /**
-   * A set of labels that the service will apply to this device when its enrollment is approved
+   * A set of labels that the service will apply to this device when its enrollment is approved.
    */
   labels?: Record<string, string>;
 };

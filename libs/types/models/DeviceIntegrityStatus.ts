@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { DeviceIntegrityStatusSummary } from './DeviceIntegrityStatusSummary';
+/**
+ * Status of device integrity.
+ */
 export type DeviceIntegrityStatus = {
-  /**
-   * Summary status of the integrity of the device.
-   */
   summary: DeviceIntegrityStatusSummary;
 };
 

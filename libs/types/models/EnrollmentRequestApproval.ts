@@ -2,21 +2,24 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+/**
+ * EnrollmentRequestApproval contains information about the approval of a device enrollment request.
+ */
 export type EnrollmentRequestApproval = {
   /**
-   * labels is a set of labels to apply to the device.
+   * A set of labels to apply to the device.
    */
   labels?: Record<string, string>;
   /**
-   * approved indicates whether the request has been approved.
+   * Indicates whether the request has been approved.
    */
   approved: boolean;
   /**
-   * approvedBy is the name of the approver.
+   * The name of the approver.
    */
   approvedBy?: string;
   /**
-   * approvedAt is the time at which the request was approved.
+   * The time at which the request was approved.
    */
   approvedAt?: string;
 };

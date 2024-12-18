@@ -3,6 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { DeviceResourceStatusType } from './DeviceResourceStatusType';
+/**
+ * Current status of the resources of the device.
+ */
 export type DeviceResourceStatus = {
   /**
    * Status of the device CPU resources.

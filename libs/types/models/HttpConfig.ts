@@ -2,33 +2,36 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+/**
+ * Configuration for HTTP transport.
+ */
 export type HttpConfig = {
   /**
-   * The username for auth with HTTP transport
+   * The username for auth with HTTP transport.
    */
   username?: string;
   /**
-   * The password for auth with HTTP transport
+   * The password for auth with HTTP transport.
    */
   password?: string;
   /**
-   * Base64 encoded TLS cert data
+   * Base64 encoded TLS cert data.
    */
   'tls.crt'?: string;
   /**
-   * Base64 encoded TLS cert key
+   * Base64 encoded TLS cert key.
    */
   'tls.key'?: string;
   /**
-   * Base64 encoded root CA
+   * Base64 encoded root CA.
    */
   'ca.crt'?: string;
   /**
-   * Skip remote server verification
+   * Skip remote server verification.
    */
   skipServerVerification?: boolean;
   /**
-   * The token for auth with HTTP transport
+   * The token for auth with HTTP transport.
    */
   token?: string;
 };

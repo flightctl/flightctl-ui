@@ -12,6 +12,9 @@ import type { RolloutPolicy } from './RolloutPolicy';
 export type FleetSpec = {
   selector?: LabelSelector;
   rolloutPolicy?: RolloutPolicy;
+  /**
+   * The template for the devices in the fleet.
+   */
   template: {
     metadata?: ObjectMeta;
     spec: DeviceSpec;

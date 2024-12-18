@@ -5,5 +5,8 @@
 import type { GenericRepoSpec } from './GenericRepoSpec';
 import type { HttpRepoSpec } from './HttpRepoSpec';
 import type { SshRepoSpec } from './SshRepoSpec';
+/**
+ * RepositorySpec describes a configuration repository.
+ */
 export type RepositorySpec = (GenericRepoSpec | HttpRepoSpec | SshRepoSpec);
 

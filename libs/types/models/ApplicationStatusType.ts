@@ -2,6 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+/**
+ * Status of a single application on the device.
+ */
 export enum ApplicationStatusType {
   ApplicationStatusPreparing = 'Preparing',
   ApplicationStatusStarting = 'Starting',

@@ -5,7 +5,7 @@
 import type { RepoSpecType } from './RepoSpecType';
 export type GenericRepoSpec = {
   /**
-   * The (possibly remote) repository URL
+   * The (possibly remote) repository URL.
    */
   url: string;
   type: RepoSpecType;

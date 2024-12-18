@@ -2,6 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+/**
+ * Status type of the device update.
+ */
 export enum DeviceUpdatedStatusType {
   DeviceUpdatedStatusUpToDate = 'UpToDate',
   DeviceUpdatedStatusOutOfDate = 'OutOfDate',

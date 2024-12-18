@@ -4,9 +4,12 @@
 /* eslint-disable */
 import type { MatchExpressions } from './MatchExpressions';
 /**
- * A map of key,value pairs that are ANDed. Empty/null label selectors match nothing.
+ * A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. Empty/null label selectors match nothing.
  */
 export type LabelSelector = {
+  /**
+   * A map of {key,value} pairs.
+   */
   matchLabels?: Record<string, string>;
   matchExpressions?: MatchExpressions;
 };

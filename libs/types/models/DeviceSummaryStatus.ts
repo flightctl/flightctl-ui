@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { DeviceSummaryStatusType } from './DeviceSummaryStatusType';
+/**
+ * A summary of the health of the device hardware and operating system resources.
+ */
 export type DeviceSummaryStatus = {
-  /**
-   * Summary status of the device.
-   */
   status: DeviceSummaryStatusType;
   /**
    * Human readable information detailing the last device status transition.

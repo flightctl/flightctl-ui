@@ -16,9 +16,6 @@ export type DeviceApplicationStatus = {
    * Number of restarts observed for the application.
    */
   restarts: number;
-  /**
-   * Status of the application.
-   */
   status: ApplicationStatusType;
 };
 

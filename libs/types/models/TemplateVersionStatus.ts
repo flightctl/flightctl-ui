@@ -4,7 +4,13 @@
 /* eslint-disable */
 import type { Condition } from './Condition';
 import type { DeviceSpec } from './DeviceSpec';
+/**
+ * TemplateVersionStatus represents information about the status of a template version.
+ */
 export type TemplateVersionStatus = (DeviceSpec & {
+  /**
+   * The time at which the template was last updated.
+   */
   updatedAt?: string;
   /**
    * Current state of the device.

@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type ImageApplicationProvider = {
   /**
-   * Reference to the container image for the application package
+   * Reference to the container image for the application package.
    */
   image: string;
 };

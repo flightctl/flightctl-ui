@@ -9,7 +9,7 @@ import type { EnrollmentRequestApproval } from './EnrollmentRequestApproval';
  */
 export type EnrollmentRequestStatus = {
   /**
-   * certificate is a PEM-encoded signed certificate.
+   * The PEM-encoded signed certificate.
    */
   certificate?: string;
   /**

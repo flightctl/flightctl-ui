@@ -7,11 +7,11 @@
  */
 export type AuthConfig = {
   /**
-   * Auth type
+   * Auth type.
    */
   authType: string;
   /**
-   * Auth URL
+   * Auth URL.
    */
   authURL: string;
 };
