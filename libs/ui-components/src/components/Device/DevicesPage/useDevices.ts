@@ -6,6 +6,7 @@ import * as queryUtils from '../../../utils/query';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { FilterStatusMap } from './types';
+import { PAGE_SIZE } from '../../../constants';
 
 type DevicesEndpointArgs = {
   nameOrAlias?: string;
@@ -13,9 +14,17 @@ type DevicesEndpointArgs = {
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
   summaryOnly?: boolean;
+  nextContinue?: string;
 };
 
-const getDevicesEndpoint = ({ nameOrAlias, ownerFleets, activeStatuses, labels, summaryOnly }: DevicesEndpointArgs) => {
+const getDevicesEndpoint = ({
+  nameOrAlias,
+  ownerFleets,
+  activeStatuses,
+  labels,
+  nextContinue,
+  summaryOnly,
+}: DevicesEndpointArgs) => {
   const filterByAppStatus = activeStatuses?.[FilterSearchParams.AppStatus];
   const filterByDevStatus = activeStatuses?.[FilterSearchParams.DeviceStatus];
   const filterByUpdateStatus = activeStatuses?.[FilterSearchParams.UpdatedStatus];
@@ -43,6 +52,12 @@ const getDevicesEndpoint = ({ nameOrAlias, ownerFleets, activeStatuses, labels, 
   queryUtils.setLabelParams(params, labels);
   if (summaryOnly) {
     params.set('summaryOnly', 'true');
+  }
+  if (nextContinue !== undefined) {
+    params.set('limit', `${PAGE_SIZE}`);
+  }
+  if (nextContinue) {
+    params.set('continue', nextContinue);
   }
   return params.size ? `devices?${params.toString()}` : 'devices';
 };
@@ -73,11 +88,17 @@ export const useDevices = (args: {
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
+  nextContinue?: string;
+  onPageFetched?: (data: DeviceList) => void;
 }): [Device[], boolean, unknown, boolean, VoidFunction] => {
   const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint(args);
-  const [devicesList, devicesLoading, devicesError, devicesRefetch, updating] = useFetchPeriodically<DeviceList>({
-    endpoint: devicesEndpoint,
-  });
+
+  const [devicesList, devicesLoading, devicesError, devicesRefetch, updating] = useFetchPeriodically<DeviceList>(
+    {
+      endpoint: devicesEndpoint,
+    },
+    args.onPageFetched,
+  );
 
   return [devicesList?.items || [], devicesLoading, devicesError, updating || devicesDebouncing, devicesRefetch];
 };

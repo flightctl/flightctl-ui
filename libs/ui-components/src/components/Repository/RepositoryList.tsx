@@ -15,8 +15,7 @@ import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 import { RepositoryIcon } from '@patternfly/react-icons/dist/js/icons/repository-icon';
 import { TFunction } from 'i18next';
 
-import { RepoSpecType, Repository, RepositoryList } from '@flightctl/types';
-import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
+import { RepoSpecType, Repository } from '@flightctl/types';
 import ListPageBody from '../ListPage/ListPageBody';
 import ListPage from '../ListPage/ListPage';
 import { getLastTransitionTimeText, getRepositorySyncStatus } from '../../utils/status/repository';
@@ -32,6 +31,8 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import ResourceLink from '../common/ResourceLink';
 import RepositoryStatus from '../Status/RepositoryStatus';
+import { useRepositories } from './useRepositories';
+import TablePagination from '../Table/TablePagination';
 
 const CreateRepositoryButton = ({ buttonText }: { buttonText?: string }) => {
   const { t } = useTranslation();
@@ -87,9 +88,7 @@ const getSearchText = (repo: Repository) => [repo.metadata.name];
 
 const RepositoryTable = () => {
   const { t } = useTranslation();
-  const [repositoryList, loading, error, refetch] = useFetchPeriodically<RepositoryList>({
-    endpoint: 'repositories',
-  });
+  const [repositories, loading, error, isUpdating, refetch, pagination] = useRepositories();
   const [deleteModalRepoId, setDeleteModalRepoId] = React.useState<string>();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
 
@@ -100,7 +99,7 @@ const RepositoryTable = () => {
     refetch();
   };
 
-  const { search, setSearch, filteredData } = useTableTextSearch(repositoryList?.items || [], getSearchText);
+  const { search, setSearch, filteredData } = useTableTextSearch(repositories, getSearchText);
   const columns = React.useMemo(() => getColumns(t), [t]);
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
@@ -128,9 +127,9 @@ const RepositoryTable = () => {
       </Toolbar>
       <Table
         aria-label={t('Repositories table')}
-        loading={loading}
+        loading={isUpdating}
         emptyFilters={filteredData.length === 0}
-        emptyData={(repositoryList?.items.length || 0) === 0}
+        emptyData={repositories.length === 0}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
         columns={columns}
@@ -174,7 +173,9 @@ const RepositoryTable = () => {
           ))}
         </Tbody>
       </Table>
-      {repositoryList?.items.length === 0 && <RepositoryEmptyState />}
+      <TablePagination isUpdating={isUpdating} pagination={pagination} />
+
+      {repositories.length === 0 && <RepositoryEmptyState />}
       {!!deleteModalRepoId && (
         <DeleteRepositoryModal
           onClose={() => setDeleteModalRepoId(undefined)}
