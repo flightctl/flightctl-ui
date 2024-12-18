@@ -234,11 +234,14 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
     onPageFetched,
   });
 
-  const pagination = {
-    currentPage,
-    setCurrentPage,
-    itemCount,
-  };
+  const pagination = React.useMemo(
+    () => ({
+      currentPage,
+      setCurrentPage,
+      itemCount,
+    }),
+    [currentPage, setCurrentPage, itemCount],
+  );
 
   return (
     <>

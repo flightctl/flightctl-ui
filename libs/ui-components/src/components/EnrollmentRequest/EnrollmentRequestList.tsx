@@ -32,8 +32,6 @@ const ErEmptyState = () => {
   return <ResourceListEmptyState icon={MicrochipIcon} titleText={t('No enrollment requests here!')} />;
 };
 
-
-
 const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
   {
     name: t('Name'),

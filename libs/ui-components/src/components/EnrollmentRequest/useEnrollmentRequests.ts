@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { useDebounce } from 'use-debounce';
 
 import { EnrollmentRequest, EnrollmentRequestList } from '@flightctl/types';
@@ -48,11 +50,14 @@ export const usePendingEnrollments = (): [
     onPageFetched,
   );
 
-  const pagination = {
-    currentPage,
-    setCurrentPage,
-    itemCount,
-  };
+  const pagination = React.useMemo(
+    () => ({
+      currentPage,
+      setCurrentPage,
+      itemCount,
+    }),
+    [currentPage, setCurrentPage, itemCount],
+  );
 
   return [erList?.items || [], isLoading || isDebouncing, error, refetch, pagination];
 };
