@@ -3,7 +3,9 @@ import { useAppContext } from './useAppContext';
 import { getErrorMessage } from '../utils/error';
 import { RESOURCE, VERB } from '../types/rbac';
 
-export const useAccessReview = (kind: RESOURCE, verb: VERB): [boolean, boolean, string | undefined] => {
+export type AccessReviewResult = [boolean, boolean, string | undefined];
+
+export const useAccessReview = (kind: RESOURCE, verb: VERB): AccessReviewResult => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string>();
   const [isAllowed, setIsAllowed] = React.useState(false);
