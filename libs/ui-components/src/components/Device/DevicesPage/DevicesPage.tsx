@@ -123,7 +123,7 @@ export const DeviceTable = ({
   const { action: decommissionDeviceAction, modal: decommissionDeviceModal } = useDecommissionListAction({
     resourceType: 'Device',
     onConfirm: async (deviceId, { target }) => {
-      const result = await post<DeviceDecommission>(`devices/${deviceId}/decommission`, {
+      await post<DeviceDecommission>(`devices/${deviceId}/decommission`, {
         decommissionTarget: target,
       });
 

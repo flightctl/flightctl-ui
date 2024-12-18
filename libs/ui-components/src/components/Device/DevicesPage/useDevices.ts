@@ -29,7 +29,7 @@ const getDevicesEndpoint = ({ nameOrAlias, ownerFleets, activeStatuses, labels, 
   queryUtils.addQueryConditions(fieldSelectors, 'status.applicationsSummary.status', filterByAppStatus);
   queryUtils.addQueryConditions(fieldSelectors, 'status.summary.status', filterByDevStatus);
   queryUtils.addQueryConditions(fieldSelectors, 'status.updated.status', filterByUpdateStatus);
-  // field-selector not yet valid
+  // field-selector for lifecycle status isn't valid yet
   //queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', filterByLifeStatus);
 
   if (nameOrAlias) {

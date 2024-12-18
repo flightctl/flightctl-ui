@@ -32,7 +32,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
 
   const { decommissionAction, decommissionModal } = useDecommissionAction({
     onConfirm: async (target: DeviceDecommission.decommissionTarget) => {
-      const result = await post<DeviceDecommission>(`devices/${deviceId}/decommission`, {
+      await post<DeviceDecommission>(`devices/${deviceId}/decommission`, {
         decommissionTarget: target,
       });
 
