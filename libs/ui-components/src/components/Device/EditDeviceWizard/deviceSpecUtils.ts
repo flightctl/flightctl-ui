@@ -35,9 +35,9 @@ const ACM_CRD_YAML_PATH = '/var/local/acm-import/crd.yaml';
 const ACM_IMPORT_YAML_PATH = '/var/local/acm-import/import.yaml';
 const ACM_REPO_SUFFIX = `/agent-registration/manifests/`;
 
-const MICROSHIFT_REGISTRAION_HOOK_NAME = 'apply-acm-manifests';
-const MICROSHIFT_REGISTRAION_HOOK_FILE = '/etc/flightctl/hooks.d/afterupdating/50-acm-registration.yaml';
-const MICROSHIFT_REGISTRAION_HOOK = `- if:
+const MICROSHIFT_REGISTRATION_HOOK_NAME = 'apply-acm-manifests';
+const MICROSHIFT_REGISTRATION_HOOK_FILE = '/etc/flightctl/hooks.d/afterupdating/50-acm-registration.yaml';
+const MICROSHIFT_REGISTRATION_HOOK = `- if:
   - path: /var/local/acm-import/crd.yaml
     op: [created]
   run: kubectl apply -f /var/local/acm-import/crd.yaml
@@ -325,7 +325,7 @@ export const ACMImportConfig: HttpConfigProviderSpec = {
   httpRef: {
     filePath: ACM_IMPORT_YAML_PATH,
     repository: ACM_REPO_NAME,
-    suffix: `${ACM_REPO_SUFFIX}{{ device.metadata.name }}`,
+    suffix: `${ACM_REPO_SUFFIX}{{ .metadata.name }}`,
   },
 };
 
@@ -358,19 +358,19 @@ const isMicroshiftRegistrationHook = (c: ConfigProviderSpec) => {
     return false;
   }
   return (
-    c.name === MICROSHIFT_REGISTRAION_HOOK_NAME &&
+    c.name === MICROSHIFT_REGISTRATION_HOOK_NAME &&
     c.inline.length === 1 &&
-    c.inline[0].path === MICROSHIFT_REGISTRAION_HOOK_FILE &&
-    c.inline[0].content === MICROSHIFT_REGISTRAION_HOOK
+    c.inline[0].path === MICROSHIFT_REGISTRATION_HOOK_FILE &&
+    c.inline[0].content === MICROSHIFT_REGISTRATION_HOOK
   );
 };
 
 export const MicroshiftRegistrationHook: InlineConfigProviderSpec = {
-  name: MICROSHIFT_REGISTRAION_HOOK_NAME,
+  name: MICROSHIFT_REGISTRATION_HOOK_NAME,
   inline: [
     {
-      path: MICROSHIFT_REGISTRAION_HOOK_FILE,
-      content: MICROSHIFT_REGISTRAION_HOOK,
+      path: MICROSHIFT_REGISTRATION_HOOK_FILE,
+      content: MICROSHIFT_REGISTRATION_HOOK,
     },
   ],
 };
