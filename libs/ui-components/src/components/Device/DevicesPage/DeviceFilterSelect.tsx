@@ -2,14 +2,18 @@ import * as React from 'react';
 import { Grid, GridItem, SelectList, SelectOption } from '@patternfly/react-core';
 import { TFunction } from 'i18next';
 
+import { ApplicationsSummaryStatusType, DeviceLifecycleStatusType, DeviceUpdatedStatusType } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { AllDeviceSummaryStatusType } from '../../../types/extraTypes';
 import FilterSelect, { FilterSelectGroup } from '../../form/FilterSelect';
 import { FilterStatusMap, UpdateStatus } from './types';
 import StatusDisplay from '../../Status/StatusDisplay';
-import { DeviceSummaryStatus, FilterSearchParams, getDeviceStatusItems } from '../../../utils/status/devices';
+import { FilterSearchParams, getDeviceStatusItems } from '../../../utils/status/devices';
 import { StatusItem } from '../../../utils/status/common';
 import { getApplicationSummaryStatusItems } from '../../../utils/status/applications';
 import { getSystemUpdateStatusItems } from '../../../utils/status/system';
+
+type DeviceSummaryStatus = ApplicationsSummaryStatusType | DeviceUpdatedStatusType | AllDeviceSummaryStatusType;
 
 export const getStatusItem = (
   t: TFunction,
@@ -27,7 +31,9 @@ export const getStatusItem = (
     case FilterSearchParams.DeviceStatus:
       return {
         title: t('Device status'),
-        items: getDeviceStatusItems(t),
+        items: getDeviceStatusItems(t).filter(
+          (item) => item.id !== DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
+        ),
       };
     default:
       return {

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { DeviceSummaryStatusType } from '@flightctl/types';
-import { FlightCtlLabel } from '../../../../types/extraTypes';
+import { DeviceLifecycleStatusType } from '@flightctl/types';
+import { AllDeviceSummaryStatusType, FlightCtlLabel } from '../../../../types/extraTypes';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getDeviceStatusHelperText } from '../../../Status/utils';
@@ -21,10 +21,13 @@ const DeviceStatusChart = ({
 }) => {
   const { t } = useTranslation();
 
-  const statusItems = getDeviceStatusItems(t);
+  // Decommissioning devices need more work. ATM, they are not being returned in the "summaryOnly" request.
+  // Moreover, if we show them as "DeviceStatus", we'd need to subtract those devices from their actual deviceStatus figures.
+  const statusItems = getDeviceStatusItems(t).filter(
+    (item) => item.id !== DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
+  );
 
-  // TODO should we add the "Pending" devices, now that the Device table does not contain ERs?
-  const devStatusData = toOverviewChartData<DeviceSummaryStatusType>(
+  const devStatusData = toOverviewChartData<AllDeviceSummaryStatusType>(
     deviceStatus,
     statusItems,
     labels,

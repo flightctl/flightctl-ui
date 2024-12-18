@@ -1,6 +1,6 @@
 import { useDebounce } from 'use-debounce';
 
-import { Device, DeviceList, DevicesSummary } from '@flightctl/types';
+import { Device, DeviceLifecycleStatusType, DeviceList, DevicesSummary } from '@flightctl/types';
 import { FilterSearchParams } from '../../../utils/status/devices';
 import * as queryUtils from '../../../utils/query';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
@@ -16,14 +16,21 @@ type DevicesEndpointArgs = {
 };
 
 const getDevicesEndpoint = ({ nameOrAlias, ownerFleets, activeStatuses, labels, summaryOnly }: DevicesEndpointArgs) => {
+  const devStatusParam = activeStatuses?.[FilterSearchParams.DeviceStatus];
+
+  const filterByDevStatus = devStatusParam?.filter(
+    (param) => param !== DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
+  );
+  // const filterByLifeStatus = devStatusParam?.filter((param) => param === DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning);
   const filterByAppStatus = activeStatuses?.[FilterSearchParams.AppStatus];
-  const filterByDevStatus = activeStatuses?.[FilterSearchParams.DeviceStatus];
   const filterByUpdateStatus = activeStatuses?.[FilterSearchParams.UpdatedStatus];
 
   const fieldSelectors: string[] = [];
   queryUtils.addQueryConditions(fieldSelectors, 'status.applicationsSummary.status', filterByAppStatus);
   queryUtils.addQueryConditions(fieldSelectors, 'status.summary.status', filterByDevStatus);
   queryUtils.addQueryConditions(fieldSelectors, 'status.updated.status', filterByUpdateStatus);
+  // field-selector for lifecycle status isn't valid yet
+  //queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', filterByLifeStatus);
 
   if (nameOrAlias) {
     queryUtils.addTextContainsCondition(fieldSelectors, 'metadata.nameoralias', nameOrAlias);

@@ -3,6 +3,7 @@ import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-tabl
 
 import { Fleet } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
+import { getDisabledTooltipProps } from '../../utils/tooltip';
 import { FleetOwnerLinkIcon, getOwnerName } from './FleetDetails/FleetOwnerLink';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import FleetStatus from './FleetStatus';
@@ -42,17 +43,18 @@ const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRow
 
   const isManaged = !!fleet.metadata?.owner;
   const actions = useFleetActions(fleetName, isManaged);
+  const deleteDisabledProps = isManaged
+    ? getDisabledTooltipProps(
+        t(
+          "This fleet is managed by a resource sync and cannot be directly deleted. Either remove this fleet's definition from the resource sync configuration, or delete the resource sync first.",
+        ),
+      )
+    : undefined;
+
   actions.push({
     title: t('Delete fleet'),
     onClick: onDeleteClick,
-    tooltipProps: isManaged
-      ? {
-          content: t(
-            "This fleet is managed by a resource sync and cannot be directly deleted. Either remove this fleet's definition from the resource sync configuration, or delete the resource sync first.",
-          ),
-        }
-      : undefined,
-    isAriaDisabled: isManaged,
+    ...deleteDisabledProps,
   });
 
   return (

@@ -1,5 +1,10 @@
 import * as React from 'react';
-import { ApplicationsSummaryStatusType, DeviceSummaryStatusType, DeviceUpdatedStatusType } from '@flightctl/types';
+import {
+  ApplicationsSummaryStatusType,
+  DeviceLifecycleStatusType,
+  DeviceSummaryStatusType,
+  DeviceUpdatedStatusType,
+} from '@flightctl/types';
 
 import { FilterSearchParams } from '../../../utils/status/devices';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -9,7 +14,9 @@ import { labelToString } from '../../../utils/labels';
 
 const validAppStatuses = Object.values(ApplicationsSummaryStatusType) as string[];
 const validUpdatedStatuses = Object.values(DeviceUpdatedStatusType) as string[];
-const validDeviceStatuses = Object.values(DeviceSummaryStatusType) as string[];
+const validDeviceStatuses = (Object.values(DeviceSummaryStatusType) as string[]).concat([
+  DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
+]);
 
 const getNewParams = (currentParams: URLSearchParams, newValues: { [key: string]: string[] }) => {
   let newParams = [...currentParams.entries()];

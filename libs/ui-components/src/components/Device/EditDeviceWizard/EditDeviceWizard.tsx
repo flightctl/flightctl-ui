@@ -17,6 +17,7 @@ import { Device } from '@flightctl/types';
 import { EditDeviceFormValues } from './types';
 import { getErrorMessage } from '../../../utils/error';
 import { fromAPILabel } from '../../../utils/labels';
+import { getDecommissionDisabledReason, getEditDisabledReason } from '../../../utils/devices';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
@@ -44,6 +45,10 @@ const EditDeviceWizard = () => {
   const deviceAlias = device?.metadata.labels?.alias || '';
   const displayText = device ? deviceAlias || t('Untitled') : deviceId;
 
+  const disabledReason = device
+    ? getDecommissionDisabledReason(device, t) || getEditDisabledReason(device, t)
+    : undefined;
+
   let body: React.ReactNode;
   if (isLoading) {
     body = (
@@ -57,10 +62,10 @@ const EditDeviceWizard = () => {
         {getErrorMessage(loadError)}
       </Alert>
     );
-  } else if (!!device?.metadata.owner) {
+  } else if (disabledReason) {
     body = (
       <Alert isInline variant="info" title={t('Device is non-editable')}>
-        {t('This device is managed by a fleet and it cannot be edited directly.')}
+        {disabledReason}
       </Alert>
     );
   } else if (device) {

@@ -7,6 +7,7 @@ import type { DeviceApplicationsSummaryStatus } from './DeviceApplicationsSummar
 import type { DeviceApplicationStatus } from './DeviceApplicationStatus';
 import type { DeviceConfigStatus } from './DeviceConfigStatus';
 import type { DeviceIntegrityStatus } from './DeviceIntegrityStatus';
+import type { DeviceLifecycleStatus } from './DeviceLifecycleStatus';
 import type { DeviceOSStatus } from './DeviceOSStatus';
 import type { DeviceResourceStatus } from './DeviceResourceStatus';
 import type { DeviceSummaryStatus } from './DeviceSummaryStatus';
@@ -36,5 +37,6 @@ export type DeviceStatus = {
    * The last time the device was seen by the service.
    */
   lastSeen: string;
+  lifecycle: DeviceLifecycleStatus;
 };
 

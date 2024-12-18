@@ -1,9 +1,11 @@
+import { ApplicationsSummaryStatusType, DeviceUpdatedStatusType } from '@flightctl/types';
+
+import { AllDeviceSummaryStatusType } from '../../../types/extraTypes';
 import { FilterSearchParams } from '../../../utils/status/devices';
-import { ApplicationsSummaryStatusType, DeviceSummaryStatusType, DeviceUpdatedStatusType } from '@flightctl/types';
 
 export type FilterStatusMap = {
   [FilterSearchParams.AppStatus]: ApplicationsSummaryStatusType[];
-  [FilterSearchParams.DeviceStatus]: DeviceSummaryStatusType[];
+  [FilterSearchParams.DeviceStatus]: AllDeviceSummaryStatusType[];
   [FilterSearchParams.UpdatedStatus]: DeviceUpdatedStatusType[];
 };
 

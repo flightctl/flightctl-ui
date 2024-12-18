@@ -2,10 +2,11 @@ import * as React from 'react';
 import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@flightctl/types';
+import { getDisabledTooltipProps } from '../../../utils/tooltip';
 import DeviceFleet from '../DeviceDetails/DeviceFleet';
 import { timeSinceText } from '../../../utils/dates';
-import { getDeviceFleet } from '../../../utils/devices';
-import { DeleteListActionResult } from '../../ListPage/types';
+import { getDecommissionDisabledReason, getEditDisabledReason } from '../../../utils/devices';
+import { ListAction } from '../../ListPage/types';
 import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
 import DeviceStatus from '../../Status/DeviceStatus';
 import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
@@ -15,31 +16,20 @@ import ResourceLink from '../../common/ResourceLink';
 
 type DeviceTableRowProps = {
   device: Device;
-  deleteAction: DeleteListActionResult['deleteAction'];
+  decommissionAction: ListAction;
   rowIndex: number;
   onRowSelect: (device: Device) => OnSelect;
   isRowSelected: (device: Device) => boolean;
 };
 
-const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
-  device,
-  deleteAction,
-  rowIndex,
-  onRowSelect,
-  isRowSelected,
-}) => {
+const DeviceTableRow = ({ device, decommissionAction, rowIndex, onRowSelect, isRowSelected }: DeviceTableRowProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const deviceName = device.metadata.name as string;
   const deviceAlias = device.metadata.labels?.alias;
-  const editActionProps = getDeviceFleet(device?.metadata)
-    ? {
-        isAriaDisabled: true,
-        tooltipProps: {
-          content: t('Device is bound to a fleet. Its configurations cannot be edited'),
-        },
-      }
-    : undefined;
+
+  const decomissionDisabledReason = getDecommissionDisabledReason(device, t);
+  const editActionProps = getDisabledTooltipProps(decomissionDisabledReason || getEditDisabledReason(device, t));
 
   return (
     <Tr>
@@ -81,9 +71,10 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
               title: t('View device details'),
               onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
             },
-            deleteAction({
+            decommissionAction({
               resourceId: deviceName,
               resourceName: deviceAlias,
+              disabledReason: decomissionDisabledReason,
             }),
           ]}
         />

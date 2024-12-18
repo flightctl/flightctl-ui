@@ -1,20 +1,18 @@
 import * as React from 'react';
-import DeleteModal from '../modals/DeleteModal/DeleteModal';
-import { IAction } from '@patternfly/react-table';
-import { useTranslation } from '../../hooks/useTranslation';
 import { TFunction } from 'react-i18next';
 
-export type DeleteListActionResult = {
-  deleteAction: (params: { resourceId: string; resourceName?: string; disabledReason?: string | boolean }) => IAction;
-  deleteModal: React.ReactNode;
-};
+import { DeviceDecommission } from '@flightctl/types';
 
-type ResourceType = 'Device' | 'EnrollmentRequest' | 'ResourceSync';
+import { getDisabledTooltipProps } from '../../utils/tooltip';
+import DeleteModal from '../modals/DeleteModal/DeleteModal';
+import DecommissionModal from '../modals/DecommissionModal/DecommissionModal';
+import { useTranslation } from '../../hooks/useTranslation';
+import { ListAction, ListActionProps, ListActionResult } from './types';
 
-type DeleteListActionProps = {
-  onDelete: (resourceId: string) => Promise<unknown>;
-  resourceType: 'Device' | 'EnrollmentRequest' | 'ResourceSync';
-};
+type DeleteResourceType = 'EnrollmentRequest' | 'ResourceSync';
+type DecommissionResourceType = 'Device';
+
+type ResourceType = DeleteResourceType | DecommissionResourceType;
 
 const getResourceTypeLabel = (t: TFunction, resourceType: ResourceType) => {
   switch (resourceType) {
@@ -27,18 +25,54 @@ const getResourceTypeLabel = (t: TFunction, resourceType: ResourceType) => {
   }
 };
 
-export const useDeleteListAction = ({ resourceType, onDelete }: DeleteListActionProps): DeleteListActionResult => {
+export const useDecommissionListAction = ({
+  onConfirm,
+}: ListActionProps<DecommissionResourceType, { target: DeviceDecommission.decommissionTarget }>): ListActionResult => {
+  const { t } = useTranslation();
+  const [decommissionDeviceId, setDecommissionDeviceId] = React.useState<string>();
+
+  const decommissionAction: ListAction = ({ resourceId, disabledReason }) => {
+    const popperProps = getDisabledTooltipProps(disabledReason);
+    return {
+      title: t('Decommission device'),
+      ...popperProps,
+      onClick: () => {
+        setDecommissionDeviceId(resourceId);
+      },
+    };
+  };
+
+  const onClose = () => {
+    setDecommissionDeviceId(undefined);
+  };
+
+  const decommissionModal = decommissionDeviceId && (
+    <DecommissionModal
+      onClose={onClose}
+      onDecommission={async (target: DeviceDecommission.decommissionTarget) => {
+        await onConfirm(decommissionDeviceId, { target });
+        onClose();
+      }}
+    />
+  );
+
+  return { action: decommissionAction, modal: decommissionModal };
+};
+
+export const useDeleteListAction = ({
+  resourceType,
+  onConfirm,
+}: ListActionProps<DeleteResourceType, undefined>): ListActionResult => {
   const { t } = useTranslation();
   const [deleteResourceId, setDeleteResourceId] = React.useState<string>();
   const [name, setName] = React.useState<string>();
 
   const resourceTypeLabel = getResourceTypeLabel(t, resourceType);
 
-  const deleteAction: DeleteListActionResult['deleteAction'] = ({ resourceId, resourceName, disabledReason }) => {
-    const popperProps = disabledReason ? { tooltipProps: { content: disabledReason } } : undefined;
+  const deleteAction: ListAction = ({ resourceId, resourceName, disabledReason }) => {
+    const popperProps = getDisabledTooltipProps(disabledReason);
     return {
       title: t('Delete {{ resourceType }}', { resourceType: resourceTypeLabel }),
-      isAriaDisabled: !!disabledReason,
       ...popperProps,
       onClick: () => {
         setDeleteResourceId(resourceId);
@@ -58,11 +92,11 @@ export const useDeleteListAction = ({ resourceType, onDelete }: DeleteListAction
       resourceName={name || deleteResourceId}
       onClose={onClose}
       onDelete={async () => {
-        await onDelete(deleteResourceId);
+        await onConfirm(deleteResourceId, undefined);
         onClose();
       }}
     />
   );
 
-  return { deleteAction, deleteModal };
+  return { action: deleteAction, modal: deleteModal };
 };
