@@ -1,7 +1,39 @@
 import * as React from 'react';
-import { deleteData, fetchData, patchData, postData, wsEndpoint } from '../utils/apiCalls';
+import {
+  deleteData,
+  fetchData,
+  handleApiJSONResponse,
+  patchData,
+  postData,
+  uiProxy,
+  wsEndpoint,
+} from '../utils/apiCalls';
 import { PatchRequest } from '@flightctl/types';
 import { K8sVerb, checkAccess } from '@openshift-console/dynamic-plugin-sdk';
+
+type OcpConfig = {
+  rbacNs: string;
+};
+
+const useOcpConfig = () => {
+  const [config, setConfig] = React.useState<OcpConfig>();
+
+  React.useEffect(() => {
+    const doItAsync = async () => {
+      try {
+        const response = await fetch(`${uiProxy}/api/config`);
+        const cfg = await handleApiJSONResponse<OcpConfig>(response);
+        setConfig(cfg);
+      } catch (error) {
+        // eslint-disable-next-line
+        console.error('Error making request:', error);
+      }
+    };
+    doItAsync();
+  }, []);
+
+  return config;
+};
 
 export const useFetch = () => {
   const get = React.useCallback(
@@ -30,14 +62,20 @@ export const useFetch = () => {
     [],
   );
 
-  const checkPermissions = React.useCallback(async (resource: string, op: string) => {
-    const ssar = await checkAccess({
-      group: 'flightctl.io',
-      resource,
-      verb: op as K8sVerb,
-    });
-    return !!ssar.status?.allowed;
-  }, []);
+  const ocpConfig = useOcpConfig();
+
+  const checkPermissions = React.useCallback(
+    async (resource: string, op: string) => {
+      const ssar = await checkAccess({
+        group: 'flightctl.io',
+        resource,
+        verb: op as K8sVerb,
+        namespace: ocpConfig?.rbacNs,
+      });
+      return !!ssar.status?.allowed;
+    },
+    [ocpConfig],
+  );
 
   return {
     getWsEndpoint,

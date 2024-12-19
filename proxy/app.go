@@ -55,6 +55,9 @@ func main() {
 		apiRouter.HandleFunc("/login", oidcHandler.Login)
 		apiRouter.HandleFunc("/login/info", oidcHandler.GetUserInfo)
 		apiRouter.HandleFunc("/logout", oidcHandler.Logout)
+	} else {
+		configHandler := config.OcpConfigHandler{}
+		apiRouter.HandleFunc("/config", configHandler.GetConfig)
 	}
 
 	spa := server.SpaHandler{}
