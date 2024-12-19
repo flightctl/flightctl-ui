@@ -77,12 +77,8 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
     },
   });
 
-  if (isLoading) {
-    return <Spinner size="md" />;
-  }
-
-  if (pendingEnrollments.length === 0) {
-    return isStandalone ? <ErEmptyState /> : null;
+  if (!isStandalone && (isLoading || pendingEnrollments.length === 0)) {
+    return null;
   }
 
   const currentEnrollmentRequest = pendingEnrollments.find((er) => er.metadata.name === approvingErId);
@@ -133,7 +129,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
             ))}
           </Tbody>
         </Table>
-
+        {isStandalone && pendingEnrollments.length === 0 && <ErEmptyState />}
         {deleteModal}
         {currentEnrollmentRequest && (
           <ApproveDeviceModal
