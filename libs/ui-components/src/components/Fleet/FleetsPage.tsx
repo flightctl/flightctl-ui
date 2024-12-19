@@ -37,13 +37,13 @@ import { useAccessReview } from '../../hooks/useAccessReview';
 import ButtonWithPermissions from '../common/ButtonWithPermissions';
 import { RESOURCE, VERB } from '../../types/rbac';
 import PageWithPermissions from '../common/PageWithPermissions';
+import { useFleetImportAccessReview } from '../../hooks/useFleetImportAccessReview';
 
 const FleetPageActions = ({ createText }: { createText?: string }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const canCreateFleet = useAccessReview(RESOURCE.FLEET, VERB.CREATE);
-  const canCreateRs = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.CREATE);
-  const canReadRepo = useAccessReview(RESOURCE.REPOSITORY, VERB.LIST);
+  const canImportFleet = useFleetImportAccessReview();
 
   return (
     <Split hasGutter>
@@ -58,11 +58,7 @@ const FleetPageActions = ({ createText }: { createText?: string }) => {
       </SplitItem>
       <SplitItem>
         <ButtonWithPermissions
-          permissions={[
-            canCreateRs[0] && canReadRepo[0],
-            canCreateRs[1] || canReadRepo[1],
-            canCreateRs[2] || canReadRepo[2],
-          ]}
+          permissions={canImportFleet}
           variant="secondary"
           onClick={() => navigate(ROUTE.FLEET_IMPORT)}
         >

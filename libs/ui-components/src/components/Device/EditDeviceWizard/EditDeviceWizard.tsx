@@ -30,6 +30,9 @@ import { useFetch } from '../../../hooks/useFetch';
 import { useEditDevice } from './useEditDevice';
 import EditDeviceWizardNav from './EditDeviceWizardNav';
 import EditDeviceWizardFooter from './EditDeviceWizardFooter';
+import PageWithPermissions from '../../common/PageWithPermissions';
+import { RESOURCE, VERB } from '../../../types/rbac';
+import { useAccessReview } from '../../../hooks/useAccessReview';
 
 import './EditDeviceWizard.css';
 
@@ -155,4 +158,13 @@ const EditDeviceWizard = () => {
   );
 };
 
-export default EditDeviceWizard;
+const EditDeviceWizardWithPermissions = () => {
+  const [allowed, loading] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
+  return (
+    <PageWithPermissions allowed={allowed} loading={loading}>
+      <EditDeviceWizard />
+    </PageWithPermissions>
+  );
+};
+
+export default EditDeviceWizardWithPermissions;

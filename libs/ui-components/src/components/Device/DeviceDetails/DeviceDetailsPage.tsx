@@ -16,8 +16,11 @@ import DeviceStatusDebugModal from './DeviceStatusDebugModal';
 import { getDeviceFleet } from '../../../utils/devices';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useAccessReview } from '../../../hooks/useAccessReview';
+import PageWithPermissions from '../../common/PageWithPermissions';
 
-const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{ hideTerminal?: boolean }>) => {
+type DeviceDetailsPageProps = React.PropsWithChildren<{ hideTerminal?: boolean }>;
+
+const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) => {
   const { t } = useTranslation();
   const {
     router: { useParams, Routes, Route, Navigate },
@@ -118,4 +121,13 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
   );
 };
 
-export default DeviceDetailsPage;
+const DeviceDetailsPageWithPermissions = (props: DeviceDetailsPageProps) => {
+  const [allowed, loading] = useAccessReview(RESOURCE.DEVICE, VERB.GET);
+  return (
+    <PageWithPermissions allowed={allowed} loading={loading}>
+      <DeviceDetailsPage {...props} />
+    </PageWithPermissions>
+  );
+};
+
+export default DeviceDetailsPageWithPermissions;

@@ -12,6 +12,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import DeleteFleetModal from '../DeleteFleetModal/DeleteFleetModal';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import PageWithPermissions from '../../common/PageWithPermissions';
 
 const FleetDetails = () => {
   const { t } = useTranslation();
@@ -105,4 +106,13 @@ const FleetDetails = () => {
   );
 };
 
-export default FleetDetails;
+const FleetDetailsWithPermissions = () => {
+  const [allowed, loading] = useAccessReview(RESOURCE.FLEET, VERB.GET);
+  return (
+    <PageWithPermissions allowed={allowed} loading={loading}>
+      <FleetDetails />
+    </PageWithPermissions>
+  );
+};
+
+export default FleetDetailsWithPermissions;

@@ -40,6 +40,8 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
+import PageWithPermissions from '../../common/PageWithPermissions';
+import { useFleetImportAccessReview } from '../../../hooks/useFleetImportAccessReview';
 
 import './ImportFleetWizard.css';
 
@@ -215,4 +217,13 @@ const ImportFleetWizard = () => {
   );
 };
 
-export default ImportFleetWizard;
+const ImportFleetWizardWithPermissions = () => {
+  const [allowed, isLoading] = useFleetImportAccessReview();
+  return (
+    <PageWithPermissions allowed={allowed} loading={isLoading}>
+      <ImportFleetWizard />
+    </PageWithPermissions>
+  );
+};
+
+export default ImportFleetWizardWithPermissions;

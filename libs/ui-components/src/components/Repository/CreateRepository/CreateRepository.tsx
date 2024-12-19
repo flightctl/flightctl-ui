@@ -23,6 +23,9 @@ import { Repository, ResourceSync, ResourceSyncList } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { RESOURCE, VERB } from '../../../types/rbac';
+import { useAccessReview } from '../../../hooks/useAccessReview';
+import PageWithPermissions from '../../common/PageWithPermissions';
 
 const CreateRepository = () => {
   const { t } = useTranslation();
@@ -141,4 +144,13 @@ const CreateRepository = () => {
   );
 };
 
-export default CreateRepository;
+const CreateRepositoryWithPermissions = () => {
+  const [allowed, loading] = useAccessReview(RESOURCE.REPOSITORY, VERB.CREATE);
+  return (
+    <PageWithPermissions allowed={allowed} loading={loading}>
+      <CreateRepository />
+    </PageWithPermissions>
+  );
+};
+
+export default CreateRepositoryWithPermissions;
