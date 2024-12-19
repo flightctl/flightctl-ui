@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  Button,
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
@@ -34,21 +33,41 @@ import DeleteFleetModal from './DeleteFleetModal/DeleteFleetModal';
 import FleetResourceSyncs from './FleetResourceSyncs';
 import { useFleetBackendFilters, useFleets } from './useFleets';
 import TablePagination from '../Table/TablePagination';
+import { useAccessReview } from '../../hooks/useAccessReview';
+import ButtonWithPermissions from '../common/ButtonWithPermissions';
+import { RESOURCE, VERB } from '../../types/rbac';
+import PageWithPermissions from '../common/PageWithPermissions';
 
 const FleetPageActions = ({ createText }: { createText?: string }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const canCreateFleet = useAccessReview(RESOURCE.FLEET, VERB.CREATE);
+  const canCreateRs = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.CREATE);
+  const canReadRepo = useAccessReview(RESOURCE.REPOSITORY, VERB.LIST);
+
   return (
     <Split hasGutter>
       <SplitItem>
-        <Button variant="primary" onClick={() => navigate(ROUTE.FLEET_CREATE)}>
+        <ButtonWithPermissions
+          permissions={canCreateFleet}
+          variant="primary"
+          onClick={() => navigate(ROUTE.FLEET_CREATE)}
+        >
           {createText || t('Create a fleet')}
-        </Button>
+        </ButtonWithPermissions>
       </SplitItem>
       <SplitItem>
-        <Button variant="secondary" onClick={() => navigate(ROUTE.FLEET_IMPORT)}>
+        <ButtonWithPermissions
+          permissions={[
+            canCreateRs[0] && canReadRepo[0],
+            canCreateRs[1] || canReadRepo[1],
+            canCreateRs[2] || canReadRepo[2],
+          ]}
+          variant="secondary"
+          onClick={() => navigate(ROUTE.FLEET_IMPORT)}
+        >
           {t('Import fleets')}
-        </Button>
+        </ButtonWithPermissions>
       </SplitItem>
     </Split>
   );
@@ -103,6 +122,10 @@ const FleetTable = () => {
 
   const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
 
+  const [canDelete] = useAccessReview(RESOURCE.FLEET, VERB.DELETE);
+  const [canCreate] = useAccessReview(RESOURCE.FLEET, VERB.CREATE);
+  const [canEdit] = useAccessReview(RESOURCE.FLEET, VERB.PATCH);
+
   return (
     <ListPageBody error={error} loading={isLoading}>
       <Toolbar inset={{ default: 'insetNone' }}>
@@ -112,16 +135,20 @@ const FleetTable = () => {
               <TableTextSearch value={name} setValue={setName} placeholder={t('Search by name')} />
             </ToolbarItem>
           </ToolbarGroup>
-          <ToolbarItem>
-            <FleetPageActions createText={t('Create fleet')} />
-          </ToolbarItem>
-          <ToolbarItem>
-            <TableActions isDisabled={!hasSelectedRows}>
-              <SelectList>
-                <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
-              </SelectList>
-            </TableActions>
-          </ToolbarItem>
+          {canCreate && (
+            <ToolbarItem>
+              <FleetPageActions createText={t('Create fleet')} />
+            </ToolbarItem>
+          )}
+          {canDelete && (
+            <ToolbarItem>
+              <TableActions isDisabled={!hasSelectedRows}>
+                <SelectList>
+                  <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
+                </SelectList>
+              </TableActions>
+            </ToolbarItem>
+          )}
         </ToolbarContent>
       </Toolbar>
       <Table
@@ -139,11 +166,13 @@ const FleetTable = () => {
               key={getResourceId(fleet)}
               fleet={fleet}
               rowIndex={rowIndex}
+              canDelete={canDelete}
               onDeleteClick={() => {
                 setFleetToDeleteId(fleet.metadata.name || '');
               }}
               isRowSelected={isRowSelected}
               onRowSelect={onRowSelect}
+              canEdit={canEdit}
             />
           ))}
         </Tbody>
@@ -194,4 +223,13 @@ const FleetsPage = () => {
   );
 };
 
-export default FleetsPage;
+const FleetsPageWithPermissions = () => {
+  const [allowed, loading] = useAccessReview(RESOURCE.FLEET, VERB.LIST);
+  return (
+    <PageWithPermissions allowed={allowed} loading={loading}>
+      <FleetsPage />
+    </PageWithPermissions>
+  );
+};
+
+export default FleetsPageWithPermissions;

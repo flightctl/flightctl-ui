@@ -15,14 +15,16 @@ type FleetRowProps = {
   onRowSelect: (fleet: Fleet) => OnSelect;
   isRowSelected: (fleet: Fleet) => boolean;
   onDeleteClick: () => void;
+  canDelete: boolean;
+  canEdit: boolean;
 };
 
-const useFleetActions = (fleetName: string, isManaged: boolean) => {
+const useFleetActions = (fleetName: string, isManaged: boolean, canEdit: boolean) => {
   const actions: IAction[] = [];
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  if (isManaged) {
+  if (isManaged || !canEdit) {
     actions.push({
       title: t("View fleet's configuration"),
       onClick: () => navigate({ route: ROUTE.FLEET_DETAILS, postfix: fleetName }),
@@ -36,24 +38,34 @@ const useFleetActions = (fleetName: string, isManaged: boolean) => {
   return actions;
 };
 
-const FleetRow: React.FC<FleetRowProps> = ({ fleet, rowIndex, onRowSelect, isRowSelected, onDeleteClick }) => {
+const FleetRow: React.FC<FleetRowProps> = ({
+  fleet,
+  rowIndex,
+  onRowSelect,
+  isRowSelected,
+  onDeleteClick,
+  canDelete,
+  canEdit,
+}) => {
   const { t } = useTranslation();
   const fleetName = fleet.metadata.name || '';
 
   const isManaged = !!fleet.metadata?.owner;
-  const actions = useFleetActions(fleetName, isManaged);
-  actions.push({
-    title: t('Delete fleet'),
-    onClick: onDeleteClick,
-    tooltipProps: isManaged
-      ? {
-          content: t(
-            "This fleet is managed by a resource sync and cannot be directly deleted. Either remove this fleet's definition from the resource sync configuration, or delete the resource sync first.",
-          ),
-        }
-      : undefined,
-    isAriaDisabled: isManaged,
-  });
+  const actions = useFleetActions(fleetName, isManaged, canEdit);
+  if (canDelete) {
+    actions.push({
+      title: t('Delete fleet'),
+      onClick: onDeleteClick,
+      tooltipProps: isManaged
+        ? {
+            content: t(
+              "This fleet is managed by a resource sync and cannot be directly deleted. Either remove this fleet's definition from the resource sync configuration, or delete the resource sync first.",
+            ),
+          }
+        : undefined,
+      isAriaDisabled: isManaged,
+    });
+  }
 
   return (
     <Tr>

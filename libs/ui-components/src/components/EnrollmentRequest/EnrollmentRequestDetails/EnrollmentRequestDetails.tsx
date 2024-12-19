@@ -35,6 +35,8 @@ import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList'
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { useAccessReview } from '../../../hooks/useAccessReview';
+import { RESOURCE, VERB } from '../../../types/rbac';
 
 import './EnrollmentRequestDetails.css';
 
@@ -49,6 +51,9 @@ const EnrollmentRequestDetails = () => {
   });
   const { remove } = useFetch();
   const navigate = useNavigate();
+  const [canApprove] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST_APPROVAL, VERB.POST);
+  const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
+
   const [isApprovalModalOpen, setIsApprovalModalOpen] = React.useState(false);
 
   const { deleteAction, deleteModal } = useDeleteAction({
@@ -72,14 +77,18 @@ const EnrollmentRequestDetails = () => {
       resourceType="Devices"
       resourceTypeLabel={t('Devices')}
       actions={
-        <DetailsPageActions>
-          <DropdownList>
-            <DropdownItem onClick={() => setIsApprovalModalOpen(true)} isDisabled={!isPendingApproval}>
-              {t('Approve')}
-            </DropdownItem>
-            {deleteAction}
-          </DropdownList>
-        </DetailsPageActions>
+        (canApprove || canApprove) && (
+          <DetailsPageActions>
+            <DropdownList>
+              {canApprove && (
+                <DropdownItem onClick={() => setIsApprovalModalOpen(true)} isDisabled={!isPendingApproval}>
+                  {t('Approve')}
+                </DropdownItem>
+              )}
+              {canDelete && deleteAction}
+            </DropdownList>
+          </DetailsPageActions>
+        )
       }
     >
       <Grid hasGutter>

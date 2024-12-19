@@ -23,6 +23,7 @@ type EditLabelsFormValues = {
 type EditLabelsFormContentProps = {
   isSubmitting: FormikProps<EditLabelsFormValues>['isSubmitting'];
   submitForm: (values: EditLabelsFormValues) => Promise<string>;
+  canEdit: boolean;
 };
 
 const getValidationSchema = (t: TFunction) => {
@@ -33,7 +34,7 @@ const getValidationSchema = (t: TFunction) => {
 
 const delayResponse = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormContentProps) => {
+const EditLabelsFormContent = ({ isSubmitting, submitForm, canEdit }: EditLabelsFormContentProps) => {
   const { t } = useTranslation();
   const [submitError, setSubmitError] = React.useState<string>();
 
@@ -53,8 +54,9 @@ const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormConte
       <LabelsField
         name="labels"
         addButtonText={isSubmitting ? t('Saving...') : undefined}
-        isFormEditable={!isSubmitting}
+        isLoading={isSubmitting}
         onChangeCallback={debouncedSubmit}
+        canEdit={canEdit}
       />
       {submitError && <Alert isInline title={submitError} variant="danger" />}
     </FlightCtlForm>
@@ -64,9 +66,10 @@ const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormConte
 type EditLabelsFormProps = {
   device: Device;
   onDeviceUpdate: () => void;
+  canEdit: boolean;
 };
 
-const EditLabelsForm = ({ device, onDeviceUpdate }: EditLabelsFormProps) => {
+const EditLabelsForm = ({ device, onDeviceUpdate, canEdit }: EditLabelsFormProps) => {
   const { t } = useTranslation();
   const { patch } = useFetch();
 
@@ -93,7 +96,9 @@ const EditLabelsForm = ({ device, onDeviceUpdate }: EditLabelsFormProps) => {
       }}
       validationSchema={getValidationSchema(t)}
     >
-      {({ isSubmitting, submitForm }) => <EditLabelsFormContent isSubmitting={isSubmitting} submitForm={submitForm} />}
+      {({ isSubmitting, submitForm }) => (
+        <EditLabelsFormContent canEdit={canEdit} isSubmitting={isSubmitting} submitForm={submitForm} />
+      )}
     </Formik>
   );
 };

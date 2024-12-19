@@ -11,7 +11,7 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, IAction, Tbody, Td, Tr } from '@patternfly/react-table';
 import { RepositoryIcon } from '@patternfly/react-icons/dist/js/icons/repository-icon';
 import { TFunction } from 'i18next';
 
@@ -32,15 +32,21 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import ResourceLink from '../common/ResourceLink';
 import RepositoryStatus from '../Status/RepositoryStatus';
+import PageWithPermissions from '../common/PageWithPermissions';
+import { RESOURCE, VERB } from '../../types/rbac';
+import { useAccessReview } from '../../hooks/useAccessReview';
 
 const CreateRepositoryButton = ({ buttonText }: { buttonText?: string }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [canCreate] = useAccessReview(RESOURCE.REPOSITORY, VERB.CREATE);
 
   return (
-    <Button variant="primary" onClick={() => navigate(ROUTE.REPO_CREATE)}>
-      {buttonText || t('Create a repository')}
-    </Button>
+    canCreate && (
+      <Button variant="primary" onClick={() => navigate(ROUTE.REPO_CREATE)}>
+        {buttonText || t('Create a repository')}
+      </Button>
+    )
   );
 };
 
@@ -85,6 +91,65 @@ const getColumns = (t: TFunction): TableColumn<Repository>[] => [
 
 const getSearchText = (repo: Repository) => [repo.metadata.name];
 
+const RepositoryTableRow = ({
+  repository,
+  canDelete,
+  canEdit,
+  rowIndex,
+  setDeleteModalRepoId,
+}: {
+  repository: Repository;
+  canDelete: boolean;
+  canEdit: boolean;
+  rowIndex: number;
+  setDeleteModalRepoId: (repoId?: string) => void;
+}) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { onRowSelect, isRowSelected } = useTableSelect();
+
+  const actions: IAction[] = [];
+  if (canEdit) {
+    actions.push({
+      title: t('Edit repository'),
+      onClick: () => navigate({ route: ROUTE.REPO_EDIT, postfix: repository.metadata.name }),
+    });
+  }
+  if (canDelete) {
+    actions.push({
+      title: t('Delete repository'),
+      onClick: () => setDeleteModalRepoId(repository.metadata.name),
+    });
+  }
+  return (
+    <Tr>
+      <Td
+        select={{
+          rowIndex,
+          onSelect: onRowSelect(repository),
+          isSelected: isRowSelected(repository),
+        }}
+      />
+      <Td dataLabel={t('Name')}>
+        <ResourceLink id={repository.metadata.name as string} routeLink={ROUTE.REPO_DETAILS} />
+      </Td>
+      <Td dataLabel={t('Type')}>
+        {repository.spec.type === RepoSpecType.HTTP ? t('HTTP service') : t('Git repository')}
+      </Td>
+      <Td dataLabel={t('Url')}>{repository.spec.url || '-'}</Td>
+      <Td dataLabel={t('Sync status')}>
+        <RepositoryStatus statusInfo={getRepositorySyncStatus(repository)} />
+      </Td>
+      <Td dataLabel={t('Last transition')}>{getLastTransitionTimeText(repository, t).text}</Td>
+      {!!actions.length && (
+        <Td isActionCell>
+          <ActionsColumn items={actions} />
+        </Td>
+      )}
+    </Tr>
+  );
+};
+
 const RepositoryTable = () => {
   const { t } = useTranslation();
   const [repositoryList, loading, error, refetch] = useFetchPeriodically<RepositoryList>({
@@ -92,8 +157,6 @@ const RepositoryTable = () => {
   });
   const [deleteModalRepoId, setDeleteModalRepoId] = React.useState<string>();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
-
-  const navigate = useNavigate();
 
   const onDeleteSuccess = () => {
     setDeleteModalRepoId(undefined);
@@ -103,7 +166,10 @@ const RepositoryTable = () => {
   const { search, setSearch, filteredData } = useTableTextSearch(repositoryList?.items || [], getSearchText);
   const columns = React.useMemo(() => getColumns(t), [t]);
 
-  const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
+  const { hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
+
+  const [canDelete] = useAccessReview(RESOURCE.REPOSITORY, VERB.DELETE);
+  const [canEdit] = useAccessReview(RESOURCE.REPOSITORY, VERB.PATCH);
 
   return (
     <ListPageBody error={error} loading={loading}>
@@ -117,13 +183,15 @@ const RepositoryTable = () => {
           <ToolbarItem>
             <CreateRepositoryButton buttonText={t('Create repository')} />
           </ToolbarItem>
-          <ToolbarItem>
-            <TableActions isDisabled={!hasSelectedRows}>
-              <DropdownList>
-                <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
-              </DropdownList>
-            </TableActions>
-          </ToolbarItem>
+          {canDelete && (
+            <ToolbarItem>
+              <TableActions isDisabled={!hasSelectedRows}>
+                <DropdownList>
+                  <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
+                </DropdownList>
+              </TableActions>
+            </ToolbarItem>
+          )}
         </ToolbarContent>
       </Toolbar>
       <Table
@@ -137,40 +205,14 @@ const RepositoryTable = () => {
       >
         <Tbody>
           {filteredData.map((repository, rowIndex) => (
-            <Tr key={repository.metadata.name}>
-              <Td
-                select={{
-                  rowIndex,
-                  onSelect: onRowSelect(repository),
-                  isSelected: isRowSelected(repository),
-                }}
-              />
-              <Td dataLabel={t('Name')}>
-                <ResourceLink id={repository.metadata.name as string} routeLink={ROUTE.REPO_DETAILS} />
-              </Td>
-              <Td dataLabel={t('Type')}>
-                {repository.spec.type === RepoSpecType.HTTP ? t('HTTP service') : t('Git repository')}
-              </Td>
-              <Td dataLabel={t('Url')}>{repository.spec.url || '-'}</Td>
-              <Td dataLabel={t('Sync status')}>
-                <RepositoryStatus statusInfo={getRepositorySyncStatus(repository)} />
-              </Td>
-              <Td dataLabel={t('Last transition')}>{getLastTransitionTimeText(repository, t).text}</Td>
-              <Td isActionCell>
-                <ActionsColumn
-                  items={[
-                    {
-                      title: t('Edit repository'),
-                      onClick: () => navigate({ route: ROUTE.REPO_EDIT, postfix: repository.metadata.name }),
-                    },
-                    {
-                      title: t('Delete repository'),
-                      onClick: () => setDeleteModalRepoId(repository.metadata.name),
-                    },
-                  ]}
-                />
-              </Td>
-            </Tr>
+            <RepositoryTableRow
+              key={repository.metadata.name}
+              repository={repository}
+              rowIndex={rowIndex}
+              canDelete={canDelete}
+              canEdit={canEdit}
+              setDeleteModalRepoId={setDeleteModalRepoId}
+            />
           ))}
         </Tbody>
       </Table>
@@ -198,10 +240,13 @@ const RepositoryTable = () => {
 
 const RepositoryList = () => {
   const { t } = useTranslation();
+  const [allowed, loading] = useAccessReview(RESOURCE.REPOSITORY, VERB.LIST);
   return (
-    <ListPage title={t('Repositories')}>
-      <RepositoryTable />
-    </ListPage>
+    <PageWithPermissions allowed={allowed} loading={loading}>
+      <ListPage title={t('Repositories')}>
+        <RepositoryTable />
+      </ListPage>
+    </PageWithPermissions>
   );
 };
 

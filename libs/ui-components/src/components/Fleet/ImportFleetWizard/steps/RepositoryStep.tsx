@@ -12,6 +12,8 @@ import { getLastTransitionTimeText, getRepositorySyncStatus } from '../../../../
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelect from '../../../form/FormSelect';
 import FlightCtlForm from '../../../form/FlightCtlForm';
+import { useAccessReview } from '../../../../hooks/useAccessReview';
+import { RESOURCE, VERB } from '../../../../types/rbac';
 
 export const repositoryStepId = 'repository';
 
@@ -75,6 +77,8 @@ const RepositoryStep = ({ repositories, hasLoaded }: { repositories: Repository[
   const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<ImportFleetFormValues>();
 
+  const [canCreateRepo] = useAccessReview(RESOURCE.REPOSITORY, VERB.CREATE);
+
   const noRepositoriesExist = hasLoaded && repositories.length === 0;
   React.useEffect(() => {
     if (values.useExistingRepo && noRepositoriesExist) {
@@ -85,25 +89,27 @@ const RepositoryStep = ({ repositories, hasLoaded }: { repositories: Repository[
   return (
     <FlightCtlForm>
       <Grid span={8}>
-        <FormSection>
-          <FormGroup isInline>
-            <Radio
-              isChecked={values.useExistingRepo}
-              onChange={() => setFieldValue('useExistingRepo', true, true)}
-              id="existing-repo"
-              name="repo"
-              label={t('Use an existing Git repository')}
-              isDisabled={noRepositoriesExist}
-            />
-            <Radio
-              isChecked={!values.useExistingRepo}
-              onChange={() => setFieldValue('useExistingRepo', false, true)}
-              id="new-repo"
-              name="repo"
-              label={t('Use a new Git repository')}
-            />
-          </FormGroup>
-        </FormSection>
+        {canCreateRepo && (
+          <FormSection>
+            <FormGroup isInline>
+              <Radio
+                isChecked={values.useExistingRepo}
+                onChange={() => setFieldValue('useExistingRepo', true, true)}
+                id="existing-repo"
+                name="repo"
+                label={t('Use an existing Git repository')}
+                isDisabled={noRepositoriesExist}
+              />
+              <Radio
+                isChecked={!values.useExistingRepo}
+                onChange={() => setFieldValue('useExistingRepo', false, true)}
+                id="new-repo"
+                name="repo"
+                label={t('Use a new Git repository')}
+              />
+            </FormGroup>
+          </FormSection>
+        )}
         <FormSection>
           {values.useExistingRepo ? <ExistingRepoForm repositories={repositories} /> : <RepositoryForm />}
         </FormSection>

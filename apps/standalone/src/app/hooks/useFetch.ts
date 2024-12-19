@@ -29,11 +29,14 @@ export const useFetch = () => {
     };
   }, []);
 
+  const checkPermissions = React.useCallback(() => Promise.resolve(true), []);
+
   return {
     getWsEndpoint,
     get,
     post,
     remove,
     patch,
+    checkPermissions,
   };
 };

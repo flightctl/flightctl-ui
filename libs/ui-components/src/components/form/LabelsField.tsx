@@ -8,10 +8,11 @@ import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 type LabelsFieldProps = {
   name: string;
-  isFormEditable?: boolean;
+  isLoading?: boolean;
   addButtonText?: string;
   helperText?: React.ReactNode;
   onChangeCallback?: (newLabels: FlightCtlLabel[], hasErrors: boolean) => void;
+  canEdit?: boolean;
 };
 
 const maxWidthDefaultLabel = '18ch'; // Can fit more chars as it doesn't have a "Close" button
@@ -22,7 +23,8 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
   onChangeCallback,
   addButtonText,
   helperText,
-  isFormEditable = true,
+  isLoading,
+  canEdit = true,
 }) => {
   const [{ value: labels }, meta, { setValue: setLabels }] = useField<FlightCtlLabel[]>(name);
   const updateLabels = async (newLabels: FlightCtlLabel[]) => {
@@ -33,7 +35,7 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
   };
 
   const onDelete = async (_ev: React.MouseEvent<Element, MouseEvent>, index: number) => {
-    if (!isFormEditable) {
+    if (isLoading) {
       return;
     }
     const newLabels = [...labels];
@@ -67,14 +69,16 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
     <>
       <LabelGroup
         numLabels={5}
-        isEditable={isFormEditable}
+        isEditable={!isLoading}
         addLabelControl={
-          <EditableLabelControl
-            defaultLabel="key=value"
-            addButtonText={addButtonText}
-            onAddLabel={onAdd}
-            isEditable={isFormEditable}
-          />
+          canEdit && (
+            <EditableLabelControl
+              defaultLabel="key=value"
+              addButtonText={addButtonText}
+              onAddLabel={onAdd}
+              isEditable={!isLoading}
+            />
+          )
         }
       >
         {labels.map(({ key, value, isDefault }, index) => {
@@ -88,14 +92,14 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
             );
           }
 
-          const closeButtonProps = !isFormEditable && { isDisabled: true };
-          const isLabelEditable = isFormEditable && !isDefault;
+          const closeButtonProps = isLoading && { isDisabled: true };
+          const isLabelEditable = !isLoading && !isDefault && canEdit;
           return (
             <Label
               key={elKey}
               textMaxWidth={maxWidthNonDefaultLabel}
               closeBtnProps={closeButtonProps}
-              onClose={(e) => onDelete(e, index)}
+              onClose={canEdit ? (e) => onDelete(e, index) : undefined}
               onEditCancel={(_, prevText) => onEdit(index, prevText)}
               onEditComplete={(_, newText) => onEdit(index, newText)}
               /* Add a basic tooltip as the PF tooltip doesn't work for editable labels */

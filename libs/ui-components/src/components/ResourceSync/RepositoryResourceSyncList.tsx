@@ -46,6 +46,8 @@ import FlightCtlActionGroup from '../form/FlightCtlActionGroup';
 import FlightCtlForm from '../form/FlightCtlForm';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import ListPageBody from '../ListPage/ListPageBody';
+import { useAccessReview } from '../../hooks/useAccessReview';
+import { RESOURCE, VERB } from '../../types/rbac';
 
 import './RepositoryResourceSyncList.css';
 
@@ -79,7 +81,7 @@ const createRefs = (rsList: ResourceSync[]): { [key: string]: React.RefObject<HT
 
 const getSearchText = (resourceSync: ResourceSync) => [resourceSync.metadata.name];
 
-const ResourceSyncEmptyState = ({ addResourceSync }: { addResourceSync: VoidFunction }) => {
+const ResourceSyncEmptyState = ({ addResourceSync }: { addResourceSync?: VoidFunction }) => {
   const { t } = useTranslation();
   return (
     <ResourceListEmptyState icon={CodeBranchIcon} titleText={t('No resource syncs here!')}>
@@ -88,13 +90,15 @@ const ResourceSyncEmptyState = ({ addResourceSync }: { addResourceSync: VoidFunc
           "A resource sync is an automated Gitops way to manage imported fleets. The resource syncs monitors changes made to the source repository and updates the fleets' configurations accordingly.",
         )}
       </EmptyStateBody>
-      <EmptyStateFooter>
-        <EmptyStateActions>
-          <Button variant="secondary" onClick={addResourceSync}>
-            {t('Add a resource sync')}
-          </Button>
-        </EmptyStateActions>
-      </EmptyStateFooter>
+      {addResourceSync && (
+        <EmptyStateFooter>
+          <EmptyStateActions>
+            <Button variant="secondary" onClick={addResourceSync}>
+              {t('Add a resource sync')}
+            </Button>
+          </EmptyStateActions>
+        </EmptyStateFooter>
+      )}
     </ResourceListEmptyState>
   );
 };
@@ -203,6 +207,9 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
   const [isAddRsModalOpen, setIsAddRsModalOpen] = React.useState(false);
 
+  const [canDelete] = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.DELETE);
+  const [canCreate] = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.CREATE);
+
   return (
     <ListPageBody error={error} loading={isLoading}>
       <Toolbar id="resource-sync-toolbar" inset={{ default: 'insetNone' }}>
@@ -212,16 +219,18 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
               <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name')} />
             </ToolbarItem>
           </ToolbarGroup>
-          <ToolbarItem>
-            <TableActions isDisabled={!hasSelectedRows}>
-              <SelectList>
-                <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
-              </SelectList>
-            </TableActions>
-          </ToolbarItem>
+          {canDelete && (
+            <ToolbarItem>
+              <TableActions isDisabled={!hasSelectedRows}>
+                <SelectList>
+                  <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
+                </SelectList>
+              </TableActions>
+            </ToolbarItem>
+          )}
         </ToolbarContent>
       </Toolbar>
-      {resourceSyncs.length > 0 && (
+      {canCreate && resourceSyncs.length > 0 && (
         <Button
           variant="link"
           icon={<PlusCircleIcon />}
@@ -263,9 +272,11 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
                   <ResourceSyncStatus resourceSync={resourceSync} />
                 </Td>
                 <Td dataLabel={t('Observed hash')}>{getObservedHash(resourceSync)}</Td>
-                <Td isActionCell>
-                  <ActionsColumn items={[deleteAction({ resourceId: resourceSync.metadata.name || '' })]} />
-                </Td>
+                {canDelete && (
+                  <Td isActionCell>
+                    <ActionsColumn items={[deleteAction({ resourceId: resourceSync.metadata.name || '' })]} />
+                  </Td>
+                )}
               </Tr>
             );
           })}
@@ -273,9 +284,13 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
       </Table>
       {resourceSyncs.length === 0 && (
         <ResourceSyncEmptyState
-          addResourceSync={() => {
-            setIsAddRsModalOpen(true);
-          }}
+          addResourceSync={
+            canCreate
+              ? () => {
+                  setIsAddRsModalOpen(true);
+                }
+              : undefined
+          }
         />
       )}
       {deleteModal}
