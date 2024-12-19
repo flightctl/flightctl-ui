@@ -2,11 +2,11 @@ import { TFunction } from 'i18next';
 import * as Yup from 'yup';
 
 import {
-  maxLengthString,
   validApplicationsSchema,
   validConfigTemplatesSchema,
   validKubernetesLabelValue,
   validLabelsSchema,
+  validOsImage,
 } from '../../form/validations';
 import { appendJSONPatch, getApplicationPatches, getLabelPatches } from '../../../utils/patch';
 import { Device, PatchRequest } from '@flightctl/types';
@@ -23,7 +23,7 @@ export const getValidationSchema = (t: TFunction) =>
   Yup.lazy(() =>
     Yup.object({
       deviceAlias: validKubernetesLabelValue(t, { isRequired: false, fieldName: t('Alias') }),
-      osImage: maxLengthString(t, { fieldName: t('System image'), maxLength: 2048 }),
+      osImage: validOsImage(t, { isFleet: false }),
       labels: validLabelsSchema(t),
       configTemplates: validConfigTemplatesSchema(t),
       applications: validApplicationsSchema(t),

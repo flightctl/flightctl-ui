@@ -4,7 +4,6 @@ import { Button, FormGroup, FormSection, Grid, Split, SplitItem } from '@pattern
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
 
 import { ApplicationFormSpec, DeviceSpecConfigFormValues } from '../types';
 
@@ -12,6 +11,8 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import WithHelperText from '../../../common/WithHelperText';
+import LearnMoreLink from '../../../common/LearnMoreLink';
+import { CREATING_APPLICATIONS_LINK } from '../../../../links';
 
 import './ApplicationsForm.css';
 
@@ -34,18 +35,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
               content={
                 <span>
                   {t('The application image. Learn how to create one')}{' '}
-                  <Button
-                    component="a"
-                    variant="link"
-                    isInline
-                    icon={<ExternalLinkAltIcon />}
-                    iconPosition="end"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://github.com/flightctl/flightctl/blob/main/docs/user/managing-devices.md#creating-applications"
-                  >
-                    {t('here')}
-                  </Button>
+                  <LearnMoreLink text={t('here')} link={CREATING_APPLICATIONS_LINK} />
                 </span>
               }
               showLabel

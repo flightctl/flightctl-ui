@@ -5,12 +5,12 @@ import { FleetFormValues } from './types';
 import { API_VERSION } from '../../../constants';
 import { toAPILabel } from '../../../utils/labels';
 import {
-  maxLengthString,
   systemdUnitListValidationSchema,
   validApplicationsSchema,
   validConfigTemplatesSchema,
   validKubernetesDnsSubdomain,
   validLabelsSchema,
+  validOsImage,
 } from '../../form/validations';
 import {
   appendJSONPatch,
@@ -33,7 +33,7 @@ import {
 export const getValidationSchema = (t: TFunction) => {
   return Yup.object<FleetFormValues>({
     name: validKubernetesDnsSubdomain(t, { isRequired: true }),
-    osImage: maxLengthString(t, { fieldName: t('System image'), maxLength: 2048 }),
+    osImage: validOsImage(t, { isFleet: true }),
     fleetLabels: validLabelsSchema(t),
     labels: validLabelsSchema(t),
     configTemplates: validConfigTemplatesSchema(t),
