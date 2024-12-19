@@ -23,11 +23,12 @@ const apiServer = `${window.location.hostname}${
   window.FCTL_API_PORT ? `:${window.FCTL_API_PORT}` : ''
 }/api/proxy/plugin/flightctl-plugin/api-proxy`;
 
-const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
-const metricsAPI = `${window.location.protocol}//${apiServer}/api/metrics`;
+export const uiProxy = `${window.location.protocol}//${apiServer}`;
+const flightCtlAPI = `${uiProxy}/api/flightctl`;
+const metricsAPI = `${uiProxy}/api/metrics`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
-const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
+export const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   if (response.ok) {
     const data = (await response.json()) as R;
     return data;
