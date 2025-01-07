@@ -6,7 +6,7 @@ import type { CronExpression } from './CronExpression';
 import type { Duration } from './Duration';
 import type { TimeZone } from './TimeZone';
 /**
- * Defines the schedule for automatic updates, including timing and optional timeout.
+ * Defines the schedule for automatic downloading and updates, including timing and optional timeout.
  */
 export type UpdateSchedule = {
   timeZone?: TimeZone;

@@ -20,5 +20,4 @@ export enum ConditionType {
   DeviceSpecValid = 'SpecValid',
   DeviceMultipleOwners = 'MultipleOwners',
   DeviceDecommissioning = 'DeviceDecommissioning',
-  TemplateVersionValid = 'Valid',
 }

@@ -5,7 +5,7 @@
 /**
  * Current status of the device OS.
  */
-export type DeviceOSStatus = {
+export type DeviceOsStatus = {
   /**
    * Version of the OS image.
    */

@@ -3,5 +3,5 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ResourceMonitorSpec } from './ResourceMonitorSpec';
-export type CPUResourceMonitorSpec = ResourceMonitorSpec;
+export type CpuResourceMonitorSpec = ResourceMonitorSpec;
 

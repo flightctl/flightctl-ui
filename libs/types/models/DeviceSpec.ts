@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { ApplicationSpec } from './ApplicationSpec';
 import type { ConfigProviderSpec } from './ConfigProviderSpec';
-import type { DeviceOSSpec } from './DeviceOSSpec';
+import type { DeviceOsSpec } from './DeviceOsSpec';
 import type { DeviceUpdatePolicySpec } from './DeviceUpdatePolicySpec';
 import type { ResourceMonitor } from './ResourceMonitor';
 /**
@@ -12,7 +12,7 @@ import type { ResourceMonitor } from './ResourceMonitor';
  */
 export type DeviceSpec = {
   updatePolicy?: DeviceUpdatePolicySpec;
-  os?: DeviceOSSpec;
+  os?: DeviceOsSpec;
   /**
    * List of config providers.
    */
