@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { DeviceConsole } from './DeviceConsole';
 import type { DeviceDecommission } from './DeviceDecommission';
-import type { DeviceOSSpec } from './DeviceOSSpec';
+import type { DeviceOsSpec } from './DeviceOsSpec';
 import type { DeviceUpdatePolicySpec } from './DeviceUpdatePolicySpec';
 import type { RenderedApplicationSpec } from './RenderedApplicationSpec';
 import type { ResourceMonitor } from './ResourceMonitor';
@@ -17,7 +17,7 @@ export type RenderedDeviceSpec = {
    */
   renderedVersion: string;
   updatePolicy?: DeviceUpdatePolicySpec;
-  os?: DeviceOSSpec;
+  os?: DeviceOsSpec;
   /**
    * The configuration to apply, in Ignition format.
    */

@@ -54,27 +54,31 @@ export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSi
     });
     return handleApiJSONResponse(response);
   } catch (error) {
-    console.error('Error making request:', error);
+    console.error('Error making GET request:', error);
     throw error;
   }
 };
 
-export const postData = async <R>(kind: string, data: R): Promise<R> => {
+const putOrPostData = async <R>(kind: string, data: R, method: 'PUT' | 'POST'): Promise<R> => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
-      method: 'POST',
+      method,
       body: JSON.stringify(data),
     });
     return handleApiJSONResponse(response);
   } catch (error) {
-    console.error('Error making request:', error);
+    console.error(`Error making ${method} request for ${kind}:`, error);
     throw error;
   }
 };
+
+export const postData = async <R>(kind: string, data: R): Promise<R> => putOrPostData(kind, data, 'POST');
+
+export const putData = async <R>(kind: string, data: R): Promise<R> => putOrPostData(kind, data, 'PUT');
 
 export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
@@ -85,7 +89,7 @@ export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Pr
     });
     return handleApiJSONResponse(response);
   } catch (error) {
-    console.error('Error making request:', error);
+    console.error('Error making DELETE request:', error);
     throw error;
   }
 };
@@ -103,7 +107,7 @@ export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal
     });
     return handleApiJSONResponse(response);
   } catch (error) {
-    console.error('Error making request:', error);
+    console.error('Error making PATCH request:', error);
     throw error;
   }
 };
@@ -116,7 +120,7 @@ export const fetchData = async <R>(kind: string, abortSignal?: AbortSignal): Pro
     });
     return handleApiJSONResponse(response);
   } catch (error) {
-    console.error('Error making request:', error);
+    console.error('Error making GET request:', error);
     throw error;
   }
 };

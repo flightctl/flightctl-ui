@@ -3,9 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * DeviceOSSpec describes the target OS for the device.
+ * DeviceOsSpec describes the target OS for the device.
  */
-export type DeviceOSSpec = {
+export type DeviceOsSpec = {
   /**
    * The target OS image name or URL.
    */

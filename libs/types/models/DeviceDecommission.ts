@@ -2,19 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { DeviceDecommissionTargetType } from './DeviceDecommissionTargetType';
+/**
+ * Metadata about a device decommissioning request.
+ */
 export type DeviceDecommission = {
-  /**
-   * Specifies the desired decommissioning method of the device.
-   */
-  decommissionTarget: DeviceDecommission.decommissionTarget;
+  target: DeviceDecommissionTargetType;
 };
-export namespace DeviceDecommission {
-  /**
-   * Specifies the desired decommissioning method of the device.
-   */
-  export enum decommissionTarget {
-    UNENROLL = 'Unenroll',
-    FACTORY_RESET = 'FactoryReset',
-  }
-}
 

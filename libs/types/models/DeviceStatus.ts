@@ -7,7 +7,8 @@ import type { DeviceApplicationsSummaryStatus } from './DeviceApplicationsSummar
 import type { DeviceApplicationStatus } from './DeviceApplicationStatus';
 import type { DeviceConfigStatus } from './DeviceConfigStatus';
 import type { DeviceIntegrityStatus } from './DeviceIntegrityStatus';
-import type { DeviceOSStatus } from './DeviceOSStatus';
+import type { DeviceLifecycleStatus } from './DeviceLifecycleStatus';
+import type { DeviceOsStatus } from './DeviceOsStatus';
 import type { DeviceResourceStatus } from './DeviceResourceStatus';
 import type { DeviceSummaryStatus } from './DeviceSummaryStatus';
 import type { DeviceSystemInfo } from './DeviceSystemInfo';
@@ -29,12 +30,13 @@ export type DeviceStatus = {
   resources: DeviceResourceStatus;
   integrity: DeviceIntegrityStatus;
   config: DeviceConfigStatus;
-  os: DeviceOSStatus;
+  os: DeviceOsStatus;
   updated: DeviceUpdatedStatus;
   summary: DeviceSummaryStatus;
   /**
    * The last time the device was seen by the service.
    */
   lastSeen: string;
+  lifecycle: DeviceLifecycleStatus;
 };
 

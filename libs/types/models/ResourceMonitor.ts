@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CPUResourceMonitorSpec } from './CPUResourceMonitorSpec';
+import type { CpuResourceMonitorSpec } from './CpuResourceMonitorSpec';
 import type { DiskResourceMonitorSpec } from './DiskResourceMonitorSpec';
 import type { MemoryResourceMonitorSpec } from './MemoryResourceMonitorSpec';
-export type ResourceMonitor = (CPUResourceMonitorSpec | MemoryResourceMonitorSpec | DiskResourceMonitorSpec);
+export type ResourceMonitor = (CpuResourceMonitorSpec | MemoryResourceMonitorSpec | DiskResourceMonitorSpec);
 

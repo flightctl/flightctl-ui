@@ -30,7 +30,31 @@ export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSi
     });
     return handleApiJSONResponse(response);
   } catch (error) {
-    console.error('Error making request:', error);
+    console.error('Error making GET request:', error);
+    throw error;
+  }
+};
+
+const putOrPostData = async <R>(
+  kind: string,
+  data: R,
+  serviceUrl: string,
+  applyOptions: (options: RequestInit) => RequestInit,
+  method: 'PUT' | 'POST',
+): Promise<R> => {
+  const options: RequestInit = {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    method,
+    body: JSON.stringify(data),
+  };
+  applyOptions(options);
+  try {
+    const response = await fetch(`${serviceUrl}/api/v1/${kind}`, options);
+    return handleApiJSONResponse(response);
+  } catch (error) {
+    console.error(`Error making ${method} request for ${kind}:`, error);
     throw error;
   }
 };
@@ -40,23 +64,14 @@ export const postData = async <R>(
   data: R,
   serviceUrl: string,
   applyOptions: (options: RequestInit) => RequestInit,
-): Promise<R> => {
-  const options: RequestInit = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    method: 'POST',
-    body: JSON.stringify(data),
-  };
-  applyOptions(options);
-  try {
-    const response = await fetch(`${serviceUrl}/api/v1/${kind}`, options);
-    return handleApiJSONResponse(response);
-  } catch (error) {
-    console.error('Error making request:', error);
-    throw error;
-  }
-};
+) => putOrPostData(kind, data, serviceUrl, applyOptions, 'POST');
+
+export const putData = async <R>(
+  kind: string,
+  data: R,
+  serviceUrl: string,
+  applyOptions: (options: RequestInit) => RequestInit,
+) => putOrPostData(kind, data, serviceUrl, applyOptions, 'PUT');
 
 export const deleteData = async <R>(
   kind: string,
@@ -73,7 +88,7 @@ export const deleteData = async <R>(
     const response = await fetch(`${serviceUrl}/api/v1/${kind}`, options);
     return handleApiJSONResponse(response);
   } catch (error) {
-    console.error('Error making request:', error);
+    console.error('Error making DELETE request:', error);
     throw error;
   }
 };
@@ -98,7 +113,7 @@ export const patchData = async <R>(
     const response = await fetch(`${serviceUrl}/api/v1/${kind}`, options);
     return handleApiJSONResponse(response);
   } catch (error) {
-    console.error('Error making request:', error);
+    console.error('Error making PATCH request:', error);
     throw error;
   }
 };
@@ -110,7 +125,7 @@ export const fetchData = async <R>(kind: string, serviceUrl: string, abortSignal
     });
     return handleApiJSONResponse(response);
   } catch (error) {
-    console.error('Error making request:', error);
+    console.error('Error making GET request:', error);
     throw error;
   }
 };

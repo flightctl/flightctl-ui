@@ -20,7 +20,7 @@ type DeviceEnrollmentModalProps = Omit<ApproveDeviceFormProps, 'error'>;
 
 const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmentRequest, onClose }) => {
   const { t } = useTranslation();
-  const { post } = useFetch();
+  const { put } = useFetch();
   const [error, setError] = React.useState<string>();
   const { user } = useAppContext();
   return (
@@ -38,7 +38,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
         }
 
         try {
-          await post<EnrollmentRequestApproval>(`enrollmentrequests/${enrollmentRequest.metadata.name}/approval`, {
+          await put<EnrollmentRequestApproval>(`enrollmentrequests/${enrollmentRequest.metadata.name}/approval`, {
             approved: true,
             labels: deviceLabels,
             approvedBy: user,

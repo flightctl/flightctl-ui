@@ -50,7 +50,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({
   const [errors, setErrors] = React.useState<string[]>();
   const {
     user,
-    fetch: { post },
+    fetch: { put },
   } = useAppContext();
 
   const approveEnrollments = async (values: MassApproveDeviceFormValues) => {
@@ -63,7 +63,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({
         labels.alias = aliasLabel;
       }
 
-      await post<EnrollmentRequestApproval>(`enrollmentrequests/${r.metadata.name}/approval`, {
+      await put<EnrollmentRequestApproval>(`enrollmentrequests/${r.metadata.name}/approval`, {
         approved: true,
         labels,
         approvedBy: user,
