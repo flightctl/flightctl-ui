@@ -19,6 +19,7 @@ import { TFunction } from 'i18next';
 
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
+import TablePagination from '../Table/TablePagination';
 import TableTextSearch from '../Table/TableTextSearch';
 import Table, { ApiSortTableColumn } from '../Table/Table';
 import { useTableSelect } from '../../hooks/useTableSelect';
@@ -32,7 +33,6 @@ import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import DeleteFleetModal from './DeleteFleetModal/DeleteFleetModal';
 import FleetResourceSyncs from './FleetResourceSyncs';
 import { useFleetBackendFilters, useFleets } from './useFleets';
-import TablePagination from '../Table/TablePagination';
 import { useAccessReview } from '../../hooks/useAccessReview';
 import ButtonWithPermissions from '../common/ButtonWithPermissions';
 import { RESOURCE, VERB } from '../../types/rbac';
@@ -114,11 +114,10 @@ const FleetTable = () => {
   const fleetColumns = React.useMemo(() => getColumns(t), [t]);
   const { name, setName, hasFiltersEnabled } = useFleetBackendFilters();
 
-  const fleetLoad = useFleets({ name, addDevicesCount: true });
+  const { fleets, isLoading, error, isUpdating, refetch, pagination } = useFleets({ name, addDevicesCount: true });
 
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
   const [fleetToDeleteId, setFleetToDeleteId] = React.useState<string>();
-  const { fleets, isLoading, error, isUpdating, refetch } = fleetLoad;
 
   const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
 
@@ -177,12 +176,7 @@ const FleetTable = () => {
           ))}
         </Tbody>
       </Table>
-      <TablePagination
-        isUpdating={fleetLoad.isUpdating}
-        itemCount={fleetLoad.itemCount}
-        currentPage={fleetLoad.currentPage}
-        setCurrentPage={fleetLoad.setCurrentPage}
-      />
+      <TablePagination pagination={pagination} isUpdating={isUpdating} />
       {fleets.length === 0 && <FleetEmptyState />}
       {fleetToDeleteId && (
         <DeleteFleetModal

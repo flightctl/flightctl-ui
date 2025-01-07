@@ -3,14 +3,8 @@ import { Trans } from 'react-i18next';
 import { Pagination, PaginationVariant, Spinner } from '@patternfly/react-core';
 
 import { PAGE_SIZE } from '../../constants';
+import { PaginationDetails } from '../../hooks/useTablePagination';
 import { useTranslation } from '../../hooks/useTranslation';
-
-type TablePaginationProps = {
-  isUpdating: boolean;
-  itemCount?: number;
-  currentPage: number;
-  setCurrentPage: (page: number) => void;
-};
 
 const PaginationTemplate = ({
   currentPage,
@@ -35,8 +29,15 @@ const PaginationTemplate = ({
   );
 };
 
-const TablePagination = ({ isUpdating, itemCount, currentPage, setCurrentPage }: TablePaginationProps) => {
+const TablePagination = ({
+  isUpdating,
+  pagination,
+}: {
+  pagination: Pick<PaginationDetails, 'currentPage' | 'setCurrentPage' | 'itemCount'>;
+  isUpdating: boolean;
+}) => {
   const { t } = useTranslation();
+  const { itemCount, currentPage, setCurrentPage } = pagination;
 
   const [prevCount, setPrevCount] = React.useState<number>(0);
   const [prevCurrentPage, setPrevCurrentPage] = React.useState<number>(0);
