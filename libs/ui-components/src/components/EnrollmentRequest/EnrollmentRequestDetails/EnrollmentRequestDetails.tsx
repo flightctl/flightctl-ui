@@ -37,6 +37,7 @@ import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import PageWithPermissions from '../../common/PageWithPermissions';
 
 import './EnrollmentRequestDetails.css';
 
@@ -232,4 +233,13 @@ const EnrollmentRequestDetails = () => {
   );
 };
 
-export default EnrollmentRequestDetails;
+const EnrollmentRequestDetailsWithPermissions = () => {
+  const [allowed, loading] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.GET);
+  return (
+    <PageWithPermissions allowed={allowed} loading={loading}>
+      <EnrollmentRequestDetails />
+    </PageWithPermissions>
+  );
+};
+
+export default EnrollmentRequestDetailsWithPermissions;

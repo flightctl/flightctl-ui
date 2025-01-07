@@ -30,6 +30,10 @@ import CreateFleetWizardFooter from './CreateFleetWizardFooter';
 import { useEditFleet } from './useEditFleet';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
+import { useAccessReview } from '../../../hooks/useAccessReview';
+import { RESOURCE, VERB } from '../../../types/rbac';
+import PageWithPermissions from '../../common/PageWithPermissions';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 import './CreateFleetWizard.css';
 
@@ -154,4 +158,21 @@ const CreateFleetWizard = () => {
   );
 };
 
-export default CreateFleetWizard;
+const CreateFleetWizardWithPermissions = () => {
+  const {
+    router: { useParams },
+  } = useAppContext();
+  const { fleetId } = useParams<{ fleetId: string }>();
+  const [createAllowed, createLoading] = useAccessReview(RESOURCE.FLEET, VERB.CREATE);
+  const [patchAllowed, patchLoading] = useAccessReview(RESOURCE.FLEET, VERB.PATCH);
+  return (
+    <PageWithPermissions
+      allowed={fleetId ? patchAllowed : createAllowed}
+      loading={fleetId ? patchLoading : createLoading}
+    >
+      <CreateFleetWizard />
+    </PageWithPermissions>
+  );
+};
+
+export default CreateFleetWizardWithPermissions;

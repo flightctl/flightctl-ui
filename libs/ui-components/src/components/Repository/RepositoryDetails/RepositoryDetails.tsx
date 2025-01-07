@@ -14,6 +14,7 @@ import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import PageWithPermissions from '../../common/PageWithPermissions';
 
 const RepositoryDetails = () => {
   const { t } = useTranslation();
@@ -87,4 +88,13 @@ const RepositoryDetails = () => {
   );
 };
 
-export default RepositoryDetails;
+const RepositoryDetailsWithPermissions = () => {
+  const [allowed, loading] = useAccessReview(RESOURCE.REPOSITORY, VERB.GET);
+  return (
+    <PageWithPermissions allowed={allowed} loading={loading}>
+      <RepositoryDetails />
+    </PageWithPermissions>
+  );
+};
+
+export default RepositoryDetailsWithPermissions;
