@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { deleteData, fetchData, patchData, postData } from '../utils/apiCalls';
+import { deleteData, fetchData, patchData, postData, putData } from '../utils/apiCalls';
 import { PatchRequest } from '@flightctl/types';
 
 export const useFetch = (getCookie: (name: string) => string | undefined, serviceUrl = '') => {
@@ -25,6 +25,11 @@ export const useFetch = (getCookie: (name: string) => string | undefined, servic
 
   const post = React.useCallback(
     async <R>(kind: string, obj: R): Promise<R> => postData(kind, obj, serviceUrl, applyHeaders),
+    [serviceUrl, applyHeaders],
+  );
+
+  const put = React.useCallback(
+    async <R>(kind: string, obj: R): Promise<R> => putData(kind, obj, serviceUrl, applyHeaders),
     [serviceUrl, applyHeaders],
   );
 
@@ -54,6 +59,7 @@ export const useFetch = (getCookie: (name: string) => string | undefined, servic
     getWsEndpoint,
     get,
     post,
+    put,
     remove,
     patch,
     checkPermissions,

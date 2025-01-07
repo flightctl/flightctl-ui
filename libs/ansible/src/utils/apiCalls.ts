@@ -35,17 +35,18 @@ export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSi
   }
 };
 
-export const postData = async <R>(
+const putOrPostData = async <R>(
   kind: string,
   data: R,
   serviceUrl: string,
   applyOptions: (options: RequestInit) => RequestInit,
+  method: 'PUT' | 'POST',
 ): Promise<R> => {
   const options: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
     },
-    method: 'POST',
+    method,
     body: JSON.stringify(data),
   };
   applyOptions(options);
@@ -57,6 +58,20 @@ export const postData = async <R>(
     throw error;
   }
 };
+
+export const postData = async <R>(
+  kind: string,
+  data: R,
+  serviceUrl: string,
+  applyOptions: (options: RequestInit) => RequestInit,
+) => putOrPostData(kind, data, serviceUrl, applyOptions, 'POST');
+
+export const putData = async <R>(
+  kind: string,
+  data: R,
+  serviceUrl: string,
+  applyOptions: (options: RequestInit) => RequestInit,
+) => putOrPostData(kind, data, serviceUrl, applyOptions, 'PUT');
 
 export const deleteData = async <R>(
   kind: string,

@@ -59,14 +59,14 @@ export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSi
   }
 };
 
-export const postData = async <R>(kind: string, data: R): Promise<R> => {
+const putOrPostData = async <R>(kind: string, data: R, method: 'PUT' | 'POST'): Promise<R> => {
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
-      method: 'POST',
+      method,
       body: JSON.stringify(data),
     });
     return handleApiJSONResponse(response);
@@ -75,6 +75,10 @@ export const postData = async <R>(kind: string, data: R): Promise<R> => {
     throw error;
   }
 };
+
+export const postData = async <R>(kind: string, data: R): Promise<R> => putOrPostData(kind, data, 'POST');
+
+export const putData = async <R>(kind: string, data: R): Promise<R> => putOrPostData(kind, data, 'PUT');
 
 export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
