@@ -33,6 +33,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
 
   const [canDelete] = useAccessReview(RESOURCE.DEVICE, VERB.DELETE);
   const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
+  const [canOpenTerminal] = useAccessReview(RESOURCE.DEVICE_CONSOLE, VERB.GET);
 
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {
@@ -64,7 +65,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
         <Nav variant="tertiary">
           <NavList>
             <NavItem to="details">{t('Details')}</NavItem>
-            <NavItem to="terminal">{t('Terminal')}</NavItem>
+            {!hideTerminal && canOpenTerminal && <NavItem to="terminal">{t('Terminal')}</NavItem>}
           </NavList>
         </Nav>
       }
@@ -102,7 +103,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: React.PropsWithChildren<{
               </DeviceDetailsTab>
             }
           />
-          {!hideTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
+          {!hideTerminal && canOpenTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
         </Routes>
       )}
       {deleteModal}

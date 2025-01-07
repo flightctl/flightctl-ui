@@ -10,6 +10,7 @@ export enum VERB {
 export enum RESOURCE {
   FLEET = 'fleets',
   DEVICE = 'devices',
+  DEVICE_CONSOLE = 'devices/console',
   REPOSITORY = 'repositories',
   RESOURCE_SYNC = 'resourcesyncs',
   ENROLLMENT_REQUEST = 'enrollmentrequests',
