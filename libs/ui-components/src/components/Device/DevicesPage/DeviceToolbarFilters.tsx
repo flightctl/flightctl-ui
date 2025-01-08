@@ -137,10 +137,13 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
   };
 
   const fetchTextMatches = async (val: string) => {
-    // Matches for labels are always exact matches
-    const labelMatches = get<DeviceList>(`devices?labelSelector=${val}&limit=1&sortBy=metadata.name&sortOrder=Asc`);
+    // By default (without the "equal" sign), the API returns a partial match, but only on the label keys
+    // To prevent this confusing behaviour, we query for exact matches in all cases (for both keys and values)
+    const exactLabelMatchParam = val.includes('=') ? val : `${val}=`;
+    const labelMatches = get<DeviceList>(
+      `devices?labelSelector=${exactLabelMatchParam}&sortBy=metadata.name&sortOrder=Asc`,
+    );
 
-    // Matches for names can be partial
     const fleetMatches = get<FleetList>(
       `fleets?fieldSelector=metadata.name contains ${val}&sortBy=metadata.name&sortOrder=Asc`,
     );
@@ -149,10 +152,21 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
 
     let newLabels: FlightCtlLabel[] = [];
     if (isPromiseFulfilled(labelMatchResult)) {
-      if (labelMatchResult.value.items?.length) {
-        newLabels = [stringToLabel(val)];
-      }
+      // In case we somehow still receive partial label matches, we extract the actual labels
+      const matchingLabels = labelMatchResult.value.items.reduce((prevLabels, newDevice) => {
+        const deviceLabels = newDevice.metadata.labels || {};
+        Object.entries(deviceLabels).forEach(([key, value]) => {
+          const labelText = labelToString({ key, value });
+          if (labelText.includes(val) && !prevLabels.includes(labelText)) {
+            prevLabels.push(labelText);
+          }
+        });
+        return prevLabels;
+      }, [] as string[]);
+
+      newLabels = matchingLabels.map(stringToLabel).sort();
     }
+
     let newFleets: string[] = [];
     if (isPromiseFulfilled(fleetMatchResult)) {
       newFleets = fleetMatchResult.value.items?.map((fleet: Fleet) => fleet.metadata.name || '') || [];
