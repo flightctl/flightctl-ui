@@ -6,8 +6,15 @@ import { useWebSocket } from '../../../hooks/useWebSocket';
 import ErrorAlert from '../../ErrorAlert/ErrorAlert';
 import { useTranslation } from '../../../hooks/useTranslation';
 import Terminal, { ImperativeTerminalType } from '../../Terminal/Terminal';
+import PageWithPermissions from '../../common/PageWithPermissions';
+import { useAccessReview } from '../../../hooks/useAccessReview';
+import { RESOURCE, VERB } from '../../../types/rbac';
 
-const TerminalTab = ({ device }: { device: Device }) => {
+type TerminalTabProps = {
+  device: Device;
+};
+
+const TerminalTab = ({ device }: TerminalTabProps) => {
   const { t } = useTranslation();
   const terminal = React.useRef<ImperativeTerminalType>(null);
 
@@ -51,4 +58,13 @@ const TerminalTab = ({ device }: { device: Device }) => {
   );
 };
 
-export default TerminalTab;
+const TerminalTabWithPermissions = (props: TerminalTabProps) => {
+  const [allowed, loading] = useAccessReview(RESOURCE.DEVICE_CONSOLE, VERB.GET);
+  return (
+    <PageWithPermissions allowed={allowed} loading={loading}>
+      <TerminalTab {...props} />
+    </PageWithPermissions>
+  );
+};
+
+export default TerminalTabWithPermissions;
