@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { TFunction } from 'react-i18next';
 import { Tbody } from '@patternfly/react-table';
-import { SelectList, SelectOption, Spinner, ToolbarItem } from '@patternfly/react-core';
+import { SelectList, SelectOption, ToolbarItem } from '@patternfly/react-core';
 import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons';
 
 import { EnrollmentRequest, EnrollmentRequestList } from '@flightctl/types';
@@ -14,20 +14,19 @@ import { useDeleteListAction } from '../ListPage/ListPageActions';
 import { useFetch } from '../../hooks/useFetch';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useTableSelect } from '../../hooks/useTableSelect';
-import { useAccessReview } from '../../hooks/useAccessReview';
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
-import { usePendingEnrollments } from './useEnrollmentRequests';
-
 import ApproveDeviceModal from '../modals/ApproveDeviceModal/ApproveDeviceModal';
 import MassDeleteDeviceModal from '../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
 import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
-import EnrollmentRequestTableRow from './EnrollmentRequestTableRow';
+import EnrollmentRequestTableRow from '../EnrollmentRequest/EnrollmentRequestTableRow';
 import EnrollmentRequestTableToolbar from './EnrollmentRequestTableToolbar';
 import { RESOURCE, VERB } from '../../types/rbac';
+import { useAccessReview } from '../../hooks/useAccessReview';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
+import { usePendingEnrollments } from './useEnrollmentRequests';
 import TablePagination from '../Table/TablePagination';
 
-const ErEmptyState = () => {
+const EnrollmentRequestEmptyState = () => {
   const { t } = useTranslation();
   return <ResourceListEmptyState icon={MicrochipIcon} titleText={t('No enrollment requests here!')} />;
 };
@@ -74,11 +73,9 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
     },
   });
 
-  if (pendingEnrollments.length === 0) {
-    if (isLoading) {
-      return <Spinner size="md" />;
-    }
-    return isStandalone ? <ErEmptyState /> : null;
+  // In non-standalone mode, hide the entire component when there are no pending enrollments
+  if (!isStandalone && pendingEnrollments.length === 0) {
+    return null;
   }
 
   const currentEnrollmentRequest = pendingEnrollments.find((er) => er.metadata.name === approvingErId);
@@ -104,7 +101,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
         </EnrollmentRequestTableToolbar>
         <Table
           aria-label={t('Table for devices pending approval')}
-          loading={false}
+          loading={!!isStandalone && isLoading && pendingEnrollments.length === 0}
           columns={enrollmentColumns}
           emptyFilters={filteredData.length === 0}
           emptyData={false}
@@ -130,6 +127,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
           </Tbody>
         </Table>
         <TablePagination pagination={pagination} isUpdating={isLoading} />
+        {isStandalone && pendingEnrollments.length === 0 && !isLoading && <EnrollmentRequestEmptyState />}
         {deleteModal}
         {currentEnrollmentRequest && (
           <ApproveDeviceModal
