@@ -22,6 +22,9 @@ export const toAPILabel = (labels: FlightCtlLabel[]): Record<string, string> =>
     {} as Record<string, string>,
   );
 
+// Used to force the API to perform an exact match check for labels
+export const labelToExactApiMatchString = (label: FlightCtlLabel) => `${label.key}=${label.value || ''}`;
+
 export const labelToString = (label: FlightCtlLabel) => `${label.key}${label.value ? `=${label.value}` : ''}`;
 
 export const stringToLabel = (labelStr: string): FlightCtlLabel => {
@@ -30,11 +33,4 @@ export const stringToLabel = (labelStr: string): FlightCtlLabel => {
     key: labelParts[0],
     value: labelParts.length > 1 ? labelParts[1] : undefined,
   };
-};
-
-export const filterDevicesLabels = (allLabels: FlightCtlLabel[], selectedLabels: FlightCtlLabel[], filter: string) => {
-  const filteredLabels = [...new Set(allLabels.concat(selectedLabels).map(labelToString))]
-    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })) // ignore case
-    .filter((label) => label.includes(filter));
-  return filteredLabels;
 };
