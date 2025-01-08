@@ -11,7 +11,7 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { ActionsColumn, IAction, Tbody, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, IAction, OnSelect, Tbody, Td, Tr } from '@patternfly/react-table';
 import { RepositoryIcon } from '@patternfly/react-icons/dist/js/icons/repository-icon';
 import { TFunction } from 'i18next';
 
@@ -98,16 +98,19 @@ const RepositoryTableRow = ({
   canEdit,
   rowIndex,
   setDeleteModalRepoId,
+  onRowSelect,
+  isRowSelected,
 }: {
   repository: Repository;
   canDelete: boolean;
   canEdit: boolean;
   rowIndex: number;
   setDeleteModalRepoId: (repoId?: string) => void;
+  onRowSelect: (repository: Repository) => OnSelect;
+  isRowSelected: (repository: Repository) => boolean;
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { onRowSelect, isRowSelected } = useTableSelect();
 
   const actions: IAction[] = [];
   if (canEdit) {
@@ -165,7 +168,7 @@ const RepositoryTable = () => {
   const { search, setSearch, filteredData } = useTableTextSearch(repositories, getSearchText);
   const columns = React.useMemo(() => getColumns(t), [t]);
 
-  const { hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
+  const { hasSelectedRows, isAllSelected, isRowSelected, setAllSelected, onRowSelect } = useTableSelect<Repository>();
 
   const [canDelete] = useAccessReview(RESOURCE.REPOSITORY, VERB.DELETE);
   const [canEdit] = useAccessReview(RESOURCE.REPOSITORY, VERB.PATCH);
@@ -211,6 +214,8 @@ const RepositoryTable = () => {
               canDelete={canDelete}
               canEdit={canEdit}
               setDeleteModalRepoId={setDeleteModalRepoId}
+              isRowSelected={isRowSelected}
+              onRowSelect={onRowSelect}
             />
           ))}
         </Tbody>
