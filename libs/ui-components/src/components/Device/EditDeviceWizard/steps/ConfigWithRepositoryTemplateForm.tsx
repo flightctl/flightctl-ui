@@ -190,6 +190,7 @@ const ConfigWithRepositoryTemplateForm = ({
         <FormSelect
           name={`configTemplates[${index}].repository`}
           items={repositoryItems}
+          withStatusIcon
           placeholderText={t('Select a repository')}
         >
           {canCreateRepo && (
