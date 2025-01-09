@@ -34,8 +34,8 @@ const K8S_DNS_SUBDOMAIN_ALLOWED_CHARACTERS = /^[a-z0-9.-]*$/;
 const K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH = 253;
 
 // https://issues.redhat.com/browse/MGMT-18349 to make the validation more robust
-const BASIC_DEVICE_OS_IMAGE_REGEXP = /^[a-zA-Z0-9.\-:@_+]*$/;
-const BASIC_FLEET_OS_IMAGE_REGEXP = /^[a-zA-Z0-9.\-:@_+{}\s]*$/;
+const BASIC_DEVICE_OS_IMAGE_REGEXP = /^[a-zA-Z0-9.\-\/:@_+]*$/;
+const BASIC_FLEET_OS_IMAGE_REGEXP = /^[a-zA-Z0-9.\-\/:@_+{}\s]*$/;
 
 const absolutePathRegex = /^\/.*$/;
 export const MAX_TARGET_REVISION_LENGTH = 244;
