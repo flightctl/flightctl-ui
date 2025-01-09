@@ -15,7 +15,7 @@ const loadInterceptors = () => {
     });
   }).as('all-enrollment-requests');
 
-  cy.intercept('GET', '/api/flightctl/api/v1/enrollmentrequests?fieldSelector=!status.approval.approved*', (req) => {
+  cy.intercept('GET', '/api/flightctl/api/v1/enrollmentrequests?fieldSelector=*', (req) => {
     req.reply({
       body: buildErResponse(getErList(true)),
     });

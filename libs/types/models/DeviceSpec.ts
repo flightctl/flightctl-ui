@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { ApplicationSpec } from './ApplicationSpec';
 import type { ConfigProviderSpec } from './ConfigProviderSpec';
+import type { DeviceDecommission } from './DeviceDecommission';
 import type { DeviceOsSpec } from './DeviceOsSpec';
 import type { DeviceUpdatePolicySpec } from './DeviceUpdatePolicySpec';
 import type { ResourceMonitor } from './ResourceMonitor';
@@ -34,5 +35,6 @@ export type DeviceSpec = {
    * Array of resource monitor configurations.
    */
   resources?: Array<ResourceMonitor>;
+  decommissioning?: DeviceDecommission;
 };
 
