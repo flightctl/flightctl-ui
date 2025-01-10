@@ -1,31 +1,31 @@
 import * as React from 'react';
 import { Dropdown, DropdownItem, MenuToggle } from '@patternfly/react-core';
 
-import DeleteModal from '../modals/DeleteModal/DeleteModal';
+import { DeviceDecommissionTargetType } from '@flightctl/types';
+
 import { useTranslation } from '../../hooks/useTranslation';
+import { getDisabledTooltipProps } from '../../utils/tooltip';
+import DeleteModal from '../modals/DeleteModal/DeleteModal';
+import DecommissionModal from '../modals/DecommissionModal/DecommissionModal';
 
 type DeleteActionProps = {
   onDelete: () => Promise<unknown>;
   resourceType: string;
   resourceName: string;
-  disabledReason?: string | boolean;
+  disabledReason?: string;
+};
+
+type DecommissionActionProps = {
+  onDecommission: (target: DeviceDecommissionTargetType) => Promise<unknown>;
+  disabledReason?: string;
 };
 
 export const useDeleteAction = ({ resourceType, resourceName, onDelete, disabledReason }: DeleteActionProps) => {
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+  const deleteProps = getDisabledTooltipProps(disabledReason);
   const deleteAction = (
-    <DropdownItem
-      onClick={() => setIsDeleteModalOpen(true)}
-      {...(disabledReason
-        ? {
-            isAriaDisabled: true,
-            tooltipProps: {
-              content: disabledReason,
-            },
-          }
-        : undefined)}
-    >
+    <DropdownItem onClick={() => setIsDeleteModalOpen(true)} {...deleteProps}>
       {t('Delete {{ resourceType }}', { resourceType })}
     </DropdownItem>
   );
@@ -39,6 +39,22 @@ export const useDeleteAction = ({ resourceType, resourceName, onDelete, disabled
   );
 
   return { deleteAction, deleteModal };
+};
+
+export const useDecommissionAction = ({ onDecommission, disabledReason }: DecommissionActionProps) => {
+  const { t } = useTranslation();
+  const [isDecommissionModalOpen, setIsDecommissionModalOpen] = React.useState(false);
+  const decommissionProps = getDisabledTooltipProps(disabledReason);
+  const decommissionAction = (
+    <DropdownItem onClick={() => setIsDecommissionModalOpen(true)} {...decommissionProps}>
+      {t('Decommission device')}
+    </DropdownItem>
+  );
+  const decommissionModal = isDecommissionModalOpen && (
+    <DecommissionModal onClose={() => setIsDecommissionModalOpen(false)} onDecommission={onDecommission} />
+  );
+
+  return { decommissionAction, decommissionModal };
 };
 
 type DetailsPageActionsProps = {

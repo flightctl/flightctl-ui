@@ -1,13 +1,14 @@
+import * as React from 'react';
 import { IAction } from '@patternfly/react-table';
 
-export type DeleteListActionResult = {
-  deleteAction: (params: { resourceId: string; resourceName?: string; disabledReason?: string }) => IAction;
-  deleteModal: React.ReactNode;
+export type ListAction = (params: { resourceId: string; resourceName?: string; disabledReason?: string }) => IAction;
+
+export type ListActionResult = {
+  action: ListAction;
+  modal: React.ReactNode;
 };
 
-export type DeleteListActionProps = {
-  onDelete: (resourceId: string) => Promise<unknown>;
-  resourceType: string;
+export type ListActionProps<T extends string, P> = {
+  onConfirm: (resourceId: string, params?: P) => Promise<unknown>;
+  resourceType: T;
 };
-
-export type DeleteListActionHook = (args: DeleteListActionProps) => DeleteListActionResult;
