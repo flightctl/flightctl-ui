@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { useEffect } from 'react';
 import { Alert, Button, Modal, Spinner, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
+import { Trans } from 'react-i18next';
+
+import { ResourceSyncList } from '@flightctl/types';
 
 import { getErrorMessage } from '../../../utils/error';
+import { commonQueries } from '../../../utils/query';
 import { useFetch } from '../../../hooks/useFetch';
-import { ResourceSyncList } from '@flightctl/types';
-import { Trans } from 'react-i18next';
 import { useTranslation } from '../../../hooks/useTranslation';
 
 type DeleteRepositoryModalProps = {
@@ -46,7 +48,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
 
   const loadRS = React.useCallback(async () => {
     try {
-      const resourceSyncs = await get<ResourceSyncList>(`resourcesyncs?fieldSelector=spec.repository=${repositoryId}`);
+      const resourceSyncs = await get<ResourceSyncList>(commonQueries.getResourceSyncsByRepo(repositoryId));
       setResourceSyncIds(resourceSyncs.items.map((rs) => rs.metadata.name || ''));
       setRsError(undefined);
     } catch (e) {

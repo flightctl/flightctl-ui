@@ -35,6 +35,7 @@ import ResourceSyncStatus from './ResourceSyncStatus';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
 import { getErrorMessage } from '../../utils/error';
+import { commonQueries } from '../../utils/query';
 
 import {
   SingleResourceSyncValues,
@@ -168,7 +169,7 @@ const CreateResourceSyncModal = ({
 
 const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) => {
   const [rsList, isLoading, error, refetch] = useFetchPeriodically<ResourceSyncList>({
-    endpoint: `resourcesyncs?fieldSelector=spec.repository=${repositoryId}`,
+    endpoint: commonQueries.getResourceSyncsByRepo(repositoryId),
   });
 
   const resourceSyncs = rsList?.items || [];

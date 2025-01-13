@@ -13,19 +13,21 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
+
+import { Repository, ResourceSync, ResourceSyncList } from '@flightctl/types';
+
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
-
-import CreateRepositoryForm from './CreateRepositoryForm';
-
-import { isPromiseFulfilled } from '../../../types/typeUtils';
-import { Repository, ResourceSync, ResourceSyncList } from '@flightctl/types';
-import { getErrorMessage } from '../../../utils/error';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { RESOURCE, VERB } from '../../../types/rbac';
 import { useAccessReview } from '../../../hooks/useAccessReview';
+import { isPromiseFulfilled } from '../../../types/typeUtils';
+import { RESOURCE, VERB } from '../../../types/rbac';
+import { getErrorMessage } from '../../../utils/error';
+import { commonQueries } from '../../../utils/query';
 import PageWithPermissions from '../../common/PageWithPermissions';
+
+import CreateRepositoryForm from './CreateRepositoryForm';
 
 const CreateRepository = () => {
   const { t } = useTranslation();
@@ -33,6 +35,7 @@ const CreateRepository = () => {
     router: { useParams },
   } = useAppContext();
   const { repositoryId } = useParams<{ repositoryId: string }>();
+
   const { get } = useFetch();
   const [repoError, setRepoError] = React.useState<string>();
   const [rsError, setRsError] = React.useState<string>();
@@ -47,7 +50,7 @@ const CreateRepository = () => {
       try {
         const results = await Promise.allSettled([
           get<Repository>(`repositories/${repositoryId}`),
-          get<ResourceSyncList>(`resourcesyncs?fieldSelector=spec.repository=${repositoryId}`),
+          get<ResourceSyncList>(commonQueries.getResourceSyncsByRepo(repositoryId as string)),
         ]);
 
         if (isPromiseFulfilled(results[0])) {
@@ -73,7 +76,8 @@ const CreateRepository = () => {
     const reload = async () => {
       try {
         setIsLoading(true);
-        const rsList = await get<ResourceSyncList>(`resourcesyncs?fieldSelector=spec.repository${repositoryId}`);
+
+        const rsList = await get<ResourceSyncList>(commonQueries.getResourceSyncsByRepo(repositoryId as string));
         setResourceSyncs(rsList.items);
         setRsError(undefined);
       } catch (e) {

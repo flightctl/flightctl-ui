@@ -13,8 +13,7 @@ type RepositoriesEndpointArgs = {
 };
 
 const getRepositoriesEndpoint = ({ nextContinue }: RepositoriesEndpointArgs) => {
-  const params = new URLSearchParams({});
-
+  const params = new URLSearchParams();
   if (nextContinue !== undefined) {
     params.set('limit', `${PAGE_SIZE}`);
   }

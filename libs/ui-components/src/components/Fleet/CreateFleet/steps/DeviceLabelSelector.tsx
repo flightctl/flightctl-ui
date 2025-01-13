@@ -12,7 +12,7 @@ import { useFetch } from '../../../../hooks/useFetch';
 import { FlightCtlLabel } from '../../../../types/extraTypes';
 import { getApiListCount } from '../../../../utils/api';
 import { getErrorMessage } from '../../../../utils/error';
-import { labelToExactApiMatchString } from '../../../../utils/labels';
+import { commonQueries } from '../../../../utils/query';
 
 const validateLabels = (labels: FlightCtlLabel[]) =>
   hasUniqueLabelKeys(labels) && getInvalidKubernetesLabels(labels).length === 0;
@@ -27,10 +27,10 @@ const DeviceLabelSelector = () => {
   const [deviceCount, setDeviceCount] = React.useState<number>(0);
 
   const updateDeviceCount = async (matchLabels: FlightCtlLabel[]) => {
-    const labelSelector = matchLabels.map(labelToExactApiMatchString);
-
     try {
-      const deviceListResp = await get<DeviceList>(`devices?labelSelector=${labelSelector.join(',')}&limit=1`);
+      const deviceListResp = await get<DeviceList>(
+        commonQueries.getDevicesWithExactLabelMatching(matchLabels, { limit: 1 }),
+      );
       const num = getApiListCount(deviceListResp);
       setDeviceCount(num || 0);
     } catch (e) {

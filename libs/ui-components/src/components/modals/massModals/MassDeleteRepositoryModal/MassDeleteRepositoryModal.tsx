@@ -1,12 +1,15 @@
-import { useFetch } from '../../../../hooks/useFetch';
-import { getErrorMessage } from '../../../../utils/error';
+import * as React from 'react';
 import { Alert, Button, Modal, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+
 import { Repository, ResourceSyncList } from '@flightctl/types';
-import * as React from 'react';
+
+import { useFetch } from '../../../../hooks/useFetch';
+import { getErrorMessage } from '../../../../utils/error';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { isPromiseRejected } from '../../../../types/typeUtils';
 import { getApiListCount } from '../../../../utils/api';
+import { commonQueries } from '../../../../utils/query';
 
 type MassDeleteRepositoryModalProps = {
   onClose: VoidFunction;
@@ -38,7 +41,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
     const promises = repositories.map(async (r) => {
       const repositoryId = r.metadata.name || '';
       const resourceSyncs = await get<ResourceSyncList>(
-        `resourcesyncs?fieldSelector=spec.repository=${repositoryId}&limit=1`,
+        commonQueries.getResourceSyncsByRepo(repositoryId, { limit: 1 }),
       );
       rsCount[repositoryId] = getApiListCount(resourceSyncs);
     });
@@ -53,7 +56,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
     setProgress(0);
     const promises = repositories.map(async (r) => {
       const repositoryId = r.metadata.name || '';
-      const resourceSyncs = await get<ResourceSyncList>(`resourcesyncs?fieldSelector=spec.repository=${repositoryId}`);
+      const resourceSyncs = await get<ResourceSyncList>(commonQueries.getResourceSyncsByRepo(repositoryId));
       const rsyncPromises = resourceSyncs.items.map((rsync) => remove(`resourcesyncs/${rsync.metadata.name}`));
       const rsyncResults = await Promise.allSettled(rsyncPromises);
       const rejectedResults = rsyncResults.filter(isPromiseRejected);
