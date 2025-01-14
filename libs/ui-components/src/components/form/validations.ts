@@ -315,6 +315,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         } else if (isHttpConfigTemplate(value)) {
           return Yup.object<HttpConfigTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
+            repository: Yup.string().required(t('Repository is required.')),
             name: validKubernetesDnsSubdomain(t, { isRequired: true }),
             filePath: Yup.string()
               .required(t('File path is required.'))

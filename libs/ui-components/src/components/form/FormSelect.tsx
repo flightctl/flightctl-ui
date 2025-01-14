@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { FormGroup, MenuToggle, Select, SelectList, SelectOption } from '@patternfly/react-core';
+import { FormGroup, MenuToggle, MenuToggleStatus, Select, SelectList, SelectOption } from '@patternfly/react-core';
 import { useField } from 'formik';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
@@ -14,13 +14,21 @@ type FormSelectProps = {
   helperText?: React.ReactNode;
   children?: React.ReactNode;
   placeholderText?: string;
+  withStatusIcon?: boolean;
 };
 
 const isItemObject = (item: string | SelectItem): item is SelectItem => typeof item === 'object';
 
 const getItemLabel = (item: string | SelectItem) => (isItemObject(item) ? item.label : item);
 
-const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeholderText, children }) => {
+const FormSelect: React.FC<FormSelectProps> = ({
+  name,
+  items,
+  withStatusIcon,
+  helperText,
+  placeholderText,
+  children,
+}) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [field, meta, { setValue, setTouched }] = useField<string>({
     name: name,
@@ -38,6 +46,17 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeh
 
   const selectedText = field.value ? getItemLabel(items[field.value]) : placeholderText;
 
+  let statusToggle: MenuToggleStatus;
+  if (withStatusIcon) {
+    if (field.value) {
+      statusToggle = MenuToggleStatus.success;
+    } else if (meta.touched) {
+      statusToggle = MenuToggleStatus.danger;
+    } else {
+      statusToggle = MenuToggleStatus.warning;
+    }
+  }
+
   return (
     <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId}>
       <Select
@@ -49,6 +68,7 @@ const FormSelect: React.FC<FormSelectProps> = ({ name, items, helperText, placeh
         }}
         toggle={(toggleRef) => (
           <MenuToggle
+            status={statusToggle}
             ref={toggleRef}
             onClick={() => {
               if (isOpen && !meta.touched) {
