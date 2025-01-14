@@ -14,7 +14,6 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { deviceApprovalValidationSchema } from '../../form/validations';
 
 import { fromAPILabel, toAPILabel } from '../../../utils/labels';
-import { useAppContext } from '../../../hooks/useAppContext';
 
 type DeviceEnrollmentModalProps = Omit<ApproveDeviceFormProps, 'error'>;
 
@@ -22,7 +21,6 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
   const { t } = useTranslation();
   const { put } = useFetch();
   const [error, setError] = React.useState<string>();
-  const { user } = useAppContext();
   return (
     <Formik<ApproveDeviceFormValues>
       initialValues={{
@@ -41,7 +39,6 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
           await put<EnrollmentRequestApproval>(`enrollmentrequests/${enrollmentRequest.metadata.name}/approval`, {
             approved: true,
             labels: deviceLabels,
-            approvedBy: user,
           });
           onClose(true);
         } catch (e) {

@@ -14,13 +14,5 @@ export type EnrollmentRequestApproval = {
    * Indicates whether the request has been approved.
    */
   approved: boolean;
-  /**
-   * The name of the approver.
-   */
-  approvedBy?: string;
-  /**
-   * The time at which the request was approved.
-   */
-  approvedAt?: string;
 };
 

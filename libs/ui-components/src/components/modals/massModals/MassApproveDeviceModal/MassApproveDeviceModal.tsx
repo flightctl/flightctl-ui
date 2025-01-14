@@ -49,7 +49,6 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({
   const [totalProgress, setTotalProgress] = React.useState(0);
   const [errors, setErrors] = React.useState<string[]>();
   const {
-    user,
     fetch: { put },
   } = useAppContext();
 
@@ -66,7 +65,6 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({
       await put<EnrollmentRequestApproval>(`enrollmentrequests/${r.metadata.name}/approval`, {
         approved: true,
         labels,
-        approvedBy: user,
       });
       setProgress((p) => p + 1);
     });
