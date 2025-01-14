@@ -24,7 +24,8 @@ import { isPromiseFulfilled } from '../../../types/typeUtils';
 import TableTextSearch, { TableTextSearchProps } from '../../Table/TableTextSearch';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
-import { getSearchResultsCount } from '../../../utils/search';
+import { commonQueries as queries } from '../../../utils/query';
+import { MAX_TOTAL_SEARCH_RESULTS, getSearchResultsCount } from '../../../utils/search';
 import { labelToString, stringToLabel } from '../../../utils/labels';
 
 import './DeviceToolbarFilters.css';
@@ -137,16 +138,12 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
   };
 
   const fetchTextMatches = async (val: string) => {
-    // By default (without the "equal" sign), the API returns a partial match, but only on the label keys
-    // To prevent this confusing behaviour, we query for exact matches in all cases (for both keys and values)
-    const exactLabelMatchParam = val.includes('=') ? val : `${val}=`;
     const labelMatches = get<DeviceList>(
-      `devices?labelSelector=${exactLabelMatchParam}&sortBy=metadata.name&sortOrder=Asc`,
+      // We ask for more items since can't get a precise amount of labels while querying for devices
+      queries.getDevicesWithExactLabelMatching([stringToLabel(val)], { limit: MAX_TOTAL_SEARCH_RESULTS * 2 }),
     );
 
-    const fleetMatches = get<FleetList>(
-      `fleets?fieldSelector=metadata.name contains ${val}&sortBy=metadata.name&sortOrder=Asc`,
-    );
+    const fleetMatches = get<FleetList>(queries.getFleetsWithNameMatching(val, { limit: MAX_TOTAL_SEARCH_RESULTS }));
 
     const [labelMatchResult, fleetMatchResult] = await Promise.allSettled([labelMatches, fleetMatches]);
 

@@ -1,7 +1,7 @@
 import fuzzy from 'fuzzysearch';
 
 // Must be an even number for "getSearchResultsCount" to work
-const MAX_TOTAL_SEARCH_RESULTS = 10;
+export const MAX_TOTAL_SEARCH_RESULTS = 10;
 
 export const fuzzySeach = (filter: string | undefined, value?: string): boolean => {
   if (!filter) {
