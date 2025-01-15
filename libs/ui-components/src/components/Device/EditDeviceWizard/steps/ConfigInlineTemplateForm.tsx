@@ -49,12 +49,7 @@ const FileForm = ({ fieldName, index }: { fieldName: string; index: number }) =>
         <FormGroup label={t('File path on the device')} isRequired>
           <TextField name={`${fieldName}.path`} />
         </FormGroup>
-        <UploadField
-          label={t('Content')}
-          name={`${fieldName}.content`}
-          maxFileBytes={MAX_INLINE_FILE_SIZE_BYTES}
-          isRequired
-        />
+        <UploadField label={t('Content')} name={`${fieldName}.content`} maxFileBytes={MAX_INLINE_FILE_SIZE_BYTES} />
         <FormGroup>
           <CheckboxField name={`${fieldName}.base64`} label={t('Content is base64 encoded')} />
         </FormGroup>

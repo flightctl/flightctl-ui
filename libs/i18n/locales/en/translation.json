@@ -346,7 +346,6 @@
   "Secret namespace is required.": "Secret namespace is required.",
   "File path must be absolute.": "File path must be absolute.",
   "File path must be unique.": "File path must be unique.",
-  "File content is required.": "File content is required.",
   "The maximum number of systemd units is {{maxSystemUnits}}.": "The maximum number of systemd units is {{maxSystemUnits}}.",
   "Invalid systemd service names: {{invalidPatterns}}": "Invalid systemd service names: {{invalidPatterns}}",
   "Systemd service names must be unique": "Systemd service names must be unique",
