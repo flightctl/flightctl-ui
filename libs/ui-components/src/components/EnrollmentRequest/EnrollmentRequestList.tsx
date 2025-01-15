@@ -65,9 +65,9 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
-  const { deleteAction, deleteModal } = useDeleteListAction({
+  const { action: deleteAction, modal: deleteModal } = useDeleteListAction({
     resourceType: 'EnrollmentRequest',
-    onDelete: async (enrollmentId: string) => {
+    onConfirm: async (enrollmentId: string) => {
       await remove(`enrollmentrequests/${enrollmentId}`);
       refetch();
     },

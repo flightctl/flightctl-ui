@@ -5,11 +5,13 @@ export enum VERB {
   GET = 'get',
   PATCH = 'patch',
   POST = 'post',
+  UPDATE = 'update',
 }
 
 export enum RESOURCE {
   FLEET = 'fleets',
   DEVICE = 'devices',
+  DEVICE_DECOMMISSION = 'devices/decommission',
   DEVICE_CONSOLE = 'devices/console',
   REPOSITORY = 'repositories',
   RESOURCE_SYNC = 'resourcesyncs',

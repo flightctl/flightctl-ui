@@ -15,6 +15,7 @@ import { fromAPILabel } from '../../../utils/labels';
 import { validLabelsSchema } from '../../form/validations';
 import { getErrorMessage } from '../../../utils/error';
 import { getLabelPatches } from '../../../utils/patch';
+import LabelsView from '../../common/LabelsView';
 
 type EditLabelsFormValues = {
   labels: FlightCtlLabel[];
@@ -23,7 +24,6 @@ type EditLabelsFormValues = {
 type EditLabelsFormContentProps = {
   isSubmitting: FormikProps<EditLabelsFormValues>['isSubmitting'];
   submitForm: (values: EditLabelsFormValues) => Promise<string>;
-  canEdit: boolean;
 };
 
 const getValidationSchema = (t: TFunction) => {
@@ -34,7 +34,7 @@ const getValidationSchema = (t: TFunction) => {
 
 const delayResponse = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const EditLabelsFormContent = ({ isSubmitting, submitForm, canEdit }: EditLabelsFormContentProps) => {
+const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormContentProps) => {
   const { t } = useTranslation();
   const [submitError, setSubmitError] = React.useState<string>();
 
@@ -56,7 +56,6 @@ const EditLabelsFormContent = ({ isSubmitting, submitForm, canEdit }: EditLabels
         addButtonText={isSubmitting ? t('Saving...') : undefined}
         isLoading={isSubmitting}
         onChangeCallback={debouncedSubmit}
-        canEdit={canEdit}
       />
       {submitError && <Alert isInline title={submitError} variant="danger" />}
     </FlightCtlForm>
@@ -66,10 +65,14 @@ const EditLabelsFormContent = ({ isSubmitting, submitForm, canEdit }: EditLabels
 type EditLabelsFormProps = {
   device: Device;
   onDeviceUpdate: () => void;
-  canEdit: boolean;
 };
 
-const EditLabelsForm = ({ device, onDeviceUpdate, canEdit }: EditLabelsFormProps) => {
+export const ViewLabels = ({ device }: { device: Device }) => {
+  const currentLabels = device.metadata.labels || {};
+  return <LabelsView prefix="read-only-labels" labels={currentLabels} />;
+};
+
+const EditLabelsForm = ({ device, onDeviceUpdate }: EditLabelsFormProps) => {
   const { t } = useTranslation();
   const { patch } = useFetch();
 
@@ -96,9 +99,7 @@ const EditLabelsForm = ({ device, onDeviceUpdate, canEdit }: EditLabelsFormProps
       }}
       validationSchema={getValidationSchema(t)}
     >
-      {({ isSubmitting, submitForm }) => (
-        <EditLabelsFormContent canEdit={canEdit} isSubmitting={isSubmitting} submitForm={submitForm} />
-      )}
+      {({ isSubmitting, submitForm }) => <EditLabelsFormContent isSubmitting={isSubmitting} submitForm={submitForm} />}
     </Formik>
   );
 };
