@@ -226,7 +226,7 @@
   "System image": "System image",
   "The target system image for this fleet's devices.": "The target system image for this fleet's devices.",
   "The target system image for this device.": "The target system image for this device.",
-  "Must be either an OCI image ref (e.g. \"quay.io/redhat/rhde:9.3\") or ostree ref (e.g. \"https://ostree.fedoraproject.org/iot?ref=fedora/stable/x86_64/iot\"). Keep this empty if you do not want to manage your OS from Flight Control.": "Must be either an OCI image ref (e.g. \"quay.io/redhat/rhde:9.3\") or ostree ref (e.g. \"https://ostree.fedoraproject.org/iot?ref=fedora/stable/x86_64/iot\"). Keep this empty if you do not want to manage your OS from Flight Control.",
+  "Must be a reference to a bootable container image (e.g. \"quay.io/<my-org>/my-rhel-with-fc-agent:<version>\"). When left empty, the device's existing OS will be kept unchanged.": "Must be a reference to a bootable container image (e.g. \"quay.io/<my-org>/my-rhel-with-fc-agent:<version>\"). When left empty, the device's existing OS will be kept unchanged.",
   "Tracked systemd services": "Tracked systemd services",
   "Device labels": "Device labels",
   "Unnamed": "Unnamed",
