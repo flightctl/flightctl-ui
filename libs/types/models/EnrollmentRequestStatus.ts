@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Condition } from './Condition';
-import type { EnrollmentRequestApprovalStatus } from './EnrollmentRequestApprovalStatus';
+import type { EnrollmentRequestApproval } from './EnrollmentRequestApproval';
 /**
  * EnrollmentRequestStatus represents information about the status of a EnrollmentRequest.
  */
@@ -16,6 +16,6 @@ export type EnrollmentRequestStatus = {
    * Current state of the EnrollmentRequest.
    */
   conditions: Array<Condition>;
-  approval?: EnrollmentRequestApprovalStatus;
+  approval?: EnrollmentRequestApproval;
 };
 

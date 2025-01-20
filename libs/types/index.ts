@@ -54,7 +54,6 @@ export type { Duration } from './models/Duration';
 export type { EnrollmentConfig } from './models/EnrollmentConfig';
 export type { EnrollmentRequest } from './models/EnrollmentRequest';
 export type { EnrollmentRequestApproval } from './models/EnrollmentRequestApproval';
-export type { EnrollmentRequestApprovalStatus } from './models/EnrollmentRequestApprovalStatus';
 export type { EnrollmentRequestList } from './models/EnrollmentRequestList';
 export type { EnrollmentRequestSpec } from './models/EnrollmentRequestSpec';
 export type { EnrollmentRequestStatus } from './models/EnrollmentRequestStatus';
