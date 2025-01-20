@@ -346,7 +346,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
                     t('File path must be unique.'),
                     (path) => !path || value.files.filter((file) => file.path === path).length == 1,
                   ),
-                content: Yup.string().required(t('File content is required.')),
+                content: Yup.string(),
               }),
             ),
           });
