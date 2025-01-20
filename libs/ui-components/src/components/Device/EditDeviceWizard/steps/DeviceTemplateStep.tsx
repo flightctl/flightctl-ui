@@ -148,7 +148,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
             aria-label={t('System image')}
             value={values.osImage}
             helperText={t(
-              'Must be either an OCI image ref (e.g. "quay.io/redhat/rhde:9.3") or ostree ref (e.g. "https://ostree.fedoraproject.org/iot?ref=fedora/stable/x86_64/iot"). Keep this empty if you do not want to manage your OS from Flight Control.',
+              'Must be either an OCI image ref (e.g. "quay.io/redhat/rhde:9.3") or ostree ref (e.g. "https://ostree.fedoraproject.org/iot?ref=fedora/stable/x86_64/iot"). When left empty, the device\'s existing OS will be kept unchanged.',
             )}
           />
         </FormGroup>
