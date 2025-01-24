@@ -17,7 +17,7 @@ import {
 import { labelToString } from '../../utils/labels';
 import { ApplicationFormSpec } from '../Device/EditDeviceWizard/types';
 import { SystemdUnitFormValue } from '../Device/SystemdUnitsModal/TrackSystemdUnitsForm';
-import { BatchForm, BatchLimitType, RolloutPolicyForm } from '../Fleet/CreateFleet/types';
+import { BatchForm, BatchLimitType, DisruptionBudgetForm, RolloutPolicyForm } from '../Fleet/CreateFleet/types';
 
 const SYSTEMD_PATTERNS_REGEXP = /^[a-z][a-z0-9-_.]*$/;
 const SYSTEMD_UNITS_MAX_PATTERNS = 256;
@@ -229,6 +229,20 @@ export const validLabelsSchema = (t: TFunction) =>
         : true;
     });
 
+export const validGroupLabelKeysSchema = (t: TFunction) =>
+  Yup.array()
+    .of(
+      Yup.string()
+        .required()
+        .test('only-label-keys', t("Full labels are not allowed, use only the 'key' part."), (value?: string) => {
+          return !value?.includes('=');
+        }),
+    )
+    .test('unique keys', t('Label keys must be unique'), (labelKeys) => {
+      const uniqueKeys = new Set(labelKeys);
+      return uniqueKeys.size === labelKeys?.length;
+    });
+
 export const validApplicationsSchema = (t: TFunction) => {
   return Yup.array()
     .of(
@@ -288,7 +302,7 @@ export const validApplicationsSchema = (t: TFunction) => {
 export const validFleetRolloutPolicySchema = (t: TFunction) => {
   return Yup.object()
     .shape({
-      isActive: Yup.boolean().required(),
+      isAdvanced: Yup.boolean().required(),
       updateTimeout: Yup.number().required('Update timeout is required'),
       batches: Yup.array()
         .of(
@@ -340,6 +354,22 @@ export const validFleetRolloutPolicySchema = (t: TFunction) => {
         message: () => errors,
       });
     });
+};
+
+export const validFleetDisruptionBudgetSchema = (t: TFunction) => {
+  return Yup.object()
+    .shape({
+      isAdvanced: Yup.boolean().required(),
+      minAvailable: Yup.number(),
+      maxUnavailable: Yup.number(),
+      groupBy: validGroupLabelKeysSchema(t),
+    })
+    .test(
+      'has-min-or-max',
+      t('At least one of minimum available or maximum unavailable devices is required.'),
+      (value: DisruptionBudgetForm) =>
+        !(value.isAdvanced && value.minAvailable === undefined && value.maxUnavailable === undefined),
+    );
 };
 
 export const validConfigTemplatesSchema = (t: TFunction) =>

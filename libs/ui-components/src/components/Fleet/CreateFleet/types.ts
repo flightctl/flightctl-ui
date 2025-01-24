@@ -1,3 +1,4 @@
+import { DisruptionBudget } from '@flightctl/types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { DeviceSpecConfigFormValues } from '../../Device/EditDeviceWizard/types';
 
@@ -14,9 +15,13 @@ export type BatchForm = {
 };
 
 export type RolloutPolicyForm = {
-  isActive: boolean;
+  isAdvanced: boolean;
   updateTimeout: number;
   batches: BatchForm[];
+};
+
+export type DisruptionBudgetForm = DisruptionBudget & {
+  isAdvanced: boolean;
 };
 
 export type FleetFormValues = DeviceSpecConfigFormValues & {
@@ -24,4 +29,5 @@ export type FleetFormValues = DeviceSpecConfigFormValues & {
   fleetLabels: FlightCtlLabel[];
   labels: FlightCtlLabel[];
   rolloutPolicy: RolloutPolicyForm;
+  disruptionBudget: DisruptionBudgetForm;
 };

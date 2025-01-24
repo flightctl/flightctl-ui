@@ -90,11 +90,19 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
             </DescriptionListGroup>
           )}
 
-          {values.rolloutPolicy.isActive && (
+          {values.rolloutPolicy.isAdvanced && (
             <DescriptionListGroup>
               <DescriptionListTerm>{t('Rollout policy')}</DescriptionListTerm>
               <DescriptionListDescription>
                 <ReviewUpdatePolicy rolloutPolicy={values.rolloutPolicy} />
+              </DescriptionListDescription>
+            </DescriptionListGroup>
+          )}
+          {values.disruptionBudget.isAdvanced && (
+            <DescriptionListGroup>
+              <DescriptionListTerm>{t('Disruption budget')}</DescriptionListTerm>
+              <DescriptionListDescription>
+                <ReviewUpdatePolicy disruptionBudget={values.disruptionBudget} />
               </DescriptionListDescription>
             </DescriptionListGroup>
           )}

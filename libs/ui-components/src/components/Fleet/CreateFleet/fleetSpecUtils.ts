@@ -40,5 +40,16 @@ export const getRolloutPolicyValues = (fleetSpec?: FleetSpec) => {
 
   // If the policy does not specify the timeout, we set the backend's default as the field is required in the UI
   const updateTimeout = fleetSpec?.rolloutPolicy?.defaultUpdateTimeout || DEFAULT_BACKEND_UPDATE_TIMEOUT;
-  return { isActive: batches.length > 0, batches, updateTimeout: durationToMinutes(updateTimeout) };
+  return { isAdvanced: batches.length > 0, batches, updateTimeout: durationToMinutes(updateTimeout) };
+};
+
+export const getDisruptionBudgetValues = (fleetSpec?: FleetSpec) => {
+  const budget = fleetSpec?.rolloutPolicy?.disruptionBudget || {};
+  const groupLabels = budget.groupBy || [];
+  return {
+    isAdvanced: groupLabels.length > 0 || !!budget.minAvailable || !!budget.maxUnavailable,
+    groupBy: groupLabels,
+    minAvailable: budget.minAvailable,
+    maxUnavailable: budget.maxUnavailable,
+  };
 };
