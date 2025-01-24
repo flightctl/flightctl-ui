@@ -121,6 +121,7 @@ const ConfigInlineTemplateForm = ({ index }: ConfigInlineTemplateFormProps) => {
                 {inlineConfig.files.length > 1 && (
                   <SplitItem>
                     <Button
+                      aria-label={t('Delete file')}
                       variant="link"
                       icon={<MinusCircleIcon />}
                       iconPosition="start"

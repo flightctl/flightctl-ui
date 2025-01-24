@@ -13,7 +13,7 @@ import {
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { Fleet } from '@flightctl/types';
-import { Formik } from 'formik';
+import { Formik, FormikErrors } from 'formik';
 import { FleetFormValues } from './types';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
@@ -25,6 +25,7 @@ import DeviceTemplateStep, {
   isDeviceTemplateStepValid,
 } from '../../Device/EditDeviceWizard/steps/DeviceTemplateStep';
 import ReviewStep, { reviewStepId } from './steps/ReviewStep';
+import UpdatePolicyStep, { isUpdatePolicyStepValid, updatePolicyStepId } from './steps/UpdatePolicyStep';
 import { getFleetPatches, getFleetResource, getInitialValues, getValidationSchema } from './utils';
 import CreateFleetWizardFooter from './CreateFleetWizardFooter';
 import { useEditFleet } from './useEditFleet';
@@ -36,6 +37,38 @@ import PageWithPermissions from '../../common/PageWithPermissions';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 import './CreateFleetWizard.css';
+
+const orderedIds = [generalInfoStepId, deviceTemplateStepId, updatePolicyStepId, reviewStepId];
+
+const getValidStepIds = (formikErrors: FormikErrors<FleetFormValues>): string[] => {
+  const validStepIds: string[] = [];
+  if (isGeneralInfoStepValid(formikErrors)) {
+    validStepIds.push(generalInfoStepId);
+  }
+  if (isDeviceTemplateStepValid(formikErrors)) {
+    validStepIds.push(deviceTemplateStepId);
+  }
+  if (isUpdatePolicyStepValid(formikErrors)) {
+    validStepIds.push(updatePolicyStepId);
+  }
+  // Review step is always valid. We disable it if some of the previous steps are invalid
+  if (validStepIds.length === orderedIds.length - 1) {
+    validStepIds.push(reviewStepId);
+  }
+  return validStepIds;
+};
+
+const isDisabledStep = (stepId: string | undefined, validStepIds: string[]) => {
+  if (!stepId) {
+    return true;
+  }
+
+  const stepIdx = orderedIds.findIndex((stepOrderId) => stepOrderId === stepId);
+
+  return orderedIds.some((orderedId, orderedStepIdx) => {
+    return orderedStepIdx < stepIdx && !validStepIds.includes(orderedId);
+  });
+};
 
 const CreateFleetWizard = () => {
   const { t } = useTranslation();
@@ -90,7 +123,8 @@ const CreateFleetWizard = () => {
         }}
       >
         {({ errors: formikErrors }) => {
-          const generalStepValid = isGeneralInfoStepValid(formikErrors);
+          const validStepIds = getValidStepIds(formikErrors);
+
           return (
             <>
               <LeaveFormConfirmation />
@@ -110,14 +144,21 @@ const CreateFleetWizard = () => {
                 <WizardStep
                   name={t('Device template')}
                   id={deviceTemplateStepId}
-                  isDisabled={(!currentStep || currentStep?.id === generalInfoStepId) && !generalStepValid}
+                  isDisabled={isDisabledStep(deviceTemplateStepId, validStepIds)}
                 >
                   {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep isFleet />}
                 </WizardStep>
                 <WizardStep
-                  name={isEdit ? t('Review and update') : t('Review and create')}
+                  name={t('Updates')}
+                  id={updatePolicyStepId}
+                  isDisabled={isDisabledStep(updatePolicyStepId, validStepIds)}
+                >
+                  {currentStep?.id === updatePolicyStepId && <UpdatePolicyStep />}
+                </WizardStep>
+                <WizardStep
+                  name={isEdit ? t('Review and save') : t('Review and create')}
                   id={reviewStepId}
-                  isDisabled={!generalStepValid || !isDeviceTemplateStepValid(formikErrors)}
+                  isDisabled={isDisabledStep(reviewStepId, validStepIds)}
                 >
                   {currentStep?.id === reviewStepId && <ReviewStep error={error} />}
                 </WizardStep>
