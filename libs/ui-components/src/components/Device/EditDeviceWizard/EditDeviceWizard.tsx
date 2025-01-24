@@ -120,7 +120,7 @@ const EditDeviceWizard = () => {
                 <WizardStep name={t('Device template')} id={deviceTemplateStepId} isDisabled={isTemplateStepDisabled}>
                   <DeviceTemplateStep isFleet={false} />
                 </WizardStep>
-                <WizardStep name={t('Review and update')} id={reviewDeviceStepId} isDisabled={!templateStepValid}>
+                <WizardStep name={t('Review and save')} id={reviewDeviceStepId} isDisabled={!templateStepValid}>
                   <ReviewDeviceStep error={submitError} />
                 </WizardStep>
               </Wizard>

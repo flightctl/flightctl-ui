@@ -50,7 +50,7 @@ const EditDeviceWizardNav = () => {
       </WizardNavItem>
       <WizardNavItem
         stepIndex={reviewDeviceStepIndex}
-        content={t('Review and update')}
+        content={t('Review and save')}
         isCurrent={activeStep?.index === reviewDeviceStepIndex + 1}
         isDisabled={isReviewDeviceDisabled}
         onClick={() => {
