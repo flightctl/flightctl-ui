@@ -1,245 +1,175 @@
 import * as React from 'react';
-import {
-  Alert,
-  Button,
-  Flex,
-  FlexItem,
-  FormGroup,
-  FormSection,
-  Grid,
-  GridItem,
-  Split,
-  SplitItem,
-} from '@patternfly/react-core';
-import { FieldArray, FormikErrors, useField, useFormikContext } from 'formik';
-import { MinusCircleIcon, PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons';
+import { Alert, Checkbox, FormGroup, FormSection, Grid } from '@patternfly/react-core';
+import { FormikErrors, useFormikContext } from 'formik';
 
-import { BatchForm, BatchLimitType, FleetFormValues } from '../types';
+import { BatchLimitType, FleetFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import FlightCtlForm from '../../../form/FlightCtlForm';
-import CheckboxField from '../../../form/CheckboxField';
-import ErrorHelperText from '../../../form/FieldHelperText';
-import ExpandableFormSection from '../../../form/ExpandableFormSection';
-import LabelsField from '../../../form/LabelsField';
-import FormSelect from '../../../form/FormSelect';
-import NumberField from '../../../form/NumberField';
 import WithHelperText from '../../../common/WithHelperText';
+
+import FlightCtlForm from '../../../form/FlightCtlForm';
+import UpdateStepRolloutPolicy from './UpdateStepRolloutPolicy';
+import UpdateStepDisruptionBudget from './UpdateStepDisruptionBudget';
+import UpdateConfirmChangesModal, { StepSetting } from './UpdateConfirmChangesModal';
 
 export const updatePolicyStepId = 'update-policy';
 
-export const isUpdatePolicyStepValid = (errors: FormikErrors<FleetFormValues>) => !errors.rolloutPolicy;
-
-const RolloutPolicyBatch = ({ index }: { index: number }) => {
-  const { t } = useTranslation();
-
-  const items = React.useMemo(
-    () => ({
-      percent: t('Percentage'),
-      value: t('Number of devices'),
-    }),
-    [t],
-  );
-
-  const [{ value: batch }, meta] = useField<BatchForm>(`rolloutPolicy.batches.${index}`);
-
-  const isPercent = batch.limitType === BatchLimitType.BatchLimitPercent;
-  return (
-    <ExpandableFormSection
-      title={t('Batch {{ batchNum }}', { batchNum: index + 1 })}
-      fieldName={`rolloutPolicy.batches.${index}`}
-    >
-      <Grid hasGutter>
-        {/* Show errors not related to an individual field */}
-        {typeof meta.error === 'string' && (
-          <GridItem>
-            <ErrorHelperText meta={meta} />
-          </GridItem>
-        )}
-        <FormGroup label={t('Select devices using labels')}>
-          <LabelsField aria-label={t('Label selector')} name={`rolloutPolicy.batches.${index}.selector`} />
-        </FormGroup>
-        <FormGroup label={t('Select a subset using')}>
-          <Flex flexWrap={{ default: 'nowrap' }} alignItems={{ default: 'alignItemsFlexEnd' }}>
-            <FlexItem>
-              <FormSelect items={items} name={`rolloutPolicy.batches.${index}.limitType`} />
-            </FlexItem>
-            <FlexItem>
-              <NumberField
-                aria-label={t('Numeric selector')}
-                name={`rolloutPolicy.batches.${index}.limit`}
-                min={1}
-                max={isPercent ? 100 : undefined}
-                widthChars={isPercent ? 3 : 8}
-              />
-            </FlexItem>
-            {isPercent && <FlexItem>%</FlexItem>}
-          </Flex>
-        </FormGroup>
-        <FormGroup
-          isRequired
-          label={
-            <WithHelperText
-              ariaLabel={t('Success threshold')}
-              content={t(
-                'Minimum percentage of devices that must update successfully in order to continue updating the next batch of devices.',
-              )}
-              showLabel
-            />
-          }
-        >
-          <Flex flexWrap={{ default: 'wrap' }}>
-            <FlexItem>{t('If')} </FlexItem>
-            <FlexItem>
-              <NumberField
-                aria-label={t('Success threshold')}
-                name={`rolloutPolicy.batches.${index}.successThreshold`}
-                min={1}
-                max={100}
-                isRequired
-              />
-            </FlexItem>
-            <FlexItem flex={{ lg: 'flex_1' }} style={{ minWidth: 200 }}>
-              {t(
-                "% of the batch devices pass the success criteria, move to next batch or the rest of fleet's devices.",
-              )}
-            </FlexItem>
-          </Flex>
-        </FormGroup>
-      </Grid>
-    </ExpandableFormSection>
-  );
-};
-
-const RolloutPolicies = () => {
-  const { t } = useTranslation();
-
-  const { values } = useFormikContext<FleetFormValues>();
-
-  const batches = values.rolloutPolicy.batches || [];
-
-  return (
-    <>
-      <FormGroup
-        isRequired
-        label={
-          <WithHelperText
-            ariaLabel={t('Update timeout')}
-            content={t(
-              "If the device does not update within this timeout, the device will be counted as a failure to its batch's success.",
-            )}
-            showLabel
-          />
-        }
-      >
-        <Flex>
-          <FlexItem>{t('Timeout devices if they did not complete the update after')} </FlexItem>
-          <FlexItem>
-            <NumberField aria-label={t('Update timeout')} name={`rolloutPolicy.updateTimeout`} min={1} isRequired />
-          </FlexItem>
-          <FlexItem>{t('minutes')}.</FlexItem>
-        </Flex>
-      </FormGroup>
-
-      <FormGroup>
-        <FieldArray name="rolloutPolicy.batches">
-          {({ push, remove }) => (
-            <>
-              {batches.map((_, index) => (
-                <FormSection key={index}>
-                  <Split hasGutter>
-                    <SplitItem isFilled>
-                      <RolloutPolicyBatch index={index} />
-                    </SplitItem>
-                    <SplitItem>
-                      <Button
-                        aria-label={t('Delete batch')}
-                        variant="link"
-                        icon={<MinusCircleIcon />}
-                        iconPosition="start"
-                        onClick={() => remove(index)}
-                      />
-                    </SplitItem>
-                  </Split>
-                </FormSection>
-              ))}
-              <FormSection>
-                <FormGroup>
-                  <Button
-                    variant="link"
-                    icon={<PlusCircleIcon />}
-                    iconPosition="start"
-                    onClick={() => {
-                      push({
-                        limit: '',
-                        limitType: BatchLimitType.BatchLimitPercent,
-                        selector: [],
-                        successThreshold: '',
-                      });
-                    }}
-                  >
-                    {t('Add batch')}
-                  </Button>
-                </FormGroup>
-              </FormSection>
-            </>
-          )}
-        </FieldArray>
-      </FormGroup>
-    </>
-  );
-};
+export const isUpdatePolicyStepValid = (errors: FormikErrors<FleetFormValues>) =>
+  !errors.rolloutPolicy && !errors.disruptionBudget;
 
 const UpdatePolicyStep = () => {
   const { t } = useTranslation();
 
   const {
-    values: { rolloutPolicy },
+    values: { rolloutPolicy, disruptionBudget },
     setFieldValue,
   } = useFormikContext<FleetFormValues>();
 
-  const onChangePolicyType = React.useCallback(
-    (isActive: boolean) => {
-      setFieldValue(
-        'rolloutPolicy.batches',
-        isActive
-          ? [
-              {
-                limit: '',
-                limitType: BatchLimitType.BatchLimitPercent,
-                successThreshold: '',
-                selector: [],
-              },
-            ]
-          : [],
-      );
-    },
-    [setFieldValue],
+  const [hasAdvancedMode, setHasAdvancedMode] = React.useState<boolean>(
+    rolloutPolicy.isAdvanced || disruptionBudget.isAdvanced,
   );
+  const [hasAdvancedRollout, setHasAdvancedRollout] = React.useState<boolean>(rolloutPolicy.isAdvanced);
+  const [hasAdvancedDisruption, setHasAdvancedDisruption] = React.useState<boolean>(disruptionBudget.isAdvanced);
+  const [alertSwitchToBasic, setAlertSwitchToBasic] = React.useState<StepSetting>();
+
+  const onSettingsChange = (setting: StepSetting, toAdvanced: boolean) => {
+    if (toAdvanced) {
+      switch (setting) {
+        case 'all-settings':
+          setHasAdvancedMode(true);
+          break;
+        case 'rollout-policies':
+          setFieldValue('rolloutPolicy.isAdvanced', true);
+          setHasAdvancedRollout(true);
+          onChangePolicyType(true);
+          break;
+        case 'disruption-budget':
+          setFieldValue('disruptionBudget.isAdvanced', true);
+          setHasAdvancedDisruption(true);
+          onChangeDisruptionBudget(true);
+          break;
+      }
+    } else {
+      setAlertSwitchToBasic(setting);
+    }
+  };
+
+  const onChangePolicyType = (toAdvanced: boolean) => {
+    setFieldValue(
+      'rolloutPolicy.batches',
+      toAdvanced
+        ? [
+            {
+              limit: '',
+              limitType: BatchLimitType.BatchLimitPercent,
+              successThreshold: '',
+              selector: [],
+            },
+          ]
+        : [],
+    );
+  };
+
+  const onChangeDisruptionBudget = (toAdvanced: boolean) => {
+    if (!toAdvanced) {
+      setFieldValue('disruptionBudget', {
+        groupBy: [],
+        minAvailable: '',
+        maxUnavailable: '',
+      });
+    }
+  };
+
+  const onModalClose = (doSwitch: boolean) => {
+    setAlertSwitchToBasic(undefined);
+    if (!doSwitch) {
+      return;
+    }
+
+    // When the user confirms switching a setting to its basic mode
+    switch (alertSwitchToBasic) {
+      case 'all-settings':
+        setHasAdvancedMode(false);
+        setHasAdvancedRollout(false);
+        setHasAdvancedDisruption(false);
+        setFieldValue('rolloutPolicy.isAdvanced', false);
+        setFieldValue('disruptionBudget.isAdvanced', false);
+        break;
+      case 'rollout-policies':
+        setFieldValue('rolloutPolicy.isAdvanced', false);
+        setHasAdvancedRollout(false);
+        onChangePolicyType(false);
+        if (!disruptionBudget.isAdvanced) {
+          setHasAdvancedMode(false);
+        }
+        break;
+      case 'disruption-budget':
+        setFieldValue('disruptionBudget.isAdvanced', false);
+        setHasAdvancedDisruption(false);
+        onChangeDisruptionBudget(false);
+        if (doSwitch && !rolloutPolicy.isAdvanced) {
+          setHasAdvancedMode(false);
+        }
+        break;
+    }
+  };
 
   return (
     <Grid span={8}>
       <FlightCtlForm>
         <FormGroup>
-          <CheckboxField
-            name="rolloutPolicy.isActive"
-            label={t('Use advanced configurations')}
-            onChangeCustom={onChangePolicyType}
+          <Checkbox
+            label={t('Use basic configurations')}
+            isChecked={!hasAdvancedMode}
+            id="all-settings"
+            onChange={(_ev: React.FormEvent<HTMLInputElement>, toBasic: boolean) => {
+              onSettingsChange('all-settings', !toBasic);
+            }}
           />
         </FormGroup>
-        {rolloutPolicy.isActive ? (
-          <FormSection title={t('Rollout policies')} titleElement="h1">
-            <Alert isInline variant="info" title={t('Batch sequencing')}>
-              {t('Batches will be applied from first to last.')}
-              <br />
-              {t('Devices that are not part of any batch will be updated last.')}
-            </Alert>
-            <RolloutPolicies />
+        {hasAdvancedMode ? (
+          <FormSection title={t('Advanced configurations')} titleElement="h1" className="pf-v5-u-mt-sm">
+            {/* Rollout policies */}
+            <Checkbox
+              label={
+                <WithHelperText
+                  showLabel
+                  ariaLabel={t('Set rollout policies')}
+                  content={t('Rollout policies allow you to control the order of updates for the fleet devices.')}
+                />
+              }
+              isChecked={hasAdvancedRollout}
+              id="rolloutPolicy"
+              onChange={(_ev: React.FormEvent<HTMLInputElement>, toAdvanced: boolean) =>
+                onSettingsChange('rollout-policies', toAdvanced)
+              }
+            />
+            {rolloutPolicy.isAdvanced && <UpdateStepRolloutPolicy />}
+
+            {/* Disruption budget */}
+            <Checkbox
+              label={
+                <WithHelperText
+                  showLabel
+                  ariaLabel={t('Set disruption budget')}
+                  content={t(
+                    'Disruption budget allows you to limit the number of similar devices that may be updating simultaneously.',
+                  )}
+                />
+              }
+              isChecked={hasAdvancedDisruption}
+              id="disruptionBudget"
+              onChange={(_ev: React.FormEvent<HTMLInputElement>, toAdvanced: boolean) =>
+                onSettingsChange('disruption-budget', toAdvanced)
+              }
+            />
+            {disruptionBudget.isAdvanced && <UpdateStepDisruptionBudget />}
           </FormSection>
         ) : (
           <Alert isInline variant="info" title={t('Default update policy')}>
             {t('All the devices that are part of this fleet will receive updates as soon as they are available.')}
           </Alert>
         )}
+        {alertSwitchToBasic && <UpdateConfirmChangesModal setting={alertSwitchToBasic} onClose={onModalClose} />}
       </FlightCtlForm>
     </Grid>
   );

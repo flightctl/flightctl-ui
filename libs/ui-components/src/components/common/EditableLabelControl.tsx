@@ -16,16 +16,14 @@ const EditableLabelControl = ({
   onAddLabel,
   isEditable = true,
 }: EditableLabelControlProps) => {
-  const [isEditing, setIsEditing] = React.useState<boolean>();
+  const [isEditing, setIsEditing] = React.useState<boolean>(false);
   const [label, setLabel] = React.useState<string>('');
   const { t } = useTranslation();
 
   const onConfirmAdd = () => {
-    if (label) {
-      onAddLabel(label);
-      setIsEditing(false);
-      setLabel('');
-    }
+    onAddLabel(label);
+    setIsEditing(false);
+    setLabel('');
   };
 
   const onDiscardAdd = () => {
@@ -54,6 +52,7 @@ const EditableLabelControl = ({
     />
   ) : (
     <Button
+      aria-label={addButtonText || t('Add label')}
       variant="link"
       className="pf-v5-u-ml-xs"
       isInline
