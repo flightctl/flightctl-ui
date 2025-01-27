@@ -174,12 +174,14 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
           ...systemdPatterns,
         },
       },
-      rolloutPolicy: getRolloutPolicyData(values.rolloutPolicy),
     },
   };
 
   if (values.registerMicroShift) {
     fleet.spec.template.spec.config?.push(ACMCrdConfig, ACMImportConfig, MicroshiftRegistrationHook);
+  }
+  if (values.rolloutPolicy.isActive) {
+    fleet.spec.rolloutPolicy = getRolloutPolicyData(values.rolloutPolicy);
   }
 
   return fleet;
