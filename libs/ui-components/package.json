@@ -1,6 +1,6 @@
 {
   "name": "@flightctl/ui-components",
-  "version": "0.4.0-rc1",
+  "version": "0.4.0-rc2",
   "description": "Components for Flightctl UI",
   "repository": "https://github.com/flightctl/flightctl-ui.git",
   "homepage": "https://github.com/flightctl/flightctl-ui.git",
