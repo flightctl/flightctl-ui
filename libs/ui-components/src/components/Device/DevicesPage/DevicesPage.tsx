@@ -6,11 +6,11 @@ import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
 
 import { useFetch } from '../../../hooks/useFetch';
-import { Device } from '@flightctl/types';
+import { Device, DeviceDecommission, DeviceDecommissionTargetType } from '@flightctl/types';
 
 import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';
-import { useDeleteListAction } from '../../ListPage/ListPageActions';
+import { useDecommissionListAction, useDeleteListAction } from '../../ListPage/ListPageActions';
 import TablePagination from '../../Table/TablePagination';
 import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
 import Table, { ApiSortTableColumn } from '../../Table/Table';
@@ -128,20 +128,31 @@ export const DeviceTable = ({
   const { t } = useTranslation();
   const [addDeviceModal, setAddDeviceModal] = React.useState(false);
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
-  const { remove } = useFetch();
+  const { remove, put } = useFetch();
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
-  const { deleteAction: deleteDeviceAction, deleteModal: deleteDeviceModal } = useDeleteListAction({
+  const { action: deleteDeviceAction, modal: deleteDeviceModal } = useDeleteListAction({
     resourceType: 'Device',
-    onDelete: async (resourceId: string) => {
+    onConfirm: async (resourceId: string) => {
       await remove(`devices/${resourceId}`);
+      refetch();
+    },
+  });
+
+  const { action: decommissionDeviceAction, modal: decommissionDeviceModal } = useDecommissionListAction({
+    resourceType: 'Device',
+    onConfirm: async (deviceId: string, mode) => {
+      await put<DeviceDecommission>(`devices/${deviceId}/decommission`, {
+        target: mode?.target || DeviceDecommissionTargetType.DeviceDecommissionTargetTypeUnenroll,
+      });
       refetch();
     },
   });
 
   const [canDelete] = useAccessReview(RESOURCE.DEVICE, VERB.DELETE);
   const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
+  const [canDecommission] = useAccessReview(RESOURCE.DEVICE_DECOMMISSION, VERB.UPDATE);
 
   return (
     <>
@@ -181,11 +192,13 @@ export const DeviceTable = ({
             <DeviceTableRow
               key={device.metadata.name || ''}
               device={device}
-              deleteAction={deleteDeviceAction}
               onRowSelect={onRowSelect}
               isRowSelected={isRowSelected}
               rowIndex={index}
+              deleteAction={deleteDeviceAction}
               canDelete={canDelete}
+              decommissionAction={decommissionDeviceAction}
+              canDecommission={canDecommission}
               canEdit={canEdit}
             />
           ))}
@@ -193,7 +206,7 @@ export const DeviceTable = ({
       </Table>
       <TablePagination isUpdating={isFilterUpdating} pagination={pagination} />
       {!hasFiltersEnabled && devices.length === 0 && <DeviceEmptyState onAddDevice={() => setAddDeviceModal(true)} />}
-      {deleteDeviceModal}
+      {deleteDeviceModal || decommissionDeviceModal}
       {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}
       {isMassDeleteModalOpen && (
         <MassDeleteDeviceModal

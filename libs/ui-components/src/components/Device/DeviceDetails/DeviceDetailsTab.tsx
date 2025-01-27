@@ -16,7 +16,7 @@ import { Device } from '@flightctl/types';
 import { timeSinceText } from '../../../utils/dates';
 import DeviceStatus from '../../Status/DeviceStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
-import EditLabelsForm from '../../modals/EditLabelsModal/EditLabelsForm';
+import EditLabelsForm, { ViewLabels } from '../../modals/EditLabelsModal/EditLabelsForm';
 import ResourceLink from '../../common/ResourceLink';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
 import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
@@ -68,7 +68,11 @@ const DeviceDetailsTab = ({ device, refetch, children, canEdit }: React.PropsWit
                   <StackItem className="fctl-device-details-tab__label">{t('Labels')}</StackItem>
                 </Stack>
                 <StackItem>
-                  <EditLabelsForm device={device} onDeviceUpdate={refetch} canEdit={canEdit} />
+                  {canEdit ? (
+                    <EditLabelsForm device={device} onDeviceUpdate={refetch} />
+                  ) : (
+                    <ViewLabels device={device} />
+                  )}
                 </StackItem>
               </FlexItem>
             </Flex>
