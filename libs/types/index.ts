@@ -29,7 +29,6 @@ export type { DeviceConsole } from './models/DeviceConsole';
 export type { DeviceDecommission } from './models/DeviceDecommission';
 export { DeviceDecommissionTargetType } from './models/DeviceDecommissionTargetType';
 export type { DeviceIntegrityStatus } from './models/DeviceIntegrityStatus';
-export type { DeviceIntegrityStatusSummary } from './models/DeviceIntegrityStatusSummary';
 export { DeviceIntegrityStatusSummaryType } from './models/DeviceIntegrityStatusSummaryType';
 export { DeviceLifecycleHookType } from './models/DeviceLifecycleHookType';
 export type { DeviceLifecycleStatus } from './models/DeviceLifecycleStatus';

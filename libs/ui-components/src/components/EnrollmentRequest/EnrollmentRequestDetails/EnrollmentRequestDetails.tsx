@@ -1,13 +1,4 @@
-import ConditionsTable from '../../DetailsPage/Tables/ConditionsTable';
-import DetailsPage from '../../DetailsPage/DetailsPage';
-import IntegrityDetails from '../../DetailsPage/Tables/IntegrityDetails';
-import LabelsView from '../../common/LabelsView';
-import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { timeSinceText } from '../../../utils/dates';
-import {
-  EnrollmentRequestStatus as EnrollmentRequestStatusType,
-  getApprovalStatus,
-} from '../../../utils/status/enrollmentRequest';
+import * as React from 'react';
 import {
   Bullseye,
   Card,
@@ -23,8 +14,16 @@ import {
   TextArea,
 } from '@patternfly/react-core';
 import { EnrollmentRequest } from '@flightctl/types';
-import * as React from 'react';
 
+import ConditionsTable from '../../DetailsPage/Tables/ConditionsTable';
+import DetailsPage from '../../DetailsPage/DetailsPage';
+import LabelsView from '../../common/LabelsView';
+import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
+import { timeSinceText } from '../../../utils/dates';
+import {
+  EnrollmentRequestStatus as EnrollmentRequestStatusType,
+  getApprovalStatus,
+} from '../../../utils/status/enrollmentRequest';
 import { useFetch } from '../../../hooks/useFetch';
 import ApproveDeviceModal from '../../modals/ApproveDeviceModal/ApproveDeviceModal';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
@@ -193,31 +192,6 @@ const EnrollmentRequestDetails = () => {
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
-        {!isPendingApproval && (
-          <GridItem md={6}>
-            <DetailsPageCard>
-              <CardTitle>{t('Device conditions')}</CardTitle>
-              <DetailsPageCardBody>
-                {er && (
-                  <ConditionsTable
-                    ariaLabel={t('Device conditions table')}
-                    conditions={er.spec.deviceStatus?.conditions}
-                  />
-                )}
-              </DetailsPageCardBody>
-            </DetailsPageCard>
-          </GridItem>
-        )}
-        {!isPendingApproval && (
-          <GridItem md={6}>
-            <DetailsPageCard>
-              <CardTitle>{t('System integrity details')}</CardTitle>
-              <DetailsPageCardBody>
-                {er && <IntegrityDetails integrity={er.spec.deviceStatus?.integrity} />}
-              </DetailsPageCardBody>
-            </DetailsPageCard>
-          </GridItem>
-        )}
       </Grid>
       {er && isApprovalModalOpen && (
         <ApproveDeviceModal
