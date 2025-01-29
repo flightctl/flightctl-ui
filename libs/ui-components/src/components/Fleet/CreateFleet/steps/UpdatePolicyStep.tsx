@@ -24,27 +24,22 @@ const UpdatePolicyStep = () => {
     setFieldValue,
   } = useFormikContext<FleetFormValues>();
 
-  const [hasAdvancedMode, setHasAdvancedMode] = React.useState<boolean>(
-    rolloutPolicy.isAdvanced || disruptionBudget.isAdvanced,
-  );
-  const [hasAdvancedRollout, setHasAdvancedRollout] = React.useState<boolean>(rolloutPolicy.isAdvanced);
-  const [hasAdvancedDisruption, setHasAdvancedDisruption] = React.useState<boolean>(disruptionBudget.isAdvanced);
+  const [forceShowAdvancedMode, setForceShowAdvancedMode] = React.useState<boolean>(false);
   const [alertSwitchToBasic, setAlertSwitchToBasic] = React.useState<StepSetting>();
+  const hasAdvancedMode = rolloutPolicy.isAdvanced || disruptionBudget.isAdvanced;
 
   const onSettingsChange = (setting: StepSetting, toAdvanced: boolean) => {
     if (toAdvanced) {
       switch (setting) {
         case 'all-settings':
-          setHasAdvancedMode(true);
+          setForceShowAdvancedMode(true);
           break;
         case 'rollout-policies':
           setFieldValue('rolloutPolicy.isAdvanced', true);
-          setHasAdvancedRollout(true);
           onChangePolicyType(true);
           break;
         case 'disruption-budget':
           setFieldValue('disruptionBudget.isAdvanced', true);
-          setHasAdvancedDisruption(true);
           onChangeDisruptionBudget(true);
           break;
       }
@@ -72,6 +67,7 @@ const UpdatePolicyStep = () => {
   const onChangeDisruptionBudget = (toAdvanced: boolean) => {
     if (!toAdvanced) {
       setFieldValue('disruptionBudget', {
+        isAdvanced: false,
         groupBy: [],
         minAvailable: '',
         maxUnavailable: '',
@@ -88,29 +84,19 @@ const UpdatePolicyStep = () => {
     // When the user confirms switching a setting to its basic mode
     switch (alertSwitchToBasic) {
       case 'all-settings':
-        setHasAdvancedMode(false);
-        setHasAdvancedRollout(false);
-        setHasAdvancedDisruption(false);
         setFieldValue('rolloutPolicy.isAdvanced', false);
         setFieldValue('disruptionBudget.isAdvanced', false);
         break;
       case 'rollout-policies':
         setFieldValue('rolloutPolicy.isAdvanced', false);
-        setHasAdvancedRollout(false);
         onChangePolicyType(false);
-        if (!disruptionBudget.isAdvanced) {
-          setHasAdvancedMode(false);
-        }
         break;
       case 'disruption-budget':
         setFieldValue('disruptionBudget.isAdvanced', false);
-        setHasAdvancedDisruption(false);
         onChangeDisruptionBudget(false);
-        if (doSwitch && !rolloutPolicy.isAdvanced) {
-          setHasAdvancedMode(false);
-        }
         break;
     }
+    setForceShowAdvancedMode(false);
   };
 
   return (
@@ -119,14 +105,14 @@ const UpdatePolicyStep = () => {
         <FormGroup>
           <Checkbox
             label={t('Use basic configurations')}
-            isChecked={!hasAdvancedMode}
+            isChecked={!hasAdvancedMode && !forceShowAdvancedMode}
             id="all-settings"
             onChange={(_ev: React.FormEvent<HTMLInputElement>, toBasic: boolean) => {
               onSettingsChange('all-settings', !toBasic);
             }}
           />
         </FormGroup>
-        {hasAdvancedMode ? (
+        {hasAdvancedMode || forceShowAdvancedMode ? (
           <FormSection title={t('Advanced configurations')} titleElement="h1" className="pf-v5-u-mt-sm">
             {/* Rollout policies */}
             <Checkbox
@@ -137,8 +123,8 @@ const UpdatePolicyStep = () => {
                   content={t('Rollout policies allow you to control the order of updates for the fleet devices.')}
                 />
               }
-              isChecked={hasAdvancedRollout}
-              id="rolloutPolicy"
+              isChecked={rolloutPolicy.isAdvanced}
+              id="advRolloutPolicy"
               onChange={(_ev: React.FormEvent<HTMLInputElement>, toAdvanced: boolean) =>
                 onSettingsChange('rollout-policies', toAdvanced)
               }
@@ -156,8 +142,8 @@ const UpdatePolicyStep = () => {
                   )}
                 />
               }
-              isChecked={hasAdvancedDisruption}
-              id="disruptionBudget"
+              isChecked={disruptionBudget.isAdvanced}
+              id="advDisruptionBudget"
               onChange={(_ev: React.FormEvent<HTMLInputElement>, toAdvanced: boolean) =>
                 onSettingsChange('disruption-budget', toAdvanced)
               }
