@@ -1,4 +1,4 @@
-import { ApplicationSpec, PatchRequest } from '@flightctl/types';
+import { ApplicationSpec, BatchSequence, PatchRequest, RolloutPolicy } from '@flightctl/types';
 import isNil from 'lodash/isNil';
 import isEqual from 'lodash/isEqual';
 import differenceWith from 'lodash/differenceWith';
@@ -6,6 +6,7 @@ import differenceWith from 'lodash/differenceWith';
 import { FlightCtlLabel } from '../types/extraTypes';
 import { toAPILabel } from './labels';
 import { ApplicationFormSpec } from '../components/Device/EditDeviceWizard/types';
+import { BatchForm, BatchLimitType, RolloutPolicyForm } from '../components/Fleet/CreateFleet/types';
 
 export const appendJSONPatch = <V = unknown>({
   patches,
@@ -70,6 +71,109 @@ export const getStringListPatches = (
         value: valueBuilder(newList),
       });
     }
+  }
+
+  return patches;
+};
+
+const toApiLimit = (formBatch: BatchForm) => {
+  if (!formBatch.limit) {
+    return undefined;
+  }
+  return formBatch.limitType === BatchLimitType.BatchLimitPercent ? `${formBatch.limit}%` : formBatch.limit;
+};
+
+const toApiDuration = (minutes: number) => {
+  const hours = minutes / 60;
+  if (hours % 1 === 0) {
+    return `${hours}h`;
+  }
+  return `${minutes}m`;
+};
+
+const toApiDeviceSelection = (policyForm: RolloutPolicyForm): BatchSequence => {
+  return {
+    strategy: 'BatchSequence',
+    sequence: policyForm.batches.map((formBatch) => {
+      return {
+        limit: toApiLimit(formBatch),
+        successThreshold: formBatch.successThreshold ? `${formBatch.successThreshold}%` : undefined,
+        selector: {
+          matchLabels: toAPILabel(formBatch.selector || []),
+        },
+      };
+    }),
+  };
+};
+
+export const getRolloutPolicyData = (updatedPolicy: RolloutPolicyForm) => ({
+  defaultUpdateTimeout: toApiDuration(updatedPolicy.updateTimeout),
+  deviceSelection: toApiDeviceSelection(updatedPolicy),
+});
+
+export const getRolloutPolicyPatches = (
+  currentPolicy: RolloutPolicy | undefined,
+  updatedPolicy: RolloutPolicyForm,
+): PatchRequest => {
+  const currentBatches = currentPolicy?.deviceSelection?.sequence || [];
+  const isCurrentlyActive = currentBatches.length > 0;
+
+  if (isCurrentlyActive !== updatedPolicy.isActive) {
+    return updatedPolicy.isActive
+      ? [
+          {
+            op: 'add',
+            path: '/spec/rolloutPolicy',
+            value: getRolloutPolicyData(updatedPolicy),
+          },
+        ]
+      : [
+          {
+            op: 'remove',
+            path: '/spec/rolloutPolicy',
+          },
+        ];
+  }
+
+  const patches: PatchRequest = [];
+  if ((currentPolicy?.defaultUpdateTimeout || '') !== (updatedPolicy.updateTimeout || '')) {
+    appendJSONPatch({
+      patches,
+      originalValue: currentPolicy?.defaultUpdateTimeout,
+      newValue: toApiDuration(updatedPolicy.updateTimeout),
+      path: '/spec/rolloutPolicy/defaultUpdateTimeout',
+    });
+  }
+
+  if (currentBatches.length === updatedPolicy.batches.length) {
+    const hasBatchChanges = currentBatches.some((batch, index) => {
+      const updatedBatch = updatedPolicy.batches[index];
+      if ((updatedBatch.limit || 0) !== (batch.limit || 0)) {
+        return true;
+      }
+      if ((updatedBatch.successThreshold || 0) !== (batch.successThreshold || 0)) {
+        return true;
+      }
+      const labelPatches = getLabelPatches('labels', batch.selector?.matchLabels || {}, updatedBatch.selector);
+      if (labelPatches.length > 0) {
+        return true;
+      }
+      return false;
+    });
+
+    if (hasBatchChanges) {
+      patches.push({
+        path: '/spec/rolloutPolicy/deviceSelection',
+        op: 'replace',
+        value: toApiDeviceSelection(updatedPolicy),
+      });
+    }
+  } else {
+    patches.push({
+      path: '/spec/rolloutPolicy/deviceSelection',
+      op: 'replace',
+      value: toApiDeviceSelection(updatedPolicy),
+    });
   }
 
   return patches;

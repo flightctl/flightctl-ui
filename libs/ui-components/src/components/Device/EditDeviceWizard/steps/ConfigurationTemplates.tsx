@@ -152,6 +152,7 @@ const ConfigurationTemplatesForm = ({ repositories, repoRefetch, canCreateRepo, 
                   </SplitItem>
                   <SplitItem>
                     <Button
+                      aria-label={t('Delete configuration')}
                       variant="link"
                       icon={<MinusCircleIcon />}
                       iconPosition="start"
