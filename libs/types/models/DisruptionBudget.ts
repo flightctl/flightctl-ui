@@ -3,11 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * DisruptionAllowance defines the level of allowed disruption when rollout is in progress.
+ * DisruptionBudget defines the level of allowed disruption when rollout is in progress.
  */
-export type DisruptionAllowance = {
+export type DisruptionBudget = {
   /**
-   * List of label keys to perform grouping for the disruption allowance.
+   * List of label keys to perform grouping for the disruption budget.
    */
   groupBy?: Array<string>;
   /**

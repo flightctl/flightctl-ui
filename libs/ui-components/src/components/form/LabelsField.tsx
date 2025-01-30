@@ -31,7 +31,7 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
     const errors = await setLabels(newLabels, true);
     const hasErrors = Object.keys(errors || {}).length > 0;
 
-    onChangeCallback && onChangeCallback(newLabels, hasErrors);
+    onChangeCallback?.(newLabels, hasErrors);
   };
 
   const onDelete = async (_ev: React.MouseEvent<Element, MouseEvent>, index: number) => {
@@ -44,6 +44,9 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
   };
 
   const onAdd = async (text: string) => {
+    if (!text) {
+      return;
+    }
     const split = text.split('=');
     let newLabel: FlightCtlLabel;
     if (split.length === 2) {

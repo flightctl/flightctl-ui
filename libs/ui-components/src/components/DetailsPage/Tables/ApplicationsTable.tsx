@@ -90,7 +90,7 @@ const ApplicationsTable = ({
 
           const deleteSystemdUnit = canEdit && !isDeletedSystemdUnit && onSystemdDelete && (
             <Button
-              aria-label={t('Delete')}
+              aria-label={t('Delete system service')}
               isDisabled={isUpdating}
               variant="plain"
               icon={<MinusCircleIcon />}

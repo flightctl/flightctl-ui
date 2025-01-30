@@ -8,6 +8,8 @@ import {
   systemdUnitListValidationSchema,
   validApplicationsSchema,
   validConfigTemplatesSchema,
+  validFleetDisruptionBudgetSchema,
+  validFleetRolloutPolicySchema,
   validKubernetesDnsSubdomain,
   validLabelsSchema,
   validOsImage,
@@ -16,6 +18,8 @@ import {
   appendJSONPatch,
   getApplicationPatches,
   getLabelPatches,
+  getRolloutPolicyData,
+  getRolloutPolicyPatches,
   getStringListPatches,
   toAPIApplication,
 } from '../../../utils/patch';
@@ -29,6 +33,7 @@ import {
   getDeviceSpecConfigPatches,
   hasMicroshiftRegistrationConfig,
 } from '../../Device/EditDeviceWizard/deviceSpecUtils';
+import { getDisruptionBudgetValues, getRolloutPolicyValues } from './fleetSpecUtils';
 
 export const getValidationSchema = (t: TFunction) => {
   return Yup.object<FleetFormValues>({
@@ -39,6 +44,8 @@ export const getValidationSchema = (t: TFunction) => {
     configTemplates: validConfigTemplatesSchema(t),
     applications: validApplicationsSchema(t),
     systemdUnits: systemdUnitListValidationSchema(t),
+    rolloutPolicy: validFleetRolloutPolicySchema(t),
+    disruptionBudget: validFleetDisruptionBudgetSchema(t),
   });
 };
 
@@ -56,6 +63,7 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
   const currentDeviceSelectLabels = currentFleet.spec.selector?.matchLabels || {};
   const updatedDeviceSelectLabels = updatedFleet.labels || {};
   const updatedDeviceSelectLabelCount = Object.keys(updatedDeviceSelectLabels).length;
+  const currentDeviceSelectLabelCount = Object.keys(currentDeviceSelectLabels).length;
 
   if (updatedDeviceSelectLabelCount > 0) {
     if (currentFleet.spec.selector) {
@@ -73,7 +81,7 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
         value: { matchLabels: newLabelMap },
       });
     }
-  } else if (currentFleet.spec.selector) {
+  } else if (currentDeviceSelectLabelCount > 0) {
     allPatches.push({
       path: '/spec/selector',
       op: 'remove',
@@ -129,6 +137,10 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
   );
   allPatches = allPatches.concat(unitPatches);
 
+  // Rollout policies (includes disruption budget)
+  const rolloutPolicyPatches = getRolloutPolicyPatches(currentFleet.spec.rolloutPolicy, updatedFleet);
+  allPatches = allPatches.concat(rolloutPolicyPatches);
+
   return allPatches;
 };
 
@@ -171,6 +183,9 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
   if (values.registerMicroShift) {
     fleet.spec.template.spec.config?.push(ACMCrdConfig, ACMImportConfig, MicroshiftRegistrationHook);
   }
+  if (values.rolloutPolicy.isAdvanced || values.disruptionBudget.isAdvanced) {
+    fleet.spec.rolloutPolicy = getRolloutPolicyData(values);
+  }
 
   return fleet;
 };
@@ -196,6 +211,8 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
         exists: true,
       })),
       registerMicroShift,
+      rolloutPolicy: getRolloutPolicyValues(fleet.spec),
+      disruptionBudget: getDisruptionBudgetValues(fleet.spec),
     };
   }
 
@@ -208,5 +225,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
     applications: [],
     systemdUnits: [],
     registerMicroShift: false,
+    rolloutPolicy: getRolloutPolicyValues(undefined),
+    disruptionBudget: getDisruptionBudgetValues(undefined),
   };
 };
