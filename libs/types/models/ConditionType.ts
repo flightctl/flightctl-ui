@@ -16,6 +16,7 @@ export enum ConditionType {
   ResourceSyncSynced = 'Synced',
   FleetOverlappingSelectors = 'OverlappingSelectors',
   FleetValid = 'Valid',
+  FleetRollout = 'Rollout',
   DeviceUpdating = 'Updating',
   DeviceSpecValid = 'SpecValid',
   DeviceMultipleOwners = 'MultipleOwners',
