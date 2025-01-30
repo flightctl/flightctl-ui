@@ -47,7 +47,7 @@ export const getDisruptionBudgetValues = (fleetSpec?: FleetSpec) => {
   const budget = fleetSpec?.rolloutPolicy?.disruptionBudget || {};
   const groupLabels = budget.groupBy || [];
   return {
-    isAdvanced: groupLabels.length > 0 || !!budget.minAvailable || !!budget.maxUnavailable,
+    isAdvanced: Boolean(groupLabels.length > 0 || budget.minAvailable || budget.maxUnavailable),
     groupBy: groupLabels,
     minAvailable: budget.minAvailable,
     maxUnavailable: budget.maxUnavailable,

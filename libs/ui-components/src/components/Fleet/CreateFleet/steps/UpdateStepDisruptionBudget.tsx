@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { FormGroup, Grid, GridItem } from '@patternfly/react-core';
+import { FormGroup, Grid, GridItem, Stack, StackItem } from '@patternfly/react-core';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import NumberField from '../../../form/NumberField';
@@ -28,7 +28,12 @@ const UpdateStepDisruptionBudget = () => {
         <TextListField
           name="disruptionBudget.groupBy"
           addButtonText={t('Add label key')}
-          helperText={t("Use only the 'key' part of the labels to group same values")}
+          helperText={
+            <Stack>
+              <StackItem>{t("Use only the 'key' part of the labels to group same values.")}</StackItem>
+              <StackItem>{t("Leaving this empty will apply the disruption budget to all fleet's devices.")}</StackItem>
+            </Stack>
+          }
         />
       </FormGroup>
       <Grid hasGutter>

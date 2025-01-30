@@ -1,6 +1,6 @@
 import * as React from 'react';
-
 import { Button, Modal, Stack, StackItem } from '@patternfly/react-core';
+import { TFunction } from 'react-i18next';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 
@@ -11,92 +11,65 @@ type UpdateConfirmChangesModalProps = {
   onClose: (doSwitch: boolean) => void;
 };
 
-const SwitchBasicSettingsConfirm = () => {
-  const { t } = useTranslation();
+const getModalContent = (setting: StepSetting, t: TFunction) => {
+  switch (setting) {
+    case 'all-settings':
+      return {
+        title: t('Switch to basic update configuration?'),
+        primaryAction: t('Switch to basic configurations'),
+        question: t('Are you sure you want to switch to basic update configurations?'),
+        result: t('If you confirm, all advanced configurations will be lost.'),
+      };
+    case 'rollout-policies': {
+      const title = t("Don't use rollout policies configurations");
+      return {
+        title,
+        primaryAction: title,
+        question: t('Are you sure you want to remove the rollout policies configurations?'),
+        result: t('If you confirm, all rollout policies configurations will be lost.'),
+      };
+    }
 
-  return (
-    <>
-      {t('Are you sure you want to switch to basic update configurations?')}
-      <br />
-      {t('If you confirm, all advanced configurations will be lost.')}
-    </>
-  );
-};
-
-const SwitchBasicDisruptionConfirm = () => {
-  const { t } = useTranslation();
-
-  return (
-    <>
-      {t('Are you sure you want to remove the disruption budget configurations?')}
-      <br />
-      {t('If you confirm, all disruption budget configurations will be lost.')}
-    </>
-  );
-};
-
-const SwitchBasicRolloutConfirm = () => {
-  const { t } = useTranslation();
-
-  return (
-    <>
-      {t('Are you sure you want to remove the rollout policies configurations?')}
-      <br />
-      {t('If you confirm, all rollout policies configurations will be lost.')}
-    </>
-  );
+    case 'disruption-budget': {
+      const title = t("Don't use disruption budget configurations");
+      return {
+        title,
+        primaryAction: title,
+        question: t('Are you sure you want to remove the disruption budget configurations?'),
+        result: t('If you confirm, all disruption budget configurations will be lost.'),
+      };
+    }
+  }
 };
 
 const UpdateConfirmChangesModal = ({ setting, onClose }: UpdateConfirmChangesModalProps) => {
   const { t } = useTranslation();
 
-  let titleText: string = '';
-  let mainActionText: string = '';
-
-  let ContentComponent: () => React.JSX.Element;
-  switch (setting) {
-    case 'all-settings':
-      ContentComponent = SwitchBasicSettingsConfirm;
-      titleText = t('Switch to basic update configuration?');
-      mainActionText = t('Switch to basic configurations');
-      break;
-    case 'rollout-policies':
-      ContentComponent = SwitchBasicRolloutConfirm;
-      titleText = t("Don't use rollout policies configurations");
-      mainActionText = titleText;
-
-      break;
-    case 'disruption-budget':
-      ContentComponent = SwitchBasicDisruptionConfirm;
-      titleText = t("Don't use disruption budget configurations");
-      mainActionText = titleText;
-      break;
-  }
+  const modalContentProps = getModalContent(setting, t);
 
   return (
     <Modal
       variant={setting === 'disruption-budget' ? 'medium' : 'small'}
-      title={titleText}
+      title={modalContentProps.title}
       titleIconVariant="warning"
       isOpen
     >
       <Stack hasGutter>
-        <StackItem>
-          <ContentComponent />
-        </StackItem>
+        <StackItem>{modalContentProps.question}</StackItem>
+        <StackItem>{modalContentProps.result}</StackItem>
         <StackItem>
           <Button
-            key="basic"
+            key="confirm"
             variant="primary"
             tabIndex={0}
             onClick={() => {
               onClose(true);
             }}
           >
-            {mainActionText}
+            {modalContentProps.primaryAction}
           </Button>
           <Button
-            key="advanced"
+            key="cancel"
             variant="link"
             tabIndex={0}
             onClick={() => {
