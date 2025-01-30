@@ -183,7 +183,7 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
   if (values.registerMicroShift) {
     fleet.spec.template.spec.config?.push(ACMCrdConfig, ACMImportConfig, MicroshiftRegistrationHook);
   }
-  if (values.rolloutPolicy.isAdvanced) {
+  if (values.rolloutPolicy.isAdvanced || values.disruptionBudget.isAdvanced) {
     fleet.spec.rolloutPolicy = getRolloutPolicyData(values);
   }
 
