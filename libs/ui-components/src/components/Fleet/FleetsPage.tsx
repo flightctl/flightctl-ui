@@ -97,7 +97,7 @@ const getColumns = (t: TFunction): ApiSortTableColumn[] => [
     name: t('System image'),
   },
   {
-    name: t('Devices'),
+    name: t('Up-to-date/devices'),
   },
   {
     name: t('Status'),
@@ -110,7 +110,7 @@ const FleetTable = () => {
   const fleetColumns = React.useMemo(() => getColumns(t), [t]);
   const { name, setName, hasFiltersEnabled } = useFleetBackendFilters();
 
-  const { fleets, isLoading, error, isUpdating, refetch, pagination } = useFleets({ name, addDevicesCount: true });
+  const { fleets, isLoading, error, isUpdating, refetch, pagination } = useFleets({ name, addDevicesSummary: true });
 
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
   const [fleetToDeleteId, setFleetToDeleteId] = React.useState<string>();

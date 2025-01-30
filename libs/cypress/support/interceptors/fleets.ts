@@ -19,7 +19,7 @@ const buildNewFleet = (newFleetName: string): Fleet => {
 // When it is set, it adds a new fleet with the name set in this environment variable
 
 const loadInterceptors = () => {
-  cy.intercept('GET', /api\/flightctl\/api\/v1\/fleets(?:(?=\?)(?:[?&]addDevicesCount=true))?/, (req) => {
+  cy.intercept('GET', /api\/flightctl\/api\/v1\/fleets(?:(?=\?)(?:[?&]addDevicesSummary=true))?/, (req) => {
     const newFleetName = Cypress.env('FLIGHTCTL_ADD_FLEET');
     const allFleets = [...basicFleets];
     if (newFleetName) {
