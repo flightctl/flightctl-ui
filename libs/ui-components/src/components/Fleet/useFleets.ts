@@ -14,7 +14,7 @@ export enum FleetSearchParams {
 type FleetsEndpointArgs = {
   name?: string;
   nextContinue?: string;
-  addDevicesCount?: boolean;
+  addDevicesSummary?: boolean;
 };
 
 export const useFleetBackendFilters = () => {
@@ -47,11 +47,11 @@ export const useFleetBackendFilters = () => {
 
 const getFleetsEndpoint = ({
   name,
-  addDevicesCount,
+  addDevicesSummary,
   nextContinue,
 }: {
   name?: string;
-  addDevicesCount?: boolean;
+  addDevicesSummary?: boolean;
   nextContinue?: string;
 }) => {
   const params = new URLSearchParams({
@@ -60,8 +60,8 @@ const getFleetsEndpoint = ({
   if (name) {
     params.set('fieldSelector', `metadata.name contains ${name}`);
   }
-  if (addDevicesCount) {
-    params.set('addDevicesCount', 'true');
+  if (addDevicesSummary) {
+    params.set('addDevicesSummary', 'true');
   }
   if (nextContinue) {
     params.set('continue', nextContinue);

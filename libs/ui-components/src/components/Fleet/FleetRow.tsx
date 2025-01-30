@@ -3,11 +3,13 @@ import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-tabl
 
 import { Fleet } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
-import { FleetOwnerLinkIcon, getOwnerName } from './FleetDetails/FleetOwnerLink';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
+import { getFleetRolloutStatusWarning } from '../../utils/status/fleet';
+
+import { FleetOwnerLinkIcon, getOwnerName } from './FleetDetails/FleetOwnerLink';
 import FleetStatus from './FleetStatus';
 import ResourceLink from '../common/ResourceLink';
-import FleetDevicesLink from './FleetDetails/FleetDevicesLink';
+import FleetDevicesCount from './FleetDetails/FleetDevicesCount';
 
 type FleetRowProps = {
   fleet: Fleet;
@@ -52,6 +54,8 @@ const FleetRow: React.FC<FleetRowProps> = ({
 
   const isManaged = !!fleet.metadata?.owner;
   const actions = useFleetActions(fleetName, isManaged, canEdit);
+  const fleetRolloutError = getFleetRolloutStatusWarning(fleet, t);
+
   if (canDelete) {
     actions.push({
       title: t('Delete fleet'),
@@ -82,8 +86,12 @@ const FleetRow: React.FC<FleetRowProps> = ({
         </FleetOwnerLinkIcon>
       </Td>
       <Td dataLabel={t('System image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>
-      <Td dataLabel={t('Devices')}>
-        <FleetDevicesLink fleetId={fleetName} count={fleet.status?.devicesSummary?.total} />
+      <Td dataLabel={t('Up-to-date/devices')}>
+        <FleetDevicesCount
+          fleetId={fleetName}
+          devicesSummary={fleet.status?.devicesSummary}
+          error={fleetRolloutError}
+        />
       </Td>
       <Td dataLabel={t('Status')}>
         <FleetStatus fleet={fleet} />

@@ -12,9 +12,9 @@ import {
 } from '../../Status/utils';
 import DonutChart from '../../charts/DonutChart';
 import { getApplicationSummaryStatusItems } from '../../../utils/status/applications';
-import { toChartData } from '../../../components/charts/utils';
+import { toChartData } from '../../charts/utils';
 
-interface FleetDevicesProps {
+interface FleetDevicesChartsProps {
   fleetId: string;
   devicesSummary: DevicesSummary;
 }
@@ -90,7 +90,7 @@ const DevicesByDeviceStatusChart = ({
   return <DonutChart title={t('Device status')} data={deviceStatusData} helperText={getDeviceStatusHelperText(t)} />;
 };
 
-const FleetDevices = ({ devicesSummary, fleetId }: FleetDevicesProps) => {
+const FleetDevicesCharts = ({ devicesSummary, fleetId }: FleetDevicesChartsProps) => {
   return (
     <Flex justifyContent={{ default: 'justifyContentSpaceAround' }}>
       <FlexItem>
@@ -106,4 +106,4 @@ const FleetDevices = ({ devicesSummary, fleetId }: FleetDevicesProps) => {
   );
 };
 
-export default FleetDevices;
+export default FleetDevicesCharts;

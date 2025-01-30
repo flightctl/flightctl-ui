@@ -3,16 +3,16 @@ import { FleetConditionType } from '../../types/extraTypes';
 import { TFunction } from 'i18next';
 import { getConditionMessage } from '../error';
 
-const fleetStatusLabels = (t: TFunction) => ({
+export const fleetStatusLabels = (t: TFunction) => ({
   [ConditionType.FleetOverlappingSelectors]: t('Selectors overlap'),
   [ConditionType.FleetValid]: t('Valid'),
   Invalid: t('Invalid'),
   SyncPending: t('Sync pending'),
 });
 
-const getFleetSyncStatus = (
+export const getFleetSyncStatus = (
   fleet: Fleet,
-  t: TFunction = (s: string) => s,
+  t: TFunction,
 ): {
   status: FleetConditionType;
   message: string | undefined;
@@ -44,4 +44,15 @@ const getFleetSyncStatus = (
   };
 };
 
-export { getFleetSyncStatus, fleetStatusLabels };
+export const getFleetRolloutStatusWarning = (fleet: Fleet, t: TFunction) => {
+  // TODO Review when the API for the rollout failure is available
+  const rolloutBatchFailedCond = fleet.status?.conditions?.find(
+    (c) => c.type === ConditionType.FleetRolloutBatchFailed && c.status === ConditionStatus.ConditionStatusTrue,
+  );
+
+  if (rolloutBatchFailedCond) {
+    const info = getConditionMessage(rolloutBatchFailedCond);
+    return info || t('Last rollout did not complete successfully');
+  }
+  return undefined;
+};

@@ -20,4 +20,6 @@ export enum ConditionType {
   DeviceSpecValid = 'SpecValid',
   DeviceMultipleOwners = 'MultipleOwners',
   DeviceDecommissioning = 'DeviceDecommissioning',
+  // TODO Needs to be defined in the API
+  FleetRolloutBatchFailed = 'FleetRolloutBatchFailed',
 }
