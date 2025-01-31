@@ -58,8 +58,8 @@ export const useFetch = () => {
   );
 
   const getWsEndpoint = React.useCallback(
-    () => ({
-      wsEndpoint,
+    (deviceId: string) => ({
+      wsEndpoint: `${wsEndpoint}/api/terminal/${deviceId}`,
       protocols: ['flightctl.ocp.auth'],
     }),
     [],

@@ -46,11 +46,11 @@ export const useFetch = (getCookie: (name: string) => string | undefined, servic
   );
 
   const getWsEndpoint = React.useCallback(
-    () => ({
-      wsEndpoint: '',
+    (deviceId: string) => ({
+      wsEndpoint: `${serviceUrl}/ws/v1/devices/${deviceId}/console`,
       protocols: [],
     }),
-    [],
+    [serviceUrl],
   );
 
   const checkPermissions = React.useCallback(() => Promise.resolve(true), []);

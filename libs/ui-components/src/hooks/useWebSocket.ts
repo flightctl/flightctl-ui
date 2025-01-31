@@ -3,7 +3,7 @@ import { useTranslation } from './useTranslation';
 import { useAppContext } from './useAppContext';
 
 export const useWebSocket = <T>(
-  endpoint: string,
+  deviceId: string,
   onMsgReceived: (msg: T) => Promise<void>,
 ): {
   sendMessage: (msg: string) => void;
@@ -30,8 +30,8 @@ export const useWebSocket = <T>(
     try {
       setIsConnecting(true);
       setIsClosed(false);
-      const { wsEndpoint, protocols } = getWsEndpoint();
-      const ws = new WebSocket(`${wsEndpoint}${endpoint}`, protocols);
+      const { wsEndpoint, protocols } = getWsEndpoint(deviceId);
+      const ws = new WebSocket(wsEndpoint, protocols);
       ws.addEventListener('open', () => setIsConnecting(false));
       ws.addEventListener('close', () => setIsClosed(true));
       ws.addEventListener('error', (evt) => {
@@ -48,7 +48,7 @@ export const useWebSocket = <T>(
       wsRef.current?.close();
       wsRef.current = undefined;
     };
-  }, [endpoint, t, getWsEndpoint, reset]);
+  }, [deviceId, t, getWsEndpoint, reset]);
 
   const reconnect = React.useCallback(() => {
     wsRef.current?.close();

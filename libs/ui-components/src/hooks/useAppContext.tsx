@@ -59,7 +59,7 @@ export type AppContextProps = {
     Prompt?: PromptFC;
   };
   fetch: {
-    getWsEndpoint: () => { wsEndpoint: string; protocols: string[] };
+    getWsEndpoint: (deviceId: string) => { wsEndpoint: string; protocols: string[] };
     get: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
     post: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
     put: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
