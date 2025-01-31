@@ -55,6 +55,8 @@ const EditableLabelControl = ({
   ) : (
     <Button
       variant="link"
+      className="pf-v5-u-ml-xs"
+      isInline
       isDisabled={!isEditable}
       onClick={() => {
         setIsEditing(true);
