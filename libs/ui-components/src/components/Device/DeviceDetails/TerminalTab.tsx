@@ -23,10 +23,7 @@ const TerminalTab = ({ device }: TerminalTabProps) => {
     terminal.current?.onDataReceived(msg);
   }, []);
 
-  const { sendMessage, isClosed, error, reconnect } = useWebSocket(
-    `/api/terminal/${device.metadata.name}`,
-    onMsgReceived,
-  );
+  const { sendMessage, isClosed, error, reconnect } = useWebSocket(device.metadata.name || '', onMsgReceived);
 
   if (error) {
     return <ErrorAlert error={error} />;
