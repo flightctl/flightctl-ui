@@ -48,7 +48,7 @@ export const getFleetSyncStatus = (
 };
 
 const isFleetRolloutFailedCondition = (rolloutCondition: Condition) =>
-  rolloutCondition.status === ConditionStatus.ConditionStatusTrue &&
+  rolloutCondition.status === ConditionStatus.ConditionStatusFalse &&
   rolloutCondition.reason === FLEET_ROLLOUT_FAILED_REASON;
 
 export const getFleetRolloutStatusWarning = (fleet: Fleet, t: TFunction) => {

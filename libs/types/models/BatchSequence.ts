@@ -7,6 +7,7 @@ import type { Batch } from './Batch';
  * BatchSequence defines the list of batches to be executed in sequence.
  */
 export type BatchSequence = {
+  strategy: 'BatchSequence';
   /**
    * A list of batch definitions.
    */

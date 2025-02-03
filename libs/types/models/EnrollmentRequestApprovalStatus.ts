@@ -3,6 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { EnrollmentRequestApproval } from './EnrollmentRequestApproval';
+/**
+ * EnrollmentRequestApprovalStatus represents information about the status of a device enrollment request approval.
+ */
 export type EnrollmentRequestApprovalStatus = (EnrollmentRequestApproval & {
   /**
    * The name of the approver.
