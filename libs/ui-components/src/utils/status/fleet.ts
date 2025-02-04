@@ -52,7 +52,7 @@ const isFleetRolloutFailedCondition = (rolloutCondition: Condition) =>
   rolloutCondition.reason === FLEET_ROLLOUT_FAILED_REASON;
 
 export const getFleetRolloutStatusWarning = (fleet: Fleet, t: TFunction) => {
-  const rolloutCondition = fleet.status?.conditions?.find((c) => c.type === ConditionType.FleetRollout);
+  const rolloutCondition = fleet.status?.conditions?.find((c) => c.type === ConditionType.FleetRolloutInProgress);
 
   if (rolloutCondition && isFleetRolloutFailedCondition(rolloutCondition)) {
     return getConditionMessage(rolloutCondition) || t('Last rollout did not complete successfully');
