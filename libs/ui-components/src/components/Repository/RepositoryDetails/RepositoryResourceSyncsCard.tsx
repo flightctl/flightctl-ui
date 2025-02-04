@@ -14,7 +14,7 @@ const ResourceSyncsTab = ({ repositoryId }: { repositoryId: string }) => {
           showLabel
           ariaLabel={t('Resource syncs')}
           content={t(
-            'Device management service will monitor the specified paths, import the defined fleets and synchronise devices',
+            'Edge Manager will monitor the specified paths, import the defined fleets and synchronise devices',
           )}
         />
       </CardTitle>

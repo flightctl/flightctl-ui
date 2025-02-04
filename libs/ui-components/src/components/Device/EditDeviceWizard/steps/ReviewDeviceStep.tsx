@@ -52,7 +52,7 @@ const ReviewStep = ({ error }: { error?: string }) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
             <DescriptionListDescription>
-              {values.osImage || t(`Device management service will not manage system image`)}
+              {values.osImage || t(`Edge Manager will not manage system image`)}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>

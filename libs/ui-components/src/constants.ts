@@ -1,4 +1,4 @@
-const APP_TITLE = 'Device management service';
+const APP_TITLE = 'Edge Manager';
 const API_VERSION = 'v1alpha1';
 const PAGE_SIZE = 15;
 
