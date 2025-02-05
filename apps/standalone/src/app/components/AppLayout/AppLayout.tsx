@@ -42,9 +42,8 @@ const AppLayout: React.FC = () => {
             <BarsIcon />
           </PageToggleButton>
         </MastheadToggle>
-
         <MastheadBrand>
-          <Brand src={logo} alt="Device management service Logo" heights={{ default: '30px' }} />
+          <Brand src={logo} alt="Edge Manager Logo" heights={{ default: '30px' }} />
         </MastheadBrand>
       </MastheadMain>
       <MastheadContent>
