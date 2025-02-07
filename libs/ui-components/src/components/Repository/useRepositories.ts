@@ -35,9 +35,9 @@ export const useRepositories = (): [
   unknown,
   boolean,
   VoidFunction,
-  Pick<PaginationDetails, 'currentPage' | 'setCurrentPage' | 'itemCount'>,
+  Pick<PaginationDetails<RepositoryList>, 'currentPage' | 'setCurrentPage' | 'itemCount'>,
 ] => {
-  const { currentPage, setCurrentPage, itemCount, nextContinue, onPageFetched } = useTablePagination();
+  const { currentPage, setCurrentPage, itemCount, nextContinue, onPageFetched } = useTablePagination<RepositoryList>();
   const [repoEndpoint, isDebouncing] = useRepositoriesEndpoint({ nextContinue });
 
   const [repoList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>(

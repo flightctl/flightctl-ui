@@ -6,12 +6,12 @@ import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/e
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 
-import { global_warning_color_100 as warningColor } from '@patternfly/react-tokens/dist/js/global_warning_color_100';
-import { global_danger_color_100 as dangerColor } from '@patternfly/react-tokens/dist/js/global_danger_color_100';
-import { global_success_color_100 as successColor } from '@patternfly/react-tokens/dist/js/global_success_color_100';
-import { global_disabled_color_100 as unknownColor } from '@patternfly/react-tokens/dist/js/global_disabled_color_100';
-import { global_active_color_100 as activeColor } from '@patternfly/react-tokens/dist/js/global_active_color_100';
-import { global_palette_black_1000 as blackColor } from '@patternfly/react-tokens/dist/js/global_palette_black_1000';
+import warningColor from '@patternfly/react-tokens/dist/js/global_warning_color_100';
+import dangerColor from '@patternfly/react-tokens/dist/js/global_danger_color_100';
+import successColor from '@patternfly/react-tokens/dist/js/global_success_color_100';
+import disabledColor from '@patternfly/react-tokens/dist/js/global_disabled_color_100';
+import activeColor from '@patternfly/react-tokens/dist/js/global_active_color_100';
+import defaultColor from '@patternfly/react-tokens/dist/js/global_palette_black_1000';
 
 export type StatusLevel = 'custom' | 'info' | 'success' | 'warning' | 'danger' | 'unknown';
 
@@ -61,10 +61,10 @@ export const getDefaultStatusColor = (level: StatusLevel) => {
       color = successColor.value;
       break;
     case 'custom':
-      color = blackColor.value;
+      color = defaultColor.value;
       break;
     default:
-      color = unknownColor.value;
+      color = disabledColor.value;
       break;
   }
   return color;

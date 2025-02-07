@@ -9,7 +9,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import './StatusDisplay.css';
 
 type StatusLabelProps = {
-  label: string;
+  label: React.ReactNode;
   message?: React.ReactNode;
   messageTitle?: string;
   level: StatusLevel;
@@ -17,7 +17,7 @@ type StatusLabelProps = {
 };
 
 export const StatusDisplayContent = ({ label, messageTitle, message, level, customIcon }: StatusLabelProps) => {
-  const iconLevel = level === 'unknown' ? undefined : level;
+  const iconStatus = level === 'unknown' ? undefined : level;
   const IconComponent = customIcon || getDefaultStatusIcon(level);
 
   if (message) {
@@ -34,7 +34,7 @@ export const StatusDisplayContent = ({ label, messageTitle, message, level, cust
           isInline
           icon={
             <Icon
-              status={iconLevel}
+              status={iconStatus}
               style={{ '--pf-v5-c-icon__content--Color': getDefaultStatusColor(level) } as React.CSSProperties}
             >
               <IconComponent />
@@ -51,7 +51,7 @@ export const StatusDisplayContent = ({ label, messageTitle, message, level, cust
     <Flex className="ftcl_status-label">
       <FlexItem>
         <Icon
-          status={iconLevel}
+          status={iconStatus}
           style={{ '--pf-v5-c-icon__content--Color': getDefaultStatusColor(level) } as React.CSSProperties}
         >
           <IconComponent />

@@ -38,9 +38,10 @@ export const usePendingEnrollments = (): [
   boolean,
   unknown,
   VoidFunction,
-  pagination: Pick<PaginationDetails, 'currentPage' | 'setCurrentPage' | 'itemCount'>,
+  pagination: Pick<PaginationDetails<EnrollmentRequestList>, 'currentPage' | 'setCurrentPage' | 'itemCount'>,
 ] => {
-  const { currentPage, setCurrentPage, itemCount, nextContinue, onPageFetched } = useTablePagination();
+  const { currentPage, setCurrentPage, itemCount, nextContinue, onPageFetched } =
+    useTablePagination<EnrollmentRequestList>();
   const [pendingErEndpoint, isDebouncing] = useEnrollmentRequestsEndpoint({ nextContinue });
 
   const [erList, isLoading, error, refetch] = useFetchPeriodically<EnrollmentRequestList>(

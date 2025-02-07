@@ -81,11 +81,11 @@ export type FleetLoad = {
   error: unknown;
   isUpdating: boolean;
   refetch: VoidFunction;
-  pagination: PaginationDetails;
+  pagination: PaginationDetails<FleetList>;
 };
 
 export const useFleets = (args: FleetsEndpointArgs): FleetLoad => {
-  const pagination = useTablePagination();
+  const pagination = useTablePagination<FleetList>();
   const [fleetsEndpoint, fleetsDebouncing] = useFleetsEndpoint({ ...args, nextContinue: pagination.nextContinue });
   const [fleetsList, isLoading, error, refetch, updating] = useFetchPeriodically<FleetList>(
     {

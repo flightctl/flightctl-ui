@@ -1,13 +1,14 @@
 import { TFunction } from 'react-i18next';
 import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons';
+import BanIcon from '@patternfly/react-icons/dist/js/icons/ban-icon';
 
 import {
   ApplicationsSummaryStatusType,
   DeviceSummaryStatus as BEDeviceSummaryStatus,
-  DeviceApplicationsSummaryStatus,
+  Device,
   DeviceIntegrityStatusSummaryType,
+  DeviceLifecycleStatusType,
   DeviceSummaryStatusType,
-  DeviceUpdatedStatus,
   DeviceUpdatedStatusType,
 } from '@flightctl/types';
 import { StatusItem } from './common';
@@ -30,13 +31,19 @@ export type DeviceSummaryStatus =
 export const getDeviceSummaryStatus = (deviceStatus?: BEDeviceSummaryStatus): DeviceSummaryStatusType =>
   deviceStatus?.status || DeviceSummaryStatusType.DeviceSummaryStatusUnknown;
 
-export const getApplicationSummaryStatus = (
-  appSummaryStatus?: DeviceApplicationsSummaryStatus,
-): ApplicationsSummaryStatusType =>
-  appSummaryStatus?.status || ApplicationsSummaryStatusType.ApplicationsSummaryStatusUnknown;
+export const getDeviceLifecycleStatus = (device: Device): DeviceLifecycleStatusType => {
+  const lifecycleStatus = device.status?.lifecycle?.status || DeviceLifecycleStatusType.DeviceLifecycleStatusEnrolled;
+  const isDecomStatus = [
+    DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
+    DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioned,
+  ].includes(lifecycleStatus);
 
-export const getSystemUpdateStatus = (updatedStatus?: DeviceUpdatedStatus): DeviceUpdatedStatusType =>
-  updatedStatus?.status || DeviceUpdatedStatusType.DeviceUpdatedStatusUnknown;
+  if (!isDecomStatus && device.spec?.decommissioning?.target) {
+    return DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning;
+  }
+
+  return lifecycleStatus;
+};
 
 export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStatusType>[] => [
   {
@@ -68,6 +75,30 @@ export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStat
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusOnline,
     label: t('Online'),
+    level: 'success',
+  },
+];
+
+export const getDeviceLifecycleStatusItems = (t: TFunction): StatusItem<DeviceLifecycleStatusType>[] => [
+  {
+    id: DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioned,
+    label: t('Decommissioned'),
+    level: 'unknown',
+    customIcon: BanIcon,
+  },
+  {
+    id: DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
+    label: t('Decommissioning'),
+    level: 'warning',
+  },
+  {
+    id: DeviceLifecycleStatusType.DeviceLifecycleStatusUnknown,
+    label: t('Unknown'),
+    level: 'unknown',
+  },
+  {
+    id: DeviceLifecycleStatusType.DeviceLifecycleStatusEnrolled,
+    label: t('Enrolled'),
     level: 'success',
   },
 ];
