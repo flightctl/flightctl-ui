@@ -1,13 +1,55 @@
-import { RolloutPolicyForm } from '../../../Fleet/CreateFleet/types';
-import { useTranslation } from '../../../../hooks/useTranslation';
+import React from 'react';
+import { Stack, StackItem } from '@patternfly/react-core';
 
-const ReviewUpdatePolicy = ({ rolloutPolicy }: { rolloutPolicy: RolloutPolicyForm }) => {
+import { DisruptionBudgetForm, RolloutPolicyForm } from '../../../Fleet/CreateFleet/types';
+import { useTranslation } from '../../../../hooks/useTranslation';
+import LabelsView from '../../../common/LabelsView';
+
+export const ReviewUpdateRolloutPolicy = ({ rolloutPolicy }: { rolloutPolicy: RolloutPolicyForm }) => {
   const { t } = useTranslation();
-  if (!rolloutPolicy.isActive) {
+
+  return rolloutPolicy.isAdvanced
+    ? '-'
+    : t('{{ count }} batches have been defined', { count: rolloutPolicy.batches.length });
+};
+
+export const ReviewUpdateDisruptionBudget = ({ disruptionBudget }: { disruptionBudget: DisruptionBudgetForm }) => {
+  const { t } = useTranslation();
+  if (!disruptionBudget.isAdvanced) {
     return '-';
   }
 
-  return t('{{ count }} batches have been defined', { count: rolloutPolicy.batches.length });
-};
+  const groupBy = disruptionBudget.groupBy || [];
+  const labels =
+    groupBy.length === 0
+      ? null
+      : groupBy.reduce((acc, labelKey) => {
+          acc[labelKey] = '';
+          return acc;
+        }, {});
 
-export default ReviewUpdatePolicy;
+  return (
+    <Stack hasGutter>
+      {labels ? (
+        <StackItem>
+          <LabelsView labels={labels} prefix="disruption" />
+        </StackItem>
+      ) : (
+        t('Applies to all the fleet devices')
+      )}
+
+      {disruptionBudget.minAvailable && (
+        <StackItem>
+          {t('Minimum available devices: {{ minAvailable }}', { minAvailable: disruptionBudget.minAvailable })}
+        </StackItem>
+      )}
+      {disruptionBudget.maxUnavailable && (
+        <StackItem>
+          {t('Maximum unavailable devices: {{ maxUnavailable }}', {
+            maxUnavailable: disruptionBudget.maxUnavailable,
+          })}
+        </StackItem>
+      )}
+    </Stack>
+  );
+};

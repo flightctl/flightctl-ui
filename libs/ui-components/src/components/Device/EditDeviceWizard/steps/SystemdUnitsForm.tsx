@@ -13,13 +13,15 @@ const SystemdUnitsForm = () => {
   const { values, setFieldValue, errors } = useFormikContext<DeviceSpecConfigFormValues>();
 
   const onAdd = (text: string) => {
-    void setFieldValue(
-      'systemdUnits',
-      values.systemdUnits.concat({
-        pattern: text,
-        exists: false,
-      }),
-    );
+    if (text) {
+      void setFieldValue(
+        'systemdUnits',
+        values.systemdUnits.concat({
+          pattern: text,
+          exists: false,
+        }),
+      );
+    }
   };
 
   const onEdit = (editIndex: number, text: string) => {

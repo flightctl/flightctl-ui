@@ -1,12 +1,16 @@
-import { ApplicationSpec, BatchSequence, PatchRequest, RolloutPolicy } from '@flightctl/types';
+import { ApplicationSpec, BatchSequence, DisruptionBudget, PatchRequest, RolloutPolicy } from '@flightctl/types';
 import isNil from 'lodash/isNil';
-import isEqual from 'lodash/isEqual';
-import differenceWith from 'lodash/differenceWith';
 
 import { FlightCtlLabel } from '../types/extraTypes';
 import { toAPILabel } from './labels';
 import { ApplicationFormSpec } from '../components/Device/EditDeviceWizard/types';
-import { BatchForm, BatchLimitType, RolloutPolicyForm } from '../components/Fleet/CreateFleet/types';
+import {
+  BatchForm,
+  BatchLimitType,
+  DisruptionBudgetForm,
+  FleetFormValues,
+  RolloutPolicyForm,
+} from '../components/Fleet/CreateFleet/types';
 
 export const appendJSONPatch = <V = unknown>({
   patches,
@@ -39,6 +43,15 @@ export const appendJSONPatch = <V = unknown>({
   });
 };
 
+const listsHaveDifferences = (arr1: string[], arr2: string[]) => {
+  if (arr1.length !== arr2.length) {
+    return true;
+  }
+  return arr1.some((item1, index) => {
+    return arr2[index] !== item1;
+  });
+};
+
 export const getStringListPatches = (
   path: string,
   currentList: string[],
@@ -61,16 +74,12 @@ export const getStringListPatches = (
       op: 'add',
       value: valueBuilder(newList),
     });
-  } else {
-    const hasDifferentItems = differenceWith(currentList, newList, isEqual).length > 0;
-
-    if (newLen !== curLen || hasDifferentItems) {
-      patches.push({
-        path,
-        op: 'replace',
-        value: valueBuilder(newList),
-      });
-    }
+  } else if (newLen !== curLen || listsHaveDifferences(currentList, newList)) {
+    patches.push({
+      path,
+      op: 'replace',
+      value: valueBuilder(newList),
+    });
   }
 
   return patches;
@@ -91,40 +100,63 @@ const toApiDuration = (minutes: number) => {
   return `${minutes}m`;
 };
 
-const toApiDeviceSelection = (policyForm: RolloutPolicyForm): BatchSequence => {
-  return {
-    strategy: 'BatchSequence',
-    sequence: policyForm.batches.map((formBatch) => {
-      return {
-        limit: toApiLimit(formBatch),
-        successThreshold: formBatch.successThreshold ? `${formBatch.successThreshold}%` : undefined,
-        selector: {
-          matchLabels: toAPILabel(formBatch.selector || []),
-        },
-      };
-    }),
+const toApiDeviceSelection = (policyForm: RolloutPolicyForm): BatchSequence => ({
+  strategy: 'BatchSequence',
+  sequence: policyForm.batches.map((formBatch) => {
+    return {
+      limit: toApiLimit(formBatch),
+      successThreshold: formBatch.successThreshold ? `${formBatch.successThreshold}%` : undefined,
+      selector: {
+        matchLabels: toAPILabel(formBatch.selector || []),
+      },
+    };
+  }),
+});
+
+const toApiDisruptionBudget = (disruptionValues: DisruptionBudgetForm) => {
+  const data: DisruptionBudget = {
+    groupBy: disruptionValues.groupBy || [],
   };
+  if (typeof disruptionValues.minAvailable === 'number') {
+    data.minAvailable = disruptionValues.minAvailable;
+  }
+  if (typeof disruptionValues.maxUnavailable === 'number') {
+    data.maxUnavailable = disruptionValues.maxUnavailable;
+  }
+
+  return data;
 };
 
-export const getRolloutPolicyData = (updatedPolicy: RolloutPolicyForm) => ({
-  defaultUpdateTimeout: toApiDuration(updatedPolicy.updateTimeout),
-  deviceSelection: toApiDeviceSelection(updatedPolicy),
-});
+export const getRolloutPolicyData = ({ rolloutPolicy, disruptionBudget }: FleetFormValues) => {
+  const newRolloutPolicy: RolloutPolicy = {};
+  if (rolloutPolicy.isAdvanced) {
+    newRolloutPolicy.defaultUpdateTimeout = toApiDuration(rolloutPolicy.updateTimeout);
+    newRolloutPolicy.deviceSelection = toApiDeviceSelection(rolloutPolicy);
+  }
+  if (disruptionBudget.isAdvanced) {
+    newRolloutPolicy.disruptionBudget = toApiDisruptionBudget(disruptionBudget);
+  }
+  return newRolloutPolicy;
+};
 
 export const getRolloutPolicyPatches = (
   currentPolicy: RolloutPolicy | undefined,
-  updatedPolicy: RolloutPolicyForm,
+  fleetValues: FleetFormValues,
 ): PatchRequest => {
   const currentBatches = currentPolicy?.deviceSelection?.sequence || [];
-  const isCurrentlyActive = currentBatches.length > 0;
+  const currentDisruption = currentPolicy?.disruptionBudget;
 
-  if (isCurrentlyActive !== updatedPolicy.isActive) {
-    return updatedPolicy.isActive
+  const hadAdvancedSettings = currentBatches.length > 0 || !!currentDisruption;
+  const wantsAdvancedSettings = fleetValues.rolloutPolicy.isAdvanced || fleetValues.disruptionBudget.isAdvanced;
+  const updatedPolicy = fleetValues.rolloutPolicy;
+
+  if (hadAdvancedSettings !== wantsAdvancedSettings) {
+    return wantsAdvancedSettings
       ? [
           {
             op: 'add',
             path: '/spec/rolloutPolicy',
-            value: getRolloutPolicyData(updatedPolicy),
+            value: getRolloutPolicyData(fleetValues),
           },
         ]
       : [
@@ -136,46 +168,84 @@ export const getRolloutPolicyPatches = (
   }
 
   const patches: PatchRequest = [];
-  if ((currentPolicy?.defaultUpdateTimeout || '') !== (updatedPolicy.updateTimeout || '')) {
-    appendJSONPatch({
-      patches,
-      originalValue: currentPolicy?.defaultUpdateTimeout,
-      newValue: toApiDuration(updatedPolicy.updateTimeout),
-      path: '/spec/rolloutPolicy/defaultUpdateTimeout',
-    });
-  }
-
-  if (currentBatches.length === updatedPolicy.batches.length) {
-    const hasBatchChanges = currentBatches.some((batch, index) => {
-      const updatedBatch = updatedPolicy.batches[index];
-      if ((updatedBatch.limit || 0) !== (batch.limit || 0)) {
-        return true;
+  if (fleetValues.rolloutPolicy.isAdvanced) {
+    // The timeout will be always expressed in minutes
+    if ((currentPolicy?.defaultUpdateTimeout || '') !== (updatedPolicy.updateTimeout || '')) {
+      appendJSONPatch({
+        patches,
+        originalValue: currentPolicy?.defaultUpdateTimeout,
+        newValue: toApiDuration(updatedPolicy.updateTimeout),
+        path: '/spec/rolloutPolicy/defaultUpdateTimeout',
+      });
+    }
+    if (currentBatches.length === updatedPolicy.batches.length) {
+      const hasBatchChanges = currentBatches.some((batch, index) => {
+        // The format of the numbers is different, we must convert them for comparison
+        const updatedBatch = updatedPolicy.batches[index];
+        if ((batch.limit || 0) !== (toApiLimit(updatedBatch) || 0)) {
+          return true;
+        }
+        const updatedThreshold = updatedBatch.successThreshold ? `${updatedBatch.successThreshold}%` : 0;
+        if (updatedThreshold !== (batch.successThreshold || 0)) {
+          return true;
+        }
+        const labelPatches = getLabelPatches('labels', batch.selector?.matchLabels || {}, updatedBatch.selector);
+        if (labelPatches.length > 0) {
+          return true;
+        }
+        return false;
+      });
+      if (hasBatchChanges) {
+        patches.push({
+          path: '/spec/rolloutPolicy/deviceSelection',
+          op: 'replace',
+          value: toApiDeviceSelection(updatedPolicy),
+        });
       }
-      if ((updatedBatch.successThreshold || 0) !== (batch.successThreshold || 0)) {
-        return true;
-      }
-      const labelPatches = getLabelPatches('labels', batch.selector?.matchLabels || {}, updatedBatch.selector);
-      if (labelPatches.length > 0) {
-        return true;
-      }
-      return false;
-    });
-
-    if (hasBatchChanges) {
+    } else {
       patches.push({
         path: '/spec/rolloutPolicy/deviceSelection',
         op: 'replace',
         value: toApiDeviceSelection(updatedPolicy),
       });
     }
-  } else {
+  } else if (currentBatches.length > 0) {
     patches.push({
       path: '/spec/rolloutPolicy/deviceSelection',
-      op: 'replace',
-      value: toApiDeviceSelection(updatedPolicy),
+      op: 'remove',
+    });
+    patches.push({
+      path: '/spec/rolloutPolicy/defaultUpdateTimeout',
+      op: 'remove',
     });
   }
 
+  if (fleetValues.disruptionBudget.isAdvanced) {
+    const hasMinChanged = (currentDisruption?.minAvailable || '') !== (fleetValues.disruptionBudget.minAvailable || '');
+    const hasMaxChanged =
+      (currentDisruption?.maxUnavailable || '') !== (fleetValues.disruptionBudget.maxUnavailable || '');
+
+    const hasChanges =
+      hasMinChanged ||
+      hasMaxChanged ||
+      listsHaveDifferences(currentDisruption?.groupBy || [], fleetValues.disruptionBudget.groupBy || []);
+
+    if (hasChanges) {
+      appendJSONPatch({
+        path: '/spec/rolloutPolicy/disruptionBudget',
+        patches,
+        originalValue: currentDisruption,
+        newValue: fleetValues.disruptionBudget.isAdvanced
+          ? toApiDisruptionBudget(fleetValues.disruptionBudget)
+          : undefined,
+      });
+    }
+  } else if (currentDisruption?.minAvailable || currentDisruption?.maxUnavailable) {
+    patches.push({
+      path: '/spec/rolloutPolicy/disruptionBudget',
+      op: 'remove',
+    });
+  }
   return patches;
 };
 

@@ -19,7 +19,10 @@ import { getErrorMessage } from '../../../../utils/error';
 import { getAPIConfig } from '../../../Device/EditDeviceWizard/deviceSpecUtils';
 import ReviewApplications from '../../../Device/EditDeviceWizard/steps/ReviewApplications';
 import ReviewTrackedSystemdServices from '../../../Device/EditDeviceWizard/steps/ReviewTrackedSystemdServices';
-import ReviewUpdatePolicy from '../../../Device/EditDeviceWizard/steps/ReviewUpdatePolicy';
+import {
+  ReviewUpdateDisruptionBudget,
+  ReviewUpdateRolloutPolicy,
+} from '../../../Device/EditDeviceWizard/steps/ReviewUpdatePolicy';
 
 export const reviewStepId = 'review';
 
@@ -90,11 +93,19 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
             </DescriptionListGroup>
           )}
 
-          {values.rolloutPolicy.isActive && (
+          {values.rolloutPolicy.isAdvanced && (
             <DescriptionListGroup>
               <DescriptionListTerm>{t('Rollout policy')}</DescriptionListTerm>
               <DescriptionListDescription>
-                <ReviewUpdatePolicy rolloutPolicy={values.rolloutPolicy} />
+                <ReviewUpdateRolloutPolicy rolloutPolicy={values.rolloutPolicy} />
+              </DescriptionListDescription>
+            </DescriptionListGroup>
+          )}
+          {values.disruptionBudget.isAdvanced && (
+            <DescriptionListGroup>
+              <DescriptionListTerm>{t('Disruption budget')}</DescriptionListTerm>
+              <DescriptionListDescription>
+                <ReviewUpdateDisruptionBudget disruptionBudget={values.disruptionBudget} />
               </DescriptionListDescription>
             </DescriptionListGroup>
           )}
