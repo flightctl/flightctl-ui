@@ -99,8 +99,9 @@ const RolloutPolicyBatch = ({ index }: { index: number }) => {
               />
             </FlexItem>
             <FlexItem flex={{ lg: 'flex_1' }} style={{ minWidth: 200 }}>
-              {t("% of the batch devices pass the success criteria, move to next batch or the rest of fleet's devices")}
-              .
+              {t(
+                "% of the batch devices pass the success criteria, move to next batch or the rest of fleet's devices.",
+              )}
             </FlexItem>
           </Flex>
         </FormGroup>

@@ -286,7 +286,7 @@
   "Success threshold": "Success threshold",
   "Minimum percentage of devices that must update successfully in order to continue updating the next batch of devices.": "Minimum percentage of devices that must update successfully in order to continue updating the next batch of devices.",
   "If": "If",
-  "% of the batch devices pass the success criteria, move to next batch or the rest of fleet's devices": "% of the batch devices pass the success criteria, move to next batch or the rest of fleet's devices",
+  "% of the batch devices pass the success criteria, move to next batch or the rest of fleet's devices.": "% of the batch devices pass the success criteria, move to next batch or the rest of fleet's devices.",
   "Update timeout": "Update timeout",
   "If the device does not update within this timeout, the device will be counted as a failure to its batch's success.": "If the device does not update within this timeout, the device will be counted as a failure to its batch's success.",
   "Timeout devices if they did not complete the update after": "Timeout devices if they did not complete the update after",
