@@ -17,8 +17,7 @@ import {
 import { labelToString } from '../../utils/labels';
 import { ApplicationFormSpec } from '../Device/EditDeviceWizard/types';
 import { SystemdUnitFormValue } from '../Device/SystemdUnitsModal/TrackSystemdUnitsForm';
-
-type UnvalidatedLabel = Partial<FlightCtlLabel>;
+import { BatchForm, BatchLimitType, RolloutPolicyForm } from '../Fleet/CreateFleet/types';
 
 const SYSTEMD_PATTERNS_REGEXP = /^[a-z][a-z0-9-_.]*$/;
 const SYSTEMD_UNITS_MAX_PATTERNS = 256;
@@ -92,12 +91,12 @@ export const getKubernetesDnsSubdomainErrors = (value: string) => {
   return errorKeys;
 };
 
-export const hasUniqueLabelKeys = (labels: UnvalidatedLabel[]) => {
+export const hasUniqueLabelKeys = (labels: FlightCtlLabel[]) => {
   const uniqueKeys = new Set(labels.map((label) => label.key));
   return uniqueKeys.size === labels.length;
 };
 
-export const getInvalidKubernetesLabels = (labels: UnvalidatedLabel[]) => {
+export const getInvalidKubernetesLabels = (labels: FlightCtlLabel[]) => {
   return labels.filter((unvalidatedLabel) => {
     const key = unvalidatedLabel.key || '';
     const value = unvalidatedLabel.value || '';
@@ -201,14 +200,13 @@ export const validOsImage = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
 export const validLabelsSchema = (t: TFunction) =>
   Yup.array()
     .of(
-      Yup.object<UnvalidatedLabel>().shape({
-        // We'll define the mandatory key restriction for all labels, not individually
-        key: Yup.string(),
+      Yup.object<FlightCtlLabel>().shape({
+        key: Yup.string().required(),
         value: Yup.string(),
       }),
     )
     .required()
-    .test('missing keys', (labels: UnvalidatedLabel[], testContext) => {
+    .test('missing keys', (labels: FlightCtlLabel[], testContext) => {
       const missingKeyLabels = labels.filter((label) => !label.key).map((label) => label.value);
       return missingKeyLabels.length > 0
         ? testContext.createError({
@@ -219,13 +217,13 @@ export const validLabelsSchema = (t: TFunction) =>
         : true;
     })
     .test('unique keys', t('Label keys must be unique'), hasUniqueLabelKeys)
-    .test('invalid-labels', (labels: UnvalidatedLabel[], testContext) => {
+    .test('invalid-labels', (labels: FlightCtlLabel[], testContext) => {
       const invalidLabels = getInvalidKubernetesLabels(labels);
 
       return invalidLabels.length > 0
         ? testContext.createError({
             message: t('The following labels are not valid Kubernetes labels: {{invalidLabels}}', {
-              invalidLabels: `${invalidLabels.map((label) => labelToString(label as FlightCtlLabel)).join(', ')}`,
+              invalidLabels: `${invalidLabels.map(labelToString).join(', ')}`,
             }),
           })
         : true;
@@ -277,6 +275,63 @@ export const validApplicationsSchema = (t: TFunction) => {
               );
 
           errors.push(error);
+        }
+        return errors;
+      }, [] as Yup.ValidationError[]);
+
+      return testContext.createError({
+        message: () => errors,
+      });
+    });
+};
+
+export const validFleetRolloutPolicySchema = (t: TFunction) => {
+  return Yup.object()
+    .shape({
+      isActive: Yup.boolean().required(),
+      updateTimeout: Yup.number().required('Update timeout is required'),
+      batches: Yup.array()
+        .of(
+          Yup.object<BatchForm>().shape({
+            selector: validLabelsSchema(t),
+            limitType: Yup.string()
+              .oneOf([BatchLimitType.BatchLimitAbsoluteNumber, BatchLimitType.BatchLimitPercent])
+              .required(),
+            limit: Yup.number()
+              .test('correct-percentage', t('Percentage must be between 1 and 100.'), (num, { parent }) => {
+                if (num === undefined) {
+                  return true;
+                }
+                if ((parent as BatchForm).limitType === BatchLimitType.BatchLimitPercent && num > 100) {
+                  return false;
+                }
+                return true;
+              })
+              // When an absolute number, we can only restrict the minimum value
+              .min(1, t('Value must be greater or equal than 1')),
+            successThreshold: Yup.number()
+              .required('Success threshold is required')
+              .min(1, t('Success threshold must be between 1 and 100'))
+              .max(100, t('Success threshold must be between 1 and 100')),
+          }),
+        )
+        .required(),
+    })
+    .test('valid-rollout', (rolloutPolicy: RolloutPolicyForm | undefined, testContext) => {
+      if (!rolloutPolicy || rolloutPolicy.batches.length === 0) {
+        return true;
+      }
+
+      const errors = rolloutPolicy.batches.reduce((errors, batch, batchIndex) => {
+        const hasError = batch.limit === undefined && Object.keys(batch.selector || {}).length === 0;
+        if (hasError) {
+          errors.push(
+            new Yup.ValidationError(
+              t('At least one of the label selector or numeric selector must be specified.'),
+              '',
+              `rolloutPolicy.batches[${batchIndex}]`,
+            ),
+          );
         }
         return errors;
       }, [] as Yup.ValidationError[]);

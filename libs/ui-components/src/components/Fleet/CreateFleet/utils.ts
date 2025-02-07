@@ -8,6 +8,7 @@ import {
   systemdUnitListValidationSchema,
   validApplicationsSchema,
   validConfigTemplatesSchema,
+  validFleetRolloutPolicySchema,
   validKubernetesDnsSubdomain,
   validLabelsSchema,
   validOsImage,
@@ -16,6 +17,8 @@ import {
   appendJSONPatch,
   getApplicationPatches,
   getLabelPatches,
+  getRolloutPolicyData,
+  getRolloutPolicyPatches,
   getStringListPatches,
   toAPIApplication,
 } from '../../../utils/patch';
@@ -29,6 +32,7 @@ import {
   getDeviceSpecConfigPatches,
   hasMicroshiftRegistrationConfig,
 } from '../../Device/EditDeviceWizard/deviceSpecUtils';
+import { getRolloutPolicyValues } from './fleetSpecUtils';
 
 export const getValidationSchema = (t: TFunction) => {
   return Yup.object<FleetFormValues>({
@@ -39,6 +43,7 @@ export const getValidationSchema = (t: TFunction) => {
     configTemplates: validConfigTemplatesSchema(t),
     applications: validApplicationsSchema(t),
     systemdUnits: systemdUnitListValidationSchema(t),
+    rolloutPolicy: validFleetRolloutPolicySchema(t),
   });
 };
 
@@ -129,6 +134,10 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
   );
   allPatches = allPatches.concat(unitPatches);
 
+  // Rollout policies
+  const rolloutPolicyPatches = getRolloutPolicyPatches(currentFleet.spec.rolloutPolicy, updatedFleet.rolloutPolicy);
+  allPatches = allPatches.concat(rolloutPolicyPatches);
+
   return allPatches;
 };
 
@@ -171,6 +180,9 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
   if (values.registerMicroShift) {
     fleet.spec.template.spec.config?.push(ACMCrdConfig, ACMImportConfig, MicroshiftRegistrationHook);
   }
+  if (values.rolloutPolicy.isActive) {
+    fleet.spec.rolloutPolicy = getRolloutPolicyData(values.rolloutPolicy);
+  }
 
   return fleet;
 };
@@ -196,6 +208,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
         exists: true,
       })),
       registerMicroShift,
+      rolloutPolicy: getRolloutPolicyValues(fleet.spec),
     };
   }
 
@@ -208,5 +221,6 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
     applications: [],
     systemdUnits: [],
     registerMicroShift: false,
+    rolloutPolicy: getRolloutPolicyValues(undefined),
   };
 };

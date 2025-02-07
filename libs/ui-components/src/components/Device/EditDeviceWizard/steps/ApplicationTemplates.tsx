@@ -86,6 +86,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
                   </SplitItem>
                   <SplitItem>
                     <Button
+                      aria-label={t('Delete variable')}
                       variant="link"
                       icon={<MinusCircleIcon />}
                       iconPosition="end"
@@ -139,6 +140,7 @@ const ApplicationTemplates = () => {
                   </SplitItem>
                   <SplitItem>
                     <Button
+                      aria-label={t('Delete application')}
                       variant="link"
                       icon={<MinusCircleIcon />}
                       iconPosition="start"

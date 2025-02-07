@@ -23,7 +23,6 @@ const DeviceStatusChart = ({
 
   const statusItems = getDeviceStatusItems(t);
 
-  // TODO should we add the "Pending" devices, now that the Device table does not contain ERs?
   const devStatusData = toOverviewChartData<DeviceSummaryStatusType>(
     deviceStatus,
     statusItems,

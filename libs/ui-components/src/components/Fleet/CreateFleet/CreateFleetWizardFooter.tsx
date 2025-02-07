@@ -10,6 +10,7 @@ import {
   deviceTemplateStepId,
   isDeviceTemplateStepValid,
 } from '../../Device/EditDeviceWizard/steps/DeviceTemplateStep';
+import { isUpdatePolicyStepValid, updatePolicyStepId } from './steps/UpdatePolicyStep';
 
 type CreateFleetWizardFooterProps = {
   isEdit: boolean;
@@ -27,7 +28,10 @@ const CreateFleetWizardFooter = ({ isEdit }: CreateFleetWizardFooterProps) => {
     isStepValid = isGeneralInfoStepValid(errors);
   } else if (activeStep.id === deviceTemplateStepId) {
     isStepValid = isDeviceTemplateStepValid(errors);
+  } else if (activeStep.id === updatePolicyStepId) {
+    isStepValid = isUpdatePolicyStepValid(errors);
   }
+
   const primaryBtn = isReviewStep ? (
     <Button variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
       {isEdit ? t('Save') : t('Create fleet')}
