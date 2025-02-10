@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { PageSection, PageSectionVariants, Title, TitleProps } from '@patternfly/react-core';
+import TechPreviewBadge from '../common/TechPreviewBadge';
 
 type ListPageProps = {
   title: string;
@@ -12,7 +13,7 @@ const ListPage: React.FC<ListPageProps> = ({ title, headingLevel = 'h1', childre
   return (
     <PageSection variant={PageSectionVariants.light}>
       <Title headingLevel={headingLevel} size="3xl">
-        {title}
+        {title} <TechPreviewBadge />
       </Title>
       {children}
     </PageSection>
