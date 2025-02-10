@@ -146,14 +146,14 @@ const FleetResourceSyncs = () => {
   return (
     <PageSection variant={PageSectionVariants.light}>
       <Stack hasGutter>
-        {errorRs.map((rs) => {
+        {pendingRs.map((rs) => {
           return (
             <StackItem key={rs.metadata.name as string}>
               <ResourceSyncInfoAlert rs={rs} />
             </StackItem>
           );
         })}
-        {pendingRs.map((rs) => {
+        {errorRs.map((rs) => {
           return (
             <StackItem key={rs.metadata.name as string}>
               <ResourceSyncErrorAlert rs={rs} refetch={rsRefetch} />
