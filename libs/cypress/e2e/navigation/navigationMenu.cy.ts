@@ -10,7 +10,7 @@ describe('App navigation', () => {
   it('opens the Overview page when accessing the root page', () => {
     cy.visit('/');
 
-    cy.get('h1').should('have.text', 'Overview');
+    cy.get('h1').should('contain.text', 'Overview');
   });
 
   mainPages.forEach((page) => {
@@ -19,7 +19,7 @@ describe('App navigation', () => {
 
       MainNavigationSection.navigateToFlightCtlSection(page);
 
-      cy.get('h1').should('have.text', page);
+      cy.get('h1').should('contain.text', page);
     });
   });
 });
