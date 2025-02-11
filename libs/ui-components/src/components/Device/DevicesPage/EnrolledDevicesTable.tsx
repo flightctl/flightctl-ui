@@ -20,17 +20,16 @@ import {
 } from '../../Status/utils';
 
 import Table, { ApiSortTableColumn } from '../../Table/Table';
-import { useDecommissionListAction, useDeleteListAction } from '../../ListPage/ListPageActions';
+import { useDecommissionListAction } from '../../ListPage/ListPageActions';
 import TablePagination from '../../Table/TablePagination';
-import MassDeleteDeviceModal from '../../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
+import MassDecommissionDeviceModal from '../../modals/massModals/MassDecommissionDeviceModal/MassDecommissionDeviceModal';
 import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
 import { EnrolledDevicesEmptyState } from './DevicesEmptyStates';
 import DeviceTableToolbar from './DeviceTableToolbar';
-import DeviceTableRow from './DeviceTableRow';
+import EnrolledDeviceTableRow from './EnrolledDeviceTableRow';
 
 interface EnrolledDeviceTableProps {
   devices: Array<Device>;
-  refetch: VoidFunction;
   ownerFleets: string[];
   activeStatuses: FilterStatusMap;
   hasFiltersEnabled: boolean;
@@ -75,7 +74,6 @@ const getDeviceColumns = (t: TFunction): ApiSortTableColumn[] => [
 
 const EnrolledDevicesTable = ({
   devices,
-  refetch,
   nameOrAlias,
   setNameOrAlias,
   ownerFleets,
@@ -90,21 +88,13 @@ const EnrolledDevicesTable = ({
   pagination,
 }: EnrolledDeviceTableProps) => {
   const { t } = useTranslation();
-  const { put, remove } = useFetch();
+  const { put } = useFetch();
 
   const [addDeviceModal, setAddDeviceModal] = React.useState(false);
-  const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
+  const [isMassDecommissionModalOpen, setIsMassDecommissionModalOpen] = React.useState(false);
   const deviceColumns = React.useMemo(() => getDeviceColumns(t), [t]);
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
-
-  const { action: deleteDeviceAction, modal: deleteDeviceModal } = useDeleteListAction({
-    resourceType: 'Device',
-    onConfirm: async (resourceId: string) => {
-      await remove(`devices/${resourceId}`);
-      refetch();
-    },
-  });
 
   const { action: decommissionDeviceAction, modal: decommissionDeviceModal } = useDecommissionListAction({
     resourceType: 'Device',
@@ -113,11 +103,9 @@ const EnrolledDevicesTable = ({
         target: params?.target || DeviceDecommissionTargetType.DeviceDecommissionTargetTypeUnenroll,
       });
       setOnlyDecommissioned(true);
-      refetch();
     },
   });
 
-  const [canDelete] = useAccessReview(RESOURCE.DEVICE, VERB.DELETE);
   const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
   const [canDecommission] = useAccessReview(RESOURCE.DEVICE_DECOMMISSION, VERB.UPDATE);
 
@@ -139,10 +127,14 @@ const EnrolledDevicesTable = ({
             {t('Add devices')}
           </Button>
         </ToolbarItem>
-        {canDelete && (
+        {canDecommission && (
           <ToolbarItem>
-            <Button isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)} variant="secondary">
-              {t('Delete devices')}
+            <Button
+              isDisabled={!hasSelectedRows}
+              onClick={() => setIsMassDecommissionModalOpen(true)}
+              variant="secondary"
+            >
+              {t('Decommission devices')}
             </Button>
           </ToolbarItem>
         )}
@@ -159,7 +151,7 @@ const EnrolledDevicesTable = ({
         </ToolbarItem>
       </DeviceTableToolbar>
       <Table
-        aria-label={t('Devices table')}
+        aria-label={t('Enrolled devices table')}
         loading={isFilterUpdating}
         columns={deviceColumns}
         emptyFilters={!hasFiltersEnabled}
@@ -169,17 +161,15 @@ const EnrolledDevicesTable = ({
       >
         <Tbody>
           {devices.map((device, index) => (
-            <DeviceTableRow
+            <EnrolledDeviceTableRow
               key={device.metadata.name || ''}
               device={device}
-              deleteAction={deleteDeviceAction}
-              decommissionAction={decommissionDeviceAction}
               onRowSelect={onRowSelect}
               isRowSelected={isRowSelected}
               rowIndex={index}
-              canDelete={canDelete}
               canEdit={canEdit}
               canDecommission={canDecommission}
+              decommissionAction={decommissionDeviceAction}
             />
           ))}
         </Tbody>
@@ -188,15 +178,15 @@ const EnrolledDevicesTable = ({
       {!hasFiltersEnabled && devices.length === 0 && (
         <EnrolledDevicesEmptyState onAddDevice={() => setAddDeviceModal(true)} />
       )}
-      {deleteDeviceModal || decommissionDeviceModal}
+      {decommissionDeviceModal}
       {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}
-      {isMassDeleteModalOpen && (
-        <MassDeleteDeviceModal
-          onClose={() => setIsMassDeleteModalOpen(false)}
-          resources={devices.filter(isRowSelected)}
-          onDeleteSuccess={() => {
-            setIsMassDeleteModalOpen(false);
-            refetch();
+      {isMassDecommissionModalOpen && (
+        <MassDecommissionDeviceModal
+          onClose={() => setIsMassDecommissionModalOpen(false)}
+          devices={devices.filter(isRowSelected)}
+          onSuccess={() => {
+            setIsMassDecommissionModalOpen(false);
+            setOnlyDecommissioned(true);
           }}
         />
       )}

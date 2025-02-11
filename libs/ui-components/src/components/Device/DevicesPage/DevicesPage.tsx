@@ -81,7 +81,6 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
           ) : (
             <EnrolledDevicesTable
               devices={data}
-              refetch={refetch}
               nameOrAlias={nameOrAlias}
               setNameOrAlias={setNameOrAlias}
               hasFiltersEnabled={hasFiltersEnabled || updating}

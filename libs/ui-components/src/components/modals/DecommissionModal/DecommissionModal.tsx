@@ -57,12 +57,12 @@ const DecommissionModal = ({ onDecommission, onClose }: DecommissionModalProps) 
         {({ submitForm }) => {
           return (
             <Stack hasGutter>
+              <StackItem>{t('Are you sure you want to proceed with decommissioning this device?')}</StackItem>
               <StackItem>
                 {t(
-                  'Decommissioning permanently removes a device from the Edge Manager inventory and all associated fleets. Once decommissioned, the device cannot be re-enrolled or managed further.',
+                  'Decommissioned devices will not be able to communicate with the edge management system anymore, and they will be removed from any fleet they were associated to. Once decommissioned, the device cannot be managed further.',
                 )}
               </StackItem>
-              <StackItem>{t('Are you sure you want to proceed with decommissioning this device?')}</StackItem>
               {error && (
                 <StackItem>
                   <Alert isInline variant="danger" title={t('An error occurred')}>

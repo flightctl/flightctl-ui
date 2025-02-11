@@ -14,29 +14,25 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import ResourceLink from '../../common/ResourceLink';
 
-type DeviceTableRowProps = {
+type EnrolledDeviceTableRowProps = {
   device: Device;
-  deleteAction: ListAction;
-  decommissionAction: ListAction;
   rowIndex: number;
   onRowSelect: (device: Device) => OnSelect;
   isRowSelected: (device: Device) => boolean;
-  canDelete: boolean;
   canEdit: boolean;
   canDecommission: boolean;
+  decommissionAction: ListAction;
 };
 
-const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
+const EnrolledDeviceTableRow = ({
   device,
-  deleteAction,
-  decommissionAction,
   rowIndex,
   onRowSelect,
   isRowSelected,
-  canDelete,
   canEdit,
   canDecommission,
-}) => {
+  decommissionAction,
+}: EnrolledDeviceTableRowProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const deviceName = device.metadata.name as string;
@@ -88,14 +84,6 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
               title: t('View device details'),
               onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
             },
-            ...(canDelete
-              ? [
-                  deleteAction({
-                    resourceId: deviceName,
-                    resourceName: deviceAlias,
-                  }),
-                ]
-              : []),
             ...(canDecommission
               ? [
                   decommissionAction({
@@ -112,4 +100,4 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
   );
 };
 
-export default DeviceTableRow;
+export default EnrolledDeviceTableRow;
