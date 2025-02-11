@@ -29,7 +29,7 @@ func main() {
 	log := log.InitLogs()
 	router := mux.NewRouter()
 	apiRouter := router.PathPrefix("/api").Subrouter()
-	apiRouter.Use(middleware.WsAuthMiddleware)
+	apiRouter.Use(middleware.AuthMiddleware)
 
 	tlsConfig, err := bridge.GetTlsConfig()
 	if err != nil {
@@ -43,18 +43,14 @@ func main() {
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
 
 	if config.OcpPlugin != "true" {
-		oidcTlsConfig, err := bridge.GetOIDCTlsConfig()
+		authHandler, err := auth.NewAuth(tlsConfig)
 		if err != nil {
 			panic(err)
 		}
-
-		oidcHandler, err := auth.NewOIDCAuth(oidcTlsConfig, tlsConfig, config.TlsCertPath != "")
-		if err != nil {
-			panic(err)
-		}
-		apiRouter.HandleFunc("/login", oidcHandler.Login)
-		apiRouter.HandleFunc("/login/info", oidcHandler.GetUserInfo)
-		apiRouter.HandleFunc("/logout", oidcHandler.Logout)
+		apiRouter.HandleFunc("/login", authHandler.Login)
+		apiRouter.HandleFunc("/login/info", authHandler.GetUserInfo)
+		apiRouter.HandleFunc("/login/refresh", authHandler.Refresh)
+		apiRouter.HandleFunc("/logout", authHandler.Logout)
 	} else {
 		configHandler := config.OcpConfigHandler{}
 		apiRouter.HandleFunc("/config", configHandler.GetConfig)

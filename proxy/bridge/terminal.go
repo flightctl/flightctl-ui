@@ -77,12 +77,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		TLSClientConfig: t.TlsConfig,
 	}
 
-	headers := http.Header{}
-	if authHeaderValue := r.Header.Get(common.AuthHeaderKey); authHeaderValue != "" {
-		headers.Add(common.AuthHeaderKey, authHeaderValue)
-	}
-
-	backend, resp, err := dialer.Dial(consoleUrl, headers)
+	backend, resp, err := dialer.Dial(consoleUrl, r.Header)
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to dial backend: '%v'", err)
 		statusCode := http.StatusBadGateway
