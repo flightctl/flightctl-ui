@@ -116,3 +116,4 @@ export type { TemplateVersionSpec } from './models/TemplateVersionSpec';
 export type { TemplateVersionStatus } from './models/TemplateVersionStatus';
 export type { TimeZone } from './models/TimeZone';
 export type { UpdateSchedule } from './models/UpdateSchedule';
+export type { Version } from './models/Version';

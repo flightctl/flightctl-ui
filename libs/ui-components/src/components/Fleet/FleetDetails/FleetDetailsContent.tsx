@@ -12,20 +12,23 @@ import {
 } from '@patternfly/react-core';
 
 import { Fleet } from '@flightctl/types';
-import FleetOwnerLink from './FleetOwnerLink';
-import FleetDevices from './FleetDevices';
-import FleetStatus from '../FleetStatus';
-import FleetDevicesLink from './FleetDevicesLink';
 import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import LabelsView from '../../common/LabelsView';
 import { getDateDisplay } from '../../../utils/dates';
+import { getFleetRolloutStatusWarning } from '../../../utils/status/fleet';
 import { useTranslation } from '../../../hooks/useTranslation';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
+import FleetOwnerLink from './FleetOwnerLink';
+import FleetDevicesCharts from './FleetDevicesCharts';
+import FleetStatus from '../FleetStatus';
+import FleetDevicesCount from './FleetDevicesCount';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
   const fleetId = fleet.metadata.name as string;
   const devicesSummary = fleet.status?.devicesSummary;
+  const rolloutError = getFleetRolloutStatusWarning(fleet, t);
+
   return (
     <Grid hasGutter>
       <GridItem md={12}>
@@ -56,9 +59,9 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
-                <DescriptionListTerm>{t('Associated devices')}</DescriptionListTerm>
+                <DescriptionListTerm>{t('Up-to-date/devices')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <FleetDevicesLink fleetId={fleetId} count={devicesSummary?.total} />
+                  <FleetDevicesCount fleetId={fleetId} devicesSummary={devicesSummary} error={rolloutError} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
@@ -85,7 +88,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
             <CardTitle>{t('Fleet devices')}</CardTitle>
 
             <CardBody>
-              <FleetDevices fleetId={fleetId} devicesSummary={devicesSummary} />
+              <FleetDevicesCharts fleetId={fleetId} devicesSummary={devicesSummary} />
             </CardBody>
           </Card>
         </GridItem>
