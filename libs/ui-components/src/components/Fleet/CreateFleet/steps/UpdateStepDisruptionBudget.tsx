@@ -15,7 +15,7 @@ const UpdateStepDisruptionBudget = () => {
   const [, meta] = useField<DisruptionBudgetForm>('disruptionBudget');
 
   return (
-    <div className="pf-v5-u-mb-lg">
+    <Grid hasGutter>
       <FormGroup
         label={
           <WithHelperText
@@ -36,53 +36,55 @@ const UpdateStepDisruptionBudget = () => {
           }
         />
       </FormGroup>
-      <Grid hasGutter>
-        <GridItem md={6}>
-          <FormGroup
-            label={
-              <WithHelperText
-                ariaLabel={t('Minimum number of available devices')}
-                content={t(
-                  'At least this number of devices will be available at any given moment, for each group defined above.',
-                )}
-                showLabel
+      <FormGroup>
+        <Grid hasGutter>
+          <GridItem md={6}>
+            <FormGroup
+              label={
+                <WithHelperText
+                  ariaLabel={t('Minimum number of available devices')}
+                  content={t(
+                    'At least this number of devices will be available at any given moment, for each group defined above.',
+                  )}
+                  showLabel
+                />
+              }
+            >
+              <NumberField
+                aria-label={t('Minimum number of available devices')}
+                name="disruptionBudget.minAvailable"
+                min={1}
               />
-            }
-          >
-            <NumberField
-              aria-label={t('Minimum number of available devices')}
-              name="disruptionBudget.minAvailable"
-              min={1}
-            />
-          </FormGroup>
-        </GridItem>
-        <GridItem md={6}>
-          <FormGroup
-            label={
-              <WithHelperText
-                ariaLabel={t('Maximum number of unavailable devices')}
-                content={t(
-                  'No more than this number of devices will be unavailable at any given moment, for each group defined above.',
-                )}
-                showLabel
-              />
-            }
-          >
-            <NumberField
-              aria-label={t('Maximum number of unavailable devices')}
-              name="disruptionBudget.maxUnavailable"
-              min={1}
-            />
-          </FormGroup>
-        </GridItem>
-        {/* Show error when both numberic values are unset */}
-        {typeof meta.error === 'string' && (
-          <GridItem md={12}>
-            <ErrorHelperText meta={meta} />
+            </FormGroup>
           </GridItem>
-        )}
-      </Grid>
-    </div>
+          <GridItem md={6}>
+            <FormGroup
+              label={
+                <WithHelperText
+                  ariaLabel={t('Maximum number of unavailable devices')}
+                  content={t(
+                    'No more than this number of devices will be unavailable at any given moment, for each group defined above.',
+                  )}
+                  showLabel
+                />
+              }
+            >
+              <NumberField
+                aria-label={t('Maximum number of unavailable devices')}
+                name="disruptionBudget.maxUnavailable"
+                min={1}
+              />
+            </FormGroup>
+          </GridItem>
+          {/* Show error when both numberic values are unset */}
+          {typeof meta.error === 'string' && (
+            <GridItem md={12}>
+              <ErrorHelperText meta={meta} />
+            </GridItem>
+          )}
+        </Grid>
+      </FormGroup>
+    </Grid>
   );
 };
 
