@@ -27,18 +27,16 @@ const TechPreviewBadge = () => {
   const { t } = useTranslation();
 
   return (
-    <Label color="orange" className="pf-v5-u-ml-md">
-      <Popover
-        aria-label={t('Technology preview description')}
-        bodyContent={<TechPreviewPopoverContent />}
-        withFocusTrap
-        triggerAction="click"
-      >
-        <span>
-          <InfoCircleIcon /> {t('Technology preview')}
-        </span>
-      </Popover>
-    </Label>
+    <Popover
+      aria-label={t('Technology preview description')}
+      bodyContent={<TechPreviewPopoverContent />}
+      withFocusTrap
+      triggerAction="click"
+    >
+      <Label color="orange" icon={<InfoCircleIcon />}>
+        {t('Technology preview')}
+      </Label>
+    </Popover>
   );
 };
 
