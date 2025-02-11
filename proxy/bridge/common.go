@@ -27,31 +27,37 @@ func GetTlsConfig() (*tls.Config, error) {
 		return nil, err
 	}
 
-	caCertPool := x509.NewCertPool()
+	caCertPool, err := x509.SystemCertPool()
+	if err != nil {
+		return nil, err
+	}
 	caCertPool.AppendCertsFromPEM(caCert)
 
 	tlsConfig.RootCAs = caCertPool
 	return tlsConfig, nil
 }
 
-func GetOIDCTlsConfig() (*tls.Config, error) {
+func GetAuthTlsConfig() (*tls.Config, error) {
 	tlsConfig := &tls.Config{}
 
-	if config.OIDCInsecure == "true" {
-		log.Warn("Using InsecureSkipVerify for OIDC communication")
+	if config.AuthInsecure == "true" {
+		log.Warn("Using InsecureSkipVerify for Auth communication")
 		tlsConfig.InsecureSkipVerify = true
 	}
 
-	_, err := os.Stat("../certs/ca_oidc.crt")
+	_, err := os.Stat("../certs/ca_auth.crt")
 	if errors.Is(err, os.ErrNotExist) {
 		return tlsConfig, nil
 	}
-	caCert, err := os.ReadFile("../certs/ca_oidc.crt")
+	caCert, err := os.ReadFile("../certs/ca_auth.crt")
 	if err != nil {
 		return nil, err
 	}
 
-	caCertPool := x509.NewCertPool()
+	caCertPool, err := x509.SystemCertPool()
+	if err != nil {
+		return nil, err
+	}
 	caCertPool.AppendCertsFromPEM(caCert)
 
 	tlsConfig.RootCAs = caCertPool

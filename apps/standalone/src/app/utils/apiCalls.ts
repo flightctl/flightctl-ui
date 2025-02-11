@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { PatchRequest } from '@flightctl/types';
+import { lastRefresh } from '../context/AuthContext';
 
 const apiPort = window.API_PORT || window.location.port;
 const apiServer = `${window.location.hostname}${apiPort ? `:${apiPort}` : ''}`;
@@ -11,9 +12,9 @@ const metricsAPI = `${window.location.protocol}//${apiServer}/api/metrics`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
 export const logout = async () => {
-  const response = await fetch(logoutAPI);
+  const response = await fetch(logoutAPI, { credentials: 'include' });
   const { url } = (await response.json()) as { url: string };
-  window.location.href = url;
+  url ? (window.location.href = url) : window.location.reload();
 };
 
 export const redirectToLogin = async () => {
@@ -47,6 +48,16 @@ const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   throw new Error(`Error ${response.status}: ${response.statusText}${errorText}`);
 };
 
+const fetchWithRetry = async <R>(input: string | URL | Request, init?: RequestInit): Promise<R> => {
+  const prevRefresh = lastRefresh;
+  let response = await fetch(input, init);
+  //if token refresh occured, lets try again
+  if (response.status === 401 && prevRefresh != lastRefresh) {
+    response = await fetch(input, init);
+  }
+  return handleApiJSONResponse(response);
+};
+
 export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
     const response = await fetch(`${metricsAPI}/api/v1/query_range?${metricQuery}`, {
@@ -61,7 +72,7 @@ export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSi
 
 const putOrPostData = async <R>(kind: string, data: R, method: 'PUT' | 'POST'): Promise<R> => {
   try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
+    return await fetchWithRetry<R>(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -69,7 +80,6 @@ const putOrPostData = async <R>(kind: string, data: R, method: 'PUT' | 'POST'): 
       method,
       body: JSON.stringify(data),
     });
-    return handleApiJSONResponse(response);
   } catch (error) {
     console.error(`Error making ${method} request for ${kind}:`, error);
     throw error;
@@ -82,12 +92,11 @@ export const putData = async <R>(kind: string, data: R): Promise<R> => putOrPost
 
 export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
+    return fetchWithRetry<R>(`${flightCtlAPI}/api/v1/${kind}`, {
       method: 'DELETE',
       credentials: 'include',
       signal: abortSignal,
     });
-    return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making DELETE request:', error);
     throw error;
@@ -96,7 +105,7 @@ export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Pr
 
 export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal?: AbortSignal): Promise<R> => {
   try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
+    return fetchWithRetry<R>(`${flightCtlAPI}/api/v1/${kind}`, {
       headers: {
         'Content-Type': 'application/json-patch+json',
       },
@@ -105,7 +114,6 @@ export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal
       body: JSON.stringify(data),
       signal: abortSignal,
     });
-    return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making PATCH request:', error);
     throw error;
@@ -114,11 +122,10 @@ export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal
 
 export const fetchData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
+    return fetchWithRetry<R>(`${flightCtlAPI}/api/v1/${kind}`, {
       credentials: 'include',
       signal: abortSignal,
     });
-    return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making GET request:', error);
     throw error;
