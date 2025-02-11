@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { PageSection, PageSectionVariants, Title, TitleProps } from '@patternfly/react-core';
+import { Flex, FlexItem, PageSection, PageSectionVariants, Title, TitleProps } from '@patternfly/react-core';
 import TechPreviewBadge from '../common/TechPreviewBadge';
 
 type ListPageProps = {
@@ -12,9 +12,16 @@ type ListPageProps = {
 const ListPage: React.FC<ListPageProps> = ({ title, headingLevel = 'h1', children }) => {
   return (
     <PageSection variant={PageSectionVariants.light}>
-      <Title headingLevel={headingLevel} size="3xl">
-        {title} <TechPreviewBadge />
-      </Title>
+      <Flex gap={{ default: 'gapMd' }} alignItems={{ default: 'alignItemsCenter' }}>
+        <FlexItem>
+          <Title headingLevel={headingLevel} size="3xl">
+            {title}
+          </Title>
+        </FlexItem>
+        <FlexItem>
+          <TechPreviewBadge />
+        </FlexItem>
+      </Flex>
       {children}
     </PageSection>
   );
