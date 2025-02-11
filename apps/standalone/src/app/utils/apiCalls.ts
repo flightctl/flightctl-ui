@@ -11,9 +11,9 @@ const metricsAPI = `${window.location.protocol}//${apiServer}/api/metrics`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
 export const logout = async () => {
-  const response = await fetch(logoutAPI);
+  const response = await fetch(logoutAPI, { credentials: 'include' });
   const { url } = (await response.json()) as { url: string };
-  window.location.href = url;
+  url ? (window.location.href = url) : window.location.reload();
 };
 
 export const redirectToLogin = async () => {
