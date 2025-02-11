@@ -47,15 +47,16 @@ export const getFleetSyncStatus = (
   };
 };
 
-const isFleetRolloutFailedCondition = (rolloutCondition: Condition) =>
-  rolloutCondition.status === ConditionStatus.ConditionStatusFalse &&
-  rolloutCondition.reason === FLEET_ROLLOUT_FAILED_REASON;
+const isFleetRolloutFailedCondition = (condition: Condition) =>
+  condition.type === ConditionType.FleetRolloutInProgress &&
+  condition.status === ConditionStatus.ConditionStatusFalse &&
+  condition.reason === FLEET_ROLLOUT_FAILED_REASON;
 
 export const getFleetRolloutStatusWarning = (fleet: Fleet, t: TFunction) => {
-  const rolloutCondition = fleet.status?.conditions?.find((c) => c.type === ConditionType.FleetRolloutInProgress);
+  const failedRolloutCondition = fleet.status?.conditions?.find(isFleetRolloutFailedCondition);
 
-  if (rolloutCondition && isFleetRolloutFailedCondition(rolloutCondition)) {
-    return getConditionMessage(rolloutCondition) || t('Last rollout did not complete successfully');
+  if (failedRolloutCondition) {
+    return getConditionMessage(failedRolloutCondition) || t('Last rollout did not complete successfully');
   }
   return undefined;
 };
