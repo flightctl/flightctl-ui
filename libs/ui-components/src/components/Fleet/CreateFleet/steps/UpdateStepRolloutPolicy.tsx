@@ -22,6 +22,7 @@ import FormSelect from '../../../form/FormSelect';
 import NumberField from '../../../form/NumberField';
 import WithHelperText from '../../../common/WithHelperText';
 import { useTranslation } from '../../../../hooks/useTranslation';
+import { getEmptyInitializedBatch } from '../fleetSpecUtils';
 
 const RolloutPolicyBatch = ({ index }: { index: number }) => {
   const { t } = useTranslation();
@@ -171,12 +172,7 @@ const UpdateStepRolloutPolicy = () => {
                     icon={<PlusCircleIcon />}
                     iconPosition="start"
                     onClick={() => {
-                      push({
-                        limit: '',
-                        limitType: BatchLimitType.BatchLimitPercent,
-                        selector: [],
-                        successThreshold: '',
-                      });
+                      push(getEmptyInitializedBatch());
                     }}
                   >
                     {t('Add batch')}
