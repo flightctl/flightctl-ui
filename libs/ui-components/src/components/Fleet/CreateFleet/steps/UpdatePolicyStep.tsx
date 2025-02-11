@@ -3,7 +3,7 @@ import { Alert, Checkbox, FormGroup, FormSection, Grid } from '@patternfly/react
 import { FormikErrors, useFormikContext } from 'formik';
 
 import { FleetFormValues } from '../types';
-import { getEmptyInitializedBatch } from '../fleetSpecUtils';
+import { DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES, getEmptyInitializedBatch } from '../fleetSpecUtils';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import WithHelperText from '../../../common/WithHelperText';
 
@@ -49,13 +49,17 @@ const UpdatePolicyStep = () => {
     }
   };
 
-  const onChangePolicyType = (toAdvanced: boolean) => {
-    setFieldValue('rolloutPolicy.batches', toAdvanced ? [getEmptyInitializedBatch()] : []);
+  const onChangePolicyType = async (toAdvanced: boolean) => {
+    await setFieldValue('rolloutPolicy', {
+      isAdvanced: toAdvanced,
+      batches: toAdvanced ? [getEmptyInitializedBatch()] : [],
+      updateTimeout: DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES,
+    });
   };
 
-  const onChangeDisruptionBudget = (toAdvanced: boolean) => {
+  const onChangeDisruptionBudget = async (toAdvanced: boolean) => {
     if (!toAdvanced) {
-      setFieldValue('disruptionBudget', {
+      await setFieldValue('disruptionBudget', {
         isAdvanced: false,
         groupBy: [],
         minAvailable: '',
@@ -64,7 +68,7 @@ const UpdatePolicyStep = () => {
     }
   };
 
-  const onModalClose = (doSwitch: boolean) => {
+  const onModalClose = async (doSwitch: boolean) => {
     setAlertSwitchToBasic(undefined);
     if (!doSwitch) {
       return;
@@ -73,16 +77,14 @@ const UpdatePolicyStep = () => {
     // When the user confirms switching a setting to its basic mode
     switch (alertSwitchToBasic) {
       case 'all-settings':
-        setFieldValue('rolloutPolicy.isAdvanced', false);
-        setFieldValue('disruptionBudget.isAdvanced', false);
+        await onChangePolicyType(false);
+        await onChangeDisruptionBudget(false);
         break;
       case 'rollout-policies':
-        setFieldValue('rolloutPolicy.isAdvanced', false);
-        onChangePolicyType(false);
+        void onChangePolicyType(false);
         break;
       case 'disruption-budget':
-        setFieldValue('disruptionBudget.isAdvanced', false);
-        onChangeDisruptionBudget(false);
+        void onChangeDisruptionBudget(false);
         break;
     }
     setForceShowAdvancedMode(false);
