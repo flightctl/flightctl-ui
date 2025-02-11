@@ -2,7 +2,8 @@ import * as React from 'react';
 import { Alert, Checkbox, FormGroup, FormSection, Grid } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 
-import { BatchLimitType, FleetFormValues } from '../types';
+import { FleetFormValues } from '../types';
+import { getEmptyInitializedBatch } from '../fleetSpecUtils';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import WithHelperText from '../../../common/WithHelperText';
 
@@ -49,19 +50,7 @@ const UpdatePolicyStep = () => {
   };
 
   const onChangePolicyType = (toAdvanced: boolean) => {
-    setFieldValue(
-      'rolloutPolicy.batches',
-      toAdvanced
-        ? [
-            {
-              limit: '',
-              limitType: BatchLimitType.BatchLimitPercent,
-              successThreshold: '',
-              selector: [],
-            },
-          ]
-        : [],
-    );
+    setFieldValue('rolloutPolicy.batches', toAdvanced ? [getEmptyInitializedBatch()] : []);
   };
 
   const onChangeDisruptionBudget = (toAdvanced: boolean) => {
