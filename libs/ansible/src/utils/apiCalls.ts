@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 
 import { PatchRequest } from '@flightctl/types';
+import { getErrorMsgFromApiResponse } from '@flightctl/ui-components/src/utils/apiCalls';
 
 const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   if (response.ok) {
@@ -13,14 +14,7 @@ const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
     throw new Error(`Error ${response.status}: ${response.statusText}`);
   }
 
-  let errorText = '';
-  try {
-    const json = (await response.json()) as { message: string } | string;
-    errorText = ` - ${typeof json === 'object' ? json.message : json}`;
-  } catch (e) {
-    // ignore
-  }
-  throw new Error(`Error ${response.status}: ${response.statusText}${errorText}`);
+  throw new Error(await getErrorMsgFromApiResponse(response));
 };
 
 export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSignal): Promise<R> => {
