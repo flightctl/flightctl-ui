@@ -18,6 +18,16 @@ type DevicesEndpointArgs = {
   nextContinue?: string;
 };
 
+const enrolledStatuses = [
+  DeviceLifecycleStatusType.DeviceLifecycleStatusEnrolled,
+  DeviceLifecycleStatusType.DeviceLifecycleStatusUnknown,
+];
+
+const decommissionedStatuses = [
+  DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioned,
+  DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
+];
+
 const getDevicesEndpoint = ({
   nameOrAlias,
   ownerFleets,
@@ -48,15 +58,9 @@ const getDevicesEndpoint = ({
   }
 
   if (onlyDecommissioned) {
-    queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', [
-      DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioned,
-      DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
-    ]);
+    queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', decommissionedStatuses);
   } else if (summaryOnly) {
-    queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', [
-      DeviceLifecycleStatusType.DeviceLifecycleStatusEnrolled,
-      DeviceLifecycleStatusType.DeviceLifecycleStatusUnknown,
-    ]);
+    queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', enrolledStatuses);
   }
 
   const params = new URLSearchParams();

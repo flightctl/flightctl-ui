@@ -94,7 +94,6 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
                   {t('Edit device configurations')}
                 </DropdownItem>
               )}
-              {canDelete && deleteAction}
               <DropdownItem
                 onClick={() => {
                   setShowDebugInfo(!showDebugInfo);
@@ -106,9 +105,11 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
             </DropdownList>
           </DetailsPageActions>
         ) : (
-          <Button aria-label={t('Delete device forever')} variant="danger">
-            {deleteAction}
-          </Button>
+          canDelete && (
+            <Button aria-label={t('Delete device forever')} variant="danger">
+              {deleteAction}
+            </Button>
+          )
         )
       }
     >

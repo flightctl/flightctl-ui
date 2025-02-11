@@ -138,7 +138,7 @@ const EnrolledDevicesTable = ({
             </Button>
           </ToolbarItem>
         )}
-        <ToolbarItem>
+        <ToolbarItem alignSelf="center">
           <Switch
             id="enrolled-devices-switch"
             label={t('Show only decommissioned devices')}
