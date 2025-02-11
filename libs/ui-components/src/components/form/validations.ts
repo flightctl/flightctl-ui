@@ -39,6 +39,8 @@ const BASIC_FLEET_OS_IMAGE_REGEXP = /^[a-zA-Z0-9.\-\/:@_+{}\s]*$/;
 const absolutePathRegex = /^\/.*$/;
 export const MAX_TARGET_REVISION_LENGTH = 244;
 
+const isInteger = (val: number | undefined) => val === undefined || Number.isInteger(val);
+
 export const getLabelValueValidations = (t: TFunction) => [
   { key: 'labelValueStartAndEnd', message: t('Starts and ends with a letter or a number.') },
   {
@@ -303,31 +305,37 @@ export const validFleetRolloutPolicySchema = (t: TFunction) => {
   return Yup.object()
     .shape({
       isAdvanced: Yup.boolean().required(),
-      updateTimeout: Yup.number().required('Update timeout is required'),
+      updateTimeout: Yup.number()
+        .required('Update timeout is required')
+        .test('not-decimal', t('Cannot be decimal'), isInteger),
       batches: Yup.array()
         .of(
-          Yup.object<BatchForm>().shape({
-            selector: validLabelsSchema(t),
-            limitType: Yup.string()
-              .oneOf([BatchLimitType.BatchLimitAbsoluteNumber, BatchLimitType.BatchLimitPercent])
-              .required(),
-            limit: Yup.number()
-              .test('correct-percentage', t('Percentage must be between 1 and 100.'), (num, { parent }) => {
-                if (num === undefined) {
+          Yup.lazy((values: BatchForm) =>
+            Yup.object<BatchForm>().shape({
+              selector: validLabelsSchema(t),
+              limitType: Yup.string()
+                .oneOf([BatchLimitType.BatchLimitAbsoluteNumber, BatchLimitType.BatchLimitPercent])
+                .required(),
+              limit: Yup.number()
+                .test('correct-percentage', t('Percentage must be between 1 and 100.'), (num) => {
+                  if (num === undefined) {
+                    return true;
+                  }
+                  if (values.limitType === BatchLimitType.BatchLimitPercent && num > 100) {
+                    return false;
+                  }
                   return true;
-                }
-                if ((parent as BatchForm).limitType === BatchLimitType.BatchLimitPercent && num > 100) {
-                  return false;
-                }
-                return true;
-              })
-              // When an absolute number, we can only restrict the minimum value
-              .min(1, t('Value must be greater or equal than 1')),
-            successThreshold: Yup.number()
-              .required('Success threshold is required')
-              .min(1, t('Success threshold must be between 1 and 100'))
-              .max(100, t('Success threshold must be between 1 and 100')),
-          }),
+                })
+                .test('not-decimal', t('Cannot be decimal'), isInteger)
+                // When an absolute number, we can only restrict the minimum value
+                .min(1, t('Value must be greater or equal than 1')),
+              successThreshold: Yup.number()
+                .required('Success threshold is required')
+                .min(1, t('Success threshold must be between 1 and 100'))
+                .max(100, t('Success threshold must be between 1 and 100'))
+                .test('not-decimal', t('Cannot be decimal'), isInteger),
+            }),
+          ),
         )
         .required(),
     })
@@ -360,8 +368,8 @@ export const validFleetDisruptionBudgetSchema = (t: TFunction) => {
   return Yup.object()
     .shape({
       isAdvanced: Yup.boolean().required(),
-      minAvailable: Yup.number(),
-      maxUnavailable: Yup.number(),
+      minAvailable: Yup.number().test('not-decimal', t('Number of devices cannot be decimal'), isInteger),
+      maxUnavailable: Yup.number().test('not-decimal', t('Number of devices cannot be decimal'), isInteger),
       groupBy: validGroupLabelKeysSchema(t),
     })
     .test(

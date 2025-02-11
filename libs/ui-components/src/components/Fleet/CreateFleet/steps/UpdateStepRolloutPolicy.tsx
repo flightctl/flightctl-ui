@@ -53,21 +53,21 @@ const RolloutPolicyBatch = ({ index }: { index: number }) => {
           <LabelsField aria-label={t('Label selector')} name={`rolloutPolicy.batches.${index}.selector`} />
         </FormGroup>
         <FormGroup label={t('Select a subset using')}>
-          <Flex flexWrap={{ default: 'nowrap' }} alignItems={{ default: 'alignItemsFlexEnd' }}>
-            <FlexItem>
+          <Split hasGutter>
+            <SplitItem>
               <FormSelect items={items} name={`rolloutPolicy.batches.${index}.limitType`} />
-            </FlexItem>
-            <FlexItem>
+            </SplitItem>
+            <SplitItem>
               <NumberField
                 aria-label={t('Numeric selector')}
                 name={`rolloutPolicy.batches.${index}.limit`}
                 min={1}
                 max={isPercent ? 100 : undefined}
                 widthChars={isPercent ? 3 : 8}
+                unit={isPercent ? '%' : undefined}
               />
-            </FlexItem>
-            {isPercent && <FlexItem>%</FlexItem>}
-          </Flex>
+            </SplitItem>
+          </Split>
         </FormGroup>
         <FormGroup
           isRequired
