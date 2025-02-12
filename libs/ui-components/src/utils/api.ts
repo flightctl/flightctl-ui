@@ -1,4 +1,14 @@
-import { Condition, ConditionStatus, ConditionType, ListMeta, ObjectMeta } from '@flightctl/types';
+import {
+  Condition,
+  ConditionStatus,
+  ConditionType,
+  DeviceList,
+  EnrollmentRequestList,
+  FleetList,
+  ObjectMeta,
+  RepositoryList,
+  ResourceSyncList,
+} from '@flightctl/types';
 
 import { AnnotationType, ApiQuery, FlightControlQuery, MetricsQuery } from '../types/extraTypes';
 import { getPeriodTimestamps } from '../utils/metrics';
@@ -42,12 +52,9 @@ const getRequestQueryString = (queryObj: FlightControlQuery) => {
   return getMetricsQueryString(queryObj);
 };
 
-export interface ApiList<R> {
-  items: Array<R>;
-  metadata: ListMeta;
-}
+export type ApiList = EnrollmentRequestList | DeviceList | FleetList | RepositoryList | ResourceSyncList;
 
-const getApiListCount = <T>(listResponse: ApiList<T> | undefined): number | undefined => {
+const getApiListCount = (listResponse: ApiList | undefined): number | undefined => {
   if (listResponse === undefined) {
     return undefined;
   }

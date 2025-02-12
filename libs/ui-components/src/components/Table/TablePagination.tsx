@@ -5,6 +5,7 @@ import { Pagination, PaginationVariant, Spinner } from '@patternfly/react-core';
 import { PAGE_SIZE } from '../../constants';
 import { PaginationDetails } from '../../hooks/useTablePagination';
 import { useTranslation } from '../../hooks/useTranslation';
+import { ApiList } from '../../utils/api';
 
 const PaginationTemplate = ({
   currentPage,
@@ -16,26 +17,27 @@ const PaginationTemplate = ({
   isUpdating: boolean;
 }) => {
   const { t } = useTranslation();
-  const totalPages = String(Math.ceil((itemCount || 0) / PAGE_SIZE));
+  const pagesCount = Math.ceil((itemCount || 0) / PAGE_SIZE);
 
-  const pageNum = `${currentPage}`;
+  const page = String(currentPage <= pagesCount ? currentPage : 0);
+  const totalPages = String(pagesCount);
   return (
     <>
       {isUpdating && <Spinner size="sm" />}{' '}
       <Trans t={t}>
-        {pageNum} of <strong>{totalPages}</strong>
+        {page} of <strong>{totalPages}</strong>
       </Trans>
     </>
   );
 };
 
-const TablePagination = ({
+function TablePagination<T extends ApiList>({
   isUpdating,
   pagination,
 }: {
-  pagination: Pick<PaginationDetails, 'currentPage' | 'setCurrentPage' | 'itemCount'>;
+  pagination: Pick<PaginationDetails<T>, 'currentPage' | 'setCurrentPage' | 'itemCount'>;
   isUpdating: boolean;
-}) => {
+}) {
   const { t } = useTranslation();
   const { itemCount, currentPage, setCurrentPage } = pagination;
 
@@ -69,6 +71,6 @@ const TablePagination = ({
       onSetPage={onSetPage}
     />
   );
-};
+}
 
 export default TablePagination;

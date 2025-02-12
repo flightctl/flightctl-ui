@@ -1,6 +1,6 @@
 import { useDebounce } from 'use-debounce';
 
-import { Device, DeviceList, DevicesSummary } from '@flightctl/types';
+import { Device, DeviceLifecycleStatusType, DeviceList, DevicesSummary } from '@flightctl/types';
 import { FilterSearchParams } from '../../../utils/status/devices';
 import * as queryUtils from '../../../utils/query';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
@@ -12,16 +12,28 @@ type DevicesEndpointArgs = {
   nameOrAlias?: string;
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
+  onlyDecommissioned?: boolean;
   labels?: FlightCtlLabel[];
   summaryOnly?: boolean;
   nextContinue?: string;
 };
+
+const enrolledStatuses = [
+  DeviceLifecycleStatusType.DeviceLifecycleStatusEnrolled,
+  DeviceLifecycleStatusType.DeviceLifecycleStatusUnknown,
+];
+
+const decommissionedStatuses = [
+  DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioned,
+  DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
+];
 
 const getDevicesEndpoint = ({
   nameOrAlias,
   ownerFleets,
   activeStatuses,
   labels,
+  onlyDecommissioned,
   nextContinue,
   summaryOnly,
 }: DevicesEndpointArgs) => {
@@ -45,6 +57,12 @@ const getDevicesEndpoint = ({
     );
   }
 
+  if (onlyDecommissioned) {
+    queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', decommissionedStatuses);
+  } else if (summaryOnly) {
+    queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', enrolledStatuses);
+  }
+
   const params = new URLSearchParams();
   if (fieldSelectors.length > 0) {
     params.set('fieldSelector', fieldSelectors.join(','));
@@ -65,6 +83,7 @@ const getDevicesEndpoint = ({
 export const useDevicesEndpoint = (args: DevicesEndpointArgs): [string, boolean] => {
   const endpoint = getDevicesEndpoint(args);
   const [devicesEndpointDebounced] = useDebounce(endpoint, 1000);
+
   return [devicesEndpointDebounced, endpoint !== devicesEndpointDebounced];
 };
 
@@ -88,6 +107,7 @@ export const useDevices = (args: {
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
+  onlyDecommissioned: boolean;
   nextContinue?: string;
   onPageFetched?: (data: DeviceList) => void;
 }): [Device[], boolean, unknown, boolean, VoidFunction] => {

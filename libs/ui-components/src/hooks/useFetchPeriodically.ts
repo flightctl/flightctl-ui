@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FlightControlQuery } from '../types/extraTypes';
-import { getQueryStringHash, getRequestQueryString, isApiQuery } from '../utils/api';
+import { getQueryStringHash, getRequestQueryString } from '../utils/api';
 
 import { useFetch } from './useFetch';
 
@@ -18,11 +18,10 @@ export const useFetchPeriodically = <R>(
   const ref = React.useRef(0);
   const prevResolvedQueryHash = React.useRef<string>();
 
-  const { get, getMetrics } = useFetch();
+  const { get } = useFetch();
 
   // When the query parameters change, the hash will too. We must perform a refetch outside the timeout loop
   const queryStringHash = getQueryStringHash(query);
-  const isAPI = isApiQuery(query);
 
   // Callback that generates the updated query for refreshes. It may provide updated values for parameters such as from/to for metric queries
   const getRequestQuery = React.useCallback(() => getRequestQueryString(query), [query]);
@@ -40,18 +39,19 @@ export const useFetchPeriodically = <R>(
               setIsUpdating(true);
             }
 
-            const fetchFn = isAPI ? get : getMetrics;
-            const data = await fetchFn(requestQuery, abortController.signal);
+            const data = (await get<R>(requestQuery, abortController.signal)) as R;
             if (isLoading) {
               setIsLoading(false);
             }
             setIsUpdating(false);
-            // eslint-disable-next-line
-            setData(isAPI ? data : (data as any).data.result);
-            setError(undefined);
-            if (isAPI && onFetchComplete) {
-              onFetchComplete(data as R);
+
+            if (onFetchComplete) {
+              onFetchComplete(data); // Data might be mutated at this point
+              setData(data);
+            } else {
+              setData(data);
             }
+            setError(undefined);
           } catch (err) {
             // aborting fetch trows 'AbortError', we can ignore it
             if (abortController.signal.aborted) {
@@ -78,7 +78,7 @@ export const useFetchPeriodically = <R>(
       abortController?.abort();
     };
     // eslint-disable-next-line
-  }, [get, getMetrics, forceUpdate, queryStringHash, isAPI]);
+  }, [get, forceUpdate, queryStringHash]);
 
   const refetch = React.useCallback(() => setForceUpdate((val) => val + 1), []);
 

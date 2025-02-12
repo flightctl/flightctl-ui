@@ -4,8 +4,9 @@ import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 import { Device } from '@flightctl/types';
 import DeviceFleet from '../DeviceDetails/DeviceFleet';
 import { timeSinceText } from '../../../utils/dates';
-import { getDeviceFleet } from '../../../utils/devices';
-import { DeleteListActionResult } from '../../ListPage/types';
+import { getDecommissionDisabledReason, getEditDisabledReason } from '../../../utils/devices';
+import { getDisabledTooltipProps } from '../../../utils/tooltip';
+import { ListAction } from '../../ListPage/types';
 import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
 import DeviceStatus from '../../Status/DeviceStatus';
 import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
@@ -13,37 +14,31 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import ResourceLink from '../../common/ResourceLink';
 
-type DeviceTableRowProps = {
+type EnrolledDeviceTableRowProps = {
   device: Device;
-  deleteAction: DeleteListActionResult['deleteAction'];
   rowIndex: number;
   onRowSelect: (device: Device) => OnSelect;
   isRowSelected: (device: Device) => boolean;
-  canDelete: boolean;
   canEdit: boolean;
+  canDecommission: boolean;
+  decommissionAction: ListAction;
 };
 
-const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
+const EnrolledDeviceTableRow = ({
   device,
-  deleteAction,
   rowIndex,
   onRowSelect,
   isRowSelected,
-  canDelete,
   canEdit,
-}) => {
+  canDecommission,
+  decommissionAction,
+}: EnrolledDeviceTableRowProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const deviceName = device.metadata.name as string;
   const deviceAlias = device.metadata.labels?.alias;
-  const editActionProps = getDeviceFleet(device?.metadata)
-    ? {
-        isAriaDisabled: true,
-        tooltipProps: {
-          content: t('Device is bound to a fleet. Its configurations cannot be edited'),
-        },
-      }
-    : undefined;
+  const editActionProps = getDisabledTooltipProps(getEditDisabledReason(device, t));
+  const decommissionDisabledReason = getDecommissionDisabledReason(device, t);
 
   return (
     <Tr>
@@ -89,11 +84,12 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
               title: t('View device details'),
               onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
             },
-            ...(canDelete
+            ...(canDecommission
               ? [
-                  deleteAction({
+                  decommissionAction({
                     resourceId: deviceName,
                     resourceName: deviceAlias,
+                    disabledReason: decommissionDisabledReason,
                   }),
                 ]
               : []),
@@ -104,4 +100,4 @@ const DeviceTableRow: React.FC<DeviceTableRowProps> = ({
   );
 };
 
-export default DeviceTableRow;
+export default EnrolledDeviceTableRow;

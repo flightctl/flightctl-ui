@@ -65,6 +65,7 @@ const Table: TableFC = ({
         <Tr>
           {!emptyData && onSelectAll && (
             <Th
+              aria-label={t('Select all rows')}
               select={{
                 onSelect: (_event, isSelecting) => onSelectAll(isSelecting),
                 isSelected: !!isAllSelected,
@@ -72,7 +73,7 @@ const Table: TableFC = ({
             />
           )}
           {columns.map((c) => (
-            <Th key={c.name} {...c.thProps}>
+            <Th key={c.name} {...c.thProps} aria-label={c.name}>
               {c.helperText ? (
                 <WithHelperText ariaLabel={c.name} showLabel content={c.helperText} triggerAction="hover" />
               ) : (

@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { DropdownItem, DropdownList, Nav, NavList } from '@patternfly/react-core';
+import { Button, DropdownItem, DropdownList, Nav, NavList } from '@patternfly/react-core';
 
-import { Device } from '@flightctl/types';
+import { Device, DeviceDecommission, DeviceDecommissionTargetType } from '@flightctl/types';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { useFetch } from '../../../hooks/useFetch';
+import { getDisabledTooltipProps } from '../../../utils/tooltip';
 import DetailsPage from '../../DetailsPage/DetailsPage';
-import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
+import DetailsPageActions, { useDecommissionAction, useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -13,7 +14,7 @@ import DeviceDetailsTab from './DeviceDetailsTab';
 import TerminalTab from './TerminalTab';
 import NavItem from '../../NavItem/NavItem';
 import DeviceStatusDebugModal from './DeviceStatusDebugModal';
-import { getDeviceFleet } from '../../../utils/devices';
+import { getEditDisabledReason, isDeviceEnrolled } from '../../../utils/devices';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import PageWithPermissions from '../../common/PageWithPermissions';
@@ -26,17 +27,21 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
     router: { useParams, Routes, Route, Navigate },
   } = useAppContext();
   const { deviceId } = useParams() as { deviceId: string };
+  const navigate = useNavigate();
+  const { put, remove } = useFetch();
   const [device, loading, error, refetch] = useFetchPeriodically<Required<Device>>({ endpoint: `devices/${deviceId}` });
+
   const [showDebugInfo, setShowDebugInfo] = React.useState<boolean>(false);
 
-  const navigate = useNavigate();
-  const { remove } = useFetch();
-
   const deviceAlias = device?.metadata.labels?.alias || deviceId;
+  const isEnrolled = device && isDeviceEnrolled(device);
 
+  const [hasTerminalAccess] = useAccessReview(RESOURCE.DEVICE_CONSOLE, VERB.GET);
   const [canDelete] = useAccessReview(RESOURCE.DEVICE, VERB.DELETE);
   const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
-  const [canOpenTerminal] = useAccessReview(RESOURCE.DEVICE_CONSOLE, VERB.GET);
+  const [canDecommission] = useAccessReview(RESOURCE.DEVICE_DECOMMISSION, VERB.UPDATE);
+
+  const canOpenTerminal = hasTerminalAccess && isEnrolled;
 
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {
@@ -45,15 +50,20 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
     },
     resourceName: deviceAlias,
     resourceType: 'device',
+    buttonLabel: isEnrolled ? undefined : t('Delete forever'),
   });
-  const editActionProps = getDeviceFleet(device?.metadata || {})
-    ? {
-        isAriaDisabled: true,
-        tooltipProps: {
-          content: t('Device is bound to a fleet. Its configurations cannot be edited'),
-        },
-      }
-    : undefined;
+
+  const { decommissionAction, decommissionModal } = useDecommissionAction({
+    onDecommission: async (target: DeviceDecommissionTargetType) => {
+      await put<DeviceDecommission>(`devices/${deviceId}/decommission`, {
+        target,
+      });
+      refetch();
+      navigate(ROUTE.DEVICES);
+    },
+  });
+
+  const editActionProps = device ? getDisabledTooltipProps(getEditDisabledReason(device, t)) : undefined;
 
   return (
     <DetailsPage
@@ -73,26 +83,34 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
         </Nav>
       }
       actions={
-        <DetailsPageActions>
-          <DropdownList>
-            {canEdit && (
+        isEnrolled ? (
+          <DetailsPageActions>
+            <DropdownList>
+              {canEdit && (
+                <DropdownItem
+                  onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}
+                  {...editActionProps}
+                >
+                  {t('Edit device configurations')}
+                </DropdownItem>
+              )}
               <DropdownItem
-                onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}
-                {...editActionProps}
+                onClick={() => {
+                  setShowDebugInfo(!showDebugInfo);
+                }}
               >
-                {t('Edit device configurations')}
+                {t('View status debug information')}
               </DropdownItem>
-            )}
-            {canDelete && deleteAction}
-            <DropdownItem
-              onClick={() => {
-                setShowDebugInfo(!showDebugInfo);
-              }}
-            >
-              {t('View status debug information')}
-            </DropdownItem>
-          </DropdownList>
-        </DetailsPageActions>
+              {canDecommission && decommissionAction}
+            </DropdownList>
+          </DetailsPageActions>
+        ) : (
+          canDelete && (
+            <Button aria-label={t('Delete device forever')} variant="danger">
+              {deleteAction}
+            </Button>
+          )
+        )
       }
     >
       {device && (
@@ -109,7 +127,8 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
           {!hideTerminal && canOpenTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
         </Routes>
       )}
-      {deleteModal}
+
+      {deleteModal || decommissionModal}
       {device && showDebugInfo && (
         <DeviceStatusDebugModal
           status={device.status}

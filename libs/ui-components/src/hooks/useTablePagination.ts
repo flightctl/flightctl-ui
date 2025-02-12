@@ -3,15 +3,17 @@ import * as React from 'react';
 import { ApiList } from '../utils/api';
 import { PAGE_SIZE } from '../constants';
 
-export type PaginationDetails = {
-  onPageFetched: (list: ApiList<unknown>) => void;
+export type PaginationDetails<T extends ApiList> = {
+  onPageFetched: (data: T) => void;
   currentPage: number;
   setCurrentPage: (page: number) => void;
   nextContinue: string;
   itemCount: number;
 };
 
-export const useTablePagination = (): PaginationDetails => {
+type ProcessData<T> = (data: T) => void;
+
+export const useTablePagination = <T extends ApiList>(processor?: ProcessData<T>): PaginationDetails<T> => {
   const [currentPage, setCurrentPage] = React.useState<number>(1);
   const [continueTokens, setContinueTokens] = React.useState<string[]>([]);
   const [itemCount, setItemCount] = React.useState<number>(0);
@@ -19,11 +21,15 @@ export const useTablePagination = (): PaginationDetails => {
   const nextContinue = currentPage <= 1 ? '' : continueTokens[currentPage - 2];
 
   const onPageFetched = React.useCallback(
-    (apiList: ApiList<unknown>) => {
+    (data: T) => {
+      if (processor) {
+        // Can mutate the data
+        processor(data);
+      }
       const prevItems = (currentPage - 1) * PAGE_SIZE;
-      setItemCount(prevItems + (apiList?.items.length || 0) + (apiList.metadata.remainingItemCount || 0));
+      setItemCount(prevItems + (data?.items.length || 0) + (data.metadata.remainingItemCount || 0));
 
-      const nextToken = apiList.metadata?.continue || '';
+      const nextToken = data.metadata?.continue || '';
       if (currentPage === 1) {
         // Always reset the list when at first page
         setContinueTokens([nextToken]);
@@ -37,7 +43,7 @@ export const useTablePagination = (): PaginationDetails => {
         );
       }
     },
-    [setContinueTokens, continueTokens, setItemCount, currentPage],
+    [setContinueTokens, continueTokens, setItemCount, currentPage, processor],
   );
 
   return { onPageFetched, currentPage, setCurrentPage, nextContinue, itemCount };

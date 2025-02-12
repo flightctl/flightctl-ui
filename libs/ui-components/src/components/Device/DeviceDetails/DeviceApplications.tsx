@@ -12,8 +12,8 @@ import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsP
 
 type DeviceDetailsTabProps = {
   device: Required<Device>;
-  refetch: VoidFunction;
   canEdit: boolean;
+  refetch?: VoidFunction;
 };
 
 const DeviceApplications = ({ device, refetch, canEdit }: React.PropsWithChildren<DeviceDetailsTabProps>) => {
@@ -25,7 +25,7 @@ const DeviceApplications = ({ device, refetch, canEdit }: React.PropsWithChildre
 
   const onClose = (hasChanges?: boolean, addedUnits?: string[]) => {
     if (hasChanges) {
-      refetch();
+      refetch?.();
     }
     if (addedUnits?.length) {
       const allAddedUnitDates = { ...addedSystemdDates };
@@ -56,7 +56,7 @@ const DeviceApplications = ({ device, refetch, canEdit }: React.PropsWithChildre
           if (patches.length > 0) {
             setIsUpdating(true);
             await patch(`devices/${device.metadata.name}`, patches);
-            refetch();
+            refetch?.();
             setIsUpdating(false);
           }
         };
