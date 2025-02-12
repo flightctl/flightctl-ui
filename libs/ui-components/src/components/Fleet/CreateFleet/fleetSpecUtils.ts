@@ -3,7 +3,7 @@ import { Duration, FleetSpec, Percentage } from '@flightctl/types';
 import { BatchLimitType } from './types';
 import { fromAPILabel } from '../../../utils/labels';
 
-const DEFAULT_BACKEND_UPDATE_TIMEOUT = '1140m'; // 24h, expressed in minutes
+export const DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES = 1140; // 24h, expressed in minutes
 const DEFAULT_BACKEND_SUCCESS_THRESHOLD_PERCENTAGE = '90%';
 
 const numberValue = (value: Percentage | number | undefined) => {
@@ -46,7 +46,7 @@ export const getRolloutPolicyValues = (fleetSpec?: FleetSpec) => {
   }));
 
   // If the policy does not specify the timeout, we set the backend's default as the field is required in the UI
-  const updateTimeout = fleetSpec?.rolloutPolicy?.defaultUpdateTimeout || DEFAULT_BACKEND_UPDATE_TIMEOUT;
+  const updateTimeout = fleetSpec?.rolloutPolicy?.defaultUpdateTimeout || `${DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES}m`;
   return { isAdvanced: batches.length > 0, batches, updateTimeout: durationToMinutes(updateTimeout) };
 };
 
