@@ -27,6 +27,7 @@ import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
 import { EnrolledDevicesEmptyState } from './DevicesEmptyStates';
 import DeviceTableToolbar from './DeviceTableToolbar';
 import EnrolledDeviceTableRow from './EnrolledDeviceTableRow';
+import { FilterSearchParams } from '../../../utils/status/devices';
 
 interface EnrolledDeviceTableProps {
   devices: Array<Device>;
@@ -144,6 +145,16 @@ const EnrolledDevicesTable = ({
             label={t('Show only decommissioned devices')}
             isChecked={false}
             onChange={() => {
+              if (hasFiltersEnabled) {
+                setActiveStatuses({
+                  [FilterSearchParams.AppStatus]: [],
+                  [FilterSearchParams.DeviceStatus]: [],
+                  [FilterSearchParams.UpdatedStatus]: [],
+                });
+                setOwnerFleets([]);
+                setNameOrAlias('');
+                setSelectedLabels([]);
+              }
               setOnlyDecommissioned(true);
             }}
             ouiaId={t('Show only decommissioned devices')}
