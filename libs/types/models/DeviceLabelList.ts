@@ -2,10 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Error = {
-  /**
-   * Error message.
-   */
-  message: string;
-};
-
+/**
+ * A list of distinct labels, where each item is formatted as "key=value".
+ *
+ */
+export type DeviceLabelList = Array<string>;

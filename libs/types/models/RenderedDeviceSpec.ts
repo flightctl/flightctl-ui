@@ -39,7 +39,10 @@ export type RenderedDeviceSpec = {
    * Array of resource monitor configurations.
    */
   resources?: Array<ResourceMonitor>;
-  console?: DeviceConsole;
+  /**
+   * The list of active console sessions.
+   */
+  consoles?: Array<DeviceConsole>;
   decommission?: DeviceDecommission;
 };
 

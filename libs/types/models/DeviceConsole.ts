@@ -7,9 +7,9 @@
  */
 export type DeviceConsole = {
   /**
-   * The gRPC endpoint for the console connection.
+   * Additional session metadata in the form of key=value pairs, can be used to initialize the type of terminal, console to be used, etc.
    */
-  gRPCEndpoint: string;
+  sessionMetadata: string;
   /**
    * The session ID for the console connection.
    */
