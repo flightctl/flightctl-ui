@@ -91,7 +91,7 @@ const UpdatePolicyStep = () => {
   };
 
   return (
-    <Grid span={8}>
+    <Grid lg={8}>
       <FlightCtlForm>
         <FormGroup>
           <Checkbox
