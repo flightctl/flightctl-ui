@@ -7,7 +7,7 @@
  */
 export type DeviceConfigStatus = {
   /**
-   * Version of the device rendered config.
+   * Rendered version of the device config.
    */
   renderedVersion: string;
 };

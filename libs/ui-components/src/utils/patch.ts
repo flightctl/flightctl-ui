@@ -1,4 +1,10 @@
-import { ApplicationSpec, BatchSequence, DisruptionBudget, PatchRequest, RolloutPolicy } from '@flightctl/types';
+import {
+  ApplicationProviderSpec,
+  BatchSequence,
+  DisruptionBudget,
+  PatchRequest,
+  RolloutPolicy,
+} from '@flightctl/types';
 import isNil from 'lodash/isNil';
 
 import { FlightCtlLabel } from '../types/extraTypes';
@@ -301,7 +307,7 @@ export const getLabelPatches = (
   return patches;
 };
 
-export const toAPIApplication = (app: ApplicationFormSpec): ApplicationSpec => {
+export const toAPIApplication = (app: ApplicationFormSpec): ApplicationProviderSpec => {
   const envVars = app.variables.reduce((acc, variable) => {
     acc[variable.name] = variable.value;
     return acc;
@@ -322,7 +328,7 @@ export const toAPIApplication = (app: ApplicationFormSpec): ApplicationSpec => {
 
 export const getApplicationPatches = (
   basePath: string,
-  currentApps: ApplicationSpec[],
+  currentApps: ApplicationProviderSpec[],
   updatedApps: ApplicationFormSpec[],
 ) => {
   const patches: PatchRequest = [];

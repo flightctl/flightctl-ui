@@ -1,9 +1,9 @@
-import { ApplicationSpec } from '@flightctl/types';
+import { ApplicationProviderSpec } from '@flightctl/types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { SpecConfigTemplate } from '../../../types/deviceSpec';
 import { SystemdUnitFormValue } from '../SystemdUnitsModal/TrackSystemdUnitsForm';
 
-export type ApplicationFormSpec = Omit<ApplicationSpec, 'envVars'> & {
+export type ApplicationFormSpec = Omit<ApplicationProviderSpec, 'envVars'> & {
   variables: { name: string; value: string }[];
 };
 

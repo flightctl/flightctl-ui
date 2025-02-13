@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ApplicationSpec } from './ApplicationSpec';
+import type { ApplicationProviderSpec } from './ApplicationProviderSpec';
 import type { ConfigProviderSpec } from './ConfigProviderSpec';
+import type { DeviceConsole } from './DeviceConsole';
 import type { DeviceDecommission } from './DeviceDecommission';
 import type { DeviceOsSpec } from './DeviceOsSpec';
 import type { DeviceUpdatePolicySpec } from './DeviceUpdatePolicySpec';
@@ -19,9 +20,9 @@ export type DeviceSpec = {
    */
   config?: Array<ConfigProviderSpec>;
   /**
-   * List of applications.
+   * List of application providers.
    */
-  applications?: Array<ApplicationSpec>;
+  applications?: Array<ApplicationProviderSpec>;
   /**
    * The systemd services to monitor.
    */
@@ -35,6 +36,10 @@ export type DeviceSpec = {
    * Array of resource monitor configurations.
    */
   resources?: Array<ResourceMonitor>;
+  /**
+   * The list of active console sessions.
+   */
+  consoles?: Array<DeviceConsole>;
   decommissioning?: DeviceDecommission;
 };
 

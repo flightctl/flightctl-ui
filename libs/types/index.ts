@@ -4,7 +4,7 @@
 /* eslint-disable */
 
 export type { ApplicationEnvVars } from './models/ApplicationEnvVars';
-export type { ApplicationSpec } from './models/ApplicationSpec';
+export type { ApplicationProviderSpec } from './models/ApplicationProviderSpec';
 export { ApplicationsSummaryStatusType } from './models/ApplicationsSummaryStatusType';
 export { ApplicationStatusType } from './models/ApplicationStatusType';
 export type { AuthConfig } from './models/AuthConfig';
@@ -89,8 +89,6 @@ export type { MemoryResourceMonitorSpec } from './models/MemoryResourceMonitorSp
 export type { ObjectMeta } from './models/ObjectMeta';
 export type { PatchRequest } from './models/PatchRequest';
 export type { Percentage } from './models/Percentage';
-export type { RenderedApplicationSpec } from './models/RenderedApplicationSpec';
-export type { RenderedDeviceSpec } from './models/RenderedDeviceSpec';
 export type { Repository } from './models/Repository';
 export type { RepositoryList } from './models/RepositoryList';
 export type { RepositorySpec } from './models/RepositorySpec';
