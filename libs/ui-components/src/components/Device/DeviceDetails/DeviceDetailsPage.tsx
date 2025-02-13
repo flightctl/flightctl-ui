@@ -34,7 +34,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
   const [showDebugInfo, setShowDebugInfo] = React.useState<boolean>(false);
 
   const deviceAlias = device?.metadata.labels?.alias || deviceId;
-  const isEnrolled = device && isDeviceEnrolled(device);
+  const isEnrolled = !device || isDeviceEnrolled(device);
 
   const [hasTerminalAccess] = useAccessReview(RESOURCE.DEVICE_CONSOLE, VERB.GET);
   const [canDelete] = useAccessReview(RESOURCE.DEVICE, VERB.DELETE);
@@ -106,7 +106,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
           </DetailsPageActions>
         ) : (
           canDelete && (
-            <Button aria-label={t('Delete device forever')} variant="danger">
+            <Button component="a" aria-label={t('Delete device forever')} variant="danger" tabIndex={0}>
               {deleteAction}
             </Button>
           )
