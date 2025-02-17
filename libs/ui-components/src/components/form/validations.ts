@@ -274,7 +274,9 @@ export const validApplicationsSchema = (t: TFunction) => {
     .of(
       Yup.object().shape({
         name: Yup.string(),
-        image: Yup.string().required(t('Image is required.')),
+        image: Yup.string()
+          .required(t('Image is required.'))
+          .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
         variables: Yup.array()
           .of(
             Yup.object().shape({
