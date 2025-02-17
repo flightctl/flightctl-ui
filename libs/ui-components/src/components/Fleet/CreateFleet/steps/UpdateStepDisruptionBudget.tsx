@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { FormGroup, Grid, GridItem, Stack, StackItem } from '@patternfly/react-core';
+import { Flex, FlexItem, FormGroup, Stack, StackItem } from '@patternfly/react-core';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import NumberField from '../../../form/NumberField';
@@ -15,7 +15,7 @@ const UpdateStepDisruptionBudget = () => {
   const [, meta] = useField<DisruptionBudgetForm>('disruptionBudget');
 
   return (
-    <Grid hasGutter>
+    <>
       <FormGroup
         label={
           <WithHelperText
@@ -37,8 +37,8 @@ const UpdateStepDisruptionBudget = () => {
         />
       </FormGroup>
       <FormGroup>
-        <Grid hasGutter>
-          <GridItem md={6}>
+        <Flex>
+          <FlexItem>
             <FormGroup
               label={
                 <WithHelperText
@@ -56,8 +56,8 @@ const UpdateStepDisruptionBudget = () => {
                 min={1}
               />
             </FormGroup>
-          </GridItem>
-          <GridItem md={6}>
+          </FlexItem>
+          <FlexItem>
             <FormGroup
               label={
                 <WithHelperText
@@ -75,16 +75,12 @@ const UpdateStepDisruptionBudget = () => {
                 min={1}
               />
             </FormGroup>
-          </GridItem>
-          {/* Show error when both numberic values are unset */}
-          {typeof meta.error === 'string' && (
-            <GridItem md={12}>
-              <ErrorHelperText meta={meta} />
-            </GridItem>
-          )}
-        </Grid>
+          </FlexItem>
+          {/* Show error when both numeric values are unset */}
+          {typeof meta.error === 'string' && <ErrorHelperText meta={meta} />}
+        </Flex>
       </FormGroup>
-    </Grid>
+    </>
   );
 };
 
