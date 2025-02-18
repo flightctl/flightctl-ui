@@ -18,5 +18,9 @@ export type DeviceSystemInfo = {
    * The Operating System reported by the device.
    */
   operatingSystem: string;
+  /**
+   * The Agent version.
+   */
+  agentVersion: string;
 };
 

@@ -4,12 +4,9 @@
 /* eslint-disable */
 import type { ApplicationEnvVars } from './ApplicationEnvVars';
 import type { ImageApplicationProvider } from './ImageApplicationProvider';
-/**
- * RenderedApplicationSpec describes the rendered and self-contained specification of an application.
- */
-export type RenderedApplicationSpec = (ApplicationEnvVars & {
+export type ApplicationProviderSpec = (ApplicationEnvVars & {
   /**
-   * An application name.
+   * The name of the application must be between 1 and 253 characters and start with a letter or number.
    */
   name?: string;
 } & ImageApplicationProvider);

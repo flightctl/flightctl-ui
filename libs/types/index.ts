@@ -4,7 +4,7 @@
 /* eslint-disable */
 
 export type { ApplicationEnvVars } from './models/ApplicationEnvVars';
-export type { ApplicationSpec } from './models/ApplicationSpec';
+export type { ApplicationProviderSpec } from './models/ApplicationProviderSpec';
 export { ApplicationsSummaryStatusType } from './models/ApplicationsSummaryStatusType';
 export { ApplicationStatusType } from './models/ApplicationStatusType';
 export type { AuthConfig } from './models/AuthConfig';
@@ -30,6 +30,7 @@ export type { DeviceDecommission } from './models/DeviceDecommission';
 export { DeviceDecommissionTargetType } from './models/DeviceDecommissionTargetType';
 export type { DeviceIntegrityStatus } from './models/DeviceIntegrityStatus';
 export { DeviceIntegrityStatusSummaryType } from './models/DeviceIntegrityStatusSummaryType';
+export type { DeviceLabelList } from './models/DeviceLabelList';
 export { DeviceLifecycleHookType } from './models/DeviceLifecycleHookType';
 export type { DeviceLifecycleStatus } from './models/DeviceLifecycleStatus';
 export { DeviceLifecycleStatusType } from './models/DeviceLifecycleStatusType';
@@ -60,7 +61,6 @@ export type { EnrollmentRequestStatus } from './models/EnrollmentRequestStatus';
 export type { EnrollmentService } from './models/EnrollmentService';
 export type { EnrollmentServiceAuth } from './models/EnrollmentServiceAuth';
 export type { EnrollmentServiceService } from './models/EnrollmentServiceService';
-export type { Error } from './models/Error';
 export { FileOperation } from './models/FileOperation';
 export { FileSpec } from './models/FileSpec';
 export type { Fleet } from './models/Fleet';
@@ -89,8 +89,6 @@ export type { MemoryResourceMonitorSpec } from './models/MemoryResourceMonitorSp
 export type { ObjectMeta } from './models/ObjectMeta';
 export type { PatchRequest } from './models/PatchRequest';
 export type { Percentage } from './models/Percentage';
-export type { RenderedApplicationSpec } from './models/RenderedApplicationSpec';
-export type { RenderedDeviceSpec } from './models/RenderedDeviceSpec';
 export type { Repository } from './models/Repository';
 export type { RepositoryList } from './models/RepositoryList';
 export type { RepositorySpec } from './models/RepositorySpec';
