@@ -1,22 +1,26 @@
 import {
   ApplicationProviderSpec,
   BatchSequence,
+  DeviceUpdatePolicySpec,
   DisruptionBudget,
   PatchRequest,
   RolloutPolicy,
+  UpdateSchedule,
 } from '@flightctl/types';
 import isNil from 'lodash/isNil';
 
 import { FlightCtlLabel } from '../types/extraTypes';
 import { toAPILabel } from './labels';
-import { ApplicationFormSpec } from '../components/Device/EditDeviceWizard/types';
 import {
+  ApplicationFormSpec,
   BatchForm,
   BatchLimitType,
   DisruptionBudgetForm,
   FleetFormValues,
   RolloutPolicyForm,
-} from '../components/Fleet/CreateFleet/types';
+  UpdatePolicyForm,
+} from '../types/deviceSpec';
+import { getStartGraceDuration, getUpdateCronExpression, localDeviceTimezone } from './time';
 
 export const appendJSONPatch = <V = unknown>({
   patches,
@@ -131,6 +135,112 @@ const toApiDisruptionBudget = (disruptionValues: DisruptionBudgetForm) => {
   }
 
   return data;
+};
+
+export const schedulesAreEqual = (a: UpdateSchedule | undefined, b: UpdateSchedule | undefined) => {
+  if (!a && !b) {
+    return true;
+  }
+  if (!a || !b) {
+    return false;
+  }
+  if (a.at !== b.at) {
+    return false;
+  }
+  if ((a.timeZone || localDeviceTimezone) !== (b.timeZone || localDeviceTimezone)) {
+    return false;
+  }
+  return (a.startGraceDuration || '0s') === (b.startGraceDuration || '0s');
+};
+
+export const updatePolicyFormToApi = (form: Required<UpdatePolicyForm>) => {
+  const downloadSchedule = {
+    at: getUpdateCronExpression(form.downloadStartsAt, form.downloadScheduleMode, form.downloadWeekDays),
+    startGraceDuration: getStartGraceDuration(form.downloadStartsAt, form.downloadEndsAt),
+    timeZone: form.downloadTimeZone === localDeviceTimezone ? undefined : form.downloadTimeZone,
+  };
+  let updateSchedule: UpdateSchedule;
+  if (form.downloadAndInstallDiffer) {
+    updateSchedule = {
+      at: getUpdateCronExpression(form.installStartsAt, form.installScheduleMode, form.installWeekDays),
+      startGraceDuration: getStartGraceDuration(form.installStartsAt, form.installEndsAt),
+      timeZone: form.installTimeZone === localDeviceTimezone ? undefined : form.installTimeZone,
+    };
+  } else {
+    updateSchedule = { ...downloadSchedule };
+  }
+  return {
+    downloadSchedule,
+    updateSchedule,
+  };
+};
+
+export const getUpdatePolicyPatches = (
+  basePath: string,
+  currentPolicy: DeviceUpdatePolicySpec | undefined,
+  form: Required<UpdatePolicyForm>,
+): PatchRequest => {
+  // Switching from basic mode to advanced or viceversa
+  if (!currentPolicy) {
+    return form.isAdvanced
+      ? ([
+          {
+            op: 'add',
+            path: basePath,
+            value: updatePolicyFormToApi(form),
+          },
+        ] as PatchRequest)
+      : [];
+  } else if (!form.isAdvanced) {
+    return [
+      {
+        op: 'remove',
+        path: basePath,
+      },
+    ] as PatchRequest;
+  }
+
+  // Making changes to existing advaced settings
+  const updatePatches: PatchRequest = [];
+  const { downloadSchedule: newDownloadSched, updateSchedule: newInstallSched } = updatePolicyFormToApi(form);
+  if (!schedulesAreEqual(currentPolicy.downloadSchedule, newDownloadSched)) {
+    if (form.downloadAndInstallDiffer) {
+      updatePatches.push({
+        op: currentPolicy.downloadSchedule ? 'replace' : 'add',
+        path: `${basePath}/downloadSchedule`,
+        value: newDownloadSched,
+      });
+    } else {
+      updatePatches.push({
+        op: 'replace',
+        path: basePath,
+        value: {
+          downloadSchedule: newDownloadSched,
+          updateSchedule: newInstallSched,
+        },
+      });
+    }
+  } else if (!form.downloadAndInstallDiffer) {
+    // DownloadSchedule did not change. Check if they just unchecked "useDifferent" and updateSchedule must be changed?
+    if (!schedulesAreEqual(currentPolicy.updateSchedule, newDownloadSched)) {
+      // Important: we are using downloadSchedule here since we don't copy settings from download to update when
+      // the checkbox for "useDifferent" is unchecked
+      updatePatches.push({
+        op: currentPolicy.updateSchedule ? 'replace' : 'add',
+        path: `${basePath}/updateSchedule`,
+        value: newDownloadSched,
+      });
+    }
+  }
+  if (form.downloadAndInstallDiffer && !schedulesAreEqual(currentPolicy.updateSchedule, newInstallSched)) {
+    updatePatches.push({
+      op: currentPolicy.updateSchedule ? 'replace' : 'add',
+      path: `${basePath}/updateSchedule`,
+      value: newInstallSched,
+    });
+  }
+
+  return updatePatches;
 };
 
 export const getRolloutPolicyData = ({ rolloutPolicy, disruptionBudget }: FleetFormValues) => {

@@ -1,7 +1,9 @@
-import { Duration, FleetSpec, Percentage } from '@flightctl/types';
+import { type DeviceUpdatePolicySpec, FleetSpec, Percentage } from '@flightctl/types';
 
-import { BatchLimitType } from './types';
+import { BatchLimitType, UpdatePolicyForm } from './../../../types/deviceSpec';
 import { fromAPILabel } from '../../../utils/labels';
+import * as timeUtils from '../../../utils/time';
+import { schedulesAreEqual } from '../../../utils/patch';
 
 export const DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES = 1140; // 24h, expressed in minutes
 const DEFAULT_BACKEND_SUCCESS_THRESHOLD_PERCENTAGE = '90%';
@@ -20,20 +22,23 @@ export const getEmptyInitializedBatch = () => ({
   selector: [],
 });
 
-const durationToMinutes = (duration: Duration) => {
-  const timeoutVal = Number(duration.replace(/[shm]/, ''));
-  if (!timeoutVal) {
-    return 0;
-  }
-
-  if (duration.includes('s')) {
-    return Math.round(timeoutVal / 60);
-  }
-  if (duration.includes('h')) {
-    return Math.round(timeoutVal * 60);
-  }
-  return timeoutVal;
-};
+export const getEmptyUpdateFormParams = () => ({
+  isEditable: true,
+  isAdvanced: false,
+  downloadAndInstallDiffer: false,
+  // Download schedule
+  downloadStartsAt: timeUtils.defaultStartTime,
+  downloadEndsAt: timeUtils.defaultEndTime,
+  downloadScheduleMode: timeUtils.UpdateScheduleMode.Daily,
+  downloadWeekDays: [false, false, false, false, false, false, false],
+  downloadTimeZone: timeUtils.localDeviceTimezone,
+  // Install schedule (updateSchedule in the API)
+  installStartsAt: timeUtils.defaultStartTime,
+  installEndsAt: timeUtils.defaultEndTime,
+  installScheduleMode: timeUtils.UpdateScheduleMode.Daily,
+  installWeekDays: [false, false, false, false, false, false, false],
+  installTimeZone: timeUtils.localDeviceTimezone,
+});
 
 export const getRolloutPolicyValues = (fleetSpec?: FleetSpec) => {
   const batches = (fleetSpec?.rolloutPolicy?.deviceSelection?.sequence || []).map((batch) => ({
@@ -47,7 +52,7 @@ export const getRolloutPolicyValues = (fleetSpec?: FleetSpec) => {
 
   // If the policy does not specify the timeout, we set the backend's default as the field is required in the UI
   const updateTimeout = fleetSpec?.rolloutPolicy?.defaultUpdateTimeout || `${DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES}m`;
-  return { isAdvanced: batches.length > 0, batches, updateTimeout: durationToMinutes(updateTimeout) };
+  return { isAdvanced: batches.length > 0, batches, updateTimeout: timeUtils.durationToMinutes(updateTimeout) };
 };
 
 export const getDisruptionBudgetValues = (fleetSpec?: FleetSpec) => {
@@ -58,5 +63,34 @@ export const getDisruptionBudgetValues = (fleetSpec?: FleetSpec) => {
     groupBy: groupLabels,
     minAvailable: budget.minAvailable,
     maxUnavailable: budget.maxUnavailable,
+  };
+};
+
+export const getUpdatePolicyValues = (updateSpec?: DeviceUpdatePolicySpec): UpdatePolicyForm => {
+  const isEqual = schedulesAreEqual(updateSpec?.updateSchedule, updateSpec?.downloadSchedule);
+
+  const downloadStartsAt = timeUtils.getTime(updateSpec?.downloadSchedule?.at);
+  const installStartsAt = timeUtils.getTime(updateSpec?.updateSchedule?.at);
+
+  const downloadWeekDays = timeUtils.getWeekDays(updateSpec?.downloadSchedule?.at);
+  const installWeekDays = timeUtils.getWeekDays(updateSpec?.updateSchedule?.at);
+
+  return {
+    isAdvanced: Boolean(updateSpec?.downloadSchedule?.at || updateSpec?.updateSchedule?.at),
+    downloadAndInstallDiffer: !isEqual,
+    downloadStartsAt,
+    downloadEndsAt: timeUtils.getEndTime(downloadStartsAt, updateSpec?.downloadSchedule?.startGraceDuration),
+    downloadWeekDays: downloadWeekDays.selectedDays,
+    downloadScheduleMode: downloadWeekDays.allSelected
+      ? timeUtils.UpdateScheduleMode.Daily
+      : timeUtils.UpdateScheduleMode.Weekly,
+    downloadTimeZone: updateSpec?.downloadSchedule?.timeZone || timeUtils.localDeviceTimezone,
+    installStartsAt,
+    installEndsAt: timeUtils.getEndTime(installStartsAt, updateSpec?.updateSchedule?.startGraceDuration),
+    installWeekDays: installWeekDays.selectedDays,
+    installScheduleMode: installWeekDays.allSelected
+      ? timeUtils.UpdateScheduleMode.Daily
+      : timeUtils.UpdateScheduleMode.Weekly,
+    installTimeZone: updateSpec?.updateSchedule?.timeZone || timeUtils.localDeviceTimezone,
   };
 };
