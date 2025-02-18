@@ -34,7 +34,10 @@ const K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH = 253;
 
 // https://issues.redhat.com/browse/MGMT-18349 to make the validation more robust
 const BASIC_DEVICE_OS_IMAGE_REGEXP = /^[a-zA-Z0-9.\-\/:@_+]*$/;
-const BASIC_FLEET_OS_IMAGE_REGEXP = /^[a-zA-Z0-9.\-\/:@_+{}\s]*$/;
+const APPLICATION_IMAGE_REGEXP = BASIC_DEVICE_OS_IMAGE_REGEXP;
+
+const TEMPLATE_VARIABLES_REGEXP = /{{[\s.a-zA-Z0-9-_\/]+}}/g;
+const TEMPLATE_VARIABLES_CONTENT_REGEXP = /^\s*(lower|upper|replace|getOrDefault)?\s*\.metadata\.(labels|name)/;
 
 const absolutePathRegex = /^\/.*$/;
 export const MAX_TARGET_REVISION_LENGTH = 244;
@@ -192,11 +195,32 @@ export const maxLengthString = (t: TFunction, props: { maxLength: number; fieldN
   Yup.string().max(props.maxLength, t('{{ fieldName }} must not exceed {{ maxLength }} characters', props));
 
 export const validOsImage = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
-  maxLengthString(t, { fieldName: t('System image'), maxLength: 2048 }).matches(
-    isFleet ? BASIC_FLEET_OS_IMAGE_REGEXP : BASIC_DEVICE_OS_IMAGE_REGEXP,
-    isFleet
-      ? t('System image contains invalid characters')
-      : t('System image contains invalid characters. Template variables are not allowed.'),
+  maxLengthString(t, { fieldName: t('System image'), maxLength: 2048 }).test(
+    'osImageValidations',
+    t('System image is invalid'),
+    (osImage: string | undefined) => {
+      if (!osImage) {
+        return true;
+      }
+
+      let validateOsImage = osImage;
+      if (isFleet) {
+        // Extract template variables if they are present, they contain otherwise invalid characters
+        const templateVariables = [...osImage.matchAll(TEMPLATE_VARIABLES_REGEXP)];
+        if (templateVariables.length > 0) {
+          const invalidVariables = templateVariables.filter(([match]) => {
+            const content = match.slice(2, -2).trim(); // Remove the surrounding "{{" and "}}", and trim any extra whitespace
+            return !content || !TEMPLATE_VARIABLES_CONTENT_REGEXP.test(content);
+          });
+          if (invalidVariables.length > 0) {
+            return false;
+          }
+          validateOsImage = osImage.replace(TEMPLATE_VARIABLES_REGEXP, 'tv');
+        }
+      }
+
+      return BASIC_DEVICE_OS_IMAGE_REGEXP.test(validateOsImage);
+    },
   );
 
 export const validLabelsSchema = (t: TFunction) =>
@@ -250,7 +274,9 @@ export const validApplicationsSchema = (t: TFunction) => {
     .of(
       Yup.object().shape({
         name: Yup.string(),
-        image: Yup.string().required(t('Image is required.')),
+        image: Yup.string()
+          .required(t('Image is required.'))
+          .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
         variables: Yup.array()
           .of(
             Yup.object().shape({
