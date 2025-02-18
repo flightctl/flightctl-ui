@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Button, WizardFooterWrapper, useWizardContext } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
-import { FleetFormValues } from './types';
+import { FleetFormValues } from './../../../types/deviceSpec';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { reviewStepId } from './steps/ReviewStep';
 import { generalInfoStepId, isGeneralInfoStepValid } from './steps/GeneralInfoStep';

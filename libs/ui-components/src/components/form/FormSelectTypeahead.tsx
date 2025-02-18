@@ -11,7 +11,6 @@ import {
 } from '@patternfly/react-core';
 import { useField } from 'formik';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
-import { useTranslation } from '../../hooks/useTranslation';
 
 import './FormSelect.css';
 
@@ -24,35 +23,31 @@ type FormSelectProps = {
   helperText?: React.ReactNode;
   children?: React.ReactNode;
   placeholderText?: string;
-  validateNewItem?: (value: string) => string | undefined;
-  transformNewItem?: (value: string) => string;
+  isValidTypedItem?: (value: string) => boolean;
+  transformTypedItem?: (value: string) => string;
 };
 
 const isItemObject = (item: string | SelectItem): item is SelectItem => typeof item === 'object';
 
 const getItemLabel = (item: string | SelectItem) => (isItemObject(item) ? item.label : item);
 
-const CREATE_NEW = 'create';
-
-const FormSelectTypeahead: React.FC<FormSelectProps> = ({
+const FormSelectTypeahead = ({
   name,
   items,
   defaultId,
   helperText,
   placeholderText,
+  isValidTypedItem,
+  transformTypedItem,
   children,
-  validateNewItem,
-  transformNewItem,
-}) => {
-  const { t } = useTranslation();
+}: FormSelectProps) => {
   const [field, meta, { setValue, setTouched }] = useField<string>({
     name: name,
   });
   const [isOpen, setIsOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState<string | undefined>(undefined);
-  const [addedItems, setAddedItems] = React.useState<string[]>(
-    !field.value || Object.keys(items).some((k) => k === field.value) ? [] : [field.value],
-  );
+
+  const currentValue = field.value;
 
   const fieldId = `selectfield-${name}`;
   const itemKeys = Object.keys(items);
@@ -65,71 +60,34 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
 
   React.useEffect(() => {
     const hasOneItem = itemKeys.length === 1;
-    if (hasOneItem && !field.value) {
+    if (hasOneItem && !currentValue) {
       setValue(itemKeys[0], true);
     }
-  }, [itemKeys, field.value, setValue]);
+  }, [itemKeys, currentValue, setValue]);
 
-  const selectedText = isOpen
-    ? inputValue
-    : field.value
-      ? getItemLabel(items[field.value]) || field.value
-      : defaultValue;
-
-  const itemValidation = inputValue ? validateNewItem?.(inputValue) : undefined;
-
-  let alreadyAdded = false;
-  const inputTransformed = inputValue && transformNewItem ? transformNewItem(inputValue) : inputValue;
-  const addedItemsFiltered = addedItems.filter((item) => {
-    if (!inputValue) {
-      return true;
-    }
-    if (!alreadyAdded) {
-      alreadyAdded = item === inputTransformed;
-    }
-    return item.includes(inputValue);
-  });
+  let selectedText = defaultValue;
+  if (inputValue) {
+    selectedText = inputValue;
+  } else if (currentValue) {
+    selectedText = getItemLabel(items[currentValue]) || currentValue;
+  }
 
   const itemKeysFiltered = itemKeys.filter((key) => {
     if (!inputValue) {
       return true;
     }
-    if (!alreadyAdded) {
-      alreadyAdded = key === inputTransformed;
-    }
-    return getItemLabel(items[key]).includes(inputValue);
+    return getItemLabel(items[key]).toLowerCase().includes(inputValue.toLowerCase());
   });
-
-  const selectOptions = [
-    ...addedItemsFiltered.map((item) => (
-      <SelectOption className="fctl-form-select__item" key={item} value={item}>
-        {item}
-      </SelectOption>
-    )),
-    ...itemKeysFiltered.map((key) => {
-      const item = items[key];
-      const desc = isItemObject(item) ? item.description : undefined;
-      return (
-        <SelectOption className="fctl-form-select__item" key={key} value={key} description={desc}>
-          {getItemLabel(item)}
-        </SelectOption>
-      );
-    }),
-  ];
 
   return (
     <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId}>
       <Select
         id={fieldId}
         className="fctl-form-select"
-        selected={field.value || defaultId}
+        selected={currentValue || defaultId}
         onSelect={(_, value) => {
-          let newValue: string = value as string;
-          if (value === CREATE_NEW && inputTransformed) {
-            setAddedItems([...addedItems, inputTransformed]);
-            newValue = inputTransformed;
-          }
-          setValue(newValue, true);
+          setTouched(true);
+          setValue(value as string, true);
           setInputValue(undefined);
           setIsOpen(false);
         }}
@@ -157,12 +115,34 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
                   setIsOpen(!isOpen);
                 }}
                 onChange={(_, value) => {
-                  setInputValue(value);
+                  setInputValue(value || undefined);
                   if (!isOpen) {
                     setIsOpen(true);
                   }
                 }}
-                id="create-typeahead-select-input"
+                onBlur={() => {
+                  if (!inputValue) {
+                    return;
+                  }
+
+                  // If there is no "isValidTypedItem", it means selection must always be done by selecting from the list
+                  const skipSetValue = isValidTypedItem ? !isValidTypedItem(inputValue) : true;
+                  if (skipSetValue) {
+                    if (itemKeysFiltered.length === 0) {
+                      setInputValue(undefined);
+                      setIsOpen(false);
+                    } else {
+                      // The typed text has no matches from the list. We clear the value to use the default/empty
+                      setValue('');
+                    }
+                    return;
+                  }
+                  const transformedValue = transformTypedItem?.(inputValue) || inputValue;
+                  setInputValue(undefined);
+                  void setValue(transformedValue);
+                  setIsOpen(false);
+                }}
+                id={`create-typeahead-select-input-${name}`}
                 autoComplete="off"
                 role="combobox"
                 isExpanded={isOpen}
@@ -175,9 +155,6 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
         isOpen={isOpen}
         onOpenChange={(open) => {
           if (!open) {
-            if (inputValue !== undefined) {
-              setInputValue(undefined);
-            }
             if (!meta.touched) {
               setTouched(true);
             }
@@ -186,19 +163,15 @@ const FormSelectTypeahead: React.FC<FormSelectProps> = ({
         }}
       >
         <SelectList className="fctl-form-select__menu">
-          {inputValue && !alreadyAdded && (
-            <SelectOption
-              className="fctl-form-select__item"
-              isDisabled={!!itemValidation}
-              description={itemValidation}
-              value={CREATE_NEW}
-            >
-              {t(`Create new option '{{ value }}'`, {
-                value: itemValidation ? inputValue : inputTransformed,
-              })}
-            </SelectOption>
-          )}
-          {selectOptions}
+          {itemKeysFiltered.map((key) => {
+            const item = items[key];
+            const desc = isItemObject(item) ? item.description : undefined;
+            return (
+              <SelectOption className="fctl-form-select__item" key={key} value={key} description={desc}>
+                {getItemLabel(item)}
+              </SelectOption>
+            );
+          })}
         </SelectList>
         {children}
       </Select>

@@ -1,10 +1,14 @@
 import {
+  ApplicationProviderSpec,
   ConfigProviderSpec,
+  DisruptionBudget,
   GitConfigProviderSpec,
   HttpConfigProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
 } from '@flightctl/types';
+import { FlightCtlLabel } from './extraTypes';
+import { UpdateScheduleMode } from '../utils/time';
 
 export enum ConfigType {
   GIT = 'git',
@@ -108,3 +112,73 @@ export const isHttpProviderSpec = (providerSpec: ConfigProviderSpec): providerSp
   'httpRef' in providerSpec;
 
 export type SpecConfigTemplate = GitConfigTemplate | HttpConfigTemplate | KubeSecretTemplate | InlineConfigTemplate;
+
+export type ApplicationFormSpec = Omit<ApplicationProviderSpec, 'envVars'> & {
+  variables: { name: string; value: string }[];
+};
+
+export type SystemdUnitFormValue = {
+  pattern: string;
+  exists: boolean;
+};
+
+export type DeviceSpecConfigFormValues = {
+  osImage?: string;
+  configTemplates: SpecConfigTemplate[];
+  applications: ApplicationFormSpec[];
+  systemdUnits: SystemdUnitFormValue[];
+  updatePolicy: UpdatePolicyForm;
+  registerMicroShift: boolean;
+};
+
+export type EditDeviceFormValues = DeviceSpecConfigFormValues & {
+  deviceAlias: string;
+  labels: FlightCtlLabel[];
+  fleetMatch: string;
+};
+
+export type FleetFormValues = DeviceSpecConfigFormValues & {
+  name: string;
+  fleetLabels: FlightCtlLabel[];
+  labels: FlightCtlLabel[];
+  rolloutPolicy: RolloutPolicyForm;
+  disruptionBudget: DisruptionBudgetForm;
+  updatePolicy: UpdatePolicyForm;
+};
+
+export enum BatchLimitType {
+  BatchLimitPercent = 'percent',
+  BatchLimitAbsoluteNumber = 'value',
+}
+
+export type BatchForm = {
+  selector: FlightCtlLabel[];
+  limit?: number;
+  limitType: BatchLimitType;
+  successThreshold?: number;
+};
+
+export type RolloutPolicyForm = {
+  isAdvanced: boolean;
+  updateTimeout: number;
+  batches: BatchForm[];
+};
+
+export type DisruptionBudgetForm = DisruptionBudget & {
+  isAdvanced: boolean;
+};
+
+export type UpdatePolicyForm = {
+  isAdvanced: boolean;
+  downloadAndInstallDiffer: boolean;
+  downloadStartsAt?: string;
+  downloadEndsAt?: string;
+  downloadScheduleMode: UpdateScheduleMode;
+  downloadWeekDays: boolean[];
+  downloadTimeZone: string;
+  installStartsAt?: string;
+  installEndsAt?: string;
+  installScheduleMode: UpdateScheduleMode;
+  installWeekDays: boolean[];
+  installTimeZone: string;
+};

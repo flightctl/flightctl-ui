@@ -2,12 +2,13 @@ import * as React from 'react';
 import { useFormikContext } from 'formik';
 import { Button, WizardFooterWrapper, useWizardContext } from '@patternfly/react-core';
 
-import { EditDeviceFormValues } from './types';
+import { EditDeviceFormValues } from '../../../types/deviceSpec';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { generalInfoStepId, isGeneralInfoStepValid } from './steps/GeneralInfoStep';
 import { deviceTemplateStepId, isDeviceTemplateStepValid } from './steps/DeviceTemplateStep';
 import { reviewDeviceStepId } from './steps/ReviewDeviceStep';
+import { deviceUpdatePolicyStepId, isUpdatePolicyStepValid } from './steps/DeviceUpdateStep';
 
 const EditDeviceWizardFooter = () => {
   const { t } = useTranslation();
@@ -18,10 +19,18 @@ const EditDeviceWizardFooter = () => {
   const isSubmitStep = activeStep.id === reviewDeviceStepId;
 
   let isStepValid = true;
-  if (activeStep.id === generalInfoStepId) {
-    isStepValid = isGeneralInfoStepValid(errors);
-  } else if (activeStep.id === deviceTemplateStepId) {
-    isStepValid = isDeviceTemplateStepValid(errors);
+  switch (activeStep.id) {
+    case generalInfoStepId:
+      isStepValid = isGeneralInfoStepValid(errors);
+      break;
+    case deviceTemplateStepId:
+      isStepValid = isDeviceTemplateStepValid(errors);
+      break;
+    case deviceUpdatePolicyStepId:
+      isStepValid = isUpdatePolicyStepValid(errors);
+      break;
+    default:
+      break;
   }
 
   const primaryBtn = isSubmitStep ? (

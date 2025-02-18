@@ -11,7 +11,7 @@ import WithHelperText from '../../../common/WithHelperText';
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import TextField from '../../../form/TextField';
 import FlightCtlForm from '../../../form/FlightCtlForm';
-import { DeviceSpecConfigFormValues } from '../types';
+import { DeviceSpecConfigFormValues } from '../../../../types/deviceSpec';
 import ConfigurationTemplates from './ConfigurationTemplates';
 import ApplicationsForm from './ApplicationTemplates';
 import SystemdUnitsForm from './SystemdUnitsForm';
