@@ -1,4 +1,4 @@
-import { Fleet, PatchRequest } from '@flightctl/types';
+import { Fleet, PatchRequest, type UpdateSchedule } from '@flightctl/types';
 import { TFunction } from 'i18next';
 import * as Yup from 'yup';
 import { FleetFormValues } from './types';
@@ -13,6 +13,7 @@ import {
   validKubernetesDnsSubdomain,
   validLabelsSchema,
   validOsImage,
+  validUpdatePolicySchema,
 } from '../../form/validations';
 import {
   appendJSONPatch,
@@ -33,7 +34,7 @@ import {
   getDeviceSpecConfigPatches,
   hasMicroshiftRegistrationConfig,
 } from '../../Device/EditDeviceWizard/deviceSpecUtils';
-import { getDisruptionBudgetValues, getRolloutPolicyValues } from './fleetSpecUtils';
+import { getDisruptionBudgetValues, getRolloutPolicyValues, getUpdatePolicyValues } from './fleetSpecUtils';
 
 export const getValidationSchema = (t: TFunction) => {
   return Yup.object<FleetFormValues>({
@@ -46,7 +47,25 @@ export const getValidationSchema = (t: TFunction) => {
     systemdUnits: systemdUnitListValidationSchema(t),
     rolloutPolicy: validFleetRolloutPolicySchema(t),
     disruptionBudget: validFleetDisruptionBudgetSchema(t),
+    updatePolicy: validUpdatePolicySchema(t),
   });
+};
+
+export const schedulesAreEqual = (a: UpdateSchedule | undefined, b: UpdateSchedule | undefined) => {
+  if (!a && !b) {
+    return true;
+  }
+  if (!a || !b) {
+    return false;
+  }
+  // TODO requires that the UI uses it
+  if (a.startGraceDuration !== b.startGraceDuration) {
+    return false;
+  }
+  if (a.timeZone !== b.timeZone) {
+    return false;
+  }
+  return a.at === b.at;
 };
 
 export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValues) => {
@@ -213,6 +232,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
       registerMicroShift,
       rolloutPolicy: getRolloutPolicyValues(fleet.spec),
       disruptionBudget: getDisruptionBudgetValues(fleet.spec),
+      updatePolicy: getUpdatePolicyValues(fleet.spec.template?.spec?.updatePolicy),
     };
   }
 
@@ -227,5 +247,6 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
     registerMicroShift: false,
     rolloutPolicy: getRolloutPolicyValues(undefined),
     disruptionBudget: getDisruptionBudgetValues(undefined),
+    updatePolicy: getUpdatePolicyValues(undefined),
   };
 };

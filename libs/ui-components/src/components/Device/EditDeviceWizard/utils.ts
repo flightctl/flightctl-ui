@@ -7,6 +7,7 @@ import {
   validKubernetesLabelValue,
   validLabelsSchema,
   validOsImage,
+  validUpdatePolicySchema,
 } from '../../form/validations';
 import { appendJSONPatch, getApplicationPatches, getLabelPatches } from '../../../utils/patch';
 import { Device, PatchRequest } from '@flightctl/types';
@@ -27,6 +28,7 @@ export const getValidationSchema = (t: TFunction) =>
       labels: validLabelsSchema(t),
       configTemplates: validConfigTemplatesSchema(t),
       applications: validApplicationsSchema(t),
+      updatePolicy: validUpdatePolicySchema(t),
     }),
   );
 
