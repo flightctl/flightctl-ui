@@ -19,7 +19,7 @@ const buildNewFleet = (newFleetName: string): Fleet => {
 // When it is set, it adds a new fleet with the name set in this environment variable
 
 const loadInterceptors = () => {
-  cy.intercept('GET', /api\/flightctl\/api\/v1\/fleets(?:(?=\?)(?:[?&]addDevicesSummary=true))?/, (req) => {
+  cy.intercept('GET', /api\/flightctl\/api\/v1\/fleets\?.*(\?addDevicesSummary=true)?$/, (req) => {
     const newFleetName = Cypress.env('FLIGHTCTL_ADD_FLEET');
     const allFleets = [...basicFleets];
     if (newFleetName) {
@@ -30,16 +30,18 @@ const loadInterceptors = () => {
     });
   }).as('fleets');
 
-  cy.intercept('GET', '/api/flightctl/api/v1/fleets/*', (req) => {
-    const newFleetName = Cypress.env('FLIGHTCTL_ADD_FLEET');
-    if (req.url.endsWith(newFleetName)) {
+  cy.intercept('GET', /api\/flightctl\/api\/v1\/fleets\/[\w-]+(\?addDevicesSummary=true)?$/, (req) => {
+    const newFleetName = Cypress.env('FLIGHTCTL_ADD_FLEET') as string;
+    const requestFleetName = req.url.match(/\/fleets\/(.+)$/)[1];
+
+    if (requestFleetName === newFleetName) {
       req.reply({
         body: buildNewFleet(newFleetName),
       });
       return;
     }
 
-    const requestedFleet = basicFleets.find((f) => req.url.endsWith(f.metadata.name));
+    const requestedFleet = basicFleets.find((f) => f.metadata.name === requestFleetName);
     if (requestedFleet) {
       req.reply({
         body: requestedFleet,
@@ -49,11 +51,10 @@ const loadInterceptors = () => {
         statusCode: 404,
       });
     }
-  }).as('get-fleet');
+  }).as('get-fleet-details');
 
   cy.intercept('POST', '/api/flightctl/api/v1/fleets', (req) => {
-    const newFleetName = req.body.metadata.name;
-    Cypress.env('FLIGHTCTL_ADD_FLEET', newFleetName);
+    const newFleetName = req.body.metadata.name as string;
     req.reply(buildNewFleet(newFleetName));
   }).as('create-new-fleet');
 };

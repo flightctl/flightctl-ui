@@ -5,6 +5,7 @@ import { CreateFleetWizardPage } from '../../pages/CreateFleetWizardPage';
 describe('Create fleet form', () => {
   let fleetsPage: FleetsPage;
   let createFleetWizardPage: CreateFleetWizardPage;
+  const newFleetName = 'sample-fleet';
 
   beforeEach(() => {
     cy.loadApiInterceptors();
@@ -16,18 +17,19 @@ describe('Create fleet form', () => {
     fleetsPage = new FleetsPage();
   });
 
-  /* TODO fix flakyness */
-  it.skip('can be submitted to create a new fleet', () => {
-    fleetsPage.fleetRow('sample-fleet').should('not.exist');
+  it('can be submitted to create a new fleet', () => {
+    fleetsPage.fleetRow(newFleetName).should('not.exist');
 
     fleetsPage.openCreateFleetFormButton.click();
     createFleetWizardPage = new CreateFleetWizardPage();
 
     createFleetWizardPage.title.should('have.text', 'Create fleet');
 
-    createFleetWizardPage.newFleetNameField.type('sample-fleet');
+    // General info step
+    createFleetWizardPage.newFleetNameField.type(newFleetName);
     createFleetWizardPage.nextFleetWizardButton.should('be.enabled').click();
 
+    // Device template step
     createFleetWizardPage.newFleetSystemImageField.type('os-image');
 
     createFleetWizardPage.addConfigurationButton.should('be.enabled').click();
@@ -40,10 +42,20 @@ describe('Create fleet form', () => {
     createFleetWizardPage.newFleetRepositoryMountPathField.type('/mount-path');
     createFleetWizardPage.nextFleetWizardButton.should('be.enabled').click();
 
+    // Updates step
+    createFleetWizardPage.nextFleetWizardButton.should('be.enabled').click();
+
+    // Review and create step
     createFleetWizardPage.createFleetFormSubmitButton.should('be.enabled').click();
 
-    const fleetDetailsPage = new FleetDetailsPage();
+    cy.wait('@create-new-fleet').then(({ request }) => {
+      expect(request.body, 'Create fleet request').to.nested.include({
+        'metadata.name': newFleetName,
+      });
+      Cypress.env('FLIGHTCTL_ADD_FLEET', newFleetName);
+    });
 
+    const fleetDetailsPage = new FleetDetailsPage();
     fleetDetailsPage.title.should('have.text', 'sample-fleet');
   });
 
