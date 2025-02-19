@@ -14,6 +14,7 @@ import {
 } from '@patternfly/react-core';
 
 import { Device } from '@flightctl/types';
+import { getUpdatePolicyValues } from '../../Fleet/CreateFleet/fleetSpecUtils';
 import { EditDeviceFormValues } from './types';
 import { getErrorMessage } from '../../../utils/error';
 import { fromAPILabel } from '../../../utils/labels';
@@ -24,6 +25,7 @@ import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
 import GeneralInfoStep, { generalInfoStepId, isGeneralInfoStepValid } from './steps/GeneralInfoStep';
 import DeviceTemplateStep, { deviceTemplateStepId, isDeviceTemplateStepValid } from './steps/DeviceTemplateStep';
+import DeviceUpdateStep, { deviceUpdatePolicyStepId, isUpdatePolicyStepValid } from './steps/DeviceUpdateStep';
 import ReviewDeviceStep, { reviewDeviceStepId } from './steps/ReviewDeviceStep';
 import { getDevicePatches, getValidationSchema } from './utils';
 import { getApplicationValues, getConfigTemplatesValues, hasMicroshiftRegistrationConfig } from './deviceSpecUtils';
@@ -70,6 +72,7 @@ const EditDeviceWizard = () => {
       </Alert>
     );
   } else if (device) {
+    // TODO extract the initValues function
     const registerMicroShift = hasMicroshiftRegistrationConfig(device.spec);
     body = (
       <Formik<EditDeviceFormValues>
@@ -82,6 +85,7 @@ const EditDeviceWizard = () => {
           applications: getApplicationValues(device.spec),
           systemdUnits: [],
           registerMicroShift,
+          updatePolicy: getUpdatePolicyValues(device.spec?.updatePolicy),
         }}
         validationSchema={getValidationSchema(t)}
         validateOnMount
@@ -101,9 +105,12 @@ const EditDeviceWizard = () => {
         {({ values, errors: formikErrors }) => {
           const generalStepValid = isGeneralInfoStepValid(formikErrors);
           const templateStepValid = isDeviceTemplateStepValid(formikErrors);
+          const updateStepValid = isUpdatePolicyStepValid(formikErrors);
 
           const canEditTemplate = !values.fleetMatch;
           const isTemplateStepDisabled = !(generalStepValid && canEditTemplate);
+          const isUpdateStepDisabled = !templateStepValid;
+
           return (
             <>
               <LeaveFormConfirmation />
@@ -123,7 +130,10 @@ const EditDeviceWizard = () => {
                 <WizardStep name={t('Device template')} id={deviceTemplateStepId} isDisabled={isTemplateStepDisabled}>
                   <DeviceTemplateStep isFleet={false} />
                 </WizardStep>
-                <WizardStep name={t('Review and save')} id={reviewDeviceStepId} isDisabled={!templateStepValid}>
+                <WizardStep name={t('Updates')} id={deviceUpdatePolicyStepId} isDisabled={isUpdateStepDisabled}>
+                  <DeviceUpdateStep />
+                </WizardStep>
+                <WizardStep name={t('Review and save')} id={reviewDeviceStepId} isDisabled={!updateStepValid}>
                   <ReviewDeviceStep error={submitError} />
                 </WizardStep>
               </Wizard>

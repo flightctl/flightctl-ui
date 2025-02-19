@@ -12,6 +12,10 @@ export type DeviceSpecConfigFormValues = {
   configTemplates: SpecConfigTemplate[];
   applications: ApplicationFormSpec[];
   systemdUnits: SystemdUnitFormValue[];
+  updatePolicy: {
+    isAdvanced: boolean;
+    downloadScheduleAt: string;
+  };
   registerMicroShift: boolean;
 };
 

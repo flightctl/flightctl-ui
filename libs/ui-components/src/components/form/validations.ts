@@ -68,20 +68,6 @@ export const getDnsSubdomainValidations = (t: TFunction) => [
   },
 ];
 
-export const getKubernetesLabelValueErrors = (labelValue: string) => {
-  const errorKeys: Record<string, string> = {};
-  if (!K8S_LABEL_VALUE_START_END.test(labelValue)) {
-    errorKeys.labelValueStartAndEnd = 'failed';
-  }
-  if (!K8S_LABEL_VALUE_ALLOWED_CHARACTERS.test(labelValue)) {
-    errorKeys.labelValueAllowedChars = 'failed';
-  }
-  if (labelValue?.length > K8S_LABEL_VALUE_MAX_LENGTH) {
-    errorKeys.labelValueMaxLength = 'failed';
-  }
-  return errorKeys;
-};
-
 export const getKubernetesDnsSubdomainErrors = (value: string) => {
   const errorKeys: Record<string, string> = {};
   if (!K8S_DNS_SUBDOMAIN_START_END.test(value)) {
@@ -388,6 +374,25 @@ export const validFleetRolloutPolicySchema = (t: TFunction) => {
         message: () => errors,
       });
     });
+};
+
+const requiredAdvancedString = (message: string) =>
+  Yup.string().when(['isAdvanced'], ([isAdvanced]) => (isAdvanced ? Yup.string().required(message) : Yup.string()));
+
+const requiredAdvancedDifferString = (message: string) =>
+  Yup.string().when(['isAdvanced', 'downloadAndUpdateDiffer'], ([isAdvanced, downloadAndUpdateDiffer]) =>
+    isAdvanced && downloadAndUpdateDiffer ? Yup.string().required(message) : Yup.string(),
+  );
+
+export const validUpdatePolicySchema = (t: TFunction) => {
+  return Yup.object().shape({
+    isAdvanced: Yup.boolean().required(),
+    // Fields are flattened so "isAdvanced" can be used for validating them
+    downloadScheduleAt: requiredAdvancedString(t('Download schedule is required')),
+    downloadGraceTime: requiredAdvancedString('Download grace time is required'),
+    updateScheduleAt: requiredAdvancedDifferString(t('Update schedule is required')),
+    updateGraceTime: requiredAdvancedDifferString('Update grace time is required'),
+  });
 };
 
 export const validFleetDisruptionBudgetSchema = (t: TFunction) => {

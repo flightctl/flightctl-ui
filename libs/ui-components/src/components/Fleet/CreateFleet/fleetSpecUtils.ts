@@ -1,7 +1,8 @@
-import { Duration, FleetSpec, Percentage } from '@flightctl/types';
+import { type DeviceUpdatePolicySpec, Duration, FleetSpec, Percentage } from '@flightctl/types';
 
 import { BatchLimitType } from './types';
 import { fromAPILabel } from '../../../utils/labels';
+import { schedulesAreEqual } from './utils';
 
 export const DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES = 1140; // 24h, expressed in minutes
 const DEFAULT_BACKEND_SUCCESS_THRESHOLD_PERCENTAGE = '90%';
@@ -58,5 +59,18 @@ export const getDisruptionBudgetValues = (fleetSpec?: FleetSpec) => {
     groupBy: groupLabels,
     minAvailable: budget.minAvailable,
     maxUnavailable: budget.maxUnavailable,
+  };
+};
+
+export const getUpdatePolicyValues = (updateSpec?: DeviceUpdatePolicySpec) => {
+  const isEqual = schedulesAreEqual(updateSpec?.updateSchedule, updateSpec?.downloadSchedule);
+
+  return {
+    isAdvanced: Boolean(updateSpec?.downloadSchedule?.at || updateSpec?.downloadSchedule?.at),
+    downloadAndUpdateDiffer: !isEqual,
+    downloadScheduleAt: updateSpec?.downloadSchedule?.at || '',
+    downloadGraceTime: updateSpec?.downloadSchedule?.startGraceDuration || '',
+    updateScheduleAt: updateSpec?.updateSchedule?.at || '',
+    updateGraceTime: updateSpec?.updateSchedule?.startGraceDuration || '',
   };
 };
