@@ -18,6 +18,7 @@ var (
 	OIDCInsecure    = getEnvVar("OIDC_INSECURE_SKIP_VERIFY", "false")
 	OcpPlugin       = getEnvVar("IS_OCP_PLUGIN", "false")
 	RBACNs          = getEnvVar("K8S_RBAC_NS", "")
+	IsRHEM          = getEnvVar("IS_RHEM", "")
 )
 
 func getEnvUrlVar(key string, defaultValue string) string {

@@ -16,6 +16,7 @@ import { BarsIcon } from '@patternfly/react-icons/dist/js/icons/bars-icon';
 import { Outlet } from 'react-router-dom';
 
 import logo from '@fctl-assets/bgimages/flightctl-logo.svg';
+import rhemLogo from '@fctl-assets/bgimages/RHEM-logo.svg';
 import AppNavigation from './AppNavigation';
 import AppToolbar from './AppToolbar';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
@@ -43,7 +44,11 @@ const AppLayout: React.FC = () => {
           </PageToggleButton>
         </MastheadToggle>
         <MastheadBrand>
-          <Brand src={logo} alt="Edge Manager Logo" heights={{ default: '30px' }} />
+          {window.isRHEM ? (
+            <Brand src={rhemLogo} alt="Red Hat Edge Manager logo" heights={{ default: '50px' }} />
+          ) : (
+            <Brand src={logo} alt="Flight Control Logo" heights={{ default: '30px' }} />
+          )}
         </MastheadBrand>
       </MastheadMain>
       <MastheadContent>

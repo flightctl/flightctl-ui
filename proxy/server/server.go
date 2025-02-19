@@ -2,17 +2,24 @@ package server
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/flightctl/flightctl-ui/config"
 )
 
 type SpaHandler struct{}
 
 func serveIndexPage(w http.ResponseWriter, r *http.Request) {
-	content, err := os.ReadFile("./dist/index.html")
+	indexName := "index"
+	if config.IsRHEM == "true" {
+		indexName = "index-rhem"
+	}
+	content, err := os.ReadFile(fmt.Sprintf("./dist/%s.html", indexName))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
