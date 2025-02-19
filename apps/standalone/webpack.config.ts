@@ -34,6 +34,7 @@ const config: Configuration & {
     },
     devMiddleware: {
       writeToDisk: true,
+      index: process.env.IS_RHEM ? 'index-rhem.html' : 'index.html',
     },
   },
   module: {
@@ -146,9 +147,11 @@ const config: Configuration & {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src', 'index.html'),
+      filename: 'index.html',
     }),
-    new CopyPlugin({
-      patterns: [{ from: './src/favicon.png', to: 'images' }],
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, 'src', 'index-rhem.html'),
+      filename: 'index-rhem.html',
     }),
     new CopyPlugin({
       patterns: [{ from: './src/assets/images/', to: 'images' }],
