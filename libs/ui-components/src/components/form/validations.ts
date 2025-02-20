@@ -36,8 +36,9 @@ const K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH = 253;
 const BASIC_DEVICE_OS_IMAGE_REGEXP = /^[a-zA-Z0-9.\-\/:@_+]*$/;
 const APPLICATION_IMAGE_REGEXP = BASIC_DEVICE_OS_IMAGE_REGEXP;
 
-const TEMPLATE_VARIABLES_REGEXP = /{{[\s.a-zA-Z0-9-_\/]+}}/g;
-const TEMPLATE_VARIABLES_CONTENT_REGEXP = /^\s*(lower|upper|replace|getOrDefault)?\s*\.metadata\.(labels|name)/;
+const TEMPLATE_VARIABLES_REGEXP = /{{.+?}}/g;
+// Special characters allowed: "dot", "pipe", "spaces" "quote", "backward slash", "underscore", "forward slash", "dash"
+const TEMPLATE_VARIABLES_CONTENT_REGEXP = /^([.a-zA-Z0-9|\s"\\_\/-])+$/;
 
 const absolutePathRegex = /^\/.*$/;
 export const MAX_TARGET_REVISION_LENGTH = 244;
@@ -67,20 +68,6 @@ export const getDnsSubdomainValidations = (t: TFunction) => [
     message: t('1-{{ maxCharacters }} characters', { maxCharacters: K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH }),
   },
 ];
-
-export const getKubernetesLabelValueErrors = (labelValue: string) => {
-  const errorKeys: Record<string, string> = {};
-  if (!K8S_LABEL_VALUE_START_END.test(labelValue)) {
-    errorKeys.labelValueStartAndEnd = 'failed';
-  }
-  if (!K8S_LABEL_VALUE_ALLOWED_CHARACTERS.test(labelValue)) {
-    errorKeys.labelValueAllowedChars = 'failed';
-  }
-  if (labelValue?.length > K8S_LABEL_VALUE_MAX_LENGTH) {
-    errorKeys.labelValueMaxLength = 'failed';
-  }
-  return errorKeys;
-};
 
 export const getKubernetesDnsSubdomainErrors = (value: string) => {
   const errorKeys: Record<string, string> = {};
