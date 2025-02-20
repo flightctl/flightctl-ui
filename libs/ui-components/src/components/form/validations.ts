@@ -34,7 +34,11 @@ const K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH = 253;
 
 // https://issues.redhat.com/browse/MGMT-18349 to make the validation more robust
 const BASIC_DEVICE_OS_IMAGE_REGEXP = /^[a-zA-Z0-9.\-\/:@_+]*$/;
-const BASIC_FLEET_OS_IMAGE_REGEXP = /^[a-zA-Z0-9.\-\/:@_+{}\s]*$/;
+const APPLICATION_IMAGE_REGEXP = BASIC_DEVICE_OS_IMAGE_REGEXP;
+
+const TEMPLATE_VARIABLES_REGEXP = /{{.+?}}/g;
+// Special characters allowed: "dot", "pipe", "spaces" "quote", "backward slash", "underscore", "forward slash", "dash"
+const TEMPLATE_VARIABLES_CONTENT_REGEXP = /^([.a-zA-Z0-9|\s"\\_\/-])+$/;
 
 const absolutePathRegex = /^\/.*$/;
 export const MAX_TARGET_REVISION_LENGTH = 244;
@@ -64,20 +68,6 @@ export const getDnsSubdomainValidations = (t: TFunction) => [
     message: t('1-{{ maxCharacters }} characters', { maxCharacters: K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH }),
   },
 ];
-
-export const getKubernetesLabelValueErrors = (labelValue: string) => {
-  const errorKeys: Record<string, string> = {};
-  if (!K8S_LABEL_VALUE_START_END.test(labelValue)) {
-    errorKeys.labelValueStartAndEnd = 'failed';
-  }
-  if (!K8S_LABEL_VALUE_ALLOWED_CHARACTERS.test(labelValue)) {
-    errorKeys.labelValueAllowedChars = 'failed';
-  }
-  if (labelValue?.length > K8S_LABEL_VALUE_MAX_LENGTH) {
-    errorKeys.labelValueMaxLength = 'failed';
-  }
-  return errorKeys;
-};
 
 export const getKubernetesDnsSubdomainErrors = (value: string) => {
   const errorKeys: Record<string, string> = {};
@@ -192,11 +182,32 @@ export const maxLengthString = (t: TFunction, props: { maxLength: number; fieldN
   Yup.string().max(props.maxLength, t('{{ fieldName }} must not exceed {{ maxLength }} characters', props));
 
 export const validOsImage = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
-  maxLengthString(t, { fieldName: t('System image'), maxLength: 2048 }).matches(
-    isFleet ? BASIC_FLEET_OS_IMAGE_REGEXP : BASIC_DEVICE_OS_IMAGE_REGEXP,
-    isFleet
-      ? t('System image contains invalid characters')
-      : t('System image contains invalid characters. Template variables are not allowed.'),
+  maxLengthString(t, { fieldName: t('System image'), maxLength: 2048 }).test(
+    'osImageValidations',
+    t('System image is invalid'),
+    (osImage: string | undefined) => {
+      if (!osImage) {
+        return true;
+      }
+
+      let validateOsImage = osImage;
+      if (isFleet) {
+        // Extract template variables if they are present, they contain otherwise invalid characters
+        const templateVariables = [...osImage.matchAll(TEMPLATE_VARIABLES_REGEXP)];
+        if (templateVariables.length > 0) {
+          const invalidVariables = templateVariables.filter(([match]) => {
+            const content = match.slice(2, -2).trim(); // Remove the surrounding "{{" and "}}", and trim any extra whitespace
+            return !content || !TEMPLATE_VARIABLES_CONTENT_REGEXP.test(content);
+          });
+          if (invalidVariables.length > 0) {
+            return false;
+          }
+          validateOsImage = osImage.replace(TEMPLATE_VARIABLES_REGEXP, 'tv');
+        }
+      }
+
+      return BASIC_DEVICE_OS_IMAGE_REGEXP.test(validateOsImage);
+    },
   );
 
 export const validLabelsSchema = (t: TFunction) =>
@@ -250,7 +261,9 @@ export const validApplicationsSchema = (t: TFunction) => {
     .of(
       Yup.object().shape({
         name: Yup.string(),
-        image: Yup.string().required(t('Image is required.')),
+        image: Yup.string()
+          .required(t('Image is required.'))
+          .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
         variables: Yup.array()
           .of(
             Yup.object().shape({
