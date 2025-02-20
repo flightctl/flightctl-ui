@@ -47,7 +47,7 @@ const getDevicesEndpoint = ({
   queryUtils.addQueryConditions(fieldSelectors, 'status.updated.status', filterByUpdateStatus);
 
   if (nameOrAlias) {
-    queryUtils.addTextContainsCondition(fieldSelectors, 'metadata.nameoralias', nameOrAlias);
+    queryUtils.addTextContainsCondition(fieldSelectors, 'metadata.nameOrAlias', nameOrAlias);
   }
   if (ownerFleets?.length) {
     queryUtils.addQueryConditions(
