@@ -17,7 +17,7 @@ import {
 import { TimesIcon } from '@patternfly/react-icons/dist/js/icons/times-icon';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
 
-import { DeviceList, Fleet, FleetList } from '@flightctl/types';
+import { DeviceLabelList, Fleet, FleetList } from '@flightctl/types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { isPromiseFulfilled } from '../../../types/typeUtils';
 
@@ -25,7 +25,7 @@ import TableTextSearch, { TableTextSearchProps } from '../../Table/TableTextSear
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import { commonQueries as queries } from '../../../utils/query';
-import { MAX_TOTAL_SEARCH_RESULTS, getSearchResultsCount } from '../../../utils/search';
+import { MAX_TOTAL_SEARCH_RESULTS, getEmptyFleetSearch, getSearchResultsCount } from '../../../utils/search';
 import { labelToString, stringToLabel } from '../../../utils/labels';
 
 import './DeviceToolbarFilters.css';
@@ -41,15 +41,26 @@ type LabelFleetSelectorProps = {
 };
 
 const LabelFleetResults = ({
+  filterText,
   allLabels,
   fleetNames,
   isUpdating,
 }: {
+  filterText: string;
   isUpdating: boolean;
   fleetNames: string[];
   allLabels: FlightCtlLabel[];
 }) => {
   const { t } = useTranslation();
+  const searchHighlighter = React.useCallback(
+    (text: string) => {
+      return text
+        .split(new RegExp(`(${filterText})`, 'g'))
+        .filter(Boolean)
+        .map((part, index) => (part.trim() === filterText ? <strong key={`part-${index}`}>{part}</strong> : part));
+    },
+    [filterText],
+  );
 
   if (isUpdating) {
     return (
@@ -74,9 +85,10 @@ const LabelFleetResults = ({
               .filter((_, index) => index < visibleLabels)
               .map((label) => {
                 const labelStr = labelToString(label);
+                const labelStrParts = searchHighlighter(labelStr);
                 return (
                   <SelectOption key={`label@@${labelStr}`} value={`label@@${labelStr}`}>
-                    {labelStr}
+                    <span>{labelStrParts}</span>
                   </SelectOption>
                 );
               })}
@@ -88,11 +100,14 @@ const LabelFleetResults = ({
           <SelectList id="select-typeahead-fleets-listbox">
             {fleetNames
               .filter((_, index) => index < visibleFleets)
-              .map((fleetName) => (
-                <SelectOption key={`fleet@@${fleetName}`} value={`fleet@@${fleetName}`}>
-                  {fleetName}
-                </SelectOption>
-              ))}
+              .map((fleetName) => {
+                const fleetNameParts = searchHighlighter(fleetName);
+                return (
+                  <SelectOption key={`fleet@@${fleetName}`} value={`fleet@@${fleetName}`}>
+                    <span>{fleetNameParts}</span>
+                  </SelectOption>
+                );
+              })}
           </SelectList>
         </SelectGroup>
       )}
@@ -138,30 +153,20 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
   };
 
   const fetchTextMatches = async (val: string) => {
-    const labelMatches = get<DeviceList>(
-      // We ask for more items since can't get a precise amount of labels while querying for devices
-      queries.getDevicesWithExactLabelMatching([stringToLabel(val)], { limit: MAX_TOTAL_SEARCH_RESULTS * 2 }),
+    const searchOnlyLabels = val.includes('=');
+    const labelMatches = get<DeviceLabelList>(
+      queries.getDevicesWithPartialLabelMatching(val, { limit: MAX_TOTAL_SEARCH_RESULTS }),
     );
 
-    const fleetMatches = get<FleetList>(queries.getFleetsWithNameMatching(val, { limit: MAX_TOTAL_SEARCH_RESULTS }));
+    const fleetMatches = searchOnlyLabels
+      ? Promise.resolve(getEmptyFleetSearch())
+      : get<FleetList>(queries.getFleetsWithNameMatching(val, { limit: MAX_TOTAL_SEARCH_RESULTS }));
 
     const [labelMatchResult, fleetMatchResult] = await Promise.allSettled([labelMatches, fleetMatches]);
 
     let newLabels: FlightCtlLabel[] = [];
     if (isPromiseFulfilled(labelMatchResult)) {
-      // In case we somehow still receive partial label matches, we extract the actual labels
-      const matchingLabels = labelMatchResult.value.items.reduce((prevLabels, newDevice) => {
-        const deviceLabels = newDevice.metadata.labels || {};
-        Object.entries(deviceLabels).forEach(([key, value]) => {
-          const labelText = labelToString({ key, value });
-          if (labelText.includes(val) && !prevLabels.includes(labelText)) {
-            prevLabels.push(labelText);
-          }
-        });
-        return prevLabels;
-      }, [] as string[]);
-
-      newLabels = matchingLabels.map(stringToLabel).sort();
+      newLabels = labelMatchResult.value.map(stringToLabel);
     }
 
     let newFleets: string[] = [];
@@ -258,7 +263,12 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
       toggle={toggle}
     >
       {filterText && (
-        <LabelFleetResults isUpdating={isUpdating} fleetNames={fleetNameResults} allLabels={labelResults} />
+        <LabelFleetResults
+          isUpdating={isUpdating}
+          filterText={filterText}
+          fleetNames={fleetNameResults}
+          allLabels={labelResults}
+        />
       )}
     </Select>
   );
