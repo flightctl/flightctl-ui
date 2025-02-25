@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Check workflow runs in a release branch
         run: |
-          if [[ "${{ github.event.release.target_commitish }}" != *releases* ]]; then
+          if [[ "${{ github.event.release.target_commitish }}" != *release-* ]]; then
             echo "Expecting to be in a release branch, but we are in: ${{ github.event.release.target_commitish }}"
             exit 1
           fi
@@ -84,7 +84,7 @@ jobs:
           for LIB in $(echo ${LIBS}); do
             git add libs/"${LIB}"/package.json
           done
-          git commit -m "Version ${GITHUB_REF_NAME}"
-          git tag -f -a ${GITHUB_REF_NAME} -m "${GITHUB_REF_NAME}"
+          git commit -m "Release ${GITHUB_REF_NAME}"
+          git tag -f -a ${GITHUB_REF_NAME} -m "Release ${GITHUB_REF_NAME}"
           git push origin ${GITHUB_REF_NAME} --force
           git push origin ${{ github.event.release.target_commitish }} --force
