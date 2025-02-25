@@ -8,7 +8,7 @@ import {
   validLabelsSchema,
   validOsImage,
 } from '../../form/validations';
-import { appendJSONPatch, getApplicationPatches, getLabelPatches } from '../../../utils/patch';
+import { appendJSONPatch, getApplicationPatches, getDeviceLabelPatches } from '../../../utils/patch';
 import { Device, PatchRequest } from '@flightctl/types';
 import { EditDeviceFormValues } from './types';
 import {
@@ -37,11 +37,7 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
   const currentLabels = currentDevice.metadata.labels || {};
   const updatedLabels = [...updatedDevice.labels];
 
-  if (updatedDevice.deviceAlias) {
-    updatedLabels.push({ key: 'alias', value: updatedDevice.deviceAlias });
-  }
-
-  const deviceLabelPatches = getLabelPatches('/metadata/labels', currentLabels, updatedLabels);
+  const deviceLabelPatches = getDeviceLabelPatches(currentLabels, updatedLabels, updatedDevice.deviceAlias);
   allPatches = allPatches.concat(deviceLabelPatches);
 
   if (updatedDevice.fleetMatch) {
