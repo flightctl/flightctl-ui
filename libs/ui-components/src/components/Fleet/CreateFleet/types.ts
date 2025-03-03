@@ -24,10 +24,20 @@ export type DisruptionBudgetForm = DisruptionBudget & {
   isAdvanced: boolean;
 };
 
+export type UpdatePolicyForm = {
+  isAdvanced: boolean;
+  downloadAndUpdateDiffer: boolean;
+  downloadScheduleAt?: string;
+  downloadGraceTime?: string;
+  updateScheduleAt?: string;
+  updateGraceTime?: string;
+};
+
 export type FleetFormValues = DeviceSpecConfigFormValues & {
   name: string;
   fleetLabels: FlightCtlLabel[];
   labels: FlightCtlLabel[];
   rolloutPolicy: RolloutPolicyForm;
   disruptionBudget: DisruptionBudgetForm;
+  updatePolicy: UpdatePolicyForm;
 };
