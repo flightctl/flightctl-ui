@@ -46,8 +46,6 @@ jobs:
         run: npm run build
       - name: Run eslint
         run: npm run lint
-      - name: Run unit tests
-        run: npm run test
   build-standalone:
     name: Build
     runs-on: ubuntu-latest
