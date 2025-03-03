@@ -27,9 +27,6 @@
     "build": "tsc --build && npm run copy:css",
     "copy:css": "rsync -Rurv --include '*/' --include '*.css' --exclude '*' src  dist",
     "dev": "tsc -w",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}'"
   },
   "dependencies": {
