@@ -14,7 +14,7 @@ import { getLabelValueValidations, validKubernetesLabelValue } from '../../form/
 type DeviceAliasEditProps = { deviceId: string; alias?: string; onAliasEdited: VoidFunction };
 type DeviceAliasEditValues = { alias: string };
 
-const DeviceAliasEdit = ({ deviceId, alias = '', onAliasEdited }: DeviceAliasEditProps) => {
+const DeviceAliasEdit = ({ deviceId, alias: originalAlias = '', onAliasEdited }: DeviceAliasEditProps) => {
   const { t } = useTranslation();
   const { patch } = useFetch();
 
@@ -37,6 +37,10 @@ const DeviceAliasEdit = ({ deviceId, alias = '', onAliasEdited }: DeviceAliasEdi
 
   const onSubmit = React.useCallback(
     async ({ alias }: DeviceAliasEditValues) => {
+      if (alias === originalAlias) {
+        toggleIsEditing();
+        return;
+      }
       const req: PatchRequest = alias
         ? [
             {
@@ -63,7 +67,7 @@ const DeviceAliasEdit = ({ deviceId, alias = '', onAliasEdited }: DeviceAliasEdi
         setIsSubmitting(false);
       }
     },
-    [deviceId, onAliasEdited, patch],
+    [deviceId, originalAlias, onAliasEdited, patch],
   );
 
   const onAliasKeyDown = React.useCallback(
@@ -91,7 +95,7 @@ const DeviceAliasEdit = ({ deviceId, alias = '', onAliasEdited }: DeviceAliasEdi
     <Grid hasGutter>
       <Formik<DeviceAliasEditValues>
         initialValues={{
-          alias,
+          alias: originalAlias,
         }}
         validationSchema={Yup.object({
           alias: validKubernetesLabelValue(t, { isRequired: false, fieldName: t('Alias') }),
@@ -104,10 +108,9 @@ const DeviceAliasEdit = ({ deviceId, alias = '', onAliasEdited }: DeviceAliasEdi
               {isEditing ? (
                 <RichValidationTextField
                   fieldName="alias"
-                  aria-label={t('Alias')}
                   ref={textInputRef}
                   validations={getLabelValueValidations(t)}
-                  placeholder={alias || t('Untitled')}
+                  placeholder={originalAlias || t('Untitled')}
                   onKeyDown={onAliasKeyDown(resetForm, errors)}
                   onBlur={() => {
                     const isValidAlias = Object.keys(errors).length === 0;
@@ -119,7 +122,7 @@ const DeviceAliasEdit = ({ deviceId, alias = '', onAliasEdited }: DeviceAliasEdi
                 />
               ) : (
                 <>
-                  {alias || t('Untitled')}
+                  {originalAlias || t('Untitled')}
                   <Button
                     variant="plain"
                     aria-label={t('Edit alias')}
