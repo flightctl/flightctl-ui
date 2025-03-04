@@ -1,5 +1,5 @@
 import { FlightCtlLabel } from '../types/extraTypes';
-import { labelToExactApiMatchString } from './labels';
+import { labelToExactApiMatchString, textToPartialApiMatchString } from './labels';
 
 const addQueryConditions = (fieldSelectors: string[], fieldSelector: string, values?: string[]) => {
   if (values?.length === 1) {
@@ -32,12 +32,9 @@ type CommonQueryOptions = {
 };
 
 export const commonQueries = {
-  // We can't specify a sorting, as every entity has a default sorting which is always applied implicitly.
   getDevicesWithExactLabelMatching: (labels: FlightCtlLabel[], options?: CommonQueryOptions) => {
     const searchParams = new URLSearchParams();
 
-    // By default (without the "equal" sign), the API returns a partial match, but only on the label keys
-    // To prevent this confusing behaviour, we query for exact matches in all cases (for both keys and values)
     const exactLabelsMatch = labels.map(labelToExactApiMatchString).join(',');
     searchParams.set('labelSelector', exactLabelsMatch);
 
@@ -45,6 +42,18 @@ export const commonQueries = {
       searchParams.set('limit', `${options.limit}`);
     }
     return `devices?${searchParams.toString()}`;
+  },
+  getDevicesWithPartialLabelMatching: (text: string, options?: CommonQueryOptions) => {
+    const searchParams = new URLSearchParams({
+      kind: 'Device',
+    });
+
+    searchParams.set('fieldSelector', textToPartialApiMatchString(text));
+
+    if (options?.limit) {
+      searchParams.set('limit', `${options.limit}`);
+    }
+    return `labels?${searchParams.toString()}`;
   },
   getFleetsWithNameMatching: (matchName: string, options?: CommonQueryOptions) => {
     const searchParams = new URLSearchParams();
