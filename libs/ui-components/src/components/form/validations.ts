@@ -210,11 +210,21 @@ export const validOsImage = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
     },
   );
 
-export const validLabelsSchema = (t: TFunction) =>
+export const validLabelsSchema = (t: TFunction, forbiddenLabels?: string[]) =>
   Yup.array()
     .of(
       Yup.object<FlightCtlLabel>().shape({
-        key: Yup.string().required(),
+        key: Yup.string()
+          .required()
+          .test('forbid labels', 'is forbidden', (key: string, testContext) => {
+            if (forbiddenLabels?.length && forbiddenLabels.includes(key)) {
+              return testContext.createError({
+                path: 'labels',
+                message: t('Label key "{{ forbiddenLabel }}" is forbidden', { forbiddenLabel: key }),
+              });
+            }
+            return true;
+          }),
         value: Yup.string(),
       }),
     )
@@ -508,6 +518,7 @@ export const deviceSystemdUnitsValidationSchema = (t: TFunction) =>
     systemdUnits: systemdUnitListValidationSchema(t),
   });
 
+const forbiddenDeviceLabels = ['alias'];
 export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDevice: boolean }) =>
   Yup.object({
     deviceAlias: conf.isSingleDevice
@@ -516,5 +527,5 @@ export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDev
           /{{n}}/,
           t('Device aliases must be unique. Add a number to the template to generate unique aliases.'),
         ),
-    labels: validLabelsSchema(t),
+    labels: validLabelsSchema(t, forbiddenDeviceLabels),
   });

@@ -307,6 +307,20 @@ export const getLabelPatches = (
   return patches;
 };
 
+export const getDeviceLabelPatches = (
+  currentLabels: Record<string, string>,
+  newLabels: FlightCtlLabel[],
+  newAlias?: string,
+) => {
+  let allNewLabels = newLabels;
+
+  const currentAlias = newAlias || currentLabels['alias']; // The "alias" label is not allowed for devices, we need to add it back
+  if (currentAlias) {
+    allNewLabels = newLabels.concat([{ key: 'alias', value: currentAlias }]);
+  }
+  return getLabelPatches('/metadata/labels', currentLabels, allNewLabels);
+};
+
 export const toAPIApplication = (app: ApplicationFormSpec): ApplicationProviderSpec => {
   const envVars = app.variables.reduce((acc, variable) => {
     acc[variable.name] = variable.value;
