@@ -77,14 +77,3 @@ jobs:
               echo "Retrying..."
             done
           done
-
-      - name: Update the repo
-        run: |
-          git add package-lock.json
-          for LIB in $(echo ${LIBS}); do
-            git add libs/"${LIB}"/package.json
-          done
-          git commit -m "Release ${GITHUB_REF_NAME}"
-          git tag -f -a ${GITHUB_REF_NAME} -m "Release ${GITHUB_REF_NAME}"
-          git push origin ${GITHUB_REF_NAME} --force
-          git push origin ${{ github.event.release.target_commitish }} --force
