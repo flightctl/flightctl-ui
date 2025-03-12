@@ -2,7 +2,7 @@ import { ChartContainer, ChartDonut } from '@patternfly/react-charts';
 import { Flex, FlexItem, Stack, StackItem, Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { Link, LinkProps } from '../../hooks/useNavigate';
-import WithHelperText from '../common/WithHelperText';
+import LabelWithHelperText from '../common/WithHelperText';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getDefaultStatusColor } from '../../utils/status/common';
 
@@ -83,7 +83,7 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
                 alignContent={{ default: 'alignContentCenter' }}
                 className="fctl-charts__title"
               >
-                {helperText ? <WithHelperText showLabel ariaLabel={title} content={helperText} /> : title}
+                {helperText ? <LabelWithHelperText label={title} content={helperText} /> : title}
               </Flex>
             </foreignObject>
             <ChartDonut

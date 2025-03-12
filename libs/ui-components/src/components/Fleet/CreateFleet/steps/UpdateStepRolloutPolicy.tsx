@@ -20,7 +20,7 @@ import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import LabelsField from '../../../form/LabelsField';
 import FormSelect from '../../../form/FormSelect';
 import NumberField from '../../../form/NumberField';
-import WithHelperText from '../../../common/WithHelperText';
+import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getEmptyInitializedBatch } from '../fleetSpecUtils';
 
@@ -70,17 +70,12 @@ const RolloutPolicyBatch = ({ index }: { index: number }) => {
             </SplitItem>
           </Split>
         </FormGroup>
-        <FormGroup
+        <FormGroupWithHelperText
+          label={t('Success threshold')}
+          content={t(
+            'The minimum percentage of devices that must be updated successfully in order to continue updating the next batch of devices.',
+          )}
           isRequired
-          label={
-            <WithHelperText
-              ariaLabel={t('Success threshold')}
-              content={t(
-                'The minimum percentage of devices that must be updated successfully in order to continue updating the next batch of devices.',
-              )}
-              showLabel
-            />
-          }
         >
           <Flex flexWrap={{ default: 'wrap' }}>
             <FlexItem>{t('If')} </FlexItem>
@@ -99,7 +94,7 @@ const RolloutPolicyBatch = ({ index }: { index: number }) => {
               )}
             </FlexItem>
           </Flex>
-        </FormGroup>
+        </FormGroupWithHelperText>
       </Grid>
     </ExpandableFormSection>
   );
@@ -121,17 +116,12 @@ const UpdateStepRolloutPolicy = () => {
         <br />
         {t('Devices that are not part of any batch will be updated last.')}
       </Alert>
-      <FormGroup
+      <FormGroupWithHelperText
+        label={t('Update timeout')}
+        content={t(
+          "The time-frame within which a device must be updated. If it exceeds it, device will be counted as a 'failed to update' in the batch success threshold.",
+        )}
         isRequired
-        label={
-          <WithHelperText
-            ariaLabel={t('Update timeout')}
-            content={t(
-              "The time-frame within which a device must be updated. If it exceeds it, device will be counted as a 'failed to update' in the batch success threshold.",
-            )}
-            showLabel
-          />
-        }
       >
         <Flex>
           <FlexItem>{t('Timeout devices that fail to update after')}</FlexItem>
@@ -140,7 +130,7 @@ const UpdateStepRolloutPolicy = () => {
           </FlexItem>
           <FlexItem>{t('minutes')}.</FlexItem>
         </Flex>
-      </FormGroup>
+      </FormGroupWithHelperText>
 
       <FormGroup>
         <FieldArray name="rolloutPolicy.batches">

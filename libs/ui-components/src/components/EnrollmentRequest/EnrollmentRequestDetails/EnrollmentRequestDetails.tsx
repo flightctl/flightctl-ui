@@ -29,7 +29,7 @@ import ApproveDeviceModal from '../../modals/ApproveDeviceModal/ApproveDeviceMod
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import EnrollmentRequestStatus from '../../Status/EnrollmentRequestStatus';
-import WithHelperText from '../../common/WithHelperText';
+import LabelWithHelperText from '../../common/WithHelperText';
 import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
@@ -138,9 +138,8 @@ const EnrollmentRequestDetails = () => {
         <GridItem md={6}>
           <DetailsPageCard>
             <CardTitle>
-              <WithHelperText
-                showLabel
-                ariaLabel={t('Certificate signing request')}
+              <LabelWithHelperText
+                label={t('Certificate signing request')}
                 content={t('A PEM-encoded PKCS#10 certificate signing request.')}
               />
             </CardTitle>
@@ -162,7 +161,7 @@ const EnrollmentRequestDetails = () => {
         <GridItem md={6}>
           <DetailsPageCard>
             <CardTitle>
-              <WithHelperText showLabel ariaLabel={t('Certificate')} content={t('A PEM-encoded signed certificate.')} />
+              <LabelWithHelperText label={t('Certificate')} content={t('A PEM-encoded signed certificate.')} />
             </CardTitle>
             <DetailsPageCardBody>
               {er?.status?.certificate ? (

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Bullseye, PageSection, Spinner } from '@patternfly/react-core';
 import { Table as PFTable, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
 import { useTranslation } from '../../hooks/useTranslation';
-import WithHelperText from '../common/WithHelperText';
+import LabelWithHelperText from '../common/WithHelperText';
 
 export type ApiSortTableColumn = {
   name: string;
@@ -75,7 +75,7 @@ const Table: TableFC = ({
           {columns.map((c) => (
             <Th key={c.name} {...c.thProps} aria-label={c.name}>
               {c.helperText ? (
-                <WithHelperText ariaLabel={c.name} showLabel content={c.helperText} triggerAction="hover" />
+                <LabelWithHelperText label={c.name} content={c.helperText} triggerAction="hover" />
               ) : (
                 c.name
               )}

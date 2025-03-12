@@ -6,7 +6,7 @@ import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circl
 import { useTranslation } from '../../../hooks/useTranslation';
 
 import TextField from '../../form/TextField';
-import WithHelperText from '../../common/WithHelperText';
+import { FormGroupWithHelperText } from '../../common/WithHelperText';
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
 import NameField from '../../form/NameField';
 import { getDnsSubdomainValidations } from '../../form/validations';
@@ -24,29 +24,20 @@ export const CreateResourceSyncForm = ({ rs, index }: { rs: ResourceSyncFormValu
         resourceType="resourcesyncs"
         validations={getDnsSubdomainValidations(t)}
       />
-      <FormGroup
-        label={t('Target revision')}
-        isRequired
-        labelIcon={<WithHelperText ariaLabel={t('Target revision')} content={t('Name of a branch or a tag.')} />}
-      >
+      <FormGroupWithHelperText label={t('Target revision')} content={t('Name of a branch or a tag.')} isRequired>
         <TextField
           name={`resourceSyncs[${index}].targetRevision`}
           aria-label={t('Target revision')}
           value={rs.targetRevision}
           helperText={t('For example: main')}
         />
-      </FormGroup>
-      <FormGroup
+      </FormGroupWithHelperText>
+      <FormGroupWithHelperText
         label={t('Path')}
+        content={t(
+          'The absolute path of a file or directory in the repository. If a directory, the directory should contain only resource definitions with no subdirectories.',
+        )}
         isRequired
-        labelIcon={
-          <WithHelperText
-            ariaLabel={t('Path')}
-            content={t(
-              'The absolute path of a file or directory in the repository. If a directory, the directory should contain only resource definitions with no subdirectories.',
-            )}
-          />
-        }
       >
         <TextField
           name={`resourceSyncs[${index}].path`}
@@ -56,7 +47,7 @@ export const CreateResourceSyncForm = ({ rs, index }: { rs: ResourceSyncFormValu
             exampleFile: '/demos/basic-nginx-demo/deployment/fleet.yaml',
           })}
         />
-      </FormGroup>
+      </FormGroupWithHelperText>
     </FormSection>
   );
 };
