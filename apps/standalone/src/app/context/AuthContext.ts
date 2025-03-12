@@ -48,8 +48,8 @@ export const useAuthContext = () => {
           redirectToLogin();
           return;
         }
-        const info = (await resp.json()) as { preferred_username: string };
-        setUsername(info.preferred_username);
+        const info = (await resp.json()) as { username: string };
+        setUsername(info.username);
         setLoading(false);
       } catch (err) {
         // TODO show err and retry btn
