@@ -16,7 +16,7 @@ import ApplicationsForm from './ApplicationTemplates';
 import SystemdUnitsForm from './SystemdUnitsForm';
 import CheckboxField from '../../../form/CheckboxField';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
-import { useAppContext } from '../../../../hooks/useAppContext';
+import { FlightCtlApp, useAppContext } from '../../../../hooks/useAppContext';
 import { ACM_REPO_NAME } from '../deviceSpecUtils';
 
 export const deviceTemplateStepId = 'device-template';
@@ -150,7 +150,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
             <SystemdUnitsForm />
           </FormGroup>
         )}
-        {appType === 'ocp' && <MicroShiftCheckbox isFleet={isFleet} />}
+        {appType === FlightCtlApp.OCP && <MicroShiftCheckbox isFleet={isFleet} />}
       </FlightCtlForm>
     </Grid>
   );

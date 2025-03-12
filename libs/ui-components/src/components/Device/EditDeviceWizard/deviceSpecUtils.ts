@@ -1,20 +1,26 @@
 import {
   ApplicationProviderSpec,
+  AppType,
   ConfigProviderSpec,
   DeviceSpec,
+  EncodingType,
   FileSpec,
   GitConfigProviderSpec,
   HttpConfigProviderSpec,
+  InlineApplicationProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
   PatchRequest,
 } from '@flightctl/types';
 import {
-  ApplicationFormSpec,
+  AppForm,
+  AppSpecType,
   ConfigSourceProvider,
   ConfigType,
   GitConfigTemplate,
   HttpConfigTemplate,
+  ImageAppForm,
+  InlineAppForm,
   InlineConfigTemplate,
   KubeSecretTemplate,
   SpecConfigTemplate,
@@ -22,6 +28,8 @@ import {
   isGitProviderSpec,
   isHttpConfigTemplate,
   isHttpProviderSpec,
+  isImageAppForm,
+  isImageAppProvider,
   isInlineProviderSpec,
   isKubeProviderSpec,
   isKubeSecretTemplate,
@@ -117,11 +125,7 @@ const isSameInlineConf = (a: InlineConfigProviderSpec, b: InlineConfigProviderSp
         isSameInlineConfigValue<string>(aInline.user, bInline.user, DEFAULT_INLINE_FILE_USER) &&
         isSameInlineConfigValue<string>(aInline.group, bInline.group, DEFAULT_INLINE_FILE_GROUP) &&
         isSameInlineConfigValue<number>(aInline.mode, bInline.mode, DEFAULT_INLINE_FILE_MODE) &&
-        isSameInlineConfigValue<string>(
-          aInline.contentEncoding,
-          bInline.contentEncoding,
-          FileSpec.contentEncoding.PLAIN,
-        ) &&
+        isSameInlineConfigValue<string>(aInline.contentEncoding, bInline.contentEncoding, EncodingType.EncodingPlain) &&
         aInline.content === bInline.content
       );
     })
@@ -189,29 +193,52 @@ export const getDeviceSpecConfigPatches = (
   return allPatches;
 };
 
-export const toAPIApplication = (app: ApplicationFormSpec): ApplicationProviderSpec => {
+export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
   const envVars = app.variables.reduce((acc, variable) => {
     acc[variable.name] = variable.value;
     return acc;
   }, {});
 
-  return app.name
-    ? {
-        name: app.name,
-        image: app.image,
-        envVars,
-      }
-    : {
-        // Name must not be sent, otherwise the API expects it to have a value
-        image: app.image,
-        envVars,
-      };
+  if (isImageAppForm(app)) {
+    const data = {
+      image: app.image,
+      envVars,
+    };
+    return app.name ? { ...data, name: app.name } : data;
+  }
+
+  return {
+    name: app.name,
+    appType: AppType.AppTypeCompose,
+    inline: app.files.map((file) => ({
+      // Warning! FileContent includes a Record<string, any> so Typescript won't warn us if we specify incorrect field names
+      path: file.path,
+      content: file.content || '',
+      contentEncoding: file.base64 ? EncodingType.EncodingBase64 : EncodingType.EncodingPlain,
+    })),
+    envVars,
+  };
+};
+
+const hasInlineApplicationChanged = (currentApp: InlineApplicationProviderSpec, updatedApp: InlineAppForm) => {
+  if (currentApp.inline.length != updatedApp.files.length) {
+    return true;
+  }
+  return currentApp.inline.some((file, index) => {
+    const updatedFile = updatedApp.files[index];
+    const isCurrentBase64 = file.contentEncoding === EncodingType.EncodingBase64;
+    return (
+      (updatedFile.base64 || false) !== isCurrentBase64 ||
+      updatedFile.path !== file.path ||
+      updatedFile.content !== file.content
+    );
+  });
 };
 
 export const getApplicationPatches = (
   basePath: string,
   currentApps: ApplicationProviderSpec[],
-  updatedApps: ApplicationFormSpec[],
+  updatedApps: AppForm[],
 ) => {
   const patches: PatchRequest = [];
 
@@ -239,17 +266,29 @@ export const getApplicationPatches = (
   } else {
     const needsPatch = currentApps.some((currentApp, index) => {
       const updatedApp = updatedApps[index];
-      if (updatedApp.name !== currentApp.name || updatedApp.image !== currentApp.image) {
+      const isCurrentImageApp = isImageAppProvider(currentApp);
+      const currentAppSpecType = isCurrentImageApp ? AppSpecType.OCI_IMAGE : AppSpecType.INLINE;
+      if (currentAppSpecType !== updatedApp.specType || updatedApp.name !== currentApp.name) {
         return true;
       }
       const currentVars = Object.entries(currentApp.envVars || {});
       if (currentVars.length !== updatedApp.variables.length) {
         return true;
+      } else {
+        const hasChangedVars = updatedApp.variables.some((variable) => {
+          const currentValue = currentApp.envVars ? currentApp.envVars[variable.name] : undefined;
+          return !currentValue || currentValue !== variable.value;
+        });
+        if (hasChangedVars) {
+          return true;
+        }
       }
-      return updatedApp.variables.some((variable) => {
-        const currentValue = currentApp.envVars ? currentApp.envVars[variable.name] : undefined;
-        return !currentValue || currentValue !== variable.value;
-      });
+
+      if (isCurrentImageApp) {
+        return (updatedApp as ImageAppForm).image !== currentApp.image;
+      }
+
+      return hasInlineApplicationChanged(currentApp, updatedApp as InlineAppForm);
     });
     if (needsPatch) {
       patches.push({
@@ -302,7 +341,7 @@ export const getApiConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
         path: file.path,
         content: file.content,
         mode: file.permissions ? parseInt(file.permissions, 8) : undefined,
-        contentEncoding: file.base64 ? FileSpec.contentEncoding.BASE64 : undefined,
+        contentEncoding: file.base64 ? EncodingType.EncodingBase64 : undefined,
       };
       // user / group fields cannot be sent as empty in PATCH operations
       if (file.user) {
@@ -316,13 +355,29 @@ export const getApiConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
   };
 };
 
-export const getApplicationValues = (deviceSpec?: DeviceSpec): ApplicationFormSpec[] => {
-  const map = deviceSpec?.applications || [];
-  return map.map((app) => {
+const getAppFormVariables = (app: ApplicationProviderSpec) =>
+  Object.entries(app.envVars || {}).map(([varName, varValue]) => ({ name: varName, value: varValue }));
+
+export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
+  const apps = deviceSpec?.applications || [];
+  return apps.map((app) => {
+    if (isImageAppProvider(app)) {
+      return {
+        specType: AppSpecType.OCI_IMAGE,
+        name: app.name || '',
+        image: app.image,
+        variables: getAppFormVariables(app),
+      };
+    }
     return {
+      specType: AppSpecType.INLINE,
       name: app.name || '',
-      image: app.image,
-      variables: Object.entries(app.envVars || {}).map(([varName, varValue]) => ({ name: varName, value: varValue })),
+      files: app.inline.map((file) => ({
+        path: file.path || '',
+        content: file.content,
+        base64: file.contentEncoding === EncodingType.EncodingBase64,
+      })),
+      variables: getAppFormVariables(app),
     };
   });
 };
@@ -372,7 +427,7 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec, registerMicroS
             path: inline.path,
             permissions: inline.mode !== undefined ? formatFileMode(inline.mode) : undefined,
             content: inline.content,
-            base64: inline.contentEncoding === FileSpec.contentEncoding.BASE64,
+            base64: inline.contentEncoding === EncodingType.EncodingBase64,
           } as InlineConfigTemplate['files'][0];
         }),
       } as InlineConfigTemplate;

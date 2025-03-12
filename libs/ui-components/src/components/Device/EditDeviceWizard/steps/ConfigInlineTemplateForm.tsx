@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, FormGroup, FormSection, Grid, Split, SplitItem } from '@patternfly/react-core';
+import { Button, FormGroup, Grid, Split, SplitItem } from '@patternfly/react-core';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { FieldArray, useField, useFormikContext } from 'formik';
@@ -129,23 +129,21 @@ const ConfigInlineTemplateForm = ({ index }: ConfigInlineTemplateFormProps) => {
               </Split>
             );
           })}
-          <FormSection>
-            <FormGroup>
-              <Button
-                variant="link"
-                icon={<PlusCircleIcon />}
-                iconPosition="start"
-                onClick={() => {
-                  push({
-                    path: '',
-                    content: '',
-                  });
-                }}
-              >
-                {t('Add file')}
-              </Button>
-            </FormGroup>
-          </FormSection>
+          <FormGroup>
+            <Button
+              variant="link"
+              icon={<PlusCircleIcon />}
+              iconPosition="start"
+              onClick={() => {
+                push({
+                  path: '',
+                  content: '',
+                });
+              }}
+            >
+              {t('Add file')}
+            </Button>
+          </FormGroup>
         </>
       )}
     </FieldArray>

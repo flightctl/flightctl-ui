@@ -1,4 +1,10 @@
-import { AppContext, AppContextProps, NavLinkFC, PromptFC } from '@flightctl/ui-components/src/hooks/useAppContext';
+import {
+  AppContext,
+  AppContextProps,
+  FlightCtlApp,
+  NavLinkFC,
+  PromptFC,
+} from '@flightctl/ui-components/src/hooks/useAppContext';
 import { ROUTE } from '@flightctl/ui-components/src/hooks/useNavigate';
 import {
   Link,
@@ -44,7 +50,7 @@ export const useValuesAppContext = (): AppContextProps => {
   const userInfo = useSelector(getUser);
 
   return {
-    appType: 'ocp',
+    appType: FlightCtlApp.OCP,
     user: userInfo?.username || '',
     router: {
       Link,
