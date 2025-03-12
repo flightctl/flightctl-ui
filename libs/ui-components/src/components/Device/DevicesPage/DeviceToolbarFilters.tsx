@@ -52,14 +52,16 @@ const LabelFleetResults = ({
   allLabels: FlightCtlLabel[];
 }) => {
   const { t } = useTranslation();
+  const regexp = React.useMemo(() => new RegExp(`(${filterText})`, 'g'), [filterText]);
+
   const searchHighlighter = React.useCallback(
     (text: string) => {
       return text
-        .split(new RegExp(`(${filterText})`, 'g'))
+        .split(regexp)
         .filter(Boolean)
         .map((part, index) => (part.trim() === filterText ? <strong key={`part-${index}`}>{part}</strong> : part));
     },
-    [filterText],
+    [filterText, regexp],
   );
 
   if (isUpdating) {
