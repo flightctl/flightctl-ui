@@ -1,7 +1,10 @@
 import {
+  ApplicationProviderSpec,
   ConfigProviderSpec,
   GitConfigProviderSpec,
   HttpConfigProviderSpec,
+  ImageApplicationProviderSpec,
+  InlineApplicationProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
 } from '@flightctl/types';
@@ -26,6 +29,33 @@ export type GitConfigTemplate = ConfigTemplate & {
   mountPath?: string;
 };
 
+export enum AppSpecType {
+  OCI_IMAGE = 'image',
+  INLINE = 'inline',
+}
+
+type InlineContent = {
+  content?: string;
+  path: string;
+  base64?: boolean;
+};
+
+type AppBase = {
+  specType: AppSpecType;
+  // appType: AppType - commented out for now, since it only accepts one value ("compose")
+  name?: string;
+  variables: { name: string; value: string }[];
+};
+
+export type InlineAppForm = AppBase & {
+  name: string; // name can only be optional for image applications
+  files: InlineContent[];
+};
+
+export type ImageAppForm = AppBase & {
+  image: string;
+};
+
 export const isGitConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is GitConfigTemplate =>
   configTemplate.type === ConfigType.GIT;
 
@@ -43,7 +73,24 @@ export type RepoConfig = GitConfigProviderSpec | HttpConfigProviderSpec;
 export const isRepoConfig = (config: ConfigSourceProvider): config is RepoConfig =>
   isGitProviderSpec(config) || isHttpProviderSpec(config);
 
-const hasTemplateVariables = (str: string) => /device.metadata/.test(str);
+export type AppForm = ImageAppForm | InlineAppForm;
+
+export const isInlineAppProvider = (app: ApplicationProviderSpec): app is InlineApplicationProviderSpec =>
+  'inline' in app;
+export const isImageAppProvider = (app: ApplicationProviderSpec): app is ImageApplicationProviderSpec => 'image' in app;
+
+export const isImageAppForm = (app: AppBase): app is ImageAppForm => app.specType === AppSpecType.OCI_IMAGE;
+export const isInlineAppForm = (app: AppBase): app is InlineAppForm => app.specType === AppSpecType.INLINE;
+
+const hasTemplateVariables = (str: string) => /{{.+?}}/.test(str);
+
+export const getAppIdentifier = (app: AppForm) => {
+  if (isImageAppForm(app)) {
+    return app.name || app.image;
+  }
+  // Name is mandatory for inline applications
+  return app.name;
+};
 
 export const getConfigFullRepoUrl = (config: RepoConfig, repositoryUrl: string) => {
   let relativePath: string = '';
@@ -84,7 +131,7 @@ export const isKubeProviderSpec = (providerSpec: ConfigProviderSpec): providerSp
 
 export type InlineConfigTemplate = ConfigTemplate & {
   type: ConfigType.INLINE;
-  files: Array<{ path: string; content: string; base64: boolean; permissions?: string; user?: string; group?: string }>;
+  files: Array<InlineContent & { permissions?: string; user?: string; group?: string }>;
 };
 
 export const isInlineConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is InlineConfigTemplate =>

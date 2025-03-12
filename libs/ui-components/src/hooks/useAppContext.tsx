@@ -37,9 +37,14 @@ export const appRoutes = {
 
 export type NavLinkFC = React.FC<{ to: string; children: (props: { isActive: boolean }) => React.ReactNode }>;
 export type PromptFC = React.FC<{ message: string }>;
+export enum FlightCtlApp {
+  STANDALONE = 'standalone',
+  OCP = 'ocp',
+  AAP = 'aap',
+}
 
 export type AppContextProps = {
-  appType: 'standalone' | 'ocp' | 'aap';
+  appType: FlightCtlApp;
   user?: string; // auth?.user?.profile.preferred_username
   i18n: {
     transNamespace?: string;
@@ -73,7 +78,7 @@ export type AppContextProps = {
 };
 
 export const AppContext = React.createContext<AppContextProps>({
-  appType: 'standalone',
+  appType: FlightCtlApp.STANDALONE,
   router: {
     useNavigate,
     Link,

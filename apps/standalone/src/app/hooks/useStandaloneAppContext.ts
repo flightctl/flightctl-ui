@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AppContextProps, NavLinkFC, appRoutes } from '@flightctl/ui-components/src/hooks/useAppContext';
+import { AppContextProps, FlightCtlApp, NavLinkFC, appRoutes } from '@flightctl/ui-components/src/hooks/useAppContext';
 import {
   Link,
   NavLink,
@@ -17,7 +17,7 @@ import { useMetrics } from './useMetrics';
 import { AuthContext } from '../context/AuthContext';
 
 const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics'> = {
-  appType: 'standalone',
+  appType: FlightCtlApp.STANDALONE,
   i18n: {
     transNamespace: undefined,
   },
