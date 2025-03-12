@@ -7,15 +7,17 @@ import {
   validKubernetesLabelValue,
   validLabelsSchema,
   validOsImage,
+  validUpdatePolicySchema,
 } from '../../form/validations';
-import { appendJSONPatch, getApplicationPatches, getLabelPatches } from '../../../utils/patch';
+import { appendJSONPatch, getLabelPatches, getUpdatePolicyPatches } from '../../../utils/patch';
 import { Device, PatchRequest } from '@flightctl/types';
-import { EditDeviceFormValues } from './types';
+import { EditDeviceFormValues, UpdatePolicyForm } from './../../../types/deviceSpec';
 import {
   ACMCrdConfig,
   ACMImportConfig,
   MicroshiftRegistrationHook,
-  getAPIConfig,
+  getApiConfig,
+  getApplicationPatches,
   getDeviceSpecConfigPatches,
 } from './deviceSpecUtils';
 
@@ -27,6 +29,7 @@ export const getValidationSchema = (t: TFunction) =>
       labels: validLabelsSchema(t),
       configTemplates: validConfigTemplatesSchema(t),
       applications: validApplicationsSchema(t),
+      updatePolicy: validUpdatePolicySchema(t),
     }),
   );
 
@@ -74,7 +77,7 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
 
   // Configurations
   const currentConfigs = currentDevice.spec?.config || [];
-  const newConfigs = updatedDevice.configTemplates.map(getAPIConfig);
+  const newConfigs = updatedDevice.configTemplates.map(getApiConfig);
   if (updatedDevice.registerMicroShift) {
     newConfigs.push(ACMCrdConfig, ACMImportConfig, MicroshiftRegistrationHook);
   }
@@ -84,6 +87,14 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
   // Applications
   const appPatches = getApplicationPatches('/spec', currentDevice.spec?.applications || [], updatedDevice.applications);
   allPatches = allPatches.concat(appPatches);
+
+  // Updates
+  const updatesPatches = getUpdatePolicyPatches(
+    '/spec/updatePolicy',
+    currentDevice.spec?.updatePolicy,
+    updatedDevice.updatePolicy as Required<UpdatePolicyForm>,
+  );
+  allPatches = allPatches.concat(updatesPatches);
 
   return allPatches;
 };

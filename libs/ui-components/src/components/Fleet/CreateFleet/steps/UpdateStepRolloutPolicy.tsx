@@ -14,7 +14,7 @@ import {
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon, PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons';
 
-import { BatchForm, BatchLimitType, FleetFormValues } from '../types';
+import { BatchForm, BatchLimitType, FleetFormValues } from '../../../../types/deviceSpec';
 import ErrorHelperText from '../../../form/FieldHelperText';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import LabelsField from '../../../form/LabelsField';

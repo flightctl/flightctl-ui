@@ -9,14 +9,14 @@ import {
   StackItem,
 } from '@patternfly/react-core';
 
-import { EditDeviceFormValues } from '../types';
+import { EditDeviceFormValues } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import LabelsView from '../../../common/LabelsView';
 import { toAPILabel } from '../../../../utils/labels';
 import { getErrorMessage } from '../../../../utils/error';
 import FlightControlDescriptionList from '../../../common/FlightCtlDescriptionList';
 import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
-import { getAPIConfig } from '../deviceSpecUtils';
+import { getApiConfig } from '../deviceSpecUtils';
 import ReviewApplications from './ReviewApplications';
 
 export const reviewDeviceStepId = 'review-device';
@@ -63,7 +63,7 @@ const ReviewStep = ({ error }: { error?: string }) => {
             <DescriptionListGroup>
               <DescriptionListTerm>{t('Configurations')}</DescriptionListTerm>
               <DescriptionListDescription>
-                <RepositorySourceList configs={values.configTemplates.map(getAPIConfig)} />
+                <RepositorySourceList configs={values.configTemplates.map(getApiConfig)} />
               </DescriptionListDescription>
             </DescriptionListGroup>
           )}

@@ -7,7 +7,8 @@ import { TFunction } from 'react-i18next';
 
 const generalInfoStepIndex = 0;
 const deviceTemplateStepIndex = 1;
-const reviewDeviceStepIndex = 2;
+const deviceUpdatesStepIndex = 2;
+const reviewDeviceStepIndex = 3;
 
 const disabledTemplateReason = (t: TFunction) =>
   t('The device will be bound to a fleet. As a result, its configurations cannot be edited directly.');
@@ -17,6 +18,7 @@ const EditDeviceWizardNav = () => {
   const { activeStep, steps, goToStepByIndex } = useWizardContext();
 
   const isEditTemplateDisabled = steps[deviceTemplateStepIndex]?.isDisabled;
+  const isDeviceUpdatesDisabled = steps[deviceUpdatesStepIndex]?.isDisabled;
   const isReviewDeviceDisabled = steps[reviewDeviceStepIndex]?.isDisabled;
 
   return (
@@ -39,8 +41,19 @@ const EditDeviceWizardNav = () => {
             goToStepByIndex(deviceTemplateStepIndex + 1);
           }
         }}
+      />
+      <WizardNavItem
+        stepIndex={deviceUpdatesStepIndex}
+        content={t('Updates')}
+        isCurrent={activeStep?.index === deviceUpdatesStepIndex + 1}
+        isDisabled={isDeviceUpdatesDisabled}
+        onClick={() => {
+          if (!isDeviceUpdatesDisabled) {
+            goToStepByIndex(deviceUpdatesStepIndex + 1);
+          }
+        }}
       >
-        {isEditTemplateDisabled && (
+        {isDeviceUpdatesDisabled && (
           <Tooltip content={disabledTemplateReason(t)}>
             <Icon status="info" size="sm">
               <InfoCircleIcon />

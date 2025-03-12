@@ -1,4 +1,5 @@
 import {
+  ApplicationProviderSpec,
   ConfigProviderSpec,
   DeviceSpec,
   FileSpec,
@@ -9,6 +10,7 @@ import {
   PatchRequest,
 } from '@flightctl/types';
 import {
+  ApplicationFormSpec,
   ConfigSourceProvider,
   ConfigType,
   GitConfigTemplate,
@@ -24,7 +26,6 @@ import {
   isKubeProviderSpec,
   isKubeSecretTemplate,
 } from '../../../types/deviceSpec';
-import { ApplicationFormSpec } from './types';
 
 const DEFAULT_INLINE_FILE_MODE = 420; // In Octal: 0644
 const DEFAULT_INLINE_FILE_USER = 'root';
@@ -188,7 +189,81 @@ export const getDeviceSpecConfigPatches = (
   return allPatches;
 };
 
-export const getAPIConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
+export const toAPIApplication = (app: ApplicationFormSpec): ApplicationProviderSpec => {
+  const envVars = app.variables.reduce((acc, variable) => {
+    acc[variable.name] = variable.value;
+    return acc;
+  }, {});
+
+  return app.name
+    ? {
+        name: app.name,
+        image: app.image,
+        envVars,
+      }
+    : {
+        // Name must not be sent, otherwise the API expects it to have a value
+        image: app.image,
+        envVars,
+      };
+};
+
+export const getApplicationPatches = (
+  basePath: string,
+  currentApps: ApplicationProviderSpec[],
+  updatedApps: ApplicationFormSpec[],
+) => {
+  const patches: PatchRequest = [];
+
+  const currentLen = currentApps.length;
+  const newLen = updatedApps.length;
+  if (currentLen === 0 && newLen > 0) {
+    // First apps(s) have been added
+    patches.push({
+      path: `${basePath}/applications`,
+      op: 'add',
+      value: updatedApps.map(toAPIApplication),
+    });
+  } else if (currentLen > 0 && newLen === 0) {
+    // Last app(s) have been removed
+    patches.push({
+      path: `${basePath}/applications`,
+      op: 'remove',
+    });
+  } else if (currentLen !== newLen) {
+    patches.push({
+      path: `${basePath}/applications`,
+      op: 'replace',
+      value: updatedApps.map(toAPIApplication),
+    });
+  } else {
+    const needsPatch = currentApps.some((currentApp, index) => {
+      const updatedApp = updatedApps[index];
+      if (updatedApp.name !== currentApp.name || updatedApp.image !== currentApp.image) {
+        return true;
+      }
+      const currentVars = Object.entries(currentApp.envVars || {});
+      if (currentVars.length !== updatedApp.variables.length) {
+        return true;
+      }
+      return updatedApp.variables.some((variable) => {
+        const currentValue = currentApp.envVars ? currentApp.envVars[variable.name] : undefined;
+        return !currentValue || currentValue !== variable.value;
+      });
+    });
+    if (needsPatch) {
+      patches.push({
+        path: `${basePath}/applications`,
+        op: 'replace',
+        value: updatedApps.map(toAPIApplication),
+      });
+    }
+  }
+
+  return patches;
+};
+
+export const getApiConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
   if (isGitConfigTemplate(ct)) {
     return {
       name: ct.name,

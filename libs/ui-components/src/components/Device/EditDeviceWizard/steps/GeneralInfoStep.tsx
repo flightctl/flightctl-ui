@@ -9,7 +9,7 @@ import LabelsField from '../../../form/LabelsField';
 import RichValidationTextField from '../../../form/RichValidationTextField';
 import { getLabelValueValidations } from '../../../form/validations';
 import DeviceLabelMatch from '../../../modals/ApproveDeviceModal/DeviceLabelMatch';
-import { EditDeviceFormValues } from '../types';
+import { EditDeviceFormValues } from '../../../../types/deviceSpec';
 
 export const generalInfoStepId = 'general-info';
 
