@@ -7,7 +7,7 @@ import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/exter
 
 import { USING_TEMPLATE_VARIABLES_LINK } from '../../../../links';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import WithHelperText from '../../../common/WithHelperText';
+import LabelWithHelperText, { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import TextField from '../../../form/TextField';
 import FlightCtlForm from '../../../form/FlightCtlForm';
@@ -50,8 +50,8 @@ const MicroShiftCheckbox = ({ isFleet }: { isFleet: boolean }) => {
             isFleet ? (
               <>
                 {t('Register all MicroShift devices to ACM')}
-                <WithHelperText
-                  ariaLabel="MicroShift registration"
+                <LabelWithHelperText
+                  label="MicroShift registration"
                   content={
                     <>
                       {t(
@@ -63,13 +63,14 @@ const MicroShiftCheckbox = ({ isFleet }: { isFleet: boolean }) => {
                       )}
                     </>
                   }
+                  hideLabel
                 />
               </>
             ) : (
               <>
                 {t('Register this MicroShift device to ACM')}
-                <WithHelperText
-                  ariaLabel="MicroShift registration"
+                <LabelWithHelperText
+                  label="MicroShift registration"
                   content={
                     <>
                       {t('Select this when the device is running MicroShift and you want to register it to ACM.')}
@@ -79,6 +80,7 @@ const MicroShiftCheckbox = ({ isFleet }: { isFleet: boolean }) => {
                       )}
                     </>
                   }
+                  hideLabel
                 />
               </>
             )
@@ -130,17 +132,12 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
             <LearnMoreLink link={USING_TEMPLATE_VARIABLES_LINK} />
           </Alert>
         )}
-        <FormGroup
-          label={
-            <WithHelperText
-              ariaLabel={t('System image')}
-              content={
-                isFleet
-                  ? t("The target system image for this fleet's devices.")
-                  : t('The target system image for this device.')
-              }
-              showLabel
-            />
+        <FormGroupWithHelperText
+          label={t('System image')}
+          content={
+            isFleet
+              ? t("The target system image for this fleet's devices.")
+              : t('The target system image for this device.')
           }
         >
           <TextField
@@ -151,7 +148,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
               'Must be a reference to a bootable container image (e.g. "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). When left empty, the device\'s existing OS will be kept unchanged.',
             )}
           />
-        </FormGroup>
+        </FormGroupWithHelperText>
         <FormGroup>
           <ConfigurationTemplates />
         </FormGroup>

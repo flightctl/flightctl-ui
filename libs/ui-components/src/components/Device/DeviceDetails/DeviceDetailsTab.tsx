@@ -19,7 +19,7 @@ import { timeSinceText } from '../../../utils/dates';
 import { useTranslation } from '../../../hooks/useTranslation';
 import EditLabelsForm, { ViewLabels } from '../../modals/EditLabelsModal/EditLabelsForm';
 import ResourceLink from '../../common/ResourceLink';
-import WithHelperText from '../../common/WithHelperText';
+import LabelWithHelperText from '../../common/WithHelperText';
 import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
@@ -137,12 +137,11 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>
-                  <WithHelperText
+                  <LabelWithHelperText
+                    label={t('Status')}
                     content={t(
                       'Indicates whether the device is available to be managed and assigned to do work or is moving to an end-of-life state.',
                     )}
-                    ariaLabel={t('Status')}
-                    showLabel
                   />
                 </DescriptionListTerm>
                 <DescriptionListDescription>

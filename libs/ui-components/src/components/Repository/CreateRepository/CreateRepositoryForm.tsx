@@ -33,7 +33,7 @@ import {
 import { RepoSpecType, Repository, ResourceSync } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
-import WithHelperText from '../../common/WithHelperText';
+import LabelWithHelperText, { FormGroupWithHelperText } from '../../common/WithHelperText';
 import NameField from '../../form/NameField';
 import TextAreaField from '../../form/TextAreaField';
 import CheckboxField from '../../form/CheckboxField';
@@ -67,16 +67,9 @@ const AdvancedSection = () => {
         <Grid hasGutter className={showConfigTypeRadios ? 'fctl-create-repo__adv-section--nested' : ''}>
           {values.repoType === RepoSpecType.HTTP && (
             <FormSection>
-              <FormGroup
+              <FormGroupWithHelperText
                 label={t('Validation suffix')}
-                labelIcon={
-                  <WithHelperText
-                    ariaLabel={t('Validation suffix')}
-                    content={t(
-                      "Suffix to the repository's base URL used to validate if the HTTP service is accessible.",
-                    )}
-                  />
-                }
+                content={t("Suffix to the repository's base URL used to validate if the HTTP service is accessible.")}
               >
                 <TextField
                   aria-label={t('Validation suffix')}
@@ -90,7 +83,7 @@ const AdvancedSection = () => {
                     )
                   }
                 />
-              </FormGroup>
+              </FormGroupWithHelperText>
             </FormSection>
           )}
 
@@ -121,17 +114,9 @@ const AdvancedSection = () => {
             />
           </FormGroup>
           {values.repoType === RepoSpecType.HTTP && (
-            <FormGroup
-              label={
-                <WithHelperText
-                  content={t('JWT authentication token for the HTTP service')}
-                  ariaLabel={t('Token')}
-                  showLabel
-                />
-              }
-            >
+            <FormGroupWithHelperText content={t('JWT authentication token for the HTTP service')} label={t('Token')}>
               <TextField name="httpConfig.token" aria-label={t('Token')} />
-            </FormGroup>
+            </FormGroupWithHelperText>
           )}
         </Grid>
       )}
@@ -298,9 +283,8 @@ const CreateRepositoryFormContent = ({ isEdit, isReadOnly, onClose, children }: 
             <Checkbox
               id="use-resource-syncs"
               label={
-                <WithHelperText
-                  showLabel
-                  ariaLabel={t('Use resource syncs')}
+                <LabelWithHelperText
+                  label={t('Use resource syncs')}
                   content={t(
                     "A resource sync is an automated Gitops way to manage imported fleets. The resource sync monitors changes made to the source repository and update the fleet's configurations accordingly.",
                   )}
