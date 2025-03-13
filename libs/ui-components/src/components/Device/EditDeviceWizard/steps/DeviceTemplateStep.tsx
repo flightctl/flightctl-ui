@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { Alert, Button, CodeBlock, CodeBlockCode, FormGroup, Grid, Spinner } from '@patternfly/react-core';
+import { Alert, CodeBlock, CodeBlockCode, FormGroup, Grid, Spinner } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 import { Trans } from 'react-i18next';
 import { Repository } from '@flightctl/types';
-import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
 
-import { USING_TEMPLATE_VARIABLES_LINK } from '../../../../links';
+import { CREATE_ACM_REPOSITORY, USING_TEMPLATE_VARIABLES_LINK } from '../../../../links';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import WithHelperText from '../../../common/WithHelperText';
 import LearnMoreLink from '../../../common/LearnMoreLink';
@@ -88,21 +87,12 @@ const MicroShiftCheckbox = ({ isFleet }: { isFleet: boolean }) => {
       </FormGroup>
       {isDisabled && (
         <FormGroup>
-          <Alert variant="warning" title={t(`'${ACM_REPO_NAME}' repository not found.`)} isInline>
-            <Trans t={t}>
-              To re-create the repository,{' '}
-              <Button
-                component="a"
-                variant="link"
-                isInline
-                href="https://github.com/flightctl/flightctl/blob/main/docs/user/registering-microshift-devices-acm.md#creating-repositories-in-flight-control"
-                target="_blank"
-                icon={<ExternalLinkAltIcon />}
-                iconPosition="end"
-              >
-                View documentation
-              </Button>
-            </Trans>
+          <Alert variant="warning" title={t('Cannot register MicroShift devices')} isInline>
+            {t(`{{ repository }} repository is missing. To re-create the repository`, {
+              repository: `'${ACM_REPO_NAME}'`,
+            })}
+            {', '}
+            <LearnMoreLink link={CREATE_ACM_REPOSITORY} text={t('view documentation')} />
           </Alert>
         </FormGroup>
       )}

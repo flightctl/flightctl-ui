@@ -17,6 +17,7 @@ import { API_VERSION } from '../../../constants';
 import { getErrorMessage } from '../../../utils/error';
 import { appendJSONPatch } from '../../../utils/patch';
 import { MAX_TARGET_REVISION_LENGTH, maxLengthString, validKubernetesDnsSubdomain } from '../../form/validations';
+import { DEMO_REPOSITORY_URL } from '../../../links';
 
 const MAX_PATH_LENGTH = 2048;
 const gitRepoUrlRegex = new RegExp(
@@ -439,7 +440,9 @@ export const repositorySchema =
           Yup.string()
             .matches(
               gitRepoUrlRegex,
-              t('Enter a valid repository URL. Example: https://github.com/flightctl/flightctl-demos'),
+              t('Enter a valid repository URL. Example: {{ demoRepositoryUrl }}', {
+                demoRepositoryUrl: DEMO_REPOSITORY_URL,
+              }),
             )
             .defined(t('Repository URL is required')),
         otherwise: () =>

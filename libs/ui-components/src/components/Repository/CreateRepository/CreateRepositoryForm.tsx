@@ -32,6 +32,7 @@ import {
 } from './utils';
 import { RepoSpecType, Repository, ResourceSync } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
+import { DEMO_REPOSITORY_URL } from '../../../links';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import WithHelperText from '../../common/WithHelperText';
 import NameField from '../../form/NameField';
@@ -265,7 +266,7 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
         <TextField
           name="url"
           aria-label={t('Repository URL')}
-          helperText={t('For example: https://github.com/flightctl/flightctl-demos')}
+          helperText={t('For example: {{ demoRepositoryUrl }}', { demoRepositoryUrl: DEMO_REPOSITORY_URL })}
         />
       </FormGroup>
 
