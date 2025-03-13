@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { Button, List, ListComponent, ListItem, Modal, OrderType, Stack, StackItem } from '@patternfly/react-core';
-import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
 
 import { useTranslation } from '../../../hooks/useTranslation';
+import { ADDING_NEW_DEVICES_LINK } from '../../../links';
+import LearnMoreLink from '../../common/LearnMoreLink';
 
 const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
   const { t } = useTranslation();
@@ -20,17 +21,7 @@ const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
           </List>
         </StackItem>
         <StackItem>
-          <Button
-            component="a"
-            variant="link"
-            isInline
-            href="https://github.com/flightctl/flightctl/blob/main/docs/user/getting-started.md#building-a-bootable-container-image-including-the-flight-control-agent"
-            target="_blank"
-            icon={<ExternalLinkAltIcon />}
-            iconPosition="end"
-          >
-            {t('Learn more about adding devices')}{' '}
-          </Button>
+          <LearnMoreLink link={ADDING_NEW_DEVICES_LINK} text={t('Learn more about adding devices')} />
         </StackItem>
         <StackItem className="pf-v5-u-mt-md">
           <Button variant="primary" isInline onClick={onClose}>
