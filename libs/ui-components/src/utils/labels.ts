@@ -22,8 +22,14 @@ export const toAPILabel = (labels: FlightCtlLabel[]): Record<string, string> =>
     {} as Record<string, string>,
   );
 
-// Used to force the API to perform an exact match check for labels
 export const labelToExactApiMatchString = (label: FlightCtlLabel) => `${label.key}=${label.value || ''}`;
+export const textToPartialApiMatchString = (text: string) => {
+  if (text.includes('=')) {
+    const [key, value] = text.split('=');
+    return value ? `metadata.labels.key=${key},metadata.labels.value contains ${value}` : `metadata.label.key=${key}`;
+  }
+  return `metadata.labels.keyOrValue contains ${text}`;
+};
 
 export const labelToString = (label: FlightCtlLabel) => `${label.key}${label.value ? `=${label.value}` : ''}`;
 
