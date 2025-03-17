@@ -17,7 +17,7 @@ import {
 import { TimesIcon } from '@patternfly/react-icons/dist/js/icons/times-icon';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
 
-import { DeviceLabelList, Fleet, FleetList } from '@flightctl/types';
+import { Fleet, FleetList, LabelList } from '@flightctl/types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { isPromiseFulfilled } from '../../../types/typeUtils';
 
@@ -156,7 +156,7 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
 
   const fetchTextMatches = async (val: string) => {
     const searchOnlyLabels = val.includes('=');
-    const labelMatches = get<DeviceLabelList>(
+    const labelMatches = get<LabelList>(
       queries.getDevicesWithPartialLabelMatching(val, { limit: MAX_TOTAL_SEARCH_RESULTS }),
     );
 
