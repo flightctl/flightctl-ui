@@ -6,7 +6,7 @@ import type { ApplicationEnvVars } from './ApplicationEnvVars';
 import type { ImageApplicationProvider } from './ImageApplicationProvider';
 export type ApplicationProviderSpec = (ApplicationEnvVars & {
   /**
-   * The name of the application must be between 1 and 253 characters and start with a letter or number.
+   * The application name must be 1–253 characters long, start with a letter or number, and contain no whitespace.
    */
   name?: string;
 } & ImageApplicationProvider);

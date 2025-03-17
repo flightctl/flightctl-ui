@@ -6,4 +6,4 @@
  * A list of distinct labels, where each item is formatted as "key=value".
  *
  */
-export type DeviceLabelList = Array<string>;
+export type LabelList = Array<string>;
