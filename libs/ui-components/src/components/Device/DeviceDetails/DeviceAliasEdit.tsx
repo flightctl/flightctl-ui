@@ -11,7 +11,7 @@ import { getErrorMessage } from '../../../utils/error';
 import RichValidationTextField from '../../form/RichValidationTextField';
 import { getLabelValueValidations, validKubernetesLabelValue } from '../../form/validations';
 
-type DeviceAliasEditProps = { deviceId: string; alias?: string; onAliasEdited: VoidFunction };
+type DeviceAliasEditProps = { deviceId: string; hasLabels: boolean; alias?: string; onAliasEdited: VoidFunction };
 type DeviceAliasEditValues = { alias: string };
 
 const DeviceAliasInputField = ({
@@ -63,7 +63,7 @@ const DeviceAliasInputField = ({
   );
 };
 
-const DeviceAliasEdit = ({ deviceId, alias: originalAlias = '', onAliasEdited }: DeviceAliasEditProps) => {
+const DeviceAliasEdit = ({ deviceId, hasLabels, alias: originalAlias = '', onAliasEdited }: DeviceAliasEditProps) => {
   const { t } = useTranslation();
   const { patch } = useFetch();
 
@@ -86,24 +86,33 @@ const DeviceAliasEdit = ({ deviceId, alias: originalAlias = '', onAliasEdited }:
 
   const onSubmit = React.useCallback(
     async ({ alias }: DeviceAliasEditValues) => {
-      if (alias === originalAlias) {
+      if (alias === originalAlias || (!hasLabels && !alias)) {
         toggleIsEditing();
         return;
       }
-      const req: PatchRequest = alias
-        ? [
-            {
-              path: '/metadata/labels/alias',
-              op: 'replace',
-              value: alias,
-            },
-          ]
-        : [
-            {
-              path: '/metadata/labels/alias',
-              op: 'remove',
-            },
-          ];
+
+      const req: PatchRequest = [];
+      if (!hasLabels) {
+        req.push({
+          path: '/metadata/labels',
+          op: 'add',
+          value: {
+            alias,
+          },
+        });
+      } else if (alias) {
+        req.push({
+          path: '/metadata/labels/alias',
+          op: 'replace',
+          value: alias,
+        });
+      } else {
+        req.push({
+          path: '/metadata/labels/alias',
+          op: 'remove',
+        });
+      }
+
       try {
         setSubmitError(undefined);
         setIsSubmitting(true);
@@ -116,7 +125,7 @@ const DeviceAliasEdit = ({ deviceId, alias: originalAlias = '', onAliasEdited }:
         setIsSubmitting(false);
       }
     },
-    [deviceId, originalAlias, onAliasEdited, patch, toggleIsEditing],
+    [deviceId, originalAlias, hasLabels, onAliasEdited, patch, toggleIsEditing],
   );
 
   return (

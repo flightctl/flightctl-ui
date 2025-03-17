@@ -34,7 +34,8 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
 
   const [showDebugInfo, setShowDebugInfo] = React.useState<boolean>(false);
 
-  const deviceAlias = device?.metadata.labels?.alias;
+  const deviceLabels = device?.metadata.labels;
+  const deviceAlias = deviceLabels?.alias;
   const isEnrolled = !device || isDeviceEnrolled(device);
 
   const [hasTerminalAccess] = useAccessReview(RESOURCE.DEVICE_CONSOLE, VERB.GET);
@@ -74,7 +75,14 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
       breadcrumbTitle={deviceAlias}
       title={
         canEdit ? (
-          <DeviceAliasEdit key={deviceAlias} deviceId={deviceId} alias={deviceAlias} onAliasEdited={refetch} />
+          /* key={deviceAlias} is needed for the input field to be initialized with the alias as its value */
+          <DeviceAliasEdit
+            key={deviceAlias}
+            deviceId={deviceId}
+            alias={deviceAlias}
+            hasLabels={!!deviceLabels}
+            onAliasEdited={refetch}
+          />
         ) : (
           deviceAlias
         )
