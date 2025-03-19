@@ -33,6 +33,9 @@ const EnrollmentRequestEmptyState = () => {
 
 const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
   {
+    name: t('Alias'),
+  },
+  {
     name: t('Name'),
   },
   {
@@ -40,7 +43,10 @@ const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
   },
 ];
 
-const getSearchText = (er: EnrollmentRequest) => [er.metadata.name];
+const getSearchText = (er: EnrollmentRequest) => {
+  const alias = er.spec.labels?.alias;
+  return alias ? [er.metadata.name, alias] : [er.metadata.name];
+};
 
 type EnrollmentRequestListProps = { refetchDevices?: VoidFunction; isStandalone?: boolean };
 
@@ -109,7 +115,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
           onSelectAll={setAllSelected}
         >
           <Tbody>
-            {pendingEnrollments.map((er, index) => (
+            {filteredData.map((er, index) => (
               <EnrollmentRequestTableRow
                 key={er.metadata.name || ''}
                 er={er}
