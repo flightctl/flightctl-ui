@@ -21,7 +21,8 @@ import './DetailsPage.css';
 
 export type DetailsPageProps = {
   id: string;
-  title?: string;
+  breadcrumbTitle?: string;
+  title?: React.ReactNode;
   children: React.ReactNode;
   error: unknown;
   loading: boolean;
@@ -32,8 +33,9 @@ export type DetailsPageProps = {
   nav?: React.ReactNode;
 };
 
-const DetailsPage: React.FC<DetailsPageProps> = ({
+const DetailsPage = ({
   id,
+  breadcrumbTitle,
   title,
   children,
   error,
@@ -43,7 +45,7 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
   resourceTypeLabel,
   actions,
   nav,
-}) => {
+}: DetailsPageProps) => {
   const { t } = useTranslation();
   let content = children;
   if (error) {
@@ -71,7 +73,7 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
           <BreadcrumbItem>
             <Link to={resourceLink}>{resourceTypeLabel}</Link>
           </BreadcrumbItem>
-          <BreadcrumbItem isActive>{title || id}</BreadcrumbItem>
+          <BreadcrumbItem isActive>{breadcrumbTitle || id}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
       <PageSection variant="light">

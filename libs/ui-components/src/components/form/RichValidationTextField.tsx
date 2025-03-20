@@ -72,71 +72,82 @@ export interface RichValidationTextFieldProps extends TextInputProps {
   }[];
 }
 
-const RichValidationTextField = ({ fieldName, validations, isRequired, ...rest }: RichValidationTextFieldProps) => {
-  const [popoverOpen, setPopoverOpen] = React.useState(false);
+const RichValidationTextField = React.forwardRef(
+  (
+    { fieldName, validations, isRequired, onBlur, ...rest }: RichValidationTextFieldProps,
+    ref: React.Ref<HTMLInputElement>,
+  ) => {
+    const [popoverOpen, setPopoverOpen] = React.useState(false);
 
-  const [field, meta, { setTouched }] = useField({
-    name: fieldName,
-  });
+    const [field, meta, { setTouched }] = useField({
+      name: fieldName,
+    });
 
-  const fieldId = `rich-validation-field-${fieldName}`;
-  const hasValue = !!field.value;
+    const fieldId = `rich-validation-field-${fieldName}`;
+    const hasValue = !!field.value;
 
-  return (
-    <FormGroup label={rest?.['aria-label']} id={`form-control__${fieldId}`} fieldId={fieldId} isRequired={isRequired}>
-      <InputGroup>
-        <InputGroupItem isFill>
-          <TextInput
-            {...field}
-            {...rest}
-            id={fieldId}
-            isRequired={isRequired}
-            aria-describedby={`${fieldId}-helper`}
-            onChange={async (event, val) => {
-              !popoverOpen && setPopoverOpen(true);
-              field.onChange(event);
-              // TODO does not work well for the first character
-              if (!meta.touched && val?.length) {
-                await setTouched(true, true);
+    return (
+      <FormGroup label={rest?.['aria-label']} id={`form-control__${fieldId}`} fieldId={fieldId} isRequired={isRequired}>
+        <InputGroup>
+          <InputGroupItem isFill>
+            <TextInput
+              {...field}
+              {...rest}
+              id={fieldId}
+              ref={ref}
+              isRequired={isRequired}
+              aria-describedby={`${fieldId}-helper`}
+              onChange={async (event, val) => {
+                !popoverOpen && setPopoverOpen(true);
+                field.onChange(event);
+                // TODO does not work well for the first character
+                if (!meta.touched && val?.length) {
+                  await setTouched(true, true);
+                }
+              }}
+              onBlur={() => {
+                setPopoverOpen(false);
+                void setTouched(true, true);
+                if (onBlur) {
+                  onBlur();
+                }
+              }}
+            />
+          </InputGroupItem>
+          <InputGroupItem>
+            <Popover
+              isVisible={popoverOpen}
+              shouldClose={() => setPopoverOpen(false)}
+              shouldOpen={() => setPopoverOpen(true)}
+              aria-label="validation popover"
+              position={PopoverPosition.top}
+              bodyContent={
+                <RichValidationStatus
+                  hasValue={hasValue}
+                  isRequired={isRequired || false}
+                  validations={validations}
+                  metaError={meta.error}
+                />
               }
-            }}
-            onBlur={() => {
-              setPopoverOpen(false);
-              void setTouched(true, true);
-            }}
-          />
-        </InputGroupItem>
-        <InputGroupItem>
-          <Popover
-            isVisible={popoverOpen}
-            shouldClose={() => setPopoverOpen(false)}
-            shouldOpen={() => setPopoverOpen(true)}
-            aria-label="validation popover"
-            position={PopoverPosition.top}
-            bodyContent={
-              <RichValidationStatus
-                hasValue={hasValue}
-                isRequired={isRequired || false}
-                validations={validations}
-                metaError={meta.error}
-              />
-            }
-            withFocusTrap={false}
-          >
-            <Button variant="plain" aria-label="Validation">
-              {!hasValue ? (
-                <InfoCircleIcon color={infoColor.value} />
-              ) : !!meta.error ? (
-                <ExclamationCircleIcon color={dangerColor.value} />
-              ) : (
-                <CheckCircleIcon color={successColor.value} />
-              )}
-            </Button>
-          </Popover>
-        </InputGroupItem>
-      </InputGroup>
-    </FormGroup>
-  );
-};
+              withFocusTrap={false}
+            >
+              <Button variant="plain" aria-label="Validation">
+                {!hasValue ? (
+                  <InfoCircleIcon color={infoColor.value} />
+                ) : !!meta.error ? (
+                  <ExclamationCircleIcon color={dangerColor.value} />
+                ) : (
+                  <CheckCircleIcon color={successColor.value} />
+                )}
+              </Button>
+            </Popover>
+          </InputGroupItem>
+        </InputGroup>
+      </FormGroup>
+    );
+  },
+);
+
+RichValidationTextField.displayName = 'RichValidationTextField';
 
 export default RichValidationTextField;

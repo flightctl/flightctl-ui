@@ -18,6 +18,7 @@ import { getEditDisabledReason, isDeviceEnrolled } from '../../../utils/devices'
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import PageWithPermissions from '../../common/PageWithPermissions';
+import DeviceAliasEdit from './DeviceAliasEdit';
 
 type DeviceDetailsPageProps = React.PropsWithChildren<{ hideTerminal?: boolean }>;
 
@@ -33,7 +34,8 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
 
   const [showDebugInfo, setShowDebugInfo] = React.useState<boolean>(false);
 
-  const deviceAlias = device?.metadata.labels?.alias || deviceId;
+  const deviceLabels = device?.metadata.labels;
+  const deviceAlias = deviceLabels?.alias;
   const isEnrolled = !device || isDeviceEnrolled(device);
 
   const [hasTerminalAccess] = useAccessReview(RESOURCE.DEVICE_CONSOLE, VERB.GET);
@@ -48,7 +50,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
       await remove(`devices/${deviceId}`);
       navigate(ROUTE.DEVICES);
     },
-    resourceName: deviceAlias,
+    resourceName: deviceAlias || deviceId,
     resourceType: 'device',
     buttonLabel: isEnrolled ? undefined : t('Delete forever'),
   });
@@ -70,7 +72,21 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
       loading={loading}
       error={error}
       id={deviceId}
-      title={deviceAlias}
+      breadcrumbTitle={deviceAlias}
+      title={
+        canEdit ? (
+          /* key={deviceAlias} is needed for the input field to be initialized with the alias as its value */
+          <DeviceAliasEdit
+            key={deviceAlias}
+            deviceId={deviceId}
+            alias={deviceAlias}
+            hasLabels={!!deviceLabels}
+            onAliasEdited={refetch}
+          />
+        ) : (
+          deviceAlias
+        )
+      }
       resourceLink={ROUTE.DEVICES}
       resourceType="Devices"
       resourceTypeLabel={t('Devices')}
