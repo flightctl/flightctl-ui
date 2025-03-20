@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AppContext, AppContextProps, NavLinkFC } from '@flightctl/ui-components/src/hooks/useAppContext';
+import { AppContext, AppContextProps, FlightCtlApp, NavLinkFC } from '@flightctl/ui-components/src/hooks/useAppContext';
 import {
   Link,
   NavLink,
@@ -26,7 +26,7 @@ export const useValuesAppContext = (getCookie: GetCookie, serviceUrl: string | u
   const metrics = useMetrics();
 
   return {
-    appType: 'aap',
+    appType: FlightCtlApp.AAP,
     user: '',
     router: {
       useNavigate,

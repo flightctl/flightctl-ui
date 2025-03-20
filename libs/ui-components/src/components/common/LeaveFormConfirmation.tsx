@@ -4,7 +4,7 @@ import { Blocker, BlockerFunction } from 'react-router-dom';
 import { useFormikContext } from 'formik';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { useAppContext } from '../../hooks/useAppContext';
+import { FlightCtlApp, useAppContext } from '../../hooks/useAppContext';
 
 const ConfirmNavigationDialog = ({ blocker }: { blocker: Blocker }) => {
   const { t } = useTranslation();
@@ -85,7 +85,7 @@ const LeaveFormConfirmation = () => {
 
   const lock = !isSubmitting && dirty;
 
-  if (appType === 'aap') {
+  if (appType === FlightCtlApp.AAP) {
     return null;
   }
 

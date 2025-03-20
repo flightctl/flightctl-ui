@@ -1,16 +1,11 @@
-import { ApplicationProviderSpec } from '@flightctl/types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
-import { SpecConfigTemplate } from '../../../types/deviceSpec';
+import { AppForm, SpecConfigTemplate } from '../../../types/deviceSpec';
 import { SystemdUnitFormValue } from '../SystemdUnitsModal/TrackSystemdUnitsForm';
-
-export type ApplicationFormSpec = Omit<ApplicationProviderSpec, 'envVars'> & {
-  variables: { name: string; value: string }[];
-};
 
 export type DeviceSpecConfigFormValues = {
   osImage?: string;
   configTemplates: SpecConfigTemplate[];
-  applications: ApplicationFormSpec[];
+  applications: AppForm[];
   systemdUnits: SystemdUnitFormValue[];
   registerMicroShift: boolean;
 };

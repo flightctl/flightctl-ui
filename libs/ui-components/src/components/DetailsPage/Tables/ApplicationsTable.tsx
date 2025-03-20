@@ -104,20 +104,23 @@ const ApplicationsTable = ({
           if (!appDetails) {
             // It's an app or a systemd unit which has not been reported yet
             const appAddedTime = addedSystemdUnitDates[appName] || 0;
-            // For apps there are is no spinner since we don't when the app was added to the spec
+            // For apps there is no spinner since we don't know when the app was added to the spec
             const showSpinner = !isApp && Date.now() - appAddedTime < DELETE_SYSTED_TIMEOUT;
             return (
               <Tr key={appName} className="applications-table__row">
                 <Td dataLabel={t('Name')}>{appName}</Td>
-                <Td dataLabel={t('Status')} colSpan={3}>
+
+                <Td dataLabel={t('Status')} colSpan={showSpinner ? 3 : 1}>
                   {showSpinner ? (
                     <>
                       <Spinner size="sm" /> {t('Waiting for service to be reported...')}
                     </>
                   ) : (
-                    t('Information not available yet')
+                    '-'
                   )}
                 </Td>
+                {!showSpinner && <Td dataLabel={t('Ready')}>-</Td>}
+                {!showSpinner && <Td dataLabel={t('Restarts')}>-</Td>}
                 <Td dataLabel={t('Type')}>
                   {isApp ? (
                     <>{t('App')}</>

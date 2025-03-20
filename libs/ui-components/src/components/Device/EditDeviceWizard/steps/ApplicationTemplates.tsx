@@ -5,60 +5,93 @@ import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
-import { ApplicationFormSpec, DeviceSpecConfigFormValues } from '../types';
-
+import { DeviceSpecConfigFormValues } from '../types';
+import { AppForm, AppSpecType, isImageAppForm, isInlineAppForm } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
+import FormSelect from '../../../form/FormSelect';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import WithHelperText from '../../../common/WithHelperText';
-import LearnMoreLink from '../../../common/LearnMoreLink';
-import { CREATING_APPLICATIONS_LINK } from '../../../../links';
+import ApplicationImageForm from './ApplicationImageForm';
+import ApplicationInlineForm from './ApplicationInlineForm';
 
 import './ApplicationsForm.css';
 
 const ApplicationSection = ({ index }: { index: number }) => {
   const { t } = useTranslation();
-  const fieldName = `applications[${index}]`;
-  const [{ value: app }] = useField<ApplicationFormSpec>(fieldName);
+  const appFieldName = `applications[${index}]`;
+  const [{ value: app }, , { setValue }] = useField<AppForm>(appFieldName);
+  const isInlineIncomplete = app.specType === AppSpecType.INLINE && !('files' in app);
+  const isImageIncomplete = app.specType === AppSpecType.OCI_IMAGE && !('image' in app);
+
+  const appTypes = React.useMemo(() => {
+    return {
+      [AppSpecType.INLINE]: t('Inline application'),
+      [AppSpecType.OCI_IMAGE]: t('Image based application'),
+    };
+  }, [t]);
+
+  React.useEffect(() => {
+    // When switching types, setting the new required fields and clearing those from the old type
+    if (isInlineIncomplete) {
+      setValue(
+        {
+          specType: AppSpecType.INLINE,
+          name: app.name || '',
+          files: [{ path: '', content: '' }],
+          variables: [],
+        },
+        false,
+      );
+    } else if (isImageIncomplete) {
+      setValue(
+        {
+          specType: AppSpecType.OCI_IMAGE,
+          name: app.name || '',
+          image: '',
+          variables: [],
+        },
+        false,
+      );
+    }
+  }, [isImageIncomplete, isInlineIncomplete, app.name, setValue]);
+
+  const appNameLabel =
+    app.specType === AppSpecType.OCI_IMAGE ? (
+      <WithHelperText
+        ariaLabel={t('Application name')}
+        content={t(
+          'The image will be used instead when application name is not specified. Application name must be unique.',
+        )}
+        showLabel
+      />
+    ) : (
+      t('Application name')
+    );
 
   return (
     <ExpandableFormSection
       title={t('Application {{ appNum }}', { appNum: index + 1 })}
-      fieldName={fieldName}
-      description={app.name || app.image}
+      fieldName={appFieldName}
+      description={app.name}
     >
       <Grid hasGutter>
-        <FormGroup
-          label={
-            <WithHelperText
-              ariaLabel={t('Image')}
-              content={
-                <span>
-                  {t('The application image. Learn how to create one')}{' '}
-                  <LearnMoreLink text={t('here')} link={CREATING_APPLICATIONS_LINK} />
-                </span>
-              }
-              showLabel
-            />
-          }
-          isRequired
-        >
-          <TextField aria-label={t('Image')} name={`applications.${index}.image`} value={app.image} />
+        <FormGroup label={t('Application type')} isRequired>
+          <FormSelect
+            items={appTypes}
+            name={`${appFieldName}.specType`}
+            placeholderText={t('Select an application type')}
+          />
         </FormGroup>
-        <FormGroup
-          label={
-            <WithHelperText
-              ariaLabel={t('Application name')}
-              content={t(
-                'The image name will be used instead of when application name is not specified. Application name must be unique.',
-              )}
-              showLabel
-            />
-          }
-        >
-          <TextField aria-label={t('Application name')} name={`applications.${index}.name`} value={app.name} />
+
+        <FormGroup label={appNameLabel} isRequired={app.specType === AppSpecType.INLINE}>
+          <TextField aria-label={t('Application name')} name={`${appFieldName}.name`} />
         </FormGroup>
-        <FieldArray name={`applications.${index}.variables`}>
+
+        {isImageAppForm(app) && <ApplicationImageForm app={app} index={index} />}
+        {isInlineAppForm(app) && <ApplicationInlineForm app={app} index={index} />}
+
+        <FieldArray name={`${appFieldName}.variables`}>
           {({ push, remove }) => (
             <>
               {app.variables.map((variable, varIndex) => (
@@ -70,7 +103,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
                     <FormGroup label={t('Name')} isRequired>
                       <TextField
                         aria-label={t('Name')}
-                        name={`applications.${index}.variables.${varIndex}.name`}
+                        name={`${appFieldName}.variables.${varIndex}.name`}
                         value={variable.name}
                       />
                     </FormGroup>
@@ -79,7 +112,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
                     <FormGroup label={t('Value')} isRequired>
                       <TextField
                         aria-label={t('Value')}
-                        name={`applications.${index}.variables.${varIndex}.value`}
+                        name={`${appFieldName}.variables.${varIndex}.value`}
                         value={variable.value}
                       />
                     </FormGroup>
@@ -104,7 +137,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
                     push({ name: '', value: '' });
                   }}
                 >
-                  {t('Add a variable')}
+                  {t('Add an application variable')}
                 </Button>
               </FormGroup>
             </>
@@ -159,7 +192,6 @@ const ApplicationTemplates = () => {
                   onClick={() => {
                     push({
                       name: '',
-                      image: '',
                       variables: [],
                     });
                   }}
