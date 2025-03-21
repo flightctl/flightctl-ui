@@ -14,6 +14,7 @@ const EditDeviceWizardFooter = () => {
   const { goToNextStep, goToPrevStep, activeStep } = useWizardContext();
   const { submitForm, isSubmitting, errors } = useFormikContext<EditDeviceFormValues>();
   const navigate = useNavigate();
+  const buttonRef = React.useRef<HTMLButtonElement>();
 
   const isSubmitStep = activeStep.id === reviewDeviceStepId;
 
@@ -24,12 +25,18 @@ const EditDeviceWizardFooter = () => {
     isStepValid = isDeviceTemplateStepValid(errors);
   }
 
+  const onMoveNext = () => {
+    goToNextStep();
+    // Blur the button, otherwise it keeps the focus from the previous click
+    buttonRef.current?.blur();
+  };
+
   const primaryBtn = isSubmitStep ? (
     <Button variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
       {t('Save')}
     </Button>
   ) : (
-    <Button variant="primary" onClick={goToNextStep} isDisabled={!isStepValid}>
+    <Button variant="primary" onClick={onMoveNext} isDisabled={!isStepValid} ref={buttonRef}>
       {t('Next')}
     </Button>
   );
