@@ -1,10 +1,9 @@
 import * as React from 'react';
 import {
+  Button,
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  SelectList,
-  SelectOption,
   Split,
   SplitItem,
   Toolbar,
@@ -23,7 +22,6 @@ import TablePagination from '../Table/TablePagination';
 import TableTextSearch from '../Table/TableTextSearch';
 import Table, { ApiSortTableColumn } from '../Table/Table';
 import { useTableSelect } from '../../hooks/useTableSelect';
-import TableActions from '../Table/TableActions';
 import { getResourceId } from '../../utils/resource';
 import MassDeleteFleetModal from '../modals/massModals/MassDeleteFleetModal/MassDeleteFleetModal';
 import FleetRow from './FleetRow';
@@ -137,11 +135,9 @@ const FleetTable = () => {
           )}
           {canDelete && (
             <ToolbarItem>
-              <TableActions isDisabled={!hasSelectedRows}>
-                <SelectList>
-                  <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
-                </SelectList>
-              </TableActions>
+              <Button isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)} variant="secondary">
+                {t('Delete fleets')}
+              </Button>
             </ToolbarItem>
           )}
         </ToolbarContent>
