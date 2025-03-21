@@ -5,7 +5,7 @@ import { FormikErrors, useFormikContext } from 'formik';
 import { FleetFormValues } from '../types';
 import { DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES, getEmptyInitializedBatch } from '../fleetSpecUtils';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import WithHelperText from '../../../common/WithHelperText';
+import LabelWithHelperText from '../../../common/WithHelperText';
 
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import UpdateStepRolloutPolicy from './UpdateStepRolloutPolicy';
@@ -108,9 +108,8 @@ const UpdatePolicyStep = () => {
             {/* Rollout policies */}
             <Checkbox
               label={
-                <WithHelperText
-                  showLabel
-                  ariaLabel={t('Set rollout policies')}
+                <LabelWithHelperText
+                  label={t('Set rollout policies')}
                   content={t('Rollout policies allow you to control the order of updates for the fleet devices.')}
                 />
               }
@@ -125,9 +124,8 @@ const UpdatePolicyStep = () => {
             {/* Disruption budget */}
             <Checkbox
               label={
-                <WithHelperText
-                  showLabel
-                  ariaLabel={t('Set disruption budget')}
+                <LabelWithHelperText
+                  label={t('Set disruption budget')}
                   content={t(
                     'Disruption budget allows you to limit the number of similar devices that may be updating simultaneously.',
                   )}

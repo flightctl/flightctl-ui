@@ -11,7 +11,7 @@ import { timeSinceText } from '../../../../utils/dates';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import DetailsPageCard, { DetailsPageCardBody } from '../../../DetailsPage/DetailsPageCard';
 import FlightControlDescriptionList from '../../../common/FlightCtlDescriptionList';
-import WithHelperText from '../../../common/WithHelperText';
+import LabelWithHelperText from '../../../common/WithHelperText';
 import ApplicationSummaryStatus from '../../../Status/ApplicationSummaryStatus';
 import DeviceStatus from '../../../Status/DeviceStatus';
 import SystemUpdateStatus from '../../../Status/SystemUpdateStatus';
@@ -26,10 +26,9 @@ const StatusContent = ({ device }: { device: Required<Device> }) => {
         <FlightControlDescriptionList columnModifier={{ default: '3Col' }}>
           <DescriptionListGroup>
             <DescriptionListTerm>
-              <WithHelperText
+              <LabelWithHelperText
+                label={t('Application status')}
                 content={t('Indicates the overall status of application workloads on the device.')}
-                ariaLabel={t('Application status')}
-                showLabel
               />
             </DescriptionListTerm>
             <DescriptionListDescription>
@@ -38,10 +37,9 @@ const StatusContent = ({ device }: { device: Required<Device> }) => {
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>
-              <WithHelperText
+              <LabelWithHelperText
+                label={t('Device status')}
                 content={t('Indicates the overall status of the device hardware and operating system.')}
-                ariaLabel={t('Device status')}
-                showLabel
               />{' '}
             </DescriptionListTerm>
             <DescriptionListDescription>
@@ -50,12 +48,11 @@ const StatusContent = ({ device }: { device: Required<Device> }) => {
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>
-              <WithHelperText
+              <LabelWithHelperText
+                label={t('Update status')}
                 content={t(
                   'Indicates whether a system is running the latest target configuration or is updating towards it.',
                 )}
-                ariaLabel={t('Update status')}
-                showLabel
               />
             </DescriptionListTerm>
             <DescriptionListDescription>
