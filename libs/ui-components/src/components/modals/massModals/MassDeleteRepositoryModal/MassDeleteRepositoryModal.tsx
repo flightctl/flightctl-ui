@@ -126,8 +126,8 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
               <Table>
                 <Thead>
                   <Tr>
-                    <Th>{t('Repository name')}</Th>
-                    <Th>{t('# Resource syncs')}</Th>
+                    <Th modifier="fitContent">{t('Repository name')}</Th>
+                    <Th modifier="fitContent">{t('# Resource syncs')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>

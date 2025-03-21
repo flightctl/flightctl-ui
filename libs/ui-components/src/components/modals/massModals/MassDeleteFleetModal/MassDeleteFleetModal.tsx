@@ -30,8 +30,8 @@ const MassDeleteFleetTable = ({ fleets }: { fleets: Array<Fleet> }) => {
     <Table>
       <Thead>
         <Tr>
-          <Th>{t('Name')}</Th>
-          <Th>{t('Managed by')}</Th>
+          <Th modifier="fitContent">{t('Name')}</Th>
+          <Th modifier="fitContent">{t('Managed by')}</Th>
         </Tr>
       </Thead>
       <Tbody>
