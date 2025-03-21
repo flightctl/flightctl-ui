@@ -6,11 +6,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import ErrorHelperText from '../../form/FieldHelperText';
 import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import FlightCtlForm from '../../form/FlightCtlForm';
-
-export type SystemdUnitFormValue = {
-  pattern: string;
-  exists: boolean;
-};
+import { SystemdUnitFormValue } from '../../../types/deviceSpec';
 
 export type SystemdUnitsFormValues = {
   systemdUnits: SystemdUnitFormValue[];

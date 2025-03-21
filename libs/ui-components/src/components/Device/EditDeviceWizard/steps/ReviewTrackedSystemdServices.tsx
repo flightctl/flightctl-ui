@@ -1,8 +1,8 @@
 import React from 'react';
 import { Label, LabelGroup } from '@patternfly/react-core';
-import { SystemdUnitFormValue } from '../../SystemdUnitsModal/TrackSystemdUnitsForm';
+import { SystemdUnitsFormValues } from '../../SystemdUnitsModal/TrackSystemdUnitsForm';
 
-const ReviewTrackedSystemdServices = ({ systemdUnits }: { systemdUnits: SystemdUnitFormValue[] }) => {
+const ReviewTrackedSystemdServices = ({ systemdUnits }: SystemdUnitsFormValues) => {
   if (systemdUnits.length === 0) {
     return '-';
   }

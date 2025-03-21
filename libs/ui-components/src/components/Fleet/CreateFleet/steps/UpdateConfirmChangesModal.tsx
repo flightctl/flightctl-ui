@@ -4,7 +4,7 @@ import { TFunction } from 'react-i18next';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 
-export type StepSetting = 'all-settings' | 'rollout-policies' | 'disruption-budget';
+export type StepSetting = 'all-settings' | 'rollout-policies' | 'update-policies' | 'disruption-budget';
 
 type UpdateConfirmChangesModalProps = {
   setting: StepSetting;
@@ -37,6 +37,15 @@ const getModalContent = (setting: StepSetting, t: TFunction) => {
         primaryAction: title,
         question: t('Are you sure you want to remove the disruption budget configurations?'),
         result: t('If you confirm, all disruption budget configurations will be lost.'),
+      };
+    }
+    case 'update-policies': {
+      const title = t("Don't use update policies");
+      return {
+        title,
+        primaryAction: title,
+        question: t('Are you sure you want to remove the update policy configurations?'),
+        result: t('If you confirm, all update policy configurations will be lost.'),
       };
     }
   }

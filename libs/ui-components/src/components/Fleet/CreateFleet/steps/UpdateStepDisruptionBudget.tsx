@@ -7,7 +7,7 @@ import NumberField from '../../../form/NumberField';
 import TextListField from '../../../form/TextListField';
 import ErrorHelperText from '../../../form/FieldHelperText';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
-import { DisruptionBudgetForm } from '../types';
+import { DisruptionBudgetForm } from '../../../../types/deviceSpec';
 
 const UpdateStepDisruptionBudget = () => {
   const { t } = useTranslation();
