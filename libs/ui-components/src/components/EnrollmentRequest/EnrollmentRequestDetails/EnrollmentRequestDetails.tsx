@@ -67,7 +67,6 @@ const EnrollmentRequestDetails = () => {
 
   const approvalStatus = er ? getApprovalStatus(er) : '-';
   const isPendingApproval = approvalStatus === EnrollmentRequestStatusType.Pending;
-
   return (
     <DetailsPage
       loading={loading}
@@ -77,7 +76,7 @@ const EnrollmentRequestDetails = () => {
       resourceType="Devices"
       resourceTypeLabel={t('Devices')}
       actions={
-        (canApprove || canApprove) && (
+        (canApprove || canDelete) && (
           <DetailsPageActions>
             <DropdownList>
               {canApprove && (
@@ -120,9 +119,9 @@ const EnrollmentRequestDetails = () => {
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Labels')}</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Default labels')}</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <LabelsView prefix="er" labels={er?.metadata.labels} />
+                    <LabelsView prefix="er" labels={er?.spec.labels} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>

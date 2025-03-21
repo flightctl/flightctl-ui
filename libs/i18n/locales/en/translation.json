@@ -260,6 +260,7 @@
   "Approve": "Approve",
   "OS": "OS",
   "Architecture": "Architecture",
+  "Default labels": "Default labels",
   "Certificate signing request": "Certificate signing request",
   "A PEM-encoded PKCS#10 certificate signing request.": "A PEM-encoded PKCS#10 certificate signing request.",
   "Certificate Signing Request": "Certificate Signing Request",

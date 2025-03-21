@@ -32,6 +32,7 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
 }) => {
   const { t } = useTranslation();
   const erName = er.metadata.name as string;
+  const erAlias = er.spec.labels?.alias;
 
   const approveEnrollment = () => {
     onApprove(erName);
@@ -57,8 +58,11 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
           isSelected: isRowSelected(er),
         }}
       />
+      <Td dataLabel={t('Alias')}>
+        <ResourceLink id={erName} name={erAlias || t('Untitled')} routeLink={ROUTE.ENROLLMENT_REQUEST_DETAILS} />
+      </Td>
       <Td dataLabel={t('Name')}>
-        <ResourceLink id={erName} routeLink={ROUTE.ENROLLMENT_REQUEST_DETAILS} />
+        <ResourceLink id={erName} />
       </Td>
       <Td dataLabel={t('Created')}>{timeSinceText(t, er.metadata.creationTimestamp)}</Td>
       {canApprove && (
