@@ -80,18 +80,18 @@ const MassDecommissionDeviceModal = ({ onClose, devices, onSuccess }: MassDecomm
           <Table>
             <Thead>
               <Tr>
-                <Th>{t('Name')}</Th>
                 <Th>{t('Alias')}</Th>
+                <Th>{t('Name')}</Th>
               </Tr>
             </Thead>
             <Tbody>
               {devices.map((device) => {
                 return (
                   <Tr key={device.metadata.name}>
+                    <Td dataLabel={t('Alias')}>{device.metadata.labels?.alias || '-'}</Td>
                     <Td dataLabel={t('Name')}>
                       <ResourceLink id={device.metadata.name as string} />
                     </Td>
-                    <Td dataLabel={t('Alias')}>{device.metadata.labels?.alias || '-'}</Td>
                   </Tr>
                 );
               })}
