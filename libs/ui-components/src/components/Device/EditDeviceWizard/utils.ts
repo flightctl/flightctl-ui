@@ -9,12 +9,7 @@ import {
   validOsImage,
   validUpdatePolicySchema,
 } from '../../form/validations';
-import {
-  appendJSONPatch,
-  getApplicationPatches,
-  getDeviceLabelPatches,
-  getUpdatePolicyPatches,
-} from '../../../utils/patch';
+import { appendJSONPatch, getDeviceLabelPatches, getUpdatePolicyPatches } from '../../../utils/patch';
 import { Device, PatchRequest } from '@flightctl/types';
 import { EditDeviceFormValues, UpdatePolicyForm } from './../../../types/deviceSpec';
 import {
@@ -22,6 +17,7 @@ import {
   ACMImportConfig,
   MicroshiftRegistrationHook,
   getApiConfig,
+  getApplicationPatches,
   getDeviceSpecConfigPatches,
 } from './deviceSpecUtils';
 
