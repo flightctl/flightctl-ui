@@ -21,6 +21,7 @@ const CreateFleetWizardFooter = ({ isEdit }: CreateFleetWizardFooterProps) => {
   const { goToNextStep, goToPrevStep, activeStep } = useWizardContext();
   const { submitForm, isSubmitting, errors } = useFormikContext<FleetFormValues>();
   const navigate = useNavigate();
+  const buttonRef = React.useRef<HTMLButtonElement>();
 
   const isReviewStep = activeStep.id === reviewStepId;
   let isStepValid = true;
@@ -32,12 +33,18 @@ const CreateFleetWizardFooter = ({ isEdit }: CreateFleetWizardFooterProps) => {
     isStepValid = isUpdatePolicyStepValid(errors);
   }
 
+  const onMoveNext = () => {
+    goToNextStep();
+    // Blur the button, otherwise it keeps the focus from the previous click
+    buttonRef.current?.blur();
+  };
+
   const primaryBtn = isReviewStep ? (
     <Button variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
       {isEdit ? t('Save') : t('Create fleet')}
     </Button>
   ) : (
-    <Button variant="primary" onClick={goToNextStep} isDisabled={!isStepValid}>
+    <Button variant="primary" onClick={onMoveNext} isDisabled={!isStepValid} ref={buttonRef}>
       {t('Next')}
     </Button>
   );
