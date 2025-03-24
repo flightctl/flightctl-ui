@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   Alert,
   Breadcrumb,
@@ -11,10 +12,11 @@ import {
   WizardStep,
   WizardStepType,
 } from '@patternfly/react-core';
-import * as React from 'react';
 import { Fleet } from '@flightctl/types';
 import { Formik, FormikErrors } from 'formik';
-import { FleetFormValues } from './types';
+
+import { FleetFormValues } from './../../../types/deviceSpec';
+import { RESOURCE, VERB } from '../../../types/rbac';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -32,7 +34,6 @@ import { useEditFleet } from './useEditFleet';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
 import { useAccessReview } from '../../../hooks/useAccessReview';
-import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { useAppContext } from '../../../hooks/useAppContext';
 

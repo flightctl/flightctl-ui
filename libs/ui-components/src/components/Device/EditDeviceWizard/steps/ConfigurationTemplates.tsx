@@ -16,8 +16,7 @@ import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-cir
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
 import { RepoSpecType, Repository, RepositoryList } from '@flightctl/types';
-import { ConfigType, SpecConfigTemplate } from '../../../../types/deviceSpec';
-import { DeviceSpecConfigFormValues } from '../types';
+import { ConfigType, DeviceSpecConfigFormValues, SpecConfigTemplate } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';

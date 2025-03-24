@@ -5,8 +5,7 @@ import { FormGroup } from '@patternfly/react-core';
 import { useTranslation } from '../../../../hooks/useTranslation';
 
 import TextField from '../../../form/TextField';
-import { DeviceSpecConfigFormValues } from '../types';
-import { KubeSecretTemplate } from '../../../../types/deviceSpec';
+import { DeviceSpecConfigFormValues, KubeSecretTemplate } from '../../../../types/deviceSpec';
 
 type ConfigK8sSecretTemplateFormProps = {
   index: number;

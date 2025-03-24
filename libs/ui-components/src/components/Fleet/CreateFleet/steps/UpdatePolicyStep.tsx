@@ -2,32 +2,37 @@ import * as React from 'react';
 import { Alert, Checkbox, FormGroup, FormSection, Grid } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 
-import { FleetFormValues } from '../types';
-import { DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES, getEmptyInitializedBatch } from '../fleetSpecUtils';
+import {
+  DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES,
+  getEmptyInitializedBatch,
+  getEmptyUpdateFormParams,
+} from '../fleetSpecUtils';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import LabelWithHelperText from '../../../common/WithHelperText';
+import { FleetFormValues } from '../../../../types/deviceSpec';
 
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import UpdateStepRolloutPolicy from './UpdateStepRolloutPolicy';
 import UpdateStepDisruptionBudget from './UpdateStepDisruptionBudget';
+import UpdateStepUpdatePolicy from './UpdateStepUpdatePolicy';
 import UpdateConfirmChangesModal, { StepSetting } from './UpdateConfirmChangesModal';
 
 export const updatePolicyStepId = 'update-policy';
 
 export const isUpdatePolicyStepValid = (errors: FormikErrors<FleetFormValues>) =>
-  !errors.rolloutPolicy && !errors.disruptionBudget;
+  !errors.rolloutPolicy && !errors.disruptionBudget && !errors.updatePolicy;
 
 const UpdatePolicyStep = () => {
   const { t } = useTranslation();
 
   const {
-    values: { rolloutPolicy, disruptionBudget },
+    values: { rolloutPolicy, disruptionBudget, updatePolicy },
     setFieldValue,
   } = useFormikContext<FleetFormValues>();
 
   const [forceShowAdvancedMode, setForceShowAdvancedMode] = React.useState<boolean>(false);
   const [alertSwitchToBasic, setAlertSwitchToBasic] = React.useState<StepSetting>();
-  const hasAdvancedMode = rolloutPolicy.isAdvanced || disruptionBudget.isAdvanced;
+  const hasAdvancedMode = rolloutPolicy.isAdvanced || disruptionBudget.isAdvanced || updatePolicy.isAdvanced;
 
   const onSettingsChange = (setting: StepSetting, toAdvanced: boolean) => {
     if (toAdvanced) {
@@ -37,11 +42,15 @@ const UpdatePolicyStep = () => {
           break;
         case 'rollout-policies':
           setFieldValue('rolloutPolicy.isAdvanced', true);
-          onChangePolicyType(true);
+          void onChangePolicyType(true);
           break;
         case 'disruption-budget':
           setFieldValue('disruptionBudget.isAdvanced', true);
-          onChangeDisruptionBudget(true);
+          void onChangeDisruptionBudget(true);
+          break;
+        case 'update-policies':
+          setFieldValue('updatePolicy.isAdvanced', true);
+          void onChangeUpdatePolicy(true);
           break;
       }
     } else {
@@ -68,6 +77,12 @@ const UpdatePolicyStep = () => {
     }
   };
 
+  const onChangeUpdatePolicy = async (toAdvanced: boolean) => {
+    if (!toAdvanced) {
+      await setFieldValue('updatePolicy', getEmptyUpdateFormParams());
+    }
+  };
+
   const onModalClose = async (doSwitch: boolean) => {
     setAlertSwitchToBasic(undefined);
     if (!doSwitch) {
@@ -79,12 +94,16 @@ const UpdatePolicyStep = () => {
       case 'all-settings':
         await onChangePolicyType(false);
         await onChangeDisruptionBudget(false);
+        await onChangeUpdatePolicy(false);
         break;
       case 'rollout-policies':
         void onChangePolicyType(false);
         break;
       case 'disruption-budget':
         void onChangeDisruptionBudget(false);
+        break;
+      case 'update-policies':
+        void onChangeUpdatePolicy(false);
         break;
     }
     setForceShowAdvancedMode(false);
@@ -118,8 +137,8 @@ const UpdatePolicyStep = () => {
               onChange={(_ev: React.FormEvent<HTMLInputElement>, toAdvanced: boolean) =>
                 onSettingsChange('rollout-policies', toAdvanced)
               }
+              body={rolloutPolicy.isAdvanced && <UpdateStepRolloutPolicy />}
             />
-            {rolloutPolicy.isAdvanced && <UpdateStepRolloutPolicy />}
 
             {/* Disruption budget */}
             <Checkbox
@@ -136,8 +155,24 @@ const UpdatePolicyStep = () => {
               onChange={(_ev: React.FormEvent<HTMLInputElement>, toAdvanced: boolean) =>
                 onSettingsChange('disruption-budget', toAdvanced)
               }
+              body={disruptionBudget.isAdvanced && <UpdateStepDisruptionBudget />}
             />
-            {disruptionBudget.isAdvanced && <UpdateStepDisruptionBudget />}
+
+            {/* Update (and download) policies */}
+            <Checkbox
+              label={
+                <LabelWithHelperText
+                  label={t('Set update policies')}
+                  content={t('Update policies allow you to control when updates should be downloaded and applied.')}
+                />
+              }
+              isChecked={updatePolicy.isAdvanced}
+              id="advUpdatePolicy"
+              onChange={(_ev: React.FormEvent<HTMLInputElement>, toAdvanced: boolean) =>
+                onSettingsChange('update-policies', toAdvanced)
+              }
+              body={updatePolicy.isAdvanced && <UpdateStepUpdatePolicy />}
+            />
           </FormSection>
         ) : (
           <Alert isInline variant="info" title={t('Default update policy')}>
