@@ -21,11 +21,12 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
   const { t } = useTranslation();
   const { put } = useFetch();
   const [error, setError] = React.useState<string>();
+  const labels = enrollmentRequest.spec.labels || {};
   return (
     <Formik<ApproveDeviceFormValues>
       initialValues={{
-        labels: fromAPILabel(enrollmentRequest.spec.labels || {}, { isDefault: true }),
-        deviceAlias: '',
+        labels: fromAPILabel(labels, { isDefault: true }).filter((label) => label.key !== 'alias'),
+        deviceAlias: labels.alias || '',
       }}
       validationSchema={deviceApprovalValidationSchema(t, { isSingleDevice: true })}
       onSubmit={async ({ labels, deviceAlias }) => {

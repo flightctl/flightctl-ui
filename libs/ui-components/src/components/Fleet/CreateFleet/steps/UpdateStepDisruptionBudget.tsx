@@ -6,8 +6,8 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import NumberField from '../../../form/NumberField';
 import TextListField from '../../../form/TextListField';
 import ErrorHelperText from '../../../form/FieldHelperText';
-import WithHelperText from '../../../common/WithHelperText';
-import { DisruptionBudgetForm } from '../types';
+import { FormGroupWithHelperText } from '../../../common/WithHelperText';
+import { DisruptionBudgetForm } from '../../../../types/deviceSpec';
 
 const UpdateStepDisruptionBudget = () => {
   const { t } = useTranslation();
@@ -16,14 +16,9 @@ const UpdateStepDisruptionBudget = () => {
 
   return (
     <>
-      <FormGroup
-        label={
-          <WithHelperText
-            ariaLabel={t('Group devices by label keys')}
-            content={t('The disruption budget will be applied to all group combinations independently.')}
-            showLabel
-          />
-        }
+      <FormGroupWithHelperText
+        label={t('Group devices by label keys')}
+        content={t('The disruption budget will be applied to all group combinations independently.')}
       >
         <TextListField
           name="disruptionBudget.groupBy"
@@ -35,46 +30,36 @@ const UpdateStepDisruptionBudget = () => {
             </Stack>
           }
         />
-      </FormGroup>
+      </FormGroupWithHelperText>
       <FormGroup>
         <Flex>
           <FlexItem>
-            <FormGroup
-              label={
-                <WithHelperText
-                  ariaLabel={t('Minimum number of available devices')}
-                  content={t(
-                    'At least this number of devices will be available at any given moment, for each group defined above.',
-                  )}
-                  showLabel
-                />
-              }
+            <FormGroupWithHelperText
+              label={t('Minimum number of available devices')}
+              content={t(
+                'At least this number of devices will be available at any given moment, for each group defined above.',
+              )}
             >
               <NumberField
                 aria-label={t('Minimum number of available devices')}
                 name="disruptionBudget.minAvailable"
                 min={1}
               />
-            </FormGroup>
+            </FormGroupWithHelperText>
           </FlexItem>
           <FlexItem>
-            <FormGroup
-              label={
-                <WithHelperText
-                  ariaLabel={t('Maximum number of unavailable devices')}
-                  content={t(
-                    'No more than this number of devices will be unavailable at any given moment, for each group defined above.',
-                  )}
-                  showLabel
-                />
-              }
+            <FormGroupWithHelperText
+              label={t('Maximum number of unavailable devices')}
+              content={t(
+                'No more than this number of devices will be unavailable at any given moment, for each group defined above.',
+              )}
             >
               <NumberField
                 aria-label={t('Maximum number of unavailable devices')}
                 name="disruptionBudget.maxUnavailable"
                 min={1}
               />
-            </FormGroup>
+            </FormGroupWithHelperText>
           </FlexItem>
           {/* Show error when both numeric values are unset */}
           {typeof meta.error === 'string' && <ErrorHelperText meta={meta} />}

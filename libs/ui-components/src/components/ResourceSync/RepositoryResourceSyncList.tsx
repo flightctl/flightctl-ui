@@ -7,8 +7,6 @@ import {
   EmptyStateBody,
   EmptyStateFooter,
   Modal,
-  SelectList,
-  SelectOption,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
@@ -28,7 +26,6 @@ import Table, { TableColumn } from '../Table/Table';
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import TableTextSearch from '../Table/TableTextSearch';
 import { useTableSelect } from '../../hooks/useTableSelect';
-import TableActions from '../Table/TableActions';
 
 import MassDeleteResourceSyncModal from '../modals/massModals/MassDeleteResourceSyncModal/MassDeleteResourceSyncModal';
 import ResourceSyncStatus from './ResourceSyncStatus';
@@ -222,11 +219,9 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
           </ToolbarGroup>
           {canDelete && (
             <ToolbarItem>
-              <TableActions isDisabled={!hasSelectedRows}>
-                <SelectList>
-                  <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
-                </SelectList>
-              </TableActions>
+              <Button isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)} variant="secondary">
+                {t('Delete resource syncs')}
+              </Button>
             </ToolbarItem>
           )}
         </ToolbarContent>

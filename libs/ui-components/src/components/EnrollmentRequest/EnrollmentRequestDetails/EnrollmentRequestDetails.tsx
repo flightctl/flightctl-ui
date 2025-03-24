@@ -29,7 +29,7 @@ import ApproveDeviceModal from '../../modals/ApproveDeviceModal/ApproveDeviceMod
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import EnrollmentRequestStatus from '../../Status/EnrollmentRequestStatus';
-import WithHelperText from '../../common/WithHelperText';
+import LabelWithHelperText from '../../common/WithHelperText';
 import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
@@ -67,7 +67,6 @@ const EnrollmentRequestDetails = () => {
 
   const approvalStatus = er ? getApprovalStatus(er) : '-';
   const isPendingApproval = approvalStatus === EnrollmentRequestStatusType.Pending;
-
   return (
     <DetailsPage
       loading={loading}
@@ -77,7 +76,7 @@ const EnrollmentRequestDetails = () => {
       resourceType="Devices"
       resourceTypeLabel={t('Devices')}
       actions={
-        (canApprove || canApprove) && (
+        (canApprove || canDelete) && (
           <DetailsPageActions>
             <DropdownList>
               {canApprove && (
@@ -120,9 +119,9 @@ const EnrollmentRequestDetails = () => {
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Labels')}</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Default labels')}</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <LabelsView prefix="er" labels={er?.metadata.labels} />
+                    <LabelsView prefix="er" labels={er?.spec.labels} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
@@ -138,9 +137,8 @@ const EnrollmentRequestDetails = () => {
         <GridItem md={6}>
           <DetailsPageCard>
             <CardTitle>
-              <WithHelperText
-                showLabel
-                ariaLabel={t('Certificate signing request')}
+              <LabelWithHelperText
+                label={t('Certificate signing request')}
                 content={t('A PEM-encoded PKCS#10 certificate signing request.')}
               />
             </CardTitle>
@@ -162,7 +160,7 @@ const EnrollmentRequestDetails = () => {
         <GridItem md={6}>
           <DetailsPageCard>
             <CardTitle>
-              <WithHelperText showLabel ariaLabel={t('Certificate')} content={t('A PEM-encoded signed certificate.')} />
+              <LabelWithHelperText label={t('Certificate')} content={t('A PEM-encoded signed certificate.')} />
             </CardTitle>
             <DetailsPageCardBody>
               {er?.status?.certificate ? (

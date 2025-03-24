@@ -8,7 +8,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { getErrorMessage } from '../../../utils/error';
 import { getStringListPatches } from '../../../utils/patch';
 import { deviceSystemdUnitsValidationSchema } from '../../form/validations';
-import TrackSystemdUnitsForm, { SystemdUnitFormValue, SystemdUnitsFormValues } from './TrackSystemdUnitsForm';
+import TrackSystemdUnitsForm, { SystemdUnitsFormValues } from './TrackSystemdUnitsForm';
 
 type SystemdUnitsModalProps = {
   onClose: (hasChanges?: boolean, addedSystemdUnits?: string[]) => void;
@@ -27,11 +27,12 @@ const SystemdUnitsModal: React.FC<SystemdUnitsModalProps> = ({ onClose, device }
   const { t } = useTranslation();
   const { patch } = useFetch();
   const [error, setError] = React.useState<string>();
-
-  const currentSystemdUnits: SystemdUnitFormValue[] = (device.spec?.systemd?.matchPatterns || []).map((p) => ({
-    pattern: p,
-    exists: true,
-  }));
+  const currentSystemdUnits: SystemdUnitsFormValues['systemdUnits'] = (device.spec?.systemd?.matchPatterns || []).map(
+    (p) => ({
+      pattern: p,
+      exists: true,
+    }),
+  );
 
   return (
     <Modal title={t('Track systemd services')} isOpen onClose={() => onClose()} variant="small">

@@ -1,7 +1,6 @@
 import { Fleet, PatchRequest } from '@flightctl/types';
 import { TFunction } from 'i18next';
 import * as Yup from 'yup';
-import { FleetFormValues } from './types';
 import { API_VERSION } from '../../../constants';
 import { toAPILabel } from '../../../utils/labels';
 import {
@@ -13,27 +12,31 @@ import {
   validKubernetesDnsSubdomain,
   validLabelsSchema,
   validOsImage,
+  validUpdatePolicySchema,
 } from '../../form/validations';
 import {
   appendJSONPatch,
-  getApplicationPatches,
   getLabelPatches,
   getRolloutPolicyData,
   getRolloutPolicyPatches,
   getStringListPatches,
-  toAPIApplication,
+  getUpdatePolicyPatches,
+  updatePolicyFormToApi,
 } from '../../../utils/patch';
 import {
   ACMCrdConfig,
   ACMImportConfig,
   MicroshiftRegistrationHook,
-  getAPIConfig,
+  getApiConfig,
+  getApplicationPatches,
   getApplicationValues,
   getConfigTemplatesValues,
   getDeviceSpecConfigPatches,
   hasMicroshiftRegistrationConfig,
+  toAPIApplication,
 } from '../../Device/EditDeviceWizard/deviceSpecUtils';
-import { getDisruptionBudgetValues, getRolloutPolicyValues } from './fleetSpecUtils';
+import { getDisruptionBudgetValues, getRolloutPolicyValues, getUpdatePolicyValues } from './fleetSpecUtils';
+import { FleetFormValues, UpdatePolicyForm } from '../../../types/deviceSpec';
 
 export const getValidationSchema = (t: TFunction) => {
   return Yup.object<FleetFormValues>({
@@ -46,6 +49,7 @@ export const getValidationSchema = (t: TFunction) => {
     systemdUnits: systemdUnitListValidationSchema(t),
     rolloutPolicy: validFleetRolloutPolicySchema(t),
     disruptionBudget: validFleetDisruptionBudgetSchema(t),
+    updatePolicy: validUpdatePolicySchema(t),
   });
 };
 
@@ -113,7 +117,7 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
 
   // Configurations
   const currentConfigs = currentFleet.spec.template.spec.config || [];
-  const newConfigs = updatedFleet.configTemplates.map(getAPIConfig);
+  const newConfigs = updatedFleet.configTemplates.map(getApiConfig);
   if (updatedFleet.registerMicroShift) {
     newConfigs.push(ACMCrdConfig, ACMImportConfig, MicroshiftRegistrationHook);
   }
@@ -141,6 +145,13 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
   const rolloutPolicyPatches = getRolloutPolicyPatches(currentFleet.spec.rolloutPolicy, updatedFleet);
   allPatches = allPatches.concat(rolloutPolicyPatches);
 
+  // Update policies
+  const updatePolicyPatches = getUpdatePolicyPatches(
+    '/spec/template/spec/updatePolicy',
+    currentFleet.spec.template.spec.updatePolicy,
+    updatedFleet.updatePolicy as Required<UpdatePolicyForm>,
+  );
+  allPatches = allPatches.concat(updatePolicyPatches);
   return allPatches;
 };
 
@@ -172,7 +183,7 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
         },
         spec: {
           os: values.osImage ? { image: values.osImage || '' } : undefined,
-          config: values.configTemplates.map(getAPIConfig),
+          config: values.configTemplates.map(getApiConfig),
           applications: values.applications.map(toAPIApplication),
           ...systemdPatterns,
         },
@@ -185,6 +196,9 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
   }
   if (values.rolloutPolicy.isAdvanced || values.disruptionBudget.isAdvanced) {
     fleet.spec.rolloutPolicy = getRolloutPolicyData(values);
+  }
+  if (values.updatePolicy.isAdvanced) {
+    fleet.spec.template.spec.updatePolicy = updatePolicyFormToApi(values.updatePolicy as Required<UpdatePolicyForm>);
   }
 
   return fleet;
@@ -213,6 +227,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
       registerMicroShift,
       rolloutPolicy: getRolloutPolicyValues(fleet.spec),
       disruptionBudget: getDisruptionBudgetValues(fleet.spec),
+      updatePolicy: getUpdatePolicyValues(fleet.spec.template?.spec?.updatePolicy),
     };
   }
 
@@ -227,5 +242,6 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
     registerMicroShift: false,
     rolloutPolicy: getRolloutPolicyValues(undefined),
     disruptionBudget: getDisruptionBudgetValues(undefined),
+    updatePolicy: getUpdatePolicyValues(undefined),
   };
 };

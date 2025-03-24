@@ -1,11 +1,9 @@
 import React from 'react';
 import {
   Button,
-  DropdownList,
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  SelectOption,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
@@ -23,7 +21,6 @@ import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import DeleteRepositoryModal from './RepositoryDetails/DeleteRepositoryModal';
 import TableTextSearch from '../Table/TableTextSearch';
 import Table, { TableColumn } from '../Table/Table';
-import TableActions from '../Table/TableActions';
 import { useTableSelect } from '../../hooks/useTableSelect';
 import MassDeleteRepositoryModal from '../modals/massModals/MassDeleteRepositoryModal/MassDeleteRepositoryModal';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
@@ -187,11 +184,9 @@ const RepositoryTable = () => {
           </ToolbarItem>
           {canDelete && (
             <ToolbarItem>
-              <TableActions isDisabled={!hasSelectedRows}>
-                <DropdownList>
-                  <SelectOption onClick={() => setIsMassDeleteModalOpen(true)}>{t('Delete')}</SelectOption>
-                </DropdownList>
-              </TableActions>
+              <Button isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)} variant="secondary">
+                {t('Delete repositories')}
+              </Button>
             </ToolbarItem>
           )}
         </ToolbarContent>

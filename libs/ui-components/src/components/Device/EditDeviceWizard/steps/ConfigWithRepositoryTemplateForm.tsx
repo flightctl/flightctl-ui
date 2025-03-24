@@ -6,13 +6,12 @@ import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exc
 import { TFunction, Trans } from 'react-i18next';
 
 import { RepoSpecType, Repository } from '@flightctl/types';
-import { GitConfigTemplate, HttpConfigTemplate } from '../../../../types/deviceSpec';
+import { DeviceSpecConfigFormValues, GitConfigTemplate, HttpConfigTemplate } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { DeviceSpecConfigFormValues } from '../types';
 import TextField from '../../../form/TextField';
 import FormSelect from '../../../form/FormSelect';
 import CreateRepositoryModal from '../../../modals/CreateRepositoryModal/CreateRepositoryModal';
-import WithHelperText from '../../../common/WithHelperText';
+import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 
 type ConfigWithRepositoryTemplateFormProps = {
   repoType: RepoSpecType;
@@ -66,14 +65,9 @@ const GitConfigForm = ({ template, index }: { template: GitConfigTemplate; index
           value={template.targetRevision}
         />
       </FormGroup>
-      <FormGroup
-        label={
-          <WithHelperText
-            ariaLabel={t('Path')}
-            content={t('Path in the repository where the configuration file(s) are located')}
-            showLabel
-          />
-        }
+      <FormGroupWithHelperText
+        label={t('Path')}
+        content={t('Path in the repository where the configuration file(s) are located')}
         isRequired
       >
         <TextField
@@ -82,16 +76,11 @@ const GitConfigForm = ({ template, index }: { template: GitConfigTemplate; index
           value={template.path}
           placeholder={t('/absolute/path')}
         />
-      </FormGroup>
-      <FormGroup
+      </FormGroupWithHelperText>
+      <FormGroupWithHelperText
+        label={t('Mount path')}
+        content={t('Path in the device where the configurations will be stored')}
         isRequired
-        label={
-          <WithHelperText
-            ariaLabel={t('Mount path')}
-            content={t('Path in the device where the configurations will be stored')}
-            showLabel
-          />
-        }
       >
         <TextField
           aria-label={t('Mount path')}
@@ -99,7 +88,7 @@ const GitConfigForm = ({ template, index }: { template: GitConfigTemplate; index
           value={template.mountPath}
           placeholder={t('/absolute/path')}
         />
-      </FormGroup>
+      </FormGroupWithHelperText>
     </>
   );
 };
@@ -129,16 +118,11 @@ const HttpConfigForm = ({
 
   return (
     <>
-      <FormGroup
+      <FormGroupWithHelperText
         label={t('Suffix')}
-        labelIcon={
-          <WithHelperText
-            ariaLabel={t('Suffix')}
-            content={t(
-              "Suffix that will be combined with the repository's base URL to invoke the HTTP service. Can include query parameters.",
-            )}
-          />
-        }
+        content={t(
+          "Suffix that will be combined with the repository's base URL to invoke the HTTP service. Can include query parameters.",
+        )}
       >
         <TextField
           aria-label={t('Suffix')}
@@ -146,15 +130,10 @@ const HttpConfigForm = ({
           value={template.suffix || ''}
           helperText={suffixHelperText}
         />
-      </FormGroup>
-      <FormGroup
+      </FormGroupWithHelperText>
+      <FormGroupWithHelperText
         label={t('File path')}
-        labelIcon={
-          <WithHelperText
-            ariaLabel={t('File path')}
-            content={t('Path of the file where the response will be stored in the device filesystem.')}
-          />
-        }
+        content={t('Path of the file where the response will be stored in the device filesystem.')}
         isRequired
       >
         <TextField
@@ -163,7 +142,7 @@ const HttpConfigForm = ({
           value={template.filePath || ''}
           placeholder={t('/absolute/path')}
         />
-      </FormGroup>
+      </FormGroupWithHelperText>
     </>
   );
 };

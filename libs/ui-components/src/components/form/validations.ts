@@ -4,20 +4,25 @@ import countBy from 'lodash/countBy';
 
 import { FlightCtlLabel } from '../../types/extraTypes';
 import {
+  ApplicationFormSpec,
+  BatchForm,
+  BatchLimitType,
+  DisruptionBudgetForm,
   GitConfigTemplate,
   HttpConfigTemplate,
   InlineConfigTemplate,
   KubeSecretTemplate,
+  RolloutPolicyForm,
   SpecConfigTemplate,
+  SystemdUnitFormValue,
+  UpdatePolicyForm,
   isGitConfigTemplate,
   isHttpConfigTemplate,
   isInlineConfigTemplate,
   isKubeSecretTemplate,
 } from '../../types/deviceSpec';
 import { labelToString } from '../../utils/labels';
-import { ApplicationFormSpec } from '../Device/EditDeviceWizard/types';
-import { SystemdUnitFormValue } from '../Device/SystemdUnitsModal/TrackSystemdUnitsForm';
-import { BatchForm, BatchLimitType, DisruptionBudgetForm, RolloutPolicyForm } from '../Fleet/CreateFleet/types';
+import { UpdateScheduleMode } from '../../utils/time';
 
 const SYSTEMD_PATTERNS_REGEXP = /^[a-z][a-z0-9-_.]*$/;
 const SYSTEMD_UNITS_MAX_PATTERNS = 256;
@@ -39,6 +44,7 @@ const APPLICATION_IMAGE_REGEXP = BASIC_DEVICE_OS_IMAGE_REGEXP;
 const TEMPLATE_VARIABLES_REGEXP = /{{.+?}}/g;
 // Special characters allowed: "dot", "pipe", "spaces" "quote", "backward slash", "underscore", "forward slash", "dash"
 const TEMPLATE_VARIABLES_CONTENT_REGEXP = /^([.a-zA-Z0-9|\s"\\_\/-])+$/;
+const TIME_VALUE_REGEXP = /^([01][0-9]|2[0-3]):([0-5][0-9])$/;
 
 const absolutePathRegex = /^\/.*$/;
 export const MAX_TARGET_REVISION_LENGTH = 244;
@@ -387,6 +393,74 @@ export const validFleetRolloutPolicySchema = (t: TFunction) => {
     });
 };
 
+const requiredDownloadTimes = (t: TFunction, isStartTime: boolean) =>
+  Yup.string().when(['isAdvanced', 'downloadAndInstallDiffer'], ([isAdvanced, downloadAndInstallDiffer]) => {
+    if (!isAdvanced) {
+      return Yup.string();
+    }
+    if (downloadAndInstallDiffer) {
+      return Yup.string().required(
+        isStartTime ? t('Downloading start time is required') : t('Downloading end time is required'),
+      );
+    }
+    return Yup.string()
+      .required(
+        isStartTime
+          ? t('Downloading and installing start times are required')
+          : t('Downloading and installing end times are required'),
+      )
+      .matches(TIME_VALUE_REGEXP, t('Time must be in hh:mm with 24-hour format', { nsSeparator: '|' }));
+  });
+
+const requiredInstallTimes = (t: TFunction, isStartTime: boolean) =>
+  Yup.string().when(['isAdvanced', 'downloadAndInstallDiffer'], ([isAdvanced, downloadAndInstallDiffer]) => {
+    if (isAdvanced && downloadAndInstallDiffer) {
+      return Yup.string()
+        .required(isStartTime ? t('Installing start time is required') : t('Installing end time is required'))
+        .matches(TIME_VALUE_REGEXP, t('Time must be in hh:mm with 24-hour format', { nsSeparator: '|' }));
+    }
+    return Yup.string();
+  });
+
+const updateWeekDaysSchema = (t: TFunction) =>
+  Yup.array()
+    .required()
+    .of(Yup.boolean().required())
+    .test(
+      'selected weekdays',
+      t('Select at least one day of the week for "weekly" schedules'),
+      (selectedDays: boolean[], { path, parent }) => {
+        const parentWeekMode =
+          path === 'updatePolicy.downloadWeekDays'
+            ? (parent as UpdatePolicyForm).downloadScheduleMode
+            : (parent as UpdatePolicyForm).installScheduleMode;
+
+        if (parentWeekMode === UpdateScheduleMode.Weekly) {
+          return selectedDays.some(Boolean);
+        }
+
+        return true;
+      },
+    );
+
+export const validUpdatePolicySchema = (t: TFunction) => {
+  return Yup.object().shape({
+    isAdvanced: Yup.boolean().required(),
+    downloadAndInstallDiffer: Yup.boolean().required(),
+    // Fields are flattened so "isAdvanced" can be used for validating them
+    downloadStartsAt: requiredDownloadTimes(t, true),
+    downloadEndsAt: requiredDownloadTimes(t, false),
+    downloadScheduleMode: Yup.string().oneOf([UpdateScheduleMode.Weekly, UpdateScheduleMode.Daily]).required(),
+    downloadWeekDays: updateWeekDaysSchema(t),
+    downloadTimeZone: Yup.string().required(t('Select the timezone for downloading updates')),
+    installStartsAt: requiredInstallTimes(t, true),
+    installEndsAt: requiredInstallTimes(t, false),
+    installScheduleMode: Yup.string().oneOf([UpdateScheduleMode.Weekly, UpdateScheduleMode.Daily]).required(),
+    installWeekDays: updateWeekDaysSchema(t),
+    installTimeZone: Yup.string().required(t('Select the timezone for installing updates')),
+  });
+};
+
 export const validFleetDisruptionBudgetSchema = (t: TFunction) => {
   return Yup.object()
     .shape({
@@ -463,6 +537,12 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
                     (path) => !path || value.files.filter((file) => file.path === path).length == 1,
                   ),
                 content: Yup.string(),
+                permissions: Yup.string()
+                  .required(t('Permissions are required'))
+                  .test('permissions', t('Permissions must use octal notation'), (perm: string) => {
+                    const valNum = Number(`0o${perm || ''}`);
+                    return Number.isFinite(valNum) && valNum >= 0 && valNum <= 0o7777;
+                  }),
               }),
             ),
           });

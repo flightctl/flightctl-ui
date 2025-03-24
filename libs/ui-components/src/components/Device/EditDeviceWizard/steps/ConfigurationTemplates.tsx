@@ -16,12 +16,11 @@ import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-cir
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
 import { RepoSpecType, Repository, RepositoryList } from '@flightctl/types';
-import { ConfigType, SpecConfigTemplate } from '../../../../types/deviceSpec';
-import { DeviceSpecConfigFormValues } from '../types';
+import { ConfigType, DeviceSpecConfigFormValues, SpecConfigTemplate } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';
-import WithHelperText from '../../../common/WithHelperText';
+import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import { getDnsSubdomainValidations } from '../../../form/validations';
 import ErrorHelperText from '../../../form/FieldHelperText';
 import FormSelect from '../../../form/FormSelect';
@@ -124,16 +123,11 @@ const ConfigurationTemplatesForm = ({ repositories, repoRefetch, canCreateRepo, 
   const generalError = typeof errors.configTemplates === 'string' ? errors.configTemplates : undefined;
 
   return (
-    <FormGroup
-      label={
-        <WithHelperText
-          ariaLabel={t('Host configurations (files)')}
-          content={t(
-            "Define configuration files that shall be present on the device's file system. For example: systemd service config, network config, firewall config, etc.",
-          )}
-          showLabel
-        />
-      }
+    <FormGroupWithHelperText
+      label={t('Host configurations (files)')}
+      content={t(
+        "Define configuration files that shall be present on the device's file system. For example: systemd service config, network config, firewall config, etc.",
+      )}
     >
       <FieldArray name="configTemplates">
         {({ push, remove }) => (
@@ -183,7 +177,7 @@ const ConfigurationTemplatesForm = ({ repositories, repoRefetch, canCreateRepo, 
           </>
         )}
       </FieldArray>
-    </FormGroup>
+    </FormGroupWithHelperText>
   );
 };
 

@@ -5,12 +5,12 @@ import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
-import { ApplicationFormSpec, DeviceSpecConfigFormValues } from '../types';
+import { ApplicationFormSpec, DeviceSpecConfigFormValues } from '../../../../types/deviceSpec';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
-import WithHelperText from '../../../common/WithHelperText';
+import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import { CREATING_APPLICATIONS_LINK } from '../../../../links';
 
@@ -28,36 +28,26 @@ const ApplicationSection = ({ index }: { index: number }) => {
       description={app.name || app.image}
     >
       <Grid hasGutter>
-        <FormGroup
-          label={
-            <WithHelperText
-              ariaLabel={t('Image')}
-              content={
-                <span>
-                  {t('The application image. Learn how to create one')}{' '}
-                  <LearnMoreLink text={t('here')} link={CREATING_APPLICATIONS_LINK} />
-                </span>
-              }
-              showLabel
-            />
+        <FormGroupWithHelperText
+          label={t('Image')}
+          content={
+            <span>
+              {t('The application image. Learn how to create one')}{' '}
+              <LearnMoreLink text={t('here')} link={CREATING_APPLICATIONS_LINK} />
+            </span>
           }
           isRequired
         >
           <TextField aria-label={t('Image')} name={`applications.${index}.image`} value={app.image} />
-        </FormGroup>
-        <FormGroup
-          label={
-            <WithHelperText
-              ariaLabel={t('Application name')}
-              content={t(
-                'The image name will be used instead of when application name is not specified. Application name must be unique.',
-              )}
-              showLabel
-            />
-          }
+        </FormGroupWithHelperText>
+        <FormGroupWithHelperText
+          label={t('Application name')}
+          content={t(
+            'The image name will be used instead of when application name is not specified. Application name must be unique.',
+          )}
         >
           <TextField aria-label={t('Application name')} name={`applications.${index}.name`} value={app.name} />
-        </FormGroup>
+        </FormGroupWithHelperText>
         <FieldArray name={`applications.${index}.variables`}>
           {({ push, remove }) => (
             <>
@@ -120,14 +110,9 @@ const ApplicationTemplates = () => {
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
 
   return (
-    <FormGroup
-      label={
-        <WithHelperText
-          ariaLabel={t('Application workloads')}
-          content={t('Define the application workloads that shall run on the device.')}
-          showLabel
-        />
-      }
+    <FormGroupWithHelperText
+      label={t('Application workloads')}
+      content={t('Define the application workloads that shall run on the device.')}
     >
       <FieldArray name="applications">
         {({ push, remove }) => (
@@ -171,7 +156,7 @@ const ApplicationTemplates = () => {
           </>
         )}
       </FieldArray>
-    </FormGroup>
+    </FormGroupWithHelperText>
   );
 };
 
