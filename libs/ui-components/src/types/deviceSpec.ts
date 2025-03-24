@@ -1,5 +1,4 @@
 import {
-  ApplicationProviderSpec,
   ConfigProviderSpec,
   DisruptionBudget,
   GitConfigProviderSpec,
@@ -11,6 +10,7 @@ import {
 } from '@flightctl/types';
 import { FlightCtlLabel } from './extraTypes';
 import { UpdateScheduleMode } from '../utils/time';
+import { ApplicationProviderSpecFixed } from './extraTypes';
 
 export enum ConfigType {
   GIT = 'git',
@@ -78,9 +78,10 @@ export const isRepoConfig = (config: ConfigSourceProvider): config is RepoConfig
 
 export type AppForm = ImageAppForm | InlineAppForm;
 
-export const isInlineAppProvider = (app: ApplicationProviderSpec): app is InlineApplicationProviderSpec =>
+export const isInlineAppProvider = (app: ApplicationProviderSpecFixed): app is InlineApplicationProviderSpec =>
   'inline' in app;
-export const isImageAppProvider = (app: ApplicationProviderSpec): app is ImageApplicationProviderSpec => 'image' in app;
+export const isImageAppProvider = (app: ApplicationProviderSpecFixed): app is ImageApplicationProviderSpec =>
+  'image' in app;
 
 export const isImageAppForm = (app: AppBase): app is ImageAppForm => app.specType === AppSpecType.OCI_IMAGE;
 export const isInlineAppForm = (app: AppBase): app is InlineAppForm => app.specType === AppSpecType.INLINE;

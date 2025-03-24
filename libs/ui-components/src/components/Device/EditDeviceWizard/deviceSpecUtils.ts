@@ -1,6 +1,7 @@
 import {
-  ApplicationProviderSpec,
   AppType,
+  // eslint-disable-next-line no-restricted-imports
+  ApplicationProviderSpec,
   ConfigProviderSpec,
   DeviceSpec,
   EncodingType,
@@ -34,6 +35,7 @@ import {
   isKubeProviderSpec,
   isKubeSecretTemplate,
 } from '../../../types/deviceSpec';
+import { ApplicationProviderSpecFixed, InlineApplicationFileFixed } from '../../../types/extraTypes';
 
 const DEFAULT_INLINE_FILE_MODE = 420; // In Octal: 0644
 const DEFAULT_INLINE_FILE_USER = 'root';
@@ -210,12 +212,13 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
   return {
     name: app.name,
     appType: AppType.AppTypeCompose,
-    inline: app.files.map((file) => ({
-      // Warning! FileContent includes a Record<string, any> so Typescript won't warn us if we specify incorrect field names
-      path: file.path,
-      content: file.content || '',
-      contentEncoding: file.base64 ? EncodingType.EncodingBase64 : EncodingType.EncodingPlain,
-    })),
+    inline: app.files.map(
+      (file): InlineApplicationFileFixed => ({
+        path: file.path,
+        content: file.content || '',
+        contentEncoding: file.base64 ? EncodingType.EncodingBase64 : EncodingType.EncodingPlain,
+      }),
+    ),
     envVars,
   };
 };
@@ -355,7 +358,7 @@ export const getApiConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
   };
 };
 
-const getAppFormVariables = (app: ApplicationProviderSpec) =>
+const getAppFormVariables = (app: ApplicationProviderSpecFixed) =>
   Object.entries(app.envVars || {}).map(([varName, varValue]) => ({ name: varName, value: varValue }));
 
 export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {

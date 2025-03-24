@@ -4,11 +4,11 @@ import countBy from 'lodash/countBy';
 
 import { FlightCtlLabel } from '../../types/extraTypes';
 import {
+  AppForm,
+  AppSpecType,
   BatchForm,
   BatchLimitType,
   DisruptionBudgetForm,
-  AppForm,
-  AppSpecType,
   GitConfigTemplate,
   HttpConfigTemplate,
   ImageAppForm,
