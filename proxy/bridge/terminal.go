@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"net/textproto"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -17,6 +19,13 @@ import (
 var (
 	websocketPingInterval = 30 * time.Second
 	websocketTimeout      = 30 * time.Second
+	websocketHeaders      = []string{
+		textproto.CanonicalMIMEHeaderKey("Connection"),
+		textproto.CanonicalMIMEHeaderKey("Sec-Websocket-Extensions"),
+		textproto.CanonicalMIMEHeaderKey("Sec-Websocket-Key"),
+		textproto.CanonicalMIMEHeaderKey("Sec-Websocket-Version"),
+		textproto.CanonicalMIMEHeaderKey("Upgrade"),
+	}
 )
 
 type TerminalBridge struct {
@@ -77,7 +86,14 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		TLSClientConfig: t.TlsConfig,
 	}
 
-	backend, resp, err := dialer.Dial(consoleUrl, r.Header)
+	headers := http.Header{}
+	for key := range r.Header {
+		if !slices.Contains(websocketHeaders, textproto.CanonicalMIMEHeaderKey(key)) {
+			headers.Add(key, r.Header.Get(key))
+		}
+	}
+
+	backend, resp, err := dialer.Dial(consoleUrl, headers)
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to dial backend: '%v'", err)
 		statusCode := http.StatusBadGateway
