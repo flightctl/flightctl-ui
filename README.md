@@ -30,15 +30,15 @@ Choose one of the two options to run the UI application
 FLIGHTCTL_SERVER=<api_server_url> npm run dev
 ```
 
-If the backend, or OIDC provider is running self-signed certs, you will need to disable the verification via env variables:
+If the backend, or Auth provider is running self-signed certs, you will need to disable the verification via env variables:
 
  - `FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY='true'` - to disable verification of backend certs
- - `OIDC_INSECURE_SKIP_VERIFY='true'` - to disable verification of OIDC certs
+ - `AUTH_INSECURE_SKIP_VERIFY='true'` - to disable verification of auth server certs
 
 or provide the CA certs:
 
  - copy backend `ca.crt` to `./certs/ca.crt`
- - copy OIDC `ca.crt` to `./certs/ca_oidc.crt`
+ - copy Auth `ca.crt` to `./certs/ca_auth.crt`
 
 ### Running UI as OCP plugin
 

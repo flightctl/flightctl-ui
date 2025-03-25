@@ -1,15 +1,29 @@
 import * as React from 'react';
-import { Bullseye, Spinner } from '@patternfly/react-core';
+import {
+  Bullseye,
+  Button,
+  EmptyState,
+  EmptyStateActions,
+  EmptyStateBody,
+  EmptyStateFooter,
+  EmptyStateHeader,
+  EmptyStateIcon,
+  EmptyStateVariant,
+  Spinner,
+} from '@patternfly/react-core';
 import { Navigate, RouteObject, RouterProvider, createBrowserRouter, useParams, useRouteError } from 'react-router-dom';
 import { TFunction } from 'i18next';
+import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons';
+import global_danger_color_100 from '@patternfly/react-tokens/dist/js/global_danger_color_100';
 
 import { useDocumentTitle } from '@flightctl/ui-components/src/hooks/useDocumentTitle';
 import { APP_TITLE } from '@flightctl/ui-components/src/constants';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
+import ErrorBoundary from '@flightctl/ui-components/src/components/common/ErrorBoundary';
 
 import AppLayout from './components/AppLayout/AppLayout';
 import NotFound from './components/AppLayout/NotFound';
-import ErrorBoundary from '@flightctl/ui-components/src/components/common/ErrorBoundary';
+import { AuthContext } from './context/AuthContext';
 
 const EnrollmentRequestDetails = React.lazy(
   () =>
@@ -281,6 +295,38 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
 
 const AppRouter = () => {
   const { t } = useTranslation();
+
+  const { loading, error } = React.useContext(AuthContext);
+  if (error) {
+    return (
+      <Bullseye>
+        <EmptyState variant={EmptyStateVariant.xl}>
+          <EmptyStateHeader
+            titleText={t('Failed to login')}
+            headingLevel="h4"
+            icon={<EmptyStateIcon icon={ExclamationCircleIcon} color={global_danger_color_100.value} />}
+          />
+          <EmptyStateBody>{error}</EmptyStateBody>
+          <EmptyStateFooter>
+            <EmptyStateActions>
+              <Button variant="link" onClick={() => window.location.replace('/')}>
+                {t('Try again')}
+              </Button>
+            </EmptyStateActions>
+          </EmptyStateFooter>
+        </EmptyState>
+      </Bullseye>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Bullseye>
+        <Spinner />
+      </Bullseye>
+    );
+  }
+
   const router = createBrowserRouter([
     {
       path: '/',
