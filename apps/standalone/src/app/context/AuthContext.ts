@@ -96,13 +96,18 @@ export const useAuthContext = () => {
   React.useEffect(() => {
     if (!loading) {
       const scheduleRefresh = () => {
+        if (!authEnabled) {
+          return;
+        }
         const expiresAt = parseInt(localStorage.getItem(EXPIRATION) || '0', 10);
         if (expiresAt > 0) {
           const now = nowInSeconds();
           // refresh 15s before expiration
           const expiresIn = expiresAt - now - 15;
           const timeout = Math.min(maxTimeout, expiresIn * 1000);
-          refreshRef.current = setTimeout(refreshToken, timeout);
+          if (timeout > 0) {
+            refreshRef.current = setTimeout(refreshToken, timeout);
+          }
         }
       };
 
@@ -131,7 +136,7 @@ export const useAuthContext = () => {
       scheduleRefresh();
     }
     return () => clearTimeout(refreshRef.current);
-  }, [loading]);
+  }, [loading, authEnabled]);
 
   return { username, loading, authEnabled, error };
 };
