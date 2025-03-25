@@ -10,8 +10,7 @@ import TextField from '../../../form/TextField';
 import UploadField from '../../../form/UploadField';
 import CheckboxField from '../../../form/CheckboxField';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
-import { DeviceSpecConfigFormValues } from '../types';
-import { InlineConfigTemplate } from '../../../../types/deviceSpec';
+import { DeviceSpecConfigFormValues, InlineConfigTemplate } from '../../../../types/deviceSpec';
 import { formatFileMode } from '../deviceSpecUtils';
 
 const MAX_INLINE_FILE_SIZE_BYTES = 1024 * 1024;
@@ -60,20 +59,18 @@ const FileForm = ({ fieldName, index }: { fieldName: string; index: number }) =>
             helperText={t('Select from the list or type in the permission code in octal notation')}
             defaultId="0644"
             items={permissions}
-            validateNewItem={(value) => {
+            isValidTypedItem={(value) => {
               try {
-                if (value !== '' && value.length <= 4) {
+                if (value !== '' && value.length === 4) {
                   const valNum = Number(`0o${value}`);
-                  if (isFinite(valNum) && valNum >= 0 && valNum <= 0o7777) {
-                    return undefined;
-                  }
+                  return Number.isFinite(valNum) && valNum >= 0 && valNum <= 0o7777;
                 }
               } catch {
-                return t('Invalid permissions');
+                return false;
               }
-              return t('Invalid permissions');
+              return false;
             }}
-            transformNewItem={formatFileMode}
+            transformTypedItem={formatFileMode}
           />
         </FormGroup>
         <FormGroup label={t('User')}>

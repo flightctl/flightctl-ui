@@ -67,18 +67,18 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
           <Table>
             <Thead>
               <Tr>
-                <Th>{t('Name')}</Th>
                 <Th>{t('Alias')}</Th>
+                <Th>{t('Name')}</Th>
               </Tr>
             </Thead>
             <Tbody>
               {resources.map((resource) => {
                 return (
                   <Tr key={resource.metadata.name}>
+                    <Td dataLabel={t('Alias')}>{resource.metadata.labels?.alias || '-'}</Td>
                     <Td dataLabel={t('Name')}>
                       <ResourceLink id={resource.metadata.name as string} />
                     </Td>
-                    <Td dataLabel={t('Alias')}>{resource.metadata.labels?.alias || '-'}</Td>
                   </Tr>
                 );
               })}

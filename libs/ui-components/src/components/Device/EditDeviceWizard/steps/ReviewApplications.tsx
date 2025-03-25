@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flex, FlexItem, Label, Stack, StackItem } from '@patternfly/react-core';
 
-import { ApplicationFormSpec } from '../types';
+import { ApplicationFormSpec } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 
 const ReviewApplications = ({ apps }: { apps: ApplicationFormSpec[] }) => {

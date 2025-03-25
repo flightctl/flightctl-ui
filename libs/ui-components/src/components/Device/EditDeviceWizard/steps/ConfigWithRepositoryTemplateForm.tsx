@@ -6,9 +6,8 @@ import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exc
 import { TFunction, Trans } from 'react-i18next';
 
 import { RepoSpecType, Repository } from '@flightctl/types';
-import { GitConfigTemplate, HttpConfigTemplate } from '../../../../types/deviceSpec';
+import { DeviceSpecConfigFormValues, GitConfigTemplate, HttpConfigTemplate } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { DeviceSpecConfigFormValues } from '../types';
 import TextField from '../../../form/TextField';
 import FormSelect from '../../../form/FormSelect';
 import CreateRepositoryModal from '../../../modals/CreateRepositoryModal/CreateRepositoryModal';

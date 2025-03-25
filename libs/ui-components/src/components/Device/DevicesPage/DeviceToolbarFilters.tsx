@@ -45,10 +45,14 @@ const LabelFleetResults = ({
   allLabels,
   fleetNames,
   isUpdating,
+  selectedFleetNames,
+  selectedLabels,
 }: {
   filterText: string;
   isUpdating: boolean;
   fleetNames: string[];
+  selectedLabels: FlightCtlLabel[];
+  selectedFleetNames: string[];
   allLabels: FlightCtlLabel[];
 }) => {
   const { t } = useTranslation();
@@ -88,8 +92,14 @@ const LabelFleetResults = ({
               .map((label) => {
                 const labelStr = labelToString(label);
                 const labelStrParts = searchHighlighter(labelStr);
+                const isSelected = selectedLabels.map(labelToString).includes(labelStr);
                 return (
-                  <SelectOption key={`label@@${labelStr}`} value={`label@@${labelStr}`}>
+                  <SelectOption
+                    key={`label@@${labelStr}`}
+                    value={`label@@${labelStr}`}
+                    hasCheckbox
+                    isSelected={isSelected}
+                  >
                     <span>{labelStrParts}</span>
                   </SelectOption>
                 );
@@ -105,7 +115,12 @@ const LabelFleetResults = ({
               .map((fleetName) => {
                 const fleetNameParts = searchHighlighter(fleetName);
                 return (
-                  <SelectOption key={`fleet@@${fleetName}`} value={`fleet@@${fleetName}`}>
+                  <SelectOption
+                    key={`fleet@@${fleetName}`}
+                    value={`fleet@@${fleetName}`}
+                    hasCheckbox
+                    isSelected={selectedFleetNames.includes(fleetName)}
+                  >
                     <span>{fleetNameParts}</span>
                   </SelectOption>
                 );
@@ -144,6 +159,7 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
 
   const closeMenu = () => {
     setIsOpen(false);
+    setFilterText('');
   };
 
   const onInputClick = () => {
@@ -201,10 +217,6 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
     }
   };
 
-  const selectedIds = selectedFleetNames
-    .map((fleetName) => `fleet@@${fleetName}`)
-    .concat(selectedLabels.map((label) => `label@@${labelToString(label)}`));
-
   const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
     <MenuToggle
       className="fctl-device-toolbar-filters__toggle"
@@ -247,7 +259,6 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
     <Select
       id="fleet-label-typeahead-select-listbox"
       isOpen={isOpen}
-      selected={selectedIds}
       onSelect={(_event, value) => {
         const valStr = value as string;
         const id = valStr.split('@@')[1];
@@ -256,8 +267,6 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
         } else {
           onSelect('label', id);
         }
-        setIsOpen(false);
-        setFilterText('');
       }}
       onOpenChange={(isOpen) => {
         !isOpen && closeMenu();
@@ -269,7 +278,9 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
           isUpdating={isUpdating}
           filterText={filterText}
           fleetNames={fleetNameResults}
+          selectedFleetNames={selectedFleetNames}
           allLabels={labelResults}
+          selectedLabels={selectedLabels}
         />
       )}
     </Select>
@@ -336,16 +347,21 @@ const DeviceToolbarFilter = ({
   };
 
   const onSelectFleetOrLabel = (type: 'fleet' | 'label', id: string) => {
-    // Selecting a previously selected label does nothing. Labels can only be removed from the chips.
     if (type === 'fleet') {
       const isSelected = selectedFleetNames.includes(id);
-      if (!isSelected) {
+
+      if (isSelected) {
+        setSelectedFleets(selectedFleetNames.filter((name) => name !== id));
+      } else {
         setSelectedFleets(selectedFleetNames.concat([id]));
       }
     } else {
       const isSelected = selectedLabels.some((label) => labelToString(label) === id);
-      if (!isSelected) {
-        const [key, val] = id.split('=');
+      const [key, val] = id.split('=');
+
+      if (isSelected) {
+        setSelectedLabels(selectedLabels.filter((label) => label.key !== key || label.value !== val));
+      } else {
         setSelectedLabels(selectedLabels.concat([{ key, value: val }]));
       }
     }

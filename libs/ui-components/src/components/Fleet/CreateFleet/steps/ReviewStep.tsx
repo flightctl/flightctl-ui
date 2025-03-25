@@ -10,13 +10,13 @@ import {
 import { useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { FleetFormValues } from '../types';
+import { FleetFormValues } from '../../../../types/deviceSpec';
 import LabelsView from '../../../common/LabelsView';
 import FlightControlDescriptionList from '../../../common/FlightCtlDescriptionList';
 import { toAPILabel } from '../../../../utils/labels';
 import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
 import { getErrorMessage } from '../../../../utils/error';
-import { getAPIConfig } from '../../../Device/EditDeviceWizard/deviceSpecUtils';
+import { getApiConfig } from '../../../Device/EditDeviceWizard/deviceSpecUtils';
 import ReviewApplications from '../../../Device/EditDeviceWizard/steps/ReviewApplications';
 import ReviewTrackedSystemdServices from '../../../Device/EditDeviceWizard/steps/ReviewTrackedSystemdServices';
 import {
@@ -71,7 +71,7 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
             <DescriptionListGroup>
               <DescriptionListTerm>{t('Configurations')}</DescriptionListTerm>
               <DescriptionListDescription>
-                <RepositorySourceList configs={values.configTemplates.map(getAPIConfig)} />
+                <RepositorySourceList configs={values.configTemplates.map(getApiConfig)} />
               </DescriptionListDescription>
             </DescriptionListGroup>
           )}

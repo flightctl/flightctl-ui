@@ -5,7 +5,7 @@ import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
-import { ApplicationFormSpec, DeviceSpecConfigFormValues } from '../types';
+import { ApplicationFormSpec, DeviceSpecConfigFormValues } from '../../../../types/deviceSpec';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
