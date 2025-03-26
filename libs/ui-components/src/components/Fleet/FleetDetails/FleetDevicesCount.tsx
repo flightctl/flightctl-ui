@@ -33,7 +33,7 @@ const UpdatedFleetDevices = ({ error }: { error?: string }) => {
 };
 
 const FleetDevicesCount = ({ fleetId, devicesSummary, error }: FleetDevicesCountProps) => {
-  if (!devicesSummary || !devicesSummary.total) {
+  if (!devicesSummary || !devicesSummary.total || !devicesSummary.updateStatus) {
     return <>0/0</>;
   }
 
