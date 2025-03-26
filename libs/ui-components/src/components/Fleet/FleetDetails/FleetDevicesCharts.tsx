@@ -30,7 +30,7 @@ const DevicesByAppStatusChart = ({
   applicationStatus,
 }: {
   fleetId: string;
-  applicationStatus: DevicesSummary['applicationStatus'];
+  applicationStatus: NonNullable<DevicesSummary['applicationStatus']>;
 }) => {
   const { t } = useTranslation();
 
@@ -53,7 +53,7 @@ const DevicesByUpdateStatusChart = ({
   updateStatus,
 }: {
   fleetId: string;
-  updateStatus: DevicesSummary['updateStatus'];
+  updateStatus: NonNullable<DevicesSummary['updateStatus']>;
 }) => {
   const { t } = useTranslation();
 
@@ -74,7 +74,7 @@ const DevicesByDeviceStatusChart = ({
   deviceStatus,
 }: {
   fleetId: string;
-  deviceStatus: DevicesSummary['summaryStatus'];
+  deviceStatus: NonNullable<DevicesSummary['summaryStatus']>;
 }) => {
   const { t } = useTranslation();
 
@@ -94,13 +94,13 @@ const FleetDevicesCharts = ({ devicesSummary, fleetId }: FleetDevicesChartsProps
   return (
     <Flex justifyContent={{ default: 'justifyContentSpaceAround' }}>
       <FlexItem>
-        <DevicesByAppStatusChart fleetId={fleetId} applicationStatus={devicesSummary.applicationStatus} />
+        <DevicesByAppStatusChart fleetId={fleetId} applicationStatus={devicesSummary.applicationStatus ?? {}} />
       </FlexItem>
       <FlexItem>
-        <DevicesByDeviceStatusChart fleetId={fleetId} deviceStatus={devicesSummary.summaryStatus} />
+        <DevicesByDeviceStatusChart fleetId={fleetId} deviceStatus={devicesSummary.summaryStatus ?? {}} />
       </FlexItem>
       <FlexItem>
-        <DevicesByUpdateStatusChart fleetId={fleetId} updateStatus={devicesSummary.updateStatus} />
+        <DevicesByUpdateStatusChart fleetId={fleetId} updateStatus={devicesSummary.updateStatus ?? {}} />
       </FlexItem>
     </Flex>
   );
