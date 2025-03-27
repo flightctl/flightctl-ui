@@ -3,10 +3,13 @@
 /* tslint:disable */
 /* eslint-disable */
 
+export type { AbsolutePath } from './models/AbsolutePath';
+export type { ApplicationContent } from './models/ApplicationContent';
 export type { ApplicationEnvVars } from './models/ApplicationEnvVars';
 export type { ApplicationProviderSpec } from './models/ApplicationProviderSpec';
 export { ApplicationsSummaryStatusType } from './models/ApplicationsSummaryStatusType';
 export { ApplicationStatusType } from './models/ApplicationStatusType';
+export { AppType } from './models/AppType';
 export type { AuthConfig } from './models/AuthConfig';
 export type { Batch } from './models/Batch';
 export type { BatchSequence } from './models/BatchSequence';
@@ -50,6 +53,7 @@ export type { DeviceUpdatePolicySpec } from './models/DeviceUpdatePolicySpec';
 export type { DiskResourceMonitorSpec } from './models/DiskResourceMonitorSpec';
 export type { DisruptionBudget } from './models/DisruptionBudget';
 export type { Duration } from './models/Duration';
+export { EncodingType } from './models/EncodingType';
 export type { EnrollmentConfig } from './models/EnrollmentConfig';
 export type { EnrollmentRequest } from './models/EnrollmentRequest';
 export type { EnrollmentRequestApproval } from './models/EnrollmentRequestApproval';
@@ -60,8 +64,10 @@ export type { EnrollmentRequestStatus } from './models/EnrollmentRequestStatus';
 export type { EnrollmentService } from './models/EnrollmentService';
 export type { EnrollmentServiceAuth } from './models/EnrollmentServiceAuth';
 export type { EnrollmentServiceService } from './models/EnrollmentServiceService';
+export type { FileContent } from './models/FileContent';
+export type { FileMetadata } from './models/FileMetadata';
 export { FileOperation } from './models/FileOperation';
-export { FileSpec } from './models/FileSpec';
+export type { FileSpec } from './models/FileSpec';
 export type { Fleet } from './models/Fleet';
 export type { FleetList } from './models/FleetList';
 export type { FleetRolloutStatus } from './models/FleetRolloutStatus';
@@ -77,7 +83,8 @@ export type { HookConditionPathOp } from './models/HookConditionPathOp';
 export type { HttpConfig } from './models/HttpConfig';
 export type { HttpConfigProviderSpec } from './models/HttpConfigProviderSpec';
 export type { HttpRepoSpec } from './models/HttpRepoSpec';
-export type { ImageApplicationProvider } from './models/ImageApplicationProvider';
+export type { ImageApplicationProviderSpec } from './models/ImageApplicationProviderSpec';
+export type { InlineApplicationProviderSpec } from './models/InlineApplicationProviderSpec';
 export type { InlineConfigProviderSpec } from './models/InlineConfigProviderSpec';
 export type { KubernetesSecretProviderSpec } from './models/KubernetesSecretProviderSpec';
 export type { LabelList } from './models/LabelList';
@@ -89,6 +96,7 @@ export type { MemoryResourceMonitorSpec } from './models/MemoryResourceMonitorSp
 export type { ObjectMeta } from './models/ObjectMeta';
 export type { PatchRequest } from './models/PatchRequest';
 export type { Percentage } from './models/Percentage';
+export type { RelativePath } from './models/RelativePath';
 export type { Repository } from './models/Repository';
 export type { RepositoryList } from './models/RepositoryList';
 export type { RepositorySpec } from './models/RepositorySpec';

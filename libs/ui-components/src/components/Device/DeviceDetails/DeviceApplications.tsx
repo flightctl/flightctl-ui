@@ -9,6 +9,7 @@ import { getDeviceFleet } from '../../../utils/devices';
 import SystemdUnitsModal from '../SystemdUnitsModal/SystemdUnitsModal';
 import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
+import { isImageAppProvider } from '../../../types/deviceSpec';
 
 type DeviceDetailsTabProps = {
   device: Required<Device>;
@@ -40,7 +41,13 @@ const DeviceApplications = ({ device, refetch, canEdit }: React.PropsWithChildre
 
   const isManagedDevice = !!getDeviceFleet(device.metadata);
   const trackedSystemdUnits = device.spec?.systemd?.matchPatterns || [];
-  const specApps = device.spec?.applications?.map((app) => app.name || app.image) || [];
+  const specApps =
+    device.spec?.applications?.map((app) => {
+      if (isImageAppProvider(app)) {
+        return app.name || app.image;
+      }
+      return app.name as string;
+    }) || [];
   const apps = device.status.applications; // includes available systemdUnits
 
   const deleteSystemdUnit = isManagedDevice

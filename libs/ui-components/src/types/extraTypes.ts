@@ -1,4 +1,15 @@
-import { ConditionType, Device, EnrollmentRequest, Fleet, ResourceSync } from '@flightctl/types';
+import {
+  AppType,
+  ApplicationEnvVars,
+  ConditionType,
+  Device,
+  EnrollmentRequest,
+  FileContent,
+  Fleet,
+  ImageApplicationProviderSpec,
+  RelativePath,
+  ResourceSync,
+} from '@flightctl/types';
 
 export enum FlightControlMetrics {
   ACTIVE_AGENT_COUNT_METRIC = 'flightctl_devicesimulator_active_agent_count',
@@ -50,3 +61,12 @@ export const isEnrollmentRequest = (resource: Device | EnrollmentRequest): resou
 export type AnnotationType = DeviceAnnotation; // Add more types when they are added to the API
 
 export const isFleet = (resource: ResourceSync | Fleet): resource is Fleet => resource.kind === 'Fleet';
+
+// ApplicationProviderSpec's definition for inline files adds a Record<string, any>. We use the fixed types to get full Typescript checks for the field
+export type InlineApplicationFileFixed = FileContent & RelativePath;
+
+// "FixedApplicationProviderSpec" will need to be manually adjusted whenever the API definition changes
+export type ApplicationProviderSpecFixed = ApplicationEnvVars & {
+  name?: string;
+  appType?: AppType;
+} & (ImageApplicationProviderSpec | { inline: InlineApplicationFileFixed[] });
