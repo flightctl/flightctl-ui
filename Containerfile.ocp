@@ -12,7 +12,7 @@ ENV NODE_OPTIONS='--max-old-space-size=8192'
 RUN npm ci
 RUN npm run build:ocp
 
-FROM registry.access.redhat.com/ubi9/go-toolset:1.20 as proxy-build
+FROM registry.access.redhat.com/ubi9/go-toolset:1.22.9-1743094161 as proxy-build
 WORKDIR /app
 COPY proxy /app
 USER 0
