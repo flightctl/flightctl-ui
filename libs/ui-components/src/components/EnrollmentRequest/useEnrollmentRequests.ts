@@ -10,12 +10,18 @@ import { PaginationDetails, useTablePagination } from '../../hooks/useTablePagin
 import { PAGE_SIZE } from '../../constants';
 
 type EnrollmentRequestsEndpointArgs = {
+  search?: string;
   nextContinue?: string;
 };
 
-const getPendingEnrollmentsEndpoint = ({ nextContinue }: EnrollmentRequestsEndpointArgs) => {
+const getPendingEnrollmentsEndpoint = ({ search, nextContinue }: EnrollmentRequestsEndpointArgs) => {
+  const fieldSelector = ['!status.approval.approved'];
+  if (search) {
+    fieldSelector.push(`metadata.name contains ${search}`);
+  }
+
   const params = new URLSearchParams({
-    fieldSelector: '!status.approval.approved',
+    fieldSelector: fieldSelector.join(','),
   });
 
   if (nextContinue !== undefined) {
@@ -33,7 +39,9 @@ export const useEnrollmentRequestsEndpoint = (args: EnrollmentRequestsEndpointAr
   return [pendingErEndpointDebounced, endpoint !== pendingErEndpointDebounced];
 };
 
-export const usePendingEnrollments = (): [
+export const usePendingEnrollments = (
+  search?: string,
+): [
   EnrollmentRequest[],
   boolean,
   unknown,
@@ -42,7 +50,7 @@ export const usePendingEnrollments = (): [
 ] => {
   const { currentPage, setCurrentPage, itemCount, nextContinue, onPageFetched } =
     useTablePagination<EnrollmentRequestList>();
-  const [pendingErEndpoint, isDebouncing] = useEnrollmentRequestsEndpoint({ nextContinue });
+  const [pendingErEndpoint, isDebouncing] = useEnrollmentRequestsEndpoint({ search, nextContinue });
 
   const [erList, isLoading, error, refetch] = useFetchPeriodically<EnrollmentRequestList>(
     {
