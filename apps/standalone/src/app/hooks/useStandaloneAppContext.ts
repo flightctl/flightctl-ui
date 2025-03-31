@@ -16,7 +16,7 @@ import { useFetch } from './useFetch';
 import { useMetrics } from './useMetrics';
 import { AuthContext } from '../context/AuthContext';
 
-const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics'> = {
+const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics' | 'settings'> = {
   appType: FlightCtlApp.STANDALONE,
   i18n: {
     transNamespace: undefined,
@@ -43,6 +43,9 @@ export const useStandaloneAppContext = (): AppContextProps => {
 
   return {
     ...standaloneAppContext,
+    settings: {
+      isRHEM: window.isRHEM || false,
+    },
     user: username,
     fetch,
     metrics,
