@@ -27,6 +27,9 @@ export const useValuesAppContext = (getCookie: GetCookie, serviceUrl: string | u
 
   return {
     appType: 'aap',
+    settings: {
+      isRHEM: true,
+    },
     user: '',
     router: {
       useNavigate,
