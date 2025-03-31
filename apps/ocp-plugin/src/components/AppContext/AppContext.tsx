@@ -36,6 +36,7 @@ const appRoutes = {
   [ROUTE.RESOURCE_SYNC_DETAILS]: '/edge/resourcesyncs',
   [ROUTE.ENROLLMENT_REQUESTS]: '/edge/enrollmentrequests',
   [ROUTE.ENROLLMENT_REQUEST_DETAILS]: '/edge/enrollmentrequests',
+  [ROUTE.COMMAND_LINE_TOOLS]: '/', // CLI downloads are shown embedded in OCP's CLI downloads page and not as an independent route
 };
 
 export const useValuesAppContext = (): AppContextProps => {
@@ -45,6 +46,9 @@ export const useValuesAppContext = (): AppContextProps => {
 
   return {
     appType: 'ocp',
+    settings: {
+      isRHEM: true,
+    },
     user: userInfo?.username || '',
     router: {
       Link,

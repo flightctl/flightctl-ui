@@ -33,6 +33,7 @@ export const appRoutes = {
   [ROUTE.RESOURCE_SYNC_DETAILS]: '/devicemanagement/resourcesyncs',
   [ROUTE.ENROLLMENT_REQUESTS]: '/devicemanagement/enrollmentrequests',
   [ROUTE.ENROLLMENT_REQUEST_DETAILS]: '/devicemanagement/enrollmentrequests',
+  [ROUTE.COMMAND_LINE_TOOLS]: '/command-line-tools',
 };
 
 export type NavLinkFC = React.FC<{ to: string; children: (props: { isActive: boolean }) => React.ReactNode }>;
@@ -43,6 +44,9 @@ export type AppContextProps = {
   user?: string; // auth?.user?.profile.preferred_username
   i18n: {
     transNamespace?: string;
+  };
+  settings: {
+    isRHEM: boolean;
   };
   router: {
     useNavigate: () => RouterNavigateFunction;
@@ -74,6 +78,9 @@ export type AppContextProps = {
 
 export const AppContext = React.createContext<AppContextProps>({
   appType: 'standalone',
+  settings: {
+    isRHEM: false,
+  },
   router: {
     useNavigate,
     Link,
