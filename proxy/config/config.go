@@ -26,15 +26,6 @@ func getEnvUrlVar(key string, defaultValue string) string {
 	return strings.TrimSuffix(urlValue, "/")
 }
 
-func getEnvDomainVar(key string, protocols []string, defaultValue string) string {
-	finalUrl := getEnvUrlVar(key, defaultValue)
-
-	for i := 0; i < len(protocols); i++ {
-		finalUrl = strings.TrimPrefix(finalUrl, protocols[i])
-	}
-	return finalUrl
-}
-
 func getEnvVar(key string, defaultValue string) string {
 	val, ok := os.LookupEnv(key)
 	if !ok {

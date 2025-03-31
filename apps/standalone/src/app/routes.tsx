@@ -65,6 +65,9 @@ const OverviewPage = React.lazy(() => import('@flightctl/ui-components/src/compo
 const PendingEnrollmentRequestsBadge = React.lazy(
   () => import('@flightctl/ui-components/src/components/EnrollmentRequest/PendingEnrollmentRequestsBadge'),
 );
+const CommandLineToolsPage = React.lazy(
+  () => import('@flightctl/ui-components/src/components/Masthead/CommandLineToolsPage'),
+);
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -131,6 +134,12 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         <OverviewPage />
       </TitledRoute>
     ),
+  },
+  {
+    // Route is only exposed for the standalone app
+    path: '/command-line-tools',
+    title: t('Command line tools'),
+    element: <CommandLineToolsPage />,
   },
   {
     path: '/devicemanagement/enrollmentrequests/:enrollmentRequestId',
