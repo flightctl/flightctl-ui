@@ -4,7 +4,7 @@ import { Tbody } from '@patternfly/react-table';
 import { SelectList, SelectOption, ToolbarItem } from '@patternfly/react-core';
 import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons';
 
-import { EnrollmentRequest, EnrollmentRequestList } from '@flightctl/types';
+import { EnrollmentRequestList } from '@flightctl/types';
 
 import Table, { ApiSortTableColumn } from '../Table/Table';
 import TableActions from '../Table/TableActions';
@@ -14,7 +14,6 @@ import { useDeleteListAction } from '../ListPage/ListPageActions';
 import { useFetch } from '../../hooks/useFetch';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useTableSelect } from '../../hooks/useTableSelect';
-import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import ApproveDeviceModal from '../modals/ApproveDeviceModal/ApproveDeviceModal';
 import MassDeleteDeviceModal from '../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
 import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
@@ -43,11 +42,6 @@ const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
   },
 ];
 
-const getSearchText = (er: EnrollmentRequest) => {
-  const alias = er.spec.labels?.alias;
-  return alias ? [er.metadata.name, alias] : [er.metadata.name];
-};
-
 type EnrollmentRequestListProps = { refetchDevices?: VoidFunction; isStandalone?: boolean };
 
 const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentRequestListProps) => {
@@ -55,8 +49,11 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const [canApprove] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST_APPROVAL, VERB.POST);
   const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
   const { remove } = useFetch();
+  const [search, setSearch] = React.useState<string>('');
+
   const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
-  const [pendingEnrollments, isLoading, error, refetch, pagination] = usePendingEnrollments();
+
+  const [pendingEnrollments, isLoading, error, refetch, pagination] = usePendingEnrollments(search);
 
   const refetchWithDevices = () => {
     refetch();
@@ -66,8 +63,6 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const [approvingErId, setApprovingErId] = React.useState<string>();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
   const [isMassApproveModalOpen, setIsMassApproveModalOpen] = React.useState(false);
-
-  const { search, setSearch, filteredData } = useTableTextSearch(pendingEnrollments, getSearchText);
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
@@ -109,13 +104,13 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
           aria-label={t('Table for devices pending approval')}
           loading={!!isStandalone && isLoading && pendingEnrollments.length === 0}
           columns={enrollmentColumns}
-          emptyFilters={filteredData.length === 0}
+          emptyFilters={pendingEnrollments.length === 0}
           emptyData={false}
           isAllSelected={isAllSelected}
           onSelectAll={setAllSelected}
         >
           <Tbody>
-            {filteredData.map((er, index) => (
+            {pendingEnrollments.map((er, index) => (
               <EnrollmentRequestTableRow
                 key={er.metadata.name || ''}
                 er={er}
@@ -147,7 +142,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
         {isMassDeleteModalOpen && (
           <MassDeleteDeviceModal
             onClose={() => setIsMassDeleteModalOpen(false)}
-            resources={filteredData.filter(isRowSelected)}
+            resources={pendingEnrollments.filter(isRowSelected)}
             onDeleteSuccess={() => {
               setIsMassDeleteModalOpen(false);
               refetch();
@@ -157,7 +152,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
         {isMassApproveModalOpen && (
           <MassApproveDeviceModal
             onClose={() => setIsMassApproveModalOpen(false)}
-            pendingEnrollments={filteredData.filter(isRowSelected)}
+            pendingEnrollments={pendingEnrollments.filter(isRowSelected)}
             onApproveSuccess={() => {
               setAllSelected(false);
               setIsMassApproveModalOpen(false);
