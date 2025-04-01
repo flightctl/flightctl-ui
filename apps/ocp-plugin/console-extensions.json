@@ -144,7 +144,7 @@
   {
     "type": "acm.overview/tab",
     "properties": {
-      "tabTitle": "Edge",
+      "tabTitle": "Edge devices",
       "component": { "$codeRef": "OverviewTab" }
     }
   }
