@@ -1,6 +1,6 @@
 {
   "name": "@flightctl/types",
-  "version": "0.5.0",
+  "version": "0.5.1-rc1",
   "description": "Types for Flightctl UI",
   "repository": "https://github.com/flightctl/flightctl-ui.git",
   "homepage": "https://github.com/flightctl/flightctl-ui.git",
