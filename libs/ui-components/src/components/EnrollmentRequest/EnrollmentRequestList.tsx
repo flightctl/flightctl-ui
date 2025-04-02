@@ -42,9 +42,13 @@ const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
   },
 ];
 
-type EnrollmentRequestListProps = { refetchDevices?: VoidFunction; isStandalone?: boolean };
+type EnrollmentRequestListProps = {
+  refetchDevices?: VoidFunction;
+  onEmptyListChanged?: (isEmpty: boolean) => void;
+  isStandalone?: boolean;
+};
 
-const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentRequestListProps) => {
+const EnrollmentRequestList = ({ onEmptyListChanged, refetchDevices, isStandalone }: EnrollmentRequestListProps) => {
   const { t } = useTranslation();
   const [canApprove] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST_APPROVAL, VERB.POST);
   const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
@@ -82,6 +86,12 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
     }
   }, [itemCount, search, isLoading]);
 
+  React.useEffect(() => {
+    if (onEmptyListChanged && !search && !isLoading) {
+      onEmptyListChanged?.(itemCount === 0);
+    }
+  }, [search, itemCount, isLoading, onEmptyListChanged]);
+
   // In non-standalone mode, hide the entire component when the search result is empty (and not due to filtering)
   if (!isStandalone && isLastUnfilteredListEmpty) {
     return null;
@@ -113,7 +123,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
           loading={!!isStandalone && isLoading && isLastUnfilteredListEmpty}
           columns={enrollmentColumns}
           emptyFilters={!search}
-          emptyData={isLastUnfilteredListEmpty}
+          emptyData={itemCount === 0}
           isAllSelected={isAllSelected}
           onSelectAll={setAllSelected}
         >
@@ -136,7 +146,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
           </Tbody>
         </Table>
         <TablePagination pagination={pagination} isUpdating={isLoading} />
-        {isStandalone && pendingEnrollments.length === 0 && !isLoading && <EnrollmentRequestEmptyState />}
+        {isStandalone && itemCount === 0 && !isLoading && <EnrollmentRequestEmptyState />}
         {deleteModal}
         {currentEnrollmentRequest && (
           <ApproveDeviceModal

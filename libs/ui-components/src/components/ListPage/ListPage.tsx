@@ -7,9 +7,10 @@ type ListPageProps = {
   title: string;
   headingLevel?: TitleProps['headingLevel'];
   children: React.ReactNode;
+  excludeBadge?: boolean;
 };
 
-const ListPage: React.FC<ListPageProps> = ({ title, headingLevel = 'h1', children }) => {
+const ListPage: React.FC<ListPageProps> = ({ title, headingLevel = 'h1', excludeBadge, children }) => {
   return (
     <PageSection variant={PageSectionVariants.light}>
       <Flex gap={{ default: 'gapMd' }} alignItems={{ default: 'alignItemsCenter' }}>
@@ -18,9 +19,11 @@ const ListPage: React.FC<ListPageProps> = ({ title, headingLevel = 'h1', childre
             {title}
           </Title>
         </FlexItem>
-        <FlexItem>
-          <TechPreviewBadge />
-        </FlexItem>
+        {!excludeBadge && (
+          <FlexItem>
+            <TechPreviewBadge />
+          </FlexItem>
+        )}
       </Flex>
       {children}
     </PageSection>
