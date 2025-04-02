@@ -1,6 +1,6 @@
 {
   "name": "@flightctl/i18n",
-  "version": "0.5.1-rc1",
+  "version": "0.5.1",
   "description": "I18n for Flightctl UI",
   "repository": "https://github.com/flightctl/flightctl-ui.git",
   "homepage": "https://github.com/flightctl/flightctl-ui.git",
