@@ -80,19 +80,19 @@ const StatusCard = () => {
   return (
     <Card>
       <CardHeader>
-        <Flex alignItems={{ default: 'alignItemsCenter' }}>
-          <FlexItem>
+        <Stack hasGutter>
+          <StackItem>
             <CardTitle>{t('Status')}</CardTitle>
-          </FlexItem>
-          <FlexItem>
+          </StackItem>
+          <StackItem>
             <StatusCardFilters
               selectedFleets={fleets}
               setSelectedFleets={setFleets}
               selectedLabels={labels}
               setSelectedLabels={setLabels}
             />
-          </FlexItem>
-        </Flex>
+          </StackItem>
+        </Stack>
       </CardHeader>
 
       <CardBody>{content}</CardBody>
