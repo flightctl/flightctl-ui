@@ -52,7 +52,6 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const [search, setSearch] = React.useState<string>('');
 
   const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
-
   const [pendingEnrollments, isLoading, error, refetch, pagination] = usePendingEnrollments(search);
   const itemCount = pendingEnrollments.length;
 
