@@ -50,10 +50,12 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
   const { remove } = useFetch();
   const [search, setSearch] = React.useState<string>('');
+  const [isLastUnfilteredListEmpty, setIsLastUnfilteredListEmpty] = React.useState<boolean>(false);
 
   const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
 
   const [pendingEnrollments, isLoading, error, refetch, pagination] = usePendingEnrollments(search);
+  const itemCount = pendingEnrollments.length;
 
   const refetchWithDevices = () => {
     refetch();
@@ -74,8 +76,14 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
     },
   });
 
-  // In non-standalone mode, hide the entire component when there are no pending enrollments
-  if (!isStandalone && pendingEnrollments.length === 0) {
+  React.useEffect(() => {
+    if (!search && !isLoading) {
+      setIsLastUnfilteredListEmpty(itemCount === 0);
+    }
+  }, [itemCount, search, isLoading]);
+
+  // In non-standalone mode, hide the entire component when the search result is empty (and not due to filtering)
+  if (!isStandalone && isLastUnfilteredListEmpty) {
     return null;
   }
 
@@ -102,10 +110,10 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
         </EnrollmentRequestTableToolbar>
         <Table
           aria-label={t('Table for devices pending approval')}
-          loading={!!isStandalone && isLoading && pendingEnrollments.length === 0}
+          loading={!!isStandalone && isLoading && isLastUnfilteredListEmpty}
           columns={enrollmentColumns}
-          emptyFilters={pendingEnrollments.length === 0}
-          emptyData={false}
+          emptyFilters={!search}
+          emptyData={isLastUnfilteredListEmpty}
           isAllSelected={isAllSelected}
           onSelectAll={setAllSelected}
         >
