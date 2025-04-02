@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Grid, GridItem } from '@patternfly/react-core';
 import StatusCard from './Cards/Status/StatusCard';
-import ToDoCard from './Cards/ToDo/ToDoCard';
+import TasksCard from './Cards/Tasks/TasksCard';
 import { useAccessReview } from '../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../types/rbac';
 import PageWithPermissions from '../common/PageWithPermissions';
@@ -20,7 +20,7 @@ const Overview = () => {
         )}
         {canListErs && (
           <GridItem md={6} lg={4}>
-            <ToDoCard />
+            <TasksCard />
           </GridItem>
         )}
       </Grid>
