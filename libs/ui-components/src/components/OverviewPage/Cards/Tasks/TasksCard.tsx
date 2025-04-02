@@ -18,7 +18,7 @@ import { usePendingEnrollmentRequestsCount } from '../../../../hooks/usePendingE
 import { Link, ROUTE } from '../../../../hooks/useNavigate';
 import ErrorAlert from '../../../ErrorAlert/ErrorAlert';
 
-const ToDoCard = () => {
+const TasksCard = () => {
   const { t } = useTranslation();
 
   const [pendingErCount, loading, error] = usePendingEnrollmentRequestsCount();
@@ -59,10 +59,10 @@ const ToDoCard = () => {
 
   return (
     <Card>
-      <CardTitle>{t('To do')}</CardTitle>
+      <CardTitle>{t('Tasks')}</CardTitle>
       <CardBody>{content}</CardBody>
     </Card>
   );
 };
 
-export default ToDoCard;
+export default TasksCard;
