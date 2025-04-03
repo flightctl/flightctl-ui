@@ -65,14 +65,11 @@ const DeleteFleetModal = ({ fleetId, onClose }: { fleetId: string; onClose: (has
       <Stack hasGutter>
         <StackItem>
           <Trans t={t}>
-            Are you sure you want to delete fleet <strong>{fleetId}</strong>?
+            Your fleet <strong>{fleetId}</strong> will be deleted permanently. Devices bound to this fleet may join
+            another fleet with matching labels. If there are no matches, the device will remain unlinked from any fleet.
           </Trans>
         </StackItem>
-        <StackItem>
-          {t(
-            'Devices bound to this fleet may join another fleet matching their labels, otherwise they will remain unlinked from any fleet.',
-          )}
-        </StackItem>
+        <StackItem>{t('Are you sure you want to delete?')}</StackItem>
         {error && (
           <StackItem>
             <Alert isInline variant="danger" title={t('An error occurred')}>
