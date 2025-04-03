@@ -109,8 +109,9 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
           aria-label={t('Table for devices pending approval')}
           loading={!!isStandalone && isLoading && pendingEnrollments.length === 0}
           columns={enrollmentColumns}
-          emptyFilters={filteredData.length === 0}
-          emptyData={false}
+          hasFilters={!!search}
+          emptyData={filteredData.length === 0}
+          clearFilters={() => setSearch('')}
           isAllSelected={isAllSelected}
           onSelectAll={setAllSelected}
         >

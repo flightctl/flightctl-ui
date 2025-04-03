@@ -244,8 +244,9 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
         columns={columns}
-        emptyFilters={filteredData.length === 0}
-        emptyData={resourceSyncs.length === 0}
+        hasFilters={!!search}
+        emptyData={filteredData.length === 0}
+        clearFilters={() => setSearch('')}
       >
         <Tbody>
           {filteredData.map((resourceSync, rowIndex) => {
