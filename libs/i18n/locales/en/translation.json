@@ -291,6 +291,7 @@
   "Edit fleet": "Edit fleet",
   "Create fleet": "Create fleet",
   "Failed to determine the number of selected devices": "Failed to determine the number of selected devices",
+  "{{ count }} devices matching the labels were selected._zero": "There are no devices matching these labels.",
   "{{ count }} devices matching the labels were selected._one": "{{ count }} device matching the labels was selected.",
   "{{ count }} devices matching the labels were selected._other": "{{ count }} devices matching the labels were selected.",
   "Add labels to select devices to be included in this fleet.": "Add labels to select devices to be included in this fleet.",
