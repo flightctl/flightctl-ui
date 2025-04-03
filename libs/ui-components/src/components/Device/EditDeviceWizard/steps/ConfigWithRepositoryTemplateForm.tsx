@@ -67,7 +67,7 @@ const GitConfigForm = ({ template, index }: { template: GitConfigTemplate; index
       </FormGroup>
       <FormGroupWithHelperText
         label={t('Path')}
-        content={t('Path in the repository where the configuration file(s) are located')}
+        content={t('Path in the repository where the configuration files are located.')}
         isRequired
       >
         <TextField
@@ -79,7 +79,7 @@ const GitConfigForm = ({ template, index }: { template: GitConfigTemplate; index
       </FormGroupWithHelperText>
       <FormGroupWithHelperText
         label={t('Mount path')}
-        content={t('Path in the device where the configurations will be stored')}
+        content={t('Path in the device where the configurations will be stored.')}
         isRequired
       >
         <TextField

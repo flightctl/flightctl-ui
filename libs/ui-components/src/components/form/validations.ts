@@ -71,7 +71,7 @@ export const getLabelValueValidations = (t: TFunction) => [
   },
   {
     key: 'labelValueMaxLength',
-    message: t('1-{{ maxCharacters }} characters', { maxCharacters: K8S_LABEL_VALUE_MAX_LENGTH }),
+    message: t('1-{{ maxCharacters }} characters.', { maxCharacters: K8S_LABEL_VALUE_MAX_LENGTH }),
   },
 ];
 
@@ -83,7 +83,7 @@ export const getDnsSubdomainValidations = (t: TFunction) => [
   },
   {
     key: 'dnsSubdomainMaxLength',
-    message: t('1-{{ maxCharacters }} characters', { maxCharacters: K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH }),
+    message: t('1-{{ maxCharacters }} characters.', { maxCharacters: K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH }),
   },
 ];
 
