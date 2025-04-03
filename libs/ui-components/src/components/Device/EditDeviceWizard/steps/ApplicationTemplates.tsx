@@ -42,9 +42,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
         </FormGroupWithHelperText>
         <FormGroupWithHelperText
           label={t('Application name')}
-          content={t(
-            'The image name will be used instead of when application name is not specified. Application name must be unique.',
-          )}
+          content={t('If not specified, the image name will be used. Application name must be unique.')}
         >
           <TextField aria-label={t('Application name')} name={`applications.${index}.name`} value={app.name} />
         </FormGroupWithHelperText>
