@@ -110,6 +110,19 @@ const EnrolledDevicesTable = ({
   const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
   const [canDecommission] = useAccessReview(RESOURCE.DEVICE_DECOMMISSION, VERB.UPDATE);
 
+  const clearAllFilters = () => {
+    if (hasFiltersEnabled) {
+      setActiveStatuses({
+        [FilterSearchParams.AppStatus]: [],
+        [FilterSearchParams.DeviceStatus]: [],
+        [FilterSearchParams.UpdatedStatus]: [],
+      });
+      setOwnerFleets([]);
+      setNameOrAlias('');
+      setSelectedLabels([]);
+    }
+  };
+
   return (
     <>
       <DeviceTableToolbar
@@ -145,16 +158,7 @@ const EnrolledDevicesTable = ({
             label={t('Show only decommissioned devices')}
             isChecked={false}
             onChange={() => {
-              if (hasFiltersEnabled) {
-                setActiveStatuses({
-                  [FilterSearchParams.AppStatus]: [],
-                  [FilterSearchParams.DeviceStatus]: [],
-                  [FilterSearchParams.UpdatedStatus]: [],
-                });
-                setOwnerFleets([]);
-                setNameOrAlias('');
-                setSelectedLabels([]);
-              }
+              clearAllFilters();
               setOnlyDecommissioned(true);
             }}
             ouiaId={t('Show only decommissioned devices')}
@@ -165,7 +169,8 @@ const EnrolledDevicesTable = ({
         aria-label={t('Enrolled devices table')}
         loading={isFilterUpdating}
         columns={deviceColumns}
-        emptyFilters={!hasFiltersEnabled}
+        hasFilters={hasFiltersEnabled}
+        clearFilters={clearAllFilters}
         emptyData={devices.length === 0}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
