@@ -115,7 +115,8 @@ const DecommissionedDevicesTable = ({
         aria-label={t('Devices table')}
         loading={isFilterUpdating}
         columns={deviceColumns}
-        emptyFilters={!hasFiltersEnabled}
+        hasFilters={hasFiltersEnabled}
+        clearFilters={() => setNameOrAlias('')}
         emptyData={devices.length === 0}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
