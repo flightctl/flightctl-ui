@@ -1,10 +1,10 @@
 import React from 'react';
-import { Flex, FlexItem, Label, Stack, StackItem } from '@patternfly/react-core';
+import { Stack, StackItem } from '@patternfly/react-core';
 
-import { ApplicationFormSpec } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
+import { AppForm, getAppIdentifier, isInlineAppForm } from '../../../../types/deviceSpec';
 
-const ReviewApplications = ({ apps }: { apps: ApplicationFormSpec[] }) => {
+const ReviewApplications = ({ apps }: { apps: AppForm[] }) => {
   const { t } = useTranslation();
   if (apps.length === 0) {
     return '-';
@@ -12,22 +12,21 @@ const ReviewApplications = ({ apps }: { apps: ApplicationFormSpec[] }) => {
 
   return (
     <Stack hasGutter>
-      {apps.map((app, index) => (
-        <StackItem key={`${app.image}_${index}`}>
-          <Flex>
-            <FlexItem>
-              {app.name || t('Unnamed')} ({app.image})
-            </FlexItem>
-            {app.variables.map((variable, index) => (
-              <FlexItem key={`var-${variable.name}_${index}`}>
-                <Label color="blue">
-                  {variable.name}={variable.value}
-                </Label>
-              </FlexItem>
-            ))}
-          </Flex>
-        </StackItem>
-      ))}
+      {apps.map((app, index) => {
+        const isInlineApp = isInlineAppForm(app);
+        const type = isInlineApp ? t('Inline') : t('Image based');
+        let name: string = '';
+        if (isInlineApp || app.name) {
+          name = app.name as string;
+        } else if (app.image) {
+          name = `${t('Unnamed')} (${app.image})`;
+        }
+        return (
+          <StackItem key={`${getAppIdentifier(app)}_${index}`}>
+            {name} ({type})
+          </StackItem>
+        );
+      })}
     </Stack>
   );
 };

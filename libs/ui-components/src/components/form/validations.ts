@@ -4,20 +4,25 @@ import countBy from 'lodash/countBy';
 
 import { FlightCtlLabel } from '../../types/extraTypes';
 import {
-  ApplicationFormSpec,
+  AppForm,
+  AppSpecType,
   BatchForm,
   BatchLimitType,
   DisruptionBudgetForm,
   GitConfigTemplate,
   HttpConfigTemplate,
+  ImageAppForm,
+  InlineAppForm,
   InlineConfigTemplate,
   KubeSecretTemplate,
   RolloutPolicyForm,
   SpecConfigTemplate,
   SystemdUnitFormValue,
   UpdatePolicyForm,
+  getAppIdentifier,
   isGitConfigTemplate,
   isHttpConfigTemplate,
+  isInlineAppForm,
   isInlineConfigTemplate,
   isKubeSecretTemplate,
 } from '../../types/deviceSpec';
@@ -40,6 +45,8 @@ const K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH = 253;
 // https://issues.redhat.com/browse/MGMT-18349 to make the validation more robust
 const BASIC_DEVICE_OS_IMAGE_REGEXP = /^[a-zA-Z0-9.\-\/:@_+]*$/;
 const APPLICATION_IMAGE_REGEXP = BASIC_DEVICE_OS_IMAGE_REGEXP;
+const APPLICATION_NAME_REGEXP = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
+const APPLICATION_VAR_NAME_REGEXP = /^[a-zA-Z_]+[a-zA-Z0-9_]*$/;
 
 const TEMPLATE_VARIABLES_REGEXP = /{{.+?}}/g;
 // Special characters allowed: "dot", "pipe", "spaces" "quote", "backward slash", "underscore", "forward slash", "dash"
@@ -47,7 +54,12 @@ const TEMPLATE_VARIABLES_CONTENT_REGEXP = /^([.a-zA-Z0-9|\s"\\_\/-])+$/;
 const TIME_VALUE_REGEXP = /^([01][0-9]|2[0-3]):([0-5][0-9])$/;
 
 const absolutePathRegex = /^\/.*$/;
+
+// Accepts only relative paths. Rejects paths that start with "/", have multiple "/", or use dots (./file, ../parent/file), etc
+const relativePathRegex = /^(?!\.\.\/|\.\.\$|\.\/)(\.\/)*[\w.-]+(?:\/[\w.-]+)*\/?$/;
+
 export const MAX_TARGET_REVISION_LENGTH = 244;
+const MAX_FILE_PATH_LENGTH = 253;
 
 const isInteger = (val: number | undefined) => val === undefined || Number.isInteger(val);
 
@@ -272,34 +284,105 @@ export const validGroupLabelKeysSchema = (t: TFunction) =>
       return uniqueKeys.size === labelKeys?.length;
     });
 
-export const validApplicationsSchema = (t: TFunction) => {
+const appVariablesSchema = (t: TFunction) => {
   return Yup.array()
     .of(
       Yup.object().shape({
-        name: Yup.string(),
-        image: Yup.string()
-          .required(t('Image is required.'))
-          .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
-        variables: Yup.array()
-          .of(
-            Yup.object().shape({
-              name: Yup.string().required(t('Variable name is required.')),
-              value: Yup.string().required(t('Variable value is required.')),
-            }),
-          )
-          .required(),
+        name: Yup.string()
+          .required(t('Variable name is required.'))
+          .matches(APPLICATION_VAR_NAME_REGEXP, t('Use alphanumeric characters, or underscore (_)')),
+        value: Yup.string().required(t('Variable value is required.')),
       }),
     )
-    .test('unique-app-ids', (apps: ApplicationFormSpec[] | undefined, testContext) => {
+    .required()
+    .test('unique-vars-names', t('Variable names of an application must be unique'), (vars) => {
+      const uniqueKeys = new Set(vars.map((varItem) => varItem.name));
+      return uniqueKeys.size === vars?.length;
+    });
+};
+
+const appSpecTypeSchema = (t: TFunction) =>
+  Yup.string().oneOf([AppSpecType.INLINE, AppSpecType.OCI_IMAGE]).required(t('Application type is required'));
+
+export const validApplicationsSchema = (t: TFunction) => {
+  return Yup.array()
+    .of(
+      Yup.lazy((value: AppForm) => {
+        if (isInlineAppForm(value)) {
+          return Yup.object<InlineAppForm>().shape({
+            specType: appSpecTypeSchema(t),
+            name: Yup.string()
+              .required(t('Name is required for inline applications.'))
+              .matches(
+                APPLICATION_NAME_REGEXP,
+                t(
+                  'Use lowercase alphanumeric characters, or dash (-). Must start and end with an alphanumeric character.',
+                ),
+              ),
+            files: Yup.array()
+              .of(
+                Yup.object().shape({
+                  content: Yup.string(),
+                  path: Yup.string()
+                    .required(t('File path is required'))
+                    .max(
+                      MAX_FILE_PATH_LENGTH,
+                      t('File path length cannot exceed {{ maxCharacters }} characters.', {
+                        maxCharacters: MAX_FILE_PATH_LENGTH,
+                      }),
+                    )
+                    .matches(
+                      relativePathRegex,
+                      t('Application file path must be relative. It cannot be outside the application directory.'),
+                    ),
+                }),
+              )
+              .required()
+              .min(1, t('Inline applications must include at least one file.'))
+              .test('unique-file-paths', (files: InlineAppForm['files'], testContext) => {
+                const duplicateFilePaths = Object.entries(countBy(files.map((file) => file.path)))
+                  .filter(([, count]) => {
+                    return count > 1;
+                  })
+                  .map(([filePath]) => filePath);
+
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                const duplicateIndex = ((testContext.parent.files || []) as InlineAppForm['files']).findIndex((file) =>
+                  duplicateFilePaths.includes(file.path),
+                );
+                if (duplicateIndex === -1) {
+                  return true;
+                }
+
+                return testContext.createError({
+                  path: `${testContext.path}[${duplicateIndex}].path`,
+                  message: () => t('Each file of the same application must use different paths.'),
+                });
+              }),
+            variables: appVariablesSchema(t),
+          });
+        }
+
+        // Image applications
+        return Yup.object<ImageAppForm>().shape({
+          specType: appSpecTypeSchema(t),
+          name: Yup.string().matches(
+            APPLICATION_NAME_REGEXP,
+            t('Use lowercase alphanumeric characters, or dash (-). Must start and end with an alphanumeric character.'),
+          ),
+          image: Yup.string()
+            .required(t('Image is required.'))
+            .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
+          variables: appVariablesSchema(t),
+        });
+      }),
+    )
+    .test('unique-app-ids', (apps: AppForm[] | undefined, testContext) => {
       if (!apps?.length) {
         return true;
       }
 
-      // App name is optional, in which case the ID is the app image.
-      // Apps should have different names or images
-      const getAppId = (app: ApplicationFormSpec) => app.name || app.image;
-
-      const appIds = apps.map(getAppId);
+      const appIds = apps.map(getAppIdentifier);
       const duplicateIds = Object.entries(countBy(appIds))
         .filter(([, count]) => {
           return count > 1;
@@ -310,7 +393,7 @@ export const validApplicationsSchema = (t: TFunction) => {
       }
 
       const errors = apps.reduce((errors, app, appIndex) => {
-        if (duplicateIds.includes(getAppId(app))) {
+        if (duplicateIds.includes(appIds[appIndex])) {
           const error = app.name
             ? new Yup.ValidationError(t('Application name must be unique.'), '', `applications[${appIndex}].name`)
             : new Yup.ValidationError(
