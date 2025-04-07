@@ -23,13 +23,7 @@ export const useFetch = () => {
     [],
   );
 
-  const getWsEndpoint = React.useCallback((deviceId: string) => {
-    const protocols = ['flightctl.standalone.auth'];
-    return {
-      wsEndpoint: `${wsEndpoint}/api/terminal/${deviceId}`,
-      protocols,
-    };
-  }, []);
+  const getWsEndpoint = React.useCallback((deviceId: string) => `${wsEndpoint}/api/terminal/${deviceId}`, []);
 
   const checkPermissions = React.useCallback(() => Promise.resolve(true), []);
 

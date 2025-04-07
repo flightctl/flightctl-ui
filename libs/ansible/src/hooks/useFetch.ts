@@ -46,10 +46,7 @@ export const useFetch = (getCookie: (name: string) => string | undefined, servic
   );
 
   const getWsEndpoint = React.useCallback(
-    (deviceId: string) => ({
-      wsEndpoint: `${serviceUrl}/ws/v1/devices/${deviceId}/console`,
-      protocols: [],
-    }),
+    (deviceId: string) => `${serviceUrl}/ws/v1/devices/${deviceId}/console`,
     [serviceUrl],
   );
 
