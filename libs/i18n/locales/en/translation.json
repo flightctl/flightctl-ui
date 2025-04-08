@@ -690,5 +690,6 @@
   "Not accessible": "Not accessible",
   "Out-of-date": "Out-of-date",
   "Updating": "Updating",
-  "Up-to-date": "Up-to-date"
+  "Up-to-date": "Up-to-date",
+  "{{ count }} devices matching the labels were selected._zero": "There are no devices matching these labels."
 }
