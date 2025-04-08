@@ -479,7 +479,6 @@
   "Secret namespace is required.": "Secret namespace is required.",
   "File path must be absolute.": "File path must be absolute.",
   "File path must be unique.": "File path must be unique.",
-  "Permissions are required": "Permissions are required",
   "Permissions must use octal notation": "Permissions must use octal notation",
   "The maximum number of systemd units is {{maxSystemUnits}}.": "The maximum number of systemd units is {{maxSystemUnits}}.",
   "Invalid systemd service names: {{invalidPatterns}}": "Invalid systemd service names: {{invalidPatterns}}",
