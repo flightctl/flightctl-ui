@@ -536,7 +536,7 @@
   "Review pending devices_one": "Review pending device",
   "Review pending devices_other": "Review pending devices",
   "All good!": "All good!",
-  "To do": "To do",
+  "Tasks": "Tasks",
   "Failed to retrieve repository details": "Failed to retrieve repository details",
   "Failed to retrieve the resource syncs": "Failed to retrieve the resource syncs",
   "The repository cannot be modified at the moment because some of its details could not be obtained.": "The repository cannot be modified at the moment because some of its details could not be obtained.",
