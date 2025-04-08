@@ -9,7 +9,7 @@ const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
   const { t } = useTranslation();
 
   return (
-    <Modal variant="medium" title={t('Add devices')} onClose={onClose} isOpen>
+    <Modal variant="small" title={t('Add devices')} onClose={onClose} isOpen>
       <Stack hasGutter>
         <StackItem>{t('You can add devices following these steps:')}</StackItem>
         <StackItem>
