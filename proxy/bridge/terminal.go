@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
@@ -79,8 +78,9 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Infof("Starting terminal session for device: %s", deviceId)
+
 	wsApi, _ := strings.CutPrefix(config.FctlApiUrl, "https://")
-	consoleUrl := fmt.Sprintf("wss://%s/ws/v1/devices/%s/console", wsApi, deviceId)
+	consoleUrl := fmt.Sprintf("wss://%s/ws/v1/devices/%s/console?%s", wsApi, deviceId, r.URL.RawQuery)
 
 	dialer := &websocket.Dialer{
 		TLSClientConfig: t.TlsConfig,
@@ -113,7 +113,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 	defer backend.Close()
 
 	upgrader := &websocket.Upgrader{
-		Subprotocols: []string{common.WsStandaloneSubprotocol, common.WsOcpSubprotocol},
+		Subprotocols: websocket.Subprotocols(r),
 		CheckOrigin:  func(r *http.Request) bool { return true },
 	}
 

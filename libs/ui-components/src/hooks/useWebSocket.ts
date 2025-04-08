@@ -2,11 +2,26 @@ import * as React from 'react';
 import { useTranslation } from './useTranslation';
 import { useAppContext } from './useAppContext';
 
+const msgToBytes = (msg: string, resize?: boolean) => {
+  const encoder = new TextEncoder();
+  const encodedData = encoder.encode(msg);
+  const result = new Uint8Array(encodedData.length + 1);
+  result[0] = resize ? 0x4 : 0x00;
+  result.set(encodedData, 1);
+  return result;
+};
+
+export type WsMetadata = {
+  tty: boolean;
+  term: string;
+};
+
 export const useWebSocket = <T>(
   deviceId: string,
   onMsgReceived: (msg: T) => Promise<void>,
+  wsMetadata: WsMetadata,
 ): {
-  sendMessage: (msg: string) => void;
+  sendMessage: (msg: string, resize?: boolean) => void;
   isConnecting: boolean;
   isClosed: boolean;
   error: unknown;
@@ -22,18 +37,25 @@ export const useWebSocket = <T>(
   const [error, setError] = React.useState<unknown>();
   const [reset, setReset] = React.useState<number>(0);
 
-  const sendMessage = React.useCallback((data: string) => {
-    wsRef.current?.send(data);
+  const sendMessage = React.useCallback((data: string, resize?: boolean) => {
+    wsRef.current?.send(msgToBytes(data, resize));
   }, []);
 
   React.useEffect(() => {
     try {
       setIsConnecting(true);
       setIsClosed(false);
-      const { wsEndpoint, protocols } = getWsEndpoint(deviceId);
-      const ws = new WebSocket(wsEndpoint, protocols);
+      const wsEndpoint = getWsEndpoint(deviceId);
+      const wsMeta = JSON.stringify(wsMetadata);
+      const params = new URLSearchParams({
+        metadata: wsMeta,
+      });
+      const ws = new WebSocket(`${wsEndpoint}?${params.toString()}`, 'v5.channel.k8s.io');
       ws.addEventListener('open', () => setIsConnecting(false));
-      ws.addEventListener('close', () => setIsClosed(true));
+      ws.addEventListener('close', () => {
+        setIsClosed(true);
+        wsRef.current = undefined;
+      });
       ws.addEventListener('error', (evt) => {
         // eslint-disable-next-line no-console
         console.error('Error creating websocket:', evt);
@@ -48,7 +70,7 @@ export const useWebSocket = <T>(
       wsRef.current?.close();
       wsRef.current = undefined;
     };
-  }, [deviceId, t, getWsEndpoint, reset]);
+  }, [deviceId, t, getWsEndpoint, reset, wsMetadata]);
 
   const reconnect = React.useCallback(() => {
     wsRef.current?.close();

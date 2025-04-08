@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { Alert, AlertActionLink, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, AlertActionLink, Bullseye, Spinner, Stack, StackItem } from '@patternfly/react-core';
 import { Device } from '@flightctl/types';
 
-import { useWebSocket } from '../../../hooks/useWebSocket';
+import { WsMetadata, useWebSocket } from '../../../hooks/useWebSocket';
 import ErrorAlert from '../../ErrorAlert/ErrorAlert';
 import { useTranslation } from '../../../hooks/useTranslation';
 import Terminal, { ImperativeTerminalType } from '../../Terminal/Terminal';
@@ -14,16 +14,54 @@ type TerminalTabProps = {
   device: Device;
 };
 
+const wsMeta: WsMetadata = {
+  tty: true,
+  term: 'xterm-256color',
+};
+
 const TerminalTab = ({ device }: TerminalTabProps) => {
   const { t } = useTranslation();
   const terminal = React.useRef<ImperativeTerminalType>(null);
 
   const onMsgReceived = React.useCallback(async (message: Blob) => {
-    const msg = await message.text();
-    terminal.current?.onDataReceived(msg);
+    try {
+      const bytes = new Uint8Array(await message.arrayBuffer());
+      const msgType = bytes[0];
+      const decoder = new TextDecoder();
+      let str = decoder.decode(bytes.slice(1));
+
+      if (msgType === 3) {
+        try {
+          const err = JSON.parse(str) as { code: number; status: string };
+          if (err.status === 'Failure') {
+            str = `command terminated with non-zero exit code: exit status ${err.code}`;
+          } else {
+            return;
+          }
+        } catch {
+          // Nothing to do
+        }
+      }
+      terminal.current?.onDataReceived(str);
+    } catch (err) {
+      // eslint-disable-next-line
+      console.error(err);
+    }
   }, []);
 
-  const { sendMessage, isClosed, error, reconnect } = useWebSocket(device.metadata.name || '', onMsgReceived);
+  const { sendMessage, isClosed, error, reconnect, isConnecting } = useWebSocket(
+    device.metadata.name || '',
+    onMsgReceived,
+    wsMeta,
+  );
+
+  if (isConnecting) {
+    return (
+      <Bullseye>
+        <Spinner />
+      </Bullseye>
+    );
+  }
 
   if (error) {
     return <ErrorAlert error={error} />;

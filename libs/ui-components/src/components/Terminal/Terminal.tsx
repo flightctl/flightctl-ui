@@ -17,7 +17,7 @@ const terminalOptions: ITerminalOptions & ITerminalInitOnlyOptions = {
 };
 
 type TerminalProps = {
-  onData: (data: string) => void;
+  onData: (data: string, resize?: boolean) => void;
 };
 
 export type ImperativeTerminalType = {
@@ -41,7 +41,13 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
     term.focus();
 
     const resizeObserver: ResizeObserver = new ResizeObserver(() => {
-      window.requestAnimationFrame(() => fitAddon.fit());
+      window.requestAnimationFrame(() => {
+        fitAddon.fit();
+        if (terminal.current) {
+          const size = JSON.stringify({ Height: terminal.current?.rows, Width: terminal.current?.cols });
+          onData(size, true);
+        }
+      });
     });
 
     terminalRef.current && resizeObserver.observe(terminalRef.current);
@@ -55,11 +61,11 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
       term.dispose();
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [onData]);
 
   React.useEffect(() => {
     const term = terminal.current;
-    const data = term?.onData(onData);
+    const data = term?.onData((data) => onData(data, false));
     return () => {
       data?.dispose();
     };
