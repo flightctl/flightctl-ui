@@ -620,12 +620,17 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
                     (path) => !path || value.files.filter((file) => file.path === path).length == 1,
                   ),
                 content: Yup.string(),
-                permissions: Yup.string()
-                  .required(t('Permissions are required'))
-                  .test('permissions', t('Permissions must use octal notation'), (perm: string) => {
-                    const valNum = Number(`0o${perm || ''}`);
+                permissions: Yup.string().test(
+                  'permissions',
+                  t('Permissions must use octal notation'),
+                  (perm: string | undefined) => {
+                    if (!perm) {
+                      return true;
+                    }
+                    const valNum = Number(`0o${perm}`);
                     return Number.isFinite(valNum) && valNum >= 0 && valNum <= 0o7777;
-                  }),
+                  },
+                ),
               }),
             ),
           });
