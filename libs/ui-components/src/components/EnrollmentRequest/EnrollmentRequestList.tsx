@@ -50,7 +50,6 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
   const { remove } = useFetch();
   const [search, setSearch] = React.useState<string>('');
-  const [isLastUnfilteredListEmpty, setIsLastUnfilteredListEmpty] = React.useState<boolean>(false);
 
   const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
 
@@ -76,11 +75,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
     },
   });
 
-  React.useEffect(() => {
-    if (!search && !isLoading) {
-      setIsLastUnfilteredListEmpty(itemCount === 0);
-    }
-  }, [itemCount, search, isLoading]);
+  const isLastUnfilteredListEmpty = !search && !isLoading && itemCount === 0;
 
   // In non-standalone mode, hide the entire component when the search result is empty (and not due to filtering)
   if (!isStandalone && isLastUnfilteredListEmpty) {
@@ -136,7 +131,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
           </Tbody>
         </Table>
         <TablePagination pagination={pagination} isUpdating={isLoading} />
-        {isStandalone && pendingEnrollments.length === 0 && !isLoading && <EnrollmentRequestEmptyState />}
+        {isStandalone && itemCount === 0 && !isLoading && <EnrollmentRequestEmptyState />}
         {deleteModal}
         {currentEnrollmentRequest && (
           <ApproveDeviceModal
