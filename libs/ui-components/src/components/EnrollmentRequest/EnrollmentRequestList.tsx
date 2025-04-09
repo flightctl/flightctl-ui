@@ -4,7 +4,7 @@ import { Tbody } from '@patternfly/react-table';
 import { SelectList, SelectOption, ToolbarItem } from '@patternfly/react-core';
 import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons';
 
-import { EnrollmentRequest, EnrollmentRequestList } from '@flightctl/types';
+import { EnrollmentRequestList } from '@flightctl/types';
 
 import Table, { ApiSortTableColumn } from '../Table/Table';
 import TableActions from '../Table/TableActions';
@@ -14,7 +14,6 @@ import { useDeleteListAction } from '../ListPage/ListPageActions';
 import { useFetch } from '../../hooks/useFetch';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useTableSelect } from '../../hooks/useTableSelect';
-import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import ApproveDeviceModal from '../modals/ApproveDeviceModal/ApproveDeviceModal';
 import MassDeleteDeviceModal from '../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
 import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/MassApproveDeviceModal';
@@ -43,11 +42,6 @@ const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
   },
 ];
 
-const getSearchText = (er: EnrollmentRequest) => {
-  const alias = er.spec.labels?.alias;
-  return alias ? [er.metadata.name, alias] : [er.metadata.name];
-};
-
 type EnrollmentRequestListProps = { refetchDevices?: VoidFunction; isStandalone?: boolean };
 
 const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentRequestListProps) => {
@@ -55,8 +49,12 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const [canApprove] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST_APPROVAL, VERB.POST);
   const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
   const { remove } = useFetch();
+  const [search, setSearch] = React.useState<string>('');
+
   const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
-  const [pendingEnrollments, isLoading, error, refetch, pagination] = usePendingEnrollments();
+
+  const [pendingEnrollments, isLoading, error, refetch, pagination] = usePendingEnrollments(search);
+  const itemCount = pendingEnrollments.length;
 
   const refetchWithDevices = () => {
     refetch();
@@ -66,8 +64,6 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const [approvingErId, setApprovingErId] = React.useState<string>();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
   const [isMassApproveModalOpen, setIsMassApproveModalOpen] = React.useState(false);
-
-  const { search, setSearch, filteredData } = useTableTextSearch(pendingEnrollments, getSearchText);
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
@@ -79,8 +75,10 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
     },
   });
 
-  // In non-standalone mode, hide the entire component when there are no pending enrollments
-  if (!isStandalone && pendingEnrollments.length === 0) {
+  const isLastUnfilteredListEmpty = !search && !isLoading && itemCount === 0;
+
+  // In non-standalone mode, hide the entire component when the search result is empty (and not due to filtering)
+  if (!isStandalone && isLastUnfilteredListEmpty) {
     return null;
   }
 
@@ -107,15 +105,15 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
         </EnrollmentRequestTableToolbar>
         <Table
           aria-label={t('Table for devices pending approval')}
-          loading={!!isStandalone && isLoading && pendingEnrollments.length === 0}
+          loading={!!isStandalone && isLoading && isLastUnfilteredListEmpty}
           columns={enrollmentColumns}
-          emptyFilters={filteredData.length === 0}
-          emptyData={false}
+          emptyFilters={!search}
+          emptyData={isLastUnfilteredListEmpty}
           isAllSelected={isAllSelected}
           onSelectAll={setAllSelected}
         >
           <Tbody>
-            {filteredData.map((er, index) => (
+            {pendingEnrollments.map((er, index) => (
               <EnrollmentRequestTableRow
                 key={er.metadata.name || ''}
                 er={er}
@@ -133,7 +131,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
           </Tbody>
         </Table>
         <TablePagination pagination={pagination} isUpdating={isLoading} />
-        {isStandalone && pendingEnrollments.length === 0 && !isLoading && <EnrollmentRequestEmptyState />}
+        {isStandalone && itemCount === 0 && !isLoading && <EnrollmentRequestEmptyState />}
         {deleteModal}
         {currentEnrollmentRequest && (
           <ApproveDeviceModal
@@ -147,7 +145,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
         {isMassDeleteModalOpen && (
           <MassDeleteDeviceModal
             onClose={() => setIsMassDeleteModalOpen(false)}
-            resources={filteredData.filter(isRowSelected)}
+            resources={pendingEnrollments.filter(isRowSelected)}
             onDeleteSuccess={() => {
               setIsMassDeleteModalOpen(false);
               refetch();
@@ -157,7 +155,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
         {isMassApproveModalOpen && (
           <MassApproveDeviceModal
             onClose={() => setIsMassApproveModalOpen(false)}
-            pendingEnrollments={filteredData.filter(isRowSelected)}
+            pendingEnrollments={pendingEnrollments.filter(isRowSelected)}
             onApproveSuccess={() => {
               setAllSelected(false);
               setIsMassApproveModalOpen(false);
