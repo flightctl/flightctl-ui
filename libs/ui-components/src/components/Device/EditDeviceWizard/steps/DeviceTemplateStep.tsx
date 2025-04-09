@@ -135,7 +135,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
             aria-label={t('System image')}
             value={values.osImage}
             helperText={t(
-              'Must be a reference to a bootable container image (e.g. "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). When left empty, the device\'s existing OS will be kept unchanged.',
+              'Must be a reference to a bootable container image (such as "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). If you do not want to manage your OS from Edge management, leave this field empty.',
             )}
           />
         </FormGroupWithHelperText>

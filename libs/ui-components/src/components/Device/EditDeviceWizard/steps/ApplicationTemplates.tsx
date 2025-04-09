@@ -84,9 +84,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
           content={
             app.specType === AppSpecType.INLINE
               ? t('The unique identifier for this application.')
-              : t(
-                  'The image will be used instead when application name is not specified. Application name must be unique.',
-                )
+              : t('If not specified, the image name will be used. Application name must be unique.')
           }
           isRequired={app.specType === AppSpecType.INLINE}
         >

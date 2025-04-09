@@ -35,7 +35,7 @@ export const CreateResourceSyncForm = ({ rs, index }: { rs: ResourceSyncFormValu
       <FormGroupWithHelperText
         label={t('Path')}
         content={t(
-          'The absolute path of a file or directory in the repository. If a directory, the directory should contain only resource definitions with no subdirectories.',
+          'The absolute path of a file or directory in the repository. Directories should only contain resource definition files and should not contain additional subdirectories.',
         )}
         isRequired
       >
