@@ -497,6 +497,7 @@
   "Red Hat Edge Manager": "Red Hat Edge Manager",
   "Flight Control": "Flight Control",
   "With the {{ productName }} command line interface, you can manage your fleets, devices and repositories from a terminal.": "With the {{ productName }} command line interface, you can manage your fleets, devices and repositories from a terminal.",
+  "Command line tools are not available for download in this {{ productName }} installation.": "Command line tools are not available for download in this {{ productName }} installation.",
   "System default": "System default",
   "Light": "Light",
   "Dark": "Dark",

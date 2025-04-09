@@ -20,83 +20,30 @@ import TechPreviewBadge from '../common/TechPreviewBadge';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
 import { getErrorMessage } from '../../utils/error';
-
-type CommandLineTool = {
-  os: string;
-  arch: string;
-  filename: string;
-  sha256: string;
-};
-type CommandLineToolResponse = {
-  baseUrl: string;
-  artifacts: CommandLineTool[];
-};
-
-const waitForResult = async <T,>(time: number, result: T): Promise<T> => {
-  return new Promise<T>((resolve) => {
-    setTimeout(() => {
-      resolve(result);
-    }, time);
-  });
-};
-
-const getCommandLineToolsResponse = async (): Promise<CommandLineToolResponse> => {
-  // TODO change for the real call to fetch the deployment links
-  return waitForResult(2000, {
-    baseUrl: 'http://example.com',
-    artifacts: [
-      {
-        os: 'linux',
-        arch: 'amd64',
-        filename: 'flightctl-linux-amd64.tar.gz',
-        sha256: '886bc29bd272aff6375001eca2ced917fc4c57fc1e5d7d401987887391d7fe37',
-      },
-      {
-        os: 'windows',
-        arch: 'amd64',
-        filename: 'flightctl-windows-amd64.zip',
-        sha256: '27caedd083727ff78f1b5ed2fd680993468131a00a1979f88b780741968be926',
-      },
-      {
-        os: 'mac',
-        arch: 'amd64',
-        filename: 'flightctl-darwin-amd64.zip',
-        sha256: '22df84460dc719a7a812a952698c5188f2cb8c1b4e6dfa8ed077a624b52d2d00',
-      },
-      {
-        os: 'windows',
-        arch: 'arm64',
-        filename: 'flightctl-windows-arm64.zip',
-        sha256: 'a22f27b8ab3c9eec78ec4122416f47ef4255d38eba7c5c177131bcc322f77267',
-      },
-      {
-        os: 'linux',
-        arch: 'arm64',
-        filename: 'flightctl-linux-arm64.tar.gz',
-        sha256: '142de4c8558edc89e4d5a57a006d062bab6b7120b2f9da2d006066b4e2f28462',
-      },
-      {
-        os: 'mac',
-        arch: 'arm64',
-        filename: 'flightctl-darwin-arm64.zip',
-        sha256: 'f9da63b888d996b84d96c9fe99be793313fe7dcadfa5575386ac830516fedbf7',
-      },
-    ],
-  } as CommandLineToolResponse);
-};
+import { CliArtifactsResponse } from '../../types/extraTypes';
 
 type CommandLineToolsContentProps = {
   productName: string;
   loading: boolean;
   loadError?: string;
-  cliToolsResponse?: CommandLineToolResponse;
+  artifactsResponse?: CliArtifactsResponse;
+};
+
+type CommandLineArtifact = CliArtifactsResponse['artifacts'][0];
+
+// "Not implemented" response from the UI Proxy when artifact functionality is disabled
+const cliArtifactsDisabledError = 'Error 501';
+
+const getArtifactUrl = (baseUrl: string, artifact: CommandLineArtifact) => {
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  return `${normalizedBaseUrl}/${artifact.arch}/${artifact.os}/${artifact.filename}`;
 };
 
 const CommandLineToolsContent = ({
   productName,
   loading,
   loadError,
-  cliToolsResponse,
+  artifactsResponse,
 }: CommandLineToolsContentProps) => {
   const { t } = useTranslation();
 
@@ -104,10 +51,10 @@ const CommandLineToolsContent = ({
     return <Spinner size="sm" />;
   }
 
-  const cliTools = cliToolsResponse?.artifacts || [];
-
   let errorMessage = loadError;
-  if (cliTools.length === 0) {
+
+  const cliArtifacts = artifactsResponse?.artifacts || [];
+  if (cliArtifacts.length === 0) {
     errorMessage = t('No {{ productName }} command line tools were found for this deployment at this time.', {
       productName,
     });
@@ -127,19 +74,25 @@ const CommandLineToolsContent = ({
 
   return (
     <List>
-      {cliTools.map((cliTool) => {
+      {cliArtifacts.map((cliArtifact) => {
+        const linkText = t('Download flightctl CLI for {{ os }} for {{ arch }}', {
+          os: cliArtifact.os,
+          arch: cliArtifact.arch,
+        });
         return (
-          <ListItem key={cliTool.sha256}>
+          <ListItem key={cliArtifact.filename}>
             <Button
               component="a"
               variant="link"
               isInline
-              href={`${cliToolsResponse?.baseUrl || ''}/${cliTool.filename}`}
+              href={getArtifactUrl(artifactsResponse?.baseUrl || '', cliArtifact)}
               target="_blank"
+              rel="noopener noreferrer"
               icon={<ExternalLinkAltIcon />}
               iconPosition="end"
+              aria-label={linkText}
             >
-              {t('Download flightctl CLI for {{ os }} for {{ arch }}', { os: cliTool.os, arch: cliTool.arch })}
+              {linkText}
             </Button>
           </ListItem>
         );
@@ -150,25 +103,33 @@ const CommandLineToolsContent = ({
 
 const CommandLineToolsPage = () => {
   const { t } = useTranslation();
-  const { settings } = useAppContext();
+  const { getCliArtifacts, settings } = useAppContext();
 
   const [loading, setLoading] = React.useState<boolean>(true);
   const [loadError, setLoadError] = React.useState<string>();
-  const [cliToolsResponse, setCliToolsResponse] = React.useState<CommandLineToolResponse>();
+  const [artifactsResponse, setCliArtifactsResponse] = React.useState<CliArtifactsResponse>();
+  const [hasArtifactsEnabled, setArtifactsEnabled] = React.useState<boolean>(true);
 
   React.useEffect(() => {
     const getLinks = async () => {
       try {
-        const toolsResponse = await getCommandLineToolsResponse();
-        setCliToolsResponse(toolsResponse);
+        if (getCliArtifacts) {
+          const apiResponse = await getCliArtifacts();
+          setCliArtifactsResponse(apiResponse);
+        }
       } catch (e) {
-        setLoadError(getErrorMessage(e));
+        const msg = getErrorMessage(e);
+        if (msg.includes(cliArtifactsDisabledError)) {
+          setArtifactsEnabled(false);
+        } else {
+          setLoadError(msg);
+        }
       } finally {
         setLoading(false);
       }
     };
     void getLinks();
-  }, []);
+  }, [getCliArtifacts]);
 
   const productName = settings.isRHEM ? t('Red Hat Edge Manager') : t('Flight Control');
 
@@ -194,14 +155,22 @@ const CommandLineToolsPage = () => {
             },
           )}
         </StackItem>
-        <StackItem>
-          <CommandLineToolsContent
-            productName={productName}
-            loading={loading}
-            loadError={loadError}
-            cliToolsResponse={cliToolsResponse}
-          />
-        </StackItem>
+        {hasArtifactsEnabled ? (
+          <StackItem>
+            <CommandLineToolsContent
+              productName={productName}
+              loading={loading}
+              loadError={loadError}
+              artifactsResponse={artifactsResponse}
+            />
+          </StackItem>
+        ) : (
+          <StackItem>
+            {t('Command line tools are not available for download in this {{ productName }} installation.', {
+              productName,
+            })}
+          </StackItem>
+        )}
       </Stack>
     </PageSection>
   );

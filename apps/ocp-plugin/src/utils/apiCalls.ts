@@ -7,7 +7,7 @@ import { getErrorMsgFromApiResponse } from '@flightctl/ui-components/src/utils/a
 declare global {
   interface Window {
     FCTL_API_PORT?: string;
-    isRHEM: boolean;
+    isRHEM?: boolean;
   }
 }
 

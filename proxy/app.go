@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"net/http"
+	"os"
 	"time"
 
 	gorillaHandlers "github.com/gorilla/handlers"
@@ -38,6 +39,13 @@ func main() {
 
 	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(tlsConfig))
 	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler())
+
+	_, cliArtifactsEnabled := os.LookupEnv("FLIGHTCTL_CLI_ARTIFACTS_SERVER")
+	if cliArtifactsEnabled {
+		apiRouter.Handle("/cli-artifacts", bridge.NewFlightCtlCliArtifactsHandler(tlsConfig))
+	} else {
+		apiRouter.HandleFunc("/cli-artifacts", bridge.UnimplementedHandler)
+	}
 
 	terminalBridge := bridge.TerminalBridge{TlsConfig: tlsConfig}
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)

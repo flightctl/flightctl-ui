@@ -139,7 +139,11 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
     // Route is only exposed for the standalone app
     path: '/command-line-tools',
     title: t('Command line tools'),
-    element: <CommandLineToolsPage />,
+    element: (
+      <TitledRoute title={t('Command line tools')}>
+        <CommandLineToolsPage />
+      </TitledRoute>
+    ),
   },
   {
     path: '/devicemanagement/enrollmentrequests/:enrollmentRequestId',
