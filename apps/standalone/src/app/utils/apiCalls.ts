@@ -7,6 +7,8 @@ const apiPort = window.API_PORT || window.location.port;
 const apiServer = `${window.location.hostname}${apiPort ? `:${apiPort}` : ''}`;
 
 const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
+export const flightCtlCliArtifactsUrl = `${window.location.protocol}//${apiServer}/api/cli-artifacts`;
+
 export const loginAPI = `${window.location.protocol}//${apiServer}/api/login`;
 const logoutAPI = `${window.location.protocol}//${apiServer}/api/logout`;
 const metricsAPI = `${window.location.protocol}//${apiServer}/api/metrics`;
@@ -60,6 +62,18 @@ export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSi
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making GET request:', error);
+    throw error;
+  }
+};
+
+export const fetchCliArtifacts = async <R>(abortSignal?: AbortSignal): Promise<R> => {
+  try {
+    const response = await fetch(flightCtlCliArtifactsUrl, {
+      signal: abortSignal,
+    });
+    return handleApiJSONResponse(response);
+  } catch (error) {
+    console.error('Error making GET Cli artifacts request:', error);
     throw error;
   }
 };

@@ -21,7 +21,6 @@ import { Prompt } from 'react-router-dom';
 import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/reducers';
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
-import { useMetrics } from '../../hooks/useMetrics';
 
 export const OCPPluginAppContext = AppContext.Provider;
 
@@ -47,7 +46,6 @@ const appRoutes = {
 
 export const useValuesAppContext = (): AppContextProps => {
   const fetch = useFetch();
-  const metrics = useMetrics();
   const userInfo = useSelector(getUser);
 
   return {
@@ -73,6 +71,5 @@ export const useValuesAppContext = (): AppContextProps => {
       transNamespace: 'plugin__flightctl-plugin',
     },
     fetch,
-    metrics,
   };
 };
