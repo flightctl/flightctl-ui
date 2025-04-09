@@ -1,8 +1,17 @@
 import * as React from 'react';
-import { Bullseye, PageSection, Spinner } from '@patternfly/react-core';
+import {
+  Button,
+  EmptyState,
+  EmptyStateActions,
+  EmptyStateBody,
+  EmptyStateHeader,
+  EmptyStateIcon,
+  Spinner,
+} from '@patternfly/react-core';
 import { Table as PFTable, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
 import { useTranslation } from '../../hooks/useTranslation';
 import LabelWithHelperText from '../common/WithHelperText';
+import { SearchIcon } from '@patternfly/react-icons/dist/js/icons';
 
 export type ApiSortTableColumn = {
   name: string;
@@ -28,8 +37,9 @@ type TableProps<D> = {
   columns: TableColumn<D>[];
   children: React.ReactNode;
   loading: boolean;
-  emptyFilters?: boolean;
+  hasFilters?: boolean;
   emptyData?: boolean;
+  clearFilters?: VoidFunction;
   'aria-label': string;
   // getSortParams: (columnIndex: number) => ThProps['sort'];
   onSelectAll?: (isSelected: boolean) => void;
@@ -42,20 +52,33 @@ const Table: TableFC = ({
   columns,
   children,
   loading,
-  emptyFilters,
+  hasFilters,
   emptyData,
+  clearFilters,
   onSelectAll,
   isAllSelected,
   ...rest
 }) => {
   const { t } = useTranslation();
-  if (emptyData && !emptyFilters) {
+  if (emptyData && hasFilters) {
     return loading ? (
       <Spinner size="md" />
     ) : (
-      <PageSection variant="light">
-        <Bullseye>{t('No resources are matching the current filters.')}</Bullseye>
-      </PageSection>
+      <EmptyState variant="full">
+        <EmptyStateHeader
+          titleText={t('No results found')}
+          icon={<EmptyStateIcon icon={SearchIcon} />}
+          headingLevel="h1"
+        />
+        <EmptyStateBody>{t('Clear all filters and try again.')}</EmptyStateBody>
+        {clearFilters && (
+          <EmptyStateActions>
+            <Button variant="link" onClick={clearFilters}>
+              {t('Clear all filters')}
+            </Button>
+          </EmptyStateActions>
+        )}
+      </EmptyState>
     );
   }
 

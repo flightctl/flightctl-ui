@@ -58,7 +58,6 @@ function TablePagination<T extends ApiList>({
   return (
     <Pagination
       isDisabled={isUpdating}
-      widgetId="table-pagination"
       isCompact
       variant={PaginationVariant.top}
       toggleTemplate={() => (

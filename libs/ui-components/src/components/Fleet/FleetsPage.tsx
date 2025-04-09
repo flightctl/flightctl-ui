@@ -146,8 +146,9 @@ const FleetTable = () => {
         aria-label={t('Fleets table')}
         loading={isUpdating}
         columns={fleetColumns}
-        emptyFilters={!hasFiltersEnabled}
+        hasFilters={hasFiltersEnabled}
         emptyData={fleets.length === 0}
+        clearFilters={() => setName('')}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
       >
@@ -169,7 +170,7 @@ const FleetTable = () => {
         </Tbody>
       </Table>
       <TablePagination pagination={pagination} isUpdating={isUpdating} />
-      {fleets.length === 0 && <FleetEmptyState />}
+      {!isUpdating && fleets.length === 0 && !name && <FleetEmptyState />}
       {fleetToDeleteId && (
         <DeleteFleetModal
           fleetId={fleetToDeleteId}
