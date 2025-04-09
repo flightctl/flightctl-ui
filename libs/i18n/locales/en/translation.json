@@ -570,7 +570,7 @@
   "Resource sync name": "Resource sync name",
   "Name of a branch or a tag.": "Name of a branch or a tag.",
   "For example: main": "For example: main",
-  "The absolute path of a file or directory in the repository. If a directory, the directory should contain only resource definitions with no subdirectories.": "The absolute path of a file or directory in the repository. If a directory, the directory should contain only resource definitions with no subdirectories.",
+  "The absolute path of a file or directory in the repository. Directories should only contain resource definition files and should not contain additional subdirectories.": "The absolute path of a file or directory in the repository. Directories should only contain resource definition files and should not contain additional subdirectories.",
   "For example: {{exampleFile}}": "For example: {{exampleFile}}",
   "Remove resource sync": "Remove resource sync",
   "Add another resource sync": "Add another resource sync",
