@@ -23,19 +23,19 @@ const SystemResourcesContent = ({ device }: { device: Required<Device> }) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('CPU pressure')}</DescriptionListTerm>
             <DescriptionListDescription>
-              <DeviceResourceStatus device={device} monitorType="cpu" />
+              <DeviceResourceStatus device={device} monitorType="CPU" />
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Disk pressure')}</DescriptionListTerm>
             <DescriptionListDescription>
-              <DeviceResourceStatus device={device} monitorType="disk" />
+              <DeviceResourceStatus device={device} monitorType="Disk" />
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Memory pressure')}</DescriptionListTerm>
             <DescriptionListDescription>
-              <DeviceResourceStatus device={device} monitorType="memory" />
+              <DeviceResourceStatus device={device} monitorType="Memory" />
             </DescriptionListDescription>
           </DescriptionListGroup>
         </FlightControlDescriptionList>
