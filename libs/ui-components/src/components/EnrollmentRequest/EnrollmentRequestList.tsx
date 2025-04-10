@@ -42,9 +42,13 @@ const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
   },
 ];
 
-type EnrollmentRequestListProps = { refetchDevices?: VoidFunction; isStandalone?: boolean };
+type EnrollmentRequestListProps = {
+  refetchDevices?: VoidFunction;
+  onEmptyListChanged?: (isEmpty: boolean) => void;
+  isStandalone?: boolean;
+};
 
-const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentRequestListProps) => {
+const EnrollmentRequestList = ({ onEmptyListChanged, refetchDevices, isStandalone }: EnrollmentRequestListProps) => {
   const { t } = useTranslation();
   const [canApprove] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST_APPROVAL, VERB.POST);
   const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
@@ -52,7 +56,6 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const [search, setSearch] = React.useState<string>('');
 
   const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
-
   const [pendingEnrollments, isLoading, error, refetch, pagination] = usePendingEnrollments(search);
   const itemCount = pendingEnrollments.length;
 
@@ -75,9 +78,14 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
     },
   });
 
-  const isLastUnfilteredListEmpty = !search && !isLoading && itemCount === 0;
+  React.useEffect(() => {
+    if (onEmptyListChanged && !search && !isLoading) {
+      onEmptyListChanged?.(itemCount === 0);
+    }
+  }, [search, itemCount, isLoading, onEmptyListChanged]);
 
   // In non-standalone mode, hide the entire component when the search result is empty (and not due to filtering)
+  const isLastUnfilteredListEmpty = !search && itemCount === 0;
   if (!isStandalone && isLastUnfilteredListEmpty) {
     return null;
   }
@@ -107,7 +115,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
           aria-label={t('Table for devices pending approval')}
           loading={!!isStandalone && isLoading && isLastUnfilteredListEmpty}
           columns={enrollmentColumns}
-          emptyData={pendingEnrollments.length === 0}
+          emptyData={itemCount === 0}
           clearFilters={() => setSearch('')}
           hasFilters={!!search}
           isAllSelected={isAllSelected}
