@@ -56,7 +56,21 @@ func NewFlightCtlHandler(tlsConfig *tls.Config) handler {
 	return handler{target: target, proxy: proxy}
 }
 
+func NewFlightCtlCliArtifactsHandler(tlsConfig *tls.Config) handler {
+	target, proxy := createReverseProxy(config.FctlCliArtifactsUrl)
+
+	proxy.Transport = &http.Transport{
+		TLSClientConfig: tlsConfig,
+	}
+
+	return handler{target: target, proxy: proxy}
+}
+
 func NewMetricsHandler() handler {
 	target, proxy := createReverseProxy(config.MetricsApiUrl)
 	return handler{target: target, proxy: proxy}
+}
+
+func UnimplementedHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
 }
