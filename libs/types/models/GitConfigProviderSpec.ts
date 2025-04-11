@@ -23,10 +23,6 @@ export type GitConfigProviderSpec = {
      * The path to the config in the Repository.
      */
     path: string;
-    /**
-     * Path in the device's file system at which the repository's path should be mounted.
-     */
-    mountPath?: string;
   };
 };
 
