@@ -51,10 +51,6 @@ export class CreateFleetWizardPage {
     return cy.get('input[aria-label="Path"]');
   }
 
-  get newFleetRepositoryMountPathField() {
-    return cy.get('input[aria-label="Mount path"]');
-  }
-
   get createFleetFormSubmitButton() {
     return cy.contains('button', 'Create fleet');
   }
