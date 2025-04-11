@@ -13,12 +13,12 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import DeviceDetailsTab from './DeviceDetailsTab';
 import TerminalTab from './TerminalTab';
 import NavItem from '../../NavItem/NavItem';
-import DeviceStatusDebugModal from './DeviceStatusDebugModal';
 import { getEditDisabledReason, isDeviceEnrolled } from '../../../utils/devices';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import EventsCard from '../../Events/EventsCard';
 import PageWithPermissions from '../../common/PageWithPermissions';
+import YamlEditor from '../../common/CodeEditor/YamlEditor';
 import DeviceAliasEdit from './DeviceAliasEdit';
 
 type DeviceDetailsPageProps = React.PropsWithChildren<{ hideTerminal?: boolean }>;
@@ -32,8 +32,6 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
   const navigate = useNavigate();
   const { put, remove } = useFetch();
   const [device, loading, error, refetch] = useFetchPeriodically<Required<Device>>({ endpoint: `devices/${deviceId}` });
-
-  const [showDebugInfo, setShowDebugInfo] = React.useState<boolean>(false);
 
   const deviceLabels = device?.metadata.labels;
   const deviceAlias = deviceLabels?.alias;
@@ -95,6 +93,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
         <Nav variant="tertiary">
           <NavList>
             <NavItem to="details">{t('Details')}</NavItem>
+            <NavItem to="yaml">{t('YAML')}</NavItem>
             {!hideTerminal && canOpenTerminal && <NavItem to="terminal">{t('Terminal')}</NavItem>}
             <NavItem to="events">{t('Events')}</NavItem>
           </NavList>
@@ -112,13 +111,6 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
                   {t('Edit device configurations')}
                 </DropdownItem>
               )}
-              <DropdownItem
-                onClick={() => {
-                  setShowDebugInfo(!showDebugInfo);
-                }}
-              >
-                {t('View status debug information')}
-              </DropdownItem>
               {canDecommission && decommissionAction}
             </DropdownList>
           </DetailsPageActions>
@@ -142,20 +134,16 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
               </DeviceDetailsTab>
             }
           />
+          <Route
+            path="yaml"
+            element={<YamlEditor filename={deviceAlias || deviceId} apiObj={device} refetch={refetch} />}
+          />
           {!hideTerminal && canOpenTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
           <Route path="events" element={<EventsCard kind={ResourceKind.DEVICE} objId={deviceId} />} />
         </Routes>
       )}
 
       {deleteModal || decommissionModal}
-      {device && showDebugInfo && (
-        <DeviceStatusDebugModal
-          status={device.status}
-          onClose={() => {
-            setShowDebugInfo(false);
-          }}
-        />
-      )}
     </DetailsPage>
   );
 };

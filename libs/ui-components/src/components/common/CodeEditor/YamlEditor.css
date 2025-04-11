@@ -1,0 +1,8 @@
+.fctl-yaml-editor .monaco-editor {
+  min-height: 70vh;
+}
+
+/* Style of the bar with the line numbers */
+.fctl-yaml-editor .monaco-editor .margin {
+  --vscode-editorGutter-background: #292e34;
+}

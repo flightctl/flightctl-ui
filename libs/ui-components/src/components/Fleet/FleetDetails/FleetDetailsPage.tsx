@@ -1,25 +1,28 @@
 import React from 'react';
-import { DropdownItem, DropdownList } from '@patternfly/react-core';
+import { DropdownItem, DropdownList, Nav, NavList } from '@patternfly/react-core';
 import { Fleet } from '@flightctl/types';
 
-import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import DetailsPage from '../../DetailsPage/DetailsPage';
-import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
-import FleetDetailsContent from './FleetDetailsContent';
-import { useTranslation } from '../../../hooks/useTranslation';
-import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
-import { useAppContext } from '../../../hooks/useAppContext';
-import DeleteFleetModal from '../DeleteFleetModal/DeleteFleetModal';
-import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
+import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
+import { useTranslation } from '../../../hooks/useTranslation';
+import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
+import { useAccessReview } from '../../../hooks/useAccessReview';
+import { useAppContext } from '../../../hooks/useAppContext';
+import NavItem from '../../NavItem/NavItem';
+import DetailsPage from '../../DetailsPage/DetailsPage';
+import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
+import DeleteFleetModal from '../DeleteFleetModal/DeleteFleetModal';
+import FleetDetailsContent from './FleetDetailsContent';
+import YamlEditor from '../../common/CodeEditor/YamlEditor';
 
-const FleetDetails = () => {
+const FleetDetailPage = () => {
   const { t } = useTranslation();
 
   const {
-    router: { useParams },
+    router: { useParams, Routes, Route, Navigate },
   } = useAppContext();
+
   const { fleetId } = useParams() as { fleetId: string };
   const [fleet, isLoading, error, refetch] = useFetchPeriodically<Required<Fleet>>({
     endpoint: `fleets/${fleetId}?addDevicesSummary=true`,
@@ -42,6 +45,14 @@ const FleetDetails = () => {
       resourceLink={ROUTE.FLEETS}
       resourceType="Fleets"
       resourceTypeLabel={t('Fleets')}
+      nav={
+        <Nav variant="tertiary">
+          <NavList>
+            <NavItem to="details">{t('Details')}</NavItem>
+            <NavItem to="yaml">{t('YAML')}</NavItem>
+          </NavList>
+        </Nav>
+      }
       actions={
         hasActions && (
           <DetailsPageActions>
@@ -84,7 +95,14 @@ const FleetDetails = () => {
     >
       {fleet && (
         <>
-          <FleetDetailsContent fleet={fleet} />
+          <Routes>
+            <Route index element={<Navigate to="details" replace />} />
+            <Route path="details" element={<FleetDetailsContent fleet={fleet} />} />
+            <Route
+              path="yaml"
+              element={<YamlEditor filename={fleet.metadata.name || 'fleet'} apiObj={fleet} refetch={refetch} />}
+            />
+          </Routes>
           {isDeleteModalOpen && (
             <DeleteFleetModal
               fleetId={fleetId}
@@ -107,7 +125,7 @@ const FleetDetailsWithPermissions = () => {
   const [allowed, loading] = useAccessReview(RESOURCE.FLEET, VERB.GET);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
-      <FleetDetails />
+      <FleetDetailPage />
     </PageWithPermissions>
   );
 };

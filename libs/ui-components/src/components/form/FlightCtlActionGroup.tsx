@@ -4,7 +4,7 @@ import { ActionGroup } from '@patternfly/react-core';
 
 import './FlightCtlActionGroup.css';
 
-const FlightCtlActionGroup = ({ children }: React.PropsWithChildren<Record<never, never>>) => (
+const FlightCtlActionGroup = ({ children }: React.PropsWithChildren) => (
   <ActionGroup className="fctl-form__action-footer">{children}</ActionGroup>
 );
 
