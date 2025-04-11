@@ -39,7 +39,6 @@ describe('Create fleet form', () => {
 
     createFleetWizardPage.newFleetTargetReferenceField.type('main');
     createFleetWizardPage.newFleetRepositoryPathField.type('/file-path');
-    createFleetWizardPage.newFleetRepositoryMountPathField.type('/mount-path');
     createFleetWizardPage.nextFleetWizardButton.should('be.enabled').click();
 
     // Updates step
