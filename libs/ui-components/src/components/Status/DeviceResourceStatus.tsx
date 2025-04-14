@@ -13,15 +13,15 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { StatusLevel } from '../../utils/status/common';
 import { StatusDisplayContent } from './StatusDisplay';
 
-type MonitorType = keyof DeviceResourceStatus; /* cpu / disk / memory */
+type MonitorType = keyof DeviceResourceStatus; /* CPU / Disk / Memory */
 
 const getMonitorTypeLabel = (monitorType: MonitorType, t: TFunction) => {
   switch (monitorType) {
-    case 'cpu':
+    case 'CPU':
       return t('CPU');
-    case 'memory':
+    case 'Memory':
       return t('Memory');
-    case 'disk':
+    case 'Disk':
       return t('Disk');
   }
 };
