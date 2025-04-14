@@ -53,12 +53,9 @@ const RepositoryEmptyState = () => {
   return (
     <ResourceListEmptyState icon={RepositoryIcon} titleText={t('No repositories here!')}>
       <EmptyStateBody>
-        <>
-          {t('You can create repositories and use them to point to Git repositories.')}
-          <br />
-          {t(` Adding resource syncs to them will allow you to keep your fleet's configurations updated and synced
-          automatically.`)}
-        </>
+        {t(
+          'Repositories make it easier to keep your fleet configurations updated and automatically synced to your devices.',
+        )}
       </EmptyStateBody>
       <EmptyStateFooter>
         <EmptyStateActions>

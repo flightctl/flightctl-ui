@@ -6,6 +6,8 @@ import {
   EmptyStateFooter,
   Split,
   SplitItem,
+  Stack,
+  StackItem,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
@@ -13,7 +15,6 @@ import {
 } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 import { TopologyIcon } from '@patternfly/react-icons/dist/js/icons/topology-icon';
-import { Trans } from 'react-i18next';
 import { TFunction } from 'i18next';
 
 import ListPage from '../ListPage/ListPage';
@@ -70,13 +71,13 @@ const FleetPageActions = ({ createText }: { createText?: string }) => {
 const FleetEmptyState = () => {
   const { t } = useTranslation();
   return (
-    <ResourceListEmptyState icon={TopologyIcon} titleText={t('No fleets here!')}>
+    <ResourceListEmptyState icon={TopologyIcon} titleText={t('No fleets yet')}>
       <EmptyStateBody>
-        <Trans t={t}>
-          Fleets are an easy way to manage multiple devices that share the same configurations.
-          <br />
-          With fleets you will be able to edit and update devices in mass.
-        </Trans>
+        <Stack>
+          <StackItem>{t('Fleets make it easier to manage multiple devices with shared configurations.')}</StackItem>
+          <StackItem>{t('Fleets allow you to edit and update your devices at once.')}</StackItem>
+          <StackItem>{t('To get started, create a new fleet or import an existing configuration.')}</StackItem>
+        </Stack>
       </EmptyStateBody>
       <EmptyStateFooter>
         <EmptyStateActions>

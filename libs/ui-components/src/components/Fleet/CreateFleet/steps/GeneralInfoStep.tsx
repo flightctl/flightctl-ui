@@ -8,7 +8,6 @@ import NameField from '../../../form/NameField';
 import LabelsField from '../../../form/LabelsField';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { getDnsSubdomainValidations } from '../../../form/validations';
-import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import DeviceLabelSelector from './DeviceLabelSelector';
 
 export const generalInfoStepId = 'general-info';
@@ -34,14 +33,9 @@ const GeneralInfoStep = ({ isEdit }: { isEdit: boolean }) => {
         <FormGroup label={t('Fleet labels')}>
           <LabelsField name="fleetLabels" />
         </FormGroup>
-        <FormGroupWithHelperText
-          label={t('Device selector')}
-          content={t(
-            'Devices matching these labels will be selected by the fleet. If left empty, no devices will be selected.',
-          )}
-        >
+        <FormGroup label={t('Device selector')}>
           <DeviceLabelSelector />
-        </FormGroupWithHelperText>
+        </FormGroup>
       </FlightCtlForm>
     </Grid>
   );

@@ -23,7 +23,7 @@ const ResourceSyncStep = () => {
         <TextContent>
           <Text>
             {t(
-              "A resource sync is an automated Gitops way to manage imported fleets. The resource sync monitors changes made to the source repository and update the fleet's configurations accordingly.",
+              'A resource sync is an automated Gitops method that helps manage your imported fleets by monitoring source repository changes and updating your fleet configuration accordingly.',
             )}
           </Text>
         </TextContent>

@@ -95,7 +95,7 @@ const DeviceLabelSelector = () => {
       />
     );
   } else {
-    message = t('Add labels to select devices to be included in this fleet.');
+    message = t('Labels used to select devices for your fleet. If not specified, no devices will be added.');
   }
 
   return (
