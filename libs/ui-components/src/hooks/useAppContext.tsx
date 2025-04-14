@@ -13,6 +13,7 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 import { PatchRequest } from '@flightctl/types';
+import { CliArtifactsResponse } from '@flightctl/ui-components/src/types/extraTypes';
 import { ROUTE } from './useNavigate';
 import { RESOURCE, VERB } from '../types/rbac';
 
@@ -33,6 +34,7 @@ export const appRoutes = {
   [ROUTE.RESOURCE_SYNC_DETAILS]: '/devicemanagement/resourcesyncs',
   [ROUTE.ENROLLMENT_REQUESTS]: '/devicemanagement/enrollmentrequests',
   [ROUTE.ENROLLMENT_REQUEST_DETAILS]: '/devicemanagement/enrollmentrequests',
+  [ROUTE.COMMAND_LINE_TOOLS]: '/command-line-tools',
 };
 
 export type NavLinkFC = React.FC<{ to: string; children: (props: { isActive: boolean }) => React.ReactNode }>;
@@ -48,6 +50,9 @@ export type AppContextProps = {
   user?: string; // auth?.user?.profile.preferred_username
   i18n: {
     transNamespace?: string;
+  };
+  settings: {
+    isRHEM?: boolean;
   };
   router: {
     useNavigate: () => RouterNavigateFunction;
@@ -72,13 +77,16 @@ export type AppContextProps = {
     patch: <R>(kind: string, patches: PatchRequest, abortSignal?: AbortSignal) => Promise<R>;
     checkPermissions: (resource: RESOURCE, verb: VERB) => Promise<boolean>;
   };
-  metrics: {
-    get: <R>(query: string, abortSignal?: AbortSignal) => Promise<R>;
-  };
+  // Extra fetch functions
+  getMetrics?: <R>(query: string, abortSignal?: AbortSignal) => Promise<R>;
+  getCliArtifacts?: (abortSignal?: AbortSignal) => Promise<CliArtifactsResponse>;
 };
 
 export const AppContext = React.createContext<AppContextProps>({
   appType: FlightCtlApp.STANDALONE,
+  settings: {
+    isRHEM: false,
+  },
   router: {
     useNavigate,
     Link,
@@ -104,9 +112,6 @@ export const AppContext = React.createContext<AppContextProps>({
     remove: async () => ({}) as any,
     patch: async () => ({}) as any,
     checkPermissions: async () => true,
-  },
-  metrics: {
-    get: async () => ({}) as any,
   },
   /* eslint-enable */
 });

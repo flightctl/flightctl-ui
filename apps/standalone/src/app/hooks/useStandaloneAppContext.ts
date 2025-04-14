@@ -12,11 +12,11 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
-import { useFetch } from './useFetch';
-import { useMetrics } from './useMetrics';
 import { AuthContext } from '../context/AuthContext';
+import { useFetch } from './useFetch';
+import { fetchCliArtifacts } from '../utils/apiCalls';
 
-const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics'> = {
+const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'settings'> = {
   appType: FlightCtlApp.STANDALONE,
   i18n: {
     transNamespace: undefined,
@@ -39,12 +39,14 @@ const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'metrics'> = {
 export const useStandaloneAppContext = (): AppContextProps => {
   const { username } = React.useContext(AuthContext);
   const fetch = useFetch();
-  const metrics = useMetrics();
 
   return {
     ...standaloneAppContext,
+    settings: {
+      isRHEM: window.isRHEM || false,
+    },
     user: username,
     fetch,
-    metrics,
+    getCliArtifacts: fetchCliArtifacts,
   };
 };

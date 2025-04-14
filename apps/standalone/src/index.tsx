@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM, { render } from 'react-dom';
 import App from './app/index';
-import { UserPreferencesProvider } from '@flightctl/ui-components/src/components/UserPreferences/UserPreferencesProvider';
+import { UserPreferencesProvider } from '@flightctl/ui-components/src/components/Masthead/UserPreferencesProvider';
 import './i18n';
 
 declare global {
@@ -25,8 +25,6 @@ if (window.API_PORT) {
   // eslint-disable-next-line
   axe(React, ReactDOM, 1000, config);
 }
-// initialize the keycloak instance
-// pass the keycloak instance to the provider at the root of your app
 
 const root = document.getElementById('root') as Element;
 

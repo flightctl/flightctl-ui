@@ -21,7 +21,6 @@ import { Prompt } from 'react-router-dom';
 import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/reducers';
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
-import { useMetrics } from '../../hooks/useMetrics';
 
 export const OCPPluginAppContext = AppContext.Provider;
 
@@ -42,15 +41,16 @@ const appRoutes = {
   [ROUTE.RESOURCE_SYNC_DETAILS]: '/edge/resourcesyncs',
   [ROUTE.ENROLLMENT_REQUESTS]: '/edge/enrollmentrequests',
   [ROUTE.ENROLLMENT_REQUEST_DETAILS]: '/edge/enrollmentrequests',
+  [ROUTE.COMMAND_LINE_TOOLS]: '/', // CLI downloads are shown embedded in OCP's CLI downloads page and not as an independent route
 };
 
 export const useValuesAppContext = (): AppContextProps => {
   const fetch = useFetch();
-  const metrics = useMetrics();
   const userInfo = useSelector(getUser);
 
   return {
     appType: FlightCtlApp.OCP,
+    settings: {},
     user: userInfo?.username || '',
     router: {
       Link,
@@ -69,6 +69,5 @@ export const useValuesAppContext = (): AppContextProps => {
       transNamespace: 'plugin__flightctl-plugin',
     },
     fetch,
-    metrics,
   };
 };

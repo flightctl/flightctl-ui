@@ -70,3 +70,15 @@ export type ApplicationProviderSpecFixed = ApplicationEnvVars & {
   name?: string;
   appType?: AppType;
 } & (ImageApplicationProviderSpec | { inline: InlineApplicationFileFixed[] });
+
+type CliArtifact = {
+  os: string;
+  arch: string;
+  filename: string;
+  sha256: string;
+};
+
+export type CliArtifactsResponse = {
+  baseUrl: string;
+  artifacts: CliArtifact[];
+};
