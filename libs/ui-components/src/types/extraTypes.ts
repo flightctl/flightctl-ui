@@ -35,6 +35,7 @@ export interface FlightCtlLabel {
 
 export interface ApiQuery {
   endpoint: string;
+  timeout?: number;
 }
 
 export interface MetricsQuery {
