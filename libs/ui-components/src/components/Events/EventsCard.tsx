@@ -15,10 +15,10 @@ import {
   SelectList,
   SelectOption,
   Spinner,
-  Stack,
-  StackItem,
 } from '@patternfly/react-core';
 import SyncAltIcon from '@patternfly/react-icons/dist/js/icons/sync-alt-icon';
+import { AutoSizer, CellMeasurer, CellMeasurerCache, List as VirtualList } from 'react-virtualized';
+import { MeasuredCellParent } from 'react-virtualized/dist/es/CellMeasurer';
 
 import { Event, ResourceKind } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -27,6 +27,8 @@ import useEvents, { DisplayEvent, SelectableEventType } from './useEvents';
 import EventItem from './EventItem';
 
 import './EventsCard.css';
+
+const mdWidthBreakpoint = 768;
 
 type EventListProps = {
   kind: ResourceKind;
@@ -47,30 +49,80 @@ const EventEmptyState = ({ hasFilters }: { hasFilters: boolean }) => {
 };
 
 const EventList = ({ events }: { events: DisplayEvent[] }) => {
-  // Reference used to give the events panel the correct height
+  const [containerHeight, setContainerHeight] = React.useState<string | number>();
   const topRef = React.useRef<HTMLDivElement>(null);
-  const [topY, setTopY] = React.useState<number>(0);
+  const listRef = React.useRef<VirtualList | null>(null);
+
+  const rowCache = React.useMemo(
+    () =>
+      new CellMeasurerCache({
+        fixedWidth: true,
+        defaultHeight: 50,
+      }),
+    [],
+  );
 
   React.useEffect(() => {
     if (topRef.current) {
       const boundingRect = topRef.current.getBoundingClientRect();
-      if (boundingRect.top > 0) {
-        setTopY(Math.ceil(boundingRect.top));
+      if (window.innerWidth < mdWidthBreakpoint) {
+        setContainerHeight(600);
+      } else if (boundingRect.top > 0) {
+        setContainerHeight(`calc(97vh - ${Math.ceil(boundingRect.top)}px)`);
       }
     }
   }, []);
 
+  const clearRowCache = React.useCallback(() => {
+    rowCache.clearAll();
+  }, [rowCache]);
+
+  React.useEffect(() => {
+    clearRowCache();
+    if (listRef.current) {
+      listRef.current?.recomputeRowHeights();
+    }
+  }, [events, clearRowCache]);
+
+  const renderRow = ({
+    index,
+    parent,
+    style,
+  }: {
+    index: number;
+    parent: MeasuredCellParent;
+    style: React.CSSProperties;
+  }) => {
+    const event = events[index];
+    return (
+      <CellMeasurer key={event.name} cache={rowCache} parent={parent} columnIndex={0} rowIndex={index}>
+        <div className="fctl-event__wrapper" style={style}>
+          <EventItem event={event} />
+        </div>
+      </CellMeasurer>
+    );
+  };
+
   return (
-    <div ref={topRef} style={{ height: `calc(97vh - ${topY}px)` }}>
-      <Stack hasGutter>
-        {events.map((event) => {
+    <div ref={topRef} style={{ height: containerHeight }}>
+      <AutoSizer onResize={clearRowCache}>
+        {({ width, height }) => {
           return (
-            <StackItem key={event.name}>
-              <EventItem event={event} />
-            </StackItem>
+            <VirtualList
+              ref={(ref) => {
+                listRef.current = ref;
+              }}
+              rowCount={events.length}
+              width={width}
+              height={height}
+              deferredMeasurementCache={rowCache}
+              rowHeight={rowCache.rowHeight}
+              rowRenderer={renderRow}
+              overscanRowCount={3}
+            />
           );
-        })}
-      </Stack>
+        }}
+      </AutoSizer>
     </div>
   );
 };
@@ -89,10 +141,8 @@ const EventsCard = ({ kind, objId, type = Event.type.WARNING }: EventListProps) 
   );
   const [events, isLoading, refetch, isUpdating, lastUpdateTime] = useEvents(searchCriteria, t);
   const [isTypeOpen, setIsTypeOpen] = React.useState<boolean>(false);
-  const title =
-    lastUpdateTime === 0
-      ? t('Events')
-      : t('Events (updated {{ lastUpdate}})', { lastUpdate: timeSinceEpochText(t, lastUpdateTime) });
+  const titleDetails =
+    lastUpdateTime === 0 ? '' : t('(updated {{ lastUpdate}})', { lastUpdate: timeSinceEpochText(t, lastUpdateTime) });
 
   let content: React.ReactNode;
   if (isLoading && !events) {
@@ -104,11 +154,12 @@ const EventsCard = ({ kind, objId, type = Event.type.WARNING }: EventListProps) 
   }
 
   return (
-    <Card>
+    <Card className="fctl-events-card">
       <CardTitle>
-        <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-          <FlexItem>{title}</FlexItem>
-          <FlexItem>
+        <Flex wrap="nowrap">
+          <FlexItem className="fctl-events-card__text">{t('Events')}</FlexItem>
+          <FlexItem className="fctl-events-card__text fctl-events-card__text-details">{titleDetails}</FlexItem>
+          <FlexItem className="fctl-events-card__button">
             <Button
               aria-label={t('Reload events')}
               isDisabled={isLoading || isUpdating}
