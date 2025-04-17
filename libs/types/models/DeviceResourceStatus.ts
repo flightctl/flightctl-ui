@@ -7,7 +7,8 @@ import type { DeviceResourceStatusType } from './DeviceResourceStatusType';
  * Current status of the resources of the device.
  */
 export type DeviceResourceStatus = {
-  CPU: DeviceResourceStatusType;
-  Memory: DeviceResourceStatusType;
-  Disk: DeviceResourceStatusType;
+  cpu: DeviceResourceStatusType;
+  memory: DeviceResourceStatusType;
+  disk: DeviceResourceStatusType;
 };
+
