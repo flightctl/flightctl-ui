@@ -40,7 +40,9 @@ const getTriggeredResourceAlert = (
   ) {
     return null;
   }
-  const monitorDetails = resourcesInfo.find((item) => item.monitorType === monitorType && item.alertRules.length > 0);
+  const monitorDetails = resourcesInfo.find(
+    (item) => item.monitorType.toLowerCase() === monitorType.toLowerCase() && item.alertRules.length > 0,
+  );
   if (!monitorDetails) {
     return null;
   }
