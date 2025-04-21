@@ -13,15 +13,15 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { StatusLevel } from '../../utils/status/common';
 import { StatusDisplayContent } from './StatusDisplay';
 
-type MonitorType = keyof DeviceResourceStatus; /* CPU / Disk / Memory */
+type MonitorType = keyof DeviceResourceStatus; /* cpu / disk / memory */
 
 const getMonitorTypeLabel = (monitorType: MonitorType, t: TFunction) => {
   switch (monitorType) {
-    case 'CPU':
+    case 'cpu':
       return t('CPU');
-    case 'Memory':
+    case 'memory':
       return t('Memory');
-    case 'Disk':
+    case 'disk':
       return t('Disk');
   }
 };
@@ -40,7 +40,9 @@ const getTriggeredResourceAlert = (
   ) {
     return null;
   }
-  const monitorDetails = resourcesInfo.find((item) => item.monitorType === monitorType && item.alertRules.length > 0);
+  const monitorDetails = resourcesInfo.find(
+    (item) => item.monitorType.toLowerCase() === monitorType.toLowerCase() && item.alertRules.length > 0,
+  );
   if (!monitorDetails) {
     return null;
   }
