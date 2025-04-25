@@ -10,7 +10,7 @@ import { Device } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import DetailsPageCard, { DetailsPageCardBody } from '../../../DetailsPage/DetailsPageCard';
 import FlightControlDescriptionList from '../../../common/FlightCtlDescriptionList';
-import DeviceResourceStatus from '../../../Status/DeviceResourceStatus';
+import DeviceResourceStatus, { MonitorType } from '../../../Status/DeviceResourceStatus';
 
 const SystemResourcesContent = ({ device }: { device: Required<Device> }) => {
   const { t } = useTranslation();
@@ -23,19 +23,19 @@ const SystemResourcesContent = ({ device }: { device: Required<Device> }) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('CPU pressure')}</DescriptionListTerm>
             <DescriptionListDescription>
-              <DeviceResourceStatus device={device} monitorType="cpu" />
+              <DeviceResourceStatus device={device} monitorType={MonitorType.cpu} />
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Disk pressure')}</DescriptionListTerm>
             <DescriptionListDescription>
-              <DeviceResourceStatus device={device} monitorType="disk" />
+              <DeviceResourceStatus device={device} monitorType={MonitorType.disk} />
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Memory pressure')}</DescriptionListTerm>
             <DescriptionListDescription>
-              <DeviceResourceStatus device={device} monitorType="memory" />
+              <DeviceResourceStatus device={device} monitorType={MonitorType.memory} />
             </DescriptionListDescription>
           </DescriptionListGroup>
         </FlightControlDescriptionList>

@@ -8,10 +8,6 @@ import type { ResourceAlertRule } from './ResourceAlertRule';
  */
 export type ResourceMonitorSpec = {
   /**
-   * The type of resource to monitor.
-   */
-  monitorType: string;
-  /**
    * Array of alert rules. Only one alert per severity is allowed.
    */
   alertRules: Array<ResourceAlertRule>;

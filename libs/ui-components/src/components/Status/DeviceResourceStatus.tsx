@@ -6,28 +6,32 @@ import {
   DeviceResourceStatus,
   DeviceResourceStatusType,
   ResourceAlertSeverityType,
-  ResourceMonitorSpec,
+  ResourceMonitor,
 } from '@flightctl/types';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { StatusLevel } from '../../utils/status/common';
 import { StatusDisplayContent } from './StatusDisplay';
 
-type MonitorType = keyof DeviceResourceStatus; /* cpu / disk / memory */
+export enum MonitorType {
+  cpu = 'cpu',
+  disk = 'disk',
+  memory = 'memory',
+}
 
 const getMonitorTypeLabel = (monitorType: MonitorType, t: TFunction) => {
   switch (monitorType) {
-    case 'cpu':
+    case MonitorType.cpu:
       return t('CPU');
-    case 'memory':
+    case MonitorType.memory:
       return t('Memory');
-    case 'disk':
+    case MonitorType.disk:
       return t('Disk');
   }
 };
 
 const getTriggeredResourceAlert = (
-  resourcesInfo: Array<ResourceMonitorSpec>,
+  resourcesInfo: Array<ResourceMonitor>,
   monitorType: MonitorType,
   monitorStatus?: DeviceResourceStatusType,
 ) => {
@@ -41,7 +45,7 @@ const getTriggeredResourceAlert = (
     return null;
   }
   const monitorDetails = resourcesInfo.find(
-    (item) => item.monitorType.toLowerCase() === monitorType.toLowerCase() && item.alertRules.length > 0,
+    (item) => item.monitorType.toLowerCase() === monitorType && item.alertRules.length > 0,
   );
   if (!monitorDetails) {
     return null;

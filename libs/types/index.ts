@@ -23,7 +23,6 @@ export { ConditionType } from './models/ConditionType';
 export type { ConfigProviderSpec } from './models/ConfigProviderSpec';
 export type { CpuResourceMonitorSpec } from './models/CpuResourceMonitorSpec';
 export type { CronExpression } from './models/CronExpression';
-export type { CustomResourceMonitorSpec } from './models/CustomResourceMonitorSpec';
 export type { Device } from './models/Device';
 export type { DeviceApplicationsSummaryStatus } from './models/DeviceApplicationsSummaryStatus';
 export type { DeviceApplicationStatus } from './models/DeviceApplicationStatus';
