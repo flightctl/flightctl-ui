@@ -3,6 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * System information collected from the device.
+ * User-defined information about the device.
  */
-export type DeviceSystemInfo = Record<string, string>;
+export type CustomDeviceInfo = Record<string, string>;
