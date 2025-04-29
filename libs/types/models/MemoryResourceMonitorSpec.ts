@@ -3,5 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ResourceMonitorSpec } from './ResourceMonitorSpec';
-export type MemoryResourceMonitorSpec = ResourceMonitorSpec;
+export type MemoryResourceMonitorSpec = ({
+  /**
+   * The type of resource to monitor.
+   */
+  monitorType: string;
+} & ResourceMonitorSpec);
 
