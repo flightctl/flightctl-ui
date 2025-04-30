@@ -37,6 +37,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
+import { useEnrollmentRequestSystemInfo } from './useEnrollmentRequestSystemInfo';
 
 import './EnrollmentRequestDetails.css';
 
@@ -55,6 +56,8 @@ const EnrollmentRequestDetails = () => {
   const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
 
   const [isApprovalModalOpen, setIsApprovalModalOpen] = React.useState(false);
+  const erSystemInfo = useEnrollmentRequestSystemInfo(er?.spec.deviceStatus?.systemInfo, t);
+  const hasDefaultLabels = Object.keys(er?.spec.labels || {}).length > 0;
 
   const { deleteAction, deleteModal } = useDeleteAction({
     resourceName: enrollmentRequestId,
@@ -107,7 +110,7 @@ const EnrollmentRequestDetails = () => {
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
-                  <DescriptionListTerm>{t('OS')}</DescriptionListTerm>
+                  <DescriptionListTerm>{t('Operating system')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     {er?.spec?.deviceStatus?.systemInfo?.operatingSystem || '-'}
                   </DescriptionListDescription>
@@ -118,22 +121,47 @@ const EnrollmentRequestDetails = () => {
                     {er?.spec?.deviceStatus?.systemInfo?.architecture || '-'}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
-                <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Default labels')}</DescriptionListTerm>
-                  <DescriptionListDescription>
-                    <LabelsView prefix="er" labels={er?.spec.labels} />
-                  </DescriptionListDescription>
-                </DescriptionListGroup>
+                {hasDefaultLabels && (
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Labels')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      <LabelsView prefix="er" labels={er?.spec.labels} />
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                )}
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     <EnrollmentRequestStatus er={er} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
+                {erSystemInfo.baseInfo.map((systemInfo) => (
+                  <DescriptionListGroup key={systemInfo.title}>
+                    <DescriptionListTerm>{systemInfo.title}</DescriptionListTerm>
+                    <DescriptionListDescription>{systemInfo.value}</DescriptionListDescription>
+                  </DescriptionListGroup>
+                ))}
               </FlightControlDescriptionList>
             </CardBody>
           </Card>
         </GridItem>
+        {erSystemInfo.customInfo.length > 0 && (
+          <GridItem md={6}>
+            <DetailsPageCard>
+              <CardTitle>{t('Custom data')}</CardTitle>
+              <CardBody>
+                <FlightControlDescriptionList columnModifier={{ lg: '3Col' }}>
+                  {erSystemInfo.customInfo.map((systemInfo) => (
+                    <DescriptionListGroup key={systemInfo.title}>
+                      <DescriptionListTerm>{systemInfo.title}</DescriptionListTerm>
+                      <DescriptionListDescription>{systemInfo.value}</DescriptionListDescription>
+                    </DescriptionListGroup>
+                  ))}
+                </FlightControlDescriptionList>
+              </CardBody>
+            </DetailsPageCard>
+          </GridItem>
+        )}
         <GridItem md={6}>
           <DetailsPageCard>
             <CardTitle>
@@ -157,13 +185,13 @@ const EnrollmentRequestDetails = () => {
             </DetailsPageCardBody>
           </DetailsPageCard>
         </GridItem>
-        <GridItem md={6}>
-          <DetailsPageCard>
-            <CardTitle>
-              <LabelWithHelperText label={t('Certificate')} content={t('A PEM-encoded signed certificate.')} />
-            </CardTitle>
-            <DetailsPageCardBody>
-              {er?.status?.certificate ? (
+        {er?.status?.certificate && (
+          <GridItem md={6}>
+            <DetailsPageCard>
+              <CardTitle>
+                <LabelWithHelperText label={t('Certificate')} content={t('A PEM-encoded signed certificate.')} />
+              </CardTitle>
+              <DetailsPageCardBody>
                 <TextArea
                   aria-label={t('Certificate')}
                   value={er.status.certificate}
@@ -171,12 +199,11 @@ const EnrollmentRequestDetails = () => {
                   autoResize
                   className="fctl-enrollment-details__text-area"
                 />
-              ) : (
-                <Bullseye>{t('Not available')}</Bullseye>
-              )}
-            </DetailsPageCardBody>
-          </DetailsPageCard>
-        </GridItem>
+              </DetailsPageCardBody>
+            </DetailsPageCard>
+          </GridItem>
+        )}
+
         <GridItem md={6}>
           <DetailsPageCard>
             <CardTitle>{t('Conditions')}</CardTitle>
