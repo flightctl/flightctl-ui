@@ -28,11 +28,11 @@ const emptySystemInfo = {
 const excludedKnownProps = [
   'distroVersion', // It's combined with "distroName"
   'customInfo', // Custom properies are evaluated separately from the predefined, known properties
-  'architecture', // Rendered separately by EnrollmentRequestDetails
-  'operatingSystem', // Rendered separately by EnrollmentRequestDetails
 ];
 
 const getInfoDataKnownKeys = (t: TFunction) => ({
+  architecture: t('Architecture'),
+  operatingSystem: t('Operating system'),
   agentVersion: t('Agent version'),
   distroName: t('Distro'),
   hostname: t('Hostname'),
@@ -46,7 +46,7 @@ const getInfoDataKnownKeys = (t: TFunction) => ({
   productUuid: t('Product UUID'),
 });
 
-export const useEnrollmentRequestSystemInfo = (
+export const useDeviceSpecSystemInfo = (
   systemInfo: FixedDeviceSystemInfo | undefined,
   t: TFunction,
 ): {
