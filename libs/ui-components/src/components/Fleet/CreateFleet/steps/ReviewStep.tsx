@@ -40,7 +40,7 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
           }}
         >
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
+            <DescriptionListTerm>{t('Fleet name')}</DescriptionListTerm>
             <DescriptionListDescription>{values.name}</DescriptionListDescription>
           </DescriptionListGroup>
           {values.fleetLabels.length > 0 && (

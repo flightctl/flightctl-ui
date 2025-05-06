@@ -16,7 +16,7 @@ export class CreateFleetWizardPage {
   }
 
   get newFleetNameField() {
-    return cy.get('input[aria-label="Name"]');
+    return cy.get('input[aria-label="Fleet name"]');
   }
 
   openFleetRichValidationsPopover() {

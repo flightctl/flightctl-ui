@@ -260,6 +260,7 @@
   "Update policies allow you to control when updates should be downloaded and applied.": "Update policies allow you to control when updates should be downloaded and applied.",
   "Default update policy": "Default update policy",
   "The device will download and apply updates as soon as they are available.": "The device will download and apply updates as soon as they are available.",
+  "Device alias": "Device alias",
   "Device labels": "Device labels",
   "Inline": "Inline",
   "Image based": "Image based",

@@ -24,7 +24,7 @@ const GeneralInfoStep = ({ isEdit }: { isEdit: boolean }) => {
       <FlightCtlForm>
         <NameField
           name="name"
-          aria-label={t('Name')}
+          aria-label={t('Fleet name')}
           isRequired
           isDisabled={isEdit}
           resourceType="fleets"
