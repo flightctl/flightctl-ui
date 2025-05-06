@@ -80,6 +80,7 @@ const DetailsPageActions = ({ children }: React.PropsWithChildren<unknown>) => {
     <Dropdown
       isOpen={actionsOpen}
       onSelect={() => setActionsOpen(false)}
+      onOpenChange={(isOpen: boolean) => setActionsOpen(isOpen)}
       popperProps={{ position: 'left', preventOverflow: true }}
       toggle={(toggleRef) => (
         <MenuToggle
