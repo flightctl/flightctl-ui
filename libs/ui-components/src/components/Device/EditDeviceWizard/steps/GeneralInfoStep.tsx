@@ -44,7 +44,7 @@ const GeneralInfoStep = () => {
       <FlightCtlForm>
         <RichValidationTextField
           fieldName="deviceAlias"
-          aria-label={t('Alias')}
+          aria-label={t('Device alias')}
           validations={getLabelValueValidations(t)}
         />
         <FormGroup label={t('Device labels')}>
