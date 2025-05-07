@@ -4,12 +4,11 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
-  Flex,
-  FlexItem,
   Grid,
   GridItem,
   Stack,
   StackItem,
+  gridSpans,
 } from '@patternfly/react-core';
 
 import { Device } from '@flightctl/types';
@@ -17,6 +16,7 @@ import { isDeviceEnrolled } from '../../../utils/devices';
 import { timeSinceText } from '../../../utils/dates';
 
 import { useTranslation } from '../../../hooks/useTranslation';
+import { useDeviceSpecSystemInfo } from '../../../hooks/useDeviceSpecSystemInfo';
 import EditLabelsForm, { ViewLabels } from '../../modals/EditLabelsModal/EditLabelsForm';
 import ResourceLink from '../../common/ResourceLink';
 import LabelWithHelperText from '../../common/WithHelperText';
@@ -45,45 +45,89 @@ const EnrolledDeviceDetails = ({
   canEdit,
 }: React.PropsWithChildren<DeviceDetailsTabProps>) => {
   const { t } = useTranslation();
+  const devSystemInfo = useDeviceSpecSystemInfo(device.status.systemInfo, t);
+  const hasExtraColumn = !!children;
+
   return (
     <Grid hasGutter>
       <GridItem md={12}>
         <DetailsPageCard>
           <DetailsPageCardBody>
-            <Flex alignItems={{ default: 'alignItemsFlexStart' }}>
-              <FlexItem flex={{ default: 'flex_1' }}>
+            <Grid>
+              <GridItem md={6} lg={hasExtraColumn ? 2 : 3}>
                 <Stack>
                   <StackItem className="fctl-device-details-tab__label">{t('Name')}</StackItem>
+                  <StackItem>
+                    <ResourceLink id={device.metadata.name || '-'} />
+                  </StackItem>
                 </Stack>
-                <StackItem>
-                  <ResourceLink id={device.metadata.name || '-'} />
-                </StackItem>
-              </FlexItem>
-              {!!children && <FlexItem flex={{ default: 'flex_1' }}>{children}</FlexItem>}
-              <FlexItem flex={{ default: 'flex_1' }}>
+              </GridItem>
+              {hasExtraColumn && (
+                <GridItem md={6} lg={2}>
+                  {children}
+                </GridItem>
+              )}
+              <GridItem md={6} lg={hasExtraColumn ? 2 : 3}>
                 <Stack>
                   <StackItem className="fctl-device-details-tab__label">{t('Fleet name')}</StackItem>
                   <StackItem>
                     <DeviceFleet device={device} />
                   </StackItem>
                 </Stack>
-              </FlexItem>
-              <FlexItem flex={{ default: 'flex_4' }}>
+              </GridItem>
+              <GridItem md={12} lg={6}>
                 <Stack>
                   <StackItem className="fctl-device-details-tab__label">{t('Labels')}</StackItem>
+                  <StackItem>
+                    {canEdit ? (
+                      <EditLabelsForm device={device} onDeviceUpdate={refetch} />
+                    ) : (
+                      <ViewLabels device={device} />
+                    )}
+                  </StackItem>
                 </Stack>
-                <StackItem>
-                  {canEdit ? (
-                    <EditLabelsForm device={device} onDeviceUpdate={refetch} />
-                  ) : (
-                    <ViewLabels device={device} />
-                  )}
-                </StackItem>
-              </FlexItem>
-            </Flex>
+              </GridItem>
+            </Grid>
+            {devSystemInfo.baseInfo.length > 0 && (
+              <Grid hasGutter>
+                {devSystemInfo.baseInfo.map((systemInfo, index) => {
+                  const sizes: gridSpans[] = hasExtraColumn ? [2, 2, 2, 6] : [3, 3, 6];
+                  const colSize = sizes[index % (hasExtraColumn ? 4 : 3)];
+                  return (
+                    <GridItem md={6} lg={colSize} key={systemInfo.title}>
+                      <Stack>
+                        <StackItem className="fctl-device-details-tab__label">{systemInfo.title}</StackItem>
+                        <StackItem>{systemInfo.value}</StackItem>
+                      </Stack>
+                    </GridItem>
+                  );
+                })}
+              </Grid>
+            )}
           </DetailsPageCardBody>
         </DetailsPageCard>
       </GridItem>
+      {devSystemInfo.customInfo.length > 0 && (
+        <GridItem md={12} lg={6}>
+          <DetailsPageCard>
+            <CardTitle>{t('Custom data')}</CardTitle>
+            <DetailsPageCardBody>
+              <Grid hasGutter>
+                {devSystemInfo.customInfo.map((systemInfo) => {
+                  return (
+                    <GridItem md={4} key={systemInfo.title}>
+                      <Stack>
+                        <StackItem className="fctl-device-details-tab__label">{systemInfo.title}</StackItem>
+                        <StackItem>{systemInfo.value}</StackItem>
+                      </Stack>
+                    </GridItem>
+                  );
+                })}
+              </Grid>
+            </DetailsPageCardBody>
+          </DetailsPageCard>
+        </GridItem>
+      )}
       <GridItem md={12} lg={6}>
         <StatusContent device={device} />
       </GridItem>
