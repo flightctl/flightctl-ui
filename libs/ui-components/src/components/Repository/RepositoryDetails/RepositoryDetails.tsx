@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DropdownItem, DropdownList, Grid, GridItem } from '@patternfly/react-core';
+import { DropdownItem, DropdownList, Grid, GridItem, Nav, NavList } from '@patternfly/react-core';
 
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { RepoSpecType, Repository } from '@flightctl/types';
@@ -15,14 +15,16 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
+import NavItem from '../../NavItem/NavItem';
+import YamlEditor from '../../common/CodeEditor/YamlEditor';
 
 const RepositoryDetails = () => {
   const { t } = useTranslation();
   const {
-    router: { useParams },
+    router: { useParams, Routes, Route, Navigate },
   } = useAppContext();
   const { repositoryId } = useParams() as { repositoryId: string };
-  const [repoDetails, isLoading, error] = useFetchPeriodically<Required<Repository>>({
+  const [repoDetails, isLoading, error, refetch] = useFetchPeriodically<Required<Repository>>({
     endpoint: `repositories/${repositoryId}`,
   });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>(false);
@@ -62,19 +64,40 @@ const RepositoryDetails = () => {
           </DetailsPageActions>
         )
       }
+      nav={
+        <Nav variant="tertiary">
+          <NavList>
+            <NavItem to="details">{t('Details')}</NavItem>
+            <NavItem to="yaml">{t('YAML')}</NavItem>
+          </NavList>
+        </Nav>
+      }
     >
       {repoDetails && (
         <>
-          <Grid hasGutter>
-            <GridItem>
-              <RepositoryGeneralDetailsCard repoDetails={repoDetails} />
-            </GridItem>
-            {canListRS && repoDetails.spec.type !== RepoSpecType.HTTP && (
-              <GridItem>
-                <RepositoryResourceSyncsCard repositoryId={repositoryId} />
-              </GridItem>
-            )}
-          </Grid>
+          <Routes>
+            <Route index element={<Navigate to="details" replace />} />
+            <Route
+              path="details"
+              element={
+                <Grid hasGutter>
+                  <GridItem>
+                    <RepositoryGeneralDetailsCard repoDetails={repoDetails} />
+                  </GridItem>
+                  {canListRS && repoDetails.spec.type !== RepoSpecType.HTTP && (
+                    <GridItem>
+                      <RepositoryResourceSyncsCard repositoryId={repositoryId} />
+                    </GridItem>
+                  )}
+                </Grid>
+              }
+            />
+            <Route
+              path="yaml"
+              element={<YamlEditor filename={repositoryId} apiObj={repoDetails} refetch={refetch} />}
+            />
+          </Routes>
+
           {isDeleteModalOpen && (
             <DeleteRepositoryModal
               onClose={() => setIsDeleteModalOpen(false)}
