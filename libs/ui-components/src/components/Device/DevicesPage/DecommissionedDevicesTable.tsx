@@ -100,7 +100,7 @@ const DecommissionedDevicesTable = ({
             <ToolbarItem alignSelf="center">
               <Switch
                 id="decommissioned-devices-switch"
-                label={t('Show only decommissioned devices')}
+                label={<span className="fctl-switch__label">{t('Show only decommissioned devices')}</span>}
                 isChecked
                 onChange={() => {
                   setOnlyDecommissioned(false);
