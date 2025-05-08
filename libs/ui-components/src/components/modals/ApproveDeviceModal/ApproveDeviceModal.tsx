@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { EnrollmentRequestApproval } from '@flightctl/types';
-import { Alert, Modal } from '@patternfly/react-core';
+import { Alert } from '@patternfly/react-core';
+import { Modal, ModalBody, ModalHeader } from '@patternfly/react-core/next';
+
 import { Formik } from 'formik';
 
 import { useFetch } from '../../../hooks/useFetch';
@@ -48,12 +50,15 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
       }}
     >
       {({ isSubmitting }) => (
-        <Modal title={t('Approve pending device')} isOpen onClose={() => !isSubmitting && onClose()} variant="small">
-          {getApprovalStatus(enrollmentRequest) !== EnrollmentRequestStatusType.Approved ? (
-            <ApproveDeviceForm enrollmentRequest={enrollmentRequest} onClose={onClose} error={error} />
-          ) : (
-            <Alert isInline variant="info" title={t('Enrollment request is already approved.')} />
-          )}
+        <Modal isOpen onClose={() => !isSubmitting && onClose()} variant="small">
+          <ModalHeader title={t('Approve pending device')} />
+          <ModalBody>
+            {getApprovalStatus(enrollmentRequest) !== EnrollmentRequestStatusType.Approved ? (
+              <ApproveDeviceForm enrollmentRequest={enrollmentRequest} onClose={onClose} error={error} />
+            ) : (
+              <Alert isInline variant="info" title={t('Enrollment request is already approved.')} />
+            )}
+          </ModalBody>
         </Modal>
       )}
     </Formik>

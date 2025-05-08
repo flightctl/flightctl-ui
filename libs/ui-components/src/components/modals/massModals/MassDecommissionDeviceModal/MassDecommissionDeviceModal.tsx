@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Alert, Button, Modal, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, Button, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import { Device, DeviceDecommission, DeviceDecommissionTargetType } from '@flightctl/types';
@@ -47,14 +48,65 @@ const MassDecommissionDeviceModal = ({ onClose, devices, onSuccess }: MassDecomm
   };
 
   return (
-    <Modal
-      title={t('Decommission devices ?')}
-      isOpen
-      onClose={onClose}
-      showClose={!isSubmitting}
-      titleIconVariant="warning"
-      variant="medium"
-      actions={[
+    <Modal isOpen onClose={isSubmitting ? undefined : onClose} variant="medium">
+      <ModalHeader title={t('Decommission devices ?')} titleIconVariant="warning" />
+      <ModalBody>
+        <Stack hasGutter>
+          <StackItem>{t('Are you sure you want to proceed with decommissioning these devices?')}</StackItem>
+          <StackItem>
+            {t(
+              'Decommissioned devices will not be able to communicate with the edge management system anymore, and they will be removed from any fleet they were associated to. Once decommissioned, the devices cannot be managed further.',
+            )}
+          </StackItem>
+          <StackItem>
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>{t('Alias')}</Th>
+                  <Th>{t('Name')}</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {devices.map((device) => {
+                  return (
+                    <Tr key={device.metadata.name}>
+                      <Td dataLabel={t('Alias')}>{device.metadata.labels?.alias || '-'}</Td>
+                      <Td dataLabel={t('Name')}>
+                        <ResourceLink id={device.metadata.name as string} />
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
+          </StackItem>
+          {isSubmitting && (
+            <StackItem>
+              <Progress
+                value={progress}
+                min={0}
+                max={totalProgress}
+                title={t('Decommissioning...')}
+                measureLocation={ProgressMeasureLocation.top}
+                label={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
+                valueText={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
+              />
+            </StackItem>
+          )}
+          {errors?.length && (
+            <StackItem>
+              <Alert isInline variant="danger" title={t('An error occurred')}>
+                <Stack hasGutter>
+                  {errors.map((e, index) => (
+                    <StackItem key={index}>{e}</StackItem>
+                  ))}
+                </Stack>
+              </Alert>
+            </StackItem>
+          )}
+        </Stack>
+      </ModalBody>
+      <ModalFooter>
         <Button
           key="decommission"
           variant="danger"
@@ -63,66 +115,11 @@ const MassDecommissionDeviceModal = ({ onClose, devices, onSuccess }: MassDecomm
           isDisabled={isSubmitting}
         >
           {t('Decommission')}
-        </Button>,
+        </Button>
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isSubmitting}>
           {t('Cancel')}
-        </Button>,
-      ]}
-    >
-      <Stack hasGutter>
-        <StackItem>{t('Are you sure you want to proceed with decommissioning these devices ?')}</StackItem>
-        <StackItem>
-          {t(
-            'Decommissioned devices will not be able to communicate with the edge management system anymore, and they will be removed from any fleet they were associated to. Once decommissioned, the devices cannot be managed further.',
-          )}
-        </StackItem>
-        <StackItem>
-          <Table>
-            <Thead>
-              <Tr>
-                <Th>{t('Alias')}</Th>
-                <Th>{t('Name')}</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {devices.map((device) => {
-                return (
-                  <Tr key={device.metadata.name}>
-                    <Td dataLabel={t('Alias')}>{device.metadata.labels?.alias || '-'}</Td>
-                    <Td dataLabel={t('Name')}>
-                      <ResourceLink id={device.metadata.name as string} />
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
-        </StackItem>
-        {isSubmitting && (
-          <StackItem>
-            <Progress
-              value={progress}
-              min={0}
-              max={totalProgress}
-              title={t('Decommissioning...')}
-              measureLocation={ProgressMeasureLocation.top}
-              label={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
-              valueText={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
-            />
-          </StackItem>
-        )}
-        {errors?.length && (
-          <StackItem>
-            <Alert isInline variant="danger" title={t('An error occurred')}>
-              <Stack hasGutter>
-                {errors.map((e, index) => (
-                  <StackItem key={index}>{e}</StackItem>
-                ))}
-              </Stack>
-            </Alert>
-          </StackItem>
-        )}
-      </Stack>
+        </Button>
+      </ModalFooter>
     </Modal>
   );
 };

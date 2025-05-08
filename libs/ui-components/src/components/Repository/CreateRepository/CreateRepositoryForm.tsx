@@ -7,10 +7,11 @@ import {
   FormGroup,
   FormSection,
   Grid,
-  Modal,
   Split,
   SplitItem,
 } from '@patternfly/react-core';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
+
 import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import { Trans } from 'react-i18next';
@@ -199,12 +200,13 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
         </SplitItem>
       </Split>
       {showConfirmChangeType && (
-        <Modal
-          title={'Change repository type?'}
-          titleIconVariant="warning"
-          variant="small"
-          isOpen
-          actions={[
+        <Modal variant="small" isOpen>
+          <ModalHeader title={'Change repository type?'} titleIconVariant="warning" />
+          <ModalBody>
+            {t('Switching the repository type will cause some data to be lost.')}{' '}
+            {t('Are you sure you want to change the repository type?')}
+          </ModalBody>
+          <ModalFooter>
             <Button
               key="change"
               variant={ButtonVariant.primary}
@@ -214,7 +216,7 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
               }}
             >
               {t('Change')}
-            </Button>,
+            </Button>
             <Button
               key="cancel"
               variant="link"
@@ -223,11 +225,8 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
               }}
             >
               {t('Cancel')}
-            </Button>,
-          ]}
-        >
-          {t('Switching the repository type will cause some data to be lost.')}
-          {t('Are you sure you want to change the repository type?')}
+            </Button>
+          </ModalFooter>
         </Modal>
       )}
     </>
