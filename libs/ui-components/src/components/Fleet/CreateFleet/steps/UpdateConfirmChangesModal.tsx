@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Button, Modal, Stack, StackItem } from '@patternfly/react-core';
+import { Button, Stack, StackItem } from '@patternfly/react-core';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
 import { TFunction } from 'react-i18next';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -57,38 +58,36 @@ const UpdateConfirmChangesModal = ({ setting, onClose }: UpdateConfirmChangesMod
   const modalContentProps = getModalContent(setting, t);
 
   return (
-    <Modal
-      variant={setting === 'disruption-budget' ? 'medium' : 'small'}
-      title={modalContentProps.title}
-      titleIconVariant="warning"
-      isOpen
-    >
-      <Stack hasGutter>
-        <StackItem>{modalContentProps.question}</StackItem>
-        <StackItem>{modalContentProps.result}</StackItem>
-        <StackItem>
-          <Button
-            key="confirm"
-            variant="primary"
-            tabIndex={0}
-            onClick={() => {
-              onClose(true);
-            }}
-          >
-            {modalContentProps.primaryAction}
-          </Button>
-          <Button
-            key="cancel"
-            variant="link"
-            tabIndex={0}
-            onClick={() => {
-              onClose(false);
-            }}
-          >
-            {t('Cancel')}
-          </Button>
-        </StackItem>
-      </Stack>
+    <Modal variant={setting === 'disruption-budget' ? 'medium' : 'small'} isOpen>
+      <ModalHeader title={modalContentProps.title} titleIconVariant="warning" />
+      <ModalBody>
+        <Stack hasGutter>
+          <StackItem>{modalContentProps.question}</StackItem>
+          <StackItem>{modalContentProps.result}</StackItem>
+        </Stack>
+      </ModalBody>
+      <ModalFooter>
+        <Button
+          key="confirm"
+          variant="primary"
+          tabIndex={0}
+          onClick={() => {
+            onClose(true);
+          }}
+        >
+          {modalContentProps.primaryAction}
+        </Button>
+        <Button
+          key="cancel"
+          variant="link"
+          tabIndex={0}
+          onClick={() => {
+            onClose(false);
+          }}
+        >
+          {t('Cancel')}
+        </Button>
+      </ModalFooter>
     </Modal>
   );
 };
