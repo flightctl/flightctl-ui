@@ -6,12 +6,12 @@ import {
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  Modal,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
+import { Modal, ModalBody, ModalHeader } from '@patternfly/react-core/next';
 import { TFunction } from 'i18next';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { CodeBranchIcon } from '@patternfly/react-icons/dist/js/icons/code-branch-icon';
@@ -136,30 +136,33 @@ const CreateResourceSyncModal = ({
   const [submitError, setSubmitError] = React.useState<string | undefined>();
 
   return (
-    <Modal variant="medium" title={t('Add a resource sync')} onClose={() => onClose()} isOpen>
-      <Formik<SingleResourceSyncValues>
-        initialValues={{ resourceSyncs: [{ name: '', targetRevision: '', path: '' }] }}
-        validationSchema={singleResourceSyncSchema(t, storedRSs)}
-        onSubmit={async (values: SingleResourceSyncValues) => {
-          const rsToAdd = getResourceSync(repositoryId, values.resourceSyncs[0]);
-          try {
-            await post<ResourceSync>('resourcesyncs', rsToAdd);
-            setSubmitError(undefined);
-            onClose(true);
-          } catch (e) {
-            setSubmitError(getErrorMessage(e));
-          }
-        }}
-      >
-        <>
-          <CreateResourceSyncModalForm onClose={onClose} />
-          {submitError && (
-            <Alert variant="danger" title={t('Unexpected error occurred')} isInline>
-              {submitError}
-            </Alert>
-          )}
-        </>
-      </Formik>
+    <Modal variant="medium" onClose={() => onClose()} isOpen>
+      <ModalHeader title={t('Add a resource sync')} />
+      <ModalBody>
+        <Formik<SingleResourceSyncValues>
+          initialValues={{ resourceSyncs: [{ name: '', targetRevision: '', path: '' }] }}
+          validationSchema={singleResourceSyncSchema(t, storedRSs)}
+          onSubmit={async (values: SingleResourceSyncValues) => {
+            const rsToAdd = getResourceSync(repositoryId, values.resourceSyncs[0]);
+            try {
+              await post<ResourceSync>('resourcesyncs', rsToAdd);
+              setSubmitError(undefined);
+              onClose(true);
+            } catch (e) {
+              setSubmitError(getErrorMessage(e));
+            }
+          }}
+        >
+          <>
+            <CreateResourceSyncModalForm onClose={onClose} />
+            {submitError && (
+              <Alert variant="danger" title={t('Unexpected error occurred')} isInline>
+                {submitError}
+              </Alert>
+            )}
+          </>
+        </Formik>
+      </ModalBody>
     </Modal>
   );
 };
