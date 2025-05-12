@@ -28,7 +28,7 @@ const templateOption1 = '{{ .metadata.labels.key }}';
 const templateOption2 = '{{ .metadata.name }}';
 const exampleCode = `/device-configs/deployment-sites/site-{{ .metadata.labels.site }}`;
 
-const MicroShiftCheckbox = ({ isFleet }: { isFleet: boolean }) => {
+const MicroShiftCheckbox = ({ isFleet, isReadOnly }: { isFleet: boolean; isReadOnly?: boolean }) => {
   const { initialValues } = useFormikContext<DeviceSpecConfigFormValues>();
   const { t } = useTranslation();
 
@@ -84,7 +84,7 @@ const MicroShiftCheckbox = ({ isFleet }: { isFleet: boolean }) => {
               </>
             )
           }
-          isDisabled={isDisabled}
+          isDisabled={isDisabled || isReadOnly}
         />
       </FormGroup>
       {isDisabled && (
@@ -102,14 +102,14 @@ const MicroShiftCheckbox = ({ isFleet }: { isFleet: boolean }) => {
   );
 };
 
-const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
+const DeviceTemplateStep = ({ isFleet, isReadOnly }: { isFleet: boolean; isReadOnly?: boolean }) => {
   const { appType } = useAppContext();
   const { t } = useTranslation();
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
   return (
     <Grid span={8}>
       <FlightCtlForm>
-        {isFleet && (
+        {isFleet && !isReadOnly && (
           <Alert isInline variant="info" title={t('Using template variables')} isExpandable>
             <Trans t={t}>
               Add a variable by using <strong>{templateOption1}</strong> or <strong>{templateOption2}</strong> and it
@@ -134,23 +134,24 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
             name="osImage"
             aria-label={t('System image')}
             value={values.osImage}
+            isDisabled={isReadOnly}
             helperText={t(
               'Must be a reference to a bootable container image (such as "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). If you do not want to manage your OS from Edge management, leave this field empty.',
             )}
           />
         </FormGroupWithHelperText>
         <FormGroup>
-          <ConfigurationTemplates />
+          <ConfigurationTemplates isReadOnly={isReadOnly} />
         </FormGroup>
         <FormGroup>
-          <ApplicationsForm />
+          <ApplicationsForm isReadOnly={isReadOnly} />
         </FormGroup>
         {isFleet && (
           <FormGroup label={t('Tracked systemd services')}>
-            <SystemdUnitsForm />
+            <SystemdUnitsForm isReadOnly={isReadOnly} />
           </FormGroup>
         )}
-        {appType === FlightCtlApp.OCP && <MicroShiftCheckbox isFleet={isFleet} />}
+        {appType === FlightCtlApp.OCP && <MicroShiftCheckbox isFleet={isFleet} isReadOnly={isReadOnly} />}
       </FlightCtlForm>
     </Grid>
   );

@@ -7,6 +7,7 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 
 import ErrorHelperText from '../../../form/FieldHelperText';
 import EditableLabelControl from '../../../common/EditableLabelControl';
+import LabelsView from '../../../common/LabelsView';
 
 const SystemdUnitsForm = () => {
   const { t } = useTranslation();
@@ -74,4 +75,18 @@ const SystemdUnitsForm = () => {
   );
 };
 
-export default SystemdUnitsForm;
+const SystemdUnitsFormWrapper = ({ isReadOnly }: { isReadOnly?: boolean }) => {
+  const { values } = useFormikContext<DeviceSpecConfigFormValues>();
+
+  if (isReadOnly) {
+    const labels: Record<string, string> = {};
+    values.systemdUnits.forEach((systemdUnit) => {
+      labels[systemdUnit.pattern] = '';
+    });
+
+    return <LabelsView prefix="systemdUnits" labels={labels} />;
+  }
+  return <SystemdUnitsForm />;
+};
+
+export default SystemdUnitsFormWrapper;
