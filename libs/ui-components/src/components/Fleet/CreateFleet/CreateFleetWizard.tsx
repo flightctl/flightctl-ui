@@ -78,8 +78,13 @@ const CreateFleetWizard = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
   const [fleetId, fleet, loading, editError] = useEditFleet();
+
+  const [canEdit] = useAccessReview(RESOURCE.FLEET, VERB.PATCH);
+
   const isEdit = !!fleetId;
-  let body;
+  const isReadOnly = !!fleet?.metadata.owner || (isEdit && !canEdit);
+
+  let body: React.ReactNode;
 
   if (loading) {
     body = (
@@ -91,12 +96,6 @@ const CreateFleetWizard = () => {
     body = (
       <Alert isInline variant="danger" title={t('An error occurred')}>
         {getErrorMessage(editError)}
-      </Alert>
-    );
-  } else if (!!fleet?.metadata.owner) {
-    body = (
-      <Alert isInline variant="info" title={t('Fleet is non-editable')}>
-        {t('This fleet is managed by a resource sync and it cannot be edited directly.')}
       </Alert>
     );
   } else {
@@ -125,12 +124,20 @@ const CreateFleetWizard = () => {
       >
         {({ errors: formikErrors }) => {
           const validStepIds = getValidStepIds(formikErrors);
+          let reviewStepLabel: string;
+          if (isReadOnly) {
+            reviewStepLabel = t('Review');
+          } else if (isEdit) {
+            reviewStepLabel = t('Review and save');
+          } else {
+            reviewStepLabel = t('Review and create');
+          }
 
           return (
             <>
               <LeaveFormConfirmation />
               <Wizard
-                footer={<CreateFleetWizardFooter isEdit={isEdit} />}
+                footer={<CreateFleetWizardFooter isReadOnly={isReadOnly} isEdit={isEdit} />}
                 onStepChange={(_, step) => {
                   if (error) {
                     setError(undefined);
@@ -140,24 +147,26 @@ const CreateFleetWizard = () => {
                 className="fctl-create-fleet"
               >
                 <WizardStep name={t('General info')} id={generalInfoStepId}>
-                  {(!currentStep || currentStep?.id === generalInfoStepId) && <GeneralInfoStep isEdit={isEdit} />}
+                  {(!currentStep || currentStep?.id === generalInfoStepId) && (
+                    <GeneralInfoStep isEdit={isEdit} isReadOnly={isReadOnly} />
+                  )}
                 </WizardStep>
                 <WizardStep
                   name={t('Device template')}
                   id={deviceTemplateStepId}
                   isDisabled={isDisabledStep(deviceTemplateStepId, validStepIds)}
                 >
-                  {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep isFleet />}
+                  {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep isFleet isReadOnly={isReadOnly} />}
                 </WizardStep>
                 <WizardStep
                   name={t('Updates')}
                   id={updatePolicyStepId}
                   isDisabled={isDisabledStep(updatePolicyStepId, validStepIds)}
                 >
-                  {currentStep?.id === updatePolicyStepId && <UpdatePolicyStep />}
+                  {currentStep?.id === updatePolicyStepId && <UpdatePolicyStep isReadOnly={isReadOnly} />}
                 </WizardStep>
                 <WizardStep
-                  name={isEdit ? t('Review and save') : t('Review and create')}
+                  name={reviewStepLabel}
                   id={reviewStepId}
                   isDisabled={isDisabledStep(reviewStepId, validStepIds)}
                 >
@@ -171,7 +180,14 @@ const CreateFleetWizard = () => {
     );
   }
 
-  const title = isEdit ? t('Edit fleet') : t('Create fleet');
+  let title: string;
+  if (isReadOnly) {
+    title = t('View fleet');
+  } else if (isEdit) {
+    title = t('Edit fleet');
+  } else {
+    title = t('Create fleet');
+  }
 
   return (
     <>

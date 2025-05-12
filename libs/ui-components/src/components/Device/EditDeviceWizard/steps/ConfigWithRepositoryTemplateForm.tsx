@@ -18,6 +18,7 @@ type ConfigWithRepositoryTemplateFormProps = {
   index: number;
   repositories: Repository[];
   repoRefetch: VoidFunction;
+  isReadOnly?: boolean;
   canCreateRepo: boolean;
 };
 
@@ -53,7 +54,15 @@ const getRepositoryItems = (
   return repositoryItems;
 };
 
-const GitConfigForm = ({ template, index }: { template: GitConfigTemplate; index: number }) => {
+const GitConfigForm = ({
+  template,
+  index,
+  isReadOnly,
+}: {
+  template: GitConfigTemplate;
+  index: number;
+  isReadOnly?: boolean;
+}) => {
   const { t } = useTranslation();
 
   return (
@@ -63,6 +72,7 @@ const GitConfigForm = ({ template, index }: { template: GitConfigTemplate; index
           aria-label={t('Branch/tag/commit')}
           name={`configTemplates[${index}].targetRevision`}
           value={template.targetRevision}
+          isDisabled={isReadOnly}
         />
       </FormGroup>
       <FormGroupWithHelperText
@@ -75,6 +85,7 @@ const GitConfigForm = ({ template, index }: { template: GitConfigTemplate; index
           name={`configTemplates[${index}].path`}
           value={template.path}
           placeholder={t('/absolute/path')}
+          isDisabled={isReadOnly}
         />
       </FormGroupWithHelperText>
       <FormGroupWithHelperText
@@ -87,6 +98,7 @@ const GitConfigForm = ({ template, index }: { template: GitConfigTemplate; index
           name={`configTemplates[${index}].mountPath`}
           value={template.mountPath}
           placeholder={t('/absolute/path')}
+          isDisabled={isReadOnly}
         />
       </FormGroupWithHelperText>
     </>
@@ -97,10 +109,12 @@ const HttpConfigForm = ({
   template,
   baseURL,
   index,
+  isReadOnly,
 }: {
   template: HttpConfigTemplate;
   index: number;
   baseURL?: string;
+  isReadOnly?: boolean;
 }) => {
   const { t } = useTranslation();
 
@@ -129,6 +143,7 @@ const HttpConfigForm = ({
           name={`configTemplates[${index}].suffix`}
           value={template.suffix || ''}
           helperText={suffixHelperText}
+          isDisabled={isReadOnly}
         />
       </FormGroupWithHelperText>
       <FormGroupWithHelperText
@@ -141,6 +156,7 @@ const HttpConfigForm = ({
           name={`configTemplates[${index}].filePath`}
           value={template.filePath || ''}
           placeholder={t('/absolute/path')}
+          isDisabled={isReadOnly}
         />
       </FormGroupWithHelperText>
     </>
@@ -152,6 +168,7 @@ const ConfigWithRepositoryTemplateForm = ({
   index,
   repositories,
   repoRefetch,
+  isReadOnly,
   canCreateRepo,
 }: ConfigWithRepositoryTemplateFormProps) => {
   const { t } = useTranslation();
@@ -159,9 +176,17 @@ const ConfigWithRepositoryTemplateForm = ({
   const [createRepoModalOpen, setCreateRepoModalOpen] = React.useState(false);
 
   const ct = values.configTemplates[index] as HttpConfigTemplate | GitConfigTemplate;
-  const selectedRepoName = ct?.repository;
+  const selectedRepoName = ct.repository;
 
-  const repositoryItems = getRepositoryItems(t, repositories, repoType, selectedRepoName);
+  const repositoryItems = isReadOnly
+    ? {
+        [selectedRepoName]: {
+          label: selectedRepoName,
+          description: '',
+        },
+      }
+    : getRepositoryItems(t, repositories, repoType, selectedRepoName);
+
   const selectedRepo = repositories.find((repo) => repo.metadata.name === selectedRepoName);
   return (
     <>
@@ -171,6 +196,7 @@ const ConfigWithRepositoryTemplateForm = ({
           items={repositoryItems}
           withStatusIcon
           placeholderText={t('Select a repository')}
+          isDisabled={isReadOnly}
         >
           {canCreateRepo && (
             <MenuFooter>
@@ -181,6 +207,7 @@ const ConfigWithRepositoryTemplateForm = ({
                 onClick={() => {
                   setCreateRepoModalOpen(true);
                 }}
+                isDisabled={isReadOnly}
               >
                 {t('Create repository')}
               </Button>
@@ -188,9 +215,16 @@ const ConfigWithRepositoryTemplateForm = ({
           )}
         </FormSelect>
       </FormGroup>
-      {repoType === RepoSpecType.GIT && <GitConfigForm template={ct as GitConfigTemplate} index={index} />}
+      {repoType === RepoSpecType.GIT && (
+        <GitConfigForm template={ct as GitConfigTemplate} index={index} isReadOnly={isReadOnly} />
+      )}
       {repoType === RepoSpecType.HTTP && (
-        <HttpConfigForm template={ct as HttpConfigTemplate} index={index} baseURL={selectedRepo?.spec.url} />
+        <HttpConfigForm
+          template={ct as HttpConfigTemplate}
+          index={index}
+          baseURL={selectedRepo?.spec.url}
+          isReadOnly={isReadOnly}
+        />
       )}
       {createRepoModalOpen && (
         <CreateRepositoryModal

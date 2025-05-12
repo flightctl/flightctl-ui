@@ -150,4 +150,23 @@ const RichValidationTextField = React.forwardRef(
 
 RichValidationTextField.displayName = 'RichValidationTextField';
 
-export default RichValidationTextField;
+const RichValidationTextFieldWrapper = React.forwardRef(
+  ({ fieldName, isDisabled, ...rest }: RichValidationTextFieldProps, ref: React.Ref<HTMLInputElement>) => {
+    const [field] = useField<string>({
+      name: fieldName,
+    });
+    if (isDisabled) {
+      return (
+        <FormGroup label={rest?.['aria-label']} isRequired={rest.isRequired}>
+          <TextInput value={field.value} {...rest} isDisabled />
+        </FormGroup>
+      );
+    }
+
+    return <RichValidationTextField ref={ref} fieldName={fieldName} {...rest} />;
+  },
+);
+
+RichValidationTextFieldWrapper.displayName = 'RichValidationTextFieldWrapper';
+
+export default RichValidationTextFieldWrapper;

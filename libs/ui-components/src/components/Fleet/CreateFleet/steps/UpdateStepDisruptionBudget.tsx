@@ -9,7 +9,7 @@ import ErrorHelperText from '../../../form/FieldHelperText';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import { DisruptionBudgetForm } from '../../../../types/deviceSpec';
 
-const UpdateStepDisruptionBudget = () => {
+const UpdateStepDisruptionBudget = ({ isReadOnly }: { isReadOnly: boolean }) => {
   const { t } = useTranslation();
 
   const [, meta] = useField<DisruptionBudgetForm>('disruptionBudget');
@@ -29,6 +29,7 @@ const UpdateStepDisruptionBudget = () => {
               <StackItem>{t("Leaving this empty will apply the disruption budget to all fleet's devices.")}</StackItem>
             </Stack>
           }
+          isReadOnly={isReadOnly}
         />
       </FormGroupWithHelperText>
       <FormGroup>
@@ -44,6 +45,7 @@ const UpdateStepDisruptionBudget = () => {
                 aria-label={t('Minimum number of available devices')}
                 name="disruptionBudget.minAvailable"
                 min={1}
+                isDisabled={isReadOnly}
               />
             </FormGroupWithHelperText>
           </FlexItem>
@@ -58,6 +60,7 @@ const UpdateStepDisruptionBudget = () => {
                 aria-label={t('Maximum number of unavailable devices')}
                 name="disruptionBudget.maxUnavailable"
                 min={1}
+                isDisabled={isReadOnly}
               />
             </FormGroupWithHelperText>
           </FlexItem>

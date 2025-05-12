@@ -13,10 +13,11 @@ import {
 import { isUpdatePolicyStepValid, updatePolicyStepId } from './steps/UpdatePolicyStep';
 
 type CreateFleetWizardFooterProps = {
+  isReadOnly: boolean;
   isEdit: boolean;
 };
 
-const CreateFleetWizardFooter = ({ isEdit }: CreateFleetWizardFooterProps) => {
+const CreateFleetWizardFooter = ({ isReadOnly, isEdit }: CreateFleetWizardFooterProps) => {
   const { t } = useTranslation();
   const { goToNextStep, goToPrevStep, activeStep } = useWizardContext();
   const { submitForm, isSubmitting, errors } = useFormikContext<FleetFormValues>();
@@ -39,15 +40,29 @@ const CreateFleetWizardFooter = ({ isEdit }: CreateFleetWizardFooterProps) => {
     buttonRef.current?.blur();
   };
 
-  const primaryBtn = isReviewStep ? (
-    <Button variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
-      {isEdit ? t('Save') : t('Create fleet')}
-    </Button>
-  ) : (
-    <Button variant="primary" onClick={onMoveNext} isDisabled={!isStepValid} ref={buttonRef}>
-      {t('Next')}
-    </Button>
-  );
+  let primaryBtn: React.ReactNode;
+
+  if (isReviewStep) {
+    if (isReadOnly) {
+      primaryBtn = (
+        <Button variant="primary" onClick={() => navigate(-1)}>
+          {t('Close')}
+        </Button>
+      );
+    } else {
+      primaryBtn = (
+        <Button variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
+          {isEdit ? t('Save') : t('Create fleet')}
+        </Button>
+      );
+    }
+  } else {
+    primaryBtn = (
+      <Button variant="primary" onClick={onMoveNext} isDisabled={!isReadOnly && !isStepValid} ref={buttonRef}>
+        {t('Next')}
+      </Button>
+    );
+  }
 
   return (
     <WizardFooterWrapper>

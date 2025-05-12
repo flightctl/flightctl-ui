@@ -1,9 +1,0 @@
-.fctl-labels-view__collapsed {
-  /* Set a maximum width on larger breakpoints */
-  @media (min-width: 769px) {
-    max-width: 400px;
-  }
-}
-
-
-

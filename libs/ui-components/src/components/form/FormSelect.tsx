@@ -21,14 +21,14 @@ const isItemObject = (item: string | SelectItem): item is SelectItem => typeof i
 
 const getItemLabel = (item: string | SelectItem) => (isItemObject(item) ? item.label : item);
 
-const FormSelect: React.FC<FormSelectProps> = ({
+const FormSelect = ({
   name,
   items,
   withStatusIcon,
   helperText,
   placeholderText,
   children,
-}) => {
+}: React.PropsWithChildren<FormSelectProps>) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [field, meta, { setValue, setTouched }] = useField<string>({
     name: name,
@@ -113,4 +113,15 @@ const FormSelect: React.FC<FormSelectProps> = ({
   );
 };
 
-export default FormSelect;
+const FormSelectWrapper = ({ name, items, isDisabled, ...rest }: FormSelectProps & { isDisabled?: boolean }) => {
+  const [{ value }] = useField<string>({
+    name: name,
+  });
+  if (isDisabled) {
+    const selectedText = value ? getItemLabel(items[value]) : rest.placeholderText;
+    return selectedText || value || '-';
+  }
+  return <FormSelect name={name} items={items} {...rest} />;
+};
+
+export default FormSelectWrapper;

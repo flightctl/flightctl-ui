@@ -47,12 +47,14 @@ type ConfigSectionProps = {
   repoRefetch: VoidFunction;
   canCreateRepo: boolean;
   canListRepo: boolean;
+  isReadOnly?: boolean;
 };
 
 const ConfigSection = ({
   index,
   repositories,
   repoRefetch,
+  isReadOnly,
   canCreateRepo,
   canListRepo,
 }: ConfigSectionProps & { index: number }) => {
@@ -67,20 +69,33 @@ const ConfigSection = ({
   useValidateOnMount();
 
   const items = React.useMemo(() => {
-    const options = {
+    const allOptions = {
       [ConfigType.INLINE]: { label: t('Inline configuration') },
+      [ConfigType.GIT]: { label: t('Git configuration') },
+      [ConfigType.HTTP]: { label: t('Http configuration') },
+      [ConfigType.K8S_SECRET]: { label: t('Kubernetes secret') },
+    };
+    if (isReadOnly) {
+      return {
+        [type]: allOptions[type],
+      };
+    }
+
+    const options = {
+      [ConfigType.INLINE]: allOptions[ConfigType.INLINE],
     };
     if (canListRepo && (canCreateRepo || repositories.length > 0)) {
-      options[ConfigType.GIT] = { label: t('Git configuration') };
-      options[ConfigType.HTTP] = { label: t('Http configuration') };
+      options[ConfigType.GIT] = allOptions[ConfigType.GIT];
+      options[ConfigType.HTTP] = allOptions[ConfigType.HTTP];
     }
     if (type === ConfigType.K8S_SECRET) {
-      options[ConfigType.K8S_SECRET] = { label: t('Kubernetes secret provider') };
+      options[ConfigType.K8S_SECRET] = allOptions[ConfigType.K8S_SECRET];
     }
+
     return options;
     // The k8s secret option must remain active for this config even when the users switch the configType to a different one
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t, canListRepo]);
+  }, [t, canListRepo, isReadOnly]);
 
   return (
     <ExpandableFormSection
@@ -90,6 +105,7 @@ const ConfigSection = ({
     >
       <Grid hasGutter>
         <RichValidationTextField
+          isDisabled={isReadOnly}
           fieldName={`${fieldName}.name`}
           aria-label={t('Source name')}
           validations={getDnsSubdomainValidations(t)}
@@ -97,15 +113,21 @@ const ConfigSection = ({
         />
 
         <FormGroup label={t('Source type')} isRequired>
-          <FormSelect items={items} name={`${fieldName}.type`} placeholderText={t('Select a source type')} />
+          <FormSelect
+            items={items}
+            name={`${fieldName}.type`}
+            placeholderText={t('Select a source type')}
+            isDisabled={isReadOnly}
+          />
         </FormGroup>
 
         {type === ConfigType.K8S_SECRET && <ConfigK8sSecretTemplateForm index={index} />}
-        {type === ConfigType.INLINE && <ConfigInlineTemplateForm index={index} />}
+        {type === ConfigType.INLINE && <ConfigInlineTemplateForm index={index} isReadOnly={isReadOnly} />}
         {(type === ConfigType.GIT || type === ConfigType.HTTP) && (
           <ConfigWithRepositoryTemplateForm
             repoType={type === ConfigType.HTTP ? RepoSpecType.HTTP : RepoSpecType.GIT}
             index={index}
+            isReadOnly={isReadOnly}
             canCreateRepo={canCreateRepo}
             repositories={repositories}
             repoRefetch={repoRefetch}
@@ -116,7 +138,13 @@ const ConfigSection = ({
   );
 };
 
-const ConfigurationTemplatesForm = ({ repositories, repoRefetch, canCreateRepo, canListRepo }: ConfigSectionProps) => {
+const ConfigurationTemplatesForm = ({
+  repositories,
+  repoRefetch,
+  isReadOnly,
+  canCreateRepo,
+  canListRepo,
+}: ConfigSectionProps) => {
   const { t } = useTranslation();
   const { values, errors } = useFormikContext<DeviceSpecConfigFormValues>();
 
@@ -138,6 +166,7 @@ const ConfigurationTemplatesForm = ({ repositories, repoRefetch, canCreateRepo, 
                   <SplitItem isFilled>
                     <ConfigSection
                       index={index}
+                      isReadOnly={isReadOnly}
                       canCreateRepo={canCreateRepo}
                       repositories={repositories}
                       repoRefetch={repoRefetch}
@@ -151,6 +180,7 @@ const ConfigurationTemplatesForm = ({ repositories, repoRefetch, canCreateRepo, 
                       icon={<MinusCircleIcon />}
                       iconPosition="start"
                       onClick={() => remove(index)}
+                      isDisabled={isReadOnly}
                     />
                   </SplitItem>
                 </Split>
@@ -168,6 +198,7 @@ const ConfigurationTemplatesForm = ({ repositories, repoRefetch, canCreateRepo, 
                       type: '',
                     });
                   }}
+                  isDisabled={isReadOnly}
                 >
                   {t('Add configuration')}
                 </Button>
@@ -181,7 +212,7 @@ const ConfigurationTemplatesForm = ({ repositories, repoRefetch, canCreateRepo, 
   );
 };
 
-const ConfigurationTemplates = () => {
+const ConfigurationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
   const [canCreateRepo] = useAccessReview(RESOURCE.REPOSITORY, VERB.CREATE);
   const [repositoryList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>({
     endpoint: 'repositories',
@@ -207,6 +238,7 @@ const ConfigurationTemplates = () => {
 
   return (
     <ConfigurationTemplatesForm
+      isReadOnly={isReadOnly}
       canListRepo
       canCreateRepo={canCreateRepo}
       repositories={repositories}
@@ -215,12 +247,18 @@ const ConfigurationTemplates = () => {
   );
 };
 
-const ConfigurationTemplatesWithPermissions = () => {
+const ConfigurationTemplatesWithPermissions = ({ isReadOnly }) => {
   const [canListRepo] = useAccessReview(RESOURCE.REPOSITORY, VERB.LIST);
-  return canListRepo ? (
+  return canListRepo && !isReadOnly ? (
     <ConfigurationTemplates />
   ) : (
-    <ConfigurationTemplatesForm canListRepo={false} canCreateRepo={false} repositories={[]} repoRefetch={() => {}} />
+    <ConfigurationTemplatesForm
+      isReadOnly
+      canListRepo={false}
+      canCreateRepo={false}
+      repositories={[]}
+      repoRefetch={() => {}}
+    />
   );
 };
 

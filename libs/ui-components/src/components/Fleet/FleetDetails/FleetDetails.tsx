@@ -32,6 +32,7 @@ const FleetDetails = () => {
   const [canEdit] = useAccessReview(RESOURCE.FLEET, VERB.PATCH);
 
   const isManaged = !!fleet?.metadata?.owner;
+  const hasActions = canDelete || (canEdit && !isManaged) || isManaged;
 
   return (
     <DetailsPage
@@ -42,24 +43,20 @@ const FleetDetails = () => {
       resourceType="Fleets"
       resourceTypeLabel={t('Fleets')}
       actions={
-        (canDelete || canEdit) && (
+        hasActions && (
           <DetailsPageActions>
             <DropdownList>
-              {canEdit && (
-                <DropdownItem
-                  isAriaDisabled={isManaged}
-                  tooltipProps={
-                    isManaged
-                      ? {
-                          content: t('Fleets managed by a resource sync cannot be edited'),
-                        }
-                      : undefined
-                  }
-                  onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}
-                >
-                  {t('Edit fleet')}
+              {isManaged && (
+                <DropdownItem onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}>
+                  {t('View fleet configurations')}
                 </DropdownItem>
               )}
+              {canEdit && !isManaged && (
+                <DropdownItem onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}>
+                  {t('Edit fleet configurations')}
+                </DropdownItem>
+              )}
+
               {canDelete && (
                 <DropdownItem
                   title={t('Delete fleet')}
