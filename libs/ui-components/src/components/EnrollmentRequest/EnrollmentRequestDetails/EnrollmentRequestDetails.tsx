@@ -47,7 +47,7 @@ const EnrollmentRequestDetails = () => {
     router: { useParams },
   } = useAppContext();
   const { enrollmentRequestId } = useParams() as { enrollmentRequestId: string };
-  const [er, loading, error, refetch] = useFetchPeriodically<EnrollmentRequest>({
+  const [er, loading, error] = useFetchPeriodically<EnrollmentRequest>({
     endpoint: `enrollmentrequests/${enrollmentRequestId}`,
   });
   const { remove } = useFetch();
@@ -58,6 +58,7 @@ const EnrollmentRequestDetails = () => {
   const [isApprovalModalOpen, setIsApprovalModalOpen] = React.useState(false);
   const erSystemInfo = useDeviceSpecSystemInfo(er?.spec.deviceStatus?.systemInfo, t);
   const hasDefaultLabels = Object.keys(er?.spec.labels || {}).length > 0;
+  const deviceId = er?.metadata.name as string;
 
   const { deleteAction, deleteModal } = useDeleteAction({
     resourceName: enrollmentRequestId,
@@ -74,7 +75,7 @@ const EnrollmentRequestDetails = () => {
     <DetailsPage
       loading={loading}
       error={error}
-      id={er?.metadata.name as string}
+      id={deviceId}
       resourceLink={ROUTE.DEVICES}
       resourceType="Devices"
       resourceTypeLabel={t('Devices')}
@@ -101,7 +102,7 @@ const EnrollmentRequestDetails = () => {
               <FlightControlDescriptionList columnModifier={{ lg: '3Col' }}>
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
-                  <DescriptionListDescription>{er?.metadata.name || '-'}</DescriptionListDescription>
+                  <DescriptionListDescription>{deviceId}</DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Last seen')}</DescriptionListTerm>
@@ -209,9 +210,9 @@ const EnrollmentRequestDetails = () => {
       {er && isApprovalModalOpen && (
         <ApproveDeviceModal
           enrollmentRequest={er}
-          onClose={(updateList) => {
+          onClose={(isApproved) => {
             setIsApprovalModalOpen(false);
-            updateList && refetch();
+            isApproved && navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceId });
           }}
         />
       )}
