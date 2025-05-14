@@ -114,6 +114,9 @@ const UpdateStepRolloutPolicy = ({ isReadOnly }: { isReadOnly: boolean }) => {
   } = useFormikContext<FleetFormValues>();
 
   const batches = rolloutPolicy.batches || [];
+  if (isReadOnly && batches.length === 0) {
+    return null;
+  }
 
   return (
     <>
@@ -154,34 +157,37 @@ const UpdateStepRolloutPolicy = ({ isReadOnly }: { isReadOnly: boolean }) => {
                     <SplitItem isFilled>
                       <RolloutPolicyBatch index={index} isReadOnly={isReadOnly} />
                     </SplitItem>
-                    <SplitItem>
-                      <Button
-                        aria-label={t('Delete batch')}
-                        variant="link"
-                        icon={<MinusCircleIcon />}
-                        iconPosition="start"
-                        onClick={() => remove(index)}
-                        isDisabled={batches.length === 1 || isReadOnly}
-                      />
-                    </SplitItem>
+                    {!isReadOnly && (
+                      <SplitItem>
+                        <Button
+                          aria-label={t('Delete batch')}
+                          variant="link"
+                          icon={<MinusCircleIcon />}
+                          iconPosition="start"
+                          onClick={() => remove(index)}
+                          isDisabled={batches.length === 1}
+                        />
+                      </SplitItem>
+                    )}
                   </Split>
                 </FormSection>
               ))}
-              <FormSection>
-                <FormGroup>
-                  <Button
-                    variant="link"
-                    icon={<PlusCircleIcon />}
-                    iconPosition="start"
-                    onClick={() => {
-                      push(getEmptyInitializedBatch());
-                    }}
-                    isDisabled={isReadOnly}
-                  >
-                    {t('Add batch')}
-                  </Button>
-                </FormGroup>
-              </FormSection>
+              {!isReadOnly && (
+                <FormSection>
+                  <FormGroup>
+                    <Button
+                      variant="link"
+                      icon={<PlusCircleIcon />}
+                      iconPosition="start"
+                      onClick={() => {
+                        push(getEmptyInitializedBatch());
+                      }}
+                    >
+                      {t('Add batch')}
+                    </Button>
+                  </FormGroup>
+                </FormSection>
+              )}
             </>
           )}
         </FieldArray>

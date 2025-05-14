@@ -99,8 +99,10 @@ const ConfigInlineTemplateForm = ({ index, isReadOnly }: ConfigInlineTemplateFor
   const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<DeviceSpecConfigFormValues>();
   const inlineConfig = values.configTemplates[index] as InlineConfigTemplate;
+  const configCount = inlineConfig.files?.length || 0;
+
   React.useEffect(() => {
-    if (!inlineConfig.files?.length) {
+    if (configCount === 0) {
       setFieldValue(`configTemplates.${index}.files`, [
         {
           path: '',
@@ -110,6 +112,10 @@ const ConfigInlineTemplateForm = ({ index, isReadOnly }: ConfigInlineTemplateFor
     }
     // eslint-disable-next-line
   }, []);
+
+  if (isReadOnly && configCount === 0) {
+    return null;
+  }
 
   return (
     <FieldArray name={`configTemplates.${index}.files`}>
@@ -122,7 +128,7 @@ const ConfigInlineTemplateForm = ({ index, isReadOnly }: ConfigInlineTemplateFor
                 <SplitItem isFilled>
                   <FileForm index={fileIndex} fieldName={fieldName} isReadOnly={isReadOnly} />
                 </SplitItem>
-                {inlineConfig.files.length > 1 && (
+                {!isReadOnly && configCount > 1 && (
                   <SplitItem>
                     <Button
                       aria-label={t('Delete file')}
@@ -130,29 +136,29 @@ const ConfigInlineTemplateForm = ({ index, isReadOnly }: ConfigInlineTemplateFor
                       icon={<MinusCircleIcon />}
                       iconPosition="start"
                       onClick={() => remove(fileIndex)}
-                      isDisabled={isReadOnly}
                     />
                   </SplitItem>
                 )}
               </Split>
             );
           })}
-          <FormGroup>
-            <Button
-              variant="link"
-              icon={<PlusCircleIcon />}
-              iconPosition="start"
-              onClick={() => {
-                push({
-                  path: '',
-                  content: '',
-                });
-              }}
-              isDisabled={isReadOnly}
-            >
-              {t('Add file')}
-            </Button>
-          </FormGroup>
+          {!isReadOnly && (
+            <FormGroup>
+              <Button
+                variant="link"
+                icon={<PlusCircleIcon />}
+                iconPosition="start"
+                onClick={() => {
+                  push({
+                    path: '',
+                    content: '',
+                  });
+                }}
+              >
+                {t('Add file')}
+              </Button>
+            </FormGroup>
+          )}
         </>
       )}
     </FieldArray>

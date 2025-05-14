@@ -123,32 +123,34 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
                       />
                     </FormGroup>
                   </SplitItem>
-                  <SplitItem>
-                    <Button
-                      aria-label={t('Delete variable')}
-                      variant="link"
-                      icon={<MinusCircleIcon />}
-                      iconPosition="end"
-                      onClick={() => remove(varIndex)}
-                      isDisabled={isReadOnly}
-                    />
-                  </SplitItem>
+                  {!isReadOnly && (
+                    <SplitItem>
+                      <Button
+                        aria-label={t('Delete variable')}
+                        variant="link"
+                        icon={<MinusCircleIcon />}
+                        iconPosition="end"
+                        onClick={() => remove(varIndex)}
+                      />
+                    </SplitItem>
+                  )}
                 </Split>
               ))}
               <ErrorHelperText error={appVarsError} />
-              <FormGroup>
-                <Button
-                  variant="link"
-                  icon={<PlusCircleIcon />}
-                  iconPosition="start"
-                  onClick={() => {
-                    push({ name: '', value: '' });
-                  }}
-                  isDisabled={isReadOnly}
-                >
-                  {t('Add an application variable')}
-                </Button>
-              </FormGroup>
+              {!isReadOnly && (
+                <FormGroup>
+                  <Button
+                    variant="link"
+                    icon={<PlusCircleIcon />}
+                    iconPosition="start"
+                    onClick={() => {
+                      push({ name: '', value: '' });
+                    }}
+                  >
+                    {t('Add an application variable')}
+                  </Button>
+                </FormGroup>
+              )}
             </>
           )}
         </FieldArray>
@@ -160,6 +162,9 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
 const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
+  if (isReadOnly && values.applications.length === 0) {
+    return null;
+  }
 
   return (
     <FormGroupWithHelperText
@@ -175,38 +180,40 @@ const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
                   <SplitItem isFilled>
                     <ApplicationSection index={index} isReadOnly={isReadOnly} />
                   </SplitItem>
-                  <SplitItem>
-                    <Button
-                      aria-label={t('Delete application')}
-                      variant="link"
-                      icon={<MinusCircleIcon />}
-                      iconPosition="start"
-                      isDisabled={isReadOnly}
-                      onClick={() => remove(index)}
-                    />
-                  </SplitItem>
+                  {!isReadOnly && (
+                    <SplitItem>
+                      <Button
+                        aria-label={t('Delete application')}
+                        variant="link"
+                        icon={<MinusCircleIcon />}
+                        iconPosition="start"
+                        onClick={() => remove(index)}
+                      />
+                    </SplitItem>
+                  )}
                 </Split>
               </FormSection>
             ))}
 
-            <FormSection>
-              <FormGroup>
-                <Button
-                  variant="link"
-                  icon={<PlusCircleIcon />}
-                  iconPosition="start"
-                  onClick={() => {
-                    push({
-                      name: '',
-                      variables: [],
-                    });
-                  }}
-                  isDisabled={isReadOnly}
-                >
-                  {t('Add application')}
-                </Button>
-              </FormGroup>
-            </FormSection>
+            {!isReadOnly && (
+              <FormSection>
+                <FormGroup>
+                  <Button
+                    variant="link"
+                    icon={<PlusCircleIcon />}
+                    iconPosition="start"
+                    onClick={() => {
+                      push({
+                        name: '',
+                        variables: [],
+                      });
+                    }}
+                  >
+                    {t('Add application')}
+                  </Button>
+                </FormGroup>
+              </FormSection>
+            )}
           </>
         )}
       </FieldArray>
