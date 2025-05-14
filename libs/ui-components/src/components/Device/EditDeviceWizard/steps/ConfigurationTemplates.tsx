@@ -147,6 +147,9 @@ const ConfigurationTemplatesForm = ({
 }: ConfigSectionProps) => {
   const { t } = useTranslation();
   const { values, errors } = useFormikContext<DeviceSpecConfigFormValues>();
+  if (isReadOnly && values.configTemplates.length === 0) {
+    return null;
+  }
 
   const generalError = typeof errors.configTemplates === 'string' ? errors.configTemplates : undefined;
 
@@ -173,37 +176,39 @@ const ConfigurationTemplatesForm = ({
                       canListRepo={canListRepo}
                     />
                   </SplitItem>
-                  <SplitItem>
-                    <Button
-                      aria-label={t('Delete configuration')}
-                      variant="link"
-                      icon={<MinusCircleIcon />}
-                      iconPosition="start"
-                      onClick={() => remove(index)}
-                      isDisabled={isReadOnly}
-                    />
-                  </SplitItem>
+                  {!isReadOnly && (
+                    <SplitItem>
+                      <Button
+                        aria-label={t('Delete configuration')}
+                        variant="link"
+                        icon={<MinusCircleIcon />}
+                        iconPosition="start"
+                        onClick={() => remove(index)}
+                      />
+                    </SplitItem>
+                  )}
                 </Split>
               </FormSection>
             ))}
-            <FormSection>
-              <FormGroup>
-                <Button
-                  variant="link"
-                  icon={<PlusCircleIcon />}
-                  iconPosition="start"
-                  onClick={() => {
-                    push({
-                      name: '',
-                      type: '',
-                    });
-                  }}
-                  isDisabled={isReadOnly}
-                >
-                  {t('Add configuration')}
-                </Button>
-              </FormGroup>
-            </FormSection>
+            {!isReadOnly && (
+              <FormSection>
+                <FormGroup>
+                  <Button
+                    variant="link"
+                    icon={<PlusCircleIcon />}
+                    iconPosition="start"
+                    onClick={() => {
+                      push({
+                        name: '',
+                        type: '',
+                      });
+                    }}
+                  >
+                    {t('Add configuration')}
+                  </Button>
+                </FormGroup>
+              </FormSection>
+            )}
             <ErrorHelperText error={generalError} />
           </>
         )}

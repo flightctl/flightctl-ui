@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Label, LabelGroup } from '@patternfly/react-core';
+import { FormGroup, Label, LabelGroup } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
 import { DeviceSpecConfigFormValues } from '../../../../types/deviceSpec';
@@ -77,6 +77,11 @@ const SystemdUnitsForm = () => {
 
 const SystemdUnitsFormWrapper = ({ isReadOnly }: { isReadOnly?: boolean }) => {
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
+  const { t } = useTranslation();
+
+  if (isReadOnly && values.systemdUnits.length === 0) {
+    return null;
+  }
 
   if (isReadOnly) {
     const labels: Record<string, string> = {};
@@ -84,9 +89,17 @@ const SystemdUnitsFormWrapper = ({ isReadOnly }: { isReadOnly?: boolean }) => {
       labels[systemdUnit.pattern] = '';
     });
 
-    return <LabelsView prefix="systemdUnits" labels={labels} />;
+    return (
+      <FormGroup label={t('Tracked systemd services')}>
+        <LabelsView prefix="systemdUnits" labels={labels} />
+      </FormGroup>
+    );
   }
-  return <SystemdUnitsForm />;
+  return (
+    <FormGroup label={t('Tracked systemd services')}>
+      <SystemdUnitsForm />
+    </FormGroup>
+  );
 };
 
 export default SystemdUnitsFormWrapper;

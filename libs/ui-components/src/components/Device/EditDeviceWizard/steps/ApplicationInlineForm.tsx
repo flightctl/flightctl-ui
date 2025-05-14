@@ -62,6 +62,10 @@ const ApplicationInlineForm = ({
 }) => {
   const { t } = useTranslation();
 
+  if (isReadOnly && !app.files?.length) {
+    return null;
+  }
+
   return (
     <FieldArray name={`applications.${index}.files`}>
       {({ push, remove }) => (
@@ -78,14 +82,13 @@ const ApplicationInlineForm = ({
                     isReadOnly={isReadOnly}
                   />
                 </SplitItem>
-                {app.files.length > 1 && (
+                {!isReadOnly && app.files.length > 1 && (
                   <SplitItem>
                     <Button
                       aria-label={t('Delete file')}
                       variant="link"
                       icon={<MinusCircleIcon />}
                       iconPosition="start"
-                      isDisabled={isReadOnly}
                       onClick={() => remove(fileIndex)}
                     />
                   </SplitItem>
@@ -94,23 +97,24 @@ const ApplicationInlineForm = ({
             );
           })}
 
-          <FormGroup>
-            <Button
-              variant="link"
-              icon={<PlusCircleIcon />}
-              iconPosition="start"
-              onClick={() => {
-                push({
-                  path: '',
-                  content: '',
-                  base64: false,
-                });
-              }}
-              isDisabled={isReadOnly}
-            >
-              {t('Add file')}
-            </Button>
-          </FormGroup>
+          {!isReadOnly && (
+            <FormGroup>
+              <Button
+                variant="link"
+                icon={<PlusCircleIcon />}
+                iconPosition="start"
+                onClick={() => {
+                  push({
+                    path: '',
+                    content: '',
+                    base64: false,
+                  });
+                }}
+              >
+                {t('Add file')}
+              </Button>
+            </FormGroup>
+          )}
         </>
       )}
     </FieldArray>
