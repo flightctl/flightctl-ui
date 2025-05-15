@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Alert, Button, Modal, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, Button, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import { Repository, ResourceSyncList } from '@flightctl/types';
@@ -88,14 +89,71 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
   }, [fetchResourceSyncsCount]);
 
   return (
-    <Modal
-      title={t('Delete repositories ?')}
-      isOpen
-      onClose={onClose}
-      showClose={!isDeleting}
-      variant="medium"
-      titleIconVariant="warning"
-      actions={[
+    <Modal isOpen onClose={isDeleting ? undefined : onClose} variant="medium">
+      <ModalHeader title={t('Delete repositories ?')} titleIconVariant="warning" />
+      <ModalBody>
+        <Stack hasGutter>
+          {isLoading && <>{t('Please wait while the repository details are loading')}</>}
+          {!isLoading && (
+            <>
+              <StackItem>{t('Are you sure you want to delete the following repositories ?')}</StackItem>
+              <StackItem>
+                <Alert variant="warning" title={t('Resource syncs will also be deleted')} isInline>
+                  {t(
+                    'Note that all the resource syncs of the selected repositories will also be deleted. Any fleet that is being managed by those resource syncs will become unmanaged.',
+                  )}
+                </Alert>
+              </StackItem>
+              <StackItem>
+                <Table>
+                  <Thead>
+                    <Tr>
+                      <Th modifier="fitContent">{t('Repository name')}</Th>
+                      <Th modifier="fitContent">{t('# Resource syncs')}</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {repositories.map((repository) => {
+                      const repositoryId = repository.metadata.name || '';
+                      return (
+                        <Tr key={repositoryId}>
+                          <Td dataLabel={t('Repository name')}>{repositoryId}</Td>
+                          <Td dataLabel={t('# Resource syncs')}>{resourceSyncCount[repositoryId] || '0'}</Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+              </StackItem>
+            </>
+          )}
+          {isDeleting && (
+            <StackItem>
+              <Progress
+                value={progress}
+                min={0}
+                max={progressTotal}
+                title={t('Deleting...')}
+                measureLocation={ProgressMeasureLocation.top}
+                label={t('{{progress}} of {{progressTotal}}', { progress, progressTotal })}
+                valueText={t('{{progress}} of {{progressTotal}}', { progress, progressTotal })}
+              />
+            </StackItem>
+          )}
+          {errors?.length && (
+            <StackItem>
+              <Alert isInline variant="danger" title={t('An error occurred')}>
+                <Stack hasGutter>
+                  {errors.map((e, index) => (
+                    <StackItem key={index}>{e}</StackItem>
+                  ))}
+                </Stack>
+              </Alert>
+            </StackItem>
+          )}
+        </Stack>
+      </ModalBody>
+      <ModalFooter>
         <Button
           key="delete"
           variant="danger"
@@ -104,72 +162,11 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
           isDisabled={isLoading || isDeleting}
         >
           {t('Delete repositories')}
-        </Button>,
+        </Button>
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
           {t('Cancel')}
-        </Button>,
-      ]}
-    >
-      <Stack hasGutter>
-        {isLoading && <>{t('Please wait while the repository details are loading')}</>}
-        {!isLoading && (
-          <>
-            <StackItem>{t('Are you sure you want to delete the following repositories ?')}</StackItem>
-            <StackItem>
-              <Alert variant="warning" title={t('Resource syncs will also be deleted')} isInline>
-                {t(
-                  'Note that all the resource syncs of the selected repositories will also be deleted. Any fleet that is being managed by those resource syncs will become unmanaged.',
-                )}
-              </Alert>
-            </StackItem>
-            <StackItem>
-              <Table>
-                <Thead>
-                  <Tr>
-                    <Th modifier="fitContent">{t('Repository name')}</Th>
-                    <Th modifier="fitContent">{t('# Resource syncs')}</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {repositories.map((repository) => {
-                    const repositoryId = repository.metadata.name || '';
-                    return (
-                      <Tr key={repositoryId}>
-                        <Td dataLabel={t('Repository name')}>{repositoryId}</Td>
-                        <Td dataLabel={t('# Resource syncs')}>{resourceSyncCount[repositoryId] || '0'}</Td>
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
-            </StackItem>
-          </>
-        )}
-        {isDeleting && (
-          <StackItem>
-            <Progress
-              value={progress}
-              min={0}
-              max={progressTotal}
-              title={t('Deleting...')}
-              measureLocation={ProgressMeasureLocation.top}
-              label={t('{{progress}} of {{progressTotal}}', { progress, progressTotal })}
-              valueText={t('{{progress}} of {{progressTotal}}', { progress, progressTotal })}
-            />
-          </StackItem>
-        )}
-        {errors?.length && (
-          <StackItem>
-            <Alert isInline variant="danger" title={t('An error occurred')}>
-              <Stack hasGutter>
-                {errors.map((e, index) => (
-                  <StackItem key={index}>{e}</StackItem>
-                ))}
-              </Stack>
-            </Alert>
-          </StackItem>
-        )}
-      </Stack>
+        </Button>
+      </ModalFooter>
     </Modal>
   );
 };
