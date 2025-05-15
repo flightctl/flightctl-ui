@@ -28,6 +28,7 @@ const emptySystemInfo = {
 const excludedKnownProps = [
   'distroVersion', // It's combined with "distroName"
   'customInfo', // Custom properies are evaluated separately from the predefined, known properties
+  'attestation', // In Phase1 this includes only the raw data, without a report of success or failure.
 ];
 
 const getInfoDataKnownKeys = (t: TFunction) => ({
@@ -44,7 +45,6 @@ const getInfoDataKnownKeys = (t: TFunction) => ({
   productName: t('Product name'),
   productSerial: t('Product serial'),
   productUuid: t('Product UUID'),
-  attestation: t('Attestation'),
   tpmVendorInfo: t('TPM vendor info'),
 });
 
@@ -74,9 +74,6 @@ export const useDeviceSpecSystemInfo = (
             'distroVersion' in systemInfo
               ? `${systemInfo.distroName} ${systemInfo.distroVersion}`
               : systemInfo.distroName;
-          break;
-        case 'attestation':
-          infoDataValue = t('Information was gathered');
           break;
         default:
           infoDataValue = systemInfo[infoKey];
