@@ -17,9 +17,10 @@ type InlineApplicationFileFormProps = {
   file: InlineAppForm['files'][0];
   fileFieldName: string;
   fileIndex: number;
+  isReadOnly?: boolean;
 };
 
-const InlineApplicationFileForm = ({ file, fileIndex, fileFieldName }: InlineApplicationFileFormProps) => {
+const InlineApplicationFileForm = ({ file, fileIndex, fileFieldName, isReadOnly }: InlineApplicationFileFormProps) => {
   const { t } = useTranslation();
   return (
     <ExpandableFormSection
@@ -29,20 +30,41 @@ const InlineApplicationFileForm = ({ file, fileIndex, fileFieldName }: InlineApp
     >
       <Grid hasGutter>
         <FormGroup label={t('File path on the device (relative)')} isRequired>
-          <TextField name={`${fileFieldName}.path`} />
+          <TextField name={`${fileFieldName}.path`} isDisabled={isReadOnly} />
         </FormGroup>
-        <UploadField label={t('Content')} name={`${fileFieldName}.content`} maxFileBytes={MAX_INLINE_FILE_SIZE_BYTES} />
+        <UploadField
+          label={t('Content')}
+          name={`${fileFieldName}.content`}
+          maxFileBytes={MAX_INLINE_FILE_SIZE_BYTES}
+          isDisabled={isReadOnly}
+        />
 
         <FormGroup>
-          <CheckboxField name={`${fileFieldName}.base64`} label={t('Content is base64 encoded')} />
+          <CheckboxField
+            name={`${fileFieldName}.base64`}
+            label={t('Content is base64 encoded')}
+            isDisabled={isReadOnly}
+          />
         </FormGroup>
       </Grid>
     </ExpandableFormSection>
   );
 };
 
-const ApplicationInlineForm = ({ app, index }: { app: InlineAppForm; index: number }) => {
+const ApplicationInlineForm = ({
+  app,
+  index,
+  isReadOnly,
+}: {
+  app: InlineAppForm;
+  index: number;
+  isReadOnly?: boolean;
+}) => {
   const { t } = useTranslation();
+
+  if (isReadOnly && !app.files?.length) {
+    return null;
+  }
 
   return (
     <FieldArray name={`applications.${index}.files`}>
@@ -53,9 +75,14 @@ const ApplicationInlineForm = ({ app, index }: { app: InlineAppForm; index: numb
             return (
               <Split key={fileIndex} hasGutter>
                 <SplitItem isFilled>
-                  <InlineApplicationFileForm file={file} fileIndex={fileIndex} fileFieldName={fieldName} />
+                  <InlineApplicationFileForm
+                    file={file}
+                    fileIndex={fileIndex}
+                    fileFieldName={fieldName}
+                    isReadOnly={isReadOnly}
+                  />
                 </SplitItem>
-                {app.files.length > 1 && (
+                {!isReadOnly && app.files.length > 1 && (
                   <SplitItem>
                     <Button
                       aria-label={t('Delete file')}
@@ -69,22 +96,25 @@ const ApplicationInlineForm = ({ app, index }: { app: InlineAppForm; index: numb
               </Split>
             );
           })}
-          <FormGroup>
-            <Button
-              variant="link"
-              icon={<PlusCircleIcon />}
-              iconPosition="start"
-              onClick={() => {
-                push({
-                  path: '',
-                  content: '',
-                  base64: false,
-                });
-              }}
-            >
-              {t('Add file')}
-            </Button>
-          </FormGroup>
+
+          {!isReadOnly && (
+            <FormGroup>
+              <Button
+                variant="link"
+                icon={<PlusCircleIcon />}
+                iconPosition="start"
+                onClick={() => {
+                  push({
+                    path: '',
+                    content: '',
+                    base64: false,
+                  });
+                }}
+              >
+                {t('Add file')}
+              </Button>
+            </FormGroup>
+          )}
         </>
       )}
     </FieldArray>

@@ -4,6 +4,8 @@ import { Label, LabelGroup } from '@patternfly/react-core';
 
 import { FlightCtlLabel } from '../../types/extraTypes';
 import EditableLabelControl from '../common/EditableLabelControl';
+import LabelsView from '../common/LabelsView';
+import { toAPILabel } from '../../utils/labels';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 type LabelsFieldProps = {
@@ -12,20 +14,12 @@ type LabelsFieldProps = {
   addButtonText?: string;
   helperText?: React.ReactNode;
   onChangeCallback?: (newLabels: FlightCtlLabel[], hasErrors: boolean) => void;
-  canEdit?: boolean;
 };
 
 const maxWidthDefaultLabel = '18ch'; // Can fit more chars as it doesn't have a "Close" button
 const maxWidthNonDefaultLabel = '16ch'; // Can fit less chars due to the "Close" button
 
-const LabelsField: React.FC<LabelsFieldProps> = ({
-  name,
-  onChangeCallback,
-  addButtonText,
-  helperText,
-  isLoading,
-  canEdit = true,
-}) => {
+const LabelsField = ({ name, onChangeCallback, addButtonText, helperText, isLoading }: LabelsFieldProps) => {
   const [{ value: labels }, meta, { setValue: setLabels }] = useField<FlightCtlLabel[]>(name);
   const updateLabels = async (newLabels: FlightCtlLabel[]) => {
     const errors = await setLabels(newLabels, true);
@@ -74,14 +68,12 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
         numLabels={5}
         isEditable={!isLoading}
         addLabelControl={
-          canEdit && (
-            <EditableLabelControl
-              defaultLabel="key=value"
-              addButtonText={addButtonText}
-              onAddLabel={onAdd}
-              isEditable={!isLoading}
-            />
-          )
+          <EditableLabelControl
+            defaultLabel="key=value"
+            addButtonText={addButtonText}
+            onAddLabel={onAdd}
+            isEditable={!isLoading}
+          />
         }
       >
         {labels.map(({ key, value, isDefault }, index) => {
@@ -96,13 +88,13 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
           }
 
           const closeButtonProps = isLoading && { isDisabled: true };
-          const isLabelEditable = !isLoading && !isDefault && canEdit;
+          const isLabelEditable = !isLoading && !isDefault;
           return (
             <Label
               key={elKey}
               textMaxWidth={maxWidthNonDefaultLabel}
               closeBtnProps={closeButtonProps}
-              onClose={canEdit ? (e) => onDelete(e, index) : undefined}
+              onClose={(e) => onDelete(e, index)}
               onEditCancel={(_, prevText) => onEdit(index, prevText)}
               onEditComplete={(_, newText) => onEdit(index, newText)}
               /* Add a basic tooltip as the PF tooltip doesn't work for editable labels */
@@ -120,4 +112,12 @@ const LabelsField: React.FC<LabelsFieldProps> = ({
   );
 };
 
-export default LabelsField;
+const LabelsFieldWrapper = ({ name, isDisabled, ...rest }: LabelsFieldProps & { isDisabled?: boolean }) => {
+  const [{ value }] = useField<FlightCtlLabel[]>(name);
+  if (isDisabled) {
+    return <LabelsView prefix={name} labels={toAPILabel(value)} />;
+  }
+  return <LabelsField name={name} {...rest} />;
+};
+
+export default LabelsFieldWrapper;

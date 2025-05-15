@@ -24,9 +24,10 @@ type ScheduleBlockProps = {
   blockType: ScheduleBlockType;
   weekDayError?: string[] | string | Weekday;
   onScheduleModeSwitch: (blockType: ScheduleBlockType) => void;
+  isReadOnly?: boolean;
 };
 
-const ScheduleTimeZone = ({ blockType }: { blockType: ScheduleBlockType }) => {
+const ScheduleTimeZone = ({ blockType, isReadOnly }: { blockType: ScheduleBlockType; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
 
   const id = `updatePolicy.${blockType}TimeZone`;
@@ -49,14 +50,23 @@ const ScheduleTimeZone = ({ blockType }: { blockType: ScheduleBlockType }) => {
         id={id}
         onChange={onChangeTimezoneCheckbox}
         label={t("Use device's local timezone")}
+        isDisabled={isReadOnly}
       />
 
-      {timeZone !== timeUtils.localDeviceTimezone && <FormSelectTypeahead name={id} defaultId="" items={zones} />}
+      {timeZone !== timeUtils.localDeviceTimezone && (
+        <FormSelectTypeahead name={id} defaultId="" items={zones} isDisabled={isReadOnly} />
+      )}
     </FormGroup>
   );
 };
 
-const ScheduleBlock = ({ blockType, updatePolicy, onScheduleModeSwitch, weekDayError }: ScheduleBlockProps) => {
+const ScheduleBlock = ({
+  blockType,
+  updatePolicy,
+  onScheduleModeSwitch,
+  weekDayError,
+  isReadOnly,
+}: ScheduleBlockProps) => {
   const { t } = useTranslation();
 
   let ariaLabel: string;
@@ -115,6 +125,7 @@ const ScheduleBlock = ({ blockType, updatePolicy, onScheduleModeSwitch, weekDayE
                 items={selectableTimes}
                 isValidTypedItem={isValidTypedItem}
                 transformTypedItem={transformTypedItem}
+                isDisabled={isReadOnly}
               />
             </FlexItem>
             <FlexItem>
@@ -125,6 +136,7 @@ const ScheduleBlock = ({ blockType, updatePolicy, onScheduleModeSwitch, weekDayE
                 items={selectableTimes}
                 isValidTypedItem={isValidTypedItem}
                 transformTypedItem={transformTypedItem}
+                isDisabled={isReadOnly}
               />
             </FlexItem>
             <FlexItem>
@@ -133,6 +145,7 @@ const ScheduleBlock = ({ blockType, updatePolicy, onScheduleModeSwitch, weekDayE
                 name={`updatePolicy.${blockType}ScheduleMode`}
                 label={t('Daily')}
                 checkedValue={timeUtils.UpdateScheduleMode.Daily}
+                isDisabled={isReadOnly}
               />
             </FlexItem>
             <FlexItem>
@@ -142,6 +155,7 @@ const ScheduleBlock = ({ blockType, updatePolicy, onScheduleModeSwitch, weekDayE
                 label={t('Weekly')}
                 checkedValue={timeUtils.UpdateScheduleMode.Weekly}
                 onChangeCustom={() => onScheduleModeSwitch(blockType)}
+                isDisabled={isReadOnly}
               />
             </FlexItem>
           </Flex>
@@ -153,25 +167,53 @@ const ScheduleBlock = ({ blockType, updatePolicy, onScheduleModeSwitch, weekDayE
                 <StackItem>
                   <Flex>
                     <FlexItem>
-                      <CheckboxFieldGroupValidation name={`updatePolicy.${blockType}WeekDays[0]`} label={t('Sun')} />
+                      <CheckboxFieldGroupValidation
+                        name={`updatePolicy.${blockType}WeekDays[0]`}
+                        label={t('Sun')}
+                        isDisabled={isReadOnly}
+                      />
                     </FlexItem>
                     <FlexItem>
-                      <CheckboxFieldGroupValidation name={`updatePolicy.${blockType}WeekDays[1]`} label={t('Mon')} />
+                      <CheckboxFieldGroupValidation
+                        name={`updatePolicy.${blockType}WeekDays[1]`}
+                        label={t('Mon')}
+                        isDisabled={isReadOnly}
+                      />
                     </FlexItem>
                     <FlexItem>
-                      <CheckboxFieldGroupValidation name={`updatePolicy.${blockType}WeekDays[2]`} label={t('Tue')} />
+                      <CheckboxFieldGroupValidation
+                        name={`updatePolicy.${blockType}WeekDays[2]`}
+                        label={t('Tue')}
+                        isDisabled={isReadOnly}
+                      />
                     </FlexItem>
                     <FlexItem>
-                      <CheckboxFieldGroupValidation name={`updatePolicy.${blockType}WeekDays[3]`} label={t('Wed')} />
+                      <CheckboxFieldGroupValidation
+                        name={`updatePolicy.${blockType}WeekDays[3]`}
+                        label={t('Wed')}
+                        isDisabled={isReadOnly}
+                      />
                     </FlexItem>
                     <FlexItem>
-                      <CheckboxFieldGroupValidation name={`updatePolicy.${blockType}WeekDays[4]`} label={t('Thu')} />
+                      <CheckboxFieldGroupValidation
+                        name={`updatePolicy.${blockType}WeekDays[4]`}
+                        label={t('Thu')}
+                        isDisabled={isReadOnly}
+                      />
                     </FlexItem>
                     <FlexItem>
-                      <CheckboxFieldGroupValidation name={`updatePolicy.${blockType}WeekDays[5]`} label={t('Fri')} />
+                      <CheckboxFieldGroupValidation
+                        name={`updatePolicy.${blockType}WeekDays[5]`}
+                        label={t('Fri')}
+                        isDisabled={isReadOnly}
+                      />
                     </FlexItem>
                     <FlexItem>
-                      <CheckboxFieldGroupValidation name={`updatePolicy.${blockType}WeekDays[6]`} label={t('Sat')} />
+                      <CheckboxFieldGroupValidation
+                        name={`updatePolicy.${blockType}WeekDays[6]`}
+                        label={t('Sat')}
+                        isDisabled={isReadOnly}
+                      />
                     </FlexItem>
                   </Flex>
                 </StackItem>
@@ -183,14 +225,14 @@ const ScheduleBlock = ({ blockType, updatePolicy, onScheduleModeSwitch, weekDayE
           </FieldArray>
         )}
         <StackItem style={{ maxWidth: 500 }}>
-          <ScheduleTimeZone blockType={blockType} />
+          <ScheduleTimeZone blockType={blockType} isReadOnly={isReadOnly} />
         </StackItem>
       </Stack>
     </FormGroupWithHelperText>
   );
 };
 
-const UpdateStepUpdatePolicy = () => {
+const UpdateStepUpdatePolicy = ({ isReadOnly }: { isReadOnly?: boolean }) => {
   const { t } = useTranslation();
 
   const {
@@ -217,6 +259,7 @@ const UpdateStepUpdatePolicy = () => {
         <CheckboxField
           label={t('Use different update schedules for downloading and installing updates')}
           name="updatePolicy.downloadAndInstallDiffer"
+          isDisabled={isReadOnly}
         />
       </StackItem>
 
@@ -226,6 +269,7 @@ const UpdateStepUpdatePolicy = () => {
           updatePolicy={updatePolicy}
           weekDayError={errors.updatePolicy?.downloadWeekDays}
           onScheduleModeSwitch={onSwitchToWeeklyMode}
+          isReadOnly={isReadOnly}
         />
       </StackItem>
 
@@ -236,6 +280,7 @@ const UpdateStepUpdatePolicy = () => {
             updatePolicy={updatePolicy}
             weekDayError={errors.updatePolicy?.installWeekDays}
             onScheduleModeSwitch={onSwitchToWeeklyMode}
+            isReadOnly={isReadOnly}
           />
         </StackItem>
       )}

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useField } from 'formik';
 import debounce from 'lodash/debounce';
+import { FormGroup, TextInput } from '@patternfly/react-core';
 
 import { useFetch } from '../../hooks/useFetch';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -12,7 +13,7 @@ type NameFieldProps = TextFieldProps & {
   validations: RichValidationTextFieldProps['validations'];
 };
 
-const NameField: React.FC<NameFieldProps> = ({ name, isDisabled, validations, resourceType, ...rest }) => {
+const NameField = ({ name, validations, resourceType, ...rest }: NameFieldProps) => {
   const { t } = useTranslation();
   const { get } = useFetch();
   const [{ value }, { error }, { setError }] = useField<string>(name);
@@ -31,7 +32,7 @@ const NameField: React.FC<NameFieldProps> = ({ name, isDisabled, validations, re
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
-    if (isDisabled || !value) {
+    if (!value) {
       currentErrorRef.current = false;
       return;
     }
@@ -67,7 +68,20 @@ const NameField: React.FC<NameFieldProps> = ({ name, isDisabled, validations, re
     ...validations,
   ];
 
-  return <RichValidationTextField fieldName={name} validations={allValidations} isDisabled={isDisabled} {...rest} />;
+  return <RichValidationTextField fieldName={name} validations={allValidations} {...rest} />;
 };
 
-export default NameField;
+const NameFieldWrapper = ({ name, isDisabled, validations, resourceType, ...rest }: NameFieldProps) => {
+  const [{ value }] = useField<string>(name);
+
+  if (isDisabled) {
+    return (
+      <FormGroup label={rest?.['aria-label']} isRequired={rest.isRequired}>
+        <TextInput value={value} {...rest} isDisabled />
+      </FormGroup>
+    );
+  }
+  return <NameField name={name} validations={validations} resourceType={resourceType} {...rest} />;
+};
+
+export default NameFieldWrapper;

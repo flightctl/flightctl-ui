@@ -23,7 +23,7 @@ import ApplicationInlineForm from './ApplicationInlineForm';
 
 import './ApplicationsForm.css';
 
-const ApplicationSection = ({ index }: { index: number }) => {
+const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
   const appFieldName = `applications[${index}]`;
   const [{ value: app }, { error }, { setValue }] = useField<AppForm>(appFieldName);
@@ -76,6 +76,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
             items={appTypes}
             name={`${appFieldName}.specType`}
             placeholderText={t('Select an application type')}
+            isDisabled={isReadOnly}
           />
         </FormGroup>
 
@@ -88,11 +89,11 @@ const ApplicationSection = ({ index }: { index: number }) => {
           }
           isRequired={app.specType === AppSpecType.INLINE}
         >
-          <TextField aria-label={t('Application name')} name={`${appFieldName}.name`} />
+          <TextField aria-label={t('Application name')} name={`${appFieldName}.name`} isDisabled={isReadOnly} />
         </FormGroupWithHelperText>
 
-        {isImageAppForm(app) && <ApplicationImageForm app={app} index={index} />}
-        {isInlineAppForm(app) && <ApplicationInlineForm app={app} index={index} />}
+        {isImageAppForm(app) && <ApplicationImageForm app={app} index={index} isReadOnly={isReadOnly} />}
+        {isInlineAppForm(app) && <ApplicationInlineForm app={app} index={index} isReadOnly={isReadOnly} />}
 
         <FieldArray name={`${appFieldName}.variables`}>
           {({ push, remove }) => (
@@ -108,6 +109,7 @@ const ApplicationSection = ({ index }: { index: number }) => {
                         aria-label={t('Name')}
                         name={`${appFieldName}.variables.${varIndex}.name`}
                         value={variable.name}
+                        isDisabled={isReadOnly}
                       />
                     </FormGroup>
                   </SplitItem>
@@ -117,33 +119,38 @@ const ApplicationSection = ({ index }: { index: number }) => {
                         aria-label={t('Value')}
                         name={`${appFieldName}.variables.${varIndex}.value`}
                         value={variable.value}
+                        isDisabled={isReadOnly}
                       />
                     </FormGroup>
                   </SplitItem>
-                  <SplitItem>
-                    <Button
-                      aria-label={t('Delete variable')}
-                      variant="link"
-                      icon={<MinusCircleIcon />}
-                      iconPosition="end"
-                      onClick={() => remove(varIndex)}
-                    />
-                  </SplitItem>
+                  {!isReadOnly && (
+                    <SplitItem>
+                      <Button
+                        aria-label={t('Delete variable')}
+                        variant="link"
+                        icon={<MinusCircleIcon />}
+                        iconPosition="end"
+                        onClick={() => remove(varIndex)}
+                      />
+                    </SplitItem>
+                  )}
                 </Split>
               ))}
               <ErrorHelperText error={appVarsError} />
-              <FormGroup>
-                <Button
-                  variant="link"
-                  icon={<PlusCircleIcon />}
-                  iconPosition="start"
-                  onClick={() => {
-                    push({ name: '', value: '' });
-                  }}
-                >
-                  {t('Add an application variable')}
-                </Button>
-              </FormGroup>
+              {!isReadOnly && (
+                <FormGroup>
+                  <Button
+                    variant="link"
+                    icon={<PlusCircleIcon />}
+                    iconPosition="start"
+                    onClick={() => {
+                      push({ name: '', value: '' });
+                    }}
+                  >
+                    {t('Add an application variable')}
+                  </Button>
+                </FormGroup>
+              )}
             </>
           )}
         </FieldArray>
@@ -152,9 +159,12 @@ const ApplicationSection = ({ index }: { index: number }) => {
   );
 };
 
-const ApplicationTemplates = () => {
+const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
+  if (isReadOnly && values.applications.length === 0) {
+    return null;
+  }
 
   return (
     <FormGroupWithHelperText
@@ -168,37 +178,42 @@ const ApplicationTemplates = () => {
               <FormSection key={index}>
                 <Split hasGutter>
                   <SplitItem isFilled>
-                    <ApplicationSection index={index} />
+                    <ApplicationSection index={index} isReadOnly={isReadOnly} />
                   </SplitItem>
-                  <SplitItem>
-                    <Button
-                      aria-label={t('Delete application')}
-                      variant="link"
-                      icon={<MinusCircleIcon />}
-                      iconPosition="start"
-                      onClick={() => remove(index)}
-                    />
-                  </SplitItem>
+                  {!isReadOnly && (
+                    <SplitItem>
+                      <Button
+                        aria-label={t('Delete application')}
+                        variant="link"
+                        icon={<MinusCircleIcon />}
+                        iconPosition="start"
+                        onClick={() => remove(index)}
+                      />
+                    </SplitItem>
+                  )}
                 </Split>
               </FormSection>
             ))}
-            <FormSection>
-              <FormGroup>
-                <Button
-                  variant="link"
-                  icon={<PlusCircleIcon />}
-                  iconPosition="start"
-                  onClick={() => {
-                    push({
-                      name: '',
-                      variables: [],
-                    });
-                  }}
-                >
-                  {t('Add application')}
-                </Button>
-              </FormGroup>
-            </FormSection>
+
+            {!isReadOnly && (
+              <FormSection>
+                <FormGroup>
+                  <Button
+                    variant="link"
+                    icon={<PlusCircleIcon />}
+                    iconPosition="start"
+                    onClick={() => {
+                      push({
+                        name: '',
+                        variables: [],
+                      });
+                    }}
+                  >
+                    {t('Add application')}
+                  </Button>
+                </FormGroup>
+              </FormSection>
+            )}
           </>
         )}
       </FieldArray>

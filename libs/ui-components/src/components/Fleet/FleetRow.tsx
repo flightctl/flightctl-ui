@@ -26,17 +26,16 @@ const useFleetActions = (fleetName: string, isManaged: boolean, canEdit: boolean
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  if (isManaged || !canEdit) {
-    actions.push({
-      title: t("View fleet's configuration"),
-      onClick: () => navigate({ route: ROUTE.FLEET_DETAILS, postfix: fleetName }),
-    });
-  } else {
-    actions.push({
-      title: t('Edit fleet'),
-      onClick: () => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetName }),
-    });
-  }
+  actions.push({
+    title: t('View fleet details'),
+    onClick: () => navigate({ route: ROUTE.FLEET_DETAILS, postfix: fleetName }),
+  });
+
+  // If users can't edit, the wizard will be in read-only mode
+  actions.push({
+    title: isManaged || !canEdit ? t('View fleet configurations') : t('Edit fleet configurations'),
+    onClick: () => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetName }),
+  });
   return actions;
 };
 

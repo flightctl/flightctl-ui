@@ -22,7 +22,7 @@ export const updatePolicyStepId = 'update-policy';
 export const isUpdatePolicyStepValid = (errors: FormikErrors<FleetFormValues>) =>
   !errors.rolloutPolicy && !errors.disruptionBudget && !errors.updatePolicy;
 
-const UpdatePolicyStep = () => {
+const UpdatePolicyStep = ({ isReadOnly }: { isReadOnly: boolean }) => {
   const { t } = useTranslation();
 
   const {
@@ -120,6 +120,7 @@ const UpdatePolicyStep = () => {
             onChange={(_ev: React.FormEvent<HTMLInputElement>, toBasic: boolean) => {
               onSettingsChange('all-settings', !toBasic);
             }}
+            isDisabled={isReadOnly}
           />
         </FormGroup>
         {hasAdvancedMode || forceShowAdvancedMode ? (
@@ -137,7 +138,8 @@ const UpdatePolicyStep = () => {
               onChange={(_ev: React.FormEvent<HTMLInputElement>, toAdvanced: boolean) =>
                 onSettingsChange('rollout-policies', toAdvanced)
               }
-              body={rolloutPolicy.isAdvanced && <UpdateStepRolloutPolicy />}
+              body={rolloutPolicy.isAdvanced && <UpdateStepRolloutPolicy isReadOnly={isReadOnly} />}
+              isDisabled={isReadOnly}
             />
 
             {/* Disruption budget */}
@@ -155,7 +157,8 @@ const UpdatePolicyStep = () => {
               onChange={(_ev: React.FormEvent<HTMLInputElement>, toAdvanced: boolean) =>
                 onSettingsChange('disruption-budget', toAdvanced)
               }
-              body={disruptionBudget.isAdvanced && <UpdateStepDisruptionBudget />}
+              body={disruptionBudget.isAdvanced && <UpdateStepDisruptionBudget isReadOnly={isReadOnly} />}
+              isDisabled={isReadOnly}
             />
 
             {/* Update (and download) policies */}
@@ -171,7 +174,8 @@ const UpdatePolicyStep = () => {
               onChange={(_ev: React.FormEvent<HTMLInputElement>, toAdvanced: boolean) =>
                 onSettingsChange('update-policies', toAdvanced)
               }
-              body={updatePolicy.isAdvanced && <UpdateStepUpdatePolicy />}
+              body={updatePolicy.isAdvanced && <UpdateStepUpdatePolicy isReadOnly={isReadOnly} />}
+              isDisabled={isReadOnly}
             />
           </FormSection>
         ) : (
