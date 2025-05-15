@@ -11,7 +11,7 @@ import {
   GridItem,
 } from '@patternfly/react-core';
 
-import { Fleet } from '@flightctl/types';
+import { Fleet, ResourceKind } from '@flightctl/types';
 import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import LabelsView from '../../common/LabelsView';
 import { getDateDisplay } from '../../../utils/dates';
@@ -22,6 +22,7 @@ import FleetOwnerLink from './FleetOwnerLink';
 import FleetDevicesCharts from './FleetDevicesCharts';
 import FleetStatus from '../FleetStatus';
 import FleetDevicesCount from './FleetDevicesCount';
+import EventsCard from '../../Events/EventsCard';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
@@ -31,7 +32,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
 
   return (
     <Grid hasGutter>
-      <GridItem md={12}>
+      <GridItem md={9}>
         <Card>
           <CardTitle>{t('Details')}</CardTitle>
           <CardBody>
@@ -81,18 +82,18 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
             </FlightControlDescriptionList>
           </CardBody>
         </Card>
-      </GridItem>
-      {devicesSummary && (
-        <GridItem md={12}>
-          <Card>
+        {devicesSummary && (
+          <Card className="pf-v5-u-mt-md">
             <CardTitle>{t('Fleet devices')}</CardTitle>
-
             <CardBody>
               <FleetDevicesCharts fleetId={fleetId} devicesSummary={devicesSummary} />
             </CardBody>
           </Card>
-        </GridItem>
-      )}
+        )}
+      </GridItem>
+      <GridItem md={3}>
+        <EventsCard kind={ResourceKind.FLEET} objId={fleetId} />
+      </GridItem>
     </Grid>
   );
 };

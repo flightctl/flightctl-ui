@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Button, DropdownItem, DropdownList, Nav, NavList } from '@patternfly/react-core';
 
-import { Device, DeviceDecommission, DeviceDecommissionTargetType } from '@flightctl/types';
+import { Device, DeviceDecommission, DeviceDecommissionTargetType, ResourceKind } from '@flightctl/types';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { useFetch } from '../../../hooks/useFetch';
 import { getDisabledTooltipProps } from '../../../utils/tooltip';
@@ -17,6 +17,7 @@ import DeviceStatusDebugModal from './DeviceStatusDebugModal';
 import { getEditDisabledReason, isDeviceEnrolled } from '../../../utils/devices';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useAccessReview } from '../../../hooks/useAccessReview';
+import EventsCard from '../../Events/EventsCard';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import DeviceAliasEdit from './DeviceAliasEdit';
 
@@ -95,6 +96,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
           <NavList>
             <NavItem to="details">{t('Details')}</NavItem>
             {!hideTerminal && canOpenTerminal && <NavItem to="terminal">{t('Terminal')}</NavItem>}
+            <NavItem to="events">{t('Events')}</NavItem>
           </NavList>
         </Nav>
       }
@@ -141,6 +143,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
             }
           />
           {!hideTerminal && canOpenTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
+          <Route path="events" element={<EventsCard kind={ResourceKind.DEVICE} objId={deviceId} />} />
         </Routes>
       )}
 
