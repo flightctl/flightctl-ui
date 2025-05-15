@@ -44,6 +44,8 @@ const getInfoDataKnownKeys = (t: TFunction) => ({
   productName: t('Product name'),
   productSerial: t('Product serial'),
   productUuid: t('Product UUID'),
+  attestation: t('Attestation'),
+  tpmVendorInfo: t('TPM vendor info'),
 });
 
 export const useDeviceSpecSystemInfo = (
@@ -64,11 +66,20 @@ export const useDeviceSpecSystemInfo = (
       return !excludedKnownProps.includes(infoKey) && systemInfo[infoKey];
     })
     .map(([infoKey, infoTitle]) => {
-      let infoDataValue = systemInfo[infoKey];
+      let infoDataValue: string;
 
-      if (infoKey === 'distroName') {
-        const version = 'distroVersion' in systemInfo ? ` ${systemInfo['distroVersion']}` : '';
-        infoDataValue = `${infoDataValue}${version}`;
+      switch (infoKey) {
+        case 'distroName':
+          infoDataValue =
+            'distroVersion' in systemInfo
+              ? `${systemInfo.distroName} ${systemInfo.distroVersion}`
+              : systemInfo.distroName;
+          break;
+        case 'attestation':
+          infoDataValue = t('Information was gathered');
+          break;
+        default:
+          infoDataValue = systemInfo[infoKey];
       }
 
       return {
