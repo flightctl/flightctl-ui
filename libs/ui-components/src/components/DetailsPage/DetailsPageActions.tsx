@@ -73,7 +73,7 @@ export const useDecommissionAction = ({ onDecommission, disabledReason }: Decomm
   return { decommissionAction, decommissionModal };
 };
 
-const DetailsPageActions = ({ children }: React.PropsWithChildren<unknown>) => {
+const DetailsPageActions = ({ children }: React.PropsWithChildren) => {
   const { t } = useTranslation();
   const [actionsOpen, setActionsOpen] = React.useState(false);
   return (
