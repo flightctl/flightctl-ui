@@ -96,25 +96,31 @@ export const getAppIdentifier = (app: AppForm) => {
   return app.name;
 };
 
+const removeSlashes = (url: string | undefined) => (url || '').replace(/^\/+|\/+$/g, '');
+const getFinalRepoUrl = (baseUrl: string, relativePath: string) => {
+  if (relativePath && !hasTemplateVariables(relativePath)) {
+    return `${baseUrl}/${relativePath}`;
+  }
+  return baseUrl;
+};
+
 export const getConfigFullRepoUrl = (config: RepoConfig, repositoryUrl: string) => {
-  let relativePath: string = '';
+  const baseUrl = removeSlashes(repositoryUrl).replace(/\.git\/?$/, '');
   if (isHttpProviderSpec(config)) {
-    relativePath = (config.httpRef.suffix || '').replace(/^\//g, ''); // remove the leading slash
-  } else if (isGitProviderSpec(config) && /github|gitlab/.test(repositoryUrl)) {
-    const configPath = config.gitRef.path.replace(/^\//g, ''); // remove the leading slash
-    const configParts = configPath.split('/');
-    const lastPart = configParts[configParts.length - 1];
+    return getFinalRepoUrl(baseUrl, removeSlashes(config.httpRef.suffix));
+  }
+  if (isGitProviderSpec(config) && /github|gitlab/.test(repositoryUrl)) {
+    const configPath = removeSlashes(config.gitRef.path);
+    const pathSegments = configPath.split('/');
+    const lastSegment = pathSegments[pathSegments.length - 1];
 
     // Extension-less files cannot be identified as such. GitHub and Gitlab both redirect to the correct URL to show the file contents
-    const fileOrDir = lastPart.includes('.') ? 'blob' : 'tree';
-    relativePath = `${fileOrDir}/${config.gitRef.targetRevision}/${configPath}`;
+    const fileOrDir = lastSegment.includes('.') ? 'blob' : 'tree';
+    return getFinalRepoUrl(baseUrl, `${fileOrDir}/${config.gitRef.targetRevision}/${configPath}`);
   }
 
-  if (relativePath && !hasTemplateVariables(relativePath)) {
-    return `${repositoryUrl}/${relativePath}`;
-  }
   // We return just the base repository URL as a fallback
-  return repositoryUrl;
+  return baseUrl;
 };
 
 export const getRepoName = (config: RepoConfig) =>
