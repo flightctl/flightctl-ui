@@ -28,11 +28,12 @@ const emptySystemInfo = {
 const excludedKnownProps = [
   'distroVersion', // It's combined with "distroName"
   'customInfo', // Custom properies are evaluated separately from the predefined, known properties
-  'architecture', // Rendered separately by EnrollmentRequestDetails
-  'operatingSystem', // Rendered separately by EnrollmentRequestDetails
+  'attestation', // In Phase1 this includes only the raw data, without a report of success or failure.
 ];
 
 const getInfoDataKnownKeys = (t: TFunction) => ({
+  architecture: t('Architecture'),
+  operatingSystem: t('Operating system'),
   agentVersion: t('Agent version'),
   distroName: t('Distro'),
   hostname: t('Hostname'),
@@ -44,9 +45,10 @@ const getInfoDataKnownKeys = (t: TFunction) => ({
   productName: t('Product name'),
   productSerial: t('Product serial'),
   productUuid: t('Product UUID'),
+  tpmVendorInfo: t('TPM vendor info'),
 });
 
-export const useEnrollmentRequestSystemInfo = (
+export const useDeviceSpecSystemInfo = (
   systemInfo: FixedDeviceSystemInfo | undefined,
   t: TFunction,
 ): {
@@ -64,11 +66,17 @@ export const useEnrollmentRequestSystemInfo = (
       return !excludedKnownProps.includes(infoKey) && systemInfo[infoKey];
     })
     .map(([infoKey, infoTitle]) => {
-      let infoDataValue = systemInfo[infoKey];
+      let infoDataValue: string;
 
-      if (infoKey === 'distroName') {
-        const version = 'distroVersion' in systemInfo ? ` ${systemInfo['distroVersion']}` : '';
-        infoDataValue = `${infoDataValue}${version}`;
+      switch (infoKey) {
+        case 'distroName':
+          infoDataValue =
+            'distroVersion' in systemInfo
+              ? `${systemInfo.distroName} ${systemInfo.distroVersion}`
+              : systemInfo.distroName;
+          break;
+        default:
+          infoDataValue = systemInfo[infoKey];
       }
 
       return {
