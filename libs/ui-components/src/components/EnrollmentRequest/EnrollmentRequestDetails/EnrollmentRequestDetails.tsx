@@ -33,11 +33,11 @@ import LabelWithHelperText from '../../common/WithHelperText';
 import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
+import { useDeviceSpecSystemInfo } from '../../../hooks/useDeviceSpecSystemInfo';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
-import { useEnrollmentRequestSystemInfo } from './useEnrollmentRequestSystemInfo';
 
 import './EnrollmentRequestDetails.css';
 
@@ -56,7 +56,7 @@ const EnrollmentRequestDetails = () => {
   const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
 
   const [isApprovalModalOpen, setIsApprovalModalOpen] = React.useState(false);
-  const erSystemInfo = useEnrollmentRequestSystemInfo(er?.spec.deviceStatus?.systemInfo, t);
+  const erSystemInfo = useDeviceSpecSystemInfo(er?.spec.deviceStatus?.systemInfo, t);
   const hasDefaultLabels = Object.keys(er?.spec.labels || {}).length > 0;
 
   const { deleteAction, deleteModal } = useDeleteAction({
@@ -107,18 +107,6 @@ const EnrollmentRequestDetails = () => {
                   <DescriptionListTerm>{t('Last seen')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     {timeSinceText(t, er?.metadata.creationTimestamp)}
-                  </DescriptionListDescription>
-                </DescriptionListGroup>
-                <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Operating system')}</DescriptionListTerm>
-                  <DescriptionListDescription>
-                    {er?.spec?.deviceStatus?.systemInfo?.operatingSystem || '-'}
-                  </DescriptionListDescription>
-                </DescriptionListGroup>
-                <DescriptionListGroup>
-                  <DescriptionListTerm>{t('Architecture')}</DescriptionListTerm>
-                  <DescriptionListDescription>
-                    {er?.spec?.deviceStatus?.systemInfo?.architecture || '-'}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 {hasDefaultLabels && (
