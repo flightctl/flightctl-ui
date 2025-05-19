@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Alert, Button, Modal, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, Button, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import { Device, EnrollmentRequest } from '@flightctl/types';
@@ -44,72 +45,69 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
       onDeleteSuccess();
     }
   };
+
   return (
-    <Modal
-      title={t('Delete devices ?')}
-      isOpen
-      onClose={onClose}
-      showClose={!isDeleting}
-      titleIconVariant="warning"
-      variant="medium"
-      actions={[
+    <Modal isOpen onClose={isDeleting ? undefined : onClose} variant="medium">
+      <ModalHeader title={t('Delete devices ?')} titleIconVariant="warning" />
+      <ModalBody>
+        <Stack hasGutter>
+          <StackItem>{t('Are you sure you want to delete the following devices ?')}</StackItem>
+          <StackItem>
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>{t('Alias')}</Th>
+                  <Th>{t('Name')}</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {resources.map((resource) => {
+                  return (
+                    <Tr key={resource.metadata.name}>
+                      <Td dataLabel={t('Alias')}>{resource.metadata.labels?.alias || '-'}</Td>
+                      <Td dataLabel={t('Name')}>
+                        <ResourceLink id={resource.metadata.name as string} />
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
+          </StackItem>
+          {isDeleting && (
+            <StackItem>
+              <Progress
+                value={progress}
+                min={0}
+                max={totalProgress}
+                title={t('Deleting...')}
+                measureLocation={ProgressMeasureLocation.top}
+                label={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
+                valueText={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
+              />
+            </StackItem>
+          )}
+          {errors?.length && (
+            <StackItem>
+              <Alert isInline variant="danger" title={t('An error occurred')}>
+                <Stack hasGutter>
+                  {errors.map((e, index) => (
+                    <StackItem key={index}>{e}</StackItem>
+                  ))}
+                </Stack>
+              </Alert>
+            </StackItem>
+          )}
+        </Stack>
+      </ModalBody>
+      <ModalFooter>
         <Button key="delete" variant="danger" onClick={deleteResources} isLoading={isDeleting} isDisabled={isDeleting}>
           {t('Delete devices')}
-        </Button>,
+        </Button>
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
           {t('Cancel')}
-        </Button>,
-      ]}
-    >
-      <Stack hasGutter>
-        <StackItem>{t('Are you sure you want to delete the following devices ?')}</StackItem>
-        <StackItem>
-          <Table>
-            <Thead>
-              <Tr>
-                <Th>{t('Alias')}</Th>
-                <Th>{t('Name')}</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {resources.map((resource) => {
-                return (
-                  <Tr key={resource.metadata.name}>
-                    <Td dataLabel={t('Alias')}>{resource.metadata.labels?.alias || '-'}</Td>
-                    <Td dataLabel={t('Name')}>
-                      <ResourceLink id={resource.metadata.name as string} />
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
-        </StackItem>
-        {isDeleting && (
-          <StackItem>
-            <Progress
-              value={progress}
-              min={0}
-              max={totalProgress}
-              title={t('Deleting...')}
-              measureLocation={ProgressMeasureLocation.top}
-              label={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
-              valueText={t('{{progress}} of {{totalProgress}}', { progress, totalProgress })}
-            />
-          </StackItem>
-        )}
-        {errors?.length && (
-          <StackItem>
-            <Alert isInline variant="danger" title={t('An error occurred')}>
-              <Stack hasGutter>
-                {errors.map((e, index) => (
-                  <StackItem key={index}>{e}</StackItem>
-                ))}
-              </Stack>
-            </Alert>
-          </StackItem>
-        )}
-      </Stack>
+        </Button>
+      </ModalFooter>
     </Modal>
   );
 };

@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { useEffect } from 'react';
-import { Alert, Button, Modal, Spinner, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
 import { Trans } from 'react-i18next';
+import { Alert, Button, Spinner, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
 
 import { ResourceSyncList } from '@flightctl/types';
 
@@ -63,7 +63,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [get, repositoryId]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     void loadRS();
   }, [loadRS]);
 
@@ -83,14 +83,54 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
   };
 
   return (
-    <Modal
-      title={t('Delete repository ?')}
-      isOpen
-      titleIconVariant="warning"
-      onClose={onClose}
-      variant={hasResourceSyncs ? 'medium' : 'small'}
-      actions={[
-        rsError ? (
+    <Modal isOpen onClose={onClose} variant={hasResourceSyncs ? 'medium' : 'small'}>
+      <ModalHeader title={t('Delete repository ?')} titleIconVariant="warning" />
+      <ModalBody>
+        <Stack hasGutter>
+          {hasResourceSyncs && (
+            <StackItem>
+              <TextContent>
+                <Text>
+                  {t(
+                    'This repository defines resource syncs. By deleting the repository, its resource syncs will also be deleted.',
+                  )}
+                </Text>
+                <Text>
+                  {t(
+                    `Any fleet that is being managed by this repository's resource syncs, will stop being managed by the service.`,
+                  )}
+                </Text>
+              </TextContent>
+            </StackItem>
+          )}
+          {rsError ? (
+            <Alert isInline variant="warning" title={t('Cannot delete repository')}>
+              {rsError}
+            </Alert>
+          ) : (
+            <StackItem>
+              <Trans t={t}>
+                Are you sure you want to delete the repository <b>{repositoryId}</b>?
+              </Trans>
+            </StackItem>
+          )}
+          {(isDeleting && message) ||
+            (isLoadingRSs && (
+              <StackItem>
+                <Spinner size="sm" /> {isLoadingRSs ? t('Checking if the repository has resource syncs') : message}
+              </StackItem>
+            ))}
+          {error && (
+            <StackItem>
+              <Alert isInline variant="danger" title={t('An error occurred')}>
+                {error}
+              </Alert>
+            </StackItem>
+          )}
+        </Stack>
+      </ModalBody>
+      <ModalFooter>
+        {rsError ? (
           <Button variant="primary" onClick={loadRS}>
             {t('Reload resource syncs')}
           </Button>
@@ -105,52 +145,11 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
           >
             {t('Delete repository')}
           </Button>
-        ),
+        )}
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
           {t('Cancel')}
-        </Button>,
-      ]}
-    >
-      <Stack hasGutter>
-        {hasResourceSyncs && (
-          <StackItem>
-            <TextContent>
-              <Text>
-                {t(
-                  'This repository defines resource syncs. By deleting the repository, its resource syncs will also be deleted.',
-                )}
-                {t(
-                  `Any fleet that is being managed by this repository's resource syncs, will stop being managed by the service.`,
-                )}
-              </Text>
-            </TextContent>
-          </StackItem>
-        )}
-        {rsError ? (
-          <Alert isInline variant="warning" title={t('Cannot delete repository')}>
-            {rsError}
-          </Alert>
-        ) : (
-          <StackItem>
-            <Trans t={t}>
-              Are you sure you want to delete the repository <b>{repositoryId}</b>?
-            </Trans>
-          </StackItem>
-        )}
-        {(isDeleting && message) ||
-          (isLoadingRSs && (
-            <StackItem>
-              <Spinner size="sm" /> {isLoadingRSs ? t('Checking if the repository has resource syncs') : message}
-            </StackItem>
-          ))}
-        {error && (
-          <StackItem>
-            <Alert isInline variant="danger" title={t('An error occurred')}>
-              {error}
-            </Alert>
-          </StackItem>
-        )}
-      </Stack>
+        </Button>
+      </ModalFooter>
     </Modal>
   );
 };

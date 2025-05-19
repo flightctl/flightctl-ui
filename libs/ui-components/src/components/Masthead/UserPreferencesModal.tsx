@@ -1,22 +1,12 @@
 import * as React from 'react';
 import { TFunction } from 'i18next';
-import {
-  Button,
-  FormGroup,
-  MenuToggle,
-  MenuToggleElement,
-  Modal,
-  Select,
-  SelectOption,
-  Stack,
-  StackItem,
-} from '@patternfly/react-core';
+import { Button, FormGroup, MenuToggle, MenuToggleElement, Select, SelectOption } from '@patternfly/react-core';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
 
 import { Theme } from '../../hooks/useThemePreferences';
 import { useTranslation } from '../../hooks/useTranslation';
-import FlightCtlActionGroup from '../form/FlightCtlActionGroup';
-import FlightCtlForm from '../form/FlightCtlForm';
 import { UserPreferencesContext } from './UserPreferencesProvider';
+import FlightCtlForm from '../form/FlightCtlForm';
 
 const getThemeLabels = (t: TFunction): { [key in Theme]: string } => ({
   system: t('System default'),
@@ -36,48 +26,45 @@ const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) 
 
   const [themeExpanded, setThemeExpanded] = React.useState(false);
   return (
-    <Modal title={t('User preferences')} isOpen variant="small" onClose={onClose}>
-      <Stack hasGutter>
-        <StackItem>
-          <FlightCtlForm>
-            <FormGroup label={t('Theme')}>
-              <Select
-                toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                  <MenuToggle
-                    ref={toggleRef}
-                    style={{ width: '100%' }}
-                    onClick={() => setThemeExpanded(true)}
-                    isExpanded={themeExpanded}
-                  >
-                    {themeLabels[theme]}
-                  </MenuToggle>
-                )}
-                selected={theme}
-                onSelect={(_, value) => {
-                  setTheme(value as Theme);
-                  setThemeExpanded(false);
-                }}
-                aria-label="theme"
-                isOpen={themeExpanded}
-                onOpenChange={setThemeExpanded}
-              >
-                {Object.keys(themeLabels).map((theme) => (
-                  <SelectOption key={theme} value={theme}>
-                    {themeLabels[theme]}
-                  </SelectOption>
-                ))}
-              </Select>
-            </FormGroup>
-          </FlightCtlForm>
-        </StackItem>
-        <StackItem>
-          <FlightCtlActionGroup>
-            <Button variant="secondary" onClick={onClose}>
-              {t('Close')}
-            </Button>
-          </FlightCtlActionGroup>
-        </StackItem>
-      </Stack>
+    <Modal isOpen variant="small" onClose={onClose}>
+      <ModalHeader title={t('User preferences')} />
+      <ModalBody>
+        <FlightCtlForm>
+          <FormGroup label={t('Theme')}>
+            <Select
+              toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                <MenuToggle
+                  ref={toggleRef}
+                  style={{ width: '100%' }}
+                  onClick={() => setThemeExpanded(true)}
+                  isExpanded={themeExpanded}
+                >
+                  {themeLabels[theme]}
+                </MenuToggle>
+              )}
+              selected={theme}
+              onSelect={(_, value) => {
+                setTheme(value as Theme);
+                setThemeExpanded(false);
+              }}
+              aria-label="theme"
+              isOpen={themeExpanded}
+              onOpenChange={setThemeExpanded}
+            >
+              {Object.keys(themeLabels).map((theme) => (
+                <SelectOption key={theme} value={theme}>
+                  {themeLabels[theme]}
+                </SelectOption>
+              ))}
+            </Select>
+          </FormGroup>
+        </FlightCtlForm>
+      </ModalBody>
+      <ModalFooter>
+        <Button variant="secondary" onClick={onClose}>
+          {t('Close')}
+        </Button>
+      </ModalFooter>
     </Modal>
   );
 };

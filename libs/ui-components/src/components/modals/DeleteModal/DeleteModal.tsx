@@ -1,7 +1,8 @@
-import { getErrorMessage } from '../../../utils/error';
-import { Alert, Button, Modal, Stack, StackItem } from '@patternfly/react-core';
 import * as React from 'react';
 import { Trans } from 'react-i18next';
+import { Alert, Button, Stack, StackItem } from '@patternfly/react-core';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
+import { getErrorMessage } from '../../../utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';
 
 type DeleteModalProps = {
@@ -16,13 +17,25 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ onDelete, onClose, resourceTy
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [error, setError] = React.useState<string>();
   return (
-    <Modal
-      title={t('Delete {{resourceType}} ?', { resourceType })}
-      isOpen
-      onClose={onClose}
-      variant="small"
-      titleIconVariant="warning"
-      actions={[
+    <Modal isOpen onClose={onClose} variant="small">
+      <ModalHeader title={t('Delete {{resourceType}} ?', { resourceType })} titleIconVariant="warning" />
+      <ModalBody>
+        <Stack hasGutter>
+          <StackItem>
+            <Trans t={t}>
+              Are you sure you want to delete {resourceType} <b>{resourceName}</b>?
+            </Trans>
+          </StackItem>
+          {error && (
+            <StackItem>
+              <Alert isInline variant="danger" title={t('An error occurred')}>
+                {error}
+              </Alert>
+            </StackItem>
+          )}
+        </Stack>
+      </ModalBody>
+      <ModalFooter>
         <Button
           key="confirm"
           variant="danger"
@@ -41,26 +54,11 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ onDelete, onClose, resourceTy
           }}
         >
           {t('Delete {{ resourceType }}', { resourceType })}
-        </Button>,
+        </Button>
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
           {t('Cancel')}
-        </Button>,
-      ]}
-    >
-      <Stack hasGutter>
-        <StackItem>
-          <Trans t={t}>
-            Are you sure you want to delete {resourceType} <b>{resourceName}</b>?
-          </Trans>
-        </StackItem>
-        {error && (
-          <StackItem>
-            <Alert isInline variant="danger" title={t('An error occurred')}>
-              {error}
-            </Alert>
-          </StackItem>
-        )}
-      </Stack>
+        </Button>
+      </ModalFooter>
     </Modal>
   );
 };

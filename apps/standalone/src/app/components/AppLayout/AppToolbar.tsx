@@ -8,11 +8,11 @@ import {
   DropdownList,
   MenuToggle,
   MenuToggleElement,
-  Modal,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
+import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
 import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/question-circle-icon';
 
 import UserPreferencesModal from '@flightctl/ui-components/src/components/Masthead/UserPreferencesModal';
@@ -132,17 +132,16 @@ const AppToolbar = () => {
       {preferencesModalOpen && <UserPreferencesModal onClose={() => setPreferencesModalOpen(false)} />}
 
       {logoutErr && (
-        <Modal
-          title={t('Failed to logout')}
-          isOpen
-          onClose={() => setLogoutErr(undefined)}
-          actions={[
+        <Modal isOpen onClose={() => setLogoutErr(undefined)}>
+          <ModalHeader title={t('Failed to logout')} />
+          <ModalBody>
+            <Alert isInline variant="danger" title={logoutErr} />
+          </ModalBody>
+          <ModalFooter>
             <Button key="cancel" variant="link" onClick={() => setLogoutErr(undefined)}>
               Close
-            </Button>,
-          ]}
-        >
-          <Alert isInline variant="danger" title={logoutErr} />
+            </Button>
+          </ModalFooter>
         </Modal>
       )}
     </Toolbar>
