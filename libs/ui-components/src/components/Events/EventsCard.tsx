@@ -61,10 +61,14 @@ const EventList = ({ events }: { events: DisplayEvent[] }) => {
   }, []);
 
   return (
-    <div ref={topRef} className="fctl-events-container" style={{ maxHeight: `calc(97vh - ${topY}px)` }}>
-      <Stack className="fctl-event-list">
+    <div ref={topRef} style={{ height: `calc(97vh - ${topY}px)` }}>
+      <Stack hasGutter>
         {events.map((event) => {
-          return <EventItem key={event.name} event={event} />;
+          return (
+            <StackItem key={event.name}>
+              <EventItem event={event} />
+            </StackItem>
+          );
         })}
       </Stack>
     </div>
@@ -115,38 +119,36 @@ const EventsCard = ({ kind, objId, type = Event.type.WARNING }: EventListProps) 
           </FlexItem>
         </Flex>
       </CardTitle>
-      <CardBody>
-        <Stack hasGutter>
-          <StackItem>
-            <Select
-              isOpen={isTypeOpen}
-              selected={selectedType}
-              onSelect={(_, value) => {
-                setSelectedType(value as SelectableEventType);
-                setIsTypeOpen(false);
+      <CardBody isFilled={false}>
+        <Select
+          isOpen={isTypeOpen}
+          selected={selectedType}
+          onSelect={(_, value) => {
+            setSelectedType(value as SelectableEventType);
+            setIsTypeOpen(false);
+          }}
+          toggle={(toggleRef) => (
+            <MenuToggle
+              ref={toggleRef}
+              isExpanded
+              onClick={() => {
+                setIsTypeOpen((open) => !open);
               }}
-              toggle={(toggleRef) => (
-                <MenuToggle
-                  ref={toggleRef}
-                  isExpanded
-                  onClick={() => {
-                    setIsTypeOpen((open) => !open);
-                  }}
-                >
-                  {selectedType === 'all' ? t('All types') : selectedType}
-                </MenuToggle>
-              )}
             >
-              <SelectList>
-                <SelectOption value="all">{t('All types')}</SelectOption>
-                <SelectOption value={Event.type.NORMAL}>{t('Normal')}</SelectOption>
-                <SelectOption value={Event.type.WARNING}>{t('Warning')}</SelectOption>
-              </SelectList>
-            </Select>
-          </StackItem>
-          <Divider />
-          <StackItem>{content}</StackItem>
-        </Stack>
+              {selectedType === 'all' ? t('All types') : selectedType}
+            </MenuToggle>
+          )}
+        >
+          <SelectList>
+            <SelectOption value="all">{t('All types')}</SelectOption>
+            <SelectOption value={Event.type.NORMAL}>{t('Normal')}</SelectOption>
+            <SelectOption value={Event.type.WARNING}>{t('Warning')}</SelectOption>
+          </SelectList>
+        </Select>
+      </CardBody>
+      <Divider />
+      <CardBody isFilled className="fctl-events-container">
+        {content}
       </CardBody>
     </Card>
   );

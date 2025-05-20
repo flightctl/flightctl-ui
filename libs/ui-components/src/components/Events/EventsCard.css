@@ -1,24 +1,5 @@
 .fctl-events-container {
   /* Make space for the EmptyState content */
   min-height: 300px;
-  overflow-y: scroll;
-}
-
-.fctl-event-list .fctl-event {
-  height: fit-content;
-  margin-bottom: var(--pf-v5-global--spacer--md);
-  margin-right: var(--pf-v5-global--spacer--md);
-}
-
-.fctl-event-list .fctl-event .fctl-event__title {
-  font-weight: var(--pf-v5-global--FontWeight--bold, bold);
-}
-
-.fctl-event-list .fctl-event .fctl-event__title .pf-v5-c-icon {
-  margin-right: var(--pf-v5-global--spacer--sm);
-}
-
-.fctl-event-list .fctl-event .fctl-event__detail {
-  color: var(--pf-v5-global--disabled-color--100);
-  font-size: var(--pf-v5-global--FontSize--sm);
+  overflow-y: auto;
 }

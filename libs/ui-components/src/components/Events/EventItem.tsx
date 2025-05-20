@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Icon, Stack, StackItem } from '@patternfly/react-core';
+import { Icon, Stack, StackItem, TextContent } from '@patternfly/react-core';
 import InfoCircleIcon from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 
@@ -20,13 +20,17 @@ const WarningEventIcon = () => (
 
 const EventItem = ({ event }: { event: DisplayEvent }) => {
   return (
-    <Stack className="fctl-event" key={event.name}>
-      <StackItem className="fctl-event__title">
-        {event.type === Event.type.NORMAL ? <NormalEventIcon /> : <WarningEventIcon />}
-        {event.reasonText}
+    <Stack>
+      <StackItem>
+        {event.type === Event.type.NORMAL ? <NormalEventIcon /> : <WarningEventIcon />}{' '}
+        <strong>{event.reasonText}</strong>
       </StackItem>
       {event.message && <StackItem>{event.message}</StackItem>}
-      <StackItem className="fctl-event__detail">{event.dateText}</StackItem>
+      <StackItem>
+        <TextContent>
+          <small>{event.dateText}</small>
+        </TextContent>
+      </StackItem>
     </Stack>
   );
 };
