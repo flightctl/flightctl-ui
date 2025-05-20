@@ -298,7 +298,7 @@
   "No matching events": "No matching events",
   "No events were found based on the current filters": "No events were found based on the current filters",
   "No events were found": "No events were found",
-  "Events (updated {{ lastUpdate}})": "Events (updated {{ lastUpdate}})",
+  "(updated {{ lastUpdate}})": "(updated {{ lastUpdate}})",
   "Reload events": "Reload events",
   "All types": "All types",
   "Normal": "Normal",
