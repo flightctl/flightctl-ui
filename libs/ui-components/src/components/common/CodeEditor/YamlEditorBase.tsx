@@ -22,12 +22,11 @@ type Monaco = typeof monacoEditor;
 type YamlEditorBaseProps = {
   filename: string;
   code?: string;
-  onEditorDidMount: (instace: typeof monacoEditor) => void;
   onCancel: VoidFunction;
   onReload?: VoidFunction;
 };
 
-const YamlEditorBase = ({ filename, code, onCancel, onEditorDidMount, onReload }: YamlEditorBaseProps) => {
+const YamlEditorBase = ({ filename, code, onCancel, onReload }: YamlEditorBaseProps) => {
   const { t } = useTranslation();
   const editorRef = React.useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = React.useRef<typeof monacoEditor | null>(null);
@@ -41,6 +40,19 @@ const YamlEditorBase = ({ filename, code, onCancel, onEditorDidMount, onReload }
       saveAs(blob, `${filename}.yaml`);
     }
   };
+
+  // recalculate bounds when viewport is changed
+  React.useEffect(() => {
+    const handleResize = () => {
+      const editors = monacoRef.current?.editor?.getEditors();
+      editors?.forEach((editor) => {
+        editor.layout({ width: 0, height: 0 });
+        editor.layout();
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   React.useEffect(() => {
     if (editorMounted) {
@@ -71,7 +83,6 @@ const YamlEditorBase = ({ filename, code, onCancel, onEditorDidMount, onReload }
           onEditorDidMount={(editor: monacoEditor.editor.IStandaloneCodeEditor, instance: Monaco) => {
             setEditorMounted(true);
             defineConsoleThemes(instance);
-            onEditorDidMount(instance);
             editorRef.current = editor;
             monacoRef.current = instance;
           }}

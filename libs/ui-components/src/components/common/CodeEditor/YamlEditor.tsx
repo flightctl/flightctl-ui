@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Alert } from '@patternfly/react-core';
 import { CodeEditorProps as PfCodeEditorProps } from '@patternfly/react-code-editor';
-import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 import { dump } from 'js-yaml';
 
 import { Device, Fleet, Repository } from '@flightctl/types';
@@ -19,7 +18,7 @@ type YamlEditorProps<R extends FlightCtlYamlResource> = Partial<Omit<PfCodeEdito
   /** Filename to use when YAML is downloaded */
   filename: string;
   /** Function to reload the resource */
-  refetch?: VoidFunction;
+  refetch: VoidFunction;
 };
 
 const convertObjToYAMLString = (obj: FlightCtlYamlResource) => {
@@ -38,22 +37,13 @@ const YamlEditor = <R extends FlightCtlYamlResource>({ filename, apiObj, refetch
   const [yaml, setYaml] = React.useState<string>(convertObjToYAMLString(apiObj));
   const [resourceVersion, setResourceVersion] = React.useState<string>(apiObj.metadata.resourceVersion || '0');
   const [doUpdate, setDoUpdate] = React.useState<boolean>(false);
-  const [monacoRef, setMonacoRef] = React.useState<typeof monacoEditor | null>(null);
 
   const {
     router: { useNavigate },
   } = useAppContext();
   const navigate = useNavigate();
 
-  let hasChanged = false;
-  let onReload: VoidFunction | undefined;
-  if (refetch) {
-    hasChanged = resourceVersion !== apiObj.metadata.resourceVersion;
-    onReload = () => {
-      void refetch();
-      setDoUpdate(true);
-    };
-  }
+  const hasChanged = resourceVersion !== apiObj.metadata.resourceVersion;
 
   React.useEffect(() => {
     if (doUpdate) {
@@ -65,20 +55,6 @@ const YamlEditor = <R extends FlightCtlYamlResource>({ filename, apiObj, refetch
 
   const { t } = useTranslation();
 
-  // recalculate bounds when viewport is changed
-  const handleResize = React.useCallback(() => {
-    const editors = monacoRef?.editor?.getEditors();
-    editors?.forEach((editor) => {
-      editor.layout({ width: 0, height: 0 });
-      editor.layout();
-    });
-  }, [monacoRef]);
-
-  React.useEffect(() => {
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [handleResize]);
-
   return (
     <div className="fctl-yaml-editor">
       <YamlEditorBase
@@ -87,8 +63,10 @@ const YamlEditor = <R extends FlightCtlYamlResource>({ filename, apiObj, refetch
         onCancel={() => {
           navigate('../.');
         }}
-        onReload={onReload}
-        onEditorDidMount={setMonacoRef}
+        onReload={() => {
+          void refetch();
+          setDoUpdate(true);
+        }}
       />
 
       {hasChanged && (
