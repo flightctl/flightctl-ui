@@ -309,6 +309,8 @@
   "{{ resourceType }} could not be deleted": "{{ resourceType }} could not be deleted",
   "{{ resourceType }} was updated successfully": "{{ resourceType }} was updated successfully",
   "{{ resourceType }} could not be updated": "{{ resourceType }} could not be updated",
+  "{{ resourceType }} was decommissioned successfully": "{{ resourceType }} was decommissioned successfully",
+  "{{ resourceType }} could not be decommissioned": "{{ resourceType }} could not be decommissioned",
   "Resource": "Resource",
   "Fleet is non-editable": "Fleet is non-editable",
   "This fleet is managed by a resource sync and it cannot be edited directly.": "This fleet is managed by a resource sync and it cannot be edited directly.",
