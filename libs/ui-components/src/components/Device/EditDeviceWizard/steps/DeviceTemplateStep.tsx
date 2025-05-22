@@ -4,7 +4,7 @@ import { FormikErrors, useFormikContext } from 'formik';
 import { Trans } from 'react-i18next';
 import { Repository } from '@flightctl/types';
 
-import { CREATE_ACM_REPOSITORY, USING_TEMPLATE_VARIABLES_LINK } from '../../../../links';
+import { getCreateAcmRepositoryLink, getUsingTemplateVariablesLink } from '../../../../links';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import LabelWithHelperText, { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import LearnMoreLink from '../../../common/LearnMoreLink';
@@ -29,6 +29,7 @@ const templateOption2 = '{{ .metadata.name }}';
 const exampleCode = `/device-configs/deployment-sites/site-{{ .metadata.labels.site }}`;
 
 const MicroShiftCheckbox = ({ isFleet }: { isFleet: boolean }) => {
+  const { appType } = useAppContext();
   const { initialValues } = useFormikContext<DeviceSpecConfigFormValues>();
   const { t } = useTranslation();
 
@@ -94,7 +95,7 @@ const MicroShiftCheckbox = ({ isFleet }: { isFleet: boolean }) => {
               repository: `'${ACM_REPO_NAME}'`,
             })}
             {', '}
-            <LearnMoreLink link={CREATE_ACM_REPOSITORY} text={t('view documentation')} />
+            <LearnMoreLink link={getCreateAcmRepositoryLink(appType)} text={t('view documentation')} />
           </Alert>
         </FormGroup>
       )}
@@ -119,7 +120,7 @@ const DeviceTemplateStep = ({ isFleet }: { isFleet: boolean }) => {
             <CodeBlock className="pf-v5-u-mt-md">
               <CodeBlockCode>{exampleCode}</CodeBlockCode>
             </CodeBlock>
-            <LearnMoreLink link={USING_TEMPLATE_VARIABLES_LINK} />
+            <LearnMoreLink link={getUsingTemplateVariablesLink(appType)} />
           </Alert>
         )}
         <FormGroupWithHelperText
