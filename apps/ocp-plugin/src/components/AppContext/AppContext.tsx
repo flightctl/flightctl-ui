@@ -22,6 +22,8 @@ import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/redu
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
 
+import './AppContext.css';
+
 export const OCPPluginAppContext = AppContext.Provider;
 
 const appRoutes = {
