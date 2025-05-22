@@ -1,0 +1,5 @@
+.fctl-events-container {
+  /* Make space for the EmptyState content */
+  min-height: 300px;
+  overflow-y: auto;
+}
