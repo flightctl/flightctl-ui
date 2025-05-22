@@ -30,19 +30,17 @@ const DeleteFleetModal = ({ fleetId, onClose }: { fleetId: string; onClose: (has
       }}
       variant="small"
     >
-      <ModalHeader title={t('Delete fleet ?')} titleIconVariant="warning" />
+      <ModalHeader title={t('Delete fleet?')} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
           <StackItem>
             <Trans t={t}>
-              Are you sure you want to delete fleet <strong>{fleetId}</strong>?
+              <strong>{fleetId}</strong> will be deleted permanently. If the device selector of a remaining fleet
+              matches a device in <strong>{fleetId}</strong>, the device will be moved to the new fleet. If there&apos;s
+              no matching fleet for a device, it will be unlinked from any fleet.
             </Trans>
           </StackItem>
-          <StackItem>
-            {t(
-              'Devices bound to this fleet may join another fleet matching their labels, otherwise they will remain unlinked from any fleet.',
-            )}
-          </StackItem>
+          <StackItem>{t('Are you sure you want to delete?')}</StackItem>
           {error && (
             <StackItem>
               <Alert isInline variant="danger" title={t('An error occurred')}>
