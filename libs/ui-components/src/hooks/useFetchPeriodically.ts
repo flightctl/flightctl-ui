@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FlightControlQuery } from '../types/extraTypes';
+import { ApiQuery } from '../types/extraTypes';
 import { getQueryStringHash, getRequestQueryString } from '../utils/api';
 
 import { useFetch } from './useFetch';
@@ -7,7 +7,7 @@ import { useFetch } from './useFetch';
 const TIMEOUT = 10000;
 
 export const useFetchPeriodically = <R>(
-  query: FlightControlQuery,
+  query: ApiQuery,
   onFetchComplete?: (data: R) => void,
 ): [R | undefined, boolean, unknown, VoidFunction, boolean] => {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -67,7 +67,7 @@ export const useFetchPeriodically = <R>(
           setData(undefined);
         }
         prevResolvedQueryHash.current = queryStringHash;
-        await new Promise((resolve) => setTimeout(resolve, TIMEOUT));
+        await new Promise((resolve) => setTimeout(resolve, query.timeout || TIMEOUT));
       }
     };
 

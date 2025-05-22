@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { DropdownItem, DropdownList, Grid, GridItem } from '@patternfly/react-core';
+import { Card, CardBody, DropdownItem, DropdownList, Grid, GridItem } from '@patternfly/react-core';
 
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { RepoSpecType, Repository } from '@flightctl/types';
+import { RepoSpecType, Repository, ResourceKind } from '@flightctl/types';
 
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
@@ -15,6 +15,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
+import EventsCard from '../../Events/EventsCard';
 
 const RepositoryDetails = () => {
   const { t } = useTranslation();
@@ -66,14 +67,23 @@ const RepositoryDetails = () => {
       {repoDetails && (
         <>
           <Grid hasGutter>
-            <GridItem>
-              <RepositoryGeneralDetailsCard repoDetails={repoDetails} />
+            <GridItem md={9}>
+              <Card>
+                <CardBody>
+                  <RepositoryGeneralDetailsCard repoDetails={repoDetails} />
+                </CardBody>
+              </Card>
+              {canListRS && repoDetails.spec.type !== RepoSpecType.HTTP && (
+                <Card>
+                  <CardBody>
+                    <RepositoryResourceSyncsCard repositoryId={repositoryId} />
+                  </CardBody>
+                </Card>
+              )}
             </GridItem>
-            {canListRS && repoDetails.spec.type !== RepoSpecType.HTTP && (
-              <GridItem>
-                <RepositoryResourceSyncsCard repositoryId={repositoryId} />
-              </GridItem>
-            )}
+            <GridItem md={3}>
+              <EventsCard kind={ResourceKind.REPOSITORY} objId={repositoryId} />
+            </GridItem>
           </Grid>
           {isDeleteModalOpen && (
             <DeleteRepositoryModal
