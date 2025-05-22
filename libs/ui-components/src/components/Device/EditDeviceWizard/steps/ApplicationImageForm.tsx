@@ -3,19 +3,21 @@ import * as React from 'react';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
 import LearnMoreLink from '../../../common/LearnMoreLink';
-import { CREATING_APPLICATIONS_LINK } from '../../../../links';
+import { getCreatingApplicationsLink } from '../../../../links';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { ImageAppForm } from '../../../../types/deviceSpec';
+import { useAppContext } from '../../../../hooks/useAppContext';
 
 const ApplicationImageForm = ({ app, index }: { app: ImageAppForm; index: number }) => {
   const { t } = useTranslation();
+  const { appType } = useAppContext();
   return (
     <FormGroupWithHelperText
       label={t('Image')}
       content={
         <span>
           {t('The application image. Learn how to create one')}{' '}
-          <LearnMoreLink text={t('here')} link={CREATING_APPLICATIONS_LINK} />
+          <LearnMoreLink text={t('here')} link={getCreatingApplicationsLink(appType)} />
         </span>
       }
       isRequired

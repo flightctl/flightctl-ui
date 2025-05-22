@@ -3,10 +3,12 @@ import { Button, List, ListComponent, ListItem, OrderType, Stack, StackItem } fr
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import { ADDING_NEW_DEVICES_LINK } from '../../../links';
+import { getAddingNewDevicesLink } from '../../../links';
 import LearnMoreLink from '../../common/LearnMoreLink';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
+  const { appType } = useAppContext();
   const { t } = useTranslation();
 
   return (
@@ -24,7 +26,7 @@ const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
             </List>
           </StackItem>
           <StackItem>
-            <LearnMoreLink link={ADDING_NEW_DEVICES_LINK} text={t('Learn more about adding devices')} />
+            <LearnMoreLink link={getAddingNewDevicesLink(appType)} text={t('Learn more about adding devices')} />
           </StackItem>
         </Stack>
       </ModalBody>

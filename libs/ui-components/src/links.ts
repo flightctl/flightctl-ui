@@ -1,13 +1,36 @@
-const baseDocsRepoUrl = 'https://github.com/flightctl/flightctl/blob/main/docs';
+import { FlightCtlApp } from './hooks/useAppContext';
 
-// Links to the fLightctl upstream docs
-export const CREATING_APPLICATIONS_LINK = `${baseDocsRepoUrl}/user/managing-devices.md#creating-applications`;
+const upstreamDocsRepoUrl = 'https://github.com/flightctl/flightctl/blob/main/docs';
 
-export const USING_TEMPLATE_VARIABLES_LINK = `${baseDocsRepoUrl}/user/managing-fleets.md#defining-device-templates`;
+const downstreamDocsRepoUrl =
+  'https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.13/html-single/edge_manager/index';
 
-export const ADDING_NEW_DEVICES_LINK = `${baseDocsRepoUrl}/user/getting-started.md#building-a-bootable-container-image-including-the-flight-control-agent`;
+const links = {
+  rhem: {
+    createApp: `${downstreamDocsRepoUrl}#build-app-packages`,
+    usingTemplateVars: `${downstreamDocsRepoUrl}#device-templates`,
+    addNewDevice: `${downstreamDocsRepoUrl}#edge-mgr-build`,
+    createAcmRepo: `${downstreamDocsRepoUrl}#device-config-git-cli`,
+  },
+  fc: {
+    createApp: `${upstreamDocsRepoUrl}/user/managing-devices.md#creating-applications`,
+    usingTemplateVars: `${upstreamDocsRepoUrl}/user/managing-fleets.md#defining-device-templates`,
+    addNewDevice: `${upstreamDocsRepoUrl}/user/getting-started.md#building-a-bootable-container-image-including-the-flight-control-agent`,
+    createAcmRepo: `${upstreamDocsRepoUrl}/user/registering-microshift-devices-acm.md#creating-the-acm-registration-repository`,
+  },
+};
 
-export const CREATE_ACM_REPOSITORY = `${baseDocsRepoUrl}/user/registering-microshift-devices-acm.md#creating-the-acm-registration-repository`;
+export const getCreatingApplicationsLink = (appType: FlightCtlApp) =>
+  appType === FlightCtlApp.STANDALONE ? links.fc.createApp : links.rhem.createApp;
+
+export const getUsingTemplateVariablesLink = (appType: FlightCtlApp) =>
+  appType === FlightCtlApp.STANDALONE ? links.fc.usingTemplateVars : links.rhem.usingTemplateVars;
+
+export const getAddingNewDevicesLink = (appType: FlightCtlApp) =>
+  appType === FlightCtlApp.STANDALONE ? links.fc.addNewDevice : links.rhem.addNewDevice;
+
+export const getCreateAcmRepositoryLink = (appType: FlightCtlApp) =>
+  appType === FlightCtlApp.STANDALONE ? links.fc.createAcmRepo : links.rhem.createAcmRepo;
 
 // Links to other flightctl upstream resources
 export const DEMO_REPOSITORY_URL = 'https://github.com/flightctl/flightctl-demos';
