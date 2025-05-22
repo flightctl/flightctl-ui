@@ -25,12 +25,14 @@
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}'"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.5",
     "@types/react-dom": "^18.2.17"
   },
   "dependencies": {
     "@types/js-yaml": "^4.0.9",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
+    "file-saver": "^2.0.2",
     "formik": "^2.4.5",
     "fuzzysearch": "^1.0.3",
     "js-yaml": "^4.1.0",
@@ -48,6 +50,8 @@
     "react": "17.0.1 - 18.x",
     "react-dom": "17.0.1 - 18.x",
     "react-i18next": "11.7.3 - 15.x",
-    "react-router-dom": "^6.22.0"
+    "react-router-dom": "^6.22.0",
+    "monaco-editor": "^0.51.0",
+    "@patternfly/react-code-editor": "^5.4.13"
   }
 }

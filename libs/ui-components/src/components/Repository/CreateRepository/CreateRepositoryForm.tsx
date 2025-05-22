@@ -260,7 +260,7 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
   );
 };
 
-type CreateRepositoryFormContentProps = React.PropsWithChildren<Record<never, never>> &
+type CreateRepositoryFormContentProps = React.PropsWithChildren &
   Pick<CreateRepositoryFormProps, 'onClose'> & {
     isEdit: boolean;
     isReadOnly: boolean;
