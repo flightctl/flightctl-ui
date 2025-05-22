@@ -13,6 +13,8 @@ import { FlightCtlLabel } from '../../../../types/extraTypes';
 import { getApiListCount } from '../../../../utils/api';
 import { getErrorMessage } from '../../../../utils/error';
 import { commonQueries } from '../../../../utils/query';
+import LabelsView from '../../../common/LabelsView';
+import { toAPILabel } from '../../../../utils/labels';
 
 const validateLabels = (labels: FlightCtlLabel[]) =>
   hasUniqueLabelKeys(labels) && getInvalidKubernetesLabels(labels).length === 0;
@@ -108,4 +110,13 @@ const DeviceLabelSelector = () => {
   );
 };
 
-export default DeviceLabelSelector;
+const DeviceLabelSelectorWrapper = ({ isReadOnly }: { isReadOnly: boolean }) => {
+  const [{ value: labels }] = useField<FlightCtlLabel[]>('labels');
+
+  if (isReadOnly) {
+    return <LabelsView prefix="device-selector" labels={toAPILabel(labels)} />;
+  }
+  return <DeviceLabelSelector />;
+};
+
+export default DeviceLabelSelectorWrapper;

@@ -15,7 +15,7 @@ export const deviceUpdatePolicyStepId = 'update-policy';
 
 export const isUpdatePolicyStepValid = (errors: FormikErrors<DeviceSpecConfigFormValues>) => !errors.updatePolicy;
 
-const UpdatePolicyStep = () => {
+const UpdatePolicyStep = ({ isReadOnly }: { isReadOnly?: boolean }) => {
   const { t } = useTranslation();
 
   const {
@@ -71,7 +71,7 @@ const UpdatePolicyStep = () => {
               label={t('Update policies')}
               content={t('Update policies allow you to control when updates should be downloaded and applied.')}
             >
-              <UpdateStepUpdatePolicy />
+              <UpdateStepUpdatePolicy isReadOnly={isReadOnly} />
             </FormGroupWithHelperText>
           </>
         ) : (

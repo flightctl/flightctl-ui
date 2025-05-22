@@ -21,7 +21,6 @@ type FormSelectProps = {
   items: Record<string, string | SelectItem>;
   defaultId?: string;
   helperText?: React.ReactNode;
-  children?: React.ReactNode;
   placeholderText?: string;
   isValidTypedItem?: (value: string) => boolean;
   transformTypedItem?: (value: string) => string;
@@ -40,10 +39,11 @@ const FormSelectTypeahead = ({
   isValidTypedItem,
   transformTypedItem,
   children,
-}: FormSelectProps) => {
+}: React.PropsWithChildren<FormSelectProps>) => {
   const [field, meta, { setValue, setTouched }] = useField<string>({
     name: name,
   });
+
   const [isOpen, setIsOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState<string | undefined>(undefined);
 
@@ -182,4 +182,25 @@ const FormSelectTypeahead = ({
   );
 };
 
-export default FormSelectTypeahead;
+const FormSelectTypeaheadWrapper = ({
+  name,
+  items,
+  isDisabled,
+  ...rest
+}: FormSelectProps & { isDisabled?: boolean }) => {
+  const [{ value }] = useField<string>({
+    name: name,
+  });
+  if (isDisabled) {
+    let displayText: string = '';
+    if (value) {
+      displayText = getItemLabel(items[value]) || value;
+    } else if (rest.defaultId) {
+      displayText = getItemLabel(items[rest.defaultId]) || rest.defaultId;
+    }
+    return displayText || rest.placeholderText || '-';
+  }
+  return <FormSelectTypeahead name={name} items={items} {...rest} />;
+};
+
+export default FormSelectTypeaheadWrapper;

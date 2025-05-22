@@ -24,7 +24,7 @@ import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getEmptyInitializedBatch } from '../fleetSpecUtils';
 
-const RolloutPolicyBatch = ({ index }: { index: number }) => {
+const RolloutPolicyBatch = ({ index, isReadOnly }: { index: number; isReadOnly: boolean }) => {
   const { t } = useTranslation();
 
   const items = React.useMemo(
@@ -51,12 +51,16 @@ const RolloutPolicyBatch = ({ index }: { index: number }) => {
           </GridItem>
         )}
         <FormGroup label={t('Select devices using labels')}>
-          <LabelsField aria-label={t('Label selector')} name={`rolloutPolicy.batches.${index}.selector`} />
+          <LabelsField
+            aria-label={t('Label selector')}
+            name={`rolloutPolicy.batches.${index}.selector`}
+            isDisabled={isReadOnly}
+          />
         </FormGroup>
         <FormGroup label={t('Select a subset using')}>
           <Split hasGutter>
             <SplitItem>
-              <FormSelect items={items} name={`rolloutPolicy.batches.${index}.limitType`} />
+              <FormSelect items={items} name={`rolloutPolicy.batches.${index}.limitType`} isDisabled={isReadOnly} />
             </SplitItem>
             <SplitItem>
               <NumberField
@@ -66,6 +70,7 @@ const RolloutPolicyBatch = ({ index }: { index: number }) => {
                 max={isPercent ? 100 : undefined}
                 widthChars={isPercent ? 3 : 8}
                 unit={isPercent ? '%' : undefined}
+                isDisabled={isReadOnly}
               />
             </SplitItem>
           </Split>
@@ -86,6 +91,7 @@ const RolloutPolicyBatch = ({ index }: { index: number }) => {
                 min={1}
                 max={100}
                 isRequired
+                isDisabled={isReadOnly}
               />
             </FlexItem>
             <FlexItem flex={{ lg: 'flex_1' }} style={{ minWidth: 200 }}>
@@ -100,7 +106,7 @@ const RolloutPolicyBatch = ({ index }: { index: number }) => {
   );
 };
 
-const UpdateStepRolloutPolicy = () => {
+const UpdateStepRolloutPolicy = ({ isReadOnly }: { isReadOnly: boolean }) => {
   const { t } = useTranslation();
 
   const {
@@ -108,6 +114,9 @@ const UpdateStepRolloutPolicy = () => {
   } = useFormikContext<FleetFormValues>();
 
   const batches = rolloutPolicy.batches || [];
+  if (isReadOnly && batches.length === 0) {
+    return null;
+  }
 
   return (
     <>
@@ -126,7 +135,13 @@ const UpdateStepRolloutPolicy = () => {
         <Flex>
           <FlexItem>{t('Timeout devices that fail to update after')}</FlexItem>
           <FlexItem>
-            <NumberField aria-label={t('Update timeout')} name="rolloutPolicy.updateTimeout" min={1} isRequired />
+            <NumberField
+              aria-label={t('Update timeout')}
+              name="rolloutPolicy.updateTimeout"
+              min={1}
+              isRequired
+              isDisabled={isReadOnly}
+            />
           </FlexItem>
           <FlexItem>{t('minutes')}.</FlexItem>
         </Flex>
@@ -140,35 +155,39 @@ const UpdateStepRolloutPolicy = () => {
                 <FormSection key={index}>
                   <Split hasGutter>
                     <SplitItem isFilled>
-                      <RolloutPolicyBatch index={index} />
+                      <RolloutPolicyBatch index={index} isReadOnly={isReadOnly} />
                     </SplitItem>
-                    <SplitItem>
-                      <Button
-                        aria-label={t('Delete batch')}
-                        variant="link"
-                        icon={<MinusCircleIcon />}
-                        iconPosition="start"
-                        onClick={() => remove(index)}
-                        isDisabled={batches.length === 1}
-                      />
-                    </SplitItem>
+                    {!isReadOnly && (
+                      <SplitItem>
+                        <Button
+                          aria-label={t('Delete batch')}
+                          variant="link"
+                          icon={<MinusCircleIcon />}
+                          iconPosition="start"
+                          onClick={() => remove(index)}
+                          isDisabled={batches.length === 1}
+                        />
+                      </SplitItem>
+                    )}
                   </Split>
                 </FormSection>
               ))}
-              <FormSection>
-                <FormGroup>
-                  <Button
-                    variant="link"
-                    icon={<PlusCircleIcon />}
-                    iconPosition="start"
-                    onClick={() => {
-                      push(getEmptyInitializedBatch());
-                    }}
-                  >
-                    {t('Add batch')}
-                  </Button>
-                </FormGroup>
-              </FormSection>
+              {!isReadOnly && (
+                <FormSection>
+                  <FormGroup>
+                    <Button
+                      variant="link"
+                      icon={<PlusCircleIcon />}
+                      iconPosition="start"
+                      onClick={() => {
+                        push(getEmptyInitializedBatch());
+                      }}
+                    >
+                      {t('Add batch')}
+                    </Button>
+                  </FormGroup>
+                </FormSection>
+              )}
             </>
           )}
         </FieldArray>

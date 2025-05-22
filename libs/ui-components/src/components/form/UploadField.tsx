@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FieldMetaProps, useField } from 'formik';
-import { FileUpload, FormGroup } from '@patternfly/react-core';
+import { FileUpload, FormGroup, TextArea } from '@patternfly/react-core';
 import { useTranslation } from '../../hooks/useTranslation';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
@@ -8,6 +8,7 @@ type UploadFieldProps = {
   name: string;
   isRequired?: boolean;
   label: string;
+  isDisabled?: boolean;
   getErrorText?: (error: string) => React.ReactNode | undefined;
   placeholder?: string;
   onChange?: (event: React.FormEvent<HTMLTextAreaElement>) => void;
@@ -130,4 +131,17 @@ const UploadField = ({ label, maxFileBytes, isRequired, name }: UploadFieldProps
   );
 };
 
-export default UploadField;
+const UploadFieldWrapper = ({ name, label, maxFileBytes, isRequired, ...rest }: UploadFieldProps) => {
+  const [{ value }] = useField<string>(name);
+
+  if (rest.isDisabled) {
+    return (
+      <FormGroup label={label} isRequired={isRequired}>
+        <TextArea aria-label={label} name={name} value={value} {...rest} isDisabled />
+      </FormGroup>
+    );
+  }
+  return <UploadField name={name} label={label} maxFileBytes={maxFileBytes} isRequired={isRequired} {...rest} />;
+};
+
+export default UploadFieldWrapper;

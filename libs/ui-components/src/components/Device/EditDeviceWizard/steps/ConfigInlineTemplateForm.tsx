@@ -15,7 +15,7 @@ import { formatFileMode } from '../deviceSpecUtils';
 
 const MAX_INLINE_FILE_SIZE_BYTES = 1024 * 1024;
 
-const FileForm = ({ fieldName, index }: { fieldName: string; index: number }) => {
+const FileForm = ({ fieldName, index, isReadOnly }: { fieldName: string; index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
   const [{ value: file }] = useField<InlineConfigTemplate['files'][0]>(fieldName);
 
@@ -46,11 +46,16 @@ const FileForm = ({ fieldName, index }: { fieldName: string; index: number }) =>
     >
       <Grid hasGutter>
         <FormGroup label={t('File path on the device')} isRequired>
-          <TextField name={`${fieldName}.path`} />
+          <TextField name={`${fieldName}.path`} isDisabled={isReadOnly} />
         </FormGroup>
-        <UploadField label={t('Content')} name={`${fieldName}.content`} maxFileBytes={MAX_INLINE_FILE_SIZE_BYTES} />
+        <UploadField
+          label={t('Content')}
+          name={`${fieldName}.content`}
+          maxFileBytes={MAX_INLINE_FILE_SIZE_BYTES}
+          isDisabled={isReadOnly}
+        />
         <FormGroup>
-          <CheckboxField name={`${fieldName}.base64`} label={t('Content is base64 encoded')} />
+          <CheckboxField name={`${fieldName}.base64`} label={t('Content is base64 encoded')} isDisabled={isReadOnly} />
         </FormGroup>
         <FormGroup label={t('Permissions')}>
           <FormSelectTypeahead
@@ -71,13 +76,14 @@ const FileForm = ({ fieldName, index }: { fieldName: string; index: number }) =>
               return false;
             }}
             transformTypedItem={formatFileMode}
+            isDisabled={isReadOnly}
           />
         </FormGroup>
         <FormGroup label={t('User')}>
-          <TextField name={`${fieldName}.user`} placeholder="root" />
+          <TextField name={`${fieldName}.user`} placeholder="root" isDisabled={isReadOnly} />
         </FormGroup>
         <FormGroup label={t('Group')}>
-          <TextField name={`${fieldName}.group`} placeholder="root" />
+          <TextField name={`${fieldName}.group`} placeholder="root" isDisabled={isReadOnly} />
         </FormGroup>
       </Grid>
     </ExpandableFormSection>
@@ -86,14 +92,17 @@ const FileForm = ({ fieldName, index }: { fieldName: string; index: number }) =>
 
 type ConfigInlineTemplateFormProps = {
   index: number;
+  isReadOnly?: boolean;
 };
 
-const ConfigInlineTemplateForm = ({ index }: ConfigInlineTemplateFormProps) => {
+const ConfigInlineTemplateForm = ({ index, isReadOnly }: ConfigInlineTemplateFormProps) => {
   const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<DeviceSpecConfigFormValues>();
   const inlineConfig = values.configTemplates[index] as InlineConfigTemplate;
+  const configCount = inlineConfig.files?.length || 0;
+
   React.useEffect(() => {
-    if (!inlineConfig.files?.length) {
+    if (configCount === 0) {
       setFieldValue(`configTemplates.${index}.files`, [
         {
           path: '',
@@ -104,6 +113,10 @@ const ConfigInlineTemplateForm = ({ index }: ConfigInlineTemplateFormProps) => {
     // eslint-disable-next-line
   }, []);
 
+  if (isReadOnly && configCount === 0) {
+    return null;
+  }
+
   return (
     <FieldArray name={`configTemplates.${index}.files`}>
       {({ push, remove }) => (
@@ -113,9 +126,9 @@ const ConfigInlineTemplateForm = ({ index }: ConfigInlineTemplateFormProps) => {
             return (
               <Split key={fileIndex} hasGutter>
                 <SplitItem isFilled>
-                  <FileForm index={fileIndex} fieldName={fieldName} />
+                  <FileForm index={fileIndex} fieldName={fieldName} isReadOnly={isReadOnly} />
                 </SplitItem>
-                {inlineConfig.files.length > 1 && (
+                {!isReadOnly && configCount > 1 && (
                   <SplitItem>
                     <Button
                       aria-label={t('Delete file')}
@@ -129,21 +142,23 @@ const ConfigInlineTemplateForm = ({ index }: ConfigInlineTemplateFormProps) => {
               </Split>
             );
           })}
-          <FormGroup>
-            <Button
-              variant="link"
-              icon={<PlusCircleIcon />}
-              iconPosition="start"
-              onClick={() => {
-                push({
-                  path: '',
-                  content: '',
-                });
-              }}
-            >
-              {t('Add file')}
-            </Button>
-          </FormGroup>
+          {!isReadOnly && (
+            <FormGroup>
+              <Button
+                variant="link"
+                icon={<PlusCircleIcon />}
+                iconPosition="start"
+                onClick={() => {
+                  push({
+                    path: '',
+                    content: '',
+                  });
+                }}
+              >
+                {t('Add file')}
+              </Button>
+            </FormGroup>
+          )}
         </>
       )}
     </FieldArray>

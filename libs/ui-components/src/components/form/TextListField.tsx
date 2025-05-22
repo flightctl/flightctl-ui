@@ -26,7 +26,7 @@ const TextListField = ({ name, onChangeCallback, addButtonText, helperText }: Te
     onChangeCallback?.(newValueList, hasErrors);
   };
 
-  const onDelete = async (_ev: React.MouseEvent<Element, MouseEvent>, index: number) => {
+  const onDelete = async (index: number) => {
     const newValueList = [...valueList];
     newValueList.splice(index, 1);
     await updateValueList(newValueList);
@@ -61,7 +61,7 @@ const TextListField = ({ name, onChangeCallback, addButtonText, helperText }: Te
             <Label
               key={`${text}_${index}`}
               textMaxWidth={maxWidth}
-              onClose={(e) => onDelete(e, index)}
+              onClose={() => onDelete(index)}
               onEditCancel={(_, prevText) => onEdit(index, prevText)}
               onEditComplete={(_, newText) => onEdit(index, newText)}
               /* Add a basic tooltip as the PF tooltip doesn't work for editable labels */
@@ -79,4 +79,20 @@ const TextListField = ({ name, onChangeCallback, addButtonText, helperText }: Te
   );
 };
 
-export default TextListField;
+const TextListFieldWrapper = ({ name, isReadOnly, ...rest }: TextListFieldProps & { isReadOnly: boolean }) => {
+  const [{ value: valueList }] = useField<string[]>(name);
+
+  if (isReadOnly) {
+    return valueList.length === 0
+      ? '-'
+      : valueList.map((text, index) => (
+          <Label key={`${text}_${index}`} textMaxWidth={maxWidth}>
+            {text}
+          </Label>
+        ));
+  }
+
+  return <TextListField name={name} {...rest} />;
+};
+
+export default TextListFieldWrapper;
