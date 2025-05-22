@@ -576,9 +576,6 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
             type: Yup.string().required(t('Source type is required.')),
             name: validKubernetesDnsSubdomain(t, { isRequired: true }),
             path: Yup.string().required(t('Path is required.')).matches(absolutePathRegex, t('Path must be absolute.')),
-            mountPath: Yup.string()
-              .required(t('Mount path is required.'))
-              .matches(absolutePathRegex, t('Mount path must be absolute.')),
             repository: Yup.string().required(t('Repository is required.')),
             targetRevision: maxLengthString(t, {
               maxLength: MAX_TARGET_REVISION_LENGTH,
