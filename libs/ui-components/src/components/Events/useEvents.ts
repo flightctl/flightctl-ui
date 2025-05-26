@@ -49,6 +49,8 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.RESOURCE_DELETION_FAILED]: t('{{ resourceType }} could not be deleted', params),
     [Event.reason.RESOURCE_UPDATED]: t('{{ resourceType }} was updated successfully', params),
     [Event.reason.RESOURCE_UPDATE_FAILED]: t('{{ resourceType }} could not be updated', params),
+    [Event.reason.RESOURCE_DECOMMISSIONED]: t('{{ resourceType }} was decommissioned successfully', params),
+    [Event.reason.RESOURCE_DECOMMISSION_FAILED]: t('{{ resourceType }} could not be decommissioned', params),
   };
 };
 
@@ -56,6 +58,7 @@ const redundantMessageReasons = [
   Event.reason.RESOURCE_CREATED, // <kind> <name> created successfully
   Event.reason.RESOURCE_UPDATED, // <kind> <name> updated successfully
   Event.reason.RESOURCE_DELETED, // <kind> <name> deleted successfully
+  Event.reason.RESOURCE_DECOMMISSIONED, // <kind> <name> decommissioned successfully
 ];
 
 const displayEventMapper = (event: Event, reasonTxt: string): DisplayEvent => ({
