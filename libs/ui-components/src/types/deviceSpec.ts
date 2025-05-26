@@ -29,7 +29,6 @@ export type GitConfigTemplate = ConfigTemplate & {
   repository: string;
   targetRevision: string;
   path: string;
-  mountPath?: string;
 };
 
 export enum AppSpecType {
