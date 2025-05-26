@@ -3,8 +3,8 @@ import { Label, Popover, Stack, StackItem } from '@patternfly/react-core';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons';
 
 import { useTranslation } from '../../hooks/useTranslation';
+import { TECH_PREVIEW_LEVEL_LINK } from '../../hooks/useAppLinks';
 import LearnMoreLink from './LearnMoreLink';
-import { TECH_PREVIEW_LEVEL_LINK } from '../../links';
 
 const TechPreviewPopoverContent = () => {
   const { t } = useTranslation();
