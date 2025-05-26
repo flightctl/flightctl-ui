@@ -457,7 +457,7 @@ export const validFleetRolloutPolicySchema = (t: TFunction) => {
       }
 
       const errors = rolloutPolicy.batches.reduce((errors, batch, batchIndex) => {
-        const hasError = batch.limit === undefined && Object.keys(batch.selector || {}).length === 0;
+        const hasError = batch.limit === undefined && batch.selector.length === 0;
         if (hasError) {
           errors.push(
             new Yup.ValidationError(
