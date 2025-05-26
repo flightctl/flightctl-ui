@@ -73,6 +73,7 @@ const EditDeviceWizard = () => {
     );
   } else if (device) {
     const registerMicroShift = hasMicroshiftRegistrationConfig(device.spec);
+    const updatePolicyValues = getUpdatePolicyValues(device.spec?.updatePolicy);
     body = (
       <Formik<EditDeviceFormValues>
         initialValues={{
@@ -84,7 +85,11 @@ const EditDeviceWizard = () => {
           applications: getApplicationValues(device.spec),
           systemdUnits: [],
           registerMicroShift,
-          updatePolicy: getUpdatePolicyValues(device.spec?.updatePolicy),
+          updatePolicy: {
+            ...updatePolicyValues,
+            isAdvanced: true,
+          },
+          useBasicUpdateConfig: !updatePolicyValues.isAdvanced,
         }}
         validationSchema={getValidationSchema(t)}
         validateOnMount

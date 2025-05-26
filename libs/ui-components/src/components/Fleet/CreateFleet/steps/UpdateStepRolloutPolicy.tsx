@@ -47,7 +47,7 @@ const RolloutPolicyBatch = ({ index, isReadOnly }: { index: number; isReadOnly: 
         {/* Show errors not related to an individual field */}
         {typeof meta.error === 'string' && (
           <GridItem>
-            <ErrorHelperText meta={meta} />
+            <ErrorHelperText meta={meta} touchRequired={false} />
           </GridItem>
         )}
         <FormGroup label={t('Select devices using labels')}>

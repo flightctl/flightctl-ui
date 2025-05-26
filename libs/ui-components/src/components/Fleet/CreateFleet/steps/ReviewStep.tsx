@@ -92,22 +92,25 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
               </DescriptionListDescription>
             </DescriptionListGroup>
           )}
-
-          {values.rolloutPolicy.isAdvanced && (
-            <DescriptionListGroup>
-              <DescriptionListTerm>{t('Rollout policy')}</DescriptionListTerm>
-              <DescriptionListDescription>
-                <ReviewUpdateRolloutPolicy rolloutPolicy={values.rolloutPolicy} />
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-          )}
-          {values.disruptionBudget.isAdvanced && (
-            <DescriptionListGroup>
-              <DescriptionListTerm>{t('Disruption budget')}</DescriptionListTerm>
-              <DescriptionListDescription>
-                <ReviewUpdateDisruptionBudget disruptionBudget={values.disruptionBudget} />
-              </DescriptionListDescription>
-            </DescriptionListGroup>
+          {!values.useBasicUpdateConfig && (
+            <>
+              {values.rolloutPolicy.isAdvanced && (
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('Rollout policy')}</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <ReviewUpdateRolloutPolicy rolloutPolicy={values.rolloutPolicy} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+              )}
+              {values.disruptionBudget.isAdvanced && (
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('Disruption budget')}</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <ReviewUpdateDisruptionBudget disruptionBudget={values.disruptionBudget} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+              )}
+            </>
           )}
         </FlightControlDescriptionList>
       </StackItem>
