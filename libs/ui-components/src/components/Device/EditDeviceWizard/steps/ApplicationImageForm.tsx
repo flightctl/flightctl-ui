@@ -3,8 +3,8 @@ import * as React from 'react';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
 import LearnMoreLink from '../../../common/LearnMoreLink';
-import { CREATING_APPLICATIONS_LINK } from '../../../../links';
 import { useTranslation } from '../../../../hooks/useTranslation';
+import { useAppLinks } from '../../../../hooks/useAppLinks';
 import { ImageAppForm } from '../../../../types/deviceSpec';
 
 const ApplicationImageForm = ({
@@ -17,13 +17,14 @@ const ApplicationImageForm = ({
   isReadOnly?: boolean;
 }) => {
   const { t } = useTranslation();
+  const createAppLink = useAppLinks('createApp');
+
   return (
     <FormGroupWithHelperText
       label={t('Image')}
       content={
         <span>
-          {t('The application image. Learn how to create one')}{' '}
-          <LearnMoreLink text={t('here')} link={CREATING_APPLICATIONS_LINK} />
+          {t('The application image. Learn how to create one')} <LearnMoreLink text={t('here')} link={createAppLink} />
         </span>
       }
       isRequired

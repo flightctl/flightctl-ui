@@ -4,7 +4,9 @@ import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import LearnMoreLink from './LearnMoreLink';
-import { TECH_PREVIEW_LEVEL_LINK } from '../../links';
+
+// Links to general Red Hat docs
+const TECH_PREVIEW_LEVEL_LINK = 'https://access.redhat.com/support/offerings/techpreview';
 
 const TechPreviewPopoverContent = () => {
   const { t } = useTranslation();
