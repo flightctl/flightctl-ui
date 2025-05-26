@@ -10,8 +10,8 @@ export const ReviewUpdateRolloutPolicy = ({ rolloutPolicy }: { rolloutPolicy: Ro
   const { t } = useTranslation();
 
   return rolloutPolicy.isAdvanced
-    ? '-'
-    : t('{{ count }} batches have been defined', { count: rolloutPolicy.batches.length });
+    ? t('{{ count }} batches have been defined', { count: rolloutPolicy.batches.length })
+    : '-';
 };
 
 export const ReviewUpdateDisruptionBudget = ({ disruptionBudget }: { disruptionBudget: DisruptionBudgetForm }) => {

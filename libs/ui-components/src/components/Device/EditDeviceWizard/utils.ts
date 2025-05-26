@@ -22,14 +22,14 @@ import {
 } from './deviceSpecUtils';
 
 export const getValidationSchema = (t: TFunction) =>
-  Yup.lazy(() =>
+  Yup.lazy((values: EditDeviceFormValues) =>
     Yup.object({
       deviceAlias: validKubernetesLabelValue(t, { isRequired: false, fieldName: t('Alias') }),
       osImage: validOsImage(t, { isFleet: false }),
       labels: validLabelsSchema(t),
       configTemplates: validConfigTemplatesSchema(t),
       applications: validApplicationsSchema(t),
-      updatePolicy: validUpdatePolicySchema(t),
+      updatePolicy: values.updatePolicy.isAdvanced ? validUpdatePolicySchema(t) : Yup.object(),
     }),
   );
 
@@ -85,11 +85,10 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
   allPatches = allPatches.concat(appPatches);
 
   // Updates
-  const updatesPatches = getUpdatePolicyPatches(
-    '/spec/updatePolicy',
-    currentDevice.spec?.updatePolicy,
-    updatedDevice.updatePolicy as Required<UpdatePolicyForm>,
-  );
+  const updatesPatches = getUpdatePolicyPatches('/spec/updatePolicy', currentDevice.spec?.updatePolicy, {
+    ...updatedDevice.updatePolicy,
+    isAdvanced: !updatedDevice.useBasicUpdateConfig,
+  } as Required<UpdatePolicyForm>);
   allPatches = allPatches.concat(updatesPatches);
 
   return allPatches;

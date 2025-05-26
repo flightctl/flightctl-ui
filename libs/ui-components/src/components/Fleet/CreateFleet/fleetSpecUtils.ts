@@ -1,6 +1,6 @@
 import { type DeviceUpdatePolicySpec, FleetSpec, Percentage } from '@flightctl/types';
 
-import { BatchLimitType, UpdatePolicyForm } from './../../../types/deviceSpec';
+import { BatchForm, BatchLimitType, RolloutPolicyForm, UpdatePolicyForm } from './../../../types/deviceSpec';
 import { fromAPILabel } from '../../../utils/labels';
 import * as timeUtils from '../../../utils/time';
 import { schedulesAreEqual } from '../../../utils/patch';
@@ -15,32 +15,14 @@ const numberValue = (value: Percentage | number | undefined) => {
   return Number(value.replace(/[%]/, ''));
 };
 
-export const getEmptyInitializedBatch = () => ({
-  limit: '',
+export const getEmptyInitializedBatch = (): BatchForm => ({
+  limit: undefined,
   limitType: BatchLimitType.BatchLimitPercent,
   successThreshold: numberValue(DEFAULT_BACKEND_SUCCESS_THRESHOLD_PERCENTAGE),
   selector: [],
 });
 
-export const getEmptyUpdateFormParams = () => ({
-  isEditable: true,
-  isAdvanced: false,
-  downloadAndInstallDiffer: false,
-  // Download schedule
-  downloadStartsAt: timeUtils.defaultStartTime,
-  downloadEndsAt: timeUtils.defaultEndTime,
-  downloadScheduleMode: timeUtils.UpdateScheduleMode.Daily,
-  downloadWeekDays: [false, false, false, false, false, false, false],
-  downloadTimeZone: timeUtils.localDeviceTimezone,
-  // Install schedule (updateSchedule in the API)
-  installStartsAt: timeUtils.defaultStartTime,
-  installEndsAt: timeUtils.defaultEndTime,
-  installScheduleMode: timeUtils.UpdateScheduleMode.Daily,
-  installWeekDays: [false, false, false, false, false, false, false],
-  installTimeZone: timeUtils.localDeviceTimezone,
-});
-
-export const getRolloutPolicyValues = (fleetSpec?: FleetSpec) => {
+export const getRolloutPolicyValues = (fleetSpec?: FleetSpec): RolloutPolicyForm => {
   const batches = (fleetSpec?.rolloutPolicy?.deviceSelection?.sequence || []).map((batch) => ({
     selector: fromAPILabel(batch.selector?.matchLabels || {}),
     limit: numberValue(batch.limit),
@@ -52,7 +34,11 @@ export const getRolloutPolicyValues = (fleetSpec?: FleetSpec) => {
 
   // If the policy does not specify the timeout, we set the backend's default as the field is required in the UI
   const updateTimeout = fleetSpec?.rolloutPolicy?.defaultUpdateTimeout || `${DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES}m`;
-  return { isAdvanced: batches.length > 0, batches, updateTimeout: timeUtils.durationToMinutes(updateTimeout) };
+  return {
+    isAdvanced: batches.length > 0,
+    batches: batches.length ? batches : [getEmptyInitializedBatch()],
+    updateTimeout: timeUtils.durationToMinutes(updateTimeout),
+  };
 };
 
 export const getDisruptionBudgetValues = (fleetSpec?: FleetSpec) => {

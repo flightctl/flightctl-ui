@@ -177,6 +177,7 @@ export type DeviceSpecConfigFormValues = {
   systemdUnits: SystemdUnitFormValue[];
   updatePolicy: UpdatePolicyForm;
   registerMicroShift: boolean;
+  useBasicUpdateConfig: boolean;
 };
 
 export type EditDeviceFormValues = DeviceSpecConfigFormValues & {

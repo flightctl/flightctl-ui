@@ -261,7 +261,9 @@ export const getRolloutPolicyPatches = (
   const currentDisruption = currentPolicy?.disruptionBudget;
 
   const hadAdvancedSettings = currentBatches.length > 0 || !!currentDisruption;
-  const wantsAdvancedSettings = fleetValues.rolloutPolicy.isAdvanced || fleetValues.disruptionBudget.isAdvanced;
+  const wantsAdvancedSettings =
+    !fleetValues.useBasicUpdateConfig &&
+    (fleetValues.rolloutPolicy.isAdvanced || fleetValues.disruptionBudget.isAdvanced);
   const updatedPolicy = fleetValues.rolloutPolicy;
 
   if (hadAdvancedSettings !== wantsAdvancedSettings) {
