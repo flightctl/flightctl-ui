@@ -155,13 +155,13 @@ const EnrolledDevicesTable = ({
         <ToolbarItem alignSelf="center">
           <Switch
             id="enrolled-devices-switch"
-            label={<span className="fctl-switch__label">{t('Show only decommissioned devices')}</span>}
+            label={<span className="fctl-switch__label">{t('Show decommissioned devices')}</span>}
             isChecked={false}
             onChange={() => {
               clearAllFilters();
               setOnlyDecommissioned(true);
             }}
-            ouiaId={t('Show only decommissioned devices')}
+            ouiaId={t('Show decommissioned devices')}
           />
         </ToolbarItem>
       </DeviceTableToolbar>
