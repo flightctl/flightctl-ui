@@ -10,6 +10,7 @@ import type * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 import ErrorBoundary from '../ErrorBoundary';
 import FlightCtlForm from '../../form/FlightCtlForm';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { useThemePreferences } from '../../../hooks/useThemePreferences';
 // TODO add useShortcutPopover when adding saving capabilities to the YAML editor
 import { defineConsoleThemes } from './CodeEditorTheme';
 
@@ -30,6 +31,7 @@ const YamlEditorBase = ({ filename, code, onCancel, onReload }: YamlEditorBasePr
   const { t } = useTranslation();
   const editorRef = React.useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = React.useRef<typeof monacoEditor | null>(null);
+  const { resolvedTheme } = useThemePreferences();
 
   const [editorMounted, setEditorMounted] = React.useState(false);
 
@@ -87,7 +89,7 @@ const YamlEditorBase = ({ filename, code, onCancel, onReload }: YamlEditorBasePr
             monacoRef.current = instance;
           }}
           options={{
-            theme: 'console-dark',
+            theme: `console-${resolvedTheme}`,
             readOnly: true,
             readOnlyMessage: {
               value: t('Yaml is currently read-only'),
