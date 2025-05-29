@@ -1,12 +1,16 @@
 import * as React from 'react';
-import { Theme, useThemePreferences } from '../../hooks/useThemePreferences';
+import { ResolvedTheme, Theme, useThemePreferences } from '../../hooks/useThemePreferences';
 
-export const UserPreferencesContext = React.createContext<{
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-}>({
-  theme: 'system',
-  setTheme: () => {},
+type ThemeContext = {
+  userTheme: Theme; // Theme setting chosen by the user
+  resolvedTheme: ResolvedTheme; // Resolved theme based on user theme and system settings
+  setUserTheme: (theme: Theme) => void;
+};
+
+export const UserPreferencesContext = React.createContext<ThemeContext>({
+  userTheme: 'system',
+  resolvedTheme: 'dark',
+  setUserTheme: () => {},
 });
 
 export type UserPreferencesProviderProps = {
@@ -14,13 +18,14 @@ export type UserPreferencesProviderProps = {
 };
 
 export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = ({ children }) => {
-  const { theme, setTheme } = useThemePreferences();
+  const { userTheme, resolvedTheme, setUserTheme } = useThemePreferences();
 
   return (
     <UserPreferencesContext.Provider
       value={{
-        theme,
-        setTheme,
+        userTheme,
+        resolvedTheme,
+        setUserTheme,
       }}
     >
       {children}
