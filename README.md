@@ -42,8 +42,16 @@ or provide the CA certs:
 
 ### Running UI as OCP plugin
 
+With this option, the Flight Control UI will run as a Plugin in the OCP console.
+**Note**: this setup is only for development, do not use it in Production environments!
+
 Login to OCP cluster and run:
 
 ```
 npm run dev:ocp 
 ```
+
+By default, the latest available OpenShift console image will be used. To specify a different console version, set the `CONSOLE_VERSION` environment variable.
+
+The following console versions are confirmed to be compatible: 4.16 to 4.20.
+
