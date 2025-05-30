@@ -1,6 +1,6 @@
 module github.com/flightctl/flightctl-ui
 
-go 1.21
+go 1.23
 
 require (
 	github.com/flightctl/flightctl v0.2.0
