@@ -22,5 +22,12 @@ FROM registry.access.redhat.com/ubi9/ubi-micro
 COPY --from=ui-build /app/apps/ocp-plugin/dist /app/proxy/dist
 COPY --from=proxy-build /app/flightctl-ui /app/proxy
 WORKDIR /app/proxy
+LABEL \
+  com.redhat.component="flightctl-ui-ocp-container" \
+  description="Flightctl User Interface Service for OCP Integration" \
+  io.k8s.description="Flightctl User Interface Service for OCP Integration" \
+  io.k8s.display-name="Flightctl UI (OCP)" \
+  name="flightctl-ui-ocp" \
+  summary="Flightctl User Interface Service for OCP Integration"
 EXPOSE 8080
 CMD ./flightctl-ui
