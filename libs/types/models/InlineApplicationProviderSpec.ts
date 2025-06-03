@@ -3,10 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ApplicationContent } from './ApplicationContent';
-export type InlineApplicationProviderSpec = {
+import type { ApplicationVolumeProviderSpec } from './ApplicationVolumeProviderSpec';
+export type InlineApplicationProviderSpec = (ApplicationVolumeProviderSpec & {
   /**
    * A list of application content.
    */
   inline: Array<ApplicationContent>;
-};
+});
 

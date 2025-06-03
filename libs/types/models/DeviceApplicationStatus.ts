@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ApplicationStatusType } from './ApplicationStatusType';
+import type { ApplicationVolumeStatus } from './ApplicationVolumeStatus';
 export type DeviceApplicationStatus = {
   /**
    * Human readable name of the application.
@@ -17,5 +18,9 @@ export type DeviceApplicationStatus = {
    */
   restarts: number;
   status: ApplicationStatusType;
+  /**
+   * Status of volumes used by this application.
+   */
+  volumes?: Array<ApplicationVolumeStatus>;
 };
 
