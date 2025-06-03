@@ -201,6 +201,7 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
     return acc;
   }, {});
 
+  // TODO EDM-1497: existing "volumes" must be kept
   if (isImageAppForm(app)) {
     const data = {
       image: app.image,
