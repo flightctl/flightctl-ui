@@ -33,7 +33,6 @@ import {
 } from './utils';
 import { RepoSpecType, Repository, ResourceSync } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
-import { DEMO_REPOSITORY_URL } from '../../../links';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import LabelWithHelperText, { FormGroupWithHelperText } from '../../common/WithHelperText';
 import NameField from '../../form/NameField';
@@ -43,6 +42,7 @@ import RadioField from '../../form/RadioField';
 import TextField from '../../form/TextField';
 import FlightCtlForm from '../../form/FlightCtlForm';
 import { getDnsSubdomainValidations } from '../../form/validations';
+import { DEMO_REPOSITORY_URL } from '../../../hooks/useAppLinks';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';
 
