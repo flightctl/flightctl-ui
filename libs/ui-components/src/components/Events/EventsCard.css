@@ -1,5 +1,29 @@
 .fctl-events-container {
   /* Make space for the EmptyState content */
   min-height: 300px;
-  overflow-y: auto;
+  padding-inline-end: var(--pf-v5-global--spacer--sm);
+}
+
+.fctl-events-container .fctl-event__wrapper {
+  padding-bottom: var(--pf-v5-global--spacer--md);
+}
+
+.fctl-events-card .fctl-events-card__text {
+  /* Reduce margin to prevent the titleDetails / button to wrap to second line */
+  margin-right: 5px;
+}
+
+.fctl-events-card .fctl-events-card__text-details {
+  @media (max-width: 1880px) and (min-width: 768px) {
+    /* Move the title to the next line and make the font smaller*/
+    font-size: smaller;
+    order: 3;
+    flex-basis: 100%;
+  }
+}
+
+.fctl-events-card .fctl-events-card__button {
+  padding: 0;
+  /* Push reload button to the right */
+  margin-left: auto;
 }

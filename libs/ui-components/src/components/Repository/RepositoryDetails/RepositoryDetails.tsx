@@ -1,9 +1,7 @@
 import * as React from 'react';
 import { Card, CardBody, DropdownItem, DropdownList, Grid, GridItem, Nav, NavList } from '@patternfly/react-core';
 
-import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { RepoSpecType, Repository, ResourceKind } from '@flightctl/types';
-
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
 import RepositoryGeneralDetailsCard from './RepositoryGeneralDetailsCard';
@@ -11,6 +9,7 @@ import RepositoryResourceSyncsCard from './RepositoryResourceSyncsCard';
 import DeleteRepositoryModal from './DeleteRepositoryModal';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
+import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';

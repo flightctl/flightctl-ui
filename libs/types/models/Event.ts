@@ -47,6 +47,8 @@ export namespace Event {
     RESOURCE_UPDATE_FAILED = 'ResourceUpdateFailed',
     RESOURCE_DELETED = 'ResourceDeleted',
     RESOURCE_DELETION_FAILED = 'ResourceDeletionFailed',
+    RESOURCE_DECOMMISSIONED = 'ResourceDecommissioned',
+    RESOURCE_DECOMMISSION_FAILED = 'ResourceDecommissionFailed',
   }
   /**
    * The type of the event. One of Normal, Warning.
