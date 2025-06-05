@@ -25,7 +25,7 @@ const gitRepoUrlRegex = new RegExp(
 );
 const httpRepoUrlRegex = /^(http|https)/;
 const pathRegex = /\/.+/;
-const jwtTokenRegexp = /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/;
+const jwtTokenRegexp = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
 
 export const isHttpRepoSpec = (repoSpec: RepositorySpec): repoSpec is HttpRepoSpec =>
   !!(repoSpec['httpConfig'] || (repoSpec as HttpRepoSpec).validationSuffix);
