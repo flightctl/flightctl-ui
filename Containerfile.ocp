@@ -24,10 +24,10 @@ COPY --from=proxy-build /app/flightctl-ui /app/proxy
 WORKDIR /app/proxy
 LABEL \
   com.redhat.component="flightctl-ui-ocp-container" \
-  description="Flightctl User Interface Service for OCP Integration" \
-  io.k8s.description="Flightctl User Interface Service for OCP Integration" \
-  io.k8s.display-name="Flightctl UI (OCP)" \
+  description="Flight Control User Interface Service for OCP Integration" \
+  io.k8s.description="Flight Control User Interface Service for OCP Integration" \
+  io.k8s.display-name="Flight Control UI (OCP)" \
   name="flightctl-ui-ocp" \
-  summary="Flightctl User Interface Service for OCP Integration"
+  summary="Flight Control User Interface Service for OCP Integration"
 EXPOSE 8080
 CMD ./flightctl-ui

@@ -2,7 +2,7 @@ module github.com/flightctl/flightctl-ui
 
 go 1.23
 
-toolchain go1.23.0
+toolchain go1.23.6
 
 require (
 	github.com/flightctl/flightctl v0.2.0
