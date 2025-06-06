@@ -27,6 +27,7 @@ const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'settings'> = {
     appRoutes,
     NavLink: NavLink as NavLinkFC,
     Navigate,
+    // @ts-expect-error typescript not checking the correct react-router version
     Route,
     useBlocker,
     useParams,

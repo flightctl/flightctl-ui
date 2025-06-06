@@ -50,8 +50,11 @@
     "react": "17.0.1 - 18.x",
     "react-dom": "17.0.1 - 18.x",
     "react-i18next": "11.7.3 - 15.x",
-    "react-router-dom": "^6.22.0",
+    "react-router-dom": "6.11.2",
     "monaco-editor": "^0.51.0",
     "@patternfly/react-code-editor": "^5.4.13"
+  },
+  "overrides": {
+    "react-router-dom-v5-compat": "6.11.2"
   }
 }

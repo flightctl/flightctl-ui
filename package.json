@@ -54,6 +54,7 @@
   },
   "overrides": {
     "cheerio": "1.0.0-rc.2",
-    "webpack": "5.75.0"
+    "webpack": "5.75.0",
+    "react-router-dom-v5-compat": "6.11.2"
   }
 }
