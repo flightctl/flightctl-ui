@@ -156,7 +156,7 @@
   "Desired system image: {{ desiredOsImage }}": "Desired system image: {{ desiredOsImage }}",
   "Connection was closed": "Connection was closed",
   "Reconnect": "Reconnect",
-  "Show only decommissioned devices": "Show only decommissioned devices",
+  "Show decommissioned devices": "Show decommissioned devices",
   "Devices table": "Devices table",
   "Device already started decommissioning and cannot be edited.": "Device already started decommissioning and cannot be edited.",
   "View device details": "View device details",
