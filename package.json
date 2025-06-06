@@ -51,5 +51,9 @@
   },
   "dependencies": {
     "lodash": "^4.17.21"
+  },
+  "overrides": {
+    "cheerio": "1.0.0-rc.2",
+    "webpack": "5.75.0"
   }
 }

@@ -1,11 +1,11 @@
 import { Device, ObjectMeta } from '@flightctl/types';
 import { TFunction } from 'react-i18next';
 
-const deviceFleetRegExp = /^Fleet\/(?<fleetName>.*)$/;
+const deviceFleetRegExp = /^Fleet\/(.*)$/;
 
 export const getDeviceFleet = (metadata: ObjectMeta) => {
   const match = deviceFleetRegExp.exec(metadata.owner || '');
-  return match?.groups?.fleetName || null;
+  return match ? match[1] : null;
 };
 
 export const isDeviceEnrolled = (dev: Device) => !dev.spec?.decommissioning?.target;
