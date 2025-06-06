@@ -24,10 +24,10 @@ COPY --from=proxy-build /app/flightctl-ui /app/proxy
 WORKDIR /app/proxy
 LABEL \
   com.redhat.component="flightctl-ui-container" \
-  description="Flightctl User Interface Service" \
-  io.k8s.description="Flightctl User Interface Service" \
-  io.k8s.display-name="Flightctl UI" \
+  description="Flight Control User Interface Service" \
+  io.k8s.description="Flight Control User Interface Service" \
+  io.k8s.display-name="Flight Control UI" \
   name="flightctl-ui" \
-  summary="Flightctl User Interface Service"
+  summary="Flight Control User Interface Service"
 EXPOSE 8080
 CMD ./flightctl-ui
