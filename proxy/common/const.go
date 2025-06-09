@@ -1,6 +1,8 @@
 package common
 
 const (
-	CookieSessionName = "flightctl-session"
-	AuthHeaderKey     = "Authorization"
+	CookieSessionName        = "flightctl-session"
+	CookieRefreshSessionName = "flightctl-session-refresh"
+	CookieSessionAuthName    = "flightctl-session-auth"
+	AuthHeaderKey            = "Authorization"
 )

@@ -23,7 +23,7 @@ export const logout = async () => {
 };
 
 export const redirectToLogin = async () => {
-  const response = await fetch(loginAPI);
+  const response = await fetch(loginAPI, { credentials: 'include' });
   const { url } = (await response.json()) as { url: string };
   window.location.href = url;
 };

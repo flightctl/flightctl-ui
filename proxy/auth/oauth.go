@@ -32,12 +32,12 @@ func executeOAuthFlow(req *osincli.AccessRequest) (TokenData, *int64, error) {
 	// Exchange refresh token for a new access token
 	accessData, err := req.GetToken()
 	if err != nil {
-		return ret, nil, fmt.Errorf("failed to refresh token: %w", err)
+		return ret, nil, fmt.Errorf("failed to execute oAuth request: %w", err)
 	}
 
 	expiresIn, err := getExpiresIn(accessData.ResponseData)
 	if err != nil {
-		return ret, nil, fmt.Errorf("failed to refresh token: %w", err)
+		return ret, nil, fmt.Errorf("failed to get token expiration: %w", err)
 	}
 
 	ret.Token = accessData.AccessToken

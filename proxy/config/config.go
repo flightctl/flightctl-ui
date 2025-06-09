@@ -14,6 +14,8 @@ var (
 	TlsKeyPath          = getEnvVar("TLS_KEY", "")
 	TlsCertPath         = getEnvVar("TLS_CERT", "")
 	AuthClientId        = getEnvVar("AUTH_CLIENT_ID", "flightctl")
+	AuthScope           = getEnvVar("AUTH_SCOPE", "openid")
+	AuthForcePKCE       = getEnvVar("AUTH_FORCE_PKCE", "false")
 	BaseUiUrl           = getEnvUrlVar("BASE_UI_URL", "http://localhost:9000")
 	InternalAuthUrl     = getEnvUrlVar("INTERNAL_AUTH_URL", "")
 	AuthInsecure        = getEnvVar("AUTH_INSECURE_SKIP_VERIFY", "")

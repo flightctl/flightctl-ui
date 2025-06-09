@@ -2,13 +2,12 @@ package auth
 
 import (
 	"crypto/tls"
-	b64 "encoding/base64"
-	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
@@ -25,28 +24,36 @@ type LoginParameters struct {
 }
 
 type AuthProvider interface {
-	GetToken(loginParams LoginParameters) (TokenData, *int64, error)
+	GetToken(loginParams LoginParameters, r *http.Request) (TokenData, *int64, error)
 	GetUserInfo(token string) (string, *http.Response, error)
-	RefreshToken(refreshToken string) (TokenData, *int64, error)
+	RefreshToken(refreshToken string, r *http.Request) (TokenData, *int64, error)
 	Logout(token string) (string, error)
-	GetLoginRedirectURL() string
+	GetLoginRedirectURL() (string, string)
 }
 
-func setCookie(w http.ResponseWriter, value TokenData) error {
-	cookieVal, err := json.Marshal(value)
-	if err != nil {
-		return err
-	}
-	cookie := http.Cookie{
-		Name:     common.CookieSessionName,
-		Value:    b64.StdEncoding.EncodeToString(cookieVal),
+func createCookie(name, value string) http.Cookie {
+	return http.Cookie{
+		Name:     name,
+		Value:    value,
 		Secure:   config.TlsCertPath != "",
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 		Path:     "/",
 	}
-	http.SetCookie(w, &cookie)
+}
+
+func setCookie(w http.ResponseWriter, value TokenData) error {
+	tokenCookie := createCookie(common.CookieSessionName, value.Token)
+	refreshCookie := createCookie(common.CookieRefreshSessionName, value.RefreshToken)
+	http.SetCookie(w, &tokenCookie)
+	http.SetCookie(w, &refreshCookie)
 	return nil
+}
+
+func removeCookie(w http.ResponseWriter, cookieName string) {
+	cookie := createCookie(cookieName, "")
+	cookie.Expires = time.Unix(0, 0)
+	http.SetCookie(w, &cookie)
 }
 
 func ParseSessionCookie(r *http.Request) (TokenData, error) {
@@ -57,14 +64,18 @@ func ParseSessionCookie(r *http.Request) (TokenData, error) {
 	}
 
 	if cookie != nil {
-		val, err := b64.StdEncoding.DecodeString(cookie.Value)
-		if err != nil {
-			return tokenData, err
-		}
+		tokenData.Token = cookie.Value
+	}
 
-		err = json.Unmarshal(val, &tokenData)
+	refreshCookie, err := r.Cookie(common.CookieRefreshSessionName)
+	if err != nil && !errors.Is(err, http.ErrNoCookie) {
 		return tokenData, err
 	}
+
+	if refreshCookie != nil {
+		tokenData.RefreshToken = refreshCookie.Value
+	}
+
 	return tokenData, nil
 }
 

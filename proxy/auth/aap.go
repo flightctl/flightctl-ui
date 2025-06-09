@@ -103,7 +103,7 @@ func getClient(url string, tlsConfig *tls.Config) (*osincli.Client, error) {
 	return client, nil
 }
 
-func (a *AAPAuthHandler) GetToken(loginParams LoginParameters) (TokenData, *int64, error) {
+func (a *AAPAuthHandler) GetToken(loginParams LoginParameters, r *http.Request) (TokenData, *int64, error) {
 	return exchangeToken(loginParams, a.internalClient)
 }
 
@@ -158,10 +158,10 @@ func (a *AAPAuthHandler) Logout(token string) (string, error) {
 	return "", nil
 }
 
-func (a *AAPAuthHandler) RefreshToken(refreshToken string) (TokenData, *int64, error) {
+func (a *AAPAuthHandler) RefreshToken(refreshToken string, r *http.Request) (TokenData, *int64, error) {
 	return refreshOAuthToken(refreshToken, a.internalClient)
 }
 
-func (a *AAPAuthHandler) GetLoginRedirectURL() string {
-	return loginRedirect(a.client)
+func (a *AAPAuthHandler) GetLoginRedirectURL() (string, string) {
+	return loginRedirect(a.client), ""
 }
