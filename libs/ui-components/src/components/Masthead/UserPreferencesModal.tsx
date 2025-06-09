@@ -20,7 +20,7 @@ type UserPreferencesModalProps = {
 
 const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) => {
   const { t } = useTranslation();
-  const { theme, setTheme } = React.useContext(UserPreferencesContext);
+  const { userTheme, setUserTheme } = React.useContext(UserPreferencesContext);
 
   const themeLabels = getThemeLabels(t);
 
@@ -39,12 +39,12 @@ const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) 
                   onClick={() => setThemeExpanded(true)}
                   isExpanded={themeExpanded}
                 >
-                  {themeLabels[theme]}
+                  {themeLabels[userTheme]}
                 </MenuToggle>
               )}
-              selected={theme}
+              selected={userTheme}
               onSelect={(_, value) => {
-                setTheme(value as Theme);
+                setUserTheme(value as Theme);
                 setThemeExpanded(false);
               }}
               aria-label="theme"
