@@ -2,6 +2,8 @@ package auth
 
 import (
 	"crypto/tls"
+	b64 "encoding/base64"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -43,7 +45,11 @@ func createCookie(name, value string) http.Cookie {
 }
 
 func setCookie(w http.ResponseWriter, value TokenData) error {
-	tokenCookie := createCookie(common.CookieSessionName, value.Token)
+	cookieVal, err := json.Marshal(TokenData{Token: value.Token})
+	if err != nil {
+		return err
+	}
+	tokenCookie := createCookie(common.CookieSessionName, b64.StdEncoding.EncodeToString(cookieVal))
 	refreshCookie := createCookie(common.CookieRefreshSessionName, value.RefreshToken)
 	http.SetCookie(w, &tokenCookie)
 	http.SetCookie(w, &refreshCookie)
@@ -64,7 +70,13 @@ func ParseSessionCookie(r *http.Request) (TokenData, error) {
 	}
 
 	if cookie != nil {
-		tokenData.Token = cookie.Value
+		val, err := b64.StdEncoding.DecodeString(cookie.Value)
+		if err != nil {
+			return tokenData, err
+		}
+		if err := json.Unmarshal(val, &tokenData); err != nil {
+			return tokenData, err
+		}
 	}
 
 	refreshCookie, err := r.Cookie(common.CookieRefreshSessionName)
