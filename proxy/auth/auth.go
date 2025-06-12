@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
 	"github.com/flightctl/flightctl/api/v1alpha1"
@@ -57,6 +58,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method == http.MethodPost {
+		removeCookie(w, common.CookieSessionAuthName)
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			log.GetLogger().WithError(err).Warn("Failed to read request body")
@@ -71,19 +73,24 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		tokenData, expires, err := a.provider.GetToken(loginParams)
+		tokenData, expires, err := a.provider.GetToken(loginParams, r)
 		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to get token")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		respondWithToken(w, tokenData, expires)
 	} else {
-		loginUrl := a.provider.GetLoginRedirectURL()
+		loginUrl, loginData := a.provider.GetLoginRedirectURL()
 		response, err := json.Marshal(RedirectResponse{Url: loginUrl})
 		if err != nil {
 			log.GetLogger().WithError(err).Warn("Failed to marshal response")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
+		}
+		if loginData != "" {
+			loginCookie := createCookie(common.CookieSessionAuthName, loginData)
+			http.SetCookie(w, &loginCookie)
 		}
 		if _, err := w.Write(response); err != nil {
 			log.GetLogger().WithError(err).Warn("Failed to write response")
@@ -102,7 +109,7 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenData, expires, err := a.provider.RefreshToken(tokenData.RefreshToken)
+	tokenData, expires, err := a.provider.RefreshToken(tokenData.RefreshToken, r)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -144,7 +151,7 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if resp.StatusCode != http.StatusOK {
+	if resp != nil && resp.StatusCode != http.StatusOK {
 		w.WriteHeader(resp.StatusCode)
 		return
 	}
