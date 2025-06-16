@@ -48,7 +48,15 @@ const ACM_REPO_SUFFIX = `/agent-registration/manifests/`;
 
 const MICROSHIFT_REGISTRATION_HOOK_NAME = 'apply-acm-manifests';
 const MICROSHIFT_REGISTRATION_HOOK_FILE = '/etc/flightctl/hooks.d/afterupdating/50-acm-registration.yaml';
-const MICROSHIFT_REGISTRATION_HOOK = `- if:
+const MICROSHIFT_REGISTRATION_HOOK = `- run: /usr/bin/bash -c "until [ -f $KUBECONFIG ]; do sleep 1; done"
+  timeout: 5m
+  envVars:
+    KUBECONFIG: /var/lib/microshift/resources/kubeadmin/kubeconfig
+- run: kubectl wait --for=condition=Ready pods --all --all-namespaces --timeout=300s
+  timeout: 5m
+  envVars:
+    KUBECONFIG: /var/lib/microshift/resources/kubeadmin/kubeconfig
+- if:
   - path: /var/local/acm-import/crd.yaml
     op: [created]
   run: kubectl apply -f /var/local/acm-import/crd.yaml
