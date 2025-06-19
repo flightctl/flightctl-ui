@@ -1,6 +1,7 @@
 import {
   AppType,
   ApplicationEnvVars,
+  ApplicationVolumeProviderSpec,
   ConditionType,
   Device,
   EnrollmentRequest,
@@ -67,10 +68,11 @@ export const isFleet = (resource: ResourceSync | Fleet): resource is Fleet => re
 export type InlineApplicationFileFixed = FileContent & RelativePath;
 
 // "FixedApplicationProviderSpec" will need to be manually adjusted whenever the API definition changes
-export type ApplicationProviderSpecFixed = ApplicationEnvVars & {
-  name?: string;
-  appType?: AppType;
-} & (ImageApplicationProviderSpec | { inline: InlineApplicationFileFixed[] });
+export type ApplicationProviderSpecFixed = ApplicationEnvVars &
+  ApplicationVolumeProviderSpec & {
+    name?: string;
+    appType?: AppType;
+  } & (ImageApplicationProviderSpec | { inline: InlineApplicationFileFixed[] });
 
 type CliArtifact = {
   os: string;
