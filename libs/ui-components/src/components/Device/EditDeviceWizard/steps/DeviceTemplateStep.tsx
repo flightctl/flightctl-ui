@@ -4,7 +4,6 @@ import { FormikErrors, useFormikContext } from 'formik';
 import { Trans } from 'react-i18next';
 import { Repository } from '@flightctl/types';
 
-import { CREATE_ACM_REPOSITORY, USING_TEMPLATE_VARIABLES_LINK } from '../../../../links';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import LabelWithHelperText, { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import LearnMoreLink from '../../../common/LearnMoreLink';
@@ -15,6 +14,7 @@ import ConfigurationTemplates from './ConfigurationTemplates';
 import ApplicationsForm from './ApplicationTemplates';
 import SystemdUnitsForm from './SystemdUnitsForm';
 import CheckboxField from '../../../form/CheckboxField';
+import { useAppLinks } from '../../../../hooks/useAppLinks';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { FlightCtlApp, useAppContext } from '../../../../hooks/useAppContext';
 import { ACM_REPO_NAME } from '../deviceSpecUtils';
@@ -31,6 +31,7 @@ const exampleCode = `/device-configs/deployment-sites/site-{{ .metadata.labels.s
 const MicroShiftCheckbox = ({ isFleet, isReadOnly }: { isFleet: boolean; isReadOnly?: boolean }) => {
   const { initialValues } = useFormikContext<DeviceSpecConfigFormValues>();
   const { t } = useTranslation();
+  const createAcmRepoLink = useAppLinks('createAcmRepo');
 
   const [repo, loading, error] = useFetchPeriodically<Required<Repository>>({
     endpoint: `repositories/${ACM_REPO_NAME}`,
@@ -94,7 +95,7 @@ const MicroShiftCheckbox = ({ isFleet, isReadOnly }: { isFleet: boolean; isReadO
               repository: `'${ACM_REPO_NAME}'`,
             })}
             {', '}
-            <LearnMoreLink link={CREATE_ACM_REPOSITORY} text={t('view documentation')} />
+            <LearnMoreLink link={createAcmRepoLink} text={t('view documentation')} />
           </Alert>
         </FormGroup>
       )}
@@ -106,6 +107,8 @@ const DeviceTemplateStep = ({ isFleet, isReadOnly }: { isFleet: boolean; isReadO
   const { appType } = useAppContext();
   const { t } = useTranslation();
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
+  const useTemplateVarsLink = useAppLinks('useTemplateVars');
+
   return (
     <Grid span={8}>
       <FlightCtlForm>
@@ -119,7 +122,7 @@ const DeviceTemplateStep = ({ isFleet, isReadOnly }: { isFleet: boolean; isReadO
             <CodeBlock className="pf-v5-u-mt-md">
               <CodeBlockCode>{exampleCode}</CodeBlockCode>
             </CodeBlock>
-            <LearnMoreLink link={USING_TEMPLATE_VARIABLES_LINK} />
+            <LearnMoreLink link={useTemplateVarsLink} />
           </Alert>
         )}
         <FormGroupWithHelperText
