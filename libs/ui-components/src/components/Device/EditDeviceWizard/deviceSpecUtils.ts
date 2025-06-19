@@ -209,11 +209,19 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
     return acc;
   }, {});
 
-  // TODO EDM-1497: existing "volumes" must be kept
+  const volumes = app.volumes?.map((v) => ({
+    name: v.name,
+    image: {
+      reference: v.reference,
+      pullPolicy: v.pullPolicy,
+    },
+  }));
+
   if (isImageAppForm(app)) {
     const data = {
       image: app.image,
       envVars,
+      volumes,
     };
     return app.name ? { ...data, name: app.name } : data;
   }
@@ -229,6 +237,7 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
       }),
     ),
     envVars,
+    volumes,
   };
 };
 
@@ -370,6 +379,13 @@ export const getApiConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
 const getAppFormVariables = (app: ApplicationProviderSpecFixed) =>
   Object.entries(app.envVars || {}).map(([varName, varValue]) => ({ name: varName, value: varValue }));
 
+const getAppFormVolumes = (app: ApplicationProviderSpecFixed) =>
+  app.volumes?.map((v) => ({
+    name: v.name,
+    reference: v.image.reference,
+    pullPolicy: v.image.pullPolicy,
+  }));
+
 export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
   const apps = deviceSpec?.applications || [];
   return apps.map((app) => {
@@ -379,6 +395,7 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
         name: app.name || '',
         image: app.image,
         variables: getAppFormVariables(app),
+        volumes: getAppFormVolumes(app),
       };
     }
     return {
@@ -390,6 +407,7 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
         base64: file.contentEncoding === EncodingType.EncodingBase64,
       })),
       variables: getAppFormVariables(app),
+      volumes: getAppFormVolumes(app),
     };
   });
 };

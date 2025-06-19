@@ -4,6 +4,7 @@ import {
   GitConfigProviderSpec,
   HttpConfigProviderSpec,
   ImageApplicationProviderSpec,
+  ImagePullPolicy,
   InlineApplicationProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
@@ -48,6 +49,11 @@ type AppBase = {
   // appType: AppType - commented out for now, since it only accepts one value ("compose")
   name?: string;
   variables: { name: string; value: string }[];
+  volumes?: {
+    name: string;
+    reference: string;
+    pullPolicy?: ImagePullPolicy;
+  }[];
 };
 
 export type InlineAppForm = AppBase & {
