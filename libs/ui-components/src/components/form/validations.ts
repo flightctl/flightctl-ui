@@ -29,7 +29,8 @@ import {
 import { labelToString } from '../../utils/labels';
 import { UpdateScheduleMode } from '../../utils/time';
 
-const SYSTEMD_PATTERNS_REGEXP = /^[a-z][a-z0-9-_.]*$/;
+const SYSTEMD_PATTERNS_REGEXP =
+  /^[0-9a-zA-Z:\-_.\\\[\]!\-\*\?]+(@[0-9a-zA-Z:\-_.\\\[\]!\-\*\?]+)?(\.[a-zA-Z\[\]!\-\*\?]+)?$/;
 const SYSTEMD_UNITS_MAX_PATTERNS = 256;
 
 // Accepts uppercase characters, and "underscore" symbols
@@ -653,8 +654,8 @@ export const systemdUnitListValidationSchema = (t: TFunction) =>
       }),
     )
     .test('invalid patterns', (systemdUnits: SystemdUnitFormValue[] | undefined, testContext) => {
-      // TODO analyze https://github.com/systemd/systemd/blob/9cebda59e818cdb89dc1e53ab5bb51b91b3dc3ff/src/basic/unit-name.c#L42
-      // and adjust the regular expression and / or the validation to accommodate for it
+      // Supports templated SystemD services with extended regex for all allowed unit file formats and glob searches
+      // See SYSTEMD_PATTERNS_REGEXP
       const invalidSystemdUnits = (systemdUnits || [])
         .map((unit) => unit.pattern)
         .filter((pattern) => {
