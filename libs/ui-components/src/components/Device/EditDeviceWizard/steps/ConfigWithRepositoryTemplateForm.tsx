@@ -88,19 +88,6 @@ const GitConfigForm = ({
           isDisabled={isReadOnly}
         />
       </FormGroupWithHelperText>
-      <FormGroupWithHelperText
-        label={t('Mount path')}
-        content={t('Path in the device where the configurations will be stored.')}
-        isRequired
-      >
-        <TextField
-          aria-label={t('Mount path')}
-          name={`configTemplates[${index}].mountPath`}
-          value={template.mountPath}
-          placeholder={t('/absolute/path')}
-          isDisabled={isReadOnly}
-        />
-      </FormGroupWithHelperText>
     </>
   );
 };
