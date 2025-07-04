@@ -55,3 +55,7 @@ By default, the latest available OpenShift console image will be used. To specif
 
 The following console versions are confirmed to be compatible: 4.16 to 4.20.
 
+<br><br>
+
+[![Watch the demo](demo-thumbnail.png)](https://www.youtube.com/watch?v=WzNG_uWnmzk)
+
