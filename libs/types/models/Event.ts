@@ -66,6 +66,13 @@ export namespace Event {
     DEVICE_CONTENT_UP_TO_DATE = 'DeviceContentUpToDate',
     DEVICE_CONTENT_OUT_OF_DATE = 'DeviceContentOutOfDate',
     DEVICE_CONTENT_UPDATING = 'DeviceContentUpdating',
+    ENROLLMENT_REQUEST_APPROVED = 'EnrollmentRequestApproved',
+    ENROLLMENT_REQUEST_APPROVAL_FAILED = 'EnrollmentRequestApprovalFailed',
+    DEVICE_OWNERSHIP_CHANGED = 'DeviceOwnershipChanged',
+    DEVICE_MULTIPLE_OWNERS_DETECTED = 'DeviceMultipleOwnersDetected',
+    DEVICE_MULTIPLE_OWNERS_RESOLVED = 'DeviceMultipleOwnersResolved',
+    INTERNAL_TASK_FAILED = 'InternalTaskFailed',
+    FLEET_SELECTOR_PROCESSING_COMPLETED = 'FleetSelectorProcessingCompleted',
   }
   /**
    * The type of the event. One of Normal, Warning.

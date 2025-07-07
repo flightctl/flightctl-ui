@@ -44,11 +44,7 @@ export interface MetricsQuery {
   period: string;
 }
 
-export type FleetConditionType =
-  | ConditionType.FleetOverlappingSelectors
-  | ConditionType.FleetValid
-  | 'Invalid'
-  | 'SyncPending';
+export type FleetConditionType = ConditionType.FleetValid | 'Invalid' | 'SyncPending';
 
 export type FlightControlQuery = ApiQuery | MetricsQuery;
 
