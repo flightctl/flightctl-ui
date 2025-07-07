@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { Button, List, ListItem, Popover } from '@patternfly/react-core';
+import { Button, Icon, List, ListItem, Popover } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
+import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 
 import { Condition, ConditionType, Device } from '@flightctl/types';
 import { getDeviceFleet } from '../../../utils/devices';
@@ -10,44 +11,12 @@ import { Link, ROUTE } from '../../../hooks/useNavigate';
 
 import './DeviceFleet.css';
 
-const FleetLessDevice = ({ multipleOwnersCondition }: { multipleOwnersCondition?: Condition }) => {
+const FleetLessDevice = () => {
   const { t } = useTranslation();
-
-  let message = '';
-  let owners: string[] = [];
-  if (multipleOwnersCondition) {
-    message = t('Device is owned by more than one fleet');
-    owners = (multipleOwnersCondition.message || '').split(',');
-  } else {
-    message = t("Device labels don't match any fleet's selector labels");
-  }
-
-  const hasMultipleOwners = owners.length > 1;
-
   return (
     <div className="fctl-device-fleet">
-      {hasMultipleOwners ? t('Multiple owners') : t('None')}
-      <Popover
-        bodyContent={
-          <span>
-            {message}
-            {hasMultipleOwners && (
-              <span>
-                {': '}
-                <List>
-                  {owners.map((ownerFleet) => {
-                    return (
-                      <ListItem key={ownerFleet}>
-                        <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: ownerFleet }}>{ownerFleet}</Link>
-                      </ListItem>
-                    );
-                  })}
-                </List>
-              </span>
-            )}
-          </span>
-        }
-      >
+      {t('None')}
+      <Popover bodyContent={<span>{t("Device labels don't match any fleet's selector labels")}</span>}>
         <Button
           isInline
           variant="plain"
@@ -59,18 +28,74 @@ const FleetLessDevice = ({ multipleOwnersCondition }: { multipleOwnersCondition?
   );
 };
 
+const MultipleDeviceOwners = ({ multipleOwnersCondition }: { multipleOwnersCondition: Condition }) => {
+  const { t } = useTranslation();
+
+  const owners: string[] = (multipleOwnersCondition.message || '').split(',');
+
+  const hasMultipleOwners = owners.length > 1;
+  if (!hasMultipleOwners) {
+    return null;
+  }
+
+  return (
+    <Popover
+      bodyContent={
+        <span>
+          {t('Device is owned by more than one fleet:')}
+          <span>
+            <List>
+              {owners.map((ownerFleet) => {
+                return (
+                  <ListItem key={ownerFleet}>
+                    <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: ownerFleet }}>{ownerFleet}</Link>
+                  </ListItem>
+                );
+              })}
+            </List>
+          </span>
+        </span>
+      }
+    >
+      <Button
+        isInline
+        variant="plain"
+        icon={
+          <Icon status="warning">
+            <ExclamationTriangleIcon />
+          </Icon>
+        }
+        aria-label={t('Ownership information')}
+      />
+    </Popover>
+  );
+};
+
 const DeviceFleet = ({ device }: { device?: Device }) => {
+  const { t } = useTranslation();
   if (!device) {
     return '-';
   }
 
+  const multipleOwnersCondition = getCondition(device.status?.conditions, ConditionType.DeviceMultipleOwners);
+  let fleetNameEl: React.ReactNode = null;
   const fleetName = getDeviceFleet(device.metadata);
   if (fleetName) {
-    return <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: fleetName }}>{fleetName}</Link>;
+    fleetNameEl = <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: fleetName }}>{fleetName}</Link>;
+  } else if (multipleOwnersCondition) {
+    // Device has no owner set, but with the multiple owners condition. The warning icon should be displayed
+    fleetNameEl = t('None');
+  } else {
+    // Valid fleetless device
+    fleetNameEl = <FleetLessDevice />;
   }
 
-  const multipleOwnersCondition = getCondition(device.status?.conditions, ConditionType.DeviceMultipleOwners);
-  return <FleetLessDevice multipleOwnersCondition={multipleOwnersCondition} />;
+  return (
+    <>
+      {fleetNameEl}
+      {multipleOwnersCondition && <MultipleDeviceOwners multipleOwnersCondition={multipleOwnersCondition} />}
+    </>
+  );
 };
 
 export default DeviceFleet;

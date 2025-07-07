@@ -47,7 +47,6 @@ export namespace Event {
     RESOURCE_UPDATE_FAILED = 'ResourceUpdateFailed',
     RESOURCE_DELETED = 'ResourceDeleted',
     RESOURCE_DELETION_FAILED = 'ResourceDeletionFailed',
-    GIT_RESOURCE_CHANGE_DETECTED = 'GitResourceChangeDetected',
     DEVICE_DECOMMISSIONED = 'DeviceDecommissioned',
     DEVICE_DECOMMISSION_FAILED = 'DeviceDecommissionFailed',
     DEVICE_CPUCRITICAL = 'DeviceCPUCritical',
@@ -63,23 +62,30 @@ export namespace Event {
     DEVICE_APPLICATION_DEGRADED = 'DeviceApplicationDegraded',
     DEVICE_APPLICATION_HEALTHY = 'DeviceApplicationHealthy',
     DEVICE_DISCONNECTED = 'DeviceDisconnected',
+    DEVICE_IS_REBOOTING = 'DeviceIsRebooting',
     DEVICE_CONNECTED = 'DeviceConnected',
     DEVICE_CONTENT_UP_TO_DATE = 'DeviceContentUpToDate',
     DEVICE_CONTENT_OUT_OF_DATE = 'DeviceContentOutOfDate',
     DEVICE_CONTENT_UPDATING = 'DeviceContentUpdating',
     ENROLLMENT_REQUEST_APPROVED = 'EnrollmentRequestApproved',
     ENROLLMENT_REQUEST_APPROVAL_FAILED = 'EnrollmentRequestApprovalFailed',
-    DEVICE_OWNERSHIP_CHANGED = 'DeviceOwnershipChanged',
     DEVICE_MULTIPLE_OWNERS_DETECTED = 'DeviceMultipleOwnersDetected',
     DEVICE_MULTIPLE_OWNERS_RESOLVED = 'DeviceMultipleOwnersResolved',
     DEVICE_SPEC_VALID = 'DeviceSpecValid',
     DEVICE_SPEC_INVALID = 'DeviceSpecInvalid',
     INTERNAL_TASK_FAILED = 'InternalTaskFailed',
-    FLEET_SELECTOR_PROCESSING_COMPLETED = 'FleetSelectorProcessingCompleted',
-    FLEET_RECONCILED = 'FleetReconciled',
-    FLEET_RECONCILE_FAILED = 'FleetReconcileFailed',
     REPOSITORY_ACCESSIBLE = 'RepositoryAccessible',
     REPOSITORY_INACCESSIBLE = 'RepositoryInaccessible',
+    FLEET_ROLLOUT_STARTED = 'FleetRolloutStarted',
+    FLEET_ROLLOUT_CREATED = 'FleetRolloutCreated',
+    FLEET_ROLLOUT_BATCH_COMPLETED = 'FleetRolloutBatchCompleted',
+    RESOURCE_SYNC_COMMIT_DETECTED = 'ResourceSyncCommitDetected',
+    RESOURCE_SYNC_ACCESSIBLE = 'ResourceSyncAccessible',
+    RESOURCE_SYNC_INACCESSIBLE = 'ResourceSyncInaccessible',
+    RESOURCE_SYNC_PARSED = 'ResourceSyncParsed',
+    RESOURCE_SYNC_PARSING_FAILED = 'ResourceSyncParsingFailed',
+    RESOURCE_SYNC_SYNCED = 'ResourceSyncSynced',
+    RESOURCE_SYNC_SYNC_FAILED = 'ResourceSyncSyncFailed',
   }
   /**
    * The type of the event. One of Normal, Warning.
@@ -89,3 +95,4 @@ export namespace Event {
     WARNING = 'Warning',
   }
 }
+
