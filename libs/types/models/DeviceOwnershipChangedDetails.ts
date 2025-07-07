@@ -2,21 +2,17 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ResourceUpdatedDetails = {
+export type DeviceOwnershipChangedDetails = {
   /**
    * The type of detail for discriminator purposes.
    */
-  detailType: 'ResourceUpdated';
+  detailType: 'DeviceOwnershipChanged';
   /**
-   * List of fields that were updated in the resource.
-   */
-  updatedFields: Array<'owner' | 'labels' | 'spec'>;
-  /**
-   * The previous owner (if applicable).
+   * The previous owner fleet (null if none).
    */
   previousOwner?: string | null;
   /**
-   * The new owner (if applicable).
+   * The new owner fleet (null if removed).
    */
   newOwner?: string | null;
 };

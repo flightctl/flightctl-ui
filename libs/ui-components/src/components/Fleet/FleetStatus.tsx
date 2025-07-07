@@ -17,9 +17,6 @@ const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
     case ConditionType.FleetValid:
       level = 'success';
       break;
-    case ConditionType.FleetOverlappingSelectors:
-      level = 'warning';
-      break;
     case 'SyncPending':
       level = 'info';
       break;
