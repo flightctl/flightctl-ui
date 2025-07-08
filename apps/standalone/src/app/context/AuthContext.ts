@@ -40,21 +40,30 @@ export const useAuthContext = () => {
         const code = searchParams.get('code');
         callbackErr = searchParams.get('error');
         if (code) {
-          const resp = await fetch(loginAPI, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            method: 'POST',
-            body: JSON.stringify({
-              code: code,
-            }),
-          });
-          const expiration = (await resp.json()) as { expiresIn: number };
-          if (expiration.expiresIn) {
-            const now = nowInSeconds();
-            localStorage.setItem(EXPIRATION, `${now + expiration.expiresIn}`);
-            lastRefresh = now;
+          try {
+            const resp = await fetch(loginAPI, {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+              method: 'POST',
+              body: JSON.stringify({
+                code: code,
+              }),
+            });
+            if (resp.status !== 200) {
+              setError('Failed to get user token');
+              return;
+            }
+            const expiration = (await resp.json()) as { expiresIn: number };
+            if (expiration.expiresIn) {
+              const now = nowInSeconds();
+              localStorage.setItem(EXPIRATION, `${now + expiration.expiresIn}`);
+              lastRefresh = now;
+            }
+          } catch (e) {
+            setError('Failed to get user token');
+            return;
           }
         } else if (callbackErr) {
           setError(callbackErr);
