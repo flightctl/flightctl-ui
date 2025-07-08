@@ -697,8 +697,6 @@
   "Past threshold ({{ percent }}%)": "Past threshold ({{ percent }}%)",
   "{{ monitorType }} pressure - {{ status }}": "{{ monitorType }} pressure - {{ status }}",
   "Within limits": "Within limits",
-  "Updates blocked": "Updates blocked",
-  "Invalid configuration": "Invalid configuration",
   "Overall status of application workloads.": "Overall status of application workloads.",
   "Overall status of device hardware and operating system.": "Overall status of device hardware and operating system.",
   "Current system configuration vs. latest system configuration.": "Current system configuration vs. latest system configuration.",
