@@ -43,19 +43,22 @@ export type EventSearchCriteria = Partial<ObjectReference> & {
 const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reason, string> => {
   const params = { resourceType: kindType };
   return {
+    // Generic resource events
     [Event.reason.RESOURCE_CREATED]: t('{{ resourceType }} was created successfully', params),
     [Event.reason.RESOURCE_CREATION_FAILED]: t('{{ resourceType }} could not be created', params),
     [Event.reason.RESOURCE_DELETED]: t('{{ resourceType }} was deleted successfully', params),
     [Event.reason.RESOURCE_DELETION_FAILED]: t('{{ resourceType }} could not be deleted', params),
     [Event.reason.RESOURCE_UPDATED]: t('{{ resourceType }} was updated successfully', params),
     [Event.reason.RESOURCE_UPDATE_FAILED]: t('{{ resourceType }} could not be updated', params),
+    [Event.reason.GIT_RESOURCE_CHANGE_DETECTED]: t('Git resource change detected', params),
+    // Device events
     [Event.reason.DEVICE_DECOMMISSIONED]: t('Device decommissioned successfully'),
     [Event.reason.DEVICE_DECOMMISSION_FAILED]: t('Device could not be decommissioned'),
     [Event.reason.DEVICE_CPUNORMAL]: t('CPU utilization has returned to normal'),
     [Event.reason.DEVICE_CPUWARNING]: t('CPU utilization has reached a warning level'),
     [Event.reason.DEVICE_CPUCRITICAL]: t('CPU utilization has reached a critical level'),
     [Event.reason.DEVICE_MEMORY_NORMAL]: t('Memory utilization has returned to normal'),
-    [Event.reason.DEVICE_MEMORY_WARNING]: t('Memory utilization has reached a warning level '),
+    [Event.reason.DEVICE_MEMORY_WARNING]: t('Memory utilization has reached a warning level'),
     [Event.reason.DEVICE_MEMORY_CRITICAL]: t('Memory utilization has reached a critical level'),
     [Event.reason.DEVICE_DISK_NORMAL]: t('Disk utilization has returned to normal'),
     [Event.reason.DEVICE_DISK_WARNING]: t('Disk utilization has reached a warning level'),
@@ -68,6 +71,23 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.DEVICE_CONTENT_UP_TO_DATE]: t('Device returned to being up-to-date'),
     [Event.reason.DEVICE_CONTENT_UPDATING]: t('Device is updating'),
     [Event.reason.DEVICE_CONTENT_OUT_OF_DATE]: t('Device is out-of-date'),
+    [Event.reason.DEVICE_MULTIPLE_OWNERS_DETECTED]: t('Detected device ownership conflict'),
+    [Event.reason.DEVICE_MULTIPLE_OWNERS_RESOLVED]: t('Device ownership conflict has been resolved'),
+    [Event.reason.DEVICE_SPEC_VALID]: t('Device specification has returned to a valid state'),
+    [Event.reason.DEVICE_SPEC_INVALID]: t('Device specification is invalid'),
+    [Event.reason.DEVICE_OWNERSHIP_CHANGED]: t('Device ownership changed'),
+    // Enrollment request events
+    [Event.reason.ENROLLMENT_REQUEST_APPROVED]: t('Enrollment request was approved'),
+    [Event.reason.ENROLLMENT_REQUEST_APPROVAL_FAILED]: t('Enrollment request approval failed'),
+    // Internal task events
+    [Event.reason.INTERNAL_TASK_FAILED]: t('Internal task failed'),
+    // Repository events
+    [Event.reason.REPOSITORY_ACCESSIBLE]: t('Repository is accessible'),
+    [Event.reason.REPOSITORY_INACCESSIBLE]: t('Repository is inaccessible'),
+    // Fleet events
+    [Event.reason.FLEET_SELECTOR_PROCESSING_COMPLETED]: t('Fleet selector processing completed'),
+    [Event.reason.FLEET_RECONCILED]: t('Fleet reconciled'),
+    [Event.reason.FLEET_RECONCILE_FAILED]: t('Fleet reconciliation failed'),
   };
 };
 
