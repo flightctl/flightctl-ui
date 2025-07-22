@@ -71,6 +71,16 @@ func NewMetricsHandler() handler {
 	return handler{target: target, proxy: proxy}
 }
 
+func NewAlertManagerHandler(tlsConfig *tls.Config) handler {
+	target, proxy := createReverseProxy(config.AlertManagerApiUrl)
+
+	proxy.Transport = &http.Transport{
+		TLSClientConfig: tlsConfig,
+	}
+
+	return handler{target: target, proxy: proxy}
+}
+
 func UnimplementedHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }

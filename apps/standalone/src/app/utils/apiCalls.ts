@@ -1,6 +1,9 @@
 /* eslint-disable no-console */
 import { PatchRequest } from '@flightctl/types';
-import { getErrorMsgFromApiResponse } from '@flightctl/ui-components/src/utils/apiCalls';
+import {
+  getErrorMsgFromAlertsApiResponse,
+  getErrorMsgFromApiResponse,
+} from '@flightctl/ui-components/src/utils/apiCalls';
 import { CliArtifactsResponse } from '@flightctl/ui-components/src/types/extraTypes';
 
 import { lastRefresh } from '../context/AuthContext';
@@ -9,11 +12,12 @@ const apiPort = window.API_PORT || window.location.port;
 const apiServer = `${window.location.hostname}${apiPort ? `:${apiPort}` : ''}`;
 
 const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
+const metricsAPI = `${window.location.protocol}//${apiServer}/api/metrics`;
+const alertsAPI = `${window.location.protocol}//${apiServer}/api/alerts`;
 export const flightCtlCliArtifactsUrl = `${window.location.protocol}//${apiServer}/api/cli-artifacts`;
 
 export const loginAPI = `${window.location.protocol}//${apiServer}/api/login`;
 const logoutAPI = `${window.location.protocol}//${apiServer}/api/logout`;
-const metricsAPI = `${window.location.protocol}//${apiServer}/api/metrics`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
 export const logout = async () => {
@@ -76,6 +80,38 @@ export const fetchCliArtifacts = async (abortSignal?: AbortSignal): Promise<CliA
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making GET Cli artifacts request:', error);
+    throw error;
+  }
+};
+
+export const fetchAlerts = async <R>(abortSignal?: AbortSignal): Promise<R> => {
+  try {
+    const response = await fetch(`${alertsAPI}/api/v2/alerts`, {
+      signal: abortSignal,
+      credentials: 'include',
+    });
+
+    if (response.ok) {
+      const data = (await response.json()) as R;
+      return data;
+    }
+
+    if (response.status === 404) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    if (response.status === 401) {
+      await redirectToLogin();
+    }
+
+    // For 500/501 errors, just throw the status code for detection
+    if (response.status === 500 || response.status === 501) {
+      throw { status: response.status };
+    }
+
+    throw new Error(await getErrorMsgFromAlertsApiResponse(response));
+  } catch (error) {
+    console.error('Error making GET alerts request:', error);
     throw error;
   }
 };

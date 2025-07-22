@@ -40,8 +40,15 @@ func main() {
 	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(tlsConfig))
 	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler())
 
-	_, cliArtifactsEnabled := os.LookupEnv("FLIGHTCTL_CLI_ARTIFACTS_SERVER")
-	if cliArtifactsEnabled {
+	alertManagerUrl, alertManagerEnabled := os.LookupEnv("FLIGHTCTL_ALERTMANAGER_PROXY")
+	if alertManagerEnabled && alertManagerUrl != "" {
+		apiRouter.Handle("/alerts/{forward:.*}", bridge.NewAlertManagerHandler(tlsConfig))
+	} else {
+		apiRouter.HandleFunc("/alerts/{forward:.*}", bridge.UnimplementedHandler)
+	}
+
+	cliArtifactsUrl, cliArtifactsEnabled := os.LookupEnv("FLIGHTCTL_CLI_ARTIFACTS_SERVER")
+	if cliArtifactsEnabled && cliArtifactsUrl != "" {
 		apiRouter.Handle("/cli-artifacts", bridge.NewFlightCtlCliArtifactsHandler(tlsConfig))
 	} else {
 		apiRouter.HandleFunc("/cli-artifacts", bridge.UnimplementedHandler)

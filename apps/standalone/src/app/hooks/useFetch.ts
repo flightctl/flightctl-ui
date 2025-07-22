@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { deleteData, fetchData, patchData, postData, putData, wsEndpoint } from '../utils/apiCalls';
+import { deleteData, fetchAlerts, fetchData, patchData, postData, putData, wsEndpoint } from '../utils/apiCalls';
 import { PatchRequest } from '@flightctl/types';
 
 export const useFetch = () => {
@@ -27,6 +27,11 @@ export const useFetch = () => {
 
   const checkPermissions = React.useCallback(() => Promise.resolve(true), []);
 
+  const getAlerts = React.useCallback(
+    async <R>(abortSignal?: AbortSignal): Promise<R> => fetchAlerts<R>(abortSignal),
+    [],
+  );
+
   return {
     getWsEndpoint,
     get,
@@ -35,5 +40,6 @@ export const useFetch = () => {
     remove,
     patch,
     checkPermissions,
+    getAlerts,
   };
 };

@@ -17,4 +17,5 @@ export enum RESOURCE {
   RESOURCE_SYNC = 'resourcesyncs',
   ENROLLMENT_REQUEST = 'enrollmentrequests',
   ENROLLMENT_REQUEST_APPROVAL = 'enrollmentrequests/approval',
+  ALERTS = 'alerts',
 }

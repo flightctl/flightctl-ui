@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
   deleteData,
+  fetchAlerts,
   fetchData,
   handleApiJSONResponse,
   patchData,
@@ -59,6 +60,11 @@ export const useFetch = () => {
 
   const getWsEndpoint = React.useCallback((deviceId: string) => `${wsEndpoint}/api/terminal/${deviceId}`, []);
 
+  const getAlerts = React.useCallback(
+    async <R>(abortSignal?: AbortSignal): Promise<R> => fetchAlerts<R>(abortSignal),
+    [],
+  );
+
   const ocpConfig = useOcpConfig();
 
   const checkPermissions = React.useCallback(
@@ -82,5 +88,6 @@ export const useFetch = () => {
     remove,
     patch,
     checkPermissions,
+    getAlerts,
   };
 };
