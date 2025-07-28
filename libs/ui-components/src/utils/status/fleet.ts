@@ -7,7 +7,6 @@ import { getConditionMessage } from '../error';
 const FLEET_ROLLOUT_FAILED_REASON = 'Suspended';
 
 export const fleetStatusLabels = (t: TFunction) => ({
-  [ConditionType.FleetOverlappingSelectors]: t('Selectors overlap'),
   [ConditionType.FleetValid]: t('Valid'),
   Invalid: t('Invalid'),
   SyncPending: t('Sync pending'),
@@ -20,18 +19,6 @@ export const getFleetSyncStatus = (
   status: FleetConditionType;
   message: string | undefined;
 } => {
-  const selectorOverlap = fleet.status?.conditions?.find(
-    (c) => c.type === ConditionType.FleetOverlappingSelectors && c.status === ConditionStatus.ConditionStatusTrue,
-  );
-  if (selectorOverlap) {
-    return {
-      message:
-        selectorOverlap.message ||
-        t("Fleet's selector overlaps with at least one other fleet, causing ambiguous device ownership."),
-      status: ConditionType.FleetOverlappingSelectors,
-    };
-  }
-
   const validCondition = (fleet.status?.conditions || []).find((c) => c.type === ConditionType.FleetValid);
   if (validCondition) {
     const isOK = validCondition.status === ConditionStatus.ConditionStatusTrue;
