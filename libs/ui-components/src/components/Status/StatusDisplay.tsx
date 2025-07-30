@@ -68,7 +68,7 @@ type StatusDisplayProps = {
     level: StatusLevel;
     customIcon?: React.ComponentClass<SVGIconProps>;
   };
-  message?: string;
+  message?: React.ReactNode;
 };
 
 const StatusDisplay = ({ item, message }: StatusDisplayProps) => {

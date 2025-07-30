@@ -34,6 +34,8 @@ export type { DeviceConfigStatus } from './models/DeviceConfigStatus';
 export type { DeviceConsole } from './models/DeviceConsole';
 export type { DeviceDecommission } from './models/DeviceDecommission';
 export { DeviceDecommissionTargetType } from './models/DeviceDecommissionTargetType';
+export type { DeviceIntegrityCheckStatus } from './models/DeviceIntegrityCheckStatus';
+export { DeviceIntegrityCheckStatusType } from './models/DeviceIntegrityCheckStatusType';
 export type { DeviceIntegrityStatus } from './models/DeviceIntegrityStatus';
 export { DeviceIntegrityStatusSummaryType } from './models/DeviceIntegrityStatusSummaryType';
 export { DeviceLifecycleHookType } from './models/DeviceLifecycleHookType';
