@@ -10,47 +10,7 @@ import {
   ResourceSyncList,
 } from '@flightctl/types';
 
-import { AnnotationType, ApiQuery, FlightControlQuery, MetricsQuery } from '../types/extraTypes';
-import { getPeriodTimestamps } from '../utils/metrics';
-
-const isApiQuery = (query: ApiQuery | MetricsQuery): query is ApiQuery => 'endpoint' in query;
-
-const getApiQueryString = (apiQuery: ApiQuery) => apiQuery.endpoint;
-
-const getMetricsQueryString = (metricsQuery: MetricsQuery) => {
-  const { metrics, period } = metricsQuery;
-  const range = getPeriodTimestamps(period);
-
-  const metric = metrics.length === 1 ? metrics[0] : `__name__=~"${metrics.join('|')}"`;
-  let query = `query=${metric}`;
-  if (range) {
-    query += `&start=${range.from}&end=${range.to}&step=${range.step}`;
-  }
-  return query;
-};
-
-/**
- * Builds the query string hash that identifies this query based only on its parameters
- * @param queryObj
- */
-const getQueryStringHash = (queryObj: FlightControlQuery) => {
-  if (isApiQuery(queryObj)) {
-    return getApiQueryString(queryObj);
-  }
-  // We just need to generate a unique string based on the data, but without the timestamps
-  return `metric=${queryObj.metrics.join(',')}&period=${queryObj.period}`;
-};
-
-/**
- * Builds the query string that should be triggered, adding time parameters etc to the base query string
- * @param queryObj
- */
-const getRequestQueryString = (queryObj: FlightControlQuery) => {
-  if (isApiQuery(queryObj)) {
-    return getApiQueryString(queryObj);
-  }
-  return getMetricsQueryString(queryObj);
-};
+import { AnnotationType } from '../types/extraTypes';
 
 export type ApiList = EnrollmentRequestList | DeviceList | FleetList | RepositoryList | ResourceSyncList;
 
@@ -82,13 +42,4 @@ const getCondition = (
   return undefined;
 };
 
-export {
-  isApiQuery,
-  getRequestQueryString,
-  getQueryStringHash,
-  getMetadataAnnotation,
-  getApiQueryString,
-  getMetricsQueryString,
-  getApiListCount,
-  getCondition,
-};
+export { getMetadataAnnotation, getApiListCount, getCondition };

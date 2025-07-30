@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { ApiQuery } from '../types/extraTypes';
-import { getQueryStringHash, getRequestQueryString } from '../utils/api';
 
 import { useFetch } from './useFetch';
 
@@ -20,22 +19,16 @@ export const useFetchPeriodically = <R>(
 
   const { get } = useFetch();
 
-  // When the query parameters change, the hash will too. We must perform a refetch outside the timeout loop
-  const queryStringHash = getQueryStringHash(query);
-
-  // Callback that generates the updated query for refreshes. It may provide updated values for parameters such as from/to for metric queries
-  const getRequestQuery = React.useCallback(() => getRequestQueryString(query), [query]);
-
   React.useEffect(() => {
     let abortController: AbortController;
 
     const fetchPeriodically = async (id: number) => {
       while (ref.current === id) {
-        const requestQuery = getRequestQuery();
+        const requestQuery = query.endpoint;
         if (requestQuery) {
           try {
             abortController = new AbortController();
-            if (id > 0 && prevResolvedQueryHash.current !== queryStringHash) {
+            if (id > 0 && prevResolvedQueryHash.current !== query.endpoint) {
               setIsUpdating(true);
             }
 
@@ -66,7 +59,7 @@ export const useFetchPeriodically = <R>(
           setError(undefined);
           setData(undefined);
         }
-        prevResolvedQueryHash.current = queryStringHash;
+        prevResolvedQueryHash.current = query.endpoint;
         await new Promise((resolve) => setTimeout(resolve, query.timeout || TIMEOUT));
       }
     };
@@ -78,7 +71,7 @@ export const useFetchPeriodically = <R>(
       abortController?.abort();
     };
     // eslint-disable-next-line
-  }, [get, forceUpdate, queryStringHash]);
+  }, [get, forceUpdate, query.endpoint]);
 
   const refetch = React.useCallback(() => setForceUpdate((val) => val + 1), []);
 

@@ -12,13 +12,19 @@ const apiPort = window.API_PORT || window.location.port;
 const apiServer = `${window.location.hostname}${apiPort ? `:${apiPort}` : ''}`;
 
 const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
-const metricsAPI = `${window.location.protocol}//${apiServer}/api/metrics`;
 const alertsAPI = `${window.location.protocol}//${apiServer}/api/alerts`;
 export const flightCtlCliArtifactsUrl = `${window.location.protocol}//${apiServer}/api/cli-artifacts`;
 
 export const loginAPI = `${window.location.protocol}//${apiServer}/api/login`;
 const logoutAPI = `${window.location.protocol}//${apiServer}/api/logout`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
+
+const getFullApiUrl = (path: string) => {
+  if (path.startsWith('alerts')) {
+    return { api: 'alerts', url: `${alertsAPI}/api/v2/${path}` };
+  }
+  return { api: 'flightctl', url: `${flightCtlAPI}/api/v1/${path}` };
+};
 
 export const logout = async () => {
   const response = await fetch(logoutAPI, { credentials: 'include' });
@@ -50,26 +56,41 @@ const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   throw new Error(await getErrorMsgFromApiResponse(response));
 };
 
-const fetchWithRetry = async <R>(input: string | URL | Request, init?: RequestInit): Promise<R> => {
-  const prevRefresh = lastRefresh;
-  let response = await fetch(input, init);
-  //if token refresh occured, lets try again
-  if (response.status === 401 && prevRefresh != lastRefresh) {
-    response = await fetch(input, init);
+const handleAlertsJSONResponse = async <R>(response: Response): Promise<R> => {
+  if (response.ok) {
+    const data = (await response.json()) as R;
+    return data;
   }
-  return handleApiJSONResponse(response);
+
+  if (response.status === 404) {
+    throw new Error(`Error ${response.status}: ${response.statusText}`);
+  }
+
+  if (response.status === 401) {
+    await redirectToLogin();
+  }
+
+  // For 500/501 errors, return the status code for detection
+  if (response.status === 500 || response.status === 501) {
+    throw new Error(`${response.status}`);
+  }
+
+  throw new Error(await getErrorMsgFromAlertsApiResponse(response));
 };
 
-export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSignal): Promise<R> => {
-  try {
-    const response = await fetch(`${metricsAPI}/api/v1/query_range?${metricQuery}`, {
-      signal: abortSignal,
-    });
-    return handleApiJSONResponse(response);
-  } catch (error) {
-    console.error('Error making GET request:', error);
-    throw error;
+const fetchWithRetry = async <R>(path: string, init?: RequestInit): Promise<R> => {
+  const { api, url } = getFullApiUrl(path);
+
+  const prevRefresh = lastRefresh;
+  let response = await fetch(url, init);
+  //if token refresh occured, lets try again
+  if (response.status === 401 && prevRefresh != lastRefresh) {
+    response = await fetch(url, init);
   }
+  if (api === 'alerts') {
+    return handleAlertsJSONResponse(response);
+  }
+  return handleApiJSONResponse(response);
 };
 
 export const fetchCliArtifacts = async (abortSignal?: AbortSignal): Promise<CliArtifactsResponse> => {
@@ -84,41 +105,9 @@ export const fetchCliArtifacts = async (abortSignal?: AbortSignal): Promise<CliA
   }
 };
 
-export const fetchAlerts = async <R>(abortSignal?: AbortSignal): Promise<R> => {
-  try {
-    const response = await fetch(`${alertsAPI}/api/v2/alerts`, {
-      signal: abortSignal,
-      credentials: 'include',
-    });
-
-    if (response.ok) {
-      const data = (await response.json()) as R;
-      return data;
-    }
-
-    if (response.status === 404) {
-      throw new Error(`Error ${response.status}: ${response.statusText}`);
-    }
-
-    if (response.status === 401) {
-      await redirectToLogin();
-    }
-
-    // For 500/501 errors, just throw the status code for detection
-    if (response.status === 500 || response.status === 501) {
-      throw { status: response.status };
-    }
-
-    throw new Error(await getErrorMsgFromAlertsApiResponse(response));
-  } catch (error) {
-    console.error('Error making GET alerts request:', error);
-    throw error;
-  }
-};
-
 const putOrPostData = async <R>(kind: string, data: R, method: 'PUT' | 'POST'): Promise<R> => {
   try {
-    return await fetchWithRetry<R>(`${flightCtlAPI}/api/v1/${kind}`, {
+    return await fetchWithRetry<R>(kind, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -138,7 +127,7 @@ export const putData = async <R>(kind: string, data: R): Promise<R> => putOrPost
 
 export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
-    return fetchWithRetry<R>(`${flightCtlAPI}/api/v1/${kind}`, {
+    return fetchWithRetry<R>(kind, {
       method: 'DELETE',
       credentials: 'include',
       signal: abortSignal,
@@ -151,7 +140,7 @@ export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Pr
 
 export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal?: AbortSignal): Promise<R> => {
   try {
-    return fetchWithRetry<R>(`${flightCtlAPI}/api/v1/${kind}`, {
+    return fetchWithRetry<R>(kind, {
       headers: {
         'Content-Type': 'application/json-patch+json',
       },
@@ -166,9 +155,9 @@ export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal
   }
 };
 
-export const fetchData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
+export const fetchData = async <R>(path: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
-    return fetchWithRetry<R>(`${flightCtlAPI}/api/v1/${kind}`, {
+    return fetchWithRetry<R>(path, {
       credentials: 'include',
       signal: abortSignal,
     });
