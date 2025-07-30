@@ -6,7 +6,7 @@
  * Status of the integrity of the device.
  */
 export enum DeviceIntegrityStatusSummaryType {
-  DeviceIntegrityStatusPassed = 'Passed',
+  DeviceIntegrityStatusVerified = 'Verified',
   DeviceIntegrityStatusFailed = 'Failed',
   DeviceIntegrityStatusUnknown = 'Unknown',
   DeviceIntegrityStatusUnsupported = 'Unsupported',

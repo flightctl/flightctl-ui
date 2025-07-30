@@ -15,6 +15,7 @@ import LabelWithHelperText from '../../../common/WithHelperText';
 import ApplicationSummaryStatus from '../../../Status/ApplicationSummaryStatus';
 import DeviceStatus from '../../../Status/DeviceStatus';
 import SystemUpdateStatus from '../../../Status/SystemUpdateStatus';
+import IntegrityStatus from '../../../Status/IntegrityStatus';
 
 const StatusContent = ({ device }: { device: Required<Device> }) => {
   const { t } = useTranslation();
@@ -57,6 +58,17 @@ const StatusContent = ({ device }: { device: Required<Device> }) => {
             </DescriptionListTerm>
             <DescriptionListDescription>
               <SystemUpdateStatus deviceStatus={device.status} />
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>
+              <LabelWithHelperText
+                label={t('Integrity status')}
+                content={t('Indicates whether the device has been verified as secure and authentic.')}
+              />
+            </DescriptionListTerm>
+            <DescriptionListDescription>
+              <IntegrityStatus integrityStatus={device.status.integrity} />
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
