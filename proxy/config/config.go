@@ -11,6 +11,7 @@ var (
 	FctlApiInsecure     = getEnvVar("FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY", "false")
 	MetricsApiUrl       = getEnvUrlVar("FLIGHTCTL_METRICS_SERVER", "http://localhost:9090")
 	FctlCliArtifactsUrl = getEnvUrlVar("FLIGHTCTL_CLI_ARTIFACTS_SERVER", "http://localhost:8090")
+	AlertManagerApiUrl  = getEnvUrlVar("FLIGHTCTL_ALERTMANAGER_PROXY", "https://localhost:8443")
 	TlsKeyPath          = getEnvVar("TLS_KEY", "")
 	TlsCertPath         = getEnvVar("TLS_CERT", "")
 	AuthClientId        = getEnvVar("AUTH_CLIENT_ID", "flightctl")

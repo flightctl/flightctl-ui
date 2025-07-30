@@ -21,6 +21,7 @@ import { Prompt } from 'react-router-dom';
 import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/reducers';
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
+import { fetchAlerts } from '../../utils/apiCalls';
 
 import './AppContext.css';
 
@@ -71,5 +72,6 @@ export const useValuesAppContext = (): AppContextProps => {
       transNamespace: 'plugin__flightctl-plugin',
     },
     fetch,
+    getAlerts: fetchAlerts,
   };
 };

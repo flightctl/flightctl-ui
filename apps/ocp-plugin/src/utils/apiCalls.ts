@@ -2,7 +2,10 @@
 
 import { PatchRequest } from '@flightctl/types';
 import { getCSRFToken } from '@openshift-console/dynamic-plugin-sdk/lib/utils/fetch/console-fetch-utils';
-import { getErrorMsgFromApiResponse } from '@flightctl/ui-components/src/utils/apiCalls';
+import {
+  getErrorMsgFromAlertsApiResponse,
+  getErrorMsgFromApiResponse,
+} from '@flightctl/ui-components/src/utils/apiCalls';
 
 declare global {
   interface Window {
@@ -28,6 +31,7 @@ const apiServer = `${window.location.hostname}${
 export const uiProxy = `${window.location.protocol}//${apiServer}`;
 const flightCtlAPI = `${uiProxy}/api/flightctl`;
 const metricsAPI = `${uiProxy}/api/metrics`;
+const alertsAPI = `${uiProxy}/api/alerts`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
 export const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
@@ -52,6 +56,35 @@ export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSi
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making GET request:', error);
+    throw error;
+  }
+};
+
+export const fetchAlerts = async <R>(abortSignal?: AbortSignal): Promise<R> => {
+  const options: RequestInit = {
+    signal: abortSignal,
+  };
+  applyConsoleHeaders(options);
+  try {
+    const response = await fetch(`${alertsAPI}/api/v2/alerts`, options);
+
+    if (response.ok) {
+      const data = (await response.json()) as R;
+      return data;
+    }
+
+    if (response.status === 404) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    // For 500/501 errors, just throw the status code for detection
+    if (response.status === 500 || response.status === 501) {
+      throw { status: response.status };
+    }
+
+    throw new Error(await getErrorMsgFromAlertsApiResponse(response));
+  } catch (error) {
+    console.error('Error making GET alerts request:', error);
     throw error;
   }
 };

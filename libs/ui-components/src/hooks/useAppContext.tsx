@@ -78,6 +78,7 @@ export type AppContextProps = {
     checkPermissions: (resource: RESOURCE, verb: VERB) => Promise<boolean>;
   };
   // Extra fetch functions
+  getAlerts?: <R>(abortSignal?: AbortSignal) => Promise<R>;
   getMetrics?: <R>(query: string, abortSignal?: AbortSignal) => Promise<R>;
   getCliArtifacts?: (abortSignal?: AbortSignal) => Promise<CliArtifactsResponse>;
 };
