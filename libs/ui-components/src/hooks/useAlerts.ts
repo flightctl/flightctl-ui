@@ -30,7 +30,7 @@ const DEFAULT_REFRESH_INTERVAL = 30000; // 30 seconds
 export const useAlerts = (
   refreshInterval: number = DEFAULT_REFRESH_INTERVAL,
 ): [AlertManagerAlert[], boolean, unknown, VoidFunction] => {
-  const { fetch } = useAppContext();
+  const { getAlerts } = useAppContext();
   const [alerts, setAlerts] = React.useState<AlertManagerAlert[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<unknown>();
@@ -45,9 +45,14 @@ export const useAlerts = (
     let intervalId: NodeJS.Timeout;
 
     const fetchAlerts = async () => {
+      if (!getAlerts) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         abortController = new AbortController();
-        const alertsData = await fetch.getAlerts<AlertManagerAlert[]>(abortController.signal);
+        const alertsData = await getAlerts<AlertManagerAlert[]>(abortController.signal);
         setAlerts(alertsData || []);
         setError(undefined);
       } catch (err) {
@@ -65,8 +70,8 @@ export const useAlerts = (
     // Initial fetch
     fetchAlerts();
 
-    // Set up periodic refresh
-    if (refreshInterval > 0) {
+    // Set up periodic refresh only if getAlerts is available
+    if (getAlerts && refreshInterval > 0) {
       intervalId = setInterval(() => {
         fetchAlerts();
       }, refreshInterval);
@@ -78,7 +83,7 @@ export const useAlerts = (
       }
       abortController?.abort();
     };
-  }, [fetch, refreshInterval, forceRefresh]);
+  }, [getAlerts, refreshInterval, forceRefresh]);
 
   return [alerts, isLoading, error, refetch];
 };
@@ -90,19 +95,25 @@ const isHttpError = (error: unknown): error is { status: number } => {
 };
 
 export const useAlertsEnabled = (): boolean => {
-  const { fetch } = useAppContext();
+  const { getAlerts } = useAppContext();
   const [alertsEnabled, setAlertsEnabled] = React.useState(false);
 
   const [canListAlerts, alertsLoading] = useAccessReview(RESOURCE.ALERTS, VERB.LIST);
-  const checkServiceEnabled = !alertsLoading && canListAlerts;
+  const checkServiceEnabled = Boolean(getAlerts) && !alertsLoading && canListAlerts;
 
   React.useEffect(() => {
     let abortController: AbortController;
 
     const checkAlertServiceEnabled = async () => {
+      if (!getAlerts) {
+        // If getAlerts is not available, alerts are disabled
+        setAlertsEnabled(false);
+        return;
+      }
+
       try {
         abortController = new AbortController();
-        await fetch.getAlerts<AlertManagerAlert[]>(abortController.signal);
+        await getAlerts<AlertManagerAlert[]>(abortController.signal);
         setAlertsEnabled(true);
       } catch (err) {
         if (!abortController.signal.aborted) {
@@ -120,12 +131,15 @@ export const useAlertsEnabled = (): boolean => {
     if (checkServiceEnabled) {
       // Check only if we know that the user has permisions to read the alerts
       checkAlertServiceEnabled();
+    } else if (!getAlerts) {
+      // If getAlerts is not available, immediately set to disabled
+      setAlertsEnabled(false);
     }
 
     return () => {
       abortController?.abort();
     };
-  }, [fetch, checkServiceEnabled]);
+  }, [getAlerts, checkServiceEnabled]);
 
   return alertsEnabled;
 };

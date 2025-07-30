@@ -76,9 +76,9 @@ export type AppContextProps = {
     remove: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
     patch: <R>(kind: string, patches: PatchRequest, abortSignal?: AbortSignal) => Promise<R>;
     checkPermissions: (resource: RESOURCE, verb: VERB) => Promise<boolean>;
-    getAlerts: <R>(abortSignal?: AbortSignal) => Promise<R>;
   };
   // Extra fetch functions
+  getAlerts?: <R>(abortSignal?: AbortSignal) => Promise<R>;
   getMetrics?: <R>(query: string, abortSignal?: AbortSignal) => Promise<R>;
   getCliArtifacts?: (abortSignal?: AbortSignal) => Promise<CliArtifactsResponse>;
 };
@@ -113,7 +113,6 @@ export const AppContext = React.createContext<AppContextProps>({
     remove: async () => ({}) as any,
     patch: async () => ({}) as any,
     checkPermissions: async () => true,
-    getAlerts: async () => ({}) as any,
   },
   /* eslint-enable */
 });

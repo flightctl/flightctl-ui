@@ -14,7 +14,7 @@ import {
 } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { useFetch } from './useFetch';
-import { fetchCliArtifacts } from '../utils/apiCalls';
+import { fetchAlerts, fetchCliArtifacts } from '../utils/apiCalls';
 
 const standaloneAppContext: Omit<AppContextProps, 'fetch' | 'settings'> = {
   appType: FlightCtlApp.STANDALONE,
@@ -47,6 +47,7 @@ export const useStandaloneAppContext = (): AppContextProps => {
     },
     user: username,
     fetch,
+    getAlerts: fetchAlerts,
     getCliArtifacts: fetchCliArtifacts,
   };
 };
