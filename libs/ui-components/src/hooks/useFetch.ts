@@ -1,11 +1,10 @@
 import { useAppContext } from './useAppContext';
 
 export const useFetch = () => {
-  const { fetch, getCliArtifacts, getMetrics } = useAppContext();
+  const { fetch, getCliArtifacts } = useAppContext();
 
   return {
     ...fetch,
     getCliArtifacts,
-    getMetrics,
   };
 };

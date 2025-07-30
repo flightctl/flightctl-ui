@@ -66,11 +66,6 @@ func NewFlightCtlCliArtifactsHandler(tlsConfig *tls.Config) handler {
 	return handler{target: target, proxy: proxy}
 }
 
-func NewMetricsHandler() handler {
-	target, proxy := createReverseProxy(config.MetricsApiUrl)
-	return handler{target: target, proxy: proxy}
-}
-
 func NewAlertManagerHandler(tlsConfig *tls.Config) handler {
 	target, proxy := createReverseProxy(config.AlertManagerApiUrl)
 

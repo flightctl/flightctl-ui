@@ -17,18 +17,6 @@ const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   throw new Error(await getErrorMsgFromApiResponse(response));
 };
 
-export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSignal): Promise<R> => {
-  try {
-    const response = await fetch(`/api/v1/query_range?${metricQuery}`, {
-      signal: abortSignal,
-    });
-    return handleApiJSONResponse(response);
-  } catch (error) {
-    console.error('Error making GET request:', error);
-    throw error;
-  }
-};
-
 const putOrPostData = async <R>(
   kind: string,
   data: R,

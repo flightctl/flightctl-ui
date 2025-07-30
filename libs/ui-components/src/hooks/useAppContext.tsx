@@ -13,7 +13,7 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 import { PatchRequest } from '@flightctl/types';
-import { CliArtifactsResponse } from '@flightctl/ui-components/src/types/extraTypes';
+import { CliArtifactsResponse } from '../types/extraTypes';
 import { ROUTE } from './useNavigate';
 import { RESOURCE, VERB } from '../types/rbac';
 
@@ -78,8 +78,6 @@ export type AppContextProps = {
     checkPermissions: (resource: RESOURCE, verb: VERB) => Promise<boolean>;
   };
   // Extra fetch functions
-  getAlerts?: <R>(abortSignal?: AbortSignal) => Promise<R>;
-  getMetrics?: <R>(query: string, abortSignal?: AbortSignal) => Promise<R>;
   getCliArtifacts?: (abortSignal?: AbortSignal) => Promise<CliArtifactsResponse>;
 };
 

@@ -12,22 +12,6 @@ import {
   ResourceSync,
 } from '@flightctl/types';
 
-export enum FlightControlMetrics {
-  ACTIVE_AGENT_COUNT_METRIC = 'flightctl_devicesimulator_active_agent_count',
-  TOTAL_API_REQUESTS_METRIC = 'flightctl_devicesimulator_api_requests_total',
-}
-
-export type MetricValue = [number, number | string];
-
-export interface PrometheusMetric {
-  metric: {
-    __name__: FlightControlMetrics;
-    job: string;
-  };
-  value?: MetricValue;
-  values?: Array<MetricValue>;
-}
-
 export interface FlightCtlLabel {
   key: string;
   value?: string;
@@ -39,14 +23,7 @@ export interface ApiQuery {
   timeout?: number;
 }
 
-export interface MetricsQuery {
-  metrics: FlightControlMetrics[];
-  period: string;
-}
-
 export type FleetConditionType = ConditionType.FleetValid | 'Invalid' | 'SyncPending';
-
-export type FlightControlQuery = ApiQuery | MetricsQuery;
 
 export enum DeviceAnnotation {
   TemplateVersion = 'fleet-controller/templateVersion',
@@ -80,4 +57,21 @@ type CliArtifact = {
 export type CliArtifactsResponse = {
   baseUrl: string;
   artifacts: CliArtifact[];
+};
+
+// AlertManager alert structure
+export type AlertManagerAlert = {
+  fingerprint: string;
+  labels: Record<string, string>;
+  annotations: Record<string, string>;
+  startsAt: string;
+  endsAt: string;
+  updatedAt: string;
+  status: {
+    state: string;
+    inhibitedBy: string[];
+    mutedBy: string[];
+    silencedBy: string[];
+  };
+  receivers: Array<{ name: string }>;
 };

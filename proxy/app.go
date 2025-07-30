@@ -38,7 +38,6 @@ func main() {
 	}
 
 	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(tlsConfig))
-	apiRouter.Handle("/metrics/{forward:.*}", bridge.NewMetricsHandler())
 
 	alertManagerUrl, alertManagerEnabled := os.LookupEnv("FLIGHTCTL_ALERTMANAGER_PROXY")
 	if alertManagerEnabled && alertManagerUrl != "" {
