@@ -11,6 +11,6 @@
     "integration-tests:ci": "npm run -w @flightctl/standalone start-prod"
   },
   "devDependencies": {
-    "cypress": "^13.7.0"
+    "cypress": "^14.0.0"
   }
 }
