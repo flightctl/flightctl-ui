@@ -15,13 +15,16 @@ import { TFunction } from 'react-i18next';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 import { Event, ResourceKind } from '@flightctl/types';
-import { useAlerts } from '../../../../hooks/useAlerts';
+import { AlertManagerAlert } from '../../../../types/extraTypes';
+import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getDateDisplay } from '../../../../utils/dates';
 import { getErrorMessage } from '../../../../utils/error';
 import ResourceLink from '../../../common/ResourceLink';
 
 import AlertsEmptyState from './AlertsEmptyState';
+
+const ALERTS_TIMEOUT = 20000; // 20 seconds
 
 // Define only the Event.reason values that correspond to alerts
 type AlertEventReason =
@@ -116,7 +119,12 @@ const resourceKindLabel = (t: TFunction, resourceKind: ResourceKind | undefined)
 
 const AlertsCard = () => {
   const { t } = useTranslation();
-  const [alerts, isLoading, error] = useAlerts();
+
+  const [alerts, isLoading, error] = useFetchPeriodically<AlertManagerAlert[]>({
+    endpoint: 'alerts',
+    timeout: ALERTS_TIMEOUT,
+  });
+
   const alertTypes = React.useMemo(() => getAlertTitles(t), [t]);
 
   let alertsBody: React.ReactNode;
@@ -130,12 +138,12 @@ const AlertsCard = () => {
         </Alert>
       </CardBody>
     );
-  } else if (alerts.length === 0) {
+  } else if (alerts?.length === 0) {
     alertsBody = <AlertsEmptyState />;
   } else {
     alertsBody = (
       <List isPlain>
-        {alerts.map((alert) => {
+        {alerts?.map((alert) => {
           const alertName = alert.labels.alertname as AlertEventReason;
           const resourceKind = alertResourceKind[alertName];
           const kindLabel = resourceKindLabel(t, resourceKind);

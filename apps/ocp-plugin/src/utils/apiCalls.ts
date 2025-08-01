@@ -30,9 +30,33 @@ const apiServer = `${window.location.hostname}${
 
 export const uiProxy = `${window.location.protocol}//${apiServer}`;
 const flightCtlAPI = `${uiProxy}/api/flightctl`;
-const metricsAPI = `${uiProxy}/api/metrics`;
 const alertsAPI = `${uiProxy}/api/alerts`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
+
+const getFullApiUrl = (path: string) => {
+  if (path.startsWith('alerts')) {
+    return { api: 'alerts', url: `${alertsAPI}/api/v2/${path}` };
+  }
+  return { api: 'flightctl', url: `${flightCtlAPI}/api/v1/${path}` };
+};
+
+const handleAlertsJSONResponse = async <R>(response: Response): Promise<R> => {
+  if (response.ok) {
+    const data = (await response.json()) as R;
+    return data;
+  }
+
+  if (response.status === 404) {
+    throw new Error(`Error ${response.status}: ${response.statusText}`);
+  }
+
+  // For 500/501 errors, return the status code for detection
+  if (response.status === 500 || response.status === 501) {
+    throw new Error(`${response.status}`);
+  }
+
+  throw new Error(await getErrorMsgFromAlertsApiResponse(response));
+};
 
 export const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   if (response.ok) {
@@ -46,47 +70,6 @@ export const handleApiJSONResponse = async <R>(response: Response): Promise<R> =
   }
 
   throw new Error(await getErrorMsgFromApiResponse(response));
-};
-
-export const fetchMetrics = async <R>(metricQuery: string, abortSignal?: AbortSignal): Promise<R> => {
-  try {
-    const response = await fetch(`${metricsAPI}/api/v1/query_range?${metricQuery}`, {
-      signal: abortSignal,
-    });
-    return handleApiJSONResponse(response);
-  } catch (error) {
-    console.error('Error making GET request:', error);
-    throw error;
-  }
-};
-
-export const fetchAlerts = async <R>(abortSignal?: AbortSignal): Promise<R> => {
-  const options: RequestInit = {
-    signal: abortSignal,
-  };
-  applyConsoleHeaders(options);
-  try {
-    const response = await fetch(`${alertsAPI}/api/v2/alerts`, options);
-
-    if (response.ok) {
-      const data = (await response.json()) as R;
-      return data;
-    }
-
-    if (response.status === 404) {
-      throw new Error(`Error ${response.status}: ${response.statusText}`);
-    }
-
-    // For 500/501 errors, just throw the status code for detection
-    if (response.status === 500 || response.status === 501) {
-      throw { status: response.status };
-    }
-
-    throw new Error(await getErrorMsgFromAlertsApiResponse(response));
-  } catch (error) {
-    console.error('Error making GET alerts request:', error);
-    throw error;
-  }
 };
 
 const putOrPostData = async <R>(kind: string, data: R, method: 'PUT' | 'POST'): Promise<R> => {
@@ -145,11 +128,16 @@ export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal
   }
 };
 
-export const fetchData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
+export const fetchData = async <R>(path: string, abortSignal?: AbortSignal): Promise<R> => {
   try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, {
+    const { api, url } = getFullApiUrl(path);
+
+    const response = await fetch(url, {
       signal: abortSignal,
     });
+    if (api === 'alerts') {
+      return handleAlertsJSONResponse(response);
+    }
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making GET request:', error);
