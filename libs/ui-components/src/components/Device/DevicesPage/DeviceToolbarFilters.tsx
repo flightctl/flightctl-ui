@@ -40,6 +40,9 @@ type LabelFleetSelectorProps = {
   placeholder?: string;
 };
 
+// Escapes special characters (eg. 'hello.world' becomes 'hello\\.world')
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const LabelFleetResults = ({
   filterText,
   allLabels,
@@ -56,7 +59,8 @@ const LabelFleetResults = ({
   allLabels: FlightCtlLabel[];
 }) => {
   const { t } = useTranslation();
-  const regexp = React.useMemo(() => new RegExp(`(${filterText})`, 'g'), [filterText]);
+
+  const regexp = React.useMemo(() => new RegExp(`(${escapeRegExp(filterText)})`, 'g'), [filterText]);
 
   const searchHighlighter = React.useCallback(
     (text: string) => {
