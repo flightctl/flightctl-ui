@@ -27,7 +27,7 @@ const UpdatePolicyStep = ({ isReadOnly }: { isReadOnly: boolean }) => {
   return (
     <Grid lg={8}>
       <FlightCtlForm>
-        <CheckboxField name="useBasicUpdateConfig" label={t('Use basic configurations')} />
+        <CheckboxField name="useBasicUpdateConfig" label={t('Use basic configurations')} isDisabled={isReadOnly} />
         {!useBasicUpdateConfig ? (
           <FormSection title={t('Advanced configurations')} titleElement="h1" className="pf-v5-u-mt-sm">
             {/* Rollout policies */}
