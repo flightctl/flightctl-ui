@@ -6,7 +6,7 @@ import {
   Route,
   NavigateFunction as RouterNavigateFunction,
   Routes,
-  useBlocker,
+  unstable_useBlocker as useBlocker,
   useLocation,
   useNavigate,
   useParams,
@@ -38,7 +38,6 @@ export const appRoutes = {
 };
 
 export type NavLinkFC = React.FC<{ to: string; children: (props: { isActive: boolean }) => React.ReactNode }>;
-export type PromptFC = React.FC<{ message: string }>;
 export enum FlightCtlApp {
   STANDALONE = 'standalone',
   OCP = 'ocp',
@@ -66,7 +65,6 @@ export type AppContextProps = {
     Route: typeof Route;
     Routes: typeof Routes;
     useLocation: typeof useLocation;
-    Prompt?: PromptFC;
   };
   fetch: {
     getWsEndpoint: (deviceId: string) => string;
