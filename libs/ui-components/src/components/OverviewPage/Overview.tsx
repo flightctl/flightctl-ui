@@ -2,9 +2,9 @@ import * as React from 'react';
 import { Grid, GridItem } from '@patternfly/react-core';
 
 import { useAccessReview } from '../../hooks/useAccessReview';
+import { useAlertsEnabled } from '../../hooks/useAlertsEnabled';
 import { RESOURCE, VERB } from '../../types/rbac';
 import PageWithPermissions from '../common/PageWithPermissions';
-import { useAlertsEnabled } from '../../hooks/useAlerts';
 
 import AlertsCard from './Cards/Alerts/AlertsCard';
 import StatusCard from './Cards/Status/StatusCard';
