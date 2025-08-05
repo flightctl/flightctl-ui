@@ -3,7 +3,7 @@
 Monorepo containing UIs for [flightctl](https://github.com/flightctl/flightctl)
 
 ### Prerequisites:
-* `Git`, `Node.js v18.x`, `npm v10.x`, `rsync`, `go` (>= 1.23)
+* `Git`, `Node.js v22.x`, `npm v10.x`, `rsync`, `go` (>= 1.23)
 
 ## Building
 
