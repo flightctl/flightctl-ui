@@ -71,6 +71,7 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.DEVICE_CONTENT_UP_TO_DATE]: t('Device returned to being up-to-date'),
     [Event.reason.DEVICE_CONTENT_UPDATING]: t('Device is updating'),
     [Event.reason.DEVICE_CONTENT_OUT_OF_DATE]: t('Device is out-of-date'),
+    [Event.reason.DEVICE_UPDATE_FAILED]: t('Device update failed'),
     [Event.reason.DEVICE_MULTIPLE_OWNERS_DETECTED]: t('Detected device ownership conflict'),
     [Event.reason.DEVICE_MULTIPLE_OWNERS_RESOLVED]: t('Device ownership conflict has been resolved'),
     [Event.reason.DEVICE_SPEC_VALID]: t('Device specification has returned to a valid state'),
@@ -83,9 +84,16 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     // Repository events
     [Event.reason.REPOSITORY_ACCESSIBLE]: t('Repository is accessible'),
     [Event.reason.REPOSITORY_INACCESSIBLE]: t('Repository is inaccessible'),
+    [Event.reason.REFERENCED_REPOSITORY_UPDATED]: t('Referenced repository was updated'),
     // Fleet events
+    [Event.reason.FLEET_VALID]: t('Fleet specification is valid'),
+    [Event.reason.FLEET_INVALID]: t('Fleet specification is invalid'),
     [Event.reason.FLEET_ROLLOUT_STARTED]: t('Fleet rollout started'),
     [Event.reason.FLEET_ROLLOUT_CREATED]: t('Fleet rollout created'),
+    [Event.reason.FLEET_ROLLOUT_FAILED]: t('Fleet rollout failed'),
+    [Event.reason.FLEET_ROLLOUT_COMPLETED]: t('Fleet rollout completed'),
+    [Event.reason.FLEET_ROLLOUT_BATCH_DISPATCHED]: t('Fleet rollout batch dispatched'),
+    [Event.reason.FLEET_ROLLOUT_DEVICE_SELECTED]: t('Fleet rollout device selected'),
     [Event.reason.FLEET_ROLLOUT_BATCH_COMPLETED]: t('Fleet rollout batch completed'),
     // Resource sync events
     [Event.reason.RESOURCE_SYNC_SYNCED]: t('Resourcesync synchronization completed', params),
