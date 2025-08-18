@@ -1,6 +1,6 @@
 {
   "name": "@flightctl/ansible",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Flightctl UI for Ansible",
   "repository": "https://github.com/flightctl/flightctl-ui.git",
   "homepage": "https://github.com/flightctl/flightctl-ui.git",
