@@ -116,6 +116,12 @@ const resourceKindLabel = (t: TFunction, resourceKind: ResourceKind | undefined)
       return t('Template version');
   }
 };
+const getAlertTitle = (alert: AlertManagerAlert, defaultTitle: string) => {
+  if (alert.annotations.summary) {
+    return alert.annotations.summary;
+  }
+  return defaultTitle;
+};
 
 const AlertsCard = () => {
   const { t } = useTranslation();
@@ -154,7 +160,7 @@ const AlertsCard = () => {
                   <Icon status="danger" size="md">
                     <ExclamationCircleIcon />
                   </Icon>{' '}
-                  <strong>{alertTypes[alertName] || alertName}</strong>
+                  <strong>{getAlertTitle(alert, alertTypes[alertName] || alertName)}</strong>
                 </StackItem>
                 <StackItem>
                   <TextContent>
