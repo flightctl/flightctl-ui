@@ -6,6 +6,9 @@ import type { EventDetails } from './EventDetails';
 import type { EventSource } from './EventSource';
 import type { ObjectMeta } from './ObjectMeta';
 import type { ObjectReference } from './ObjectReference';
+/**
+ * Event represents a single event that occurred in the system.
+ */
 export type Event = {
   /**
    * APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources.
@@ -63,6 +66,7 @@ export namespace Event {
     DEVICE_APPLICATION_HEALTHY = 'DeviceApplicationHealthy',
     DEVICE_DISCONNECTED = 'DeviceDisconnected',
     DEVICE_IS_REBOOTING = 'DeviceIsRebooting',
+    DEVICE_CONFLICT_PAUSED = 'DeviceConflictPaused',
     DEVICE_CONNECTED = 'DeviceConnected',
     DEVICE_CONTENT_UP_TO_DATE = 'DeviceContentUpToDate',
     DEVICE_CONTENT_OUT_OF_DATE = 'DeviceContentOutOfDate',
@@ -94,6 +98,7 @@ export namespace Event {
     RESOURCE_SYNC_PARSING_FAILED = 'ResourceSyncParsingFailed',
     RESOURCE_SYNC_SYNCED = 'ResourceSyncSynced',
     RESOURCE_SYNC_SYNC_FAILED = 'ResourceSyncSyncFailed',
+    SYSTEM_RESTORED = 'SystemRestored',
   }
   /**
    * The type of the event. One of Normal, Warning.

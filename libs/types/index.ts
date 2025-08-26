@@ -14,6 +14,7 @@ export type { ApplicationVolumeProviderSpec } from './models/ApplicationVolumePr
 export type { ApplicationVolumeStatus } from './models/ApplicationVolumeStatus';
 export { AppType } from './models/AppType';
 export type { AuthConfig } from './models/AuthConfig';
+export type { AuthOrganizationsConfig } from './models/AuthOrganizationsConfig';
 export type { Batch } from './models/Batch';
 export type { BatchSequence } from './models/BatchSequence';
 export type { CertificateSigningRequest } from './models/CertificateSigningRequest';

@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AuthOrganizationsConfig } from './AuthOrganizationsConfig';
 /**
  * Auth config.
  */
@@ -14,5 +15,6 @@ export type AuthConfig = {
    * Auth URL.
    */
   authURL: string;
+  authOrganizationsConfig: AuthOrganizationsConfig;
 };
 

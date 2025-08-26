@@ -2,15 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Event } from './Event';
 export type InternalTaskFailedDetails = {
   /**
    * The type of detail for discriminator purposes.
    */
   detailType: 'InternalTaskFailed';
-  /**
-   * The type of internal task that failed.
-   */
-  taskType: string;
   /**
    * The error message describing the failure.
    */
@@ -19,9 +16,6 @@ export type InternalTaskFailedDetails = {
    * Number of times the task has been retried.
    */
   retryCount?: number;
-  /**
-   * Parameters needed to retry the task.
-   */
-  taskParameters?: Record<string, string>;
+  originalEvent: Event;
 };
 

@@ -30,7 +30,7 @@ export const getFleetSyncStatus = (
   }
   return {
     status: 'SyncPending',
-    message: t('Waiting for first sync'),
+    message: t('Awaiting first sync'),
   };
 };
 

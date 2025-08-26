@@ -50,6 +50,7 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.RESOURCE_DELETION_FAILED]: t('{{ resourceType }} could not be deleted', params),
     [Event.reason.RESOURCE_UPDATED]: t('{{ resourceType }} was updated successfully', params),
     [Event.reason.RESOURCE_UPDATE_FAILED]: t('{{ resourceType }} could not be updated', params),
+    [Event.reason.SYSTEM_RESTORED]: t('The system was restored from a backup'),
     // Device events
     [Event.reason.DEVICE_DECOMMISSIONED]: t('Device decommissioned successfully'),
     [Event.reason.DEVICE_DECOMMISSION_FAILED]: t('Device could not be decommissioned'),
@@ -76,6 +77,7 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.DEVICE_MULTIPLE_OWNERS_RESOLVED]: t('Device ownership conflict has been resolved'),
     [Event.reason.DEVICE_SPEC_VALID]: t('Device specification has returned to a valid state'),
     [Event.reason.DEVICE_SPEC_INVALID]: t('Device specification is invalid'),
+    [Event.reason.DEVICE_CONFLICT_PAUSED]: t('Device is paused after database restore'),
     // Enrollment request events
     [Event.reason.ENROLLMENT_REQUEST_APPROVED]: t('Enrollment request was approved'),
     [Event.reason.ENROLLMENT_REQUEST_APPROVAL_FAILED]: t('Enrollment request approval failed'),
