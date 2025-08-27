@@ -1,6 +1,8 @@
 import { TFunction } from 'react-i18next';
-import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons';
-import BanIcon from '@patternfly/react-icons/dist/js/icons/ban-icon';
+import { DisconnectedIcon } from '@patternfly/react-icons/dist/js/icons/disconnected-icon';
+import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons/power-off-icon';
+import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-circle-icon';
+import { BanIcon } from '@patternfly/react-icons/dist/js/icons/ban-icon';
 
 import {
   ApplicationsSummaryStatusType,
@@ -55,6 +57,18 @@ export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStat
     id: DeviceSummaryStatusType.DeviceSummaryStatusDegraded,
     label: t('Degraded'),
     level: 'warning',
+  },
+  {
+    id: DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect,
+    label: t('Awaiting reconnect'),
+    level: 'warning',
+    customIcon: DisconnectedIcon,
+  },
+  {
+    id: DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused,
+    label: t('Updates paused'),
+    level: 'warning',
+    customIcon: PauseCircleIcon,
   },
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusUnknown,

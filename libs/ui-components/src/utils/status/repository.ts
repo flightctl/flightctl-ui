@@ -78,7 +78,7 @@ const getRepositorySyncStatus = (
   // As a fallback, we indicate the repository is waiting for sync
   return {
     status: 'Sync pending',
-    message: t('Waiting for first sync'),
+    message: t('Awaiting first sync'),
   };
 };
 

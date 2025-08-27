@@ -50,6 +50,7 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.RESOURCE_DELETION_FAILED]: t('{{ resourceType }} could not be deleted', params),
     [Event.reason.RESOURCE_UPDATED]: t('{{ resourceType }} was updated successfully', params),
     [Event.reason.RESOURCE_UPDATE_FAILED]: t('{{ resourceType }} could not be updated', params),
+    [Event.reason.SYSTEM_RESTORED]: t('The system was restored from a backup'),
     // Device events
     [Event.reason.DEVICE_DECOMMISSIONED]: t('Device decommissioned successfully'),
     [Event.reason.DEVICE_DECOMMISSION_FAILED]: t('Device could not be decommissioned'),
@@ -71,10 +72,12 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.DEVICE_CONTENT_UP_TO_DATE]: t('Device returned to being up-to-date'),
     [Event.reason.DEVICE_CONTENT_UPDATING]: t('Device is updating'),
     [Event.reason.DEVICE_CONTENT_OUT_OF_DATE]: t('Device is out-of-date'),
+    [Event.reason.DEVICE_UPDATE_FAILED]: t('Device update failed'),
     [Event.reason.DEVICE_MULTIPLE_OWNERS_DETECTED]: t('Detected device ownership conflict'),
     [Event.reason.DEVICE_MULTIPLE_OWNERS_RESOLVED]: t('Device ownership conflict has been resolved'),
     [Event.reason.DEVICE_SPEC_VALID]: t('Device specification has returned to a valid state'),
     [Event.reason.DEVICE_SPEC_INVALID]: t('Device specification is invalid'),
+    [Event.reason.DEVICE_CONFLICT_PAUSED]: t('Device is paused after database restore'),
     // Enrollment request events
     [Event.reason.ENROLLMENT_REQUEST_APPROVED]: t('Enrollment request was approved'),
     [Event.reason.ENROLLMENT_REQUEST_APPROVAL_FAILED]: t('Enrollment request approval failed'),
@@ -83,9 +86,16 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     // Repository events
     [Event.reason.REPOSITORY_ACCESSIBLE]: t('Repository is accessible'),
     [Event.reason.REPOSITORY_INACCESSIBLE]: t('Repository is inaccessible'),
+    [Event.reason.REFERENCED_REPOSITORY_UPDATED]: t('Referenced repository was updated'),
     // Fleet events
+    [Event.reason.FLEET_VALID]: t('Fleet specification is valid'),
+    [Event.reason.FLEET_INVALID]: t('Fleet specification is invalid'),
     [Event.reason.FLEET_ROLLOUT_STARTED]: t('Fleet rollout started'),
     [Event.reason.FLEET_ROLLOUT_CREATED]: t('Fleet rollout created'),
+    [Event.reason.FLEET_ROLLOUT_FAILED]: t('Fleet rollout failed'),
+    [Event.reason.FLEET_ROLLOUT_COMPLETED]: t('Fleet rollout completed'),
+    [Event.reason.FLEET_ROLLOUT_BATCH_DISPATCHED]: t('Fleet rollout batch dispatched'),
+    [Event.reason.FLEET_ROLLOUT_DEVICE_SELECTED]: t('Fleet rollout device selected'),
     [Event.reason.FLEET_ROLLOUT_BATCH_COMPLETED]: t('Fleet rollout batch completed'),
     // Resource sync events
     [Event.reason.RESOURCE_SYNC_SYNCED]: t('Resourcesync synchronization completed', params),

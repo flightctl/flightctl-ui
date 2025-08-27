@@ -12,4 +12,6 @@ export enum DeviceSummaryStatusType {
   DeviceSummaryStatusRebooting = 'Rebooting',
   DeviceSummaryStatusPoweredOff = 'PoweredOff',
   DeviceSummaryStatusUnknown = 'Unknown',
+  DeviceSummaryStatusAwaitingReconnect = 'AwaitingReconnect',
+  DeviceSummaryStatusConflictPaused = 'ConflictPaused',
 }

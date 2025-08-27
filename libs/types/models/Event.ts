@@ -6,6 +6,9 @@ import type { EventDetails } from './EventDetails';
 import type { EventSource } from './EventSource';
 import type { ObjectMeta } from './ObjectMeta';
 import type { ObjectReference } from './ObjectReference';
+/**
+ * Event represents a single event that occurred in the system.
+ */
 export type Event = {
   /**
    * APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources.
@@ -63,10 +66,12 @@ export namespace Event {
     DEVICE_APPLICATION_HEALTHY = 'DeviceApplicationHealthy',
     DEVICE_DISCONNECTED = 'DeviceDisconnected',
     DEVICE_IS_REBOOTING = 'DeviceIsRebooting',
+    DEVICE_CONFLICT_PAUSED = 'DeviceConflictPaused',
     DEVICE_CONNECTED = 'DeviceConnected',
     DEVICE_CONTENT_UP_TO_DATE = 'DeviceContentUpToDate',
     DEVICE_CONTENT_OUT_OF_DATE = 'DeviceContentOutOfDate',
     DEVICE_CONTENT_UPDATING = 'DeviceContentUpdating',
+    DEVICE_UPDATE_FAILED = 'DeviceUpdateFailed',
     ENROLLMENT_REQUEST_APPROVED = 'EnrollmentRequestApproved',
     ENROLLMENT_REQUEST_APPROVAL_FAILED = 'EnrollmentRequestApprovalFailed',
     DEVICE_MULTIPLE_OWNERS_DETECTED = 'DeviceMultipleOwnersDetected',
@@ -76,8 +81,15 @@ export namespace Event {
     INTERNAL_TASK_FAILED = 'InternalTaskFailed',
     REPOSITORY_ACCESSIBLE = 'RepositoryAccessible',
     REPOSITORY_INACCESSIBLE = 'RepositoryInaccessible',
-    FLEET_ROLLOUT_STARTED = 'FleetRolloutStarted',
+    REFERENCED_REPOSITORY_UPDATED = 'ReferencedRepositoryUpdated',
+    FLEET_VALID = 'FleetValid',
+    FLEET_INVALID = 'FleetInvalid',
     FLEET_ROLLOUT_CREATED = 'FleetRolloutCreated',
+    FLEET_ROLLOUT_STARTED = 'FleetRolloutStarted',
+    FLEET_ROLLOUT_FAILED = 'FleetRolloutFailed',
+    FLEET_ROLLOUT_COMPLETED = 'FleetRolloutCompleted',
+    FLEET_ROLLOUT_BATCH_DISPATCHED = 'FleetRolloutBatchDispatched',
+    FLEET_ROLLOUT_DEVICE_SELECTED = 'FleetRolloutDeviceSelected',
     FLEET_ROLLOUT_BATCH_COMPLETED = 'FleetRolloutBatchCompleted',
     RESOURCE_SYNC_COMMIT_DETECTED = 'ResourceSyncCommitDetected',
     RESOURCE_SYNC_ACCESSIBLE = 'ResourceSyncAccessible',
@@ -86,6 +98,7 @@ export namespace Event {
     RESOURCE_SYNC_PARSING_FAILED = 'ResourceSyncParsingFailed',
     RESOURCE_SYNC_SYNCED = 'ResourceSyncSynced',
     RESOURCE_SYNC_SYNC_FAILED = 'ResourceSyncSyncFailed',
+    SYSTEM_RESTORED = 'SystemRestored',
   }
   /**
    * The type of the event. One of Normal, Warning.

@@ -14,15 +14,15 @@ export type FleetRolloutStartedDetails = {
   /**
    * Rollout strategy type.
    */
-  isImmediate: FleetRolloutStartedDetails.isImmediate;
+  rolloutStrategy: FleetRolloutStartedDetails.rolloutStrategy;
 };
 export namespace FleetRolloutStartedDetails {
   /**
    * Rollout strategy type.
    */
-  export enum isImmediate {
-    BATCHED = 'batched',
-    IMMEDIATE = 'immediate',
+  export enum rolloutStrategy {
+    NONE = 'None',
+    BATCHED = 'Batched',
   }
 }
 

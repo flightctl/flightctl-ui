@@ -10,7 +10,7 @@ export type ResourceUpdatedDetails = {
   /**
    * List of fields that were updated in the resource.
    */
-  updatedFields: Array<'owner' | 'labels' | 'spec'>;
+  updatedFields: Array<'owner' | 'labels' | 'spec' | 'spec.selector' | 'spec.template'>;
   /**
    * The previous owner (if applicable).
    */
