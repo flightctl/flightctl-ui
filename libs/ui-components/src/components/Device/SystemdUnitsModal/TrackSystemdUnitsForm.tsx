@@ -56,7 +56,7 @@ const TrackSystemdUnitsForm: React.FC<TrackSystemdUnitsFormProps> = ({ onClose, 
     <FlightCtlForm>
       <TextInput
         aria-label={t('Systemd service name')}
-        placeholder={t('Type here')}
+        placeholder="name.service"
         value={currentText}
         onBlur={onAdd}
         onKeyDown={(ev) => {
