@@ -3,16 +3,32 @@ package auth
 import (
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 
 	"github.com/flightctl/flightctl-ui/bridge"
+	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
 	"github.com/openshift/osincli"
+	"golang.org/x/oauth2"
+
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
+
+type OIDCRoundTripper struct {
+	Transport http.RoundTripper
+	Origin    string
+}
+
+func (c *OIDCRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Add("Origin", c.Origin)
+	return c.Transport.RoundTrip(req)
+}
 
 type OIDCUserInfo struct {
 	Username string `json:"preferred_username,omitempty"`
@@ -20,18 +36,17 @@ type OIDCUserInfo struct {
 
 type OIDCAuthHandler struct {
 	tlsConfig          *tls.Config
-	client             *osincli.Client
-	internalClient     *osincli.Client
-	endSessionEndpoint string
-	userInfoEndpoint   string
 	authURL            string
+	oidcConfig         oidcServerResponse
+	internalOidcConfig oidcServerResponse
 }
 
 type oidcServerResponse struct {
-	TokenEndpoint      string `json:"token_endpoint"`
-	AuthEndpoint       string `json:"authorization_endpoint"`
-	UserInfoEndpoint   string `json:"userinfo_endpoint"`
-	EndSessionEndpoint string `json:"end_session_endpoint"`
+	TokenEndpoint       string   `json:"token_endpoint"`
+	AuthEndpoint        string   `json:"authorization_endpoint"`
+	UserInfoEndpoint    string   `json:"userinfo_endpoint"`
+	EndSessionEndpoint  string   `json:"end_session_endpoint"`
+	CodeChallengeMethod []string `json:"code_challenge_methods_supported"`
 }
 
 func getOIDCAuthHandler(authURL string, internalAuthURL *string) (*OIDCAuthHandler, error) {
@@ -73,18 +88,11 @@ func getOIDCAuthHandler(authURL string, internalAuthURL *string) (*OIDCAuthHandl
 		return nil, fmt.Errorf("failed to parse oidc config: %w", err)
 	}
 
-	internalClient, err := getOIDCClient(oidcResponse, tlsConfig)
-	if err != nil {
-		return nil, err
-	}
-
 	handler := &OIDCAuthHandler{
 		tlsConfig:          tlsConfig,
-		internalClient:     internalClient,
-		client:             internalClient,
-		endSessionEndpoint: oidcResponse.EndSessionEndpoint,
-		userInfoEndpoint:   oidcResponse.UserInfoEndpoint,
 		authURL:            authURL,
+		oidcConfig:         oidcResponse,
+		internalOidcConfig: oidcResponse,
 	}
 
 	if internalAuthURL != nil {
@@ -94,12 +102,7 @@ func getOIDCAuthHandler(authURL string, internalAuthURL *string) (*OIDCAuthHandl
 			UserInfoEndpoint:   replaceBaseURL(oidcResponse.UserInfoEndpoint, *internalAuthURL, authURL),
 			EndSessionEndpoint: replaceBaseURL(oidcResponse.EndSessionEndpoint, *internalAuthURL, authURL),
 		}
-		client, err := getOIDCClient(extConfig, tlsConfig)
-		if err != nil {
-			return nil, err
-		}
-		handler.client = client
-		handler.endSessionEndpoint = extConfig.EndSessionEndpoint
+		handler.oidcConfig = extConfig
 	}
 
 	return handler, nil
@@ -125,54 +128,75 @@ func replaceBaseURL(endpoint, oldBase, newBase string) string {
 	return endpointURL.String()
 }
 
-func getOIDCClient(oidcConfig oidcServerResponse, tlsConfig *tls.Config) (*osincli.Client, error) {
+func getOIDCClient(verifier *string, oidcConfig oidcServerResponse) (*osincli.Client, error) {
 	oidcClientConfig := &osincli.ClientConfig{
 		ClientId:                 config.AuthClientId,
 		AuthorizeUrl:             oidcConfig.AuthEndpoint,
 		TokenUrl:                 oidcConfig.TokenEndpoint,
 		RedirectUrl:              config.BaseUiUrl + "/callback",
 		ErrorsInStatusCode:       true,
-		SendClientSecretInParams: false,
-		Scope:                    "openid",
+		Scope:                    config.AuthScope,
+		SendClientSecretInParams: true,
+	}
+
+	if verifier != nil {
+		oidcClientConfig.CodeChallengeMethod = "S256"
+		oidcClientConfig.CodeChallenge = oauth2.S256ChallengeFromVerifier(*verifier)
+		oidcClientConfig.CodeVerifier = *verifier
 	}
 
 	client, err := osincli.NewClient(oidcClientConfig)
 	if err != nil {
 		return nil, err
 	}
-
-	client.Transport = &http.Transport{
-		TLSClientConfig: tlsConfig,
-	}
-
 	return client, nil
 }
 
-func (a *OIDCAuthHandler) GetToken(loginParams LoginParameters) (TokenData, *int64, error) {
-	return exchangeToken(loginParams, a.internalClient)
+func (a OIDCAuthHandler) GetToken(loginParams LoginParameters, r *http.Request) (TokenData, *int64, error) {
+	cookie, err := r.Cookie(common.CookieSessionAuthName)
+	if err != nil && !errors.Is(err, http.ErrNoCookie) {
+		return TokenData{}, nil, err
+	}
+	var verifier string
+	if cookie != nil {
+		verifier = cookie.Value
+	}
+	client, err := getOIDCClient(&verifier, a.internalOidcConfig)
+	if err != nil {
+		return TokenData{}, nil, err
+	}
+	client.Transport = &OIDCRoundTripper{
+		Origin: r.Header.Get("Origin"),
+		Transport: &http.Transport{
+			TLSClientConfig: a.tlsConfig,
+		},
+	}
+	return exchangeToken(loginParams, client)
 }
 
+var subjectKeys = []string{"preferred_username", "nickname", "name", "email"}
+
 func (o *OIDCAuthHandler) GetUserInfo(token string) (string, *http.Response, error) {
-	body, resp, err := getUserInfo(token, o.tlsConfig, o.authURL, o.userInfoEndpoint)
-
+	jwtToken, err := jwt.Parse([]byte(token), jwt.WithVerify(false), jwt.WithValidate(false))
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to get user info")
-		return "", resp, err
+		return "", nil, err
 	}
 
-	if body != nil {
-		userInfo := OIDCUserInfo{}
-		if err := json.Unmarshal(*body, &userInfo); err != nil {
-			return "", resp, fmt.Errorf("failed to unmarshal OIDC user response: %w", err)
+	for _, key := range subjectKeys {
+		keyVal, found := jwtToken.Get(key)
+		if found {
+			if valStr, ok := keyVal.(string); ok {
+				return valStr, nil, nil
+			}
+
 		}
-		return userInfo.Username, resp, nil
 	}
 
-	return "", resp, nil
+	return jwtToken.Subject(), nil, nil
 }
 
 func (o *OIDCAuthHandler) Logout(token string) (string, error) {
-	u, err := url.Parse(o.endSessionEndpoint)
+	u, err := url.Parse(o.oidcConfig.EndSessionEndpoint)
 	if err != nil {
 		log.GetLogger().WithError(err).Warn("Failed to parse OIDC response")
 		return "", err
@@ -185,10 +209,16 @@ func (o *OIDCAuthHandler) Logout(token string) (string, error) {
 	return u.String(), nil
 }
 
-func (o *OIDCAuthHandler) RefreshToken(refreshToken string) (TokenData, *int64, error) {
-	return refreshOAuthToken(refreshToken, o.internalClient)
+func (o OIDCAuthHandler) RefreshToken(refreshToken string, r *http.Request) (TokenData, *int64, error) {
+	client, _ := getOIDCClient(nil, o.internalOidcConfig)
+	return refreshOAuthToken(refreshToken, client)
 }
 
-func (a *OIDCAuthHandler) GetLoginRedirectURL() string {
-	return loginRedirect(a.client)
+func (a *OIDCAuthHandler) GetLoginRedirectURL() (string, string) {
+	var verifier string
+	if config.AuthForcePKCE == "true" || slices.Contains(a.oidcConfig.CodeChallengeMethod, "S256") {
+		verifier = oauth2.GenerateVerifier()
+	}
+	client, _ := getOIDCClient(&verifier, a.oidcConfig)
+	return loginRedirect(client), verifier
 }
