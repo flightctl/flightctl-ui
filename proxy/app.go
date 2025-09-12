@@ -30,7 +30,11 @@ func main() {
 	log := log.InitLogs()
 	router := mux.NewRouter()
 	apiRouter := router.PathPrefix("/api").Subrouter()
+
 	apiRouter.Use(middleware.AuthMiddleware)
+	if config.IsOrganizationsEnabled() {
+		apiRouter.Use(middleware.OrganizationMiddleware)
+	}
 
 	tlsConfig, err := bridge.GetTlsConfig()
 	if err != nil {
@@ -55,6 +59,16 @@ func main() {
 
 	terminalBridge := bridge.TerminalBridge{TlsConfig: tlsConfig}
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
+
+	if config.IsOrganizationsEnabled() {
+		orgHandler, err := auth.NewOrganizationHandler()
+		if err != nil {
+			panic(err)
+		}
+		apiRouter.Handle("/current-organization", orgHandler)
+	} else {
+		apiRouter.HandleFunc("/current-organization", bridge.UnimplementedHandler)
+	}
 
 	if config.OcpPlugin != "true" {
 		authHandler, err := auth.NewAuth(tlsConfig)

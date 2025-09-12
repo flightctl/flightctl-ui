@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   deleteData,
   fetchData,
+  fetchUiProxy,
   handleApiJSONResponse,
   patchData,
   postData,
@@ -81,6 +82,10 @@ export const useFetch = () => {
     [ocpConfig],
   );
 
+  const proxyFetch = React.useCallback(async (endpoint: string, requestInit: RequestInit): Promise<Response> => {
+    return fetchUiProxy(endpoint, requestInit);
+  }, []);
+
   return {
     getWsEndpoint,
     get,
@@ -89,5 +94,6 @@ export const useFetch = () => {
     remove,
     patch,
     checkPermissions,
+    proxyFetch,
   };
 };

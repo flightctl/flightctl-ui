@@ -4,7 +4,6 @@ import {
   getErrorMsgFromAlertsApiResponse,
   getErrorMsgFromApiResponse,
 } from '@flightctl/ui-components/src/utils/apiCalls';
-import { CliArtifactsResponse } from '@flightctl/ui-components/src/types/extraTypes';
 
 import { lastRefresh } from '../context/AuthContext';
 
@@ -12,22 +11,28 @@ const apiPort = window.API_PORT || window.location.port;
 const apiServer = `${window.location.hostname}${apiPort ? `:${apiPort}` : ''}`;
 
 const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
-const alertsAPI = `${window.location.protocol}//${apiServer}/api/alerts`;
-export const flightCtlCliArtifactsUrl = `${window.location.protocol}//${apiServer}/api/cli-artifacts`;
+const uiProxyAPI = `${window.location.protocol}//${apiServer}/api`;
 
 export const loginAPI = `${window.location.protocol}//${apiServer}/api/login`;
-const logoutAPI = `${window.location.protocol}//${apiServer}/api/logout`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
+
+// UI proxy utility - returns raw Response
+export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): Promise<Response> => {
+  return await fetch(`${uiProxyAPI}/${endpoint}`, {
+    credentials: 'include',
+    ...requestInit,
+  });
+};
 
 const getFullApiUrl = (path: string) => {
   if (path.startsWith('alerts')) {
-    return { api: 'alerts', url: `${alertsAPI}/api/v2/${path}` };
+    return { api: 'alerts', url: `${uiProxyAPI}/alerts/api/v2/${path}` };
   }
   return { api: 'flightctl', url: `${flightCtlAPI}/api/v1/${path}` };
 };
 
 export const logout = async () => {
-  const response = await fetch(logoutAPI, { credentials: 'include' });
+  const response = await fetch(`${uiProxyAPI}/logout`, { credentials: 'include' });
   const { url } = (await response.json()) as { url: string };
   url ? (window.location.href = url) : window.location.reload();
 };
@@ -91,18 +96,6 @@ const fetchWithRetry = async <R>(path: string, init?: RequestInit): Promise<R> =
     return handleAlertsJSONResponse(response);
   }
   return handleApiJSONResponse(response);
-};
-
-export const fetchCliArtifacts = async (abortSignal?: AbortSignal): Promise<CliArtifactsResponse> => {
-  try {
-    const response = await fetch(flightCtlCliArtifactsUrl, {
-      signal: abortSignal,
-    });
-    return handleApiJSONResponse(response);
-  } catch (error) {
-    console.error('Error making GET Cli artifacts request:', error);
-    throw error;
-  }
 };
 
 const putOrPostData = async <TRequest, TResponse = TRequest>(

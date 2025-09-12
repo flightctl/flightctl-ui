@@ -14,6 +14,11 @@ import {
 } from '@patternfly/react-core';
 import { BarsIcon } from '@patternfly/react-icons/dist/js/icons/bars-icon';
 import { Outlet } from 'react-router-dom';
+import OrganizationGuard, {
+  useOrganizationGuardContext,
+} from '@flightctl/ui-components/src/components/common/OrganizationGuard';
+import OrganizationSelector from '@flightctl/ui-components/src/components/common/OrganizationSelector';
+import PageNavigation from '@flightctl/ui-components/src/components/common/PageNavigation';
 
 import logo from '@fctl-assets/bgimages/flightctl-logo.svg';
 import rhemLogo from '@fctl-assets/bgimages/RHEM-logo.svg';
@@ -21,9 +26,11 @@ import AppNavigation from './AppNavigation';
 import AppToolbar from './AppToolbar';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 
-const AppLayout: React.FC = () => {
+const AppLayoutContent = () => {
   const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+
+  const { isOrganizationSelectionRequired } = useOrganizationGuardContext();
 
   const onSidebarToggle = () => {
     setIsSidebarOpen((prevIsOpen) => !prevIsOpen);
@@ -59,7 +66,13 @@ const AppLayout: React.FC = () => {
 
   const Sidebar = (
     <PageSidebar theme="dark" isSidebarOpen={isSidebarOpen}>
-      <PageSidebarBody>
+      <PageSidebarBody
+        style={{
+          opacity: isOrganizationSelectionRequired ? 0.3 : 1,
+          pointerEvents: isOrganizationSelectionRequired ? 'none' : 'auto',
+          transition: 'opacity 0.2s ease-in-out',
+        }}
+      >
         <AppNavigation />
       </PageSidebarBody>
     </PageSidebar>
@@ -81,8 +94,23 @@ const AppLayout: React.FC = () => {
   );
   return (
     <Page mainContainerId={pageId} header={Header} sidebar={Sidebar} isManagedSidebar skipToContent={PageSkipToContent}>
-      <Outlet />
+      {isOrganizationSelectionRequired ? (
+        <OrganizationSelector isFirstLogin />
+      ) : (
+        <>
+          <PageNavigation />
+          <Outlet />
+        </>
+      )}
     </Page>
+  );
+};
+
+const AppLayout = () => {
+  return (
+    <OrganizationGuard>
+      <AppLayoutContent />
+    </OrganizationGuard>
   );
 };
 

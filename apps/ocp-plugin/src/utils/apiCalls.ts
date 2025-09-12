@@ -33,6 +33,16 @@ const flightCtlAPI = `${uiProxy}/api/flightctl`;
 const alertsAPI = `${uiProxy}/api/alerts`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
+// UI proxy utility - returns raw Response
+export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): Promise<Response> => {
+  const options = { ...requestInit };
+
+  // Apply CSRF token for POST requests - AuthMiddleware handles authentication
+  const optionsWithCSRF = applyConsoleHeaders(options);
+
+  return await fetch(`${uiProxy}/api/${endpoint}`, optionsWithCSRF);
+};
+
 const getFullApiUrl = (path: string) => {
   if (path.startsWith('alerts')) {
     return { api: 'alerts', url: `${alertsAPI}/api/v2/${path}` };
