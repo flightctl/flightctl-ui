@@ -36,6 +36,7 @@ export const useAuthContext = () => {
       let callbackErr: string | null = null;
       if (window.location.pathname === '/callback') {
         localStorage.removeItem(EXPIRATION);
+        localStorage.removeItem('flightctl-current-organization');
         const searchParams = new URLSearchParams(window.location.search);
         const code = searchParams.get('code');
         callbackErr = searchParams.get('error');

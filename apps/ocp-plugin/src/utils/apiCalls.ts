@@ -14,14 +14,24 @@ declare global {
   }
 }
 
-export const applyConsoleHeaders = (options: RequestInit) => {
+const addRequiredHeaders = (options: RequestInit): RequestInit => {
+  const updatedOptions = { ...options };
+
   const token = getCSRFToken();
-  if (options.headers) {
-    options.headers['X-CSRFToken'] = token;
+  const orgId = localStorage.getItem('flightctl-current-organization');
+
+  if (updatedOptions.headers) {
+    updatedOptions.headers['X-CSRFToken'] = token;
+    if (orgId) {
+      updatedOptions.headers['X-FlightCtl-Organization-ID'] = orgId;
+    }
   } else {
-    options.headers = { 'X-CSRFToken': token };
+    updatedOptions.headers = orgId
+      ? { 'X-CSRFToken': token, 'X-FlightCtl-Organization-ID': orgId }
+      : { 'X-CSRFToken': token };
   }
-  return options;
+
+  return updatedOptions;
 };
 
 const apiServer = `${window.location.hostname}${
@@ -33,14 +43,10 @@ const flightCtlAPI = `${uiProxy}/api/flightctl`;
 const alertsAPI = `${uiProxy}/api/alerts`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
-// UI proxy utility - returns raw Response
 export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): Promise<Response> => {
-  const options = { ...requestInit };
+  const options = addRequiredHeaders(requestInit);
 
-  // Apply CSRF token for POST requests - AuthMiddleware handles authentication
-  const optionsWithCSRF = applyConsoleHeaders(options);
-
-  return await fetch(`${uiProxy}/api/${endpoint}`, optionsWithCSRF);
+  return await fetch(`${uiProxy}/api/${endpoint}`, options);
 };
 
 const getFullApiUrl = (path: string) => {
@@ -87,14 +93,15 @@ const putOrPostData = async <TRequest, TResponse = TRequest>(
   data: TRequest,
   method: 'PUT' | 'POST',
 ): Promise<TResponse> => {
-  const options: RequestInit = {
+  const baseOptions: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
     },
     method,
     body: JSON.stringify(data),
   };
-  applyConsoleHeaders(options);
+
+  const options = addRequiredHeaders(baseOptions);
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, options);
     return handleApiJSONResponse(response);
@@ -111,11 +118,12 @@ export const putData = async <TRequest>(kind: string, data: TRequest): Promise<T
   putOrPostData<TRequest, TRequest>(kind, data, 'PUT');
 
 export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
-  const options: RequestInit = {
+  const baseOptions: RequestInit = {
     method: 'DELETE',
     signal: abortSignal,
   };
-  applyConsoleHeaders(options);
+
+  const options = addRequiredHeaders(baseOptions);
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, options);
     return handleApiJSONResponse(response);
@@ -126,7 +134,7 @@ export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Pr
 };
 
 export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal?: AbortSignal): Promise<R> => {
-  const options: RequestInit = {
+  const baseOptions: RequestInit = {
     headers: {
       'Content-Type': 'application/json-patch+json',
     },
@@ -134,7 +142,8 @@ export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal
     body: JSON.stringify(data),
     signal: abortSignal,
   };
-  applyConsoleHeaders(options);
+
+  const options = addRequiredHeaders(baseOptions);
   try {
     const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, options);
     return handleApiJSONResponse(response);
@@ -148,9 +157,13 @@ export const fetchData = async <R>(path: string, abortSignal?: AbortSignal): Pro
   try {
     const { api, url } = getFullApiUrl(path);
 
-    const response = await fetch(url, {
+    const baseOptions: RequestInit = {
       signal: abortSignal,
-    });
+    };
+
+    const options = addRequiredHeaders(baseOptions);
+
+    const response = await fetch(url, options);
     if (api === 'alerts') {
       return handleAlertsJSONResponse(response);
     }

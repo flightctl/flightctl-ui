@@ -16,12 +16,30 @@ const uiProxyAPI = `${window.location.protocol}//${apiServer}/api`;
 export const loginAPI = `${window.location.protocol}//${apiServer}/api/login`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
-// UI proxy utility - returns raw Response
+// Helper function to add organization header to request options
+const addOrganizationHeader = (options: RequestInit): RequestInit => {
+  const orgId = localStorage.getItem('flightctl-current-organization');
+  if (orgId) {
+    return {
+      ...options,
+      headers: {
+        ...options.headers,
+        'X-FlightCtl-Organization-ID': orgId,
+      },
+    };
+  }
+  return options;
+};
+
 export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): Promise<Response> => {
-  return await fetch(`${uiProxyAPI}/${endpoint}`, {
+  const baseOptions = {
     credentials: 'include',
     ...requestInit,
-  });
+  } as RequestInit;
+
+  const options = addOrganizationHeader(baseOptions);
+
+  return await fetch(`${uiProxyAPI}/${endpoint}`, options);
 };
 
 const getFullApiUrl = (path: string) => {
@@ -86,11 +104,14 @@ const handleAlertsJSONResponse = async <R>(response: Response): Promise<R> => {
 const fetchWithRetry = async <R>(path: string, init?: RequestInit): Promise<R> => {
   const { api, url } = getFullApiUrl(path);
 
+  // Add organization header if available
+  const options = addOrganizationHeader({ ...init });
+
   const prevRefresh = lastRefresh;
-  let response = await fetch(url, init);
+  let response = await fetch(url, options);
   //if token refresh occured, lets try again
   if (response.status === 401 && prevRefresh != lastRefresh) {
-    response = await fetch(url, init);
+    response = await fetch(url, options);
   }
   if (api === 'alerts') {
     return handleAlertsJSONResponse(response);

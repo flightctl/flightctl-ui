@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -37,20 +38,18 @@ func OrganizationMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// getOrganizationFromRequest extracts the organization ID from the request cookie
+// getOrganizationFromRequest extracts the organization ID from the request header
 func getOrganizationFromRequest(r *http.Request) (string, error) {
-	// DEBUG: Log all cookies for middleware
-	log := log.GetLogger()
-	log.Info("DEBUG MIDDLEWARE: All cookies received:")
-	for _, c := range r.Cookies() {
-		log.Infof("DEBUG MIDDLEWARE: Cookie name='%s' value='%s'", c.Name, c.Value)
+	// Read organization from header (both OCP plugin and standalone now use headers)
+	organizationID := r.Header.Get("X-FlightCtl-Organization-ID")
+
+	if organizationID == "" {
+		log.GetLogger().Info("DEBUG MIDDLEWARE: No organization header found")
+		return "", fmt.Errorf("no organization header found")
 	}
 
-	cookie, err := r.Cookie("flightctl-organization")
-	if err != nil {
-		return "", err
-	}
-	return cookie.Value, nil
+	log.GetLogger().Infof("DEBUG MIDDLEWARE: Organization from header: '%s'", organizationID)
+	return organizationID, nil
 }
 
 func isFlightCtlAPICall(path string) bool {
@@ -61,8 +60,6 @@ func shouldAddOrgId(path string) bool {
 	excludePaths := []string{
 		// The API call to retrieve all organizations - with an org_id, only that particular organization will be returned
 		"/api/v1/organizations",
-		// And the UI proxy paths for organization selection and authentication functions
-		"/current-organization",
 		"/login",
 		"/logout",
 		"/config",

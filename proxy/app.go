@@ -60,14 +60,14 @@ func main() {
 	terminalBridge := bridge.TerminalBridge{TlsConfig: tlsConfig}
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
 
+	// Simple endpoint to check if organizations are enabled
 	if config.IsOrganizationsEnabled() {
-		orgHandler, err := auth.NewOrganizationHandler()
-		if err != nil {
-			panic(err)
-		}
-		apiRouter.Handle("/current-organization", orgHandler)
+		apiRouter.HandleFunc("/organizations-enabled", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"enabled": true}`))
+		})
 	} else {
-		apiRouter.HandleFunc("/current-organization", bridge.UnimplementedHandler)
+		apiRouter.HandleFunc("/organizations-enabled", bridge.UnimplementedHandler)
 	}
 
 	if config.OcpPlugin != "true" {

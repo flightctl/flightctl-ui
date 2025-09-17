@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Organization, OrganizationList } from '@flightctl/types';
 import { useAppContext } from '../../hooks/useAppContext';
 import { getErrorMessage } from '../../utils/error';
+import { getCurrentOrganizationId, storeCurrentOrganizationId } from '../../utils/organizationStorage';
 
 interface OrganizationContextType {
   currentOrganization?: Organization;
@@ -11,8 +12,9 @@ interface OrganizationContextType {
   selectionError?: string;
 }
 
-const OrganizationContext = React.createContext<OrganizationContextType | null>(null);
 export const ORGANIZATION_LOCAL_STORAGE_KEY = 'flightctl-current-organization';
+
+const OrganizationContext = React.createContext<OrganizationContextType | null>(null);
 
 export const useOrganizationGuardContext = (): OrganizationContextType => {
   const context = React.useContext(OrganizationContext);
@@ -32,61 +34,62 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
   const [organizationsLoaded, setOrganizationsLoaded] = React.useState(false);
   const [selectionError, setSelectionError] = React.useState<string | undefined>();
 
-  const selectOrganization = React.useCallback(
-    async (org: Organization) => {
-      const organizationId = org.metadata?.name || '';
+  const selectOrganization = React.useCallback(async (org: Organization) => {
+    const organizationId = org.metadata?.name || '';
 
-      try {
-        // Send organization selection to UI proxy
-        await proxyFetch('current-organization', { method: 'POST', body: JSON.stringify({ organizationId }) });
-        // Set in localStorage for OrganizationSelector pre-selection in the next login
-        localStorage.setItem(ORGANIZATION_LOCAL_STORAGE_KEY, organizationId);
-
-        setCurrentOrganization(org);
-      } catch (error) {
-        // The selection must be made at the proxy level, or all requests will fail with the missing org_id
-        setSelectionError(getErrorMessage(error));
-      }
-    },
-    [proxyFetch],
-  );
+    try {
+      // Store organization in localStorage - headers will handle the rest
+      storeCurrentOrganizationId(organizationId);
+      setCurrentOrganization(org);
+    } catch (error) {
+      setSelectionError(getErrorMessage(error));
+    }
+  }, []);
 
   // Determine if multi-orgs are enabled. If so, check if an organization is already selected
   React.useEffect(() => {
     const initializeOrganizations = async () => {
       try {
-        const currentOrgResponse = await proxyFetch('current-organization', {
+        // First, check if organizations are enabled via proxy endpoint
+        const organizationsEnabledResponse = await proxyFetch('organizations-enabled', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
         });
 
-        const organizationsEnabled = currentOrgResponse.status !== 501;
+        const organizationsEnabled = organizationsEnabledResponse.status !== 501;
         setIsOrganizationsEnabled(organizationsEnabled);
 
         if (!organizationsEnabled) {
           return;
         }
 
-        // Load available organizations
+        // Organizations are enabled - load available organizations
         const organizations = await fetch.get<OrganizationList>('organizations');
         setAvailableOrganizations(organizations.items);
 
-        let cookieOrganization: string | null = null;
-        if (currentOrgResponse.ok) {
-          const data = (await currentOrgResponse.json()) as { organizationId: string };
-          cookieOrganization = data.organizationId;
-        }
+        // Get current organization from localStorage (no need for server call)
+        const currentOrgId = getCurrentOrganizationId();
 
-        if (cookieOrganization) {
-          // The user already selected an organization in this login session, update state
-          const currentOrg = organizations.items.find((org) => org.metadata?.name === cookieOrganization);
-          if (currentOrg) {
-            setCurrentOrganization(currentOrg);
+        // Validate current organization against available organizations
+        const currentOrg = currentOrgId
+          ? organizations.items.find((org) => org.metadata?.name === currentOrgId)
+          : undefined;
+
+        if (currentOrg) {
+          // Current organization is valid - use it
+          selectOrganization(currentOrg);
+        } else {
+          // Current organization is invalid/missing - clean up and handle defaults
+          if (currentOrgId) {
+            setCurrentOrganization(undefined);
+            storeCurrentOrganizationId(''); // Clear invalid organization from localStorage
           }
-        } else if (organizations.items?.length === 1) {
-          // The user did not select an organization in this login session, but they only have access to one.
-          await selectOrganization(organizations.items[0]);
+
+          if (organizations.items?.length === 1) {
+            // Auto-select if only one organization available
+            await selectOrganization(organizations.items[0]);
+          }
         }
       } catch (error) {
         setSelectionError(getErrorMessage(error));
