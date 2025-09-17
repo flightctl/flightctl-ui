@@ -6,6 +6,7 @@ import {
   getErrorMsgFromAlertsApiResponse,
   getErrorMsgFromApiResponse,
 } from '@flightctl/ui-components/src/utils/apiCalls';
+import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
 
 declare global {
   interface Window {
@@ -18,7 +19,7 @@ const addRequiredHeaders = (options: RequestInit): RequestInit => {
   const updatedOptions = { ...options };
 
   const token = getCSRFToken();
-  const orgId = localStorage.getItem('flightctl-current-organization');
+  const orgId = localStorage.getItem(ORGANIZATION_STORAGE_KEY);
 
   if (updatedOptions.headers) {
     updatedOptions.headers['X-CSRFToken'] = token;

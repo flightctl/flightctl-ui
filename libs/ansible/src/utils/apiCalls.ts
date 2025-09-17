@@ -41,6 +41,17 @@ const putOrPostData = async <TRequest, TResponse = TRequest>(
   }
 };
 
+export const fetchUiProxy = async (
+  endpoint: string,
+  serviceUrl: string,
+  applyOptions: (options: RequestInit) => RequestInit,
+  requestInit: RequestInit,
+): Promise<Response> => {
+  const options = applyOptions(requestInit);
+
+  return await fetch(`${serviceUrl}/api/${endpoint}`, options);
+};
+
 export const postData = async <TRequest, TResponse = TRequest>(
   kind: string,
   data: TRequest,

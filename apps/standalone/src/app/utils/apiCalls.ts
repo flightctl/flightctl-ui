@@ -4,6 +4,7 @@ import {
   getErrorMsgFromAlertsApiResponse,
   getErrorMsgFromApiResponse,
 } from '@flightctl/ui-components/src/utils/apiCalls';
+import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
 
 import { lastRefresh } from '../context/AuthContext';
 
@@ -18,7 +19,7 @@ export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'w
 
 // Helper function to add organization header to request options
 const addOrganizationHeader = (options: RequestInit): RequestInit => {
-  const orgId = localStorage.getItem('flightctl-current-organization');
+  const orgId = localStorage.getItem(ORGANIZATION_STORAGE_KEY);
   if (orgId) {
     return {
       ...options,

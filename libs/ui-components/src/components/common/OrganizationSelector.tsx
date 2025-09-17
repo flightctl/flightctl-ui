@@ -25,7 +25,8 @@ import { Modal, ModalBody, ModalHeader } from '@patternfly/react-core/next';
 
 import { Organization } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
-import { ORGANIZATION_LOCAL_STORAGE_KEY, useOrganizationGuardContext } from './OrganizationGuard';
+import { useOrganizationGuardContext } from './OrganizationGuard';
+import { ORGANIZATION_STORAGE_KEY } from '../../utils/organizationStorage';
 
 interface OrganizationSelectorContentProps {
   defaultOrganizationId?: string;
@@ -153,7 +154,7 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
 
   const getLastSelectedOrganization = React.useCallback(() => {
     try {
-      const savedOrgId = localStorage.getItem(ORGANIZATION_LOCAL_STORAGE_KEY);
+      const savedOrgId = localStorage.getItem(ORGANIZATION_STORAGE_KEY);
       if (savedOrgId && availableOrganizations.some((org) => org.metadata?.name === savedOrgId)) {
         return savedOrgId;
       }
@@ -164,11 +165,11 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
   }, [availableOrganizations]);
 
   const handleSelect = React.useCallback(
-    async (orgId: string) => {
+    (orgId: string) => {
       const org = availableOrganizations.find((org) => org.metadata?.name === orgId);
       if (org) {
         try {
-          await selectOrganization(org);
+          selectOrganization(org);
           onClose?.(true);
         } catch (error) {
           onClose?.(false);

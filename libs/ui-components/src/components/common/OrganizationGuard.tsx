@@ -8,11 +8,9 @@ interface OrganizationContextType {
   currentOrganization?: Organization;
   availableOrganizations: Organization[];
   isOrganizationSelectionRequired: boolean;
-  selectOrganization: (org: Organization) => Promise<void>;
+  selectOrganization: (org: Organization) => void;
   selectionError?: string;
 }
-
-export const ORGANIZATION_LOCAL_STORAGE_KEY = 'flightctl-current-organization';
 
 const OrganizationContext = React.createContext<OrganizationContextType | null>(null);
 
@@ -34,7 +32,7 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
   const [organizationsLoaded, setOrganizationsLoaded] = React.useState(false);
   const [selectionError, setSelectionError] = React.useState<string | undefined>();
 
-  const selectOrganization = React.useCallback(async (org: Organization) => {
+  const selectOrganization = React.useCallback((org: Organization) => {
     const organizationId = org.metadata?.name || '';
 
     try {
@@ -53,7 +51,7 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
         // First, check if organizations are enabled via proxy endpoint
         const organizationsEnabledResponse = await proxyFetch('organizations-enabled', {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { Accept: 'application/json' },
           credentials: 'include',
         });
 
@@ -68,7 +66,6 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
         const organizations = await fetch.get<OrganizationList>('organizations');
         setAvailableOrganizations(organizations.items);
 
-        // Get current organization from localStorage (no need for server call)
         const currentOrgId = getCurrentOrganizationId();
 
         // Validate current organization against available organizations
@@ -77,18 +74,16 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
           : undefined;
 
         if (currentOrg) {
-          // Current organization is valid - use it
+          // The previously selected organization exists - use it
           selectOrganization(currentOrg);
         } else {
-          // Current organization is invalid/missing - clean up and handle defaults
-          if (currentOrgId) {
-            setCurrentOrganization(undefined);
-            storeCurrentOrganizationId(''); // Clear invalid organization from localStorage
-          }
-
           if (organizations.items?.length === 1) {
-            // Auto-select if only one organization available
-            await selectOrganization(organizations.items[0]);
+            // Only one organization available - select it automatically
+            selectOrganization(organizations.items[0]);
+          } else if (currentOrgId) {
+            // Previously set organization does not exist anymore - remove it from localStorage so the user can select a new organization
+            setCurrentOrganization(undefined);
+            storeCurrentOrganizationId('');
           }
         }
       } catch (error) {
