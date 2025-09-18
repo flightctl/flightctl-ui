@@ -12,11 +12,12 @@ import type { FleetRolloutDeviceSelectedDetails } from './FleetRolloutDeviceSele
 import type { FleetRolloutFailedDetails } from './FleetRolloutFailedDetails';
 import type { FleetRolloutStartedDetails } from './FleetRolloutStartedDetails';
 import type { InternalTaskFailedDetails } from './InternalTaskFailedDetails';
+import type { InternalTaskPermanentlyFailedDetails } from './InternalTaskPermanentlyFailedDetails';
 import type { ReferencedRepositoryUpdatedDetails } from './ReferencedRepositoryUpdatedDetails';
 import type { ResourceSyncCompletedDetails } from './ResourceSyncCompletedDetails';
 import type { ResourceUpdatedDetails } from './ResourceUpdatedDetails';
 /**
  * Event-specific details, structured based on event type.
  */
-export type EventDetails = (ResourceUpdatedDetails | DeviceOwnershipChangedDetails | DeviceMultipleOwnersDetectedDetails | DeviceMultipleOwnersResolvedDetails | InternalTaskFailedDetails | ResourceSyncCompletedDetails | ReferencedRepositoryUpdatedDetails | FleetRolloutStartedDetails | FleetRolloutFailedDetails | FleetRolloutCompletedDetails | FleetRolloutBatchDispatchedDetails | FleetRolloutBatchCompletedDetails | FleetRolloutDeviceSelectedDetails);
+export type EventDetails = (ResourceUpdatedDetails | DeviceOwnershipChangedDetails | DeviceMultipleOwnersDetectedDetails | DeviceMultipleOwnersResolvedDetails | InternalTaskFailedDetails | InternalTaskPermanentlyFailedDetails | ResourceSyncCompletedDetails | ReferencedRepositoryUpdatedDetails | FleetRolloutStartedDetails | FleetRolloutFailedDetails | FleetRolloutCompletedDetails | FleetRolloutBatchDispatchedDetails | FleetRolloutBatchCompletedDetails | FleetRolloutDeviceSelectedDetails);
 
