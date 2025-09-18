@@ -4,7 +4,7 @@ import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 import { Device } from '@flightctl/types';
 import DeviceFleet from '../DeviceDetails/DeviceFleet';
 import { timeSinceText } from '../../../utils/dates';
-import { getDecommissionDisabledReason, getEditDisabledReason } from '../../../utils/devices';
+import { getDecommissionDisabledReason, getEditDisabledReason, getResumeDisabledReason } from '../../../utils/devices';
 import { getDisabledTooltipProps } from '../../../utils/tooltip';
 import { ListAction } from '../../ListPage/types';
 import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
@@ -22,6 +22,8 @@ type EnrolledDeviceTableRowProps = {
   canEdit: boolean;
   canDecommission: boolean;
   decommissionAction: ListAction;
+  canResume: boolean;
+  resumeAction: ListAction;
 };
 
 const EnrolledDeviceTableRow = ({
@@ -32,6 +34,8 @@ const EnrolledDeviceTableRow = ({
   canEdit,
   canDecommission,
   decommissionAction,
+  canResume,
+  resumeAction,
 }: EnrolledDeviceTableRowProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -39,6 +43,7 @@ const EnrolledDeviceTableRow = ({
   const deviceAlias = device.metadata.labels?.alias;
   const editActionProps = getDisabledTooltipProps(getEditDisabledReason(device, t));
   const decommissionDisabledReason = getDecommissionDisabledReason(device, t);
+  const resumeDisabledReason = getResumeDisabledReason(device, t);
 
   return (
     <Tr>
@@ -84,6 +89,15 @@ const EnrolledDeviceTableRow = ({
               title: t('View device details'),
               onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
             },
+            ...(canResume
+              ? [
+                  resumeAction({
+                    resourceId: deviceName,
+                    resourceName: deviceAlias,
+                    disabledReason: resumeDisabledReason,
+                  }),
+                ]
+              : []),
             ...(canDecommission
               ? [
                   decommissionAction({

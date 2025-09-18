@@ -102,6 +102,7 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
               setSelectedLabels={setSelectedLabels}
               isFilterUpdating={updating}
               pagination={pagination}
+              refetchDevices={refetch}
             />
           )}
         </ListPageBody>

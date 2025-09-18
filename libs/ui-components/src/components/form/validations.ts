@@ -695,3 +695,30 @@ export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDev
         ),
     labels: validLabelsSchema(t, forbiddenDeviceLabels),
   });
+
+export const createMassResumeValidationSchema = (t: TFunction) =>
+  Yup.object().shape({
+    mode: Yup.string().oneOf(['fleet', 'labels', 'all']).required(),
+    fleetId: Yup.string().when('mode', {
+      is: 'fleet',
+      then: (schema) => schema.required(t('Fleet selection is required')),
+    }),
+    labels: Yup.lazy(() =>
+      Yup.mixed().test('labels-validation', function (labels) {
+        const parent = this.parent as { mode?: string };
+        if (parent.mode !== 'labels') {
+          return true;
+        }
+        if (!Array.isArray(labels) || labels.length === 0) {
+          return this.createError({ message: t('At least one label is required') });
+        }
+        try {
+          validLabelsSchema(t).validateSync(labels);
+          return true;
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Yup.ValidationError ? error.message : t('Invalid labels provided');
+          return this.createError({ message: errorMessage });
+        }
+      }),
+    ),
+  });

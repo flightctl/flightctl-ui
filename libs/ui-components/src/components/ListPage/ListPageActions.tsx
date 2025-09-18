@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TFunction } from 'react-i18next';
+import { TFunction, Trans } from 'react-i18next';
 
 import { DeviceDecommissionTargetType } from '@flightctl/types';
 import { ListAction, ListActionProps, ListActionResult } from './types';
@@ -8,9 +8,10 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { getDisabledTooltipProps } from '../../utils/tooltip';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import DecommissionModal from '../modals/DecommissionModal/DecommissionModal';
+import ResumeDevicesModal from '../modals/ResumeDevicesModal/ResumeDevicesModal';
 
 type DeleteResourceType = 'EnrollmentRequest' | 'ResourceSync' | 'Device';
-type DecommissionResourceType = 'Device';
+type DeviceOnlyResourceType = 'Device';
 
 type ResourceType = 'Device' | 'EnrollmentRequest' | 'ResourceSync';
 
@@ -70,7 +71,7 @@ export const useDeleteListAction = ({
 
 export const useDecommissionListAction = ({
   onConfirm,
-}: ListActionProps<DecommissionResourceType, { target: DeviceDecommissionTargetType }>): ListActionResult => {
+}: ListActionProps<DeviceOnlyResourceType, { target: DeviceDecommissionTargetType }>): ListActionResult => {
   const { t } = useTranslation();
   const [decommissionDeviceId, setDecommissionDeviceId] = React.useState<string>();
 
@@ -99,4 +100,46 @@ export const useDecommissionListAction = ({
   );
 
   return { action: decommissionAction, modal: decommissionModal };
+};
+
+export const useResumeListAction = (onResumeComplete?: VoidFunction): ListActionResult => {
+  const { t } = useTranslation();
+  const [deviceId, setDeviceId] = React.useState<string>();
+  const [deviceName, setDeviceName] = React.useState<string>();
+
+  const resumeAction: ListAction = ({ resourceId, resourceName, disabledReason }) => {
+    const popperProps = getDisabledTooltipProps(disabledReason);
+    return {
+      title: t('Resume device'),
+      ...popperProps,
+      onClick: () => {
+        setDeviceId(resourceId);
+        setDeviceName(resourceName || resourceId);
+      },
+    };
+  };
+
+  const onClose = (hasResumed?: boolean) => {
+    setDeviceId(undefined);
+    setDeviceName(undefined);
+    if (hasResumed) {
+      onResumeComplete?.();
+    }
+  };
+
+  const resumeModal = deviceId && (
+    <ResumeDevicesModal
+      mode="device"
+      title={
+        <Trans t={t}>
+          You are about to resume device <strong>{deviceName}</strong>
+        </Trans>
+      }
+      selector={{ fieldSelector: `metadata.name=${deviceId}` }}
+      expectedCount={1}
+      onClose={onClose}
+    />
+  );
+
+  return { action: resumeAction, modal: resumeModal };
 };

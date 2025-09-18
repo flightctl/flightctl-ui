@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Switch, ToolbarItem } from '@patternfly/react-core';
+import { Button, PageSection, PageSectionVariants, Switch, ToolbarItem } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 import { TFunction } from 'react-i18next';
 
@@ -20,7 +20,7 @@ import {
 } from '../../Status/utils';
 
 import Table, { ApiSortTableColumn } from '../../Table/Table';
-import { useDecommissionListAction } from '../../ListPage/ListPageActions';
+import { useDecommissionListAction, useResumeListAction } from '../../ListPage/ListPageActions';
 import TablePagination from '../../Table/TablePagination';
 import MassDecommissionDeviceModal from '../../modals/massModals/MassDecommissionDeviceModal/MassDecommissionDeviceModal';
 import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
@@ -28,6 +28,7 @@ import { EnrolledDevicesEmptyState } from './DevicesEmptyStates';
 import DeviceTableToolbar from './DeviceTableToolbar';
 import EnrolledDeviceTableRow from './EnrolledDeviceTableRow';
 import { FilterSearchParams } from '../../../utils/status/devices';
+import { GlobalSystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 
 interface EnrolledDeviceTableProps {
   devices: Array<Device>;
@@ -43,6 +44,7 @@ interface EnrolledDeviceTableProps {
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
   isFilterUpdating: boolean;
   pagination: Pick<PaginationDetails<DeviceList>, 'currentPage' | 'setCurrentPage' | 'itemCount'>;
+  refetchDevices: VoidFunction;
   // getSortParams: (columnIndex: number) => ThProps['sort'];
 }
 
@@ -87,6 +89,7 @@ const EnrolledDevicesTable = ({
   hasFiltersEnabled,
   isFilterUpdating,
   pagination,
+  refetchDevices,
 }: EnrolledDeviceTableProps) => {
   const { t } = useTranslation();
   const { put } = useFetch();
@@ -97,6 +100,7 @@ const EnrolledDevicesTable = ({
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
+  const { action: resumeDeviceAction, modal: resumeDeviceModal } = useResumeListAction(refetchDevices);
   const { action: decommissionDeviceAction, modal: decommissionDeviceModal } = useDecommissionListAction({
     resourceType: 'Device',
     onConfirm: async (deviceId: string, params) => {
@@ -109,6 +113,7 @@ const EnrolledDevicesTable = ({
 
   const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
   const [canDecommission] = useAccessReview(RESOURCE.DEVICE_DECOMMISSION, VERB.UPDATE);
+  const [canResume] = useAccessReview(RESOURCE.DEVICE_RESUME, VERB.UPDATE);
 
   const clearAllFilters = () => {
     if (hasFiltersEnabled) {
@@ -125,6 +130,8 @@ const EnrolledDevicesTable = ({
 
   return (
     <>
+      <GlobalSystemRestoreBanners onResumeComplete={refetchDevices} />
+
       <DeviceTableToolbar
         nameOrAlias={nameOrAlias}
         setNameOrAlias={setNameOrAlias}
@@ -186,6 +193,8 @@ const EnrolledDevicesTable = ({
               canEdit={canEdit}
               canDecommission={canDecommission}
               decommissionAction={decommissionDeviceAction}
+              canResume={canResume}
+              resumeAction={resumeDeviceAction}
             />
           ))}
         </Tbody>
@@ -194,7 +203,7 @@ const EnrolledDevicesTable = ({
       {!hasFiltersEnabled && devices.length === 0 && (
         <EnrolledDevicesEmptyState onAddDevice={() => setAddDeviceModal(true)} />
       )}
-      {decommissionDeviceModal}
+      {decommissionDeviceModal || resumeDeviceModal}
       {addDeviceModal && <AddDeviceModal onClose={() => setAddDeviceModal(false)} />}
       {isMassDecommissionModalOpen && (
         <MassDecommissionDeviceModal

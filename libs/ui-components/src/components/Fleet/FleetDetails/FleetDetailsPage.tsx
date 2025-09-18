@@ -13,8 +13,9 @@ import NavItem from '../../NavItem/NavItem';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
 import DeleteFleetModal from '../DeleteFleetModal/DeleteFleetModal';
-import FleetDetailsContent from './FleetDetailsContent';
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
+import FleetDetailsContent from './FleetDetailsContent';
+import FleetRestoreBanner from './FleetRestoreBanner';
 
 const FleetDetailPage = () => {
   const { t } = useTranslation();
@@ -45,6 +46,7 @@ const FleetDetailPage = () => {
       resourceLink={ROUTE.FLEETS}
       resourceType="Fleets"
       resourceTypeLabel={t('Fleets')}
+      banner={<FleetRestoreBanner fleet={fleet} refetch={refetch} />}
       nav={
         <Nav variant="tertiary">
           <NavList>
@@ -98,10 +100,7 @@ const FleetDetailPage = () => {
           <Routes>
             <Route index element={<Navigate to="details" replace />} />
             <Route path="details" element={<FleetDetailsContent fleet={fleet} />} />
-            <Route
-              path="yaml"
-              element={<YamlEditor filename={fleet.metadata.name || 'fleet'} apiObj={fleet} refetch={refetch} />}
-            />
+            <Route path="yaml" element={<YamlEditor filename={fleetId} apiObj={fleet} refetch={refetch} />} />
           </Routes>
           {isDeleteModalOpen && (
             <DeleteFleetModal
