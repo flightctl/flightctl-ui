@@ -79,9 +79,17 @@ export const commonQueries = {
     const searchParams = new URLSearchParams({
       limit: '1',
     });
-    // Must include all labels with exact match
     searchParams.set('labelSelector', labels.map(labelToExactApiMatchString).join(','));
-    // Must be in ConflictPaused status
+    searchParams.set(
+      'fieldSelector',
+      `status.summary.status=${DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused}`,
+    );
+    return `devices?${searchParams.toString()}`;
+  },
+  getAllSuspendedDevicesCount: () => {
+    const searchParams = new URLSearchParams({
+      limit: '1',
+    });
     searchParams.set(
       'fieldSelector',
       `status.summary.status=${DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused}`,

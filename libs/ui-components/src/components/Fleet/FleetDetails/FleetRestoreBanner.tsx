@@ -15,7 +15,9 @@ const FleetRestoreBanner = ({ fleet, refetch }: { fleet?: Fleet; refetch: VoidFu
   const fleetId = fleet.metadata.name as string;
 
   const fleetDeviceStatuses = fleet?.status?.devicesSummary?.summaryStatus;
-  const suspendedDevicesCount = fleetDeviceStatuses?.[DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused] || 0;
+  const suspendedDevicesCountNum =
+    fleetDeviceStatuses?.[DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused] || 0;
+  const suspendedDevicesCount = suspendedDevicesCountNum.toString();
 
   return (
     <SystemRestoreBanners
@@ -24,8 +26,8 @@ const FleetRestoreBanner = ({ fleet, refetch }: { fleet?: Fleet; refetch: VoidFu
       resumeAction={{
         actionText: t('Resume all'),
         title: (
-          <Trans t={t}>
-            You are about to resume all <strong>{suspendedDevicesCount}</strong> suspended devices in{' '}
+          <Trans t={t} count={suspendedDevicesCountNum}>
+            You are about to resume all<strong>{suspendedDevicesCount}</strong> suspended devices in{' '}
             <strong>{fleetId}</strong>
           </Trans>
         ),

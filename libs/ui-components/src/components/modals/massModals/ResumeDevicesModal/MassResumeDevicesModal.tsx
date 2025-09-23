@@ -82,8 +82,7 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
   const [countError, setCountError] = React.useState<string | null>(null);
 
   const hasResumedAtLeastOne = Boolean(resumedCount !== undefined && resumedCount > 0);
-  const hasResumedAllExpected =
-    values.mode === SelectionMode.ALL ? hasResumedAtLeastOne : deviceCountNum > 0 && resumedCount === deviceCountNum;
+  const hasResumedAllExpected = hasResumedAtLeastOne && resumedCount === deviceCountNum;
   const isSubmitEnabled =
     (values.mode === SelectionMode.ALL || deviceCountNum > 0) &&
     !isSubmitting &&
@@ -93,18 +92,27 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
   const deviceCount = deviceCountNum.toString();
 
   const loadMatchingDevicesCount = React.useCallback(
-    async (criteria: { fleetId?: string; labels?: FlightCtlLabel[] }) => {
+    async (criteria: { fleetId?: string; labels?: FlightCtlLabel[]; all?: boolean }) => {
       setIsCountLoading(true);
       setCountError(null);
       setDeviceCountNum(0);
 
       try {
-        const fleetLabels = criteria.fleetId ? getSelectedFleetLabels(fleets, criteria.fleetId) : criteria.labels || [];
-        if (fleetLabels.length === 0) {
-          throw new Error('Invalid criteria: must provide either fleetId or labels');
+        let queryEndpoint: string;
+
+        if (criteria.all) {
+          queryEndpoint = commonQueries.getAllSuspendedDevicesCount();
+        } else {
+          const fleetLabels = criteria.fleetId
+            ? getSelectedFleetLabels(fleets, criteria.fleetId)
+            : criteria.labels || [];
+          if (fleetLabels.length === 0) {
+            throw new Error('Invalid criteria: must provide either fleetId or labels');
+          }
+          queryEndpoint = commonQueries.getSuspendedDeviceCountByLabels(fleetLabels);
         }
 
-        const deviceResult = await get<DeviceList>(commonQueries.getSuspendedDeviceCountByLabels(fleetLabels));
+        const deviceResult = await get<DeviceList>(queryEndpoint);
         await showSpinnerBriefly();
         setDeviceCountNum(getApiListCount(deviceResult) || 0);
       } catch (error) {
@@ -153,13 +161,16 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
   const handleSelectionModeChanged = (mode: SelectionMode) => {
     setFieldValue('mode', mode);
 
-    if (mode === SelectionMode.FLEET && values.fleetId) {
+    if (mode === SelectionMode.ALL) {
+      // Load count for all suspended devices
+      loadMatchingDevicesCount({ all: true });
+    } else if (mode === SelectionMode.FLEET && values.fleetId) {
       // If switching to a mode that already had a valid selection, we refresh the count
       loadMatchingDevicesCount({ fleetId: values.fleetId });
     } else if (mode === SelectionMode.LABELS && values.labels.length > 0) {
       loadMatchingDevicesCount({ labels: values.labels });
     } else {
-      // Clear the count if there isn't a valid selection, and also in "all" mode
+      // Clear the count if there isn't a valid selection
       setDeviceCountNum(0);
       setCountError(null);
       setIsCountLoading(false);
@@ -323,7 +334,7 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
           )}
         </FlightCtlForm>
 
-        {isValid && dirty && values.mode !== SelectionMode.ALL && (
+        {isValid && dirty && resumedCount === undefined && (
           <StackItem>
             {isCountLoading ? (
               <Alert variant="info" isInline title={t('Refreshing device count')}>
@@ -335,16 +346,29 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
                 {countError}
               </Alert>
             ) : deviceCountNum > 0 ? (
-              <Alert variant="success" isInline title={t('Devices found')}>
+              <Alert
+                variant={values.mode === SelectionMode.ALL ? 'warning' : 'success'}
+                isInline
+                title={t('Devices found')}
+              >
                 {values.mode === SelectionMode.FLEET ? (
                   <Trans t={t}>
                     <strong>{deviceCount}</strong> suspended devices are currently associated with fleet{' '}
                     <strong>{values.fleetId}</strong>.
                   </Trans>
-                ) : (
+                ) : values.mode === SelectionMode.LABELS ? (
                   <Trans t={t}>
                     <strong>{deviceCount}</strong> suspended devices match the specified labels.
                   </Trans>
+                ) : (
+                  <>
+                    <Trans t={t} count={deviceCountNum}>
+                      You are about to resume all <strong>{deviceCount}</strong> suspended devices.
+                    </Trans>
+                    {t(
+                      'This action is irreversible and will allow all affected devices to receive new configuration updates from the server.',
+                    )}
+                  </>
                 )}
               </Alert>
             ) : (
@@ -353,6 +377,8 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
                   <Trans t={t}>
                     No suspended devices are associated with fleet <strong>{values.fleetId}</strong>.
                   </Trans>
+                ) : values.mode === SelectionMode.ALL ? (
+                  t('No suspended devices found.')
                 ) : (
                   t('No suspended devices match the specified labels.')
                 )}
@@ -368,18 +394,6 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
             </Alert>
           </StackItem>
         )}
-
-        {/* Display an alert for "all" mode before the user resumes all devices */}
-        {resumedCount === undefined && values.mode === SelectionMode.ALL && (
-          <StackItem>
-            <Alert variant="warning" isInline title={t('Resume all devices')}>
-              {t(
-                'You are about to resume all suspended devices. This action is irreversible and will allow all affected devices to receive new configuration updates from the server.',
-              )}
-            </Alert>
-          </StackItem>
-        )}
-
         {resumedCount !== undefined && hasResumedAllExpected && (
           <StackItem>
             <Alert isInline variant="success" title={t('Resume successful')}>
@@ -392,7 +406,7 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
           <StackItem>
             <Alert isInline variant="warning" title={t('Resumed with warnings')}>
               {t('{{ expectedCount }} devices to resume, and {{ resumedCount }} resumed successfully', {
-                deviceCountNum,
+                expectedCount: deviceCountNum,
                 resumedCount,
               })}
             </Alert>
