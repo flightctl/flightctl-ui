@@ -46,7 +46,7 @@ export const postData = async <TRequest, TResponse = TRequest>(
   data: TRequest,
   serviceUrl: string,
   applyOptions: (options: RequestInit) => RequestInit,
-) => putOrPostData<TRequest, TResponse>(kind, data, serviceUrl, applyOptions, 'POST');
+): Promise<TResponse> => putOrPostData<TRequest, TResponse>(kind, data, serviceUrl, applyOptions, 'POST');
 
 export const putData = async <TRequest>(
   kind: string,

@@ -42,9 +42,16 @@ export const useFetch = () => {
     [],
   );
 
-  const post = React.useCallback(async <R>(kind: string, obj: R): Promise<R> => postData(kind, obj), []);
+  const post = React.useCallback(
+    async <TRequest, TResponse = TRequest>(kind: string, data: TRequest): Promise<TResponse> => {
+      return postData<TRequest, TResponse>(kind, data);
+    },
+    [],
+  );
 
-  const put = React.useCallback(async <R>(kind: string, obj: R): Promise<R> => putData(kind, obj), []);
+  const put = React.useCallback(async <TRequest>(kind: string, data: TRequest): Promise<TRequest> => {
+    return putData<TRequest>(kind, data);
+  }, []);
 
   const remove = React.useCallback(
     async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => deleteData(kind, abortSignal),
@@ -52,8 +59,8 @@ export const useFetch = () => {
   );
 
   const patch = React.useCallback(
-    async <R>(kind: string, obj: PatchRequest, abortSignal?: AbortSignal): Promise<R> =>
-      patchData(kind, obj, abortSignal),
+    async <R>(kind: string, patches: PatchRequest, abortSignal?: AbortSignal): Promise<R> =>
+      patchData(kind, patches, abortSignal),
     [],
   );
 

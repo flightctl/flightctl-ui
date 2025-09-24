@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, PageSection, PageSectionVariants, Switch, ToolbarItem } from '@patternfly/react-core';
+import { Button, Switch, ToolbarItem } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 import { TFunction } from 'react-i18next';
 

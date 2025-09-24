@@ -4,8 +4,6 @@ import {
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  PageSection,
-  PageSectionVariants,
   Split,
   SplitItem,
   Stack,

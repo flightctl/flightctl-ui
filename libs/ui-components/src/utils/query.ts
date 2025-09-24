@@ -1,6 +1,6 @@
 import { FlightCtlLabel } from '../types/extraTypes';
 import { labelToExactApiMatchString, textToPartialApiMatchString } from './labels';
-import { DeviceResumeRequest, DeviceSummaryStatusType } from '@flightctl/types';
+import { DeviceSummaryStatusType } from '@flightctl/types';
 
 const addQueryConditions = (fieldSelectors: string[], fieldSelector: string, values?: string[]) => {
   if (values?.length === 1) {

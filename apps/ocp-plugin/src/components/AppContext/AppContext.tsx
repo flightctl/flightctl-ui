@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   AppContext,
   AppContextProps,
@@ -5,6 +6,7 @@ import {
   NavLinkFC,
   PromptFC,
 } from '@flightctl/ui-components/src/hooks/useAppContext';
+import { SystemRestoreProvider } from '@flightctl/ui-components/src/hooks/useSystemRestoreContext';
 import { ROUTE } from '@flightctl/ui-components/src/hooks/useNavigate';
 import {
   Link,
@@ -24,7 +26,20 @@ import { useFetch } from '../../hooks/useFetch';
 
 import './AppContext.css';
 
-export const OCPPluginAppContext = AppContext.Provider;
+/**
+ * OCP Plugin App Context Provider that includes SystemRestoreProvider
+ * The OCP plugin system calls useValuesAppContext separately and passes the value as a prop
+ */
+export const OCPPluginAppContext: React.FC<React.PropsWithChildren<{ value: AppContextProps }>> = ({
+  children,
+  value,
+}) => {
+  return (
+    <AppContext.Provider value={value}>
+      <SystemRestoreProvider>{children}</SystemRestoreProvider>
+    </AppContext.Provider>
+  );
+};
 
 const appRoutes = {
   [ROUTE.ROOT]: '/',

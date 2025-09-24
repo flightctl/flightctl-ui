@@ -24,12 +24,13 @@ export const useFetch = (getCookie: (name: string) => string | undefined, servic
   );
 
   const post = React.useCallback(
-    async <R>(kind: string, obj: R): Promise<R> => postData(kind, obj, serviceUrl, applyHeaders),
+    async <TRequest, TResponse = TRequest>(kind: string, data: TRequest): Promise<TResponse> =>
+      postData(kind, data, serviceUrl, applyHeaders),
     [serviceUrl, applyHeaders],
   );
 
   const put = React.useCallback(
-    async <R>(kind: string, obj: R): Promise<R> => putData(kind, obj, serviceUrl, applyHeaders),
+    async <TRequest>(kind: string, data: TRequest): Promise<TRequest> => putData(kind, data, serviceUrl, applyHeaders),
     [serviceUrl, applyHeaders],
   );
 

@@ -32,12 +32,11 @@ import { commonQueries } from '../../../../utils/query';
 import { getApiListCount } from '../../../../utils/api';
 import { fromAPILabel, labelToExactApiMatchString } from '../../../../utils/labels';
 import { useFleets } from '../../../Fleet/useFleets';
+import ResumeAllDevicesConfirmationDialog from './ResumeAllDevicesConfirmationDialog';
 
 // Adds an artificial delay to make sure that the user notices the count is refreshing.
 // This is specially needed when users switch between modes, and the selection for the new mode is already valid.
 const showSpinnerBriefly = () => new Promise((resolve) => setTimeout(resolve, 450));
-
-type SelectionMode = 'fleet' | 'labels' | 'all';
 
 type MassResumeFormValues = {
   mode: SelectionMode;
@@ -49,11 +48,11 @@ interface MassResumeDevicesModalProps {
   onClose: (hasResumed?: boolean) => void;
 }
 
-const SelectionMode = {
-  FLEET: 'fleet',
-  LABELS: 'labels',
-  ALL: 'all',
-} as const;
+enum SelectionMode {
+  FLEET = 'fleet',
+  LABELS = 'labels',
+  ALL = 'all',
+}
 
 const getSelectedFleetLabels = (fleets: Fleet[], fleetId: string) => {
   const selectedFleet = fleets.find((fleet) => fleet.metadata.name === fleetId);
@@ -72,6 +71,7 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
   const [isFleetListOpen, setIsFleetSelectOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | undefined>(undefined);
+  const [showResumeAllConfirmation, setShowResumeAllConfirmation] = React.useState(false);
 
   // Resume result state
   const [resumedCount, setResumedCount] = React.useState<number | undefined>(undefined);
@@ -81,8 +81,8 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
   const [isCountLoading, setIsCountLoading] = React.useState(false);
   const [countError, setCountError] = React.useState<string | null>(null);
 
-  const hasResumedAtLeastOne = Boolean(resumedCount !== undefined && resumedCount > 0);
-  const hasResumedAllExpected = hasResumedAtLeastOne && resumedCount === deviceCountNum;
+  const hasResumedAtLeastOne = resumedCount !== undefined && resumedCount > 0;
+  const hasResumedAllExpected = deviceCountNum > 0 && resumedCount === deviceCountNum;
   const isSubmitEnabled =
     (values.mode === SelectionMode.ALL || deviceCountNum > 0) &&
     !isSubmitting &&
@@ -125,7 +125,7 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
     [get, t, fleets],
   );
 
-  const handleResume = async () => {
+  const performResume = async () => {
     setIsSubmitting(true);
     setSubmitError(undefined);
 
@@ -155,6 +155,14 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
       setSubmitError(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleResume = () => {
+    if (values.mode === SelectionMode.ALL) {
+      setShowResumeAllConfirmation(true);
+    } else {
+      performResume();
     }
   };
 
@@ -413,6 +421,17 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
           </StackItem>
         )}
       </Stack>
+      {showResumeAllConfirmation && (
+        <ResumeAllDevicesConfirmationDialog
+          deviceCountNum={deviceCountNum}
+          onClose={(doConfirm) => {
+            setShowResumeAllConfirmation(false);
+            if (doConfirm) {
+              performResume();
+            }
+          }}
+        />
+      )}
     </Modal>
   );
 };

@@ -55,6 +55,7 @@ const SuspendedDevicesAlert = ({
   );
 
   const getMainMessage = () => {
+    const suspendedCountStr = suspendedCount.toString();
     switch (mode) {
       case 'device':
         return t(
@@ -62,18 +63,18 @@ const SuspendedDevicesAlert = ({
         );
       case 'fleet':
         return (
-          <>
-            <strong>{suspendedCount}</strong> <strong>devices in this fleet</strong> are suspended because their local
-            configuration is newer than the server&apos;s record. These devices will not receive updates until they are
-            resumed.
-          </>
+          <Trans t={t} count={suspendedCount}>
+            <strong>{suspendedCountStr}</strong> <strong>devices in this fleet</strong> are suspended because their
+            local configuration is newer than the server&apos;s record. These devices will not receive updates until
+            they are resumed.
+          </Trans>
         );
       default:
         return (
-          <>
-            <strong>{suspendedCount}</strong> devices are suspended because their local configuration is newer than the
-            server&apos;s record. These devices will not receive updates until they are resumed.
-          </>
+          <Trans t={t} count={suspendedCount}>
+            <strong>{suspendedCountStr}</strong> devices are suspended because their local configuration is newer than
+            the server&apos;s record. These devices will not receive updates until they are resumed.
+          </Trans>
         );
     }
   };

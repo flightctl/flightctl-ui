@@ -17,7 +17,7 @@ interface ResumeDeviceModalProps {
 /**
  * Modal to resume an individual device, or all the devices in a fleet
  */
-const ResumeDevicesModal = ({ mode, title, selector, expectedCount = 1, onClose }: ResumeDeviceModalProps) => {
+const ResumeDevicesModal = ({ mode, title, selector, expectedCount, onClose }: ResumeDeviceModalProps) => {
   const { t } = useTranslation();
   const { post } = useFetch();
   const [resumedCount, setResumedCount] = React.useState<number | undefined>(undefined);
@@ -96,7 +96,7 @@ const ResumeDevicesModal = ({ mode, title, selector, expectedCount = 1, onClose 
           </StackItem>
         )}
 
-        {resumedCount != undefined && resumedCount !== expectedCount && (
+        {resumedCount !== undefined && resumedCount !== expectedCount && (
           <StackItem>
             <Alert isInline variant="warning" title={t('Resume with warnings')}>
               {t('{{ expectedCount }} devices to resume, and {{ resumedCount }} resumed successfully', {
