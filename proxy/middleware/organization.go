@@ -31,34 +31,37 @@ func OrganizationMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// Organization is selected - add org_id to the request
 		query := r.URL.Query()
-		query.Set(queryOrganizationID, orgID)
+
+		if isAlertsAPICall(r.URL.Path) {
+			// AlertManager expects org_id as a filter parameter
+			query.Set("filter", "org_id="+orgID)
+		} else {
+			query.Set(queryOrganizationID, orgID)
+		}
+
 		r.URL.RawQuery = query.Encode()
+
+		// Remove the organization header since we've converted it to query param
+		r.Header.Del(headerOrganizationID)
 
 		next.ServeHTTP(w, r)
 	})
 }
 
 func isFlightCtlAPICall(path string) bool {
-	return strings.Contains(path, "/api/v1/")
+	return strings.HasPrefix(path, "/api/flightctl/")
+}
+
+func isAlertsAPICall(path string) bool {
+	return strings.HasPrefix(path, "/api/alerts/")
 }
 
 func shouldAddOrgID(path string) bool {
-	excludePaths := []string{
-		// The API call to retrieve all organizations (otherwise, if called with an org_id, only that particular organization will be returned
-		"/api/v1/organizations",
-		"/login",
-		"/logout",
-		"/config",
+	// Exclude the organizations endpoint since it needs to return ALL organizations the user has access to
+	if strings.HasPrefix(path, "/api/flightctl/api/v1/organizations") {
+		return false
 	}
 
-	for _, excludePath := range excludePaths {
-		if strings.Contains(path, excludePath) {
-			return false
-		}
-	}
-
-	// Only add org_id to FlightCtl API calls
-	return isFlightCtlAPICall(path)
+	return isFlightCtlAPICall(path) || isAlertsAPICall(path)
 }
