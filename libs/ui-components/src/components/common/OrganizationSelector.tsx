@@ -49,20 +49,7 @@ const OrganizationSelectorContent = ({
 }: OrganizationSelectorContentProps) => {
   const { t } = useTranslation();
   const [selectedOrg, setSelectedOrg] = React.useState<string | undefined>(defaultOrganizationId);
-  const hasUserMadeSelection = React.useRef(false);
   const needsScroll = organizations.length > MAX_ORGANIZATIONS_FOR_SCROLL;
-
-  // Only set default organization if user hasn't made a manual selection yet
-  React.useEffect(() => {
-    if (defaultOrganizationId && !hasUserMadeSelection.current && !selectedOrg) {
-      setSelectedOrg(defaultOrganizationId);
-    }
-  }, [defaultOrganizationId, selectedOrg]);
-
-  const handleOrgSelection = React.useCallback((orgId: string) => {
-    hasUserMadeSelection.current = true;
-    setSelectedOrg(orgId);
-  }, []);
 
   return (
     <Stack hasGutter>
@@ -79,7 +66,7 @@ const OrganizationSelectorContent = ({
         <Menu
           activeItemId={selectedOrg}
           selected={selectedOrg}
-          onSelect={(_ev, orgId) => handleOrgSelection(orgId as string)}
+          onSelect={(_ev, orgId) => setSelectedOrg(orgId as string)}
           isScrollable={needsScroll}
         >
           <MenuContent menuHeight={needsScroll ? '230px' : 'auto'}>
