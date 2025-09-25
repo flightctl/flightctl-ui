@@ -72,7 +72,11 @@ export const handleApiJSONResponse = async <R>(response: Response): Promise<R> =
   throw new Error(await getErrorMsgFromApiResponse(response));
 };
 
-const putOrPostData = async <R>(kind: string, data: R, method: 'PUT' | 'POST'): Promise<R> => {
+const putOrPostData = async <TRequest, TResponse = TRequest>(
+  kind: string,
+  data: TRequest,
+  method: 'PUT' | 'POST',
+): Promise<TResponse> => {
   const options: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
@@ -90,9 +94,11 @@ const putOrPostData = async <R>(kind: string, data: R, method: 'PUT' | 'POST'): 
   }
 };
 
-export const postData = async <R>(kind: string, data: R): Promise<R> => putOrPostData(kind, data, 'POST');
+export const postData = async <TRequest, TResponse = TRequest>(kind: string, data: TRequest): Promise<TResponse> =>
+  putOrPostData<TRequest, TResponse>(kind, data, 'POST');
 
-export const putData = async <R>(kind: string, data: R): Promise<R> => putOrPostData(kind, data, 'PUT');
+export const putData = async <TRequest>(kind: string, data: TRequest): Promise<TRequest> =>
+  putOrPostData<TRequest, TRequest>(kind, data, 'PUT');
 
 export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Promise<R> => {
   const options: RequestInit = {

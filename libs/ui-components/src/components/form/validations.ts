@@ -695,3 +695,17 @@ export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDev
         ),
     labels: validLabelsSchema(t, forbiddenDeviceLabels),
   });
+
+export const createMassResumeValidationSchema = (t: TFunction) =>
+  Yup.object().shape({
+    mode: Yup.string().oneOf(['fleet', 'labels', 'all']).required(),
+    fleetId: Yup.string().when('mode', ([mode]) =>
+      mode === 'fleet' ? Yup.string().required(t('Fleet selection is required')) : Yup.string(),
+    ),
+    labels: Yup.array().when('mode', ([mode]) => {
+      if (mode === 'labels') {
+        return validLabelsSchema(t).min(1, t('At least one label is required'));
+      }
+      return Yup.array();
+    }),
+  });

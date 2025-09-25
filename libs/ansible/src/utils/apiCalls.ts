@@ -17,13 +17,13 @@ const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   throw new Error(await getErrorMsgFromApiResponse(response));
 };
 
-const putOrPostData = async <R>(
+const putOrPostData = async <TRequest, TResponse = TRequest>(
   kind: string,
-  data: R,
+  data: TRequest,
   serviceUrl: string,
   applyOptions: (options: RequestInit) => RequestInit,
   method: 'PUT' | 'POST',
-): Promise<R> => {
+): Promise<TResponse> => {
   const options: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
@@ -41,19 +41,19 @@ const putOrPostData = async <R>(
   }
 };
 
-export const postData = async <R>(
+export const postData = async <TRequest, TResponse = TRequest>(
   kind: string,
-  data: R,
+  data: TRequest,
   serviceUrl: string,
   applyOptions: (options: RequestInit) => RequestInit,
-) => putOrPostData(kind, data, serviceUrl, applyOptions, 'POST');
+): Promise<TResponse> => putOrPostData<TRequest, TResponse>(kind, data, serviceUrl, applyOptions, 'POST');
 
-export const putData = async <R>(
+export const putData = async <TRequest>(
   kind: string,
-  data: R,
+  data: TRequest,
   serviceUrl: string,
   applyOptions: (options: RequestInit) => RequestInit,
-) => putOrPostData(kind, data, serviceUrl, applyOptions, 'PUT');
+): Promise<TRequest> => putOrPostData<TRequest, TRequest>(kind, data, serviceUrl, applyOptions, 'PUT');
 
 export const deleteData = async <R>(
   kind: string,

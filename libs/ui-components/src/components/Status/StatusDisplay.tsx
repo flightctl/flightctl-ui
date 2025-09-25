@@ -14,11 +14,29 @@ type StatusLabelProps = {
   messageTitle?: string;
   level: StatusLevel;
   customIcon?: React.ComponentClass<SVGIconProps>;
+  customColor?: string;
 };
 
-export const StatusDisplayContent = ({ label, messageTitle, message, level, customIcon }: StatusLabelProps) => {
-  const iconStatus = level === 'unknown' ? undefined : level;
+export const StatusDisplayContent = ({
+  label,
+  messageTitle,
+  message,
+  level,
+  customIcon,
+  customColor,
+}: StatusLabelProps) => {
+  const overrideStatus = level === 'unknown' || (level === 'custom' && customColor);
   const IconComponent = customIcon || getDefaultStatusIcon(level);
+  const iconColor = customColor || getDefaultStatusColor(level);
+
+  const icon = (
+    <Icon
+      status={overrideStatus ? undefined : level}
+      style={{ '--pf-v5-c-icon__content--Color': iconColor } as React.CSSProperties}
+    >
+      <IconComponent />
+    </Icon>
+  );
 
   if (message) {
     return (
@@ -29,18 +47,7 @@ export const StatusDisplayContent = ({ label, messageTitle, message, level, cust
         className="fctl-status-display-content__popover"
         hasAutoWidth={false}
       >
-        <Button
-          variant="link"
-          isInline
-          icon={
-            <Icon
-              status={iconStatus}
-              style={{ '--pf-v5-c-icon__content--Color': getDefaultStatusColor(level) } as React.CSSProperties}
-            >
-              <IconComponent />
-            </Icon>
-          }
-        >
+        <Button variant="link" isInline icon={icon}>
           {label}
         </Button>
       </Popover>
@@ -49,14 +56,7 @@ export const StatusDisplayContent = ({ label, messageTitle, message, level, cust
 
   return (
     <Flex className="ftcl_status-label">
-      <FlexItem>
-        <Icon
-          status={iconStatus}
-          style={{ '--pf-v5-c-icon__content--Color': getDefaultStatusColor(level) } as React.CSSProperties}
-        >
-          <IconComponent />
-        </Icon>
-      </FlexItem>
+      <FlexItem>{icon}</FlexItem>
       <FlexItem>{label}</FlexItem>
     </Flex>
   );
@@ -67,6 +67,7 @@ type StatusDisplayProps = {
     label: string;
     level: StatusLevel;
     customIcon?: React.ComponentClass<SVGIconProps>;
+    customColor?: string;
   };
   message?: React.ReactNode;
 };
@@ -77,7 +78,15 @@ const StatusDisplay = ({ item, message }: StatusDisplayProps) => {
     return <StatusDisplayContent level="unknown" label={t('Unknown')} />;
   }
 
-  return <StatusDisplayContent level={item.level} customIcon={item.customIcon} label={item.label} message={message} />;
+  return (
+    <StatusDisplayContent
+      level={item.level}
+      customIcon={item.customIcon}
+      customColor={item.customColor}
+      label={item.label}
+      message={message}
+    />
+  );
 };
 
 export default StatusDisplay;

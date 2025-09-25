@@ -14,19 +14,35 @@ export const useAccessReview = (kind: RESOURCE, verb: VERB): AccessReviewResult 
     fetch: { checkPermissions },
   } = useAppContext();
   React.useEffect(() => {
+    let isMounted = true;
+
     const doItAsync = async () => {
+      if (!isMounted) return;
+
       setIsLoading(true);
       try {
         const allowed = await checkPermissions(kind, verb);
-        setIsAllowed(allowed);
+        if (isMounted) {
+          setIsAllowed(allowed);
+        }
       } catch (err) {
-        setError(getErrorMessage(err));
-        setIsAllowed(false);
+        if (isMounted) {
+          setError(getErrorMessage(err));
+          setIsAllowed(false);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
+
     doItAsync();
+
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+    };
   }, [kind, verb, checkPermissions]);
 
   return [isAllowed, isLoading, error];

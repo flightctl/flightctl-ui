@@ -37,6 +37,7 @@ import ButtonWithPermissions from '../common/ButtonWithPermissions';
 import { RESOURCE, VERB } from '../../types/rbac';
 import PageWithPermissions from '../common/PageWithPermissions';
 import { useFleetImportAccessReview } from '../../hooks/useFleetImportAccessReview';
+import { GlobalSystemRestoreBanners } from '../SystemRestore/SystemRestoreBanners';
 
 const FleetPageActions = ({ createText }: { createText?: string }) => {
   const { t } = useTranslation();
@@ -122,6 +123,7 @@ const FleetTable = () => {
 
   return (
     <ListPageBody error={error} loading={isLoading}>
+      <GlobalSystemRestoreBanners onResumeComplete={refetch} />
       <Toolbar inset={{ default: 'insetNone' }}>
         <ToolbarContent>
           <ToolbarGroup>

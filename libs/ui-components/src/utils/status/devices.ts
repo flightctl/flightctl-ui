@@ -1,8 +1,10 @@
 import { TFunction } from 'react-i18next';
-import { DisconnectedIcon } from '@patternfly/react-icons/dist/js/icons/disconnected-icon';
 import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons/power-off-icon';
 import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-circle-icon';
 import { BanIcon } from '@patternfly/react-icons/dist/js/icons/ban-icon';
+import { PendingIcon } from '@patternfly/react-icons/dist/js/icons/pending-icon';
+import suspendedColor from '@patternfly/react-tokens/dist/js/global_palette_orange_300';
+import pendingSyncColor from '@patternfly/react-tokens/dist/js/global_palette_blue_300';
 
 import {
   ApplicationsSummaryStatusType,
@@ -59,18 +61,6 @@ export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStat
     level: 'warning',
   },
   {
-    id: DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect,
-    label: t('Awaiting reconnect'),
-    level: 'warning',
-    customIcon: DisconnectedIcon,
-  },
-  {
-    id: DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused,
-    label: t('Updates paused'),
-    level: 'warning',
-    customIcon: PauseCircleIcon,
-  },
-  {
     id: DeviceSummaryStatusType.DeviceSummaryStatusUnknown,
     label: t('Unknown'),
     level: 'unknown',
@@ -91,7 +81,50 @@ export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStat
     label: t('Online'),
     level: 'success',
   },
+  {
+    id: DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect,
+    label: t('Pending sync'),
+    level: 'info',
+    customIcon: PendingIcon,
+    customColor: pendingSyncColor.value,
+  },
+  {
+    id: DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused,
+    label: t('Suspended'),
+    level: 'custom',
+    customIcon: PauseCircleIcon,
+    customColor: suspendedColor.value,
+  },
 ];
+
+/**
+ * Returns device status items for the Overview page, allowing to exclude statuses.
+ * If "AwaitingReconnect" or "ConflictPaused" statuses are present, they are ordered at the beginning
+ */
+export const getOverviewDeviceStatusItems = (
+  t: TFunction,
+  excludeStatuses?: DeviceSummaryStatusType[],
+): StatusItem<DeviceSummaryStatusType>[] => {
+  const allStatusItems = getDeviceStatusItems(t);
+
+  const filteredItems = excludeStatuses
+    ? allStatusItems.filter((item) => !excludeStatuses.includes(item.id))
+    : allStatusItems;
+
+  const priorityStatuses = [
+    DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect,
+    DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused,
+  ];
+
+  const priorityItems = filteredItems.filter((item) => priorityStatuses.includes(item.id));
+  const otherItems = filteredItems.filter((item) => !priorityStatuses.includes(item.id));
+
+  const orderedPriorityItems = priorityStatuses
+    .map((status) => priorityItems.find((item) => item.id === status))
+    .filter(Boolean) as StatusItem<DeviceSummaryStatusType>[];
+
+  return [...orderedPriorityItems, ...otherItems];
+};
 
 export const getDeviceLifecycleStatusItems = (t: TFunction): StatusItem<DeviceLifecycleStatusType>[] => [
   {

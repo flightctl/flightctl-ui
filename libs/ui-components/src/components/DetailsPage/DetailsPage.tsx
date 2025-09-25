@@ -31,6 +31,7 @@ export type DetailsPageProps = {
   resourceLink: Route;
   actions?: React.ReactNode;
   nav?: React.ReactNode;
+  banner?: React.ReactNode;
 };
 
 const DetailsPage = ({
@@ -45,6 +46,7 @@ const DetailsPage = ({
   resourceTypeLabel,
   actions,
   nav,
+  banner,
 }: DetailsPageProps) => {
   const { t } = useTranslation();
   let content = children;
@@ -86,6 +88,7 @@ const DetailsPage = ({
           <SplitItem>{actions}</SplitItem>
         </Split>
       </PageSection>
+      {banner}
       {nav && (
         <PageSection variant="light" type="nav" className="fctl-details-page__nav">
           {nav}

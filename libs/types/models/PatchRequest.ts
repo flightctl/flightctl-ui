@@ -14,5 +14,5 @@ export type PatchRequest = Array<{
   /**
    * The operation to perform.
    */
-  op: 'add' | 'replace' | 'remove';
+  op: 'add' | 'replace' | 'remove' | 'test';
 }>;

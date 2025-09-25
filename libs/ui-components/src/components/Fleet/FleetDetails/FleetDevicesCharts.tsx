@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Flex, FlexItem } from '@patternfly/react-core';
 
-import { DevicesSummary } from '@flightctl/types';
+import { DeviceSummaryStatusType, DevicesSummary } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { FilterSearchParams, getDeviceStatusItems } from '../../../utils/status/devices';
+import { FilterSearchParams, getOverviewDeviceStatusItems } from '../../../utils/status/devices';
 import { getSystemUpdateStatusItems } from '../../../utils/status/system';
 import {
   getApplicationStatusHelperText,
@@ -18,6 +18,11 @@ interface FleetDevicesChartsProps {
   fleetId: string;
   devicesSummary: DevicesSummary;
 }
+
+const systemRestoreStatuses = [
+  DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect,
+  DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused,
+];
 
 const getBaseFleetQuery = (fleetId: string) => {
   const baseQuery = new URLSearchParams();
@@ -78,7 +83,8 @@ const DevicesByDeviceStatusChart = ({
 }) => {
   const { t } = useTranslation();
 
-  const statusItems = getDeviceStatusItems(t);
+  const excludeStatuses = systemRestoreStatuses.filter((status) => !deviceStatus[status]);
+  const statusItems = getOverviewDeviceStatusItems(t, excludeStatuses);
 
   const deviceStatusData = toChartData(
     deviceStatus,

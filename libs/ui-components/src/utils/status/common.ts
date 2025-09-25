@@ -20,6 +20,7 @@ export interface StatusItem<T extends string> {
   label: string;
   level: StatusLevel;
   customIcon?: React.ComponentClass<SVGIconProps>;
+  customColor?: string;
 }
 
 export const getDefaultStatusIcon = (level: StatusLevel) => {

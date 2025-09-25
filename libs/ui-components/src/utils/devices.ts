@@ -1,4 +1,4 @@
-import { Device, ObjectMeta } from '@flightctl/types';
+import { Device, DeviceSummaryStatusType, ObjectMeta } from '@flightctl/types';
 import { TFunction } from 'react-i18next';
 
 const deviceFleetRegExp = /^Fleet\/(?<fleetName>.*)$/;
@@ -23,6 +23,16 @@ export const getEditDisabledReason = (device: Device, t: TFunction) => {
 export const getDecommissionDisabledReason = (device: Device, t: TFunction) => {
   if (!isDeviceEnrolled(device)) {
     return t('Device decommissioning already started.');
+  }
+  return undefined;
+};
+
+export const isDeviceResumable = (device: Device) =>
+  device.status?.summary.status === DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused;
+
+export const getResumeDisabledReason = (device: Device, t: TFunction) => {
+  if (!isDeviceResumable(device)) {
+    return t('Device is not suspended.');
   }
   return undefined;
 };

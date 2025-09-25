@@ -71,8 +71,12 @@ export type AppContextProps = {
   fetch: {
     getWsEndpoint: (deviceId: string) => string;
     get: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
-    post: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
-    put: <R>(kind: string, data: R, abortSignal?: AbortSignal) => Promise<R>;
+    post: <TRequest, TResponse = TRequest>(
+      kind: string,
+      data: TRequest,
+      abortSignal?: AbortSignal,
+    ) => Promise<TResponse>;
+    put: <TRequest>(kind: string, data: TRequest, abortSignal?: AbortSignal) => Promise<TRequest>;
     remove: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
     patch: <R>(kind: string, patches: PatchRequest, abortSignal?: AbortSignal) => Promise<R>;
     checkPermissions: (resource: RESOURCE, verb: VERB) => Promise<boolean>;

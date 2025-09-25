@@ -78,11 +78,13 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.DEVICE_SPEC_VALID]: t('Device specification has returned to a valid state'),
     [Event.reason.DEVICE_SPEC_INVALID]: t('Device specification is invalid'),
     [Event.reason.DEVICE_CONFLICT_PAUSED]: t('Device is paused after database restore'),
+    [Event.reason.DEVICE_CONFLICT_RESOLVED]: t('Device conflict has been resolved'),
     // Enrollment request events
     [Event.reason.ENROLLMENT_REQUEST_APPROVED]: t('Enrollment request was approved'),
     [Event.reason.ENROLLMENT_REQUEST_APPROVAL_FAILED]: t('Enrollment request approval failed'),
     // Internal task events
     [Event.reason.INTERNAL_TASK_FAILED]: t('Internal task failed'),
+    [Event.reason.INTERNAL_TASK_PERMANENTLY_FAILED]: t('Internal task permanently failed'),
     // Repository events
     [Event.reason.REPOSITORY_ACCESSIBLE]: t('Repository is accessible'),
     [Event.reason.REPOSITORY_INACCESSIBLE]: t('Repository is inaccessible'),

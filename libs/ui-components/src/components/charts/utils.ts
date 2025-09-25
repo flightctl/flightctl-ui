@@ -27,7 +27,7 @@ export const toChartData = <T extends string>(
     return {
       x: `${statusItem.label}`,
       y: entryIndex === -1 ? 0 : percentages[entryIndex],
-      color: getDefaultStatusColor(statusItem.level),
+      color: statusItem.customColor || getDefaultStatusColor(statusItem.level),
       link: {
         to: ROUTE.DEVICES as Route,
         query: query.toString(),

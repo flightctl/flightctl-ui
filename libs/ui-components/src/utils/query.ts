@@ -1,5 +1,6 @@
 import { FlightCtlLabel } from '../types/extraTypes';
 import { labelToExactApiMatchString, textToPartialApiMatchString } from './labels';
+import { DeviceSummaryStatusType } from '@flightctl/types';
 
 const addQueryConditions = (fieldSelectors: string[], fieldSelector: string, values?: string[]) => {
   if (values?.length === 1) {
@@ -74,6 +75,27 @@ export const commonQueries = {
     return `resourcesyncs?${searchParams.toString()}`;
   },
   getRepositoryById: (repositoryId: string) => `repositories/${repositoryId}`,
+  getSuspendedDeviceCountByLabels: (labels: FlightCtlLabel[]) => {
+    const searchParams = new URLSearchParams({
+      limit: '1',
+    });
+    searchParams.set('labelSelector', labels.map(labelToExactApiMatchString).join(','));
+    searchParams.set(
+      'fieldSelector',
+      `status.summary.status=${DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused}`,
+    );
+    return `devices?${searchParams.toString()}`;
+  },
+  getAllSuspendedDevicesCount: () => {
+    const searchParams = new URLSearchParams({
+      limit: '1',
+    });
+    searchParams.set(
+      'fieldSelector',
+      `status.summary.status=${DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused}`,
+    );
+    return `devices?${searchParams.toString()}`;
+  },
 };
 
 export { addQueryConditions, addTextContainsCondition, setLabelParams };

@@ -1,25 +1,37 @@
 import * as React from 'react';
+import { Trans } from 'react-i18next';
 import { Button, DropdownItem, DropdownList, Nav, NavList } from '@patternfly/react-core';
 
-import { Device, DeviceDecommission, DeviceDecommissionTargetType, ResourceKind } from '@flightctl/types';
+import {
+  Device,
+  DeviceDecommission,
+  DeviceDecommissionTargetType,
+  DeviceSummaryStatusType,
+  ResourceKind,
+} from '@flightctl/types';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { useFetch } from '../../../hooks/useFetch';
 import { getDisabledTooltipProps } from '../../../utils/tooltip';
 import DetailsPage from '../../DetailsPage/DetailsPage';
-import DetailsPageActions, { useDecommissionAction, useDeleteAction } from '../../DetailsPage/DetailsPageActions';
+import DetailsPageActions, {
+  useDecommissionAction,
+  useDeleteAction,
+  useResumeAction,
+} from '../../DetailsPage/DetailsPageActions';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import DeviceDetailsTab from './DeviceDetailsTab';
 import TerminalTab from './TerminalTab';
 import NavItem from '../../NavItem/NavItem';
-import { getEditDisabledReason, isDeviceEnrolled } from '../../../utils/devices';
+import { getEditDisabledReason, getResumeDisabledReason, isDeviceEnrolled } from '../../../utils/devices';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import EventsCard from '../../Events/EventsCard';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
 import DeviceAliasEdit from './DeviceAliasEdit';
+import { SystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 
 type DeviceDetailsPageProps = React.PropsWithChildren<{ hideTerminal?: boolean }>;
 
@@ -35,12 +47,14 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
 
   const deviceLabels = device?.metadata.labels;
   const deviceAlias = deviceLabels?.alias;
+  const deviceNameOrAlias = deviceAlias || deviceId;
   const isEnrolled = !device || isDeviceEnrolled(device);
 
   const [hasTerminalAccess] = useAccessReview(RESOURCE.DEVICE_CONSOLE, VERB.GET);
   const [canDelete] = useAccessReview(RESOURCE.DEVICE, VERB.DELETE);
   const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
   const [canDecommission] = useAccessReview(RESOURCE.DEVICE_DECOMMISSION, VERB.UPDATE);
+  const [canResume] = useAccessReview(RESOURCE.DEVICE_RESUME, VERB.UPDATE);
 
   const canOpenTerminal = hasTerminalAccess && isEnrolled;
 
@@ -49,7 +63,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
       await remove(`devices/${deviceId}`);
       navigate(ROUTE.DEVICES);
     },
-    resourceName: deviceAlias || deviceId,
+    resourceName: deviceNameOrAlias,
     resourceType: 'device',
     buttonLabel: isEnrolled ? undefined : t('Delete forever'),
   });
@@ -64,7 +78,33 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
     },
   });
 
+  const { resumeAction, resumeModal } = useResumeAction({
+    deviceId,
+    alias: deviceAlias,
+    disabledReason: device ? getResumeDisabledReason(device, t) : undefined,
+    onResumeComplete: refetch,
+  });
+
   const editActionProps = device ? getDisabledTooltipProps(getEditDisabledReason(device, t)) : undefined;
+  const resumeDevice = {
+    actionText: t('Resume device'),
+    title: (
+      <Trans t={t}>
+        You are about to resume <strong>{deviceNameOrAlias}</strong>
+      </Trans>
+    ),
+    requestSelector: {
+      fieldSelector: `metadata.name=${deviceId}`,
+    },
+  };
+
+  const deviceSummaryStatus = device?.status?.summary.status;
+  const deviceSummary = {
+    [DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused]:
+      deviceSummaryStatus === DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused ? 1 : 0,
+    [DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect]:
+      deviceSummaryStatus === DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect ? 1 : 0,
+  };
 
   return (
     <DetailsPage
@@ -84,6 +124,17 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
           />
         ) : (
           deviceAlias
+        )
+      }
+      banner={
+        device && (
+          <SystemRestoreBanners
+            mode="device"
+            resumeAction={resumeDevice}
+            summaryStatus={deviceSummary}
+            onResumeComplete={refetch}
+            className="pf-v5-u-pt-0 pf-v5-u-px-lg"
+          />
         )
       }
       resourceLink={ROUTE.DEVICES}
@@ -111,6 +162,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
                   {t('Edit device configurations')}
                 </DropdownItem>
               )}
+              {canResume && resumeAction}
               {canDecommission && decommissionAction}
             </DropdownList>
           </DetailsPageActions>
@@ -143,7 +195,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
         </Routes>
       )}
 
-      {deleteModal || decommissionModal}
+      {deleteModal || decommissionModal || resumeModal}
     </DetailsPage>
   );
 };

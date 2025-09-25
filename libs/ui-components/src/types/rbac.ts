@@ -13,6 +13,7 @@ export enum RESOURCE {
   DEVICE = 'devices',
   DEVICE_CONSOLE = 'devices/console',
   DEVICE_DECOMMISSION = 'devices/decommission',
+  DEVICE_RESUME = 'devices/resume',
   REPOSITORY = 'repositories',
   RESOURCE_SYNC = 'resourcesyncs',
   ENROLLMENT_REQUEST = 'enrollmentrequests',
