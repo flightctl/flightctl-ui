@@ -7,11 +7,12 @@ export const useFetch = (getCookie: (name: string) => string | undefined, servic
     (options: RequestInit) => {
       const token = getCookie('csrftoken');
       if (token) {
-        if (options.headers) {
-          options.headers['X-CSRFToken'] = token;
-        } else {
-          options.headers = { 'X-CSRFToken': token };
-        }
+        const headers = new Headers(options.headers || {});
+        headers.set('X-CSRFToken', token);
+        return {
+          ...options,
+          headers,
+        };
       }
       return options;
     },

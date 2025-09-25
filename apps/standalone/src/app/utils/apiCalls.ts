@@ -21,12 +21,11 @@ export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'w
 const addOrganizationHeader = (options: RequestInit): RequestInit => {
   const orgId = localStorage.getItem(ORGANIZATION_STORAGE_KEY);
   if (orgId) {
+    const headers = new Headers(options.headers || {});
+    headers.set('X-FlightCtl-Organization-ID', orgId);
     return {
       ...options,
-      headers: {
-        ...options.headers,
-        'X-FlightCtl-Organization-ID': orgId,
-      },
+      headers,
     };
   }
   return options;

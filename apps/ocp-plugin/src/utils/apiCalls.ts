@@ -16,23 +16,19 @@ declare global {
 }
 
 const addRequiredHeaders = (options: RequestInit): RequestInit => {
-  const updatedOptions = { ...options };
-
   const token = getCSRFToken();
   const orgId = localStorage.getItem(ORGANIZATION_STORAGE_KEY);
 
-  if (updatedOptions.headers) {
-    updatedOptions.headers['X-CSRFToken'] = token;
-    if (orgId) {
-      updatedOptions.headers['X-FlightCtl-Organization-ID'] = orgId;
-    }
-  } else {
-    updatedOptions.headers = orgId
-      ? { 'X-CSRFToken': token, 'X-FlightCtl-Organization-ID': orgId }
-      : { 'X-CSRFToken': token };
+  const headers = new Headers(options.headers || {});
+  headers.set('X-CSRFToken', token);
+  if (orgId) {
+    headers.set('X-FlightCtl-Organization-ID', orgId);
   }
 
-  return updatedOptions;
+  return {
+    ...options,
+    headers,
+  };
 };
 
 const apiServer = `${window.location.hostname}${
