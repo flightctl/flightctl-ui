@@ -21,7 +21,7 @@ func corsHandler(router *mux.Router) http.Handler {
 	return gorillaHandlers.CORS(
 		gorillaHandlers.AllowedOrigins([]string{"http://localhost:9000"}),
 		gorillaHandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "PATCH"}),
-		gorillaHandlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+		gorillaHandlers.AllowedHeaders([]string{"Content-Type", "Authorization", "X-FlightCtl-Organization-ID"}),
 		gorillaHandlers.AllowCredentials(),
 	)(router)
 }
@@ -30,7 +30,11 @@ func main() {
 	log := log.InitLogs()
 	router := mux.NewRouter()
 	apiRouter := router.PathPrefix("/api").Subrouter()
+
 	apiRouter.Use(middleware.AuthMiddleware)
+	if config.IsOrganizationsEnabled() {
+		apiRouter.Use(middleware.OrganizationMiddleware)
+	}
 
 	tlsConfig, err := bridge.GetTlsConfig()
 	if err != nil {
@@ -55,6 +59,16 @@ func main() {
 
 	terminalBridge := bridge.TerminalBridge{TlsConfig: tlsConfig}
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
+
+	// Simple endpoint to check if organizations are enabled
+	if config.IsOrganizationsEnabled() {
+		apiRouter.HandleFunc("/organizations-enabled", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"enabled": true}`))
+		})
+	} else {
+		apiRouter.HandleFunc("/organizations-enabled", bridge.UnimplementedHandler)
+	}
 
 	if config.OcpPlugin != "true" {
 		authHandler, err := auth.NewAuth(tlsConfig)

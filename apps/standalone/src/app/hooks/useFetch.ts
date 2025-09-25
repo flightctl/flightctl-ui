@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { deleteData, fetchData, patchData, postData, putData, wsEndpoint } from '../utils/apiCalls';
+import { deleteData, fetchData, fetchUiProxy, patchData, postData, putData, wsEndpoint } from '../utils/apiCalls';
 import { PatchRequest } from '@flightctl/types';
 
 export const useFetch = () => {
@@ -34,6 +34,10 @@ export const useFetch = () => {
 
   const checkPermissions = React.useCallback(() => Promise.resolve(true), []);
 
+  const proxyFetch = React.useCallback(async (endpoint: string, requestInit: RequestInit): Promise<Response> => {
+    return fetchUiProxy(endpoint, requestInit);
+  }, []);
+
   return {
     getWsEndpoint,
     get,
@@ -42,5 +46,6 @@ export const useFetch = () => {
     remove,
     patch,
     checkPermissions,
+    proxyFetch,
   };
 };

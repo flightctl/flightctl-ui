@@ -13,7 +13,6 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 import { PatchRequest } from '@flightctl/types';
-import { CliArtifactsResponse } from '../types/extraTypes';
 import { ROUTE } from './useNavigate';
 import { RESOURCE, VERB } from '../types/rbac';
 
@@ -80,9 +79,9 @@ export type AppContextProps = {
     remove: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
     patch: <R>(kind: string, patches: PatchRequest, abortSignal?: AbortSignal) => Promise<R>;
     checkPermissions: (resource: RESOURCE, verb: VERB) => Promise<boolean>;
+    // All methods to the UI proxy are handled in the same method - returns raw Response
+    proxyFetch: (endpoint: string, requestInit: RequestInit) => Promise<Response>;
   };
-  // Extra fetch functions
-  getCliArtifacts?: (abortSignal?: AbortSignal) => Promise<CliArtifactsResponse>;
 };
 
 export const AppContext = React.createContext<AppContextProps>({
@@ -115,6 +114,7 @@ export const AppContext = React.createContext<AppContextProps>({
     remove: async () => ({}) as any,
     patch: async () => ({}) as any,
     checkPermissions: async () => true,
+    proxyFetch: async () => ({}) as any,
   },
   /* eslint-enable */
 });

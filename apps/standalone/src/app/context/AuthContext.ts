@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { loginAPI, redirectToLogin } from '../utils/apiCalls';
+import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
 
 const AUTH_DISABLED_STATUS_CODE = 418;
 const EXPIRATION = 'expiration';
@@ -36,6 +37,7 @@ export const useAuthContext = () => {
       let callbackErr: string | null = null;
       if (window.location.pathname === '/callback') {
         localStorage.removeItem(EXPIRATION);
+        localStorage.removeItem(ORGANIZATION_STORAGE_KEY);
         const searchParams = new URLSearchParams(window.location.search);
         const code = searchParams.get('code');
         callbackErr = searchParams.get('error');

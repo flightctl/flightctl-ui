@@ -4,7 +4,7 @@ import {
   getErrorMsgFromAlertsApiResponse,
   getErrorMsgFromApiResponse,
 } from '@flightctl/ui-components/src/utils/apiCalls';
-import { CliArtifactsResponse } from '@flightctl/ui-components/src/types/extraTypes';
+import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
 
 import { lastRefresh } from '../context/AuthContext';
 
@@ -12,22 +12,45 @@ const apiPort = window.API_PORT || window.location.port;
 const apiServer = `${window.location.hostname}${apiPort ? `:${apiPort}` : ''}`;
 
 const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
-const alertsAPI = `${window.location.protocol}//${apiServer}/api/alerts`;
-export const flightCtlCliArtifactsUrl = `${window.location.protocol}//${apiServer}/api/cli-artifacts`;
+const uiProxyAPI = `${window.location.protocol}//${apiServer}/api`;
 
 export const loginAPI = `${window.location.protocol}//${apiServer}/api/login`;
-const logoutAPI = `${window.location.protocol}//${apiServer}/api/logout`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
+
+// Helper function to add organization header to request options
+const addOrganizationHeader = (options: RequestInit): RequestInit => {
+  const orgId = localStorage.getItem(ORGANIZATION_STORAGE_KEY);
+  if (orgId) {
+    const headers = new Headers(options.headers || {});
+    headers.set('X-FlightCtl-Organization-ID', orgId);
+    return {
+      ...options,
+      headers,
+    };
+  }
+  return options;
+};
+
+export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): Promise<Response> => {
+  const baseOptions = {
+    credentials: 'include',
+    ...requestInit,
+  } as RequestInit;
+
+  const options = addOrganizationHeader(baseOptions);
+
+  return await fetch(`${uiProxyAPI}/${endpoint}`, options);
+};
 
 const getFullApiUrl = (path: string) => {
   if (path.startsWith('alerts')) {
-    return { api: 'alerts', url: `${alertsAPI}/api/v2/${path}` };
+    return { api: 'alerts', url: `${uiProxyAPI}/alerts/api/v2/${path}` };
   }
   return { api: 'flightctl', url: `${flightCtlAPI}/api/v1/${path}` };
 };
 
 export const logout = async () => {
-  const response = await fetch(logoutAPI, { credentials: 'include' });
+  const response = await fetch(`${uiProxyAPI}/logout`, { credentials: 'include' });
   const { url } = (await response.json()) as { url: string };
   url ? (window.location.href = url) : window.location.reload();
 };
@@ -81,28 +104,19 @@ const handleAlertsJSONResponse = async <R>(response: Response): Promise<R> => {
 const fetchWithRetry = async <R>(path: string, init?: RequestInit): Promise<R> => {
   const { api, url } = getFullApiUrl(path);
 
+  // Add organization header if available
+  const options = addOrganizationHeader({ ...init });
+
   const prevRefresh = lastRefresh;
-  let response = await fetch(url, init);
+  let response = await fetch(url, options);
   //if token refresh occured, lets try again
   if (response.status === 401 && prevRefresh != lastRefresh) {
-    response = await fetch(url, init);
+    response = await fetch(url, options);
   }
   if (api === 'alerts') {
     return handleAlertsJSONResponse(response);
   }
   return handleApiJSONResponse(response);
-};
-
-export const fetchCliArtifacts = async (abortSignal?: AbortSignal): Promise<CliArtifactsResponse> => {
-  try {
-    const response = await fetch(flightCtlCliArtifactsUrl, {
-      signal: abortSignal,
-    });
-    return handleApiJSONResponse(response);
-  } catch (error) {
-    console.error('Error making GET Cli artifacts request:', error);
-    throw error;
-  }
 };
 
 const putOrPostData = async <TRequest, TResponse = TRequest>(

@@ -24,6 +24,7 @@ echo "Using external IP: $EXTERNAL_IP" >&2
 # Read configuration flags from environment variables (with defaults)
 ENABLE_CLI_ARTIFACTS=${ENABLE_CLI_ARTIFACTS:-false}
 ENABLE_ALERTMANAGER=${ENABLE_ALERTMANAGER:-false}
+ENABLE_ORGANIZATIONS=${ENABLE_ORGANIZATIONS:-false}
 
 # Set core environment variables for kind development
 export FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY='true'
@@ -43,11 +44,19 @@ else
     unset FLIGHTCTL_ALERTMANAGER_PROXY
 fi
 
+# Organizations - conditionally set or unset
+if [ "$ENABLE_ORGANIZATIONS" = "true" ]; then
+    export ORGANIZATIONS_ENABLED="true"
+else
+    export ORGANIZATIONS_ENABLED="false"
+fi
+
 echo "Environment variables set:" >&2
 echo "  FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY=$FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY" >&2
 echo "  FLIGHTCTL_SERVER=$FLIGHTCTL_SERVER" >&2
 echo "  FLIGHTCTL_CLI_ARTIFACTS_SERVER=${FLIGHTCTL_CLI_ARTIFACTS_SERVER:-'(disabled)'}" >&2
 echo "  FLIGHTCTL_ALERTMANAGER_PROXY=${FLIGHTCTL_ALERTMANAGER_PROXY:-'(disabled)'}" >&2
+echo "  ORGANIZATIONS_ENABLED=$ORGANIZATIONS_ENABLED" >&2
 echo >&2
 
  

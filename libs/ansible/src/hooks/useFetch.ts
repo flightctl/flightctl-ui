@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { deleteData, fetchData, patchData, postData, putData } from '../utils/apiCalls';
+import { deleteData, fetchData, fetchUiProxy, patchData, postData, putData } from '../utils/apiCalls';
 import { PatchRequest } from '@flightctl/types';
 
 export const useFetch = (getCookie: (name: string) => string | undefined, serviceUrl = '') => {
@@ -7,11 +7,12 @@ export const useFetch = (getCookie: (name: string) => string | undefined, servic
     (options: RequestInit) => {
       const token = getCookie('csrftoken');
       if (token) {
-        if (options.headers) {
-          options.headers['X-CSRFToken'] = token;
-        } else {
-          options.headers = { 'X-CSRFToken': token };
-        }
+        const headers = new Headers(options.headers || {});
+        headers.set('X-CSRFToken', token);
+        return {
+          ...options,
+          headers,
+        };
       }
       return options;
     },
@@ -53,6 +54,13 @@ export const useFetch = (getCookie: (name: string) => string | undefined, servic
 
   const checkPermissions = React.useCallback(() => Promise.resolve(true), []);
 
+  const proxyFetch = React.useCallback(
+    async (endpoint: string, requestInit: RequestInit): Promise<Response> => {
+      return fetchUiProxy(endpoint, serviceUrl, applyHeaders, requestInit);
+    },
+    [serviceUrl, applyHeaders],
+  );
+
   return {
     getWsEndpoint,
     get,
@@ -61,5 +69,6 @@ export const useFetch = (getCookie: (name: string) => string | undefined, servic
     remove,
     patch,
     checkPermissions,
+    proxyFetch,
   };
 };

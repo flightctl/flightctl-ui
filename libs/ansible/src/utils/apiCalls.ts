@@ -17,6 +17,17 @@ const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   throw new Error(await getErrorMsgFromApiResponse(response));
 };
 
+export const fetchUiProxy = async (
+  endpoint: string,
+  serviceUrl: string,
+  applyOptions: (options: RequestInit) => RequestInit,
+  requestInit: RequestInit,
+): Promise<Response> => {
+  const options = applyOptions(requestInit);
+
+  return await fetch(`${serviceUrl}/api/${endpoint}`, options);
+};
+
 const putOrPostData = async <TRequest, TResponse = TRequest>(
   kind: string,
   data: TRequest,
@@ -31,9 +42,9 @@ const putOrPostData = async <TRequest, TResponse = TRequest>(
     method,
     body: JSON.stringify(data),
   };
-  applyOptions(options);
+  const updatedOptions = applyOptions(options);
   try {
-    const response = await fetch(`${serviceUrl}/api/v1/${kind}`, options);
+    const response = await fetch(`${serviceUrl}/api/v1/${kind}`, updatedOptions);
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error(`Error making ${method} request for ${kind}:`, error);
@@ -65,9 +76,9 @@ export const deleteData = async <R>(
     method: 'DELETE',
     signal: abortSignal,
   };
-  applyOptions(options);
+  const updatedOptions = applyOptions(options);
   try {
-    const response = await fetch(`${serviceUrl}/api/v1/${kind}`, options);
+    const response = await fetch(`${serviceUrl}/api/v1/${kind}`, updatedOptions);
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making DELETE request:', error);
@@ -90,9 +101,9 @@ export const patchData = async <R>(
     body: JSON.stringify(data),
     signal: abortSignal,
   };
-  applyOptions(options);
+  const updatedOptions = applyOptions(options);
   try {
-    const response = await fetch(`${serviceUrl}/api/v1/${kind}`, options);
+    const response = await fetch(`${serviceUrl}/api/v1/${kind}`, updatedOptions);
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making PATCH request:', error);

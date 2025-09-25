@@ -126,6 +126,11 @@ func replaceBaseURL(endpoint, oldBase, newBase string) string {
 }
 
 func getOIDCClient(oidcConfig oidcServerResponse, tlsConfig *tls.Config) (*osincli.Client, error) {
+	scope := "openid"
+	if config.IsOrganizationsEnabled() {
+		scope = "openid organization:*"
+	}
+
 	oidcClientConfig := &osincli.ClientConfig{
 		ClientId:                 config.AuthClientId,
 		AuthorizeUrl:             oidcConfig.AuthEndpoint,
@@ -133,7 +138,7 @@ func getOIDCClient(oidcConfig oidcServerResponse, tlsConfig *tls.Config) (*osinc
 		RedirectUrl:              config.BaseUiUrl + "/callback",
 		ErrorsInStatusCode:       true,
 		SendClientSecretInParams: false,
-		Scope:                    "openid",
+		Scope:                    scope,
 	}
 
 	client, err := osincli.NewClient(oidcClientConfig)

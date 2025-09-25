@@ -6,6 +6,7 @@ import { useAppContext } from '@flightctl/ui-components/src/hooks/useAppContext'
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import DeviceDetails from '@flightctl/ui-components/src/components/Device/DeviceDetails/DeviceDetailsPage';
 import WithTooltip from '@flightctl/ui-components/src/components/common/WithTooltip';
+import WithPageLayout from '../common/WithPageLayout';
 import { getWatchK8sResourceResult, isMicroShiftCluster } from '../../utils/clusters';
 import { ManagedCluster } from '../../types/k8s';
 
@@ -29,7 +30,11 @@ const DeviceDetailsPage = () => {
 
   const watchResultError = getWatchK8sResourceResult(k8sError as K8sWatchResourceError, true);
   if (!loaded || (k8sError && !watchResultError)) {
-    return <DeviceDetails />;
+    return (
+      <WithPageLayout>
+        <DeviceDetails />
+      </WithPageLayout>
+    );
   }
 
   let mcContent: React.ReactNode;
@@ -58,12 +63,14 @@ const DeviceDetailsPage = () => {
     );
   }
   return (
-    <DeviceDetails>
-      <Stack>
-        <StackItem className="fctl-device-details-tab__label">{t('MicroShift cluster')}</StackItem>
-        <StackItem>{mcContent}</StackItem>
-      </Stack>
-    </DeviceDetails>
+    <WithPageLayout>
+      <DeviceDetails>
+        <Stack>
+          <StackItem className="fctl-device-details-tab__label">{t('MicroShift cluster')}</StackItem>
+          <StackItem>{mcContent}</StackItem>
+        </Stack>
+      </DeviceDetails>
+    </WithPageLayout>
   );
 };
 

@@ -31,9 +31,6 @@ type CommandLineToolsContentProps = {
 
 type CommandLineArtifact = CliArtifactsResponse['artifacts'][0];
 
-// "Not implemented" response from the UI Proxy when artifact functionality is disabled
-const cliArtifactsDisabledError = 'Error 501';
-
 const getArtifactUrl = (baseUrl: string, artifact: CommandLineArtifact) => {
   const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
   return `${normalizedBaseUrl}/${artifact.arch}/${artifact.os}/${artifact.filename}`;
@@ -103,7 +100,8 @@ const CommandLineToolsContent = ({
 
 const CommandLineToolsPage = () => {
   const { t } = useTranslation();
-  const { getCliArtifacts, settings } = useAppContext();
+  const { fetch, settings } = useAppContext();
+  const proxyFetch = fetch.proxyFetch;
 
   const [loading, setLoading] = React.useState<boolean>(true);
   const [loadError, setLoadError] = React.useState<string>();
@@ -113,23 +111,28 @@ const CommandLineToolsPage = () => {
   React.useEffect(() => {
     const getLinks = async () => {
       try {
-        if (getCliArtifacts) {
-          const apiResponse = await getCliArtifacts();
-          setCliArtifactsResponse(apiResponse);
+        const response = await proxyFetch('cli-artifacts', {
+          method: 'GET',
+        });
+        if (!response.ok) {
+          if (response.status === 501) {
+            // Response that indicatest that the feature is disabled
+            setArtifactsEnabled(false);
+          } else {
+            setLoadError(getErrorMessage(response.statusText));
+          }
+          return;
         }
+        const apiResponse = (await response.json()) as CliArtifactsResponse;
+        setCliArtifactsResponse(apiResponse);
       } catch (e) {
-        const msg = getErrorMessage(e);
-        if (msg.includes(cliArtifactsDisabledError)) {
-          setArtifactsEnabled(false);
-        } else {
-          setLoadError(msg);
-        }
+        setArtifactsEnabled(false);
       } finally {
         setLoading(false);
       }
     };
     void getLinks();
-  }, [getCliArtifacts]);
+  }, [proxyFetch]);
 
   const productName = settings.isRHEM ? t('Red Hat Edge Manager') : t('Flight Control');
 
