@@ -39,9 +39,6 @@ const getDeviceColumns = (t: TFunction): ApiSortTableColumn[] => [
   {
     name: t('Status'),
   },
-  {
-    name: t('Last seen'),
-  },
 ];
 
 const DecommissionedDevicesTable = ({

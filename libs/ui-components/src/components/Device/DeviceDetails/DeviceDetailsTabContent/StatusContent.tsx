@@ -6,9 +6,9 @@ import {
   DescriptionListTerm,
 } from '@patternfly/react-core';
 
-import { Device } from '@flightctl/types';
-import { timeSinceText } from '../../../../utils/dates';
+import { Device, DeviceLastSeen } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
+import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import DetailsPageCard, { DetailsPageCardBody } from '../../../DetailsPage/DetailsPageCard';
 import FlightControlDescriptionList from '../../../common/FlightCtlDescriptionList';
 import LabelWithHelperText from '../../../common/WithHelperText';
@@ -16,9 +16,17 @@ import ApplicationSummaryStatus from '../../../Status/ApplicationSummaryStatus';
 import DeviceStatus from '../../../Status/DeviceStatus';
 import SystemUpdateStatus from '../../../Status/SystemUpdateStatus';
 import IntegrityStatus from '../../../Status/IntegrityStatus';
+import { timeSinceText } from '../../../../utils/dates';
+
+const LAST_SEEN_REFRESH_INTERVAL = 60 * 1000; // 1 minute
 
 const StatusContent = ({ device }: { device: Required<Device> }) => {
   const { t } = useTranslation();
+
+  const [lastSeenResponse] = useFetchPeriodically<DeviceLastSeen>({
+    endpoint: `devices/${device.metadata.name}/lastseen`,
+    timeout: LAST_SEEN_REFRESH_INTERVAL,
+  });
 
   return (
     <DetailsPageCard>
@@ -73,7 +81,7 @@ const StatusContent = ({ device }: { device: Required<Device> }) => {
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Last seen')}</DescriptionListTerm>
-            <DescriptionListDescription>{timeSinceText(t, device.status.lastSeen)}</DescriptionListDescription>
+            <DescriptionListDescription>{timeSinceText(t, lastSeenResponse?.lastSeen)}</DescriptionListDescription>
           </DescriptionListGroup>
         </FlightControlDescriptionList>
       </DetailsPageCardBody>

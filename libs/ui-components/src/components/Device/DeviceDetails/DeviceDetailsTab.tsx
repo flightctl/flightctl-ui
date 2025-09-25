@@ -13,7 +13,6 @@ import {
 
 import { Device } from '@flightctl/types';
 import { isDeviceEnrolled } from '../../../utils/devices';
-import { timeSinceText } from '../../../utils/dates';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useDeviceSpecSystemInfo } from '../../../hooks/useDeviceSpecSystemInfo';
@@ -191,10 +190,6 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
                 <DescriptionListDescription>
                   <DeviceLifecycleStatus device={device} />
                 </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Last seen')}</DescriptionListTerm>
-                <DescriptionListDescription>{timeSinceText(t, device.status.lastSeen)}</DescriptionListDescription>
               </DescriptionListGroup>
               {children}
             </FlightControlDescriptionList>

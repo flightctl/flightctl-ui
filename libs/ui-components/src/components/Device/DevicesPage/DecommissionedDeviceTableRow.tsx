@@ -2,7 +2,6 @@ import * as React from 'react';
 import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@flightctl/types';
-import { timeSinceText } from '../../../utils/dates';
 import { ListAction } from '../../ListPage/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
@@ -49,7 +48,6 @@ const DecommissionedDeviceTableRow = ({
       <Td dataLabel={t('Device status')}>
         <DeviceLifecycleStatus device={device} />
       </Td>
-      <Td dataLabel={t('Last seen')}>{timeSinceText(t, device.status?.lastSeen)}</Td>
       {canDelete && (
         <Td isActionCell>
           <ActionsColumn
