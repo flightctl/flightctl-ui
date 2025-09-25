@@ -39,6 +39,7 @@ export type { DeviceIntegrityCheckStatus } from './models/DeviceIntegrityCheckSt
 export { DeviceIntegrityCheckStatusType } from './models/DeviceIntegrityCheckStatusType';
 export type { DeviceIntegrityStatus } from './models/DeviceIntegrityStatus';
 export { DeviceIntegrityStatusSummaryType } from './models/DeviceIntegrityStatusSummaryType';
+export type { DeviceLastSeen } from './models/DeviceLastSeen';
 export { DeviceLifecycleHookType } from './models/DeviceLifecycleHookType';
 export type { DeviceLifecycleStatus } from './models/DeviceLifecycleStatus';
 export { DeviceLifecycleStatusType } from './models/DeviceLifecycleStatusType';

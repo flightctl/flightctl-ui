@@ -34,9 +34,9 @@ export type DeviceStatus = {
   updated: DeviceUpdatedStatus;
   summary: DeviceSummaryStatus;
   /**
-   * The last time the device was seen by the service.
+   * The last time the device was seen by the service (NOTE: this property is not returned by the API).
    */
-  lastSeen: string;
+  lastSeen?: string;
   lifecycle: DeviceLifecycleStatus;
 };
 

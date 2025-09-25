@@ -70,9 +70,6 @@ const getDeviceColumns = (t: TFunction): ApiSortTableColumn[] => [
     name: t('Update status'),
     helperText: getUpdateStatusHelperText(t),
   },
-  {
-    name: t('Last seen'),
-  },
 ];
 
 const EnrolledDevicesTable = ({

@@ -3,7 +3,6 @@ import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@flightctl/types';
 import DeviceFleet from '../DeviceDetails/DeviceFleet';
-import { timeSinceText } from '../../../utils/dates';
 import { getDecommissionDisabledReason, getEditDisabledReason, getResumeDisabledReason } from '../../../utils/devices';
 import { getDisabledTooltipProps } from '../../../utils/tooltip';
 import { ListAction } from '../../ListPage/types';
@@ -72,7 +71,6 @@ const EnrolledDeviceTableRow = ({
       <Td dataLabel={t('System update status')}>
         <SystemUpdateStatus deviceStatus={device.status} />
       </Td>
-      <Td dataLabel={t('Last seen')}>{timeSinceText(t, device.status?.lastSeen)}</Td>
       <Td isActionCell>
         <ActionsColumn
           items={[
