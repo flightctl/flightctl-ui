@@ -133,13 +133,19 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
       let labels: FlightCtlLabel[];
 
       if (values.mode === SelectionMode.ALL) {
-        // Currently the API will resume all ConflictPaused devices by sending an empty labelSelector
-        // TODO: The API should have an explicit way to resume all suspended devices
         labels = [];
-      } else if (values.mode === SelectionMode.FLEET) {
-        labels = getSelectedFleetLabels(fleets, values.fleetId);
       } else {
-        labels = values.labels;
+        if (values.mode === SelectionMode.FLEET) {
+          labels = getSelectedFleetLabels(fleets, values.fleetId);
+        } else {
+          labels = values.labels;
+        }
+        // This shouldn't happen due to validations, but since an empty label selector would target all existing devices,
+        // wake sure the UI does't accidentally submit a request with an empty selector
+        const emptySelection = labels.every((label) => label.key === '');
+        if (labels.length === 0 || emptySelection) {
+          throw new Error('The current selection would target all devices.');
+        }
       }
 
       const resumeRequest: DeviceResumeRequest = {
