@@ -10,7 +10,7 @@ const AppNavigation = () => {
   const { t } = useTranslation();
   return (
     <Nav id="flightclt-nav" theme="dark">
-      <NavList id="flightclt-navlist">
+      <NavList id="flightclt-navlist" style={{ padding: 0 }}>
         {getAppRoutes(t)
           .filter((route) => route.showInNav)
           .map((route) => {

@@ -3,6 +3,9 @@ import {
   Dropdown,
   DropdownItem,
   DropdownList,
+  Icon,
+  Masthead,
+  MastheadContent,
   MenuToggle,
   MenuToggleElement,
   PageSection,
@@ -10,9 +13,15 @@ import {
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
+import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useFetch } from '../../hooks/useFetch';
+import { AuthType } from '../../types/extraTypes';
 import { useOrganizationGuardContext } from './OrganizationGuard';
 import OrganizationSelector from './OrganizationSelector';
+import CopyLoginCommandModal from './CopyLoginCommandModal';
+
+export const OAUTH_REDIRECT_AFTER_LOGIN_KEY = 'oauthRedirectAfterLogin';
 
 type OrganizationDropdownProps = {
   organizationName?: string;
@@ -44,6 +53,7 @@ const OrganizationDropdown = ({ organizationName, onSwitchOrganization }: Organi
           {organizationName}
         </MenuToggle>
       )}
+      popperProps={{ position: 'right' }}
     >
       <DropdownList>
         <DropdownItem onClick={onSwitchOrganization}>{t('Change Organization')}</DropdownItem>
@@ -52,37 +62,64 @@ const OrganizationDropdown = ({ organizationName, onSwitchOrganization }: Organi
   );
 };
 
-const PageNavigation = ({ children }: React.PropsWithChildren) => {
+const PageNavigation = ({ authType }: { authType: AuthType }) => {
+  const { t } = useTranslation();
+  const { proxyFetch } = useFetch();
   const { currentOrganization, availableOrganizations } = useOrganizationGuardContext();
   const [showOrganizationModal, setShowOrganizationModal] = React.useState(false);
+  const [showCopyLoginCommandModal, setShowCopyLoginCommandModal] = React.useState(false);
 
   const showOrganizationSelection = availableOrganizations.length > 1;
-  const hasChildren = React.Children.count(children) > 0;
+  const currentOrgDisplayName = currentOrganization?.spec?.displayName || currentOrganization?.metadata?.name || '';
+  const isAuthTypeWithModal = authType === AuthType.K8S;
 
-  if (!showOrganizationSelection && !hasChildren) {
+  if (authType === AuthType.DISABLED) {
     return null;
   }
 
-  const currentOrgDisplayName = currentOrganization?.spec?.displayName || currentOrganization?.metadata?.name || '';
-
+  // CELIA-WIP MAKE link clearly clickable with the cursor pointer
   return (
     <>
       <PageSection variant="light" padding={{ default: 'noPadding' }}>
-        <Toolbar isFullHeight isStatic className="fctl-app_toolbar">
-          <ToolbarContent>
-            {hasChildren && <ToolbarItem>{children}</ToolbarItem>}
-            {showOrganizationSelection && (
-              <ToolbarItem>
-                <OrganizationDropdown
-                  organizationName={currentOrgDisplayName}
-                  onSwitchOrganization={() => {
-                    setShowOrganizationModal(true);
+        <Masthead id="global-actions-masthead">
+          <MastheadContent>
+            <Toolbar isFullHeight isStatic className="fctl-subnav_toolbar">
+              <ToolbarContent>
+                <ToolbarItem
+                  onClick={async () => {
+                    if (isAuthTypeWithModal) {
+                      setShowCopyLoginCommandModal(true);
+                    } else {
+                      localStorage.setItem(OAUTH_REDIRECT_AFTER_LOGIN_KEY, 'copy-login-command');
+                      // Use CLI token endpoint for CLI authentication flows
+                      const response = await proxyFetch('/login/create-session-token', { credentials: 'include' });
+                      const { url } = (await response.json()) as { url: string };
+                      console.log('%c url', 'color: blue; font-size:18px', url);
+                      window.open(url, '_blank', 'noopener,noreferrer');
+                    }
                   }}
-                />
-              </ToolbarItem>
-            )}
-          </ToolbarContent>
-        </Toolbar>
+                >
+                  {t('Copy login command')}
+                  {!isAuthTypeWithModal && (
+                    <Icon className="pf-v5-u-ml-sm">
+                      <ExternalLinkAltIcon />
+                    </Icon>
+                  )}
+                </ToolbarItem>
+                {showOrganizationSelection && (
+                  <ToolbarItem>
+                    <OrganizationDropdown
+                      organizationName={currentOrgDisplayName}
+                      onSwitchOrganization={() => {
+                        setShowOrganizationModal(true);
+                      }}
+                    />
+                  </ToolbarItem>
+                )}
+              </ToolbarContent>
+            </Toolbar>
+          </MastheadContent>
+        </Masthead>
       </PageSection>
 
       {showOrganizationModal && (
@@ -96,6 +133,8 @@ const PageNavigation = ({ children }: React.PropsWithChildren) => {
           }}
         />
       )}
+      {/* For the OCP plugin, we just show a modal. We'll obtain the External API URL and display the login command */}
+      {showCopyLoginCommandModal && <CopyLoginCommandModal onClose={() => setShowCopyLoginCommandModal(false)} />}
     </>
   );
 };

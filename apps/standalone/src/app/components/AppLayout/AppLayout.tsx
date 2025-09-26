@@ -25,12 +25,16 @@ import rhemLogo from '@fctl-assets/bgimages/RHEM-logo.svg';
 import AppNavigation from './AppNavigation';
 import AppToolbar from './AppToolbar';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
+import { AuthContext } from '../../context/AuthContext';
+
+const pageId = 'primary-app-container';
 
 const AppLayoutContent = () => {
   const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
   const { isOrganizationSelectionRequired } = useOrganizationGuardContext();
+  const { authType } = React.useContext(AuthContext);
 
   const onSidebarToggle = () => {
     setIsSidebarOpen((prevIsOpen) => !prevIsOpen);
@@ -78,8 +82,6 @@ const AppLayoutContent = () => {
     </PageSidebar>
   );
 
-  const pageId = 'primary-app-container';
-
   const PageSkipToContent = (
     <SkipToContent
       onClick={(event) => {
@@ -98,7 +100,7 @@ const AppLayoutContent = () => {
         <OrganizationSelector isFirstLogin />
       ) : (
         <>
-          <PageNavigation />
+          <PageNavigation authType={authType} />
           <Outlet />
         </>
       )}
