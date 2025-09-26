@@ -22,9 +22,19 @@ func refreshOAuthToken(refreshToken string, client *osincli.Client) (TokenData, 
 	return executeOAuthFlow(req)
 }
 
-func loginRedirect(client *osincli.Client) string {
+func loginRedirect(client *osincli.Client, forceReauth bool) string {
 	authorizeRequest := client.NewAuthorizeRequest(osincli.CODE)
-	return authorizeRequest.GetAuthorizeUrl().String()
+
+	url := authorizeRequest.GetAuthorizeUrl()
+
+	// Add prompt=login to force re-authentication if requested
+	if forceReauth {
+		query := url.Query()
+		query.Add("prompt", "login")
+		url.RawQuery = query.Encode()
+	}
+
+	return url.String()
 }
 
 func executeOAuthFlow(req *osincli.AccessRequest) (TokenData, *int64, error) {
