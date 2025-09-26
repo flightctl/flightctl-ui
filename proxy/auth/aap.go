@@ -162,6 +162,10 @@ func (a *AAPAuthHandler) RefreshToken(refreshToken string) (TokenData, *int64, e
 	return refreshOAuthToken(refreshToken, a.internalClient)
 }
 
-func (a *AAPAuthHandler) GetLoginRedirectURL() string {
-	return loginRedirect(a.client)
+func (a *AAPAuthHandler) GetLoginRedirectURL(forceReauth bool) string {
+	return loginRedirect(a.client, forceReauth)
+}
+
+func (a *AAPAuthHandler) GetAuthType() string {
+	return "AAPGateway"
 }

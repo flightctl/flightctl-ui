@@ -21,9 +21,10 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
 import { getErrorMessage } from '../../utils/error';
 import { CliArtifactsResponse } from '../../types/extraTypes';
+import { getBrandName } from '../../utils/brand';
 
 type CommandLineToolsContentProps = {
-  productName: string;
+  brandName: string;
   loading: boolean;
   loadError?: string;
   artifactsResponse?: CliArtifactsResponse;
@@ -37,7 +38,7 @@ const getArtifactUrl = (baseUrl: string, artifact: CommandLineArtifact) => {
 };
 
 const CommandLineToolsContent = ({
-  productName,
+  brandName,
   loading,
   loadError,
   artifactsResponse,
@@ -52,8 +53,8 @@ const CommandLineToolsContent = ({
 
   const cliArtifacts = artifactsResponse?.artifacts || [];
   if (cliArtifacts.length === 0) {
-    errorMessage = t('No {{ productName }} command line tools were found for this deployment at this time.', {
-      productName,
+    errorMessage = t('No {{ brandName }} command line tools were found for this deployment at this time.', {
+      brandName,
     });
   }
 
@@ -62,7 +63,7 @@ const CommandLineToolsContent = ({
       <Alert
         isInline
         variant="danger"
-        title={t('Could not list the {{ productName }} command line tools', { productName })}
+        title={t('Could not list the {{ brandName }} command line tools', { brandName })}
       >
         {errorMessage}
       </Alert>
@@ -134,7 +135,7 @@ const CommandLineToolsPage = () => {
     void getLinks();
   }, [proxyFetch]);
 
-  const productName = settings.isRHEM ? t('Red Hat Edge Manager') : t('Flight Control');
+  const brandName = getBrandName(settings);
 
   return (
     <PageSection variant={PageSectionVariants.light}>
@@ -152,16 +153,16 @@ const CommandLineToolsPage = () => {
         <Divider className="pf-v5-u-my-lg" />
         <StackItem>
           {t(
-            'With the {{ productName }} command line interface, you can manage your fleets, devices and repositories from a terminal.',
+            'With the {{ brandName }} command line interface, you can manage your fleets, devices and repositories from a terminal.',
             {
-              productName,
+              brandName,
             },
           )}
         </StackItem>
         {hasArtifactsEnabled ? (
           <StackItem>
             <CommandLineToolsContent
-              productName={productName}
+              brandName={brandName}
               loading={loading}
               loadError={loadError}
               artifactsResponse={artifactsResponse}
@@ -169,8 +170,8 @@ const CommandLineToolsPage = () => {
           </StackItem>
         ) : (
           <StackItem>
-            {t('Command line tools are not available for download in this {{ productName }} installation.', {
-              productName,
+            {t('Command line tools are not available for download in this {{ brandName }} installation.', {
+              brandName,
             })}
           </StackItem>
         )}

@@ -1,11 +1,15 @@
 package auth
 
 import (
+	"crypto/rand"
 	"crypto/tls"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
+	"time"
 
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
@@ -17,7 +21,13 @@ type ExpiresInResp struct {
 }
 
 type UserInfoResponse struct {
+	AuthType string `json:"authType"`
 	Username string `json:"username,omitempty"`
+}
+
+type SessionTokenResponse struct {
+	Token      string `json:"token"`
+	ServiceUrl string `json:"serviceUrl"`
 }
 
 type RedirectResponse struct {
@@ -25,11 +35,21 @@ type RedirectResponse struct {
 }
 
 type AuthHandler struct {
-	provider AuthProvider
+	provider     AuthProvider
+	sessionMutex sync.Mutex
+	apiTokenMap  map[string]*ApiToken
+}
+
+type ApiToken struct {
+	Token     string
+	ExpiresIn *int64
+	CreatedAt time.Time
 }
 
 func NewAuth(apiTlsConfig *tls.Config) (*AuthHandler, error) {
-	auth := AuthHandler{}
+	auth := AuthHandler{
+		apiTokenMap: make(map[string]*ApiToken),
+	}
 	authConfig, internalAuthUrl, err := getAuthInfo(apiTlsConfig)
 	if err != nil {
 		return nil, err
@@ -51,7 +71,7 @@ func NewAuth(apiTlsConfig *tls.Config) (*AuthHandler, error) {
 	return &auth, err
 }
 
-func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if a.provider == nil {
 		w.WriteHeader(http.StatusTeapot)
 		return
@@ -78,7 +98,9 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		respondWithToken(w, tokenData, expires)
 	} else {
-		loginUrl := a.provider.GetLoginRedirectURL()
+
+		forceReauth := r.URL.Query().Get("force") == "true"
+		loginUrl := a.provider.GetLoginRedirectURL(forceReauth)
 		response, err := json.Marshal(RedirectResponse{Url: loginUrl})
 		if err != nil {
 			log.GetLogger().WithError(err).Warn("Failed to marshal response")
@@ -91,7 +113,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
+func (a *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	if a.provider == nil {
 		w.WriteHeader(http.StatusTeapot)
 		return
@@ -126,7 +148,7 @@ func respondWithToken(w http.ResponseWriter, tokenData TokenData, expires *int64
 	}
 }
 
-func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
+func (a *AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	if a.provider == nil {
 		w.WriteHeader(http.StatusTeapot)
 		return
@@ -148,7 +170,7 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(resp.StatusCode)
 		return
 	}
-	userInfo := UserInfoResponse{Username: username}
+	userInfo := UserInfoResponse{Username: username, AuthType: a.provider.GetAuthType()}
 	res, err := json.Marshal(userInfo)
 	if err != nil {
 		log.GetLogger().WithError(err).Warn("Failed to marshal user info")
@@ -160,7 +182,150 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+// Creates a cryptographically secure random session ID
+func generateSessionId() (string, error) {
+	bytes := make([]byte, 16)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
+}
+
+func (a *AuthHandler) storeApiTokenMapping(tokenData TokenData, expires *int64) (string, error) {
+	sessionId, err := generateSessionId()
+	if err != nil {
+		return "", err
+	}
+
+	session := &ApiToken{
+		Token:     tokenData.Token,
+		ExpiresIn: expires,
+		CreatedAt: time.Now(),
+	}
+
+	a.sessionMutex.Lock()
+	a.apiTokenMap[sessionId] = session
+	a.sessionMutex.Unlock()
+
+	return sessionId, nil
+}
+
+// Gets the auth token associated to a given sessionId.
+// Deletes the mapping immediately after retrieval so it can only be used once.
+func (a *AuthHandler) getSingleUseApiTokenMapping(sessionId string) (*ApiToken, bool) {
+	a.sessionMutex.Lock()
+	defer a.sessionMutex.Unlock()
+
+	session, exists := a.apiTokenMap[sessionId]
+	if exists {
+		delete(a.apiTokenMap, sessionId)
+	}
+	return session, exists
+}
+
+func (a *AuthHandler) CreateSessionToken(w http.ResponseWriter, r *http.Request) {
+	if a.provider == nil {
+		w.WriteHeader(http.StatusTeapot)
+		return
+	}
+	if r.Method == http.MethodPost {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to read request body")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		loginParams := LoginParameters{}
+		err = json.Unmarshal(body, &loginParams)
+		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to unmarshal request body")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		tokenData, expires, err := a.provider.GetToken(loginParams)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		// Store the token, mapping it to a new sessionId that can be used to access the token only once.
+		sessionId, err := a.storeApiTokenMapping(tokenData, expires)
+		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to store API token session")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		// Keep the token stored internally and return the associated sessionId
+		response := map[string]string{"sessionId": sessionId}
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to marshal session response")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if _, err := w.Write(jsonResponse); err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to write session response")
+		}
+	} else {
+		// Always force fresh authentication. This allow us to get a different token than the current user token
+		loginUrl := a.provider.GetLoginRedirectURL(true)
+
+		response, err := json.Marshal(RedirectResponse{Url: loginUrl})
+		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to marshal response")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if _, err := w.Write(response); err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to write response")
+		}
+	}
+}
+
+func getExternalServiceUrl() string {
+	if config.FctlApiUrlExternal == "" {
+		return config.FctlApiUrl
+	}
+	return config.FctlApiUrlExternal
+}
+
+func (a *AuthHandler) GetSessionToken(w http.ResponseWriter, r *http.Request) {
+	if a.provider == nil {
+		w.WriteHeader(http.StatusTeapot)
+		return
+	}
+
+	sessionId := r.URL.Query().Get("sessionId")
+	if sessionId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Retrieve the token associated to the sessionId, and delete the mapping so it can not be used again.
+	session, exists := a.getSingleUseApiTokenMapping(sessionId)
+	if !exists {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	response := SessionTokenResponse{ServiceUrl: getExternalServiceUrl(), Token: session.Token}
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		log.GetLogger().WithError(err).Warn("Failed to marshal API token response")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if _, err := w.Write(jsonResponse); err != nil {
+		log.GetLogger().WithError(err).Warn("Failed to write API token response")
+	}
+}
+
+func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	if a.provider == nil {
 		w.WriteHeader(http.StatusTeapot)
 		return

@@ -1,0 +1,10 @@
+.fctl-login-command__codeblock {
+  white-space: pre-wrap;
+  word-break: break-all;
+  user-select: all;
+}
+
+.fctl-login-command__copy-content {
+  /* Keep a fixed width to prevent a change in size when the full command is displayed */
+  width: 80vw;
+}

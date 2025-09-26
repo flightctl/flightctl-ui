@@ -8,6 +8,7 @@ import (
 var (
 	BridgePort           = ":" + getEnvVar("API_PORT", "3001")
 	FctlApiUrl           = getEnvUrlVar("FLIGHTCTL_SERVER", "https://localhost:3443")
+	FctlApiUrlExternal   = getEnvUrlVar("FLIGHTCTL_SERVER_EXTERNAL", "")
 	FctlApiInsecure      = getEnvVar("FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY", "false")
 	FctlCliArtifactsUrl  = getEnvUrlVar("FLIGHTCTL_CLI_ARTIFACTS_SERVER", "http://localhost:8090")
 	AlertManagerApiUrl   = getEnvUrlVar("FLIGHTCTL_ALERTMANAGER_PROXY", "https://localhost:8443")

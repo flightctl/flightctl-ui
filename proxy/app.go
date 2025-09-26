@@ -77,6 +77,10 @@ func main() {
 		}
 		apiRouter.HandleFunc("/login", authHandler.Login)
 		apiRouter.HandleFunc("/login/info", authHandler.GetUserInfo)
+		// Creates a new session token. Returns a session ID that can be used once to get the actual API token.
+		apiRouter.HandleFunc("/login/create-session-token", authHandler.CreateSessionToken)
+		// Returns the token associated to the sessionId. The token can only be retrieved once.
+		apiRouter.HandleFunc("/login/get-session-token", authHandler.GetSessionToken)
 		apiRouter.HandleFunc("/login/refresh", authHandler.Refresh)
 		apiRouter.HandleFunc("/logout", authHandler.Logout)
 	} else {

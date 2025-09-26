@@ -29,7 +29,8 @@ type AuthProvider interface {
 	GetUserInfo(token string) (string, *http.Response, error)
 	RefreshToken(refreshToken string) (TokenData, *int64, error)
 	Logout(token string) (string, error)
-	GetLoginRedirectURL() string
+	GetLoginRedirectURL(forceReauth bool) string
+	GetAuthType() string
 }
 
 func setCookie(w http.ResponseWriter, value TokenData) error {
