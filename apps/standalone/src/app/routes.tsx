@@ -68,6 +68,9 @@ const PendingEnrollmentRequestsBadge = React.lazy(
 const CommandLineToolsPage = React.lazy(
   () => import('@flightctl/ui-components/src/components/Masthead/CommandLineToolsPage'),
 );
+const CopyLoginCommandPage = React.lazy(
+  () => import('@flightctl/ui-components/src/components/Masthead/CopyLoginCommandPage'),
+);
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -310,6 +313,7 @@ const AppRouter = () => {
   const { t } = useTranslation();
 
   const { loading, error } = React.useContext(AuthContext);
+
   if (error) {
     return (
       <Bullseye>
@@ -346,6 +350,15 @@ const AppRouter = () => {
       element: <AppLayout />,
       errorElement: <ErrorPage />,
       children: getAppRoutes(t),
+    },
+    // Route is only exposed for the standalone app, and it doesn't inherit the app layout
+    {
+      path: '/copy-login-command',
+      element: (
+        <TitledRoute title={t('Copy login command')}>
+          <CopyLoginCommandPage />
+        </TitledRoute>
+      ),
     },
   ]);
 
