@@ -130,22 +130,18 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
     setSubmitError(undefined);
 
     try {
-      let labels: FlightCtlLabel[];
+      let labels: FlightCtlLabel[] = [];
 
-      if (values.mode === SelectionMode.ALL) {
-        labels = [];
-      } else {
-        if (values.mode === SelectionMode.FLEET) {
-          labels = getSelectedFleetLabels(fleets, values.fleetId);
-        } else {
-          labels = values.labels;
-        }
-        // This shouldn't happen due to validations, but since an empty label selector would target all existing devices,
-        // wake sure the UI does't accidentally submit a request with an empty selector
-        const emptySelection = labels.every((label) => label.key === '');
-        if (labels.length === 0 || emptySelection) {
-          throw new Error('The current selection would target all devices.');
-        }
+      if (values.mode === SelectionMode.FLEET) {
+        labels = getSelectedFleetLabels(fleets, values.fleetId);
+      } else if (values.mode === SelectionMode.LABELS) {
+        labels = values.labels;
+      }
+      // This shouldn't happen due to validations, but since an empty label selector would target all existing devices,
+      // wake sure the UI does't accidentally submit a request with an empty selector
+      const emptySelection = labels.every((label) => label.key === '');
+      if (labels.length === 0 || emptySelection) {
+        throw new Error('The current selection would target all devices.');
       }
 
       const resumeRequest: DeviceResumeRequest = {
@@ -411,7 +407,7 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
         {resumedCount !== undefined && hasResumedAllExpected && (
           <StackItem>
             <Alert isInline variant="success" title={t('Resume successful')}>
-              {t('{{ resumedCount }} devices were resumed', { resumedCount })}
+              {t('{{ count }} devices were resumed', { count: resumedCount })}
             </Alert>
           </StackItem>
         )}
@@ -429,12 +425,12 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
       </Stack>
       {showResumeAllConfirmation && (
         <ResumeAllDevicesConfirmationDialog
-          deviceCountNum={deviceCountNum}
-          onClose={(doConfirm) => {
+          devicesToResume={deviceCountNum}
+          onClose={(resumedCount) => {
+            setResumedCount(resumedCount);
+            setIsCountLoading(false);
+            setCountError(null);
             setShowResumeAllConfirmation(false);
-            if (doConfirm) {
-              performResume();
-            }
           }}
         />
       )}
