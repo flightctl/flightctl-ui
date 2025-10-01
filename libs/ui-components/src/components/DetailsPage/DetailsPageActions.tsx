@@ -127,6 +127,8 @@ const DetailsPageActions = ({ children }: React.PropsWithChildren) => {
       onSelect={() => setActionsOpen(false)}
       onOpenChange={(isOpen: boolean) => setActionsOpen(isOpen)}
       popperProps={{ position: 'left', preventOverflow: true }}
+      shouldFocusToggleOnSelect
+      shouldFocusFirstItemOnOpen
       toggle={(toggleRef) => (
         <MenuToggle
           ref={toggleRef}
