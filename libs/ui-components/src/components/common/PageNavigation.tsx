@@ -3,6 +3,8 @@ import {
   Dropdown,
   DropdownItem,
   DropdownList,
+  Masthead,
+  MastheadContent,
   MenuToggle,
   MenuToggleElement,
   PageSection,
@@ -44,6 +46,7 @@ const OrganizationDropdown = ({ organizationName, onSwitchOrganization }: Organi
           {organizationName}
         </MenuToggle>
       )}
+      popperProps={{ position: 'right' }}
     >
       <DropdownList>
         <DropdownItem onClick={onSwitchOrganization}>{t('Change Organization')}</DropdownItem>
@@ -52,14 +55,12 @@ const OrganizationDropdown = ({ organizationName, onSwitchOrganization }: Organi
   );
 };
 
-const PageNavigation = ({ children }: React.PropsWithChildren) => {
+const PageNavigation = () => {
   const { currentOrganization, availableOrganizations } = useOrganizationGuardContext();
   const [showOrganizationModal, setShowOrganizationModal] = React.useState(false);
 
   const showOrganizationSelection = availableOrganizations.length > 1;
-  const hasChildren = React.Children.count(children) > 0;
-
-  if (!showOrganizationSelection && !hasChildren) {
+  if (!showOrganizationSelection) {
     return null;
   }
 
@@ -68,21 +69,24 @@ const PageNavigation = ({ children }: React.PropsWithChildren) => {
   return (
     <>
       <PageSection variant="light" padding={{ default: 'noPadding' }}>
-        <Toolbar isFullHeight isStatic className="fctl-app_toolbar">
-          <ToolbarContent>
-            {hasChildren && <ToolbarItem>{children}</ToolbarItem>}
-            {showOrganizationSelection && (
-              <ToolbarItem>
-                <OrganizationDropdown
-                  organizationName={currentOrgDisplayName}
-                  onSwitchOrganization={() => {
-                    setShowOrganizationModal(true);
-                  }}
-                />
-              </ToolbarItem>
-            )}
-          </ToolbarContent>
-        </Toolbar>
+        <Masthead id="global-actions-masthead">
+          <MastheadContent>
+            <Toolbar isFullHeight isStatic className="fctl-subnav_toolbar">
+              <ToolbarContent>
+                {showOrganizationSelection && (
+                  <ToolbarItem>
+                    <OrganizationDropdown
+                      organizationName={currentOrgDisplayName}
+                      onSwitchOrganization={() => {
+                        setShowOrganizationModal(true);
+                      }}
+                    />
+                  </ToolbarItem>
+                )}
+              </ToolbarContent>
+            </Toolbar>
+          </MastheadContent>
+        </Masthead>
       </PageSection>
 
       {showOrganizationModal && (
