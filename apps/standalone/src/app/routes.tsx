@@ -68,6 +68,9 @@ const PendingEnrollmentRequestsBadge = React.lazy(
 const CommandLineToolsPage = React.lazy(
   () => import('@flightctl/ui-components/src/components/Masthead/CommandLineToolsPage'),
 );
+const CopyLoginCommandPage = React.lazy(
+  () => import('@flightctl/ui-components/src/components/Masthead/CopyLoginCommandPage'),
+);
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -346,6 +349,15 @@ const AppRouter = () => {
       element: <AppLayout />,
       errorElement: <ErrorPage />,
       children: getAppRoutes(t),
+    },
+    {
+      path: '/copy-login-command',
+      element: (
+        <TitledRoute title={t('Copy login command')}>
+          <CopyLoginCommandPage />
+        </TitledRoute>
+      ),
+      errorElement: <ErrorPage />,
     },
   ]);
 

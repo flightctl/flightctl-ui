@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { loginAPI, redirectToLogin } from '../utils/apiCalls';
 import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
+import { AuthType } from '@flightctl/ui-components/src/types/extraTypes';
+// CELIA-WIP DETERMINE BEST PLACE FOR THE IMPORT
+import { OAUTH_REDIRECT_AFTER_LOGIN_KEY } from '@flightctl/ui-components/src/components/common/PageNavigation';
 
 const AUTH_DISABLED_STATUS_CODE = 418;
 const EXPIRATION = 'expiration';
@@ -12,15 +15,15 @@ const maxTimeout = 2 ** 31 - 1;
 const nowInSeconds = () => Math.round(Date.now() / 1000);
 
 type AuthContextProps = {
+  authType: AuthType;
   username: string;
   loading: boolean;
-  authEnabled: boolean;
   error: string | undefined;
 };
 
 export const AuthContext = React.createContext<AuthContextProps>({
+  authType: AuthType.DISABLED,
   username: '',
-  authEnabled: true,
   loading: false,
   error: undefined,
 });
@@ -28,7 +31,7 @@ export const AuthContext = React.createContext<AuthContextProps>({
 export const useAuthContext = () => {
   const [username, setUsername] = React.useState('');
   const [loading, setLoading] = React.useState(true);
-  const [authEnabled, setAuthEnabled] = React.useState(true);
+  const [authType, setAuthType] = React.useState<AuthType>(AuthType.DISABLED);
   const [error, setError] = React.useState<string>();
   const refreshRef = React.useRef<NodeJS.Timeout>();
 
@@ -36,13 +39,19 @@ export const useAuthContext = () => {
     const getUserInfo = async () => {
       let callbackErr: string | null = null;
       if (window.location.pathname === '/callback') {
+        // Check if this is a flow that generates a new session token
+        let redirectAfterLogin = localStorage.getItem(OAUTH_REDIRECT_AFTER_LOGIN_KEY);
+        const isCreateNewSessionFlow = redirectAfterLogin === 'copy-login-command';
+
         localStorage.removeItem(EXPIRATION);
         localStorage.removeItem(ORGANIZATION_STORAGE_KEY);
         const searchParams = new URLSearchParams(window.location.search);
         const code = searchParams.get('code');
         callbackErr = searchParams.get('error');
         if (code) {
-          const resp = await fetch(loginAPI, {
+          const endpoint = isCreateNewSessionFlow ? `${loginAPI}/create-session-token` : loginAPI;
+
+          const resp = await fetch(endpoint, {
             headers: {
               'Content-Type': 'application/json',
             },
@@ -52,10 +61,16 @@ export const useAuthContext = () => {
               code: code,
             }),
           });
-          const expiration = (await resp.json()) as { expiresIn: number };
-          if (expiration.expiresIn) {
+
+          const responseJson = (await resp.json()) as { expiresIn: number; sessionId?: string };
+          if (isCreateNewSessionFlow) {
+            redirectAfterLogin = `${redirectAfterLogin}?sessionId=${responseJson.sessionId || ''}`;
+            localStorage.removeItem(OAUTH_REDIRECT_AFTER_LOGIN_KEY);
+            window.location.href = `/${redirectAfterLogin}`;
+            return;
+          } else if (responseJson.expiresIn) {
             const now = nowInSeconds();
-            localStorage.setItem(EXPIRATION, `${now + expiration.expiresIn}`);
+            localStorage.setItem(EXPIRATION, `${now + responseJson.expiresIn}`);
             lastRefresh = now;
           }
         } else if (callbackErr) {
@@ -69,7 +84,7 @@ export const useAuthContext = () => {
             credentials: 'include',
           });
           if (resp.status === AUTH_DISABLED_STATUS_CODE) {
-            setAuthEnabled(false);
+            setAuthType(AuthType.DISABLED);
             setLoading(false);
             return;
           }
@@ -81,8 +96,9 @@ export const useAuthContext = () => {
             setError('Failed to get user info');
             return;
           }
-          const info = (await resp.json()) as { username: string };
+          const info = (await resp.json()) as { username: string; authType: AuthType };
           setUsername(info.username);
+          setAuthType(info.authType);
           setLoading(false);
         } catch (err) {
           // eslint-disable-next-line
@@ -98,7 +114,7 @@ export const useAuthContext = () => {
   React.useEffect(() => {
     if (!loading) {
       const scheduleRefresh = () => {
-        if (!authEnabled) {
+        if (authType === AuthType.DISABLED) {
           return;
         }
         const expiresAt = parseInt(localStorage.getItem(EXPIRATION) || '0', 10);
@@ -138,7 +154,7 @@ export const useAuthContext = () => {
       scheduleRefresh();
     }
     return () => clearTimeout(refreshRef.current);
-  }, [loading, authEnabled]);
+  }, [loading, authType]);
 
-  return { username, loading, authEnabled, error };
+  return { username, loading, authType, error };
 };
