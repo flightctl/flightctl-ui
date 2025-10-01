@@ -1,3 +1,15 @@
-.fctl-app_toolbar {
-    justify-content: end;
+.fctl-app_toolbar,
+.fctl-subnav_toolbar {
+  justify-content: flex-end;
+}
+
+/* Extra navigation bar for global actions (organization switcher, copy login command, etc.) */
+/* We make it as tall as the navigation menu items on the left */
+#global-actions-masthead {
+  padding: 0;
+  --pf-v5-c-masthead--m-display-inline__content--MinHeight: 3.5rem;
+}
+
+#global-actions-masthead .fctl-subnav_toolbar {
+  --pf-v5-c-toolbar--BackgroundColor: var(--pf-v5-global--BackgroundColor--dark-300);
 }
