@@ -85,7 +85,8 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
     onResumeComplete: refetch,
   });
 
-  const editActionProps = device ? getDisabledTooltipProps(getEditDisabledReason(device, t)) : undefined;
+  const editDisabledReason = device ? getEditDisabledReason(device, t) : undefined;
+  const editActionProps = device ? getDisabledTooltipProps(editDisabledReason) : undefined;
   const resumeDevice = {
     actionText: t('Resume device'),
     title: (
@@ -188,7 +189,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
           />
           <Route
             path="yaml"
-            element={<YamlEditor filename={deviceAlias || deviceId} apiObj={device} refetch={refetch} />}
+            element={<YamlEditor apiObj={device} refetch={refetch} disabledEditReason={editDisabledReason} />}
           />
           {!hideTerminal && canOpenTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
           <Route path="events" element={<EventsCard kind={ResourceKind.DEVICE} objId={deviceId} />} />
