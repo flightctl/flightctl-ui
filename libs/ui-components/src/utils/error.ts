@@ -22,3 +22,8 @@ export const getConditionMessage = (condition: Condition, reason?: string): stri
   [uppercaseSentence(reason || condition.reason), uppercaseSentence(condition.message)]
     .filter((msg) => !!msg)
     .join('. ');
+
+export const isResourceVersionTestFailure = (error: unknown): boolean => {
+  const errorMessage = getErrorMessage(error);
+  return errorMessage.includes('Error 400') && errorMessage.includes('/metadata/resourceVersion');
+};

@@ -103,10 +103,7 @@ const RepositoryDetails = () => {
                 </Grid>
               }
             />
-            <Route
-              path="yaml"
-              element={<YamlEditor filename={repositoryId} apiObj={repoDetails} refetch={refetch} />}
-            />
+            <Route path="yaml" element={<YamlEditor apiObj={repoDetails} refetch={refetch} />} />
           </Routes>
           {isDeleteModalOpen && (
             <DeleteRepositoryModal

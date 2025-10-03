@@ -13,9 +13,9 @@ import NavItem from '../../NavItem/NavItem';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
 import DeleteFleetModal from '../DeleteFleetModal/DeleteFleetModal';
-import YamlEditor from '../../common/CodeEditor/YamlEditor';
 import FleetDetailsContent from './FleetDetailsContent';
 import FleetRestoreBanner from './FleetRestoreBanner';
+import FleetYaml from './FleetYaml';
 
 const FleetDetailPage = () => {
   const { t } = useTranslation();
@@ -100,7 +100,7 @@ const FleetDetailPage = () => {
           <Routes>
             <Route index element={<Navigate to="details" replace />} />
             <Route path="details" element={<FleetDetailsContent fleet={fleet} />} />
-            <Route path="yaml" element={<YamlEditor filename={fleetId} apiObj={fleet} refetch={refetch} />} />
+            <Route path="yaml" element={<FleetYaml fleet={fleet} refetch={refetch} />} />
           </Routes>
           {isDeleteModalOpen && (
             <DeleteFleetModal
