@@ -19,12 +19,12 @@ import OrganizationGuard, {
 } from '@flightctl/ui-components/src/components/common/OrganizationGuard';
 import OrganizationSelector from '@flightctl/ui-components/src/components/common/OrganizationSelector';
 import PageNavigation from '@flightctl/ui-components/src/components/common/PageNavigation';
+import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 
-import logo from '@fctl-assets/bgimages/flightctl-logo.svg';
+import logo from '@fctl-assets/bgimages/flight-control-logo.svg';
 import rhemLogo from '@fctl-assets/bgimages/RHEM-logo.svg';
 import AppNavigation from './AppNavigation';
 import AppToolbar from './AppToolbar';
-import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 
 const AppLayoutContent = () => {
   const { t } = useTranslation();
