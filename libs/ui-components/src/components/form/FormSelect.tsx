@@ -66,6 +66,8 @@ const FormSelect = ({
           setValue(value as string, true);
           setIsOpen(false);
         }}
+        shouldFocusToggleOnSelect
+        shouldFocusFirstItemOnOpen
         toggle={(toggleRef) => (
           <MenuToggle
             status={statusToggle}
