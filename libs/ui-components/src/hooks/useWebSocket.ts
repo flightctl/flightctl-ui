@@ -18,6 +18,7 @@ export type WsMetadata = {
 
 export const useWebSocket = <T>(
   deviceId: string,
+  organizationId: string | undefined,
   onMsgReceived: (msg: T) => Promise<void>,
   wsMetadata: WsMetadata,
 ): {
@@ -50,6 +51,12 @@ export const useWebSocket = <T>(
       const params = new URLSearchParams({
         metadata: wsMeta,
       });
+
+      // NOTE: Since webSocket connections can't use custom headers, we must add the "org_id" query parameter to the URL instead
+      if (organizationId) {
+        params.set('org_id', organizationId);
+      }
+
       const ws = new WebSocket(`${wsEndpoint}?${params.toString()}`, 'v5.channel.k8s.io');
       ws.addEventListener('open', () => setIsConnecting(false));
       ws.addEventListener('close', () => {
@@ -70,7 +77,7 @@ export const useWebSocket = <T>(
       wsRef.current?.close();
       wsRef.current = undefined;
     };
-  }, [deviceId, t, getWsEndpoint, reset, wsMetadata]);
+  }, [deviceId, organizationId, t, getWsEndpoint, reset, wsMetadata]);
 
   const reconnect = React.useCallback(() => {
     wsRef.current?.close();

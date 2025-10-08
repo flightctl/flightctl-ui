@@ -12,11 +12,10 @@ const (
 
 // OrganizationMiddleware adds org_id query parameter to FlightCtl API requests
 // and blocks API calls when no organization is selected
-
 func OrganizationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Don't add org_id to requests that don't need it, and for CORS preflight requests
-		if r.Method == http.MethodOptions || !shouldAddOrgID(r.URL.Path) {
+		if r.Method == http.MethodOptions || !shouldAddOrgIDFromHeader(r.URL.Path) {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -57,8 +56,16 @@ func isAlertsAPICall(path string) bool {
 	return strings.HasPrefix(path, "/api/alerts/")
 }
 
-func shouldAddOrgID(path string) bool {
-	// Exclude the organizations endpoint since it needs to return ALL organizations the user has access to
+// Determines whether to add the org_id to the request from the custom header.
+//
+// Requests that need to have "org_id" query parameter added:
+// - /api/flightctl: General flightctl API calls (see exclusions below)
+// - /api/alerts: Alerts API calls
+//
+// Requests that do not need to have "org_id" query parameter added:
+// - /api/flightctl/api/v1/organizations: To retrieve all possible organizations, "org_id" must not be sent
+// - /api/terminal: Since websocket connections cannot use custom headers, "org_id" is already added to the original URL
+func shouldAddOrgIDFromHeader(path string) bool {
 	if strings.HasPrefix(path, "/api/flightctl/api/v1/organizations") {
 		return false
 	}
