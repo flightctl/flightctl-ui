@@ -9,6 +9,7 @@ import Terminal, { ImperativeTerminalType } from '../../Terminal/Terminal';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import { useOrganizationGuardContext } from '../../common/OrganizationGuard';
 
 type TerminalTabProps = {
   device: Device;
@@ -22,6 +23,7 @@ const wsMeta: WsMetadata = {
 const TerminalTab = ({ device }: TerminalTabProps) => {
   const { t } = useTranslation();
   const terminal = React.useRef<ImperativeTerminalType>(null);
+  const { currentOrganization } = useOrganizationGuardContext();
 
   const onMsgReceived = React.useCallback(async (message: Blob) => {
     try {
@@ -51,6 +53,7 @@ const TerminalTab = ({ device }: TerminalTabProps) => {
 
   const { sendMessage, isClosed, error, reconnect, isConnecting } = useWebSocket(
     device.metadata.name || '',
+    currentOrganization?.metadata?.name || undefined,
     onMsgReceived,
     wsMeta,
   );
