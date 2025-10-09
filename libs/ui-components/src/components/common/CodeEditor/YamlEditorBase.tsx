@@ -26,7 +26,7 @@ type YamlEditorBaseProps = {
   code?: string;
   onCancel: VoidFunction;
   onReload?: VoidFunction;
-  onSave?: (yamlContent: string) => Promise<void>;
+  onSave?: (yamlContent: string | undefined) => Promise<void>;
   isSaving: boolean;
   disabledEditReason?: string;
   editorRef?: React.MutableRefObject<monacoEditor.editor.IStandaloneCodeEditor | null>;
@@ -59,9 +59,7 @@ const YamlEditorBase = ({
   const handleSave = async () => {
     if (onSave) {
       const yamlContent = editorRef?.current?.getValue();
-      if (yamlContent) {
-        await onSave(yamlContent);
-      }
+      await onSave(yamlContent);
     }
   };
 

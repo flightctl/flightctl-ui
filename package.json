@@ -34,7 +34,6 @@
     "@babel/preset-env": "^7.24.0",
     "@babel/preset-react": "^7.23.3",
     "@babel/preset-typescript": "^7.23.3",
-    "@types/fast-json-patch": "^1.0.4",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "concurrently": "^8.2.2",

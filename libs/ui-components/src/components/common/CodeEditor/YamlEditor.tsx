@@ -135,7 +135,11 @@ const YamlEditor = <R extends FlightCtlYamlResource>({ apiObj, refetch, disabled
     }
   }, [doUpdate, apiObj]);
 
-  const handleSave = async (updatedYaml: string) => {
+  const handleSave = async (updatedYaml: string | undefined) => {
+    if (!updatedYaml) {
+      return;
+    }
+
     let updatedObj: R;
     try {
       updatedObj = load(updatedYaml) as R;
