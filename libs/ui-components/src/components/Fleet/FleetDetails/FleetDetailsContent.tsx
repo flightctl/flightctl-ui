@@ -92,7 +92,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
         )}
       </GridItem>
       <GridItem md={3}>
-        <EventsCard kind={ResourceKind.FLEET} objId={fleetId} />
+        <EventsCard kind={ResourceKind.Fleet} objId={fleetId} />
       </GridItem>
     </Grid>
   );

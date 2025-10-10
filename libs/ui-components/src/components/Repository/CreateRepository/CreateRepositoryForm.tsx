@@ -51,7 +51,7 @@ import './CreateRepositoryForm.css';
 const AdvancedSection = () => {
   const { t } = useTranslation();
   const { values } = useFormikContext<RepositoryFormValues>();
-  const showConfigTypeRadios = values.repoType === RepoSpecType.GIT;
+  const showConfigTypeRadios = values.repoType === RepoSpecType.Git;
 
   return (
     <FormSection>
@@ -67,7 +67,7 @@ const AdvancedSection = () => {
       )}
       {values.configType === 'http' && (
         <Grid hasGutter className={showConfigTypeRadios ? 'fctl-create-repo__adv-section--nested' : ''}>
-          {values.repoType === RepoSpecType.HTTP && (
+          {values.repoType === RepoSpecType.Http && (
             <FormSection>
               <FormGroupWithHelperText
                 label={t('Validation suffix')}
@@ -115,7 +115,7 @@ const AdvancedSection = () => {
               isDisabled={values.httpConfig?.skipServerVerification}
             />
           </FormGroup>
-          {values.repoType === RepoSpecType.HTTP && (
+          {values.repoType === RepoSpecType.Http && (
             <FormGroupWithHelperText content={t('JWT authentication token for the HTTP service')} label={t('Token')}>
               <TextField name="httpConfig.token" aria-label={t('Token')} />
             </FormGroupWithHelperText>
@@ -152,14 +152,14 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
 
   const doChangeRepoType = (toType?: RepoSpecType) => {
     if (!toType) {
-      toType = values.repoType === RepoSpecType.GIT ? RepoSpecType.HTTP : RepoSpecType.GIT;
+      toType = values.repoType === RepoSpecType.Git ? RepoSpecType.Http : RepoSpecType.Git;
     }
-    if (toType === RepoSpecType.HTTP) {
-      void setFieldValue('repoType', RepoSpecType.HTTP);
+    if (toType === RepoSpecType.Http) {
+      void setFieldValue('repoType', RepoSpecType.Http);
       void setFieldValue('configType', 'http');
       void setFieldValue('useResourceSyncs', false);
     } else {
-      void setFieldValue('repoType', RepoSpecType.GIT);
+      void setFieldValue('repoType', RepoSpecType.Git);
       void setFieldValue('httpConfig.token', undefined);
     }
     void validateForm();
@@ -181,7 +181,7 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
             id="git-repo-radio"
             name="repoType"
             label={t('Use Git repository')}
-            checkedValue={RepoSpecType.GIT}
+            checkedValue={RepoSpecType.Git}
             onChangeCustom={onRepoTypeChange}
             noDefaultOnChange
             isDisabled={isRepoTypeChangeDisabled}
@@ -192,7 +192,7 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
             id="http-repo-radio"
             name="repoType"
             label={t('Use HTTP service')}
-            checkedValue={RepoSpecType.HTTP}
+            checkedValue={RepoSpecType.Http}
             onChangeCustom={onRepoTypeChange}
             noDefaultOnChange
             isDisabled={isRepoTypeChangeDisabled}
@@ -273,7 +273,7 @@ const CreateRepositoryFormContent = ({ isEdit, isReadOnly, onClose, children }: 
 
   const [canCreateRS] = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.CREATE);
 
-  const showResourceSyncs = values.canUseResourceSyncs && values.repoType === RepoSpecType.GIT;
+  const showResourceSyncs = values.canUseResourceSyncs && values.repoType === RepoSpecType.Git;
   return (
     <FlightCtlForm className="fctl-create-repo">
       <fieldset disabled={isReadOnly}>

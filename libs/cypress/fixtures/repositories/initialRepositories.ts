@@ -11,7 +11,7 @@ const repoList: Repository[] = [
     },
     spec: {
       url: 'https://github.com/flightctl/flightctl-demos',
-      type: RepoSpecType.GIT,
+      type: RepoSpecType.Git,
     },
     status: {
       conditions: [

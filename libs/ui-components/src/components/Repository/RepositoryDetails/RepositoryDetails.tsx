@@ -89,7 +89,7 @@ const RepositoryDetails = () => {
                         <RepositoryGeneralDetailsCard repoDetails={repoDetails} />
                       </CardBody>
                     </Card>
-                    {canListRS && repoDetails.spec.type !== RepoSpecType.HTTP && (
+                    {canListRS && repoDetails.spec.type !== RepoSpecType.Http && (
                       <Card>
                         <CardBody>
                           <RepositoryResourceSyncsCard repositoryId={repositoryId} />
@@ -98,7 +98,7 @@ const RepositoryDetails = () => {
                     )}
                   </GridItem>
                   <GridItem md={3}>
-                    <EventsCard kind={ResourceKind.REPOSITORY} objId={repositoryId} />
+                    <EventsCard kind={ResourceKind.Repository} objId={repositoryId} />
                   </GridItem>
                 </Grid>
               }

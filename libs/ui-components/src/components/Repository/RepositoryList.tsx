@@ -132,7 +132,7 @@ const RepositoryTableRow = ({
         <ResourceLink id={repository.metadata.name as string} routeLink={ROUTE.REPO_DETAILS} />
       </Td>
       <Td dataLabel={t('Type')}>
-        {repository.spec.type === RepoSpecType.HTTP ? t('HTTP service') : t('Git repository')}
+        {repository.spec.type === RepoSpecType.Http ? t('HTTP service') : t('Git repository')}
       </Td>
       <Td dataLabel={t('Url')}>{repository.spec.url || '-'}</Td>
       <Td dataLabel={t('Sync status')}>

@@ -125,7 +125,7 @@ const ConfigSection = ({
         {type === ConfigType.INLINE && <ConfigInlineTemplateForm index={index} isReadOnly={isReadOnly} />}
         {(type === ConfigType.GIT || type === ConfigType.HTTP) && (
           <ConfigWithRepositoryTemplateForm
-            repoType={type === ConfigType.HTTP ? RepoSpecType.HTTP : RepoSpecType.GIT}
+            repoType={type === ConfigType.HTTP ? RepoSpecType.Http : RepoSpecType.Git}
             index={index}
             isReadOnly={isReadOnly}
             canCreateRepo={canCreateRepo}

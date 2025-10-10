@@ -60,7 +60,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Url')}</DescriptionListTerm>
             <DescriptionListDescription>
-              {repoDetails?.spec.type === RepoSpecType.HTTP ? (
+              {repoDetails?.spec.type === RepoSpecType.Http ? (
                 <HttpRepositoryUrl url={repoDetails.spec.url} />
               ) : (
                 <GitRepositoryLink url={repoDetails.spec.url} />
@@ -70,7 +70,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Type')}</DescriptionListTerm>
             <DescriptionListDescription>
-              {repoDetails?.spec.type === RepoSpecType.HTTP ? t('HTTP service') : t('Git repository')}
+              {repoDetails?.spec.type === RepoSpecType.Http ? t('HTTP service') : t('Git repository')}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup />

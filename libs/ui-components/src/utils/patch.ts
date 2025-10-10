@@ -4,6 +4,7 @@ import {
   DisruptionBudget,
   PatchRequest,
   RolloutPolicy,
+  RolloutStrategy,
   UpdateSchedule,
 } from '@flightctl/types';
 import isNil from 'lodash/isNil';
@@ -109,7 +110,7 @@ const toApiDuration = (minutes: number) => {
 };
 
 const toApiDeviceSelection = (policyForm: RolloutPolicyForm): BatchSequence => ({
-  strategy: 'BatchSequence',
+  strategy: RolloutStrategy.BatchSequence,
   sequence: policyForm.batches.map((formBatch) => {
     return {
       limit: toApiLimit(formBatch),

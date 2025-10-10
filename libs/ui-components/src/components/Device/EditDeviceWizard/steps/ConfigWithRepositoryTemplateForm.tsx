@@ -202,10 +202,10 @@ const ConfigWithRepositoryTemplateForm = ({
           )}
         </FormSelect>
       </FormGroup>
-      {repoType === RepoSpecType.GIT && (
+      {repoType === RepoSpecType.Git && (
         <GitConfigForm template={ct as GitConfigTemplate} index={index} isReadOnly={isReadOnly} />
       )}
-      {repoType === RepoSpecType.HTTP && (
+      {repoType === RepoSpecType.Http && (
         <HttpConfigForm
           template={ct as HttpConfigTemplate}
           index={index}
