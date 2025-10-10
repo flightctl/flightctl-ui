@@ -31,7 +31,7 @@ import './EventsCard.css';
 type EventListProps = {
   kind: ResourceKind;
   objId: string;
-  type?: Event.type;
+  type?: Event['type'];
 };
 
 const EventEmptyState = ({ hasFilters }: { hasFilters: boolean }) => {
@@ -75,7 +75,7 @@ const EventList = ({ events }: { events: DisplayEvent[] }) => {
   );
 };
 
-const EventsCard = ({ kind, objId, type = Event.type.WARNING }: EventListProps) => {
+const EventsCard = ({ kind, objId, type = 'Warning' }: EventListProps) => {
   const { t } = useTranslation();
 
   const [selectedType, setSelectedType] = React.useState<SelectableEventType>(type);
@@ -98,7 +98,7 @@ const EventsCard = ({ kind, objId, type = Event.type.WARNING }: EventListProps) 
   if (isLoading && !events) {
     content = <Spinner size="sm" />;
   } else if (!isLoading && events?.length === 0) {
-    content = <EventEmptyState hasFilters={selectedType !== 'all'} />;
+    content = <EventEmptyState hasFilters={selectedType !== 'All'} />;
   } else {
     content = <EventList events={events || []} />;
   }
@@ -135,14 +135,14 @@ const EventsCard = ({ kind, objId, type = Event.type.WARNING }: EventListProps) 
                 setIsTypeOpen((open) => !open);
               }}
             >
-              {selectedType === 'all' ? t('All types') : selectedType}
+              {selectedType === 'All' ? t('All types') : selectedType}
             </MenuToggle>
           )}
         >
           <SelectList>
-            <SelectOption value="all">{t('All types')}</SelectOption>
-            <SelectOption value={Event.type.NORMAL}>{t('Normal')}</SelectOption>
-            <SelectOption value={Event.type.WARNING}>{t('Warning')}</SelectOption>
+            <SelectOption value="All">{t('All types')}</SelectOption>
+            <SelectOption value="Normal">{t('Normal')}</SelectOption>
+            <SelectOption value="Warning">{t('Warning')}</SelectOption>
           </SelectList>
         </Select>
       </CardBody>

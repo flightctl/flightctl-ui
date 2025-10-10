@@ -3,7 +3,6 @@ import { Icon, Stack, StackItem, TextContent } from '@patternfly/react-core';
 import InfoCircleIcon from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 
-import { Event } from '@flightctl/types';
 import { DisplayEvent } from './useEvents';
 
 const NormalEventIcon = () => (
@@ -22,8 +21,7 @@ const EventItem = ({ event }: { event: DisplayEvent }) => {
   return (
     <Stack>
       <StackItem>
-        {event.type === Event.type.NORMAL ? <NormalEventIcon /> : <WarningEventIcon />}{' '}
-        <strong>{event.reasonText}</strong>
+        {event.type === 'Normal' ? <NormalEventIcon /> : <WarningEventIcon />} <strong>{event.reasonText}</strong>
       </StackItem>
       {event.message && <StackItem>{event.message}</StackItem>}
       <StackItem>
