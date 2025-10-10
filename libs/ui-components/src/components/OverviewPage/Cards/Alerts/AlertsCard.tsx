@@ -14,7 +14,7 @@ import {
 import { TFunction } from 'react-i18next';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
-import { Event, ResourceKind } from '@flightctl/types';
+import { ResourceKind } from '@flightctl/types';
 import { AlertManagerAlert } from '../../../../types/extraTypes';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -28,91 +28,91 @@ const ALERTS_TIMEOUT = 20000; // 20 seconds
 
 // Define only the Event.reason values that correspond to alerts
 type AlertEventReason =
-  | Event.reason.DEVICE_APPLICATION_DEGRADED
-  | Event.reason.DEVICE_APPLICATION_ERROR
-  | Event.reason.DEVICE_APPLICATION_HEALTHY
-  | Event.reason.DEVICE_CPUCRITICAL
-  | Event.reason.DEVICE_CPUNORMAL
-  | Event.reason.DEVICE_CPUWARNING
-  | Event.reason.DEVICE_MEMORY_CRITICAL
-  | Event.reason.DEVICE_MEMORY_NORMAL
-  | Event.reason.DEVICE_MEMORY_WARNING
-  | Event.reason.DEVICE_DISK_CRITICAL
-  | Event.reason.DEVICE_DISK_NORMAL
-  | Event.reason.DEVICE_DISK_WARNING
-  | Event.reason.DEVICE_CONNECTED
-  | Event.reason.DEVICE_DISCONNECTED
-  | Event.reason.RESOURCE_DELETED
-  | Event.reason.DEVICE_DECOMMISSIONED;
+  | 'DeviceApplicationDegraded'
+  | 'DeviceApplicationError'
+  | 'DeviceApplicationHealthy'
+  | 'DeviceCPUCritical'
+  | 'DeviceCPUNormal'
+  | 'DeviceCPUWarning'
+  | 'DeviceMemoryCritical'
+  | 'DeviceMemoryNormal'
+  | 'DeviceMemoryWarning'
+  | 'DeviceDiskCritical'
+  | 'DeviceDiskNormal'
+  | 'DeviceDiskWarning'
+  | 'DeviceConnected'
+  | 'DeviceDisconnected'
+  | 'ResourceDeleted'
+  | 'DeviceDecommissioned';
 
 // Alert types that are processed by the alert exporter
 const getAlertTitles = (t: (key: string) => string): Record<AlertEventReason, string> => ({
   // Application status alerts
-  [Event.reason.DEVICE_APPLICATION_DEGRADED]: t('Some application workloads are degraded'),
-  [Event.reason.DEVICE_APPLICATION_ERROR]: t('Some application workloads are in error state'),
-  [Event.reason.DEVICE_APPLICATION_HEALTHY]: t('All application workloads are healthy'),
+  DeviceApplicationDegraded: t('Some application workloads are degraded'),
+  DeviceApplicationError: t('Some application workloads are in error state'),
+  DeviceApplicationHealthy: t('All application workloads are healthy'),
   // CPU alerts
-  [Event.reason.DEVICE_CPUCRITICAL]: t('CPU utilization has reached a critical level'),
-  [Event.reason.DEVICE_CPUNORMAL]: t('CPU utilization has returned to normal'),
-  [Event.reason.DEVICE_CPUWARNING]: t('CPU utilization has reached a warning level'),
+  DeviceCPUCritical: t('CPU utilization has reached a critical level'),
+  DeviceCPUNormal: t('CPU utilization has returned to normal'),
+  DeviceCPUWarning: t('CPU utilization has reached a warning level'),
   // Memory alerts
-  [Event.reason.DEVICE_MEMORY_CRITICAL]: t('Memory utilization has reached a critical level'),
-  [Event.reason.DEVICE_MEMORY_NORMAL]: t('Memory utilization has returned to normal'),
-  [Event.reason.DEVICE_MEMORY_WARNING]: t('Memory utilization has reached a warning level'),
+  DeviceMemoryCritical: t('Memory utilization has reached a critical level'),
+  DeviceMemoryNormal: t('Memory utilization has returned to normal'),
+  DeviceMemoryWarning: t('Memory utilization has reached a warning level'),
   // Disk alerts
-  [Event.reason.DEVICE_DISK_CRITICAL]: t('Disk utilization has reached a critical level'),
-  [Event.reason.DEVICE_DISK_NORMAL]: t('Disk utilization has returned to normal'),
-  [Event.reason.DEVICE_DISK_WARNING]: t('Disk utilization has reached a warning level'),
+  DeviceDiskCritical: t('Disk utilization has reached a critical level'),
+  DeviceDiskNormal: t('Disk utilization has returned to normal'),
+  DeviceDiskWarning: t('Disk utilization has reached a warning level'),
   // Other device-specific alerts
-  [Event.reason.DEVICE_CONNECTED]: t('Device reconnected'),
-  [Event.reason.DEVICE_DISCONNECTED]: t('Device is disconnected'),
-  [Event.reason.DEVICE_DECOMMISSIONED]: t('Device decommissioned successfully'),
+  DeviceConnected: t('Device reconnected'),
+  DeviceDisconnected: t('Device is disconnected'),
+  DeviceDecommissioned: t('Device decommissioned successfully'),
   // Resource lifecycle alerts
-  [Event.reason.RESOURCE_DELETED]: t('Resource was deleted successfully'),
+  ResourceDeleted: t('Resource was deleted successfully'),
 });
 
 const alertResourceKind: Record<AlertEventReason, ResourceKind | undefined> = {
   // Application status alerts
-  [Event.reason.DEVICE_APPLICATION_DEGRADED]: ResourceKind.DEVICE,
-  [Event.reason.DEVICE_APPLICATION_ERROR]: ResourceKind.DEVICE,
-  [Event.reason.DEVICE_APPLICATION_HEALTHY]: ResourceKind.DEVICE,
+  DeviceApplicationDegraded: ResourceKind.Device,
+  DeviceApplicationError: ResourceKind.Device,
+  DeviceApplicationHealthy: ResourceKind.Device,
   // CPU alerts
-  [Event.reason.DEVICE_CPUCRITICAL]: ResourceKind.DEVICE,
-  [Event.reason.DEVICE_CPUNORMAL]: ResourceKind.DEVICE,
-  [Event.reason.DEVICE_CPUWARNING]: ResourceKind.DEVICE,
+  DeviceCPUCritical: ResourceKind.Device,
+  DeviceCPUNormal: ResourceKind.Device,
+  DeviceCPUWarning: ResourceKind.Device,
   // Memory alerts
-  [Event.reason.DEVICE_MEMORY_CRITICAL]: ResourceKind.DEVICE,
-  [Event.reason.DEVICE_MEMORY_NORMAL]: ResourceKind.DEVICE,
-  [Event.reason.DEVICE_MEMORY_WARNING]: ResourceKind.DEVICE,
+  DeviceMemoryCritical: ResourceKind.Device,
+  DeviceMemoryNormal: ResourceKind.Device,
+  DeviceMemoryWarning: ResourceKind.Device,
   // Disk alerts
-  [Event.reason.DEVICE_DISK_CRITICAL]: ResourceKind.DEVICE,
-  [Event.reason.DEVICE_DISK_NORMAL]: ResourceKind.DEVICE,
-  [Event.reason.DEVICE_DISK_WARNING]: ResourceKind.DEVICE,
+  DeviceDiskCritical: ResourceKind.Device,
+  DeviceDiskNormal: ResourceKind.Device,
+  DeviceDiskWarning: ResourceKind.Device,
   // Other device-specific alerts
-  [Event.reason.DEVICE_CONNECTED]: ResourceKind.DEVICE,
-  [Event.reason.DEVICE_DISCONNECTED]: ResourceKind.DEVICE,
-  [Event.reason.DEVICE_DECOMMISSIONED]: ResourceKind.DEVICE,
+  DeviceConnected: ResourceKind.Device,
+  DeviceDisconnected: ResourceKind.Device,
+  DeviceDecommissioned: ResourceKind.Device,
   // Resource lifecycle alerts
-  [Event.reason.RESOURCE_DELETED]: undefined,
+  ResourceDeleted: undefined,
 };
 
 const resourceKindLabel = (t: TFunction, resourceKind: ResourceKind | undefined) => {
   switch (resourceKind) {
     case undefined:
       return t('Resource');
-    case ResourceKind.DEVICE:
+    case ResourceKind.Device:
       return t('Device');
-    case ResourceKind.ENROLLMENT_REQUEST:
+    case ResourceKind.EnrollmentRequest:
       return t('Enrollment request');
-    case ResourceKind.CERTIFICATE_SIGNING_REQUEST:
+    case ResourceKind.CertificateSigningRequest:
       return t('Certificate signing request');
-    case ResourceKind.FLEET:
+    case ResourceKind.Fleet:
       return t('Fleet');
-    case ResourceKind.REPOSITORY:
+    case ResourceKind.Repository:
       return t('Repository');
-    case ResourceKind.RESOURCE_SYNC:
+    case ResourceKind.ResourceSync:
       return t('Resource sync');
-    case ResourceKind.TEMPLATE_VERSION:
+    case ResourceKind.TemplateVersion:
       return t('Template version');
   }
 };
@@ -165,7 +165,7 @@ const AlertsCard = () => {
                 <StackItem>
                   <TextContent>
                     {kindLabel}{' '}
-                    {resourceKind === ResourceKind.DEVICE ? (
+                    {resourceKind === ResourceKind.Device ? (
                       <ResourceLink id={alert.labels.resource} />
                     ) : (
                       alert.labels.resource

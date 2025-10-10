@@ -103,7 +103,7 @@ const ImportFleetWizard = () => {
     endpoint: 'repositories',
   });
 
-  const gitRepositories = (repoList?.items || []).filter((repo) => repo.spec.type === RepoSpecType.GIT);
+  const gitRepositories = (repoList?.items || []).filter((repo) => repo.spec.type === RepoSpecType.Git);
 
   let body: React.ReactNode;
 
@@ -122,7 +122,7 @@ const ImportFleetWizard = () => {
   } else {
     const repoInitValues = getInitValues({
       options: {
-        allowedRepoTypes: [RepoSpecType.GIT],
+        allowedRepoTypes: [RepoSpecType.Git],
         showRepoTypes: false,
       },
     });

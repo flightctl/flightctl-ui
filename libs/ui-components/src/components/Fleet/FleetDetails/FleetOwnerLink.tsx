@@ -4,9 +4,9 @@ import { Link, ROUTE } from '../../../hooks/useNavigate';
 import WithTooltip from '../../common/WithTooltip';
 import { useTranslation } from '../../../hooks/useTranslation';
 
-const rsOwnerRegex = /^ResourceSync\/(?<rsName>.*)$/;
+const rsOwnerRegex = /^ResourceSync\/(.*)$/;
 
-export const getOwnerName = (owner: string | undefined) => rsOwnerRegex.exec(owner || '')?.groups?.rsName;
+export const getOwnerName = (owner: string | undefined) => rsOwnerRegex.exec(owner || '')?.[1];
 
 export const RSLink = ({ rsName }: { rsName: string }) => (
   <div>

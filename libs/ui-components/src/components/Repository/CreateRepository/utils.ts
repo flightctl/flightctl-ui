@@ -46,7 +46,7 @@ export const getInitValues = ({
   const useRSs = options?.canUseResourceSyncs ?? true;
 
   if (!repository) {
-    const selectedRepoType = options?.allowedRepoTypes?.length === 1 ? options.allowedRepoTypes[0] : RepoSpecType.GIT;
+    const selectedRepoType = options?.allowedRepoTypes?.length === 1 ? options.allowedRepoTypes[0] : RepoSpecType.Git;
 
     return {
       exists: false,
@@ -205,7 +205,7 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
     } else {
       appendJSONPatch({
         patches,
-        newValue: values.repoType === RepoSpecType.HTTP ? values.validationSuffix : undefined,
+        newValue: values.repoType === RepoSpecType.Http ? values.validationSuffix : undefined,
         originalValue: repository.spec.validationSuffix,
         path: '/spec/validationSuffix',
       });
@@ -434,7 +434,7 @@ export const repositorySchema =
     return Yup.object({
       name: validKubernetesDnsSubdomain(t, { isRequired: !repository }),
       url: Yup.string().when('repoType', {
-        is: (repoType: RepoSpecType) => repoType === RepoSpecType.GIT,
+        is: (repoType: RepoSpecType) => repoType === RepoSpecType.Git,
         then: () =>
           Yup.string()
             .matches(
@@ -508,7 +508,7 @@ export const getRepository = (values: Omit<RepositoryFormValues, 'useResourceSyn
         httpRepoSpec.httpConfig['tls.key'] = btoa(tlsKey);
       }
     }
-    if (spec.type === RepoSpecType.HTTP && values.httpConfig.token) {
+    if (spec.type === RepoSpecType.Http && values.httpConfig.token) {
       httpRepoSpec.httpConfig.token = values.httpConfig.token;
     }
   } else if (values.configType === 'ssh' && values.sshConfig) {
@@ -552,6 +552,6 @@ export const getResourceSync = (repositoryId: string, values: ResourceSyncFormVa
 
 export const handlePromises = async (promises: Promise<unknown>[]): Promise<string[]> => {
   const results = await Promise.allSettled(promises);
-  const failedPromises = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+  const failedPromises = results.filter((r) => r.status === 'rejected');
   return failedPromises.map((fp) => getErrorMessage(fp.reason));
 };
