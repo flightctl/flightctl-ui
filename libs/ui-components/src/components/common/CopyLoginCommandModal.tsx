@@ -23,7 +23,7 @@ const CopyLoginCommandModal = ({ onClose }: { onClose: VoidFunction }) => {
   const brandName = getBrandName(settings);
 
   const [serviceUrl, setServiceUrl] = React.useState('');
-  const loginCommand = String.raw`flightctl login ${serviceUrl || DEFAULT_API_URL} --token=$(oc whoami -t)`;
+  const loginCommand = serviceUrl ? String.raw`flightctl login ${serviceUrl} --token=$(oc whoami -t)` : '';
 
   React.useEffect(() => {
     const loadServiceUrl = async () => {
@@ -50,13 +50,17 @@ const CopyLoginCommandModal = ({ onClose }: { onClose: VoidFunction }) => {
           </StackItem>
           <StackItem>
             <CodeBlock
-              actions={[
-                <CodeBlockAction key="copy-command">
-                  <CopyButton text={loginCommand} ariaLabel={t('Copy login command')} />
-                </CodeBlockAction>,
-              ]}
+              actions={
+                loginCommand
+                  ? [
+                      <CodeBlockAction key="copy-command">
+                        <CopyButton text={loginCommand} ariaLabel={t('Copy login command')} />
+                      </CodeBlockAction>,
+                    ]
+                  : undefined
+              }
             >
-              <CodeBlockCode>{serviceUrl ? loginCommand : t('Loading...')}</CodeBlockCode>
+              <CodeBlockCode>{loginCommand || t('Loading...')}</CodeBlockCode>
             </CodeBlock>
           </StackItem>
           <StackItem>

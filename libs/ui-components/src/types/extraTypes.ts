@@ -80,5 +80,5 @@ export enum AuthType {
   DISABLED = 'DISABLED',
   OIDC = 'OIDC',
   K8S = 'K8S',
-  AAP = 'AAP',
+  AAP = 'AAPGateway',
 }

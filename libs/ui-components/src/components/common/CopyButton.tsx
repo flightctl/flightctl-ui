@@ -21,14 +21,16 @@ const CopyButton = ({ ariaLabel, text, variant }: CopyButtonProps) => {
   };
 
   React.useEffect(() => {
-    let timeout: NodeJS.Timeout;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
     if (copied) {
       timeout = setTimeout(() => {
         setCopied(false);
       }, 1000);
     }
     return () => {
-      clearTimeout(timeout);
+      if (timeout) {
+        clearTimeout(timeout);
+      }
     };
   }, [copied]);
 
@@ -37,9 +39,10 @@ const CopyButton = ({ ariaLabel, text, variant }: CopyButtonProps) => {
       <Button
         variant={variant || 'plain'}
         isInline={variant === 'link'}
+        onClick={onCopy}
         icon={
           <Icon size="sm">
-            <CopyIcon onClick={onCopy} />
+            <CopyIcon />
           </Icon>
         }
         aria-label={ariaLabel || t('Copy text')}
