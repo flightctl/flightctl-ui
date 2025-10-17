@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { loginAPI, redirectToLogin } from '../utils/apiCalls';
 import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
+import { AuthType } from '@flightctl/ui-components/src/types/extraTypes';
+import { OAUTH_REDIRECT_AFTER_LOGIN_KEY } from '@flightctl/ui-components/src/constants';
 
 const AUTH_DISABLED_STATUS_CODE = 418;
 const EXPIRATION = 'expiration';
@@ -11,16 +13,18 @@ const maxTimeout = 2 ** 31 - 1;
 
 const nowInSeconds = () => Math.round(Date.now() / 1000);
 
+const secondarySessionRedirectPages = ['copy-login-command'];
+
 type AuthContextProps = {
+  authType: AuthType;
   username: string;
   loading: boolean;
-  authEnabled: boolean;
   error: string | undefined;
 };
 
 export const AuthContext = React.createContext<AuthContextProps>({
+  authType: AuthType.DISABLED,
   username: '',
-  authEnabled: true,
   loading: false,
   error: undefined,
 });
@@ -28,7 +32,7 @@ export const AuthContext = React.createContext<AuthContextProps>({
 export const useAuthContext = () => {
   const [username, setUsername] = React.useState('');
   const [loading, setLoading] = React.useState(true);
-  const [authEnabled, setAuthEnabled] = React.useState(true);
+  const [authType, setAuthType] = React.useState<AuthType>(AuthType.DISABLED);
   const [error, setError] = React.useState<string>();
   const refreshRef = React.useRef<NodeJS.Timeout>();
 
@@ -36,13 +40,29 @@ export const useAuthContext = () => {
     const getUserInfo = async () => {
       let callbackErr: string | null = null;
       if (window.location.pathname === '/callback') {
-        localStorage.removeItem(EXPIRATION);
-        localStorage.removeItem(ORGANIZATION_STORAGE_KEY);
         const searchParams = new URLSearchParams(window.location.search);
         const code = searchParams.get('code');
         callbackErr = searchParams.get('error');
+
         if (code) {
-          const resp = await fetch(loginAPI, {
+          // Some pages require the user to re-authenticate for security reasons.
+          // The token generated for these "secondary sessions" is independent of the primary session token.
+          const redirectAfterLogin = localStorage.getItem(OAUTH_REDIRECT_AFTER_LOGIN_KEY);
+          const isPrimarySession = !secondarySessionRedirectPages.includes(redirectAfterLogin || '');
+
+          let loginEndpoint: string;
+          if (isPrimarySession) {
+            loginEndpoint = loginAPI;
+            localStorage.removeItem(ORGANIZATION_STORAGE_KEY);
+            localStorage.removeItem(EXPIRATION);
+          } else {
+            // Do not clear the localStorage items, otherwise they would be unset for the primary session too
+            // We will force a new authentication flow that will allow us to retrieve the token from a newly generated sessionId
+            loginEndpoint = `${loginAPI}/create-session-token`;
+          }
+
+          // In both cases, we trigger a new login flow
+          const resp = await fetch(loginEndpoint, {
             headers: {
               'Content-Type': 'application/json',
             },
@@ -52,11 +72,16 @@ export const useAuthContext = () => {
               code: code,
             }),
           });
-          const expiration = (await resp.json()) as { expiresIn: number };
-          if (expiration.expiresIn) {
+
+          if (isPrimarySession) {
+            const newLoginResponse = (await resp.json()) as { expiresIn: number };
             const now = nowInSeconds();
-            localStorage.setItem(EXPIRATION, `${now + expiration.expiresIn}`);
+            localStorage.setItem(EXPIRATION, `${now + newLoginResponse.expiresIn}`);
             lastRefresh = now;
+          } else {
+            const newLoginResponse = (await resp.json()) as { sessionId: string };
+            localStorage.removeItem(OAUTH_REDIRECT_AFTER_LOGIN_KEY);
+            window.location.href = `/${redirectAfterLogin}?sessionId=${newLoginResponse.sessionId || ''}`;
           }
         } else if (callbackErr) {
           setError(callbackErr);
@@ -69,7 +94,7 @@ export const useAuthContext = () => {
             credentials: 'include',
           });
           if (resp.status === AUTH_DISABLED_STATUS_CODE) {
-            setAuthEnabled(false);
+            setAuthType(AuthType.DISABLED);
             setLoading(false);
             return;
           }
@@ -81,8 +106,9 @@ export const useAuthContext = () => {
             setError('Failed to get user info');
             return;
           }
-          const info = (await resp.json()) as { username: string };
+          const info = (await resp.json()) as { username: string; authType: AuthType };
           setUsername(info.username);
+          setAuthType(info.authType);
           setLoading(false);
         } catch (err) {
           // eslint-disable-next-line
@@ -98,7 +124,7 @@ export const useAuthContext = () => {
   React.useEffect(() => {
     if (!loading) {
       const scheduleRefresh = () => {
-        if (!authEnabled) {
+        if (authType === AuthType.DISABLED) {
           return;
         }
         const expiresAt = parseInt(localStorage.getItem(EXPIRATION) || '0', 10);
@@ -138,7 +164,7 @@ export const useAuthContext = () => {
       scheduleRefresh();
     }
     return () => clearTimeout(refreshRef.current);
-  }, [loading, authEnabled]);
+  }, [loading, authType]);
 
-  return { username, loading, authEnabled, error };
+  return { username, loading, authType, error };
 };
