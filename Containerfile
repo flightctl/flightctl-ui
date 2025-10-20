@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/nodejs-18-minimal:latest as ui-build
+FROM registry.access.redhat.com/ubi9/nodejs-22-minimal:latest as ui-build
 USER root
 RUN microdnf install -y rsync
 
