@@ -38,11 +38,8 @@ const LoginCommandCopy = ({ loginCommand, brandName }: { loginCommand: string; b
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = React.useState(false);
 
-  // Truncate the command for initial display (show first part + ellipsis)
-  const truncatedCommand =
-    loginCommand.length > TRUNCATED_COMMAND_LENGTH
-      ? `${loginCommand.substring(0, TRUNCATED_COMMAND_LENGTH)}`
-      : loginCommand;
+  const hasShowMore = loginCommand.length > TRUNCATED_COMMAND_LENGTH;
+  const visibleCommand = hasShowMore ? `${loginCommand.substring(0, TRUNCATED_COMMAND_LENGTH)}...` : loginCommand;
 
   return (
     <Stack hasGutter className="fctl-login-command__copy-content">
@@ -50,7 +47,7 @@ const LoginCommandCopy = ({ loginCommand, brandName }: { loginCommand: string; b
         <Alert variant="success" isInline title={t('Login successful!')} />
       </StackItem>
       <StackItem>
-        {t('Copy and run this command in your terminal to authenticate to {{ brandName }}:', { brandName })}
+        {t('Copy and run this command in your terminal to authenticate with {{ brandName }}:', { brandName })}
       </StackItem>
       <StackItem>
         <CodeBlock
@@ -62,23 +59,27 @@ const LoginCommandCopy = ({ loginCommand, brandName }: { loginCommand: string; b
         >
           <CodeBlockCode className="fctl-login-command__codeblock">
             {/* When the full command is shown, hide the truncated command. This allows the full command to be copied using the keyboard */}
-            {isExpanded ? '' : `${truncatedCommand}...`}
-            <ExpandableSection
-              toggleText={isExpanded ? t('Show less') : t('Show more')}
-              isExpanded={isExpanded}
-              isDetached
-              contentId="code-block-expand"
-            >
-              {loginCommand}
-            </ExpandableSection>
-            <ExpandableSectionToggle
-              isExpanded={isExpanded}
-              onToggle={(isExpanded) => setIsExpanded(isExpanded)}
-              contentId="code-block-expand"
-              direction={isExpanded ? 'up' : 'down'}
-            >
-              {isExpanded ? t('Show Less') : t('Show More')}
-            </ExpandableSectionToggle>
+            {isExpanded ? '' : visibleCommand}
+            {hasShowMore && (
+              <>
+                <ExpandableSection
+                  toggleText={isExpanded ? t('Show less') : t('Show more')}
+                  isExpanded={isExpanded}
+                  isDetached
+                  contentId="code-block-expand"
+                >
+                  {loginCommand}
+                </ExpandableSection>
+                <ExpandableSectionToggle
+                  isExpanded={isExpanded}
+                  onToggle={(isExpanded) => setIsExpanded(isExpanded)}
+                  contentId="code-block-expand"
+                  direction={isExpanded ? 'up' : 'down'}
+                >
+                  {isExpanded ? t('Show less') : t('Show more')}
+                </ExpandableSectionToggle>
+              </>
+            )}
           </CodeBlockCode>
         </CodeBlock>
       </StackItem>
@@ -101,7 +102,7 @@ const CopyLoginCommandBody = ({ brandName }: { brandName: string }) => {
   const [loginCommand, setLoginCommand] = React.useState('');
   const [tokenNotFound, setTokenNotFound] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState('');
-  const sessionId = window.location.search.split('sessionId=')[1];
+  const sessionId = new URLSearchParams(window.location.search).get('sessionId');
 
   React.useEffect(() => {
     const getSessionToken = async () => {

@@ -16,6 +16,11 @@ import (
 	"github.com/flightctl/flightctl/api/v1alpha1"
 )
 
+const (
+	DefaultTokenCleanupInterval = 10 * time.Minute // How often to run cleanup
+	DefaultTokenMaxAge          = 15 * time.Minute // Max age before forced removal
+)
+
 type ExpiresInResp struct {
 	ExpiresIn *int64 `json:"expiresIn"`
 }
@@ -35,9 +40,10 @@ type RedirectResponse struct {
 }
 
 type AuthHandler struct {
-	provider     AuthProvider
-	sessionMutex sync.Mutex
-	apiTokenMap  map[string]*ApiToken
+	provider         AuthProvider
+	sessionMutex     sync.Mutex
+	apiTokenMap      map[string]*ApiToken
+	stopTokenCleanup chan struct{}
 }
 
 type ApiToken struct {
@@ -48,7 +54,8 @@ type ApiToken struct {
 
 func NewAuth(apiTlsConfig *tls.Config) (*AuthHandler, error) {
 	auth := AuthHandler{
-		apiTokenMap: make(map[string]*ApiToken),
+		apiTokenMap:      make(map[string]*ApiToken),
+		stopTokenCleanup: make(chan struct{}),
 	}
 	authConfig, internalAuthUrl, err := getAuthInfo(apiTlsConfig)
 	if err != nil {
@@ -68,6 +75,12 @@ func NewAuth(apiTlsConfig *tls.Config) (*AuthHandler, error) {
 	default:
 		err = fmt.Errorf("unknown auth type: %s", authConfig.AuthType)
 	}
+
+	if err == nil && auth.provider != nil {
+		// Start the cleanup routine for expired tokens
+		go auth.startTokenCleanup()
+	}
+
 	return &auth, err
 }
 
@@ -221,6 +234,61 @@ func (a *AuthHandler) getSingleUseApiTokenMapping(sessionId string) (*ApiToken, 
 		delete(a.apiTokenMap, sessionId)
 	}
 	return session, exists
+}
+
+// Cleans up expired and old tokens that were never retrieved through getSingleUseApiTokenMapping
+func (a *AuthHandler) startTokenCleanup() {
+	ticker := time.NewTicker(DefaultTokenCleanupInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			a.cleanupExpiredTokens()
+		case <-a.stopTokenCleanup:
+			return
+		}
+	}
+}
+
+// Removes expired tokens and tokens older than DefaultMaxTokenAge from the apiTokenMap
+func (a *AuthHandler) cleanupExpiredTokens() {
+	a.sessionMutex.Lock()
+	defer a.sessionMutex.Unlock()
+
+	now := time.Now()
+	deletedTokens := 0
+
+	for sessionId, token := range a.apiTokenMap {
+		shouldRemove := false
+
+		if now.Sub(token.CreatedAt) > DefaultTokenMaxAge {
+			// Remove tokens older than the directed max age
+			shouldRemove = true
+		} else if token.ExpiresIn != nil {
+			// Remove expired tokens (if ExpiresIn is set)
+			expiration := token.CreatedAt.Add(time.Duration(*token.ExpiresIn) * time.Second)
+			if now.After(expiration) {
+				shouldRemove = true
+			}
+		}
+
+		if shouldRemove {
+			delete(a.apiTokenMap, sessionId)
+			deletedTokens++
+		}
+	}
+
+	if deletedTokens > 0 {
+		log.GetLogger().WithFields(map[string]interface{}{
+			"deletedTokens":   deletedTokens,
+			"remainingTokens": len(a.apiTokenMap),
+		}).Info("Cleaned up expired API tokens")
+	}
+}
+
+func (a *AuthHandler) StopTokenCleanup() {
+	close(a.stopTokenCleanup)
 }
 
 func (a *AuthHandler) CreateSessionToken(w http.ResponseWriter, r *http.Request) {
