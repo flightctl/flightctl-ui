@@ -15,17 +15,43 @@ jobs:
   publish-to-npm:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+
       - name: Check workflow runs in a release branch
         run: |
-          if [[ "${{ github.event.release.target_commitish }}" != *release-* ]]; then
-            echo "Expecting to be in a release branch, but we are in: ${{ github.event.release.target_commitish }}"
+          TAG_NAME="${{ github.event.release.tag_name }}"
+
+          # Extract major.minor version from tag (e.g., v0.10.5-rc1 -> 0.10)
+          TAG_VERSION=$(echo "${TAG_NAME}" | sed 's/^v//' | grep -oE '^[0-9]+\.[0-9]+')
+          if [[ -z "${TAG_VERSION}" ]]; then
+            echo "✗ Error: Could not extract version from tag ${TAG_NAME}"
             exit 1
           fi
 
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.release.target_commitish }}
-          fetch-depth: 0
+          EXPECTED_BRANCH="release-${TAG_VERSION}"
+          echo "Tag version: ${TAG_VERSION}.x"
+          echo "Expected release branch: ${EXPECTED_BRANCH}"
+
+          # Get the commit SHA for the tag
+          TAG_COMMIT=$(git rev-list -n 1 "${TAG_NAME}")
+          echo "Tag ${TAG_NAME} points to commit: ${TAG_COMMIT}"
+
+          # Get all branches containing this commit
+          BRANCHES=$(git branch -r --contains ${TAG_COMMIT} | sed 's|^[[:space:]]*origin/||' | grep -v HEAD)
+          echo "Branches containing this commit:"
+          echo "${BRANCHES}"
+
+          # Check if the expected release branch contains this commit
+          if echo "${BRANCHES}" | grep -q "^${EXPECTED_BRANCH}$"; then
+            echo "✓ Tag ${TAG_NAME} is on the correct release branch: ${EXPECTED_BRANCH}"
+          else
+            echo "✗ Error: Tag ${TAG_NAME} (version ${TAG_VERSION}) is not on branch ${EXPECTED_BRANCH}"
+            echo "Available branches: ${BRANCHES}"
+            exit 1
+          fi
 
       - name: Lookup for workspaces to be published
         run: |
