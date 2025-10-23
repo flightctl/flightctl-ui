@@ -38,7 +38,8 @@ func main() {
 
 	tlsConfig, err := bridge.GetTlsConfig()
 	if err != nil {
-		panic(err)
+		log.WithError(err).Error("Failed to get TLS configuration")
+		os.Exit(1)
 	}
 
 	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(tlsConfig))
@@ -73,7 +74,8 @@ func main() {
 	if config.OcpPlugin != "true" {
 		authHandler, err := auth.NewAuth(tlsConfig)
 		if err != nil {
-			panic(err)
+			log.WithError(err).Error("Failed to initialize authentication")
+			os.Exit(1)
 		}
 		apiRouter.HandleFunc("/login", authHandler.Login)
 		apiRouter.HandleFunc("/login/info", authHandler.GetUserInfo)
@@ -92,7 +94,8 @@ func main() {
 	if config.TlsKeyPath != "" && config.TlsCertPath != "" {
 		cert, err := tls.LoadX509KeyPair(config.TlsCertPath, config.TlsKeyPath)
 		if err != nil {
-			panic(err)
+			log.WithError(err).Error("Failed to load TLS certificate")
+			os.Exit(1)
 		}
 		serverTlsconfig = &tls.Config{
 			Certificates: []tls.Certificate{cert},
