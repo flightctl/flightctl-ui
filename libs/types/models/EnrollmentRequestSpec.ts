@@ -16,5 +16,9 @@ export type EnrollmentRequestSpec = {
    * A set of labels that the service will apply to this device when its enrollment is approved.
    */
   labels?: Record<string, string>;
+  /**
+   * The rendered version of the device from desired.json (optional).
+   */
+  knownRenderedVersion?: string;
 };
 

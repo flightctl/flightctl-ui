@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { ApplicationEnvVars } from './ApplicationEnvVars';
 import type { AppType } from './AppType';
+import type { ArtifactApplicationProviderSpec } from './ArtifactApplicationProviderSpec';
 import type { ImageApplicationProviderSpec } from './ImageApplicationProviderSpec';
 import type { InlineApplicationProviderSpec } from './InlineApplicationProviderSpec';
 export type ApplicationProviderSpec = (ApplicationEnvVars & {
@@ -12,5 +13,5 @@ export type ApplicationProviderSpec = (ApplicationEnvVars & {
    */
   name?: string;
   appType?: AppType;
-} & (ImageApplicationProviderSpec | InlineApplicationProviderSpec));
+} & (ImageApplicationProviderSpec | ArtifactApplicationProviderSpec | InlineApplicationProviderSpec));
 

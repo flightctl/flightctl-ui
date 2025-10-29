@@ -7,4 +7,5 @@
  */
 export enum AppType {
   AppTypeCompose = 'compose',
+  AppTypeQuadlet = 'quadlet',
 }
