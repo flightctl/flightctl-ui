@@ -1,4 +1,24 @@
-#!/usr/bin/env bash
+#!/bin/sh
+
+flightctl_namespace="flightctl-external"
+
+# Validates that the script can run properly to detect the backend deployment setttings
+validate_prerequisites() {
+    if ! command -v kubectl >/dev/null 2>&1; then
+        echo "❌ Error: kubectl not found. " >&2
+        exit 1
+    fi
+    
+    if ! kubectl config get-contexts kind-kind >/dev/null 2>&1; then
+        echo "❌ Error: kind-kind context not found. Please deploy flightctl first." >&2
+        exit 1
+    fi
+    
+    if ! kubectl get namespaces --context kind-kind >/dev/null 2>&1; then
+        echo "❌ Error: Cannot connect to kind cluster. Please check your setup." >&2
+        exit 1
+    fi
+}
 
 # Function to get external IP address
 get_external_ip() {
@@ -11,6 +31,43 @@ get_external_ip() {
     fi
 }
 
+# Function that determines if a setting is enabled based on the presence of a service in the kind cluster
+detect_service_setting() {
+    setting_name="$1"
+    service_name="$2"
+    
+    if kubectl get service "$service_name" -n "$flightctl_namespace" --context kind-kind >/dev/null 2>&1; then
+        echo "Autodetected: $setting_name enabled ✅" >&2
+        echo "true"
+    else
+        echo "Autodetected: $setting_name disabled ❌" >&2
+        echo "false"
+    fi
+    return 0
+}
+
+# Function that determines if organizations are enabled based on the "organizations.enabled" setting from "flightctl-api-config" ConfigMap
+detect_organizations_setting() {
+    SETTING_VALUE=$(kubectl get configmap flightctl-api-config -n "$flightctl_namespace" --context kind-kind -o jsonpath='{.data.config\.yaml}' 2>/dev/null | grep -A1 "organizations:" | grep "enabled:" | awk '{print $2}' | tr -d ' ')
+    
+    if [ -n "$SETTING_VALUE" ]; then
+        if [ "$SETTING_VALUE" = "true" ]; then
+            echo "Autodetected: Organizations enabled ✅" >&2
+        else
+            echo "Autodetected: Organizations disabled ❌" >&2
+        fi
+        echo "$SETTING_VALUE"
+    else
+        echo "Autodetected: Organizations disabled ❌ (no setting found in ConfigMap)" >&2
+        echo "false"
+    fi
+    return 0
+}
+
+
+# Check that the Backend is running in a kind cluster and we can access it
+validate_prerequisites
+
 # Get the external IP address
 EXTERNAL_IP=$(get_external_ip)
 
@@ -21,42 +78,48 @@ fi
 
 echo "Using external IP: $EXTERNAL_IP" >&2
 
-# Read configuration flags from environment variables (with defaults)
-ENABLE_CLI_ARTIFACTS=${ENABLE_CLI_ARTIFACTS:-false}
-ENABLE_ALERTMANAGER=${ENABLE_ALERTMANAGER:-false}
-ENABLE_ORGANIZATIONS=${ENABLE_ORGANIZATIONS:-false}
-
 # Set core environment variables for kind development
 export FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY='true'
 export FLIGHTCTL_SERVER="https://$EXTERNAL_IP:3443"
 
-# CLI Artifacts - conditionally set or unset
-if [ "$ENABLE_CLI_ARTIFACTS" = "true" ]; then
-    export FLIGHTCTL_CLI_ARTIFACTS_SERVER="http://$EXTERNAL_IP:8090"
-else
-    unset FLIGHTCTL_CLI_ARTIFACTS_SERVER
+# Organizations - get setting from kind cluster, unless it has been configured already
+if [ -z "$ENABLE_ORGANIZATIONS" ]; then
+    ENABLE_ORGANIZATIONS=$(detect_organizations_setting)
 fi
-
-# AlertManager - conditionally set or unset
-if [ "$ENABLE_ALERTMANAGER" = "true" ]; then
-    export FLIGHTCTL_ALERTMANAGER_PROXY="https://$EXTERNAL_IP:8443"
-else
-    unset FLIGHTCTL_ALERTMANAGER_PROXY
-fi
-
-# Organizations - conditionally set or unset
+export ENABLE_ORGANIZATIONS
 if [ "$ENABLE_ORGANIZATIONS" = "true" ]; then
     export ORGANIZATIONS_ENABLED="true"
 else
     export ORGANIZATIONS_ENABLED="false"
 fi
 
-echo "Environment variables set:" >&2
+# CLI artifacts - get setting from kind cluster, unless it has been configured already
+if [ -z "$ENABLE_CLI_ARTIFACTS" ]; then
+    ENABLE_CLI_ARTIFACTS=$(detect_service_setting "CLI artifacts" "flightctl-cli-artifacts")
+fi
+export ENABLE_CLI_ARTIFACTS
+if [ "$ENABLE_CLI_ARTIFACTS" = "true" ]; then
+    export FLIGHTCTL_CLI_ARTIFACTS_SERVER="http://$EXTERNAL_IP:8090"
+else
+    unset FLIGHTCTL_CLI_ARTIFACTS_SERVER
+fi
+
+# AlertManager - get setting from kind cluster, unless it has been configured already
+if [ -z "$ENABLE_ALERTMANAGER" ]; then
+    ENABLE_ALERTMANAGER=$(detect_service_setting "AlertManager" "flightctl-alertmanager-proxy")
+fi
+export ENABLE_ALERTMANAGER
+if [ "$ENABLE_ALERTMANAGER" = "true" ]; then
+    export FLIGHTCTL_ALERTMANAGER_PROXY="https://$EXTERNAL_IP:8443"
+else
+    unset FLIGHTCTL_ALERTMANAGER_PROXY
+fi
+
+echo ""
+echo "🌐 Environment variables set:" >&2
 echo "  FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY=$FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY" >&2
 echo "  FLIGHTCTL_SERVER=$FLIGHTCTL_SERVER" >&2
 echo "  FLIGHTCTL_CLI_ARTIFACTS_SERVER=${FLIGHTCTL_CLI_ARTIFACTS_SERVER:-'(disabled)'}" >&2
 echo "  FLIGHTCTL_ALERTMANAGER_PROXY=${FLIGHTCTL_ALERTMANAGER_PROXY:-'(disabled)'}" >&2
 echo "  ORGANIZATIONS_ENABLED=$ORGANIZATIONS_ENABLED" >&2
 echo >&2
-
- 
