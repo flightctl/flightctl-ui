@@ -5,10 +5,12 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 
 	"github.com/gorilla/mux"
 
 	"github.com/flightctl/flightctl-ui/config"
+	"github.com/flightctl/flightctl-ui/log"
 )
 
 type handler struct {
@@ -28,7 +30,8 @@ func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func createReverseProxy(apiURL string) (*url.URL, *httputil.ReverseProxy) {
 	target, err := url.Parse(apiURL)
 	if err != nil {
-		panic(err)
+		log.GetLogger().WithError(err).Errorf("Failed to parse URL '%s'", apiURL)
+		os.Exit(1)
 	}
 	proxy := httputil.NewSingleHostReverseProxy(target)
 	proxy.ModifyResponse = func(r *http.Response) error {
