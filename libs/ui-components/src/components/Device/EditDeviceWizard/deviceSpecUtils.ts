@@ -25,6 +25,7 @@ import {
   InlineConfigTemplate,
   KubeSecretTemplate,
   SpecConfigTemplate,
+  isArtifactAppProvider,
   isGitConfigTemplate,
   isGitProviderSpec,
   isHttpConfigTemplate,
@@ -284,6 +285,7 @@ export const getApplicationPatches = (
       value: updatedApps.map(toAPIApplication),
     });
   } else {
+    // TODO EDM-2451: Add support for artifact applications
     const needsPatch = currentApps.some((currentApp, index) => {
       const updatedApp = updatedApps[index];
       const isCurrentImageApp = isImageAppProvider(currentApp);
@@ -307,7 +309,9 @@ export const getApplicationPatches = (
       if (isCurrentImageApp) {
         return (updatedApp as ImageAppForm).image !== currentApp.image;
       }
-
+      if (isArtifactAppProvider(currentApp)) {
+        return false;
+      }
       return hasInlineApplicationChanged(currentApp, updatedApp as InlineAppForm);
     });
     if (needsPatch) {
@@ -386,28 +390,31 @@ const getAppFormVolumes = (app: ApplicationProviderSpecFixed) =>
 
 export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
   const apps = deviceSpec?.applications || [];
-  return apps.map((app) => {
-    if (isImageAppProvider(app)) {
+  return apps
+    .filter((app) => !isArtifactAppProvider(app))
+    .map((app) => {
+      if (isImageAppProvider(app)) {
+        return {
+          specType: AppSpecType.OCI_IMAGE,
+          name: app.name || '',
+          image: app.image,
+          variables: getAppFormVariables(app),
+          volumes: getAppFormVolumes(app),
+        };
+      }
+      // TODO EDM-2451: Add support for artifact applications
       return {
-        specType: AppSpecType.OCI_IMAGE,
+        specType: AppSpecType.INLINE,
         name: app.name || '',
-        image: app.image,
+        files: (app as InlineApplicationProviderSpec).inline.map((file) => ({
+          path: file.path || '',
+          content: file.content,
+          base64: file.contentEncoding === EncodingType.EncodingBase64,
+        })),
         variables: getAppFormVariables(app),
         volumes: getAppFormVolumes(app),
       };
-    }
-    return {
-      specType: AppSpecType.INLINE,
-      name: app.name || '',
-      files: app.inline.map((file) => ({
-        path: file.path || '',
-        content: file.content,
-        base64: file.contentEncoding === EncodingType.EncodingBase64,
-      })),
-      variables: getAppFormVariables(app),
-      volumes: getAppFormVolumes(app),
-    };
-  });
+    });
 };
 
 export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec, registerMicroShift?: boolean) => {
