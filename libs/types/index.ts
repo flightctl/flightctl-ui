@@ -13,6 +13,7 @@ export type { ApplicationVolume } from './models/ApplicationVolume';
 export type { ApplicationVolumeProviderSpec } from './models/ApplicationVolumeProviderSpec';
 export type { ApplicationVolumeStatus } from './models/ApplicationVolumeStatus';
 export { AppType } from './models/AppType';
+export type { ArtifactApplicationProviderSpec } from './models/ArtifactApplicationProviderSpec';
 export type { AuthConfig } from './models/AuthConfig';
 export type { AuthOrganizationsConfig } from './models/AuthOrganizationsConfig';
 export type { Batch } from './models/Batch';

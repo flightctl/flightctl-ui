@@ -1,4 +1,5 @@
 import {
+  ArtifactApplicationProviderSpec,
   ConfigProviderSpec,
   DisruptionBudget,
   GitConfigProviderSpec,
@@ -87,6 +88,8 @@ export const isInlineAppProvider = (app: ApplicationProviderSpecFixed): app is I
   'inline' in app;
 export const isImageAppProvider = (app: ApplicationProviderSpecFixed): app is ImageApplicationProviderSpec =>
   'image' in app;
+export const isArtifactAppProvider = (app: ApplicationProviderSpecFixed): app is ArtifactApplicationProviderSpec =>
+  'artifact' in app;
 
 export const isImageAppForm = (app: AppBase): app is ImageAppForm => app.specType === AppSpecType.OCI_IMAGE;
 export const isInlineAppForm = (app: AppBase): app is InlineAppForm => app.specType === AppSpecType.INLINE;
