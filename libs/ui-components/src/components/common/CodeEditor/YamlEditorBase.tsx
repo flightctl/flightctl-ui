@@ -12,6 +12,7 @@ import FlightCtlForm from '../../form/FlightCtlForm';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useThemePreferences } from '../../../hooks/useThemePreferences';
 // TODO add useShortcutPopover when adding saving capabilities to the YAML editor
+import WithTooltip from '../WithTooltip';
 import { defineConsoleThemes } from './CodeEditorTheme';
 
 import './YamlEditorBase.css';
@@ -25,21 +26,40 @@ type YamlEditorBaseProps = {
   code?: string;
   onCancel: VoidFunction;
   onReload?: VoidFunction;
+  onSave?: (yamlContent: string | undefined) => Promise<void>;
+  isSaving: boolean;
+  disabledEditReason?: string;
+  editorRef?: React.MutableRefObject<monacoEditor.editor.IStandaloneCodeEditor | null>;
 };
 
-const YamlEditorBase = ({ filename, code, onCancel, onReload }: YamlEditorBaseProps) => {
+const YamlEditorBase = ({
+  filename,
+  code,
+  onCancel,
+  onReload,
+  onSave,
+  isSaving,
+  disabledEditReason,
+  editorRef,
+}: YamlEditorBaseProps) => {
   const { t } = useTranslation();
-  const editorRef = React.useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = React.useRef<typeof monacoEditor | null>(null);
   const { resolvedTheme } = useThemePreferences();
 
   const [editorMounted, setEditorMounted] = React.useState(false);
 
   const downloadYaml = () => {
-    const resource = editorRef.current?.getValue();
+    const resource = editorRef?.current?.getValue();
     if (resource) {
       const blob = new Blob([resource], { type: 'text/yaml;charset=utf-8' });
       saveAs(blob, `${filename}.yaml`);
+    }
+  };
+
+  const handleSave = async () => {
+    if (onSave) {
+      const yamlContent = editorRef?.current?.getValue();
+      await onSave(yamlContent);
     }
   };
 
@@ -85,18 +105,30 @@ const YamlEditorBase = ({ filename, code, onCancel, onReload }: YamlEditorBasePr
           onEditorDidMount={(editor: monacoEditor.editor.IStandaloneCodeEditor, instance: Monaco) => {
             setEditorMounted(true);
             defineConsoleThemes(instance);
-            editorRef.current = editor;
             monacoRef.current = instance;
+            if (editorRef) {
+              editorRef.current = editor;
+            }
           }}
           options={{
             theme: `console-${resolvedTheme}`,
-            readOnly: true,
-            readOnlyMessage: {
-              value: t('Yaml is currently read-only'),
-            },
+            readOnly: !!disabledEditReason,
           }}
         />
         <ActionGroup className="fctl-yaml-editor-base__action-group">
+          {onSave && (
+            <WithTooltip showTooltip={!!disabledEditReason} content={disabledEditReason}>
+              <Button
+                variant="primary"
+                aria-label={t('Save')}
+                onClick={handleSave}
+                isLoading={isSaving}
+                isAriaDisabled={isSaving || !!disabledEditReason}
+              >
+                {t('Save')}
+              </Button>
+            </WithTooltip>
+          )}
           {onReload && (
             <Button variant="secondary" aria-label={t('Reload')} onClick={onReload}>
               {t('Reload')}
