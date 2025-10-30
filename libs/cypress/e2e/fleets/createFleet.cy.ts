@@ -39,13 +39,15 @@ describe('Create fleet form', () => {
 
     createFleetWizardPage.newFleetTargetReferenceField.type('main');
     createFleetWizardPage.newFleetRepositoryPathField.type('/file-path');
-    createFleetWizardPage.nextFleetWizardButton.should('be.enabled').click();
+
+    // Fleet spec step
+    createFleetWizardPage.nextFleetWizardButton.should('have.text', 'Next').should('be.enabled').click();
 
     // Updates step
-    createFleetWizardPage.nextFleetWizardButton.should('be.enabled').click();
+    createFleetWizardPage.nextFleetWizardButton.should('have.text', 'Next').should('be.enabled').click();
 
     // Review and create step
-    createFleetWizardPage.createFleetFormSubmitButton.should('be.enabled').click();
+    createFleetWizardPage.createFleetFormSubmitButton.should('have.text', 'Create fleet').should('be.enabled').click();
 
     cy.wait('@create-new-fleet').then(({ request }) => {
       expect(request.body, 'Create fleet request').to.nested.include({

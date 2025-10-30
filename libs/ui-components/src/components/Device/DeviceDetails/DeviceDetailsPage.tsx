@@ -192,7 +192,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
             element={<YamlEditor apiObj={device} refetch={refetch} disabledEditReason={editDisabledReason} />}
           />
           {!hideTerminal && canOpenTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
-          <Route path="events" element={<EventsCard kind={ResourceKind.DEVICE} objId={deviceId} />} />
+          <Route path="events" element={<EventsCard kind={ResourceKind.Device} objId={deviceId} />} />
         </Routes>
       )}
 

@@ -20,10 +20,10 @@
   "scripts": {
     "prebuild": "tsc --noEmit && rimraf dist",
     "build": "tsc --build",
-    "gen-types": "rimraf ./models && node ./scripts/openapi-typescript.js && rsync -a --remove-source-files tmp-types/ ./ && npm run build",
+    "gen-types": "node ./scripts/openapi-typescript.mjs && mv tmp-types/types.gen.ts index.ts && npm run build",
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}'"
   },
   "devDependencies": {
-    "openapi-typescript-codegen": "^0.27.0"
+    "@hey-api/openapi-ts": "^0.85.1"
   }
 }

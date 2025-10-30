@@ -1,16 +1,26 @@
 import React from 'react';
 import { TFunction } from 'react-i18next';
-
-import { CustomDeviceInfo, DeviceSystemInfo } from '@flightctl/types';
-
-// The API definition doesn't handle "customInfo" correctly
-export type FixedDeviceSystemInfo = DeviceSystemInfo & {
-  customInfo?: CustomDeviceInfo;
-};
+import { DeviceSystemInfo } from '@flightctl/types';
 
 type SystemInfoEntry = {
   title: string;
   value: string;
+};
+
+// If somehow the API still returns a "CustomDeviceInfo" map value, we convert it to a string
+const safeString = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (value && typeof value === 'object') {
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return '[Invalid object]';
+    }
+  }
+  return String(value || '');
 };
 
 // Converts a camelCase variable into words. Example: "someInfoData" --> "Some info data"
@@ -49,7 +59,7 @@ const getInfoDataKnownKeys = (t: TFunction) => ({
 });
 
 export const useDeviceSpecSystemInfo = (
-  systemInfo: FixedDeviceSystemInfo | undefined,
+  systemInfo: DeviceSystemInfo | undefined,
   t: TFunction,
 ): {
   baseInfo: SystemInfoEntry[];
@@ -72,11 +82,11 @@ export const useDeviceSpecSystemInfo = (
         case 'distroName':
           infoDataValue =
             'distroVersion' in systemInfo
-              ? `${systemInfo.distroName} ${systemInfo.distroVersion}`
-              : systemInfo.distroName;
+              ? `${safeString(systemInfo.distroName)} ${safeString(systemInfo.distroVersion)}`
+              : safeString(systemInfo.distroName);
           break;
         default:
-          infoDataValue = systemInfo[infoKey];
+          infoDataValue = safeString(systemInfo[infoKey]);
       }
 
       return {
@@ -94,7 +104,7 @@ export const useDeviceSpecSystemInfo = (
     if (value) {
       baseInfoList.push({
         title: propNameToTitle(infoKey),
-        value,
+        value: safeString(value),
       });
     }
   });
@@ -107,7 +117,7 @@ export const useDeviceSpecSystemInfo = (
       if (value) {
         customInfoList.push({
           title: propNameToTitle(customInfoKey),
-          value,
+          value: safeString(value),
         });
       }
     });
