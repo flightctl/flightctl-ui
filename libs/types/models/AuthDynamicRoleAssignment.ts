@@ -14,5 +14,9 @@ export type AuthDynamicRoleAssignment = {
    * The JSON path to the role/group claim (e.g., ["groups"], ["roles"], ["realm_access", "roles"]).
    */
   claimPath: Array<string>;
+  /**
+   * Separator for org:role format (default ':'). Roles containing the separator are split into organization-scoped roles. Roles without separator are global and apply to all organizations.
+   */
+  separator?: string;
 };
 

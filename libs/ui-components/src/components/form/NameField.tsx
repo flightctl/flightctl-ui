@@ -7,6 +7,7 @@ import { useFetch } from '../../hooks/useFetch';
 import { useTranslation } from '../../hooks/useTranslation';
 import RichValidationTextField, { RichValidationTextFieldProps } from './RichValidationTextField';
 import { TextFieldProps } from './TextField';
+import { DefaultHelperText } from './FieldHelperText';
 
 type NameFieldProps = TextFieldProps & {
   resourceType: string;
@@ -71,13 +72,14 @@ const NameField = ({ name, validations, resourceType, ...rest }: NameFieldProps)
   return <RichValidationTextField fieldName={name} validations={allValidations} {...rest} />;
 };
 
-const NameFieldWrapper = ({ name, isDisabled, validations, resourceType, ...rest }: NameFieldProps) => {
+const NameFieldWrapper = ({ name, isDisabled, validations, resourceType, helperText, ...rest }: NameFieldProps) => {
   const [{ value }] = useField<string>(name);
 
   if (isDisabled) {
     return (
       <FormGroup label={rest?.['aria-label']} isRequired={rest.isRequired}>
         <TextInput value={value} {...rest} isDisabled />
+        {helperText && <DefaultHelperText helperText={helperText} />}
       </FormGroup>
     );
   }

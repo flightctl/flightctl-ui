@@ -36,7 +36,9 @@ export const appendJSONPatch = <V = unknown>({
   if (newValue === originalValue) {
     return;
   }
-  if (!newValue && originalValue) {
+  // For boolean values, we should never remove them, only set them to true or false
+  // For other values, if newValue is falsy and originalValue exists, remove the field
+  if (!newValue && originalValue && typeof newValue !== 'boolean') {
     patches.push({
       op: 'remove',
       path,

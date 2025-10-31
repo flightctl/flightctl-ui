@@ -19,9 +19,7 @@ This document describes all environment variables and configuration options avai
 | `FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY` | Skip backend server TLS verification | `false`                  | `true`, `false`                        |
 | `FLIGHTCTL_CLI_ARTIFACTS_SERVER`        | CLI artifacts server URL             | `http://localhost:8090`  | `https://cli.flightctl.example.com`    |
 | `FLIGHTCTL_ALERTMANAGER_PROXY`          | AlertManager proxy server URL        | `https://localhost:8443` | `https://alerts.flightctl.example.com` |
-| `INTERNAL_AUTH_URL`                     | Internal authentication URL          | _(empty)_                | `https://auth.internal.example.com`    |
 | `AUTH_INSECURE_SKIP_VERIFY`             | Skip auth server TLS verification    | `false`                  | `true`, `false`                        |
-| `AUTH_CLIENT_ID`                        | OAuth client ID for authentication   | `flightctl`              | Custom client ID                       |
 | `TLS_CERT`                              | Path to TLS certificate              | _(empty)_                | `/path/to/server.crt`                  |
 | `TLS_KEY`                               | Path to TLS private key              | _(empty)_                | `/path/to/server.key`                  |
 | `API_PORT`                              | UI proxy server port                 | `3001`                   | `8080`, `3000`, etc.                   |

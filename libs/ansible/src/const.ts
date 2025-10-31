@@ -17,5 +17,10 @@ export const appRoutes = {
   [ROUTE.RESOURCE_SYNC_DETAILS]: '/edge/resourcesyncs',
   [ROUTE.ENROLLMENT_REQUESTS]: '/edge/enrollmentrequests',
   [ROUTE.ENROLLMENT_REQUEST_DETAILS]: '/edge/enrollmentrequests',
-  [ROUTE.COMMAND_LINE_TOOLS]: '/', // TODO - TBD where to show the CLI downloads?
+  // Unimplemented UI routes
+  [ROUTE.COMMAND_LINE_TOOLS]: '/',
+  [ROUTE.AUTH_PROVIDERS]: '/',
+  [ROUTE.AUTH_PROVIDER_CREATE]: '/',
+  [ROUTE.AUTH_PROVIDER_EDIT]: '/',
+  [ROUTE.AUTH_PROVIDER_DETAILS]: '/',
 };

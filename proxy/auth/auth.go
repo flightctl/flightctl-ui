@@ -25,12 +25,16 @@ type RedirectResponse struct {
 }
 
 type AuthHandler struct {
-	provider AuthProvider
+	provider       AuthProvider
+	apiTlsConfig   *tls.Config
+	authConfigData *v1alpha1.AuthConfig
 }
 
 func NewAuth(apiTlsConfig *tls.Config) (*AuthHandler, error) {
-	auth := AuthHandler{}
-	authConfig, internalAuthUrl, err := getAuthInfo(apiTlsConfig)
+	auth := AuthHandler{
+		apiTlsConfig: apiTlsConfig,
+	}
+	authConfig, err := getAuthInfo(apiTlsConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -40,40 +44,249 @@ func NewAuth(apiTlsConfig *tls.Config) (*AuthHandler, error) {
 		return &auth, nil
 	}
 
-	providerType, authURL, err := extractProviderInfo(authConfig)
+	// Store the full auth config for later use
+	auth.authConfigData = authConfig
+
+	return &auth, nil
+}
+
+// getProviderForLogin creates a provider instance by fetching the latest auth config
+func (a *AuthHandler) getProviderForLogin(providerName string) (AuthProvider, error) {
+	// Fetch the latest auth config to support dynamic provider changes
+	authConfig, err := getAuthInfo(a.apiTlsConfig)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get auth config: %w", err)
 	}
 
-	switch providerType {
-	case "AAPGateway":
-		auth.provider, err = getAAPAuthHandler(authURL, internalAuthUrl)
-	case "OIDC":
-		auth.provider, err = getOIDCAuthHandler(authURL, internalAuthUrl)
-	case "k8s":
-		auth.provider, err = getK8sAuthHandler(authURL, internalAuthUrl)
-	default:
-		err = fmt.Errorf("unknown auth type: %s", providerType)
+	if authConfig == nil || authConfig.Providers == nil {
+		return nil, fmt.Errorf("no providers configured")
 	}
-	return &auth, err
+
+	// Find the provider config
+	var providerConfig *v1alpha1.AuthProvider
+	for i, pc := range *authConfig.Providers {
+		if pc.Metadata.Name != nil && *pc.Metadata.Name == providerName {
+			providerConfig = &(*authConfig.Providers)[i]
+			break
+		}
+	}
+
+	if providerConfig == nil {
+		return nil, fmt.Errorf("provider not found: %s", providerName)
+	}
+
+	// Get the provider type from the spec discriminator
+	providerTypeStr, err := providerConfig.Spec.Discriminator()
+	if err != nil {
+		return nil, fmt.Errorf("failed to determine provider type for %s: %w", providerName, err)
+	}
+
+	// Create provider based on type
+	var provider AuthProvider
+
+	switch providerTypeStr {
+	case ProviderTypeK8s:
+		k8sSpec, err := providerConfig.Spec.AsK8sProviderSpec()
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse K8s provider spec for %s: %w", providerName, err)
+		}
+		// For K8s providers, distinguish between OpenShift OAuth and vanilla K8s token auth:
+		// - OpenShift: externalOpenShiftApiUrl is set and different from apiUrl
+		// - Vanilla K8s: externalOpenShiftApiUrl is not set, empty, or same as apiUrl
+		isOpenShift := k8sSpec.ExternalOpenShiftApiUrl != nil &&
+			*k8sSpec.ExternalOpenShiftApiUrl != "" &&
+			*k8sSpec.ExternalOpenShiftApiUrl != k8sSpec.ApiUrl
+		if isOpenShift {
+			// This is OpenShift OAuth flow
+			openshiftHandler, err := getOpenShiftAuthHandler(providerConfig, &k8sSpec)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create OpenShift provider %s: %w", providerName, err)
+			}
+			provider = openshiftHandler
+		} else {
+			// This is regular k8s token auth
+			provider, err = getK8sAuthHandler(providerConfig, &k8sSpec)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create K8s provider %s: %w", providerName, err)
+			}
+		}
+	case ProviderTypeOIDC:
+		oidcSpec, err := providerConfig.Spec.AsOIDCProviderSpec()
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse OIDC provider spec for %s: %w", providerName, err)
+		}
+		oidcHandler, err := getOIDCAuthHandler(providerConfig, &oidcSpec)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create OIDC provider %s: %w", providerName, err)
+		}
+		provider = oidcHandler
+	case ProviderTypeAAP:
+		aapSpec, err := providerConfig.Spec.AsAapProviderSpec()
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse AAP provider spec for %s: %w", providerName, err)
+		}
+		aapHandler, err := getAAPAuthHandler(providerConfig, &aapSpec)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create AAP provider %s: %w", providerName, err)
+		}
+		provider = aapHandler
+	case ProviderTypeOAuth2:
+		oauth2Spec, err := providerConfig.Spec.AsOAuth2ProviderSpec()
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse OAuth2 provider spec for %s: %w", providerName, err)
+		}
+		oauth2Handler, err := getOAuth2AuthHandler(providerConfig, &oauth2Spec)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create OAuth2 provider %s: %w", providerName, err)
+		}
+		provider = oauth2Handler
+	default:
+		return nil, fmt.Errorf("unknown provider type: %s for provider: %s", providerTypeStr, providerName)
+	}
+
+	return provider, nil
+}
+
+// getClientIdFromProviderConfig extracts the client_id from a provider config
+func getClientIdFromProviderConfig(providerConfig *v1alpha1.AuthProvider) (string, error) {
+	providerTypeStr, err := providerConfig.Spec.Discriminator()
+	if err != nil {
+		return "", fmt.Errorf("failed to determine provider type: %w", err)
+	}
+
+	switch providerTypeStr {
+	case ProviderTypeOIDC:
+		oidcSpec, err := providerConfig.Spec.AsOIDCProviderSpec()
+		if err != nil {
+			return "", fmt.Errorf("failed to parse OIDC provider spec: %w", err)
+		}
+		return oidcSpec.ClientId, nil
+	case ProviderTypeOAuth2:
+		oauth2Spec, err := providerConfig.Spec.AsOAuth2ProviderSpec()
+		if err != nil {
+			return "", fmt.Errorf("failed to parse OAuth2 provider spec: %w", err)
+		}
+		return oauth2Spec.ClientId, nil
+	case ProviderTypeAAP:
+		return "", fmt.Errorf("AAP providers client_id needs to be retrieved")
+	case ProviderTypeK8s:
+		// For K8s providers, check if it's OpenShift OAuth
+		k8sSpec, err := providerConfig.Spec.AsK8sProviderSpec()
+		if err != nil {
+			return "", fmt.Errorf("failed to parse K8s provider spec: %w", err)
+		}
+		isOpenShift := k8sSpec.ExternalOpenShiftApiUrl != nil &&
+			*k8sSpec.ExternalOpenShiftApiUrl != "" &&
+			*k8sSpec.ExternalOpenShiftApiUrl != k8sSpec.ApiUrl
+		if isOpenShift {
+			// OpenShift OAuth uses a default client ID
+			return "system:serviceaccount:openshift-authentication:oauth-proxy", nil
+		}
+		// Regular K8s token providers don't use this endpoint
+		return "", fmt.Errorf("K8s token providers don't use token exchange endpoint")
+	default:
+		return "", fmt.Errorf("unknown provider type: %s", providerTypeStr)
+	}
+}
+
+// isProviderWithCustomerToken determines if a provider uses customer-provided tokens (K8s)
+// Returns true for K8s token providers (they use direct validation)
+// Returns false for OIDC, OAuth2, AAP, and OpenShift providers (they use backend BFF)
+func isProviderWithCustomerToken(provider AuthProvider) bool {
+	// K8s token providers use direct validation, not OAuth2 flow
+	if _, ok := provider.(*TokenAuthProvider); ok {
+		return true
+	}
+	// All other providers (OIDC, OAuth2, AAP, OpenShift) use backend BFF
+	return false
 }
 
 func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	if a.provider == nil {
+	// Check if auth is completely disabled (no config at all)
+	if a.authConfigData == nil {
 		w.WriteHeader(http.StatusTeapot)
 		return
 	}
-	if r.Method == http.MethodPost {
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			log.GetLogger().WithError(err).Warn("Failed to read request body")
-			w.WriteHeader(http.StatusBadRequest)
+
+	// For GET requests, extract provider from query parameter
+	var provider AuthProvider
+	var err error
+	if r.Method == http.MethodGet {
+		providerName := r.URL.Query().Get("provider")
+		if providerName == "" {
+			respondWithError(w, http.StatusBadRequest, "provider query parameter is required")
 			return
 		}
 
-		// Check if this is a token-based auth provider (k8s)
-		if tokenProvider, ok := a.provider.(*TokenAuthProvider); ok {
+		provider, err = a.getProviderForLogin(providerName)
+		if err != nil {
+			log.GetLogger().WithError(err).Warnf("Could not find provider: %s", providerName)
+			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid authentication provider: %s", providerName))
+			return
+		}
+
+		// Check if this is a token-based auth provider (k8s) - token providers don't use PKCE flow
+		if _, ok := provider.(*TokenAuthProvider); ok {
+			// Token providers don't need a redirect URL - they handle login via POST with token
+			loginUrl := provider.GetLoginRedirectURL("", "")
+			response, err := json.Marshal(RedirectResponse{Url: loginUrl})
+			if err != nil {
+				log.GetLogger().WithError(err).Warn("Failed to marshal response")
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			if _, err := w.Write(response); err != nil {
+				log.GetLogger().WithError(err).Warn("Failed to write response")
+			}
+			return
+		}
+
+		// Generate PKCE parameters (code verifier and challenge)
+		// PKCE is required - fail if generation fails
+		codeVerifier, err := generateCodeVerifier()
+		if err != nil {
+			log.GetLogger().WithError(err).Error("Failed to generate PKCE code verifier - PKCE is required")
+			respondWithError(w, http.StatusInternalServerError, "Failed to initialize PKCE authentication flow")
+			return
+		}
+
+		codeChallenge := generateCodeChallenge(codeVerifier)
+
+		// Store code verifier in cookie for later use during token exchange
+		setPKCEVerifierCookie(w, providerName, codeVerifier)
+
+		// Also encode code_verifier in state parameter as fallback if cookie fails
+		loginUrl := provider.GetLoginRedirectURL(codeChallenge, codeVerifier)
+		response, err := json.Marshal(RedirectResponse{Url: loginUrl})
+		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to marshal response")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if _, err := w.Write(response); err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to write response")
+		}
+	} else if r.Method == http.MethodPost {
+		// For POST requests (OAuth callback), extract provider from query parameter
+		providerName := r.URL.Query().Get("provider")
+		log.GetLogger().Infof("Provider name: %s", providerName)
+		if providerName == "" {
+			respondWithError(w, http.StatusBadRequest, "provider query parameter is required")
+			return
+		}
+
+		provider, err := a.getProviderForLogin(providerName)
+		if err != nil {
+			log.GetLogger().WithError(err).Warnf("Could not find provider: %s", providerName)
+			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid authentication provider: %s", providerName))
+			return
+		}
+
+		// Check if this is a token-based auth provider (K8s)
+		if isProviderWithCustomerToken(provider) {
+			tokenProvider := provider.(*TokenAuthProvider)
 			var loginParams TokenLoginParameters
+			body, err := io.ReadAll(r.Body)
 			err = json.Unmarshal(body, &loginParams)
 			if err != nil {
 				log.GetLogger().WithError(err).Warn("Failed to unmarshal request body")
@@ -92,11 +305,19 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 				respondWithError(w, http.StatusUnauthorized, err.Error())
 				return
 			}
+			// Store the provider name in the token data so we can route to it later
+			tokenData.Provider = providerName
 			respondWithToken(w, tokenData, expires)
 			return
 		}
 
-		// OAuth-based providers (OIDC, AAP)
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to read request body")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
 		loginParams := LoginParameters{}
 		err = json.Unmarshal(body, &loginParams)
 		if err != nil {
@@ -104,45 +325,203 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		tokenData, expires, err := a.provider.GetToken(loginParams)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+
+		// PKCE is required - retrieve code_verifier from cookie or state
+		if loginParams.CodeVerifier == "" {
+			// First try cookie
+			codeVerifier, err := getPKCEVerifierCookie(r, providerName)
+			if err != nil {
+				log.GetLogger().WithError(err).Warnf("Failed to get PKCE verifier from cookie for provider %s", providerName)
+			} else if codeVerifier != "" {
+				loginParams.CodeVerifier = codeVerifier
+				log.GetLogger().Infof("Retrieved PKCE verifier from cookie for provider %s", providerName)
+			} else {
+				// Fallback: try to extract from state parameter
+				state := r.URL.Query().Get("state")
+				if state != "" {
+					codeVerifier = extractCodeVerifierFromState(state, providerName)
+					if codeVerifier != "" {
+						loginParams.CodeVerifier = codeVerifier
+						log.GetLogger().Infof("Retrieved PKCE verifier from state parameter for provider %s", providerName)
+					}
+				}
+			}
+		}
+
+		// PKCE is required - fail if code_verifier is missing
+		if loginParams.CodeVerifier == "" {
+			log.GetLogger().Errorf("PKCE code_verifier is required but not available for provider %s", providerName)
+			respondWithError(w, http.StatusBadRequest, "PKCE code verifier is required but not found. Please restart the login flow.")
 			return
 		}
-		respondWithToken(w, tokenData, expires)
+
+		// Clear PKCE verifier cookie after use (success or failure)
+		clearPKCEVerifierCookie(w, providerName)
+
+		// Get provider config to extract client_id
+		authConfig, err := getAuthInfo(a.apiTlsConfig)
+		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to get auth config for client_id")
+			respondWithError(w, http.StatusInternalServerError, "Failed to get provider configuration")
+			return
+		}
+		if authConfig == nil || authConfig.Providers == nil {
+			respondWithError(w, http.StatusInternalServerError, "No providers configured")
+			return
+		}
+
+		var providerConfig *v1alpha1.AuthProvider
+		for i, pc := range *authConfig.Providers {
+			if pc.Metadata.Name != nil && *pc.Metadata.Name == providerName {
+				providerConfig = &(*authConfig.Providers)[i]
+				break
+			}
+		}
+		if providerConfig == nil {
+			respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Provider config not found: %s", providerName))
+			return
+		}
+
+		clientId, err := getClientIdFromProviderConfig(providerConfig)
+		if err != nil {
+			log.GetLogger().WithError(err).Warnf("Failed to get client_id for provider %s", providerName)
+			respondWithError(w, http.StatusInternalServerError, "Failed to get client_id from provider configuration")
+			return
+		}
+
+		// All the other providers should use backend BFF
+		tokenReq := &ApiTokenRequest{
+			GrantType:    "authorization_code",
+			ProviderName: providerName,
+			ClientId:     clientId,
+			Code:         &loginParams.Code,
+			CodeVerifier: &loginParams.CodeVerifier,
+		}
+
+		// Call backend BFF token endpoint
+		tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, tokenReq)
+		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to exchange token with backend")
+			// Check if it's an OAuth2 error response
+			if tokenResp != nil && tokenResp.Error != nil {
+				errorDesc := ""
+				if tokenResp.ErrorDescription != nil {
+					errorDesc = *tokenResp.ErrorDescription
+				}
+				respondWithError(w, http.StatusBadRequest, fmt.Sprintf("OAuth2 error: %s - %s", *tokenResp.Error, errorDesc))
+			} else {
+				respondWithError(w, http.StatusInternalServerError, "Failed to exchange authorization code for token")
+			}
+			return
+		}
+
+		// Convert backend response to TokenData
+		tokenData, expiresIn := convertTokenResponseToTokenData(tokenResp, providerName)
+		respondWithToken(w, tokenData, expiresIn)
 	} else {
-		loginUrl := a.provider.GetLoginRedirectURL()
-		response, err := json.Marshal(RedirectResponse{Url: loginUrl})
-		if err != nil {
-			log.GetLogger().WithError(err).Warn("Failed to marshal response")
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		if _, err := w.Write(response); err != nil {
-			log.GetLogger().WithError(err).Warn("Failed to write response")
-		}
+		respondWithError(w, http.StatusMethodNotAllowed, "Method not allowed")
 	}
 }
 
 func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
-	if a.provider == nil {
+	if a.authConfigData == nil {
 		w.WriteHeader(http.StatusTeapot)
 		return
 	}
 	tokenData, err := ParseSessionCookie(r)
 	if err != nil {
-		clearCookie(w)
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	tokenData, expires, err := a.provider.RefreshToken(tokenData.RefreshToken)
-	if err != nil {
-		clearCookie(w)
-		w.WriteHeader(http.StatusUnauthorized)
+	// Check if provider is specified
+	if tokenData.Provider == "" {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	respondWithToken(w, tokenData, expires)
+
+	// Get provider to determine routing
+	provider, err := a.getProviderForLogin(tokenData.Provider)
+	if err != nil {
+		log.GetLogger().WithError(err).Warnf("Failed to get provider: %s", tokenData.Provider)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Route based on provider type
+	if isProviderWithCustomerToken(provider) {
+		// K8s token providers don't support refresh
+		w.WriteHeader(http.StatusBadRequest)
+		respondWithError(w, http.StatusBadRequest, "Token refresh not supported for K8s token providers")
+		return
+	}
+
+	// OAuth2/OIDC/AAP/OpenShift providers use backend BFF
+	if tokenData.RefreshToken == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Get provider config to extract client_id
+	authConfig, err := getAuthInfo(a.apiTlsConfig)
+	if err != nil {
+		log.GetLogger().WithError(err).Warn("Failed to get auth config for client_id")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if authConfig == nil || authConfig.Providers == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	var providerConfig *v1alpha1.AuthProvider
+	for i, pc := range *authConfig.Providers {
+		if pc.Metadata.Name != nil && *pc.Metadata.Name == tokenData.Provider {
+			providerConfig = &(*authConfig.Providers)[i]
+			break
+		}
+	}
+	if providerConfig == nil {
+		log.GetLogger().Warnf("Provider config not found: %s", tokenData.Provider)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	clientId, err := getClientIdFromProviderConfig(providerConfig)
+	if err != nil {
+		log.GetLogger().WithError(err).Warnf("Failed to get client_id for provider %s", tokenData.Provider)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Construct token request for backend
+	tokenReq := &ApiTokenRequest{
+		GrantType:    "refresh_token",
+		ProviderName: tokenData.Provider,
+		ClientId:     clientId,
+		RefreshToken: &tokenData.RefreshToken,
+	}
+
+	// Call backend BFF token endpoint
+	tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, tokenReq)
+	if err != nil {
+		log.GetLogger().WithError(err).Warn("Failed to refresh token with backend")
+		// Check if it's an OAuth2 error response
+		if tokenResp != nil && tokenResp.Error != nil {
+			errorDesc := ""
+			if tokenResp.ErrorDescription != nil {
+				errorDesc = *tokenResp.ErrorDescription
+			}
+			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("OAuth2 error: %s - %s", *tokenResp.Error, errorDesc))
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// Convert backend response to TokenData
+	newTokenData, expiresIn := convertTokenResponseToTokenData(tokenResp, tokenData.Provider)
+	respondWithToken(w, newTokenData, expiresIn)
 }
 
 func respondWithToken(w http.ResponseWriter, tokenData TokenData, expires *int64) {
@@ -162,36 +541,57 @@ func respondWithToken(w http.ResponseWriter, tokenData TokenData, expires *int64
 }
 
 func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
-	if a.provider == nil {
+	// Check if auth is completely disabled (no config at all)
+	if a.authConfigData == nil {
 		w.WriteHeader(http.StatusTeapot)
 		return
 	}
 
-	token, err := getToken(r)
-	if token == "" || err != nil {
-		clearCookie(w)
-		w.WriteHeader(http.StatusUnauthorized)
+	// Get token and provider from session cookie
+	tokenData, err := ParseSessionCookie(r)
+	if err != nil {
+		w.Header().Set("Clear-Site-Data", `"cookies"`)
+		respondWithError(w, http.StatusUnauthorized, "Invalid or missing session cookie")
 		return
 	}
 
-	username, resp, err := a.provider.GetUserInfo(token)
+	// If no provider specified, clear the cookie and force a new login
+	if tokenData.Provider == "" {
+		w.Header().Set("Clear-Site-Data", `"cookies"`)
+		respondWithError(w, http.StatusUnauthorized, "No authentication provider specified in session")
+		return
+	}
+
+	token := tokenData.GetAuthToken()
+	if token == "" {
+		log.GetLogger().Warn("No token found in session cookie")
+		w.Header().Set("Clear-Site-Data", `"cookies"`)
+		respondWithError(w, http.StatusUnauthorized, "No authentication token found in session")
+		return
+	}
+
+	// Route ALL providers to API server userinfo endpoint
+	username, err := getUserInfoFromApiServer(a.apiTlsConfig, token)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to get user info")
-		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
-			clearCookie(w)
-			w.WriteHeader(http.StatusUnauthorized)
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+		log.GetLogger().WithError(err).Warnf("Failed to get user info from API server for provider %s", tokenData.Provider)
+		// If user info retrieval fails, treat as authentication failure
+		w.Header().Set("Clear-Site-Data", `"cookies"`)
+		respondWithError(w, http.StatusUnauthorized, fmt.Sprintf("Failed to get user info: %v", err))
 		return
 	}
-	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusUnauthorized {
-			clearCookie(w)
-		}
-		w.WriteHeader(resp.StatusCode)
+
+	if username == "" {
+		log.GetLogger().Warnf("API server userinfo returned empty username for provider %s", tokenData.Provider)
+		respondWithError(w, http.StatusInternalServerError, "User info response missing username")
 		return
 	}
+
+	log.GetLogger().Debugf("Successfully retrieved username '%s' from backend for provider %s", username, tokenData.Provider)
+	a.respondWithUserInfo(w, username)
+}
+
+// respondWithUserInfo is a helper to send the UserInfoResponse
+func (a AuthHandler) respondWithUserInfo(w http.ResponseWriter, username string) {
 	userInfo := UserInfoResponse{Username: username}
 	res, err := json.Marshal(userInfo)
 	if err != nil {
@@ -205,24 +605,45 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	if a.provider == nil {
+	// Check if auth is completely disabled (no config at all)
+	if a.authConfigData == nil {
 		w.WriteHeader(http.StatusTeapot)
 		return
 	}
 
-	token, err := getToken(r)
-	if token == "" || err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	redirectUrl, err := a.provider.Logout(token)
+	// Get token and provider from session cookie
+	tokenData, err := ParseSessionCookie(r)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to logout")
-		w.WriteHeader(http.StatusInternalServerError)
+		// No valid session, but still clear cookies and return success
+		w.Header().Set("Clear-Site-Data", `"cookies"`)
+		response, _ := json.Marshal(RedirectResponse{})
+		w.Write(response)
 		return
 	}
 
+	var redirectUrl string
+
+	// If we have a provider, call its Logout method
+	if tokenData.Provider != "" {
+		authToken := tokenData.GetAuthToken()
+		if authToken == "" {
+			// No valid session, but still clear cookies and return success
+			w.Header().Set("Clear-Site-Data", `"cookies"`)
+			response, _ := json.Marshal(RedirectResponse{})
+			w.Write(response)
+			return
+		}
+
+		provider, err := a.getProviderForLogin(tokenData.Provider)
+		if err == nil {
+			redirectUrl, err = provider.Logout(authToken)
+			if err != nil {
+				log.GetLogger().WithError(err).Warn("Failed to logout from provider")
+			}
+		}
+	}
+
+	// In any case, we proceed to clear the cookies
 	w.Header().Set("Clear-Site-Data", `"cookies"`)
 	redirectResp := RedirectResponse{}
 	if redirectUrl != "" {
@@ -239,7 +660,7 @@ func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getAuthInfo(apiTlsConfig *tls.Config) (*v1alpha1.AuthConfig, *string, error) {
+func getAuthInfo(apiTlsConfig *tls.Config) (*v1alpha1.AuthConfig, error) {
 	client := &http.Client{Transport: &http.Transport{
 		TLSClientConfig: apiTlsConfig,
 	}}
@@ -248,117 +669,32 @@ func getAuthInfo(apiTlsConfig *tls.Config) (*v1alpha1.AuthConfig, *string, error
 	req, err := http.NewRequest(http.MethodGet, authConfigUrl, nil)
 	if err != nil {
 		log.GetLogger().WithError(err).Warn("Could not create request")
-		return nil, nil, err
+		return nil, err
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
 		log.GetLogger().WithError(err).Warn("Failed to get auth config")
-		return nil, nil, err
+		return nil, err
 	}
 
 	if resp.StatusCode == http.StatusTeapot {
-		return nil, nil, nil
+		return nil, nil
 	}
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.GetLogger().WithError(err).Warn("Failed to read terminal session response")
-		return nil, nil, err
+		return nil, err
 	}
 
 	authConfig := &v1alpha1.AuthConfig{}
 	err = json.Unmarshal(body, authConfig)
 	if err != nil {
 		log.GetLogger().WithError(err).Warn("Failed to unmarshal auth config")
-		return nil, nil, err
+		return nil, err
 	}
 
-	if config.InternalAuthUrl == "" {
-		return authConfig, nil, nil
-	}
-	return authConfig, &config.InternalAuthUrl, nil
-}
-
-// extractProviderInfo extracts the provider type and URL from the default provider in AuthConfig.
-// It currently only handles the provider marked as the default one.
-func extractProviderInfo(authConfig *v1alpha1.AuthConfig) (string, string, error) {
-	if authConfig.DefaultProvider == nil || *authConfig.DefaultProvider == "" {
-		return "", "", fmt.Errorf("no default provider specified")
-	}
-
-	if authConfig.Providers == nil || len(*authConfig.Providers) == 0 {
-		return "", "", fmt.Errorf("no auth providers configured")
-	}
-
-	// Find the default provider by name
-	var defaultProvider *v1alpha1.AuthProvider
-	for i := range *authConfig.Providers {
-		provider := &(*authConfig.Providers)[i]
-		if provider.Metadata.Name != nil && *provider.Metadata.Name == *authConfig.DefaultProvider {
-			defaultProvider = provider
-			break
-		}
-	}
-
-	if defaultProvider == nil {
-		return "", "", fmt.Errorf("default provider '%s' not found in providers list", *authConfig.DefaultProvider)
-	}
-
-	// Extract provider type and URL based on the provider spec
-	// We only need the discriminator and URL fields, so we parse the union JSON directly
-	discriminator, err := defaultProvider.Spec.Discriminator()
-	if err != nil {
-		return "", "", fmt.Errorf("failed to determine provider type: %w", err)
-	}
-
-	var providerType string
-	var authURL string
-
-	// Parse only the fields we need from the spec union
-	// Marshal the spec to get the raw JSON, then unmarshal into a map
-	specJSON, err := json.Marshal(defaultProvider.Spec)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to marshal provider spec: %w", err)
-	}
-	var specMap map[string]interface{}
-	if err := json.Unmarshal(specJSON, &specMap); err != nil {
-		return "", "", fmt.Errorf("failed to parse provider spec: %w", err)
-	}
-
-	switch discriminator {
-	case "oidc":
-		providerType = "OIDC"
-		if issuer, ok := specMap["issuer"].(string); ok {
-			authURL = issuer
-		} else {
-			return "", "", fmt.Errorf("issuer not found in OIDC provider spec")
-		}
-	case "aap":
-		providerType = "AAPGateway"
-		// Prefer external URL if available, otherwise use internal API URL
-		if extURL, ok := specMap["externalApiUrl"].(string); ok && extURL != "" {
-			authURL = extURL
-		} else if apiURL, ok := specMap["apiUrl"].(string); ok {
-			authURL = apiURL
-		} else {
-			return "", "", fmt.Errorf("apiUrl not found in AAP provider spec")
-		}
-	case "k8s":
-		providerType = "k8s"
-		if apiURL, ok := specMap["apiUrl"].(string); ok {
-			authURL = apiURL
-		} else {
-			return "", "", fmt.Errorf("apiUrl not found in K8s provider spec")
-		}
-	default:
-		return "", "", fmt.Errorf("unsupported provider type: %s", discriminator)
-	}
-
-	if authURL == "" {
-		return "", "", fmt.Errorf("auth URL not found for provider type: %s", discriminator)
-	}
-
-	return providerType, authURL, nil
+	return authConfig, nil
 }

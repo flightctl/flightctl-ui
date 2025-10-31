@@ -3,9 +3,13 @@ import { RESOURCE, VERB } from '../types/rbac';
 import { usePermissionsContext } from '../components/common/PermissionsContext';
 import { useFetch } from './useFetch';
 
-// Alerts are considered disabled if the service returns either 501 (Not Implemented) or 500
-const isDisabledAlertManagerService = (error: Error): boolean =>
-  Number(error.message) === 501 || Number(error.message) === 500;
+// Alerts are considered disabled if:
+// - Service returns 501 (Not Implemented) or 500 (Internal Server Error)
+// - Service returns 401 (Unauthorized) - authentication issue with alerts service
+const isDisabledAlertManagerService = (error: Error): boolean => {
+  const errorCode = Number(error.message);
+  return errorCode === 501 || errorCode === 500 || errorCode === 401;
+};
 
 export const useAlertsEnabled = (): boolean => {
   const { get } = useFetch();

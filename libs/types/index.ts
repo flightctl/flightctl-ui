@@ -175,5 +175,8 @@ export type { TemplateVersionList } from './models/TemplateVersionList';
 export type { TemplateVersionSpec } from './models/TemplateVersionSpec';
 export type { TemplateVersionStatus } from './models/TemplateVersionStatus';
 export type { TimeZone } from './models/TimeZone';
+export { TokenRequest } from './models/TokenRequest';
+export { TokenResponse } from './models/TokenResponse';
 export type { UpdateSchedule } from './models/UpdateSchedule';
+export type { UserInfoResponse } from './models/UserInfoResponse';
 export type { Version } from './models/Version';
