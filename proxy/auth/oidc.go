@@ -194,6 +194,10 @@ func (o *OIDCAuthHandler) RefreshToken(refreshToken string) (TokenData, *int64, 
 	return refreshOAuthToken(refreshToken, o.internalClient)
 }
 
-func (a *OIDCAuthHandler) GetLoginRedirectURL() string {
-	return loginRedirect(a.client)
+func (a *OIDCAuthHandler) GetLoginRedirectURL(forceReauth bool) string {
+	return loginRedirect(a.client, forceReauth)
+}
+
+func (o *OIDCAuthHandler) GetAuthType() string {
+	return "OIDC"
 }
