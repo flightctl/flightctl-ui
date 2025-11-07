@@ -45,6 +45,8 @@ func NewAuth(apiTlsConfig *tls.Config) (*AuthHandler, error) {
 		auth.provider, err = getAAPAuthHandler(authConfig.AuthURL, internalAuthUrl)
 	case "OIDC":
 		auth.provider, err = getOIDCAuthHandler(authConfig.AuthURL, internalAuthUrl)
+	case "k8s":
+		auth.provider, err = getK8sAuthHandler(authConfig.AuthURL, internalAuthUrl)
 	default:
 		err = fmt.Errorf("unknown auth type: %s", authConfig.AuthType)
 	}
@@ -64,6 +66,32 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Check if this is a token-based auth provider (k8s)
+		if tokenProvider, ok := a.provider.(*TokenAuthProvider); ok {
+			var loginParams TokenLoginParameters
+			err = json.Unmarshal(body, &loginParams)
+			if err != nil {
+				log.GetLogger().WithError(err).Warn("Failed to unmarshal request body")
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			if loginParams.Token == "" {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			tokenData, expires, err := tokenProvider.ValidateToken(loginParams.Token)
+			if err != nil {
+				log.GetLogger().WithError(err).Warn("Token validation failed")
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			respondWithToken(w, tokenData, expires)
+			return
+		}
+
+		// OAuth-based providers (OIDC, AAP)
 		loginParams := LoginParameters{}
 		err = json.Unmarshal(body, &loginParams)
 		if err != nil {

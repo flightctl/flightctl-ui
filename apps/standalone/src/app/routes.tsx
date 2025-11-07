@@ -24,6 +24,7 @@ import ErrorBoundary from '@flightctl/ui-components/src/components/common/ErrorB
 import AppLayout from './components/AppLayout/AppLayout';
 import NotFound from './components/AppLayout/NotFound';
 import { AuthContext } from './context/AuthContext';
+import { LoginPage } from './components/Login/LoginPage';
 
 const EnrollmentRequestDetails = React.lazy(
   () =>
@@ -341,6 +342,10 @@ const AppRouter = () => {
   }
 
   const router = createBrowserRouter([
+    {
+      path: '/login',
+      element: <LoginPage />,
+    },
     {
       path: '/',
       element: <AppLayout />,

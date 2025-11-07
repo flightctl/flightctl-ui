@@ -34,6 +34,12 @@ export const useAuthContext = () => {
 
   React.useEffect(() => {
     const getUserInfo = async () => {
+      // Skip auth check if we're on the login page
+      if (window.location.pathname === '/login') {
+        setLoading(false);
+        return;
+      }
+
       let callbackErr: string | null = null;
       if (window.location.pathname === '/callback') {
         localStorage.removeItem(EXPIRATION);
