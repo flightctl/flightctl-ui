@@ -19,10 +19,10 @@ import {
   TextVariants,
   Title,
 } from '@patternfly/react-core';
-import { useTranslation } from 'react-i18next';
 
 import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
 import FlightCtlForm from '@flightctl/ui-components/src/components/form/FlightCtlForm';
+import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import { loginAPI } from '../../utils/apiCalls';
 
 const EXPIRATION = 'expiration';
@@ -67,8 +67,8 @@ export const LoginPage = () => {
       });
 
       if (!resp.ok) {
-        const errorData = await resp.json().catch(() => ({}));
-        setSubmitError(errorData.error || 'Authentication failed');
+        const errorData = (await resp.json()) as { error?: string };
+        setSubmitError(errorData.error || t('Authentication failed'));
         setIsSubmitting(false);
         return;
       }
@@ -112,8 +112,7 @@ export const LoginPage = () => {
                   <TextArea
                     id="accessToken"
                     value={token}
-                    onChange={(_event, value) => {
-                      const tokenVal = value.trim();
+                    onChange={(_event, tokenVal) => {
                       if (tokenVal && !isValidJwtTokenFormat(tokenVal)) {
                         setValidationError(
                           t('Invalid token format. Expected a JWT token with format: header.payload.signature'),

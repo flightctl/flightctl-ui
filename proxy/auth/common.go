@@ -50,6 +50,19 @@ func setCookie(w http.ResponseWriter, value TokenData) error {
 	return nil
 }
 
+func clearCookie(w http.ResponseWriter) {
+	cookie := http.Cookie{
+		Name:     common.CookieSessionName,
+		Value:    "",
+		Secure:   config.TlsCertPath != "",
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+		MaxAge:   -1,
+	}
+	http.SetCookie(w, &cookie)
+}
+
 func ParseSessionCookie(r *http.Request) (TokenData, error) {
 	tokenData := TokenData{}
 	cookie, err := r.Cookie(common.CookieSessionName)

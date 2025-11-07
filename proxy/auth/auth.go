@@ -126,13 +126,15 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 	tokenData, err := ParseSessionCookie(r)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		clearCookie(w)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	tokenData, expires, err := a.provider.RefreshToken(tokenData.RefreshToken)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		clearCookie(w)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	respondWithToken(w, tokenData, expires)
@@ -162,6 +164,7 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 
 	token, err := getToken(r)
 	if token == "" || err != nil {
+		clearCookie(w)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -169,10 +172,18 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	username, resp, err := a.provider.GetUserInfo(token)
 	if err != nil {
 		log.GetLogger().WithError(err).Warn("Failed to get user info")
-		w.WriteHeader(http.StatusInternalServerError)
+		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
+			clearCookie(w)
+			w.WriteHeader(http.StatusUnauthorized)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusUnauthorized {
+			clearCookie(w)
+		}
 		w.WriteHeader(resp.StatusCode)
 		return
 	}

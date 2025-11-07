@@ -80,7 +80,10 @@ export const useAuthContext = () => {
             return;
           }
           if (resp.status === 401) {
-            await redirectToLogin();
+            // Don't redirect if we're already on the login page
+            if (window.location.pathname !== '/login') {
+              await redirectToLogin();
+            }
             return;
           }
           if (resp.status !== 200) {
@@ -103,6 +106,11 @@ export const useAuthContext = () => {
 
   React.useEffect(() => {
     if (!loading) {
+      // Don't schedule refresh if we're on login page
+      if (window.location.pathname === '/login') {
+        return;
+      }
+
       const scheduleRefresh = () => {
         if (!authEnabled) {
           return;

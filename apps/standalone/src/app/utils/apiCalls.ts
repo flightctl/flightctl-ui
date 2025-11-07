@@ -75,7 +75,10 @@ const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   }
 
   if (response.status === 401) {
-    await redirectToLogin();
+    // Don't redirect if we're already on the login page
+    if (window.location.pathname !== '/login') {
+      await redirectToLogin();
+    }
   }
 
   throw new Error(await getErrorMsgFromApiResponse(response));

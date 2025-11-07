@@ -41,8 +41,8 @@ func (t *TokenAuthProvider) ValidateToken(token string) (TokenData, *int64, erro
 		TLSClientConfig: t.apiTlsConfig,
 	}}
 
-	// Call a basic API endpoint to validate the token
-	validateUrl := config.FctlApiUrl + "/api/v1/fleets?limit=1"
+	// Verify that the token is valid for the Flight Control API
+	validateUrl := config.FctlApiUrl + "/api/v1/auth/validate"
 
 	req, err := http.NewRequest(http.MethodGet, validateUrl, nil)
 	if err != nil {
@@ -67,8 +67,8 @@ func (t *TokenAuthProvider) ValidateToken(token string) (TokenData, *int64, erro
 		return TokenData{}, nil, fmt.Errorf("Token is invalid or unauthorized")
 	}
 
-	// Accept any successful response (2xx) or even some 4xx errors that aren't auth-related
-	if resp.StatusCode < 200 || resp.StatusCode >= 500 {
+	// Accept only successful responses
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return TokenData{}, nil, fmt.Errorf("Token validation failed")
 	}
 
@@ -191,6 +191,15 @@ func (t *TokenAuthProvider) GetUserInfo(token string) (string, *http.Response, e
 	// For K8s, extract username from the JWT token
 	if token == "" {
 		return "", nil, fmt.Errorf("token is required for K8s userinfo")
+	}
+
+	// Check if token is expired
+	expiresIn := extractTokenExpiration(token)
+	if expiresIn != nil && *expiresIn == 0 {
+		resp := &http.Response{
+			StatusCode: http.StatusUnauthorized,
+		}
+		return "", resp, fmt.Errorf("token has expired")
 	}
 
 	username, err := ExtractUsernameFromToken(token)
