@@ -4,7 +4,7 @@ Monorepo containing UIs for [Flight Control](https://github.com/flightctl/flight
 
 ## Prerequisites
 
-- `Git`, `Node.js v22.x`, `npm v10.x`, `rsync`, `go` (>= 1.23)
+- `Git`, `Node.js v22.x`, `npm v10.x`, `rsync`, `go` (>= 1.24)
 
 ## Building
 
