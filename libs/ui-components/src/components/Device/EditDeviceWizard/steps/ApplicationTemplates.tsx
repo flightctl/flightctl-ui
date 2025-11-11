@@ -1,6 +1,9 @@
 import * as React from 'react';
 
-import { Button, FormGroup, FormSection, Grid, Split, SplitItem } from '@patternfly/react-core';
+import { Button } from '@patternfly/react-core/dist/esm/components/Button';
+import { FormGroup, FormSection } from '@patternfly/react-core/dist/esm/components/Form';
+import { Grid } from '@patternfly/react-core/dist/esm/layouts/Grid';
+import { Split, SplitItem } from '@patternfly/react-core/dist/esm/layouts/Split';
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
@@ -45,6 +48,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
       setValue(
         {
           specType: AppSpecType.INLINE,
+          appType: (app.appType || ('compose' as unknown as AppForm['appType'])),
           name: app.name || '',
           files: [{ path: '', content: '' }],
           variables: [],
@@ -55,6 +59,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
       setValue(
         {
           specType: AppSpecType.OCI_IMAGE,
+          appType: app.appType,
           name: app.name || '',
           image: '',
           variables: [],
@@ -62,7 +67,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
         false,
       );
     }
-  }, [isImageIncomplete, isInlineIncomplete, app.name, setValue]);
+  }, [isImageIncomplete, isInlineIncomplete, app.name, app.appType, setValue]);
 
   return (
     <ExpandableFormSection
@@ -91,6 +96,20 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
         >
           <TextField aria-label={t('Application name')} name={`${appFieldName}.name`} isDisabled={isReadOnly} />
         </FormGroupWithHelperText>
+
+        {isInlineAppForm(app) && (
+          <FormGroup label={t('Application format')} isRequired>
+            <FormSelect
+              items={{
+                compose: t('Compose'),
+                quadlet: t('Quadlet'),
+              }}
+              name={`${appFieldName}.appType`}
+              placeholderText={t('Select a format')}
+              isDisabled={isReadOnly}
+            />
+          </FormGroup>
+        )}
 
         {isImageAppForm(app) && <ApplicationImageForm app={app} index={index} isReadOnly={isReadOnly} />}
         {isInlineAppForm(app) && <ApplicationInlineForm app={app} index={index} isReadOnly={isReadOnly} />}
