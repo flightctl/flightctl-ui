@@ -228,7 +228,7 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
 
   return {
     name: app.name,
-    appType: AppType.AppTypeCompose,
+    appType: app.appType || AppType.AppTypeCompose,
     inline: app.files.map(
       (file): InlineApplicationFileFixed => ({
         path: file.path,
@@ -396,6 +396,7 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
       if (isImageAppProvider(app)) {
         return {
           specType: AppSpecType.OCI_IMAGE,
+          appType: app.appType,
           name: app.name || '',
           image: app.image,
           variables: getAppFormVariables(app),
@@ -405,6 +406,7 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
       // TODO EDM-2451: Add support for artifact applications
       return {
         specType: AppSpecType.INLINE,
+        appType: app.appType,
         name: app.name || '',
         files: (app as InlineApplicationProviderSpec).inline.map((file) => ({
           path: file.path || '',

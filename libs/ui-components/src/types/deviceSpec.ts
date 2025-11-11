@@ -1,4 +1,5 @@
 import {
+  AppType,
   ArtifactApplicationProviderSpec,
   ConfigProviderSpec,
   DisruptionBudget,
@@ -46,7 +47,7 @@ type InlineContent = {
 
 type AppBase = {
   specType: AppSpecType;
-  // appType: AppType - commented out for now, since it only accepts one value ("compose")
+  appType?: AppType;
   name?: string;
   variables: { name: string; value: string }[];
   volumes?: {
