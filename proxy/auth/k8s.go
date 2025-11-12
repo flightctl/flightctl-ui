@@ -2,8 +2,6 @@ package auth
 
 import (
 	"crypto/tls"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -12,6 +10,7 @@ import (
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 type TokenAuthProvider struct {
@@ -85,14 +84,13 @@ func (t *TokenAuthProvider) ValidateToken(token string) (TokenData, *int64, erro
 // extractTokenExpiration extracts the expiration time from a JWT token
 // Returns the number of seconds until expiration, or nil if no expiration is set
 func extractTokenExpiration(token string) *int64 {
-	claims, err := extractJwtTokenClaims(token)
+	parsedToken, err := jwt.ParseInsecure([]byte(token))
 	if err != nil {
 		return nil
 	}
 
-	// Look for the "exp" claim (standard JWT expiration claim)
-	exp, ok := claims["exp"]
-	if !ok {
+	exp, exists := parsedToken.Get("exp")
+	if !exists {
 		return nil
 	}
 
@@ -119,53 +117,36 @@ func extractTokenExpiration(token string) *int64 {
 	return &expiresIn
 }
 
-// extractJwtTokenClaims extracts the claims from a JWT token
-func extractJwtTokenClaims(token string) (map[string]interface{}, error) {
-	// K8s tokens have the format: <header>.<payload>.<signature>
-	parts := strings.Split(token, ".")
-	if len(parts) != 3 {
-		return nil, fmt.Errorf("invalid token format")
-	}
-
-	// Decode the payload (second part)
-	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode token payload: %w", err)
-	}
-
-	// Parse the JSON payload
-	var claims map[string]interface{}
-	if err := json.Unmarshal(payload, &claims); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal token claims: %w", err)
-	}
-
-	return claims, nil
-}
-
 // extractUsernameFromClaims extracts the username from JWT claims
-func extractUsernameFromClaims(claims map[string]interface{}) (string, bool) {
+func extractUsernameFromClaims(parsedToken jwt.Token) (string, bool) {
 	// Prefer the short service account name over the full sub claim
-	if k8sInfo, ok := claims["kubernetes.io"].(map[string]interface{}); ok {
-		if sa, ok := k8sInfo["serviceaccount"].(map[string]interface{}); ok {
-			if saName, ok := sa["name"].(string); ok && saName != "" {
-				return saName, true
+	if k8sInfo, exists := parsedToken.Get("kubernetes.io"); exists {
+		if k8sInfoMap, ok := k8sInfo.(map[string]interface{}); ok {
+			if sa, ok := k8sInfoMap["serviceaccount"].(map[string]interface{}); ok {
+				if saName, ok := sa["name"].(string); ok && saName != "" {
+					return saName, true
+				}
 			}
 		}
 	}
 
 	// Try to extract the service account name from the old flat claim structure
-	if saName, ok := claims["kubernetes.io/serviceaccount/service-account.name"].(string); ok && saName != "" {
-		return saName, true
+	if saName, exists := parsedToken.Get("kubernetes.io/serviceaccount/service-account.name"); exists {
+		if saNameStr, ok := saName.(string); ok && saNameStr != "" {
+			return saNameStr, true
+		}
 	}
 
 	// Fallback to sub claim (which contains the full system:serviceaccount:namespace:name format)
-	if username, ok := claims["sub"].(string); ok && username != "" {
-		// Try to extract just the service account name from sub if it's in the right format
-		parts := strings.Split(username, ":")
-		if len(parts) == 4 && parts[0] == "system" && parts[1] == "serviceaccount" {
-			return parts[3], true // Return just the service account name
+	if username, exists := parsedToken.Get("sub"); exists {
+		if usernameStr, ok := username.(string); ok && usernameStr != "" {
+			// Try to extract just the service account name from sub if it's in the right format
+			parts := strings.Split(usernameStr, ":")
+			if len(parts) == 4 && parts[0] == "system" && parts[1] == "serviceaccount" {
+				return parts[3], true // Return just the service account name
+			}
+			return usernameStr, true
 		}
-		return username, true
 	}
 
 	return "", false
@@ -173,12 +154,13 @@ func extractUsernameFromClaims(claims map[string]interface{}) (string, bool) {
 
 // ExtractUsernameFromToken extracts the username from a K8s JWT token
 func ExtractUsernameFromToken(token string) (string, error) {
-	claims, err := extractJwtTokenClaims(token)
+	// Parse the token without signature validation (we only need to extract claims)
+	parsedToken, err := jwt.ParseInsecure([]byte(token))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to parse JWT token: %w", err)
 	}
 
-	username, ok := extractUsernameFromClaims(claims)
+	username, ok := extractUsernameFromClaims(parsedToken)
 	if !ok {
 		return "", fmt.Errorf("could not extract username from token claims")
 	}
