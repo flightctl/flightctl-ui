@@ -696,6 +696,7 @@
   "Resource was deleted successfully": "Resource was deleted successfully",
   "Enrollment request": "Enrollment request",
   "Template version": "Template version",
+  "Auth provider": "Auth provider",
   "Loading alerts...": "Loading alerts...",
   "Error loading alerts": "Error loading alerts",
   "Alerts": "Alerts",

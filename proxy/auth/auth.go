@@ -40,15 +40,20 @@ func NewAuth(apiTlsConfig *tls.Config) (*AuthHandler, error) {
 		return &auth, nil
 	}
 
-	switch authConfig.AuthType {
+	providerType, authURL, err := extractProviderInfo(authConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	switch providerType {
 	case "AAPGateway":
-		auth.provider, err = getAAPAuthHandler(authConfig.AuthURL, internalAuthUrl)
+		auth.provider, err = getAAPAuthHandler(authURL, internalAuthUrl)
 	case "OIDC":
-		auth.provider, err = getOIDCAuthHandler(authConfig.AuthURL, internalAuthUrl)
+		auth.provider, err = getOIDCAuthHandler(authURL, internalAuthUrl)
 	case "k8s":
-		auth.provider, err = getK8sAuthHandler(authConfig.AuthURL, internalAuthUrl)
+		auth.provider, err = getK8sAuthHandler(authURL, internalAuthUrl)
 	default:
-		err = fmt.Errorf("unknown auth type: %s", authConfig.AuthType)
+		err = fmt.Errorf("unknown auth type: %s", providerType)
 	}
 	return &auth, err
 }
@@ -274,4 +279,86 @@ func getAuthInfo(apiTlsConfig *tls.Config) (*v1alpha1.AuthConfig, *string, error
 		return authConfig, nil, nil
 	}
 	return authConfig, &config.InternalAuthUrl, nil
+}
+
+// extractProviderInfo extracts the provider type and URL from the default provider in AuthConfig.
+// It currently only handles the provider marked as the default one.
+func extractProviderInfo(authConfig *v1alpha1.AuthConfig) (string, string, error) {
+	if authConfig.DefaultProvider == nil || *authConfig.DefaultProvider == "" {
+		return "", "", fmt.Errorf("no default provider specified")
+	}
+
+	if authConfig.Providers == nil || len(*authConfig.Providers) == 0 {
+		return "", "", fmt.Errorf("no auth providers configured")
+	}
+
+	// Find the default provider by name
+	var defaultProvider *v1alpha1.AuthProvider
+	for i := range *authConfig.Providers {
+		provider := &(*authConfig.Providers)[i]
+		if provider.Metadata.Name != nil && *provider.Metadata.Name == *authConfig.DefaultProvider {
+			defaultProvider = provider
+			break
+		}
+	}
+
+	if defaultProvider == nil {
+		return "", "", fmt.Errorf("default provider '%s' not found in providers list", *authConfig.DefaultProvider)
+	}
+
+	// Extract provider type and URL based on the provider spec
+	// We only need the discriminator and URL fields, so we parse the union JSON directly
+	discriminator, err := defaultProvider.Spec.Discriminator()
+	if err != nil {
+		return "", "", fmt.Errorf("failed to determine provider type: %w", err)
+	}
+
+	var providerType string
+	var authURL string
+
+	// Parse only the fields we need from the spec union
+	// Marshal the spec to get the raw JSON, then unmarshal into a map
+	specJSON, err := json.Marshal(defaultProvider.Spec)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to marshal provider spec: %w", err)
+	}
+	var specMap map[string]interface{}
+	if err := json.Unmarshal(specJSON, &specMap); err != nil {
+		return "", "", fmt.Errorf("failed to parse provider spec: %w", err)
+	}
+
+	switch discriminator {
+	case "oidc":
+		providerType = "OIDC"
+		if issuer, ok := specMap["issuer"].(string); ok {
+			authURL = issuer
+		} else {
+			return "", "", fmt.Errorf("issuer not found in OIDC provider spec")
+		}
+	case "aap":
+		providerType = "AAPGateway"
+		// Prefer external URL if available, otherwise use internal API URL
+		if extURL, ok := specMap["externalApiUrl"].(string); ok && extURL != "" {
+			authURL = extURL
+		} else if apiURL, ok := specMap["apiUrl"].(string); ok {
+			authURL = apiURL
+		} else {
+			return "", "", fmt.Errorf("apiUrl not found in AAP provider spec")
+		}
+	case "k8s":
+		providerType = "k8s"
+		if apiURL, ok := specMap["apiUrl"].(string); ok {
+			authURL = apiURL
+		} else {
+			return "", "", fmt.Errorf("apiUrl not found in K8s provider spec")
+		}
+	default:
+		return "", "", fmt.Errorf("unsupported provider type: %s", discriminator)
+	}
+
+	if authURL == "" {
+		return "", "", fmt.Errorf("auth URL not found for provider type: %s", discriminator)
+	}
+
+	return providerType, authURL, nil
 }

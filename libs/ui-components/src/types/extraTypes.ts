@@ -2,7 +2,6 @@ import {
   AppType,
   ApplicationEnvVars,
   ApplicationVolumeProviderSpec,
-  ArtifactApplicationProviderSpec,
   ConditionType,
   Device,
   EnrollmentRequest,
@@ -46,7 +45,7 @@ export type ApplicationProviderSpecFixed = ApplicationEnvVars &
   ApplicationVolumeProviderSpec & {
     name?: string;
     appType?: AppType;
-  } & (ImageApplicationProviderSpec | ArtifactApplicationProviderSpec | { inline: InlineApplicationFileFixed[] });
+  } & (ImageApplicationProviderSpec | { inline: InlineApplicationFileFixed[] });
 
 type CliArtifact = {
   os: string;

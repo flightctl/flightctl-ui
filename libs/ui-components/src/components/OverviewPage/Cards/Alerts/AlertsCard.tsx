@@ -114,6 +114,8 @@ const resourceKindLabel = (t: TFunction, resourceKind: ResourceKind | undefined)
       return t('Resource sync');
     case ResourceKind.TEMPLATE_VERSION:
       return t('Template version');
+    case ResourceKind.AUTH_PROVIDER:
+      return t('Auth provider');
   }
 };
 const getAlertTitle = (alert: AlertManagerAlert, defaultTitle: string) => {
