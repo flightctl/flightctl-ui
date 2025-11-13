@@ -13,4 +13,5 @@ export enum ResourceKind {
   REPOSITORY = 'Repository',
   RESOURCE_SYNC = 'ResourceSync',
   TEMPLATE_VERSION = 'TemplateVersion',
+  AUTH_PROVIDER = 'AuthProvider',
 }

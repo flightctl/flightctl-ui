@@ -58,7 +58,9 @@ export const logout = async () => {
 export const redirectToLogin = async () => {
   const response = await fetch(loginAPI);
   const { url } = (await response.json()) as { url: string };
-  window.location.href = url;
+  // If URL is empty, it means token-based auth (k8s) - redirect to login page
+  // Otherwise, it's OAuth - redirect to external provider
+  window.location.href = url || '/login';
 };
 
 const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
@@ -73,7 +75,10 @@ const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
   }
 
   if (response.status === 401) {
-    await redirectToLogin();
+    // Don't redirect if we're already on the login page
+    if (window.location.pathname !== '/login') {
+      await redirectToLogin();
+    }
   }
 
   throw new Error(await getErrorMsgFromApiResponse(response));

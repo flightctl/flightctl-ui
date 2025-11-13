@@ -13,6 +13,7 @@ import type { DeviceResourceStatus } from './DeviceResourceStatus';
 import type { DeviceSummaryStatus } from './DeviceSummaryStatus';
 import type { DeviceSystemInfo } from './DeviceSystemInfo';
 import type { DeviceUpdatedStatus } from './DeviceUpdatedStatus';
+import type { SystemdUnitStatus } from './SystemdUnitStatus';
 /**
  * DeviceStatus represents information about the status of a device. Status may trail the actual state of a device.
  */
@@ -23,7 +24,11 @@ export type DeviceStatus = {
   conditions: Array<Condition>;
   systemInfo: DeviceSystemInfo;
   /**
-   * List of device application status.
+   * List of systemd unit statuses.
+   */
+  systemd?: Array<SystemdUnitStatus>;
+  /**
+   * List of device application statuses.
    */
   applications: Array<DeviceApplicationStatus>;
   applicationsSummary: DeviceApplicationsSummaryStatus;

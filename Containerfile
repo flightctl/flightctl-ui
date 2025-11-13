@@ -12,13 +12,13 @@ ENV NODE_OPTIONS='--max-old-space-size=8192'
 RUN npm ci
 RUN npm run build
 
-FROM registry.access.redhat.com/ubi9/go-toolset:1.23.9-1751538372 as proxy-build
+FROM registry.access.redhat.com/ubi9/go-toolset:1.24.6-1762373805 as proxy-build
 WORKDIR /app
 COPY proxy /app
 USER 0
 RUN CGO_ENABLED=1 CGO_CFLAGS=-flto GOEXPERIMENT=strictfipsruntime go build
 
-FROM quay.io/flightctl/flightctl-base:9.6-1758714456
+FROM quay.io/flightctl/flightctl-base:9.6-1762316544
 COPY --from=ui-build /app/apps/standalone/dist /app/proxy/dist
 COPY --from=proxy-build /app/flightctl-ui /app/proxy
 WORKDIR /app/proxy
