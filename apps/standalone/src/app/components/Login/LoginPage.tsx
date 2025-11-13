@@ -67,8 +67,24 @@ export const LoginPage = () => {
       });
 
       if (!resp.ok) {
-        const errorData = (await resp.json()) as { error?: string };
-        setSubmitError(errorData.error || t('Authentication failed'));
+        let errorMessage = t('Authentication failed');
+        try {
+          const contentType = resp.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const errorData = (await resp.json()) as { error?: string };
+            errorMessage = errorData.error || errorMessage;
+          } else {
+            // Fallback for non-JSON responses
+            const text = await resp.text();
+            if (text) {
+              errorMessage = text;
+            }
+          }
+        } catch (parseErr) {
+          // If parsing fails, use default error message
+          errorMessage = t('Authentication failed');
+        }
+        setSubmitError(errorMessage);
         setIsSubmitting(false);
         return;
       }

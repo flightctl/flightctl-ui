@@ -84,7 +84,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			tokenData, expires, err := tokenProvider.ValidateToken(loginParams.Token)
 			if err != nil {
 				log.GetLogger().WithError(err).Warn("Token validation failed")
-				w.WriteHeader(http.StatusUnauthorized)
+				respondWithError(w, http.StatusUnauthorized, err.Error())
 				return
 			}
 			respondWithToken(w, tokenData, expires)
