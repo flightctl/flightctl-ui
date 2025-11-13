@@ -25,6 +25,7 @@ import {
   InlineConfigTemplate,
   KubeSecretTemplate,
   SpecConfigTemplate,
+  SystemdUnitFormValue,
   isGitConfigTemplate,
   isGitProviderSpec,
   isHttpConfigTemplate,
@@ -407,6 +408,15 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
       volumes: getAppFormVolumes(app),
     };
   });
+};
+
+export const getSystemdUnitsValues = (deviceSpec?: DeviceSpec): SystemdUnitFormValue[] => {
+  return (
+    deviceSpec?.systemd?.matchPatterns?.map((pattern) => ({
+      pattern,
+      exists: true,
+    })) || []
+  );
 };
 
 export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec, registerMicroShift?: boolean) => {

@@ -28,7 +28,12 @@ import DeviceTemplateStep, { deviceTemplateStepId, isDeviceTemplateStepValid } f
 import DeviceUpdateStep, { deviceUpdatePolicyStepId, isUpdatePolicyStepValid } from './steps/DeviceUpdateStep';
 import ReviewDeviceStep, { reviewDeviceStepId } from './steps/ReviewDeviceStep';
 import { getDevicePatches, getValidationSchema } from './utils';
-import { getApplicationValues, getConfigTemplatesValues, hasMicroshiftRegistrationConfig } from './deviceSpecUtils';
+import {
+  getApplicationValues,
+  getConfigTemplatesValues,
+  getSystemdUnitsValues,
+  hasMicroshiftRegistrationConfig,
+} from './deviceSpecUtils';
 import { useFetch } from '../../../hooks/useFetch';
 import { useEditDevice } from './useEditDevice';
 import EditDeviceWizardNav from './EditDeviceWizardNav';
@@ -83,7 +88,7 @@ const EditDeviceWizard = () => {
           configTemplates: getConfigTemplatesValues(device.spec, registerMicroShift),
           fleetMatch: '', // Initially this is always a fleetless device
           applications: getApplicationValues(device.spec),
-          systemdUnits: [],
+          systemdUnits: getSystemdUnitsValues(device.spec),
           registerMicroShift,
           updatePolicy: {
             ...updatePolicyValues,
