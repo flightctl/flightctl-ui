@@ -145,7 +145,7 @@ const DeviceTemplateStep = ({ isFleet, isReadOnly }: { isFleet: boolean; isReadO
         </FormGroupWithHelperText>
         <ConfigurationTemplates isReadOnly={isReadOnly} />
         <ApplicationsForm isReadOnly={isReadOnly} />
-        {isFleet && <SystemdUnitsForm isReadOnly={isReadOnly} />}
+        <SystemdUnitsForm isReadOnly={isReadOnly} />
         {appType === FlightCtlApp.OCP && <MicroShiftCheckbox isFleet={isFleet} isReadOnly={isReadOnly} />}
       </FlightCtlForm>
     </Grid>

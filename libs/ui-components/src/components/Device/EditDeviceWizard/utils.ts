@@ -9,7 +9,12 @@ import {
   validOsImage,
   validUpdatePolicySchema,
 } from '../../form/validations';
-import { appendJSONPatch, getDeviceLabelPatches, getUpdatePolicyPatches } from '../../../utils/patch';
+import {
+  appendJSONPatch,
+  getDeviceLabelPatches,
+  getStringListPatches,
+  getUpdatePolicyPatches,
+} from '../../../utils/patch';
 import { Device, PatchRequest } from '@flightctl/types';
 import { EditDeviceFormValues, UpdatePolicyForm } from './../../../types/deviceSpec';
 import {
@@ -83,6 +88,15 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
   // Applications
   const appPatches = getApplicationPatches('/spec', currentDevice.spec?.applications || [], updatedDevice.applications);
   allPatches = allPatches.concat(appPatches);
+
+  // Systemd services
+  const systemdUnitPatches = getStringListPatches(
+    '/spec/systemd',
+    currentDevice.spec?.systemd?.matchPatterns || [],
+    updatedDevice.systemdUnits.map((unit) => unit.pattern),
+    (list) => ({ matchPatterns: list }),
+  );
+  allPatches = allPatches.concat(systemdUnitPatches);
 
   // Updates
   const updatesPatches = getUpdatePolicyPatches('/spec/updatePolicy', currentDevice.spec?.updatePolicy, {
