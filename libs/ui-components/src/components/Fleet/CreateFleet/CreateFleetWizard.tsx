@@ -79,7 +79,8 @@ const CreateFleetWizard = () => {
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
   const [fleetId, fleet, loading, editError] = useEditFleet();
 
-  const [canEdit] = useAccessReview(RESOURCE.FLEET, VERB.PATCH);
+  const [permissions] = useAccessReview([{ kind: RESOURCE.FLEET, verb: VERB.PATCH }]);
+  const [canEdit = false] = permissions;
 
   const isEdit = !!fleetId;
   const isReadOnly = !!fleet?.metadata.owner || (isEdit && !canEdit);
@@ -216,18 +217,20 @@ const CreateFleetWizard = () => {
   );
 };
 
+const createFleetWizardPermissions = [
+  { kind: RESOURCE.FLEET, verb: VERB.CREATE },
+  { kind: RESOURCE.FLEET, verb: VERB.PATCH },
+];
+
 const CreateFleetWizardWithPermissions = () => {
   const {
     router: { useParams },
   } = useAppContext();
   const { fleetId } = useParams<{ fleetId: string }>();
-  const [createAllowed, createLoading] = useAccessReview(RESOURCE.FLEET, VERB.CREATE);
-  const [patchAllowed, patchLoading] = useAccessReview(RESOURCE.FLEET, VERB.PATCH);
+  const [permissions, loading] = useAccessReview(createFleetWizardPermissions);
+  const [createAllowed = false, patchAllowed = false] = permissions;
   return (
-    <PageWithPermissions
-      allowed={fleetId ? patchAllowed : createAllowed}
-      loading={fleetId ? patchLoading : createLoading}
-    >
+    <PageWithPermissions allowed={fleetId ? patchAllowed : createAllowed} loading={loading}>
       <CreateFleetWizard />
     </PageWithPermissions>
   );

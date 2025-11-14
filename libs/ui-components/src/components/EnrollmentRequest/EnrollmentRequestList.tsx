@@ -4,8 +4,6 @@ import { Tbody } from '@patternfly/react-table';
 import { SelectList, SelectOption, ToolbarItem } from '@patternfly/react-core';
 import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons';
 
-import { EnrollmentRequestList } from '@flightctl/types';
-
 import Table, { ApiSortTableColumn } from '../Table/Table';
 import TableActions from '../Table/TableActions';
 import ListPage from '../ListPage/ListPage';
@@ -48,10 +46,15 @@ type EnrollmentRequestListProps = {
   isStandalone?: boolean;
 };
 
+const enrollmentRequestListPermissions = [
+  { kind: RESOURCE.ENROLLMENT_REQUEST_APPROVAL, verb: VERB.POST },
+  { kind: RESOURCE.ENROLLMENT_REQUEST, verb: VERB.DELETE },
+];
+
 const EnrollmentRequestList = ({ onEmptyListChanged, refetchDevices, isStandalone }: EnrollmentRequestListProps) => {
   const { t } = useTranslation();
-  const [canApprove] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST_APPROVAL, VERB.POST);
-  const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
+  const [permissions] = useAccessReview(enrollmentRequestListPermissions);
+  const [canApprove = false, canDelete = false] = permissions;
   const { remove } = useFetch();
   const [search, setSearch] = React.useState<string>('');
 

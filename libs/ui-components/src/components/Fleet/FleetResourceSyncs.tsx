@@ -166,7 +166,8 @@ const FleetResourceSyncs = () => {
 };
 
 const FleetResourceSyncsWithPermissions = () => {
-  const [allowed] = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.LIST);
+  const [permissions] = useAccessReview([{ kind: RESOURCE.RESOURCE_SYNC, verb: VERB.LIST }]);
+  const [allowed = false] = permissions;
   return allowed && <FleetResourceSyncs />;
 };
 

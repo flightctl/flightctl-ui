@@ -181,7 +181,8 @@ const EditDeviceWizard = () => {
 };
 
 const EditDeviceWizardWithPermissions = () => {
-  const [allowed, loading] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
+  const [permissions, loading] = useAccessReview([{ kind: RESOURCE.DEVICE, verb: VERB.PATCH }]);
+  const [allowed = false] = permissions;
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <EditDeviceWizard />

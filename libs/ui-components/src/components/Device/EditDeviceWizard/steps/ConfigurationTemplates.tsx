@@ -218,7 +218,8 @@ const ConfigurationTemplatesForm = ({
 };
 
 const ConfigurationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
-  const [canCreateRepo] = useAccessReview(RESOURCE.REPOSITORY, VERB.CREATE);
+  const [permissions] = useAccessReview([{ kind: RESOURCE.REPOSITORY, verb: VERB.CREATE }]);
+  const [canCreateRepo = false] = permissions;
   const [repositoryList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>({
     endpoint: 'repositories',
   });
@@ -253,7 +254,8 @@ const ConfigurationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
 };
 
 const ConfigurationTemplatesWithPermissions = ({ isReadOnly }) => {
-  const [canListRepo] = useAccessReview(RESOURCE.REPOSITORY, VERB.LIST);
+  const [permissions] = useAccessReview([{ kind: RESOURCE.REPOSITORY, verb: VERB.LIST }]);
+  const [canListRepo = false] = permissions;
   return canListRepo && !isReadOnly ? (
     <ConfigurationTemplates />
   ) : (

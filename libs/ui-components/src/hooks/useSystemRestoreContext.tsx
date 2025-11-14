@@ -18,7 +18,8 @@ const SystemRestoreContext = React.createContext<SystemRestoreContextData | unde
  * This provides data needed for showing consistent restore banners across all pages.
  */
 export const SystemRestoreProvider = ({ children }: React.PropsWithChildren) => {
-  const [canListDevices] = useAccessReview(RESOURCE.DEVICE, VERB.LIST);
+  const [permissions] = useAccessReview([{ kind: RESOURCE.DEVICE, verb: VERB.LIST }]);
+  const [canListDevices = false] = permissions;
 
   // We obtain the unfiltered device summary to detect if any devices are in system restore statuses
   const [devicesSummary, isLoading] = useDevicesSummary({});

@@ -35,6 +35,14 @@ import { SystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 
 type DeviceDetailsPageProps = React.PropsWithChildren<{ hideTerminal?: boolean }>;
 
+const deviceDetailsPermissions = [
+  { kind: RESOURCE.DEVICE_CONSOLE, verb: VERB.GET },
+  { kind: RESOURCE.DEVICE, verb: VERB.DELETE },
+  { kind: RESOURCE.DEVICE, verb: VERB.PATCH },
+  { kind: RESOURCE.DEVICE_DECOMMISSION, verb: VERB.UPDATE },
+  { kind: RESOURCE.DEVICE_RESUME, verb: VERB.UPDATE },
+];
+
 const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) => {
   const { t } = useTranslation();
   const {
@@ -50,11 +58,9 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
   const deviceNameOrAlias = deviceAlias || deviceId;
   const isEnrolled = !device || isDeviceEnrolled(device);
 
-  const [hasTerminalAccess] = useAccessReview(RESOURCE.DEVICE_CONSOLE, VERB.GET);
-  const [canDelete] = useAccessReview(RESOURCE.DEVICE, VERB.DELETE);
-  const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
-  const [canDecommission] = useAccessReview(RESOURCE.DEVICE_DECOMMISSION, VERB.UPDATE);
-  const [canResume] = useAccessReview(RESOURCE.DEVICE_RESUME, VERB.UPDATE);
+  const [permissions] = useAccessReview(deviceDetailsPermissions);
+  const [hasTerminalAccess = false, canDelete = false, canEdit = false, canDecommission = false, canResume = false] =
+    permissions;
 
   const canOpenTerminal = hasTerminalAccess && isEnrolled;
 
@@ -202,7 +208,8 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
 };
 
 const DeviceDetailsPageWithPermissions = (props: DeviceDetailsPageProps) => {
-  const [allowed, loading] = useAccessReview(RESOURCE.DEVICE, VERB.GET);
+  const [permissions, loading] = useAccessReview([{ kind: RESOURCE.DEVICE, verb: VERB.GET }]);
+  const [allowed = false] = permissions;
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <DeviceDetailsPage {...props} />

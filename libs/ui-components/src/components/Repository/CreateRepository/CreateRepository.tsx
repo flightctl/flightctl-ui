@@ -149,7 +149,8 @@ const CreateRepository = () => {
 };
 
 const CreateRepositoryWithPermissions = () => {
-  const [allowed, loading] = useAccessReview(RESOURCE.REPOSITORY, VERB.CREATE);
+  const [permissions, loading] = useAccessReview([{ kind: RESOURCE.REPOSITORY, verb: VERB.CREATE }]);
+  const [allowed = false] = permissions;
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <CreateRepository />

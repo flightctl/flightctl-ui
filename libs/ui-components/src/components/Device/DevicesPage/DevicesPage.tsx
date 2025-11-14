@@ -112,11 +112,14 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
 };
 
 const DevicesPageWithPermissions = () => {
-  const [canListDevice, deviceLoading] = useAccessReview(RESOURCE.DEVICE, VERB.LIST);
-  const [canListER, erLoading] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.LIST);
+  const [permissions, loading] = useAccessReview([
+    { kind: RESOURCE.DEVICE, verb: VERB.LIST },
+    { kind: RESOURCE.ENROLLMENT_REQUEST, verb: VERB.LIST },
+  ]);
+  const [canListDevice = false, canListER = false] = permissions;
 
   return (
-    <PageWithPermissions loading={deviceLoading || erLoading} allowed={canListDevice || canListER}>
+    <PageWithPermissions loading={loading} allowed={canListDevice || canListER}>
       {canListDevice ? <DevicesPage canListER={canListER} /> : <EnrollmentRequestList isStandalone />}
     </PageWithPermissions>
   );

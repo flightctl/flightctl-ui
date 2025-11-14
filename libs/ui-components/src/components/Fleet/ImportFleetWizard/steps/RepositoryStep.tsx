@@ -77,7 +77,8 @@ const RepositoryStep = ({ repositories, hasLoaded }: { repositories: Repository[
   const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<ImportFleetFormValues>();
 
-  const [canCreateRepo] = useAccessReview(RESOURCE.REPOSITORY, VERB.CREATE);
+  const [permissions] = useAccessReview([{ kind: RESOURCE.REPOSITORY, verb: VERB.CREATE }]);
+  const [canCreateRepo = false] = permissions;
 
   const noRepositoriesExist = hasLoaded && repositories.length === 0;
   React.useEffect(() => {

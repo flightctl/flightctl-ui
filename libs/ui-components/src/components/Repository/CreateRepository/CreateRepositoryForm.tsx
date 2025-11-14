@@ -271,7 +271,8 @@ const CreateRepositoryFormContent = ({ isEdit, isReadOnly, onClose, children }: 
   const { values, setFieldValue, isValid, dirty, submitForm, isSubmitting } = useFormikContext<RepositoryFormValues>();
   const isSubmitDisabled = isSubmitting || !dirty || !isValid;
 
-  const [canCreateRS] = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.CREATE);
+  const [permissions] = useAccessReview([{ kind: RESOURCE.RESOURCE_SYNC, verb: VERB.CREATE }]);
+  const [canCreateRS = false] = permissions;
 
   const showResourceSyncs = values.canUseResourceSyncs && values.repoType === RepoSpecType.GIT;
   return (
