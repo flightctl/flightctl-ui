@@ -72,6 +72,12 @@ const getDeviceColumns = (t: TFunction): ApiSortTableColumn[] => [
   },
 ];
 
+const enrolledDevicesPermissions = [
+  { kind: RESOURCE.DEVICE, verb: VERB.PATCH },
+  { kind: RESOURCE.DEVICE_DECOMMISSION, verb: VERB.UPDATE },
+  { kind: RESOURCE.DEVICE_RESUME, verb: VERB.UPDATE },
+];
+
 const EnrolledDevicesTable = ({
   devices,
   nameOrAlias,
@@ -108,9 +114,8 @@ const EnrolledDevicesTable = ({
     },
   });
 
-  const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
-  const [canDecommission] = useAccessReview(RESOURCE.DEVICE_DECOMMISSION, VERB.UPDATE);
-  const [canResume] = useAccessReview(RESOURCE.DEVICE_RESUME, VERB.UPDATE);
+  const [permissions] = useAccessReview(enrolledDevicesPermissions);
+  const [canEdit = false, canDecommission = false, canResume = false] = permissions;
 
   const clearAllFilters = () => {
     if (hasFiltersEnabled) {

@@ -2,33 +2,74 @@ import * as React from 'react';
 import { useAppContext } from './useAppContext';
 import { getErrorMessage } from '../utils/error';
 import { RESOURCE, VERB } from '../types/rbac';
+import type { PermissionCheckRequest, PermissionCheckResponse } from '@flightctl/types';
 
 export type AccessReviewResult = [boolean, boolean, string | undefined];
+export type AccessReviewResults = [boolean[], boolean, string | undefined];
 
-export const useAccessReview = (kind: RESOURCE, verb: VERB): AccessReviewResult => {
+export type PermissionCheck = {
+  kind: RESOURCE;
+  verb: VERB;
+};
+
+/**
+ * Hook to check multiple permissions in a single API call.
+ * @param permissions Array of {kind, verb} pairs to check
+ * @returns [results, isLoading, error] where results is an array of booleans in the same order as the input permissions
+ */
+export const useAccessReview = (permissions: PermissionCheck[]): AccessReviewResults => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string>();
-  const [isAllowed, setIsAllowed] = React.useState(false);
+  const [results, setResults] = React.useState<boolean[]>([]);
 
   const {
-    fetch: { checkPermissions },
+    fetch: { post },
   } = useAppContext();
+
+  // Allows the callers to invoke the hook with new permissions arrays and not to trigger new requests each time
+  const permissionKeys = React.useMemo(() => {
+    return permissions.map((p) => `${p.kind}:${p.verb}`).join(',');
+  }, [permissions]);
+
   React.useEffect(() => {
     let isMounted = true;
 
-    const doItAsync = async () => {
-      if (!isMounted) return;
+    const checkPermissions = async () => {
+      if (!isMounted) {
+        return;
+      }
+
+      if (permissionKeys.length === 0) {
+        setIsLoading(false);
+        setResults([]);
+        return;
+      }
 
       setIsLoading(true);
       try {
-        const allowed = await checkPermissions(kind, verb);
+        const request = {
+          permissions: permissionKeys.split(',').map((p) => {
+            const [kind, verb] = p.split(':');
+            return {
+              resource: kind,
+              op: verb,
+            };
+          }),
+        };
+        const response = await post<PermissionCheckRequest, PermissionCheckResponse>('auth/checkpermission', request);
         if (isMounted) {
-          setIsAllowed(allowed);
+          // We keep the order in which we requested the permissions, even if the response uses a different order
+          const resultsArray = request.permissions.map((reqPerm) => {
+            const result = response.results.find((res) => res.resource === reqPerm.resource && res.op === reqPerm.op);
+            return result?.allowed ?? false;
+          });
+          setResults(resultsArray);
         }
       } catch (err) {
         if (isMounted) {
           setError(getErrorMessage(err));
-          setIsAllowed(false);
+          // Set all results to false on error
+          setResults(permissionKeys.split(',').map(() => false));
         }
       } finally {
         if (isMounted) {
@@ -37,13 +78,12 @@ export const useAccessReview = (kind: RESOURCE, verb: VERB): AccessReviewResult 
       }
     };
 
-    doItAsync();
-
+    void checkPermissions();
     // Cleanup function to prevent state updates after unmount
     return () => {
       isMounted = false;
     };
-  }, [kind, verb, checkPermissions]);
+  }, [permissionKeys, post]);
 
-  return [isAllowed, isLoading, error];
+  return [results, isLoading, error];
 };

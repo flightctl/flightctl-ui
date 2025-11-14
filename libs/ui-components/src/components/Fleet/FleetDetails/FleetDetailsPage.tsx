@@ -17,6 +17,10 @@ import FleetDetailsContent from './FleetDetailsContent';
 import FleetRestoreBanner from './FleetRestoreBanner';
 import FleetYaml from './FleetYaml';
 
+const fleetDetailsPermissions = [
+  { kind: RESOURCE.FLEET, verb: VERB.DELETE },
+  { kind: RESOURCE.FLEET, verb: VERB.PATCH },
+];
 const FleetDetailPage = () => {
   const { t } = useTranslation();
 
@@ -32,8 +36,8 @@ const FleetDetailPage = () => {
 
   const navigate = useNavigate();
 
-  const [canDelete] = useAccessReview(RESOURCE.FLEET, VERB.DELETE);
-  const [canEdit] = useAccessReview(RESOURCE.FLEET, VERB.PATCH);
+  const [permissions] = useAccessReview(fleetDetailsPermissions);
+  const [canDelete = false, canEdit = false] = permissions;
 
   const isManaged = !!fleet?.metadata?.owner;
   const hasActions = canDelete || (canEdit && !isManaged) || isManaged;
@@ -121,7 +125,8 @@ const FleetDetailPage = () => {
 };
 
 const FleetDetailsWithPermissions = () => {
-  const [allowed, loading] = useAccessReview(RESOURCE.FLEET, VERB.GET);
+  const [permissions, loading] = useAccessReview([{ kind: RESOURCE.FLEET, verb: VERB.GET }]);
+  const [allowed = false] = permissions;
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <FleetDetailPage />

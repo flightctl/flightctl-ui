@@ -16,7 +16,8 @@ type DevicesEmptyStateProps = {
 
 export const EnrolledDevicesEmptyState = ({ onAddDevice }: DevicesEmptyStateProps) => {
   const { t } = useTranslation();
-  const [canCreateFleet] = useAccessReview(RESOURCE.FLEET, VERB.CREATE);
+  const [permissions] = useAccessReview([{ kind: RESOURCE.FLEET, verb: VERB.CREATE }]);
+  const [canCreateFleet = false] = permissions;
   return (
     <ResourceListEmptyState icon={MicrochipIcon} titleText={t('No devices here!')}>
       <EmptyStateBody>

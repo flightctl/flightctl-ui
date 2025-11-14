@@ -81,9 +81,6 @@ func main() {
 		apiRouter.HandleFunc("/login/info", authHandler.GetUserInfo)
 		apiRouter.HandleFunc("/login/refresh", authHandler.Refresh)
 		apiRouter.HandleFunc("/logout", authHandler.Logout)
-	} else {
-		configHandler := config.OcpConfigHandler{}
-		apiRouter.HandleFunc("/config", configHandler.GetConfig)
 	}
 
 	spa := server.SpaHandler{}

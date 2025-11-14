@@ -32,8 +32,6 @@ export const useFetch = () => {
 
   const getWsEndpoint = React.useCallback((deviceId: string) => `${wsEndpoint}/api/terminal/${deviceId}`, []);
 
-  const checkPermissions = React.useCallback(() => Promise.resolve(true), []);
-
   const proxyFetch = React.useCallback(async (endpoint: string, requestInit: RequestInit): Promise<Response> => {
     return fetchUiProxy(endpoint, requestInit);
   }, []);
@@ -45,7 +43,6 @@ export const useFetch = () => {
     put,
     remove,
     patch,
-    checkPermissions,
     proxyFetch,
   };
 };

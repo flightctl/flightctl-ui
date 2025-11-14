@@ -97,7 +97,8 @@ const TerminalTab = ({ device }: TerminalTabProps) => {
 };
 
 const TerminalTabWithPermissions = (props: TerminalTabProps) => {
-  const [allowed, loading] = useAccessReview(RESOURCE.DEVICE_CONSOLE, VERB.GET);
+  const [permissions, loading] = useAccessReview([{ kind: RESOURCE.DEVICE_CONSOLE, verb: VERB.GET }]);
+  const [allowed = false] = permissions;
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <TerminalTab {...props} />
