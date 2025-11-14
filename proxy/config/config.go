@@ -18,7 +18,6 @@ var (
 	InternalAuthUrl      = getEnvUrlVar("INTERNAL_AUTH_URL", "")
 	AuthInsecure         = getEnvVar("AUTH_INSECURE_SKIP_VERIFY", "")
 	OcpPlugin            = getEnvVar("IS_OCP_PLUGIN", "false")
-	RBACNs               = getEnvVar("K8S_RBAC_NS", "")
 	IsRHEM               = getEnvVar("IS_RHEM", "")
 	OrganizationsEnabled = getEnvVar("ORGANIZATIONS_ENABLED", "false")
 )

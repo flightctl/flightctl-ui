@@ -41,6 +41,11 @@ const getDeviceColumns = (t: TFunction): ApiSortTableColumn[] => [
   },
 ];
 
+const decommissionedDevicesPermissions = [
+  { kind: RESOURCE.DEVICE, verb: VERB.DELETE },
+  { kind: RESOURCE.DEVICE, verb: VERB.PATCH },
+];
+
 const DecommissionedDevicesTable = ({
   devices,
   refetch,
@@ -67,8 +72,8 @@ const DecommissionedDevicesTable = ({
     },
   });
 
-  const [canDelete] = useAccessReview(RESOURCE.DEVICE, VERB.DELETE);
-  const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
+  const [permissions] = useAccessReview(decommissionedDevicesPermissions);
+  const [canDelete = false, canEdit = false] = permissions;
 
   return (
     <>

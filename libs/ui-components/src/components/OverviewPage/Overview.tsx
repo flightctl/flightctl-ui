@@ -11,13 +11,18 @@ import AlertsCard from './Cards/Alerts/AlertsCard';
 import StatusCard from './Cards/Status/StatusCard';
 import TasksCard from './Cards/Tasks/TasksCard';
 
+const overviewPermissions = [
+  { kind: RESOURCE.DEVICE, verb: VERB.LIST },
+  { kind: RESOURCE.ENROLLMENT_REQUEST, verb: VERB.LIST },
+];
+
 const Overview = () => {
   const alertsEnabled = useAlertsEnabled();
-  const [canListDevices, devicesLoading] = useAccessReview(RESOURCE.DEVICE, VERB.LIST);
-  const [canListErs, erLoading] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.LIST);
+  const [permissions, loading] = useAccessReview(overviewPermissions);
+  const [canListDevices = false, canListErs = false] = permissions;
 
   return (
-    <PageWithPermissions allowed={canListDevices || canListErs} loading={devicesLoading || erLoading}>
+    <PageWithPermissions allowed={canListDevices || canListErs} loading={loading}>
       <GlobalSystemRestoreBanners className="pf-v5-u-py-0" />
 
       <Grid hasGutter>

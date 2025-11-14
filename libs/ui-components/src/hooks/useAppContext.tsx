@@ -14,7 +14,6 @@ import {
 } from 'react-router-dom';
 import { PatchRequest } from '@flightctl/types';
 import { ROUTE } from './useNavigate';
-import { RESOURCE, VERB } from '../types/rbac';
 
 export const appRoutes = {
   [ROUTE.ROOT]: '/',
@@ -78,7 +77,6 @@ export type AppContextProps = {
     put: <TRequest>(kind: string, data: TRequest, abortSignal?: AbortSignal) => Promise<TRequest>;
     remove: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
     patch: <R>(kind: string, patches: PatchRequest, abortSignal?: AbortSignal) => Promise<R>;
-    checkPermissions: (resource: RESOURCE, verb: VERB) => Promise<boolean>;
     // All methods to the UI proxy are handled in the same method - returns raw Response
     proxyFetch: (endpoint: string, requestInit: RequestInit) => Promise<Response>;
   };
@@ -113,7 +111,6 @@ export const AppContext = React.createContext<AppContextProps>({
     put: async () => ({}) as any,
     remove: async () => ({}) as any,
     patch: async () => ({}) as any,
-    checkPermissions: async () => true,
     proxyFetch: async () => ({}) as any,
   },
   /* eslint-enable */

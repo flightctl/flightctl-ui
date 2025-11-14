@@ -52,8 +52,6 @@ export const useFetch = (getCookie: (name: string) => string | undefined, servic
     [serviceUrl],
   );
 
-  const checkPermissions = React.useCallback(() => Promise.resolve(true), []);
-
   const proxyFetch = React.useCallback(
     async (endpoint: string, requestInit: RequestInit): Promise<Response> => {
       return fetchUiProxy(endpoint, serviceUrl, applyHeaders, requestInit);
@@ -68,7 +66,6 @@ export const useFetch = (getCookie: (name: string) => string | undefined, servic
     put,
     remove,
     patch,
-    checkPermissions,
     proxyFetch,
   };
 };

@@ -11,7 +11,8 @@ export const useAlertsEnabled = (): boolean => {
   const { get } = useFetch();
   const [alertsEnabled, setAlertsEnabled] = React.useState(false);
 
-  const [canListAlerts, alertsLoading] = useAccessReview(RESOURCE.ALERTS, VERB.LIST);
+  const [permissions, alertsLoading] = useAccessReview([{ kind: RESOURCE.ALERTS, verb: VERB.LIST }]);
+  const [canListAlerts = false] = permissions;
 
   React.useEffect(() => {
     let abortController: AbortController;

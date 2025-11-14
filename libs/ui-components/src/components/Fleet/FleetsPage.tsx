@@ -36,20 +36,26 @@ import { useAccessReview } from '../../hooks/useAccessReview';
 import ButtonWithPermissions from '../common/ButtonWithPermissions';
 import { RESOURCE, VERB } from '../../types/rbac';
 import PageWithPermissions from '../common/PageWithPermissions';
-import { useFleetImportAccessReview } from '../../hooks/useFleetImportAccessReview';
 import { GlobalSystemRestoreBanners } from '../SystemRestore/SystemRestoreBanners';
+
+const fleetPageActionsPermissions = [
+  { kind: RESOURCE.FLEET, verb: VERB.CREATE },
+  { kind: RESOURCE.RESOURCE_SYNC, verb: VERB.CREATE },
+  { kind: RESOURCE.REPOSITORY, verb: VERB.LIST },
+];
 
 const FleetPageActions = ({ createText }: { createText?: string }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const canCreateFleet = useAccessReview(RESOURCE.FLEET, VERB.CREATE);
-  const canImportFleet = useFleetImportAccessReview();
+  const [permissions, loading] = useAccessReview(fleetPageActionsPermissions);
+  const [canCreateFleet = false, canCreateRs = false, canReadRepo = false] = permissions;
+  const canImportFleet = canCreateRs && canReadRepo;
 
   return (
     <Split hasGutter>
       <SplitItem>
         <ButtonWithPermissions
-          permissions={canCreateFleet}
+          permissions={[canCreateFleet, loading, undefined]}
           variant="primary"
           onClick={() => navigate(ROUTE.FLEET_CREATE)}
         >
@@ -58,7 +64,7 @@ const FleetPageActions = ({ createText }: { createText?: string }) => {
       </SplitItem>
       <SplitItem>
         <ButtonWithPermissions
-          permissions={canImportFleet}
+          permissions={[canImportFleet, loading, undefined]}
           variant="secondary"
           onClick={() => navigate(ROUTE.FLEET_IMPORT)}
         >
@@ -104,6 +110,12 @@ const getColumns = (t: TFunction): ApiSortTableColumn[] => [
   },
 ];
 
+const fleetTablePermissions = [
+  { kind: RESOURCE.FLEET, verb: VERB.DELETE },
+  { kind: RESOURCE.FLEET, verb: VERB.CREATE },
+  { kind: RESOURCE.FLEET, verb: VERB.PATCH },
+];
+
 const FleetTable = () => {
   const { t } = useTranslation();
 
@@ -117,9 +129,8 @@ const FleetTable = () => {
 
   const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
 
-  const [canDelete] = useAccessReview(RESOURCE.FLEET, VERB.DELETE);
-  const [canCreate] = useAccessReview(RESOURCE.FLEET, VERB.CREATE);
-  const [canEdit] = useAccessReview(RESOURCE.FLEET, VERB.PATCH);
+  const [permissions] = useAccessReview(fleetTablePermissions);
+  const [canDelete = false, canCreate = false, canEdit = false] = permissions;
 
   return (
     <ListPageBody error={error} loading={isLoading}>
@@ -214,7 +225,8 @@ const FleetsPage = () => {
 };
 
 const FleetsPageWithPermissions = () => {
-  const [allowed, loading] = useAccessReview(RESOURCE.FLEET, VERB.LIST);
+  const [permissions, loading] = useAccessReview([{ kind: RESOURCE.FLEET, verb: VERB.LIST }]);
+  const [allowed = false] = permissions;
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <FleetsPage />
