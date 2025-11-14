@@ -36,15 +36,6 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
     setSelectedLabels,
   } = useDeviceBackendFilters();
   const [onlyDecommissioned, setOnlyDecommissioned] = React.useState<boolean>(false);
-  const [showDeviceListBadge, setShowDeviceListBadge] = React.useState<boolean>(true);
-
-  const onEmptyErChanged = React.useCallback((isEmpty: boolean) => {
-    if (isEmpty) {
-      setShowDeviceListBadge(true);
-    } else {
-      setShowDeviceListBadge(false);
-    }
-  }, []);
 
   const { currentPage, setCurrentPage, onPageFetched, nextContinue, itemCount } = useTablePagination<DeviceList>(
     onlyDecommissioned ? undefined : removeDecommissionedDevices,
@@ -71,9 +62,9 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
 
   return (
     <>
-      {canListER && <EnrollmentRequestList onEmptyListChanged={onEmptyErChanged} refetchDevices={refetch} />}
+      {canListER && <EnrollmentRequestList refetchDevices={refetch} />}
 
-      <ListPage title={t('Devices')} withBadge={showDeviceListBadge}>
+      <ListPage title={t('Devices')}>
         {/* When searching for decommissioned devices we want to avoid showing the enrolled devices */}
         <ListPageBody error={error} loading={loading || (onlyDecommissioned && updating && !hasFiltersEnabled)}>
           {onlyDecommissioned ? (

@@ -3,8 +3,6 @@ import {
   Alert,
   Button,
   Divider,
-  Flex,
-  FlexItem,
   List,
   ListItem,
   PageSection,
@@ -16,7 +14,6 @@ import {
 } from '@patternfly/react-core';
 import ExternalLinkAltIcon from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
 
-import TechPreviewBadge from '../common/TechPreviewBadge';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
 import { getErrorMessage } from '../../utils/error';
@@ -140,14 +137,7 @@ const CommandLineToolsPage = () => {
     <PageSection variant={PageSectionVariants.light}>
       <Stack hasGutter>
         <StackItem>
-          <Flex>
-            <FlexItem>
-              <Title headingLevel="h1">{t('Command Line Tools')}</Title>
-            </FlexItem>
-            <FlexItem>
-              <TechPreviewBadge />
-            </FlexItem>
-          </Flex>
+          <Title headingLevel="h1">{t('Command Line Tools')}</Title>
         </StackItem>
         <Divider className="pf-v5-u-my-lg" />
         <StackItem>
