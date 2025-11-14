@@ -1,24 +1,17 @@
 import * as React from 'react';
-import Overview from './Overview';
+import { PageSection, PageSectionVariants, Title } from '@patternfly/react-core';
+
 import { useTranslation } from '../../hooks/useTranslation';
-import { Flex, FlexItem, PageSection, PageSectionVariants, Title } from '@patternfly/react-core';
-import TechPreviewBadge from '../common/TechPreviewBadge';
+import Overview from './Overview';
 
 const OverviewPage = () => {
   const { t } = useTranslation();
   return (
     <>
       <PageSection variant={PageSectionVariants.light}>
-        <Flex gap={{ default: 'gapMd' }} alignItems={{ default: 'alignItemsCenter' }}>
-          <FlexItem>
-            <Title headingLevel="h1" size="3xl" role="heading">
-              {t('Overview')}
-            </Title>
-          </FlexItem>
-          <FlexItem>
-            <TechPreviewBadge />
-          </FlexItem>
-        </Flex>
+        <Title headingLevel="h1" size="3xl" role="heading">
+          {t('Overview')}
+        </Title>
       </PageSection>
       <PageSection variant={PageSectionVariants.light} isFilled>
         <Overview />
