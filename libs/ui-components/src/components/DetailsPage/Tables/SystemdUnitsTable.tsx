@@ -5,19 +5,30 @@ import { CogIcon } from '@patternfly/react-icons/dist/js/icons/cog-icon';
 import { ClockIcon } from '@patternfly/react-icons/dist/js/icons/clock-icon';
 
 import { SystemdUnitStatus } from '@flightctl/types';
+import FolderIcon from '@patternfly/react-icons/dist/js/icons/folder-icon';
+import { DatabaseIcon } from '@patternfly/react-icons/dist/js/icons/database-icon';
+import { NetworkIcon } from '@patternfly/react-icons/dist/js/icons/network-icon';
+import { ConnectedIcon } from '@patternfly/react-icons/dist/js/icons/connected-icon';
 import { useTranslation } from '../../../hooks/useTranslation';
 
-const serviceRegex = /\.service$/;
-const timerRegex = /\.timer$/;
+const unitTypeIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  service: CogIcon,
+  timer: ClockIcon,
+  socket: ConnectedIcon,
+  target: NetworkIcon,
+  mount: DatabaseIcon,
+  path: FolderIcon,
+};
 
 const SystemdUnitStatusIcon = ({ unitName }: { unitName: string }) => {
-  if (serviceRegex.test(unitName)) {
-    return <CogIcon className="pf-v5-u-mr-md" />;
+  const unitType = unitName.split('.').pop();
+  const IconComponent = unitType ? unitTypeIconMap[unitType] : null;
+
+  if (!IconComponent) {
+    return null;
   }
-  if (timerRegex.test(unitName)) {
-    return <ClockIcon className="pf-v5-u-mr-md" />;
-  }
-  return null;
+
+  return <IconComponent className="pf-v5-u-mr-xs" />;
 };
 
 type SystemdUnitsTableProps = {
@@ -32,7 +43,7 @@ const SystemdUnitRow = ({ unitStatus }: { unitStatus: SystemdUnitStatus }) => {
       <Td dataLabel={t('Name')}>
         <SystemdUnitStatusIcon unitName={unitStatus.unit} /> {unitStatus.unit}
       </Td>
-      <Td dataLabel={t('Enable state')}>
+      <Td dataLabel={t('Enable')}>
         <Label color="blue" variant="outline">
           {unitStatus.enableState}
         </Label>
@@ -42,14 +53,9 @@ const SystemdUnitRow = ({ unitStatus }: { unitStatus: SystemdUnitStatus }) => {
           {unitStatus.loadState}
         </Label>
       </Td>
-      <Td dataLabel={t('Active state')}>
+      <Td dataLabel={t('Status')}>
         <Label color="blue" variant="outline">
-          {unitStatus.activeState}
-        </Label>
-      </Td>
-      <Td dataLabel={t('Sub state')}>
-        <Label color="blue" variant="outline">
-          {unitStatus.subState}
+          {unitStatus.activeState} {unitStatus.subState && `(${unitStatus.subState})`}
         </Label>
       </Td>
     </Tr>
@@ -66,10 +72,9 @@ const SystemdUnitsTable = ({ systemdUnitsStatus }: SystemdUnitsTableProps) => {
       <Thead>
         <Tr>
           <Th>{t('Name')}</Th>
-          <Th modifier="wrap">{t('Enable state')}</Th>
+          <Th modifier="wrap">{t('Enable')}</Th>
           <Th modifier="wrap">{t('Load state')}</Th>
-          <Th modifier="wrap">{t('Active state')}</Th>
-          <Th modifier="wrap">{t('Sub state')}</Th>
+          <Th modifier="wrap">{t('Status')}</Th>
         </Tr>
       </Thead>
       <Tbody>
