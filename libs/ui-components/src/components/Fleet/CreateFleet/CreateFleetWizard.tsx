@@ -33,7 +33,7 @@ import CreateFleetWizardFooter from './CreateFleetWizardFooter';
 import { useEditFleet } from './useEditFleet';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { useAppContext } from '../../../hooks/useAppContext';
 
@@ -79,8 +79,8 @@ const CreateFleetWizard = () => {
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
   const [fleetId, fleet, loading, editError] = useEditFleet();
 
-  const [permissions] = useAccessReview([{ kind: RESOURCE.FLEET, verb: VERB.PATCH }]);
-  const [canEdit = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canEdit] = checkPermissions([{ kind: RESOURCE.FLEET, verb: VERB.PATCH }]);
 
   const isEdit = !!fleetId;
   const isReadOnly = !!fleet?.metadata.owner || (isEdit && !canEdit);
@@ -227,8 +227,8 @@ const CreateFleetWizardWithPermissions = () => {
     router: { useParams },
   } = useAppContext();
   const { fleetId } = useParams<{ fleetId: string }>();
-  const [permissions, loading] = useAccessReview(createFleetWizardPermissions);
-  const [createAllowed = false, patchAllowed = false] = permissions;
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [createAllowed, patchAllowed] = checkPermissions(createFleetWizardPermissions);
   return (
     <PageWithPermissions allowed={fleetId ? patchAllowed : createAllowed} loading={loading}>
       <CreateFleetWizard />

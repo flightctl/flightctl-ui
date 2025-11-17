@@ -13,7 +13,7 @@ import { useDeviceBackendFilters } from './useDeviceBackendFilters';
 import EnrollmentRequestList from '../../EnrollmentRequest/EnrollmentRequestList';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../../types/rbac';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import EnrolledDevicesTable from './EnrolledDevicesTable';
 import DecommissionedDevicesTable from './DecommissionedDevicesTable';
 
@@ -112,11 +112,11 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
 };
 
 const DevicesPageWithPermissions = () => {
-  const [permissions, loading] = useAccessReview([
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [canListDevice, canListER] = checkPermissions([
     { kind: RESOURCE.DEVICE, verb: VERB.LIST },
     { kind: RESOURCE.ENROLLMENT_REQUEST, verb: VERB.LIST },
   ]);
-  const [canListDevice = false, canListER = false] = permissions;
 
   return (
     <PageWithPermissions loading={loading} allowed={canListDevice || canListER}>

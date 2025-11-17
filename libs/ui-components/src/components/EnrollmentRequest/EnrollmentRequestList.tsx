@@ -18,7 +18,7 @@ import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/
 import EnrollmentRequestTableRow from '../EnrollmentRequest/EnrollmentRequestTableRow';
 import EnrollmentRequestTableToolbar from './EnrollmentRequestTableToolbar';
 import { RESOURCE, VERB } from '../../types/rbac';
-import { useAccessReview } from '../../hooks/useAccessReview';
+import { usePermissionsContext } from '../common/PermissionsContext';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { usePendingEnrollments } from './useEnrollmentRequests';
 import TablePagination from '../Table/TablePagination';
@@ -53,8 +53,8 @@ const enrollmentRequestListPermissions = [
 
 const EnrollmentRequestList = ({ onEmptyListChanged, refetchDevices, isStandalone }: EnrollmentRequestListProps) => {
   const { t } = useTranslation();
-  const [permissions] = useAccessReview(enrollmentRequestListPermissions);
-  const [canApprove = false, canDelete = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canApprove, canDelete] = checkPermissions(enrollmentRequestListPermissions);
   const { remove } = useFetch();
   const [search, setSearch] = React.useState<string>('');
 

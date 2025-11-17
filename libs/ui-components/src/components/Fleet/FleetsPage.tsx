@@ -32,8 +32,7 @@ import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import DeleteFleetModal from './DeleteFleetModal/DeleteFleetModal';
 import FleetResourceSyncs from './FleetResourceSyncs';
 import { useFleetBackendFilters, useFleets } from './useFleets';
-import { useAccessReview } from '../../hooks/useAccessReview';
-import ButtonWithPermissions from '../common/ButtonWithPermissions';
+import { usePermissionsContext } from '../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../types/rbac';
 import PageWithPermissions from '../common/PageWithPermissions';
 import { GlobalSystemRestoreBanners } from '../SystemRestore/SystemRestoreBanners';
@@ -47,30 +46,26 @@ const fleetPageActionsPermissions = [
 const FleetPageActions = ({ createText }: { createText?: string }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [permissions, loading] = useAccessReview(fleetPageActionsPermissions);
-  const [canCreateFleet = false, canCreateRs = false, canReadRepo = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canCreateFleet, canCreateRs, canReadRepo] = checkPermissions(fleetPageActionsPermissions);
   const canImportFleet = canCreateRs && canReadRepo;
 
   return (
     <Split hasGutter>
-      <SplitItem>
-        <ButtonWithPermissions
-          permissions={[canCreateFleet, loading, undefined]}
-          variant="primary"
-          onClick={() => navigate(ROUTE.FLEET_CREATE)}
-        >
-          {createText || t('Create a fleet')}
-        </ButtonWithPermissions>
-      </SplitItem>
-      <SplitItem>
-        <ButtonWithPermissions
-          permissions={[canImportFleet, loading, undefined]}
-          variant="secondary"
-          onClick={() => navigate(ROUTE.FLEET_IMPORT)}
-        >
-          {t('Import fleets')}
-        </ButtonWithPermissions>
-      </SplitItem>
+      {canCreateFleet && (
+        <SplitItem>
+          <Button variant="primary" onClick={() => navigate(ROUTE.FLEET_CREATE)}>
+            {createText || t('Create a fleet')}
+          </Button>
+        </SplitItem>
+      )}
+      {canImportFleet && (
+        <SplitItem>
+          <Button variant="secondary" onClick={() => navigate(ROUTE.FLEET_IMPORT)}>
+            {t('Import fleets')}
+          </Button>
+        </SplitItem>
+      )}
     </Split>
   );
 };
@@ -129,8 +124,8 @@ const FleetTable = () => {
 
   const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
 
-  const [permissions] = useAccessReview(fleetTablePermissions);
-  const [canDelete = false, canCreate = false, canEdit = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canDelete, canCreate, canEdit] = checkPermissions(fleetTablePermissions);
 
   return (
     <ListPageBody error={error} loading={isLoading}>
@@ -225,8 +220,8 @@ const FleetsPage = () => {
 };
 
 const FleetsPageWithPermissions = () => {
-  const [permissions, loading] = useAccessReview([{ kind: RESOURCE.FLEET, verb: VERB.LIST }]);
-  const [allowed = false] = permissions;
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.FLEET, verb: VERB.LIST }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <FleetsPage />

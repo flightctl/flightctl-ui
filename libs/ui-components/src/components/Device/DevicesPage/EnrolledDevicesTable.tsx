@@ -10,7 +10,7 @@ import { FlightCtlLabel } from '../../../types/extraTypes';
 import { PaginationDetails } from '../../../hooks/useTablePagination';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useTableSelect } from '../../../hooks/useTableSelect';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { useFetch } from '../../../hooks/useFetch';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import {
@@ -114,8 +114,8 @@ const EnrolledDevicesTable = ({
     },
   });
 
-  const [permissions] = useAccessReview(enrolledDevicesPermissions);
-  const [canEdit = false, canDecommission = false, canResume = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canEdit, canDecommission, canResume] = checkPermissions(enrolledDevicesPermissions);
 
   const clearAllFilters = () => {
     if (hasFiltersEnabled) {

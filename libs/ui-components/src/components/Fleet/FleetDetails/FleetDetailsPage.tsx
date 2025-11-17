@@ -7,7 +7,7 @@ import PageWithPermissions from '../../common/PageWithPermissions';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { useAppContext } from '../../../hooks/useAppContext';
 import NavItem from '../../NavItem/NavItem';
 import DetailsPage from '../../DetailsPage/DetailsPage';
@@ -36,8 +36,8 @@ const FleetDetailPage = () => {
 
   const navigate = useNavigate();
 
-  const [permissions] = useAccessReview(fleetDetailsPermissions);
-  const [canDelete = false, canEdit = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canDelete, canEdit] = checkPermissions(fleetDetailsPermissions);
 
   const isManaged = !!fleet?.metadata?.owner;
   const hasActions = canDelete || (canEdit && !isManaged) || isManaged;
@@ -104,7 +104,7 @@ const FleetDetailPage = () => {
           <Routes>
             <Route index element={<Navigate to="details" replace />} />
             <Route path="details" element={<FleetDetailsContent fleet={fleet} />} />
-            <Route path="yaml" element={<FleetYaml fleet={fleet} refetch={refetch} />} />
+            <Route path="yaml" element={<FleetYaml fleet={fleet} refetch={refetch} canEdit={canEdit} />} />
           </Routes>
           {isDeleteModalOpen && (
             <DeleteFleetModal
@@ -125,8 +125,8 @@ const FleetDetailPage = () => {
 };
 
 const FleetDetailsWithPermissions = () => {
-  const [permissions, loading] = useAccessReview([{ kind: RESOURCE.FLEET, verb: VERB.GET }]);
-  const [allowed = false] = permissions;
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.FLEET, verb: VERB.GET }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <FleetDetailPage />

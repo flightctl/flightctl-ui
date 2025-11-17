@@ -8,7 +8,7 @@ import { Device, DeviceList } from '@flightctl/types';
 import { PaginationDetails } from '../../../hooks/useTablePagination';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useTableSelect } from '../../../hooks/useTableSelect';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { useFetch } from '../../../hooks/useFetch';
 import { RESOURCE, VERB } from '../../../types/rbac';
 
@@ -72,8 +72,8 @@ const DecommissionedDevicesTable = ({
     },
   });
 
-  const [permissions] = useAccessReview(decommissionedDevicesPermissions);
-  const [canDelete = false, canEdit = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canDelete, canEdit] = checkPermissions(decommissionedDevicesPermissions);
 
   return (
     <>

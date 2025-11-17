@@ -41,7 +41,7 @@ import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
 import PageWithPermissions from '../../common/PageWithPermissions';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
 
 import './ImportFleetWizard.css';
@@ -224,8 +224,8 @@ const importFleetWizardPermissions = [
 ];
 
 const ImportFleetWizardWithPermissions = () => {
-  const [permissions, isLoading] = useAccessReview(importFleetWizardPermissions);
-  const [canCreateRs = false, canReadRepo = false] = permissions;
+  const { checkPermissions, loading: isLoading } = usePermissionsContext();
+  const [canCreateRs, canReadRepo] = checkPermissions(importFleetWizardPermissions);
   const allowed = canCreateRs && canReadRepo;
   return (
     <PageWithPermissions allowed={allowed} loading={isLoading}>

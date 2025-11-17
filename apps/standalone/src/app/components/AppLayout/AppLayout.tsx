@@ -21,6 +21,7 @@ import OrganizationSelector from '@flightctl/ui-components/src/components/common
 import PageNavigation from '@flightctl/ui-components/src/components/common/PageNavigation';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import { SystemRestoreProvider } from '@flightctl/ui-components/src/hooks/useSystemRestoreContext';
+import { PermissionsContextProvider } from '@flightctl/ui-components/src/components/common/PermissionsContext';
 
 import logo from '@fctl-assets/bgimages/flight-control-logo.svg';
 import rhemLogo from '@fctl-assets/bgimages/RHEM-logo.svg';
@@ -110,9 +111,11 @@ const AppLayoutContent = () => {
 const AppLayout = () => {
   return (
     <OrganizationGuard>
-      <SystemRestoreProvider>
-        <AppLayoutContent />
-      </SystemRestoreProvider>
+      <PermissionsContextProvider>
+        <SystemRestoreProvider>
+          <AppLayoutContent />
+        </SystemRestoreProvider>
+      </PermissionsContextProvider>
     </OrganizationGuard>
   );
 };

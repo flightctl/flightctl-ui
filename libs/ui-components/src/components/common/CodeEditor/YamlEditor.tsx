@@ -25,6 +25,8 @@ type YamlEditorProps<R extends FlightCtlYamlResource> = Partial<Omit<PfCodeEdito
   refetch: VoidFunction;
   /** Reason why editing is disabled, if applicable */
   disabledEditReason?: string;
+  /** Whether the user can edit the resource (controls Save button visibility) */
+  canEdit?: boolean;
 };
 
 const convertObjToYAMLString = (obj: FlightCtlYamlResource) => {
@@ -103,7 +105,12 @@ const createPatchList = (original: FlightCtlYamlResource, updated: FlightCtlYaml
   return getFallbackPatches(original, updated);
 };
 
-const YamlEditor = <R extends FlightCtlYamlResource>({ apiObj, refetch, disabledEditReason }: YamlEditorProps<R>) => {
+const YamlEditor = <R extends FlightCtlYamlResource>({
+  apiObj,
+  refetch,
+  disabledEditReason,
+  canEdit = true,
+}: YamlEditorProps<R>) => {
   const [yaml, setYaml] = React.useState<string>(convertObjToYAMLString(apiObj));
   const [yamlResourceVersion, setYamlResourceVersion] = React.useState<string>(apiObj.metadata.resourceVersion || '0');
   const [doUpdate, setDoUpdate] = React.useState<boolean>(false);
@@ -200,9 +207,9 @@ const YamlEditor = <R extends FlightCtlYamlResource>({ apiObj, refetch, disabled
           setSaveError(undefined);
           setDoUpdate(true);
         }}
-        onSave={handleSave}
+        onSave={canEdit ? handleSave : undefined}
         isSaving={isSaving}
-        disabledEditReason={disabledEditReason}
+        disabledEditReason={canEdit ? disabledEditReason : undefined}
         editorRef={editorRef}
       />
 

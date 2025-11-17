@@ -44,7 +44,7 @@ import FlightCtlActionGroup from '../form/FlightCtlActionGroup';
 import FlightCtlForm from '../form/FlightCtlForm';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import ListPageBody from '../ListPage/ListPageBody';
-import { useAccessReview } from '../../hooks/useAccessReview';
+import { usePermissionsContext } from '../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../types/rbac';
 
 import './RepositoryResourceSyncList.css';
@@ -213,8 +213,8 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
   const [isAddRsModalOpen, setIsAddRsModalOpen] = React.useState(false);
 
-  const [permissions] = useAccessReview(repositoryResourceSyncListPermissions);
-  const [canDelete = false, canCreate = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canDelete, canCreate] = checkPermissions(repositoryResourceSyncListPermissions);
 
   return (
     <ListPageBody error={error} loading={isLoading}>

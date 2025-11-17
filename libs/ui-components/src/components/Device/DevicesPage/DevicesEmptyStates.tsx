@@ -4,7 +4,7 @@ import { Button, EmptyStateActions, EmptyStateBody, EmptyStateFooter } from '@pa
 import MicrochipIcon from '@patternfly/react-icons/dist/js/icons/microchip-icon';
 import BanIcon from '@patternfly/react-icons/dist/js/icons/ban-icon';
 
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
 import { RESOURCE, VERB } from '../../../types/rbac';
@@ -16,8 +16,8 @@ type DevicesEmptyStateProps = {
 
 export const EnrolledDevicesEmptyState = ({ onAddDevice }: DevicesEmptyStateProps) => {
   const { t } = useTranslation();
-  const [permissions] = useAccessReview([{ kind: RESOURCE.FLEET, verb: VERB.CREATE }]);
-  const [canCreateFleet = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canCreateFleet] = checkPermissions([{ kind: RESOURCE.FLEET, verb: VERB.CREATE }]);
   return (
     <ResourceListEmptyState icon={MicrochipIcon} titleText={t('No devices here!')}>
       <EmptyStateBody>

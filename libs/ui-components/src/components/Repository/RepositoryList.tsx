@@ -30,15 +30,15 @@ import ResourceLink from '../common/ResourceLink';
 import RepositoryStatus from '../Status/RepositoryStatus';
 import PageWithPermissions from '../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../types/rbac';
-import { useAccessReview } from '../../hooks/useAccessReview';
+import { usePermissionsContext } from '../common/PermissionsContext';
 import { useRepositories } from './useRepositories';
 import TablePagination from '../Table/TablePagination';
 
 const CreateRepositoryButton = ({ buttonText }: { buttonText?: string }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [permissions] = useAccessReview([{ kind: RESOURCE.REPOSITORY, verb: VERB.CREATE }]);
-  const [canCreate = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canCreate] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.CREATE }]);
 
   return (
     canCreate && (
@@ -169,8 +169,8 @@ const RepositoryTable = () => {
 
   const { hasSelectedRows, isAllSelected, isRowSelected, setAllSelected, onRowSelect } = useTableSelect<Repository>();
 
-  const [permissions] = useAccessReview(repositoryTablePermissions);
-  const [canDelete = false, canEdit = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canDelete, canEdit] = checkPermissions(repositoryTablePermissions);
 
   return (
     <ListPageBody error={error} loading={loading}>
@@ -244,8 +244,8 @@ const RepositoryTable = () => {
 
 const RepositoryList = () => {
   const { t } = useTranslation();
-  const [permissions, loading] = useAccessReview([{ kind: RESOURCE.REPOSITORY, verb: VERB.LIST }]);
-  const [allowed = false] = permissions;
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.LIST }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <ListPage title={t('Repositories')}>

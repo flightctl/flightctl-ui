@@ -43,7 +43,7 @@ import TextField from '../../form/TextField';
 import FlightCtlForm from '../../form/FlightCtlForm';
 import { getDnsSubdomainValidations } from '../../form/validations';
 import { DEMO_REPOSITORY_URL } from '../../../hooks/useAppLinks';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
 
 import './CreateRepositoryForm.css';
@@ -271,8 +271,8 @@ const CreateRepositoryFormContent = ({ isEdit, isReadOnly, onClose, children }: 
   const { values, setFieldValue, isValid, dirty, submitForm, isSubmitting } = useFormikContext<RepositoryFormValues>();
   const isSubmitDisabled = isSubmitting || !dirty || !isValid;
 
-  const [permissions] = useAccessReview([{ kind: RESOURCE.RESOURCE_SYNC, verb: VERB.CREATE }]);
-  const [canCreateRS = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canCreateRS] = checkPermissions([{ kind: RESOURCE.RESOURCE_SYNC, verb: VERB.CREATE }]);
 
   const showResourceSyncs = values.canUseResourceSyncs && values.repoType === RepoSpecType.GIT;
   return (

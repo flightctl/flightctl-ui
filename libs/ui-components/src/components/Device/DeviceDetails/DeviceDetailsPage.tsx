@@ -26,7 +26,7 @@ import TerminalTab from './TerminalTab';
 import NavItem from '../../NavItem/NavItem';
 import { getEditDisabledReason, getResumeDisabledReason, isDeviceEnrolled } from '../../../utils/devices';
 import { RESOURCE, VERB } from '../../../types/rbac';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import EventsCard from '../../Events/EventsCard';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
@@ -58,9 +58,9 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
   const deviceNameOrAlias = deviceAlias || deviceId;
   const isEnrolled = !device || isDeviceEnrolled(device);
 
-  const [permissions] = useAccessReview(deviceDetailsPermissions);
-  const [hasTerminalAccess = false, canDelete = false, canEdit = false, canDecommission = false, canResume = false] =
-    permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [hasTerminalAccess, canDelete, canEdit, canDecommission, canResume] =
+    checkPermissions(deviceDetailsPermissions);
 
   const canOpenTerminal = hasTerminalAccess && isEnrolled;
 
@@ -195,7 +195,9 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
           />
           <Route
             path="yaml"
-            element={<YamlEditor apiObj={device} refetch={refetch} disabledEditReason={editDisabledReason} />}
+            element={
+              <YamlEditor apiObj={device} refetch={refetch} disabledEditReason={editDisabledReason} canEdit={canEdit} />
+            }
           />
           {!hideTerminal && canOpenTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
           <Route path="events" element={<EventsCard kind={ResourceKind.DEVICE} objId={deviceId} />} />
@@ -208,8 +210,8 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
 };
 
 const DeviceDetailsPageWithPermissions = (props: DeviceDetailsPageProps) => {
-  const [permissions, loading] = useAccessReview([{ kind: RESOURCE.DEVICE, verb: VERB.GET }]);
-  const [allowed = false] = permissions;
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.DEVICE, verb: VERB.GET }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <DeviceDetailsPage {...props} />

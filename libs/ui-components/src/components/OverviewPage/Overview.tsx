@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Grid, GridItem } from '@patternfly/react-core';
 
-import { useAccessReview } from '../../hooks/useAccessReview';
+import { usePermissionsContext } from '../common/PermissionsContext';
 import { useAlertsEnabled } from '../../hooks/useAlertsEnabled';
 import { RESOURCE, VERB } from '../../types/rbac';
 import PageWithPermissions from '../common/PageWithPermissions';
@@ -18,8 +18,8 @@ const overviewPermissions = [
 
 const Overview = () => {
   const alertsEnabled = useAlertsEnabled();
-  const [permissions, loading] = useAccessReview(overviewPermissions);
-  const [canListDevices = false, canListErs = false] = permissions;
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [canListDevices, canListErs] = checkPermissions(overviewPermissions);
 
   return (
     <PageWithPermissions allowed={canListDevices || canListErs} loading={loading}>

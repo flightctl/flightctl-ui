@@ -12,7 +12,7 @@ import DeleteRepositoryModal from './DeleteRepositoryModal';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
@@ -41,8 +41,8 @@ const RepositoryDetails = () => {
     navigate(ROUTE.REPOSITORIES);
   };
 
-  const [permissions] = useAccessReview(repositoryDetailsPermissions);
-  const [canDelete = false, canEdit = false, canListRS = false] = permissions;
+  const { checkPermissions } = usePermissionsContext();
+  const [canDelete, canEdit, canListRS] = checkPermissions(repositoryDetailsPermissions);
 
   return (
     <DetailsPage
@@ -107,7 +107,7 @@ const RepositoryDetails = () => {
                 </Grid>
               }
             />
-            <Route path="yaml" element={<YamlEditor apiObj={repoDetails} refetch={refetch} />} />
+            <Route path="yaml" element={<YamlEditor apiObj={repoDetails} refetch={refetch} canEdit={canEdit} />} />
           </Routes>
           {isDeleteModalOpen && (
             <DeleteRepositoryModal
@@ -123,8 +123,8 @@ const RepositoryDetails = () => {
 };
 
 const RepositoryDetailsWithPermissions = () => {
-  const [permissions, loading] = useAccessReview([{ kind: RESOURCE.REPOSITORY, verb: VERB.GET }]);
-  const [allowed = false] = permissions;
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.GET }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <RepositoryDetails />

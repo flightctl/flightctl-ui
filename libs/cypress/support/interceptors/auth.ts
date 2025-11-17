@@ -5,17 +5,17 @@ const loadInterceptors = () => {
     });
   });
 
-  cy.intercept('POST', '/api/flightctl/api/v1/auth/checkpermission', (req) => {
-    const items = req.body.permissions;
-    const response = items.map((item: { resource: string; op: string }) => ({
-      resource: item.resource,
-      op: item.op,
-      allowed: true,
-    }));
+  cy.intercept('GET', '/api/flightctl/api/v1/auth/listpermissions', (req) => {
+    // Return a mock PermissionList with common permissions
     req.reply({
       statusCode: 200,
       body: {
-        results: response,
+        permissions: [
+          {
+            resource: '*',
+            operations: ['*'],
+          },
+        ],
       },
     });
   });
