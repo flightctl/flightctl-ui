@@ -59,7 +59,7 @@ export const PermissionsContextProvider = ({ children }: React.PropsWithChildren
       setLoading(true);
       setError(undefined);
       try {
-        const response = await get<PermissionList>('auth/listpermissions', abortController.signal);
+        const response = await get<PermissionList>('auth/permissions', abortController.signal);
         if (!abortController.signal.aborted) {
           setUserPermissions(response.permissions);
         }
