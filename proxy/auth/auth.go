@@ -50,35 +50,38 @@ func NewAuth(apiTlsConfig *tls.Config) (*AuthHandler, error) {
 	return &auth, nil
 }
 
-// getProviderForLogin creates a provider instance by fetching the latest auth config
-func (a *AuthHandler) getProviderForLogin(providerName string) (AuthProvider, error) {
-	// Fetch the latest auth config to support dynamic provider changes
-	authConfig, err := getAuthInfo(a.apiTlsConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get auth config: %w", err)
-	}
-
+// findProviderConfig finds a provider config by name from the auth config
+func findProviderConfig(authConfig *v1alpha1.AuthConfig, providerName string) (*v1alpha1.AuthProvider, error) {
 	if authConfig == nil || authConfig.Providers == nil {
 		return nil, fmt.Errorf("no providers configured")
 	}
 
-	// Find the provider config
-	var providerConfig *v1alpha1.AuthProvider
 	for i, pc := range *authConfig.Providers {
 		if pc.Metadata.Name != nil && *pc.Metadata.Name == providerName {
-			providerConfig = &(*authConfig.Providers)[i]
-			break
+			return &(*authConfig.Providers)[i], nil
 		}
 	}
 
-	if providerConfig == nil {
-		return nil, fmt.Errorf("provider not found: %s", providerName)
+	return nil, fmt.Errorf("provider not found: %s", providerName)
+}
+
+// getProviderInstance creates a provider instance by fetching the latest auth config
+// Returns both the provider instance and the provider config to avoid duplicate API calls
+func (a *AuthHandler) getProviderInstance(providerName string) (AuthProvider, *v1alpha1.AuthProvider, error) {
+	authConfig, err := getAuthInfo(a.apiTlsConfig)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get auth config: %w", err)
+	}
+
+	providerConfig, err := findProviderConfig(authConfig, providerName)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	// Get the provider type from the spec discriminator
 	providerTypeStr, err := providerConfig.Spec.Discriminator()
 	if err != nil {
-		return nil, fmt.Errorf("failed to determine provider type for %s: %w", providerName, err)
+		return nil, nil, fmt.Errorf("failed to determine provider type for %s: %w", providerName, err)
 	}
 
 	// Create provider based on type
@@ -88,7 +91,7 @@ func (a *AuthHandler) getProviderForLogin(providerName string) (AuthProvider, er
 	case ProviderTypeK8s:
 		k8sSpec, err := providerConfig.Spec.AsK8sProviderSpec()
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse K8s provider spec for %s: %w", providerName, err)
+			return nil, nil, fmt.Errorf("failed to parse K8s provider spec for %s: %w", providerName, err)
 		}
 		// For K8s providers, distinguish between OpenShift OAuth and vanilla K8s token auth:
 		// - OpenShift: externalOpenShiftApiUrl is set and different from apiUrl
@@ -100,51 +103,51 @@ func (a *AuthHandler) getProviderForLogin(providerName string) (AuthProvider, er
 			// This is OpenShift OAuth flow
 			openshiftHandler, err := getOpenShiftAuthHandler(providerConfig, &k8sSpec)
 			if err != nil {
-				return nil, fmt.Errorf("failed to create OpenShift provider %s: %w", providerName, err)
+				return nil, nil, fmt.Errorf("failed to create OpenShift provider %s: %w", providerName, err)
 			}
 			provider = openshiftHandler
 		} else {
 			// This is regular k8s token auth
 			provider, err = getK8sAuthHandler(providerConfig, &k8sSpec)
 			if err != nil {
-				return nil, fmt.Errorf("failed to create K8s provider %s: %w", providerName, err)
+				return nil, nil, fmt.Errorf("failed to create K8s provider %s: %w", providerName, err)
 			}
 		}
 	case ProviderTypeOIDC:
 		oidcSpec, err := providerConfig.Spec.AsOIDCProviderSpec()
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse OIDC provider spec for %s: %w", providerName, err)
+			return nil, nil, fmt.Errorf("failed to parse OIDC provider spec for %s: %w", providerName, err)
 		}
 		oidcHandler, err := getOIDCAuthHandler(providerConfig, &oidcSpec)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create OIDC provider %s: %w", providerName, err)
+			return nil, nil, fmt.Errorf("failed to create OIDC provider %s: %w", providerName, err)
 		}
 		provider = oidcHandler
 	case ProviderTypeAAP:
 		aapSpec, err := providerConfig.Spec.AsAapProviderSpec()
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse AAP provider spec for %s: %w", providerName, err)
+			return nil, nil, fmt.Errorf("failed to parse AAP provider spec for %s: %w", providerName, err)
 		}
 		aapHandler, err := getAAPAuthHandler(providerConfig, &aapSpec)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create AAP provider %s: %w", providerName, err)
+			return nil, nil, fmt.Errorf("failed to create AAP provider %s: %w", providerName, err)
 		}
 		provider = aapHandler
 	case ProviderTypeOAuth2:
 		oauth2Spec, err := providerConfig.Spec.AsOAuth2ProviderSpec()
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse OAuth2 provider spec for %s: %w", providerName, err)
+			return nil, nil, fmt.Errorf("failed to parse OAuth2 provider spec for %s: %w", providerName, err)
 		}
 		oauth2Handler, err := getOAuth2AuthHandler(providerConfig, &oauth2Spec)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create OAuth2 provider %s: %w", providerName, err)
+			return nil, nil, fmt.Errorf("failed to create OAuth2 provider %s: %w", providerName, err)
 		}
 		provider = oauth2Handler
 	default:
-		return nil, fmt.Errorf("unknown provider type: %s for provider: %s", providerTypeStr, providerName)
+		return nil, nil, fmt.Errorf("unknown provider type: %s for provider: %s", providerTypeStr, providerName)
 	}
 
-	return provider, nil
+	return provider, providerConfig, nil
 }
 
 // getClientIdFromProviderConfig extracts the client_id from a provider config
@@ -218,7 +221,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		provider, err = a.getProviderForLogin(providerName)
+		provider, _, err = a.getProviderInstance(providerName)
 		if err != nil {
 			log.GetLogger().WithError(err).Warnf("Could not find provider: %s", providerName)
 			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid authentication provider: %s", providerName))
@@ -275,7 +278,8 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		provider, err := a.getProviderForLogin(providerName)
+		var providerConfig *v1alpha1.AuthProvider
+		provider, providerConfig, err = a.getProviderInstance(providerName)
 		if err != nil {
 			log.GetLogger().WithError(err).Warnf("Could not find provider: %s", providerName)
 			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid authentication provider: %s", providerName))
@@ -311,6 +315,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Flow for all providers except K8s token providers
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			log.GetLogger().WithError(err).Warn("Failed to read request body")
@@ -358,30 +363,6 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		// Clear PKCE verifier cookie after use (success or failure)
 		clearPKCEVerifierCookie(w, providerName)
 
-		// Get provider config to extract client_id
-		authConfig, err := getAuthInfo(a.apiTlsConfig)
-		if err != nil {
-			log.GetLogger().WithError(err).Warn("Failed to get auth config for client_id")
-			respondWithError(w, http.StatusInternalServerError, "Failed to get provider configuration")
-			return
-		}
-		if authConfig == nil || authConfig.Providers == nil {
-			respondWithError(w, http.StatusInternalServerError, "No providers configured")
-			return
-		}
-
-		var providerConfig *v1alpha1.AuthProvider
-		for i, pc := range *authConfig.Providers {
-			if pc.Metadata.Name != nil && *pc.Metadata.Name == providerName {
-				providerConfig = &(*authConfig.Providers)[i]
-				break
-			}
-		}
-		if providerConfig == nil {
-			respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Provider config not found: %s", providerName))
-			return
-		}
-
 		clientId, err := getClientIdFromProviderConfig(providerConfig)
 		if err != nil {
 			log.GetLogger().WithError(err).Warnf("Failed to get client_id for provider %s", providerName)
@@ -389,7 +370,6 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// All the other providers should use backend BFF
 		tokenReq := &ApiTokenRequest{
 			GrantType:    "authorization_code",
 			ProviderName: providerName,
@@ -398,24 +378,13 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			CodeVerifier: &loginParams.CodeVerifier,
 		}
 
-		// Call backend BFF token endpoint
 		tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, tokenReq)
 		if err != nil {
 			log.GetLogger().WithError(err).Warn("Failed to exchange token with backend")
-			// Check if it's an OAuth2 error response
-			if tokenResp != nil && tokenResp.Error != nil {
-				errorDesc := ""
-				if tokenResp.ErrorDescription != nil {
-					errorDesc = *tokenResp.ErrorDescription
-				}
-				respondWithError(w, http.StatusBadRequest, fmt.Sprintf("OAuth2 error: %s - %s", *tokenResp.Error, errorDesc))
-			} else {
-				respondWithError(w, http.StatusInternalServerError, "Failed to exchange authorization code for token")
-			}
+			handleOAuthErrorResponse(w, tokenResp, "Failed to exchange authorization code for token")
 			return
 		}
 
-		// Convert backend response to TokenData
 		tokenData, expiresIn := convertTokenResponseToTokenData(tokenResp, providerName)
 		respondWithToken(w, tokenData, expiresIn)
 	} else {
@@ -441,14 +410,14 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get provider to determine routing
-	provider, err := a.getProviderForLogin(tokenData.Provider)
+	var providerConfig *v1alpha1.AuthProvider
+	provider, providerConfig, err := a.getProviderInstance(tokenData.Provider)
 	if err != nil {
 		log.GetLogger().WithError(err).Warnf("Failed to get provider: %s", tokenData.Provider)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	// Route based on provider type
 	if isProviderWithCustomerToken(provider) {
 		// K8s token providers don't support refresh
 		w.WriteHeader(http.StatusBadRequest)
@@ -456,34 +425,8 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// OAuth2/OIDC/AAP/OpenShift providers use backend BFF
 	if tokenData.RefreshToken == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	// Get provider config to extract client_id
-	authConfig, err := getAuthInfo(a.apiTlsConfig)
-	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to get auth config for client_id")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if authConfig == nil || authConfig.Providers == nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	var providerConfig *v1alpha1.AuthProvider
-	for i, pc := range *authConfig.Providers {
-		if pc.Metadata.Name != nil && *pc.Metadata.Name == tokenData.Provider {
-			providerConfig = &(*authConfig.Providers)[i]
-			break
-		}
-	}
-	if providerConfig == nil {
-		log.GetLogger().Warnf("Provider config not found: %s", tokenData.Provider)
-		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -494,7 +437,6 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Construct token request for backend
 	tokenReq := &ApiTokenRequest{
 		GrantType:    "refresh_token",
 		ProviderName: tokenData.Provider,
@@ -502,26 +444,29 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		RefreshToken: &tokenData.RefreshToken,
 	}
 
-	// Call backend BFF token endpoint
 	tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, tokenReq)
 	if err != nil {
 		log.GetLogger().WithError(err).Warn("Failed to refresh token with backend")
-		// Check if it's an OAuth2 error response
-		if tokenResp != nil && tokenResp.Error != nil {
-			errorDesc := ""
-			if tokenResp.ErrorDescription != nil {
-				errorDesc = *tokenResp.ErrorDescription
-			}
-			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("OAuth2 error: %s - %s", *tokenResp.Error, errorDesc))
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+		handleOAuthErrorResponse(w, tokenResp, "Failed to refresh token")
 		return
 	}
 
 	// Convert backend response to TokenData
 	newTokenData, expiresIn := convertTokenResponseToTokenData(tokenResp, tokenData.Provider)
 	respondWithToken(w, newTokenData, expiresIn)
+}
+
+// handleOAuthErrorResponse handles OAuth2 error responses from token exchange/refresh
+func handleOAuthErrorResponse(w http.ResponseWriter, tokenResp *ApiTokenResponse, defaultMessage string) {
+	if tokenResp != nil && tokenResp.Error != nil {
+		errorDesc := ""
+		if tokenResp.ErrorDescription != nil {
+			errorDesc = *tokenResp.ErrorDescription
+		}
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("OAuth2 error: %s - %s", *tokenResp.Error, errorDesc))
+	} else {
+		respondWithError(w, http.StatusInternalServerError, defaultMessage)
+	}
 }
 
 func respondWithToken(w http.ResponseWriter, tokenData TokenData, expires *int64) {
@@ -634,7 +579,7 @@ func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		provider, err := a.getProviderForLogin(tokenData.Provider)
+		provider, _, err := a.getProviderInstance(tokenData.Provider)
 		if err == nil {
 			redirectUrl, err = provider.Logout(authToken)
 			if err != nil {

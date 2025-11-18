@@ -51,10 +51,7 @@ func (c *AAPRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func getAAPAuthHandler(provider *v1alpha1.AuthProvider, aapSpec *v1alpha1.AapProviderSpec) (*AAPAuthHandler, error) {
-	providerName := ""
-	if provider.Metadata.Name != nil {
-		providerName = *provider.Metadata.Name
-	}
+	providerName := extractProviderName(provider)
 
 	// Validate required fields
 	if aapSpec.ApiUrl == "" {

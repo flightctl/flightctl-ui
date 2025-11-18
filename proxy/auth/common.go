@@ -18,6 +18,7 @@ import (
 	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
+	"github.com/flightctl/flightctl/api/v1alpha1"
 	"github.com/openshift/osincli"
 )
 
@@ -650,6 +651,14 @@ func getMapKeys(m map[string]interface{}) []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// extractProviderName extracts the provider name from AuthProvider metadata
+func extractProviderName(provider *v1alpha1.AuthProvider) string {
+	if provider != nil && provider.Metadata.Name != nil {
+		return *provider.Metadata.Name
+	}
+	return ""
 }
 
 // PKCE cookie name prefix

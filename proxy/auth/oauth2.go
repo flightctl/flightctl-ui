@@ -24,10 +24,7 @@ type OAuth2AuthHandler struct {
 
 // getOAuth2AuthHandler creates an OAuth2 handler using explicit endpoints
 func getOAuth2AuthHandler(provider *v1alpha1.AuthProvider, oauth2Spec *v1alpha1.OAuth2ProviderSpec) (*OAuth2AuthHandler, error) {
-	providerName := ""
-	if provider.Metadata.Name != nil {
-		providerName = *provider.Metadata.Name
-	}
+	providerName := extractProviderName(provider)
 
 	if oauth2Spec.AuthorizationUrl == "" || oauth2Spec.TokenUrl == "" || oauth2Spec.UserinfoUrl == "" || oauth2Spec.ClientId == "" || oauth2Spec.Scopes == nil || len(*oauth2Spec.Scopes) == 0 {
 		return nil, fmt.Errorf("OAuth2 provider %s missing required fields", providerName)

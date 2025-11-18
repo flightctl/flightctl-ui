@@ -197,10 +197,7 @@ func (t *TokenAuthProvider) GetLoginRedirectURL(codeChallenge string, codeVerifi
 
 // getK8sAuthHandler creates a new K8s token authentication handler
 func getK8sAuthHandler(provider *v1alpha1.AuthProvider, k8sSpec *v1alpha1.K8sProviderSpec) (*TokenAuthProvider, error) {
-	providerName := ""
-	if provider.Metadata.Name != nil {
-		providerName = *provider.Metadata.Name
-	}
+	providerName := extractProviderName(provider)
 
 	// Use API TLS config since we're calling the FlightCtl API to validate tokens
 	tlsConfig, err := bridge.GetTlsConfig()

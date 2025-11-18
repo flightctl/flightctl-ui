@@ -33,10 +33,7 @@ type openshiftOAuthDiscovery struct {
 }
 
 func getOpenShiftAuthHandler(provider *v1alpha1.AuthProvider, k8sSpec *v1alpha1.K8sProviderSpec) (*OpenShiftAuthHandler, error) {
-	providerName := ""
-	if provider.Metadata.Name != nil {
-		providerName = *provider.Metadata.Name
-	}
+	providerName := extractProviderName(provider)
 
 	// For OpenShift OAuth, we need externalOpenShiftApiUrl
 	authURL := ""

@@ -35,10 +35,7 @@ type oidcServerResponse struct {
 }
 
 func getOIDCAuthHandler(provider *v1alpha1.AuthProvider, oidcSpec *v1alpha1.OIDCProviderSpec) (*OIDCAuthHandler, error) {
-	providerName := ""
-	if provider.Metadata.Name != nil {
-		providerName = *provider.Metadata.Name
-	}
+	providerName := extractProviderName(provider)
 
 	if oidcSpec.Issuer == "" {
 		return nil, fmt.Errorf("OIDC provider %s missing Issuer", providerName)
