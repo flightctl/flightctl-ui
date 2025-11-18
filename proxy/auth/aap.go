@@ -3,7 +3,6 @@ package auth
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -144,34 +143,10 @@ func (a *AAPAuthHandler) GetToken(loginParams LoginParameters) (TokenData, *int6
 }
 
 func (a *AAPAuthHandler) GetUserInfo(tokenData TokenData) (string, *http.Response, error) {
-	// For AAP, use AccessToken for userinfo endpoint
-	token := tokenData.AccessToken
-	if token == "" {
-		return "", nil, fmt.Errorf("access token is required for AAP userinfo")
+	resp := &http.Response{
+		StatusCode: http.StatusInternalServerError,
 	}
-
-	userInfoEndpoint := fmt.Sprintf("%s/api/gateway/v1/me/", a.internalAuthURL)
-	body, resp, err := getUserInfo(token, a.tlsConfig, a.authURL, userInfoEndpoint)
-
-	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to get user info")
-		return "", resp, err
-	}
-
-	if body != nil {
-		userInfo := AAPUserInfo{}
-		if err := json.Unmarshal(*body, &userInfo); err != nil {
-			log.GetLogger().WithError(err).Warn("Failed to unmarshal user info")
-			return "", resp, err
-		}
-
-		if len(userInfo.Results) == 0 {
-			log.GetLogger().Warn("No user results available")
-			return "", resp, fmt.Errorf("no user available")
-		}
-		return userInfo.Results[0].Username, resp, nil
-	}
-	return "", resp, nil
+	return "", resp, fmt.Errorf("User information should be retrieved through the flightctl API")
 }
 
 func (a *AAPAuthHandler) Logout(token string) (string, error) {

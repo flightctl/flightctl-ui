@@ -25,7 +25,6 @@ type OIDCAuthHandler struct {
 	tokenEndpoint      string
 	clientId           string
 	providerName       string
-	usernameClaim      []string // JSON path to username claim as array of path segments (e.g., ["preferred_username"], ["user", "name"])
 }
 
 type oidcServerResponse struct {
@@ -96,12 +95,6 @@ func getOIDCAuthHandler(provider *v1alpha1.AuthProvider, oidcSpec *v1alpha1.OIDC
 		return nil, err
 	}
 
-	// Get username claim from provider config, default to DefaultUsernameClaim
-	usernameClaim := []string{DefaultUsernameClaim}
-	if oidcSpec.UsernameClaim != nil && len(*oidcSpec.UsernameClaim) > 0 {
-		usernameClaim = *oidcSpec.UsernameClaim
-	}
-
 	handler := &OIDCAuthHandler{
 		tlsConfig:          tlsConfig,
 		internalClient:     internalClient,
@@ -112,7 +105,6 @@ func getOIDCAuthHandler(provider *v1alpha1.AuthProvider, oidcSpec *v1alpha1.OIDC
 		tokenEndpoint:      oidcResponse.TokenEndpoint,
 		clientId:           clientId,
 		providerName:       providerName,
-		usernameClaim:      usernameClaim,
 	}
 
 	if internalAuthURL != nil {
@@ -188,44 +180,10 @@ func (a *OIDCAuthHandler) GetToken(loginParams LoginParameters) (TokenData, *int
 }
 
 func (o *OIDCAuthHandler) GetUserInfo(tokenData TokenData) (string, *http.Response, error) {
-	// For OIDC, use AccessToken for userinfo endpoint
-	token := tokenData.AccessToken
-	if token == "" {
-		return "", nil, fmt.Errorf("access token is required for OIDC userinfo")
+	resp := &http.Response{
+		StatusCode: http.StatusInternalServerError,
 	}
-
-	body, resp, err := getUserInfo(token, o.tlsConfig, o.authURL, o.userInfoEndpoint)
-
-	if err != nil {
-		log.GetLogger().WithError(err).Warnf("Failed to get user info from provider %s", o.providerName)
-		return "", resp, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		log.GetLogger().Warnf("Userinfo endpoint returned status %d for provider %s", resp.StatusCode, o.providerName)
-		return "", resp, fmt.Errorf("userinfo endpoint returned status %d", resp.StatusCode)
-	}
-
-	if body == nil {
-		log.GetLogger().Warnf("Userinfo endpoint returned empty body for provider %s", o.providerName)
-		return "", resp, fmt.Errorf("userinfo endpoint returned empty body")
-	}
-
-	// Parse as generic map to support different userinfo response formats
-	var userInfo map[string]interface{}
-	if err := json.Unmarshal(*body, &userInfo); err != nil {
-		log.GetLogger().WithError(err).Warnf("Failed to unmarshal OIDC user response for provider %s. Body: %s", o.providerName, string(*body))
-		return "", resp, fmt.Errorf("failed to unmarshal OIDC user response: %w", err)
-	}
-
-	// Extract username from the specified claim path
-	username := extractUsernameFromUserInfo(userInfo, o.usernameClaim)
-	if username == "" {
-		log.GetLogger().Warnf("Could not extract username from claim path %v in userinfo response for provider %s. Available fields: %v", o.usernameClaim, o.providerName, getMapKeys(userInfo))
-		return "", resp, fmt.Errorf("username not found in userinfo response using claim path: %v", o.usernameClaim)
-	}
-
-	return username, resp, nil
+	return "", resp, fmt.Errorf("User information should be retrieved through the flightctl API")
 }
 
 func (o *OIDCAuthHandler) Logout(token string) (string, error) {

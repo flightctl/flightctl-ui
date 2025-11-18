@@ -173,33 +173,10 @@ func ExtractUsernameFromToken(token string) (string, error) {
 
 // GetUserInfo retrieves user information from the provided JWT token
 func (t *TokenAuthProvider) GetUserInfo(tokenData TokenData) (string, *http.Response, error) {
-	// For K8s, extract username from the JWT token
-	// K8s tokens are stored in IDToken field
-	token := tokenData.IDToken
-	if token == "" {
-		return "", nil, fmt.Errorf("token is required for K8s userinfo")
-	}
-
-	// Check if token is expired
-	expiresIn := extractTokenExpiration(token)
-	if expiresIn != nil && *expiresIn == 0 {
-		resp := &http.Response{
-			StatusCode: http.StatusUnauthorized,
-		}
-		return "", resp, fmt.Errorf("token has expired")
-	}
-
-	username, err := ExtractUsernameFromToken(token)
-	if err != nil {
-		log.GetLogger().WithError(err).Warnf("Failed to extract username from token for provider %s", t.providerName)
-		return "", nil, err
-	}
-
 	resp := &http.Response{
-		StatusCode: http.StatusOK,
+		StatusCode: http.StatusInternalServerError,
 	}
-
-	return username, resp, nil
+	return "", resp, fmt.Errorf("User information should be retrieved through the flightctl API")
 }
 
 // RefreshToken is not applicable for K8s token auth

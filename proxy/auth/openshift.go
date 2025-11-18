@@ -106,29 +106,10 @@ func (o *OpenShiftAuthHandler) GetToken(loginParams LoginParameters) (TokenData,
 }
 
 func (o *OpenShiftAuthHandler) GetUserInfo(tokenData TokenData) (string, *http.Response, error) {
-	// For OpenShift, tokens are JWTs, so we can extract username from the token itself
-	// Use IDToken if available (from OAuth response), otherwise use AccessToken
-	token := tokenData.IDToken
-	if token == "" {
-		token = tokenData.AccessToken
-	}
-
-	if token == "" {
-		return "", nil, fmt.Errorf("token is required for OpenShift userinfo")
-	}
-
-	// Extract username from JWT token claims (OpenShift tokens are JWTs)
-	username, err := ExtractUsernameFromToken(token)
-	if err != nil {
-		log.GetLogger().WithError(err).Warnf("Failed to extract username from OpenShift token for provider %s", o.providerName)
-		return "", nil, err
-	}
-
 	resp := &http.Response{
-		StatusCode: http.StatusOK,
+		StatusCode: http.StatusInternalServerError,
 	}
-
-	return username, resp, nil
+	return "", resp, fmt.Errorf("User information should be retrieved through the flightctl API")
 }
 
 func (o *OpenShiftAuthHandler) RefreshToken(refreshToken string) (TokenData, *int64, error) {
