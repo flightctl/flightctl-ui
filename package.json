@@ -9,7 +9,6 @@
   "workspaces": [
     "./libs/ui-components",
     "./libs/types",
-    "./libs/cypress",
     "./libs/i18n",
     "./libs/ansible",
     "./apps/ocp-plugin",
@@ -24,8 +23,8 @@
     "build:ocp": "npm run -w @flightctl/ocp-plugin build",
     "build:libs": "npm run -w @flightctl/types build && npm run -w @flightctl/ui-components build && npm run -w @flightctl/ansible build",
     "gen-types": "npm run -w @flightctl/types gen-types",
-    "integration-tests:ci": "npm run build:libs && npm run -w @flightctl/ui-tests-cypress integration-tests:ci",
-    "integration-tests:open": "npm run -w @flightctl/ui-tests-cypress integration-tests:open",
+    "integration-tests:ci": "npm run build:libs && npm run -w @flightctl/standalone start-prod",
+    "integration-tests:open": "cd libs/cypress && cypress open --config-file cypress.config.ts",
     "lint": "eslint \"{libs,apps}/*/src/**/*.{js,jsx,ts,tsx}\" && prettier --check \"{libs,apps}/*/src/**/*.{js,jsx,ts,tsx}\" && npm run i18n",
     "format": "prettier --check --write \"{libs,apps}/*/src/**/*.{js,jsx,ts,tsx}\"",
     "i18n": "npm run -w @flightctl/i18n i18n"
@@ -37,6 +36,7 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "concurrently": "^8.2.2",
+    "cypress": "^14.0.0",
     "eslint": "^8.44.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
