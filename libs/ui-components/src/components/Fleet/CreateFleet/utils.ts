@@ -32,6 +32,7 @@ import {
   getApplicationValues,
   getConfigTemplatesValues,
   getDeviceSpecConfigPatches,
+  getSystemdUnitsValues,
   hasMicroshiftRegistrationConfig,
   toAPIApplication,
 } from '../../Device/EditDeviceWizard/deviceSpecUtils';
@@ -236,10 +237,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
       osImage: fleet.spec.template.spec.os?.image || '',
       configTemplates: getConfigTemplatesValues(fleet.spec.template.spec, registerMicroShift),
       applications: getApplicationValues(fleet.spec.template.spec),
-      systemdUnits: (fleet.spec.template.spec.systemd?.matchPatterns || []).map((p) => ({
-        pattern: p,
-        exists: true,
-      })),
+      systemdUnits: getSystemdUnitsValues(fleet.spec.template.spec),
       registerMicroShift,
       rolloutPolicy,
       disruptionBudget,

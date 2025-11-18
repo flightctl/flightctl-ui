@@ -26,6 +26,7 @@ import DeviceLifecycleStatus from '../../Status/DeviceLifecycleStatus';
 import DeviceFleet from './DeviceFleet';
 import DeviceOs from './DeviceOs';
 import DeviceApplications from './DeviceApplications';
+import DeviceSystemdUnits from './DeviceSystemdUnits';
 import StatusContent from './DeviceDetailsTabContent/StatusContent';
 import SystemResourcesContent from './DeviceDetailsTabContent/SystemResourcesContent';
 
@@ -157,7 +158,10 @@ const EnrolledDeviceDetails = ({
         </DetailsPageCard>
       </GridItem>
       <GridItem md={12} lg={6}>
-        <DeviceApplications device={device} refetch={refetch} canEdit={canEdit} />
+        <DeviceApplications device={device} />
+      </GridItem>
+      <GridItem md={12} lg={6}>
+        <DeviceSystemdUnits device={device} />
       </GridItem>
     </Grid>
   );
@@ -221,7 +225,7 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
         </DetailsPageCard>
       </GridItem>
       <GridItem md={12} lg={6}>
-        <DeviceApplications device={device} canEdit={false} />
+        <DeviceApplications device={device} />
       </GridItem>
     </Grid>
   );

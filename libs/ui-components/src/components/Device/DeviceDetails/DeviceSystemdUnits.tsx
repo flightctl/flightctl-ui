@@ -3,37 +3,28 @@ import { CardTitle, Flex, FlexItem } from '@patternfly/react-core';
 
 import { Device } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
-import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
+import SystemdUnitsTable from '../../DetailsPage/Tables/SystemdUnitsTable';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
-import { isImageAppProvider } from '../../../types/deviceSpec';
 
-type DeviceDetailsTabProps = {
+type DeviceSystemdUnitsProps = {
   device: Required<Device>;
 };
 
-const DeviceApplications = ({ device }: DeviceDetailsTabProps) => {
+const DeviceSystemdUnits = ({ device }: DeviceSystemdUnitsProps) => {
   const { t } = useTranslation();
-
-  const specApps =
-    device.spec?.applications?.map((app) => {
-      if (isImageAppProvider(app)) {
-        return app.name || app.image;
-      }
-      return app.name as string;
-    }) || [];
 
   return (
     <DetailsPageCard>
       <CardTitle>
         <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-          <FlexItem>{t('Applications')}</FlexItem>
+          <FlexItem>{t('System services')}</FlexItem>
         </Flex>
       </CardTitle>
       <DetailsPageCardBody>
-        <ApplicationsTable appsStatus={device.status.applications} specApps={specApps} />
+        <SystemdUnitsTable systemdUnitsStatus={device.status.systemd || []} />
       </DetailsPageCardBody>
     </DetailsPageCard>
   );
 };
 
-export default DeviceApplications;
+export default DeviceSystemdUnits;
