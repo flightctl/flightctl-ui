@@ -36,4 +36,16 @@ const rootApp = (
   </React.StrictMode>
 );
 
-render(rootApp, root);
+const start = async () => {
+  if (process.env.USE_MSW === 'true') {
+    const { worker } = await import('./mocks/browser');
+    await worker.start({
+      onUnhandledRequest: 'bypass',
+      serviceWorker: { url: '/mockServiceWorker.js' },
+    });
+  }
+  render(rootApp, root);
+};
+
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+start();

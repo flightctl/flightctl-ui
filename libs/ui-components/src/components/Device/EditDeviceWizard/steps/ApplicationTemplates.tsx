@@ -23,6 +23,7 @@ import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import ApplicationImageForm from './ApplicationImageForm';
 import ApplicationInlineForm from './ApplicationInlineForm';
+import ApplicationContainerForm from './ApplicationContainerForm';
 
 import './ApplicationsForm.css';
 
@@ -49,6 +50,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
         {
           specType: AppSpecType.INLINE,
           appType: (app.appType || ('compose' as unknown as AppForm['appType'])),
+          inlineFormat: 'compose',
           name: app.name || '',
           files: [{ path: '', content: '' }],
           variables: [],
@@ -99,12 +101,14 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
 
         {isInlineAppForm(app) && (
           <FormGroup label={t('Application format')} isRequired>
+            {/* UI-only format selector; 'container' maps to quadlet on submit */}
             <FormSelect
               items={{
                 compose: t('Compose'),
                 quadlet: t('Quadlet'),
+                container: t('Container'),
               }}
-              name={`${appFieldName}.appType`}
+              name={`${appFieldName}.inlineFormat`}
               placeholderText={t('Select a format')}
               isDisabled={isReadOnly}
             />
@@ -112,7 +116,12 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
         )}
 
         {isImageAppForm(app) && <ApplicationImageForm app={app} index={index} isReadOnly={isReadOnly} />}
-        {isInlineAppForm(app) && <ApplicationInlineForm app={app} index={index} isReadOnly={isReadOnly} />}
+        {isInlineAppForm(app) && app.inlineFormat !== 'container' && (
+          <ApplicationInlineForm app={app} index={index} isReadOnly={isReadOnly} />
+        )}
+        {isInlineAppForm(app) && app.inlineFormat === 'container' && (
+          <ApplicationContainerForm app={app} index={index} isReadOnly={isReadOnly} />
+        )}
 
         <FieldArray name={`${appFieldName}.variables`}>
           {({ push, remove }) => (

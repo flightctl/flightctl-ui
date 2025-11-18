@@ -60,6 +60,17 @@ type AppBase = {
 export type InlineAppForm = AppBase & {
   name: string; // name can only be optional for image applications
   files: InlineContent[];
+  // UI-only: inline format selector; defaults to 'compose' | 'quadlet'. Adds 'container'.
+  inlineFormat?: 'compose' | 'quadlet' | 'container';
+  // UI-only: structured fields for container quadlet generation
+  container?: {
+    image: string;
+    ports: { hostPort: number; containerPort: number; protocol?: 'tcp' | 'udp' }[];
+    mounts: { name: string; mountPath: string }[];
+    memory?: string; // e.g. 512M, 1G
+    cpuQuota?: string; // e.g. 50%, 100000
+    cpuWeight?: number; // 1-10000
+  };
 };
 
 export type ImageAppForm = AppBase & {

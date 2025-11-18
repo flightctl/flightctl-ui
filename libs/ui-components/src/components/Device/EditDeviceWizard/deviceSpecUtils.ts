@@ -226,10 +226,54 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
     return app.name ? { ...data, name: app.name } : data;
   }
 
+  // Inline applications: support UI-only 'container' format which is encoded as quadlet
+  if ((app as InlineAppForm).inlineFormat === 'container' && (app as InlineAppForm).container) {
+    const name = (app as InlineAppForm).name;
+    const container = (app as InlineAppForm).container!;
+    const ports = (container.ports || []).map((p) => {
+      const proto = (p.protocol || 'tcp').toLowerCase();
+      return `PublishPort=${p.hostPort}:${p.containerPort}/${proto}`;
+    });
+    const mounts = (container.mounts || []).map((m) => `Volume=${m.name}:${m.mountPath}`);
+    const resources: string[] = [];
+    if (container.memory) resources.push(`Memory=${container.memory}`);
+    if (container.cpuQuota) resources.push(`CPUQuota=${container.cpuQuota}`);
+    if (container.cpuWeight !== undefined) resources.push(`CPUWeight=${container.cpuWeight}`);
+    const lines = [
+      '[Unit]',
+      `Description=${name}`,
+      '',
+      '[Container]',
+      `Image=${container.image}`,
+      'EnvironmentFile=.env',
+      ...ports,
+      ...mounts,
+      ...resources,
+      '',
+      '[Install]',
+      'WantedBy=multi-user.target',
+      '',
+    ];
+    const quadlet = lines.join('\n');
+    return {
+      name,
+      appType: AppType.AppTypeQuadlet,
+      inline: [
+        {
+          path: `${name}.container`,
+          content: quadlet,
+          contentEncoding: EncodingType.EncodingPlain,
+        },
+      ],
+      envVars,
+      volumes,
+    };
+  }
+
   return {
-    name: app.name,
-    appType: app.appType || AppType.AppTypeCompose,
-    inline: app.files.map(
+    name: (app as InlineAppForm).name,
+    appType: (app.appType || AppType.AppTypeCompose),
+    inline: (app as InlineAppForm).files.map(
       (file): InlineApplicationFileFixed => ({
         path: file.path,
         content: file.content || '',

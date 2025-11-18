@@ -26,9 +26,15 @@ const config: Configuration & {
     port: 9000,
     historyApiFallback: true,
     open: true,
-    static: {
-      directory: path.resolve(__dirname, 'dist'),
-    },
+    static: [
+      {
+        directory: path.resolve(__dirname, 'dist'),
+      },
+      {
+        directory: path.resolve(__dirname, 'public'),
+        watch: true,
+      },
+    ],
     client: {
       overlay: true,
     },
@@ -159,6 +165,16 @@ const config: Configuration & {
     new CopyPlugin({
       patterns: [{ from: '../../libs/i18n/locales', to: 'locales' }],
     }),
+    // Provide MSW worker script in dev server output so worker.start() can register it
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, '../../node_modules/msw/browser.js'),
+          to: 'mockServiceWorker.js',
+          noErrorOnMissing: true,
+        },
+      ],
+    }),
   ],
   resolve: {
     extensions: ['.js', '.ts', '.tsx', '.jsx'],
@@ -201,11 +217,18 @@ if (NODE_ENV === 'production') {
   );
   config.devtool = 'source-map';
 } else {
-  config.plugins?.push(
-    new DefinePlugin({
-      'window.API_PORT': JSON.stringify(process.env.API_PORT) || '3001',
-    }),
-  );
+  const useMsw = (process.env.USE_MSW || '').toLowerCase() === 'true';
+  const defines: Record<string, string> = {
+    'process.env.USE_MSW': JSON.stringify(process.env.USE_MSW || ''),
+  };
+  // In mock mode, force same-origin requests so the Service Worker can intercept them.
+  // Otherwise, default to proxy port or provided API_PORT.
+  if (useMsw) {
+    defines['window.API_PORT'] = 'undefined';
+  } else {
+    defines['window.API_PORT'] = JSON.stringify(process.env.API_PORT) || '3001';
+  }
+  config.plugins?.push(new DefinePlugin(defines));
 }
 
 export default config;

@@ -18,6 +18,7 @@
   "scripts": {
     "prebuild": "rimraf **/dist",
     "dev": "npm run -w @flightctl/standalone dev",
+    "dev:mock": "npm run -w @flightctl/standalone dev:mock",
     "dev:ocp": "npm run -w @flightctl/ocp-plugin dev",
     "dev:kind": "npm run -w @flightctl/standalone dev:kind",
     "build": "npm run -w @flightctl/standalone build",

@@ -310,6 +310,48 @@ export const validApplicationsSchema = (t: TFunction) => {
     .of(
       Yup.lazy((value: AppForm) => {
         if (isInlineAppForm(value)) {
+          const inline = value as InlineAppForm;
+          if (inline.inlineFormat === 'container') {
+            return Yup.object<InlineAppForm>().shape({
+              specType: appSpecTypeSchema(t),
+              name: Yup.string()
+                .required(t('Name is required for inline applications.'))
+                .matches(
+                  APPLICATION_NAME_REGEXP,
+                  t(
+                    'Use lowercase alphanumeric characters, or dash (-). Must start and end with an alphanumeric character.',
+                  ),
+                ),
+              container: Yup.object()
+                .required()
+                .shape({
+                  image: Yup.string()
+                    .required(t('Image is required.'))
+                    .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
+                  ports: Yup.array()
+                    .of(
+                      Yup.object().shape({
+                        hostPort: Yup.number().required(t('Host port is required.')).min(1).max(65535),
+                        containerPort: Yup.number().required(t('Container port is required.')).min(1).max(65535),
+                        protocol: Yup.string().oneOf(['tcp', 'udp']).optional(),
+                      }),
+                    )
+                    .optional(),
+                  mounts: Yup.array()
+                    .of(
+                      Yup.object().shape({
+                        name: Yup.string().required(t('Volume name is required.')),
+                        mountPath: Yup.string().required(t('Mount path is required.')),
+                      }),
+                    )
+                    .optional(),
+                  memory: Yup.string().optional(),
+                  cpuQuota: Yup.string().optional(),
+                  cpuWeight: Yup.number().optional(),
+                }),
+              variables: appVariablesSchema(t),
+            });
+          }
           return Yup.object<InlineAppForm>().shape({
             specType: appSpecTypeSchema(t),
             name: Yup.string()
@@ -378,7 +420,8 @@ export const validApplicationsSchema = (t: TFunction) => {
         });
       }),
     )
-    .test('unique-app-ids', (apps: AppForm[] | undefined, testContext) => {
+    .test('unique-app-ids', (appsUnknown: unknown, testContext) => {
+      const apps = appsUnknown as AppForm[] | undefined;
       if (!apps?.length) {
         return true;
       }

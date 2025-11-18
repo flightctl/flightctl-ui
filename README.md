@@ -47,6 +47,18 @@ or provide the CA certs:
 
 See [CONFIGURATION.md](CONFIGURATION.md) for complete configuration options.
 
+### Running Standalone UI with mock data (no backend)
+
+The standalone app can run fully offline using MSW and the existing Cypress fixtures.
+
+```shell
+npm run dev:mock
+```
+
+Notes:
+- Mocked endpoints cover core `/api/flightctl/api/v1` routes (fleets, repositories) and can be extended in `apps/standalone/src/mocks/handlers.ts`.
+- To disable mocks in the same session, stop the dev server and run `npm run dev` (without the `USE_MSW` flag).
+
 ### Running UI as OCP plugin
 
 With this option, the Flight Control UI will run as a Plugin in the OCP console.
