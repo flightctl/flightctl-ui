@@ -6,14 +6,21 @@ import (
 )
 
 type OcpConfig struct {
-	RBACNs string `json:"rbacNs"`
+	RBACNs         string `json:"rbacNs"`
+	ExternalApiUrl string `json:"externalApiUrl"`
 }
 
 type OcpConfigHandler struct{}
 
 func (c *OcpConfigHandler) GetConfig(w http.ResponseWriter, r *http.Request) {
+	externalApiUrl := FctlApiUrlExternal
+	if externalApiUrl == "" {
+		externalApiUrl = FctlApiUrl
+	}
+
 	ocpConfig := OcpConfig{
-		RBACNs: RBACNs,
+		RBACNs:         RBACNs,
+		ExternalApiUrl: externalApiUrl,
 	}
 	resp, err := json.Marshal(ocpConfig)
 	if err != nil {
