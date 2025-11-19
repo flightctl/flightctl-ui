@@ -88,30 +88,25 @@ func (a *AuthHandler) getProviderInstance(providerName string) (AuthProvider, *v
 	var provider AuthProvider
 
 	switch providerTypeStr {
+	case ProviderTypeOpenShift:
+		openshiftSpec, err := providerConfig.Spec.AsOpenShiftProviderSpec()
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to parse OpenShift provider spec for %s: %w", providerName, err)
+		}
+		openshiftHandler, err := getOpenShiftAuthHandlerFromSpec(providerConfig, &openshiftSpec)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to create OpenShift provider %s: %w", providerName, err)
+		}
+		provider = openshiftHandler
 	case ProviderTypeK8s:
 		k8sSpec, err := providerConfig.Spec.AsK8sProviderSpec()
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to parse K8s provider spec for %s: %w", providerName, err)
 		}
-		// For K8s providers, distinguish between OpenShift OAuth and vanilla K8s token auth:
-		// - OpenShift: externalOpenShiftApiUrl is set and different from apiUrl
-		// - Vanilla K8s: externalOpenShiftApiUrl is not set, empty, or same as apiUrl
-		isOpenShift := k8sSpec.ExternalOpenShiftApiUrl != nil &&
-			*k8sSpec.ExternalOpenShiftApiUrl != "" &&
-			*k8sSpec.ExternalOpenShiftApiUrl != k8sSpec.ApiUrl
-		if isOpenShift {
-			// This is OpenShift OAuth flow
-			openshiftHandler, err := getOpenShiftAuthHandler(providerConfig, &k8sSpec)
-			if err != nil {
-				return nil, nil, fmt.Errorf("failed to create OpenShift provider %s: %w", providerName, err)
-			}
-			provider = openshiftHandler
-		} else {
-			// This is regular k8s token auth
-			provider, err = getK8sAuthHandler(providerConfig, &k8sSpec)
-			if err != nil {
-				return nil, nil, fmt.Errorf("failed to create K8s provider %s: %w", providerName, err)
-			}
+		// This is regular k8s token auth
+		provider, err = getK8sAuthHandler(providerConfig, &k8sSpec)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to create K8s provider %s: %w", providerName, err)
 		}
 	case ProviderTypeOIDC:
 		oidcSpec, err := providerConfig.Spec.AsOIDCProviderSpec()
@@ -172,19 +167,16 @@ func getClientIdFromProviderConfig(providerConfig *v1alpha1.AuthProvider) (strin
 		return oauth2Spec.ClientId, nil
 	case ProviderTypeAAP:
 		return "", fmt.Errorf("AAP providers client_id needs to be retrieved")
-	case ProviderTypeK8s:
-		// For K8s providers, check if it's OpenShift OAuth
-		k8sSpec, err := providerConfig.Spec.AsK8sProviderSpec()
+	case ProviderTypeOpenShift:
+		openshiftSpec, err := providerConfig.Spec.AsOpenShiftProviderSpec()
 		if err != nil {
-			return "", fmt.Errorf("failed to parse K8s provider spec: %w", err)
+			return "", fmt.Errorf("failed to parse OpenShift provider spec: %w", err)
 		}
-		isOpenShift := k8sSpec.ExternalOpenShiftApiUrl != nil &&
-			*k8sSpec.ExternalOpenShiftApiUrl != "" &&
-			*k8sSpec.ExternalOpenShiftApiUrl != k8sSpec.ApiUrl
-		if isOpenShift {
-			// OpenShift OAuth uses a default client ID
-			return "system:serviceaccount:openshift-authentication:oauth-proxy", nil
+		if openshiftSpec.ClientId == nil || *openshiftSpec.ClientId == "" {
+			return "", fmt.Errorf("OpenShift provider missing required ClientId")
 		}
+		return *openshiftSpec.ClientId, nil
+	case ProviderTypeK8s:
 		// Regular K8s token providers don't use this endpoint
 		return "", fmt.Errorf("K8s token providers don't use token exchange endpoint")
 	default:
@@ -370,15 +362,16 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		tokenReq := &ApiTokenRequest{
-			GrantType:    "authorization_code",
-			ProviderName: providerName,
+		redirectURI := config.BaseUiUrl + "/callback"
+		tokenReq := &v1alpha1.TokenRequest{
+			GrantType:    v1alpha1.AuthorizationCode,
 			ClientId:     clientId,
 			Code:         &loginParams.Code,
 			CodeVerifier: &loginParams.CodeVerifier,
+			RedirectUri:  &redirectURI,
 		}
 
-		tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, tokenReq)
+		tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, providerName, tokenReq)
 		if err != nil {
 			log.GetLogger().WithError(err).Warn("Failed to exchange token with backend")
 			handleOAuthErrorResponse(w, tokenResp, "Failed to exchange authorization code for token")
@@ -437,14 +430,13 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenReq := &ApiTokenRequest{
-		GrantType:    "refresh_token",
-		ProviderName: tokenData.Provider,
+	tokenReq := &v1alpha1.TokenRequest{
+		GrantType:    v1alpha1.RefreshToken,
 		ClientId:     clientId,
 		RefreshToken: &tokenData.RefreshToken,
 	}
 
-	tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, tokenReq)
+	tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, tokenData.Provider, tokenReq)
 	if err != nil {
 		log.GetLogger().WithError(err).Warn("Failed to refresh token with backend")
 		handleOAuthErrorResponse(w, tokenResp, "Failed to refresh token")
@@ -457,7 +449,7 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleOAuthErrorResponse handles OAuth2 error responses from token exchange/refresh
-func handleOAuthErrorResponse(w http.ResponseWriter, tokenResp *ApiTokenResponse, defaultMessage string) {
+func handleOAuthErrorResponse(w http.ResponseWriter, tokenResp *v1alpha1.TokenResponse, defaultMessage string) {
 	if tokenResp != nil && tokenResp.Error != nil {
 		errorDesc := ""
 		if tokenResp.ErrorDescription != nil {
@@ -495,14 +487,14 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	// Get token and provider from session cookie
 	tokenData, err := ParseSessionCookie(r)
 	if err != nil {
-		w.Header().Set("Clear-Site-Data", `"cookies"`)
+		clearSessionCookie(w, r)
 		respondWithError(w, http.StatusUnauthorized, "Invalid or missing session cookie")
 		return
 	}
 
 	// If no provider specified, clear the cookie and force a new login
 	if tokenData.Provider == "" {
-		w.Header().Set("Clear-Site-Data", `"cookies"`)
+		clearSessionCookie(w, r)
 		respondWithError(w, http.StatusUnauthorized, "No authentication provider specified in session")
 		return
 	}
@@ -510,7 +502,7 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	token := tokenData.GetAuthToken()
 	if token == "" {
 		log.GetLogger().Warn("No token found in session cookie")
-		w.Header().Set("Clear-Site-Data", `"cookies"`)
+		clearSessionCookie(w, r)
 		respondWithError(w, http.StatusUnauthorized, "No authentication token found in session")
 		return
 	}
@@ -519,8 +511,8 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	username, err := getUserInfoFromApiServer(a.apiTlsConfig, token)
 	if err != nil {
 		log.GetLogger().WithError(err).Warnf("Failed to get user info from API server for provider %s", tokenData.Provider)
-		// If user info retrieval fails, treat as authentication failure
-		w.Header().Set("Clear-Site-Data", `"cookies"`)
+		// If user info retrieval fails (including timeouts), treat as authentication failure
+		clearSessionCookie(w, r)
 		respondWithError(w, http.StatusUnauthorized, fmt.Sprintf("Failed to get user info: %v", err))
 		return
 	}

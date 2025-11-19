@@ -24,7 +24,7 @@ import { FormGroupWithHelperText } from '../../common/WithHelperText';
 import { RoleClaimHelperText, RoleSeparatorHelperText } from './AuthProviderHelperText';
 
 const getAvailableRoles = (t: TFunction): Record<string, string> => ({
-  admin: t('Administrator'),
+  admin: t('System administrator'),
   'org-admin': t('Organization administrator'),
   operator: t('Operator'),
   installer: t('Installer'),

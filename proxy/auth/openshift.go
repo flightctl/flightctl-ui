@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/config"
@@ -32,41 +33,70 @@ type openshiftOAuthDiscovery struct {
 	TokenEndpoint         string `json:"token_endpoint"`
 }
 
-func getOpenShiftAuthHandler(provider *v1alpha1.AuthProvider, k8sSpec *v1alpha1.K8sProviderSpec) (*OpenShiftAuthHandler, error) {
+// getOpenShiftAuthHandlerFromSpec creates an OpenShift auth handler from OpenShiftProviderSpec
+func getOpenShiftAuthHandlerFromSpec(provider *v1alpha1.AuthProvider, openshiftSpec *v1alpha1.OpenShiftProviderSpec) (*OpenShiftAuthHandler, error) {
 	providerName := extractProviderName(provider)
 
-	// For OpenShift OAuth, we need externalOpenShiftApiUrl
-	authURL := ""
-	if k8sSpec.ExternalOpenShiftApiUrl != nil && *k8sSpec.ExternalOpenShiftApiUrl != "" {
-		authURL = *k8sSpec.ExternalOpenShiftApiUrl
-	} else if k8sSpec.ApiUrl != "" {
-		authURL = k8sSpec.ApiUrl
+	// Determine the API server URL - prefer ClusterControlPlaneUrl, fallback to authorization URL base
+	apiServerURL := ""
+	if openshiftSpec.ClusterControlPlaneUrl != nil && *openshiftSpec.ClusterControlPlaneUrl != "" {
+		apiServerURL = *openshiftSpec.ClusterControlPlaneUrl
+	} else if openshiftSpec.AuthorizationUrl != nil && *openshiftSpec.AuthorizationUrl != "" {
+		// Extract base URL from authorization URL (remove /oauth/authorize if present)
+		authURL := *openshiftSpec.AuthorizationUrl
+		parsedURL, err := url.Parse(authURL)
+		if err == nil {
+			// Remove /oauth/authorize path if present
+			if parsedURL.Path == "/oauth/authorize" || strings.HasSuffix(parsedURL.Path, "/oauth/authorize") {
+				parsedURL.Path = strings.TrimSuffix(parsedURL.Path, "/oauth/authorize")
+			}
+			apiServerURL = parsedURL.String()
+		} else {
+			apiServerURL = authURL
+		}
 	} else {
-		return nil, fmt.Errorf("OpenShift provider %s missing ApiUrl or ExternalOpenShiftApiUrl", providerName)
+		return nil, fmt.Errorf("OpenShift provider %s missing ClusterControlPlaneUrl or AuthorizationUrl", providerName)
 	}
 
-	apiServerURL := authURL // OpenShift API server URL (used for discovery)
+	// Determine authorization URL
+	authURL := ""
+	if openshiftSpec.AuthorizationUrl != nil && *openshiftSpec.AuthorizationUrl != "" {
+		authURL = *openshiftSpec.AuthorizationUrl
+	} else {
+		// Default to {apiServerURL}/oauth/authorize
+		authURL = fmt.Sprintf("%s/oauth/authorize", apiServerURL)
+	}
 
-	// OpenShift OAuth typically uses "system:serviceaccount:openshift-authentication:oauth-proxy" as client ID
-	// or a configured client ID. Since K8sProviderSpec doesn't have ClientId, we'll use a default
-	clientId := "system:serviceaccount:openshift-authentication:oauth-proxy"
+	// Determine token URL
+	tokenURL := ""
+	if openshiftSpec.TokenUrl != nil && *openshiftSpec.TokenUrl != "" {
+		tokenURL = *openshiftSpec.TokenUrl
+	} else {
+		// Default to {apiServerURL}/oauth/token
+		tokenURL = fmt.Sprintf("%s/oauth/token", apiServerURL)
+	}
 
-	// OpenShift OAuth token endpoint is typically at {apiServerURL}/oauth/token
-	tokenURL := fmt.Sprintf("%s/oauth/token", apiServerURL)
+	// Determine client ID - required, no default
+	if openshiftSpec.ClientId == nil || *openshiftSpec.ClientId == "" {
+		return nil, fmt.Errorf("OpenShift provider %s missing required ClientId", providerName)
+	}
+	clientId := *openshiftSpec.ClientId
 
 	tlsConfig, err := bridge.GetAuthTlsConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	// OpenShift OAuth uses "user:full" scope by default
-	scope := "user:full"
-	// Note: K8sProviderSpec doesn't have Scopes field, so we use default
+	// Determine scopes
+	scope := "user:full" // Default scope
+	if openshiftSpec.Scopes != nil && len(*openshiftSpec.Scopes) > 0 {
+		scope = buildScopeParam(openshiftSpec.Scopes, scope)
+	}
 
 	// Create OAuth2 client config for OpenShift
 	oauthClientConfig := &osincli.ClientConfig{
 		ClientId:                 clientId,
-		AuthorizeUrl:             fmt.Sprintf("%s/oauth/authorize", apiServerURL),
+		AuthorizeUrl:             authURL,
 		TokenUrl:                 tokenURL,
 		RedirectUrl:              config.BaseUiUrl + "/callback",
 		ErrorsInStatusCode:       true,
@@ -87,7 +117,7 @@ func getOpenShiftAuthHandler(provider *v1alpha1.AuthProvider, k8sSpec *v1alpha1.
 		tlsConfig:      tlsConfig,
 		internalClient: client,
 		client:         client,
-		authURL:        fmt.Sprintf("%s/oauth/authorize", apiServerURL),
+		authURL:        authURL,
 		tokenURL:       tokenURL,
 		apiServerURL:   apiServerURL,
 		clientId:       clientId,

@@ -12,51 +12,14 @@ import (
 
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
+	"github.com/flightctl/flightctl/api/v1alpha1"
 )
-
-// ApiTokenRequest represents the token request to the API server
-type ApiTokenRequest struct {
-	GrantType    string  `json:"grant_type"`
-	ProviderName string  `json:"provider_name"`
-	ClientId     string  `json:"client_id"`
-	Code         *string `json:"code,omitempty"`
-	CodeVerifier *string `json:"code_verifier,omitempty"`
-	RefreshToken *string `json:"refresh_token,omitempty"`
-	Scope        *string `json:"scope,omitempty"`
-}
-
-// ApiTokenResponse represents the token response from the API server
-type ApiTokenResponse struct {
-	AccessToken      *string `json:"access_token,omitempty"`
-	RefreshToken     *string `json:"refresh_token,omitempty"`
-	ExpiresIn        *int64  `json:"expires_in,omitempty"`
-	TokenType        *string `json:"token_type,omitempty"`
-	Error            *string `json:"error,omitempty"`
-	ErrorDescription *string `json:"error_description,omitempty"`
-}
-
-// ApiUserInfoResponse represents the OIDC UserInfo response from the API server
-type ApiUserInfoResponse struct {
-	Sub               *string `json:"sub,omitempty"`
-	PreferredUsername *string `json:"preferred_username,omitempty"`
-	Name              *string `json:"name,omitempty"`
-	Organizations     *[]struct {
-		Metadata struct {
-			Name *string `json:"name,omitempty"`
-		} `json:"metadata,omitempty"`
-		Spec *struct {
-			DisplayName *string `json:"displayName,omitempty"`
-			ExternalId  *string `json:"externalId,omitempty"`
-		} `json:"spec,omitempty"`
-	} `json:"organizations,omitempty"`
-	Error *string `json:"error,omitempty"`
-}
 
 // k8s service account prefix
 const k8sServiceAccountPrefix = "system:serviceaccount:"
 
 // exchangeTokenWithApiServer allows us to perform the token exchange through the Flight Control API
-func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, tokenReq *ApiTokenRequest) (*ApiTokenResponse, error) {
+func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, tokenReq *v1alpha1.TokenRequest) (*v1alpha1.TokenResponse, error) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: apiTlsConfig,
@@ -64,7 +27,7 @@ func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, tokenReq *ApiTokenRequ
 		Timeout: 30 * time.Second,
 	}
 
-	tokenURL := config.FctlApiUrl + "/api/v1/auth/" + tokenReq.ProviderName + "/token"
+	tokenURL := config.FctlApiUrl + "/api/v1/auth/" + providerName + "/token"
 
 	// Marshal request body
 	reqBody, err := json.Marshal(tokenReq)
@@ -81,7 +44,7 @@ func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, tokenReq *ApiTokenRequ
 	req.Header.Set("Accept", "application/json")
 
 	// Log request details
-	log.GetLogger().Infof("API server token request: method=%s, url=%s, grant_type=%s, provider_name=%s, client_id=%s, body=%s", req.Method, req.URL.String(), tokenReq.GrantType, tokenReq.ProviderName, tokenReq.ClientId, string(reqBody))
+	log.GetLogger().Infof("API server token request: method=%s, url=%s, grant_type=%s, provider_name=%s, client_id=%s, body=%s", req.Method, req.URL.String(), tokenReq.GrantType, providerName, tokenReq.ClientId, string(reqBody))
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -105,7 +68,7 @@ func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, tokenReq *ApiTokenRequ
 
 	if resp.StatusCode != http.StatusOK {
 		// Try to parse as JSON first (OAuth2 errors are usually JSON)
-		var tokenResp ApiTokenResponse
+		var tokenResp v1alpha1.TokenResponse
 		if err := json.Unmarshal(body, &tokenResp); err == nil {
 			// Successfully parsed as JSON, check for OAuth2 error fields
 			if tokenResp.Error != nil {
@@ -122,7 +85,7 @@ func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, tokenReq *ApiTokenRequ
 	}
 
 	// Status is OK, parse as JSON
-	var tokenResp ApiTokenResponse
+	var tokenResp v1alpha1.TokenResponse
 	if err := json.Unmarshal(body, &tokenResp); err != nil {
 		return nil, fmt.Errorf("failed to parse API server token response: %w (body: %s)", err, string(body))
 	}
@@ -191,7 +154,7 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 
 	if resp.StatusCode != http.StatusOK {
 		// Try to parse as JSON first
-		var userInfoResp ApiUserInfoResponse
+		var userInfoResp v1alpha1.UserInfoResponse
 		if err := json.Unmarshal(body, &userInfoResp); err == nil {
 			// Successfully parsed as JSON, check for error field
 			if userInfoResp.Error != nil {
@@ -204,7 +167,7 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 	}
 
 	// Status is OK, parse as JSON
-	var userInfoResp ApiUserInfoResponse
+	var userInfoResp v1alpha1.UserInfoResponse
 	if err := json.Unmarshal(body, &userInfoResp); err != nil {
 		return "", fmt.Errorf("failed to parse userinfo response: %w (body: %s)", err, string(body))
 	}
@@ -227,8 +190,8 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 	return username, nil
 }
 
-// convertTokenResponseToTokenData converts ApiTokenResponse to proxy TokenData
-func convertTokenResponseToTokenData(tokenResp *ApiTokenResponse, providerName string) (TokenData, *int64) {
+// convertTokenResponseToTokenData converts TokenResponse to proxy TokenData
+func convertTokenResponseToTokenData(tokenResp *v1alpha1.TokenResponse, providerName string) (TokenData, *int64) {
 	tokenData := TokenData{
 		Provider: providerName,
 	}
@@ -247,7 +210,9 @@ func convertTokenResponseToTokenData(tokenResp *ApiTokenResponse, providerName s
 
 	var expiresIn *int64
 	if tokenResp.ExpiresIn != nil {
-		expiresIn = tokenResp.ExpiresIn
+		// Convert from *int to *int64
+		expiresInVal := int64(*tokenResp.ExpiresIn)
+		expiresIn = &expiresInVal
 	}
 
 	return tokenData, expiresIn

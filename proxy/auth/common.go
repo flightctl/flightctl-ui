@@ -22,12 +22,13 @@ import (
 	"github.com/openshift/osincli"
 )
 
-// Provider type constants
-const (
-	ProviderTypeK8s    = "k8s"
-	ProviderTypeOIDC   = "oidc"
-	ProviderTypeAAP    = "aap"
-	ProviderTypeOAuth2 = "oauth2"
+// Provider type constants - use backend constants instead of hardcoding
+var (
+	ProviderTypeK8s       = string(v1alpha1.K8s)
+	ProviderTypeOIDC      = string(v1alpha1.Oidc)
+	ProviderTypeAAP       = string(v1alpha1.Aap)
+	ProviderTypeOAuth2    = string(v1alpha1.Oauth2)
+	ProviderTypeOpenShift = string(v1alpha1.Openshift)
 )
 
 // Default claim constants
@@ -748,6 +749,13 @@ func clearPKCEVerifierCookie(w http.ResponseWriter, providerName string) {
 		SameSite: http.SameSiteLaxMode, // Use Lax to match the set cookie
 	}
 	http.SetCookie(w, &cookie)
+}
+
+// clearSessionCookie removes the session cookie
+func clearSessionCookie(w http.ResponseWriter, r *http.Request) {
+	// TODO EDM-2612 Setting cookie here was not working, removed the code - needs to be investigated.
+	// Set Clear-Site-Data header to instruct browser to clear cookies
+	w.Header().Set("Clear-Site-Data", `"cookies"`)
 }
 
 // extractCodeVerifierFromState extracts code_verifier from state parameter if it was encoded there

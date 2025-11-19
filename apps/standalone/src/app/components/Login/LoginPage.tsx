@@ -2,11 +2,11 @@ import * as React from 'react';
 import { Alert, Bullseye, Spinner } from '@patternfly/react-core';
 
 import { AuthConfig, AuthProvider } from '@flightctl/types';
+import { ProviderType } from '@flightctl/ui-components/src/types/extraTypes';
 import ProviderSelector from '@flightctl/ui-components/src/components/Login/ProviderSelector';
 import TokenLoginForm from '@flightctl/ui-components/src/components/Login/TokenLoginForm';
 import { useFetch } from '@flightctl/ui-components/src/hooks/useFetch';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
-import { isK8sTokenProvider } from '@flightctl/ui-components/src/utils/k8sProvider';
 import { getProviderDisplayName } from '@flightctl/ui-components/src/utils/authProvider';
 
 import LoginPageLayout from './LoginPageLayout';
@@ -39,7 +39,7 @@ const LoginPage = () => {
 
     // For k8s token providers, we will show the TokenLoginForm.
     // For other providers, we will redirect to their OAuth flow.
-    if (!isK8sTokenProvider(provider)) {
+    if (provider.spec.providerType !== ProviderType.K8s) {
       setIsRedirecting(true);
       try {
         await redirectToProviderLogin(provider);
@@ -73,7 +73,7 @@ const LoginPage = () => {
         if (providers.length > 0) {
           setProviders(providers);
           setDefaultProviderName(config.defaultProvider || '');
-          if (providers.length === 1 && !isK8sTokenProvider(providers[0])) {
+          if (providers.length === 1 && providers[0].spec.providerType !== ProviderType.K8s) {
             setIsRedirecting(true);
             try {
               await redirectToProviderLogin(providers[0]);
@@ -93,7 +93,9 @@ const LoginPage = () => {
     };
 
     void loadAuthConfig();
-  }, [get, t]);
+    // Prevent the UI going to a loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (loading) {
     return (
@@ -117,7 +119,7 @@ const LoginPage = () => {
 
   const selectedProvider = userSelectedProvider || (providers.length === 1 ? providers[0] : null);
   if (selectedProvider) {
-    if (isK8sTokenProvider(selectedProvider)) {
+    if (selectedProvider.spec.providerType === ProviderType.K8s) {
       content = (
         <TokenLoginForm
           provider={selectedProvider}

@@ -84,7 +84,9 @@ export const getInitValues = (authProvider?: AuthProvider): AuthProviderFormValu
   let orgNamePrefix = '';
   let orgNameSuffix = '';
 
-  const orgAssignment = authProvider.spec.organizationAssignment;
+  const spec = authProvider.spec as DynamicAuthProviderSpec;
+
+  const orgAssignment = spec.organizationAssignment;
   if (isOrgAssignmentDynamic(orgAssignment)) {
     orgAssignmentType = OrgAssignmentType.Dynamic;
     claimPath = orgAssignment.claimPath || [];
@@ -104,7 +106,7 @@ export const getInitValues = (authProvider?: AuthProvider): AuthProviderFormValu
   let roleSeparator: string = DEFAULT_ROLE_SEPARATOR;
   let staticRoles: string[] = [];
 
-  const roleAssignment = authProvider.spec.roleAssignment;
+  const roleAssignment = spec.roleAssignment;
   if (isRoleAssignmentStatic(roleAssignment)) {
     roleAssignmentType = RoleAssignmentType.Static;
     staticRoles = roleAssignment.roles || [];
@@ -114,7 +116,6 @@ export const getInitValues = (authProvider?: AuthProvider): AuthProviderFormValu
     roleSeparator = roleAssignment.separator || DEFAULT_ROLE_SEPARATOR;
   }
 
-  const spec = authProvider.spec as DynamicAuthProviderSpec;
   const isOAuth2 = isOAuth2Provider(spec);
   return {
     exists: true,
@@ -423,7 +424,7 @@ export const getAuthProviderPatches = (values: AuthProviderFormValues, authProvi
   const newSpec = newAuthProvider.spec as DynamicAuthProviderSpec;
 
   const providerTypeChanged = prevSpec.providerType !== newSpec.providerType;
-  const secretWasChanged = values.clientSecret !== newSpec.clientSecret;
+  const secretWasChanged = prevSpec.clientSecret !== newSpec.clientSecret;
 
   // If provider type changed AND user provided a new secret, we can do a full replace
   if (providerTypeChanged && secretWasChanged) {
