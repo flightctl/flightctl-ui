@@ -102,7 +102,6 @@ export const isImageAppProvider = (app: ApplicationProviderSpecFixed): app is Im
 export const isImageAppForm = (app: AppBase): app is ImageAppForm => app.specType === AppSpecType.OCI_IMAGE;
 export const isInlineAppForm = (app: AppBase): app is InlineAppForm => app.specType === AppSpecType.INLINE;
 export const isQuadletAppForm = (app: AppBase): app is QuadletAppForm => app.appType === AppType.AppTypeQuadlet;
-export const isComposeAppForm = (app: AppBase): app is ComposeAppForm => app.appType === AppType.AppTypeCompose;
 
 const hasTemplateVariables = (str: string) => /{{.+?}}/.test(str);
 

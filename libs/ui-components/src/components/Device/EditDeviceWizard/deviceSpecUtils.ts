@@ -218,12 +218,18 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
   }));
 
   if (isImageAppForm(app)) {
-    const data = {
+    const data: ApplicationProviderSpec = {
       image: app.image,
       envVars,
       volumes,
     };
-    return app.name ? { ...data, name: app.name } : data;
+    if (app.name) {
+      data.name = app.name;
+    }
+    if (app.appType) {
+      data.appType = app.appType;
+    }
+    return data;
   }
 
   return {
@@ -385,6 +391,7 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
         specType: AppSpecType.OCI_IMAGE,
         name: app.name || '',
         image: app.image,
+        appType: app.appType,
         variables: getAppFormVariables(app),
         // TODO EDM-2324: Add proper support for volumes
         volumes: [] as ImageAppForm['volumes'],

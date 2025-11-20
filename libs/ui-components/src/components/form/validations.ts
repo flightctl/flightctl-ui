@@ -23,9 +23,9 @@ import {
   SystemdUnitFormValue,
   UpdatePolicyForm,
   getAppIdentifier,
-  isComposeAppForm,
   isGitConfigTemplate,
   isHttpConfigTemplate,
+  isImageAppForm,
   isInlineConfigTemplate,
   isKubeSecretTemplate,
   isQuadletAppForm,
@@ -530,16 +530,24 @@ export const validApplicationsSchema = (t: TFunction) => {
   return Yup.array()
     .of(
       Yup.lazy((value: AppForm) => {
-        if (isComposeAppForm(value)) {
-          return Yup.object<ComposeAppForm>().shape({
-            specType: appSpecTypeSchema(t),
-            name: inlineAppNameSchema(t, 'compose'),
-            files: inlineAppFileSchema(t)
-              .test('unique-file-paths', uniqueFilePathsTest(t))
-              .test('compose-file-name', composeFileName(t)),
+        if (isImageAppForm(value)) {
+          // Image applications (can be either compose or quadlet)
+          return Yup.object<ImageAppForm>().shape({
+            specType: Yup.string().oneOf([AppSpecType.OCI_IMAGE]).required(t('Application type is required')),
+            name: Yup.string().matches(
+              APPLICATION_NAME_REGEXP,
+              t(
+                'Use lowercase alphanumeric characters, or dash (-). Must start and end with an alphanumeric character.',
+              ),
+            ),
+            image: Yup.string()
+              .required(t('Image is required.'))
+              .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
             variables: appVariablesSchema(t),
           });
         }
+
+        // Inline quadlet applications
         if (isQuadletAppForm(value)) {
           return Yup.object<QuadletAppForm>().shape({
             appType: Yup.string().oneOf([AppType.AppTypeQuadlet]).required(t('Application type is required')),
@@ -553,16 +561,13 @@ export const validApplicationsSchema = (t: TFunction) => {
           });
         }
 
-        // Image applications
-        return Yup.object<ImageAppForm>().shape({
+        // Inline compose applications
+        return Yup.object<ComposeAppForm>().shape({
           specType: appSpecTypeSchema(t),
-          name: Yup.string().matches(
-            APPLICATION_NAME_REGEXP,
-            t('Use lowercase alphanumeric characters, or dash (-). Must start and end with an alphanumeric character.'),
-          ),
-          image: Yup.string()
-            .required(t('Image is required.'))
-            .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
+          name: inlineAppNameSchema(t, 'compose'),
+          files: inlineAppFileSchema(t)
+            .test('unique-file-paths', uniqueFilePathsTest(t))
+            .test('compose-file-name', composeFileName(t)),
           variables: appVariablesSchema(t),
         });
       }),

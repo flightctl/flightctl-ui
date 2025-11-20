@@ -40,9 +40,8 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
   const appFieldName = `applications[${index}]`;
   const [{ value: app }, { error }, { setValue }] = useField<AppForm>(appFieldName);
   const isImageIncomplete = app.specType === AppSpecType.OCI_IMAGE && !('image' in app);
-  const isComposeIncomplete = app.appType === AppType.AppTypeCompose && !('files' in app);
-  const isQuadletIncomplete = app.appType === AppType.AppTypeQuadlet && !('files' in app);
-  const shouldResetApp = isComposeIncomplete || isQuadletIncomplete || isImageIncomplete;
+  const isInlineIncomplete = app.specType === AppSpecType.INLINE && !('files' in app);
+  const shouldResetApp = isInlineIncomplete || isImageIncomplete;
 
   // @ts-expect-error Formik error object includes "variables"
   const appVarsError = typeof error?.variables === 'string' ? (error.variables as string) : undefined; // eslint-disable @typescript-eslint/no-unsafe-assignment
@@ -53,30 +52,33 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
   React.useEffect(() => {
     // When switching specType, the app becomes "incomplete" and we must add the required fields for the new type
     if (shouldResetApp) {
-      if (app.appType === AppType.AppTypeCompose || app.appType === AppType.AppTypeQuadlet) {
+      if (app.specType === AppSpecType.INLINE) {
+        // Switching to inline - need files
         setValue(
           {
             specType: AppSpecType.INLINE,
             appType: app.appType || AppType.AppTypeCompose,
             name: app.name || '',
             files: [{ path: '', content: '' }],
-            variables: [],
+            variables: app.variables || [],
           } as AppForm,
           false,
         );
-      } else {
+      } else if (app.specType === AppSpecType.OCI_IMAGE) {
+        // Switching to image - need image field
         setValue(
           {
             specType: AppSpecType.OCI_IMAGE,
+            appType: app.appType || AppType.AppTypeCompose,
             name: app.name || '',
             image: '',
-            variables: [],
+            variables: app.variables || [],
           } as AppForm,
           false,
         );
       }
     }
-  }, [shouldResetApp, app.appType, app.name, setValue]);
+  }, [shouldResetApp, app.specType, app.appType, app.name, app.variables, setValue]);
 
   return (
     <ExpandableFormSection
@@ -94,16 +96,14 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
           />
         </FormGroup>
 
-        {!isImageAppForm(app) && (
-          <FormGroup label={t('Application format')} isRequired>
-            <FormSelect
-              items={appFormats}
-              name={`${appFieldName}.appType`}
-              placeholderText={t('Select an application format')}
-              isDisabled={isReadOnly}
-            />
-          </FormGroup>
-        )}
+        <FormGroup label={t('Application format')} isRequired>
+          <FormSelect
+            items={appFormats}
+            name={`${appFieldName}.appType`}
+            placeholderText={t('Select an application format')}
+            isDisabled={isReadOnly}
+          />
+        </FormGroup>
 
         <FormGroupWithHelperText
           label={t('Application name')}
