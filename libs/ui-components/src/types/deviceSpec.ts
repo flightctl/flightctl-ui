@@ -1,6 +1,6 @@
 import {
-  ApplicationVolume,
   AppType,
+  ApplicationVolume,
   ConfigProviderSpec,
   DisruptionBudget,
   GitConfigProviderSpec,
@@ -48,13 +48,14 @@ type InlineContent = {
 
 type AppBase = {
   specType: AppSpecType;
-  appType?: AppType;
+  appType: AppType;
   name?: string;
   variables: { name: string; value: string }[];
   volumes?: ApplicationVolumeForm[];
 };
 
 export type ImageAppForm = AppBase & {
+  appType: AppType.AppTypeCompose | AppType.AppTypeQuadlet;
   image: string;
 };
 

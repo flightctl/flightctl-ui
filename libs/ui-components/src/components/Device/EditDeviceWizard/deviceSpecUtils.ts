@@ -10,7 +10,6 @@ import {
   GitConfigProviderSpec,
   HttpConfigProviderSpec,
   ImageMountVolumeProviderSpec,
-  ImagePullPolicy,
   InlineApplicationProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
@@ -231,21 +230,19 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
   if (isImageAppForm(app)) {
     const data: ApplicationProviderSpec = {
       image: app.image,
+      appType: app.appType,
       envVars,
       volumes,
     };
     if (app.name) {
       data.name = app.name;
     }
-    if (app.appType) {
-      data.appType = app.appType;
-    }
     return data;
   }
 
   return {
     name: app.name,
-    appType: app.appType || AppType.AppTypeCompose,
+    appType: app.appType,
     inline: app.files.map(
       (file): InlineApplicationFileFixed => ({
         path: file.path,
@@ -397,22 +394,24 @@ const getAppFormVariables = (app: ApplicationProviderSpecFixed) =>
 export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
   const apps = deviceSpec?.applications || [];
   return apps.map((app) => {
+    if (!app.appType) {
+      throw new Error('Application appType is required');
+    }
     if (isImageAppProvider(app)) {
       return {
         specType: AppSpecType.OCI_IMAGE,
         name: app.name || '',
         image: app.image,
-        appType: app.appType,
+        appType: app.appType as AppType.AppTypeCompose | AppType.AppTypeQuadlet,
         variables: getAppFormVariables(app),
         volumes: app.volumes || [],
       };
     }
 
-    // Inline applications can either be "Compose" or "Quadlet"
     const inlineApp = app as InlineApplicationProviderSpec;
     return {
       specType: AppSpecType.INLINE,
-      appType: app.appType || AppType.AppTypeCompose,
+      appType: app.appType,
       name: app.name || '',
       files: inlineApp.inline,
       variables: getAppFormVariables(app),

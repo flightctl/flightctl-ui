@@ -1,9 +1,17 @@
 import React from 'react';
 import { Stack, StackItem } from '@patternfly/react-core';
+import { TFunction } from 'react-i18next';
 
 import { AppType } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { AppForm, getAppIdentifier, isImageAppForm } from '../../../../types/deviceSpec';
+
+const getAppFormatLabel = (appType: AppType, t: TFunction) => {
+  if (appType === AppType.AppTypeQuadlet) {
+    return t('Quadlet');
+  }
+  return t('Compose');
+};
 
 const ReviewApplications = ({ apps }: { apps: AppForm[] }) => {
   const { t } = useTranslation();
@@ -11,19 +19,12 @@ const ReviewApplications = ({ apps }: { apps: AppForm[] }) => {
     return '-';
   }
 
-  const getAppFormatLabel = (appType?: AppType) => {
-    if (appType === AppType.AppTypeQuadlet) {
-      return t('Quadlet');
-    }
-    return t('Compose');
-  };
-
   return (
     <Stack hasGutter>
       {apps.map((app, index) => {
         const isImageApp = isImageAppForm(app);
         const specType = isImageApp ? t('Image based') : t('Inline');
-        const formatType = getAppFormatLabel(app.appType);
+        const formatType = getAppFormatLabel(app.appType, t);
         const type = `${specType} - ${formatType}`;
         let name: string = '';
         if (!isImageApp || app.name) {

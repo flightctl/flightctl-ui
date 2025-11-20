@@ -325,7 +325,7 @@ const appVariablesSchema = (t: TFunction) => {
 };
 
 const appSpecTypeSchema = (t: TFunction) =>
-  Yup.string().oneOf([AppSpecType.INLINE, AppSpecType.OCI_IMAGE]).required(t('Application type is required'));
+  Yup.string().oneOf([AppSpecType.INLINE, AppSpecType.OCI_IMAGE]).required(t('Definition source is required'));
 
 // Common application name validation schema for inline applications (compose and quadlet)
 const inlineAppNameSchema = (t: TFunction, appTypeName: string) =>
@@ -533,7 +533,12 @@ export const validApplicationsSchema = (t: TFunction) => {
         if (isImageAppForm(value)) {
           // Image applications (can be either compose or quadlet)
           return Yup.object<ImageAppForm>().shape({
-            specType: Yup.string().oneOf([AppSpecType.OCI_IMAGE]).required(t('Application type is required')),
+            specType: Yup.string()
+              .oneOf([AppSpecType.OCI_IMAGE])
+              .required(t('Definition source must be image for this type of applications')),
+            appType: Yup.string()
+              .oneOf([AppType.AppTypeCompose, AppType.AppTypeQuadlet])
+              .required(t('Application type is required')),
             name: Yup.string().matches(
               APPLICATION_NAME_REGEXP,
               t(
@@ -550,8 +555,8 @@ export const validApplicationsSchema = (t: TFunction) => {
         // Inline quadlet applications
         if (isQuadletAppForm(value)) {
           return Yup.object<QuadletAppForm>().shape({
-            appType: Yup.string().oneOf([AppType.AppTypeQuadlet]).required(t('Application type is required')),
             specType: appSpecTypeSchema(t),
+            appType: Yup.string().oneOf([AppType.AppTypeQuadlet]).required(t('Application type is required')),
             name: inlineAppNameSchema(t, 'quadlet'),
             files: inlineAppFileSchema(t)
               .test('unique-file-paths', uniqueFilePathsTest(t))
@@ -564,6 +569,7 @@ export const validApplicationsSchema = (t: TFunction) => {
         // Inline compose applications
         return Yup.object<ComposeAppForm>().shape({
           specType: appSpecTypeSchema(t),
+          appType: Yup.string().oneOf([AppType.AppTypeCompose]).required(t('Application type is required')),
           name: inlineAppNameSchema(t, 'compose'),
           files: inlineAppFileSchema(t)
             .test('unique-file-paths', uniqueFilePathsTest(t))
