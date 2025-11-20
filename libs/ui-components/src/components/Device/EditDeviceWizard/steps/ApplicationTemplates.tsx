@@ -4,7 +4,9 @@ import { Button, FormGroup, FormSection, Grid, Split, SplitItem } from '@pattern
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
+import { TFunction } from 'i18next';
 
+import { AppType } from '@flightctl/types';
 import {
   AppForm,
   AppSpecType,
@@ -23,46 +25,58 @@ import ApplicationInlineForm from './ApplicationInlineForm';
 
 import './ApplicationsForm.css';
 
+const appSpecTypeOptions = (t: TFunction) => ({
+  [AppSpecType.INLINE]: t('Inline application'),
+  [AppSpecType.OCI_IMAGE]: t('Image based application'),
+});
+
+const appFormatOptions = (t: TFunction) => ({
+  [AppType.AppTypeCompose]: t('Compose'),
+  [AppType.AppTypeQuadlet]: t('Quadlet'),
+});
+
 const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
   const appFieldName = `applications[${index}]`;
   const [{ value: app }, { error }, { setValue }] = useField<AppForm>(appFieldName);
-  const isInlineIncomplete = app.specType === AppSpecType.INLINE && !('files' in app);
   const isImageIncomplete = app.specType === AppSpecType.OCI_IMAGE && !('image' in app);
+  const isComposeIncomplete = app.appType === AppType.AppTypeCompose && !('files' in app);
+  const isQuadletIncomplete = app.appType === AppType.AppTypeQuadlet && !('files' in app);
+  const shouldResetApp = isComposeIncomplete || isQuadletIncomplete || isImageIncomplete;
+
   // @ts-expect-error Formik error object includes "variables"
   const appVarsError = typeof error?.variables === 'string' ? (error.variables as string) : undefined; // eslint-disable @typescript-eslint/no-unsafe-assignment
 
-  const appTypes = React.useMemo(() => {
-    return {
-      [AppSpecType.INLINE]: t('Inline application'),
-      [AppSpecType.OCI_IMAGE]: t('Image based application'),
-    };
-  }, [t]);
+  const appTypes = appSpecTypeOptions(t);
+  const appFormats = appFormatOptions(t);
 
   React.useEffect(() => {
-    // When switching types, setting the new required fields and clearing those from the old type
-    if (isInlineIncomplete) {
-      setValue(
-        {
-          specType: AppSpecType.INLINE,
-          name: app.name || '',
-          files: [{ path: '', content: '' }],
-          variables: [],
-        },
-        false,
-      );
-    } else if (isImageIncomplete) {
-      setValue(
-        {
-          specType: AppSpecType.OCI_IMAGE,
-          name: app.name || '',
-          image: '',
-          variables: [],
-        },
-        false,
-      );
+    // When switching specType, the app becomes "incomplete" and we must add the required fields for the new type
+    if (shouldResetApp) {
+      if (app.appType === AppType.AppTypeCompose || app.appType === AppType.AppTypeQuadlet) {
+        setValue(
+          {
+            specType: AppSpecType.INLINE,
+            appType: app.appType || AppType.AppTypeCompose,
+            name: app.name || '',
+            files: [{ path: '', content: '' }],
+            variables: [],
+          } as AppForm,
+          false,
+        );
+      } else {
+        setValue(
+          {
+            specType: AppSpecType.OCI_IMAGE,
+            name: app.name || '',
+            image: '',
+            variables: [],
+          } as AppForm,
+          false,
+        );
+      }
     }
-  }, [isImageIncomplete, isInlineIncomplete, app.name, setValue]);
+  }, [shouldResetApp, app.appType, app.name, setValue]);
 
   return (
     <ExpandableFormSection
@@ -79,6 +93,17 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
             isDisabled={isReadOnly}
           />
         </FormGroup>
+
+        {!isImageAppForm(app) && (
+          <FormGroup label={t('Application format')} isRequired>
+            <FormSelect
+              items={appFormats}
+              name={`${appFieldName}.appType`}
+              placeholderText={t('Select an application format')}
+              isDisabled={isReadOnly}
+            />
+          </FormGroup>
+        )}
 
         <FormGroupWithHelperText
           label={t('Application name')}

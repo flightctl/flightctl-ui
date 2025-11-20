@@ -228,7 +228,7 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
 
   return {
     name: app.name,
-    appType: AppType.AppTypeCompose,
+    appType: app.appType || AppType.AppTypeCompose,
     inline: app.files.map(
       (file): InlineApplicationFileFixed => ({
         path: file.path,
@@ -377,13 +377,6 @@ export const getApiConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
 const getAppFormVariables = (app: ApplicationProviderSpecFixed) =>
   Object.entries(app.envVars || {}).map(([varName, varValue]) => ({ name: varName, value: varValue }));
 
-const getAppFormVolumes = (app: ApplicationProviderSpecFixed) =>
-  app.volumes?.map((v) => ({
-    name: v.name,
-    reference: v.image.reference,
-    pullPolicy: v.image.pullPolicy,
-  }));
-
 export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
   const apps = deviceSpec?.applications || [];
   return apps.map((app) => {
@@ -393,20 +386,21 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
         name: app.name || '',
         image: app.image,
         variables: getAppFormVariables(app),
-        volumes: getAppFormVolumes(app),
+        // TODO EDM-2324: Add proper support for volumes
+        volumes: [] as ImageAppForm['volumes'],
       };
     }
+
+    // Inline applications can either be "Compose" or "Quadlet"
+    const inlineApp = app as InlineApplicationProviderSpec;
     return {
       specType: AppSpecType.INLINE,
+      appType: app.appType || AppType.AppTypeCompose,
       name: app.name || '',
-      files: (app as InlineApplicationProviderSpec).inline.map((file) => ({
-        path: file.path || '',
-        content: file.content,
-        base64: file.contentEncoding === EncodingType.EncodingBase64,
-      })),
+      files: inlineApp.inline,
       variables: getAppFormVariables(app),
-      volumes: getAppFormVolumes(app),
-    };
+      volumes: inlineApp.volumes,
+    } as InlineAppForm;
   });
 };
 

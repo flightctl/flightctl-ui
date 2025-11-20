@@ -1,4 +1,5 @@
 import {
+  AppType,
   ConfigProviderSpec,
   DisruptionBudget,
   GitConfigProviderSpec,
@@ -45,7 +46,7 @@ type InlineContent = {
 
 type AppBase = {
   specType: AppSpecType;
-  // appType: AppType - commented out for now, since it only accepts one value ("compose")
+  appType?: AppType;
   name?: string;
   variables: { name: string; value: string }[];
   volumes?: {
@@ -55,13 +56,23 @@ type AppBase = {
   }[];
 };
 
-export type InlineAppForm = AppBase & {
+export type ImageAppForm = AppBase & {
+  image: string;
+};
+
+export type InlineAppForm = ComposeAppForm | QuadletAppForm;
+
+export type ComposeAppForm = AppBase & {
+  appType: AppType.AppTypeCompose;
   name: string; // name can only be optional for image applications
   files: InlineContent[];
 };
 
-export type ImageAppForm = AppBase & {
-  image: string;
+// Technically it's the same as ComposeAppForm, with a different "appType"
+export type QuadletAppForm = AppBase & {
+  appType: AppType.AppTypeQuadlet;
+  name: string; // name can only be optional for image applications
+  files: InlineContent[];
 };
 
 export const isGitConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is GitConfigTemplate =>
@@ -90,6 +101,8 @@ export const isImageAppProvider = (app: ApplicationProviderSpecFixed): app is Im
 
 export const isImageAppForm = (app: AppBase): app is ImageAppForm => app.specType === AppSpecType.OCI_IMAGE;
 export const isInlineAppForm = (app: AppBase): app is InlineAppForm => app.specType === AppSpecType.INLINE;
+export const isQuadletAppForm = (app: AppBase): app is QuadletAppForm => app.appType === AppType.AppTypeQuadlet;
+export const isComposeAppForm = (app: AppBase): app is ComposeAppForm => app.appType === AppType.AppTypeCompose;
 
 const hasTemplateVariables = (str: string) => /{{.+?}}/.test(str);
 

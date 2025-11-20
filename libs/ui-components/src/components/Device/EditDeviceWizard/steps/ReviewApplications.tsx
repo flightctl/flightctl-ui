@@ -2,7 +2,7 @@ import React from 'react';
 import { Stack, StackItem } from '@patternfly/react-core';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { AppForm, getAppIdentifier, isInlineAppForm } from '../../../../types/deviceSpec';
+import { AppForm, getAppIdentifier, isImageAppForm } from '../../../../types/deviceSpec';
 
 const ReviewApplications = ({ apps }: { apps: AppForm[] }) => {
   const { t } = useTranslation();
@@ -13,10 +13,10 @@ const ReviewApplications = ({ apps }: { apps: AppForm[] }) => {
   return (
     <Stack hasGutter>
       {apps.map((app, index) => {
-        const isInlineApp = isInlineAppForm(app);
-        const type = isInlineApp ? t('Inline') : t('Image based');
+        const isImageApp = isImageAppForm(app);
+        const type = isImageApp ? t('Image based') : t('Inline');
         let name: string = '';
-        if (isInlineApp || app.name) {
+        if (!isImageApp || app.name) {
           name = app.name as string;
         } else if (app.image) {
           name = `${t('Unnamed')} (${app.image})`;
