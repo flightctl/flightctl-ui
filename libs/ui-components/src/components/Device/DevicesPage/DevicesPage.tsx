@@ -13,7 +13,7 @@ import { useDeviceBackendFilters } from './useDeviceBackendFilters';
 import EnrollmentRequestList from '../../EnrollmentRequest/EnrollmentRequestList';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../../types/rbac';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import EnrolledDevicesTable from './EnrolledDevicesTable';
 import DecommissionedDevicesTable from './DecommissionedDevicesTable';
 
@@ -112,11 +112,14 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
 };
 
 const DevicesPageWithPermissions = () => {
-  const [canListDevice, deviceLoading] = useAccessReview(RESOURCE.DEVICE, VERB.LIST);
-  const [canListER, erLoading] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.LIST);
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [canListDevice, canListER] = checkPermissions([
+    { kind: RESOURCE.DEVICE, verb: VERB.LIST },
+    { kind: RESOURCE.ENROLLMENT_REQUEST, verb: VERB.LIST },
+  ]);
 
   return (
-    <PageWithPermissions loading={deviceLoading || erLoading} allowed={canListDevice || canListER}>
+    <PageWithPermissions loading={loading} allowed={canListDevice || canListER}>
       {canListDevice ? <DevicesPage canListER={canListER} /> : <EnrollmentRequestList isStandalone />}
     </PageWithPermissions>
   );

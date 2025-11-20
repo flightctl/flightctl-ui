@@ -21,6 +21,7 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
+import { usePermissionsContext } from '../../../common/PermissionsContext';
 import { getDnsSubdomainValidations } from '../../../form/validations';
 import ErrorHelperText from '../../../form/FieldHelperText';
 import FormSelect from '../../../form/FormSelect';
@@ -29,7 +30,6 @@ import ConfigWithRepositoryTemplateForm from './ConfigWithRepositoryTemplateForm
 import ConfigK8sSecretTemplateForm from './ConfigK8sSecretTemplateForm';
 import ConfigInlineTemplateForm from './ConfigInlineTemplateForm';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
-import { useAccessReview } from '../../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../../types/rbac';
 
 const useValidateOnMount = () => {
@@ -218,7 +218,8 @@ const ConfigurationTemplatesForm = ({
 };
 
 const ConfigurationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
-  const [canCreateRepo] = useAccessReview(RESOURCE.REPOSITORY, VERB.CREATE);
+  const { checkPermissions } = usePermissionsContext();
+  const [canCreateRepo] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.CREATE }]);
   const [repositoryList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>({
     endpoint: 'repositories',
   });
@@ -253,7 +254,8 @@ const ConfigurationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
 };
 
 const ConfigurationTemplatesWithPermissions = ({ isReadOnly }) => {
-  const [canListRepo] = useAccessReview(RESOURCE.REPOSITORY, VERB.LIST);
+  const { checkPermissions } = usePermissionsContext();
+  const [canListRepo] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.LIST }]);
   return canListRepo && !isReadOnly ? (
     <ConfigurationTemplates />
   ) : (

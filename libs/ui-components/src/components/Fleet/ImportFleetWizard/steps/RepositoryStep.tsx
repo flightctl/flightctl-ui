@@ -12,7 +12,7 @@ import { getLastTransitionTimeText, getRepositorySyncStatus } from '../../../../
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelect from '../../../form/FormSelect';
 import FlightCtlForm from '../../../form/FlightCtlForm';
-import { useAccessReview } from '../../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../../types/rbac';
 
 export const repositoryStepId = 'repository';
@@ -77,7 +77,8 @@ const RepositoryStep = ({ repositories, hasLoaded }: { repositories: Repository[
   const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<ImportFleetFormValues>();
 
-  const [canCreateRepo] = useAccessReview(RESOURCE.REPOSITORY, VERB.CREATE);
+  const { checkPermissions } = usePermissionsContext();
+  const [canCreateRepo] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.CREATE }]);
 
   const noRepositoriesExist = hasLoaded && repositories.length === 0;
   React.useEffect(() => {

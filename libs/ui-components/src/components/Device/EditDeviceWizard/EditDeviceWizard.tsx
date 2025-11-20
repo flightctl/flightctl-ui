@@ -39,8 +39,8 @@ import { useEditDevice } from './useEditDevice';
 import EditDeviceWizardNav from './EditDeviceWizardNav';
 import EditDeviceWizardFooter from './EditDeviceWizardFooter';
 import PageWithPermissions from '../../common/PageWithPermissions';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
-import { useAccessReview } from '../../../hooks/useAccessReview';
 
 import './EditDeviceWizard.css';
 
@@ -181,7 +181,8 @@ const EditDeviceWizard = () => {
 };
 
 const EditDeviceWizardWithPermissions = () => {
-  const [allowed, loading] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.DEVICE, verb: VERB.PATCH }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <EditDeviceWizard />

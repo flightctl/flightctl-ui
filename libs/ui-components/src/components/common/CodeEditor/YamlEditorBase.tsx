@@ -30,6 +30,7 @@ type YamlEditorBaseProps = {
   isSaving: boolean;
   disabledEditReason?: string;
   editorRef?: React.MutableRefObject<monacoEditor.editor.IStandaloneCodeEditor | null>;
+  readOnly?: boolean;
 };
 
 const YamlEditorBase = ({
@@ -41,6 +42,7 @@ const YamlEditorBase = ({
   isSaving,
   disabledEditReason,
   editorRef,
+  readOnly = false,
 }: YamlEditorBaseProps) => {
   const { t } = useTranslation();
   const monacoRef = React.useRef<typeof monacoEditor | null>(null);
@@ -112,7 +114,7 @@ const YamlEditorBase = ({
           }}
           options={{
             theme: `console-${resolvedTheme}`,
-            readOnly: !!disabledEditReason,
+            readOnly: readOnly || !!disabledEditReason,
           }}
         />
         <ActionGroup className="fctl-yaml-editor-base__action-group">

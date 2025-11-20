@@ -15,7 +15,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { Link, ROUTE } from '../../hooks/useNavigate';
 import { getLastTransitionTime, getRepositorySyncStatus } from '../../utils/status/repository';
-import { useAccessReview } from '../../hooks/useAccessReview';
+import { usePermissionsContext } from '../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../types/rbac';
 
 // Entries format: <rs0Name>@@<rs0LastSync>,<rs1Name>@@<rs1LastSync>,...
@@ -166,7 +166,8 @@ const FleetResourceSyncs = () => {
 };
 
 const FleetResourceSyncsWithPermissions = () => {
-  const [allowed] = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.LIST);
+  const { checkPermissions } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.RESOURCE_SYNC, verb: VERB.LIST }]);
   return allowed && <FleetResourceSyncs />;
 };
 

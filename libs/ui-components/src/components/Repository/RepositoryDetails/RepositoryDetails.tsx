@@ -12,13 +12,18 @@ import DeleteRepositoryModal from './DeleteRepositoryModal';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
 import EventsCard from '../../Events/EventsCard';
 import NavItem from '../../NavItem/NavItem';
 
+const repositoryDetailsPermissions = [
+  { kind: RESOURCE.REPOSITORY, verb: VERB.DELETE },
+  { kind: RESOURCE.REPOSITORY, verb: VERB.PATCH },
+  { kind: RESOURCE.RESOURCE_SYNC, verb: VERB.LIST },
+];
 const RepositoryDetails = () => {
   const { t } = useTranslation();
   const {
@@ -36,9 +41,8 @@ const RepositoryDetails = () => {
     navigate(ROUTE.REPOSITORIES);
   };
 
-  const [canDelete] = useAccessReview(RESOURCE.REPOSITORY, VERB.DELETE);
-  const [canEdit] = useAccessReview(RESOURCE.REPOSITORY, VERB.PATCH);
-  const [canListRS] = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.LIST);
+  const { checkPermissions } = usePermissionsContext();
+  const [canDelete, canEdit, canListRS] = checkPermissions(repositoryDetailsPermissions);
 
   return (
     <DetailsPage
@@ -103,7 +107,7 @@ const RepositoryDetails = () => {
                 </Grid>
               }
             />
-            <Route path="yaml" element={<YamlEditor apiObj={repoDetails} refetch={refetch} />} />
+            <Route path="yaml" element={<YamlEditor apiObj={repoDetails} refetch={refetch} canEdit={canEdit} />} />
           </Routes>
           {isDeleteModalOpen && (
             <DeleteRepositoryModal
@@ -119,7 +123,8 @@ const RepositoryDetails = () => {
 };
 
 const RepositoryDetailsWithPermissions = () => {
-  const [allowed, loading] = useAccessReview(RESOURCE.REPOSITORY, VERB.GET);
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.GET }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <RepositoryDetails />

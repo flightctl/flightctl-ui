@@ -33,7 +33,7 @@ import CreateFleetWizardFooter from './CreateFleetWizardFooter';
 import { useEditFleet } from './useEditFleet';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { useAppContext } from '../../../hooks/useAppContext';
 
@@ -79,7 +79,8 @@ const CreateFleetWizard = () => {
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
   const [fleetId, fleet, loading, editError] = useEditFleet();
 
-  const [canEdit] = useAccessReview(RESOURCE.FLEET, VERB.PATCH);
+  const { checkPermissions } = usePermissionsContext();
+  const [canEdit] = checkPermissions([{ kind: RESOURCE.FLEET, verb: VERB.PATCH }]);
 
   const isEdit = !!fleetId;
   const isReadOnly = !!fleet?.metadata.owner || (isEdit && !canEdit);
@@ -216,18 +217,20 @@ const CreateFleetWizard = () => {
   );
 };
 
+const createFleetWizardPermissions = [
+  { kind: RESOURCE.FLEET, verb: VERB.CREATE },
+  { kind: RESOURCE.FLEET, verb: VERB.PATCH },
+];
+
 const CreateFleetWizardWithPermissions = () => {
   const {
     router: { useParams },
   } = useAppContext();
   const { fleetId } = useParams<{ fleetId: string }>();
-  const [createAllowed, createLoading] = useAccessReview(RESOURCE.FLEET, VERB.CREATE);
-  const [patchAllowed, patchLoading] = useAccessReview(RESOURCE.FLEET, VERB.PATCH);
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [createAllowed, patchAllowed] = checkPermissions(createFleetWizardPermissions);
   return (
-    <PageWithPermissions
-      allowed={fleetId ? patchAllowed : createAllowed}
-      loading={fleetId ? patchLoading : createLoading}
-    >
+    <PageWithPermissions allowed={fleetId ? patchAllowed : createAllowed} loading={loading}>
       <CreateFleetWizard />
     </PageWithPermissions>
   );

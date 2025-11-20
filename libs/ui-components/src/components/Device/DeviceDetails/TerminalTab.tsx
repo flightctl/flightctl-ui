@@ -7,7 +7,7 @@ import ErrorAlert from '../../ErrorAlert/ErrorAlert';
 import { useTranslation } from '../../../hooks/useTranslation';
 import Terminal, { ImperativeTerminalType } from '../../Terminal/Terminal';
 import PageWithPermissions from '../../common/PageWithPermissions';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useOrganizationGuardContext } from '../../common/OrganizationGuard';
 
@@ -97,7 +97,8 @@ const TerminalTab = ({ device }: TerminalTabProps) => {
 };
 
 const TerminalTabWithPermissions = (props: TerminalTabProps) => {
-  const [allowed, loading] = useAccessReview(RESOURCE.DEVICE_CONSOLE, VERB.GET);
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.DEVICE_CONSOLE, verb: VERB.GET }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <TerminalTab {...props} />

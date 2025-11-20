@@ -20,7 +20,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { isPromiseFulfilled } from '../../../types/typeUtils';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { getErrorMessage } from '../../../utils/error';
@@ -149,7 +149,8 @@ const CreateRepository = () => {
 };
 
 const CreateRepositoryWithPermissions = () => {
-  const [allowed, loading] = useAccessReview(RESOURCE.REPOSITORY, VERB.CREATE);
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.CREATE }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <CreateRepository />

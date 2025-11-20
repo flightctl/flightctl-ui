@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DeviceSummaryStatusType, DevicesSummary } from '@flightctl/types';
 import { useDevicesSummary } from '../components/Device/DevicesPage/useDevices';
-import { useAccessReview } from './useAccessReview';
+import { usePermissionsContext } from '../components/common/PermissionsContext';
 import { RESOURCE, VERB } from '../types/rbac';
 
 interface SystemRestoreContextData {
@@ -18,7 +18,8 @@ const SystemRestoreContext = React.createContext<SystemRestoreContextData | unde
  * This provides data needed for showing consistent restore banners across all pages.
  */
 export const SystemRestoreProvider = ({ children }: React.PropsWithChildren) => {
-  const [canListDevices] = useAccessReview(RESOURCE.DEVICE, VERB.LIST);
+  const { checkPermissions } = usePermissionsContext();
+  const [canListDevices] = checkPermissions([{ kind: RESOURCE.DEVICE, verb: VERB.LIST }]);
 
   // We obtain the unfiltered device summary to detect if any devices are in system restore statuses
   const [devicesSummary, isLoading] = useDevicesSummary({});

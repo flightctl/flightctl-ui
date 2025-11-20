@@ -44,7 +44,7 @@ import FlightCtlActionGroup from '../form/FlightCtlActionGroup';
 import FlightCtlForm from '../form/FlightCtlForm';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import ListPageBody from '../ListPage/ListPageBody';
-import { useAccessReview } from '../../hooks/useAccessReview';
+import { usePermissionsContext } from '../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../types/rbac';
 
 import './RepositoryResourceSyncList.css';
@@ -167,6 +167,11 @@ const CreateResourceSyncModal = ({
   );
 };
 
+const repositoryResourceSyncListPermissions = [
+  { kind: RESOURCE.RESOURCE_SYNC, verb: VERB.DELETE },
+  { kind: RESOURCE.RESOURCE_SYNC, verb: VERB.CREATE },
+];
+
 const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) => {
   const [rsList, isLoading, error, refetch] = useFetchPeriodically<ResourceSyncList>({
     endpoint: commonQueries.getResourceSyncsByRepo(repositoryId),
@@ -208,8 +213,8 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
   const [isAddRsModalOpen, setIsAddRsModalOpen] = React.useState(false);
 
-  const [canDelete] = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.DELETE);
-  const [canCreate] = useAccessReview(RESOURCE.RESOURCE_SYNC, VERB.CREATE);
+  const { checkPermissions } = usePermissionsContext();
+  const [canDelete, canCreate] = checkPermissions(repositoryResourceSyncListPermissions);
 
   return (
     <ListPageBody error={error} loading={isLoading}>

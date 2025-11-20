@@ -140,6 +140,8 @@ export type { OrganizationList } from './models/OrganizationList';
 export type { OrganizationSpec } from './models/OrganizationSpec';
 export type { PatchRequest } from './models/PatchRequest';
 export type { Percentage } from './models/Percentage';
+export type { Permission } from './models/Permission';
+export type { PermissionList } from './models/PermissionList';
 export type { ReferencedRepositoryUpdatedDetails } from './models/ReferencedRepositoryUpdatedDetails';
 export type { RelativePath } from './models/RelativePath';
 export type { Repository } from './models/Repository';

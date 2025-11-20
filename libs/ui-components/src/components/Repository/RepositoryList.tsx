@@ -30,14 +30,15 @@ import ResourceLink from '../common/ResourceLink';
 import RepositoryStatus from '../Status/RepositoryStatus';
 import PageWithPermissions from '../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../types/rbac';
-import { useAccessReview } from '../../hooks/useAccessReview';
+import { usePermissionsContext } from '../common/PermissionsContext';
 import { useRepositories } from './useRepositories';
 import TablePagination from '../Table/TablePagination';
 
 const CreateRepositoryButton = ({ buttonText }: { buttonText?: string }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [canCreate] = useAccessReview(RESOURCE.REPOSITORY, VERB.CREATE);
+  const { checkPermissions } = usePermissionsContext();
+  const [canCreate] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.CREATE }]);
 
   return (
     canCreate && (
@@ -148,6 +149,10 @@ const RepositoryTableRow = ({
   );
 };
 
+const repositoryTablePermissions = [
+  { kind: RESOURCE.REPOSITORY, verb: VERB.DELETE },
+  { kind: RESOURCE.REPOSITORY, verb: VERB.PATCH },
+];
 const RepositoryTable = () => {
   const { t } = useTranslation();
   const [repositories, loading, error, isUpdating, refetch, pagination] = useRepositories();
@@ -164,8 +169,8 @@ const RepositoryTable = () => {
 
   const { hasSelectedRows, isAllSelected, isRowSelected, setAllSelected, onRowSelect } = useTableSelect<Repository>();
 
-  const [canDelete] = useAccessReview(RESOURCE.REPOSITORY, VERB.DELETE);
-  const [canEdit] = useAccessReview(RESOURCE.REPOSITORY, VERB.PATCH);
+  const { checkPermissions } = usePermissionsContext();
+  const [canDelete, canEdit] = checkPermissions(repositoryTablePermissions);
 
   return (
     <ListPageBody error={error} loading={loading}>
@@ -239,7 +244,8 @@ const RepositoryTable = () => {
 
 const RepositoryList = () => {
   const { t } = useTranslation();
-  const [allowed, loading] = useAccessReview(RESOURCE.REPOSITORY, VERB.LIST);
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.LIST }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <ListPage title={t('Repositories')}>

@@ -25,7 +25,6 @@ This document describes all environment variables and configuration options avai
 | `TLS_CERT`                              | Path to TLS certificate              | _(empty)_                | `/path/to/server.crt`                  |
 | `TLS_KEY`                               | Path to TLS private key              | _(empty)_                | `/path/to/server.key`                  |
 | `API_PORT`                              | UI proxy server port                 | `3001`                   | `8080`, `3000`, etc.                   |
-| `K8S_RBAC_NS`                           | Kubernetes RBAC namespace            | _(empty)_                | `flightctl`                            |
 | `IS_OCP_PLUGIN`                         | Run as OpenShift Console plugin      | `false`                  | `true`, `false`                        |
 | `IS_RHEM`                               | Red Hat Enterprise Mode              | _(empty)_                | `true`, `false`                        |
 

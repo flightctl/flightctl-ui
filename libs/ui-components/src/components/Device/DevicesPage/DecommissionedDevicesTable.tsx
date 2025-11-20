@@ -8,7 +8,7 @@ import { Device, DeviceList } from '@flightctl/types';
 import { PaginationDetails } from '../../../hooks/useTablePagination';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useTableSelect } from '../../../hooks/useTableSelect';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { useFetch } from '../../../hooks/useFetch';
 import { RESOURCE, VERB } from '../../../types/rbac';
 
@@ -41,6 +41,11 @@ const getDeviceColumns = (t: TFunction): ApiSortTableColumn[] => [
   },
 ];
 
+const decommissionedDevicesPermissions = [
+  { kind: RESOURCE.DEVICE, verb: VERB.DELETE },
+  { kind: RESOURCE.DEVICE, verb: VERB.PATCH },
+];
+
 const DecommissionedDevicesTable = ({
   devices,
   refetch,
@@ -67,8 +72,8 @@ const DecommissionedDevicesTable = ({
     },
   });
 
-  const [canDelete] = useAccessReview(RESOURCE.DEVICE, VERB.DELETE);
-  const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
+  const { checkPermissions } = usePermissionsContext();
+  const [canDelete, canEdit] = checkPermissions(decommissionedDevicesPermissions);
 
   return (
     <>

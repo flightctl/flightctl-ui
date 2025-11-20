@@ -4,8 +4,6 @@ import { Tbody } from '@patternfly/react-table';
 import { SelectList, SelectOption, ToolbarItem } from '@patternfly/react-core';
 import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons';
 
-import { EnrollmentRequestList } from '@flightctl/types';
-
 import Table, { ApiSortTableColumn } from '../Table/Table';
 import TableActions from '../Table/TableActions';
 import ListPage from '../ListPage/ListPage';
@@ -20,7 +18,7 @@ import MassApproveDeviceModal from '../modals/massModals/MassApproveDeviceModal/
 import EnrollmentRequestTableRow from '../EnrollmentRequest/EnrollmentRequestTableRow';
 import EnrollmentRequestTableToolbar from './EnrollmentRequestTableToolbar';
 import { RESOURCE, VERB } from '../../types/rbac';
-import { useAccessReview } from '../../hooks/useAccessReview';
+import { usePermissionsContext } from '../common/PermissionsContext';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { usePendingEnrollments } from './useEnrollmentRequests';
 import TablePagination from '../Table/TablePagination';
@@ -48,10 +46,15 @@ type EnrollmentRequestListProps = {
   isStandalone?: boolean;
 };
 
+const enrollmentRequestListPermissions = [
+  { kind: RESOURCE.ENROLLMENT_REQUEST_APPROVAL, verb: VERB.POST },
+  { kind: RESOURCE.ENROLLMENT_REQUEST, verb: VERB.DELETE },
+];
+
 const EnrollmentRequestList = ({ onEmptyListChanged, refetchDevices, isStandalone }: EnrollmentRequestListProps) => {
   const { t } = useTranslation();
-  const [canApprove] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST_APPROVAL, VERB.POST);
-  const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
+  const { checkPermissions } = usePermissionsContext();
+  const [canApprove, canDelete] = checkPermissions(enrollmentRequestListPermissions);
   const { remove } = useFetch();
   const [search, setSearch] = React.useState<string>('');
 

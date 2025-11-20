@@ -10,7 +10,7 @@ import { FlightCtlLabel } from '../../../types/extraTypes';
 import { PaginationDetails } from '../../../hooks/useTablePagination';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useTableSelect } from '../../../hooks/useTableSelect';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { useFetch } from '../../../hooks/useFetch';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import {
@@ -72,6 +72,12 @@ const getDeviceColumns = (t: TFunction): ApiSortTableColumn[] => [
   },
 ];
 
+const enrolledDevicesPermissions = [
+  { kind: RESOURCE.DEVICE, verb: VERB.PATCH },
+  { kind: RESOURCE.DEVICE_DECOMMISSION, verb: VERB.UPDATE },
+  { kind: RESOURCE.DEVICE_RESUME, verb: VERB.UPDATE },
+];
+
 const EnrolledDevicesTable = ({
   devices,
   nameOrAlias,
@@ -108,9 +114,8 @@ const EnrolledDevicesTable = ({
     },
   });
 
-  const [canEdit] = useAccessReview(RESOURCE.DEVICE, VERB.PATCH);
-  const [canDecommission] = useAccessReview(RESOURCE.DEVICE_DECOMMISSION, VERB.UPDATE);
-  const [canResume] = useAccessReview(RESOURCE.DEVICE_RESUME, VERB.UPDATE);
+  const { checkPermissions } = usePermissionsContext();
+  const [canEdit, canDecommission, canResume] = checkPermissions(enrolledDevicesPermissions);
 
   const clearAllFilters = () => {
     if (hasFiltersEnabled) {

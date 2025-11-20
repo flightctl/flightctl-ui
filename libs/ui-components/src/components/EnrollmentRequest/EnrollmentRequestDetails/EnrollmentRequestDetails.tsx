@@ -35,11 +35,16 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useDeviceSpecSystemInfo } from '../../../hooks/useDeviceSpecSystemInfo';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { useAccessReview } from '../../../hooks/useAccessReview';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
 
 import './EnrollmentRequestDetails.css';
+
+const enrollmentRequestDetailsPermissions = [
+  { kind: RESOURCE.ENROLLMENT_REQUEST_APPROVAL, verb: VERB.POST },
+  { kind: RESOURCE.ENROLLMENT_REQUEST, verb: VERB.DELETE },
+];
 
 const EnrollmentRequestDetails = () => {
   const { t } = useTranslation();
@@ -52,8 +57,8 @@ const EnrollmentRequestDetails = () => {
   });
   const { remove } = useFetch();
   const navigate = useNavigate();
-  const [canApprove] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST_APPROVAL, VERB.POST);
-  const [canDelete] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.DELETE);
+  const { checkPermissions } = usePermissionsContext();
+  const [canApprove, canDelete] = checkPermissions(enrollmentRequestDetailsPermissions);
 
   const [isApprovalModalOpen, setIsApprovalModalOpen] = React.useState(false);
   const erSystemInfo = useDeviceSpecSystemInfo(er?.spec.deviceStatus?.systemInfo, t);
@@ -222,7 +227,8 @@ const EnrollmentRequestDetails = () => {
 };
 
 const EnrollmentRequestDetailsWithPermissions = () => {
-  const [allowed, loading] = useAccessReview(RESOURCE.ENROLLMENT_REQUEST, VERB.GET);
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.ENROLLMENT_REQUEST, verb: VERB.GET }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <EnrollmentRequestDetails />
