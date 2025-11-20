@@ -201,6 +201,6 @@ func (o *OIDCAuthHandler) RefreshToken(refreshToken string) (TokenData, *int64, 
 	return refreshOAuthToken(refreshToken, o.internalClient)
 }
 
-func (a *OIDCAuthHandler) GetLoginRedirectURL(codeChallenge string, codeVerifier string) string {
-	return loginRedirect(a.client, a.providerName, codeChallenge, codeVerifier)
+func (a *OIDCAuthHandler) GetLoginRedirectURL(codeChallenge string) string {
+	return loginRedirect(a.client, a.providerName, codeChallenge)
 }

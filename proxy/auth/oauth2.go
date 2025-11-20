@@ -99,6 +99,6 @@ func (o *OAuth2AuthHandler) RefreshToken(refreshToken string) (TokenData, *int64
 	return refreshOAuthToken(refreshToken, o.internalClient)
 }
 
-func (o *OAuth2AuthHandler) GetLoginRedirectURL(codeChallenge string, codeVerifier string) string {
-	return loginRedirect(o.client, o.providerName, codeChallenge, codeVerifier)
+func (o *OAuth2AuthHandler) GetLoginRedirectURL(codeChallenge string) string {
+	return loginRedirect(o.client, o.providerName, codeChallenge)
 }
