@@ -15,6 +15,10 @@ export type TokenResponse = {
    */
   token_type?: TokenResponse.token_type;
   /**
+   * OIDC ID token (JWT). Present when using OIDC with openid scope.
+   */
+  id_token?: string;
+  /**
    * OAuth2 refresh token.
    */
   refresh_token?: string;
