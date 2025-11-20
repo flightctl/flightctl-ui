@@ -19,10 +19,11 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import { isDynamicAuthProvider } from '../../../types/extraTypes';
 import { getErrorMessage } from '../../../utils/error';
 import PageWithPermissions from '../../common/PageWithPermissions';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 
 import CreateAuthProviderForm from './CreateAuthProviderForm';
 
@@ -39,6 +40,10 @@ const CreateAuthProvider = ({ authProviderId }: { authProviderId: string | undef
       setIsLoading(true);
       try {
         const provider = await get<AuthProvider>(`authproviders/${authProviderId}`);
+        // API should not return non-dynamic providers, but we add the check for safety
+        if (!isDynamicAuthProvider(provider)) {
+          throw new Error('Authentication providers of type ' + provider.spec.providerType + ' cannot be modified');
+        }
         setAuthProviderDetails(provider);
       } catch (e) {
         setError(getErrorMessage(e));
@@ -118,18 +123,20 @@ const CreateAuthProvider = ({ authProviderId }: { authProviderId: string | undef
   );
 };
 
+const createAuthProviderPermissions = [
+  { kind: RESOURCE.AUTH_PROVIDER, verb: VERB.CREATE },
+  { kind: RESOURCE.AUTH_PROVIDER, verb: VERB.PATCH },
+];
+
 const CreateAuthProviderWithPermissions = () => {
   const {
     router: { useParams },
   } = useAppContext();
   const { authProviderId } = useParams<{ authProviderId: string }>();
-  const [createAllowed, createLoading] = useAccessReview(RESOURCE.AUTH_PROVIDER, VERB.CREATE);
-  const [patchAllowed, patchLoading] = useAccessReview(RESOURCE.AUTH_PROVIDER, VERB.PATCH);
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [createAllowed, patchAllowed] = checkPermissions(createAuthProviderPermissions);
   return (
-    <PageWithPermissions
-      allowed={authProviderId ? patchAllowed : createAllowed}
-      loading={authProviderId ? patchLoading : createLoading}
-    >
+    <PageWithPermissions allowed={authProviderId ? patchAllowed : createAllowed} loading={loading}>
       <CreateAuthProvider authProviderId={authProviderId} />
     </PageWithPermissions>
   );

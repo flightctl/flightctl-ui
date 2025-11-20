@@ -14,13 +14,13 @@ import {
   ToolbarItem,
   Tooltip,
 } from '@patternfly/react-core';
+import CogIcon from '@patternfly/react-icons/dist/js/icons/cog-icon';
 import { useTranslation } from '../../hooks/useTranslation';
+import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { useOrganizationGuardContext } from './OrganizationGuard';
 import OrganizationSelector from './OrganizationSelector';
-import { ROUTE, useNavigate } from '../../hooks/useNavigate';
-import CogIcon from '@patternfly/react-icons/dist/js/icons/cog-icon';
-import { useAccessReview } from '../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../types/rbac';
+import { usePermissionsContext } from './PermissionsContext';
 
 type OrganizationDropdownProps = {
   organizationName?: string;
@@ -65,7 +65,8 @@ const PageNavigation = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { currentOrganization, availableOrganizations } = useOrganizationGuardContext();
-  const [isAdmin] = useAccessReview(RESOURCE.AUTH_PROVIDER, VERB.UPDATE);
+  const { checkPermissions } = usePermissionsContext();
+  const [isAdmin] = checkPermissions([{ kind: RESOURCE.AUTH_PROVIDER, verb: VERB.CREATE }]);
   const [showOrganizationModal, setShowOrganizationModal] = React.useState(false);
   const showOrganizationSelection = availableOrganizations.length > 1;
   const currentOrgDisplayName = currentOrganization?.spec?.displayName || currentOrganization?.metadata?.name || '';
@@ -94,18 +95,20 @@ const PageNavigation = () => {
                     />
                   </ToolbarItem>
                 )}
-                <ToolbarItem>
-                  <Tooltip content={t('Manage authentication providers')}>
-                    <Button
-                      variant="link"
-                      aria-label={t('Settings')}
-                      onClick={() => navigate(ROUTE.AUTH_PROVIDERS)}
-                      icon={<CogIcon />}
-                    >
-                      {t('Settings')}
-                    </Button>
-                  </Tooltip>
-                </ToolbarItem>
+                {isAdmin && (
+                  <ToolbarItem>
+                    <Tooltip content={t('Manage authentication providers')}>
+                      <Button
+                        variant="link"
+                        aria-label={t('Settings')}
+                        onClick={() => navigate(ROUTE.AUTH_PROVIDERS)}
+                        icon={<CogIcon />}
+                      >
+                        {t('Settings')}
+                      </Button>
+                    </Tooltip>
+                  </ToolbarItem>
+                )}
               </ToolbarContent>
             </Toolbar>
           </MastheadContent>

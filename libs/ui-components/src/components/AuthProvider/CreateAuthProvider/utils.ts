@@ -31,25 +31,32 @@ export const getAssignmentTypeLabel = (
   t: TFunction,
 ) => {
   switch (type) {
-    case OrgAssignmentType.Static:
+    case OrgAssignmentType.Static: {
       return t('Static');
-    case OrgAssignmentType.Dynamic:
+    }
+    case OrgAssignmentType.Dynamic: {
       return t('Dynamic');
-    case OrgAssignmentType.PerUser:
+    }
+    case OrgAssignmentType.PerUser: {
       return t('Per user');
-    default:
+    }
+    default: {
       return 'N/A';
+    }
   }
 };
 
 export const getProviderTypeLabel = (type: AuthProviderSpec['providerType'], t: TFunction) => {
   switch (type) {
-    case ProviderType.OIDC:
+    case ProviderType.OIDC: {
       return t('OIDC');
-    case ProviderType.OAuth2:
+    }
+    case ProviderType.OAuth2: {
       return t('OAuth2');
-    default:
+    }
+    default: {
       return 'N/A';
+    }
   }
 };
 
@@ -180,13 +187,14 @@ const isOrgAssignmentEqual = (a: AuthOrganizationAssignment, b: AuthOrganization
   }
 
   switch (a.type) {
-    case OrgAssignmentType.Static:
-      if (!isOrgAssignmentStatic(a) || !isOrgAssignmentStatic(b)) {
+    case OrgAssignmentType.Static: {
+      if (!isOrgAssignmentStatic(b)) {
         return false;
       }
       return (a.organizationName || '') === (b.organizationName || '');
-    case OrgAssignmentType.Dynamic:
-      if (!isOrgAssignmentDynamic(a) || !isOrgAssignmentDynamic(b)) {
+    }
+    case OrgAssignmentType.Dynamic: {
+      if (!isOrgAssignmentDynamic(b)) {
         return false;
       }
       const aClaimPath = a.claimPath || [];
@@ -201,16 +209,19 @@ const isOrgAssignmentEqual = (a: AuthOrganizationAssignment, b: AuthOrganization
         (a.organizationNamePrefix || '') === (b.organizationNamePrefix || '') &&
         (a.organizationNameSuffix || '') === (b.organizationNameSuffix || '')
       );
-    case OrgAssignmentType.PerUser:
-      if (!isOrgAssignmentPerUser(a) || !isOrgAssignmentPerUser(b)) {
+    }
+    case OrgAssignmentType.PerUser: {
+      if (!isOrgAssignmentPerUser(b)) {
         return false;
       }
       return (
         (a.organizationNamePrefix || '') === (b.organizationNamePrefix || '') &&
         (a.organizationNameSuffix || '') === (b.organizationNameSuffix || '')
       );
-    default:
+    }
+    default: {
       return false;
+    }
   }
 };
 
@@ -224,8 +235,8 @@ const isRoleAssignmentEqual = (a: AuthRoleAssignment, b: AuthRoleAssignment): bo
   }
 
   switch (a.type) {
-    case RoleAssignmentType.Static:
-      if (!isRoleAssignmentStatic(a) || !isRoleAssignmentStatic(b)) {
+    case RoleAssignmentType.Static: {
+      if (!isRoleAssignmentStatic(b)) {
         return false;
       }
       const aRoles = a.roles || [];
@@ -235,8 +246,9 @@ const isRoleAssignmentEqual = (a: AuthRoleAssignment, b: AuthRoleAssignment): bo
       }
       // Compare roles arrays (order matters for roles)
       return aRoles.every((val, idx) => val === bRoles[idx]);
-    case RoleAssignmentType.Dynamic:
-      if (!isRoleAssignmentDynamic(a) || !isRoleAssignmentDynamic(b)) {
+    }
+    case RoleAssignmentType.Dynamic: {
+      if (!isRoleAssignmentDynamic(b)) {
         return false;
       }
       const aClaimPath = a.claimPath || [];
@@ -249,8 +261,10 @@ const isRoleAssignmentEqual = (a: AuthRoleAssignment, b: AuthRoleAssignment): bo
         return false;
       }
       return (a.separator || DEFAULT_ROLE_SEPARATOR) === (b.separator || DEFAULT_ROLE_SEPARATOR);
-    default:
+    }
+    default: {
       return false;
+    }
   }
 };
 
@@ -464,23 +478,31 @@ export const authProviderSchema = (t: TFunction) => (values: AuthProviderFormVal
     scopes: Yup.array()
       .of(Yup.string())
       .test('unique-scopes', t('Please remove duplicate scopes'), (scopes) => {
-        const uniqueScopes = new Set(scopes);
+        const uniqueScopes = new Set(scopes || []);
         return uniqueScopes.size === scopes?.length;
       }),
     usernameClaim: Yup.array().of(Yup.string()),
     roleAssignmentType: Yup.string().oneOf(Object.values(RoleAssignmentType)),
     roleClaimPath: Yup.array()
       .of(Yup.string())
-      .when('roleAssignmentType', {
-        is: RoleAssignmentType.Dynamic,
-        then: (schema) => schema.min(1, t('At least one claim path segment is required for dynamic role assignment')),
+      .when('roleAssignmentType', (roleAssignmentType, schema) => {
+        const roleType = (
+          Array.isArray(roleAssignmentType) ? roleAssignmentType[0] : roleAssignmentType
+        ) as RoleAssignmentType;
+        return roleType === RoleAssignmentType.Dynamic
+          ? schema.min(1, t('At least one claim path segment is required for dynamic role assignment'))
+          : schema;
       }),
     roleSeparator: Yup.string().optional().nullable(),
     staticRoles: Yup.array()
       .of(Yup.string())
-      .when('roleAssignmentType', {
-        is: RoleAssignmentType.Static,
-        then: (schema) => schema.min(1, t('At least one role is required for static role assignment')),
+      .when('roleAssignmentType', (roleAssignmentType, schema) => {
+        const roleType = (
+          Array.isArray(roleAssignmentType) ? roleAssignmentType[0] : roleAssignmentType
+        ) as RoleAssignmentType;
+        return roleType === RoleAssignmentType.Static
+          ? schema.min(1, t('At least one role is required for static role assignment'))
+          : schema;
       }),
     orgAssignmentType: Yup.string()
       .oneOf(Object.values(OrgAssignmentType))

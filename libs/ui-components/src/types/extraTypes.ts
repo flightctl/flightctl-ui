@@ -2,6 +2,7 @@ import {
   AppType,
   ApplicationEnvVars,
   ApplicationVolumeProviderSpec,
+  AuthProvider,
   ConditionType,
   Device,
   EnrollmentRequest,
@@ -80,10 +81,15 @@ export type AlertManagerAlert = {
 
 // AuthProviders that can be added dynamically to the system can only be OAuth2 or OIDC.
 export type DynamicAuthProviderSpec = OIDCProviderSpec | OAuth2ProviderSpec;
+export type DynamicAuthProvider = AuthProvider & { spec: DynamicAuthProviderSpec };
+
+export const isDynamicAuthProvider = (provider: AuthProvider): provider is DynamicAuthProvider =>
+  provider.spec.providerType === ProviderType.OIDC || provider.spec.providerType === ProviderType.OAuth2;
 
 export enum ProviderType {
   OIDC = 'oidc',
   OAuth2 = 'oauth2',
   K8s = 'k8s',
   AAP = 'aap',
+  OpenShift = 'openshift',
 }

@@ -1,16 +1,6 @@
 import * as React from 'react';
 import { Bullseye, Page, PageSection } from '@patternfly/react-core';
-
-const THEME_DARK_CLASS = 'pf-v5-theme-dark';
-
-const updateThemeClass = (isDark: boolean) => {
-  const htmlElement = document.documentElement;
-  if (isDark) {
-    htmlElement.classList.add(THEME_DARK_CLASS);
-  } else {
-    htmlElement.classList.remove(THEME_DARK_CLASS);
-  }
-};
+import { updateThemeClass } from '@flightctl/ui-components/src/hooks/useThemePreferences';
 
 // Hook to detect browser's theme preference for login page (before user has preferences)
 const useBrowserTheme = () => {
@@ -20,12 +10,12 @@ const useBrowserTheme = () => {
 
   React.useEffect(() => {
     const darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)');
-    updateThemeClass(darkThemeMq.matches);
+    updateThemeClass(document.documentElement, darkThemeMq.matches ? 'dark' : 'light');
 
     // Listen for changes
     const listener = (e: MediaQueryListEvent) => {
       setIsDark(e.matches);
-      updateThemeClass(e.matches);
+      updateThemeClass(document.documentElement, e.matches ? 'dark' : 'light');
     };
 
     darkThemeMq.addEventListener('change', listener);

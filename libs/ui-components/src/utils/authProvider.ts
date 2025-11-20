@@ -7,10 +7,12 @@ export const getProviderDisplayName = (provider: AuthProvider, t: TFunction): st
   if ('displayName' in spec && spec.displayName) {
     return spec.displayName;
   }
+  if (provider.spec.providerType === ProviderType.OpenShift) {
+    return t('OpenShift');
+  }
   if (provider.spec.providerType === ProviderType.K8s) {
     return t('Kubernetes');
   }
-
   if (provider.spec.providerType === ProviderType.AAP) {
     return t('Ansible Automation Platform');
   }

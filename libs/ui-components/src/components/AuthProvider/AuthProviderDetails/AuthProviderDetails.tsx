@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { DropdownItem, DropdownList, Nav, NavList } from '@patternfly/react-core';
 
-import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { AuthProvider } from '@flightctl/types';
 
+import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
 import AuthProviderDetailsTab from './AuthProviderDetailsTab';
@@ -11,11 +11,16 @@ import DeleteAuthProviderModal from './DeleteAuthProviderModal';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { useAccessReview } from '../../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
 import NavItem from '../../NavItem/NavItem';
+
+const authProviderDetailsPermissions = [
+  { kind: RESOURCE.AUTH_PROVIDER, verb: VERB.DELETE },
+  { kind: RESOURCE.AUTH_PROVIDER, verb: VERB.PATCH },
+];
 
 const AuthProviderDetails = () => {
   const { t } = useTranslation();
@@ -34,8 +39,8 @@ const AuthProviderDetails = () => {
     navigate(ROUTE.AUTH_PROVIDERS);
   };
 
-  const [canDelete] = useAccessReview(RESOURCE.AUTH_PROVIDER, VERB.DELETE);
-  const [canEdit] = useAccessReview(RESOURCE.AUTH_PROVIDER, VERB.PATCH);
+  const { checkPermissions } = usePermissionsContext();
+  const [canDelete, canEdit] = checkPermissions(authProviderDetailsPermissions);
 
   return (
     <DetailsPage
@@ -94,7 +99,8 @@ const AuthProviderDetails = () => {
 };
 
 const AuthProviderDetailsWithPermissions = () => {
-  const [allowed, loading] = useAccessReview(RESOURCE.AUTH_PROVIDER, VERB.GET);
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [allowed] = checkPermissions([{ kind: RESOURCE.AUTH_PROVIDER, verb: VERB.GET }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <AuthProviderDetails />

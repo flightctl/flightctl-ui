@@ -5,11 +5,16 @@ import { Label } from '@patternfly/react-core';
 import { AuthProvider } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../hooks/useNavigate';
-import { useAccessReview } from '../../hooks/useAccessReview';
 import { RESOURCE, VERB } from '../../types/rbac';
+import { DynamicAuthProviderSpec } from '../../types/extraTypes';
 import { isOAuth2Provider } from './CreateAuthProvider/types';
 import { getProviderTypeLabel } from './CreateAuthProvider/utils';
-import { DynamicAuthProviderSpec } from '../../types/extraTypes';
+import { usePermissionsContext } from '../common/PermissionsContext';
+
+const authProviderPermissions = [
+  { kind: RESOURCE.AUTH_PROVIDER, verb: VERB.UPDATE },
+  { kind: RESOURCE.AUTH_PROVIDER, verb: VERB.DELETE },
+];
 
 const AuthProviderRow = ({ provider, onDeleteClick }: { provider: AuthProvider; onDeleteClick: VoidFunction }) => {
   const { t } = useTranslation();
@@ -17,8 +22,8 @@ const AuthProviderRow = ({ provider, onDeleteClick }: { provider: AuthProvider; 
   const providerName = provider.metadata.name || '';
   const providerSpec = provider.spec as DynamicAuthProviderSpec;
 
-  const [canUpdate] = useAccessReview(RESOURCE.AUTH_PROVIDER, VERB.UPDATE);
-  const [canDelete] = useAccessReview(RESOURCE.AUTH_PROVIDER, VERB.DELETE);
+  const { checkPermissions } = usePermissionsContext();
+  const [canEdit, canDelete] = checkPermissions(authProviderPermissions);
 
   const actions = [
     {
@@ -27,7 +32,7 @@ const AuthProviderRow = ({ provider, onDeleteClick }: { provider: AuthProvider; 
     },
   ];
 
-  if (canUpdate) {
+  if (canEdit) {
     actions.push({
       title: t('Edit'),
       onClick: () => navigate({ route: ROUTE.AUTH_PROVIDER_EDIT, postfix: providerName }),

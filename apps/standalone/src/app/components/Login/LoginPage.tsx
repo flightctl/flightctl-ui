@@ -13,9 +13,16 @@ import LoginPageLayout from './LoginPageLayout';
 import { loginAPI } from '../../utils/apiCalls';
 
 const redirectToProviderLogin = async (provider: AuthProvider) => {
-  // Backend generates PKCE parameters and stores code_verifier in a cookie
   const response = await fetch(`${loginAPI}?provider=${provider.metadata.name}`);
-  const { url } = (await response.json()) as { url: string };
+
+  if (!response.ok) {
+    throw new Error(`Login redirect failed with status ${response.status}`);
+  }
+
+  const { url } = (await response.json()) as { url?: string };
+  if (!url) {
+    throw new Error('Login redirect URL missing in response');
+  }
   window.location.href = url;
 };
 

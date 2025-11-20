@@ -26,8 +26,8 @@ import AuthProviderRow from './AuthProviderRow';
 import { useAuthProviders } from './useAuthProviders';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import PageWithPermissions from '../common/PageWithPermissions';
+import { usePermissionsContext } from '../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../types/rbac';
-import { useAccessReview } from '../../hooks/useAccessReview';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import DeleteAuthProviderModal from './AuthProviderDetails/DeleteAuthProviderModal';
 
@@ -49,7 +49,8 @@ const getColumns = (t: TFunction): ApiSortTableColumn[] => [
 const CreateAuthProviderButton = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [canCreate] = useAccessReview(RESOURCE.AUTH_PROVIDER, VERB.CREATE);
+  const { checkPermissions } = usePermissionsContext();
+  const [canCreate] = checkPermissions([{ kind: RESOURCE.AUTH_PROVIDER, verb: VERB.CREATE }]);
 
   return (
     canCreate && (
@@ -124,11 +125,12 @@ const AuthProvidersTable = () => {
 const AuthProvidersPage = () => {
   const { t } = useTranslation();
 
-  const [allowed, loading] = useAccessReview(RESOURCE.AUTH_PROVIDER, VERB.LIST);
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [canList] = checkPermissions([{ kind: RESOURCE.AUTH_PROVIDER, verb: VERB.LIST }]);
   const navigate = useNavigate();
 
   return (
-    <PageWithPermissions allowed={allowed} loading={loading}>
+    <PageWithPermissions allowed={canList} loading={loading}>
       <PageSection variant="light" type="breadcrumb">
         <Stack hasGutter>
           <StackItem>
