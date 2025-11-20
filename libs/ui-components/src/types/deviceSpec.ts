@@ -1,14 +1,16 @@
 import {
+  ApplicationVolume,
   AppType,
   ConfigProviderSpec,
   DisruptionBudget,
   GitConfigProviderSpec,
   HttpConfigProviderSpec,
   ImageApplicationProviderSpec,
-  ImagePullPolicy,
+  ImageVolumeSource,
   InlineApplicationProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
+  VolumeMount,
 } from '@flightctl/types';
 import { FlightCtlLabel } from './extraTypes';
 import { UpdateScheduleMode } from '../utils/time';
@@ -49,11 +51,7 @@ type AppBase = {
   appType?: AppType;
   name?: string;
   variables: { name: string; value: string }[];
-  volumes?: {
-    name: string;
-    reference: string;
-    pullPolicy?: ImagePullPolicy;
-  }[];
+  volumes?: ApplicationVolumeForm[];
 };
 
 export type ImageAppForm = AppBase & {
@@ -102,6 +100,11 @@ export const isImageAppProvider = (app: ApplicationProviderSpecFixed): app is Im
 export const isImageAppForm = (app: AppBase): app is ImageAppForm => app.specType === AppSpecType.OCI_IMAGE;
 export const isInlineAppForm = (app: AppBase): app is InlineAppForm => app.specType === AppSpecType.INLINE;
 export const isQuadletAppForm = (app: AppBase): app is QuadletAppForm => app.appType === AppType.AppTypeQuadlet;
+
+export type ApplicationVolumeForm = ApplicationVolume & {
+  image?: ImageVolumeSource;
+  mount?: VolumeMount;
+};
 
 const hasTemplateVariables = (str: string) => /{{.+?}}/.test(str);
 

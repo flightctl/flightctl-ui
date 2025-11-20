@@ -2,12 +2,15 @@ import {
   AppType,
   // eslint-disable-next-line no-restricted-imports
   ApplicationProviderSpec,
+  ApplicationVolume,
   ConfigProviderSpec,
   DeviceSpec,
   EncodingType,
   FileSpec,
   GitConfigProviderSpec,
   HttpConfigProviderSpec,
+  ImageMountVolumeProviderSpec,
+  ImagePullPolicy,
   InlineApplicationProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
@@ -209,13 +212,21 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
     return acc;
   }, {});
 
-  const volumes = app.volumes?.map((v) => ({
-    name: v.name,
-    image: {
-      reference: v.reference,
-      pullPolicy: v.pullPolicy,
-    },
-  }));
+  const volumes = app.volumes?.map((v) => {
+    // @ts-expect-error We will only set the fields that are present
+    const volume: ApplicationVolume = {
+      name: v.name,
+    };
+    // It's either one of the two fields, or both.
+    // ImageMountVolumeProviderSpec is the spec that has both fields
+    if (v.image) {
+      (volume as ImageMountVolumeProviderSpec).image = v.image;
+    }
+    if (v.mount) {
+      (volume as ImageMountVolumeProviderSpec).mount = v.mount;
+    }
+    return volume;
+  });
 
   if (isImageAppForm(app)) {
     const data: ApplicationProviderSpec = {
@@ -393,8 +404,7 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
         image: app.image,
         appType: app.appType,
         variables: getAppFormVariables(app),
-        // TODO EDM-2324: Add proper support for volumes
-        volumes: [] as ImageAppForm['volumes'],
+        volumes: app.volumes || [],
       };
     }
 
@@ -406,7 +416,7 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
       name: app.name || '',
       files: inlineApp.inline,
       variables: getAppFormVariables(app),
-      volumes: inlineApp.volumes,
+      volumes: app.volumes || [],
     } as InlineAppForm;
   });
 };
