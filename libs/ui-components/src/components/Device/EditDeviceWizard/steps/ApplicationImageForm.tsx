@@ -5,14 +5,14 @@ import TextField from '../../../form/TextField';
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useAppLinks } from '../../../../hooks/useAppLinks';
-import { ImageAppForm } from '../../../../types/deviceSpec';
+import { ComposeImageAppForm, QuadletImageAppForm } from '../../../../types/deviceSpec';
 
 const ApplicationImageForm = ({
   app,
   index,
   isReadOnly,
 }: {
-  app: ImageAppForm;
+  app: QuadletImageAppForm | ComposeImageAppForm;
   index: number;
   isReadOnly?: boolean;
 }) => {
