@@ -10,22 +10,25 @@ import (
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
+	"github.com/flightctl/flightctl/api/v1alpha1"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 type TokenAuthProvider struct {
 	apiTlsConfig *tls.Config
 	authURL      string
+	providerName string
 }
 
 type TokenLoginParameters struct {
 	Token string `json:"token"`
 }
 
-func NewTokenAuthProvider(apiTlsConfig *tls.Config, authURL string) *TokenAuthProvider {
+func NewTokenAuthProvider(apiTlsConfig *tls.Config, authURL string, providerName string) *TokenAuthProvider {
 	return &TokenAuthProvider{
 		apiTlsConfig: apiTlsConfig,
 		authURL:      authURL,
+		providerName: providerName,
 	}
 }
 
@@ -73,7 +76,7 @@ func (t *TokenAuthProvider) ValidateToken(token string) (TokenData, *int64, erro
 
 	// Store the validated K8s JWT token
 	tokenData := TokenData{
-		Token:        token,
+		IDToken:      token,
 		RefreshToken: "",
 	}
 
@@ -169,32 +172,11 @@ func ExtractUsernameFromToken(token string) (string, error) {
 }
 
 // GetUserInfo retrieves user information from the provided JWT token
-func (t *TokenAuthProvider) GetUserInfo(token string) (string, *http.Response, error) {
-	// For K8s, extract username from the JWT token
-	if token == "" {
-		return "", nil, fmt.Errorf("token is required for K8s userinfo")
-	}
-
-	// Check if token is expired
-	expiresIn := extractTokenExpiration(token)
-	if expiresIn != nil && *expiresIn == 0 {
-		resp := &http.Response{
-			StatusCode: http.StatusUnauthorized,
-		}
-		return "", resp, fmt.Errorf("token has expired")
-	}
-
-	username, err := ExtractUsernameFromToken(token)
-	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to extract username from token")
-		return "", nil, err
-	}
-
+func (t *TokenAuthProvider) GetUserInfo(tokenData TokenData) (string, *http.Response, error) {
 	resp := &http.Response{
-		StatusCode: http.StatusOK,
+		StatusCode: http.StatusInternalServerError,
 	}
-
-	return username, resp, nil
+	return "", resp, fmt.Errorf("User information should be retrieved through the flightctl API")
 }
 
 // RefreshToken is not applicable for K8s token auth
@@ -209,22 +191,23 @@ func (t *TokenAuthProvider) Logout(token string) (string, error) {
 }
 
 // GetLoginRedirectURL is not applicable for token auth
-func (t *TokenAuthProvider) GetLoginRedirectURL() string {
+func (t *TokenAuthProvider) GetLoginRedirectURL(codeChallenge string, codeVerifier string) string {
 	return ""
 }
 
 // getK8sAuthHandler creates a new K8s token authentication handler
-func getK8sAuthHandler(authURL string, internalAuthURL *string) (*TokenAuthProvider, error) {
+func getK8sAuthHandler(provider *v1alpha1.AuthProvider, k8sSpec *v1alpha1.K8sProviderSpec) (*TokenAuthProvider, error) {
+	providerName := extractProviderName(provider)
+
 	// Use API TLS config since we're calling the FlightCtl API to validate tokens
 	tlsConfig, err := bridge.GetTlsConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	url := authURL
-	if internalAuthURL != nil {
-		url = *internalAuthURL
-	}
+	// For K8s token auth, we don't need authURL for the provider itself
+	// The token validation happens against the FlightCtl API
+	authURL := ""
 
-	return NewTokenAuthProvider(tlsConfig, url), nil
+	return NewTokenAuthProvider(tlsConfig, authURL, providerName), nil
 }

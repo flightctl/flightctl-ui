@@ -12,8 +12,8 @@ github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 h1:NMZiJj8QnKe1LgsbDayM4UoHwbvw
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0/go.mod h1:ZXNYxsqcloTdSy/rNShjYzMhyjf0LaoftYK0p+A3h40=
 github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
 github.com/felixge/httpsnoop v1.0.4/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
-github.com/flightctl/flightctl v1.0.0-main.0.20251113083308-3f1bc5ade635 h1:v6Qw29IXC/Qmh41R4UK80XO0s212cLyOiguGLzKMA9Y=
-github.com/flightctl/flightctl v1.0.0-main.0.20251113083308-3f1bc5ade635/go.mod h1:+ZOPs3gV3QH9S4K5SGNWs0l3nP/UTPmVTCORNtYA9tA=
+github.com/flightctl/flightctl v1.0.0-main.0.20251119121430-1919682154b5 h1:aLP6In+L7qRtubwket/8wdHj9C2RnubgX2hlhey5iog=
+github.com/flightctl/flightctl v1.0.0-main.0.20251119121430-1919682154b5/go.mod h1:V9peeoF0VazgcV19mzGsFHhaNp1GY3LdQSx452LXF3k=
 github.com/fxamacker/cbor/v2 v2.7.0 h1:iM5WgngdRBanHcxugY4JySA0nk1wZorNOpTgCMedv5E=
 github.com/fxamacker/cbor/v2 v2.7.0/go.mod h1:pxXPTn3joSm21Gbwsv0w9OSA2y1HFR9qXEeXQVeNoDQ=
 github.com/getkin/kin-openapi v0.132.0 h1:3ISeLMsQzcb5v26yeJrBcdTCEQTag36ZjaGk7MIRUwk=

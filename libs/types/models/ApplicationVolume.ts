@@ -3,10 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ImageVolumeProviderSpec } from './ImageVolumeProviderSpec';
-export type ApplicationVolume = ({
+export type ApplicationVolume = {
   /**
    * Unique name of the volume used within the application.
    */
   name: string;
-} & ImageVolumeProviderSpec);
-
+} & ImageVolumeProviderSpec;

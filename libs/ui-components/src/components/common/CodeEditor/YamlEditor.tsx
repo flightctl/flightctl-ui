@@ -5,7 +5,7 @@ import { dump, load } from 'js-yaml';
 import { compare } from 'fast-json-patch';
 import type * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
-import { Device, Fleet, PatchRequest, Repository, ResourceKind } from '@flightctl/types';
+import { AuthProvider, Device, Fleet, PatchRequest, Repository, ResourceKind } from '@flightctl/types';
 import { fromAPILabel } from '../../../utils/labels';
 import { getLabelPatches } from '../../../utils/patch';
 import { getErrorMessage, isResourceVersionTestFailure } from '../../../utils/error';
@@ -16,7 +16,7 @@ import YamlEditorBase from './YamlEditorBase';
 
 import './YamlEditor.css';
 
-type FlightCtlYamlResource = Fleet | Device | Repository;
+type FlightCtlYamlResource = Fleet | Device | Repository | AuthProvider;
 
 type YamlEditorProps<R extends FlightCtlYamlResource> = Partial<Omit<PfCodeEditorProps, 'ref' | 'code'>> & {
   /** FlightCtl resource to display in the editor. */
@@ -51,6 +51,8 @@ const getResourceEndpoint = (obj: FlightCtlYamlResource) => {
       return `devices/${resourceName}`;
     case ResourceKind.REPOSITORY:
       return `repositories/${resourceName}`;
+    case ResourceKind.AUTH_PROVIDER:
+      return `authproviders/${resourceName}`;
     default:
       throw new Error(`Unsupported resource kind: ${kind}`);
   }

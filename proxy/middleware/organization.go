@@ -69,6 +69,9 @@ func shouldAddOrgIDFromHeader(path string) bool {
 	if strings.HasPrefix(path, "/api/flightctl/api/v1/organizations") {
 		return false
 	}
+	if strings.HasPrefix(path, "/api/flightctl/api/v1/auth/config") {
+		return false
+	}
 
 	return isFlightCtlAPICall(path) || isAlertsAPICall(path)
 }

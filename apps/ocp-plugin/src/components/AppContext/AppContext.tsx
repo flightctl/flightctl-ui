@@ -53,7 +53,12 @@ const appRoutes = {
   [ROUTE.RESOURCE_SYNC_DETAILS]: '/edge/resourcesyncs',
   [ROUTE.ENROLLMENT_REQUESTS]: '/edge/enrollmentrequests',
   [ROUTE.ENROLLMENT_REQUEST_DETAILS]: '/edge/enrollmentrequests',
+  // Unimplemented UI routes for OCP plugin
   [ROUTE.COMMAND_LINE_TOOLS]: '/', // CLI downloads are shown embedded in OCP's CLI downloads page and not as an independent route
+  [ROUTE.AUTH_PROVIDERS]: '/', // Authentication providers must be defined in the OpenShift Console, not through Flight Control
+  [ROUTE.AUTH_PROVIDER_CREATE]: '/',
+  [ROUTE.AUTH_PROVIDER_EDIT]: '/',
+  [ROUTE.AUTH_PROVIDER_DETAILS]: '/',
 };
 
 export const useValuesAppContext = (): AppContextProps => {

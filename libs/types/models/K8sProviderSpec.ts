@@ -21,10 +21,6 @@ export type K8sProviderSpec = {
    */
   apiUrl: string;
   /**
-   * The external OpenShift API URL (for external access).
-   */
-  externalOpenShiftApiUrl?: string;
-  /**
    * The RBAC namespace for permissions.
    */
   rbacNs?: string;

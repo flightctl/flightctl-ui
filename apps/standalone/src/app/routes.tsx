@@ -23,8 +23,8 @@ import ErrorBoundary from '@flightctl/ui-components/src/components/common/ErrorB
 
 import AppLayout from './components/AppLayout/AppLayout';
 import NotFound from './components/AppLayout/NotFound';
+import LoginPage from './components/Login/LoginPage';
 import { AuthContext } from './context/AuthContext';
-import { LoginPage } from './components/Login/LoginPage';
 
 const EnrollmentRequestDetails = React.lazy(
   () =>
@@ -68,6 +68,15 @@ const PendingEnrollmentRequestsBadge = React.lazy(
 );
 const CommandLineToolsPage = React.lazy(
   () => import('@flightctl/ui-components/src/components/Masthead/CommandLineToolsPage'),
+);
+const AuthProvidersPage = React.lazy(
+  () => import('@flightctl/ui-components/src/components/AuthProvider/AuthProvidersPage'),
+);
+const CreateAuthProvider = React.lazy(
+  () => import('@flightctl/ui-components/src/components/AuthProvider/CreateAuthProvider/CreateAuthProvider'),
+);
+const AuthProviderDetails = React.lazy(
+  () => import('@flightctl/ui-components/src/components/AuthProvider/AuthProviderDetails/AuthProviderDetails'),
 );
 
 export type ExtendedRouteObject = RouteObject & {
@@ -305,12 +314,49 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
       </TitledRoute>
     ),
   },
+  {
+    path: '/admin/authproviders',
+    title: t('Authentication Providers'),
+    element: (
+      <TitledRoute title={t('Authentication Providers')}>
+        <AuthProvidersPage />
+      </TitledRoute>
+    ),
+  },
+  {
+    path: '/admin/authproviders/create',
+    title: t('Create Authentication Provider'),
+    element: (
+      <TitledRoute title={t('Create Authentication Provider')}>
+        <CreateAuthProvider />
+      </TitledRoute>
+    ),
+  },
+  {
+    path: '/admin/authproviders/edit/:authProviderId',
+    title: t('Edit Authentication Provider'),
+    element: (
+      <TitledRoute title={t('Edit Authentication Provider')}>
+        <CreateAuthProvider />
+      </TitledRoute>
+    ),
+  },
+  {
+    path: '/admin/authproviders/:authProviderId/*',
+    title: t('Authentication Provider Details'),
+    element: (
+      <TitledRoute title={t('Authentication Provider Details')}>
+        <AuthProviderDetails />
+      </TitledRoute>
+    ),
+  },
 ];
 
 const AppRouter = () => {
   const { t } = useTranslation();
 
-  const { loading, error } = React.useContext(AuthContext);
+  const { username, loading, authEnabled, error } = React.useContext(AuthContext);
+
   if (error) {
     return (
       <Bullseye>
@@ -341,10 +387,25 @@ const AppRouter = () => {
     );
   }
 
+  // Check if user needs to authenticate
+  const isAuthenticated = !authEnabled || !!username;
+  const isLoginPage = window.location.pathname === '/login';
+  const isCallbackPage = window.location.pathname === '/callback';
+
+  // Redirect to login if not authenticated and not already on login/callback page
+  if (!isAuthenticated && !isLoginPage && !isCallbackPage) {
+    window.location.href = '/login';
+    return null;
+  }
+
   const router = createBrowserRouter([
     {
       path: '/login',
       element: <LoginPage />,
+    },
+    {
+      path: '/callback',
+      element: <Navigate to="/" replace />,
     },
     {
       path: '/',

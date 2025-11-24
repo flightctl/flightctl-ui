@@ -11,12 +11,9 @@ import (
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
+	"github.com/flightctl/flightctl/api/v1alpha1"
 	"github.com/openshift/osincli"
 )
-
-type OIDCUserInfo struct {
-	Username string `json:"preferred_username,omitempty"`
-}
 
 type OIDCAuthHandler struct {
 	tlsConfig          *tls.Config
@@ -25,6 +22,9 @@ type OIDCAuthHandler struct {
 	endSessionEndpoint string
 	userInfoEndpoint   string
 	authURL            string
+	tokenEndpoint      string
+	clientId           string
+	providerName       string
 }
 
 type oidcServerResponse struct {
@@ -34,7 +34,21 @@ type oidcServerResponse struct {
 	EndSessionEndpoint string `json:"end_session_endpoint"`
 }
 
-func getOIDCAuthHandler(authURL string, internalAuthURL *string) (*OIDCAuthHandler, error) {
+func getOIDCAuthHandler(provider *v1alpha1.AuthProvider, oidcSpec *v1alpha1.OIDCProviderSpec) (*OIDCAuthHandler, error) {
+	providerName := extractProviderName(provider)
+
+	if oidcSpec.Issuer == "" {
+		return nil, fmt.Errorf("OIDC provider %s missing Issuer", providerName)
+	}
+
+	if oidcSpec.ClientId == "" {
+		return nil, fmt.Errorf("OIDC provider %s missing ClientId", providerName)
+	}
+
+	authURL := oidcSpec.Issuer
+	clientId := oidcSpec.ClientId
+	internalAuthURL := (*string)(nil) // OIDC doesn't use internalAuthURL for now
+
 	tlsConfig, err := bridge.GetAuthTlsConfig()
 	if err != nil {
 		return nil, err
@@ -73,7 +87,7 @@ func getOIDCAuthHandler(authURL string, internalAuthURL *string) (*OIDCAuthHandl
 		return nil, fmt.Errorf("failed to parse oidc config: %w", err)
 	}
 
-	internalClient, err := getOIDCClient(oidcResponse, tlsConfig)
+	internalClient, err := getOIDCClient(oidcResponse, tlsConfig, clientId, oidcSpec.Scopes)
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +99,9 @@ func getOIDCAuthHandler(authURL string, internalAuthURL *string) (*OIDCAuthHandl
 		endSessionEndpoint: oidcResponse.EndSessionEndpoint,
 		userInfoEndpoint:   oidcResponse.UserInfoEndpoint,
 		authURL:            authURL,
+		tokenEndpoint:      oidcResponse.TokenEndpoint,
+		clientId:           clientId,
+		providerName:       providerName,
 	}
 
 	if internalAuthURL != nil {
@@ -94,12 +111,13 @@ func getOIDCAuthHandler(authURL string, internalAuthURL *string) (*OIDCAuthHandl
 			UserInfoEndpoint:   replaceBaseURL(oidcResponse.UserInfoEndpoint, *internalAuthURL, authURL),
 			EndSessionEndpoint: replaceBaseURL(oidcResponse.EndSessionEndpoint, *internalAuthURL, authURL),
 		}
-		client, err := getOIDCClient(extConfig, tlsConfig)
+		client, err := getOIDCClient(extConfig, tlsConfig, clientId, oidcSpec.Scopes)
 		if err != nil {
 			return nil, err
 		}
 		handler.client = client
 		handler.endSessionEndpoint = extConfig.EndSessionEndpoint
+		handler.tokenEndpoint = extConfig.TokenEndpoint
 	}
 
 	return handler, nil
@@ -125,14 +143,15 @@ func replaceBaseURL(endpoint, oldBase, newBase string) string {
 	return endpointURL.String()
 }
 
-func getOIDCClient(oidcConfig oidcServerResponse, tlsConfig *tls.Config) (*osincli.Client, error) {
-	scope := "openid"
+func getOIDCClient(oidcConfig oidcServerResponse, tlsConfig *tls.Config, clientId string, providerScopes *[]string) (*osincli.Client, error) {
+	defaultScopes := "openid profile email"
 	if config.IsOrganizationsEnabled() {
-		scope = "openid organization:*"
+		defaultScopes += " organization:*"
 	}
+	scope := buildScopeParam(providerScopes, defaultScopes)
 
 	oidcClientConfig := &osincli.ClientConfig{
-		ClientId:                 config.AuthClientId,
+		ClientId:                 clientId,
 		AuthorizeUrl:             oidcConfig.AuthEndpoint,
 		TokenUrl:                 oidcConfig.TokenEndpoint,
 		RedirectUrl:              config.BaseUiUrl + "/callback",
@@ -154,26 +173,14 @@ func getOIDCClient(oidcConfig oidcServerResponse, tlsConfig *tls.Config) (*osinc
 }
 
 func (a *OIDCAuthHandler) GetToken(loginParams LoginParameters) (TokenData, *int64, error) {
-	return exchangeToken(loginParams, a.internalClient)
+	return exchangeToken(loginParams, a.internalClient, a.tokenEndpoint, a.clientId, config.BaseUiUrl+"/callback")
 }
 
-func (o *OIDCAuthHandler) GetUserInfo(token string) (string, *http.Response, error) {
-	body, resp, err := getUserInfo(token, o.tlsConfig, o.authURL, o.userInfoEndpoint)
-
-	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to get user info")
-		return "", resp, err
+func (o *OIDCAuthHandler) GetUserInfo(tokenData TokenData) (string, *http.Response, error) {
+	resp := &http.Response{
+		StatusCode: http.StatusInternalServerError,
 	}
-
-	if body != nil {
-		userInfo := OIDCUserInfo{}
-		if err := json.Unmarshal(*body, &userInfo); err != nil {
-			return "", resp, fmt.Errorf("failed to unmarshal OIDC user response: %w", err)
-		}
-		return userInfo.Username, resp, nil
-	}
-
-	return "", resp, nil
+	return "", resp, fmt.Errorf("User information should be retrieved through the flightctl API")
 }
 
 func (o *OIDCAuthHandler) Logout(token string) (string, error) {
@@ -185,7 +192,7 @@ func (o *OIDCAuthHandler) Logout(token string) (string, error) {
 
 	uq := u.Query()
 	uq.Add("post_logout_redirect_uri", config.BaseUiUrl)
-	uq.Add("client_id", config.AuthClientId)
+	uq.Add("client_id", o.clientId)
 	u.RawQuery = uq.Encode()
 	return u.String(), nil
 }
@@ -194,6 +201,6 @@ func (o *OIDCAuthHandler) RefreshToken(refreshToken string) (TokenData, *int64, 
 	return refreshOAuthToken(refreshToken, o.internalClient)
 }
 
-func (a *OIDCAuthHandler) GetLoginRedirectURL() string {
-	return loginRedirect(a.client)
+func (a *OIDCAuthHandler) GetLoginRedirectURL(codeChallenge string, codeVerifier string) string {
+	return loginRedirect(a.client, a.providerName, codeChallenge, codeVerifier)
 }
