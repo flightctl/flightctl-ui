@@ -1,13 +1,16 @@
 import {
+  AppType,
+  ApplicationVolume,
   ConfigProviderSpec,
   DisruptionBudget,
   GitConfigProviderSpec,
   HttpConfigProviderSpec,
   ImageApplicationProviderSpec,
-  ImagePullPolicy,
+  ImageVolumeSource,
   InlineApplicationProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
+  VolumeMount,
 } from '@flightctl/types';
 import { FlightCtlLabel } from './extraTypes';
 import { UpdateScheduleMode } from '../utils/time';
@@ -45,23 +48,30 @@ type InlineContent = {
 
 type AppBase = {
   specType: AppSpecType;
-  // appType: AppType - commented out for now, since it only accepts one value ("compose")
+  appType: AppType;
   name?: string;
   variables: { name: string; value: string }[];
-  volumes?: {
-    name: string;
-    reference: string;
-    pullPolicy?: ImagePullPolicy;
-  }[];
+  volumes?: ApplicationVolumeForm[];
 };
 
-export type InlineAppForm = AppBase & {
+export type ImageAppForm = AppBase & {
+  appType: AppType.AppTypeCompose | AppType.AppTypeQuadlet;
+  image: string;
+};
+
+export type InlineAppForm = ComposeAppForm | QuadletAppForm;
+
+export type ComposeAppForm = AppBase & {
+  appType: AppType.AppTypeCompose;
   name: string; // name can only be optional for image applications
   files: InlineContent[];
 };
 
-export type ImageAppForm = AppBase & {
-  image: string;
+// Technically it's the same as ComposeAppForm, with a different "appType"
+export type QuadletAppForm = AppBase & {
+  appType: AppType.AppTypeQuadlet;
+  name: string; // name can only be optional for image applications
+  files: InlineContent[];
 };
 
 export const isGitConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is GitConfigTemplate =>
@@ -90,6 +100,12 @@ export const isImageAppProvider = (app: ApplicationProviderSpecFixed): app is Im
 
 export const isImageAppForm = (app: AppBase): app is ImageAppForm => app.specType === AppSpecType.OCI_IMAGE;
 export const isInlineAppForm = (app: AppBase): app is InlineAppForm => app.specType === AppSpecType.INLINE;
+export const isQuadletAppForm = (app: AppBase): app is QuadletAppForm => app.appType === AppType.AppTypeQuadlet;
+
+export type ApplicationVolumeForm = ApplicationVolume & {
+  image?: ImageVolumeSource;
+  mount?: VolumeMount;
+};
 
 const hasTemplateVariables = (str: string) => /{{.+?}}/.test(str);
 

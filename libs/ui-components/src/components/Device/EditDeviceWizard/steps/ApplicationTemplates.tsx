@@ -1,10 +1,12 @@
 import * as React from 'react';
 
-import { Button, FormGroup, FormSection, Grid, Split, SplitItem } from '@patternfly/react-core';
+import { Button, FormGroup, FormSection, Grid, Split, SplitItem, Stack, StackItem } from '@patternfly/react-core';
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
+import { TFunction } from 'i18next';
 
+import { AppType } from '@flightctl/types';
 import {
   AppForm,
   AppSpecType,
@@ -15,6 +17,7 @@ import {
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import FormSelect from '../../../form/FormSelect';
+import RadioField from '../../../form/RadioField';
 import ErrorHelperText from '../../../form/FieldHelperText';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
@@ -23,46 +26,54 @@ import ApplicationInlineForm from './ApplicationInlineForm';
 
 import './ApplicationsForm.css';
 
+const appTypeOptions = (t: TFunction) => ({
+  [AppType.AppTypeQuadlet]: t('Quadlet application'),
+  [AppType.AppTypeCompose]: t('Compose application'),
+});
+
 const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
   const appFieldName = `applications[${index}]`;
   const [{ value: app }, { error }, { setValue }] = useField<AppForm>(appFieldName);
-  const isInlineIncomplete = app.specType === AppSpecType.INLINE && !('files' in app);
   const isImageIncomplete = app.specType === AppSpecType.OCI_IMAGE && !('image' in app);
+  const isInlineIncomplete = app.specType === AppSpecType.INLINE && !('files' in app);
+  const shouldResetApp = isInlineIncomplete || isImageIncomplete;
+
   // @ts-expect-error Formik error object includes "variables"
   const appVarsError = typeof error?.variables === 'string' ? (error.variables as string) : undefined; // eslint-disable @typescript-eslint/no-unsafe-assignment
 
-  const appTypes = React.useMemo(() => {
-    return {
-      [AppSpecType.INLINE]: t('Inline application'),
-      [AppSpecType.OCI_IMAGE]: t('Image based application'),
-    };
-  }, [t]);
+  const appTypesOptions = appTypeOptions(t);
 
   React.useEffect(() => {
-    // When switching types, setting the new required fields and clearing those from the old type
-    if (isInlineIncomplete) {
-      setValue(
-        {
-          specType: AppSpecType.INLINE,
-          name: app.name || '',
-          files: [{ path: '', content: '' }],
-          variables: [],
-        },
-        false,
-      );
-    } else if (isImageIncomplete) {
-      setValue(
-        {
-          specType: AppSpecType.OCI_IMAGE,
-          name: app.name || '',
-          image: '',
-          variables: [],
-        },
-        false,
-      );
+    // When switching specType, the app becomes "incomplete" and we must add the required fields for the new type
+    if (shouldResetApp) {
+      if (app.specType === AppSpecType.INLINE) {
+        // Switching to inline - need files
+        setValue(
+          {
+            specType: AppSpecType.INLINE,
+            appType: app.appType,
+            name: app.name || '',
+            files: [{ path: '', content: '' }],
+            variables: [],
+          } as AppForm,
+          false,
+        );
+      } else if (app.specType === AppSpecType.OCI_IMAGE) {
+        // Switching to image - need image field
+        setValue(
+          {
+            specType: AppSpecType.OCI_IMAGE,
+            appType: app.appType,
+            name: app.name || '',
+            image: '',
+            variables: [],
+          } as AppForm,
+          false,
+        );
+      }
     }
-  }, [isImageIncomplete, isInlineIncomplete, app.name, setValue]);
+  }, [shouldResetApp, app.specType, app.appType, app.name, setValue]);
 
   return (
     <ExpandableFormSection
@@ -73,12 +84,57 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
       <Grid hasGutter>
         <FormGroup label={t('Application type')} isRequired>
           <FormSelect
-            items={appTypes}
-            name={`${appFieldName}.specType`}
+            items={appTypesOptions}
+            name={`${appFieldName}.appType`}
             placeholderText={t('Select an application type')}
             isDisabled={isReadOnly}
           />
         </FormGroup>
+
+        <FormGroupWithHelperText
+          label={t('Definition source')}
+          isRequired
+          content={
+            <Stack hasGutter>
+              <StackItem>
+                <strong>{t('Configuration Sources')}:</strong>
+              </StackItem>
+              <StackItem>
+                <u>
+                  <li>
+                    <strong>{t('OCI reference')}</strong> -{' '}
+                    {t('Pull definitions from container registry (reusable, versioned).')}
+                  </li>
+                  <li>
+                    <strong>{t('Inline')}</strong> -{' '}
+                    {t('Define application files directly in this interface (custom, one-off).')}
+                  </li>
+                </u>
+              </StackItem>
+            </Stack>
+          }
+        >
+          <Split hasGutter>
+            <SplitItem>
+              <RadioField
+                id={`${appFieldName}-spec-type-image`}
+                name={`${appFieldName}.specType`}
+                label={t('OCI reference URL')}
+                checkedValue={AppSpecType.OCI_IMAGE}
+                isDisabled={isReadOnly}
+              />
+            </SplitItem>
+            <SplitItem>
+              <RadioField
+                id={`${appFieldName}-spec-type-inline`}
+                name={`${appFieldName}.specType`}
+                label={t('Inline')}
+                checkedValue={AppSpecType.INLINE}
+                isDisabled={isReadOnly}
+              />
+            </SplitItem>{' '}
+          </Split>
+        </FormGroupWithHelperText>
 
         <FormGroupWithHelperText
           label={t('Application name')}
@@ -171,52 +227,61 @@ const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
       label={t('Application workloads')}
       content={t('Define the application workloads that shall run on the device.')}
     >
-      <FieldArray name="applications">
-        {({ push, remove }) => (
-          <>
-            {values.applications.map((_app, index) => (
-              <FormSection key={index}>
-                <Split hasGutter>
-                  <SplitItem isFilled>
-                    <ApplicationSection index={index} isReadOnly={isReadOnly} />
-                  </SplitItem>
-                  {!isReadOnly && (
-                    <SplitItem>
-                      <Button
-                        aria-label={t('Delete application')}
-                        variant="link"
-                        icon={<MinusCircleIcon />}
-                        iconPosition="start"
-                        onClick={() => remove(index)}
-                      />
+      <>
+        <small>
+          {t(
+            'Configure containerized applications and services that will run on your fleet devices. You can deploy single containers, Quadlet applications for advanced container orchestration or inline applications with custom files.',
+          )}
+        </small>
+        <FieldArray name="applications">
+          {({ push, remove }) => (
+            <>
+              {values.applications.map((_app, index) => (
+                <FormSection key={index}>
+                  <Split hasGutter>
+                    <SplitItem isFilled>
+                      <ApplicationSection index={index} isReadOnly={isReadOnly} />
                     </SplitItem>
-                  )}
-                </Split>
-              </FormSection>
-            ))}
+                    {!isReadOnly && (
+                      <SplitItem>
+                        <Button
+                          aria-label={t('Delete application')}
+                          variant="link"
+                          icon={<MinusCircleIcon />}
+                          iconPosition="start"
+                          onClick={() => remove(index)}
+                        />
+                      </SplitItem>
+                    )}
+                  </Split>
+                </FormSection>
+              ))}
 
-            {!isReadOnly && (
-              <FormSection>
-                <FormGroup>
-                  <Button
-                    variant="link"
-                    icon={<PlusCircleIcon />}
-                    iconPosition="start"
-                    onClick={() => {
-                      push({
-                        name: '',
-                        variables: [],
-                      });
-                    }}
-                  >
-                    {t('Add application')}
-                  </Button>
-                </FormGroup>
-              </FormSection>
-            )}
-          </>
-        )}
-      </FieldArray>
+              {!isReadOnly && (
+                <FormSection>
+                  <FormGroup>
+                    <Button
+                      variant="link"
+                      icon={<PlusCircleIcon />}
+                      iconPosition="start"
+                      onClick={() => {
+                        push({
+                          appType: AppType.AppTypeQuadlet,
+                          specType: AppSpecType.INLINE,
+                          name: '',
+                          variables: [],
+                        });
+                      }}
+                    >
+                      {t('Add application')}
+                    </Button>
+                  </FormGroup>
+                </FormSection>
+              )}
+            </>
+          )}
+        </FieldArray>
+      </>
     </FormGroupWithHelperText>
   );
 };

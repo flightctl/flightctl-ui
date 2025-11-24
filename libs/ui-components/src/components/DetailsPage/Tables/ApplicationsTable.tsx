@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Bullseye } from '@patternfly/react-core';
+import { Bullseye, Label } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import { DeviceApplicationStatus } from '@flightctl/types';
@@ -35,6 +35,7 @@ const ApplicationsTable = ({ appsStatus, specApps }: ApplicationsTableProps) => 
           <Th modifier="wrap">{t('Status')}</Th>
           <Th modifier="wrap">{t('Ready')}</Th>
           <Th modifier="wrap">{t('Restarts')}</Th>
+          <Th modifier="wrap">{t('Type')}</Th>
         </Tr>
       </Thead>
       <Tbody>
@@ -43,6 +44,7 @@ const ApplicationsTable = ({ appsStatus, specApps }: ApplicationsTableProps) => 
             status: null,
             ready: '-',
             restarts: '-',
+            appType: null,
           };
 
           return (
@@ -53,6 +55,9 @@ const ApplicationsTable = ({ appsStatus, specApps }: ApplicationsTableProps) => 
               </Td>
               <Td dataLabel={t('Ready')}>{appDetails.ready}</Td>
               <Td dataLabel={t('Restarts')}>{appDetails.restarts}</Td>
+              <Td dataLabel={t('Type')}>
+                {appDetails.appType ? <Label variant="outline">{appDetails.appType}</Label> : '-'}
+              </Td>
             </Tr>
           );
         })}

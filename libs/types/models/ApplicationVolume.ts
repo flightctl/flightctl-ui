@@ -2,10 +2,13 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ImageMountVolumeProviderSpec } from './ImageMountVolumeProviderSpec';
 import type { ImageVolumeProviderSpec } from './ImageVolumeProviderSpec';
-export type ApplicationVolume = {
+import type { MountVolumeProviderSpec } from './MountVolumeProviderSpec';
+export type ApplicationVolume = ({
   /**
    * Unique name of the volume used within the application.
    */
   name: string;
-} & ImageVolumeProviderSpec;
+} & (ImageVolumeProviderSpec | MountVolumeProviderSpec | ImageMountVolumeProviderSpec));
+

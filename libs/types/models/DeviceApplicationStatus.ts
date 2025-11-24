@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { ApplicationStatusType } from './ApplicationStatusType';
 import type { ApplicationVolumeStatus } from './ApplicationVolumeStatus';
+import type { AppType } from './AppType';
 export type DeviceApplicationStatus = {
   /**
    * Human readable name of the application.
@@ -18,6 +19,11 @@ export type DeviceApplicationStatus = {
    */
   restarts: number;
   status: ApplicationStatusType;
+  /**
+   * Whether the application is embedded in the bootc image.
+   */
+  embedded: boolean;
+  appType: AppType;
   /**
    * Status of volumes used by this application.
    */

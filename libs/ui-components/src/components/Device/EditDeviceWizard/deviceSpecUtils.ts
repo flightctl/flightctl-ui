@@ -2,12 +2,14 @@ import {
   AppType,
   // eslint-disable-next-line no-restricted-imports
   ApplicationProviderSpec,
+  ApplicationVolume,
   ConfigProviderSpec,
   DeviceSpec,
   EncodingType,
   FileSpec,
   GitConfigProviderSpec,
   HttpConfigProviderSpec,
+  ImageMountVolumeProviderSpec,
   InlineApplicationProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
@@ -209,26 +211,38 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
     return acc;
   }, {});
 
-  const volumes = app.volumes?.map((v) => ({
-    name: v.name,
-    image: {
-      reference: v.reference,
-      pullPolicy: v.pullPolicy,
-    },
-  }));
+  const volumes = app.volumes?.map((v) => {
+    // @ts-expect-error We will only set the fields that are present
+    const volume: ApplicationVolume = {
+      name: v.name,
+    };
+    // It's either one of the two fields, or both.
+    // ImageMountVolumeProviderSpec is the spec that has both fields
+    if (v.image) {
+      (volume as ImageMountVolumeProviderSpec).image = v.image;
+    }
+    if (v.mount) {
+      (volume as ImageMountVolumeProviderSpec).mount = v.mount;
+    }
+    return volume;
+  });
 
   if (isImageAppForm(app)) {
-    const data = {
+    const data: ApplicationProviderSpec = {
       image: app.image,
+      appType: app.appType,
       envVars,
       volumes,
     };
-    return app.name ? { ...data, name: app.name } : data;
+    if (app.name) {
+      data.name = app.name;
+    }
+    return data;
   }
 
   return {
     name: app.name,
-    appType: AppType.AppTypeCompose,
+    appType: app.appType,
     inline: app.files.map(
       (file): InlineApplicationFileFixed => ({
         path: file.path,
@@ -377,36 +391,32 @@ export const getApiConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
 const getAppFormVariables = (app: ApplicationProviderSpecFixed) =>
   Object.entries(app.envVars || {}).map(([varName, varValue]) => ({ name: varName, value: varValue }));
 
-const getAppFormVolumes = (app: ApplicationProviderSpecFixed) =>
-  app.volumes?.map((v) => ({
-    name: v.name,
-    reference: v.image.reference,
-    pullPolicy: v.image.pullPolicy,
-  }));
-
 export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
   const apps = deviceSpec?.applications || [];
   return apps.map((app) => {
+    if (!app.appType) {
+      throw new Error('Application appType is required');
+    }
     if (isImageAppProvider(app)) {
       return {
         specType: AppSpecType.OCI_IMAGE,
         name: app.name || '',
         image: app.image,
+        appType: app.appType as AppType.AppTypeCompose | AppType.AppTypeQuadlet,
         variables: getAppFormVariables(app),
-        volumes: getAppFormVolumes(app),
+        volumes: app.volumes || [],
       };
     }
+
+    const inlineApp = app as InlineApplicationProviderSpec;
     return {
       specType: AppSpecType.INLINE,
+      appType: app.appType,
       name: app.name || '',
-      files: (app as InlineApplicationProviderSpec).inline.map((file) => ({
-        path: file.path || '',
-        content: file.content,
-        base64: file.contentEncoding === EncodingType.EncodingBase64,
-      })),
+      files: inlineApp.inline,
       variables: getAppFormVariables(app),
-      volumes: getAppFormVolumes(app),
-    };
+      volumes: app.volumes || [],
+    } as InlineAppForm;
   });
 };
 
