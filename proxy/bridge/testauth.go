@@ -178,6 +178,7 @@ func (h *TestAuthHandler) validateOIDCProvider(req *TestConnectionRequest, respo
 
 	if discovery.Issuer != req.Issuer {
 		issuerNotes = append(issuerNotes, fmt.Sprintf("Discovery document issuer (%s) does not match provided issuer (%s)", discovery.Issuer, req.Issuer))
+		hasErrors = true
 	}
 
 	if discovery.AuthorizationEndpoint == "" {

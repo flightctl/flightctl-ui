@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/flightctl/flightctl-ui/bridge"
@@ -118,57 +117,6 @@ func extractTokenExpiration(token string) *int64 {
 	}
 
 	return &expiresIn
-}
-
-// extractUsernameFromClaims extracts the username from JWT claims
-func extractUsernameFromClaims(parsedToken jwt.Token) (string, bool) {
-	// Prefer the short service account name over the full sub claim
-	if k8sInfo, exists := parsedToken.Get("kubernetes.io"); exists {
-		if k8sInfoMap, ok := k8sInfo.(map[string]interface{}); ok {
-			if sa, ok := k8sInfoMap["serviceaccount"].(map[string]interface{}); ok {
-				if saName, ok := sa["name"].(string); ok && saName != "" {
-					return saName, true
-				}
-			}
-		}
-	}
-
-	// Try to extract the service account name from the old flat claim structure
-	if saName, exists := parsedToken.Get("kubernetes.io/serviceaccount/service-account.name"); exists {
-		if saNameStr, ok := saName.(string); ok && saNameStr != "" {
-			return saNameStr, true
-		}
-	}
-
-	// Fallback to sub claim (which contains the full system:serviceaccount:namespace:name format)
-	if username, exists := parsedToken.Get("sub"); exists {
-		if usernameStr, ok := username.(string); ok && usernameStr != "" {
-			// Try to extract just the service account name from sub if it's in the right format
-			parts := strings.Split(usernameStr, ":")
-			if len(parts) == 4 && parts[0] == "system" && parts[1] == "serviceaccount" {
-				return parts[3], true // Return just the service account name
-			}
-			return usernameStr, true
-		}
-	}
-
-	return "", false
-}
-
-// ExtractUsernameFromToken extracts the username from a K8s JWT token
-func ExtractUsernameFromToken(token string) (string, error) {
-	// Parse the token without signature validation (we only need to extract claims)
-	parsedToken, err := jwt.ParseInsecure([]byte(token))
-	if err != nil {
-		return "", fmt.Errorf("failed to parse JWT token: %w", err)
-	}
-
-	username, ok := extractUsernameFromClaims(parsedToken)
-	if !ok {
-		return "", fmt.Errorf("could not extract username from token claims")
-	}
-
-	return username, nil
 }
 
 // GetUserInfo retrieves user information from the provided JWT token

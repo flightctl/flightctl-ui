@@ -66,7 +66,7 @@ const AuthProviderEmptyState = () => {
   return (
     <ResourceListEmptyState icon={CubesIcon} titleText={t('Add your first authentication providers')}>
       <EmptyStateBody>
-        {t('Connect OIDC and Oauth2 providers to enable additional secure authentication options for your users.')}
+        {t('Connect OIDC and OAuth2 providers to enable additional secure authentication options for your users.')}
       </EmptyStateBody>
       <EmptyStateFooter>
         <EmptyStateActions>

@@ -31,21 +31,15 @@ var (
 	ProviderTypeOpenShift = string(v1beta1.Openshift)
 )
 
-// Default claim constants
-const (
-	DefaultUsernameClaim = "preferred_username"
-	DefaultRoleClaim     = "roles"
-)
-
 type TokenData struct {
 	// IDToken (JWT token)
-	//   - OIDC: Used for API authentication
+	//   - OIDC: Used for API authentication and GetUserInfo (via backend API)
 	//   - K8s: Used for API authentication and GetUserInfo
 	//   - OAuth2/AAP: Not used
 	IDToken string `json:"idToken"`
 
 	// AccessToken (opaque token)
-	//   - OIDC: Used for GetUserInfo endpoint
+	//   - OIDC: Stored but not directly used (IDToken is preferred via GetAuthToken())
 	//   - OAuth2/AAP: Used for API authentication and GetUserInfo
 	//   - K8s: Not used
 	AccessToken string `json:"accessToken"`
@@ -600,37 +594,6 @@ func getValueByPath(data map[string]interface{}, path []string) (interface{}, bo
 	}
 
 	return nil, false
-}
-
-// extractUsernameFromUserInfo extracts username from userinfo map using the specified claim path
-// Supports both simple field names (e.g., ["preferred_username"]) and nested paths (e.g., ["user", "name"])
-func extractUsernameFromUserInfo(userInfo map[string]interface{}, usernameClaimPath []string) string {
-	// Try the specified claim path first
-	if len(usernameClaimPath) > 0 {
-		if val, exists := getValueByPath(userInfo, usernameClaimPath); exists {
-			if str, ok := val.(string); ok && str != "" {
-				return str
-			}
-		}
-	}
-
-	// Fallback to common OAuth2/OIDC username fields
-	commonClaims := [][]string{
-		{DefaultUsernameClaim},
-		{"email"},
-		{"sub"},
-		{"name"},
-		{"username"},
-	}
-	for _, claimPath := range commonClaims {
-		if val, exists := getValueByPath(userInfo, claimPath); exists {
-			if str, ok := val.(string); ok && str != "" {
-				return str
-			}
-		}
-	}
-
-	return ""
 }
 
 // getMapKeys returns the keys of a map as a slice of strings

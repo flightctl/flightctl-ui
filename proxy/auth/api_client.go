@@ -196,12 +196,16 @@ func convertTokenResponseToTokenData(tokenResp *v1beta1.TokenResponse, providerN
 		Provider: providerName,
 	}
 
+	// Assign both AccessToken and IdToken if present
+	// GetAuthToken() will use the correct token depending on the scenario:
+	// - For OIDC: prefers IDToken (JWT) for API authentication
+	// - For OAuth2/AAP: uses AccessToken (IDToken will be empty)
 	if tokenResp.AccessToken != nil {
 		tokenData.AccessToken = *tokenResp.AccessToken
-		// For OIDC, if we don't have a separate id_token, use access_token as IDToken
-		// The API server will return id_token in access_token field for OIDC if needed
-		// For now, we'll set both - GetAuthToken() will prefer IDToken if present
-		tokenData.IDToken = *tokenResp.AccessToken
+	}
+
+	if tokenResp.IdToken != nil {
+		tokenData.IDToken = *tokenResp.IdToken
 	}
 
 	if tokenResp.RefreshToken != nil {
