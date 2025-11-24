@@ -223,7 +223,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		// Check if this is a token-based auth provider (k8s) - token providers don't use PKCE flow
 		if _, ok := provider.(*TokenAuthProvider); ok {
 			// Token providers don't need a redirect URL - they handle login via POST with token
-			loginUrl := provider.GetLoginRedirectURL("", "")
+			loginUrl := provider.GetLoginRedirectURL("")
 			response, err := json.Marshal(RedirectResponse{Url: loginUrl})
 			if err != nil {
 				log.GetLogger().WithError(err).Warn("Failed to marshal response")
@@ -251,7 +251,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		setPKCEVerifierCookie(w, providerName, codeVerifier)
 
 		// Also encode code_verifier in state parameter as fallback if cookie fails
-		loginUrl := provider.GetLoginRedirectURL(codeChallenge, codeVerifier)
+		loginUrl := provider.GetLoginRedirectURL(codeChallenge)
 		response, err := json.Marshal(RedirectResponse{Url: loginUrl})
 		if err != nil {
 			log.GetLogger().WithError(err).Warn("Failed to marshal response")
@@ -336,11 +336,21 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 				// Fallback: try to extract from state parameter
 				state := r.URL.Query().Get("state")
 				if state != "" {
-					codeVerifier = extractCodeVerifierFromState(state, providerName)
-					if codeVerifier != "" {
-						loginParams.CodeVerifier = codeVerifier
-						log.GetLogger().Infof("Retrieved PKCE verifier from state parameter for provider %s", providerName)
+					// Extract provider name from state
+					providerName := extractProviderNameFromState(state)
+					if providerName == "" {
+						respondWithError(w, http.StatusBadRequest, "Invalid state parameter")
+						return
 					}
+
+					// Get verifier from cookie ONLY (remove any fallback to state)
+					codeVerifier, err := getPKCEVerifierCookie(r, providerName)
+					if err != nil || codeVerifier == "" {
+						respondWithError(w, http.StatusBadRequest, "PKCE verification failed")
+						return
+					}
+					loginParams.CodeVerifier = codeVerifier
+					log.GetLogger().Infof("Retrieved PKCE verifier from state parameter for provider %s", providerName)
 				}
 			}
 		}

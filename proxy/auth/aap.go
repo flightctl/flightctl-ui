@@ -176,6 +176,6 @@ func (a *AAPAuthHandler) RefreshToken(refreshToken string) (TokenData, *int64, e
 	return refreshOAuthToken(refreshToken, a.internalClient)
 }
 
-func (a *AAPAuthHandler) GetLoginRedirectURL(codeChallenge string, codeVerifier string) string {
-	return loginRedirect(a.client, a.providerName, codeChallenge, codeVerifier)
+func (a *AAPAuthHandler) GetLoginRedirectURL(codeChallenge string) string {
+	return loginRedirect(a.client, a.providerName, codeChallenge)
 }

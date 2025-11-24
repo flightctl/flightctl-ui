@@ -13,7 +13,9 @@ import LoginPageLayout from './LoginPageLayout';
 import { loginAPI } from '../../utils/apiCalls';
 
 const redirectToProviderLogin = async (provider: AuthProvider) => {
-  const response = await fetch(`${loginAPI}?provider=${provider.metadata.name}`);
+  const response = await fetch(`${loginAPI}?provider=${provider.metadata.name}`, {
+    credentials: 'include',
+  });
 
   if (!response.ok) {
     throw new Error(`Login redirect failed with status ${response.status}`);
