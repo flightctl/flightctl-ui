@@ -43,19 +43,14 @@ export const PermissionsContextProvider = ({ children }: React.PropsWithChildren
   const [error, setError] = React.useState<string | undefined>();
   const { currentOrganization } = useOrganizationGuardContext();
 
+  const orgId = currentOrganization?.metadata?.name;
+
   const { get } = useFetch();
 
   React.useEffect(() => {
     const abortController = new AbortController();
 
     const loadPermissions = async () => {
-      // Only fetch permissions when an organization has been selected
-      if (!currentOrganization) {
-        setLoading(false);
-        setUserPermissions([]);
-        return;
-      }
-
       setLoading(true);
       setError(undefined);
       try {
@@ -76,13 +71,15 @@ export const PermissionsContextProvider = ({ children }: React.PropsWithChildren
       }
     };
 
-    void loadPermissions();
+    if (orgId) {
+      void loadPermissions();
+    }
 
     // Cleanup: abort the request if the organization changes or component unmounts
     return () => {
       abortController.abort();
     };
-  }, [get, currentOrganization]);
+  }, [get, orgId]);
 
   const checkPermissions = React.useCallback(
     (permissionChecks: PermissionCheck[]): boolean[] =>
