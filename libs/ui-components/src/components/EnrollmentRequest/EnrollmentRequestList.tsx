@@ -42,7 +42,6 @@ const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
 
 type EnrollmentRequestListProps = {
   refetchDevices?: VoidFunction;
-  onEmptyListChanged?: (isEmpty: boolean) => void;
   isStandalone?: boolean;
 };
 
@@ -51,7 +50,7 @@ const enrollmentRequestListPermissions = [
   { kind: RESOURCE.ENROLLMENT_REQUEST, verb: VERB.DELETE },
 ];
 
-const EnrollmentRequestList = ({ onEmptyListChanged, refetchDevices, isStandalone }: EnrollmentRequestListProps) => {
+const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentRequestListProps) => {
   const { t } = useTranslation();
   const { checkPermissions } = usePermissionsContext();
   const [canApprove, canDelete] = checkPermissions(enrollmentRequestListPermissions);
@@ -80,12 +79,6 @@ const EnrollmentRequestList = ({ onEmptyListChanged, refetchDevices, isStandalon
       refetch();
     },
   });
-
-  React.useEffect(() => {
-    if (onEmptyListChanged && !search && !isLoading) {
-      onEmptyListChanged?.(itemCount === 0);
-    }
-  }, [search, itemCount, isLoading, onEmptyListChanged]);
 
   // In non-standalone mode, hide the entire component when the search result is empty (and not due to filtering)
   const isLastUnfilteredListEmpty = !search && itemCount === 0;
