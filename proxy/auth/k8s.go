@@ -8,7 +8,6 @@ import (
 
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/config"
-	"github.com/flightctl/flightctl-ui/log"
 	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
@@ -47,7 +46,6 @@ func (t *TokenAuthProvider) ValidateToken(token string) (TokenData, *int64, erro
 
 	req, err := http.NewRequest(http.MethodGet, validateUrl, nil)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to create token validation request")
 		return TokenData{}, nil, err
 	}
 

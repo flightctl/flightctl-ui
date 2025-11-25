@@ -17,7 +17,6 @@ import (
 
 	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
-	"github.com/flightctl/flightctl-ui/log"
 	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
@@ -90,26 +89,21 @@ func ParseSessionCookie(r *http.Request) (TokenData, error) {
 	tokenData := TokenData{}
 	cookie, err := r.Cookie(common.CookieSessionName)
 	if err != nil && !errors.Is(err, http.ErrNoCookie) {
-		log.GetLogger().Debugf("Error getting session cookie: %v", err)
 		return tokenData, err
 	}
 
 	if cookie != nil {
 		val, err := b64.StdEncoding.DecodeString(cookie.Value)
 		if err != nil {
-			log.GetLogger().Debugf("Error decoding session cookie: %v", err)
 			return tokenData, err
 		}
 
 		err = json.Unmarshal(val, &tokenData)
 		if err != nil {
-			log.GetLogger().Debugf("Error unmarshaling session cookie: %v", err)
 			return tokenData, err
 		}
-		log.GetLogger().Debugf("Parsed session cookie (provider: %s, id token length: %d, access token length: %d)", tokenData.Provider, len(tokenData.IDToken), len(tokenData.AccessToken))
 		return tokenData, err
 	}
-	log.GetLogger().Debug("No session cookie found in request")
 	return tokenData, nil
 }
 
@@ -120,7 +114,6 @@ func getUserInfo(token string, tlsConfig *tls.Config, authURL string, userInfoEn
 
 	req, err := http.NewRequest(http.MethodGet, userInfoEndpoint, nil)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to create http request")
 		return nil, nil, err
 	}
 
@@ -128,7 +121,6 @@ func getUserInfo(token string, tlsConfig *tls.Config, authURL string, userInfoEn
 
 	proxyUrl, err := url.Parse(authURL)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to parse proxy url")
 		return nil, nil, err
 	}
 	req.Header.Add("X-Forwarded-Host", proxyUrl.Host)
@@ -136,7 +128,6 @@ func getUserInfo(token string, tlsConfig *tls.Config, authURL string, userInfoEn
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to get user info")
 		return nil, nil, err
 	}
 	defer resp.Body.Close()
@@ -144,7 +135,6 @@ func getUserInfo(token string, tlsConfig *tls.Config, authURL string, userInfoEn
 	if resp.StatusCode == http.StatusOK {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			log.GetLogger().WithError(err).Warn("Failed to read response body")
 			return nil, resp, err
 		}
 		return &body, resp, nil
@@ -173,12 +163,9 @@ func respondWithError(w http.ResponseWriter, statusCode int, message string) {
 	errorResp := ErrorResponse{Error: message}
 	response, err := json.Marshal(errorResp)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to marshal error response")
 		return
 	}
-	if _, err := w.Write(response); err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to write error response")
-	}
+	w.Write(response)
 }
 
 // exchangeToken exchanges an authorization code for an access token
@@ -208,16 +195,9 @@ func exchangeToken(loginParams LoginParameters, client *osincli.Client, tokenURL
 
 		configField := clientValue.FieldByName("Config")
 		if !configField.IsValid() {
-			// Try alternative field names (in case the structure changed)
 			configField = clientValue.FieldByName("config")
 			if !configField.IsValid() {
-				// Log available fields for debugging
-				fieldNames := make([]string, 0, clientValue.NumField())
-				for i := 0; i < clientValue.NumField(); i++ {
-					fieldNames = append(fieldNames, clientValue.Type().Field(i).Name)
-				}
-				log.GetLogger().Warnf("Failed to find Config field in osincli.Client. Available fields: %v", fieldNames)
-				return TokenData{}, nil, fmt.Errorf("failed to access client config for PKCE flow: Config field not found")
+				return TokenData{}, nil, fmt.Errorf("Failed to obtain the client config for PKCE flow")
 			}
 		}
 
@@ -236,7 +216,7 @@ func exchangeToken(loginParams LoginParameters, client *osincli.Client, tokenURL
 				// Try alternative field name
 				tokenURLField = configValue.FieldByName("tokenUrl")
 				if !tokenURLField.IsValid() {
-					return TokenData{}, nil, fmt.Errorf("failed to access token URL from client config for PKCE flow")
+					return TokenData{}, nil, fmt.Errorf("Failed to obtain the token URL for PKCE flow")
 				}
 			}
 			tokenURL = tokenURLField.String()
@@ -249,7 +229,7 @@ func exchangeToken(loginParams LoginParameters, client *osincli.Client, tokenURL
 				// Try alternative field name
 				clientIDField = configValue.FieldByName("clientId")
 				if !clientIDField.IsValid() {
-					return TokenData{}, nil, fmt.Errorf("failed to access client ID from client config for PKCE flow")
+					return TokenData{}, nil, fmt.Errorf("Failed to obtain the client ID for PKCE flow")
 				}
 			}
 			clientID = clientIDField.String()
@@ -262,7 +242,7 @@ func exchangeToken(loginParams LoginParameters, client *osincli.Client, tokenURL
 				// Try alternative field name
 				redirectURIField = configValue.FieldByName("redirectUrl")
 				if !redirectURIField.IsValid() {
-					return TokenData{}, nil, fmt.Errorf("failed to access redirect URI from client config for PKCE flow")
+					return TokenData{}, nil, fmt.Errorf("Failed to obtain the redirect URI for PKCE flow")
 				}
 			}
 			redirectURI = redirectURIField.String()
@@ -313,10 +293,6 @@ func exchangeToken(loginParams LoginParameters, client *osincli.Client, tokenURL
 	data.Set("client_id", clientID)
 	data.Set("redirect_uri", redirectURI)
 
-	// Log the exact request being sent (without sensitive code/verifier values)
-	log.GetLogger().Infof("Token exchange request (PKCE): grant_type=authorization_code, client_id=%s, redirect_uri=%s, code_verifier length=%d, code length=%d, token_url=%s", clientID, redirectURI, len(loginParams.CodeVerifier), len(loginParams.Code), tokenURL)
-	log.GetLogger().Debugf("Token exchange form data (sanitized): grant_type=%s, client_id=%s, redirect_uri=%s, code_verifier=[REDACTED], code=[REDACTED]", data.Get("grant_type"), data.Get("client_id"), data.Get("redirect_uri"))
-
 	// Create HTTP request
 	req, err := http.NewRequest(http.MethodPost, tokenURL, strings.NewReader(data.Encode()))
 	if err != nil {
@@ -348,18 +324,11 @@ func exchangeToken(loginParams LoginParameters, client *osincli.Client, tokenURL
 
 	// Check for HTTP error status
 	if resp.StatusCode != http.StatusOK {
-		// Log the full response for debugging
-		log.GetLogger().Warnf("Token exchange failed with status %d. Response body: %s", resp.StatusCode, string(body))
-		return ret, nil, fmt.Errorf("token exchange failed with status %d: %s", resp.StatusCode, string(body))
+		return ret, nil, fmt.Errorf("token exchange failed with status %d", resp.StatusCode)
 	}
 
 	// Check content type to determine response format
 	contentType := resp.Header.Get("Content-Type")
-	bodyPreview := string(body)
-	if len(bodyPreview) > 200 {
-		bodyPreview = bodyPreview[:200] + "..."
-	}
-	log.GetLogger().Infof("Token response Content-Type: %s, Body length: %d, Body preview: %s", contentType, len(body), bodyPreview)
 
 	// Parse response based on content type
 	var tokenResponse map[string]interface{}
@@ -369,19 +338,13 @@ func exchangeToken(loginParams LoginParameters, client *osincli.Client, tokenURL
 		// Parse as form-encoded
 		values, err := url.ParseQuery(string(body))
 		if err != nil {
-			log.GetLogger().Warnf("Failed to parse form-encoded token response. Status: %d, Content-Type: %s, Body: %s", resp.StatusCode, contentType, string(body))
-			return ret, nil, fmt.Errorf("failed to parse form-encoded token response: %w (response body: %s)", err, string(body))
+			return ret, nil, fmt.Errorf("failed to parse form-encoded token response: %w", err)
 		}
-
-		// Log all parsed values for debugging
-		log.GetLogger().Debugf("Parsed form-encoded response values: %v", values)
 
 		// Check for errors in form-encoded response
 		errorParam := values.Get("error")
 		if errorParam != "" {
 			errorDesc := values.Get("error_description")
-			errorURI := values.Get("error_uri")
-			log.GetLogger().Warnf("OAuth provider returned error in form-encoded response: error=%s, error_description=%s, error_uri=%s", errorParam, errorDesc, errorURI)
 			return ret, nil, fmt.Errorf("oauth error: %s - %s", errorParam, errorDesc)
 		}
 
@@ -392,14 +355,11 @@ func exchangeToken(loginParams LoginParameters, client *osincli.Client, tokenURL
 				tokenResponse[k] = v[0]
 			}
 		}
-		log.GetLogger().Debugf("Parsed form-encoded token response. Keys: %v", getMapKeys(tokenResponse))
 	} else {
 		// Try to parse as JSON
 		if err := json.Unmarshal(body, &tokenResponse); err != nil {
-			log.GetLogger().Warnf("Failed to parse token response as JSON. Status: %d, Content-Type: %s, Body: %s", resp.StatusCode, contentType, string(body))
-			return ret, nil, fmt.Errorf("failed to parse token response: %w (response body: %s)", err, string(body))
+			return ret, nil, fmt.Errorf("failed to parse token response: %w", err)
 		}
-		log.GetLogger().Debugf("Parsed JSON token response. Keys: %v", getMapKeys(tokenResponse))
 
 		// Check for errors in JSON response (some providers return JSON error responses)
 		if errorParam, ok := tokenResponse["error"].(string); ok && errorParam != "" {
@@ -407,11 +367,6 @@ func exchangeToken(loginParams LoginParameters, client *osincli.Client, tokenURL
 			if desc, ok := tokenResponse["error_description"].(string); ok {
 				errorDesc = desc
 			}
-			errorURI := ""
-			if uri, ok := tokenResponse["error_uri"].(string); ok {
-				errorURI = uri
-			}
-			log.GetLogger().Warnf("OAuth provider returned error in JSON response: error=%s, error_description=%s, error_uri=%s", errorParam, errorDesc, errorURI)
 			return ret, nil, fmt.Errorf("oauth error: %s - %s", errorParam, errorDesc)
 		}
 	}
@@ -419,19 +374,14 @@ func exchangeToken(loginParams LoginParameters, client *osincli.Client, tokenURL
 	// Extract tokens
 	if accessToken, ok := tokenResponse["access_token"].(string); ok {
 		ret.AccessToken = accessToken
-		log.GetLogger().Debugf("Extracted access_token (length: %d)", len(accessToken))
-	} else {
-		log.GetLogger().Warnf("access_token not found in token response. Available keys: %v", getMapKeys(tokenResponse))
 	}
 
 	if idToken, ok := tokenResponse["id_token"].(string); ok {
 		ret.IDToken = idToken
-		log.GetLogger().Debugf("Extracted id_token (length: %d)", len(idToken))
 	}
 
 	if refreshToken, ok := tokenResponse["refresh_token"].(string); ok {
 		ret.RefreshToken = refreshToken
-		log.GetLogger().Debugf("Extracted refresh_token (length: %d)", len(refreshToken))
 	}
 
 	// Extract expires_in
@@ -455,14 +405,6 @@ func loginRedirect(client *osincli.Client, providerName string, codeChallenge st
 	authorizeRequest := client.NewAuthorizeRequest(osincli.CODE)
 	authURL := authorizeRequest.GetAuthorizeUrl()
 
-	// Log the redirect_uri used in authorization request for debugging
-	parsedAuthURL, _ := url.Parse(authURL.String())
-	redirectURI := parsedAuthURL.Query().Get("redirect_uri")
-	if redirectURI == "" {
-		redirectURI = config.BaseUiUrl + "/callback"
-	}
-	log.GetLogger().Infof("Authorization request for provider %s: redirect_uri=%s", providerName, redirectURI)
-
 	// Include provider name in state parameter so callback can identify which provider to use
 	// Format: "provider:<providerName>"
 	// NOTE: We do NOT encode code_verifier in state for security reasons.
@@ -478,11 +420,6 @@ func loginRedirect(client *osincli.Client, providerName string, codeChallenge st
 	// Add state to query parameters
 	query := parsedURL.Query()
 	query.Set("state", state)
-
-	// PKCE is required - codeChallenge must be provided
-	if codeChallenge == "" {
-		log.GetLogger().Error("PKCE code_challenge is required but not provided - this should not happen")
-	}
 
 	// Add PKCE parameters (required)
 	query.Set("code_challenge", codeChallenge)
@@ -561,50 +498,6 @@ func buildScopeParam(providerScopes *[]string, defaultScopes string) string {
 	return defaultScopes
 }
 
-// getValueByPath extracts a value from a map using an array path (e.g., ["user", "name"])
-// Path segments are used directly as map keys, so dots and other special characters
-// are treated as literal characters (e.g., ["kubernetes.io", "some-field"] works correctly)
-// Returns the value and whether it was found
-func getValueByPath(data map[string]interface{}, path []string) (interface{}, bool) {
-	if len(path) == 0 {
-		return nil, false
-	}
-
-	current := data
-
-	for i, part := range path {
-		if i == len(path)-1 {
-			// Last part - extract the value
-			if value, exists := current[part]; exists {
-				return value, true
-			}
-			return nil, false
-		}
-
-		// Navigate deeper into the object
-		if next, exists := current[part]; exists {
-			if nextMap, ok := next.(map[string]interface{}); ok {
-				current = nextMap
-			} else {
-				return nil, false
-			}
-		} else {
-			return nil, false
-		}
-	}
-
-	return nil, false
-}
-
-// getMapKeys returns the keys of a map as a slice of strings
-func getMapKeys(m map[string]interface{}) []string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	return keys
-}
-
 // extractProviderName extracts the provider name from AuthProvider metadata
 func extractProviderName(provider *v1beta1.AuthProvider) string {
 	if provider != nil && provider.Metadata.Name != nil {
@@ -654,36 +547,22 @@ func setPKCEVerifierCookie(w http.ResponseWriter, providerName string, codeVerif
 		// Don't set Domain - let browser use default (current domain)
 	}
 	http.SetCookie(w, &cookie)
-	log.GetLogger().Infof("Set PKCE verifier cookie for provider %s (cookie: %s, value length: %d, secure: %v, path: %s, sameSite: %v)",
-		providerName, cookieName, len(codeVerifier), cookie.Secure, cookie.Path, cookie.SameSite)
 }
 
 // getPKCEVerifierCookie retrieves the code verifier from a cookie
 func getPKCEVerifierCookie(r *http.Request, providerName string) (string, error) {
 	cookieName := pkceCookiePrefix + providerName
 
-	// Log all cookies for debugging
-	allCookies := r.Cookies()
-	cookieNames := make([]string, len(allCookies))
-	for i, c := range allCookies {
-		cookieNames[i] = c.Name
-	}
-	log.GetLogger().Infof("Looking for PKCE cookie %s. Available cookies: %v (total: %d). Request host: %s, request path: %s, request method: %s",
-		cookieName, cookieNames, len(allCookies), r.Host, r.URL.Path, r.Method)
-
 	cookie, err := r.Cookie(cookieName)
 	if err != nil {
 		if errors.Is(err, http.ErrNoCookie) {
-			log.GetLogger().Warnf("PKCE verifier cookie not found: %s (this will cause token exchange to fail)", cookieName)
 			return "", nil
 		}
 		return "", err
 	}
 	if cookie.Value == "" {
-		log.GetLogger().Warnf("PKCE verifier cookie is empty: %s", cookieName)
 		return "", nil
 	}
-	log.GetLogger().Debugf("Found PKCE verifier cookie for provider %s (length: %d)", providerName, len(cookie.Value))
 	return cookie.Value, nil
 }
 

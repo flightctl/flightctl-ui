@@ -10,7 +10,6 @@ import (
 
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/config"
-	"github.com/flightctl/flightctl-ui/log"
 	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
@@ -186,7 +185,6 @@ func (o *OIDCAuthHandler) GetUserInfo(tokenData TokenData) (string, *http.Respon
 func (o *OIDCAuthHandler) Logout(token string) (string, error) {
 	u, err := url.Parse(o.endSessionEndpoint)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to parse OIDC response")
 		return "", err
 	}
 

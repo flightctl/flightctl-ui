@@ -215,7 +215,6 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 		provider, _, err = a.getProviderInstance(providerName)
 		if err != nil {
-			log.GetLogger().WithError(err).Warnf("Could not find provider: %s", providerName)
 			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid authentication provider: %s", providerName))
 			return
 		}
@@ -230,9 +229,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-			if _, err := w.Write(response); err != nil {
-				log.GetLogger().WithError(err).Warn("Failed to write response")
-			}
+			w.Write(response)
 			return
 		}
 
@@ -240,7 +237,6 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		// PKCE is required - fail if generation fails
 		codeVerifier, err := generateCodeVerifier()
 		if err != nil {
-			log.GetLogger().WithError(err).Error("Failed to generate PKCE code verifier - PKCE is required")
 			respondWithError(w, http.StatusInternalServerError, "Failed to initialize PKCE authentication flow")
 			return
 		}
@@ -254,17 +250,13 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		loginUrl := provider.GetLoginRedirectURL(codeChallenge)
 		response, err := json.Marshal(RedirectResponse{Url: loginUrl})
 		if err != nil {
-			log.GetLogger().WithError(err).Warn("Failed to marshal response")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		if _, err := w.Write(response); err != nil {
-			log.GetLogger().WithError(err).Warn("Failed to write response")
-		}
+		w.Write(response)
 	} else if r.Method == http.MethodPost {
 		// For POST requests (OAuth callback), extract provider from query parameter
 		providerName := r.URL.Query().Get("provider")
-		log.GetLogger().Infof("Provider name: %s", providerName)
 		if providerName == "" {
 			respondWithError(w, http.StatusBadRequest, "provider query parameter is required")
 			return
@@ -273,7 +265,6 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		var providerConfig *v1beta1.AuthProvider
 		provider, providerConfig, err = a.getProviderInstance(providerName)
 		if err != nil {
-			log.GetLogger().WithError(err).Warnf("Could not find provider: %s", providerName)
 			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid authentication provider: %s", providerName))
 			return
 		}
@@ -285,7 +276,6 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			body, err := io.ReadAll(r.Body)
 			err = json.Unmarshal(body, &loginParams)
 			if err != nil {
-				log.GetLogger().WithError(err).Warn("Failed to unmarshal request body")
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
@@ -297,7 +287,6 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 			tokenData, expires, err := tokenProvider.ValidateToken(loginParams.Token)
 			if err != nil {
-				log.GetLogger().WithError(err).Warn("Token validation failed")
 				respondWithError(w, http.StatusUnauthorized, err.Error())
 				return
 			}
@@ -310,7 +299,6 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		// Flow for all providers except K8s token providers
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			log.GetLogger().WithError(err).Warn("Failed to read request body")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -318,7 +306,6 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		loginParams := LoginParameters{}
 		err = json.Unmarshal(body, &loginParams)
 		if err != nil {
-			log.GetLogger().WithError(err).Warn("Failed to unmarshal request body")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -331,7 +318,6 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 				log.GetLogger().WithError(err).Warnf("Failed to get PKCE verifier from cookie for provider %s", providerName)
 			} else if codeVerifier != "" {
 				loginParams.CodeVerifier = codeVerifier
-				log.GetLogger().Infof("Retrieved PKCE verifier from cookie for provider %s", providerName)
 			} else {
 				// Fallback: try to extract from state parameter
 				state := r.URL.Query().Get("state")
@@ -350,14 +336,12 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					loginParams.CodeVerifier = codeVerifier
-					log.GetLogger().Infof("Retrieved PKCE verifier from state parameter for provider %s", providerName)
 				}
 			}
 		}
 
 		// PKCE is required - fail if code_verifier is missing
 		if loginParams.CodeVerifier == "" {
-			log.GetLogger().Errorf("PKCE code_verifier is required but not available for provider %s", providerName)
 			respondWithError(w, http.StatusBadRequest, "PKCE code verifier is required but not found. Please restart the login flow.")
 			return
 		}
@@ -367,8 +351,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 		clientId, err := getClientIdFromProviderConfig(providerConfig)
 		if err != nil {
-			log.GetLogger().WithError(err).Warnf("Failed to get client_id for provider %s", providerName)
-			respondWithError(w, http.StatusInternalServerError, "Failed to get client_id from provider configuration")
+			respondWithError(w, http.StatusInternalServerError, "Failed to obtain the configuration details for provider")
 			return
 		}
 
@@ -383,8 +366,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 		tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, providerName, tokenReq)
 		if err != nil {
-			log.GetLogger().WithError(err).Warn("Failed to exchange token with backend")
-			handleOAuthErrorResponse(w, tokenResp, "Failed to exchange authorization code for token")
+			handleOAuthErrorResponse(w, tokenResp, "Failed to obtain login authorization code")
 			return
 		}
 
@@ -416,7 +398,6 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var providerConfig *v1beta1.AuthProvider
 	provider, providerConfig, err := a.getProviderInstance(tokenData.Provider)
 	if err != nil {
-		log.GetLogger().WithError(err).Warnf("Failed to get provider: %s", tokenData.Provider)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -435,7 +416,6 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	clientId, err := getClientIdFromProviderConfig(providerConfig)
 	if err != nil {
-		log.GetLogger().WithError(err).Warnf("Failed to get client_id for provider %s", tokenData.Provider)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -448,8 +428,7 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, tokenData.Provider, tokenReq)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to refresh token with backend")
-		handleOAuthErrorResponse(w, tokenResp, "Failed to refresh token")
+		handleOAuthErrorResponse(w, tokenResp, "Failed to obtain new access token")
 		return
 	}
 
@@ -482,9 +461,7 @@ func respondWithToken(w http.ResponseWriter, tokenData TokenData, expires *int64
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if _, err := w.Write(exp); err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to write response")
-	}
+	w.Write(exp)
 }
 
 func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
@@ -511,7 +488,6 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 
 	token := tokenData.GetAuthToken()
 	if token == "" {
-		log.GetLogger().Warn("No token found in session cookie")
 		clearSessionCookie(w, r)
 		respondWithError(w, http.StatusUnauthorized, "No authentication token found in session")
 		return
@@ -520,7 +496,6 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	// Route ALL providers to API server userinfo endpoint
 	username, err := getUserInfoFromApiServer(a.apiTlsConfig, token)
 	if err != nil {
-		log.GetLogger().WithError(err).Warnf("Failed to get user info from API server for provider %s", tokenData.Provider)
 		// If user info retrieval fails (including timeouts), treat as authentication failure
 		clearSessionCookie(w, r)
 		respondWithError(w, http.StatusUnauthorized, fmt.Sprintf("Failed to get user info: %v", err))
@@ -528,12 +503,10 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if username == "" {
-		log.GetLogger().Warnf("API server userinfo returned empty username for provider %s", tokenData.Provider)
-		respondWithError(w, http.StatusInternalServerError, "User info response missing username")
+		respondWithError(w, http.StatusInternalServerError, "Failed to retrieve user details")
 		return
 	}
 
-	log.GetLogger().Debugf("Successfully retrieved username '%s' from backend for provider %s", username, tokenData.Provider)
 	a.respondWithUserInfo(w, username)
 }
 
@@ -542,13 +515,10 @@ func (a AuthHandler) respondWithUserInfo(w http.ResponseWriter, username string)
 	userInfo := UserInfoResponse{Username: username}
 	res, err := json.Marshal(userInfo)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to marshal user info")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if _, err := w.Write(res); err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to write response")
-	}
+	w.Write(res)
 }
 
 func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
@@ -562,7 +532,7 @@ func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	tokenData, err := ParseSessionCookie(r)
 	if err != nil {
 		// No valid session, but still clear cookies and return success
-		w.Header().Set("Clear-Site-Data", `"cookies"`)
+		clearSessionCookie(w, r)
 		response, _ := json.Marshal(RedirectResponse{})
 		w.Write(response)
 		return
@@ -575,7 +545,7 @@ func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		authToken := tokenData.GetAuthToken()
 		if authToken == "" {
 			// No valid session, but still clear cookies and return success
-			w.Header().Set("Clear-Site-Data", `"cookies"`)
+			clearSessionCookie(w, r)
 			response, _ := json.Marshal(RedirectResponse{})
 			w.Write(response)
 			return
@@ -591,20 +561,17 @@ func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// In any case, we proceed to clear the cookies
-	w.Header().Set("Clear-Site-Data", `"cookies"`)
+	clearSessionCookie(w, r)
 	redirectResp := RedirectResponse{}
 	if redirectUrl != "" {
 		redirectResp.Url = redirectUrl
 	}
 	response, err := json.Marshal(redirectResp)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to marshal response")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if _, err := w.Write(response); err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to write response")
-	}
+	w.Write(response)
 }
 
 func getAuthInfo(apiTlsConfig *tls.Config) (*v1beta1.AuthConfig, error) {
@@ -615,13 +582,11 @@ func getAuthInfo(apiTlsConfig *tls.Config) (*v1beta1.AuthConfig, error) {
 
 	req, err := http.NewRequest(http.MethodGet, authConfigUrl, nil)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Could not create request")
 		return nil, err
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to get auth config")
 		return nil, err
 	}
 
@@ -632,14 +597,12 @@ func getAuthInfo(apiTlsConfig *tls.Config) (*v1beta1.AuthConfig, error) {
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to read terminal session response")
 		return nil, err
 	}
 
 	authConfig := &v1beta1.AuthConfig{}
 	err = json.Unmarshal(body, authConfig)
 	if err != nil {
-		log.GetLogger().WithError(err).Warn("Failed to unmarshal auth config")
 		return nil, err
 	}
 
