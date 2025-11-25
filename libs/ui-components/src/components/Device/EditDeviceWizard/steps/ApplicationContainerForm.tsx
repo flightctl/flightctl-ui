@@ -291,16 +291,16 @@ const ApplicationContainerForm = ({
             <FormGroupWithHelperText
               label={t('Memory limit')}
               content={t(
-                'Set the maximum memory usage for your container using Podman format: "b" (bytes), "k" (kibibytes), "m" (mebibytes), "g" (gibibytes). Examples: "512m", "1g", "2048k". Ensure the limit fits within your device\'s available memory and accounts for other applications and system processes.',
+                'Set the maximum memory usage for your container using Podman format. You can specify a number with an optional unit: "b" (bytes), "k" (kibibytes), "m" (mebibytes), "g" (gibibytes). Examples: "512", "512m", "1g", "2048k". Ensure the limit fits within your device\'s available memory and accounts for other applications and system processes.',
               )}
             >
               <TextField
                 aria-label={t('Memory limit')}
                 name={`${appFieldName}.limits.memory`}
                 value={app.limits?.memory || ''}
-                placeholder={t('Enter numeric value and unit')}
+                placeholder={t('Enter numeric value with optional unit')}
                 isDisabled={isReadOnly}
-                helperText={t('Provide a valid memory value (e.g., "512m", "2g", "1024k").')}
+                helperText={t('Provide a valid memory value (e.g., "512", "512m", "2g", "1024k").')}
               />
             </FormGroupWithHelperText>
           </Grid>

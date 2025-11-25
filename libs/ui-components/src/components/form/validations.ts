@@ -533,11 +533,8 @@ const quadletFilesAtRoot =
 const PORT_NUMBER_REGEXP = /^\d+$/;
 const MAX_PORT = 65535;
 
-// CPU limits: accepts decimal numbers (e.g., "0.5", "1", "2", "0.75")
-const CPU_LIMIT_REGEXP = /^\d+(\.\d+)?$/;
-
-// Memory limits: accepts numbers with Podman units (b, k, m, g)
-const MEMORY_LIMIT_REGEXP = /^\d+[bkmg]$/i;
+// Memory limits: accepts numbers with optional Podman units (b, k, m, g)
+const MEMORY_LIMIT_REGEXP = /^\d+[bkmg]?$/i;
 
 export const validatePortNumber = (port: string, t: TFunction): string | undefined => {
   if (!port) {
@@ -585,6 +582,35 @@ export const isValidPortMapping = (
   return !isDuplicatePortMapping(hostPort, containerPort, existingPorts);
 };
 
+export const validateCPULimit = (cpu: string | undefined): boolean => {
+  if (!cpu) {
+    return true;
+  }
+  const trimmed = cpu.trim();
+  if (!trimmed) {
+    return true;
+  }
+  const val = Number.parseFloat(trimmed);
+  if (Number.isNaN(val) || val < 0) {
+    return false;
+  }
+  return true;
+};
+
+export const validateMemoryLimit = (memory: string | undefined): boolean => {
+  if (!memory) {
+    return true;
+  }
+  const trimmed = memory.trim();
+  if (!trimmed) {
+    return true;
+  }
+  if (!MEMORY_LIMIT_REGEXP.test(trimmed)) {
+    return false;
+  }
+  return true;
+};
+
 export const validApplicationsSchema = (t: TFunction) => {
   return Yup.array()
     .of(
@@ -619,16 +645,8 @@ export const validApplicationsSchema = (t: TFunction) => {
                 .required(),
             ),
             limits: Yup.object().shape({
-              cpu: Yup.string().test(
-                'valid-cpu-format',
-                t('CPU limit must be a number (e.g., "0.5", "1", "2").'),
-                (value) => !value || CPU_LIMIT_REGEXP.test(value.trim()),
-              ),
-              memory: Yup.string().test(
-                'valid-memory-format',
-                t('Memory limit must include a unit at the end (b, k, m, g). Examples: "512m", "1g", "2048k".'),
-                (value) => !value || MEMORY_LIMIT_REGEXP.test(value.trim()),
-              ),
+              cpu: Yup.string().test('valid-cpu-format', t('CPU limit is invalid.'), validateCPULimit),
+              memory: Yup.string().test('valid-memory-format', t('Memory limit is invalid.'), validateMemoryLimit),
             }),
             volumes: Yup.array().of(
               Yup.object().shape({
