@@ -113,6 +113,7 @@ export const useAuthContext = () => {
             setLoading(false);
             return;
           }
+
           if (resp.status === 401) {
             // Extract error message from response if available
             let errorMessage = t('Authentication failed. Please try logging in again.');
@@ -131,8 +132,8 @@ export const useAuthContext = () => {
               // If parsing fails, use default error message
             }
             setError(errorMessage);
-            // Don't redirect if we're already on the login page
-            if (window.location.pathname !== '/login') {
+            // Don't redirect if we're already on the login or login callback pages
+            if (!['/login', '/callback'].includes(window.location.pathname)) {
               redirectToLogin();
             }
             setLoading(false);

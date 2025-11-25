@@ -3,6 +3,7 @@ package auth
 import (
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,6 +23,26 @@ type UserInfoResponse struct {
 
 type RedirectResponse struct {
 	Url string `json:"url"`
+}
+
+// UserInfoError is a custom error type that carries a user-facing error message
+type UserInfoError struct {
+	UserMessage string
+	Err         error
+}
+
+func (e *UserInfoError) Error() string {
+	if e.UserMessage != "" {
+		return e.UserMessage
+	}
+	if e.Err != nil {
+		return e.Err.Error()
+	}
+	return "userinfo error"
+}
+
+func (e *UserInfoError) Unwrap() error {
+	return e.Err
 }
 
 type AuthHandler struct {
@@ -498,7 +519,10 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// If user info retrieval fails (including timeouts), treat as authentication failure
 		clearSessionCookie(w, r)
-		respondWithError(w, http.StatusUnauthorized, fmt.Sprintf("Failed to get user info: %v", err))
+
+		// Extract the user-facing error message
+		errorMsg := extractUserInfoErrorMessage(err)
+		respondWithError(w, http.StatusUnauthorized, errorMsg)
 		return
 	}
 
@@ -607,4 +631,20 @@ func getAuthInfo(apiTlsConfig *tls.Config) (*v1beta1.AuthConfig, error) {
 	}
 
 	return authConfig, nil
+}
+
+// extractUserInfoErrorMessage extracts a user-facing error message from an error
+func extractUserInfoErrorMessage(err error) string {
+	if err == nil {
+		return "Unknown error"
+	}
+
+	// Check if it's a UserInfoError with a user message
+	var userInfoErr *UserInfoError
+	if errors.As(err, &userInfoErr) && userInfoErr.UserMessage != "" {
+		return userInfoErr.UserMessage
+	}
+
+	// Fallback: return a generic error message
+	return "Authentication failed. Please try logging in again."
 }
