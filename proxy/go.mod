@@ -5,7 +5,7 @@ go 1.24.0
 toolchain go1.24.6
 
 require (
-	github.com/flightctl/flightctl v1.0.0-main.0.20251119121430-1919682154b5
+	github.com/flightctl/flightctl v1.0.0-main.0.20251125075421-bbc6daa7c2e7
 	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/websocket v1.5.3

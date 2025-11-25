@@ -1,8 +1,9 @@
 import { Repository } from '@flightctl/types';
 import { repoList } from '../../fixtures';
+import { API_VERSION } from '../constants';
 
 const buildRepositoriesResponse = (repositories: Repository[]) => ({
-  apiVersion: 'v1alpha1',
+  apiVersion: API_VERSION,
   items: repositories,
   kind: 'RepositoryList',
   metadata: {},

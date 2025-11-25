@@ -18,17 +18,17 @@ import (
 	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
-	"github.com/flightctl/flightctl/api/v1alpha1"
+	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
 
 // Provider type constants - use backend constants instead of hardcoding
 var (
-	ProviderTypeK8s       = string(v1alpha1.K8s)
-	ProviderTypeOIDC      = string(v1alpha1.Oidc)
-	ProviderTypeAAP       = string(v1alpha1.Aap)
-	ProviderTypeOAuth2    = string(v1alpha1.Oauth2)
-	ProviderTypeOpenShift = string(v1alpha1.Openshift)
+	ProviderTypeK8s       = string(v1beta1.K8s)
+	ProviderTypeOIDC      = string(v1beta1.Oidc)
+	ProviderTypeAAP       = string(v1beta1.Aap)
+	ProviderTypeOAuth2    = string(v1beta1.Oauth2)
+	ProviderTypeOpenShift = string(v1beta1.Openshift)
 )
 
 // Default claim constants
@@ -643,7 +643,7 @@ func getMapKeys(m map[string]interface{}) []string {
 }
 
 // extractProviderName extracts the provider name from AuthProvider metadata
-func extractProviderName(provider *v1alpha1.AuthProvider) string {
+func extractProviderName(provider *v1beta1.AuthProvider) string {
 	if provider != nil && provider.Metadata.Name != nil {
 		return *provider.Metadata.Name
 	}

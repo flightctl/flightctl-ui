@@ -10,7 +10,7 @@ import (
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
-	"github.com/flightctl/flightctl/api/v1alpha1"
+	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
@@ -196,7 +196,7 @@ func (t *TokenAuthProvider) GetLoginRedirectURL(codeChallenge string) string {
 }
 
 // getK8sAuthHandler creates a new K8s token authentication handler
-func getK8sAuthHandler(provider *v1alpha1.AuthProvider, k8sSpec *v1alpha1.K8sProviderSpec) (*TokenAuthProvider, error) {
+func getK8sAuthHandler(provider *v1beta1.AuthProvider, k8sSpec *v1beta1.K8sProviderSpec) (*TokenAuthProvider, error) {
 	providerName := extractProviderName(provider)
 
 	// Use API TLS config since we're calling the FlightCtl API to validate tokens

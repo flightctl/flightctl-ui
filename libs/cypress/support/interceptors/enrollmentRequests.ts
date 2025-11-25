@@ -1,8 +1,9 @@
 import { getErList } from '../../fixtures';
 import { EnrollmentRequest } from '@flightctl/types';
+import { API_VERSION } from '../constants';
 
 const buildErResponse = (enrollmentRequests: EnrollmentRequest[]) => ({
-  apiVersion: 'v1alpha1',
+  apiVersion: API_VERSION,
   items: enrollmentRequests,
   kind: 'EnrollmentRequestList',
   metadata: {},

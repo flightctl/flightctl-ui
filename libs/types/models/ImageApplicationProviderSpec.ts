@@ -7,7 +7,7 @@ import type { ApplicationResources } from './ApplicationResources';
 import type { ApplicationVolumeProviderSpec } from './ApplicationVolumeProviderSpec';
 export type ImageApplicationProviderSpec = (ApplicationVolumeProviderSpec & {
   /**
-   * Reference to the container image for the application package.
+   * Reference to the OCI image or artifact for the application package.
    */
   image: string;
   /**

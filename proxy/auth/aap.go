@@ -10,7 +10,7 @@ import (
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
-	"github.com/flightctl/flightctl/api/v1alpha1"
+	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
 
@@ -50,7 +50,7 @@ func (c *AAPRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func getAAPAuthHandler(provider *v1alpha1.AuthProvider, aapSpec *v1alpha1.AapProviderSpec) (*AAPAuthHandler, error) {
+func getAAPAuthHandler(provider *v1beta1.AuthProvider, aapSpec *v1beta1.AapProviderSpec) (*AAPAuthHandler, error) {
 	providerName := extractProviderName(provider)
 
 	// Validate required fields

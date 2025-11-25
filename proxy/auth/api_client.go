@@ -12,14 +12,14 @@ import (
 
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
-	"github.com/flightctl/flightctl/api/v1alpha1"
+	"github.com/flightctl/flightctl/api/v1beta1"
 )
 
 // k8s service account prefix
 const k8sServiceAccountPrefix = "system:serviceaccount:"
 
 // exchangeTokenWithApiServer allows us to perform the token exchange through the Flight Control API
-func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, tokenReq *v1alpha1.TokenRequest) (*v1alpha1.TokenResponse, error) {
+func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, tokenReq *v1beta1.TokenRequest) (*v1beta1.TokenResponse, error) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: apiTlsConfig,
@@ -68,7 +68,7 @@ func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, t
 
 	if resp.StatusCode != http.StatusOK {
 		// Try to parse as JSON first (OAuth2 errors are usually JSON)
-		var tokenResp v1alpha1.TokenResponse
+		var tokenResp v1beta1.TokenResponse
 		if err := json.Unmarshal(body, &tokenResp); err == nil {
 			// Successfully parsed as JSON, check for OAuth2 error fields
 			if tokenResp.Error != nil {
@@ -85,7 +85,7 @@ func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, t
 	}
 
 	// Status is OK, parse as JSON
-	var tokenResp v1alpha1.TokenResponse
+	var tokenResp v1beta1.TokenResponse
 	if err := json.Unmarshal(body, &tokenResp); err != nil {
 		return nil, fmt.Errorf("failed to parse API server token response: %w (body: %s)", err, string(body))
 	}
@@ -154,7 +154,7 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 
 	if resp.StatusCode != http.StatusOK {
 		// Try to parse as JSON first
-		var userInfoResp v1alpha1.UserInfoResponse
+		var userInfoResp v1beta1.UserInfoResponse
 		if err := json.Unmarshal(body, &userInfoResp); err == nil {
 			// Successfully parsed as JSON, check for error field
 			if userInfoResp.Error != nil {
@@ -167,7 +167,7 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 	}
 
 	// Status is OK, parse as JSON
-	var userInfoResp v1alpha1.UserInfoResponse
+	var userInfoResp v1beta1.UserInfoResponse
 	if err := json.Unmarshal(body, &userInfoResp); err != nil {
 		return "", fmt.Errorf("failed to parse userinfo response: %w (body: %s)", err, string(body))
 	}
@@ -191,7 +191,7 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 }
 
 // convertTokenResponseToTokenData converts TokenResponse to proxy TokenData
-func convertTokenResponseToTokenData(tokenResp *v1alpha1.TokenResponse, providerName string) (TokenData, *int64) {
+func convertTokenResponseToTokenData(tokenResp *v1beta1.TokenResponse, providerName string) (TokenData, *int64) {
 	tokenData := TokenData{
 		Provider: providerName,
 	}

@@ -1,4 +1,5 @@
 import { ConditionStatus, ConditionType } from '@flightctl/types';
+import { API_VERSION } from '../../support/constants';
 
 const approvedErStatus = {
   approval: {
@@ -22,7 +23,7 @@ const approvedErStatus = {
 const getErList = (onlyPending: boolean) =>
   [
     {
-      apiVersion: 'v1alpha1',
+      apiVersion: API_VERSION,
       kind: 'EnrollmentRequest',
       metadata: {
         creationTimestamp: '2024-04-10T11:48:43Z',
@@ -35,7 +36,7 @@ const getErList = (onlyPending: boolean) =>
       status: approvedErStatus,
     },
     {
-      apiVersion: 'v1alpha1',
+      apiVersion: API_VERSION,
       kind: 'EnrollmentRequest',
       metadata: {
         creationTimestamp: '2024-04-10T12:15:31Z',
@@ -48,7 +49,7 @@ const getErList = (onlyPending: boolean) =>
       status: { conditions: [] },
     },
     {
-      apiVersion: 'v1alpha1',
+      apiVersion: API_VERSION,
       kind: 'EnrollmentRequest',
       metadata: {
         creationTimestamp: '2024-04-10T09:31:04Z',
@@ -61,7 +62,7 @@ const getErList = (onlyPending: boolean) =>
       status: approvedErStatus,
     },
     {
-      apiVersion: 'v1alpha1',
+      apiVersion: API_VERSION,
       kind: 'EnrollmentRequest',
       metadata: {
         creationTimestamp: '2024-10-10T12:15:31Z',

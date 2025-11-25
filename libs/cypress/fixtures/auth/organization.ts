@@ -1,5 +1,7 @@
+import { API_VERSION } from '../../support/constants';
+
 const defaultOrg = {
-  apiVersion: 'v1alpha1',
+  apiVersion: API_VERSION,
   kind: 'Organization',
   metadata: {
     name: 'default',

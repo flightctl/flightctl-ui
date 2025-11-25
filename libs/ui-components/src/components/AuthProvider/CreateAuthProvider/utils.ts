@@ -25,6 +25,7 @@ import {
 } from './types';
 import { validKubernetesDnsSubdomain } from '../../form/validations';
 import { DynamicAuthProviderSpec, ProviderType } from '../../../types/extraTypes';
+import { API_VERSION } from '../../../constants';
 
 export const getAssignmentTypeLabel = (
   type: AuthOrganizationAssignment['type'] | AuthRoleAssignment['type'] | undefined,
@@ -316,7 +317,7 @@ export const getAuthProvider = (values: AuthProviderFormValues): AuthProvider =>
   }
 
   return {
-    apiVersion: 'v1alpha1',
+    apiVersion: API_VERSION,
     kind: 'AuthProvider',
     metadata: {
       name: values.name,
