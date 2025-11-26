@@ -142,7 +142,7 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 				errorMsg = statusObj.Reason
 			}
 			if errorMsg == "" {
-				errorMsg = fmt.Sprintf("Userinfo service returned an error (code: %d)", statusObj.Code)
+				errorMsg = fmt.Sprintf("Failed to obtain the user details (code: %d)", statusObj.Code)
 			}
 			return "", &UserInfoError{UserMessage: errorMsg}
 		}
@@ -155,23 +155,20 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		// Try to parse as JSON first
 		var userInfoResp v1beta1.UserInfoResponse
 		if err := json.Unmarshal(body, &userInfoResp); err == nil {
-			// Successfully parsed as JSON, check for error field
 			if userInfoResp.Error != nil {
 				return "", &UserInfoError{UserMessage: *userInfoResp.Error}
 			}
-			return "", &UserInfoError{UserMessage: fmt.Sprintf("Userinfo service returned status %d", resp.StatusCode)}
+			return "", &UserInfoError{UserMessage: fmt.Sprintf("Failed to obtain the user details (status code: %d)", resp.StatusCode)}
 		}
-		// Not JSON, return the plain text error
-		return "", &UserInfoError{UserMessage: fmt.Sprintf("Userinfo service returned status %d: %s", resp.StatusCode, string(body))}
+		return "", &UserInfoError{UserMessage: fmt.Sprintf("Failed to obtain the user details (status code: %d)", resp.StatusCode)}
 	}
 
 	// Status is OK, parse as JSON
 	var userInfoResp v1beta1.UserInfoResponse
 	if err := json.Unmarshal(body, &userInfoResp); err != nil {
-		return "", &UserInfoError{UserMessage: "Invalid response format from userinfo service.", Err: err}
+		return "", &UserInfoError{UserMessage: "Failed to obtain the user details (invalid response format).", Err: err}
 	}
 
 	// Check for errors in response (even with 200 status)
@@ -180,7 +177,7 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 	}
 
 	if userInfoResp.PreferredUsername == nil {
-		return "", &UserInfoError{UserMessage: "Userinfo service could not provide necessary user details for login."}
+		return "", &UserInfoError{UserMessage: "Failed to obtain the user details (missing username)."}
 	}
 
 	// Extract and strip the k8s service account prefix from preferred_username if present

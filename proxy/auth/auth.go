@@ -424,8 +424,6 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isProviderWithCustomerToken(provider) {
-		// K8s token providers don't support refresh
-		w.WriteHeader(http.StatusBadRequest)
 		respondWithError(w, http.StatusBadRequest, "Token refresh not supported for K8s token providers")
 		return
 	}
