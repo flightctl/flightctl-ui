@@ -7,7 +7,7 @@ import (
 
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/config"
-	"github.com/flightctl/flightctl/api/v1alpha1"
+	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
 
@@ -23,7 +23,7 @@ type OAuth2AuthHandler struct {
 }
 
 // getOAuth2AuthHandler creates an OAuth2 handler using explicit endpoints
-func getOAuth2AuthHandler(provider *v1alpha1.AuthProvider, oauth2Spec *v1alpha1.OAuth2ProviderSpec) (*OAuth2AuthHandler, error) {
+func getOAuth2AuthHandler(provider *v1beta1.AuthProvider, oauth2Spec *v1beta1.OAuth2ProviderSpec) (*OAuth2AuthHandler, error) {
 	providerName := extractProviderName(provider)
 
 	if oauth2Spec.AuthorizationUrl == "" || oauth2Spec.TokenUrl == "" || oauth2Spec.UserinfoUrl == "" || oauth2Spec.ClientId == "" || oauth2Spec.Scopes == nil || len(*oauth2Spec.Scopes) == 0 {

@@ -1,8 +1,9 @@
 import { basicFleets } from '../../fixtures/fleets';
 import { Fleet } from '@flightctl/types';
+import { API_VERSION } from '../constants';
 
 const buildFleetResponse = (fleets: Fleet[]) => ({
-  apiVersion: 'v1alpha1',
+  apiVersion: API_VERSION,
   items: fleets,
   kind: 'FleetList',
   metadata: {},

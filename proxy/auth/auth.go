@@ -9,7 +9,7 @@ import (
 
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
-	"github.com/flightctl/flightctl/api/v1alpha1"
+	"github.com/flightctl/flightctl/api/v1beta1"
 )
 
 type ExpiresInResp struct {
@@ -27,7 +27,7 @@ type RedirectResponse struct {
 type AuthHandler struct {
 	provider       AuthProvider
 	apiTlsConfig   *tls.Config
-	authConfigData *v1alpha1.AuthConfig
+	authConfigData *v1beta1.AuthConfig
 }
 
 func NewAuth(apiTlsConfig *tls.Config) (*AuthHandler, error) {
@@ -51,7 +51,7 @@ func NewAuth(apiTlsConfig *tls.Config) (*AuthHandler, error) {
 }
 
 // findProviderConfig finds a provider config by name from the auth config
-func findProviderConfig(authConfig *v1alpha1.AuthConfig, providerName string) (*v1alpha1.AuthProvider, error) {
+func findProviderConfig(authConfig *v1beta1.AuthConfig, providerName string) (*v1beta1.AuthProvider, error) {
 	if authConfig == nil || authConfig.Providers == nil {
 		return nil, fmt.Errorf("no providers configured")
 	}
@@ -67,7 +67,7 @@ func findProviderConfig(authConfig *v1alpha1.AuthConfig, providerName string) (*
 
 // getProviderInstance creates a provider instance by fetching the latest auth config
 // Returns both the provider instance and the provider config to avoid duplicate API calls
-func (a *AuthHandler) getProviderInstance(providerName string) (AuthProvider, *v1alpha1.AuthProvider, error) {
+func (a *AuthHandler) getProviderInstance(providerName string) (AuthProvider, *v1beta1.AuthProvider, error) {
 	authConfig, err := getAuthInfo(a.apiTlsConfig)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get auth config: %w", err)
@@ -146,7 +146,7 @@ func (a *AuthHandler) getProviderInstance(providerName string) (AuthProvider, *v
 }
 
 // getClientIdFromProviderConfig extracts the client_id from a provider config
-func getClientIdFromProviderConfig(providerConfig *v1alpha1.AuthProvider) (string, error) {
+func getClientIdFromProviderConfig(providerConfig *v1beta1.AuthProvider) (string, error) {
 	providerTypeStr, err := providerConfig.Spec.Discriminator()
 	if err != nil {
 		return "", fmt.Errorf("failed to determine provider type: %w", err)
@@ -270,7 +270,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var providerConfig *v1alpha1.AuthProvider
+		var providerConfig *v1beta1.AuthProvider
 		provider, providerConfig, err = a.getProviderInstance(providerName)
 		if err != nil {
 			log.GetLogger().WithError(err).Warnf("Could not find provider: %s", providerName)
@@ -373,8 +373,8 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		redirectURI := config.BaseUiUrl + "/callback"
-		tokenReq := &v1alpha1.TokenRequest{
-			GrantType:    v1alpha1.AuthorizationCode,
+		tokenReq := &v1beta1.TokenRequest{
+			GrantType:    v1beta1.AuthorizationCode,
 			ClientId:     clientId,
 			Code:         &loginParams.Code,
 			CodeVerifier: &loginParams.CodeVerifier,
@@ -413,7 +413,7 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get provider to determine routing
-	var providerConfig *v1alpha1.AuthProvider
+	var providerConfig *v1beta1.AuthProvider
 	provider, providerConfig, err := a.getProviderInstance(tokenData.Provider)
 	if err != nil {
 		log.GetLogger().WithError(err).Warnf("Failed to get provider: %s", tokenData.Provider)
@@ -440,8 +440,8 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenReq := &v1alpha1.TokenRequest{
-		GrantType:    v1alpha1.RefreshToken,
+	tokenReq := &v1beta1.TokenRequest{
+		GrantType:    v1beta1.RefreshToken,
 		ClientId:     clientId,
 		RefreshToken: &tokenData.RefreshToken,
 	}
@@ -459,7 +459,7 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleOAuthErrorResponse handles OAuth2 error responses from token exchange/refresh
-func handleOAuthErrorResponse(w http.ResponseWriter, tokenResp *v1alpha1.TokenResponse, defaultMessage string) {
+func handleOAuthErrorResponse(w http.ResponseWriter, tokenResp *v1beta1.TokenResponse, defaultMessage string) {
 	if tokenResp != nil && tokenResp.Error != nil {
 		errorDesc := ""
 		if tokenResp.ErrorDescription != nil {
@@ -607,7 +607,7 @@ func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getAuthInfo(apiTlsConfig *tls.Config) (*v1alpha1.AuthConfig, error) {
+func getAuthInfo(apiTlsConfig *tls.Config) (*v1beta1.AuthConfig, error) {
 	client := &http.Client{Transport: &http.Transport{
 		TLSClientConfig: apiTlsConfig,
 	}}
@@ -636,7 +636,7 @@ func getAuthInfo(apiTlsConfig *tls.Config) (*v1alpha1.AuthConfig, error) {
 		return nil, err
 	}
 
-	authConfig := &v1alpha1.AuthConfig{}
+	authConfig := &v1beta1.AuthConfig{}
 	err = json.Unmarshal(body, authConfig)
 	if err != nil {
 		log.GetLogger().WithError(err).Warn("Failed to unmarshal auth config")

@@ -1,4 +1,5 @@
 import { defaultOrg } from '../../fixtures/auth/organization';
+import { API_VERSION } from '../constants';
 
 const loadInterceptors = () => {
   cy.intercept('GET', '/api/login/info', (req) => {
@@ -18,7 +19,7 @@ const loadInterceptors = () => {
     req.reply({
       statusCode: 200,
       body: {
-        apiVersion: 'v1alpha1',
+        apiVersion: API_VERSION,
         kind: 'OrganizationList',
         metadata: {},
         items: [defaultOrg],

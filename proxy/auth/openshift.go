@@ -12,7 +12,7 @@ import (
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
-	"github.com/flightctl/flightctl/api/v1alpha1"
+	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
 
@@ -34,7 +34,7 @@ type openshiftOAuthDiscovery struct {
 }
 
 // getOpenShiftAuthHandlerFromSpec creates an OpenShift auth handler from OpenShiftProviderSpec
-func getOpenShiftAuthHandlerFromSpec(provider *v1alpha1.AuthProvider, openshiftSpec *v1alpha1.OpenShiftProviderSpec) (*OpenShiftAuthHandler, error) {
+func getOpenShiftAuthHandlerFromSpec(provider *v1beta1.AuthProvider, openshiftSpec *v1beta1.OpenShiftProviderSpec) (*OpenShiftAuthHandler, error) {
 	providerName := extractProviderName(provider)
 
 	// Determine the API server URL - prefer ClusterControlPlaneUrl, fallback to authorization URL base

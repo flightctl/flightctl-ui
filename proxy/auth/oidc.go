@@ -11,7 +11,7 @@ import (
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
-	"github.com/flightctl/flightctl/api/v1alpha1"
+	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
 
@@ -34,7 +34,7 @@ type oidcServerResponse struct {
 	EndSessionEndpoint string `json:"end_session_endpoint"`
 }
 
-func getOIDCAuthHandler(provider *v1alpha1.AuthProvider, oidcSpec *v1alpha1.OIDCProviderSpec) (*OIDCAuthHandler, error) {
+func getOIDCAuthHandler(provider *v1beta1.AuthProvider, oidcSpec *v1beta1.OIDCProviderSpec) (*OIDCAuthHandler, error) {
 	providerName := extractProviderName(provider)
 
 	if oidcSpec.Issuer == "" {

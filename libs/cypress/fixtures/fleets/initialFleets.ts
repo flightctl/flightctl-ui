@@ -1,8 +1,9 @@
 import { Fleet } from '@flightctl/types';
+import { API_VERSION } from '../../support/constants';
 
 const basicFleets: Fleet[] = [
   {
-    apiVersion: 'v1alpha1',
+    apiVersion: API_VERSION,
     kind: 'Fleet',
     metadata: {
       creationTimestamp: '2024-04-10T12:11:54Z',
@@ -48,11 +49,11 @@ const basicFleets: Fleet[] = [
         applicationStatus: {},
         summaryStatus: {},
         updateStatus: {},
-      }
+      },
     },
   },
   {
-    apiVersion: 'v1alpha1',
+    apiVersion: API_VERSION,
     kind: 'Fleet',
     metadata: {
       creationTimestamp: '2024-04-10T12:13:58Z',
@@ -106,7 +107,7 @@ const basicFleets: Fleet[] = [
         applicationStatus: {},
         summaryStatus: {},
         updateStatus: {},
-      }
+      },
     },
   },
 ];

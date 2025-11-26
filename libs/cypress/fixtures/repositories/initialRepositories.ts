@@ -1,8 +1,9 @@
 import { ConditionStatus, ConditionType, RepoSpecType, Repository } from '@flightctl/types';
+import { API_VERSION } from '../../support/constants';
 
 const repoList: Repository[] = [
   {
-    apiVersion: 'v1alpha1',
+    apiVersion: API_VERSION,
     kind: 'Repository',
     metadata: {
       creationTimestamp: '2024-04-30T14:05:53Z',

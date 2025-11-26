@@ -1,7 +1,8 @@
 import { Device, PatchRequest } from '@flightctl/types';
+import { API_VERSION } from '../constants';
 
 const buildDevicesResponse = (devices: Device[]) => ({
-  apiVersion: 'v1alpha1',
+  apiVersion: API_VERSION,
   items: devices,
   kind: 'DeviceList',
   metadata: {},
