@@ -1,4 +1,3 @@
-import { compare } from 'fast-json-patch';
 import {
   AppType,
   // eslint-disable-next-line no-restricted-imports
@@ -22,6 +21,7 @@ import {
   AppForm,
   AppSpecType,
   ApplicationVolumeForm,
+  ComposeImageAppForm,
   ComposeInlineAppForm,
   ConfigSourceProvider,
   ConfigType,
@@ -29,6 +29,8 @@ import {
   HttpConfigTemplate,
   InlineConfigTemplate,
   KubeSecretTemplate,
+  PortMapping,
+  QuadletImageAppForm,
   QuadletInlineAppForm,
   SpecConfigTemplate,
   SystemdUnitFormValue,
@@ -292,52 +294,208 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
   };
 };
 
+const hasInlineApplicationChanged = (
+  currentApp: InlineApplicationProviderSpec,
+  updatedApp: QuadletInlineAppForm | ComposeInlineAppForm,
+) => {
+  if (currentApp.inline.length !== updatedApp.files.length) {
+    return true;
+  }
+  return currentApp.inline.some((file, index) => {
+    const updatedFile = updatedApp.files[index];
+    const isCurrentBase64 = file.contentEncoding === EncodingType.EncodingBase64;
+    return (
+      (updatedFile.base64 || false) !== isCurrentBase64 ||
+      updatedFile.path !== file.path ||
+      updatedFile.content !== file.content
+    );
+  });
+};
+
+const areVolumesEqual = (currentVolumes: ApplicationVolume[], updatedFormVolumes: ApplicationVolumeForm[]): boolean => {
+  if (currentVolumes.length !== updatedFormVolumes.length) {
+    return false;
+  }
+
+  return currentVolumes.every((currentVol, index) => {
+    const updatedFormVol = updatedFormVolumes[index];
+    const currentFullVol = currentVol as ApplicationVolume & ImageMountVolumeProviderSpec;
+
+    if (currentFullVol.name !== updatedFormVol.name) {
+      return false;
+    }
+
+    const currentImageRef = currentFullVol.image?.reference || '';
+    const updatedImageRef = updatedFormVol?.imageRef || '';
+    if (currentImageRef !== updatedImageRef) {
+      return false;
+    }
+
+    const currentPullPolicy = currentFullVol.image?.pullPolicy || ImagePullPolicy.PullIfNotPresent;
+    const updatedPullPolicy = updatedFormVol?.imagePullPolicy || ImagePullPolicy.PullIfNotPresent;
+    if (currentPullPolicy !== updatedPullPolicy) {
+      return false;
+    }
+
+    const currentMountPath = currentFullVol.mount?.path || '';
+    const updatedMountPath = updatedFormVol?.mountPath || '';
+    if (currentMountPath !== updatedMountPath) {
+      return false;
+    }
+
+    return true;
+  });
+};
+
+const arePortsEqual = (currentPorts: string[], updatedPorts: PortMapping[]): boolean => {
+  if (currentPorts.length !== updatedPorts.length) {
+    return false;
+  }
+
+  // Reordered ports will be considered as changed
+  return currentPorts.every((currentPort, index) => {
+    const updatedPort = updatedPorts[index];
+    return currentPort === `${updatedPort.hostPort}:${updatedPort.containerPort}`;
+  });
+};
+
+const areResourceLimitsEqual = (
+  currentLimits: { cpu?: string; memory?: string } | undefined,
+  updatedLimits: { cpu?: string; memory?: string } | undefined,
+): boolean => {
+  const currentCpu = currentLimits?.cpu || '';
+  const updatedCpu = updatedLimits?.cpu || '';
+  const currentMemory = currentLimits?.memory || '';
+  const updatedMemory = updatedLimits?.memory || '';
+
+  return currentCpu === updatedCpu && currentMemory === updatedMemory;
+};
+
+const areEnvVariablesEqual = (
+  currentVars: Record<string, string> | undefined,
+  updatedFormVars: { name: string; value: string }[],
+): boolean => {
+  const envVars = currentVars || {};
+  if (Object.keys(envVars).length !== updatedFormVars.length) {
+    return false;
+  }
+
+  return updatedFormVars.every((variable) => {
+    // Envvars may have "falsy" values (eg. number 0) when they are defined
+    return variable.name in envVars && envVars[variable.name] === variable.value;
+  });
+};
+
+const hasSingleContainerAppChanged = (currentApp: ApplicationProviderSpec, updatedApp: AppForm): boolean => {
+  if (!isSingleContainerAppForm(updatedApp)) {
+    return true;
+  }
+
+  const imageApp = currentApp as ImageApplicationProviderSpec & ApplicationProviderSpec;
+  if (imageApp.name !== updatedApp.name || imageApp.image !== updatedApp.image) {
+    return true;
+  }
+
+  if (!arePortsEqual(imageApp.ports || [], updatedApp.ports || [])) {
+    return true;
+  }
+
+  if (!areResourceLimitsEqual(imageApp.resources?.limits, updatedApp.limits)) {
+    return true;
+  }
+
+  if (!areEnvVariablesEqual(imageApp.envVars, updatedApp.variables)) {
+    return true;
+  }
+
+  return !areVolumesEqual(imageApp.volumes || [], updatedApp.volumes || []);
+};
+
+const hasApplicationChanged = (currentApp: ApplicationProviderSpec, updatedApp: AppForm): boolean => {
+  const isCurrentImageApp = isImageAppProvider(currentApp);
+  const currentAppSpecType = isCurrentImageApp ? AppSpecType.OCI_IMAGE : AppSpecType.INLINE;
+
+  // Check if application name changed, or it's a different type of application (either specType or appType)
+  if (
+    currentAppSpecType !== updatedApp.specType ||
+    currentApp.appType !== updatedApp.appType ||
+    currentApp.name !== updatedApp.name
+  ) {
+    return true;
+  }
+
+  if (!areEnvVariablesEqual(currentApp.envVars, updatedApp.variables)) {
+    return true;
+  }
+
+  // The app is a single container application
+  if (isSingleContainerAppForm(updatedApp)) {
+    return hasSingleContainerAppChanged(currentApp, updatedApp);
+  }
+
+  // The app is an image application (Quadlet/Compose image apps)
+  if (isCurrentImageApp) {
+    const imageApp = currentApp as ImageApplicationProviderSpec;
+    const updatedImageApp = updatedApp as QuadletImageAppForm | ComposeImageAppForm;
+    if (imageApp.image !== updatedImageApp.image) {
+      return true;
+    }
+
+    return !areVolumesEqual(imageApp.volumes || [], updatedApp.volumes || []);
+  }
+
+  // The app must be an inline application
+  return hasInlineApplicationChanged(
+    currentApp as InlineApplicationProviderSpec,
+    updatedApp as QuadletInlineAppForm | ComposeInlineAppForm,
+  );
+};
+
 export const getApplicationPatches = (
   basePath: string,
   currentApps: ApplicationProviderSpec[],
   updatedApps: AppForm[],
-): PatchRequest => {
-  const patchPath = `${basePath}/applications`;
-  const updatedApiApps = updatedApps.map(toAPIApplication);
+) => {
+  const patches: PatchRequest = [];
 
-  // Generate patches using fast-json-patch
-  const rawPatches = compare({ applications: currentApps }, { applications: updatedApiApps }) as PatchRequest;
+  const currentLen = currentApps.length;
+  const newLen = updatedApps.length;
 
-  const apiPatches = rawPatches.map((patch) => ({
-    ...patch,
-    path: patch.path.replace('/applications', patchPath),
-  }));
-
-  const supportedOps = ['add', 'replace', 'remove', 'test'];
-  const hasOnlySupportedOperations = apiPatches.every((patch) => supportedOps.includes(patch.op));
-  if (hasOnlySupportedOperations) {
-    return apiPatches;
-  }
-
-  // If there are unsupported operations, use a simple replace strategy
-  if (currentApps.length === 0 && updatedApiApps.length > 0) {
-    return [
-      {
-        path: patchPath,
-        op: 'add',
-        value: updatedApiApps,
-      },
-    ];
-  } else if (currentApps.length > 0 && updatedApiApps.length === 0) {
-    return [
-      {
-        path: patchPath,
-        op: 'remove',
-      },
-    ];
-  }
-  return [
-    {
-      path: patchPath,
+  if (currentLen === 0 && newLen > 0) {
+    // First apps(s) have been added
+    patches.push({
+      path: `${basePath}/applications`,
+      op: 'add',
+      value: updatedApps.map(toAPIApplication),
+    });
+  } else if (currentLen > 0 && newLen === 0) {
+    // Last app(s) have been removed
+    patches.push({
+      path: `${basePath}/applications`,
+      op: 'remove',
+    });
+  } else if (currentLen !== newLen) {
+    // Array length changed, need to replace entire array
+    patches.push({
+      path: `${basePath}/applications`,
       op: 'replace',
-      value: updatedApiApps,
-    },
-  ];
+      value: updatedApps.map(toAPIApplication),
+    });
+  } else {
+    // Apps length has not changed. We only PATCH the applications that have actually changed
+    currentApps.forEach((currentApp, index) => {
+      const updatedApp = updatedApps[index];
+      if (hasApplicationChanged(currentApp, updatedApp)) {
+        patches.push({
+          path: `${basePath}/applications/${index}`,
+          op: 'replace',
+          value: toAPIApplication(updatedApp),
+        });
+      }
+    });
+  }
+
+  return patches;
 };
 
 export const getApiConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
