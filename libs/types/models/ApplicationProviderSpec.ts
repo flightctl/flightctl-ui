@@ -11,6 +11,6 @@ export type ApplicationProviderSpec = (ApplicationEnvVars & {
    * The application name must be 1–253 characters long, start with a letter or number, and contain no whitespace.
    */
   name?: string;
-  appType?: AppType;
+  appType: AppType;
 } & (ImageApplicationProviderSpec | InlineApplicationProviderSpec));
 

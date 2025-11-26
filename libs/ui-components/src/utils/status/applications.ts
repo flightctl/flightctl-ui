@@ -5,6 +5,7 @@ import {
   ApplicationsSummaryStatusType as AppSummaryStatus,
 } from '@flightctl/types';
 import { StatusItem } from './common';
+import AsleepIcon from '@patternfly/react-icons/dist/js/icons/asleep-icon';
 
 export const getApplicationSummaryStatusItems = (t: TFunction): StatusItem<AppSummaryStatus>[] => [
   {
@@ -22,6 +23,12 @@ export const getApplicationSummaryStatusItems = (t: TFunction): StatusItem<AppSu
     id: AppSummaryStatus.ApplicationsSummaryStatusUnknown,
     label: t('Unknown'),
     level: 'unknown',
+  },
+  {
+    id: AppSummaryStatus.ApplicationsSummaryStatusNoApplications,
+    label: t('No applications'),
+    level: 'info',
+    customIcon: AsleepIcon,
   },
   {
     id: AppSummaryStatus.ApplicationsSummaryStatusHealthy,

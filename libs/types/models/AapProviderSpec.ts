@@ -2,8 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { AuthOrganizationAssignment } from './AuthOrganizationAssignment';
-import type { AuthRoleAssignment } from './AuthRoleAssignment';
 /**
  * AapProviderSpec describes an Ansible Automation Platform (AAP) provider configuration.
  */
@@ -21,14 +19,28 @@ export type AapProviderSpec = {
    */
   apiUrl: string;
   /**
-   * The external AAP API URL (for external access).
+   * The OAuth2 authorization endpoint URL.
    */
-  externalApiUrl?: string;
+  authorizationUrl: string;
+  /**
+   * The OAuth2 token endpoint URL.
+   */
+  tokenUrl: string;
+  /**
+   * The OAuth2 client ID.
+   */
+  clientId: string;
+  /**
+   * The OAuth2 client secret.
+   */
+  clientSecret: string;
   /**
    * Whether this AAP provider is enabled.
    */
   enabled?: boolean;
-  organizationAssignment: AuthOrganizationAssignment;
-  roleAssignment: AuthRoleAssignment;
+  /**
+   * List of OAuth2 scopes to request.
+   */
+  scopes: Array<string>;
 };
 
