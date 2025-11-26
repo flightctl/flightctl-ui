@@ -13,6 +13,13 @@ type ApplicationsTableProps = {
   specApps: string[];
 };
 
+const emptyAppDetails: Partial<DeviceApplicationStatus> = {
+  name: '',
+  ready: '-',
+  restarts: 0,
+  embedded: false,
+};
+
 const ApplicationsTable = ({ appsStatus, specApps }: ApplicationsTableProps) => {
   const { t } = useTranslation();
 
@@ -36,16 +43,18 @@ const ApplicationsTable = ({ appsStatus, specApps }: ApplicationsTableProps) => 
           <Th modifier="wrap">{t('Ready')}</Th>
           <Th modifier="wrap">{t('Restarts')}</Th>
           <Th modifier="wrap">{t('Type')}</Th>
+          <Th modifier="wrap">{t('Embedded')}</Th>
         </Tr>
       </Thead>
       <Tbody>
         {allAppNames.map((appName) => {
-          const appDetails = appsStatus.find((app) => app.name === appName) || {
-            status: null,
-            ready: '-',
-            restarts: '-',
-            appType: null,
-          };
+          const appDetails = appsStatus.find((app) => app.name === appName) || emptyAppDetails;
+          let embedded = '-';
+          if (appDetails.embedded === true) {
+            embedded = t('Yes');
+          } else if (appDetails.embedded === false) {
+            embedded = t('No');
+          }
 
           return (
             <Tr key={appName}>
@@ -58,6 +67,7 @@ const ApplicationsTable = ({ appsStatus, specApps }: ApplicationsTableProps) => 
               <Td dataLabel={t('Type')}>
                 {appDetails.appType ? <Label variant="outline">{appDetails.appType}</Label> : '-'}
               </Td>
+              <Td dataLabel={t('Embedded')}>{embedded}</Td>
             </Tr>
           );
         })}
