@@ -136,6 +136,7 @@ const TokenLoginForm = ({ provider, onBack }: TokenLoginFormProps) => {
                 <FormGroup label={t('Service account token')} isRequired>
                   <TextArea
                     id="accessToken"
+                    aria-label={t('Service account token')}
                     value={token}
                     onChange={(_event, tokenVal) => {
                       if (tokenVal && !isValidJwtTokenFormat(tokenVal)) {

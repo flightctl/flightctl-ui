@@ -31,6 +31,7 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
   const [availableOrganizations, setAvailableOrganizations] = React.useState<Organization[]>([]);
   const [organizationsLoaded, setOrganizationsLoaded] = React.useState(false);
   const [selectionError, setSelectionError] = React.useState<string | undefined>();
+  const initializationStartedRef = React.useRef(false);
 
   const selectOrganization = React.useCallback((org: Organization) => {
     const organizationId = org.metadata?.name || '';
@@ -46,6 +47,13 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
 
   // Determine if multi-orgs are enabled. If so, check if an organization is already selected
   React.useEffect(() => {
+    // Prevent multiple initialization calls - only run once when isOrganizationsEnabled is null
+    if (initializationStartedRef.current || isOrganizationsEnabled !== null) {
+      return;
+    }
+
+    initializationStartedRef.current = true;
+
     const initializeOrganizations = async () => {
       try {
         // First, check if organizations are enabled via proxy endpoint
@@ -96,7 +104,8 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
     };
 
     void initializeOrganizations();
-  }, [fetch, proxyFetch, selectOrganization]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOrganizationsEnabled]);
 
   const isOrganizationSelectionRequired = React.useMemo(() => {
     // Don't show selector while still loading

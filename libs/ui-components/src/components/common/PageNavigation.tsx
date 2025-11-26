@@ -61,7 +61,7 @@ const OrganizationDropdown = ({ organizationName, onSwitchOrganization }: Organi
   );
 };
 
-const PageNavigation = () => {
+const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { currentOrganization, availableOrganizations } = useOrganizationGuardContext();
@@ -95,7 +95,7 @@ const PageNavigation = () => {
                     />
                   </ToolbarItem>
                 )}
-                {isAdmin && (
+                {isAdmin && showSettings && (
                   <ToolbarItem>
                     <Tooltip content={t('Manage authentication providers')}>
                       <Button

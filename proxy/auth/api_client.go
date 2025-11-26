@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/flightctl/flightctl-ui/config"
-	"github.com/flightctl/flightctl-ui/log"
 	"github.com/flightctl/flightctl/api/v1beta1"
 )
 
@@ -43,9 +42,6 @@ func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, t
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
-	// Log request details
-	log.GetLogger().Infof("API server token request: method=%s, url=%s, grant_type=%s, provider_name=%s, client_id=%s, body=%s", req.Method, req.URL.String(), tokenReq.GrantType, providerName, tokenReq.ClientId, string(reqBody))
-
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call API server token endpoint: %w", err)
@@ -56,9 +52,6 @@ func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, t
 	if err != nil {
 		return nil, fmt.Errorf("failed to read token response: %w", err)
 	}
-
-	// Log API server response for debugging
-	log.GetLogger().Infof("API server token response: status=%d, content-type=%s, body=%s", resp.StatusCode, resp.Header.Get("Content-Type"), string(body))
 
 	// Check HTTP status code first before trying to parse JSON
 	if resp.StatusCode == http.StatusTeapot {
@@ -87,7 +80,7 @@ func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, t
 	// Status is OK, parse as JSON
 	var tokenResp v1beta1.TokenResponse
 	if err := json.Unmarshal(body, &tokenResp); err != nil {
-		return nil, fmt.Errorf("failed to parse API server token response: %w (body: %s)", err, string(body))
+		return nil, fmt.Errorf("failed to parse API server token response: %w", err)
 	}
 
 	// Check for errors in response (even with 200 status)
@@ -115,73 +108,79 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 
 	req, err := http.NewRequest(http.MethodGet, userInfoURL, nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to create userinfo request: %w", err)
+		return "", &UserInfoError{UserMessage: "Unable to reach userinfo service.", Err: err}
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Accept", "application/json")
 
-	// Log request details including Authorization header preview
-	authHeader := req.Header.Get("Authorization")
-	authHeaderPreview := ""
-	if len(authHeader) > 60 {
-		authHeaderPreview = authHeader[:60] + "..."
-	} else {
-		authHeaderPreview = authHeader
-	}
-	log.GetLogger().Infof("Backend userinfo request: method=%s, url=%s, token_length=%d, auth_header_preview=%s",
-		req.Method, req.URL.String(), len(token), authHeaderPreview)
-
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("failed to call backend userinfo endpoint: %w", err)
+		return "", &UserInfoError{UserMessage: "Unable to reach userinfo service.", Err: err}
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("failed to read userinfo response: %w", err)
+		return "", &UserInfoError{UserMessage: "Invalid response from userinfo service.", Err: err}
 	}
 
-	// Log backend response for debugging
-	log.GetLogger().Infof("Backend userinfo response: status=%d, content-type=%s, body=%s", resp.StatusCode, resp.Header.Get("Content-Type"), string(body))
+	// Check if response is a Kubernetes Status error object (can occur with any HTTP status)
+	// Status objects have: kind="Status", status="Failure", message, code, etc.
+	var statusObj struct {
+		Kind    string `json:"kind"`
+		Status  string `json:"status"`
+		Message string `json:"message"`
+		Code    int32  `json:"code"`
+		Reason  string `json:"reason"`
+	}
+	if err := json.Unmarshal(body, &statusObj); err == nil {
+		// Successfully parsed, check if it's a Status object with Failure status
+		if statusObj.Kind == "Status" && statusObj.Status == "Failure" {
+			errorMsg := statusObj.Message
+			if errorMsg == "" {
+				errorMsg = statusObj.Reason
+			}
+			if errorMsg == "" {
+				errorMsg = fmt.Sprintf("Failed to obtain the user details (code: %d)", statusObj.Code)
+			}
+			return "", &UserInfoError{UserMessage: errorMsg}
+		}
+	}
 
 	// Check HTTP status code first before trying to parse JSON
 	if resp.StatusCode == http.StatusTeapot {
 		// 418 indicates auth not configured
-		return "", fmt.Errorf("auth not configured")
+		return "", &UserInfoError{UserMessage: "auth not configured"}
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		// Try to parse as JSON first
 		var userInfoResp v1beta1.UserInfoResponse
 		if err := json.Unmarshal(body, &userInfoResp); err == nil {
-			// Successfully parsed as JSON, check for error field
 			if userInfoResp.Error != nil {
-				return "", fmt.Errorf("userinfo error: %s", *userInfoResp.Error)
+				return "", &UserInfoError{UserMessage: *userInfoResp.Error}
 			}
-			return "", fmt.Errorf("backend returned status %d", resp.StatusCode)
+			return "", &UserInfoError{UserMessage: fmt.Sprintf("Failed to obtain the user details (status code: %d)", resp.StatusCode)}
 		}
-		// Not JSON, return the plain text error
-		return "", fmt.Errorf("backend returned status %d: %s", resp.StatusCode, string(body))
+		return "", &UserInfoError{UserMessage: fmt.Sprintf("Failed to obtain the user details (status code: %d)", resp.StatusCode)}
 	}
 
 	// Status is OK, parse as JSON
 	var userInfoResp v1beta1.UserInfoResponse
 	if err := json.Unmarshal(body, &userInfoResp); err != nil {
-		return "", fmt.Errorf("failed to parse userinfo response: %w (body: %s)", err, string(body))
+		return "", &UserInfoError{UserMessage: "Failed to obtain the user details (invalid response format).", Err: err}
 	}
 
 	// Check for errors in response (even with 200 status)
 	if userInfoResp.Error != nil {
-		return "", fmt.Errorf("userinfo error: %s", *userInfoResp.Error)
+		return "", &UserInfoError{UserMessage: *userInfoResp.Error}
+	}
+
+	if userInfoResp.PreferredUsername == nil {
+		return "", &UserInfoError{UserMessage: "Failed to obtain the user details (missing username)."}
 	}
 
 	// Extract and strip the k8s service account prefix from preferred_username if present
-	if userInfoResp.PreferredUsername == nil {
-		return "", fmt.Errorf("userinfo response missing preferred_username")
-	}
-
 	username := *userInfoResp.PreferredUsername
 	if strings.HasPrefix(username, k8sServiceAccountPrefix) {
 		username = strings.TrimPrefix(username, k8sServiceAccountPrefix)
@@ -196,12 +195,16 @@ func convertTokenResponseToTokenData(tokenResp *v1beta1.TokenResponse, providerN
 		Provider: providerName,
 	}
 
+	// Assign both AccessToken and IdToken if present
+	// GetAuthToken() will use the correct token depending on the scenario:
+	// - For OIDC: prefers IDToken (JWT) for API authentication
+	// - For OAuth2/AAP: uses AccessToken (IDToken will be empty)
 	if tokenResp.AccessToken != nil {
 		tokenData.AccessToken = *tokenResp.AccessToken
-		// For OIDC, if we don't have a separate id_token, use access_token as IDToken
-		// The API server will return id_token in access_token field for OIDC if needed
-		// For now, we'll set both - GetAuthToken() will prefer IDToken if present
-		tokenData.IDToken = *tokenResp.AccessToken
+	}
+
+	if tokenResp.IdToken != nil {
+		tokenData.IDToken = *tokenResp.IdToken
 	}
 
 	if tokenResp.RefreshToken != nil {

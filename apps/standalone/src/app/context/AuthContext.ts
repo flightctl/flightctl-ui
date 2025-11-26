@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { loginAPI, redirectToLogin } from '../utils/apiCalls';
 import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
+import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 
 const AUTH_DISABLED_STATUS_CODE = 418;
 const EXPIRATION = 'expiration';
@@ -31,6 +32,7 @@ export const useAuthContext = () => {
   const [authEnabled, setAuthEnabled] = React.useState(true);
   const [error, setError] = React.useState<string>();
   const refreshRef = React.useRef<NodeJS.Timeout>();
+  const { t } = useTranslation();
 
   React.useEffect(() => {
     const getUserInfo = async () => {
@@ -68,7 +70,7 @@ export const useAuthContext = () => {
           });
 
           if (!resp.ok) {
-            let errorMessage = 'Authentication failed';
+            let errorMessage = t('Authentication failed');
             try {
               const contentType = resp.headers.get('content-type');
               if (contentType && contentType.includes('application/json')) {
@@ -111,9 +113,10 @@ export const useAuthContext = () => {
             setLoading(false);
             return;
           }
+
           if (resp.status === 401) {
             // Extract error message from response if available
-            let errorMessage = 'Authentication failed. Please try logging in again.';
+            let errorMessage = t('Authentication failed. Please try logging in again.');
             try {
               const contentType = resp.headers.get('content-type');
               if (contentType && contentType.includes('application/json')) {
@@ -129,8 +132,8 @@ export const useAuthContext = () => {
               // If parsing fails, use default error message
             }
             setError(errorMessage);
-            // Don't redirect if we're already on the login page
-            if (window.location.pathname !== '/login') {
+            // Don't redirect if we're already on the login or login callback pages
+            if (!['/login', '/callback'].includes(window.location.pathname)) {
               redirectToLogin();
             }
             setLoading(false);
@@ -138,7 +141,7 @@ export const useAuthContext = () => {
           }
           if (resp.status !== 200) {
             // Extract error message from response if available
-            let errorMessage = 'Failed to get user info';
+            let errorMessage = t('Failed to get user info');
             try {
               const contentType = resp.headers.get('content-type');
               if (contentType && contentType.includes('application/json')) {
@@ -163,7 +166,7 @@ export const useAuthContext = () => {
         } catch (err) {
           // eslint-disable-next-line
           console.log(err);
-          const errorMessage = err instanceof Error ? err.message : 'Failed to get user info';
+          const errorMessage = err instanceof Error ? err.message : t('Failed to get user info');
           setError(errorMessage);
           setLoading(false);
         }
@@ -171,7 +174,7 @@ export const useAuthContext = () => {
     };
 
     getUserInfo();
-  }, []);
+  }, [t]);
 
   React.useEffect(() => {
     if (!loading) {

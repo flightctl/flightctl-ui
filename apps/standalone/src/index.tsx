@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM, { render } from 'react-dom';
+import { Bullseye, Spinner } from '@patternfly/react-core';
 import App from './app/index';
 import { UserPreferencesProvider } from '@flightctl/ui-components/src/components/Masthead/UserPreferencesProvider';
 import './i18n';
@@ -30,9 +31,17 @@ const root = document.getElementById('root') as Element;
 
 const rootApp = (
   <React.StrictMode>
-    <UserPreferencesProvider>
-      <App />
-    </UserPreferencesProvider>
+    <React.Suspense
+      fallback={
+        <Bullseye>
+          <Spinner />
+        </Bullseye>
+      }
+    >
+      <UserPreferencesProvider>
+        <App />
+      </UserPreferencesProvider>
+    </React.Suspense>
   </React.StrictMode>
 );
 

@@ -11,7 +11,6 @@ import (
 
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/config"
-	"github.com/flightctl/flightctl-ui/log"
 	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
@@ -149,7 +148,6 @@ func (o *OpenShiftAuthHandler) Logout(token string) (string, error) {
 	discoveryURL := fmt.Sprintf("%s/.well-known/oauth-authorization-server", o.apiServerURL)
 	req, err := http.NewRequest(http.MethodGet, discoveryURL, nil)
 	if err != nil {
-		log.GetLogger().WithError(err).Debug("Failed to create discovery request for logout URL")
 		return "", nil
 	}
 
@@ -161,25 +159,21 @@ func (o *OpenShiftAuthHandler) Logout(token string) (string, error) {
 
 	res, err := httpClient.Do(req)
 	if err != nil {
-		log.GetLogger().WithError(err).Debug("Failed to fetch OAuth discovery for logout URL")
 		return "", nil
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		log.GetLogger().Debugf("OAuth discovery returned status %d", res.StatusCode)
 		return "", nil
 	}
 
 	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		log.GetLogger().WithError(err).Debug("Failed to read OAuth discovery response")
 		return "", nil
 	}
 
 	var discovery openshiftOAuthDiscovery
 	if err := json.Unmarshal(bodyBytes, &discovery); err != nil {
-		log.GetLogger().WithError(err).Debug("Failed to parse OAuth discovery response")
 		return "", nil
 	}
 
