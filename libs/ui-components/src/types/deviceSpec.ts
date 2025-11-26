@@ -7,13 +7,11 @@ import {
   HttpConfigProviderSpec,
   ImageApplicationProviderSpec,
   ImagePullPolicy,
-  InlineApplicationProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
 } from '@flightctl/types';
-import { FlightCtlLabel } from './extraTypes';
+import { ApplicationProviderSpecFixed, FlightCtlLabel } from './extraTypes';
 import { UpdateScheduleMode } from '../utils/time';
-import { ApplicationProviderSpecFixed } from './extraTypes';
 
 export enum ConfigType {
   GIT = 'git',
@@ -117,10 +115,9 @@ export type AppForm =
   | ComposeInlineAppForm
   | SingleContainerAppForm;
 
-export const isInlineAppProvider = (app: ApplicationProviderSpecFixed): app is InlineApplicationProviderSpec =>
-  'inline' in app;
-export const isImageAppProvider = (app: ApplicationProviderSpecFixed): app is ImageApplicationProviderSpec =>
-  'image' in app;
+export const isImageAppProvider = (
+  app: ApplicationProviderSpecFixed,
+): app is ApplicationProviderSpecFixed & ImageApplicationProviderSpec => 'image' in app;
 
 // Type guards for the 5 explicit types
 export const isQuadletImageAppForm = (app: AppBase): app is QuadletImageAppForm =>

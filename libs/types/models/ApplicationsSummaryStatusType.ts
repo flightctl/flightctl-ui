@@ -10,4 +10,5 @@ export enum ApplicationsSummaryStatusType {
   ApplicationsSummaryStatusDegraded = 'Degraded',
   ApplicationsSummaryStatusError = 'Error',
   ApplicationsSummaryStatusUnknown = 'Unknown',
+  ApplicationsSummaryStatusNoApplications = 'NoApplications',
 }

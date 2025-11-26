@@ -47,7 +47,7 @@ export type InlineApplicationFileFixed = FileContent & RelativePath;
 export type ApplicationProviderSpecFixed = ApplicationEnvVars &
   ApplicationVolumeProviderSpec & {
     name?: string;
-    appType?: AppType;
+    appType: AppType;
   } & (ImageApplicationProviderSpec | { inline: InlineApplicationFileFixed[] });
 
 type CliArtifact = {

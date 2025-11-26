@@ -7,11 +7,11 @@
  */
 export type ApplicationResourceLimits = {
   /**
-   * CPU limit in cores (e.g., "1", "0.75").
+   * CPU limit in cores. Format restricted based on application type.
    */
   cpu?: string;
   /**
-   * Memory limit with unit (e.g., "256m", "2g") using Podman format (b=bytes, k=kibibytes, m=mebibytes, g=gibibytes).
+   * Memory limit with optional unit. Format restricted based on application type.
    */
   memory?: string;
 };
