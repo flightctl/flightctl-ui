@@ -355,7 +355,7 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
 const AppRouter = () => {
   const { t } = useTranslation();
 
-  const { username, loading, authEnabled, error } = React.useContext(AuthContext);
+  const { username, loading, error } = React.useContext(AuthContext);
 
   if (error) {
     return (
@@ -388,7 +388,7 @@ const AppRouter = () => {
   }
 
   // Check if user needs to authenticate
-  const isAuthenticated = !authEnabled || !!username;
+  const isAuthenticated = !!username;
   const isLoginPage = window.location.pathname === '/login';
   const isCallbackPage = window.location.pathname === '/callback';
 

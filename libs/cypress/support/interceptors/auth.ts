@@ -8,12 +8,6 @@ const loadInterceptors = () => {
     });
   });
 
-  cy.intercept('GET', '/api/organizations-enabled', (req) => {
-    req.reply({
-      statusCode: 200, // marks organizations as enabled
-    });
-  });
-
   // Returning a single organization makes it become selected automatically
   cy.intercept('GET', '/api/flightctl/api/v1/organizations', (req) => {
     req.reply({

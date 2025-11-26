@@ -32,9 +32,7 @@ func main() {
 	apiRouter := router.PathPrefix("/api").Subrouter()
 
 	apiRouter.Use(middleware.AuthMiddleware)
-	if config.IsOrganizationsEnabled() {
-		apiRouter.Use(middleware.OrganizationMiddleware)
-	}
+	apiRouter.Use(middleware.OrganizationMiddleware)
 
 	tlsConfig, err := bridge.GetTlsConfig()
 	if err != nil {
@@ -63,16 +61,6 @@ func main() {
 
 	testAuthHandler := bridge.NewTestAuthHandler(tlsConfig)
 	apiRouter.HandleFunc("/test-auth-provider-connection", testAuthHandler.TestConnection)
-
-	// Simple endpoint to check if organizations are enabled
-	if config.IsOrganizationsEnabled() {
-		apiRouter.HandleFunc("/organizations-enabled", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"enabled": true}`))
-		})
-	} else {
-		apiRouter.HandleFunc("/organizations-enabled", bridge.UnimplementedHandler)
-	}
 
 	if config.OcpPlugin != "true" {
 		authHandler, err := auth.NewAuth(tlsConfig)

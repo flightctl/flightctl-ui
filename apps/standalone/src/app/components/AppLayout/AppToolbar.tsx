@@ -69,14 +69,14 @@ const AppToolbar = () => {
   const [preferencesModalOpen, setPreferencesModalOpen] = React.useState(false);
   const [helpDropdownOpen, setHelpDropdownOpen] = React.useState<boolean>(false);
 
-  const { username, authEnabled } = React.useContext(AuthContext);
+  const { username } = React.useContext(AuthContext);
   const [logoutLoading, setLogoutLoading] = React.useState(false);
   const [logoutErr, setLogoutErr] = React.useState<string>();
   const onUserPreferences = () => setPreferencesModalOpen(true);
   const navigate = useNavigate();
 
   let userDropdown = <UserDropdown onUserPreferences={onUserPreferences} />;
-  if (authEnabled && username) {
+  if (username) {
     userDropdown = (
       <UserDropdown username={username} onUserPreferences={onUserPreferences}>
         <DropdownItem

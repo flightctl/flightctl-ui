@@ -53,12 +53,6 @@ func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, t
 		return nil, fmt.Errorf("failed to read token response: %w", err)
 	}
 
-	// Check HTTP status code first before trying to parse JSON
-	if resp.StatusCode == http.StatusTeapot {
-		// 418 indicates auth not configured
-		return nil, fmt.Errorf("auth not configured")
-	}
-
 	if resp.StatusCode != http.StatusOK {
 		// Try to parse as JSON first (OAuth2 errors are usually JSON)
 		var tokenResp v1beta1.TokenResponse
@@ -146,12 +140,6 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 			}
 			return "", &UserInfoError{UserMessage: errorMsg}
 		}
-	}
-
-	// Check HTTP status code first before trying to parse JSON
-	if resp.StatusCode == http.StatusTeapot {
-		// 418 indicates auth not configured
-		return "", &UserInfoError{UserMessage: "auth not configured"}
 	}
 
 	if resp.StatusCode != http.StatusOK {

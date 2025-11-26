@@ -19,4 +19,6 @@ export enum SystemdEnableStateType {
   SystemdEnableStateGenerated = 'generated',
   SystemdEnableStateTransient = 'transient',
   SystemdEnableStateBad = 'bad',
+  SystemdEnableStateUnknown = 'unknown',
+  SystemdEnableStateEmpty = '',
 }

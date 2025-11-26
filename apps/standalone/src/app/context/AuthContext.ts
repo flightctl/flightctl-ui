@@ -3,7 +3,6 @@ import { loginAPI, redirectToLogin } from '../utils/apiCalls';
 import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 
-const AUTH_DISABLED_STATUS_CODE = 418;
 const EXPIRATION = 'expiration';
 export let lastRefresh = 0;
 
@@ -15,13 +14,11 @@ const nowInSeconds = () => Math.round(Date.now() / 1000);
 type AuthContextProps = {
   username: string;
   loading: boolean;
-  authEnabled: boolean;
   error: string | undefined;
 };
 
 export const AuthContext = React.createContext<AuthContextProps>({
   username: '',
-  authEnabled: true,
   loading: false,
   error: undefined,
 });
@@ -29,7 +26,6 @@ export const AuthContext = React.createContext<AuthContextProps>({
 export const useAuthContext = () => {
   const [username, setUsername] = React.useState('');
   const [loading, setLoading] = React.useState(true);
-  const [authEnabled, setAuthEnabled] = React.useState(true);
   const [error, setError] = React.useState<string>();
   const refreshRef = React.useRef<NodeJS.Timeout>();
   const { t } = useTranslation();
@@ -52,12 +48,8 @@ export const useAuthContext = () => {
         callbackErr = searchParams.get('error');
         if (code && state) {
           // Extract provider name from the state parameter
-          // The state format is: "provider:<providerName>" or "provider:<providerName>:<encoded_verifier>"
+          // The state format is: "provider:<providerName>"
           const providerName = state.startsWith('provider:') ? state.substring(9).split(':')[0] : state;
-
-          // CELIA-WIP WE SHOULD ONLY USE PROVIDER HERE, THE OTHER SHOULD BE WITH THE PKCE FLOW
-          // Backend retrieves code_verifier from cookie automatically, or from state as fallback
-          // Pass state in query parameter so backend can extract code_verifier if cookie fails
           const resp = await fetch(`${loginAPI}?provider=${providerName}&state=${encodeURIComponent(state)}`, {
             headers: {
               'Content-Type': 'application/json',
@@ -108,11 +100,6 @@ export const useAuthContext = () => {
           const resp = await fetch(`${loginAPI}/info`, {
             credentials: 'include',
           });
-          if (resp.status === AUTH_DISABLED_STATUS_CODE) {
-            setAuthEnabled(false);
-            setLoading(false);
-            return;
-          }
 
           if (resp.status === 401) {
             // Extract error message from response if available
@@ -184,9 +171,6 @@ export const useAuthContext = () => {
       }
 
       const scheduleRefresh = () => {
-        if (!authEnabled) {
-          return;
-        }
         const expiresAt = parseInt(localStorage.getItem(EXPIRATION) || '0', 10);
         if (expiresAt > 0) {
           const now = nowInSeconds();
@@ -224,7 +208,7 @@ export const useAuthContext = () => {
       scheduleRefresh();
     }
     return () => clearTimeout(refreshRef.current);
-  }, [loading, authEnabled]);
+  }, [loading]);
 
-  return { username, loading, authEnabled, error };
+  return { username, loading, error };
 };

@@ -61,8 +61,7 @@ func NewAuth(apiTlsConfig *tls.Config) (*AuthHandler, error) {
 	}
 
 	if authConfig == nil {
-		log.GetLogger().Info("Auth disabled")
-		return &auth, nil
+		return nil, fmt.Errorf("Auth config is missing")
 	}
 
 	// Store the full auth config for later use
@@ -218,12 +217,6 @@ func isProviderWithCustomerToken(provider AuthProvider) bool {
 }
 
 func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	// Check if auth is completely disabled (no config at all)
-	if a.authConfigData == nil {
-		w.WriteHeader(http.StatusTeapot)
-		return
-	}
-
 	// For GET requests, extract provider from query parameter
 	var provider AuthProvider
 	var err error
@@ -399,10 +392,6 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
-	if a.authConfigData == nil {
-		w.WriteHeader(http.StatusTeapot)
-		return
-	}
 	tokenData, err := ParseSessionCookie(r)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -484,13 +473,6 @@ func respondWithToken(w http.ResponseWriter, tokenData TokenData, expires *int64
 }
 
 func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
-	// Check if auth is completely disabled (no config at all)
-	if a.authConfigData == nil {
-		w.WriteHeader(http.StatusTeapot)
-		return
-	}
-
-	// Get token and provider from session cookie
 	tokenData, err := ParseSessionCookie(r)
 	if err != nil {
 		clearSessionCookie(w, r)
@@ -544,13 +526,6 @@ func (a AuthHandler) respondWithUserInfo(w http.ResponseWriter, username string)
 }
 
 func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	// Check if auth is completely disabled (no config at all)
-	if a.authConfigData == nil {
-		w.WriteHeader(http.StatusTeapot)
-		return
-	}
-
-	// Get token and provider from session cookie
 	tokenData, err := ParseSessionCookie(r)
 	if err != nil {
 		// No valid session, but still clear cookies and return success
@@ -610,10 +585,6 @@ func getAuthInfo(apiTlsConfig *tls.Config) (*v1beta1.AuthConfig, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
-	}
-
-	if resp.StatusCode == http.StatusTeapot {
-		return nil, nil
 	}
 
 	defer resp.Body.Close()

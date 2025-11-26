@@ -46,25 +46,6 @@ detect_service_setting() {
     return 0
 }
 
-# Function that determines if organizations are enabled based on the "organizations.enabled" setting from "flightctl-api-config" ConfigMap
-detect_organizations_setting() {
-    SETTING_VALUE=$(kubectl get configmap flightctl-api-config -n "$flightctl_namespace" --context kind-kind -o jsonpath='{.data.config\.yaml}' 2>/dev/null | grep -A1 "organizations:" | grep "enabled:" | awk '{print $2}' | tr -d ' ')
-    
-    if [ -n "$SETTING_VALUE" ]; then
-        if [ "$SETTING_VALUE" = "true" ]; then
-            echo "Autodetected: Organizations enabled ✅" >&2
-        else
-            echo "Autodetected: Organizations disabled ❌" >&2
-        fi
-        echo "$SETTING_VALUE"
-    else
-        echo "Autodetected: Organizations disabled ❌ (no setting found in ConfigMap)" >&2
-        echo "false"
-    fi
-    return 0
-}
-
-
 # Check that the Backend is running in a kind cluster and we can access it
 validate_prerequisites
 
@@ -81,17 +62,6 @@ echo "Using external IP: $EXTERNAL_IP" >&2
 # Set core environment variables for kind development
 export FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY='true'
 export FLIGHTCTL_SERVER="https://$EXTERNAL_IP:3443"
-
-# Organizations - get setting from kind cluster, unless it has been configured already
-if [ -z "$ENABLE_ORGANIZATIONS" ]; then
-    ENABLE_ORGANIZATIONS=$(detect_organizations_setting)
-fi
-export ENABLE_ORGANIZATIONS
-if [ "$ENABLE_ORGANIZATIONS" = "true" ]; then
-    export ORGANIZATIONS_ENABLED="true"
-else
-    export ORGANIZATIONS_ENABLED="false"
-fi
 
 # CLI artifacts - get setting from kind cluster, unless it has been configured already
 if [ -z "$ENABLE_CLI_ARTIFACTS" ]; then
@@ -121,5 +91,4 @@ echo "  FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY=$FLIGHTCTL_SERVER_INSECURE_SKIP_VE
 echo "  FLIGHTCTL_SERVER=$FLIGHTCTL_SERVER" >&2
 echo "  FLIGHTCTL_CLI_ARTIFACTS_SERVER=${FLIGHTCTL_CLI_ARTIFACTS_SERVER:-'(disabled)'}" >&2
 echo "  FLIGHTCTL_ALERTMANAGER_PROXY=${FLIGHTCTL_ALERTMANAGER_PROXY:-'(disabled)'}" >&2
-echo "  ORGANIZATIONS_ENABLED=$ORGANIZATIONS_ENABLED" >&2
 echo >&2
