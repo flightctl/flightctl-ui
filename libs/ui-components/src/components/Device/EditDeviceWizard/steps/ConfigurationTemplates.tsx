@@ -99,7 +99,7 @@ const ConfigSection = ({
 
   return (
     <ExpandableFormSection
-      title={t('Configuration {{ configNum }}', { configNum: index + 1 })}
+      title={name || t('Configuration {{ configNum }}', { configNum: index + 1 })}
       fieldName={fieldName}
       description={name}
     >

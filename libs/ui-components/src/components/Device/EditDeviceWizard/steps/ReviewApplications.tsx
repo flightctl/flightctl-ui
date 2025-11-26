@@ -4,17 +4,30 @@ import { TFunction } from 'react-i18next';
 
 import { AppType } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { AppForm, getAppIdentifier, isImageAppForm } from '../../../../types/deviceSpec';
+import { AppForm, getAppIdentifier } from '../../../../types/deviceSpec';
 
-const getAppFormatLabel = (appType: AppType, t: TFunction) => {
-  if (appType === AppType.AppTypeQuadlet) {
-    return t('Quadlet');
+const getAppFormatLabel = (appType: AppType, t: TFunction): string => {
+  const labels: Record<AppType, string> = {
+    [AppType.AppTypeContainer]: t('Single Container'),
+    [AppType.AppTypeQuadlet]: t('Quadlet'),
+    [AppType.AppTypeCompose]: t('Compose'),
+  };
+  return labels[appType] || t('Unknown');
+};
+
+const getAppName = (app: AppForm, t: TFunction): string => {
+  if (app.name) {
+    return app.name;
   }
-  return t('Compose');
+  if ('image' in app && app.image) {
+    return `${t('Unnamed')} (${app.image})`;
+  }
+  return '';
 };
 
 const ReviewApplications = ({ apps }: { apps: AppForm[] }) => {
   const { t } = useTranslation();
+
   if (apps.length === 0) {
     return '-';
   }
@@ -22,19 +35,11 @@ const ReviewApplications = ({ apps }: { apps: AppForm[] }) => {
   return (
     <Stack hasGutter>
       {apps.map((app, index) => {
-        const isImageApp = isImageAppForm(app);
-        const specType = isImageApp ? t('Image based') : t('Inline');
+        const name = getAppName(app, t);
         const formatType = getAppFormatLabel(app.appType, t);
-        const type = `${specType} - ${formatType}`;
-        let name: string = '';
-        if (!isImageApp || app.name) {
-          name = app.name as string;
-        } else if (app.image) {
-          name = `${t('Unnamed')} (${app.image})`;
-        }
         return (
           <StackItem key={`${getAppIdentifier(app)}_${index}`}>
-            {name} ({type})
+            {name} ({formatType})
           </StackItem>
         );
       })}

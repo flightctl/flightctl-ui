@@ -1,0 +1,5 @@
+.fctl-containerapp__added-ports {
+  /* In PF5 light mode, the border is almost invisible */
+  border: 1px solid gray !important;
+  margin-top: 1rem;
+}

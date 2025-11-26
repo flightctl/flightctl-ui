@@ -9,12 +9,12 @@ import CheckboxField from '../../../form/CheckboxField';
 import UploadField from '../../../form/UploadField';
 import TextField from '../../../form/TextField';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
-import { InlineAppForm } from '../../../../types/deviceSpec';
+import { ComposeInlineAppForm, QuadletInlineAppForm } from '../../../../types/deviceSpec';
 
 const MAX_INLINE_FILE_SIZE_BYTES = 1024 * 1024;
 
 type InlineApplicationFileFormProps = {
-  file: InlineAppForm['files'][0];
+  file: (QuadletInlineAppForm | ComposeInlineAppForm)['files'][0];
   fileFieldName: string;
   fileIndex: number;
   isReadOnly?: boolean;
@@ -56,7 +56,7 @@ const ApplicationInlineForm = ({
   index,
   isReadOnly,
 }: {
-  app: InlineAppForm;
+  app: QuadletInlineAppForm | ComposeInlineAppForm;
   index: number;
   isReadOnly?: boolean;
 }) => {
