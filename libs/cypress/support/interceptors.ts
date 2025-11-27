@@ -4,9 +4,12 @@ import { loadInterceptors as loadResourceSyncsInterceptors } from './interceptor
 import { loadInterceptors as loadDeviceInterceptors } from './interceptors/devices';
 import { loadInterceptors as loadRepositoryInterceptors } from './interceptors/repositories';
 import { loadInterceptors as loadAuthInterceptors } from './interceptors/auth';
+import { loadInterceptors as loadGeneralInterceptors } from './interceptors/general';
 
 const loadApiInterceptors = () => {
   loadAuthInterceptors();
+  loadGeneralInterceptors();
+  loadResourceSyncsInterceptors();
   loadFleetInterceptors();
   loadDeviceInterceptors();
   loadEnrollmentRequestsInterceptors();

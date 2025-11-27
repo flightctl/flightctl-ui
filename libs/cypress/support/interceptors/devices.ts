@@ -1,5 +1,6 @@
 import { Device, PatchRequest } from '@flightctl/types';
 import { API_VERSION } from '../constants';
+import { createListMatcher, createDetailMatcher } from './matchers';
 
 const buildDevicesResponse = (devices: Device[]) => ({
   apiVersion: API_VERSION,
@@ -9,19 +10,13 @@ const buildDevicesResponse = (devices: Device[]) => ({
 });
 
 const loadInterceptors = () => {
-  cy.intercept('GET', '/api/flightctl/api/v1/devices', (req) => {
+  cy.intercept('GET', createListMatcher('devices'), (req) => {
     req.reply({
       body: buildDevicesResponse([]),
     });
   }).as('device-list');
 
-  cy.intercept('GET', '/api/flightctl/api/v1/devices?*', (req) => {
-    req.reply({
-      body: buildDevicesResponse([]),
-    });
-  }).as('device-list-filter');
-
-  cy.intercept('PATCH', '/api/flightctl/api/v1/devices/*', (req) => {
+  cy.intercept('PATCH', createDetailMatcher('devices'), (req) => {
     if (Array.isArray(req.body)) {
       const isAliasPatch = (req.body[0] as PatchRequest[0]).path === '/metadata/alias';
       if (isAliasPatch) {
