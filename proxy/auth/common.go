@@ -73,10 +73,11 @@ func setCookie(w http.ResponseWriter, value TokenData) error {
 	if err != nil {
 		return err
 	}
+	secure := config.TlsCertPath != ""
 	cookie := http.Cookie{
 		Name:     common.CookieSessionName,
 		Value:    b64.StdEncoding.EncodeToString(cookieVal),
-		Secure:   config.TlsCertPath != "",
+		Secure:   secure,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 		Path:     "/",
@@ -576,15 +577,24 @@ func clearPKCEVerifierCookie(w http.ResponseWriter, providerName string) {
 		Path:     "/",
 		Secure:   config.TlsCertPath != "",
 		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode, // Use Lax to match the set cookie
+		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, &cookie)
 }
 
 // clearSessionCookie removes the session cookie
 func clearSessionCookie(w http.ResponseWriter, r *http.Request) {
-	// TODO EDM-2612 Setting cookie here was not working, removed the code - needs to be investigated.
-	// Set Clear-Site-Data header to instruct browser to clear cookies
+	cookie := http.Cookie{
+		Name:     common.CookieSessionName,
+		Value:    "",
+		MaxAge:   -1,
+		Path:     "/",
+		Secure:   config.TlsCertPath != "",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	}
+	http.SetCookie(w, &cookie)
+
 	w.Header().Set("Clear-Site-Data", `"cookies"`)
 }
 
