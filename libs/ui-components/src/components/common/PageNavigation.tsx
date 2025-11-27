@@ -4,11 +4,11 @@ import {
   Dropdown,
   DropdownItem,
   DropdownList,
-  Masthead,
-  MastheadContent,
   MenuToggle,
   MenuToggleElement,
-  PageSection,
+  Panel,
+  PanelMain,
+  PanelMainBody,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -21,6 +21,8 @@ import { useOrganizationGuardContext } from './OrganizationGuard';
 import OrganizationSelector from './OrganizationSelector';
 import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from './PermissionsContext';
+
+import './PageNavigation.css';
 
 type OrganizationDropdownProps = {
   organizationName?: string;
@@ -80,9 +82,9 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
 
   return (
     <>
-      <PageSection variant="light" padding={{ default: 'noPadding' }}>
-        <Masthead id="global-actions-masthead">
-          <MastheadContent>
+      <Panel className="fctl-subnav_panel">
+        <PanelMain>
+          <PanelMainBody>
             <Toolbar isFullHeight isStatic className="fctl-subnav_toolbar">
               <ToolbarContent>
                 {showOrganizationSelection && (
@@ -111,9 +113,9 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
                 )}
               </ToolbarContent>
             </Toolbar>
-          </MastheadContent>
-        </Masthead>
-      </PageSection>
+          </PanelMainBody>
+        </PanelMain>
+      </Panel>
 
       {showOrganizationModal && (
         <OrganizationSelector
