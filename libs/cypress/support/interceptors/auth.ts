@@ -1,21 +1,20 @@
 import { defaultOrg } from '../../fixtures/auth/organization';
 import { API_VERSION } from '../constants';
+import { createListMatcher } from './matchers';
 
 const loadInterceptors = () => {
   cy.intercept('GET', '/api/login/info', (req) => {
     req.reply({
-      statusCode: 418,
-    });
-  });
-
-  cy.intercept('GET', '/api/organizations-enabled', (req) => {
-    req.reply({
-      statusCode: 200, // marks organizations as enabled
+      // CELIA-WIP MOST LIKELY WE NEED TO ADD MORE MOCKS FOR CYPRESS TESTS TO CONTINUE WORKING
+      statusCode: 200,
+      body: {
+        username: 'cypress-user',
+      },
     });
   });
 
   // Returning a single organization makes it become selected automatically
-  cy.intercept('GET', '/api/flightctl/api/v1/organizations', (req) => {
+  cy.intercept('GET', createListMatcher('organizations'), (req) => {
     req.reply({
       statusCode: 200,
       body: {
@@ -27,7 +26,7 @@ const loadInterceptors = () => {
     });
   });
 
-  cy.intercept('GET', '/api/flightctl/api/v1/auth/permissions', (req) => {
+  cy.intercept('GET', /^\/api\/flightctl\/api\/v1\/auth\/permissions(\?.*)?$/, (req) => {
     // The user is a super admin
     req.reply({
       statusCode: 200,

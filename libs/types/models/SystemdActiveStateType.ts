@@ -14,4 +14,5 @@ export enum SystemdActiveStateType {
   SystemdActiveStateDeactivating = 'deactivating',
   SystemdActiveStateMaintenance = 'maintenance',
   SystemdActiveStateRefreshing = 'refreshing',
+  SystemdActiveStateUnknown = 'unknown',
 }

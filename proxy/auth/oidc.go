@@ -143,10 +143,7 @@ func replaceBaseURL(endpoint, oldBase, newBase string) string {
 }
 
 func getOIDCClient(oidcConfig oidcServerResponse, tlsConfig *tls.Config, clientId string, providerScopes *[]string) (*osincli.Client, error) {
-	defaultScopes := "openid profile email"
-	if config.IsOrganizationsEnabled() {
-		defaultScopes += " organization:*"
-	}
+	defaultScopes := "openid profile email organization:*"
 	scope := buildScopeParam(providerScopes, defaultScopes)
 
 	oidcClientConfig := &osincli.ClientConfig{

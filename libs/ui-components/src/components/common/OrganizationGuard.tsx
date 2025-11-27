@@ -24,9 +24,7 @@ export const useOrganizationGuardContext = (): OrganizationContextType => {
 
 const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
   const { fetch } = useAppContext();
-  const proxyFetch = fetch.proxyFetch;
 
-  const [isOrganizationsEnabled, setIsOrganizationsEnabled] = React.useState<boolean | null>(null); // null = loading
   const [currentOrganization, setCurrentOrganization] = React.useState<Organization | undefined>();
   const [availableOrganizations, setAvailableOrganizations] = React.useState<Organization[]>([]);
   const [organizationsLoaded, setOrganizationsLoaded] = React.useState(false);
@@ -47,8 +45,8 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
 
   // Determine if multi-orgs are enabled. If so, check if an organization is already selected
   React.useEffect(() => {
-    // Prevent multiple initialization calls - only run once when isOrganizationsEnabled is null
-    if (initializationStartedRef.current || isOrganizationsEnabled !== null) {
+    // Prevent multiple initialization calls - only run once
+    if (initializationStartedRef.current) {
       return;
     }
 
@@ -56,21 +54,6 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
 
     const initializeOrganizations = async () => {
       try {
-        // First, check if organizations are enabled via proxy endpoint
-        const organizationsEnabledResponse = await proxyFetch('organizations-enabled', {
-          method: 'GET',
-          headers: { Accept: 'application/json' },
-          credentials: 'include',
-        });
-
-        const organizationsEnabled = organizationsEnabledResponse.status !== 501;
-        setIsOrganizationsEnabled(organizationsEnabled);
-
-        if (!organizationsEnabled) {
-          return;
-        }
-
-        // Organizations are enabled - load available organizations
         const organizations = await fetch.get<OrganizationList>('organizations');
         setAvailableOrganizations(organizations.items);
 
@@ -96,7 +79,6 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
         }
       } catch (error) {
         setSelectionError(getErrorMessage(error));
-        setIsOrganizationsEnabled(false);
         setAvailableOrganizations([]);
       } finally {
         setOrganizationsLoaded(true);
@@ -105,16 +87,16 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
 
     void initializeOrganizations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOrganizationsEnabled]);
+  }, []);
 
   const isOrganizationSelectionRequired = React.useMemo(() => {
     // Don't show selector while still loading
-    if (isOrganizationsEnabled === null || !organizationsLoaded) {
+    if (!organizationsLoaded) {
       return false;
     }
 
-    return isOrganizationsEnabled && availableOrganizations.length > 1 && !currentOrganization;
-  }, [isOrganizationsEnabled, organizationsLoaded, availableOrganizations.length, currentOrganization]);
+    return availableOrganizations.length > 1 && !currentOrganization;
+  }, [organizationsLoaded, availableOrganizations.length, currentOrganization]);
 
   const contextValue = React.useMemo(
     () => ({

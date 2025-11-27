@@ -1,5 +1,7 @@
+import { createListMatcher } from './matchers';
+
 const loadInterceptors = () => {
-  cy.intercept('GET', '/api/flightctl/api/v1/resourcesyncs', (req) => {
+  cy.intercept('GET', createListMatcher('resourcesyncs'), (req) => {
     req.reply({
       body: [],
     });

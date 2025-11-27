@@ -13,4 +13,5 @@ export enum SystemdLoadStateType {
   SystemdLoadStateError = 'error',
   SystemdLoadStateMerged = 'merged',
   SystemdLoadStateMasked = 'masked',
+  SystemdLoadStateUnknown = 'unknown',
 }

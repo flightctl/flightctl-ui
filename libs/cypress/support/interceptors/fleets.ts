@@ -1,6 +1,7 @@
 import { basicFleets } from '../../fixtures/fleets';
 import { Fleet } from '@flightctl/types';
 import { API_VERSION } from '../constants';
+import { createListMatcher, createDetailMatcher, extractResourceName } from './matchers';
 
 const buildFleetResponse = (fleets: Fleet[]) => ({
   apiVersion: API_VERSION,
@@ -20,7 +21,7 @@ const buildNewFleet = (newFleetName: string): Fleet => {
 // When it is set, it adds a new fleet with the name set in this environment variable
 
 const loadInterceptors = () => {
-  cy.intercept('GET', /api\/flightctl\/api\/v1\/fleets\?.*(\?addDevicesSummary=true)?$/, (req) => {
+  cy.intercept('GET', createListMatcher('fleets'), (req) => {
     const newFleetName = Cypress.env('FLIGHTCTL_ADD_FLEET');
     const allFleets = [...basicFleets];
     if (newFleetName) {
@@ -31,9 +32,14 @@ const loadInterceptors = () => {
     });
   }).as('fleets');
 
-  cy.intercept('GET', /api\/flightctl\/api\/v1\/fleets\/[\w-]+(\?addDevicesSummary=true)?$/, (req) => {
+  cy.intercept('GET', createDetailMatcher('fleets'), (req) => {
     const newFleetName = Cypress.env('FLIGHTCTL_ADD_FLEET') as string;
-    const requestFleetName = req.url.match(/\/fleets\/(.+)$/)[1];
+    const requestFleetName = extractResourceName(req.url, 'fleets');
+
+    if (!requestFleetName) {
+      req.reply({ statusCode: 404 });
+      return;
+    }
 
     if (requestFleetName === newFleetName) {
       req.reply({

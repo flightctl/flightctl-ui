@@ -6,7 +6,6 @@ This document describes all environment variables and configuration options avai
 
 | Variable               | Description                               | Default | Values          |
 | ---------------------- | ----------------------------------------- | ------- | --------------- |
-| `ENABLE_ORGANIZATIONS` | Enable/disable organizations support      | `false` | `true`, `false` |
 | `ENABLE_CLI_ARTIFACTS` | Enable/disable CLI download functionality | `true`  | `true`, `false` |
 | `ENABLE_ALERTMANAGER`  | Enable/disable alerts functionality       | `true`  | `true`, `false` |
 
@@ -41,7 +40,6 @@ ENABLE_CLI_ARTIFACTS=false npm run dev:kind
 ```shell
 # Use remote backend and custom settings
 FLIGHTCTL_SERVER=https://flightctl.prod.example.com \
-ENABLE_ORGANIZATIONS=false \
 ENABLE_CLI_ARTIFACTS=false \
 npm run dev
 ```
