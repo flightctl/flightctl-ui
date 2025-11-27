@@ -57,25 +57,23 @@ func getAAPAuthHandler(provider *v1beta1.AuthProvider, aapSpec *v1beta1.AapProvi
 	if aapSpec.ApiUrl == "" {
 		return nil, fmt.Errorf("AAP provider %s missing ApiUrl", providerName)
 	}
-
-	// Use externalApiUrl if available, otherwise use apiUrl
-	authURL := aapSpec.ApiUrl
-	if aapSpec.ExternalApiUrl != nil && *aapSpec.ExternalApiUrl != "" {
-		authURL = *aapSpec.ExternalApiUrl
+	if aapSpec.ClientId == "" {
+		return nil, fmt.Errorf("AAP provider %s missing ClientId", providerName)
 	}
-
-	// AAP OAuth typically uses a default client ID or requires it to be configured
-	// Since the new spec doesn't include ClientId, we'll use a default or make it configurable
-	// For now, using a default client ID that AAP typically uses
-	clientId := "flightctl-ui"        // Default client ID for AAP
-	internalAuthURL := aapSpec.ApiUrl // Use internal URL for token exchange
+	if aapSpec.AuthorizationUrl == "" {
+		return nil, fmt.Errorf("AAP provider %s missing AuthorizationUrl", providerName)
+	}
+	if aapSpec.TokenUrl == "" {
+		return nil, fmt.Errorf("AAP provider %s missing TokenUrl", providerName)
+	}
 
 	tlsConfig, err := bridge.GetAuthTlsConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := getClient(authURL, tlsConfig, clientId)
+	// Use the authorization and token URLs directly from the spec
+	client, err := getClient(aapSpec.AuthorizationUrl, aapSpec.TokenUrl, tlsConfig, aapSpec.ClientId)
 	if err != nil {
 		return nil, err
 	}
@@ -84,27 +82,17 @@ func getAAPAuthHandler(provider *v1beta1.AuthProvider, aapSpec *v1beta1.AapProvi
 		client:          client,
 		internalClient:  client,
 		tlsConfig:       tlsConfig,
-		authURL:         authURL,
-		tokenURL:        fmt.Sprintf("%s/o/token/", internalAuthURL),
-		internalAuthURL: internalAuthURL,
-		clientId:        clientId,
+		authURL:         aapSpec.AuthorizationUrl,
+		tokenURL:        aapSpec.TokenUrl,
+		internalAuthURL: aapSpec.ApiUrl,
+		clientId:        aapSpec.ClientId,
 		providerName:    providerName,
-	}
-
-	// If we have both external and internal URLs, create separate clients
-	if aapSpec.ExternalApiUrl != nil && *aapSpec.ExternalApiUrl != "" && *aapSpec.ExternalApiUrl != aapSpec.ApiUrl {
-		internalClient, err := getClient(internalAuthURL, tlsConfig, clientId)
-		if err != nil {
-			return nil, err
-		}
-		handler.internalClient = internalClient
-		handler.tokenURL = fmt.Sprintf("%s/o/token/", internalAuthURL)
 	}
 
 	return handler, nil
 }
 
-func getClient(url string, tlsConfig *tls.Config, clientId string) (*osincli.Client, error) {
+func getClient(authorizationUrl, tokenUrl string, tlsConfig *tls.Config, clientId string) (*osincli.Client, error) {
 	// Use provided clientId, require it to be non-empty
 	if clientId == "" {
 		return nil, fmt.Errorf("clientId is required for AAP provider")
@@ -112,8 +100,8 @@ func getClient(url string, tlsConfig *tls.Config, clientId string) (*osincli.Cli
 
 	oidcClientConfig := &osincli.ClientConfig{
 		ClientId:                 clientId,
-		AuthorizeUrl:             fmt.Sprintf("%s/o/authorize/", url),
-		TokenUrl:                 fmt.Sprintf("%s/o/token/", url),
+		AuthorizeUrl:             authorizationUrl,
+		TokenUrl:                 tokenUrl,
 		RedirectUrl:              config.BaseUiUrl + "/callback",
 		ErrorsInStatusCode:       true,
 		SendClientSecretInParams: true,
