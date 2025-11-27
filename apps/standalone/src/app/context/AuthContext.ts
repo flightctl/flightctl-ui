@@ -102,7 +102,14 @@ export const useAuthContext = () => {
           });
 
           if (resp.status === 401) {
-            // Extract error message from response if available
+            const isOnAuthPage = ['/login', '/callback'].includes(window.location.pathname);
+            if (!isOnAuthPage) {
+              // The user is not authenticated - start the login process, and do not show any authentication errors yet
+              setLoading(false);
+              redirectToLogin();
+              return;
+            }
+
             let errorMessage = t('Authentication failed. Please try logging in again.');
             try {
               const contentType = resp.headers.get('content-type');
@@ -119,10 +126,6 @@ export const useAuthContext = () => {
               // If parsing fails, use default error message
             }
             setError(errorMessage);
-            // Don't redirect if we're already on the login or login callback pages
-            if (!['/login', '/callback'].includes(window.location.pathname)) {
-              redirectToLogin();
-            }
             setLoading(false);
             return;
           }
