@@ -2,9 +2,7 @@ package auth
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -143,48 +141,7 @@ func (o *OpenShiftAuthHandler) RefreshToken(refreshToken string) (TokenData, *in
 }
 
 func (o *OpenShiftAuthHandler) Logout(token string) (string, error) {
-	// OpenShift OAuth logout endpoint is typically at {issuer}/logout
-	// Try to discover it from the OAuth discovery endpoint
-	discoveryURL := fmt.Sprintf("%s/.well-known/oauth-authorization-server", o.apiServerURL)
-	req, err := http.NewRequest(http.MethodGet, discoveryURL, nil)
-	if err != nil {
-		return "", nil
-	}
-
-	httpClient := http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: o.tlsConfig,
-		},
-	}
-
-	res, err := httpClient.Do(req)
-	if err != nil {
-		return "", nil
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		return "", nil
-	}
-
-	bodyBytes, err := io.ReadAll(res.Body)
-	if err != nil {
-		return "", nil
-	}
-
-	var discovery openshiftOAuthDiscovery
-	if err := json.Unmarshal(bodyBytes, &discovery); err != nil {
-		return "", nil
-	}
-
-	if discovery.Issuer != "" {
-		logoutURL, err := url.Parse(discovery.Issuer)
-		if err == nil {
-			logoutURL.Path = "/logout"
-			return logoutURL.String(), nil
-		}
-	}
-
+	// The cookie will be cleared by the proxy
 	return "", nil
 }
 
