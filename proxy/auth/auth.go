@@ -186,7 +186,14 @@ func getClientIdFromProviderConfig(providerConfig *v1beta1.AuthProvider) (string
 		}
 		return oauth2Spec.ClientId, nil
 	case ProviderTypeAAP:
-		return "", fmt.Errorf("AAP providers client_id needs to be retrieved")
+		aapSpec, err := providerConfig.Spec.AsAapProviderSpec()
+		if err != nil {
+			return "", fmt.Errorf("failed to parse AAP provider spec: %w", err)
+		}
+		if aapSpec.ClientId == "" {
+			return "", fmt.Errorf("AAP provider missing required ClientId")
+		}
+		return aapSpec.ClientId, nil
 	case ProviderTypeOpenShift:
 		openshiftSpec, err := providerConfig.Spec.AsOpenShiftProviderSpec()
 		if err != nil {
