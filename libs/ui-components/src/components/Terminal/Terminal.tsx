@@ -89,14 +89,14 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
   }));
 
   return (
-    <Stack hasGutter>
+    <Stack hasGutter className="fctl-terminal-container">
       {!receivedData && (
         <StackItem>
           <Spinner size="md" /> {t('Waiting for terminal session to open...')}
         </StackItem>
       )}
-      <StackItem>
-        <div style={{ width: '100%' }} ref={terminalRef} />
+      <StackItem isFilled>
+        <div className="fctl-terminal-wrapper" ref={terminalRef} />
       </StackItem>
     </Stack>
   );

@@ -24,6 +24,36 @@ const TerminalTab = ({ device }: TerminalTabProps) => {
   const { t } = useTranslation();
   const terminal = React.useRef<ImperativeTerminalType>(null);
   const { currentOrganization } = useOrganizationGuardContext();
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [containerHeight, setContainerHeight] = React.useState<string>('calc(97vh - 300px)');
+
+  React.useEffect(() => {
+    const updateHeight = () => {
+      if (containerRef.current) {
+        const boundingRect = containerRef.current.getBoundingClientRect();
+        if (boundingRect.top > 0) {
+          setContainerHeight(`calc(97vh - ${Math.ceil(boundingRect.top)}px)`);
+        }
+      }
+    };
+
+    updateHeight();
+
+    // Use ResizeObserver to detect when container position changes
+    const resizeObserver = new ResizeObserver(updateHeight);
+
+    // Also listen to window resize for viewport changes
+    window.addEventListener('resize', updateHeight);
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, []);
 
   const onMsgReceived = React.useCallback(async (message: Blob) => {
     try {
@@ -71,28 +101,30 @@ const TerminalTab = ({ device }: TerminalTabProps) => {
   }
 
   return (
-    <Stack hasGutter>
-      {isClosed && (
-        <Alert
-          isInline
-          variant="info"
-          title={t('Connection was closed')}
-          actionLinks={
-            <AlertActionLink
-              onClick={() => {
-                terminal.current?.reset();
-                reconnect();
-              }}
-            >
-              {t('Reconnect')}
-            </AlertActionLink>
-          }
-        />
-      )}
-      <StackItem>
-        <Terminal onData={sendMessage} ref={terminal} />
-      </StackItem>
-    </Stack>
+    <div ref={containerRef} style={{ height: containerHeight, display: 'flex', flexDirection: 'column' }}>
+      <Stack hasGutter style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {isClosed && (
+          <Alert
+            isInline
+            variant="info"
+            title={t('Connection was closed')}
+            actionLinks={
+              <AlertActionLink
+                onClick={() => {
+                  terminal.current?.reset();
+                  reconnect();
+                }}
+              >
+                {t('Reconnect')}
+              </AlertActionLink>
+            }
+          />
+        )}
+        <StackItem isFilled>
+          <Terminal onData={sendMessage} ref={terminal} />
+        </StackItem>
+      </Stack>
+    </div>
   );
 };
 
