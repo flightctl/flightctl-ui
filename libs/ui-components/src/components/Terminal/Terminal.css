@@ -1,1 +1,12 @@
 @import '@xterm/xterm/css/xterm.css';
+
+.fctl-terminal-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.fctl-terminal-wrapper {
+  width: 100%;
+  height: 100%;
+}
