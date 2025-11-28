@@ -10,6 +10,11 @@ import { DatabaseIcon } from '@patternfly/react-icons/dist/js/icons/database-ico
 import { NetworkIcon } from '@patternfly/react-icons/dist/js/icons/network-icon';
 import { ConnectedIcon } from '@patternfly/react-icons/dist/js/icons/connected-icon';
 import { useTranslation } from '../../../hooks/useTranslation';
+import {
+  getSystemdActiveStateLabel,
+  getSystemdEnableStateLabel,
+  getSystemdLoadStateLabel,
+} from '../../../utils/status/systemd';
 
 const unitTypeIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   service: CogIcon,
@@ -45,17 +50,17 @@ const SystemdUnitRow = ({ unitStatus }: { unitStatus: SystemdUnitStatus }) => {
       </Td>
       <Td dataLabel={t('Enable')}>
         <Label color="blue" variant="outline">
-          {unitStatus.enableState}
+          {getSystemdEnableStateLabel(unitStatus.enableState, t)}
         </Label>
       </Td>
       <Td dataLabel={t('Load state')}>
         <Label color="blue" variant="outline">
-          {unitStatus.loadState}
+          {getSystemdLoadStateLabel(unitStatus.loadState, t)}
         </Label>
       </Td>
       <Td dataLabel={t('Status')}>
         <Label color="blue" variant="outline">
-          {unitStatus.activeState} {unitStatus.subState && `(${unitStatus.subState})`}
+          {getSystemdActiveStateLabel(unitStatus.activeState, t)} {unitStatus.subState && `(${unitStatus.subState})`}
         </Label>
       </Td>
     </Tr>
