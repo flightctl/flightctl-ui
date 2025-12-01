@@ -2,6 +2,7 @@ import {
   AppType,
   // eslint-disable-next-line no-restricted-imports
   ApplicationProviderSpec,
+  ApplicationResourceLimits,
   ApplicationVolume,
   ConfigProviderSpec,
   DeviceSpec,
@@ -256,8 +257,15 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
     if (app.ports) {
       data.ports = app.ports.map((p) => `${p.hostPort}:${p.containerPort}`);
     }
-    const appLimits = app.limits || {};
-    if (appLimits.cpu || appLimits.memory) {
+    // Removed fields must not appear in the resources object
+    const appLimits: ApplicationResourceLimits = {};
+    if (app.limits?.cpu) {
+      appLimits.cpu = app.limits.cpu;
+    }
+    if (app.limits?.memory) {
+      appLimits.memory = app.limits.memory;
+    }
+    if (Object.keys(appLimits).length > 0) {
       data.resources = {
         limits: appLimits,
       };
