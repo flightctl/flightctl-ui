@@ -611,6 +611,55 @@ export const validateMemoryLimit = (memory: string | undefined): boolean => {
   return true;
 };
 
+// Common volume validation helpers
+const volumeNameSchema = (t: TFunction) => validApplicationAndVolumeName(t).required(t('Volume name is required'));
+
+const imageRefSchema = (t: TFunction) =>
+  Yup.string()
+    .required(t('Image reference is required for this volume type'))
+    .matches(APPLICATION_IMAGE_REGEXP, t('Image reference includes invalid characters.'));
+
+const imagePullPolicySchema = (t: TFunction) =>
+  Yup.string()
+    .oneOf(
+      [ImagePullPolicy.PullAlways, ImagePullPolicy.PullIfNotPresent, ImagePullPolicy.PullNever],
+      t('Pull policy must be one of: Always, IfNotPresent, or Never'),
+    )
+    .required(t('Pull policy is required'));
+
+const mountPathSchema = (t: TFunction, isRequired: boolean = true) => {
+  const schema = Yup.string().matches(absolutePathRegex, t('Mount path must be absolute.'));
+  return isRequired ? schema.required(t('Mount path is required for this volume type')) : schema;
+};
+
+// Volume validation schemas
+const singleContainerVolumesSchema = (t: TFunction) =>
+  Yup.array().of(
+    Yup.object().shape({
+      name: volumeNameSchema(t),
+      volumeType: Yup.string().required(t('Volume type is required')),
+      imageRef: Yup.string().when('volumeType', (volumeType, schema) => {
+        const volType = (Array.isArray(volumeType) ? volumeType[0] : volumeType) as VolumeType;
+        return volType === VolumeType.IMAGE_MOUNT ? imageRefSchema(t) : schema;
+      }),
+      imagePullPolicy: Yup.string().when('volumeType', (volumeType, schema) => {
+        const volType = (Array.isArray(volumeType) ? volumeType[0] : volumeType) as VolumeType;
+        return volType === VolumeType.IMAGE_MOUNT ? imagePullPolicySchema(t) : schema;
+      }),
+      mountPath: mountPathSchema(t, true),
+    }),
+  );
+
+const composeQuadletVolumesSchema = (t: TFunction) =>
+  Yup.array().of(
+    Yup.object().shape({
+      name: volumeNameSchema(t),
+      volumeType: Yup.string().oneOf([VolumeType.IMAGE_ONLY]).required(t('Volume type is required')),
+      imageRef: imageRefSchema(t),
+      imagePullPolicy: imagePullPolicySchema(t),
+    }),
+  );
+
 export const validApplicationsSchema = (t: TFunction) => {
   return Yup.array()
     .of(
@@ -648,37 +697,7 @@ export const validApplicationsSchema = (t: TFunction) => {
               cpu: Yup.string().test('valid-cpu-format', t('CPU limit is invalid.'), validateCPULimit),
               memory: Yup.string().test('valid-memory-format', t('Memory limit is invalid.'), validateMemoryLimit),
             }),
-            volumes: Yup.array().of(
-              Yup.object().shape({
-                name: validApplicationAndVolumeName(t).required(t('Volume name is required')),
-                volumeType: Yup.string()
-                  .oneOf([VolumeType.IMAGE_ONLY, VolumeType.MOUNT_ONLY, VolumeType.IMAGE_MOUNT])
-                  .required(t('Volume type is required')),
-                imageRef: Yup.string().when('volumeType', {
-                  is: (val: VolumeType) => val === VolumeType.IMAGE_ONLY || val === VolumeType.IMAGE_MOUNT,
-                  then: (schema) =>
-                    schema
-                      .required(t('Image reference is required for this volume type'))
-                      .matches(APPLICATION_IMAGE_REGEXP, t('Image reference includes invalid characters.')),
-                  otherwise: (schema) =>
-                    schema.matches(APPLICATION_IMAGE_REGEXP, t('Image reference includes invalid characters.')),
-                }),
-                imagePullPolicy: Yup.string()
-                  .oneOf(
-                    [ImagePullPolicy.PullAlways, ImagePullPolicy.PullIfNotPresent, ImagePullPolicy.PullNever],
-                    t('Pull policy must be one of: Always, IfNotPresent, or Never'),
-                  )
-                  .required(t('Pull policy is required')),
-                mountPath: Yup.string().when('volumeType', {
-                  is: (val: VolumeType) => val === VolumeType.MOUNT_ONLY || val === VolumeType.IMAGE_MOUNT,
-                  then: (schema) =>
-                    schema
-                      .required(t('Mount path is required for this volume type'))
-                      .matches(absolutePathRegex, t('Mount path must be absolute.')),
-                  otherwise: (schema) => schema.matches(absolutePathRegex, t('Mount path must be absolute.')),
-                }),
-              }),
-            ),
+            volumes: singleContainerVolumesSchema(t),
             variables: appVariablesSchema(t),
           });
         }
@@ -696,6 +715,7 @@ export const validApplicationsSchema = (t: TFunction) => {
             image: Yup.string()
               .required(t('Image is required.'))
               .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
+            volumes: composeQuadletVolumesSchema(t),
             variables: appVariablesSchema(t),
           });
         }
@@ -710,6 +730,7 @@ export const validApplicationsSchema = (t: TFunction) => {
               .test('unique-file-paths', uniqueFilePathsTest(t))
               .test('quadlet-file-types', quadletFileTypesValidation(t))
               .test('quadlet-files-at-root', quadletFilesAtRoot(t)),
+            volumes: composeQuadletVolumesSchema(t),
             variables: appVariablesSchema(t),
           });
         }
@@ -722,6 +743,7 @@ export const validApplicationsSchema = (t: TFunction) => {
           files: inlineAppFileSchema(t)
             .test('unique-file-paths', uniqueFilePathsTest(t))
             .test('compose-file-name', composeFileName(t)),
+          volumes: composeQuadletVolumesSchema(t),
           variables: appVariablesSchema(t),
         });
       }),

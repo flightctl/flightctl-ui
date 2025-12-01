@@ -27,15 +27,16 @@ const getPullPolicyOptions = (t: TFunction) => ({
   [ImagePullPolicy.PullNever]: t('Never'),
 });
 
-const getVolumeTypeOptions = (t: TFunction, isSingleContainerApp: boolean) => {
-  const validTypes: Partial<Record<VolumeType, string>> = {
-    [VolumeType.MOUNT_ONLY]: t('Mount volume'),
-    [VolumeType.IMAGE_MOUNT]: t('Image mount volume'),
-  };
-  if (!isSingleContainerApp) {
-    validTypes[VolumeType.IMAGE_ONLY] = t('Image volume');
+const getVolumeTypeOptions = (t: TFunction, isSingleContainerApp: boolean): Record<string, string> => {
+  if (isSingleContainerApp) {
+    return {
+      [VolumeType.MOUNT_ONLY]: t('Mount volume'),
+      [VolumeType.IMAGE_MOUNT]: t('Image mount volume'),
+    };
   }
-  return validTypes;
+  return {
+    [VolumeType.IMAGE_ONLY]: t('Image volume'),
+  };
 };
 
 const ApplicationVolumeForm = ({

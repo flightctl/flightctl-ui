@@ -309,7 +309,7 @@ const hasInlineApplicationChanged = (
   if (currentApp.inline.length !== updatedApp.files.length) {
     return true;
   }
-  return currentApp.inline.some((file, index) => {
+  const filesChanged = currentApp.inline.some((file, index) => {
     const updatedFile = updatedApp.files[index];
     const isCurrentBase64 = file.contentEncoding === EncodingType.EncodingBase64;
     return (
@@ -318,6 +318,27 @@ const hasInlineApplicationChanged = (
       updatedFile.content !== file.content
     );
   });
+  if (filesChanged) {
+    return true;
+  }
+  return !areVolumesEqual(currentApp.volumes || [], updatedApp.volumes || []);
+};
+
+const getApiVolumeType = (vol: ApplicationVolume): VolumeType | undefined => {
+  const fullVol = vol as ApplicationVolume & ImageMountVolumeProviderSpec;
+  const hasImage = !!fullVol.image;
+  const hasMount = !!fullVol.mount;
+
+  if (hasImage && hasMount) {
+    return VolumeType.IMAGE_MOUNT;
+  }
+  if (hasImage) {
+    return VolumeType.IMAGE_ONLY;
+  }
+  if (hasMount) {
+    return VolumeType.MOUNT_ONLY;
+  }
+  return undefined;
 };
 
 const areVolumesEqual = (currentVolumes: ApplicationVolume[], updatedFormVolumes: ApplicationVolumeForm[]): boolean => {
@@ -333,22 +354,32 @@ const areVolumesEqual = (currentVolumes: ApplicationVolume[], updatedFormVolumes
       return false;
     }
 
-    const currentImageRef = currentFullVol.image?.reference || '';
-    const updatedImageRef = updatedFormVol?.imageRef || '';
-    if (currentImageRef !== updatedImageRef) {
+    const currentVolumeType = getApiVolumeType(currentVol);
+    const updatedVolumeType = updatedFormVol.volumeType;
+    if (currentVolumeType !== updatedVolumeType) {
       return false;
     }
 
-    const currentPullPolicy = currentFullVol.image?.pullPolicy || ImagePullPolicy.PullIfNotPresent;
-    const updatedPullPolicy = updatedFormVol?.imagePullPolicy || ImagePullPolicy.PullIfNotPresent;
-    if (currentPullPolicy !== updatedPullPolicy) {
-      return false;
+    if (currentVolumeType === VolumeType.IMAGE_ONLY || currentVolumeType === VolumeType.IMAGE_MOUNT) {
+      const currentImageRef = currentFullVol.image?.reference || '';
+      const updatedImageRef = updatedFormVol?.imageRef || '';
+      if (currentImageRef !== updatedImageRef) {
+        return false;
+      }
+
+      const currentPullPolicy = currentFullVol.image?.pullPolicy || ImagePullPolicy.PullIfNotPresent;
+      const updatedPullPolicy = updatedFormVol?.imagePullPolicy || ImagePullPolicy.PullIfNotPresent;
+      if (currentPullPolicy !== updatedPullPolicy) {
+        return false;
+      }
     }
 
-    const currentMountPath = currentFullVol.mount?.path || '';
-    const updatedMountPath = updatedFormVol?.mountPath || '';
-    if (currentMountPath !== updatedMountPath) {
-      return false;
+    if (currentVolumeType === VolumeType.MOUNT_ONLY || currentVolumeType === VolumeType.IMAGE_MOUNT) {
+      const currentMountPath = currentFullVol.mount?.path || '';
+      const updatedMountPath = updatedFormVol?.mountPath || '';
+      if (currentMountPath !== updatedMountPath) {
+        return false;
+      }
     }
 
     return true;
