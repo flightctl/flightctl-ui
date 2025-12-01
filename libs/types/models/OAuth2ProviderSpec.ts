@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { AuthOrganizationAssignment } from './AuthOrganizationAssignment';
 import type { AuthRoleAssignment } from './AuthRoleAssignment';
+import type { OAuth2Introspection } from './OAuth2Introspection';
 /**
  * OAuth2ProviderSpec describes an OAuth2 provider configuration.
  */
@@ -54,5 +55,6 @@ export type OAuth2ProviderSpec = {
    */
   usernameClaim?: Array<string>;
   roleAssignment: AuthRoleAssignment;
+  introspection?: OAuth2Introspection;
 };
 

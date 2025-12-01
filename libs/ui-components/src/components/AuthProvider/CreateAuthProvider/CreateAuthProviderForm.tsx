@@ -24,6 +24,7 @@ import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import { FormGroupWithHelperText } from '../../common/WithHelperText';
 
 import Oauth2ProviderFields from './Oauth2ProviderFields';
+import OAuth2IntrospectionSection from './OAuth2IntrospectionSection';
 import OrganizationAssignmentSection from './AuthOrganizationAssignment';
 import RoleAssignmentSection from './RoleAssignmentSection';
 import TestConnectionModal from '../TestConnectionModal/TestConnectionModal';
@@ -123,6 +124,8 @@ export const AuthProviderForm = ({ isEdit }: { isEdit?: boolean }) => {
       <FormGroup label={t('Client secret')} isRequired>
         <TextField name="clientSecret" aria-label={t('Client secret')} type="password" />
       </FormGroup>
+
+      {values.providerType === ProviderType.OAuth2 && <OAuth2IntrospectionSection />}
 
       <FormSection title={t('User identity & authorization')}>
         <FormGroupWithHelperText label={t('Scopes')} content={<ScopesHelperText />}>

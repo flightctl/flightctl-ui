@@ -20,8 +20,16 @@ import {
 import { AuthProvider } from '@flightctl/types';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import { DEFAULT_USERNAME_CLAIM, OrgAssignmentType, isOAuth2Provider } from '../CreateAuthProvider/types';
-import { getAssignmentTypeLabel, getProviderTypeLabel } from '../CreateAuthProvider/utils';
+import {
+  DEFAULT_USERNAME_CLAIM,
+  IntrospectionType,
+  OrgAssignmentType,
+  isGitHubIntrospection,
+  isJwtIntrospection,
+  isOAuth2Provider,
+  isRfc7662Introspection,
+} from '../CreateAuthProvider/types';
+import { getAssignmentTypeLabel, getIntrospectionTypeLabel, getProviderTypeLabel } from '../CreateAuthProvider/utils';
 import RoleAssigmentDetails from './RoleAssigmentDetails';
 import { DynamicAuthProviderSpec } from '../../../types/extraTypes';
 
@@ -132,6 +140,82 @@ const AuthProviderDetailsTab = ({ authProvider }: { authProvider: AuthProvider }
           </CardBody>
         </Card>
       </StackItem>
+
+      {isOAuth2 && spec.introspection && (
+        <StackItem>
+          <Card>
+            <CardBody>
+              <Title headingLevel="h2" size="lg" className="pf-v5-u-mb-md">
+                {t('Token introspection')}
+              </Title>
+              <DescriptionList isHorizontal>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('Introspection type')}</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <Label color="cyan">
+                      {getIntrospectionTypeLabel(spec.introspection.type as IntrospectionType, t)}
+                    </Label>
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+
+                {isRfc7662Introspection(spec.introspection) && (
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Introspection URL')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      <CopyUrl url={spec.introspection.url} />
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                )}
+
+                {isGitHubIntrospection(spec.introspection) && (
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('GitHub API URL')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      <CopyUrl url={spec.introspection.url || 'https://api.github.com'} />
+                      {!spec.introspection.url && (
+                        <TextContent>
+                          <Text component={TextVariants.small} style={{ color: 'var(--pf-v5-global--Color--200)' }}>
+                            {t('Default')}
+                          </Text>
+                        </TextContent>
+                      )}
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                )}
+
+                {isJwtIntrospection(spec.introspection) && (
+                  <>
+                    <DescriptionListGroup>
+                      <DescriptionListTerm>{t('JWKS URL')}</DescriptionListTerm>
+                      <DescriptionListDescription>
+                        <CopyUrl url={spec.introspection.jwksUrl} />
+                      </DescriptionListDescription>
+                    </DescriptionListGroup>
+                    {spec.introspection.issuer && (
+                      <DescriptionListGroup>
+                        <DescriptionListTerm>{t('Issuer')}</DescriptionListTerm>
+                        <DescriptionListDescription>{spec.introspection.issuer}</DescriptionListDescription>
+                      </DescriptionListGroup>
+                    )}
+                    {spec.introspection.audience && spec.introspection.audience.length > 0 && (
+                      <DescriptionListGroup>
+                        <DescriptionListTerm>{t('Audience')}</DescriptionListTerm>
+                        <DescriptionListDescription>
+                          <LabelGroup>
+                            {spec.introspection.audience.map((aud, index) => (
+                              <Label key={`${aud}-${index}`}>{aud}</Label>
+                            ))}
+                          </LabelGroup>
+                        </DescriptionListDescription>
+                      </DescriptionListGroup>
+                    )}
+                  </>
+                )}
+              </DescriptionList>
+            </CardBody>
+          </Card>
+        </StackItem>
+      )}
 
       <StackItem>
         <Card>

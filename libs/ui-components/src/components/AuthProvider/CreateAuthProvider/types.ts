@@ -7,8 +7,12 @@ import {
   AuthRoleAssignment,
   AuthStaticOrganizationAssignment,
   AuthStaticRoleAssignment,
+  GitHubIntrospectionSpec,
+  JwtIntrospectionSpec,
+  OAuth2Introspection,
   OAuth2ProviderSpec,
   OIDCProviderSpec,
+  Rfc7662IntrospectionSpec,
 } from '@flightctl/types';
 import { ProviderType } from '../../../types/extraTypes';
 
@@ -53,6 +57,22 @@ export const isRoleAssignmentDynamic = (
   roleAssignment: AuthRoleAssignment,
 ): roleAssignment is AuthDynamicRoleAssignment => roleAssignment.type === RoleAssignmentType.Dynamic;
 
+export enum IntrospectionType {
+  Rfc7662 = 'rfc7662',
+  GitHub = 'github',
+  Jwt = 'jwt',
+  None = 'none',
+}
+
+export const isRfc7662Introspection = (introspection: OAuth2Introspection): introspection is Rfc7662IntrospectionSpec =>
+  introspection.type === IntrospectionType.Rfc7662;
+
+export const isGitHubIntrospection = (introspection: OAuth2Introspection): introspection is GitHubIntrospectionSpec =>
+  introspection.type === IntrospectionType.GitHub;
+
+export const isJwtIntrospection = (introspection: OAuth2Introspection): introspection is JwtIntrospectionSpec =>
+  introspection.type === IntrospectionType.Jwt;
+
 export type AuthProviderFormValues = {
   exists: boolean;
   name: string;
@@ -73,6 +93,12 @@ export type AuthProviderFormValues = {
   authorizationUrl?: string;
   tokenUrl?: string;
   userinfoUrl?: string;
+
+  // OAuth2 introspection fields
+  introspectionType?: IntrospectionType;
+  introspectionUrl?: string; // For all types: maps to 'url' for rfc7662/github, 'jwksUrl' for jwt
+  introspectionJwtIssuer?: string; // For jwt type (optional)
+  introspectionJwtAudience?: string[]; // For jwt type (optional)
 
   orgAssignmentType: OrgAssignmentType;
   orgName?: string; // OrgAssignment: Static only

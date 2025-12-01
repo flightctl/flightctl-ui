@@ -7,19 +7,27 @@ import {
   AuthProviderSpec,
   AuthRoleAssignment,
   AuthStaticRoleAssignment,
+  GitHubIntrospectionSpec,
+  JwtIntrospectionSpec,
+  OAuth2Introspection,
   OAuth2ProviderSpec,
   PatchRequest,
+  Rfc7662IntrospectionSpec,
 } from '@flightctl/types';
 import { appendJSONPatch } from '../../../utils/patch';
 import {
   AuthProviderFormValues,
   DEFAULT_ROLE_SEPARATOR,
+  IntrospectionType,
   OrgAssignmentType,
   RoleAssignmentType,
+  isGitHubIntrospection,
+  isJwtIntrospection,
   isOAuth2Provider,
   isOrgAssignmentDynamic,
   isOrgAssignmentPerUser,
   isOrgAssignmentStatic,
+  isRfc7662Introspection,
   isRoleAssignmentDynamic,
   isRoleAssignmentStatic,
 } from './types';
@@ -61,6 +69,26 @@ export const getProviderTypeLabel = (type: AuthProviderSpec['providerType'], t: 
   }
 };
 
+export const getIntrospectionTypeLabel = (type: IntrospectionType, t: TFunction) => {
+  switch (type) {
+    case IntrospectionType.Rfc7662: {
+      return t('RFC 7662');
+    }
+    case IntrospectionType.GitHub: {
+      return t('GitHub');
+    }
+    case IntrospectionType.Jwt: {
+      return t('JWT');
+    }
+    case IntrospectionType.None: {
+      return t('None');
+    }
+    default: {
+      return 'N/A';
+    }
+  }
+};
+
 export const getInitValues = (authProvider?: AuthProvider): AuthProviderFormValues => {
   if (!authProvider) {
     return {
@@ -83,6 +111,10 @@ export const getInitValues = (authProvider?: AuthProvider): AuthProviderFormValu
       claimPath: [],
       orgNamePrefix: '',
       orgNameSuffix: '',
+      introspectionType: undefined,
+      introspectionUrl: undefined,
+      introspectionJwtIssuer: undefined,
+      introspectionJwtAudience: [],
     };
   }
 
@@ -125,6 +157,29 @@ export const getInitValues = (authProvider?: AuthProvider): AuthProviderFormValu
   }
 
   const isOAuth2 = isOAuth2Provider(spec);
+
+  // Extract introspection fields if present
+  let introspectionType: IntrospectionType | undefined;
+  let introspectionUrl: string | undefined;
+  let introspectionJwtIssuer: string | undefined;
+  let introspectionJwtAudience: string[] | undefined;
+
+  if (isOAuth2 && spec.introspection) {
+    const introspection = spec.introspection;
+    if (isRfc7662Introspection(introspection)) {
+      introspectionType = IntrospectionType.Rfc7662;
+      introspectionUrl = introspection.url;
+    } else if (isGitHubIntrospection(introspection)) {
+      introspectionType = IntrospectionType.GitHub;
+      introspectionUrl = introspection.url;
+    } else if (isJwtIntrospection(introspection)) {
+      introspectionType = IntrospectionType.Jwt;
+      introspectionUrl = introspection.jwksUrl;
+      introspectionJwtIssuer = introspection.issuer;
+      introspectionJwtAudience = introspection.audience || [];
+    }
+  }
+
   return {
     exists: true,
     name: authProvider.metadata.name as string,
@@ -137,6 +192,10 @@ export const getInitValues = (authProvider?: AuthProvider): AuthProviderFormValu
     authorizationUrl: isOAuth2 ? spec.authorizationUrl : undefined,
     tokenUrl: isOAuth2 ? spec.tokenUrl : undefined,
     userinfoUrl: isOAuth2 ? spec.userinfoUrl : undefined,
+    introspectionType,
+    introspectionUrl,
+    introspectionJwtIssuer,
+    introspectionJwtAudience,
     scopes: spec.scopes || [],
     usernameClaim: spec.usernameClaim || [],
     roleAssignmentType,
@@ -286,6 +345,46 @@ const getRoleAssignment = (values: AuthProviderFormValues): AuthRoleAssignment =
   }
 };
 
+const getIntrospection = (values: AuthProviderFormValues): OAuth2Introspection | undefined => {
+  switch (values.introspectionType) {
+    case IntrospectionType.Rfc7662: {
+      if (!values.introspectionUrl) {
+        return undefined;
+      }
+      const rfc7662Spec: Rfc7662IntrospectionSpec = {
+        type: IntrospectionType.Rfc7662,
+        url: values.introspectionUrl,
+      };
+      return rfc7662Spec as OAuth2Introspection;
+    }
+    case IntrospectionType.GitHub: {
+      const githubSpec: GitHubIntrospectionSpec = {
+        type: IntrospectionType.GitHub,
+        ...(values.introspectionUrl && { url: values.introspectionUrl }),
+      };
+      return githubSpec as OAuth2Introspection;
+    }
+    case IntrospectionType.Jwt: {
+      if (!values.introspectionUrl) {
+        return undefined;
+      }
+      const jwtSpec: JwtIntrospectionSpec = {
+        type: IntrospectionType.Jwt,
+        jwksUrl: values.introspectionUrl,
+      };
+      if (values.introspectionJwtIssuer) {
+        jwtSpec.issuer = values.introspectionJwtIssuer;
+      }
+      if (values.introspectionJwtAudience && values.introspectionJwtAudience.length > 0) {
+        jwtSpec.audience = values.introspectionJwtAudience;
+      }
+      return jwtSpec as OAuth2Introspection;
+    }
+    default:
+      return undefined;
+  }
+};
+
 export const getAuthProvider = (values: AuthProviderFormValues): AuthProvider => {
   const baseSpec = {
     providerType: values.providerType,
@@ -302,12 +401,14 @@ export const getAuthProvider = (values: AuthProviderFormValues): AuthProvider =>
 
   let spec: AuthProviderSpec;
   if (values.providerType === ProviderType.OAuth2) {
+    const introspection = getIntrospection(values);
     spec = {
       ...baseSpec,
       providerType: ProviderType.OAuth2,
       authorizationUrl: values.authorizationUrl || '',
       tokenUrl: values.tokenUrl || '',
       userinfoUrl: values.userinfoUrl || '',
+      ...(introspection && { introspection }),
     };
   } else {
     spec = {
@@ -406,6 +507,21 @@ const patchAuthProviderFields = (
       path: '/spec/roleAssignment',
     });
   }
+
+  // Handle introspection changes for OAuth2 providers
+  if (isOAuth2Provider(spec) && isOAuth2Provider(newSpec)) {
+    const oldIntrospection = spec.introspection;
+    const newIntrospection = newSpec.introspection;
+    const introspectionChanged = JSON.stringify(oldIntrospection) !== JSON.stringify(newIntrospection);
+    if (introspectionChanged) {
+      appendJSONPatch({
+        patches,
+        originalValue: oldIntrospection,
+        newValue: newIntrospection,
+        path: '/spec/introspection',
+      });
+    }
+  }
 };
 
 const patchProviderTypeSpecificFields = (patches: PatchRequest, spec: AuthProviderSpec, newSpec: AuthProviderSpec) => {
@@ -428,6 +544,10 @@ const patchProviderTypeSpecificFields = (patches: PatchRequest, spec: AuthProvid
     oauth2Fields.forEach((field) => {
       patches.push({ op: 'remove', path: `/spec/${field}` });
     });
+    // Also remove introspection if it exists
+    if (spec.introspection) {
+      patches.push({ op: 'remove', path: '/spec/introspection' });
+    }
   }
 };
 
@@ -527,6 +647,32 @@ export const authProviderSchema = (t: TFunction) => (values: AuthProviderFormVal
       authorizationUrl: Yup.string().required(t('Authorization URL is required')).url(t('Must be a valid URL')),
       tokenUrl: Yup.string().required(t('Token URL is required')).url(t('Must be a valid URL')),
       userinfoUrl: Yup.string().required(t('Userinfo URL is required')).url(t('Must be a valid URL')),
+      introspectionType: Yup.string().oneOf(Object.values(IntrospectionType)).optional(),
+      introspectionUrl: Yup.string()
+        .when('introspectionType', (introspectionType, schema) => {
+          const type = (
+            Array.isArray(introspectionType) ? introspectionType[0] : introspectionType
+          ) as IntrospectionType;
+
+          switch (type) {
+            case IntrospectionType.GitHub: {
+              return schema.url(t('Must be a valid URL'));
+            }
+            case IntrospectionType.Rfc7662: {
+              return schema.required(t('Introspection URL is required for RFC 7662')).url(t('Must be a valid URL'));
+            }
+
+            case IntrospectionType.Jwt: {
+              return schema.required(t('JWKS URL is required for JWT introspection')).url(t('Must be a valid URL'));
+            }
+            default: {
+              return schema;
+            }
+          }
+        })
+        .optional(),
+      introspectionJwtIssuer: Yup.string().optional(),
+      introspectionJwtAudience: Yup.array().of(Yup.string()).optional(),
     };
   }
 
