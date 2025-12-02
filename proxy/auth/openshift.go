@@ -124,22 +124,6 @@ func getOpenShiftAuthHandlerFromSpec(provider *v1beta1.AuthProvider, openshiftSp
 	return handler, nil
 }
 
-func (o *OpenShiftAuthHandler) GetToken(loginParams LoginParameters) (TokenData, *int64, error) {
-	// OpenShift typically doesn't require client_secret with PKCE
-	return exchangeToken(loginParams, o.internalClient, o.tokenURL, o.clientId, config.BaseUiUrl+"/callback")
-}
-
-func (o *OpenShiftAuthHandler) GetUserInfo(tokenData TokenData) (string, *http.Response, error) {
-	resp := &http.Response{
-		StatusCode: http.StatusInternalServerError,
-	}
-	return "", resp, fmt.Errorf("User information should be retrieved through the flightctl API")
-}
-
-func (o *OpenShiftAuthHandler) RefreshToken(refreshToken string) (TokenData, *int64, error) {
-	return refreshOAuthToken(refreshToken, o.internalClient)
-}
-
 func (o *OpenShiftAuthHandler) Logout(token string) (string, error) {
 	// The cookie will be cleared by the proxy
 	return "", nil

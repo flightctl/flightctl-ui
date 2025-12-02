@@ -30,11 +30,6 @@ func NewTokenAuthProvider(apiTlsConfig *tls.Config, authURL string, providerName
 	}
 }
 
-// GetToken does not exist for token auth
-func (t *TokenAuthProvider) GetToken(loginParams LoginParameters) (TokenData, *int64, error) {
-	return TokenData{}, nil, fmt.Errorf("token auth does not use OAuth code flow")
-}
-
 // ValidateToken validates a K8s token by calling the backend API
 func (t *TokenAuthProvider) ValidateToken(token string) (TokenData, *int64, error) {
 	client := &http.Client{Transport: &http.Transport{
@@ -115,19 +110,6 @@ func extractTokenExpiration(token string) *int64 {
 	}
 
 	return &expiresIn
-}
-
-// GetUserInfo retrieves user information from the provided JWT token
-func (t *TokenAuthProvider) GetUserInfo(tokenData TokenData) (string, *http.Response, error) {
-	resp := &http.Response{
-		StatusCode: http.StatusInternalServerError,
-	}
-	return "", resp, fmt.Errorf("User information should be retrieved through the flightctl API")
-}
-
-// RefreshToken is not applicable for K8s token auth
-func (t *TokenAuthProvider) RefreshToken(refreshToken string) (TokenData, *int64, error) {
-	return TokenData{}, nil, fmt.Errorf("token refresh not supported for K8s token auth")
 }
 
 // Logout for token auth just clears the session
