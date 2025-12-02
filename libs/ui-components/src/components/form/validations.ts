@@ -23,7 +23,6 @@ import {
   SpecConfigTemplate,
   SystemdUnitFormValue,
   UpdatePolicyForm,
-  VolumeType,
   getAppIdentifier,
   isComposeImageAppForm,
   isGitConfigTemplate,
@@ -614,10 +613,13 @@ export const validateMemoryLimit = (memory: string | undefined): boolean => {
 // Common volume validation helpers
 const volumeNameSchema = (t: TFunction) => validApplicationAndVolumeName(t).required(t('Volume name is required'));
 
-const imageRefSchema = (t: TFunction) =>
-  Yup.string()
-    .required(t('Image reference is required for this volume type'))
-    .matches(APPLICATION_IMAGE_REGEXP, t('Image reference includes invalid characters.'));
+const optionalImageRefSchema = (t: TFunction) =>
+  Yup.string().test('image-ref-format', t('Image reference includes invalid characters.'), (value) => {
+    if (!value || value.length === 0) {
+      return true; // Empty is allowed
+    }
+    return APPLICATION_IMAGE_REGEXP.test(value);
+  });
 
 const imagePullPolicySchema = (t: TFunction) =>
   Yup.string()
@@ -637,15 +639,8 @@ const singleContainerVolumesSchema = (t: TFunction) =>
   Yup.array().of(
     Yup.object().shape({
       name: volumeNameSchema(t),
-      volumeType: Yup.string().required(t('Volume type is required')),
-      imageRef: Yup.string().when('volumeType', (volumeType, schema) => {
-        const volType = (Array.isArray(volumeType) ? volumeType[0] : volumeType) as VolumeType;
-        return volType === VolumeType.IMAGE_MOUNT ? imageRefSchema(t) : schema;
-      }),
-      imagePullPolicy: Yup.string().when('volumeType', (volumeType, schema) => {
-        const volType = (Array.isArray(volumeType) ? volumeType[0] : volumeType) as VolumeType;
-        return volType === VolumeType.IMAGE_MOUNT ? imagePullPolicySchema(t) : schema;
-      }),
+      imageRef: optionalImageRefSchema(t),
+      imagePullPolicy: Yup.string(),
       mountPath: mountPathSchema(t, true),
     }),
   );
@@ -654,8 +649,7 @@ const composeQuadletVolumesSchema = (t: TFunction) =>
   Yup.array().of(
     Yup.object().shape({
       name: volumeNameSchema(t),
-      volumeType: Yup.string().oneOf([VolumeType.IMAGE_ONLY]).required(t('Volume type is required')),
-      imageRef: imageRefSchema(t),
+      imageRef: optionalImageRefSchema(t).required(t('Image reference is required for this volume type')),
       imagePullPolicy: imagePullPolicySchema(t),
     }),
   );

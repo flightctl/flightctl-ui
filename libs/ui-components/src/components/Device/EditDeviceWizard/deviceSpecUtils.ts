@@ -35,7 +35,6 @@ import {
   QuadletInlineAppForm,
   SpecConfigTemplate,
   SystemdUnitFormValue,
-  VolumeType,
   isComposeImageAppForm,
   isGitConfigTemplate,
   isGitProviderSpec,
@@ -226,17 +225,13 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
       name: v.name || '',
     };
 
-    // Use volumeType to determine which fields to include
-    const hasImage = v.volumeType === VolumeType.IMAGE_ONLY || v.volumeType === VolumeType.IMAGE_MOUNT;
-    const hasMount = v.volumeType === VolumeType.MOUNT_ONLY || v.volumeType === VolumeType.IMAGE_MOUNT;
-
-    if (hasImage && v.imageRef) {
+    if (v.imageRef) {
       volume.image = {
         reference: v.imageRef,
-        pullPolicy: v.imagePullPolicy,
+        pullPolicy: v.imagePullPolicy || ImagePullPolicy.PullIfNotPresent,
       };
     }
-    if (hasMount && v.mountPath) {
+    if (v.mountPath) {
       volume.mount = {
         path: v.mountPath,
       };
@@ -324,23 +319,6 @@ const hasInlineApplicationChanged = (
   return !areVolumesEqual(currentApp.volumes || [], updatedApp.volumes || []);
 };
 
-const getApiVolumeType = (vol: ApplicationVolume): VolumeType | undefined => {
-  const fullVol = vol as ApplicationVolume & ImageMountVolumeProviderSpec;
-  const hasImage = !!fullVol.image;
-  const hasMount = !!fullVol.mount;
-
-  if (hasImage && hasMount) {
-    return VolumeType.IMAGE_MOUNT;
-  }
-  if (hasImage) {
-    return VolumeType.IMAGE_ONLY;
-  }
-  if (hasMount) {
-    return VolumeType.MOUNT_ONLY;
-  }
-  return undefined;
-};
-
 const areVolumesEqual = (currentVolumes: ApplicationVolume[], updatedFormVolumes: ApplicationVolumeForm[]): boolean => {
   if (currentVolumes.length !== updatedFormVolumes.length) {
     return false;
@@ -354,19 +332,13 @@ const areVolumesEqual = (currentVolumes: ApplicationVolume[], updatedFormVolumes
       return false;
     }
 
-    const currentVolumeType = getApiVolumeType(currentVol);
-    const updatedVolumeType = updatedFormVol.volumeType;
-    if (currentVolumeType !== updatedVolumeType) {
+    const currentImageRef = currentFullVol.image?.reference || '';
+    const updatedImageRef = updatedFormVol?.imageRef || '';
+    if (currentImageRef !== updatedImageRef) {
       return false;
     }
 
-    if (currentVolumeType === VolumeType.IMAGE_ONLY || currentVolumeType === VolumeType.IMAGE_MOUNT) {
-      const currentImageRef = currentFullVol.image?.reference || '';
-      const updatedImageRef = updatedFormVol?.imageRef || '';
-      if (currentImageRef !== updatedImageRef) {
-        return false;
-      }
-
+    if (currentImageRef || updatedImageRef) {
       const currentPullPolicy = currentFullVol.image?.pullPolicy || ImagePullPolicy.PullIfNotPresent;
       const updatedPullPolicy = updatedFormVol?.imagePullPolicy || ImagePullPolicy.PullIfNotPresent;
       if (currentPullPolicy !== updatedPullPolicy) {
@@ -374,12 +346,10 @@ const areVolumesEqual = (currentVolumes: ApplicationVolume[], updatedFormVolumes
       }
     }
 
-    if (currentVolumeType === VolumeType.MOUNT_ONLY || currentVolumeType === VolumeType.IMAGE_MOUNT) {
-      const currentMountPath = currentFullVol.mount?.path || '';
-      const updatedMountPath = updatedFormVol?.mountPath || '';
-      if (currentMountPath !== updatedMountPath) {
-        return false;
-      }
+    const currentMountPath = currentFullVol.mount?.path || '';
+    const updatedMountPath = updatedFormVol?.mountPath || '';
+    if (currentMountPath !== updatedMountPath) {
+      return false;
     }
 
     return true;
@@ -599,17 +569,11 @@ const convertVolumesToForm = (volumes?: ApplicationVolume[]) => {
     const volForm: ApplicationVolumeForm = {
       name: fullVolume.name,
       imageRef: fullVolume.image?.reference || '',
-      imagePullPolicy: fullVolume.image?.pullPolicy || ImagePullPolicy.PullIfNotPresent,
       mountPath: fullVolume.mount?.path || '',
     };
-
-    // Determine volumeType based on which fields are present
-    if (volForm.imageRef && volForm.mountPath) {
-      volForm.volumeType = VolumeType.IMAGE_MOUNT;
-    } else if (volForm.imageRef) {
-      volForm.volumeType = VolumeType.IMAGE_ONLY;
-    } else if (volForm.mountPath) {
-      volForm.volumeType = VolumeType.MOUNT_ONLY;
+    // Only set imagePullPolicy if there's an image
+    if (fullVolume.image) {
+      volForm.imagePullPolicy = fullVolume.image.pullPolicy || ImagePullPolicy.PullIfNotPresent;
     }
     return volForm;
   });

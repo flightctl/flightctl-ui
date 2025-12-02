@@ -131,15 +131,8 @@ export const isComposeInlineAppForm = (app: AppBase): app is ComposeInlineAppFor
 export const isSingleContainerAppForm = (app: AppBase): app is SingleContainerAppForm =>
   app.appType === AppType.AppTypeContainer;
 
-export enum VolumeType {
-  IMAGE_ONLY = 'image',
-  MOUNT_ONLY = 'mount',
-  IMAGE_MOUNT = 'imageMount',
-}
-
 export type ApplicationVolumeForm = {
   name: string;
-  volumeType?: VolumeType;
   imageRef?: string;
   imagePullPolicy?: ImagePullPolicy;
   mountPath?: string;
