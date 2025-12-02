@@ -31,28 +31,12 @@ var (
 )
 
 type TokenData struct {
-	// IDToken (JWT token)
-	//   - OIDC: Used for API authentication and GetUserInfo (via backend API)
-	//   - K8s: Used for API authentication and GetUserInfo
-	//   - OAuth2/AAP: Not used
-	IDToken string `json:"idToken"`
-
-	// AccessToken (opaque token)
-	//   - OIDC: Stored but not directly used (IDToken is preferred via GetAuthToken())
-	//   - OAuth2/AAP: Used for API authentication and GetUserInfo
-	//   - K8s: Not used
-	AccessToken string `json:"accessToken"`
-
+	// Token is the authentication token to use for API calls
+	//   - OIDC/K8s: IDToken (JWT)
+	//   - OAuth2/AAP/OpenShift: AccessToken (opaque)
+	Token        string `json:"token"`
 	RefreshToken string `json:"refreshToken"`
 	Provider     string `json:"provider,omitempty"`
-}
-
-// GetAuthToken returns the token to use for API authentication.
-func (t TokenData) GetAuthToken() string {
-	if t.IDToken != "" {
-		return t.IDToken
-	}
-	return t.AccessToken
 }
 
 type LoginParameters struct {
@@ -74,10 +58,17 @@ func setCookie(w http.ResponseWriter, value TokenData) error {
 		return err
 	}
 	secure := config.TlsCertPath != ""
+	encodedValue := b64.StdEncoding.EncodeToString(cookieVal)
+
+	// Check cookie value size to ensure it doesn't exceed the maximum
+	if len(encodedValue) > maxCookieValueSize {
+		return fmt.Errorf("cookie value size (%d bytes) exceeds maximum allowed size (%d bytes)", len(encodedValue), maxCookieValueSize)
+	}
+
 	cookie := http.Cookie{
 		Name:     common.CookieSessionName,
-		Value:    b64.StdEncoding.EncodeToString(cookieVal),
 		Secure:   secure,
+		Value:    encodedValue,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 		Path:     "/",
@@ -372,13 +363,10 @@ func exchangeToken(loginParams LoginParameters, client *osincli.Client, tokenURL
 		}
 	}
 
-	// Extract tokens
-	if accessToken, ok := tokenResponse["access_token"].(string); ok {
-		ret.AccessToken = accessToken
-	}
-
-	if idToken, ok := tokenResponse["id_token"].(string); ok {
-		ret.IDToken = idToken
+	if idToken, ok := tokenResponse["id_token"].(string); ok && idToken != "" {
+		ret.Token = idToken
+	} else if accessToken, ok := tokenResponse["access_token"].(string); ok {
+		ret.Token = accessToken
 	}
 
 	if refreshToken, ok := tokenResponse["refresh_token"].(string); ok {
@@ -445,17 +433,14 @@ func executeOAuthFlow(req *osincli.AccessRequest) (TokenData, *int64, error) {
 		return ret, nil, fmt.Errorf("failed to refresh token: %w", err)
 	}
 
-	// Always store the access_token
-	ret.AccessToken = accessData.AccessToken
-
-	// For OIDC flows, check if id_token is present in the response
-	// OIDC providers return both access_token and id_token:
-	// - id_token (JWT) is used for API authentication
-	// - access_token (opaque) is used for userinfo endpoint
 	if idTokenRaw, exists := accessData.ResponseData["id_token"]; exists {
 		if idToken, ok := idTokenRaw.(string); ok && idToken != "" {
-			ret.IDToken = idToken
+			ret.Token = idToken
+		} else {
+			ret.Token = accessData.AccessToken
 		}
+	} else {
+		ret.Token = accessData.AccessToken
 	}
 
 	ret.RefreshToken = accessData.RefreshToken
@@ -509,6 +494,11 @@ func extractProviderName(provider *v1beta1.AuthProvider) string {
 
 // PKCE cookie name prefix
 const pkceCookiePrefix = "pkce_verifier_"
+
+// maxCookieValueSize is the maximum size for a cookie value in bytes
+// RFC 6265 specifies a maximum cookie size of 4096 bytes total.
+// We use 4000 bytes for the value to leave room for cookie name and attributes.
+const maxCookieValueSize = 4000
 
 // generateCodeVerifier generates a cryptographically random code verifier
 // Returns a base64url-encoded string of 32 random bytes (43-128 characters per RFC 7636)

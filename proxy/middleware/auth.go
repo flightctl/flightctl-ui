@@ -15,7 +15,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		if err != nil {
 			log.GetLogger().Warn(err.Error())
 		} else {
-			token := tokenData.GetAuthToken()
+			token := tokenData.Token
 			if token != "" {
 				r.Header.Add(common.AuthHeaderKey, "Bearer "+token)
 			}

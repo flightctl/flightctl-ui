@@ -73,7 +73,7 @@ func (t *TokenAuthProvider) ValidateToken(token string) (TokenData, *int64, erro
 
 	// Store the validated K8s JWT token
 	tokenData := TokenData{
-		IDToken:      token,
+		Token:        token,
 		RefreshToken: "",
 	}
 
