@@ -24,11 +24,11 @@ import { FormGroupWithHelperText } from '../../common/WithHelperText';
 import { RoleClaimHelperText, RoleSeparatorHelperText } from './AuthProviderHelperText';
 
 const getAvailableRoles = (t: TFunction): Record<string, string> => ({
-  admin: t('System administrator'),
-  'org-admin': t('Organization administrator'),
-  operator: t('Operator'),
-  installer: t('Installer'),
-  viewer: t('Viewer'),
+  'flightctl-admin': t('System administrator'),
+  'flightctl-org-admin': t('Organization administrator'),
+  'flightctl-operator': t('Operator'),
+  'flightctl-installer': t('Installer'),
+  'flightctl-viewer': t('Viewer'),
 });
 
 const RoleSelector = () => {
@@ -100,7 +100,7 @@ const RoleSelector = () => {
         }
       >
         {roles.map((roleCode) => (
-          <Label key={roleCode} onClose={() => onDelete(roleCode)} textMaxWidth="18ch" isEditable>
+          <Label key={roleCode} onClose={() => onDelete(roleCode)} textMaxWidth="18ch">
             {allRoles[roleCode]}
           </Label>
         ))}
