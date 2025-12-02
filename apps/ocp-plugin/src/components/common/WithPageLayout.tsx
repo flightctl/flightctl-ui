@@ -8,9 +8,9 @@ import { SystemRestoreProvider } from '@flightctl/ui-components/src/hooks/useSys
 import { PermissionsContextProvider } from '@flightctl/ui-components/src/components/common/PermissionsContext';
 
 const WithPageLayoutContent = ({ children }: React.PropsWithChildren) => {
-  const { isOrganizationSelectionRequired } = useOrganizationGuardContext();
+  const { mustShowOrganizationSelector } = useOrganizationGuardContext();
 
-  if (isOrganizationSelectionRequired) {
+  if (mustShowOrganizationSelector) {
     return <OrganizationSelector isFirstLogin />;
   }
 
