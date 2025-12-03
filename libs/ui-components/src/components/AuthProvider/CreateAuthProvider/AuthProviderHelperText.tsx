@@ -70,7 +70,7 @@ export const RoleSeparatorHelperText = () => {
     <div>
       <p>
         {t(
-          'Separator for org:role format (default: ":"). Roles containing the separator are split into organization-scoped roles. Roles without separator are global and apply to all organizations. Example: "org1:admin" becomes org-scoped role "admin" for organization "org1", while "admin" becomes a global role.',
+          'Separator for org:role format (default: ":"). Roles containing the separator are split into organization-scoped roles. Roles without separator are global and apply to all organizations. Example: "org1:flightctl-admin" becomes org-scoped role "flightctl-admin" for organization "org1", while "flightctl-admin" becomes a global role.',
         )}
       </p>
     </div>
