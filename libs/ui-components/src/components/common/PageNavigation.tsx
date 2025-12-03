@@ -21,6 +21,7 @@ import { useOrganizationGuardContext } from './OrganizationGuard';
 import OrganizationSelector from './OrganizationSelector';
 import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from './PermissionsContext';
+import { useAppContext } from '../../hooks/useAppContext';
 
 import './PageNavigation.css';
 
@@ -63,9 +64,30 @@ const OrganizationDropdown = ({ organizationName, onSwitchOrganization }: Organi
   );
 };
 
+const getRedirectPathAfterOrgSwitch = (pathname: string): string => {
+  // If we're currently on a details page for the original organization, return the parent list page.
+  const deviceEntityMatch = pathname.match(
+    /^\/(edge|devicemanagement)\/(fleets|devices|repositories|enrollmentrequests)\/[^/]+/,
+  );
+  if (deviceEntityMatch) {
+    return `/${deviceEntityMatch[1]}/${deviceEntityMatch[2]}`;
+  }
+
+  // In the admin section, currently there's only one option, but we keep it generic for future expansion.
+  const adminMatch = pathname.match(/^\/admin\/(authproviders)\/[^/]+/);
+  if (adminMatch) {
+    const entityType = adminMatch[1];
+    return `/admin/${entityType}`;
+  }
+
+  return '/overview';
+};
+
 const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { router } = useAppContext();
+  const location = router.useLocation();
   const { currentOrganization, availableOrganizations } = useOrganizationGuardContext();
   const { checkPermissions } = usePermissionsContext();
   const [isAdmin] = checkPermissions([{ kind: RESOURCE.AUTH_PROVIDER, verb: VERB.CREATE }]);
@@ -123,7 +145,8 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
           onClose={(isChanged) => {
             setShowOrganizationModal(false);
             if (isChanged) {
-              window.location.reload();
+              const targetPath = getRedirectPathAfterOrgSwitch(location.pathname);
+              window.location.href = targetPath;
             }
           }}
         />
