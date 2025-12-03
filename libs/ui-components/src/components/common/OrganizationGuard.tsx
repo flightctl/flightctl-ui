@@ -7,7 +7,7 @@ import { getCurrentOrganizationId, storeCurrentOrganizationId } from '../../util
 interface OrganizationContextType {
   currentOrganization?: Organization;
   availableOrganizations: Organization[];
-  isOrganizationSelectionRequired: boolean;
+  mustShowOrganizationSelector: boolean;
   selectOrganization: (org: Organization) => void;
   selectionError?: string;
 }
@@ -77,6 +77,7 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
             storeCurrentOrganizationId('');
           }
         }
+        setSelectionError(undefined);
       } catch (error) {
         setSelectionError(getErrorMessage(error));
         setAvailableOrganizations([]);
@@ -89,24 +90,24 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isOrganizationSelectionRequired = React.useMemo(() => {
+  const mustShowOrganizationSelector = React.useMemo(() => {
     // Don't show selector while still loading
     if (!organizationsLoaded) {
       return false;
     }
-
-    return availableOrganizations.length > 1 && !currentOrganization;
-  }, [organizationsLoaded, availableOrganizations.length, currentOrganization]);
+    // Show selector if there's an error OR if multiple orgs and none selected
+    return !!selectionError || (availableOrganizations.length > 1 && !currentOrganization);
+  }, [organizationsLoaded, selectionError, availableOrganizations.length, currentOrganization]);
 
   const contextValue = React.useMemo(
     () => ({
       currentOrganization,
       availableOrganizations,
-      isOrganizationSelectionRequired,
+      mustShowOrganizationSelector,
       selectOrganization,
       selectionError,
     }),
-    [currentOrganization, availableOrganizations, isOrganizationSelectionRequired, selectOrganization, selectionError],
+    [currentOrganization, availableOrganizations, mustShowOrganizationSelector, selectOrganization, selectionError],
   );
 
   return <OrganizationContext.Provider value={contextValue}>{children}</OrganizationContext.Provider>;

@@ -32,7 +32,7 @@ const AppLayoutContent = () => {
   const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
-  const { isOrganizationSelectionRequired } = useOrganizationGuardContext();
+  const { mustShowOrganizationSelector } = useOrganizationGuardContext();
 
   const onSidebarToggle = () => {
     setIsSidebarOpen((prevIsOpen) => !prevIsOpen);
@@ -70,8 +70,8 @@ const AppLayoutContent = () => {
     <PageSidebar theme="dark" isSidebarOpen={isSidebarOpen}>
       <PageSidebarBody
         style={{
-          opacity: isOrganizationSelectionRequired ? 0.3 : 1,
-          pointerEvents: isOrganizationSelectionRequired ? 'none' : 'auto',
+          opacity: mustShowOrganizationSelector ? 0.3 : 1,
+          pointerEvents: mustShowOrganizationSelector ? 'none' : 'auto',
           transition: 'opacity 0.2s ease-in-out',
         }}
       >
@@ -96,7 +96,7 @@ const AppLayoutContent = () => {
   );
   return (
     <Page mainContainerId={pageId} header={Header} sidebar={Sidebar} isManagedSidebar skipToContent={PageSkipToContent}>
-      {isOrganizationSelectionRequired ? (
+      {mustShowOrganizationSelector ? (
         <OrganizationSelector isFirstLogin />
       ) : (
         <>

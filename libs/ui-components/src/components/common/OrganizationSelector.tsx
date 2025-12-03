@@ -3,6 +3,7 @@ import {
   ActionList,
   ActionListGroup,
   ActionListItem,
+  Alert,
   Bullseye,
   Button,
   Card,
@@ -62,45 +63,49 @@ const OrganizationSelectorContent = ({
           </Text>
         </TextContent>
       </StackItem>
-      <StackItem>
-        <Menu
-          activeItemId={selectedOrg}
-          selected={selectedOrg}
-          onSelect={(_ev, orgId) => setSelectedOrg(orgId as string)}
-          isScrollable={needsScroll}
-        >
-          <MenuContent menuHeight={needsScroll ? '230px' : 'auto'}>
-            <MenuList>
-              {organizations.map((org) => {
-                const orgId = org.metadata?.name as string;
-                return (
-                  <MenuItem itemId={orgId} key={orgId}>
-                    {org.spec?.displayName || orgId}
-                  </MenuItem>
-                );
-              })}
-            </MenuList>
-          </MenuContent>
-        </Menu>
-      </StackItem>
-      <StackItem>
-        <ActionList>
-          <ActionListGroup>
-            <ActionListItem>
-              <Button variant="primary" onClick={() => onSelect(selectedOrg as string)} isDisabled={!selectedOrg}>
-                {t('Continue')}
-              </Button>
-            </ActionListItem>
-            {allowCancel && (
+      {organizations.length > 0 && (
+        <StackItem>
+          <Menu
+            activeItemId={selectedOrg}
+            selected={selectedOrg}
+            onSelect={(_ev, orgId) => setSelectedOrg(orgId as string)}
+            isScrollable={needsScroll}
+          >
+            <MenuContent menuHeight={needsScroll ? '230px' : 'auto'}>
+              <MenuList>
+                {organizations.map((org) => {
+                  const orgId = org.metadata?.name as string;
+                  return (
+                    <MenuItem itemId={orgId} key={orgId}>
+                      {org.spec?.displayName || orgId}
+                    </MenuItem>
+                  );
+                })}
+              </MenuList>
+            </MenuContent>
+          </Menu>
+        </StackItem>
+      )}
+      {organizations.length > 0 && (
+        <StackItem>
+          <ActionList>
+            <ActionListGroup>
               <ActionListItem>
-                <Button variant="link" onClick={onCancel}>
-                  {t('Cancel')}
+                <Button variant="primary" onClick={() => onSelect(selectedOrg as string)} isDisabled={!selectedOrg}>
+                  {t('Continue')}
                 </Button>
               </ActionListItem>
-            )}
-          </ActionListGroup>
-        </ActionList>
-      </StackItem>
+              {allowCancel && (
+                <ActionListItem>
+                  <Button variant="link" onClick={onCancel}>
+                    {t('Cancel')}
+                  </Button>
+                </ActionListItem>
+              )}
+            </ActionListGroup>
+          </ActionList>
+        </StackItem>
+      )}
     </Stack>
   );
 };
@@ -136,7 +141,8 @@ interface OrganizationSelectorProps {
 }
 
 const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSelectorProps) => {
-  const { availableOrganizations, selectOrganization, isOrganizationSelectionRequired } = useOrganizationGuardContext();
+  const { availableOrganizations, selectOrganization, mustShowOrganizationSelector, selectionError } =
+    useOrganizationGuardContext();
   const { t } = useTranslation();
 
   const getLastSelectedOrganization = React.useCallback(() => {
@@ -166,12 +172,33 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
     [availableOrganizations, selectOrganization, onClose],
   );
 
+  if (selectionError) {
+    return (
+      <PageSection variant="light">
+        <Bullseye>
+          <Alert variant="danger" title={t('Unable to log in to the application')} isInline>
+            <TextContent>
+              <Text>{t('We cannot log you in as we could not determine what organizations you have access to.')}</Text>
+              <Text>{t('Please try refreshing the page. If the problem persists, contact your administrator.')}</Text>
+              <Text>
+                <details>
+                  <summary>{t('Error details')}:</summary>
+                  {selectionError}
+                </details>
+              </Text>
+            </TextContent>
+          </Alert>
+        </Bullseye>
+      </PageSection>
+    );
+  }
+
   const commonProps = {
     defaultOrganizationId: getLastSelectedOrganization(),
     organizations: availableOrganizations,
     onSelect: handleSelect,
     onCancel: () => onClose?.(false),
-    allowCancel: !isOrganizationSelectionRequired,
+    allowCancel: !mustShowOrganizationSelector,
   };
 
   // The modal for selecting an organization can be displayed in two ways:
