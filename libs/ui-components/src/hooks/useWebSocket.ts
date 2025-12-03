@@ -33,6 +33,7 @@ export const useWebSocket = <T>(
   } = useAppContext();
   const { t } = useTranslation();
   const wsRef = React.useRef<WebSocket>();
+  const isMountedRef = React.useRef(true);
   const [isConnecting, setIsConnecting] = React.useState(true);
   const [isClosed, setIsClosed] = React.useState(false);
   const [error, setError] = React.useState<unknown>();
@@ -40,6 +41,13 @@ export const useWebSocket = <T>(
 
   const sendMessage = React.useCallback((data: string, resize?: boolean) => {
     wsRef.current?.send(msgToBytes(data, resize));
+  }, []);
+
+  React.useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   React.useEffect(() => {
@@ -58,25 +66,49 @@ export const useWebSocket = <T>(
       }
 
       const ws = new WebSocket(`${wsEndpoint}?${params.toString()}`, 'v5.channel.k8s.io');
-      ws.addEventListener('open', () => setIsConnecting(false));
-      ws.addEventListener('close', () => {
-        setIsClosed(true);
+
+      const handleOpen = () => {
+        if (isMountedRef.current) {
+          setIsConnecting(false);
+        }
+      };
+
+      const handleClose = () => {
+        if (isMountedRef.current) {
+          setIsClosed(true);
+        }
         wsRef.current = undefined;
-      });
-      ws.addEventListener('error', (evt) => {
+      };
+
+      const handleError = (evt: Event) => {
         // eslint-disable-next-line no-console
         console.error('Error creating websocket:', evt);
-        setError(t('Websocket error occured'));
-      });
+        if (isMountedRef.current) {
+          setError(t('Websocket error occured'));
+        }
+      };
+
+      ws.addEventListener('open', handleOpen);
+      ws.addEventListener('close', handleClose);
+      ws.addEventListener('error', handleError);
       wsRef.current = ws;
+
+      return () => {
+        ws.removeEventListener('open', handleOpen);
+        ws.removeEventListener('close', handleClose);
+        ws.removeEventListener('error', handleError);
+        ws.close();
+        wsRef.current = undefined;
+      };
     } catch (err) {
-      setIsConnecting(false);
-      setError(err);
+      if (isMountedRef.current) {
+        setIsConnecting(false);
+        setError(err);
+      }
+      return () => {
+        // No cleanup needed if WebSocket creation failed
+      };
     }
-    return () => {
-      wsRef.current?.close();
-      wsRef.current = undefined;
-    };
   }, [deviceId, organizationId, t, getWsEndpoint, reset, wsMetadata]);
 
   const reconnect = React.useCallback(() => {
@@ -86,10 +118,15 @@ export const useWebSocket = <T>(
   }, []);
 
   React.useEffect(() => {
-    const listener = (evt: MessageEvent<T>) => onMsgReceived(evt.data);
-    wsRef.current?.addEventListener('message', listener);
+    const listener = (evt: MessageEvent<T>) => {
+      if (isMountedRef.current) {
+        onMsgReceived(evt.data);
+      }
+    };
+    const ws = wsRef.current;
+    ws?.addEventListener('message', listener);
     return () => {
-      wsRef.current?.removeEventListener('message', listener);
+      ws?.removeEventListener('message', listener);
     };
   }, [onMsgReceived, reset]);
 
