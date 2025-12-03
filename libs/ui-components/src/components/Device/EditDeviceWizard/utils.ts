@@ -34,7 +34,8 @@ export const getValidationSchema = (t: TFunction) =>
       labels: validLabelsSchema(t),
       configTemplates: validConfigTemplatesSchema(t),
       applications: validApplicationsSchema(t),
-      updatePolicy: values.updatePolicy.isAdvanced ? validUpdatePolicySchema(t) : Yup.object(),
+      updatePolicy:
+        !values.useBasicUpdateConfig && values.updatePolicy.isAdvanced ? validUpdatePolicySchema(t) : Yup.object(),
     }),
   );
 
