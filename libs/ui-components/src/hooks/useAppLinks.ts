@@ -3,7 +3,7 @@ import { FlightCtlApp, useAppContext } from './useAppContext';
 // Links to other flightctl upstream resources
 export const DEMO_REPOSITORY_URL = 'https://github.com/flightctl/flightctl-demos';
 
-const ACM_VERSION = '2.13';
+const ACM_VERSION = '2.14';
 const AAP_VERSION = '2.5';
 
 const upstreamDocsBase = 'https://github.com/flightctl/flightctl/blob/main/docs';
@@ -12,10 +12,10 @@ const aapDownstreamDocsBase = `https://docs.redhat.com/en/documentation/red_hat_
 
 const links = {
   fc: {
-    createApp: `${upstreamDocsBase}/user/managing-devices.md#creating-applications`,
-    useTemplateVars: `${upstreamDocsBase}/user/managing-fleets.md#defining-device-templates`,
-    addNewDevice: `${upstreamDocsBase}/user/getting-started.md#building-a-bootable-container-image-including-the-flight-control-agent`,
-    createAcmRepo: `${upstreamDocsBase}/user/registering-microshift-devices-acm.md#creating-the-acm-registration-repository`,
+    createApp: `${upstreamDocsBase}/user/using/managing-devices.md#creating-applications`,
+    useTemplateVars: `${upstreamDocsBase}/user/using/managing-fleets.md#defining-device-templates`,
+    addNewDevice: `${upstreamDocsBase}/user/building/building-images.md#choosing-an-enrollment-method`,
+    createAcmRepo: `${upstreamDocsBase}/user/using/registering-microshift-devices-acm.md#auto-registering-devices-with-microshift-into-acm`,
   },
   acm: {
     createApp: `${acmDownstreamDocsBase}#build-app-packages`,
