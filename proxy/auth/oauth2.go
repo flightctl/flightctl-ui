@@ -78,25 +78,10 @@ func getOAuth2AuthHandler(provider *v1beta1.AuthProvider, oauth2Spec *v1beta1.OA
 	return handler, nil
 }
 
-func (o *OAuth2AuthHandler) GetToken(loginParams LoginParameters) (TokenData, *int64, error) {
-	return exchangeToken(loginParams, o.internalClient, o.tokenURL, o.clientId, config.BaseUiUrl+"/callback")
-}
-
-func (o *OAuth2AuthHandler) GetUserInfo(tokenData TokenData) (string, *http.Response, error) {
-	resp := &http.Response{
-		StatusCode: http.StatusInternalServerError,
-	}
-	return "", resp, fmt.Errorf("User information should be retrieved through the flightctl API")
-}
-
 func (o *OAuth2AuthHandler) Logout(token string) (string, error) {
 	// OAuth2 providers typically don't have a standardized logout endpoint
 	// Return empty string to indicate no logout URL
 	return "", nil
-}
-
-func (o *OAuth2AuthHandler) RefreshToken(refreshToken string) (TokenData, *int64, error) {
-	return refreshOAuthToken(refreshToken, o.internalClient)
 }
 
 func (o *OAuth2AuthHandler) GetLoginRedirectURL(codeChallenge string) string {

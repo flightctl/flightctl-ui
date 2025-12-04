@@ -178,21 +178,45 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 }
 
 // convertTokenResponseToTokenData converts TokenResponse to proxy TokenData
-func convertTokenResponseToTokenData(tokenResp *v1beta1.TokenResponse, providerName string) (TokenData, *int64) {
+// Based on provider type, it only stores the appropriate token to reduce cookie size:
+//   - OIDC/K8s: stores IDToken (JWT)
+//   - OAuth2/AAP/OpenShift: stores AccessToken (opaque)
+func convertTokenResponseToTokenData(tokenResp *v1beta1.TokenResponse, providerConfig *v1beta1.AuthProvider) (TokenData, *int64) {
 	tokenData := TokenData{
-		Provider: providerName,
+		Provider: "",
 	}
 
-	// Assign both AccessToken and IdToken if present
-	// GetAuthToken() will use the correct token depending on the scenario:
-	// - For OIDC: prefers IDToken (JWT) for API authentication
-	// - For OAuth2/AAP: uses AccessToken (IDToken will be empty)
-	if tokenResp.AccessToken != nil {
-		tokenData.AccessToken = *tokenResp.AccessToken
+	if providerConfig != nil && providerConfig.Metadata.Name != nil {
+		tokenData.Provider = *providerConfig.Metadata.Name
 	}
 
-	if tokenResp.IdToken != nil {
-		tokenData.IDToken = *tokenResp.IdToken
+	// Determine provider type to decide which token to store
+	if providerConfig != nil {
+		providerTypeStr, err := providerConfig.Spec.Discriminator()
+		if err == nil {
+			switch providerTypeStr {
+			case ProviderTypeOIDC, ProviderTypeK8s:
+				// OIDC and K8s use IDToken (JWT)
+				if tokenResp.IdToken != nil {
+					tokenData.Token = *tokenResp.IdToken
+				}
+			case ProviderTypeOAuth2, ProviderTypeAAP, ProviderTypeOpenShift:
+				// OAuth2, AAP, and OpenShift use AccessToken (opaque)
+				if tokenResp.AccessToken != nil {
+					tokenData.Token = *tokenResp.AccessToken
+				}
+			}
+		}
+	}
+
+	// Fallback: if token not set yet (unknown provider type, error determining type, or no provider config),
+	// prefer IDToken if available, otherwise AccessToken
+	if tokenData.Token == "" {
+		if tokenResp.IdToken != nil {
+			tokenData.Token = *tokenResp.IdToken
+		} else if tokenResp.AccessToken != nil {
+			tokenData.Token = *tokenResp.AccessToken
+		}
 	}
 
 	if tokenResp.RefreshToken != nil {
