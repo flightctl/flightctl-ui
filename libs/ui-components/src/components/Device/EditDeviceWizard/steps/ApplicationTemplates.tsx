@@ -27,6 +27,7 @@ import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import ApplicationImageForm from './ApplicationImageForm';
 import ApplicationInlineForm from './ApplicationInlineForm';
 import ApplicationContainerForm from './ApplicationContainerForm';
+import ApplicationVolumeForm from './ApplicationVolumeForm';
 
 import './ApplicationsForm.css';
 
@@ -85,6 +86,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
           name: appName || '',
           files: [{ path: '', content: '' }],
           variables: [],
+          volumes: [],
         } as AppForm,
         false,
       );
@@ -97,6 +99,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
           name: appName || '',
           image: '',
           variables: [],
+          volumes: [],
         } as AppForm,
         false,
       );
@@ -189,6 +192,12 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
           </>
         )}
 
+        <ApplicationVolumeForm
+          appFieldName={appFieldName}
+          volumes={app.volumes || []}
+          isReadOnly={isReadOnly}
+          isSingleContainerApp={isContainer}
+        />
         <FieldArray name={`${appFieldName}.variables`}>
           {({ push, remove }) => (
             <>
@@ -235,6 +244,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
                 <FormGroup>
                   <Button
                     variant="link"
+                    style={{ paddingInline: 0 }}
                     icon={<PlusCircleIcon />}
                     iconPosition="start"
                     onClick={() => {

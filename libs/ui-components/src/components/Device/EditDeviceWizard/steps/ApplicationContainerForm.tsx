@@ -19,7 +19,6 @@ import ErrorHelperText from '../../../form/FieldHelperText';
 import { isDuplicatePortMapping, isValidPortMapping, validatePortNumber } from '../../../form/validations';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { PortMapping, SingleContainerAppForm } from '../../../../types/deviceSpec';
-import ApplicationVolumeForm from './ApplicationVolumeForm';
 
 import './ApplicationContainerForm.css';
 
@@ -305,12 +304,6 @@ const ApplicationContainerForm = ({
             </FormGroupWithHelperText>
           </Grid>
         </FormGroup>
-        <ApplicationVolumeForm
-          appFieldName={appFieldName}
-          volumes={app.volumes || []}
-          isReadOnly={isReadOnly}
-          isSingleContainerApp={true}
-        />
       </Grid>
     </FormSection>
   );
