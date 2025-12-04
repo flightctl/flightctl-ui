@@ -122,18 +122,6 @@ func getClient(authorizationUrl, tokenUrl string, tlsConfig *tls.Config, clientI
 	return client, nil
 }
 
-func (a *AAPAuthHandler) GetToken(loginParams LoginParameters) (TokenData, *int64, error) {
-	// UI proxy uses PKCE only - client_secret is not used
-	return exchangeToken(loginParams, a.internalClient, a.tokenURL, a.clientId, config.BaseUiUrl+"/callback")
-}
-
-func (a *AAPAuthHandler) GetUserInfo(tokenData TokenData) (string, *http.Response, error) {
-	resp := &http.Response{
-		StatusCode: http.StatusInternalServerError,
-	}
-	return "", resp, fmt.Errorf("User information should be retrieved through the flightctl API")
-}
-
 func (a *AAPAuthHandler) Logout(token string) (string, error) {
 	data := url.Values{}
 	data.Set("client_id", a.clientId)
@@ -158,10 +146,6 @@ func (a *AAPAuthHandler) Logout(token string) (string, error) {
 	}
 	defer res.Body.Close()
 	return "", nil
-}
-
-func (a *AAPAuthHandler) RefreshToken(refreshToken string) (TokenData, *int64, error) {
-	return refreshOAuthToken(refreshToken, a.internalClient)
 }
 
 func (a *AAPAuthHandler) GetLoginRedirectURL(codeChallenge string) string {

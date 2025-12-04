@@ -391,7 +391,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		tokenData, expiresIn := convertTokenResponseToTokenData(tokenResp, providerName)
+		tokenData, expiresIn := convertTokenResponseToTokenData(tokenResp, providerConfig)
 		respondWithToken(w, tokenData, expiresIn)
 	} else {
 		respondWithError(w, http.StatusMethodNotAllowed, "Method not allowed")
@@ -448,7 +448,7 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert backend response to TokenData
-	newTokenData, expiresIn := convertTokenResponseToTokenData(tokenResp, tokenData.Provider)
+	newTokenData, expiresIn := convertTokenResponseToTokenData(tokenResp, providerConfig)
 	respondWithToken(w, newTokenData, expiresIn)
 }
 
@@ -494,7 +494,7 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := tokenData.GetAuthToken()
+	token := tokenData.Token
 	if token == "" {
 		clearSessionCookie(w, r)
 		respondWithError(w, http.StatusUnauthorized, "No authentication token found in session")
@@ -546,7 +546,7 @@ func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	// If we have a provider, call its Logout method
 	if tokenData.Provider != "" {
-		authToken := tokenData.GetAuthToken()
+		authToken := tokenData.Token
 		if authToken == "" {
 			// No valid session, but still clear cookies and return success
 			clearSessionCookie(w, r)
