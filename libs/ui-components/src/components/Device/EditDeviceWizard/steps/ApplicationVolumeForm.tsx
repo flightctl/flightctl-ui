@@ -6,7 +6,7 @@ import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-cir
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
 import { ImagePullPolicy } from '@flightctl/types';
-import { ApplicationVolumeForm as VolumeFormType, VolumeType } from '../../../../types/deviceSpec';
+import { ApplicationVolumeForm as VolumeFormType } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import FormSelect from '../../../form/FormSelect';
@@ -27,17 +27,6 @@ const getPullPolicyOptions = (t: TFunction) => ({
   [ImagePullPolicy.PullNever]: t('Never'),
 });
 
-const getVolumeTypeOptions = (t: TFunction, isSingleContainerApp: boolean) => {
-  const validTypes: Partial<Record<VolumeType, string>> = {
-    [VolumeType.MOUNT_ONLY]: t('Mount volume'),
-    [VolumeType.IMAGE_MOUNT]: t('Image mount volume'),
-  };
-  if (!isSingleContainerApp) {
-    validTypes[VolumeType.IMAGE_ONLY] = t('Image volume');
-  }
-  return validTypes;
-};
-
 const ApplicationVolumeForm = ({
   appFieldName,
   volumes,
@@ -47,13 +36,7 @@ const ApplicationVolumeForm = ({
   const { t } = useTranslation();
   const [, { error }] = useField<VolumeFormType[]>(`${appFieldName}.volumes`);
 
-  const { volumeTypeOptions, pullPolicyOptions } = React.useMemo(
-    () => ({
-      volumeTypeOptions: getVolumeTypeOptions(t, isSingleContainerApp),
-      pullPolicyOptions: getPullPolicyOptions(t),
-    }),
-    [t, isSingleContainerApp],
-  );
+  const pullPolicyOptions = React.useMemo(() => getPullPolicyOptions(t), [t]);
 
   const volumesError = typeof error === 'string' ? error : undefined;
   return (
@@ -63,10 +46,6 @@ const ApplicationVolumeForm = ({
           <>
             {volumes.map((volume, volumeIndex) => {
               const volumeFieldName = `${appFieldName}.volumes[${volumeIndex}]`;
-              const hasImage =
-                volume.volumeType === VolumeType.IMAGE_ONLY || volume.volumeType === VolumeType.IMAGE_MOUNT;
-              const hasMount =
-                volume.volumeType === VolumeType.MOUNT_ONLY || volume.volumeType === VolumeType.IMAGE_MOUNT;
 
               return (
                 <FormSection key={volumeIndex} className="pf-v5-u-mt-md">
@@ -77,83 +56,47 @@ const ApplicationVolumeForm = ({
                         fieldName={volumeFieldName}
                       >
                         <Grid hasGutter>
-                          <FormGroup label={t('Volume type')} isRequired>
-                            <FormSelect
-                              name={`${volumeFieldName}.volumeType`}
-                              items={volumeTypeOptions}
-                              placeholderText={t('Select volume type')}
-                              isDisabled={isReadOnly}
-                            />
-                          </FormGroup>
-
                           <FormGroup label={t('Name')} isRequired>
                             <TextField
-                              aria-label={t('Volume name')}
                               name={`${volumeFieldName}.name`}
-                              value={volume.name || ''}
+                              aria-label={t('Volume name')}
                               isDisabled={isReadOnly}
                             />
                           </FormGroup>
 
-                          {hasImage && (
-                            <>
-                              <FormGroup label={t('Image reference')} isRequired>
-                                <TextField
-                                  aria-label={t('Image reference')}
-                                  name={`${volumeFieldName}.imageRef`}
-                                  value={volume.imageRef || ''}
-                                  isDisabled={isReadOnly}
-                                  helperText={t('Provide a valid container image reference for the volume.')}
-                                />
-                              </FormGroup>
-
-                              <FormGroupWithHelperText
-                                label={t('Pull policy')}
-                                content={
-                                  <div>
-                                    <p>
-                                      <strong>{t('Pull options:')}</strong>
-                                    </p>
-                                    <ul>
-                                      <li>
-                                        <strong>{t('Always')}</strong> -{' '}
-                                        {t('Attempts to always pull the latest image (uses more bandwidth)')}
-                                      </li>
-                                      <li>
-                                        <strong>{t('If not present')}</strong> -{' '}
-                                        {t('Pull only if missing locally (efficient)')}
-                                      </li>
-                                      <li>
-                                        <strong>{t('Never')}</strong> -{' '}
-                                        {t('Use cached images only (fastest, may fail)')}
-                                      </li>
-                                    </ul>
-                                    <p>
-                                      💡 <strong>{t('Trade-off:')}</strong> {t('Freshness vs. bandwidth efficiency.')}
-                                    </p>
-                                  </div>
-                                }
-                              >
-                                <FormSelect
-                                  name={`${volumeFieldName}.imagePullPolicy`}
-                                  items={pullPolicyOptions}
-                                  placeholderText={t('Select pull policy')}
-                                  isDisabled={isReadOnly}
-                                />
-                              </FormGroupWithHelperText>
-                            </>
-                          )}
-
-                          {hasMount && (
+                          {isSingleContainerApp && (
                             <FormGroup label={t('Mount path')} isRequired>
                               <TextField
-                                aria-label={t('Mount path')}
                                 name={`${volumeFieldName}.mountPath`}
-                                value={volume.mountPath || ''}
+                                aria-label={t('Mount path')}
                                 isDisabled={isReadOnly}
                                 helperText={t('Absolute path where the volume will be mounted on the container.')}
                               />
                             </FormGroup>
+                          )}
+
+                          <FormGroup label={t('Image reference')} isRequired={!isSingleContainerApp}>
+                            <TextField
+                              name={`${volumeFieldName}.imageRef`}
+                              aria-label={t('Image reference')}
+                              isDisabled={isReadOnly}
+                              helperText={
+                                isSingleContainerApp
+                                  ? t('Optional: Provide a valid container image reference for the volume.')
+                                  : t('Provide a valid container image reference for the volume.')
+                              }
+                            />
+                          </FormGroup>
+
+                          {volume.imageRef && (
+                            <FormGroupWithHelperText label={t('Pull policy')} content={t('Pull policy for the image')}>
+                              <FormSelect
+                                name={`${volumeFieldName}.imagePullPolicy`}
+                                items={pullPolicyOptions}
+                                placeholderText={t('Select pull policy')}
+                                isDisabled={isReadOnly}
+                              />
+                            </FormGroupWithHelperText>
                           )}
                         </Grid>
                       </ExpandableFormSection>
@@ -181,11 +124,15 @@ const ApplicationVolumeForm = ({
                   icon={<PlusCircleIcon />}
                   iconPosition="start"
                   onClick={() => {
-                    push({
+                    const emptyVolume: VolumeFormType = {
                       name: '',
-                      volumeType: undefined,
+                      imageRef: '',
                       imagePullPolicy: ImagePullPolicy.PullIfNotPresent,
-                    });
+                    };
+                    if (isSingleContainerApp) {
+                      emptyVolume.mountPath = '';
+                    }
+                    push(emptyVolume);
                   }}
                 >
                   {t('Add volume')}
