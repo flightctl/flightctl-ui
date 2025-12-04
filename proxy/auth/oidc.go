@@ -168,17 +168,6 @@ func getOIDCClient(oidcConfig oidcServerResponse, tlsConfig *tls.Config, clientI
 	return client, nil
 }
 
-func (a *OIDCAuthHandler) GetToken(loginParams LoginParameters) (TokenData, *int64, error) {
-	return exchangeToken(loginParams, a.internalClient, a.tokenEndpoint, a.clientId, config.BaseUiUrl+"/callback")
-}
-
-func (o *OIDCAuthHandler) GetUserInfo(tokenData TokenData) (string, *http.Response, error) {
-	resp := &http.Response{
-		StatusCode: http.StatusInternalServerError,
-	}
-	return "", resp, fmt.Errorf("User information should be retrieved through the flightctl API")
-}
-
 func (o *OIDCAuthHandler) Logout(token string) (string, error) {
 	u, err := url.Parse(o.endSessionEndpoint)
 	if err != nil {
@@ -190,10 +179,6 @@ func (o *OIDCAuthHandler) Logout(token string) (string, error) {
 	uq.Add("client_id", o.clientId)
 	u.RawQuery = uq.Encode()
 	return u.String(), nil
-}
-
-func (o *OIDCAuthHandler) RefreshToken(refreshToken string) (TokenData, *int64, error) {
-	return refreshOAuthToken(refreshToken, o.internalClient)
 }
 
 func (a *OIDCAuthHandler) GetLoginRedirectURL(codeChallenge string) string {
