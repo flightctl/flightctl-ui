@@ -18,7 +18,7 @@ import {
   RolloutPolicyForm,
   UpdatePolicyForm,
 } from '../types/deviceSpec';
-import { getStartGraceDuration, getUpdateCronExpression, localDeviceTimezone } from './time';
+import { getUpdateCronExpression, localDeviceTimezone } from './time';
 
 export const appendJSONPatch = <V = unknown>({
   patches,
@@ -156,14 +156,14 @@ export const schedulesAreEqual = (a: UpdateSchedule | undefined, b: UpdateSchedu
 export const updatePolicyFormToApi = (form: Required<UpdatePolicyForm>) => {
   const downloadSchedule = {
     at: getUpdateCronExpression(form.downloadStartsAt, form.downloadScheduleMode, form.downloadWeekDays),
-    startGraceDuration: getStartGraceDuration(form.downloadStartsAt, form.downloadEndsAt),
+    startGraceDuration: form.downloadStartGraceDuration || '0s',
     timeZone: form.downloadTimeZone === localDeviceTimezone ? undefined : form.downloadTimeZone,
   };
   let updateSchedule: UpdateSchedule;
   if (form.downloadAndInstallDiffer) {
     updateSchedule = {
       at: getUpdateCronExpression(form.installStartsAt, form.installScheduleMode, form.installWeekDays),
-      startGraceDuration: getStartGraceDuration(form.installStartsAt, form.installEndsAt),
+      startGraceDuration: form.installStartGraceDuration || '0s',
       timeZone: form.installTimeZone === localDeviceTimezone ? undefined : form.installTimeZone,
     };
   } else {

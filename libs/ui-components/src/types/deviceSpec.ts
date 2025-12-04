@@ -277,11 +277,13 @@ export type UpdatePolicyForm = {
   downloadAndInstallDiffer: boolean;
   downloadStartsAt?: string;
   downloadEndsAt?: string;
+  downloadStartGraceDuration?: string;
   downloadScheduleMode: UpdateScheduleMode;
   downloadWeekDays: boolean[];
   downloadTimeZone: string;
   installStartsAt?: string;
   installEndsAt?: string;
+  installStartGraceDuration?: string;
   installScheduleMode: UpdateScheduleMode;
   installWeekDays: boolean[];
   installTimeZone: string;
