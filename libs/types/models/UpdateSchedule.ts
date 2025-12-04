@@ -11,6 +11,6 @@ import type { TimeZone } from './TimeZone';
 export type UpdateSchedule = {
   timeZone?: TimeZone;
   at: CronExpression;
-  startGraceDuration?: Duration;
+  startGraceDuration: Duration;
 };
 

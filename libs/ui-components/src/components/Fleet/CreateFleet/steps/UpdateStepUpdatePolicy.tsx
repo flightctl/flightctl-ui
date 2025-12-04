@@ -11,6 +11,7 @@ import CheckboxField, { CheckboxFieldGroupValidation } from '../../../form/Check
 import FormSelectTypeahead from '../../../form/FormSelectTypeahead';
 import RadioField from '../../../form/RadioField';
 import ErrorHelperText from '../../../form/FieldHelperText';
+import TextField from '../../../form/TextField';
 
 import './UpdateStepUpdatePolicy.css';
 
@@ -113,9 +114,9 @@ const ScheduleBlock = ({
   const isWeekly = scheduleMode === timeUtils.UpdateScheduleMode.Weekly;
 
   return (
-    <FormGroupWithHelperText isRequired label={ariaLabel} content={helperContent}>
-      <Stack hasGutter>
-        <StackItem>
+    <Stack hasGutter>
+      <StackItem>
+        <FormGroupWithHelperText isRequired label={ariaLabel} content={helperContent}>
           <Flex>
             <FlexItem>
               <FormSelectTypeahead
@@ -159,12 +160,11 @@ const ScheduleBlock = ({
               />
             </FlexItem>
           </Flex>
-        </StackItem>
-        {isWeekly && (
-          <FieldArray name={`updatePolicy.${blockType}WeekDays`}>
-            {() => (
-              <>
-                <StackItem>
+
+          {isWeekly && (
+            <FieldArray name={`updatePolicy.${blockType}WeekDays`}>
+              {() => (
+                <>
                   <Flex>
                     <FlexItem>
                       <CheckboxFieldGroupValidation
@@ -216,19 +216,29 @@ const ScheduleBlock = ({
                       />
                     </FlexItem>
                   </Flex>
-                </StackItem>
-                <StackItem>
                   <ErrorHelperText error={weekDayError} />
-                </StackItem>
-              </>
-            )}
-          </FieldArray>
-        )}
-        <StackItem style={{ maxWidth: 500 }}>
-          <ScheduleTimeZone blockType={blockType} isReadOnly={isReadOnly} />
-        </StackItem>
-      </Stack>
-    </FormGroupWithHelperText>
+                </>
+              )}
+            </FieldArray>
+          )}
+        </FormGroupWithHelperText>
+      </StackItem>
+      <StackItem>
+        <ScheduleTimeZone blockType={blockType} isReadOnly={isReadOnly} />
+      </StackItem>
+      <StackItem>
+        <FormGroup isRequired label={t('Start grace duration')}>
+          <TextField
+            name={`updatePolicy.${blockType}StartGraceDuration`}
+            label={t('Start grace duration')}
+            helperText={t('Devices can start the update within this time window after the scheduled trigger.')}
+            isRequired
+            isDisabled={isReadOnly}
+            placeholder="30m"
+          />
+        </FormGroup>
+      </StackItem>
+    </Stack>
   );
 };
 
