@@ -129,6 +129,6 @@ func (o *OpenShiftAuthHandler) Logout(token string) (string, error) {
 	return "", nil
 }
 
-func (o *OpenShiftAuthHandler) GetLoginRedirectURL(codeChallenge string) string {
-	return loginRedirect(o.client, o.providerName, codeChallenge)
+func (o *OpenShiftAuthHandler) GetLoginRedirectURL(state string, codeChallenge string) string {
+	return loginRedirect(o.client, state, codeChallenge)
 }

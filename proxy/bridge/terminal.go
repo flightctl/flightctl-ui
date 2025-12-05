@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
@@ -77,10 +78,29 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate deviceId to prevent SSRF attacks
+	if !common.IsSafeResourceName(deviceId) {
+		log.Warnf("Invalid deviceId: %s", deviceId)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	sanitizedQuery, err := sanitizeQueryForSSRF(r.URL.RawQuery)
+	if err != nil {
+		log.Warnf("Invalid query string: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	log.Infof("Starting terminal session for device: %s", deviceId)
 
 	wsApi, _ := strings.CutPrefix(config.FctlApiUrl, "https://")
-	consoleUrl := fmt.Sprintf("wss://%s/ws/v1/devices/%s/console?%s", wsApi, deviceId, r.URL.RawQuery)
+	var consoleUrl string
+	if sanitizedQuery != "" {
+		consoleUrl = fmt.Sprintf("wss://%s/ws/v1/devices/%s/console?%s", wsApi, deviceId, sanitizedQuery)
+	} else {
+		consoleUrl = fmt.Sprintf("wss://%s/ws/v1/devices/%s/console", wsApi, deviceId)
+	}
 
 	dialer := &websocket.Dialer{
 		TLSClientConfig: t.TlsConfig,
