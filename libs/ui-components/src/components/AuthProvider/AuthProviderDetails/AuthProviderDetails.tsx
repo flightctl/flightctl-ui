@@ -16,6 +16,7 @@ import PageWithPermissions from '../../common/PageWithPermissions';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
 import NavItem from '../../NavItem/NavItem';
+import { ProviderType } from '../../../types/extraTypes';
 
 const authProviderDetailsPermissions = [
   { kind: RESOURCE.AUTH_PROVIDER, verb: VERB.DELETE },
@@ -41,6 +42,7 @@ const AuthProviderDetails = () => {
 
   const { checkPermissions } = usePermissionsContext();
   const [canDelete, canEdit] = checkPermissions(authProviderDetailsPermissions);
+  const isOAuth2 = authProviderDetails?.spec.providerType === ProviderType.OAuth2;
 
   return (
     <DetailsPage
@@ -56,7 +58,15 @@ const AuthProviderDetails = () => {
           <DetailsPageActions>
             <DropdownList>
               {canEdit && (
-                <DropdownItem onClick={() => navigate({ route: ROUTE.AUTH_PROVIDER_EDIT, postfix: authProviderId })}>
+                <DropdownItem
+                  onClick={() => navigate({ route: ROUTE.AUTH_PROVIDER_EDIT, postfix: authProviderId })}
+                  isAriaDisabled={isOAuth2}
+                  tooltipProps={
+                    isOAuth2
+                      ? { content: <span>{t('OAuth2 providers can only be edited via the YAML editor')}</span> }
+                      : undefined
+                  }
+                >
                   {t('Edit authentication provider')}
                 </DropdownItem>
               )}

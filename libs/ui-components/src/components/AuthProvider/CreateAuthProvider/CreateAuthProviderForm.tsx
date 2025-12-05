@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Button, FormGroup, FormSection, Grid, Popover, Split, SplitItem } from '@patternfly/react-core';
+import { Alert, Button, Divider, FormGroup, FormSection, Grid, Popover } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
@@ -9,7 +9,6 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import NameField from '../../form/NameField';
 import TextField from '../../form/TextField';
-import RadioField from '../../form/RadioField';
 import SwitchField from '../../form/SwitchField';
 import ListItemField from '../../form/ListItemField';
 import FlightCtlForm from '../../form/FlightCtlForm';
@@ -28,26 +27,6 @@ import OrganizationAssignmentSection from './AuthOrganizationAssignment';
 import RoleAssignmentSection from './RoleAssignmentSection';
 import TestConnectionModal from '../TestConnectionModal/TestConnectionModal';
 import { ScopesHelperText, UsernameClaimHelperText } from './AuthProviderHelperText';
-
-const ProviderTypeSection = () => {
-  const { t } = useTranslation();
-
-  return (
-    <Split hasGutter>
-      <SplitItem>
-        <RadioField id="oidc-provider-radio" name="providerType" label={t('OIDC')} checkedValue={ProviderType.OIDC} />
-      </SplitItem>
-      <SplitItem>
-        <RadioField
-          id="oauth2-provider-radio"
-          name="providerType"
-          label={t('OAuth2')}
-          checkedValue={ProviderType.OAuth2}
-        />
-      </SplitItem>
-    </Split>
-  );
-};
 
 const EnabledHelpText = () => {
   const { t } = useTranslation();
@@ -108,21 +87,23 @@ export const AuthProviderForm = ({ isEdit }: { isEdit?: boolean }) => {
         <TextField name="displayName" aria-label={t('Display name')} helperText={t('Display name for this provider')} />
       </FormGroup>
 
-      <ProviderTypeSection />
-
       {values.providerType === ProviderType.OAuth2 && <Oauth2ProviderFields />}
 
-      <FormGroup label={t('Issuer URL')} isRequired={isOidcProvider}>
-        <TextField name="issuer" aria-label={t('Issuer URL')} />
-      </FormGroup>
+      <FormSection title={t('OIDC')}>
+        <FormGroup label={t('Issuer URL')} isRequired={isOidcProvider}>
+          <TextField name="issuer" aria-label={t('Issuer URL')} />
+        </FormGroup>
 
-      <FormGroup label={t('Client ID')} isRequired>
-        <TextField name="clientId" aria-label={t('Client ID')} />
-      </FormGroup>
+        <FormGroup label={t('Client ID')} isRequired>
+          <TextField name="clientId" aria-label={t('Client ID')} />
+        </FormGroup>
 
-      <FormGroup label={t('Client secret')} isRequired>
-        <TextField name="clientSecret" aria-label={t('Client secret')} type="password" />
-      </FormGroup>
+        <FormGroup label={t('Client secret')} isRequired>
+          <TextField name="clientSecret" aria-label={t('Client secret')} type="password" />
+        </FormGroup>
+      </FormSection>
+
+      <Divider style={{ margin: '2rem 0 1rem' }} />
 
       <FormSection title={t('User identity & authorization')}>
         <FormGroupWithHelperText label={t('Scopes')} content={<ScopesHelperText />}>
@@ -145,6 +126,8 @@ export const AuthProviderForm = ({ isEdit }: { isEdit?: boolean }) => {
       </FormSection>
 
       <RoleAssignmentSection />
+
+      <Divider style={{ margin: '2rem 0 1rem' }} />
 
       <OrganizationAssignmentSection />
     </>

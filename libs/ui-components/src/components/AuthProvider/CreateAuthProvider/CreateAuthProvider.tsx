@@ -7,9 +7,6 @@ import {
   PageSection,
   PageSectionVariants,
   Spinner,
-  Text,
-  TextContent,
-  TextVariants,
   Title,
 } from '@patternfly/react-core';
 
@@ -20,7 +17,7 @@ import { useFetch } from '../../../hooks/useFetch';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
-import { isDynamicAuthProvider } from '../../../types/extraTypes';
+import { ProviderType, isDynamicAuthProvider } from '../../../types/extraTypes';
 import { getErrorMessage } from '../../../utils/error';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { usePermissionsContext } from '../../common/PermissionsContext';
@@ -57,7 +54,9 @@ const CreateAuthProvider = ({ authProviderId }: { authProviderId: string | undef
     }
   }, [get, authProviderId]);
 
+  let title: string | undefined;
   let content: React.ReactNode;
+
   if (error) {
     content = (
       <Alert isInline variant="danger" title={t('An error occurred')}>
@@ -72,7 +71,16 @@ const CreateAuthProvider = ({ authProviderId }: { authProviderId: string | undef
         <Spinner />
       </Bullseye>
     );
+  } else if (authProviderDetails?.spec.providerType === ProviderType.OAuth2) {
+    content = (
+      <PageSection variant={PageSectionVariants.light}>
+        <Alert isInline variant="danger" title={t('Not allowed')}>
+          {t('OAuth2 providers can only be edited via the YAML editor')}
+        </Alert>
+      </PageSection>
+    );
   } else {
+    title = authProviderDetails ? t('Edit authentication provider') : t('Add authentication provider');
     content = (
       <CreateAuthProviderForm
         authProvider={authProviderDetails}
@@ -82,13 +90,6 @@ const CreateAuthProvider = ({ authProviderId }: { authProviderId: string | undef
         }
       />
     );
-  }
-
-  let title: string;
-  if (!!authProviderDetails) {
-    title = t('Edit authentication provider');
-  } else {
-    title = t('Add authentication provider');
   }
 
   return (
@@ -106,16 +107,13 @@ const CreateAuthProvider = ({ authProviderId }: { authProviderId: string | undef
           <BreadcrumbItem isActive>{title}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light}>
-        <Title headingLevel="h1" size="3xl">
-          {title}
-        </Title>
-        <TextContent>
-          <Text component={TextVariants.small}>
-            {t("Set up how users will sign in and which organization they'll be assigned to.")}
-          </Text>
-        </TextContent>
-      </PageSection>
+      {title && (
+        <PageSection variant={PageSectionVariants.light} className="pf-v5-u-pt-0">
+          <Title headingLevel="h1" size="3xl">
+            {title}
+          </Title>
+        </PageSection>
+      )}
       <PageSection variant={PageSectionVariants.light} className="pf-v5-u-pt-0">
         {content}
       </PageSection>
