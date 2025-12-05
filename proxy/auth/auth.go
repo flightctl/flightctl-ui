@@ -244,7 +244,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		// Check if this is a token-based auth provider (k8s) - token providers don't use PKCE flow
 		if _, ok := provider.(*TokenAuthProvider); ok {
 			// Token providers don't need a redirect URL - they handle login via POST with token
-			loginUrl := provider.GetLoginRedirectURL("")
+			loginUrl := provider.GetLoginRedirectURL("", "")
 			response, err := json.Marshal(RedirectResponse{Url: loginUrl})
 			if err != nil {
 				log.GetLogger().WithError(err).Warn("Failed to marshal response")
@@ -265,11 +265,21 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 		codeChallenge := generateCodeChallenge(codeVerifier)
 
+		// Generate random state for CSRF protection
+		state, err := generateState()
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Failed to initialize authentication flow")
+			return
+		}
+
 		// Store code verifier in cookie for later use during token exchange
 		setPKCEVerifierCookie(w, providerName, codeVerifier)
 
-		// Also encode code_verifier in state parameter as fallback if cookie fails
-		loginUrl := provider.GetLoginRedirectURL(codeChallenge)
+		// Store state → providerName mapping in secure cookie for validation on callback
+		setStateCookie(w, state, providerName)
+
+		// Generate login URL with random state and PKCE challenge
+		loginUrl := provider.GetLoginRedirectURL(state, codeChallenge)
 		response, err := json.Marshal(RedirectResponse{Url: loginUrl})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -277,10 +287,18 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(response)
 	} else if r.Method == http.MethodPost {
-		// Extract provider from query parameter and validate it to prevent SSRF attacks
-		providerName := r.URL.Query().Get("provider")
-		if !common.IsSafeResourceName(providerName) {
-			respondWithError(w, http.StatusBadRequest, "Invalid authentication provider")
+		// Validate state parameter for CSRF protection (must be first)
+		state := r.URL.Query().Get("state")
+		if state == "" {
+			respondWithError(w, http.StatusBadRequest, "Missing state parameter")
+			return
+		}
+
+		// Validate state and extract provider name from secure cookie mapping
+		providerName, err := validateAndExtractProviderFromState(r, state)
+		if err != nil {
+			log.GetLogger().WithError(err).Warnf("State validation failed")
+			respondWithError(w, http.StatusBadRequest, "Invalid state parameter - possible CSRF attack or expired state")
 			return
 		}
 
@@ -332,33 +350,16 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// PKCE is required - retrieve code_verifier from cookie or state
+		// Clear state cookie after validation (success or failure)
+		clearStateCookie(w, state)
+
+		// PKCE is required - retrieve code_verifier from cookie
 		if loginParams.CodeVerifier == "" {
-			// First try cookie
 			codeVerifier, err := getPKCEVerifierCookie(r, providerName)
 			if err != nil {
 				log.GetLogger().WithError(err).Warnf("Failed to get PKCE verifier from cookie for provider %s", providerName)
 			} else if codeVerifier != "" {
 				loginParams.CodeVerifier = codeVerifier
-			} else {
-				// Fallback: try to extract from state parameter
-				state := r.URL.Query().Get("state")
-				if state != "" {
-					// Extract provider name from state
-					providerName := extractProviderNameFromState(state)
-					if providerName == "" {
-						respondWithError(w, http.StatusBadRequest, "Invalid state parameter")
-						return
-					}
-
-					// Get verifier from cookie ONLY (remove any fallback to state)
-					codeVerifier, err := getPKCEVerifierCookie(r, providerName)
-					if err != nil || codeVerifier == "" {
-						respondWithError(w, http.StatusBadRequest, "PKCE verification failed")
-						return
-					}
-					loginParams.CodeVerifier = codeVerifier
-				}
 			}
 		}
 
@@ -369,6 +370,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Clear PKCE verifier cookie after use (success or failure)
+		// Note: state cookie was already cleared above after validation
 		clearPKCEVerifierCookie(w, providerName)
 
 		clientId, err := getClientIdFromProviderConfig(providerConfig)

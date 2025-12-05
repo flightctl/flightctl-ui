@@ -122,7 +122,7 @@ func (t *TokenAuthProvider) Logout(token string) (string, error) {
 }
 
 // GetLoginRedirectURL is not applicable for token auth
-func (t *TokenAuthProvider) GetLoginRedirectURL(codeChallenge string) string {
+func (t *TokenAuthProvider) GetLoginRedirectURL(state string, codeChallenge string) string {
 	return ""
 }
 

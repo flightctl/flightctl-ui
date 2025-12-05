@@ -148,6 +148,6 @@ func (a *AAPAuthHandler) Logout(token string) (string, error) {
 	return "", nil
 }
 
-func (a *AAPAuthHandler) GetLoginRedirectURL(codeChallenge string) string {
-	return loginRedirect(a.client, a.providerName, codeChallenge)
+func (a *AAPAuthHandler) GetLoginRedirectURL(state string, codeChallenge string) string {
+	return loginRedirect(a.client, state, codeChallenge)
 }

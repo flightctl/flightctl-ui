@@ -47,10 +47,7 @@ export const useAuthContext = () => {
         const state = searchParams.get('state');
         callbackErr = searchParams.get('error');
         if (code && state) {
-          // Extract provider name from the state parameter
-          // The state format is: "provider:<providerName>"
-          const providerName = state.startsWith('provider:') ? state.substring(9).split(':')[0] : state;
-          const resp = await fetch(`${loginAPI}?provider=${providerName}&state=${encodeURIComponent(state)}`, {
+          const resp = await fetch(`${loginAPI}?state=${encodeURIComponent(state)}`, {
             headers: {
               'Content-Type': 'application/json',
             },
