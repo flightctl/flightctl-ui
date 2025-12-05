@@ -117,6 +117,16 @@ func (h *TestAuthHandler) validateOIDCProvider(req *TestConnectionRequest, respo
 
 	// Fetch OIDC discovery document
 	discoveryUrl := fmt.Sprintf("%s/.well-known/openid-configuration", req.Issuer)
+	// Validate the constructed discovery URL to prevent SSRF attacks
+	if err := validateURLForSSRF(discoveryUrl); err != nil {
+		response.Results = append(response.Results, FieldValidationResult{
+			Field: "issuer",
+			Valid: false,
+			Value: req.Issuer,
+			Notes: []string{fmt.Sprintf("Discovery URL cannot be validated: %v", err)},
+		})
+		return
+	}
 	httpReq, err := http.NewRequest(http.MethodGet, discoveryUrl, nil)
 	if err != nil {
 		response.Results = append(response.Results, FieldValidationResult{
@@ -362,6 +372,15 @@ func (h *TestAuthHandler) checkEndpointReachability(urlStr string, fieldName str
 			Valid: false,
 			Value: urlStr,
 			Notes: []string{fmt.Sprintf("%s must be a valid http(s) URL", fieldName)},
+		}
+	}
+	// Validate the parsed URL to prevent SSRF attacks, even if skipSSRF is true
+	// This ensures the URL is safe before making the request
+	if err := validateURLForSSRF(parsed.String()); err != nil {
+		return FieldValidation{
+			Valid: false,
+			Value: urlStr,
+			Notes: []string{fmt.Sprintf("%s: %v", fieldName, err)},
 		}
 	}
 	req, err := http.NewRequest(http.MethodGet, parsed.String(), nil)

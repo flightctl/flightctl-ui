@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
 	"github.com/flightctl/flightctl/api/v1beta1"
@@ -229,8 +230,8 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var err error
 	if r.Method == http.MethodGet {
 		providerName := r.URL.Query().Get("provider")
-		if providerName == "" {
-			respondWithError(w, http.StatusBadRequest, "provider query parameter is required")
+		if !common.IsSafeResourceName(providerName) {
+			respondWithError(w, http.StatusBadRequest, "Invalid authentication provider")
 			return
 		}
 
@@ -276,10 +277,10 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(response)
 	} else if r.Method == http.MethodPost {
-		// For POST requests (OAuth callback), extract provider from query parameter
+		// Extract provider from query parameter and validate it to prevent SSRF attacks
 		providerName := r.URL.Query().Get("provider")
-		if providerName == "" {
-			respondWithError(w, http.StatusBadRequest, "provider query parameter is required")
+		if !common.IsSafeResourceName(providerName) {
+			respondWithError(w, http.StatusBadRequest, "Invalid authentication provider")
 			return
 		}
 
@@ -405,8 +406,8 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if provider is specified
-	if tokenData.Provider == "" {
+	// Validate provider name from cookie to prevent SSRF attacks
+	if !common.IsSafeResourceName(tokenData.Provider) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -582,7 +583,10 @@ func getAuthInfo(apiTlsConfig *tls.Config) (*v1beta1.AuthConfig, error) {
 	client := &http.Client{Transport: &http.Transport{
 		TLSClientConfig: apiTlsConfig,
 	}}
-	authConfigUrl := config.FctlApiUrl + "/api/v1/auth/config"
+	authConfigUrl, err := common.BuildFctlApiUrl("api/v1/auth/config")
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := http.NewRequest(http.MethodGet, authConfigUrl, nil)
 	if err != nil {
