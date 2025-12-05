@@ -5,7 +5,6 @@ import { Device } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
 import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
-import { isImageAppProvider } from '../../../types/deviceSpec';
 
 type DeviceDetailsTabProps = {
   device: Required<Device>;
@@ -13,14 +12,6 @@ type DeviceDetailsTabProps = {
 
 const DeviceApplications = ({ device }: DeviceDetailsTabProps) => {
   const { t } = useTranslation();
-
-  const specApps =
-    device.spec?.applications?.map((app) => {
-      if (isImageAppProvider(app)) {
-        return app.name || app.image;
-      }
-      return app.name as string;
-    }) || [];
 
   return (
     <DetailsPageCard>
@@ -30,7 +21,7 @@ const DeviceApplications = ({ device }: DeviceDetailsTabProps) => {
         </Flex>
       </CardTitle>
       <DetailsPageCardBody>
-        <ApplicationsTable appsStatus={device.status.applications} specApps={specApps} />
+        <ApplicationsTable appsStatus={device.status.applications} />
       </DetailsPageCardBody>
     </DetailsPageCard>
   );
