@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"net/url"
 	"os"
 
 	"github.com/flightctl/flightctl-ui/config"
@@ -62,4 +63,19 @@ func GetAuthTlsConfig() (*tls.Config, error) {
 
 	tlsConfig.RootCAs = caCertPool
 	return tlsConfig, nil
+}
+
+// sanitizeQueryForSSRF sanitizes a raw query string by parsing and re-encoding it
+func sanitizeQueryForSSRF(rawQuery string) (string, error) {
+	if rawQuery == "" {
+		return "", nil
+	}
+
+	parsedQuery, err := url.ParseQuery(rawQuery)
+	if err != nil {
+		return "", err
+	}
+
+	// Re-encode the query string to sanitize it
+	return parsedQuery.Encode(), nil
 }
