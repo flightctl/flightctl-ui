@@ -213,15 +213,42 @@ func getClientIdFromProviderConfig(providerConfig *v1beta1.AuthProvider) (string
 }
 
 // isProviderWithCustomerToken determines if a provider uses customer-provided tokens (K8s)
-// Returns true for K8s token providers (they use direct validation)
-// Returns false for OIDC, OAuth2, AAP, and OpenShift providers (they use backend BFF)
 func isProviderWithCustomerToken(provider AuthProvider) bool {
-	// K8s token providers use direct validation, not OAuth2 flow
 	if _, ok := provider.(*TokenAuthProvider); ok {
 		return true
 	}
-	// All other providers (OIDC, OAuth2, AAP, OpenShift) use backend BFF
 	return false
+}
+
+// handleTokenProviderLogin handles login for token-based auth providers (K8s)
+func handleTokenProviderLogin(w http.ResponseWriter, r *http.Request, tokenProvider *TokenAuthProvider, providerName string) bool {
+	var loginParams TokenLoginParameters
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return false
+	}
+
+	err = json.Unmarshal(body, &loginParams)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return false
+	}
+
+	if loginParams.Token == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return false
+	}
+
+	tokenData, expires, err := tokenProvider.ValidateToken(loginParams.Token)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, err.Error())
+		return false
+	}
+
+	tokenData.Provider = providerName
+	respondWithToken(w, tokenData, expires)
+	return true
 }
 
 func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -287,10 +314,22 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(response)
 	} else if r.Method == http.MethodPost {
-		// Validate state parameter for CSRF protection (must be first)
+		// Token providers pass provider in query param, not state
+		providerNameFromQuery := r.URL.Query().Get("provider")
+		if providerNameFromQuery != "" && common.IsSafeResourceName(providerNameFromQuery) {
+			provider, _, err := a.getProviderInstance(providerNameFromQuery)
+			if err == nil && isProviderWithCustomerToken(provider) {
+				// Handle token provider login immediately and return
+				tokenProvider := provider.(*TokenAuthProvider)
+				handleTokenProviderLogin(w, r, tokenProvider, providerNameFromQuery)
+				return
+			}
+		}
+
+		// OAuth flow: validate state parameter for CSRF protection
 		state := r.URL.Query().Get("state")
 		if state == "" {
-			respondWithError(w, http.StatusBadRequest, "Missing state parameter")
+			respondWithError(w, http.StatusBadRequest, "Missing state parameter for Oauth flow")
 			return
 		}
 
@@ -306,33 +345,6 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		provider, providerConfig, err = a.getProviderInstance(providerName)
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid authentication provider: %s", providerName))
-			return
-		}
-
-		// Check if this is a token-based auth provider (K8s)
-		if isProviderWithCustomerToken(provider) {
-			tokenProvider := provider.(*TokenAuthProvider)
-			var loginParams TokenLoginParameters
-			body, err := io.ReadAll(r.Body)
-			err = json.Unmarshal(body, &loginParams)
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			if loginParams.Token == "" {
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			tokenData, expires, err := tokenProvider.ValidateToken(loginParams.Token)
-			if err != nil {
-				respondWithError(w, http.StatusUnauthorized, err.Error())
-				return
-			}
-			// Store the provider name in the token data so we can route to it later
-			tokenData.Provider = providerName
-			respondWithToken(w, tokenData, expires)
 			return
 		}
 
