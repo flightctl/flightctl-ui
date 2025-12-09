@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/flightctl/flightctl-ui/bridge"
-	"github.com/flightctl/flightctl-ui/config"
+	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
@@ -36,8 +36,11 @@ func (t *TokenAuthProvider) ValidateToken(token string) (TokenData, *int64, erro
 		TLSClientConfig: t.apiTlsConfig,
 	}}
 
-	// Verify that the token is valid for the Flight Control API
-	validateUrl := config.FctlApiUrl + "/api/v1/auth/validate"
+	// Endpoint to validate that a given token is authorized to access the Flight Control API
+	validateUrl, err := common.BuildFctlApiUrl("api/v1/auth/validate")
+	if err != nil {
+		return TokenData{}, nil, err
+	}
 
 	req, err := http.NewRequest(http.MethodGet, validateUrl, nil)
 	if err != nil {
