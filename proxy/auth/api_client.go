@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/flightctl/flightctl-ui/config"
+	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl/api/v1beta1"
 )
 
@@ -19,6 +19,11 @@ const k8sServiceAccountPrefix = "system:serviceaccount:"
 
 // exchangeTokenWithApiServer allows us to perform the token exchange through the Flight Control API
 func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, tokenReq *v1beta1.TokenRequest) (*v1beta1.TokenResponse, error) {
+	// Validate provider name to prevent SSRF attacks
+	if !common.IsSafeResourceName(providerName) {
+		return nil, fmt.Errorf("invalid provider name: %s", providerName)
+	}
+
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: apiTlsConfig,
@@ -26,7 +31,10 @@ func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, t
 		Timeout: 30 * time.Second,
 	}
 
-	tokenURL := config.FctlApiUrl + "/api/v1/auth/" + providerName + "/token"
+	tokenURL, err := common.BuildFctlApiUrl("api/v1/auth", providerName, "token")
+	if err != nil {
+		return nil, fmt.Errorf("failed to construct token URL: %w", err)
+	}
 
 	// Marshal request body
 	reqBody, err := json.Marshal(tokenReq)
@@ -98,7 +106,10 @@ func getUserInfoFromApiServer(apiTlsConfig *tls.Config, token string) (string, e
 		Timeout: 30 * time.Second,
 	}
 
-	userInfoURL := config.FctlApiUrl + "/api/v1/auth/userinfo"
+	userInfoURL, err := common.BuildFctlApiUrl("api/v1/auth/userinfo")
+	if err != nil {
+		return "", &UserInfoError{UserMessage: "Unable to reach userinfo service.", Err: err}
+	}
 
 	req, err := http.NewRequest(http.MethodGet, userInfoURL, nil)
 	if err != nil {
