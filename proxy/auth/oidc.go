@@ -181,6 +181,6 @@ func (o *OIDCAuthHandler) Logout(token string) (string, error) {
 	return u.String(), nil
 }
 
-func (a *OIDCAuthHandler) GetLoginRedirectURL(codeChallenge string) string {
-	return loginRedirect(a.client, a.providerName, codeChallenge)
+func (a *OIDCAuthHandler) GetLoginRedirectURL(state string, codeChallenge string) string {
+	return loginRedirect(a.client, state, codeChallenge)
 }

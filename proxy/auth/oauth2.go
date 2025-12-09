@@ -84,6 +84,6 @@ func (o *OAuth2AuthHandler) Logout(token string) (string, error) {
 	return "", nil
 }
 
-func (o *OAuth2AuthHandler) GetLoginRedirectURL(codeChallenge string) string {
-	return loginRedirect(o.client, o.providerName, codeChallenge)
+func (o *OAuth2AuthHandler) GetLoginRedirectURL(state string, codeChallenge string) string {
+	return loginRedirect(o.client, state, codeChallenge)
 }
