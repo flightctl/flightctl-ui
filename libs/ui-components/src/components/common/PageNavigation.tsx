@@ -64,23 +64,37 @@ const OrganizationDropdown = ({ organizationName, onSwitchOrganization }: Organi
   );
 };
 
-const getRedirectPathAfterOrgSwitch = (pathname: string): string => {
-  // If we're currently on a details page for the original organization, return the parent list page.
-  const deviceEntityMatch = pathname.match(
-    /^\/(edge|devicemanagement)\/(fleets|devices|repositories|enrollmentrequests)\/[^/]+/,
-  );
-  if (deviceEntityMatch) {
-    return `/${deviceEntityMatch[1]}/${deviceEntityMatch[2]}`;
+const listRoutes = [ROUTE.FLEETS, ROUTE.DEVICES, ROUTE.REPOSITORIES, ROUTE.ENROLLMENT_REQUESTS, ROUTE.AUTH_PROVIDERS];
+
+const getRedirectPathAfterOrgSwitch = (pathname: string, appRoutes: Record<ROUTE, string>): string => {
+  const routeMapping: Array<{ detailRoutes: ROUTE[]; listRoute: ROUTE }> = [
+    { detailRoutes: [ROUTE.FLEET_DETAILS, ROUTE.FLEET_EDIT], listRoute: ROUTE.FLEETS },
+    { detailRoutes: [ROUTE.DEVICE_DETAILS, ROUTE.DEVICE_EDIT], listRoute: ROUTE.DEVICES },
+    { detailRoutes: [ROUTE.REPO_DETAILS, ROUTE.REPO_EDIT], listRoute: ROUTE.REPOSITORIES },
+    { detailRoutes: [ROUTE.ENROLLMENT_REQUEST_DETAILS], listRoute: ROUTE.ENROLLMENT_REQUESTS },
+    { detailRoutes: [ROUTE.AUTH_PROVIDER_DETAILS, ROUTE.AUTH_PROVIDER_EDIT], listRoute: ROUTE.AUTH_PROVIDERS },
+  ];
+
+  // Map detail/edit routes to their corresponding list routes
+  for (const { detailRoutes, listRoute } of routeMapping) {
+    for (const detailRoute of detailRoutes) {
+      const detailPath = appRoutes[detailRoute];
+      if (detailPath && pathname.startsWith(detailPath + '/')) {
+        return appRoutes[listRoute];
+      }
+    }
   }
 
-  // In the admin section, currently there's only one option, but we keep it generic for future expansion.
-  const adminMatch = pathname.match(/^\/admin\/(authproviders)\/[^/]+/);
-  if (adminMatch) {
-    const entityType = adminMatch[1];
-    return `/admin/${entityType}`;
+  // If in a list page, we can stay on the same page
+  for (const listRoute of listRoutes) {
+    const listPath = appRoutes[listRoute];
+    if (listPath && pathname === listPath) {
+      return listPath;
+    }
   }
 
-  return '/overview';
+  // Default to root/overview
+  return appRoutes[ROUTE.ROOT];
 };
 
 const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => {
@@ -145,7 +159,7 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
           onClose={(isChanged) => {
             setShowOrganizationModal(false);
             if (isChanged) {
-              const targetPath = getRedirectPathAfterOrgSwitch(location.pathname);
+              const targetPath = getRedirectPathAfterOrgSwitch(location.pathname, router.appRoutes);
               window.location.href = targetPath;
             }
           }}
