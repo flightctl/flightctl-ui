@@ -42,7 +42,7 @@ import PageWithPermissions from '../../common/PageWithPermissions';
 import './EnrollmentRequestDetails.css';
 
 const enrollmentRequestDetailsPermissions = [
-  { kind: RESOURCE.ENROLLMENT_REQUEST_APPROVAL, verb: VERB.POST },
+  { kind: RESOURCE.ENROLLMENT_REQUEST_APPROVAL, verb: VERB.UPDATE },
   { kind: RESOURCE.ENROLLMENT_REQUEST, verb: VERB.DELETE },
 ];
 
