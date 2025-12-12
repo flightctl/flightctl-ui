@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/textproto"
+	"net/url"
+	"path"
 	"slices"
 	"strings"
 	"sync"
@@ -53,6 +55,46 @@ func copyMsgs(writeMutex *sync.Mutex, dest, src *websocket.Conn) error {
 	}
 }
 
+// buildDeviceConsoleURL constructs a websocket URL for the device console endpoint.
+// It extracts and validates the deviceId from the request path, sanitizes the query string,
+// and safely builds the URL using Go's url package to prevent SSRF attacks.
+func buildDeviceConsoleURL(r *http.Request) (string, error) {
+	deviceId, found := strings.CutPrefix(r.URL.Path, "/api/terminal/")
+	if !found || !common.IsSafeResourceName(deviceId) {
+		return "", fmt.Errorf("invalid deviceId")
+	}
+
+	// Sanitize query string
+	sanitizedQuery, err := sanitizeQueryForSSRF(r.URL.RawQuery)
+	if err != nil {
+		return "", fmt.Errorf("invalid query string: %w", err)
+	}
+
+	// Parse the base API URL to safely construct the websocket URL
+	baseURL, err := url.Parse(config.FctlApiUrl)
+	if err != nil {
+		return "", fmt.Errorf("invalid base API URL: %w", err)
+	}
+
+	// Construct the websocket URL safely using url.URL to prevent SSRF
+	consoleURL := &url.URL{
+		Scheme: "wss",
+		Host:   baseURL.Host,
+		Path:   path.Join("/ws/v1/devices", deviceId, "console"),
+	}
+
+	// Add query parameters if present
+	if sanitizedQuery != "" {
+		parsedQuery, err := url.ParseQuery(sanitizedQuery)
+		if err != nil {
+			return "", fmt.Errorf("invalid sanitized query string: %w", err)
+		}
+		consoleURL.RawQuery = parsedQuery.Encode()
+	}
+
+	return consoleURL.String(), nil
+}
+
 func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 	isWebsocket := false
 	upgrades := r.Header["Upgrade"]
@@ -71,36 +113,16 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(errMsg))
 	}
 
-	deviceId, found := strings.CutPrefix(r.URL.Path, "/api/terminal/")
-	if !found {
-		log.Warnf("Failed to get deviceId: %s", deviceId)
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	// Validate deviceId to prevent SSRF attacks
-	if !common.IsSafeResourceName(deviceId) {
-		log.Warnf("Invalid deviceId: %s", deviceId)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	sanitizedQuery, err := sanitizeQueryForSSRF(r.URL.RawQuery)
+	consoleURL, err := buildDeviceConsoleURL(r)
 	if err != nil {
-		log.Warnf("Invalid query string: %v", err)
+		log.Warnf("Failed to build console URL: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
+	// Extract deviceId for logging purposes
+	deviceId, _ := strings.CutPrefix(r.URL.Path, "/api/terminal/")
 	log.Infof("Starting terminal session for device: %s", deviceId)
-
-	wsApi, _ := strings.CutPrefix(config.FctlApiUrl, "https://")
-	var consoleUrl string
-	if sanitizedQuery != "" {
-		consoleUrl = fmt.Sprintf("wss://%s/ws/v1/devices/%s/console?%s", wsApi, deviceId, sanitizedQuery)
-	} else {
-		consoleUrl = fmt.Sprintf("wss://%s/ws/v1/devices/%s/console", wsApi, deviceId)
-	}
 
 	dialer := &websocket.Dialer{
 		TLSClientConfig: t.TlsConfig,
@@ -113,7 +135,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	backend, resp, err := dialer.Dial(consoleUrl, headers)
+	backend, resp, err := dialer.Dial(consoleURL, headers)
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to dial backend: '%v'", err)
 		statusCode := http.StatusBadGateway

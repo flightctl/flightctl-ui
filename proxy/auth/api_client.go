@@ -18,10 +18,9 @@ import (
 const k8sServiceAccountPrefix = "system:serviceaccount:"
 
 // exchangeTokenWithApiServer allows us to perform the token exchange through the Flight Control API
-func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, tokenReq *v1beta1.TokenRequest) (*v1beta1.TokenResponse, error) {
-	// Validate provider name to prevent SSRF attacks
-	if !common.IsSafeResourceName(providerName) {
-		return nil, fmt.Errorf("invalid provider name: %s", providerName)
+func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerConfig *v1beta1.AuthProvider, tokenReq *v1beta1.TokenRequest) (*v1beta1.TokenResponse, error) {
+	if providerConfig == nil || providerConfig.Metadata.Name == nil {
+		return nil, fmt.Errorf("invalid provider configuration")
 	}
 
 	client := &http.Client{
@@ -31,7 +30,7 @@ func exchangeTokenWithApiServer(apiTlsConfig *tls.Config, providerName string, t
 		Timeout: 30 * time.Second,
 	}
 
-	tokenURL, err := common.BuildFctlApiUrl("api/v1/auth", providerName, "token")
+	tokenURL, err := common.BuildFctlApiUrl("api/v1/auth", *providerConfig.Metadata.Name, "token")
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct token URL: %w", err)
 	}
