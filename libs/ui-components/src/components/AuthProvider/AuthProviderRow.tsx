@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { ActionsColumn, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, IAction, Td, Tr } from '@patternfly/react-table';
 import { Label } from '@patternfly/react-core';
 
 import { AuthProvider } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { RESOURCE, VERB } from '../../types/rbac';
-import { DynamicAuthProviderSpec } from '../../types/extraTypes';
+import { DynamicAuthProviderSpec, ProviderType } from '../../types/extraTypes';
 import { isOAuth2Provider } from './CreateAuthProvider/types';
 import { getProviderTypeLabel } from './CreateAuthProvider/utils';
 import { usePermissionsContext } from '../common/PermissionsContext';
@@ -25,7 +25,7 @@ const AuthProviderRow = ({ provider, onDeleteClick }: { provider: AuthProvider; 
   const { checkPermissions } = usePermissionsContext();
   const [canEdit, canDelete] = checkPermissions(authProviderPermissions);
 
-  const actions = [
+  const actions: IAction[] = [
     {
       title: t('View details'),
       onClick: () => navigate({ route: ROUTE.AUTH_PROVIDER_DETAILS, postfix: providerName }),
@@ -33,8 +33,15 @@ const AuthProviderRow = ({ provider, onDeleteClick }: { provider: AuthProvider; 
   ];
 
   if (canEdit) {
+    const isDisableEdit = providerSpec.providerType === ProviderType.OAuth2;
     actions.push({
       title: t('Edit'),
+      isAriaDisabled: isDisableEdit,
+      tooltipProps: isDisableEdit
+        ? {
+            content: t('OAuth2 providers can only be edited via the YAML editor'),
+          }
+        : undefined,
       onClick: () => navigate({ route: ROUTE.AUTH_PROVIDER_EDIT, postfix: providerName }),
     });
   }
