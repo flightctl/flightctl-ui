@@ -400,7 +400,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			RedirectUri:  &redirectURI,
 		}
 
-		tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, providerName, tokenReq)
+		tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, providerConfig, tokenReq)
 		if err != nil {
 			handleOAuthErrorResponse(w, tokenResp, "Failed to obtain login authorization code")
 			return
@@ -456,7 +456,7 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		RefreshToken: &tokenData.RefreshToken,
 	}
 
-	tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, tokenData.Provider, tokenReq)
+	tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, providerConfig, tokenReq)
 	if err != nil {
 		handleOAuthErrorResponse(w, tokenResp, "Failed to obtain new access token")
 		return

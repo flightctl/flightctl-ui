@@ -115,19 +115,20 @@ func (h *TestAuthHandler) validateOIDCProvider(req *TestConnectionRequest, respo
 		return
 	}
 
-	// Fetch OIDC discovery document
-	discoveryUrl := fmt.Sprintf("%s/.well-known/openid-configuration", req.Issuer)
-	// Validate the constructed discovery URL to prevent SSRF attacks
-	if err := validateURLForSSRF(discoveryUrl); err != nil {
+	issuerURL, err := url.Parse(req.Issuer)
+	if err != nil {
 		response.Results = append(response.Results, FieldValidationResult{
 			Field: "issuer",
 			Valid: false,
 			Value: req.Issuer,
-			Notes: []string{fmt.Sprintf("Discovery URL cannot be validated: %v", err)},
+			Notes: []string{fmt.Sprintf("Invalid issuer URL format: %v", err)},
 		})
 		return
 	}
-	httpReq, err := http.NewRequest(http.MethodGet, discoveryUrl, nil)
+
+	// Fetch OIDC discovery document
+	discoveryURL := issuerURL.JoinPath(".well-known", "openid-configuration").String()
+	httpReq, err := makeSafeHTTPRequest(http.MethodGet, discoveryURL)
 	if err != nil {
 		response.Results = append(response.Results, FieldValidationResult{
 			Field: "issuer",
@@ -220,7 +221,7 @@ func (h *TestAuthHandler) validateOIDCProvider(req *TestConnectionRequest, respo
 	// Verify the discovered endpoints are reachable
 	// Skip SSRF validation since these come from the validated issuer
 	if discovery.AuthorizationEndpoint != "" {
-		validation := h.checkEndpointReachability(discovery.AuthorizationEndpoint, "Authorization endpoint", httpClient, false, true)
+		validation := h.checkEndpointReachability(discovery.AuthorizationEndpoint, "Authorization endpoint", httpClient, false)
 		response.Results = append(response.Results, FieldValidationResult{
 			Field: "authorizationUrl",
 			Valid: validation.Valid,
@@ -230,7 +231,7 @@ func (h *TestAuthHandler) validateOIDCProvider(req *TestConnectionRequest, respo
 	}
 
 	if discovery.TokenEndpoint != "" {
-		validation := h.checkEndpointReachability(discovery.TokenEndpoint, "Token endpoint", httpClient, true, true)
+		validation := h.checkEndpointReachability(discovery.TokenEndpoint, "Token endpoint", httpClient, true)
 		response.Results = append(response.Results, FieldValidationResult{
 			Field: "tokenUrl",
 			Valid: validation.Valid,
@@ -240,7 +241,7 @@ func (h *TestAuthHandler) validateOIDCProvider(req *TestConnectionRequest, respo
 	}
 
 	if discovery.UserinfoEndpoint != "" {
-		validation := h.checkEndpointReachability(discovery.UserinfoEndpoint, "Userinfo endpoint", httpClient, false, true)
+		validation := h.checkEndpointReachability(discovery.UserinfoEndpoint, "Userinfo endpoint", httpClient, false)
 		response.Results = append(response.Results, FieldValidationResult{
 			Field: "userinfoUrl",
 			Valid: validation.Valid,
@@ -253,7 +254,7 @@ func (h *TestAuthHandler) validateOIDCProvider(req *TestConnectionRequest, respo
 func (h *TestAuthHandler) validateOAuth2Provider(req *TestConnectionRequest, response *TestConnectionResponse, httpClient *http.Client) {
 	// For OAuth2: other fields first, then issuer last
 	if req.AuthorizationUrl != "" {
-		validation := h.checkEndpointReachability(req.AuthorizationUrl, "Authorization URL", httpClient, false, false)
+		validation := h.checkEndpointReachability(req.AuthorizationUrl, "Authorization URL", httpClient, false)
 		response.Results = append(response.Results, FieldValidationResult{
 			Field: "authorizationUrl",
 			Valid: validation.Valid,
@@ -270,7 +271,7 @@ func (h *TestAuthHandler) validateOAuth2Provider(req *TestConnectionRequest, res
 	}
 
 	if req.TokenUrl != "" {
-		validation := h.checkEndpointReachability(req.TokenUrl, "Token URL", httpClient, true, false)
+		validation := h.checkEndpointReachability(req.TokenUrl, "Token URL", httpClient, true)
 		response.Results = append(response.Results, FieldValidationResult{
 			Field: "tokenUrl",
 			Valid: validation.Valid,
@@ -287,7 +288,7 @@ func (h *TestAuthHandler) validateOAuth2Provider(req *TestConnectionRequest, res
 	}
 
 	if req.UserinfoUrl != "" {
-		validation := h.checkEndpointReachability(req.UserinfoUrl, "Userinfo URL", httpClient, false, false)
+		validation := h.checkEndpointReachability(req.UserinfoUrl, "Userinfo URL", httpClient, false)
 		response.Results = append(response.Results, FieldValidationResult{
 			Field: "userinfoUrl",
 			Valid: validation.Valid,
@@ -305,7 +306,7 @@ func (h *TestAuthHandler) validateOAuth2Provider(req *TestConnectionRequest, res
 
 	// Validate issuer if provided (optional for OAuth2) - add last
 	if req.Issuer != "" {
-		validation := h.checkEndpointReachability(req.Issuer, "Issuer URL", httpClient, false, false)
+		validation := h.checkEndpointReachability(req.Issuer, "Issuer URL", httpClient, false)
 		response.Results = append(response.Results, FieldValidationResult{
 			Field: "issuer",
 			Valid: validation.Valid,
@@ -333,6 +334,11 @@ func validateURLForSSRF(rawURL string) error {
 		return fmt.Errorf("invalid URL: %v", err)
 	}
 
+	// Only allow http and https schemes
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return fmt.Errorf("only http and https schemes are allowed")
+	}
+
 	host := parsed.Hostname()
 	if host == "" {
 		return fmt.Errorf("missing hostname")
@@ -354,36 +360,57 @@ func validateURLForSSRF(rawURL string) error {
 	return nil
 }
 
-func (h *TestAuthHandler) checkEndpointReachability(urlStr string, fieldName string, httpClient *http.Client, isTokenEndpoint bool, skipSSRF bool) FieldValidation {
-	// Minimal SSRF protection (skip for discovered endpoints from validated issuer)
-	if !skipSSRF {
-		if err := validateURLForSSRF(urlStr); err != nil {
-			return FieldValidation{
-				Valid: false,
-				Value: urlStr,
-				Notes: []string{fmt.Sprintf("%s: %v", fieldName, err)},
-			}
-		}
+// makeSafeHTTPRequest creates an HTTP request with explicit SSRF validation
+// This function validates the URL and reconstructs it from validated components
+func makeSafeHTTPRequest(method, urlStr string) (*http.Request, error) {
+	// Validate URL for SSRF (checks scheme, hostname, localhost, private IPs)
+	if err := validateURLForSSRF(urlStr); err != nil {
+		return nil, fmt.Errorf("URL failed SSRF validation: %w", err)
 	}
 
 	parsed, err := url.Parse(urlStr)
-	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
-		return FieldValidation{
-			Valid: false,
-			Value: urlStr,
-			Notes: []string{fmt.Sprintf("%s must be a valid http(s) URL", fieldName)},
+	if err != nil {
+		return nil, fmt.Errorf("invalid URL format: %w", err)
+	}
+
+	// Extract components for reconstruction
+	hostname := parsed.Hostname()
+	var safePort string
+	if parsed.Host != "" {
+		_, port, err := net.SplitHostPort(parsed.Host)
+		if err == nil && port != "" {
+			safePort = port
 		}
 	}
-	// Validate the parsed URL to prevent SSRF attacks, even if skipSSRF is true
-	// This ensures the URL is safe before making the request
-	if err := validateURLForSSRF(parsed.String()); err != nil {
-		return FieldValidation{
-			Valid: false,
-			Value: urlStr,
-			Notes: []string{fmt.Sprintf("%s: %v", fieldName, err)},
-		}
+
+	// Reconstruct host from validated hostname and extracted port
+	safeHost := hostname
+	if safePort != "" {
+		safeHost = net.JoinHostPort(hostname, safePort)
 	}
-	req, err := http.NewRequest(http.MethodGet, parsed.String(), nil)
+
+	// Build URL string directly from validated components
+	safeURLStr := fmt.Sprintf("%s://%s", parsed.Scheme, safeHost)
+	if parsed.Path != "" {
+		safeURLStr += parsed.Path
+	}
+	if parsed.RawQuery != "" {
+		safeURLStr += "?" + parsed.RawQuery
+	}
+	if parsed.Fragment != "" {
+		safeURLStr += "#" + parsed.Fragment
+	}
+
+	// Final validation on reconstructed URL for extra protection
+	if err := validateURLForSSRF(safeURLStr); err != nil {
+		return nil, fmt.Errorf("reconstructed URL failed SSRF validation: %w", err)
+	}
+
+	return http.NewRequest(method, safeURLStr, nil)
+}
+
+func (h *TestAuthHandler) checkEndpointReachability(urlStr string, fieldName string, httpClient *http.Client, isTokenEndpoint bool) FieldValidation {
+	req, err := makeSafeHTTPRequest(http.MethodGet, urlStr)
 	if err != nil {
 		return FieldValidation{
 			Valid: false,
