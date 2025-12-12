@@ -91,23 +91,6 @@ export const getTime = (cronExp?: string) => {
   return `${formatTimePart(hours)}:${formatTimePart(minutes)}`;
 };
 
-const getMinuteDifference = (timeA: string, timeB: string) => {
-  const [aHours, aMinutes] = timeA.split(':').map(Number);
-  const [bHours, bMinutes] = timeB.split(':').map(Number);
-
-  const totalMinutesA = aHours * 60 + aMinutes;
-  const totalMinutesB = bHours * 60 + bMinutes;
-
-  let difference = totalMinutesB - totalMinutesA;
-
-  // Adjust for crossing midnight by adding 24 hours if A is after B
-  if (difference < 0) {
-    difference += 24 * 60;
-  }
-
-  return difference;
-};
-
 export const getWeekDays = (cronExp?: string): { allSelected: boolean; selectedDays: boolean[] } => {
   const defaultDays = [true, true, true, true, true, true, true];
 
@@ -137,11 +120,4 @@ export const getUpdateCronExpression = (startTime: string, scheduleMode: UpdateS
     })
     .filter((num) => num !== null);
   return `${minutes} ${hours} * * ${weekDayVals.join(',')}`;
-};
-
-export const getStartGraceDuration = (startTime: string, endTime: string) => {
-  if (startTime && startTime === endTime) {
-    return '24h';
-  }
-  return `${getMinuteDifference(startTime, endTime)}m`;
 };
