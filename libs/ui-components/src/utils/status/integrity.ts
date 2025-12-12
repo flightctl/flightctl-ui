@@ -1,4 +1,5 @@
 import { TFunction } from 'react-i18next';
+import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
 import { DeviceIntegrityCheckStatusType, DeviceIntegrityStatusSummaryType } from '@flightctl/types';
 import { StatusItem } from './common';
@@ -12,7 +13,8 @@ export const getIntegrityStatusItems = (t: TFunction): StatusItem<DeviceIntegrit
   {
     id: DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusUnsupported,
     label: t('Unsupported'),
-    level: 'unknown',
+    level: 'info',
+    customIcon: InfoCircleIcon,
   },
   {
     id: DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusUnknown,
