@@ -61,18 +61,25 @@ export const getUpdatePolicyValues = (updateSpec?: DeviceUpdatePolicySpec): Upda
   const downloadWeekDays = timeUtils.getWeekDays(updateSpec?.downloadSchedule?.at);
   const installWeekDays = timeUtils.getWeekDays(updateSpec?.updateSchedule?.at);
 
+  const downloadStartGraceDuration = updateSpec?.downloadSchedule?.startGraceDuration;
+  const installStartGraceDuration = isEqual
+    ? downloadStartGraceDuration
+    : updateSpec?.updateSchedule?.startGraceDuration;
+
   return {
     isAdvanced: Boolean(updateSpec?.downloadSchedule?.at || updateSpec?.updateSchedule?.at),
     downloadAndInstallDiffer: !isEqual,
     downloadStartsAt,
-    downloadEndsAt: timeUtils.getEndTime(downloadStartsAt, updateSpec?.downloadSchedule?.startGraceDuration),
+    downloadEndsAt: timeUtils.getEndTime(downloadStartsAt, downloadStartGraceDuration),
+    downloadStartGraceDuration,
     downloadWeekDays: downloadWeekDays.selectedDays,
     downloadScheduleMode: downloadWeekDays.allSelected
       ? timeUtils.UpdateScheduleMode.Daily
       : timeUtils.UpdateScheduleMode.Weekly,
     downloadTimeZone: updateSpec?.downloadSchedule?.timeZone || timeUtils.localDeviceTimezone,
     installStartsAt,
-    installEndsAt: timeUtils.getEndTime(installStartsAt, updateSpec?.updateSchedule?.startGraceDuration),
+    installEndsAt: timeUtils.getEndTime(installStartsAt, installStartGraceDuration),
+    installStartGraceDuration,
     installWeekDays: installWeekDays.selectedDays,
     installScheduleMode: installWeekDays.allSelected
       ? timeUtils.UpdateScheduleMode.Daily

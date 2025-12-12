@@ -60,6 +60,8 @@ const TEMPLATE_VARIABLES_REGEXP = /{{.+?}}/g;
 // Special characters allowed: "dot", "pipe", "spaces" "quote", "backward slash", "underscore", "forward slash", "dash"
 const TEMPLATE_VARIABLES_CONTENT_REGEXP = /^([.a-zA-Z0-9|\s"\\_\/-])+$/;
 const TIME_VALUE_REGEXP = /^([01][0-9]|2[0-3]):([0-5][0-9])$/;
+// Go duration format: positive number followed by unit (s, m, or h). Examples: "30m", "1h", "45m", "30s"
+const DURATION_REGEXP = /^\d+[smh]$/;
 
 const absolutePathRegex = /^\/.*$/;
 
@@ -871,6 +873,16 @@ const requiredInstallTimes = (t: TFunction, isStartTime: boolean) =>
     return Yup.string();
   });
 
+const requiredStartGraceDuration = (t: TFunction, isInstallField: boolean = false) =>
+  Yup.string().when(['isAdvanced', 'downloadAndInstallDiffer'], ([isAdvanced, downloadAndInstallDiffer]) => {
+    if (!isAdvanced || (isInstallField && !downloadAndInstallDiffer)) {
+      return Yup.string();
+    }
+    return Yup.string()
+      .required(t('Start grace duration is required'))
+      .matches(DURATION_REGEXP, t('Duration must be a number followed by a unit ("s", "m", or "h")'));
+  });
+
 const updateWeekDaysSchema = (t: TFunction) =>
   Yup.array()
     .required()
@@ -899,11 +911,13 @@ export const validUpdatePolicySchema = (t: TFunction) => {
     // Fields are flattened so "isAdvanced" can be used for validating them
     downloadStartsAt: requiredDownloadTimes(t, true),
     downloadEndsAt: requiredDownloadTimes(t, false),
+    downloadStartGraceDuration: requiredStartGraceDuration(t, false),
     downloadScheduleMode: Yup.string().oneOf([UpdateScheduleMode.Weekly, UpdateScheduleMode.Daily]).required(),
     downloadWeekDays: updateWeekDaysSchema(t),
     downloadTimeZone: Yup.string().required(t('Select the timezone for downloading updates')),
     installStartsAt: requiredInstallTimes(t, true),
     installEndsAt: requiredInstallTimes(t, false),
+    installStartGraceDuration: requiredStartGraceDuration(t, true),
     installScheduleMode: Yup.string().oneOf([UpdateScheduleMode.Weekly, UpdateScheduleMode.Daily]).required(),
     installWeekDays: updateWeekDaysSchema(t),
     installTimeZone: Yup.string().required(t('Select the timezone for installing updates')),
