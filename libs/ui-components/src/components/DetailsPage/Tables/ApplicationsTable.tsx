@@ -7,34 +7,17 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import ApplicationStatus from '../../Status/ApplicationStatus';
 
 type ApplicationsTableProps = {
-  // Contains the statuses of all detected applications
   appsStatus: DeviceApplicationStatus[];
-  // List of apps as defined the device / fleet spec
-  specApps: string[];
 };
 
-const emptyAppDetails: Partial<DeviceApplicationStatus> = {
-  name: '',
-  ready: '-',
-  restarts: 0,
-  embedded: false,
-};
-
-const ApplicationsTable = ({ appsStatus, specApps }: ApplicationsTableProps) => {
+const ApplicationsTable = ({ appsStatus }: ApplicationsTableProps) => {
   const { t } = useTranslation();
 
-  // Includes applications already reported in status as well as those that are only in the spec yet
-  const allAppNames: string[] = [];
-  specApps.forEach((app) => {
-    allAppNames.push(app);
-  });
-  appsStatus.forEach((appStatus) => {
-    if (!allAppNames.includes(appStatus.name)) {
-      allAppNames.push(appStatus.name);
-    }
-  });
+  if (appsStatus.length === 0) {
+    return <Bullseye>{t('No applications found')}</Bullseye>;
+  }
 
-  return allAppNames.length ? (
+  return (
     <Table aria-label={t('Device applications table')}>
       <Thead>
         <Tr>
@@ -47,34 +30,22 @@ const ApplicationsTable = ({ appsStatus, specApps }: ApplicationsTableProps) => 
         </Tr>
       </Thead>
       <Tbody>
-        {allAppNames.map((appName) => {
-          const appDetails = appsStatus.find((app) => app.name === appName) || emptyAppDetails;
-          let embedded = '-';
-          if (appDetails.embedded === true) {
-            embedded = t('Yes');
-          } else if (appDetails.embedded === false) {
-            embedded = t('No');
-          }
-
+        {appsStatus.map((app) => {
           return (
-            <Tr key={appName}>
-              <Td dataLabel={t('Name')}>{appName}</Td>
+            <Tr key={app.name}>
+              <Td dataLabel={t('Name')}>{app.name}</Td>
               <Td dataLabel={t('Status')}>
-                {appDetails.status ? <ApplicationStatus status={appDetails.status} /> : '-'}
+                <ApplicationStatus status={app.status} />
               </Td>
-              <Td dataLabel={t('Ready')}>{appDetails.ready}</Td>
-              <Td dataLabel={t('Restarts')}>{appDetails.restarts}</Td>
-              <Td dataLabel={t('Type')}>
-                {appDetails.appType ? <Label variant="outline">{appDetails.appType}</Label> : '-'}
-              </Td>
-              <Td dataLabel={t('Embedded')}>{embedded}</Td>
+              <Td dataLabel={t('Ready')}>{app.ready}</Td>
+              <Td dataLabel={t('Restarts')}>{app.restarts}</Td>
+              <Td dataLabel={t('Type')}>{app.appType ? <Label variant="outline">{app.appType}</Label> : '-'}</Td>
+              <Td dataLabel={t('Embedded')}>{app.embedded ? t('Yes') : t('No')}</Td>
             </Tr>
           );
         })}
       </Tbody>
     </Table>
-  ) : (
-    <Bullseye>{t('No applications found')}</Bullseye>
   );
 };
 
