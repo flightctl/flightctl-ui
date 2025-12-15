@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Bullseye, Label } from '@patternfly/react-core';
-import { Table, Tbody, Td, Tr } from '@patternfly/react-table';
+import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import { DeviceApplicationStatus } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -19,6 +19,16 @@ const ApplicationsTable = ({ appsStatus }: ApplicationsTableProps) => {
 
   return (
     <Table aria-label={t('Device applications table')}>
+      <Thead>
+        <Tr>
+          <Th>{t('Name')}</Th>
+          <Th modifier="wrap">{t('Status')}</Th>
+          <Th modifier="wrap">{t('Ready')}</Th>
+          <Th modifier="wrap">{t('Restarts')}</Th>
+          <Th modifier="wrap">{t('Type')}</Th>
+          <Th modifier="wrap">{t('Embedded')}</Th>
+        </Tr>
+      </Thead>
       <Tbody>
         {appsStatus.map((app) => {
           return (
