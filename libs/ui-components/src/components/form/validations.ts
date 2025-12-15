@@ -386,17 +386,26 @@ const uniqueFilePathsTest =
       return true;
     }
 
-    const parentFiles = (testContext.parent as { files?: (QuadletInlineAppForm | ComposeInlineAppForm)['files'] })
-      .files;
-    const duplicateIndex = (parentFiles || []).findIndex((file) => duplicateFilePaths.includes(file.path));
+    // Create errors for all files with duplicate paths
+    const errors = files.reduce((errors, file, index) => {
+      if (duplicateFilePaths.includes(file.path)) {
+        errors.push(
+          new Yup.ValidationError(
+            t('Each file of the same application must use different paths.'),
+            '',
+            `${testContext.path}[${index}].path`,
+          ),
+        );
+      }
+      return errors;
+    }, [] as Yup.ValidationError[]);
 
-    if (duplicateIndex === -1) {
+    if (errors.length === 0) {
       return true;
     }
 
     return testContext.createError({
-      path: `${testContext.path}[${duplicateIndex}].path`,
-      message: () => t('Each file of the same application must use different paths.'),
+      message: () => errors,
     });
   };
 
