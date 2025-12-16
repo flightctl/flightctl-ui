@@ -21,6 +21,7 @@ import { useOrganizationGuardContext } from './OrganizationGuard';
 import OrganizationSelector from './OrganizationSelector';
 import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from './PermissionsContext';
+import { useAppContext } from '../../hooks/useAppContext';
 
 import './PageNavigation.css';
 
@@ -63,9 +64,44 @@ const OrganizationDropdown = ({ organizationName, onSwitchOrganization }: Organi
   );
 };
 
+const listRoutes = [ROUTE.FLEETS, ROUTE.DEVICES, ROUTE.REPOSITORIES, ROUTE.ENROLLMENT_REQUESTS, ROUTE.AUTH_PROVIDERS];
+
+const getRedirectPathAfterOrgSwitch = (pathname: string, appRoutes: Record<ROUTE, string>): string => {
+  const routeMapping: Array<{ detailRoutes: ROUTE[]; listRoute: ROUTE }> = [
+    { detailRoutes: [ROUTE.FLEET_DETAILS, ROUTE.FLEET_EDIT], listRoute: ROUTE.FLEETS },
+    { detailRoutes: [ROUTE.DEVICE_DETAILS, ROUTE.DEVICE_EDIT], listRoute: ROUTE.DEVICES },
+    { detailRoutes: [ROUTE.REPO_DETAILS, ROUTE.REPO_EDIT], listRoute: ROUTE.REPOSITORIES },
+    { detailRoutes: [ROUTE.ENROLLMENT_REQUEST_DETAILS], listRoute: ROUTE.ENROLLMENT_REQUESTS },
+    { detailRoutes: [ROUTE.AUTH_PROVIDER_DETAILS, ROUTE.AUTH_PROVIDER_EDIT], listRoute: ROUTE.AUTH_PROVIDERS },
+  ];
+
+  // Map detail/edit routes to their corresponding list routes
+  for (const { detailRoutes, listRoute } of routeMapping) {
+    for (const detailRoute of detailRoutes) {
+      const detailPath = appRoutes[detailRoute];
+      if (detailPath && pathname.startsWith(detailPath + '/')) {
+        return appRoutes[listRoute];
+      }
+    }
+  }
+
+  // If in a list page, we can stay on the same page
+  for (const listRoute of listRoutes) {
+    const listPath = appRoutes[listRoute];
+    if (listPath && pathname === listPath) {
+      return listPath;
+    }
+  }
+
+  // Default to root/overview
+  return appRoutes[ROUTE.ROOT];
+};
+
 const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { router } = useAppContext();
+  const location = router.useLocation();
   const { currentOrganization, availableOrganizations } = useOrganizationGuardContext();
   const { checkPermissions } = usePermissionsContext();
   const [isAdmin] = checkPermissions([{ kind: RESOURCE.AUTH_PROVIDER, verb: VERB.CREATE }]);
@@ -123,7 +159,8 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
           onClose={(isChanged) => {
             setShowOrganizationModal(false);
             if (isChanged) {
-              window.location.reload();
+              const targetPath = getRedirectPathAfterOrgSwitch(location.pathname, router.appRoutes);
+              window.location.href = targetPath;
             }
           }}
         />
