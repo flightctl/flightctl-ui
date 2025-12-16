@@ -189,19 +189,26 @@ export const useAuthContext = () => {
             credentials: 'include',
             method: 'GET',
           });
+
+          if (!resp.ok) {
+            // We only attempt refreshing once. If it fails, the user will be soon logged out
+            localStorage.removeItem(EXPIRATION);
+            return;
+          }
+
           const expiration = (await resp.json()) as { expiresIn: number };
-          const now = nowInSeconds();
           if (expiration.expiresIn) {
+            const now = nowInSeconds();
             localStorage.setItem(EXPIRATION, `${now + expiration.expiresIn}`);
+            lastRefresh = now;
+            // Schedule next refresh based on expiration
+            scheduleRefresh();
           } else {
             localStorage.removeItem(EXPIRATION);
           }
-          lastRefresh = now;
         } catch (err) {
-          // eslint-disable-next-line
-          console.log('failed to refresh token:', err);
-        } finally {
-          scheduleRefresh();
+          // By deleting the expiration, the next API request will get 401 and redirect to login
+          localStorage.removeItem(EXPIRATION);
         }
       };
 
