@@ -286,7 +286,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		// PKCE is required - fail if generation fails
 		codeVerifier, err := generateCodeVerifier()
 		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "Failed to initialize PKCE authentication flow")
+			respondWithError(w, http.StatusInternalServerError, "Failed to initialize authentication flow")
 			return
 		}
 
@@ -337,7 +337,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		providerName, err := validateAndExtractProviderFromState(r, state)
 		if err != nil {
 			log.GetLogger().WithError(err).Warnf("State validation failed")
-			respondWithError(w, http.StatusBadRequest, "Invalid state parameter - possible CSRF attack or expired state")
+			respondWithError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -377,7 +377,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 		// PKCE is required - fail if code_verifier is missing
 		if loginParams.CodeVerifier == "" {
-			respondWithError(w, http.StatusBadRequest, "PKCE code verifier is required but not found. Please restart the login flow.")
+			respondWithError(w, http.StatusBadRequest, "The login flow could not complete within 10 minutes. Please restart the login flow.")
 			return
 		}
 
