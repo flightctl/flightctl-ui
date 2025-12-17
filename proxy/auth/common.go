@@ -128,6 +128,11 @@ func loginRedirect(client *osincli.Client, state string, codeChallenge string) s
 	query.Set("code_challenge", codeChallenge)
 	query.Set("code_challenge_method", "S256")
 
+	// Force that when a new auth flow starts, the user is prompted to select
+	// their account and enter credentials, even if they're already logged in
+	// Does not work for all providers (eg. OpenShift)
+	query.Set("prompt", "login select_account")
+
 	parsedURL.RawQuery = query.Encode()
 
 	return parsedURL.String()
