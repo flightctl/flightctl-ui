@@ -10,6 +10,9 @@ interface OrganizationContextType {
   mustShowOrganizationSelector: boolean;
   selectOrganization: (org: Organization) => void;
   selectionError?: string;
+  isReloading: boolean;
+  isEmptyOrganizations: boolean;
+  refetch: (extraDelay: number) => Promise<void>;
 }
 
 const OrganizationContext = React.createContext<OrganizationContextType | null>(null);
@@ -29,6 +32,8 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
   const [availableOrganizations, setAvailableOrganizations] = React.useState<Organization[]>([]);
   const [organizationsLoaded, setOrganizationsLoaded] = React.useState(false);
   const [selectionError, setSelectionError] = React.useState<string | undefined>();
+  const [isEmptyOrganizations, setIsEmptyOrganizations] = React.useState(false);
+  const [isReloading, setIsReloading] = React.useState(false);
   const initializationStartedRef = React.useRef(false);
 
   const selectOrganization = React.useCallback((org: Organization) => {
@@ -43,6 +48,63 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
     }
   }, []);
 
+  const fetchOrganizations = React.useCallback(async () => {
+    try {
+      const organizations = await fetch.get<OrganizationList>('organizations');
+      setAvailableOrganizations(organizations.items);
+
+      // Treat empty organizations list as an error
+      if (!organizations.items || organizations.items.length === 0) {
+        setSelectionError('No organizations available');
+        setIsEmptyOrganizations(true);
+        setOrganizationsLoaded(true);
+        return;
+      }
+
+      const currentOrgId = getCurrentOrganizationId();
+
+      // Validate current organization against available organizations
+      const currentOrg = currentOrgId
+        ? organizations.items.find((org) => org.metadata?.name === currentOrgId)
+        : undefined;
+
+      if (currentOrg) {
+        // The previously selected organization exists - use it
+        selectOrganization(currentOrg);
+      } else {
+        if (organizations.items?.length === 1) {
+          // Only one organization available - select it automatically
+          selectOrganization(organizations.items[0]);
+        } else if (currentOrgId) {
+          // Previously set organization does not exist anymore - remove it from localStorage so the user can select a new organization
+          setCurrentOrganization(undefined);
+          storeCurrentOrganizationId('');
+        }
+      }
+      setSelectionError(undefined);
+      setIsEmptyOrganizations(false);
+    } catch (error) {
+      setSelectionError(getErrorMessage(error));
+      setAvailableOrganizations([]);
+      setIsEmptyOrganizations(false);
+    } finally {
+      setOrganizationsLoaded(true);
+    }
+  }, [fetch, selectOrganization]);
+
+  const refetch = React.useCallback(
+    async (addDelay: number = 0) => {
+      setIsReloading(true);
+      try {
+        await new Promise((resolve) => setTimeout(resolve, addDelay));
+        await fetchOrganizations();
+      } finally {
+        setIsReloading(false);
+      }
+    },
+    [fetchOrganizations],
+  );
+
   // Determine if multi-orgs are enabled. If so, check if an organization is already selected
   React.useEffect(() => {
     // Prevent multiple initialization calls - only run once
@@ -52,41 +114,7 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
 
     initializationStartedRef.current = true;
 
-    const initializeOrganizations = async () => {
-      try {
-        const organizations = await fetch.get<OrganizationList>('organizations');
-        setAvailableOrganizations(organizations.items);
-
-        const currentOrgId = getCurrentOrganizationId();
-
-        // Validate current organization against available organizations
-        const currentOrg = currentOrgId
-          ? organizations.items.find((org) => org.metadata?.name === currentOrgId)
-          : undefined;
-
-        if (currentOrg) {
-          // The previously selected organization exists - use it
-          selectOrganization(currentOrg);
-        } else {
-          if (organizations.items?.length === 1) {
-            // Only one organization available - select it automatically
-            selectOrganization(organizations.items[0]);
-          } else if (currentOrgId) {
-            // Previously set organization does not exist anymore - remove it from localStorage so the user can select a new organization
-            setCurrentOrganization(undefined);
-            storeCurrentOrganizationId('');
-          }
-        }
-        setSelectionError(undefined);
-      } catch (error) {
-        setSelectionError(getErrorMessage(error));
-        setAvailableOrganizations([]);
-      } finally {
-        setOrganizationsLoaded(true);
-      }
-    };
-
-    void initializeOrganizations();
+    void fetchOrganizations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -106,8 +134,20 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
       mustShowOrganizationSelector,
       selectOrganization,
       selectionError,
+      isEmptyOrganizations,
+      isReloading,
+      refetch,
     }),
-    [currentOrganization, availableOrganizations, mustShowOrganizationSelector, selectOrganization, selectionError],
+    [
+      currentOrganization,
+      availableOrganizations,
+      mustShowOrganizationSelector,
+      selectOrganization,
+      selectionError,
+      isEmptyOrganizations,
+      isReloading,
+      refetch,
+    ],
   );
 
   return <OrganizationContext.Provider value={contextValue}>{children}</OrganizationContext.Provider>;
