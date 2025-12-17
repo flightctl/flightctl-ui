@@ -39,6 +39,7 @@ interface OrganizationSelectorContentProps {
 }
 
 const MAX_ORGANIZATIONS_FOR_SCROLL = 4;
+const EXTRA_DELAY = 450;
 
 const OrganizationSelectorContent = ({
   defaultOrganizationId,
@@ -141,8 +142,15 @@ interface OrganizationSelectorProps {
 }
 
 const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSelectorProps) => {
-  const { availableOrganizations, selectOrganization, mustShowOrganizationSelector, selectionError } =
-    useOrganizationGuardContext();
+  const {
+    availableOrganizations,
+    selectOrganization,
+    mustShowOrganizationSelector,
+    selectionError,
+    isEmptyOrganizations,
+    refetch,
+    isReloading,
+  } = useOrganizationGuardContext();
   const { t } = useTranslation();
 
   const getLastSelectedOrganization = React.useCallback(() => {
@@ -172,21 +180,47 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
     [availableOrganizations, selectOrganization, onClose],
   );
 
+  const handleRefetch = React.useCallback(async () => {
+    await refetch(EXTRA_DELAY);
+  }, [refetch]);
+
   if (selectionError) {
     return (
       <PageSection variant="light">
         <Bullseye>
           <Alert variant="danger" title={t('Unable to log in to the application')} isInline>
             <TextContent>
-              <Text>{t('We cannot log you in as we could not determine what organizations you have access to.')}</Text>
-              <Text>{t('Please try refreshing the page. If the problem persists, contact your administrator.')}</Text>
-              <Text>
-                <details>
-                  <summary>{t('Error details')}:</summary>
-                  {selectionError}
-                </details>
-              </Text>
+              {isEmptyOrganizations ? (
+                <>
+                  <Text>{t('You do not have access to any organizations.')}</Text>
+                  <Text>{t('Please contact your administrator to be granted access to an organization.')}</Text>
+                </>
+              ) : (
+                <>
+                  <Text>
+                    {t('We cannot log you in as we could not determine what organizations you have access to.')}
+                  </Text>
+                  <Text>
+                    {t('Please try refreshing the page. If the problem persists, contact your administrator.')}
+                  </Text>
+                  <Text component="pre">
+                    <details>
+                      <summary>{t('Error details')}:</summary>
+                      {selectionError}
+                    </details>
+                  </Text>
+                </>
+              )}
             </TextContent>
+            <ActionList className="pf-v5-u-mt-md">
+              <ActionListGroup>
+                <ActionListItem>
+                  <Button variant="primary" onClick={handleRefetch} isDisabled={isReloading}>
+                    {t('Reload organizations')}
+                  </Button>
+                </ActionListItem>
+              </ActionListGroup>
+            </ActionList>
           </Alert>
         </Bullseye>
       </PageSection>
