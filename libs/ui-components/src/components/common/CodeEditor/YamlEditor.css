@@ -7,6 +7,6 @@
   --vscode-editorGutter-background: #f5f5f5;
 }
 
-.pf-v5-theme-dark .fctl-yaml-editor .monaco-editor .margin {
+.pf-v6-theme-dark .fctl-yaml-editor .monaco-editor .margin {
   --vscode-editorGutter-background: #292e34;
 }

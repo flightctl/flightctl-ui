@@ -14,9 +14,11 @@
 }
 
 .fctl-shortcut__command-key {
-  border: var(--pf-v5-global--BorderWidth--sm) solid var(--pf-v5-global--BorderColor--100);
+  /* border: var(--pf-v5-global--BorderWidth--sm) solid var(--pf-v5-global--BorderColor--100); */
+  border: 1px solid cyan;
   border-radius: 3px;
-  color: var(--pf-v5-global--Color--200);
+  /* color: var(--pf-v5-global--Color--200); */
+  color: cyan;
   font-size: var(--pf-v5-global--FontSize--sm);
   padding: 1px 3px;
 }

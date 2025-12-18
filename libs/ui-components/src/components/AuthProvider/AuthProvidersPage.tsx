@@ -35,6 +35,9 @@ const getColumns = (t: TFunction): ApiSortTableColumn[] => [
     name: t('Name'),
   },
   {
+    name: t('Display name'),
+  },
+  {
     name: t('Type'),
   },
   {
@@ -136,9 +139,7 @@ const AuthProvidersPage = () => {
             <Title headingLevel="h1" size="3xl">
               {t('Authentication')}
             </Title>
-            <Content>
-              <Content component={ContentVariants.small}>{t('Manage authentication providers')}</Content>
-            </Content>
+            <Content component={ContentVariants.small}>{t('Manage authentication providers')}</Content>
           </StackItem>
           <StackItem>
             <Toolbar>

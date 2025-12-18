@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { ActionsColumn, IAction, Td, Tr } from '@patternfly/react-table';
 import { Label } from '@patternfly/react-core';
-
+import CheckCircleIcon from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
+import TimesCircleIcon from '@patternfly/react-icons/dist/js/icons/times-circle-icon';
 import { AuthProvider } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../hooks/useNavigate';
@@ -68,16 +69,15 @@ const AuthProviderRow = ({ provider, onDeleteClick }: { provider: AuthProvider; 
   return (
     <Tr>
       <Td dataLabel={t('Name')}>
-        <Link to={{ route: ROUTE.AUTH_PROVIDER_DETAILS, postfix: providerName }}>
-          <strong>{providerName}</strong>
-        </Link>
+        <Link to={{ route: ROUTE.AUTH_PROVIDER_DETAILS, postfix: providerName }}>{providerName}</Link>
       </Td>
+      <Td dataLabel={t('Display name')}>{providerSpec.displayName || providerName}</Td>
       <Td dataLabel={t('Type')}>
         <Label color="blue">{getProviderTypeLabel(providerSpec.providerType, t)}</Label>
       </Td>
       <Td dataLabel={urlTitle}>{url || 'N/A'}</Td>
       <Td dataLabel={t('Enabled')}>
-        <Label color={isEnabled ? 'green' : 'grey'} isDisabled={!isEnabled}>
+        <Label color={isEnabled ? 'green' : 'grey'} icon={isEnabled ? <CheckCircleIcon /> : <TimesCircleIcon />}>
           {isEnabled ? t('Enabled') : t('Disabled')}
         </Label>
       </Td>

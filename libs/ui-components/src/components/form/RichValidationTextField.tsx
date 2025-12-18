@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useField } from 'formik';
 import {
   Button,
   FormGroup,
@@ -18,10 +19,9 @@ import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-cir
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
-import successColor /* CODEMODS: you should update this color token, original v5 token was global_palette_green_500 */ from '@patternfly/react-tokens/dist/js/t_temp_dev_tbd';
-import dangerColor /* CODEMODS: you should update this color token, original v5 token was global_danger_color_100 */ from '@patternfly/react-tokens/dist/js/t_temp_dev_tbd';
-import infoColor /* CODEMODS: you should update this color token, original v5 token was global_palette_blue_300 */ from '@patternfly/react-tokens/dist/js/t_temp_dev_tbd';
-import { useField } from 'formik';
+import dangerColor from '@patternfly/react-tokens/dist/js/t_global_icon_color_status_danger_default';
+import successColor from '@patternfly/react-tokens/dist/js/t_global_icon_color_status_success_default';
+import infoColor from '@patternfly/react-tokens/dist/js/t_global_color_nonstatus_blue_300';
 
 interface RichValidationStatusProps {
   validations: RichValidationTextFieldProps['validations'];

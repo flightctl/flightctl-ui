@@ -83,7 +83,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
           </CardBody>
         </Card>
         {devicesSummary && (
-          <Card className="pf-v5-u-mt-md">
+          <Card className="pf-v6-u-mt-md">
             <CardTitle>{t('Fleet devices')}</CardTitle>
             <CardBody>
               <FleetDevicesCharts fleetId={fleetId} devicesSummary={devicesSummary} />

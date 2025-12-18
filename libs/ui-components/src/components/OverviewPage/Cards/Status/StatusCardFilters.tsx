@@ -35,7 +35,7 @@ const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
   const hasFilters = selectedFleets.length + selectedLabels.length > 0;
 
   return (
-    <Flex>
+    <Flex alignItems={{ default: 'alignItemsFlexEnd' }}>
       <FlexItem>
         <Toolbar id="overview-toolbar" inset={{ default: 'insetNone' }}>
           <ToolbarContent>

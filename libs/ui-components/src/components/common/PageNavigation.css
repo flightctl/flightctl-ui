@@ -1,5 +1,4 @@
 .fctl-subnav_panel {
-  border-bottom: 1px solid var(--pf-v5-global--BorderColor--100);
   --pf-v5-c-panel__main-body--PaddingTop: 0.6rem;
   --pf-v5-c-panel__main-body--PaddingBottom: 0.6rem;
 }

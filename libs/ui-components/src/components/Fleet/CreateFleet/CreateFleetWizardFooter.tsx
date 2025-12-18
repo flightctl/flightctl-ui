@@ -1,6 +1,13 @@
 import * as React from 'react';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { Button, WizardFooterWrapper, useWizardContext } from '@patternfly/react-core';
+import {
+  ActionList,
+  ActionListGroup,
+  ActionListItem,
+  Button,
+  WizardFooterWrapper,
+  useWizardContext,
+} from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 import { FleetFormValues } from './../../../types/deviceSpec';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -66,15 +73,21 @@ const CreateFleetWizardFooter = ({ isReadOnly, isEdit }: CreateFleetWizardFooter
 
   return (
     <WizardFooterWrapper>
-      {primaryBtn}
-      {activeStep.id !== generalInfoStepId && (
-        <Button variant="secondary" onClick={goToPrevStep} isDisabled={isSubmitting}>
-          {t('Back')}
-        </Button>
-      )}
-      <Button variant="link" onClick={() => navigate(-1)} isDisabled={isSubmitting}>
-        {t('Cancel')}
-      </Button>
+      <ActionList>
+        <ActionListGroup>
+          <ActionListItem>{primaryBtn}</ActionListItem>
+          {activeStep.id !== generalInfoStepId && (
+            <Button variant="secondary" onClick={goToPrevStep} isDisabled={isSubmitting}>
+              {t('Back')}
+            </Button>
+          )}
+        </ActionListGroup>
+        <ActionListGroup>
+          <Button variant="link" onClick={() => navigate(-1)} isDisabled={isSubmitting}>
+            {t('Cancel')}
+          </Button>
+        </ActionListGroup>
+      </ActionList>
     </WizardFooterWrapper>
   );
 };

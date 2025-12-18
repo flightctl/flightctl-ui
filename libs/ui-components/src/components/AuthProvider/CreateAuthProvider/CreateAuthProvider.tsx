@@ -99,15 +99,13 @@ const CreateAuthProvider = ({ authProviderId }: { authProviderId: string | undef
         </Breadcrumb>
       </PageSection>
       {title && (
-        <PageSection hasBodyWrapper={false} className="pf-v5-u-pt-0">
+        <PageSection hasBodyWrapper={false}>
           <Title headingLevel="h1" size="3xl">
             {title}
           </Title>
         </PageSection>
       )}
-      <PageSection hasBodyWrapper={false} className="pf-v5-u-pt-0">
-        {content}
-      </PageSection>
+      <PageSection hasBodyWrapper={false}>{content}</PageSection>
     </>
   );
 };

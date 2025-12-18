@@ -115,7 +115,7 @@ const ListItemField = ({
           component={ContentVariants.small}
           style={{
             marginTop: '0.5rem',
-            color: 'var(--pf-t--temp--dev--tbd)' /* CODEMODS: original v5 color was --pf-v5-global--Color--200 */,
+            color: 'var(--pf-t--global--text--color--subtle)',
           }}
         >
           {resolvedLabel || t('Resolved')}: <strong>{displayedResolvedValue}</strong>
