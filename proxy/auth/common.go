@@ -327,22 +327,18 @@ func clearSessionCookie(w http.ResponseWriter, r *http.Request) {
 // This provides CSRF protection by ensuring the state matches what was stored during login initiation.
 func validateAndExtractProviderFromState(r *http.Request, state string) (string, error) {
 	if state == "" {
-		return "", fmt.Errorf("state parameter is required")
+		return "", fmt.Errorf("State parameter is required")
 	}
 
 	// Retrieve provider name from state cookie
 	providerName, err := getStateCookie(r, state)
-	if err != nil {
-		return "", fmt.Errorf("failed to retrieve state cookie: %w", err)
-	}
-
-	if providerName == "" {
-		return "", fmt.Errorf("state cookie not found or invalid - possible CSRF attack or expired state")
+	if err != nil || providerName == "" {
+		return "", fmt.Errorf("Necessary fields to complete the login flow are missing or invalid")
 	}
 
 	// Validate provider name format to prevent injection
 	if !common.IsSafeResourceName(providerName) {
-		return "", fmt.Errorf("invalid provider name in state cookie")
+		return "", fmt.Errorf("Invalid provider name in state cookie")
 	}
 
 	return providerName, nil
