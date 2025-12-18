@@ -1,18 +1,18 @@
 import * as React from 'react';
 import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 import {
-	Alert,
-	Button,
-	EmptyStateActions,
-	EmptyStateBody,
-	EmptyStateFooter,
-	Toolbar,
-	ToolbarContent,
-	ToolbarGroup,
-	ToolbarItem,
-	Modal /* data-codemods */,
-	ModalBody /* data-codemods */,
-	ModalHeader /* data-codemods */
+  Alert,
+  Button,
+  EmptyStateActions,
+  EmptyStateBody,
+  EmptyStateFooter,
+  Modal /* data-codemods */,
+  ModalBody /* data-codemods */,
+  ModalHeader /* data-codemods */,
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
 } from '@patternfly/react-core';
 
 import { TFunction } from 'i18next';
@@ -224,7 +224,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
       <Toolbar id="resource-sync-toolbar" inset={{ default: 'insetNone' }}>
         <ToolbarContent>
           <ToolbarGroup>
-            <ToolbarItem >
+            <ToolbarItem>
               <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name')} />
             </ToolbarItem>
           </ToolbarGroup>

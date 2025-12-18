@@ -70,7 +70,7 @@ const DetailsPage = ({
 
   return (
     <>
-      <PageSection hasBodyWrapper={false}  type="breadcrumb">
+      <PageSection hasBodyWrapper={false} type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
             <Link to={resourceLink}>{resourceTypeLabel}</Link>
@@ -78,7 +78,7 @@ const DetailsPage = ({
           <BreadcrumbItem isActive>{breadcrumbTitle || id}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
-      <PageSection hasBodyWrapper={false} >
+      <PageSection hasBodyWrapper={false}>
         <Split hasGutter>
           <SplitItem isFilled>
             <Title headingLevel="h1" size="3xl" role="heading">
@@ -90,7 +90,7 @@ const DetailsPage = ({
       </PageSection>
       {banner}
       {nav && (
-        <PageSection hasBodyWrapper={false}   className="fctl-details-page__nav">
+        <PageSection hasBodyWrapper={false} className="fctl-details-page__nav">
           {nav}
         </PageSection>
       )}

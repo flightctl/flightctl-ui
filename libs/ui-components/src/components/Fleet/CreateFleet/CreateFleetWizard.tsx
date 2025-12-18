@@ -191,7 +191,7 @@ const CreateFleetWizard = () => {
 
   return (
     <>
-      <PageSection hasBodyWrapper={false}  type="breadcrumb">
+      <PageSection hasBodyWrapper={false} type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
             <Link to={ROUTE.FLEETS}>{t('Fleets')}</Link>
@@ -204,12 +204,12 @@ const CreateFleetWizard = () => {
           <BreadcrumbItem isActive>{title}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
-      <PageSection hasBodyWrapper={false} >
+      <PageSection hasBodyWrapper={false}>
         <Title headingLevel="h1" size="3xl">
           {title}
         </Title>
       </PageSection>
-      <PageSection hasBodyWrapper={false}  type="wizard">
+      <PageSection hasBodyWrapper={false} type="wizard">
         <ErrorBoundary>{body}</ErrorBoundary>
       </PageSection>
     </>

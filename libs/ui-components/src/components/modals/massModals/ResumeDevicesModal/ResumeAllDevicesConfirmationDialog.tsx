@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 import {
-	Alert,
-	Button,
-	Stack,
-	StackItem,
-	Content,
-	Modal /* data-codemods */,
-	ModalBody /* data-codemods */,
-	ModalFooter /* data-codemods */,
-	ModalHeader /* data-codemods */
+  Alert,
+  Button,
+  Content,
+  Modal /* data-codemods */,
+  ModalBody /* data-codemods */,
+  ModalFooter /* data-codemods */,
+  ModalHeader /* data-codemods */,
+  Stack,
+  StackItem,
 } from '@patternfly/react-core';
 
 import { DeviceResumeRequest, DeviceResumeResponse } from '@flightctl/types';

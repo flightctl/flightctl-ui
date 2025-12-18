@@ -1,14 +1,14 @@
 import * as React from 'react';
 import {
   Button,
+  Content,
+  ContentVariants,
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
   PageSection,
   Stack,
   StackItem,
-  Content,
-  ContentVariants,
   Title,
   Toolbar,
   ToolbarContent,
@@ -130,7 +130,7 @@ const AuthProvidersPage = () => {
 
   return (
     <PageWithPermissions allowed={canList} loading={loading}>
-      <PageSection hasBodyWrapper={false}  type="breadcrumb">
+      <PageSection hasBodyWrapper={false} type="breadcrumb">
         <Stack hasGutter>
           <StackItem>
             <Title headingLevel="h1" size="3xl">

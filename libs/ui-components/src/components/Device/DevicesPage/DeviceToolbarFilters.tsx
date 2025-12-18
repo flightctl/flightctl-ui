@@ -251,7 +251,12 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
         />
 
         <TextInputGroupUtilities {...(!filterText && { style: { display: 'none' } })}>
-          <Button icon={<TimesIcon aria-hidden />} variant="plain" onClick={onClearButtonClick} aria-label={t('Clear filter text')} />
+          <Button
+            icon={<TimesIcon aria-hidden />}
+            variant="plain"
+            onClick={onClearButtonClick}
+            aria-label={t('Clear filter text')}
+          />
         </TextInputGroupUtilities>
       </TextInputGroup>
     </MenuToggle>

@@ -80,7 +80,7 @@ const DecommissionedDevicesTable = ({
       <Toolbar id="decommissioned-devices-toolbar" inset={{ default: 'insetNone' }}>
         <ToolbarContent>
           <ToolbarGroup>
-            <ToolbarItem >
+            <ToolbarItem>
               <DeviceNameOnlyToolbarFilter nameOrAlias={nameOrAlias} setNameOrAlias={setNameOrAlias} />
             </ToolbarItem>
             <ToolbarItem>

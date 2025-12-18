@@ -30,7 +30,13 @@ const ExpandableFormSection = ({
         <Split hasGutter>
           <SplitItem>{title}</SplitItem>
           {!isExpanded && !!description && (
-            <SplitItem style={{ color: "var(--pf-t--temp--dev--tbd)"/* CODEMODS: original v5 color was --pf-v5-global--Color--100 */ }}>{description}</SplitItem>
+            <SplitItem
+              style={{
+                color: 'var(--pf-t--temp--dev--tbd)' /* CODEMODS: original v5 color was --pf-v5-global--Color--100 */,
+              }}
+            >
+              {description}
+            </SplitItem>
           )}
           {!isExpanded && error && (
             <SplitItem>

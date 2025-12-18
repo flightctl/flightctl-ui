@@ -178,7 +178,7 @@ const RepositoryTable = () => {
       <Toolbar inset={{ default: 'insetNone' }}>
         <ToolbarContent>
           <ToolbarGroup>
-            <ToolbarItem >
+            <ToolbarItem>
               <TableTextSearch value={search} setValue={setSearch} />
             </ToolbarItem>
           </ToolbarGroup>

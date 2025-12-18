@@ -2,10 +2,11 @@ import * as React from 'react';
 import {
   Brand,
   Masthead,
-  MastheadLogo,
+  MastheadBrand,
   MastheadContent,
+  MastheadLogo,
   MastheadMain,
-  MastheadToggle, MastheadBrand,
+  MastheadToggle,
   Page,
   PageSidebar,
   PageSidebarBody,
@@ -42,23 +43,24 @@ const AppLayoutContent = () => {
     <Masthead id="stack-inline-masthead">
       <MastheadMain>
         <MastheadToggle>
-          <PageToggleButton isHamburgerButton
+          <PageToggleButton
+            isHamburgerButton
             variant="plain"
             aria-label={t('Global navigation')}
             isSidebarOpen={isSidebarOpen}
             onSidebarToggle={onSidebarToggle}
             id="page-toggle-button"
-          >
-            
-          </PageToggleButton>
+          />
         </MastheadToggle>
-        <MastheadBrand data-codemods><MastheadLogo data-codemods>
-          {window.isRHEM ? (
-            <Brand src={rhemLogo} alt="Red Hat Edge Manager logo" heights={{ default: '50px' }} />
-          ) : (
-            <Brand src={logo} alt="Flight Control Logo" heights={{ default: '30px' }} />
-          )}
-        </MastheadLogo></MastheadBrand>
+        <MastheadBrand data-codemods>
+          <MastheadLogo data-codemods>
+            {window.isRHEM ? (
+              <Brand src={rhemLogo} alt="Red Hat Edge Manager logo" heights={{ default: '50px' }} />
+            ) : (
+              <Brand src={logo} alt="Flight Control Logo" heights={{ default: '30px' }} />
+            )}
+          </MastheadLogo>
+        </MastheadBrand>
       </MastheadMain>
       <MastheadContent>
         <AppToolbar />
@@ -67,7 +69,7 @@ const AppLayoutContent = () => {
   );
 
   const Sidebar = (
-    <PageSidebar  isSidebarOpen={isSidebarOpen}>
+    <PageSidebar isSidebarOpen={isSidebarOpen}>
       <PageSidebarBody
         style={{
           opacity: mustShowOrganizationSelector ? 0.3 : 1,
@@ -95,7 +97,13 @@ const AppLayoutContent = () => {
     </SkipToContent>
   );
   return (
-    <Page mainContainerId={pageId} masthead={Header} sidebar={Sidebar} isManagedSidebar skipToContent={PageSkipToContent}>
+    <Page
+      mainContainerId={pageId}
+      masthead={Header}
+      sidebar={Sidebar}
+      isManagedSidebar
+      skipToContent={PageSkipToContent}
+    >
       {mustShowOrganizationSelector ? (
         <OrganizationSelector isFirstLogin />
       ) : (

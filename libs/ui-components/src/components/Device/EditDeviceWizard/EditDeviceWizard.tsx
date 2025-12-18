@@ -154,7 +154,7 @@ const EditDeviceWizard = () => {
 
   return (
     <>
-      <PageSection hasBodyWrapper={false}  type="breadcrumb">
+      <PageSection hasBodyWrapper={false} type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
             <Link to={ROUTE.DEVICES}>{t('Devices')}</Link>
@@ -167,12 +167,12 @@ const EditDeviceWizard = () => {
           <BreadcrumbItem isActive>{t('Edit device')}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
-      <PageSection hasBodyWrapper={false} >
+      <PageSection hasBodyWrapper={false}>
         <Title headingLevel="h1" size="3xl">
           {t('Edit device')}
         </Title>
       </PageSection>
-      <PageSection hasBodyWrapper={false}  type="wizard">
+      <PageSection hasBodyWrapper={false} type="wizard">
         <ErrorBoundary>{body}</ErrorBoundary>
       </PageSection>
     </>

@@ -1,18 +1,17 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 import {
-	Alert,
-	Button,
-	Spinner,
-	Stack,
-	StackItem,
-	Content,
-	Modal /* data-codemods */,
-	ModalBody /* data-codemods */,
-	ModalFooter /* data-codemods */,
-	ModalHeader /* data-codemods */
+  Alert,
+  Button,
+  Content,
+  Modal /* data-codemods */,
+  ModalBody /* data-codemods */,
+  ModalFooter /* data-codemods */,
+  ModalHeader /* data-codemods */,
+  Spinner,
+  Stack,
+  StackItem,
 } from '@patternfly/react-core';
-
 
 import { ResourceSyncList } from '@flightctl/types';
 

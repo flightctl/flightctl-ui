@@ -119,7 +119,7 @@ const CreateRepository = () => {
   }
 
   return (
-    <PageSection hasBodyWrapper={false} >
+    <PageSection hasBodyWrapper={false}>
       <Stack hasGutter>
         <StackItem>
           <Breadcrumb>

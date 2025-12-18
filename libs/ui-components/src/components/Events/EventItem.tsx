@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Icon, Stack, StackItem, Content } from '@patternfly/react-core';
+import { Content, Icon, Stack, StackItem } from '@patternfly/react-core';
 import InfoCircleIcon from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 

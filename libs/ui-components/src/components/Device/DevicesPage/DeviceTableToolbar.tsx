@@ -1,14 +1,15 @@
 import * as React from 'react';
 import {
-	Label, LabelGroup, Button,
-	Split,
-	SplitItem,
-	Toolbar,
-	ToolbarContent,
-	ToolbarGroup,
-	ToolbarItem
+  Button,
+  Label,
+  LabelGroup,
+  Split,
+  SplitItem,
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
 } from '@patternfly/react-core';
-
 
 import { TableTextSearchProps } from '../../Table/TableTextSearch';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -71,14 +72,14 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
       <Toolbar id="devices-toolbar" inset={{ default: 'insetNone' }}>
         <ToolbarContent>
           <ToolbarGroup>
-            <ToolbarItem >
+            <ToolbarItem>
               <DeviceStatusFilter
                 activeStatuses={activeStatuses}
                 updateStatus={updateStatus}
                 isFilterUpdating={isFilterUpdating}
               />
             </ToolbarItem>
-            <ToolbarItem >
+            <ToolbarItem>
               <DeviceTableToolbarFilters
                 selectedLabels={selectedLabels}
                 selectedFleetNames={ownerFleets}
@@ -134,7 +135,11 @@ const DeviceToolbarChips = ({
         <SplitItem>
           <LabelGroup categoryName={t('Fleet')} isClosable onClick={() => setOwnerFleets([])}>
             {ownerFleets.map((fleetId) => (
-              <Label variant="outline" key={fleetId} onClose={() => setOwnerFleets(ownerFleets.filter((f) => f !== fleetId))}>
+              <Label
+                variant="outline"
+                key={fleetId}
+                onClose={() => setOwnerFleets(ownerFleets.filter((f) => f !== fleetId))}
+              >
                 {fleetId}
               </Label>
             ))}
@@ -144,7 +149,9 @@ const DeviceToolbarChips = ({
       {nameOrAlias && (
         <SplitItem>
           <LabelGroup categoryName={t('Name / Alias')} isClosable onClick={() => setNameOrAlias('')}>
-            <Label variant="outline" onClose={() => setNameOrAlias('')}>{nameOrAlias}</Label>
+            <Label variant="outline" onClose={() => setNameOrAlias('')}>
+              {nameOrAlias}
+            </Label>
           </LabelGroup>
         </SplitItem>
       )}
@@ -154,7 +161,8 @@ const DeviceToolbarChips = ({
             {selectedLabels.map((label) => {
               const labelStr = labelToString(label);
               return (
-                <Label variant="outline"
+                <Label
+                  variant="outline"
                   key={labelStr}
                   onClose={() => setSelectedLabels(selectedLabels.filter((l) => labelToString(l) !== labelStr))}
                 >

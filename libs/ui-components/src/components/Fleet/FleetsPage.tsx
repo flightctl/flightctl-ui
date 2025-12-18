@@ -133,7 +133,7 @@ const FleetTable = () => {
       <Toolbar inset={{ default: 'insetNone' }}>
         <ToolbarContent>
           <ToolbarGroup>
-            <ToolbarItem >
+            <ToolbarItem>
               <TableTextSearch value={name} setValue={setName} placeholder={t('Search by name')} />
             </ToolbarItem>
           </ToolbarGroup>

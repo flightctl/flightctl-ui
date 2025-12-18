@@ -4,12 +4,12 @@ import {
   Card,
   CardBody,
   CardTitle,
+  Content,
   Icon,
   List,
   ListItem,
   Stack,
   StackItem,
-  Content,
 } from '@patternfly/react-core';
 import { TFunction } from 'react-i18next';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';

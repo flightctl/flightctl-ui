@@ -1,13 +1,15 @@
 import * as React from 'react';
 import {
-	Label, LabelGroup, Button,
-	Flex,
-	FlexItem,
-	StackItem,
-	Toolbar,
-	ToolbarContent,
-	ToolbarGroup,
-	ToolbarItem
+  Button,
+  Flex,
+  FlexItem,
+  Label,
+  LabelGroup,
+  StackItem,
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
 } from '@patternfly/react-core';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -38,7 +40,7 @@ const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
         <Toolbar id="overview-toolbar" inset={{ default: 'insetNone' }}>
           <ToolbarContent>
             <ToolbarGroup>
-              <ToolbarItem >
+              <ToolbarItem>
                 <DeviceTableToolbarFilters
                   selectedFleetNames={selectedFleets}
                   setSelectedFleets={setSelectedFleets}
@@ -58,7 +60,11 @@ const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
               <FlexItem>
                 <LabelGroup categoryName={t('Fleets')} isClosable onClick={() => setSelectedFleets([])}>
                   {selectedFleets.map((fleet) => (
-                    <Label variant="outline" key={fleet} onClose={() => setSelectedFleets(selectedFleets.filter((f) => f !== fleet))}>
+                    <Label
+                      variant="outline"
+                      key={fleet}
+                      onClose={() => setSelectedFleets(selectedFleets.filter((f) => f !== fleet))}
+                    >
                       {fleet}
                     </Label>
                   ))}
@@ -71,7 +77,8 @@ const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
                   {selectedLabels.map((l) => {
                     const label = labelToString(l);
                     return (
-                      <Label variant="outline"
+                      <Label
+                        variant="outline"
                         key={label}
                         onClose={() => setSelectedLabels(selectedLabels.filter((l) => labelToString(l) !== label))}
                       >

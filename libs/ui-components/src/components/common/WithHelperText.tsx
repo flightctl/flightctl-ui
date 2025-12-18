@@ -20,7 +20,8 @@ const HelperTextPopover = ({
   triggerAction,
 }: Omit<HelperTextPopoverProps, 'label'> & { ariaLabel: string }) => (
   <Popover aria-label={ariaLabel} bodyContent={content} withFocusTrap triggerAction={triggerAction}>
-    <Button icon={<OutlinedQuestionCircleIcon />}
+    <Button
+      icon={<OutlinedQuestionCircleIcon />}
       component="a"
       className="fctl-helper-text__icon"
       isInline
@@ -30,7 +31,7 @@ const HelperTextPopover = ({
         ev.stopPropagation();
       }}
       aria-label={`${ariaLabel} help text`}
-     />
+    />
   </Popover>
 );
 
