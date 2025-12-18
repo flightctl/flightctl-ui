@@ -194,6 +194,7 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
                 <>
                   <Text>{t('You do not have access to any organizations.')}</Text>
                   <Text>{t('Please contact your administrator to be granted access to an organization.')}</Text>
+                  <Text>{t('You will need to log out and log in again to access the application.')}</Text>
                 </>
               ) : (
                 <>
@@ -212,15 +213,17 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
                 </>
               )}
             </TextContent>
-            <ActionList className="pf-v5-u-mt-md">
-              <ActionListGroup>
-                <ActionListItem>
-                  <Button variant="primary" onClick={handleRefetch} isDisabled={isReloading}>
-                    {t('Reload organizations')}
-                  </Button>
-                </ActionListItem>
-              </ActionListGroup>
-            </ActionList>
+            {!isEmptyOrganizations && (
+              <ActionList className="pf-v5-u-mt-md">
+                <ActionListGroup>
+                  <ActionListItem>
+                    <Button variant="primary" onClick={handleRefetch} isDisabled={isReloading}>
+                      {t('Reload organizations')}
+                    </Button>
+                  </ActionListItem>
+                </ActionListGroup>
+              </ActionList>
+            )}
           </Alert>
         </Bullseye>
       </PageSection>
