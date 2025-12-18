@@ -5,8 +5,8 @@ import { EmptyState, EmptyStateBody, PageSection } from '@patternfly/react-core'
 const AccessDenied = () => {
   const { t } = useTranslation();
   return (
-    <PageSection hasBodyWrapper={false} >
-      <EmptyState  headingLevel="h4"   titleText={t('Restricted Access')}>
+    <PageSection hasBodyWrapper={false}>
+      <EmptyState headingLevel="h4" titleText={t('Restricted Access')}>
         <EmptyStateBody>{t("You don't have access to this section.")}</EmptyStateBody>
       </EmptyState>
     </PageSection>

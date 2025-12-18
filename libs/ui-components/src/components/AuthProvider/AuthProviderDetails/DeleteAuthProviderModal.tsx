@@ -1,18 +1,16 @@
 import * as React from 'react';
 import {
-	Alert,
-	Button,
-	Stack,
-	StackItem,
-	TextInput,
-	Modal /* data-codemods */,
-	ModalBody /* data-codemods */,
-	ModalFooter /* data-codemods */,
-	ModalHeader /* data-codemods */
+  Alert,
+  Button,
+  Modal /* data-codemods */,
+  ModalBody /* data-codemods */,
+  ModalFooter /* data-codemods */,
+  ModalHeader /* data-codemods */,
+  ModalVariant /* data-codemods */,
+  Stack,
+  StackItem,
+  TextInput,
 } from '@patternfly/react-core';
-import {
-	ModalVariant
-} from '@patternfly/react-core/next';
 import { Trans } from 'react-i18next';
 
 import { useFetch } from '../../../hooks/useFetch';

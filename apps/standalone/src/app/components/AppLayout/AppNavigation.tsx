@@ -9,7 +9,7 @@ import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslatio
 const AppNavigation = () => {
   const { t } = useTranslation();
   return (
-    <Nav id="flightclt-nav" >
+    <Nav id="flightclt-nav">
       <NavList id="flightclt-navlist" style={{ padding: 0 }}>
         {getAppRoutes(t)
           .filter((route) => route.showInNav)

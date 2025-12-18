@@ -8,13 +8,13 @@ import {
   DropdownList,
   MenuToggle,
   MenuToggleElement,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem,
   Modal /* data-codemods */,
   ModalBody /* data-codemods */,
   ModalFooter /* data-codemods */,
   ModalHeader /* data-codemods */,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
 } from '@patternfly/react-core';
 
 import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/question-circle-icon';

@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { EnrollmentRequest, EnrollmentRequestApproval } from '@flightctl/types';
 import {
-	Alert,
-	Button,
-	FormGroup,
-	Progress,
-	ProgressMeasureLocation,
-	Stack,
-	StackItem,
-	Modal /* data-codemods */,
-	ModalBody /* data-codemods */,
-	ModalFooter /* data-codemods */,
-	ModalHeader /* data-codemods */
+  Alert,
+  Button,
+  FormGroup,
+  Modal /* data-codemods */,
+  ModalBody /* data-codemods */,
+  ModalFooter /* data-codemods */,
+  ModalHeader /* data-codemods */,
+  Progress,
+  ProgressMeasureLocation,
+  Stack,
+  StackItem,
 } from '@patternfly/react-core';
 
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';

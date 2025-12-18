@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Grid, Stack, StackItem, Content,  } from '@patternfly/react-core';
+import { Content, Grid, Stack, StackItem } from '@patternfly/react-core';
 import { FormikErrors } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';

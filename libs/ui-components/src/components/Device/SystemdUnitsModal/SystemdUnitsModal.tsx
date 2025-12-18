@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Formik } from 'formik';
 import {
-	Modal /* data-codemods */,
-	ModalBody /* data-codemods */,
-	ModalHeader /* data-codemods */
+  Modal /* data-codemods */,
+  ModalBody /* data-codemods */,
+  ModalHeader /* data-codemods */,
 } from '@patternfly/react-core';
 import { Device } from '@flightctl/types';
 

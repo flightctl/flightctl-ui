@@ -10,7 +10,7 @@ type ListPageProps = {
 
 const ListPage: React.FC<ListPageProps> = ({ title, headingLevel = 'h1', children }) => {
   return (
-    <PageSection hasBodyWrapper={false} >
+    <PageSection hasBodyWrapper={false}>
       <Flex gap={{ default: 'gapMd' }} alignItems={{ default: 'alignItemsCenter' }}>
         <FlexItem>
           <Title headingLevel={headingLevel} size="3xl">

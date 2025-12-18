@@ -1,18 +1,17 @@
 import * as React from 'react';
 import { TFunction } from 'i18next';
 import {
-	Button,
-	FormGroup,
-	MenuToggle,
-	MenuToggleElement,
-	Select,
-	SelectOption,
-	Modal /* data-codemods */,
-	ModalBody /* data-codemods */,
-	ModalFooter /* data-codemods */,
-	ModalHeader /* data-codemods */
+  Button,
+  FormGroup,
+  MenuToggle,
+  MenuToggleElement,
+  Modal /* data-codemods */,
+  ModalBody /* data-codemods */,
+  ModalFooter /* data-codemods */,
+  ModalHeader /* data-codemods */,
+  Select,
+  SelectOption,
 } from '@patternfly/react-core';
-
 
 import { Theme } from '../../hooks/useThemePreferences';
 import { useTranslation } from '../../hooks/useTranslation';

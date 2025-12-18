@@ -197,7 +197,7 @@ const ImportFleetWizard = () => {
 
   return (
     <>
-      <PageSection hasBodyWrapper={false}  type="breadcrumb">
+      <PageSection hasBodyWrapper={false} type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
             <Link to={ROUTE.FLEETS}>{t('Fleets')}</Link>
@@ -205,12 +205,12 @@ const ImportFleetWizard = () => {
           <BreadcrumbItem isActive>{t('Import fleets')}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
-      <PageSection hasBodyWrapper={false} >
+      <PageSection hasBodyWrapper={false}>
         <Title headingLevel="h1" size="3xl">
           {t('Import fleets')}
         </Title>
       </PageSection>
-      <PageSection hasBodyWrapper={false}  type="wizard">
+      <PageSection hasBodyWrapper={false} type="wizard">
         <ErrorBoundary>{body}</ErrorBoundary>
       </PageSection>
     </>

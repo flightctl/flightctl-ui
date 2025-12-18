@@ -4,13 +4,13 @@ import {
   Card,
   CardBody,
   CardTitle,
+  Content,
+  ContentVariants,
   List,
   ListItem,
   Spinner,
   Split,
   SplitItem,
-  Content,
-  ContentVariants,
 } from '@patternfly/react-core';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { usePendingEnrollmentRequestsCount } from '../../../../hooks/usePendingEnrollmentRequestsCount';

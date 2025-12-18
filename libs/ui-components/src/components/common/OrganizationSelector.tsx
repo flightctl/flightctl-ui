@@ -1,30 +1,29 @@
 import * as React from 'react';
 import {
-	ActionList,
-	ActionListGroup,
-	ActionListItem,
-	Alert,
-	Bullseye,
-	Button,
-	Card,
-	CardBody,
-	CardTitle,
-	Flex,
-	FlexItem,
-	Menu,
-	MenuContent,
-	MenuItem,
-	MenuList,
-	PageSection,
-	Stack,
-	StackItem,
-	Content,
-	Title,
-	Modal /* data-codemods */,
-	ModalBody /* data-codemods */,
-	ModalHeader /* data-codemods */
+  ActionList,
+  ActionListGroup,
+  ActionListItem,
+  Alert,
+  Bullseye,
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  Content,
+  Flex,
+  FlexItem,
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuList,
+  Modal /* data-codemods */,
+  ModalBody /* data-codemods */,
+  ModalHeader /* data-codemods */,
+  PageSection,
+  Stack,
+  StackItem,
+  Title,
 } from '@patternfly/react-core';
-
 
 import { Organization } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -117,7 +116,7 @@ const OrganizationSelectorCustomModal = (props: OrganizationSelectorContentProps
   const { t } = useTranslation();
 
   return (
-    <PageSection hasBodyWrapper={false} >
+    <PageSection hasBodyWrapper={false}>
       <Bullseye>
         <Card isLarge>
           <CardTitle>
@@ -188,14 +187,16 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
 
   if (selectionError) {
     return (
-      <PageSection hasBodyWrapper={false} >
+      <PageSection hasBodyWrapper={false}>
         <Bullseye>
           <Alert variant="danger" title={t('Unable to log in to the application')} isInline>
             <Content>
               {isEmptyOrganizations ? (
                 <>
                   <Content component="p">{t('You do not have access to any organizations.')}</Content>
-                  <Content component="p">{t('Please contact your administrator to be granted access to an organization.')}</Content>
+                  <Content component="p">
+                    {t('Please contact your administrator to be granted access to an organization.')}
+                  </Content>
                 </>
               ) : (
                 <>

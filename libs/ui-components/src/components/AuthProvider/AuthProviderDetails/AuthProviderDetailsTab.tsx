@@ -3,6 +3,8 @@ import {
   Card,
   CardBody,
   ClipboardCopy,
+  Content,
+  ContentVariants,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -12,8 +14,6 @@ import {
   LabelGroup,
   Stack,
   StackItem,
-  Content,
-  ContentVariants,
   Title,
 } from '@patternfly/react-core';
 import { AuthProvider } from '@flightctl/types';

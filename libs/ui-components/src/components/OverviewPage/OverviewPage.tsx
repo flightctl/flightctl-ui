@@ -8,12 +8,12 @@ const OverviewPage = () => {
   const { t } = useTranslation();
   return (
     <>
-      <PageSection hasBodyWrapper={false} >
+      <PageSection hasBodyWrapper={false}>
         <Title headingLevel="h1" size="3xl" role="heading">
           {t('Overview')}
         </Title>
       </PageSection>
-      <PageSection hasBodyWrapper={false}  isFilled>
+      <PageSection hasBodyWrapper={false} isFilled>
         <Overview />
       </PageSection>
     </>

@@ -78,7 +78,7 @@ const DetailsNotFound = ({ kind, id }: DetailsNotFoundProps) => {
 
   return (
     <PageSection hasBodyWrapper={false}>
-      <EmptyState  headingLevel="h1" icon={ExclamationTriangleIcon}  titleText={title} variant="full">
+      <EmptyState headingLevel="h1" icon={ExclamationTriangleIcon} titleText={title} variant="full">
         <EmptyStateBody>
           <Stack>
             <StackItem>{msg}</StackItem>

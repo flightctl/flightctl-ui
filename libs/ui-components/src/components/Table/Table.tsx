@@ -1,11 +1,5 @@
 import * as React from 'react';
-import {
-  Button,
-  EmptyState,
-  EmptyStateActions,
-  EmptyStateBody,
-  Spinner,
-} from '@patternfly/react-core';
+import { Button, EmptyState, EmptyStateActions, EmptyStateBody, Spinner } from '@patternfly/react-core';
 import { Table as PFTable, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
 import { useTranslation } from '../../hooks/useTranslation';
 import LabelWithHelperText from '../common/WithHelperText';
@@ -62,7 +56,7 @@ const Table: TableFC = ({
     return loading ? (
       <Spinner size="md" />
     ) : (
-      <EmptyState  headingLevel="h1" icon={SearchIcon}  titleText={t('No results found')} variant="full">
+      <EmptyState headingLevel="h1" icon={SearchIcon} titleText={t('No results found')} variant="full">
         <EmptyStateBody>{t('Clear all filters and try again.')}</EmptyStateBody>
         {clearFilters && (
           <EmptyStateActions>

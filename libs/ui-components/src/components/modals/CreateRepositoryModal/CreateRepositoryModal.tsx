@@ -1,8 +1,8 @@
 import * as React from 'react';
 import {
-	Modal /* data-codemods */,
-	ModalBody /* data-codemods */,
-	ModalHeader /* data-codemods */
+  Modal /* data-codemods */,
+  ModalBody /* data-codemods */,
+  ModalHeader /* data-codemods */,
 } from '@patternfly/react-core';
 
 import { Repository } from '@flightctl/types';
