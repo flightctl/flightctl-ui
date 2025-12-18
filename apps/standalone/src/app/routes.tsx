@@ -3,18 +3,18 @@ import {
   Bullseye,
   Button,
   EmptyState,
-  EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
   EmptyStateHeader,
   EmptyStateIcon,
   EmptyStateVariant,
   Spinner,
+  Stack,
+  StackItem,
 } from '@patternfly/react-core';
 import { Navigate, RouteObject, RouterProvider, createBrowserRouter, useParams, useRouteError } from 'react-router-dom';
 import { TFunction } from 'i18next';
-import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons';
-import global_danger_color_100 from '@patternfly/react-tokens/dist/js/global_danger_color_100';
+import { PathMissingIcon } from '@patternfly/react-icons/dist/js/icons/path-missing-icon';
 
 import { useDocumentTitle } from '@flightctl/ui-components/src/hooks/useDocumentTitle';
 import { APP_TITLE } from '@flightctl/ui-components/src/constants';
@@ -359,23 +359,25 @@ const AppRouter = () => {
 
   if (error) {
     return (
-      <Bullseye>
-        <EmptyState variant={EmptyStateVariant.xl}>
-          <EmptyStateHeader
-            titleText={t('Failed to login')}
-            headingLevel="h4"
-            icon={<EmptyStateIcon icon={ExclamationCircleIcon} color={global_danger_color_100.value} />}
-          />
-          <EmptyStateBody>{error}</EmptyStateBody>
-          <EmptyStateFooter>
-            <EmptyStateActions>
-              <Button variant="link" onClick={() => window.location.replace('/')}>
-                {t('Try again')}
-              </Button>
-            </EmptyStateActions>
-          </EmptyStateFooter>
-        </EmptyState>
-      </Bullseye>
+      <EmptyState variant={EmptyStateVariant.xl} style={{ marginTop: '20%' }}>
+        <EmptyStateHeader
+          titleText={t('Log in interrupted')}
+          headingLevel="h2"
+          icon={<EmptyStateIcon icon={PathMissingIcon} />}
+        />
+        <EmptyStateBody>
+          <Stack>
+            <StackItem style={{ margin: 'auto' }}>
+              {t("Your log in didn't fully complete. Try again to continue.")}
+            </StackItem>
+          </Stack>
+        </EmptyStateBody>
+        <EmptyStateFooter>
+          <Button variant="link" onClick={() => window.location.replace('/')}>
+            {t('Try again')}
+          </Button>
+        </EmptyStateFooter>
+      </EmptyState>
     );
   }
 
