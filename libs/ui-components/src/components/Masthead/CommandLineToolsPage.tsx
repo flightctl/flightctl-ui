@@ -6,7 +6,6 @@ import {
   List,
   ListItem,
   PageSection,
-  PageSectionVariants,
   Spinner,
   Stack,
   StackItem,
@@ -134,7 +133,7 @@ const CommandLineToolsPage = () => {
   const productName = settings.isRHEM ? t('Red Hat Edge Manager') : t('Flight Control');
 
   return (
-    <PageSection variant={PageSectionVariants.light}>
+    <PageSection hasBodyWrapper={false} >
       <Stack hasGutter>
         <StackItem>
           <Title headingLevel="h1">{t('Command Line Tools')}</Title>

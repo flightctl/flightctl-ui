@@ -52,7 +52,7 @@ const FleetDetailPage = () => {
       resourceTypeLabel={t('Fleets')}
       banner={<FleetRestoreBanner fleet={fleet} refetch={refetch} />}
       nav={
-        <Nav variant="tertiary">
+        <Nav variant="horizontal-subnav">
           <NavList>
             <NavItem to="details">{t('Details')}</NavItem>
             <NavItem to="yaml">{t('YAML')}</NavItem>

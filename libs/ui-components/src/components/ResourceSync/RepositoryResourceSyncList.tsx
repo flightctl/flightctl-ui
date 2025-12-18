@@ -1,17 +1,20 @@
 import * as React from 'react';
 import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 import {
-  Alert,
-  Button,
-  EmptyStateActions,
-  EmptyStateBody,
-  EmptyStateFooter,
-  Toolbar,
-  ToolbarContent,
-  ToolbarGroup,
-  ToolbarItem,
+	Alert,
+	Button,
+	EmptyStateActions,
+	EmptyStateBody,
+	EmptyStateFooter,
+	Toolbar,
+	ToolbarContent,
+	ToolbarGroup,
+	ToolbarItem,
+	Modal /* data-codemods */,
+	ModalBody /* data-codemods */,
+	ModalHeader /* data-codemods */
 } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalHeader } from '@patternfly/react-core/next';
+
 import { TFunction } from 'i18next';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { CodeBranchIcon } from '@patternfly/react-icons/dist/js/icons/code-branch-icon';
@@ -221,7 +224,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
       <Toolbar id="resource-sync-toolbar" inset={{ default: 'insetNone' }}>
         <ToolbarContent>
           <ToolbarGroup>
-            <ToolbarItem variant="search-filter">
+            <ToolbarItem >
               <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name')} />
             </ToolbarItem>
           </ToolbarGroup>

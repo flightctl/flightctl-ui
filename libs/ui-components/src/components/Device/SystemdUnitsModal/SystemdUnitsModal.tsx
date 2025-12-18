@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { Formik } from 'formik';
-import { Modal, ModalBody, ModalHeader } from '@patternfly/react-core/next';
+import {
+	Modal /* data-codemods */,
+	ModalBody /* data-codemods */,
+	ModalHeader /* data-codemods */
+} from '@patternfly/react-core';
 import { Device } from '@flightctl/types';
 
 import { useFetch } from '../../../hooks/useFetch';

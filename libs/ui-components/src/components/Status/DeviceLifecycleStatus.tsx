@@ -1,5 +1,5 @@
 import * as React from 'react';
-import disabledColor from '@patternfly/react-tokens/dist/js/global_disabled_color_100';
+import disabledColor/* CODEMODS: you should update this color token, original v5 token was global_disabled_color_100 */ from "@patternfly/react-tokens/dist/js/t_temp_dev_tbd";
 
 import { Device, DeviceLifecycleStatusType } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';

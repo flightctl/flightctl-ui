@@ -5,7 +5,6 @@ import {
   BreadcrumbItem,
   Bullseye,
   PageSection,
-  PageSectionVariants,
   Spinner,
   Title,
 } from '@patternfly/react-core';
@@ -73,7 +72,7 @@ const CreateAuthProvider = ({ authProviderId }: { authProviderId: string | undef
     );
   } else if (authProviderDetails?.spec.providerType === ProviderType.OAuth2) {
     content = (
-      <PageSection variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false} >
         <Alert isInline variant="danger" title={t('Not allowed')}>
           {t('OAuth2 providers can only be edited via the YAML editor')}
         </Alert>
@@ -94,7 +93,7 @@ const CreateAuthProvider = ({ authProviderId }: { authProviderId: string | undef
 
   return (
     <>
-      <PageSection variant="light" type="breadcrumb">
+      <PageSection hasBodyWrapper={false}  type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
             <Link to={ROUTE.AUTH_PROVIDERS}>{t('Authentication providers')}</Link>
@@ -108,13 +107,13 @@ const CreateAuthProvider = ({ authProviderId }: { authProviderId: string | undef
         </Breadcrumb>
       </PageSection>
       {title && (
-        <PageSection variant={PageSectionVariants.light} className="pf-v5-u-pt-0">
+        <PageSection hasBodyWrapper={false}  className="pf-v5-u-pt-0">
           <Title headingLevel="h1" size="3xl">
             {title}
           </Title>
         </PageSection>
       )}
-      <PageSection variant={PageSectionVariants.light} className="pf-v5-u-pt-0">
+      <PageSection hasBodyWrapper={false}  className="pf-v5-u-pt-0">
         {content}
       </PageSection>
     </>

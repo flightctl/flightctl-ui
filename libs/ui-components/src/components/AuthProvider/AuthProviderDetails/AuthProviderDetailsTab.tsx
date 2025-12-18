@@ -12,9 +12,8 @@ import {
   LabelGroup,
   Stack,
   StackItem,
-  Text,
-  TextContent,
-  TextVariants,
+  Content,
+  ContentVariants,
   Title,
 } from '@patternfly/react-core';
 import { AuthProvider } from '@flightctl/types';
@@ -157,11 +156,11 @@ const AuthProviderDetailsTab = ({ authProvider }: { authProvider: AuthProvider }
                   {spec.usernameClaim?.length ? (
                     <>
                       <LabelGroup>{spec.usernameClaim?.map((claim) => <Label key={claim}>{claim}</Label>)}</LabelGroup>
-                      <TextContent>
-                        <Text component={TextVariants.small}>
+                      <Content>
+                        <Content component={ContentVariants.small}>
                           {t('Resulting username claim')}: <strong>{spec.usernameClaim.join('.')}</strong>
-                        </Text>
-                      </TextContent>
+                        </Content>
+                      </Content>
                     </>
                   ) : (
                     <Label color="grey">{`${DEFAULT_USERNAME_CLAIM} - (${t('Default')})`}</Label>

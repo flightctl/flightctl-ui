@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { PageSection, PageSectionVariants, Title } from '@patternfly/react-core';
+import { PageSection, Title } from '@patternfly/react-core';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import Overview from './Overview';
@@ -8,12 +8,12 @@ const OverviewPage = () => {
   const { t } = useTranslation();
   return (
     <>
-      <PageSection variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false} >
         <Title headingLevel="h1" size="3xl" role="heading">
           {t('Overview')}
         </Title>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light} isFilled>
+      <PageSection hasBodyWrapper={false}  isFilled>
         <Overview />
       </PageSection>
     </>

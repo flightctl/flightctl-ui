@@ -1,16 +1,20 @@
 import * as React from 'react';
 import {
-  Alert,
-  Button,
-  ButtonVariant,
-  Checkbox,
-  FormGroup,
-  FormSection,
-  Grid,
-  Split,
-  SplitItem,
+	Alert,
+	Button,
+	ButtonVariant,
+	Checkbox,
+	FormGroup,
+	FormSection,
+	Grid,
+	Split,
+	SplitItem,
+	Modal /* data-codemods */,
+	ModalBody /* data-codemods */,
+	ModalFooter /* data-codemods */,
+	ModalHeader /* data-codemods */
 } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
+
 
 import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';

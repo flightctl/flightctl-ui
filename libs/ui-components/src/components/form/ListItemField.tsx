@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { Label, LabelGroup, Text, TextVariants } from '@patternfly/react-core';
+import { Label, LabelGroup, Content, ContentVariants } from '@patternfly/react-core';
 
 import EditableLabelControl from '../common/EditableLabelControl';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
@@ -111,9 +111,9 @@ const ListItemField = ({
         })}
       </LabelGroup>
       {displayedResolvedValue && (
-        <Text component={TextVariants.small} style={{ marginTop: '0.5rem', color: 'var(--pf-v5-global--Color--200)' }}>
+        <Content component={ContentVariants.small} style={{ marginTop: '0.5rem', color: "var(--pf-t--temp--dev--tbd)"/* CODEMODS: original v5 color was --pf-v5-global--Color--200 */ }}>
           {resolvedLabel || t('Resolved')}: <strong>{displayedResolvedValue}</strong>
-        </Text>
+        </Content>
       )}
       <ErrorHelperText meta={meta} touchRequired={false} />
     </>

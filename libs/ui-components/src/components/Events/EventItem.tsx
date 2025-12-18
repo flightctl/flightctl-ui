@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Icon, Stack, StackItem, TextContent } from '@patternfly/react-core';
+import { Icon, Stack, StackItem, Content } from '@patternfly/react-core';
 import InfoCircleIcon from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 
@@ -27,9 +27,9 @@ const EventItem = ({ event }: { event: DisplayEvent }) => {
       </StackItem>
       {event.message && <StackItem>{event.message}</StackItem>}
       <StackItem>
-        <TextContent>
+        <Content>
           <small>{event.dateText}</small>
-        </TextContent>
+        </Content>
       </StackItem>
     </Stack>
   );

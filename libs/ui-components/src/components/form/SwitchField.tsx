@@ -22,7 +22,7 @@ const SwitchField = ({ label, labelIcon, helperText, name, ...props }: SwitchFie
   const fieldId = `switchfield-${name}`;
 
   return (
-    <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId} label={label} labelIcon={labelIcon}>
+    <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId} label={label} labelHelp={labelIcon}>
       <Switch {...field} {...props} id={fieldId} onChange={onChange} isChecked={!!field.value} />
       <DefaultHelperText helperText={helperText} />
       <ErrorHelperText meta={meta} />

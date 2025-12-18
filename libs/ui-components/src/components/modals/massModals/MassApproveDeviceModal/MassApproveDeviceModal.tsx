@@ -1,7 +1,19 @@
 import * as React from 'react';
 import { EnrollmentRequest, EnrollmentRequestApproval } from '@flightctl/types';
-import { Alert, Button, FormGroup, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
+import {
+	Alert,
+	Button,
+	FormGroup,
+	Progress,
+	ProgressMeasureLocation,
+	Stack,
+	StackItem,
+	Modal /* data-codemods */,
+	ModalBody /* data-codemods */,
+	ModalFooter /* data-codemods */,
+	ModalHeader /* data-codemods */
+} from '@patternfly/react-core';
+
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { Formik } from 'formik';
 

@@ -70,7 +70,7 @@ const RepositoryDetails = () => {
         )
       }
       nav={
-        <Nav variant="tertiary">
+        <Nav variant="horizontal-subnav">
           <NavList>
             <NavItem to="details">{t('Details')}</NavItem>
             <NavItem to="yaml">{t('YAML')}</NavItem>

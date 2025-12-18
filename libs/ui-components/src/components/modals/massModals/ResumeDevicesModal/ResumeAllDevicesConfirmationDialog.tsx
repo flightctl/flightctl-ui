@@ -1,6 +1,17 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import { Alert, Button, Modal, ModalVariant, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
+import {
+	Alert,
+	Button,
+	Stack,
+	StackItem,
+	Content,
+	Modal /* data-codemods */,
+	ModalBody /* data-codemods */,
+	ModalFooter /* data-codemods */,
+	ModalHeader /* data-codemods */
+} from '@patternfly/react-core';
+
 import { DeviceResumeRequest, DeviceResumeResponse } from '@flightctl/types';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -20,20 +31,20 @@ const ModalContentBeforeResume = ({ devicesToResume }: { devicesToResume: number
   return (
     <Stack hasGutter>
       <StackItem>
-        <TextContent>
-          <Text>
+        <Content>
+          <Content component="p">
             <Trans t={t} count={devicesToResume}>
               You are about to resume all <strong>{deviceCount}</strong> suspended devices.
             </Trans>
-          </Text>
-        </TextContent>
-        <TextContent>
-          <Text>
+          </Content>
+        </Content>
+        <Content>
+          <Content component="p">
             {t(
               'This action is irreversible and will allow all affected devices to receive new configuration updates from the server.',
             )}
-          </Text>
-        </TextContent>
+          </Content>
+        </Content>
       </StackItem>
     </Stack>
   );
@@ -79,54 +90,58 @@ const ResumeAllDevicesConfirmationModal = ({ devicesToResume, onClose }: ResumeA
     ? t('Resume all {{ count }} devices?', { count: devicesToResume })
     : t('Resume devices result');
 
-  const buttons = isBeforeResume
-    ? [
-        <Button
-          key="confirm"
-          variant="primary"
-          isDisabled={isSubmitting}
-          onClick={async () => {
-            setIsSubmitting(true);
-            try {
-              const resumeRequest: DeviceResumeRequest = {
-                labelSelector: '', // All devices
-              };
-              const resumeResponse = await post<DeviceResumeRequest, DeviceResumeResponse>(
-                'deviceactions/resume',
-                resumeRequest,
-              );
-              setResumedCount(resumeResponse.resumedDevices || 0);
-            } catch (error) {
-              setResumedCount(0);
-              setSubmitError(getErrorMessage(error));
-            } finally {
-              setIsSubmitting(false);
-            }
-          }}
-        >
-          {t('Resume all devices')}
-        </Button>,
-        <Button key="cancel" variant="link" isDisabled={isSubmitting} onClick={() => onClose(undefined)}>
-          {t('Cancel')}
-        </Button>,
-      ]
-    : [
-        <Button key="close" variant="primary" onClick={() => onClose(resumedCount)}>
-          {t('Close')}
-        </Button>,
-      ];
-
   return (
-    <Modal variant={ModalVariant.small} title={title} isOpen onClose={() => onClose(undefined)} actions={buttons}>
-      {isBeforeResume ? (
-        <ModalContentBeforeResume devicesToResume={devicesToResume} />
-      ) : (
-        <ModalContentAfterResume
-          resumedCount={resumedCount}
-          hasResumedAll={resumedCount === devicesToResume}
-          submitError={submitError}
-        />
-      )}
+    <Modal isOpen onClose={() => onClose(undefined)} variant="small">
+      <ModalHeader title={title} />
+      <ModalBody>
+        {isBeforeResume ? (
+          <ModalContentBeforeResume devicesToResume={devicesToResume} />
+        ) : (
+          <ModalContentAfterResume
+            resumedCount={resumedCount}
+            hasResumedAll={resumedCount === devicesToResume}
+            submitError={submitError}
+          />
+        )}
+      </ModalBody>
+      <ModalFooter>
+        {isBeforeResume ? (
+          <>
+            <Button
+              key="confirm"
+              variant="primary"
+              isDisabled={isSubmitting}
+              onClick={async () => {
+                setIsSubmitting(true);
+                try {
+                  const resumeRequest: DeviceResumeRequest = {
+                    labelSelector: '', // All devices
+                  };
+                  const resumeResponse = await post<DeviceResumeRequest, DeviceResumeResponse>(
+                    'deviceactions/resume',
+                    resumeRequest,
+                  );
+                  setResumedCount(resumeResponse.resumedDevices || 0);
+                } catch (error) {
+                  setResumedCount(0);
+                  setSubmitError(getErrorMessage(error));
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }}
+            >
+              {t('Resume all devices')}
+            </Button>
+            <Button key="cancel" variant="link" isDisabled={isSubmitting} onClick={() => onClose(undefined)}>
+              {t('Cancel')}
+            </Button>
+          </>
+        ) : (
+          <Button key="close" variant="primary" onClick={() => onClose(resumedCount)}>
+            {t('Close')}
+          </Button>
+        )}
+      </ModalFooter>
     </Modal>
   );
 };

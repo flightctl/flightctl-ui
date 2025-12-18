@@ -20,7 +20,7 @@ const HelperTextPopover = ({
   triggerAction,
 }: Omit<HelperTextPopoverProps, 'label'> & { ariaLabel: string }) => (
   <Popover aria-label={ariaLabel} bodyContent={content} withFocusTrap triggerAction={triggerAction}>
-    <Button
+    <Button icon={<OutlinedQuestionCircleIcon />}
       component="a"
       className="fctl-helper-text__icon"
       isInline
@@ -30,9 +30,7 @@ const HelperTextPopover = ({
         ev.stopPropagation();
       }}
       aria-label={`${ariaLabel} help text`}
-    >
-      <OutlinedQuestionCircleIcon />
-    </Button>
+     />
   </Popover>
 );
 
@@ -56,7 +54,7 @@ export const FormGroupWithHelperText = ({
 }: React.PropsWithChildren<FormGroupWithHelperTextProps>) => (
   <FormGroup
     label={label}
-    labelIcon={<HelperTextPopover ariaLabel={label} content={content} />}
+    labelHelp={<HelperTextPopover ariaLabel={label} content={content} />}
     isRequired={isRequired}
   >
     {children}

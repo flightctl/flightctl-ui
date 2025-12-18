@@ -1,5 +1,9 @@
 import * as React from 'react';
-import { Modal, ModalBody, ModalHeader } from '@patternfly/react-core/next';
+import {
+	Modal /* data-codemods */,
+	ModalBody /* data-codemods */,
+	ModalHeader /* data-codemods */
+} from '@patternfly/react-core';
 
 import { Repository } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';

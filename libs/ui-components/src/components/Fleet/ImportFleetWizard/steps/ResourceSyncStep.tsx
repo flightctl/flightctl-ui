@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Grid, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
+import { Grid, Stack, StackItem, Content,  } from '@patternfly/react-core';
 import { FormikErrors } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -20,13 +20,13 @@ const ResourceSyncStep = () => {
   return (
     <Stack hasGutter>
       <StackItem>
-        <TextContent>
-          <Text>
+        <Content>
+          <Content component="p">
             {t(
               'A resource sync is an automated Gitops method that helps manage your imported fleets by monitoring source repository changes and updating your fleet configuration accordingly.',
             )}
-          </Text>
-        </TextContent>
+          </Content>
+        </Content>
       </StackItem>
       <StackItem>
         <FlightControlForm>

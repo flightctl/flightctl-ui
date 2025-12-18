@@ -1,14 +1,18 @@
 import * as React from 'react';
 import {
-  Alert,
-  Button,
-  ExpandableSection,
-  Progress,
-  ProgressMeasureLocation,
-  Stack,
-  StackItem,
+	Alert,
+	Button,
+	ExpandableSection,
+	Progress,
+	ProgressMeasureLocation,
+	Stack,
+	StackItem,
+	Modal /* data-codemods */,
+	ModalBody /* data-codemods */,
+	ModalFooter /* data-codemods */,
+	ModalHeader /* data-codemods */
 } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
+
 import { Fleet } from '@flightctl/types';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 

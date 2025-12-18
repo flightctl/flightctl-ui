@@ -14,10 +14,9 @@ import {
   HelperTextItem,
   Stack,
   StackItem,
-  Text,
+  Content,
   TextArea,
-  TextContent,
-  TextVariants,
+  ContentVariants,
   Title,
 } from '@patternfly/react-core';
 import ArrowLeftIcon from '@patternfly/react-icons/dist/js/icons/arrow-left-icon';
@@ -124,12 +123,12 @@ const TokenLoginForm = ({ provider, onBack }: TokenLoginFormProps) => {
             </StackItem>
 
             <StackItem>
-              <TextContent>
-                <Text>{t('Enter your Kubernetes service account token to authenticate with the cluster.')}</Text>
-                <Text component={TextVariants.small}>
+              <Content>
+                <Content component="p">{t('Enter your Kubernetes service account token to authenticate with the cluster.')}</Content>
+                <Content component={ContentVariants.small}>
                   {t('You can find this token in your Kubernetes service account credentials.')}
-                </Text>
-              </TextContent>
+                </Content>
+              </Content>
             </StackItem>
             <StackItem>
               <FlightCtlForm>

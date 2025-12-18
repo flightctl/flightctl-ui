@@ -1,15 +1,14 @@
 import * as React from 'react';
 import {
-  Button,
-  Chip,
-  ChipGroup,
-  Split,
-  SplitItem,
-  Toolbar,
-  ToolbarContent,
-  ToolbarGroup,
-  ToolbarItem,
+	Label, LabelGroup, Button,
+	Split,
+	SplitItem,
+	Toolbar,
+	ToolbarContent,
+	ToolbarGroup,
+	ToolbarItem
 } from '@patternfly/react-core';
+
 
 import { TableTextSearchProps } from '../../Table/TableTextSearch';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -72,14 +71,14 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
       <Toolbar id="devices-toolbar" inset={{ default: 'insetNone' }}>
         <ToolbarContent>
           <ToolbarGroup>
-            <ToolbarItem variant="search-filter">
+            <ToolbarItem >
               <DeviceStatusFilter
                 activeStatuses={activeStatuses}
                 updateStatus={updateStatus}
                 isFilterUpdating={isFilterUpdating}
               />
             </ToolbarItem>
-            <ToolbarItem variant="search-filter">
+            <ToolbarItem >
               <DeviceTableToolbarFilters
                 selectedLabels={selectedLabels}
                 selectedFleetNames={ownerFleets}
@@ -121,49 +120,49 @@ const DeviceToolbarChips = ({
         const { title, items } = getStatusItem(t, key);
         return (
           <SplitItem key={key}>
-            <ChipGroup categoryName={title} isClosable onClick={() => updateStatus(key)}>
+            <LabelGroup categoryName={title} isClosable onClick={() => updateStatus(key)}>
               {activeStatuses[key].map((status: string) => (
-                <Chip key={status} onClick={() => updateStatus(key, status)}>
+                <Label variant="outline" key={status} onClose={() => updateStatus(key, status)}>
                   {items.find(({ id }) => id === status)?.label}
-                </Chip>
+                </Label>
               ))}
-            </ChipGroup>
+            </LabelGroup>
           </SplitItem>
         );
       })}
       {!!ownerFleets.length && (
         <SplitItem>
-          <ChipGroup categoryName={t('Fleet')} isClosable onClick={() => setOwnerFleets([])}>
+          <LabelGroup categoryName={t('Fleet')} isClosable onClick={() => setOwnerFleets([])}>
             {ownerFleets.map((fleetId) => (
-              <Chip key={fleetId} onClick={() => setOwnerFleets(ownerFleets.filter((f) => f !== fleetId))}>
+              <Label variant="outline" key={fleetId} onClose={() => setOwnerFleets(ownerFleets.filter((f) => f !== fleetId))}>
                 {fleetId}
-              </Chip>
+              </Label>
             ))}
-          </ChipGroup>
+          </LabelGroup>
         </SplitItem>
       )}
       {nameOrAlias && (
         <SplitItem>
-          <ChipGroup categoryName={t('Name / Alias')} isClosable onClick={() => setNameOrAlias('')}>
-            <Chip onClick={() => setNameOrAlias('')}>{nameOrAlias}</Chip>
-          </ChipGroup>
+          <LabelGroup categoryName={t('Name / Alias')} isClosable onClick={() => setNameOrAlias('')}>
+            <Label variant="outline" onClose={() => setNameOrAlias('')}>{nameOrAlias}</Label>
+          </LabelGroup>
         </SplitItem>
       )}
       {!!selectedLabels.length && (
         <SplitItem>
-          <ChipGroup categoryName={t('Labels')} isClosable onClick={() => setSelectedLabels([])}>
+          <LabelGroup categoryName={t('Labels')} isClosable onClick={() => setSelectedLabels([])}>
             {selectedLabels.map((label) => {
               const labelStr = labelToString(label);
               return (
-                <Chip
+                <Label variant="outline"
                   key={labelStr}
-                  onClick={() => setSelectedLabels(selectedLabels.filter((l) => labelToString(l) !== labelStr))}
+                  onClose={() => setSelectedLabels(selectedLabels.filter((l) => labelToString(l) !== labelStr))}
                 >
                   {labelStr}
-                </Chip>
+                </Label>
               );
             })}
-          </ChipGroup>
+          </LabelGroup>
         </SplitItem>
       )}
       {(!!statusKeys.length || !!ownerFleets.length || !!nameOrAlias || !!selectedLabels.length) && (

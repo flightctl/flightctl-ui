@@ -41,7 +41,7 @@ const EnabledHelpText = () => {
       withFocusTrap
       triggerAction="click"
     >
-      <Button
+      <Button icon={<OutlinedQuestionCircleIcon />}
         component="a"
         className="fctl-helper-text__icon"
         isInline
@@ -51,9 +51,7 @@ const EnabledHelpText = () => {
           ev.stopPropagation();
         }}
         aria-label="Enabled help text"
-      >
-        <OutlinedQuestionCircleIcon />
-      </Button>
+       />
     </Popover>
   );
 };

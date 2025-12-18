@@ -9,9 +9,8 @@ import {
   Spinner,
   Split,
   SplitItem,
-  Text,
-  TextContent,
-  TextVariants,
+  Content,
+  ContentVariants,
 } from '@patternfly/react-core';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { usePendingEnrollmentRequestsCount } from '../../../../hooks/usePendingEnrollmentRequestsCount';
@@ -49,9 +48,9 @@ const TasksCard = () => {
     } else {
       content = (
         <Bullseye>
-          <TextContent>
-            <Text component={TextVariants.small}>{t('All good!')}</Text>
-          </TextContent>
+          <Content>
+            <Content component={ContentVariants.small}>{t('All good!')}</Content>
+          </Content>
         </Bullseye>
       );
     }

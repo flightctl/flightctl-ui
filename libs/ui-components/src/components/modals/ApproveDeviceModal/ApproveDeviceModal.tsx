@@ -1,7 +1,12 @@
 import * as React from 'react';
 import { EnrollmentRequestApproval } from '@flightctl/types';
-import { Alert } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalHeader } from '@patternfly/react-core/next';
+import {
+	Alert,
+	Modal /* data-codemods */,
+	ModalBody /* data-codemods */,
+	ModalHeader /* data-codemods */
+} from '@patternfly/react-core';
+
 
 import { Formik } from 'formik';
 
