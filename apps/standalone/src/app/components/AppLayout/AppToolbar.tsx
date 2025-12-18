@@ -11,8 +11,12 @@ import {
   Toolbar,
   ToolbarContent,
   ToolbarItem,
+  Modal /* data-codemods */,
+  ModalBody /* data-codemods */,
+  ModalFooter /* data-codemods */,
+  ModalHeader /* data-codemods */,
 } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
+
 import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/question-circle-icon';
 
 import UserPreferencesModal from '@flightctl/ui-components/src/components/Masthead/UserPreferencesModal';
@@ -112,9 +116,8 @@ const AppToolbar = () => {
                 variant="plain"
                 onClick={() => setHelpDropdownOpen(!helpDropdownOpen)}
                 isExpanded={helpDropdownOpen}
-              >
-                <QuestionCircleIcon />
-              </MenuToggle>
+                icon={<QuestionCircleIcon />}
+              />
             )}
             popperProps={{ position: 'right' }}
           >

@@ -3,7 +3,6 @@ import {
   Alert,
   AlertActionCloseButton,
   PageSection,
-  PageSectionVariants,
   Stack,
   StackItem,
 } from '@patternfly/react-core';
@@ -144,7 +143,7 @@ const FleetResourceSyncs = () => {
     return null;
   }
   return (
-    <PageSection variant={PageSectionVariants.light}>
+    <PageSection hasBodyWrapper={false} >
       <Stack hasGutter>
         {pendingRs.map((rs) => {
           return (

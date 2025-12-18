@@ -5,8 +5,6 @@ import {
   EmptyState,
   EmptyStateBody,
   EmptyStateFooter,
-  EmptyStateHeader,
-  EmptyStateIcon,
   EmptyStateVariant,
   Spinner,
   Stack,
@@ -28,9 +26,7 @@ import { AuthContext } from './context/AuthContext';
 
 const EnrollmentRequestDetails = React.lazy(
   () =>
-    import(
-      '@flightctl/ui-components/src/components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails'
-    ),
+    import('@flightctl/ui-components/src/components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails'),
 );
 const DevicesPage = React.lazy(() => import('@flightctl/ui-components/src/components/Device/DevicesPage/DevicesPage'));
 const DeviceDetails = React.lazy(
@@ -359,12 +355,7 @@ const AppRouter = () => {
 
   if (error) {
     return (
-      <EmptyState variant={EmptyStateVariant.xl} style={{ marginTop: '20%' }}>
-        <EmptyStateHeader
-          titleText={t('Log in interrupted')}
-          headingLevel="h2"
-          icon={<EmptyStateIcon icon={PathMissingIcon} />}
-        />
+      <EmptyState  headingLevel="h2" icon={PathMissingIcon}  titleText={t('Log in interrupted')} variant={EmptyStateVariant.xl} style={{ marginTop: '20%' }}>
         <EmptyStateBody>
           <Stack>
             <StackItem style={{ margin: 'auto' }}>

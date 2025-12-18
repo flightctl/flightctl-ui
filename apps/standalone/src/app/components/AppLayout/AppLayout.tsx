@@ -2,17 +2,17 @@ import * as React from 'react';
 import {
   Brand,
   Masthead,
-  MastheadBrand,
+  MastheadLogo,
   MastheadContent,
   MastheadMain,
-  MastheadToggle,
+  MastheadToggle, MastheadBrand,
   Page,
   PageSidebar,
   PageSidebarBody,
   PageToggleButton,
   SkipToContent,
 } from '@patternfly/react-core';
-import { BarsIcon } from '@patternfly/react-icons/dist/js/icons/bars-icon';
+
 import { Outlet } from 'react-router-dom';
 import OrganizationGuard, {
   useOrganizationGuardContext,
@@ -42,23 +42,23 @@ const AppLayoutContent = () => {
     <Masthead id="stack-inline-masthead">
       <MastheadMain>
         <MastheadToggle>
-          <PageToggleButton
+          <PageToggleButton isHamburgerButton
             variant="plain"
             aria-label={t('Global navigation')}
             isSidebarOpen={isSidebarOpen}
             onSidebarToggle={onSidebarToggle}
             id="page-toggle-button"
           >
-            <BarsIcon />
+            
           </PageToggleButton>
         </MastheadToggle>
-        <MastheadBrand>
+        <MastheadBrand data-codemods><MastheadLogo data-codemods>
           {window.isRHEM ? (
             <Brand src={rhemLogo} alt="Red Hat Edge Manager logo" heights={{ default: '50px' }} />
           ) : (
             <Brand src={logo} alt="Flight Control Logo" heights={{ default: '30px' }} />
           )}
-        </MastheadBrand>
+        </MastheadLogo></MastheadBrand>
       </MastheadMain>
       <MastheadContent>
         <AppToolbar />
@@ -67,7 +67,7 @@ const AppLayoutContent = () => {
   );
 
   const Sidebar = (
-    <PageSidebar theme="dark" isSidebarOpen={isSidebarOpen}>
+    <PageSidebar  isSidebarOpen={isSidebarOpen}>
       <PageSidebarBody
         style={{
           opacity: mustShowOrganizationSelector ? 0.3 : 1,
@@ -95,7 +95,7 @@ const AppLayoutContent = () => {
     </SkipToContent>
   );
   return (
-    <Page mainContainerId={pageId} header={Header} sidebar={Sidebar} isManagedSidebar skipToContent={PageSkipToContent}>
+    <Page mainContainerId={pageId} masthead={Header} sidebar={Sidebar} isManagedSidebar skipToContent={PageSkipToContent}>
       {mustShowOrganizationSelector ? (
         <OrganizationSelector isFirstLogin />
       ) : (

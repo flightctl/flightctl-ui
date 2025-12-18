@@ -1,5 +1,8 @@
-import { ChartContainer, ChartDonut } from '@patternfly/react-charts';
-import { Flex, FlexItem, Stack, StackItem, Text, TextContent, TextVariants } from '@patternfly/react-core';
+import {
+	ChartContainer,
+	ChartDonut
+} from '@patternfly/react-charts/victory';
+import { Flex, FlexItem, Stack, StackItem, Content, ContentVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { Link, LinkProps } from '../../hooks/useNavigate';
 import LabelWithHelperText from '../common/WithHelperText';
@@ -101,9 +104,9 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
       </FlexItem>
       <FlexItem>
         {isEmpty ? (
-          <TextContent>
-            <Text component={TextVariants.small}>{t('No devices')}</Text>
-          </TextContent>
+          <Content>
+            <Content component={ContentVariants.small}>{t('No devices')}</Content>
+          </Content>
         ) : (
           <Legend rows={[firstRow, secondRow]} />
         )}

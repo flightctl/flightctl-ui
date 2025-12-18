@@ -7,9 +7,8 @@ import {
   PageSection,
   Stack,
   StackItem,
-  Text,
-  TextContent,
-  TextVariants,
+  Content,
+  ContentVariants,
   Title,
   Toolbar,
   ToolbarContent,
@@ -131,15 +130,15 @@ const AuthProvidersPage = () => {
 
   return (
     <PageWithPermissions allowed={canList} loading={loading}>
-      <PageSection variant="light" type="breadcrumb">
+      <PageSection hasBodyWrapper={false}  type="breadcrumb">
         <Stack hasGutter>
           <StackItem>
             <Title headingLevel="h1" size="3xl">
               {t('Authentication')}
             </Title>
-            <TextContent>
-              <Text component={TextVariants.small}>{t('Manage authentication providers')}</Text>
-            </TextContent>
+            <Content>
+              <Content component={ContentVariants.small}>{t('Manage authentication providers')}</Content>
+            </Content>
           </StackItem>
           <StackItem>
             <Toolbar>

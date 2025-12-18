@@ -29,11 +29,10 @@ const useBrowserTheme = () => {
 };
 
 const LoginPageLayout = ({ children }: React.PropsWithChildren) => {
-  const theme = useBrowserTheme();
-
+  // CELIA-WIP check if theme is applied correctly
   return (
     <Page>
-      <PageSection variant={theme} isFilled>
+      <PageSection hasBodyWrapper={false} type="default" isFilled>
         <Bullseye>{children}</Bullseye>
       </PageSection>
     </Page>

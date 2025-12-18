@@ -7,7 +7,6 @@ import {
   Button,
   ExpandableSection,
   PageSection,
-  PageSectionVariants,
   Spinner,
   Stack,
   StackItem,
@@ -120,7 +119,7 @@ const CreateRepository = () => {
   }
 
   return (
-    <PageSection variant={PageSectionVariants.light}>
+    <PageSection hasBodyWrapper={false} >
       <Stack hasGutter>
         <StackItem>
           <Breadcrumb>

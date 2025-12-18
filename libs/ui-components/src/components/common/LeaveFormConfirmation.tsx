@@ -1,6 +1,13 @@
 import * as React from 'react';
-import { Button, Text, TextContent } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
+import {
+	Button,
+	Content,
+	Modal /* data-codemods */,
+	ModalBody /* data-codemods */,
+	ModalFooter /* data-codemods */,
+	ModalHeader /* data-codemods */
+} from '@patternfly/react-core';
+
 
 import { Blocker, BlockerFunction } from 'react-router-dom';
 import { useFormikContext } from 'formik';
@@ -19,9 +26,9 @@ const ConfirmNavigationDialog = ({ blocker }: { blocker: Blocker }) => {
     <Modal isOpen variant="small">
       <ModalHeader title={t('There are unsaved changes')} titleIconVariant="warning" />
       <ModalBody>
-        <TextContent>
-          <Text>{t('Are you sure you want to leave the current page? Unsaved changes will be lost.')}</Text>
-        </TextContent>
+        <Content>
+          <Content component="p">{t('Are you sure you want to leave the current page? Unsaved changes will be lost.')}</Content>
+        </Content>
       </ModalBody>
       <ModalFooter>
         <Button

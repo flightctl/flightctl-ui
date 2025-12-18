@@ -4,8 +4,6 @@ import {
   EmptyState,
   EmptyStateActions,
   EmptyStateBody,
-  EmptyStateHeader,
-  EmptyStateIcon,
   Spinner,
 } from '@patternfly/react-core';
 import { Table as PFTable, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
@@ -64,12 +62,7 @@ const Table: TableFC = ({
     return loading ? (
       <Spinner size="md" />
     ) : (
-      <EmptyState variant="full">
-        <EmptyStateHeader
-          titleText={t('No results found')}
-          icon={<EmptyStateIcon icon={SearchIcon} />}
-          headingLevel="h1"
-        />
+      <EmptyState  headingLevel="h1" icon={SearchIcon}  titleText={t('No results found')} variant="full">
         <EmptyStateBody>{t('Clear all filters and try again.')}</EmptyStateBody>
         {clearFilters && (
           <EmptyStateActions>

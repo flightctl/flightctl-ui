@@ -23,7 +23,7 @@ const EnrollmentRequestTableToolbar = ({
     <Toolbar id="enrollment-requests-toolbar" inset={{ default: 'insetNone' }}>
       <ToolbarContent>
         <ToolbarGroup>
-          <ToolbarItem variant="search-filter">
+          <ToolbarItem >
             <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name')} />
           </ToolbarItem>
         </ToolbarGroup>

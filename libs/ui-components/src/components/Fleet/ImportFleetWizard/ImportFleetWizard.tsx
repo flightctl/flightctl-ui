@@ -5,7 +5,6 @@ import {
   Bullseye,
   Button,
   PageSection,
-  PageSectionVariants,
   Spinner,
   Title,
   Wizard,
@@ -198,7 +197,7 @@ const ImportFleetWizard = () => {
 
   return (
     <>
-      <PageSection variant="light" type="breadcrumb">
+      <PageSection hasBodyWrapper={false}  type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
             <Link to={ROUTE.FLEETS}>{t('Fleets')}</Link>
@@ -206,12 +205,12 @@ const ImportFleetWizard = () => {
           <BreadcrumbItem isActive>{t('Import fleets')}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false} >
         <Title headingLevel="h1" size="3xl">
           {t('Import fleets')}
         </Title>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light} type="wizard">
+      <PageSection hasBodyWrapper={false}  type="wizard">
         <ErrorBoundary>{body}</ErrorBoundary>
       </PageSection>
     </>

@@ -1,7 +1,18 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import { Alert, Button, Spinner, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
+import {
+	Alert,
+	Button,
+	Spinner,
+	Stack,
+	StackItem,
+	Content,
+	Modal /* data-codemods */,
+	ModalBody /* data-codemods */,
+	ModalFooter /* data-codemods */,
+	ModalHeader /* data-codemods */
+} from '@patternfly/react-core';
+
 
 import { ResourceSyncList } from '@flightctl/types';
 
@@ -89,18 +100,18 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
         <Stack hasGutter>
           {hasResourceSyncs && (
             <StackItem>
-              <TextContent>
-                <Text>
+              <Content>
+                <Content component="p">
                   {t(
                     'This repository defines resource syncs. By deleting the repository, its resource syncs will also be deleted.',
                   )}
-                </Text>
-                <Text>
+                </Content>
+                <Content component="p">
                   {t(
                     `Any fleet that is being managed by this repository's resource syncs, will stop being managed by the service.`,
                   )}
-                </Text>
-              </TextContent>
+                </Content>
+              </Content>
             </StackItem>
           )}
           {rsError ? (
