@@ -1,14 +1,16 @@
 .fctl-rslist-row--selected {
-  background-color: var(--pf-v5-global--palette--blue-50);
+  /* background-color: var(--pf-v5-global--palette--blue-50); */
+  background-color: fuchsia;
 }
 
-.pf-v5-theme-dark .fctl-rslist-row--selected {
-  background-color: var(--pf-v5-global--palette--blue-400);
+.pf-v6-theme-dark .fctl-rslist-row--selected {
+  /* background-color: var(--pf-v5-global--palette--blue-400); */
+  background-color: fuchsia;
 }
 
 .fctl-rslist__addrsbutton {
   position: absolute;
   right: 0;
   display: inline-block;
-  top: 20%
+  top: 20%;
 }

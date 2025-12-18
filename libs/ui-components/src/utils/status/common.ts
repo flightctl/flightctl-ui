@@ -6,12 +6,12 @@ import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/e
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 
-import warningColor /* CODEMODS: you should update this color token, original v5 token was global_warning_color_100 */ from '@patternfly/react-tokens/dist/js/t_temp_dev_tbd';
-import dangerColor /* CODEMODS: you should update this color token, original v5 token was global_danger_color_100 */ from '@patternfly/react-tokens/dist/js/t_temp_dev_tbd';
-import successColor /* CODEMODS: you should update this color token, original v5 token was global_success_color_100 */ from '@patternfly/react-tokens/dist/js/t_temp_dev_tbd';
-import disabledColor /* CODEMODS: you should update this color token, original v5 token was global_disabled_color_100 */ from '@patternfly/react-tokens/dist/js/t_temp_dev_tbd';
-import activeColor /* CODEMODS: you should update this color token, original v5 token was global_active_color_100 */ from '@patternfly/react-tokens/dist/js/t_temp_dev_tbd';
-import defaultColor /* CODEMODS: you should update this color token, original v5 token was global_palette_black_1000 */ from '@patternfly/react-tokens/dist/js/t_temp_dev_tbd';
+import warningColor from '@patternfly/react-tokens/dist/js/t_global_color_status_warning_200';
+import dangerColor from '@patternfly/react-tokens/dist/js/t_global_icon_color_status_danger_default';
+import successColor from '@patternfly/react-tokens/dist/js/t_global_icon_color_status_success_default';
+import disabledColor from '@patternfly/react-tokens/dist/js/t_global_color_disabled_200';
+import activeColor from '@patternfly/react-tokens/dist/js/t_global_color_status_info_200';
+import defaultColor from '@patternfly/react-tokens/dist/js/t_chart_color_black_200';
 
 export type StatusLevel = 'custom' | 'info' | 'success' | 'warning' | 'danger' | 'unknown';
 

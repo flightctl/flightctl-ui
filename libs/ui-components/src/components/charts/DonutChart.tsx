@@ -1,6 +1,6 @@
 import * as React from 'react';
+import { ChartContainer, ChartDonut } from '@patternfly/react-charts/victory';
 import { Content, ContentVariants, Flex, FlexItem, Stack, StackItem } from '@patternfly/react-core';
-import { ChartDonut } from '@patternfly/react-charts/victory';
 import { Link, LinkProps } from '../../hooks/useNavigate';
 import LabelWithHelperText from '../common/WithHelperText';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -75,7 +75,7 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
     >
       <FlexItem className="fctl-charts__donut">
         <div style={{ height: '230px', width: '230px' }}>
-          <div className="fctl-charts__donut-container">
+          <ChartContainer className="fctl-charts__donut-container">
             <foreignObject x="0" y="0" width="230px" height="230px">
               <Flex
                 alignItems={{ default: 'alignItemsCenter' }}
@@ -96,14 +96,12 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
               standalone={false}
               labels={isEmpty ? [] : data.map((datum) => datum.tooltip)}
             />
-          </div>
+          </ChartContainer>
         </div>
       </FlexItem>
       <FlexItem>
         {isEmpty ? (
-          <Content>
-            <Content component={ContentVariants.small}>{t('No devices')}</Content>
-          </Content>
+          <Content component={ContentVariants.small}>{t('No devices')}</Content>
         ) : (
           <Legend rows={[firstRow, secondRow]} />
         )}

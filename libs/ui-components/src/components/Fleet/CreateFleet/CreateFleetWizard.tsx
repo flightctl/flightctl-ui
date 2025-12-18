@@ -36,8 +36,6 @@ import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-import './CreateFleetWizard.css';
-
 const orderedIds = [generalInfoStepId, deviceTemplateStepId, updatePolicyStepId, reviewStepId];
 
 const getValidStepIds = (formikErrors: FormikErrors<FleetFormValues>): string[] => {
@@ -144,7 +142,6 @@ const CreateFleetWizard = () => {
                   }
                   setCurrentStep(step);
                 }}
-                className="fctl-create-fleet"
               >
                 <WizardStep name={t('General info')} id={generalInfoStepId}>
                   {(!currentStep || currentStep?.id === generalInfoStepId) && (

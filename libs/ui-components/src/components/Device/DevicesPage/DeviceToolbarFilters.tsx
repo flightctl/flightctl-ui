@@ -223,7 +223,6 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
 
   const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
     <MenuToggle
-      className="fctl-device-toolbar-filters__toggle"
       ref={toggleRef}
       variant="typeahead"
       aria-label={t('Fleet and label filter toggle')}
@@ -231,7 +230,7 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
       isExpanded={isOpen}
       isFullWidth
       icon={
-        <Icon size="md" className="fctl-device-toolbar-filters__search-icon">
+        <Icon size="md">
           <SearchIcon />
         </Icon>
       }
@@ -383,7 +382,11 @@ const DeviceToolbarFilter = ({
               ref={toggleRef}
               onClick={onToggle}
               isExpanded={isSearchTypeExpanded}
-              className="fctl_device-toolbar-filters__typeselect"
+              style={
+                {
+                  width: '250px',
+                } as React.CSSProperties
+              }
             >
               {selectedSearchType === NAME_SEARCH ? t('Name and alias') : t('Labels and fleets')}
             </MenuToggle>

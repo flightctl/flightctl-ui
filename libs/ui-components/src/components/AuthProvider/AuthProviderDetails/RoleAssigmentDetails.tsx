@@ -28,7 +28,7 @@ const RoleAssigmentDetails = ({ roleAssignment }: { roleAssignment: AuthRoleAssi
   return (
     <>
       <Label color="purple">{getAssignmentTypeLabel(roleAssignment.type, t)}</Label>
-      <LabelGroup className="pf-v5-u-mt-sm">
+      <LabelGroup className="pf-v6-u-ml-sm">
         {values.map((role, index) => (
           <Label key={`${role}-${index}`}>{role}</Label>
         ))}
@@ -36,7 +36,7 @@ const RoleAssigmentDetails = ({ roleAssignment }: { roleAssignment: AuthRoleAssi
       {separator && (
         <>
           <br />
-          <LabelGroup className="pf-v5-u-mt-sm">
+          <LabelGroup className="pf-v6-u-mt-sm">
             <Label color="purple">{t('Separator')}</Label>
 
             <Label key="separator" color="blue">

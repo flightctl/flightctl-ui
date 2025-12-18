@@ -79,7 +79,7 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
                 isFilterUpdating={isFilterUpdating}
               />
             </ToolbarItem>
-            <ToolbarItem>
+            <ToolbarItem style={{ alignItems: 'flex-start' }}>
               <DeviceTableToolbarFilters
                 selectedLabels={selectedLabels}
                 selectedFleetNames={ownerFleets}
