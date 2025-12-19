@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import { Button, DropdownItem, DropdownList, Nav, NavList } from '@patternfly/react-core';
+import { Button, DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
 
 import {
   Device,
@@ -23,8 +23,8 @@ import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import DeviceDetailsTab from './DeviceDetailsTab';
 import TerminalTab from './TerminalTab';
-import NavItem from '../../NavItem/NavItem';
 import { getEditDisabledReason, getResumeDisabledReason, isDeviceEnrolled } from '../../../utils/devices';
+import TabsNav from '../../TabsNav/TabsNav';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import EventsCard from '../../Events/EventsCard';
@@ -148,14 +148,12 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
       resourceType="Devices"
       resourceTypeLabel={t('Devices')}
       nav={
-        <Nav variant="horizontal-subnav">
-          <NavList>
-            <NavItem to="details">{t('Details')}</NavItem>
-            <NavItem to="yaml">{t('YAML')}</NavItem>
-            {!hideTerminal && canOpenTerminal && <NavItem to="terminal">{t('Terminal')}</NavItem>}
-            <NavItem to="events">{t('Events')}</NavItem>
-          </NavList>
-        </Nav>
+        <TabsNav aria-label="Device details tabs" tabKeys={['details', 'yaml', 'terminal', 'events']}>
+          <Tab eventKey="details" title={t('Details')} />
+          <Tab eventKey="yaml" title={t('YAML')} />
+          {!hideTerminal && canOpenTerminal && <Tab eventKey="terminal" title={t('Terminal')} />}
+          <Tab eventKey="events" title={t('Events')} />
+        </TabsNav>
       }
       actions={
         isEnrolled ? (
