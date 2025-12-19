@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Card, CardBody, DropdownItem, DropdownList, Grid, GridItem, Tab } from '@patternfly/react-core';
+import { DropdownItem, DropdownList, Grid, GridItem, Tab } from '@patternfly/react-core';
 
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { RepoSpecType, Repository, ResourceKind } from '@flightctl/types';
@@ -86,19 +86,18 @@ const RepositoryDetails = () => {
               element={
                 <Grid hasGutter>
                   <GridItem md={9}>
-                    <Card>
-                      <CardBody>
+                    <Grid hasGutter>
+                      <GridItem>
                         <RepositoryGeneralDetailsCard repoDetails={repoDetails} />
-                      </CardBody>
-                    </Card>
-                    {canListRS && repoDetails.spec.type === RepoSpecType.GIT && (
-                      <Card>
-                        <CardBody>
+                      </GridItem>
+                      {canListRS && repoDetails.spec.type === RepoSpecType.GIT && (
+                        <GridItem>
                           <RepositoryResourceSyncsCard repositoryId={repositoryId} />
-                        </CardBody>
-                      </Card>
-                    )}
+                        </GridItem>
+                      )}
+                    </Grid>
                   </GridItem>
+
                   <GridItem md={3}>
                     <EventsCard kind={ResourceKind.REPOSITORY} objId={repositoryId} />
                   </GridItem>
