@@ -1,14 +1,12 @@
-name: Push to main
+name: Push to lab
 
 on:
   push:
     branches:
-      - main
-    tags:
-      - '**'
+      - lab
 env:
-  QUAY_ORG: quay.io/flightctl
-  QUAY_CHARTS: quay.io/flightctl/charts
+  QUAY_ORG: quay.io/flightctl-lab
+  QUAY_CHARTS: quay.io/flightctl-lab/charts
   QUAY_STANDALONE_REPO: flightctl-ui
   QUAY_OCP_REPO: flightctl-ocp-ui
 
@@ -80,8 +78,8 @@ jobs:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ needs.generate-tags.outputs.image_tags }}
           registry: ${{ env.QUAY_ORG }}
-          username: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_USERNAME }}
-          password: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_PASSWORD }}
+          username: ${{ secrets.QUAY_FLIGHTCTL_LAB_ROBOT_USERNAME }}
+          password: ${{ secrets.QUAY_FLIGHTCTL_LAB_ROBOT_PASSWORD }}
 
   publish-flightctl-ocp-ui:
     runs-on: ubuntu-latest
@@ -120,5 +118,5 @@ jobs:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ needs.generate-tags.outputs.image_tags }}
           registry: ${{ env.QUAY_ORG }}
-          username: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_USERNAME }}
-          password: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_PASSWORD }}
+          username: ${{ secrets.QUAY_FLIGHTCTL_LAB_ROBOT_USERNAME }}
+          password: ${{ secrets.QUAY_FLIGHTCTL_LAB_ROBOT_PASSWORD }}
