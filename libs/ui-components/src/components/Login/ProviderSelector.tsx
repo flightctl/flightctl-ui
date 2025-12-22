@@ -1,12 +1,9 @@
 import * as React from 'react';
-import { Button, Card, CardBody, CardTitle, Stack, StackItem, Title } from '@patternfly/react-core';
+import { Button, Stack, StackItem } from '@patternfly/react-core';
 
 import { AuthProvider } from '@flightctl/types';
-import fcLogo from '@fctl-assets/bgimages/flight-control-logo.svg';
-import rhemLogo from '@fctl-assets/bgimages/RHEM-logo.svg';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { useAppContext } from '../../hooks/useAppContext';
 import { isOAuth2Provider } from '../AuthProvider/CreateAuthProvider/types';
 import { getProviderDisplayName } from '../../utils/authProvider';
 import { DynamicAuthProviderSpec } from '../../types/extraTypes';
@@ -34,7 +31,6 @@ const ProviderSelector = ({
   disabled = false,
 }: ProviderSelectorProps) => {
   const { t } = useTranslation();
-  const { settings } = useAppContext();
 
   const duplicateProviderNames = React.useMemo(() => {
     // Record of provider names and display names that are duplicates
@@ -53,61 +49,36 @@ const ProviderSelector = ({
   }, [providers, t]);
 
   return (
-    <>
-      <Card isLarge>
-        <CardBody>
-          <Stack hasGutter>
-            <StackItem>
-              <img
-                src={settings.isRHEM ? (rhemLogo as string) : (fcLogo as string)}
-                alt={settings.isRHEM ? 'Red Hat Edge Manager' : 'Flight Control'}
-              />
-            </StackItem>
+    <Stack hasGutter>
+      {providers.map((provider) => {
+        const displayName = getProviderDisplayName(provider, t);
 
-            <StackItem>
-              <CardTitle>
-                <Title headingLevel="h2" size="lg">
-                  {t('Choose login method')}
-                </Title>
-              </CardTitle>
-            </StackItem>
-
-            <StackItem>
-              <Stack hasGutter>
-                {providers.map((provider) => {
-                  const displayName = getProviderDisplayName(provider, t);
-
-                  const isDuplicateName = duplicateProviderNames[displayName];
-                  let details: string | undefined;
-                  if (isDuplicateName) {
-                    const spec = provider.spec as DynamicAuthProviderSpec;
-                    if (isOAuth2Provider(spec)) {
-                      details = spec.authorizationUrl || spec.clientId || '';
-                    } else {
-                      details = spec.issuer || spec.clientId || '';
-                    }
-                  }
-                  return (
-                    <StackItem key={getProviderKey(provider)}>
-                      <Button
-                        variant={defaultProviderName === provider.metadata.name ? 'primary' : 'secondary'}
-                        isBlock
-                        size="lg"
-                        onClick={() => onProviderSelect(provider)}
-                        isDisabled={disabled}
-                      >
-                        {t('Log in with {{ providerName }}', { providerName: getProviderDisplayName(provider, t) })}
-                      </Button>
-                      {isDuplicateName && <small>{details}</small>}
-                    </StackItem>
-                  );
-                })}
-              </Stack>
-            </StackItem>
-          </Stack>
-        </CardBody>
-      </Card>
-    </>
+        const isDuplicateName = duplicateProviderNames[displayName];
+        let details: string | undefined;
+        if (isDuplicateName) {
+          const spec = provider.spec as DynamicAuthProviderSpec;
+          if (isOAuth2Provider(spec)) {
+            details = spec.authorizationUrl || spec.clientId || '';
+          } else {
+            details = spec.issuer || spec.clientId || '';
+          }
+        }
+        return (
+          <StackItem key={getProviderKey(provider)}>
+            <Button
+              variant={defaultProviderName === provider.metadata.name ? 'primary' : 'secondary'}
+              isBlock
+              size="lg"
+              onClick={() => onProviderSelect(provider)}
+              isDisabled={disabled}
+            >
+              {t('Log in with {{ providerName }}', { providerName: getProviderDisplayName(provider, t) })}
+            </Button>
+            {isDuplicateName && <small>{details}</small>}
+          </StackItem>
+        );
+      })}
+    </Stack>
   );
 };
 

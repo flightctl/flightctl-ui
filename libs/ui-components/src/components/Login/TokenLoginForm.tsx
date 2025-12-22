@@ -1,5 +1,8 @@
 import * as React from 'react';
 import {
+  ActionList,
+  ActionListGroup,
+  ActionListItem,
   Alert,
   Bullseye,
   Button,
@@ -117,19 +120,18 @@ const TokenLoginForm = ({ provider, onBack }: TokenLoginFormProps) => {
         <CardBody>
           <Stack hasGutter style={{ '--pf-v5-l-stack--m-gutter--Gap': '1.5rem' } as React.CSSProperties}>
             <StackItem>
-              <Title headingLevel="h2" size="xl">
+              <Title headingLevel="h1" size="2xl">
                 {t('Enter your Kubernetes token')}
               </Title>
             </StackItem>
 
             <StackItem>
-              <Content>
-                <Content component="p">
-                  {t('Enter your Kubernetes service account token to authenticate with the cluster.')}
-                </Content>
-                <Content component={ContentVariants.small}>
-                  {t('You can find this token in your Kubernetes service account credentials.')}
-                </Content>
+              <Content component="p">
+                {t('Enter your Kubernetes service account token to authenticate with the cluster.')}
+              </Content>
+
+              <Content component={ContentVariants.small}>
+                {t('You can find this token in your Kubernetes service account credentials.')}
               </Content>
             </StackItem>
             <StackItem>
@@ -186,14 +188,27 @@ const TokenLoginForm = ({ provider, onBack }: TokenLoginFormProps) => {
           </Stack>
         </CardBody>
         <CardFooter>
-          <Button
-            variant="primary"
-            isDisabled={!token || !!validationError || isSubmitting}
-            isLoading={isSubmitting}
-            onClick={handleSubmit}
-          >
-            {isSubmitting ? t('Authenticating...') : t('Login')}
-          </Button>
+          <ActionList>
+            <ActionListGroup>
+              <ActionListItem>
+                <Button
+                  variant="primary"
+                  isDisabled={!token || !!validationError || isSubmitting}
+                  isLoading={isSubmitting}
+                  onClick={handleSubmit}
+                >
+                  {isSubmitting ? t('Authenticating...') : t('Login')}
+                </Button>
+              </ActionListItem>
+              {onBack && (
+                <ActionListItem>
+                  <Button variant="link" onClick={onBack} isDisabled={isSubmitting}>
+                    {t('Cancel')}
+                  </Button>
+                </ActionListItem>
+              )}
+            </ActionListGroup>
+          </ActionList>
         </CardFooter>
       </Card>
     </Bullseye>
