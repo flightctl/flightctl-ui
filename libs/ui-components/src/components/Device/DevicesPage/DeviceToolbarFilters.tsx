@@ -75,7 +75,7 @@ const LabelFleetResults = ({
   if (isUpdating) {
     return (
       <div className="fctl-device-toolbar-filters__hint">
-        <Spinner size="md" className="pf-v5-u-mr-sm" />
+        <Spinner size="md" className="pf-v6-u-mr-sm" />
         {t('Searching...')}
       </div>
     );

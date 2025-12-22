@@ -41,8 +41,6 @@ import PageWithPermissions from '../../common/PageWithPermissions';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
 
-import './EditDeviceWizard.css';
-
 const EditDeviceWizard = () => {
   const { t } = useTranslation();
   const [submitError, setSubmitError] = React.useState<string | undefined>();
@@ -123,7 +121,6 @@ const EditDeviceWizard = () => {
             <>
               <LeaveFormConfirmation />
               <Wizard
-                className="fctl-edit-device__wizard"
                 footer={<EditDeviceWizardFooter />}
                 nav={<EditDeviceWizardNav />}
                 onStepChange={() => {

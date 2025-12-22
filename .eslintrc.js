@@ -63,11 +63,6 @@ module.exports = {
           },
           {
             name: '@patternfly/react-core',
-            importNames: ['ActionGroup'],
-            message: 'Use FlightCtlActionGroup wrapper',
-          },
-          {
-            name: '@patternfly/react-core',
             importNames: ['DescriptionList'],
             message: 'Use FlightCtlDescriptionList wrapper',
           },

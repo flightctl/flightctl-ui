@@ -16,9 +16,9 @@ import {
   MenuContent,
   MenuItem,
   MenuList,
-  Modal /* data-codemods */,
-  ModalBody /* data-codemods */,
-  ModalHeader /* data-codemods */,
+  Modal,
+  ModalBody,
+  ModalHeader,
   PageSection,
   Stack,
   StackItem,
@@ -215,7 +215,7 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
                 </>
               )}
             </Content>
-            <ActionList className="pf-v5-u-mt-md">
+            <ActionList className="pf-v6-u-mt-md">
               <ActionListGroup>
                 <ActionListItem>
                   <Button variant="primary" onClick={handleRefetch} isDisabled={isReloading}>

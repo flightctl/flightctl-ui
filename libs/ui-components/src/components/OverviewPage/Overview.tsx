@@ -23,7 +23,7 @@ const Overview = () => {
 
   return (
     <PageWithPermissions allowed={canListDevices || canListErs} loading={loading}>
-      <GlobalSystemRestoreBanners className="pf-v5-u-py-0" />
+      <GlobalSystemRestoreBanners className="pf-v6-u-py-0" />
 
       <Grid hasGutter>
         <GridItem md={alertsEnabled ? 9 : 12}>

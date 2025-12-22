@@ -1,14 +1,15 @@
 import * as React from 'react';
 import { ActionsColumn, Tbody, Td, Tr } from '@patternfly/react-table';
 import {
+  ActionGroup,
   Alert,
   Button,
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  Modal /* data-codemods */,
-  ModalBody /* data-codemods */,
-  ModalHeader /* data-codemods */,
+  Modal,
+  ModalBody,
+  ModalHeader,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
@@ -33,7 +34,6 @@ import { useTableSelect } from '../../hooks/useTableSelect';
 import MassDeleteResourceSyncModal from '../modals/massModals/MassDeleteResourceSyncModal/MassDeleteResourceSyncModal';
 import ResourceSyncStatus from './ResourceSyncStatus';
 import { useTranslation } from '../../hooks/useTranslation';
-import { useAppContext } from '../../hooks/useAppContext';
 import { getErrorMessage } from '../../utils/error';
 import { commonQueries } from '../../utils/query';
 
@@ -43,7 +43,6 @@ import {
   singleResourceSyncSchema,
 } from '../Repository/CreateRepository/utils';
 import { CreateResourceSyncForm } from '../Repository/CreateRepository/CreateResourceSyncsForm';
-import FlightCtlActionGroup from '../form/FlightCtlActionGroup';
 import FlightCtlForm from '../form/FlightCtlForm';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import ListPageBody from '../ListPage/ListPageBody';
@@ -69,16 +68,6 @@ const getColumns = (t: TFunction): TableColumn<ResourceSync>[] => [
     name: t('Observed hash'),
   },
 ];
-
-const createRefs = (rsList: ResourceSync[]): { [key: string]: React.RefObject<HTMLTableRowElement> } => {
-  const rsRefs = {};
-  rsList.forEach((rs) => {
-    if (rs.metadata.name) {
-      rsRefs[rs.metadata.name] = React.createRef();
-    }
-  });
-  return rsRefs;
-};
 
 const getSearchText = (resourceSync: ResourceSync) => [resourceSync.metadata.name];
 
@@ -113,14 +102,14 @@ const CreateResourceSyncModalForm = ({ onClose }: { onClose: VoidFunction }) => 
   return (
     <FlightCtlForm>
       <CreateResourceSyncForm rs={rsToAdd} index={0} />
-      <FlightCtlActionGroup>
+      <ActionGroup>
         <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
           {t('Add a resource sync')}
         </Button>
         <Button variant="link" isDisabled={isSubmitting} onClick={onClose}>
           {t('Cancel')}
         </Button>
-      </FlightCtlActionGroup>
+      </ActionGroup>
     </FlightCtlForm>
   );
 };
@@ -184,22 +173,6 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
 
   const { t } = useTranslation();
   const { remove } = useFetch();
-  const {
-    router: { useLocation },
-  } = useAppContext();
-  const { hash = '#' } = useLocation();
-  const rsRefs = createRefs(resourceSyncs);
-  const selectedRs = hash.split('#')[1];
-
-  React.useEffect(() => {
-    const rsRow = rsRefs[selectedRs]?.current;
-    if (rsRow) {
-      rsRow.scrollIntoView({ block: 'start', behavior: 'smooth' });
-    }
-    // Needs to be run only at the beginning
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const { filteredData, search, setSearch } = useTableTextSearch(resourceSyncs, getSearchText);
 
   const columns = React.useMemo(() => getColumns(t), [t]);
@@ -262,15 +235,14 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
         <Tbody>
           {filteredData.map((resourceSync, rowIndex) => {
             const rsName = resourceSync.metadata.name as string;
-            const rsRef = rsRefs[rsName];
-            const isSelected = rsName === selectedRs;
+            const isSelected = isRowSelected(resourceSync);
             return (
-              <Tr key={rsName} ref={rsRef} className={isSelected ? 'fctl-rslist-row--selected' : ''}>
+              <Tr key={rsName} className={isSelected ? 'fctl-rslist-row--selected' : ''}>
                 <Td
                   select={{
                     rowIndex,
+                    isSelected,
                     onSelect: onRowSelect(resourceSync),
-                    isSelected: isRowSelected(resourceSync),
                   }}
                 />
                 <Td dataLabel={t('Name')}>{rsName}</Td>

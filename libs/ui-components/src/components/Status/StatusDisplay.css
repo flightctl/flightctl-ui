@@ -3,10 +3,10 @@
 }
 .ftcl_status-label > div {
   /* Reduce the space between the icon and the label, caused by the table rules */
-  --pf-v5-l-flex--spacer--column: 0.5rem;
+  --pf-v6-l-flex--spacer--column: 0.5rem;
 }
 
-.fctl-status-display-content__popover .pf-v5-c-popover__body {
-  overflow-y: scroll;
+.fctl-status-display-content__popover .pf-v6-c-popover__body {
+  overflow-y: auto;
   max-height: 30vh;
 }

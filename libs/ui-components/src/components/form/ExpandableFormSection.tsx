@@ -6,8 +6,6 @@ import { useField, useFormikContext } from 'formik';
 import { useTranslation } from '../../hooks/useTranslation';
 import WithTooltip from '../common/WithTooltip';
 
-import './ExpandableFormSection.css';
-
 const ExpandableFormSection = ({
   fieldName,
   title,
@@ -32,7 +30,7 @@ const ExpandableFormSection = ({
           {!isExpanded && !!description && (
             <SplitItem
               style={{
-                color: 'var(--pf-t--temp--dev--tbd)' /* CODEMODS: original v5 color was --pf-v5-global--Color--100 */,
+                color: 'var(--pf-t--global--text--color--100)',
               }}
             >
               {description}
@@ -41,7 +39,7 @@ const ExpandableFormSection = ({
           {!isExpanded && error && (
             <SplitItem>
               <WithTooltip showTooltip content={t('Invalid {{ itemType }}', { itemType: title })}>
-                <ExclamationCircleIcon className="fctl-expandable-section--error" />
+                <ExclamationCircleIcon style={{ color: 'var(--pf-t--global--icon--color--status--danger--default)' }} />
               </WithTooltip>
             </SplitItem>
           )}

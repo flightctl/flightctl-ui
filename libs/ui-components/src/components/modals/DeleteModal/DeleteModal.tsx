@@ -1,15 +1,6 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import {
-  Alert,
-  Button,
-  Modal /* data-codemods */,
-  ModalBody /* data-codemods */,
-  ModalFooter /* data-codemods */,
-  ModalHeader /* data-codemods */,
-  Stack,
-  StackItem,
-} from '@patternfly/react-core';
+import { Alert, Button, Modal, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
 
 import { getErrorMessage } from '../../../utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';

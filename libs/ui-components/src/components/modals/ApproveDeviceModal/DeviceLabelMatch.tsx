@@ -4,6 +4,8 @@ import { Spinner, TextInput } from '@patternfly/react-core';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { DeviceMatchStatus } from '../../../hooks/useDeviceLabelMatch';
 
+import './DeviceLabelMatch.css';
+
 export const DeviceLabelMatch = ({ matchStatus }: { matchStatus: DeviceMatchStatus }) => {
   const { t } = useTranslation();
 

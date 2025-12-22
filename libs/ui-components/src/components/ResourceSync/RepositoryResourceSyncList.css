@@ -1,11 +1,9 @@
 .fctl-rslist-row--selected {
-  /* background-color: var(--pf-v5-global--palette--blue-50); */
-  background-color: fuchsia;
+  background-color: var(--pf-t--color--blue--20);
 }
 
 .pf-v6-theme-dark .fctl-rslist-row--selected {
-  /* background-color: var(--pf-v5-global--palette--blue-400); */
-  background-color: fuchsia;
+  background-color: var(--pf-t--color--blue--60);
 }
 
 .fctl-rslist__addrsbutton {

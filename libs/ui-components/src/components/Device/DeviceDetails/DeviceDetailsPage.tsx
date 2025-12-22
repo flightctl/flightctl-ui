@@ -140,7 +140,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
             resumeAction={resumeDevice}
             summaryStatus={deviceSummary}
             onResumeComplete={refetch}
-            className="pf-v5-u-pt-0 pf-v5-u-px-lg"
+            className="pf-v6-u-pt-0 pf-v6-u-px-lg"
           />
         )
       }

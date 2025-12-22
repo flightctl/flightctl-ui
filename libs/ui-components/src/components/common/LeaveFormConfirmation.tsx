@@ -1,12 +1,5 @@
 import * as React from 'react';
-import {
-  Button,
-  Content,
-  Modal /* data-codemods */,
-  ModalBody /* data-codemods */,
-  ModalFooter /* data-codemods */,
-  ModalHeader /* data-codemods */,
-} from '@patternfly/react-core';
+import { Button, Content, Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core';
 
 import { Blocker, BlockerFunction } from 'react-router-dom';
 import { useFormikContext } from 'formik';

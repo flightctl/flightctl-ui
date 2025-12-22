@@ -119,7 +119,7 @@ const DeviceTemplateStep = ({ isFleet, isReadOnly }: { isFleet: boolean; isReadO
               will be applied based on each device&rsquo;s details. For example, you could set the following value to
               apply different files in a Git configuration:
             </Trans>
-            <CodeBlock className="pf-v5-u-mt-md">
+            <CodeBlock className="pf-v6-u-my-md">
               <CodeBlockCode>{exampleCode}</CodeBlockCode>
             </CodeBlock>
             <LearnMoreLink link={useTemplateVarsLink} />

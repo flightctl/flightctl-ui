@@ -1,16 +1,12 @@
 .fctl-form-select__toggle {
-    width: 100%;
+  width: 100%;
 }
 
 .fctl-form-select__menu {
-    max-height: 20rem;
-    overflow: auto;
+  max-height: 20rem;
+  overflow: auto;
 }
 
-.fctl-form-select{
-    max-width: 30rem;
-}
-
-.fctl-form-select__item .pf-v5-c-menu__item-text {
-    white-space: normal;
+.fctl-form-select {
+  max-width: 30rem;
 }
