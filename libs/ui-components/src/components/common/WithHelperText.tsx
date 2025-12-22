@@ -2,8 +2,6 @@ import * as React from 'react';
 import { Button, FormGroup, Popover } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 
-import './WithHelperText.css';
-
 type HelperTextPopoverProps = {
   label: string;
   triggerAction?: 'click' | 'hover';
@@ -23,7 +21,6 @@ const HelperTextPopover = ({
     <Button
       icon={<OutlinedQuestionCircleIcon />}
       component="a"
-      className="fctl-helper-text__icon"
       isInline
       variant="plain"
       onClick={(ev) => {

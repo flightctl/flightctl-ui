@@ -6,10 +6,10 @@ import {
   FormGroup,
   MenuToggle,
   MenuToggleElement,
-  Modal /* data-codemods */,
-  ModalBody /* data-codemods */,
-  ModalFooter /* data-codemods */,
-  ModalHeader /* data-codemods */,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
   Radio,
   Select,
   SelectList,
@@ -333,7 +333,7 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
             <StackItem>
               {isCountLoading ? (
                 <Alert variant="info" isInline title={t('Refreshing device count')}>
-                  <Spinner size="md" className="pf-v5-u-mr-sm" />
+                  <Spinner size="md" />
                   {t('Checking how many suspended devices match your criteria...')}
                 </Alert>
               ) : countError ? (

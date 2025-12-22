@@ -105,20 +105,13 @@ const TokenLoginForm = ({ provider, onBack }: TokenLoginFormProps) => {
       <Card isLarge>
         {onBack && (
           <CardHeader>
-            <Button
-              variant="link"
-              className="pf-v5-u-size-sm"
-              onClick={onBack}
-              isInline
-              isDisabled={isSubmitting}
-              icon={<ArrowLeftIcon />}
-            >
+            <Button variant="link" onClick={onBack} isInline isDisabled={isSubmitting} icon={<ArrowLeftIcon />}>
               {t('Back to login options')}
             </Button>
           </CardHeader>
         )}
         <CardBody>
-          <Stack hasGutter style={{ '--pf-v5-l-stack--m-gutter--Gap': '1.5rem' } as React.CSSProperties}>
+          <Stack hasGutter>
             <StackItem>
               <Title headingLevel="h1" size="2xl">
                 {t('Enter your Kubernetes token')}

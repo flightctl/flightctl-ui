@@ -32,7 +32,7 @@ export const StatusDisplayContent = ({
   const icon = (
     <Icon
       status={overrideStatus ? undefined : level}
-      style={{ '--pf-v5-c-icon__content--Color': iconColor } as React.CSSProperties}
+      style={{ '--pf-v6-c-icon__content--Color': iconColor } as React.CSSProperties}
     >
       <IconComponent />
     </Icon>

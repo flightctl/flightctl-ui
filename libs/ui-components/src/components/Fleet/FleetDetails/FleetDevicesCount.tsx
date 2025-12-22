@@ -25,7 +25,7 @@ const UpdatedFleetDevices = ({ error }: { error?: string }) => {
       bodyContent={error}
       hasAutoWidth={false}
     >
-      <Icon status="danger" className="pf-v5-u-mr-sm">
+      <Icon status="danger">
         <ExclamationCircleIcon />
       </Icon>
     </Popover>

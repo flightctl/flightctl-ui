@@ -1,12 +1,11 @@
 import * as React from 'react';
 import { useFormikContext } from 'formik';
-import { Alert, Button, FormGroup } from '@patternfly/react-core';
+import { ActionGroup, Alert, Button, FormGroup } from '@patternfly/react-core';
 
 import { EnrollmentRequest } from '@flightctl/types';
 import RichValidationTextField from '../../form/RichValidationTextField';
 import LabelsField from '../../form/LabelsField';
 import { getLabelValueValidations } from '../../form/validations';
-import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import FlightCtlForm from '../../form/FlightCtlForm';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -53,7 +52,7 @@ const ApproveDeviceForm: React.FC<ApproveDeviceFormProps> = ({ enrollmentRequest
       </FormGroup>
       {children}
       {error && <Alert isInline title={error} variant="danger" />}
-      <FlightCtlActionGroup>
+      <ActionGroup>
         <Button
           key="confirm"
           variant="primary"
@@ -66,7 +65,7 @@ const ApproveDeviceForm: React.FC<ApproveDeviceFormProps> = ({ enrollmentRequest
         <Button key="cancel" variant="link" onClick={() => onClose()} isDisabled={isSubmitting}>
           {t('Cancel')}
         </Button>
-      </FlightCtlActionGroup>
+      </ActionGroup>
     </FlightCtlForm>
   );
 };

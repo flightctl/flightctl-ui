@@ -43,8 +43,6 @@ import PageWithPermissions from '../../common/PageWithPermissions';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
 
-import './ImportFleetWizard.css';
-
 const validationSchema = (t: TFunction) =>
   Yup.lazy((values: ImportFleetFormValues) =>
     values.useExistingRepo
@@ -162,11 +160,7 @@ const ImportFleetWizard = () => {
         {({ values, errors: formikErrors }) => (
           <>
             <LeaveFormConfirmation />
-            <Wizard
-              footer={<ImportFleetWizardFooter />}
-              onStepChange={(_, step) => setCurrentStep(step)}
-              className="fctl-import-fleet"
-            >
+            <Wizard footer={<ImportFleetWizardFooter />} onStepChange={(_, step) => setCurrentStep(step)}>
               <WizardStep name={t('Select or create repository')} id={repositoryStepId}>
                 {(!currentStep || currentStep?.id === repositoryStepId) && (
                   <RepositoryStep repositories={gitRepositories} hasLoaded={!!repoList} />

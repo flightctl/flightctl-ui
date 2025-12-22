@@ -143,7 +143,7 @@ const YamlEditorBase = ({
             icon={<DownloadIcon />}
             type="submit"
             variant="secondary"
-            className="pf-v5-u-ml-auto hidden-sm hidden-xs"
+            className="pf-v6-u-ml-auto"
             aria-label={t('Download')}
             onClick={downloadYaml}
           >

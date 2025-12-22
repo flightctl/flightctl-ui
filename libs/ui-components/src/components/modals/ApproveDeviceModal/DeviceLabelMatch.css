@@ -1,0 +1,4 @@
+/* Prevent the border from disappearing when the input is hovered */
+.pf-v6-c-form-control.pf-m-readonly.pf-m-warning:hover {
+  --pf-v6-c-form-control--after--BorderColor: var(--pf-t--global--border--color--status--warning--hover);
+}

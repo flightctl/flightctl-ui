@@ -40,7 +40,7 @@ const getIntegrityCheckItem = (
     <StackItem key={key}>
       <Icon
         status={iconStatus}
-        style={{ '--pf-v5-c-icon__content--Color': getDefaultStatusColor(levelItem.level) } as React.CSSProperties}
+        style={{ '--pf-v6-c-icon__content--Color': getDefaultStatusColor(levelItem.level) } as React.CSSProperties}
       >
         <IconComponent />
       </Icon>{' '}

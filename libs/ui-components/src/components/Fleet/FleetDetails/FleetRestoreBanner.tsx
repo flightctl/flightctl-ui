@@ -38,7 +38,7 @@ const FleetRestoreBanner = ({ fleet, refetch }: { fleet?: Fleet; refetch: VoidFu
         },
       }}
       onResumeComplete={refetch}
-      className="pf-v5-u-pt-0 pf-v5-u-px-lg"
+      className="pf-v6-u-px-lg"
     />
   );
 };

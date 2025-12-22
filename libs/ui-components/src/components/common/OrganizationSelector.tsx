@@ -15,14 +15,14 @@ import {
   MenuContent,
   MenuItem,
   MenuList,
+  Modal,
+  ModalBody,
+  ModalHeader,
   PageSection,
   Stack,
   StackItem,
   Content,
   Title,
-  Modal /* data-codemods */,
-  ModalBody /* data-codemods */,
-  ModalHeader /* data-codemods */,
 } from '@patternfly/react-core';
 
 import { Organization } from '@flightctl/types';
@@ -219,7 +219,7 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
               )}
             </Content>
             {!isEmptyOrganizations && (
-              <ActionList className="pf-v5-u-mt-md">
+              <ActionList className="pf-v6-u-mt-md">
                 <ActionListGroup>
                   <ActionListItem>
                     <Button variant="primary" onClick={handleRefetch} isDisabled={isReloading}>
@@ -229,7 +229,7 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
                 </ActionListGroup>
               </ActionList>
             )}
-            <ActionList className="pf-v5-u-mt-md">
+            <ActionList className="pf-v6-u-mt-md">
               <ActionListGroup>
                 <ActionListItem>
                   <Button variant="primary" onClick={handleRefetch} isDisabled={isReloading}>

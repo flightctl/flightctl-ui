@@ -52,8 +52,8 @@ const AppLayoutContent = () => {
             id="page-toggle-button"
           />
         </MastheadToggle>
-        <MastheadBrand data-codemods>
-          <MastheadLogo data-codemods>
+        <MastheadBrand>
+          <MastheadLogo>
             {window.isRHEM ? (
               <Brand src={rhemLogo} alt="Red Hat Edge Manager logo" heights={{ default: '50px' }} />
             ) : (
