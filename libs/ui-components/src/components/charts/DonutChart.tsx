@@ -16,6 +16,9 @@ export type Data = {
   tooltip: string;
 };
 
+const chartWidth = 230;
+const chartHeight = 230;
+
 const Legend = ({ rows }: { rows: Data[][] }) => {
   return (
     <Stack>
@@ -74,30 +77,34 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
       alignItems={{ default: 'alignItemsCenter' }}
     >
       <FlexItem className="fctl-charts__donut">
-        <div style={{ height: '230px', width: '230px' }}>
-          <ChartContainer className="fctl-charts__donut-container">
-            <foreignObject x="0" y="0" width="230px" height="230px">
-              <Flex
-                alignItems={{ default: 'alignItemsCenter' }}
-                justifyContent={{ default: 'justifyContentCenter' }}
-                alignContent={{ default: 'alignContentCenter' }}
-                className="fctl-charts__title"
-              >
-                {helperText ? <LabelWithHelperText label={title} content={helperText} /> : title}
-              </Flex>
-            </foreignObject>
-            <ChartDonut
-              ariaDesc={title}
-              ariaTitle={title}
-              constrainToVisibleArea
-              colorScale={isEmpty ? [getDefaultStatusColor('unknown')] : data.map((datum) => datum.color)}
-              data={isEmpty ? [{ y: 100 }] : data}
-              name={title}
-              standalone={false}
-              labels={isEmpty ? [] : data.map((datum) => datum.tooltip)}
-            />
-          </ChartContainer>
-        </div>
+        <ChartContainer
+          className="fctl-charts__donut-container"
+          width={chartWidth}
+          height={chartHeight}
+          role="img"
+          aria-label={title}
+        >
+          <foreignObject x="0" y="0" width={chartWidth} height={chartHeight}>
+            <Flex
+              alignItems={{ default: 'alignItemsCenter' }}
+              justifyContent={{ default: 'justifyContentCenter' }}
+              alignContent={{ default: 'alignContentCenter' }}
+              className="fctl-charts__title"
+            >
+              {helperText ? <LabelWithHelperText label={title} content={helperText} /> : title}
+            </Flex>
+          </foreignObject>
+          <ChartDonut
+            ariaDesc={title}
+            ariaTitle={title}
+            constrainToVisibleArea
+            colorScale={isEmpty ? [getDefaultStatusColor('unknown')] : data.map((datum) => datum.color)}
+            data={isEmpty ? [{ y: 100 }] : data}
+            name={title}
+            standalone={false}
+            labels={isEmpty ? [] : data.map((datum) => datum.tooltip)}
+          />
+        </ChartContainer>
       </FlexItem>
       <FlexItem>
         {isEmpty ? (
