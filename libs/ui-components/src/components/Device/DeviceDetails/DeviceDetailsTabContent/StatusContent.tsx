@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  CardBody,
   CardTitle,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -9,7 +10,7 @@ import {
 import { Device, DeviceLastSeen } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
-import DetailsPageCard, { DetailsPageCardBody } from '../../../DetailsPage/DetailsPageCard';
+import DetailsPageCard from '../../../DetailsPage/DetailsPageCard';
 import FlightControlDescriptionList from '../../../common/FlightCtlDescriptionList';
 import LabelWithHelperText from '../../../common/WithHelperText';
 import ApplicationSummaryStatus from '../../../Status/ApplicationSummaryStatus';
@@ -31,7 +32,7 @@ const StatusContent = ({ device }: { device: Required<Device> }) => {
   return (
     <DetailsPageCard>
       <CardTitle>{t('System status')}</CardTitle>
-      <DetailsPageCardBody>
+      <CardBody>
         <FlightControlDescriptionList columnModifier={{ default: '3Col' }}>
           <DescriptionListGroup>
             <DescriptionListTerm>
@@ -84,7 +85,7 @@ const StatusContent = ({ device }: { device: Required<Device> }) => {
             <DescriptionListDescription>{timeSinceText(t, lastSeenResponse?.lastSeen)}</DescriptionListDescription>
           </DescriptionListGroup>
         </FlightControlDescriptionList>
-      </DetailsPageCardBody>
+      </CardBody>
     </DetailsPageCard>
   );
 };

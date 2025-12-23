@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  CardBody,
   CardTitle,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -20,7 +21,7 @@ import EditLabelsForm, { ViewLabels } from '../../modals/EditLabelsModal/EditLab
 import ResourceLink from '../../common/ResourceLink';
 import LabelWithHelperText from '../../common/WithHelperText';
 import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
-import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
+import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
 import DeviceLifecycleStatus from '../../Status/DeviceLifecycleStatus';
 import DeviceFleet from './DeviceFleet';
@@ -52,7 +53,7 @@ const EnrolledDeviceDetails = ({
     <Grid hasGutter>
       <GridItem md={12}>
         <DetailsPageCard>
-          <DetailsPageCardBody>
+          <CardBody>
             <Grid>
               <GridItem md={6} lg={hasExtraColumn ? 2 : 3}>
                 <Stack>
@@ -104,14 +105,14 @@ const EnrolledDeviceDetails = ({
                 })}
               </Grid>
             )}
-          </DetailsPageCardBody>
+          </CardBody>
         </DetailsPageCard>
       </GridItem>
       {devSystemInfo.customInfo.length > 0 && (
         <GridItem md={12} lg={6}>
           <DetailsPageCard>
             <CardTitle>{t('Custom data')}</CardTitle>
-            <DetailsPageCardBody>
+            <CardBody>
               <Grid hasGutter>
                 {devSystemInfo.customInfo.map((systemInfo) => {
                   return (
@@ -124,7 +125,7 @@ const EnrolledDeviceDetails = ({
                   );
                 })}
               </Grid>
-            </DetailsPageCardBody>
+            </CardBody>
           </DetailsPageCard>
         </GridItem>
       )}
@@ -137,7 +138,7 @@ const EnrolledDeviceDetails = ({
       <GridItem md={12} lg={6}>
         <DetailsPageCard>
           <CardTitle>{t('Configurations')}</CardTitle>
-          <DetailsPageCardBody>
+          <CardBody>
             <FlightControlDescriptionList columnModifier={{ default: '2Col' }}>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('System image (running)')}</DescriptionListTerm>
@@ -154,7 +155,7 @@ const EnrolledDeviceDetails = ({
                 </DescriptionListDescription>
               </DescriptionListGroup>
             </FlightControlDescriptionList>
-          </DetailsPageCardBody>
+          </CardBody>
         </DetailsPageCard>
       </GridItem>
       <GridItem md={12} lg={6}>
@@ -174,7 +175,7 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
     <Grid hasGutter>
       <GridItem md={12}>
         <DetailsPageCard>
-          <DetailsPageCardBody>
+          <CardBody>
             <FlightControlDescriptionList columnModifier={{ default: '3Col' }}>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
@@ -197,14 +198,14 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
               </DescriptionListGroup>
               {children}
             </FlightControlDescriptionList>
-          </DetailsPageCardBody>
+          </CardBody>
         </DetailsPageCard>
       </GridItem>
 
       <GridItem md={12} lg={6}>
         <DetailsPageCard>
           <CardTitle>{t('Configurations')}</CardTitle>
-          <DetailsPageCardBody>
+          <CardBody>
             <FlightControlDescriptionList columnModifier={{ default: '2Col' }}>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('System image (running)')}</DescriptionListTerm>
@@ -221,7 +222,7 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
                 </DescriptionListDescription>
               </DescriptionListGroup>
             </FlightControlDescriptionList>
-          </DetailsPageCardBody>
+          </CardBody>
         </DetailsPageCard>
       </GridItem>
       <GridItem md={12} lg={6}>
