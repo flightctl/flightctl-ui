@@ -31,19 +31,15 @@ const ModalContentBeforeResume = ({ devicesToResume }: { devicesToResume: number
   return (
     <Stack hasGutter>
       <StackItem>
-        <Content>
-          <Content component="p">
-            <Trans t={t} count={devicesToResume}>
-              You are about to resume all <strong>{deviceCount}</strong> suspended devices.
-            </Trans>
-          </Content>
+        <Content component="p">
+          <Trans t={t} count={devicesToResume}>
+            You are about to resume all <strong>{deviceCount}</strong> suspended devices.
+          </Trans>
         </Content>
-        <Content>
-          <Content component="p">
-            {t(
-              'This action is irreversible and will allow all affected devices to receive new configuration updates from the server.',
-            )}
-          </Content>
+        <Content component="p">
+          {t(
+            'This action is irreversible and will allow all affected devices to receive new configuration updates from the server.',
+          )}
         </Content>
       </StackItem>
     </Stack>

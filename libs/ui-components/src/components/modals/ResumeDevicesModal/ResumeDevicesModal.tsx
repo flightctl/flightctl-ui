@@ -58,19 +58,15 @@ const ResumeDevicesModal = ({ mode, title, selector, expectedCount, onClose }: R
       <ModalBody>
         <Stack hasGutter>
           <StackItem>
-            <Content>
-              <Content component="p">{title}</Content>
-            </Content>
+            <Content component="p">{title}</Content>
           </StackItem>
 
           <StackItem>
-            <Content>
-              <Content component="p">
-                {t(
-                  "This action will resolve the configuration conflict and allow the devices to receive new updates from the server. This action is irreversible, please ensure the devices' assigned configuration is correct before proceeding.",
-                  { count: pluralCount },
-                )}
-              </Content>
+            <Content component="p">
+              {t(
+                "This action will resolve the configuration conflict and allow the devices to receive new updates from the server. This action is irreversible, please ensure the devices' assigned configuration is correct before proceeding.",
+                { count: pluralCount },
+              )}
             </Content>
           </StackItem>
 

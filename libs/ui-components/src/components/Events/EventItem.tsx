@@ -27,9 +27,7 @@ const EventItem = ({ event }: { event: DisplayEvent }) => {
       </StackItem>
       {event.message && <StackItem>{event.message}</StackItem>}
       <StackItem>
-        <Content>
-          <small>{event.dateText}</small>
-        </Content>
+        <Content component="small">{event.dateText}</Content>
       </StackItem>
     </Stack>
   );

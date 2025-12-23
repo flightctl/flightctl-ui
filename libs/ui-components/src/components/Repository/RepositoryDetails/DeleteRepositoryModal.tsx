@@ -99,17 +99,15 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
         <Stack hasGutter>
           {hasResourceSyncs && (
             <StackItem>
-              <Content>
-                <Content component="p">
-                  {t(
-                    'This repository defines resource syncs. By deleting the repository, its resource syncs will also be deleted.',
-                  )}
-                </Content>
-                <Content component="p">
-                  {t(
-                    `Any fleet that is being managed by this repository's resource syncs, will stop being managed by the service.`,
-                  )}
-                </Content>
+              <Content component="p">
+                {t(
+                  'This repository defines resource syncs. By deleting the repository, its resource syncs will also be deleted.',
+                )}
+              </Content>
+              <Content component="p">
+                {t(
+                  `Any fleet that is being managed by this repository's resource syncs, will stop being managed by the service.`,
+                )}
               </Content>
             </StackItem>
           )}

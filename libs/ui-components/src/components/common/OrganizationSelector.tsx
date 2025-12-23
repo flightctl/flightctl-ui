@@ -57,12 +57,10 @@ const OrganizationSelectorContent = ({
   return (
     <Stack hasGutter>
       <StackItem>
-        <Content>
-          <Content component="p">
-            {isFirstLogin
-              ? t('You have access to multiple organizations. Please select one to continue.')
-              : t('Please select an organization to continue. This will refresh the application.')}
-          </Content>
+        <Content component="p">
+          {isFirstLogin
+            ? t('You have access to multiple organizations. Please select one to continue.')
+            : t('Please select an organization to continue. This will refresh the application.')}
         </Content>
       </StackItem>
       {organizations.length > 0 && (

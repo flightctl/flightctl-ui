@@ -18,10 +18,8 @@ const ConfirmNavigationDialog = ({ blocker }: { blocker: Blocker }) => {
     <Modal isOpen variant="small">
       <ModalHeader title={t('There are unsaved changes')} titleIconVariant="warning" />
       <ModalBody>
-        <Content>
-          <Content component="p">
-            {t('Are you sure you want to leave the current page? Unsaved changes will be lost.')}
-          </Content>
+        <Content component="p">
+          {t('Are you sure you want to leave the current page? Unsaved changes will be lost.')}
         </Content>
       </ModalBody>
       <ModalFooter>

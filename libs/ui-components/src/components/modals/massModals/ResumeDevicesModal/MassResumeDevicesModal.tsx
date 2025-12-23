@@ -218,18 +218,14 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
         <Stack hasGutter>
           <FlightCtlForm>
             <StackItem>
-              <Content>
-                <Content component="p">
-                  {t(
-                    "Following a system restore, devices have been identified with configurations newer than the server's records. To prevent data loss, they have been suspended from receiving updates.",
-                  )}
-                </Content>
+              <Content component="p">
+                {t(
+                  "Following a system restore, devices have been identified with configurations newer than the server's records. To prevent data loss, they have been suspended from receiving updates.",
+                )}
               </Content>
             </StackItem>
             <StackItem>
-              <Content>
-                <Content component="p">{t('Choose the criteria to select the devices to resume')}:</Content>
-              </Content>
+              <Content component="p">{t('Choose the criteria to select the devices to resume')}:</Content>
             </StackItem>
 
             <StackItem>

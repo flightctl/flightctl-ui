@@ -83,10 +83,8 @@ const TestConnectionModal = ({ onClose, results }: TestConnectionModalProps) => 
                 <Alert variant="success" title={t('Connection test successful')} />
               </StackItem>
               <StackItem>
-                <Content>
-                  <Content component={ContentVariants.small}>
-                    {t("Great! We successfully connected to your provider. Here's what we found:")}
-                  </Content>
+                <Content component={ContentVariants.small}>
+                  {t("Great! We successfully connected to your provider. Here's what we found:")}
                 </Content>
               </StackItem>
             </>
