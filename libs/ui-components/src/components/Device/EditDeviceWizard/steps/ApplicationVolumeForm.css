@@ -1,0 +1,6 @@
+/* 
+Workaround to prevent volume expandable sections (which are nested) to occupy vertical space when collapsed.
+*/
+.fctl-application-volume-form .pf-v6-c-expandable-section__content:where([hidden]) {
+  --pf-v6-c-expandable-section__content--MaxHeight: 0;
+}

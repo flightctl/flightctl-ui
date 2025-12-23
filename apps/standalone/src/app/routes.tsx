@@ -5,8 +5,6 @@ import {
   EmptyState,
   EmptyStateBody,
   EmptyStateFooter,
-  EmptyStateHeader,
-  EmptyStateIcon,
   EmptyStateVariant,
   Spinner,
   Stack,
@@ -359,12 +357,13 @@ const AppRouter = () => {
 
   if (error) {
     return (
-      <EmptyState variant={EmptyStateVariant.xl} style={{ marginTop: '20%' }}>
-        <EmptyStateHeader
-          titleText={t('Log in interrupted')}
-          headingLevel="h2"
-          icon={<EmptyStateIcon icon={PathMissingIcon} />}
-        />
+      <EmptyState
+        headingLevel="h2"
+        icon={PathMissingIcon}
+        titleText={t('Log in interrupted')}
+        variant={EmptyStateVariant.xl}
+        style={{ marginTop: '20%' }}
+      >
         <EmptyStateBody>
           <Stack>
             <StackItem style={{ margin: 'auto' }}>

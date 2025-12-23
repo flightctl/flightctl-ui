@@ -2,6 +2,6 @@
   Overwrites style set by OCP's console global CSS
   Classname is not passed to the root "label" element, we must target the PF switch first
  */
-.pf-v5-c-switch .fctl-switch__label {
+.pf-v6-c-switch .fctl-switch__label {
   font-weight: normal;
 }

@@ -82,7 +82,6 @@ const RoleSelector = () => {
                 isDisabled={!hasAvailableRoles}
                 onClick={() => setIsOpen(!isOpen)}
                 isExpanded={isOpen}
-                className="pf-v5-u-ml-xs"
               >
                 {t('Add role')}
               </MenuToggle>
@@ -115,7 +114,7 @@ const RoleAssignmentSection = () => {
   const { values } = useFormikContext<AuthProviderFormValues>();
 
   return (
-    <FormSection title={t('Role assignment')} className="pf-v5-u-mt-md">
+    <FormSection title={t('Role assignment')}>
       <Split hasGutter>
         <SplitItem>
           <RadioField

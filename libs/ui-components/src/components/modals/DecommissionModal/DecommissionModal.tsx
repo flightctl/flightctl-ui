@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Formik } from 'formik';
-import { Alert, Button, Stack, StackItem } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalHeader } from '@patternfly/react-core/next';
+import { Alert, Button, Modal, ModalBody, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
 
 import { DeviceDecommissionTargetType } from '@flightctl/types';
 

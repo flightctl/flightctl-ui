@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { CardTitle, Flex, FlexItem } from '@patternfly/react-core';
+import { CardBody, CardTitle, Flex, FlexItem } from '@patternfly/react-core';
 
 import { Device } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import SystemdUnitsTable from '../../DetailsPage/Tables/SystemdUnitsTable';
-import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
+import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 
 type DeviceSystemdUnitsProps = {
   device: Required<Device>;
@@ -20,9 +20,9 @@ const DeviceSystemdUnits = ({ device }: DeviceSystemdUnitsProps) => {
           <FlexItem>{t('System services')}</FlexItem>
         </Flex>
       </CardTitle>
-      <DetailsPageCardBody>
+      <CardBody>
         <SystemdUnitsTable systemdUnitsStatus={device.status.systemd || []} />
-      </DetailsPageCardBody>
+      </CardBody>
     </DetailsPageCard>
   );
 };

@@ -3,8 +3,8 @@ import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons/power-off-ic
 import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-circle-icon';
 import { BanIcon } from '@patternfly/react-icons/dist/js/icons/ban-icon';
 import { PendingIcon } from '@patternfly/react-icons/dist/js/icons/pending-icon';
-import suspendedColor from '@patternfly/react-tokens/dist/js/global_palette_orange_300';
-import pendingSyncColor from '@patternfly/react-tokens/dist/js/global_palette_blue_300';
+import suspendedColor from '@patternfly/react-tokens/dist/js/t_color_orange_40';
+import pendingSyncColor from '@patternfly/react-tokens/dist/js/t_global_color_status_info_200';
 
 import {
   ApplicationsSummaryStatusType,

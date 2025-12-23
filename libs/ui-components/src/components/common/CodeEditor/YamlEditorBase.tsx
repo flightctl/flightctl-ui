@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as monaco from 'monaco-editor';
 import { loader } from '@monaco-editor/react';
-import { ActionGroup, Button } from '@patternfly/react-core';
+import { ActionGroup, Button, Tooltip } from '@patternfly/react-core';
 import { CodeEditor, Language } from '@patternfly/react-code-editor';
 import { DownloadIcon } from '@patternfly/react-icons/dist/js/icons/download-icon';
 import { saveAs } from 'file-saver';
@@ -12,7 +12,6 @@ import FlightCtlForm from '../../form/FlightCtlForm';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useThemePreferences } from '../../../hooks/useThemePreferences';
 // TODO add useShortcutPopover when adding saving capabilities to the YAML editor
-import WithTooltip from '../WithTooltip';
 import { defineConsoleThemes } from './CodeEditorTheme';
 
 import './YamlEditorBase.css';
@@ -46,6 +45,7 @@ const YamlEditorBase = ({
 }: YamlEditorBaseProps) => {
   const { t } = useTranslation();
   const monacoRef = React.useRef<typeof monacoEditor | null>(null);
+  const saveButtonRef = React.useRef<HTMLButtonElement>(null);
   const { resolvedTheme } = useThemePreferences();
 
   const [editorMounted, setEditorMounted] = React.useState(false);
@@ -119,8 +119,10 @@ const YamlEditorBase = ({
         />
         <ActionGroup className="fctl-yaml-editor-base__action-group">
           {onSave && (
-            <WithTooltip showTooltip={!!disabledEditReason} content={disabledEditReason}>
+            <>
+              {disabledEditReason && <Tooltip content={disabledEditReason} triggerRef={saveButtonRef} />}
               <Button
+                ref={saveButtonRef}
                 variant="primary"
                 aria-label={t('Save')}
                 onClick={handleSave}
@@ -129,7 +131,7 @@ const YamlEditorBase = ({
               >
                 {t('Save')}
               </Button>
-            </WithTooltip>
+            </>
           )}
           {onReload && (
             <Button variant="secondary" aria-label={t('Reload')} onClick={onReload}>
@@ -143,7 +145,7 @@ const YamlEditorBase = ({
             icon={<DownloadIcon />}
             type="submit"
             variant="secondary"
-            className="pf-v5-u-ml-auto hidden-sm hidden-xs"
+            className="pf-v6-u-ml-auto"
             aria-label={t('Download')}
             onClick={downloadYaml}
           >

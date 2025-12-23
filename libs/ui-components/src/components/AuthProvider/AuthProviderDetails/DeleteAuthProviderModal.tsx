@@ -1,6 +1,16 @@
 import * as React from 'react';
-import { Alert, Button, Stack, StackItem, TextInput } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalFooter, ModalHeader, ModalVariant } from '@patternfly/react-core/next';
+import {
+  Alert,
+  Button,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalVariant,
+  Stack,
+  StackItem,
+  TextInput,
+} from '@patternfly/react-core';
 import { Trans } from 'react-i18next';
 
 import { useFetch } from '../../../hooks/useFetch';

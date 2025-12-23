@@ -1,12 +1,5 @@
 import * as React from 'react';
-import {
-  Alert,
-  AlertActionCloseButton,
-  PageSection,
-  PageSectionVariants,
-  Stack,
-  StackItem,
-} from '@patternfly/react-core';
+import { Alert, AlertActionCloseButton, PageSection, Stack, StackItem } from '@patternfly/react-core';
 import { Trans } from 'react-i18next';
 
 import { ConditionType, ResourceSync, ResourceSyncList } from '@flightctl/types';
@@ -144,7 +137,7 @@ const FleetResourceSyncs = () => {
     return null;
   }
   return (
-    <PageSection variant={PageSectionVariants.light}>
+    <PageSection hasBodyWrapper={false}>
       <Stack hasGutter>
         {pendingRs.map((rs) => {
           return (

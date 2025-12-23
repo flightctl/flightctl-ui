@@ -1,6 +1,6 @@
-import { ChartContainer, ChartDonut } from '@patternfly/react-charts';
-import { Flex, FlexItem, Stack, StackItem, Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
+import { ChartContainer, ChartDonut } from '@patternfly/react-charts/victory';
+import { Content, ContentVariants, Flex, FlexItem, Stack, StackItem } from '@patternfly/react-core';
 import { Link, LinkProps } from '../../hooks/useNavigate';
 import LabelWithHelperText from '../common/WithHelperText';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -15,6 +15,9 @@ export type Data = {
   link: LinkProps;
   tooltip: string;
 };
+
+const chartWidth = 230;
+const chartHeight = 230;
 
 const Legend = ({ rows }: { rows: Data[][] }) => {
   return (
@@ -74,36 +77,38 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
       alignItems={{ default: 'alignItemsCenter' }}
     >
       <FlexItem className="fctl-charts__donut">
-        <div style={{ height: '230px', width: '230px' }}>
-          <ChartContainer className="fctl-charts__donut-container">
-            <foreignObject x="0" y="0" width="230px" height="230px">
-              <Flex
-                alignItems={{ default: 'alignItemsCenter' }}
-                justifyContent={{ default: 'justifyContentCenter' }}
-                alignContent={{ default: 'alignContentCenter' }}
-                className="fctl-charts__title"
-              >
-                {helperText ? <LabelWithHelperText label={title} content={helperText} /> : title}
-              </Flex>
-            </foreignObject>
-            <ChartDonut
-              ariaDesc={title}
-              ariaTitle={title}
-              constrainToVisibleArea
-              colorScale={isEmpty ? [getDefaultStatusColor('unknown')] : data.map((datum) => datum.color)}
-              data={isEmpty ? [{ y: 100 }] : data}
-              name={title}
-              standalone={false}
-              labels={isEmpty ? [] : data.map((datum) => datum.tooltip)}
-            />
-          </ChartContainer>
-        </div>
+        <ChartContainer
+          className="fctl-charts__donut-container"
+          width={chartWidth}
+          height={chartHeight}
+          role="img"
+          aria-label={title}
+        >
+          <foreignObject x="0" y="0" width={chartWidth} height={chartHeight}>
+            <Flex
+              alignItems={{ default: 'alignItemsCenter' }}
+              justifyContent={{ default: 'justifyContentCenter' }}
+              alignContent={{ default: 'alignContentCenter' }}
+              className="fctl-charts__title"
+            >
+              {helperText ? <LabelWithHelperText label={title} content={helperText} /> : title}
+            </Flex>
+          </foreignObject>
+          <ChartDonut
+            ariaDesc={title}
+            ariaTitle={title}
+            constrainToVisibleArea
+            colorScale={isEmpty ? [getDefaultStatusColor('unknown')] : data.map((datum) => datum.color)}
+            data={isEmpty ? [{ y: 100 }] : data}
+            name={title}
+            standalone={false}
+            labels={isEmpty ? [] : data.map((datum) => datum.tooltip)}
+          />
+        </ChartContainer>
       </FlexItem>
       <FlexItem>
         {isEmpty ? (
-          <TextContent>
-            <Text component={TextVariants.small}>{t('No devices')}</Text>
-          </TextContent>
+          <Content component={ContentVariants.small}>{t('No devices')}</Content>
         ) : (
           <Legend rows={[firstRow, secondRow]} />
         )}

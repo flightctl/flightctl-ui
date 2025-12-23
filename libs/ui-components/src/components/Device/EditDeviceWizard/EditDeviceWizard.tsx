@@ -6,7 +6,6 @@ import {
   BreadcrumbItem,
   Bullseye,
   PageSection,
-  PageSectionVariants,
   Spinner,
   Title,
   Wizard,
@@ -41,8 +40,6 @@ import EditDeviceWizardFooter from './EditDeviceWizardFooter';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
-
-import './EditDeviceWizard.css';
 
 const EditDeviceWizard = () => {
   const { t } = useTranslation();
@@ -124,7 +121,6 @@ const EditDeviceWizard = () => {
             <>
               <LeaveFormConfirmation />
               <Wizard
-                className="fctl-edit-device__wizard"
                 footer={<EditDeviceWizardFooter />}
                 nav={<EditDeviceWizardNav />}
                 onStepChange={() => {
@@ -155,7 +151,7 @@ const EditDeviceWizard = () => {
 
   return (
     <>
-      <PageSection variant="light" type="breadcrumb">
+      <PageSection hasBodyWrapper={false} type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
             <Link to={ROUTE.DEVICES}>{t('Devices')}</Link>
@@ -168,12 +164,12 @@ const EditDeviceWizard = () => {
           <BreadcrumbItem isActive>{t('Edit device')}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false}>
         <Title headingLevel="h1" size="3xl">
           {t('Edit device')}
         </Title>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light} type="wizard">
+      <PageSection hasBodyWrapper={false} type="wizard">
         <ErrorBoundary>{body}</ErrorBoundary>
       </PageSection>
     </>

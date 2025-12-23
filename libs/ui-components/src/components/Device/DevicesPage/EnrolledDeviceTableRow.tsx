@@ -68,7 +68,7 @@ const EnrolledDeviceTableRow = ({
       <Td dataLabel={t('Device status')}>
         <DeviceStatus deviceStatus={device.status} />
       </Td>
-      <Td dataLabel={t('System update status')}>
+      <Td dataLabel={t('Update status')}>
         <SystemUpdateStatus deviceStatus={device.status} />
       </Td>
       <Td isActionCell>

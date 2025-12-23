@@ -1,5 +1,5 @@
 import React from 'react';
-import { DropdownItem, DropdownList, Nav, NavList } from '@patternfly/react-core';
+import { DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
 import { Fleet } from '@flightctl/types';
 
 import { RESOURCE, VERB } from '../../../types/rbac';
@@ -9,13 +9,13 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { useAppContext } from '../../../hooks/useAppContext';
-import NavItem from '../../NavItem/NavItem';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
 import DeleteFleetModal from '../DeleteFleetModal/DeleteFleetModal';
 import FleetDetailsContent from './FleetDetailsContent';
 import FleetRestoreBanner from './FleetRestoreBanner';
 import FleetYaml from './FleetYaml';
+import TabsNav from '../../TabsNav/TabsNav';
 
 const fleetDetailsPermissions = [
   { kind: RESOURCE.FLEET, verb: VERB.DELETE },
@@ -52,12 +52,10 @@ const FleetDetailPage = () => {
       resourceTypeLabel={t('Fleets')}
       banner={<FleetRestoreBanner fleet={fleet} refetch={refetch} />}
       nav={
-        <Nav variant="tertiary">
-          <NavList>
-            <NavItem to="details">{t('Details')}</NavItem>
-            <NavItem to="yaml">{t('YAML')}</NavItem>
-          </NavList>
-        </Nav>
+        <TabsNav aria-label="Fleet details tabs" tabKeys={['details', 'yaml']}>
+          <Tab eventKey="details" title={t('Details')} />
+          <Tab eventKey="yaml" title={t('YAML')} />
+        </TabsNav>
       }
       actions={
         hasActions && (

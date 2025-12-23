@@ -1,14 +1,6 @@
 import * as React from 'react';
 import { useFetch } from '../../hooks/useFetch';
-import {
-  Bullseye,
-  EmptyState,
-  EmptyStateBody,
-  EmptyStateHeader,
-  PageSection,
-  Spinner,
-  Title,
-} from '@patternfly/react-core';
+import { Bullseye, EmptyState, EmptyStateBody, PageSection, Spinner, Title } from '@patternfly/react-core';
 import { ResourceSync } from '@flightctl/types';
 import { Trans } from 'react-i18next';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -48,17 +40,18 @@ const ResourceSyncToRepository = () => {
   }, [get, navigate, rsId]);
 
   return (
-    <PageSection variant="light">
+    <PageSection hasBodyWrapper={false}>
       <Title headingLevel="h1" size="3xl">
         {t('Resource sync {{rsId}}', { rsId })}
       </Title>
       {error ? (
-        <EmptyState>
-          <EmptyStateHeader>
+        <EmptyState
+          titleText={
             <Trans t={t}>
               Could not find the details for the resource sync <strong>{rsId}</strong>
             </Trans>
-          </EmptyStateHeader>
+          }
+        >
           <EmptyStateBody>{error}</EmptyStateBody>
         </EmptyState>
       ) : (

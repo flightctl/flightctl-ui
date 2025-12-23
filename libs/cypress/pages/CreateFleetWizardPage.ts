@@ -24,7 +24,7 @@ export class CreateFleetWizardPage {
   }
 
   get newFleetRichValidationsPopoverError() {
-    return cy.get('.pf-v5-c-helper-text__item.pf-m-error');
+    return cy.get('.pf-v6-c-helper-text__item.pf-m-error');
   }
 
   get newFleetSystemImageField() {

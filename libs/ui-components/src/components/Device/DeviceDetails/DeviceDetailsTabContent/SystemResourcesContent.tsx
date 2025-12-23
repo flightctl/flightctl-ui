@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  CardBody,
   CardTitle,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -8,7 +9,7 @@ import {
 
 import { Device } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import DetailsPageCard, { DetailsPageCardBody } from '../../../DetailsPage/DetailsPageCard';
+import DetailsPageCard from '../../../DetailsPage/DetailsPageCard';
 import FlightControlDescriptionList from '../../../common/FlightCtlDescriptionList';
 import DeviceResourceStatus, { MonitorType } from '../../../Status/DeviceResourceStatus';
 
@@ -18,7 +19,7 @@ const SystemResourcesContent = ({ device }: { device: Required<Device> }) => {
   return (
     <DetailsPageCard>
       <CardTitle>{t('Resource status')}</CardTitle>
-      <DetailsPageCardBody>
+      <CardBody>
         <FlightControlDescriptionList columnModifier={{ default: '3Col' }}>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('CPU pressure')}</DescriptionListTerm>
@@ -39,7 +40,7 @@ const SystemResourcesContent = ({ device }: { device: Required<Device> }) => {
             </DescriptionListDescription>
           </DescriptionListGroup>
         </FlightControlDescriptionList>
-      </DetailsPageCardBody>
+      </CardBody>
     </DetailsPageCard>
   );
 };

@@ -1,6 +1,17 @@
 import * as React from 'react';
-import { Alert, Button, Progress, ProgressMeasureLocation, Stack, StackItem } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
+import {
+  Alert,
+  Button,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Progress,
+  ProgressMeasureLocation,
+  Stack,
+  StackItem,
+} from '@patternfly/react-core';
+
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import { Repository, ResourceSyncList } from '@flightctl/types';

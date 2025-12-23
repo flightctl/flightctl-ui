@@ -124,45 +124,43 @@ const LoginPage = () => {
     );
   }
 
-  let content: React.ReactNode = null;
-
   const selectedProvider = userSelectedProvider || (providers.length === 1 ? providers[0] : null);
+  if (selectedProvider?.spec.providerType === ProviderType.K8s) {
+    return (
+      <TokenLoginForm
+        provider={selectedProvider}
+        onBack={
+          userSelectedProvider
+            ? () => {
+                setUserSelectedProvider(null);
+              }
+            : undefined
+        }
+      />
+    );
+  }
+
   if (selectedProvider) {
-    if (selectedProvider.spec.providerType === ProviderType.K8s) {
-      content = (
-        <TokenLoginForm
-          provider={selectedProvider}
-          onBack={
-            userSelectedProvider
-              ? () => {
-                  setUserSelectedProvider(null);
-                }
-              : undefined
-          }
-        />
-      );
-    } else {
-      content = (
-        <>
-          {t('Redirecting to login for {{ provider }}...', {
-            provider: getProviderDisplayName(selectedProvider, t) || selectedProvider.metadata.name,
-          })}
-          <Spinner size="lg" />
-        </>
-      );
-    }
-  } else {
-    content = (
+    return (
+      <>
+        {t('Redirecting to login for {{ provider }}...', {
+          provider: getProviderDisplayName(selectedProvider, t) || selectedProvider.metadata.name,
+        })}
+        <Spinner size="lg" />
+      </>
+    );
+  }
+
+  return (
+    <LoginPageLayout>
       <ProviderSelector
         providers={providers}
         defaultProviderName={defaultProviderName}
         onProviderSelect={handleProviderSelect}
         disabled={isRedirecting}
       />
-    );
-  }
-
-  return <LoginPageLayout>{content}</LoginPageLayout>;
+    </LoginPageLayout>
+  );
 };
 
 export default LoginPage;

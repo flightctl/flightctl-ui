@@ -13,7 +13,7 @@ const OrganizationAssignmentSection = () => {
   const { values } = useFormikContext<AuthProviderFormValues>();
 
   return (
-    <FormSection title={t('Organization assignment')} className="pf-v5-u-mt-md">
+    <FormSection title={t('Organization assignment')} className="pf-v6-u-mt-md">
       <Split hasGutter>
         <SplitItem>
           <RadioField

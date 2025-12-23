@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { EmptyState, EmptyStateHeader, EmptyStateIcon } from '@patternfly/react-core';
+import { EmptyState } from '@patternfly/react-core';
 
 type ResourceListEmptyStateProps = {
   titleText: string;
@@ -11,8 +11,12 @@ const ResourceListEmptyState = ({
   icon,
   children,
 }: React.PropsWithChildren<ResourceListEmptyStateProps>) => (
-  <EmptyState style={{ '--pf-v5-c-empty-state--PaddingTop': '4rem' } as React.CSSProperties}>
-    <EmptyStateHeader titleText={titleText} headingLevel="h4" icon={<EmptyStateIcon icon={icon} />} />
+  <EmptyState
+    headingLevel="h4"
+    icon={icon}
+    titleText={titleText}
+    style={{ '--pf-v6-c-empty-state--PaddingBlockStart': '4rem' } as React.CSSProperties}
+  >
     {children}
   </EmptyState>
 );

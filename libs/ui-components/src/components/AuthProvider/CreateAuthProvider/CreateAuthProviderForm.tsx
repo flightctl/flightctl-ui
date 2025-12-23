@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Button, Divider, FormGroup, FormSection, Grid, Popover } from '@patternfly/react-core';
+import { ActionGroup, Alert, Button, Divider, FormGroup, FormSection, Grid, Popover } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
@@ -12,7 +12,6 @@ import TextField from '../../form/TextField';
 import SwitchField from '../../form/SwitchField';
 import ListItemField from '../../form/ListItemField';
 import FlightCtlForm from '../../form/FlightCtlForm';
-import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { getDnsSubdomainValidations } from '../../form/validations';
 import { AuthProviderFormValues, FieldValidationResult } from './types';
 import { ProviderType } from '../../../types/extraTypes';
@@ -42,8 +41,8 @@ const EnabledHelpText = () => {
       triggerAction="click"
     >
       <Button
+        icon={<OutlinedQuestionCircleIcon />}
         component="a"
-        className="fctl-helper-text__icon"
         isInline
         variant="plain"
         onClick={(ev) => {
@@ -51,9 +50,7 @@ const EnabledHelpText = () => {
           ev.stopPropagation();
         }}
         aria-label="Enabled help text"
-      >
-        <OutlinedQuestionCircleIcon />
-      </Button>
+      />
     </Popover>
   );
 };
@@ -199,7 +196,7 @@ const CreateAuthProviderFormContent = ({
           {testError}
         </Alert>
       )}
-      <FlightCtlActionGroup>
+      <ActionGroup>
         <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
           {isEdit ? t('Save') : t('Create authentication provider')}
         </Button>
@@ -209,7 +206,7 @@ const CreateAuthProviderFormContent = ({
         <Button variant="link" isDisabled={isSubmitting} onClick={onClose}>
           {t('Cancel')}
         </Button>
-      </FlightCtlActionGroup>
+      </ActionGroup>
       {testResults && <TestConnectionModal onClose={() => setTestResults(null)} results={testResults} />}
     </FlightCtlForm>
   );

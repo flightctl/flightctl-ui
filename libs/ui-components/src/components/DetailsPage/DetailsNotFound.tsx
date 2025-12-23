@@ -5,8 +5,6 @@ import {
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  EmptyStateHeader,
-  EmptyStateIcon,
   PageSection,
   Stack,
   StackItem,
@@ -79,13 +77,8 @@ const DetailsNotFound = ({ kind, id }: DetailsNotFoundProps) => {
   const { title, msg } = getKindMsgs(t, kind, id);
 
   return (
-    <PageSection>
-      <EmptyState variant="full">
-        <EmptyStateHeader
-          titleText={title}
-          icon={<EmptyStateIcon icon={ExclamationTriangleIcon} />}
-          headingLevel="h1"
-        />
+    <PageSection hasBodyWrapper={false}>
+      <EmptyState headingLevel="h1" icon={ExclamationTriangleIcon} titleText={title} variant="full">
         <EmptyStateBody>
           <Stack>
             <StackItem>{msg}</StackItem>

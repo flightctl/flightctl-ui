@@ -6,7 +6,7 @@ import WithPageLayout from '../common/WithPageLayout';
 const OverviewTab = () => {
   return (
     <WithPageLayout>
-      <PageSection>
+      <PageSection hasBodyWrapper={false}>
         <Overview />
       </PageSection>
     </WithPageLayout>

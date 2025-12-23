@@ -31,9 +31,7 @@ const SystemUpdateStatusChart = ({
     FilterSearchParams.UpdatedStatus,
   );
 
-  return (
-    <DonutChart title={t('System update status')} data={updateStatusData} helperText={getUpdateStatusHelperText(t)} />
-  );
+  return <DonutChart title={t('Update status')} data={updateStatusData} helperText={getUpdateStatusHelperText(t)} />;
 };
 
 export default SystemUpdateStatusChart;

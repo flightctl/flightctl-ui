@@ -7,7 +7,6 @@ import {
   Divider,
   EmptyState,
   EmptyStateBody,
-  EmptyStateHeader,
   Flex,
   FlexItem,
   MenuToggle,
@@ -37,8 +36,7 @@ type EventListProps = {
 const EventEmptyState = ({ hasFilters }: { hasFilters: boolean }) => {
   const { t } = useTranslation();
   return (
-    <EmptyState>
-      <EmptyStateHeader>{t('No matching events')}</EmptyStateHeader>
+    <EmptyState titleText={t('No matching events')}>
       <EmptyStateBody>
         {hasFilters ? t('No events were found based on the current filters') : t('No events were found')}
       </EmptyStateBody>

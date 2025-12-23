@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Bullseye, EmptyState, EmptyStateBody, EmptyStateVariant, Label } from '@patternfly/react-core';
+import { Bullseye, Content, EmptyState, EmptyStateBody, EmptyStateVariant, Label } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { CogIcon } from '@patternfly/react-icons/dist/js/icons/cog-icon';
 import { ClockIcon } from '@patternfly/react-icons/dist/js/icons/clock-icon';
@@ -33,7 +33,7 @@ const SystemdUnitStatusIcon = ({ unitName }: { unitName: string }) => {
     return null;
   }
 
-  return <IconComponent className="pf-v5-u-mr-xs" />;
+  return <IconComponent className="pf-v6-u-mr-xs" />;
 };
 
 type SystemdUnitsTableProps = {
@@ -92,8 +92,8 @@ const SystemdUnitsTable = ({ systemdUnitsStatus }: SystemdUnitsTableProps) => {
     <Bullseye>
       <EmptyState variant={EmptyStateVariant.sm}>
         <EmptyStateBody>
-          <p>{t('No system services found')}</p>
-          <p className="pf-v5-u-font-size-sm">{t('System services can be configured via the device specification')}</p>
+          <Content component="p">{t('No system services found')}</Content>
+          <Content component="small">{t('System services can be configured via the device specification')}</Content>
         </EmptyStateBody>
       </EmptyState>
     </Bullseye>

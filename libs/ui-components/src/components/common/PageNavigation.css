@@ -1,7 +1,6 @@
-.fctl-subnav_panel {
-  border-bottom: 1px solid var(--pf-v5-global--BorderColor--100);
-  --pf-v5-c-panel__main-body--PaddingTop: 0.6rem;
-  --pf-v5-c-panel__main-body--PaddingBottom: 0.6rem;
+.fctl-subnav_panel .pf-v6-c-panel__main-body {
+  padding-block-start: 0.5rem;
+  padding-block-end: 0;
 }
 
 .fctl-subnav_toolbar {

@@ -2,15 +2,7 @@
   padding: 0.75rem;
 }
 
-.fctl_device-toolbar-filters__typeselect .pf-v5-c-menu-toggle__text {
-  min-width: 150px;
-  text-align: left;
-}
-
-.fctl-device-toolbar-filters__search-icon {
-  padding: 0.5rem 1rem;
-}
-
-.fctl-device-toolbar-filters__toggle .pf-v5-c-menu-toggle__controls {
-  display: none;
+.fctl-device-toolbar-filters__toggle .pf-v6-c-menu-toggle__icon {
+  --pf-v6-c-menu-toggle--PaddingBlockStart: -0.5rem;
+  margin-left: 0.5rem;
 }

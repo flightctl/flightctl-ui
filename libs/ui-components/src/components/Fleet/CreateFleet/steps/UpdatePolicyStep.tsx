@@ -12,6 +12,8 @@ import UpdateStepDisruptionBudget from './UpdateStepDisruptionBudget';
 import UpdateStepUpdatePolicy from './UpdateStepUpdatePolicy';
 import CheckboxField from '../../../form/CheckboxField';
 
+import './UpdatePolicyStep.css';
+
 export const updatePolicyStepId = 'update-policy';
 
 export const isUpdatePolicyStepValid = (errors: FormikErrors<FleetFormValues>) =>
@@ -29,7 +31,7 @@ const UpdatePolicyStep = ({ isReadOnly }: { isReadOnly: boolean }) => {
       <FlightCtlForm>
         <CheckboxField name="useBasicUpdateConfig" label={t('Use basic configurations')} isDisabled={isReadOnly} />
         {!useBasicUpdateConfig ? (
-          <FormSection title={t('Advanced configurations')} titleElement="h1" className="pf-v5-u-mt-sm">
+          <FormSection title={t('Advanced configurations')} titleElement="h1" className="fctl-update-policy--advanced">
             {/* Rollout policies */}
             <CheckboxField
               name="rolloutPolicy.isAdvanced"
