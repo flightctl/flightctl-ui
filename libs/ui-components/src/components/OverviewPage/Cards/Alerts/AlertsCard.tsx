@@ -162,7 +162,9 @@ const AlertsCard = () => {
                   <Icon status="danger" size="md">
                     <ExclamationCircleIcon />
                   </Icon>{' '}
-                  <strong>{getAlertTitle(alert, alertTypes[alertName] || alertName)}</strong>
+                  <span style={{ fontWeight: 'var(--pf-t--global--font--weight--body--bold)' }}>
+                    {getAlertTitle(alert, alertTypes[alertName] || alertName)}
+                  </span>
                 </StackItem>
                 <StackItem>
                   <Content>

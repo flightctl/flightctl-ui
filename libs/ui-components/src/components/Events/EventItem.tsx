@@ -23,7 +23,7 @@ const EventItem = ({ event }: { event: DisplayEvent }) => {
     <Stack>
       <StackItem>
         {event.type === Event.type.NORMAL ? <NormalEventIcon /> : <WarningEventIcon />}{' '}
-        <strong>{event.reasonText}</strong>
+        <span style={{ fontWeight: 'var(--pf-t--global--font--weight--body--bold)' }}>{event.reasonText}</span>
       </StackItem>
       {event.message && <StackItem>{event.message}</StackItem>}
       <StackItem>
