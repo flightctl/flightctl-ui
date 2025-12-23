@@ -30,7 +30,7 @@ const ExpandableFormSection = ({
           {!isExpanded && !!description && (
             <SplitItem
               style={{
-                color: 'var(--pf-t--global--text--color--100)',
+                color: 'var(--pf-t--global--text--color--regular)',
               }}
             >
               {description}
