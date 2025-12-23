@@ -223,6 +223,7 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
 
   const toggle = (toggleRef: React.Ref<MenuToggleElement>) => (
     <MenuToggle
+      className="fctl-device-toolbar-filters__toggle"
       ref={toggleRef}
       variant="typeahead"
       aria-label={t('Fleet and label filter toggle')}
