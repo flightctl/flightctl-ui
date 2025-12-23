@@ -1,3 +1,9 @@
 .fctl-yaml-editor-base__action-group {
+  /* ActionGroup is correctly placed without extra margin */
   --pf-v6-c-form__group--m-action--MarginBlockStart: 0;
+}
+
+.fctl-yaml-editor-base__action-group .pf-v6-c-form__actions {
+  /* Provide a separation to the "save success/error" alert after modifying the YAML */
+  --pf-v6-c-form__actions--MarginBlockEnd: 1.5rem;
 }

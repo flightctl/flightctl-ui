@@ -596,11 +596,11 @@ export const validateCPULimit = (cpu: string | undefined): boolean => {
   if (!cpu) {
     return true;
   }
-  const trimmed = cpu.trim();
-  if (!trimmed) {
-    return true;
+
+  if (!/^[0-9]+$/.test(cpu)) {
+    return false;
   }
-  const val = Number.parseFloat(trimmed);
+  const val = Number.parseFloat(cpu);
   if (Number.isNaN(val) || val < 0) {
     return false;
   }
@@ -611,11 +611,8 @@ export const validateMemoryLimit = (memory: string | undefined): boolean => {
   if (!memory) {
     return true;
   }
-  const trimmed = memory.trim();
-  if (!trimmed) {
-    return true;
-  }
-  if (!MEMORY_LIMIT_REGEXP.test(trimmed)) {
+
+  if (!MEMORY_LIMIT_REGEXP.test(memory)) {
     return false;
   }
   return true;
