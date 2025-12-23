@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { CardTitle, Flex, FlexItem } from '@patternfly/react-core';
+import { CardBody, CardTitle, Flex, FlexItem } from '@patternfly/react-core';
 
 import { Device } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
-import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
+import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 
 type DeviceDetailsTabProps = {
   device: Required<Device>;
@@ -20,9 +20,9 @@ const DeviceApplications = ({ device }: DeviceDetailsTabProps) => {
           <FlexItem>{t('Applications')}</FlexItem>
         </Flex>
       </CardTitle>
-      <DetailsPageCardBody>
+      <CardBody>
         <ApplicationsTable appsStatus={device.status.applications} />
-      </DetailsPageCardBody>
+      </CardBody>
     </DetailsPageCard>
   );
 };

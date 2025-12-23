@@ -26,7 +26,7 @@ import {
 } from '../../../utils/status/enrollmentRequest';
 import { useFetch } from '../../../hooks/useFetch';
 import ApproveDeviceModal from '../../modals/ApproveDeviceModal/ApproveDeviceModal';
-import DetailsPageCard, { DetailsPageCardBody } from '../../DetailsPage/DetailsPageCard';
+import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import EnrollmentRequestStatus from '../../Status/EnrollmentRequestStatus';
 import LabelWithHelperText from '../../common/WithHelperText';
@@ -164,7 +164,7 @@ const EnrollmentRequestDetails = () => {
                 content={t('A PEM-encoded PKCS#10 certificate signing request.')}
               />
             </CardTitle>
-            <DetailsPageCardBody>
+            <CardBody>
               {er?.spec.csr ? (
                 <TextArea
                   aria-label={t('Certificate Signing Request')}
@@ -176,7 +176,7 @@ const EnrollmentRequestDetails = () => {
               ) : (
                 <Bullseye>{t('Not available')}</Bullseye>
               )}
-            </DetailsPageCardBody>
+            </CardBody>
           </DetailsPageCard>
         </GridItem>
         {er?.status?.certificate && (
@@ -185,7 +185,7 @@ const EnrollmentRequestDetails = () => {
               <CardTitle>
                 <LabelWithHelperText label={t('Certificate')} content={t('A PEM-encoded signed certificate.')} />
               </CardTitle>
-              <DetailsPageCardBody>
+              <CardBody>
                 <TextArea
                   aria-label={t('Certificate')}
                   value={er.status.certificate}
@@ -193,7 +193,7 @@ const EnrollmentRequestDetails = () => {
                   autoResize
                   className="fctl-enrollment-details__text-area"
                 />
-              </DetailsPageCardBody>
+              </CardBody>
             </DetailsPageCard>
           </GridItem>
         )}
@@ -201,14 +201,14 @@ const EnrollmentRequestDetails = () => {
         <GridItem md={6}>
           <DetailsPageCard>
             <CardTitle>{t('Conditions')}</CardTitle>
-            <DetailsPageCardBody>
+            <CardBody>
               {er && (
                 <ConditionsTable
                   ariaLabel={t('Enrollment request conditions table')}
                   conditions={er.status?.conditions}
                 />
               )}
-            </DetailsPageCardBody>
+            </CardBody>
           </DetailsPageCard>
         </GridItem>
       </Grid>
