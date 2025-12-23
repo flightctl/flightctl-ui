@@ -2,7 +2,7 @@
   padding: 0.75rem;
 }
 
-.pf-m-typeahead .pf-v6-c-menu-toggle__icon {
+.fctl-device-toolbar-filters__toggle .pf-v6-c-menu-toggle__icon {
   --pf-v6-c-menu-toggle--PaddingBlockStart: -0.5rem;
   margin-left: 0.5rem;
 }
