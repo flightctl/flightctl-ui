@@ -48,9 +48,7 @@ const TasksCard = () => {
     } else {
       content = (
         <Bullseye>
-          <Content>
-            <Content component={ContentVariants.small}>{t('All good!')}</Content>
-          </Content>
+          <Content component={ContentVariants.small}>{t('All good!')}</Content>
         </Bullseye>
       );
     }

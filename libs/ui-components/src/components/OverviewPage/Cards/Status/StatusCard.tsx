@@ -47,10 +47,8 @@ const StatusCard = () => {
     content = (
       <Stack>
         <StackItem>
-          <Content>
-            <Content component={ContentVariants.small}>
-              {t('{{count}} Devices', { count: devicesSummary?.total || 0 })}
-            </Content>
+          <Content component={ContentVariants.small}>
+            {t('{{count}} Devices', { count: devicesSummary?.total || 0 })}
           </Content>
         </StackItem>
         <StackItem>

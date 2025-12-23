@@ -20,12 +20,10 @@ const ResourceSyncStep = () => {
   return (
     <Stack hasGutter>
       <StackItem>
-        <Content>
-          <Content component="p">
-            {t(
-              'A resource sync is an automated Gitops method that helps manage your imported fleets by monitoring source repository changes and updating your fleet configuration accordingly.',
-            )}
-          </Content>
+        <Content component="p">
+          {t(
+            'A resource sync is an automated Gitops method that helps manage your imported fleets by monitoring source repository changes and updating your fleet configuration accordingly.',
+          )}
         </Content>
       </StackItem>
       <StackItem>

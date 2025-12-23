@@ -175,9 +175,7 @@ const AlertsCard = () => {
                   </Content>
                 </StackItem>
                 <StackItem>
-                  <Content>
-                    <small>{getDateDisplay(alert.startsAt || '')}</small>
-                  </Content>
+                  <Content component="small">{getDateDisplay(alert.startsAt || '')}</Content>
                 </StackItem>
               </Stack>
             </ListItem>
