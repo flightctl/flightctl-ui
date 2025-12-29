@@ -3,10 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * RepoSpecType is the type of the repository.
+ * The type of authentication for OCI registries.
  */
-export enum RepoSpecType {
-  GIT = 'git',
-  HTTP = 'http',
-  OCI = 'oci',
+export enum OciAuthType {
+  DOCKER = 'docker',
 }

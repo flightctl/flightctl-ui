@@ -5,13 +5,14 @@ import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circl
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { TFunction, Trans } from 'react-i18next';
 
-import { RepoSpecType, Repository } from '@flightctl/types';
+import { GenericRepoSpec, HttpRepoSpec, RepoSpecType, Repository } from '@flightctl/types';
 import { DeviceSpecConfigFormValues, GitConfigTemplate, HttpConfigTemplate } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import FormSelect from '../../../form/FormSelect';
 import CreateRepositoryModal from '../../../modals/CreateRepositoryModal/CreateRepositoryModal';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
+import { getRepoUrlOrRegistry } from '../../../Repository/CreateRepository/utils';
 
 type ConfigWithRepositoryTemplateFormProps = {
   repoType: RepoSpecType;
@@ -30,9 +31,11 @@ const getRepositoryItems = (
 ) => {
   const repositoryItems = repositories.reduce((acc, curr) => {
     if (curr.spec.type === repoType) {
-      acc[curr.metadata.name || ''] = {
-        label: curr.metadata.name,
-        description: curr.spec.url,
+      const description = getRepoUrlOrRegistry(curr.spec);
+      const repoName = curr.metadata.name || '';
+      acc[repoName] = {
+        label: repoName,
+        description,
       };
     }
     return acc;
@@ -175,6 +178,7 @@ const ConfigWithRepositoryTemplateForm = ({
     : getRepositoryItems(t, repositories, repoType, selectedRepoName);
 
   const selectedRepo = repositories.find((repo) => repo.metadata.name === selectedRepoName);
+  const repoSpec = selectedRepo?.spec as GenericRepoSpec | HttpRepoSpec | undefined;
   return (
     <>
       <FormGroup label={t('Repository')} isRequired>
@@ -209,7 +213,7 @@ const ConfigWithRepositoryTemplateForm = ({
         <HttpConfigForm
           template={ct as HttpConfigTemplate}
           index={index}
-          baseURL={selectedRepo?.spec.url}
+          baseURL={repoSpec?.url || ''}
           isReadOnly={isReadOnly}
         />
       )}

@@ -31,7 +31,7 @@ import {
   handlePromises,
   repositorySchema,
 } from './utils';
-import { RepoSpecType, Repository, ResourceSync } from '@flightctl/types';
+import { OciRepoSpec, RepoSpecType, Repository, ResourceSync } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import LabelWithHelperText, { FormGroupWithHelperText } from '../../common/WithHelperText';
@@ -52,6 +52,40 @@ const AdvancedSection = () => {
   const { t } = useTranslation();
   const { values } = useFormikContext<RepositoryFormValues>();
   const showConfigTypeRadios = values.repoType === RepoSpecType.GIT;
+  const isOciRepo = values.repoType === RepoSpecType.OCI;
+
+  if (isOciRepo) {
+    return (
+      <FormSection>
+        <Grid hasGutter>
+          <CheckboxField
+            name="ociConfig.ociAuth.use"
+            label={t('Basic authentication')}
+            body={
+              <>
+                <FormGroup label={t('Username')} isRequired>
+                  <TextField name="ociConfig.ociAuth.username" aria-label={t('Username')} />
+                </FormGroup>
+                <FormGroup label={t('Password')} isRequired>
+                  <TextField name="ociConfig.ociAuth.password" aria-label={t('Password')} type="password" />
+                </FormGroup>
+              </>
+            }
+          />
+          <FormGroup>
+            <CheckboxField name="ociConfig.skipServerVerification" label={t('Skip server verification')} />
+          </FormGroup>
+          <FormGroup label={t('CA certificate')}>
+            <TextAreaField
+              name="ociConfig.caCrt"
+              aria-label={t('CA certificate')}
+              isDisabled={values.ociConfig?.skipServerVerification}
+            />
+          </FormGroup>
+        </Grid>
+      </FormSection>
+    );
+  }
 
   return (
     <FormSection>
@@ -142,7 +176,7 @@ const AdvancedSection = () => {
 const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
   const { t } = useTranslation();
   const { values, setFieldValue, validateForm } = useFormikContext<RepositoryFormValues>();
-  const [showConfirmChangeType, setShowConfirmChangeType] = React.useState<boolean>();
+  const [showConfirmChangeType, setShowConfirmChangeType] = React.useState<RepoSpecType | undefined>();
 
   if (!values.showRepoTypes) {
     return null;
@@ -150,26 +184,41 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
 
   const isRepoTypeChangeDisabled = values.allowedRepoTypes?.length === 1;
 
-  const doChangeRepoType = (toType?: RepoSpecType) => {
-    if (!toType) {
-      toType = values.repoType === RepoSpecType.GIT ? RepoSpecType.HTTP : RepoSpecType.GIT;
+  const doChangeRepoType = (toType: RepoSpecType) => {
+    if (toType === RepoSpecType.GIT) {
+      void setFieldValue('repoType', RepoSpecType.GIT);
+      void setFieldValue('httpConfig.token', undefined);
+      void setFieldValue('canUseResourceSyncs', true);
     }
+
     if (toType === RepoSpecType.HTTP) {
       void setFieldValue('repoType', RepoSpecType.HTTP);
       void setFieldValue('configType', 'http');
       void setFieldValue('useResourceSyncs', false);
-    } else {
-      void setFieldValue('repoType', RepoSpecType.GIT);
-      void setFieldValue('httpConfig.token', undefined);
+      void setFieldValue('canUseResourceSyncs', false);
+    }
+
+    if (toType === RepoSpecType.OCI) {
+      void setFieldValue('repoType', RepoSpecType.OCI);
+      void setFieldValue('useResourceSyncs', false);
+      void setFieldValue('canUseResourceSyncs', false);
+      if (!values.ociConfig) {
+        void setFieldValue('ociConfig', {
+          registry: '',
+          scheme: OciRepoSpec.scheme.HTTPS,
+          accessMode: OciRepoSpec.accessMode.READ,
+        });
+      }
     }
     void validateForm();
   };
 
-  const onRepoTypeChange = (repoType: unknown) => {
+  const onRepoTypeChange = (type: unknown) => {
+    const repoType = type as RepoSpecType;
     if (isEdit) {
-      setShowConfirmChangeType(true);
+      setShowConfirmChangeType(repoType);
     } else {
-      doChangeRepoType(repoType as RepoSpecType);
+      doChangeRepoType(repoType);
     }
   };
 
@@ -198,6 +247,17 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
             isDisabled={isRepoTypeChangeDisabled}
           />
         </SplitItem>
+        <SplitItem>
+          <RadioField
+            id="oci-repo-radio"
+            name="repoType"
+            label={t('Use OCI registry')}
+            checkedValue={RepoSpecType.OCI}
+            onChangeCustom={onRepoTypeChange}
+            noDefaultOnChange
+            isDisabled={isRepoTypeChangeDisabled}
+          />
+        </SplitItem>
       </Split>
       {showConfirmChangeType && (
         <Modal variant="small" isOpen>
@@ -211,8 +271,8 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
               key="change"
               variant={ButtonVariant.primary}
               onClick={() => {
-                setShowConfirmChangeType(false);
-                doChangeRepoType();
+                setShowConfirmChangeType(undefined);
+                doChangeRepoType(showConfirmChangeType);
               }}
             >
               {t('Change')}
@@ -221,7 +281,7 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
               key="cancel"
               variant="link"
               onClick={() => {
-                setShowConfirmChangeType(false);
+                setShowConfirmChangeType(undefined);
               }}
             >
               {t('Cancel')}
@@ -235,6 +295,8 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
 
 export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
   const { t } = useTranslation();
+  const { values } = useFormikContext<RepositoryFormValues>();
+  const isOciRepo = values.repoType === RepoSpecType.OCI;
 
   return (
     <>
@@ -246,15 +308,69 @@ export const RepositoryForm = ({ isEdit }: { isEdit?: boolean }) => {
         resourceType="repositories"
         validations={getDnsSubdomainValidations(t)}
       />
-      <FormGroup label={t('Repository URL')} isRequired>
-        <TextField
-          name="url"
-          aria-label={t('Repository URL')}
-          helperText={t('For example: {{ demoRepositoryUrl }}', { demoRepositoryUrl: DEMO_REPOSITORY_URL })}
-        />
-      </FormGroup>
+      {isOciRepo ? (
+        <FormGroup label={t('Registry hostname')} isRequired>
+          <TextField
+            name="ociConfig.registry"
+            aria-label={t('Registry hostname')}
+            helperText={t('For example: quay.io, registry.redhat.io, myregistry.com:5000')}
+          />
+        </FormGroup>
+      ) : (
+        <FormGroup label={t('Repository URL')} isRequired>
+          <TextField
+            name="url"
+            aria-label={t('Repository URL')}
+            helperText={t('For example: {{ demoRepositoryUrl }}', { demoRepositoryUrl: DEMO_REPOSITORY_URL })}
+          />
+        </FormGroup>
+      )}
 
       <RepositoryType isEdit={isEdit} />
+      {isOciRepo && (
+        <FormSection>
+          <FormGroup label={t('Scheme')}>
+            <Split hasGutter>
+              <SplitItem>
+                <RadioField
+                  id="oci-scheme-https"
+                  name="ociConfig.scheme"
+                  label={t('HTTPS')}
+                  checkedValue={OciRepoSpec.scheme.HTTPS}
+                />
+              </SplitItem>
+              <SplitItem>
+                <RadioField
+                  id="oci-scheme-http"
+                  name="ociConfig.scheme"
+                  label={t('HTTP')}
+                  checkedValue={OciRepoSpec.scheme.HTTP}
+                />
+              </SplitItem>
+            </Split>
+          </FormGroup>
+          <FormGroup label={t('Access mode')}>
+            <Split hasGutter>
+              <SplitItem>
+                <RadioField
+                  id="oci-access-read"
+                  name="ociConfig.accessMode"
+                  label={t('Read only')}
+                  checkedValue={OciRepoSpec.accessMode.READ}
+                />
+              </SplitItem>
+              <SplitItem>
+                <RadioField
+                  id="oci-access-readwrite"
+                  name="ociConfig.accessMode"
+                  label={t('Read and write')}
+                  checkedValue={OciRepoSpec.accessMode.READ_WRITE}
+                />
+              </SplitItem>
+            </Split>
+          </FormGroup>
+        </FormSection>
+      )}
       <CheckboxField name="useAdvancedConfig" label={t('Use advanced configurations')} body={<AdvancedSection />} />
     </>
   );
@@ -348,10 +464,10 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
       onSubmit={async (values) => {
         setErrors(undefined);
         if (repository) {
-          const patches = getRepositoryPatches(values, repository);
+          const specPatches = getRepositoryPatches(values, repository);
           try {
-            if (patches.length) {
-              await patch<Repository>(`repositories/${repository.metadata.name}`, patches);
+            if (specPatches.length) {
+              await patch<Repository>(`repositories/${repository.metadata.name}`, specPatches);
             }
             if (values.useResourceSyncs) {
               const storedRSs = resourceSyncs || [];

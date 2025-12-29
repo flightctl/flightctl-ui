@@ -1,4 +1,4 @@
-import { RepoSpecType } from '@flightctl/types';
+import { OciRepoSpec, RepoSpecType } from '@flightctl/types';
 
 export type ResourceSyncFormValue = {
   name: string;
@@ -35,6 +35,18 @@ export type RepositoryFormValues = {
   sshConfig?: {
     sshPrivateKey?: string;
     privateKeyPassphrase?: string;
+    skipServerVerification?: boolean;
+  };
+  ociConfig?: {
+    registry: string;
+    scheme?: OciRepoSpec.scheme;
+    accessMode?: OciRepoSpec.accessMode;
+    caCrt?: string;
+    ociAuth?: {
+      use?: boolean;
+      username?: string;
+      password?: string;
+    };
     skipServerVerification?: boolean;
   };
   canUseResourceSyncs: boolean;
