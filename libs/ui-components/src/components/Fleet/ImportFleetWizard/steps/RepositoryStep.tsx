@@ -3,7 +3,7 @@ import { FormGroup, FormSection, Grid, Radio } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import { Repository } from '@flightctl/types';
+import { GenericRepoSpec, Repository } from '@flightctl/types';
 import { ImportFleetFormValues } from '../types';
 
 import { RepositoryForm } from '../../../Repository/CreateRepository/CreateRepositoryForm';
@@ -36,7 +36,7 @@ const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
   const { values } = useFormikContext<ImportFleetFormValues>();
 
   const currentRepo = repositories.find((r) => r.metadata.name === values.existingRepo);
-
+  const repoSpec = currentRepo?.spec as GenericRepoSpec | undefined; // Only git repositories can be used for importing fleets;
   return (
     <>
       <FormGroup label={t('Repository')} fieldId="repository">
@@ -60,7 +60,7 @@ const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
           </Thead>
           <Tbody>
             <Tr>
-              <Td dataLabel={t('URL')}>{currentRepo.spec.url}</Td>
+              <Td dataLabel={t('URL')}>{repoSpec?.url || '-'}</Td>
               <Td dataLabel={t('Sync status')}>
                 <RepositoryStatus statusInfo={getRepositorySyncStatus(currentRepo)} />
               </Td>

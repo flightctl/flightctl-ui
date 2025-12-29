@@ -7,6 +7,7 @@ import { ConfigSourceProvider, getRepoName, isRepoConfig } from '../../../types/
 import { isPromiseRejected } from '../../../types/typeUtils';
 import { getErrorMessage } from '../../../utils/error';
 import { getConfigDetails } from './RepositorySource';
+import { getRepoUrlOrRegistry } from '../CreateRepository/utils';
 
 const useArrayEq = (array: string[]) => {
   const prevArrayRef = React.useRef(array);
@@ -45,7 +46,7 @@ const RepositorySourceList = ({ configs }: { configs: Array<ConfigSourceProvider
         if (isRepoMissing) {
           repoInfo.errorMsg = getErrorMessage(result.reason);
         } else {
-          repoInfo.url = result.value.spec.url;
+          repoInfo.url = getRepoUrlOrRegistry(result.value.spec);
         }
         map[repoName] = repoInfo;
       });

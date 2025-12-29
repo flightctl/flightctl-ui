@@ -1,8 +1,11 @@
 import * as Yup from 'yup';
 import { TFunction } from 'i18next';
 import {
+  DockerAuth,
   HttpConfig,
   HttpRepoSpec,
+  OciAuthType,
+  OciRepoSpec,
   PatchRequest,
   RepoSpecType,
   Repository,
@@ -29,6 +32,14 @@ const jwtTokenRegexp = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
 export const isHttpRepoSpec = (repoSpec: RepositorySpec): repoSpec is HttpRepoSpec =>
   !!(repoSpec['httpConfig'] || (repoSpec as HttpRepoSpec).validationSuffix);
 export const isSshRepoSpec = (repoSpec: RepositorySpec): repoSpec is SshRepoSpec => !!repoSpec['sshConfig'];
+export const isOciRepoSpec = (repoSpec: RepositorySpec): repoSpec is OciRepoSpec => repoSpec.type === RepoSpecType.OCI;
+
+export const getRepoUrlOrRegistry = (repoSpec: RepositorySpec): string => {
+  if (isOciRepoSpec(repoSpec)) {
+    return repoSpec.registry || '';
+  }
+  return repoSpec.url || '';
+};
 
 export const getInitValues = ({
   repository,
@@ -43,12 +54,13 @@ export const getInitValues = ({
     showRepoTypes?: boolean;
   };
 }): RepositoryFormValues => {
-  const useRSs = options?.canUseResourceSyncs ?? true;
+  const configAllowsResourceSyncs = options?.canUseResourceSyncs ?? true;
 
   if (!repository) {
     const selectedRepoType = options?.allowedRepoTypes?.length === 1 ? options.allowedRepoTypes[0] : RepoSpecType.GIT;
+    const canUseRSs = selectedRepoType === RepoSpecType.GIT && configAllowsResourceSyncs;
 
-    return {
+    const initValues: RepositoryFormValues = {
       exists: false,
       repoType: selectedRepoType,
       allowedRepoTypes: options?.allowedRepoTypes,
@@ -57,9 +69,8 @@ export const getInitValues = ({
       url: '',
       useAdvancedConfig: false,
       configType: 'http',
-
-      canUseResourceSyncs: useRSs,
-      useResourceSyncs: useRSs,
+      canUseResourceSyncs: canUseRSs,
+      useResourceSyncs: canUseRSs,
       resourceSyncs: [
         {
           name: '',
@@ -68,20 +79,32 @@ export const getInitValues = ({
         },
       ],
     };
+
+    if (selectedRepoType === RepoSpecType.OCI) {
+      initValues.ociConfig = {
+        registry: '',
+        scheme: OciRepoSpec.scheme.HTTPS,
+        accessMode: OciRepoSpec.accessMode.READ,
+      };
+    }
+
+    return initValues;
   }
+
+  const canUseRSs = repository.spec.type === RepoSpecType.GIT && configAllowsResourceSyncs;
 
   const formValues: RepositoryFormValues = {
     exists: true,
     name: repository.metadata.name || '',
-    url: repository.spec.url || '',
+    url: isOciRepoSpec(repository.spec) ? '' : repository.spec.url || '',
     repoType: repository.spec.type,
     validationSuffix: 'validationSuffix' in repository.spec ? repository.spec.validationSuffix : '',
     allowedRepoTypes: options?.allowedRepoTypes,
     showRepoTypes: options?.showRepoTypes ?? true,
-    useResourceSyncs: !!resourceSyncs?.length,
     useAdvancedConfig: false,
     configType: 'http',
-    canUseResourceSyncs: useRSs,
+    canUseResourceSyncs: canUseRSs,
+    useResourceSyncs: canUseRSs && !!resourceSyncs?.length,
     resourceSyncs: resourceSyncs?.length
       ? resourceSyncs
           .filter((rs) => rs.spec.repository === repository.metadata.name)
@@ -94,7 +117,29 @@ export const getInitValues = ({
       : [{ name: '', path: '', targetRevision: '' }],
   };
 
-  if (isHttpRepoSpec(repository.spec)) {
+  if (isOciRepoSpec(repository.spec)) {
+    formValues.useAdvancedConfig = !!(
+      repository.spec.ociAuth ||
+      repository.spec['ca.crt'] ||
+      repository.spec.skipServerVerification ||
+      repository.spec.scheme ||
+      repository.spec.accessMode
+    );
+    formValues.ociConfig = {
+      registry: repository.spec.registry,
+      scheme: repository.spec.scheme || OciRepoSpec.scheme.HTTPS,
+      accessMode: repository.spec.accessMode || OciRepoSpec.accessMode.READ,
+      ociAuth: repository.spec.ociAuth
+        ? {
+            use: true,
+            username: repository.spec.ociAuth.username,
+            password: repository.spec.ociAuth.password,
+          }
+        : undefined,
+      caCrt: repository.spec['ca.crt'] ? atob(repository.spec['ca.crt']) : undefined,
+      skipServerVerification: repository.spec.skipServerVerification,
+    };
+  } else if (isHttpRepoSpec(repository.spec)) {
     formValues.useAdvancedConfig = true;
     formValues.configType = 'http';
     formValues.httpConfig = {
@@ -126,19 +171,112 @@ export const getInitValues = ({
 };
 
 export const getRepositoryPatches = (values: RepositoryFormValues, repository: Repository): PatchRequest => {
+  // If repoType changes, replace the entire spec
+  if (values.repoType !== repository.spec.type) {
+    const newRepository = getRepository(values);
+    return [
+      {
+        op: 'replace',
+        path: '/spec',
+        value: newRepository.spec,
+      },
+    ];
+  }
+
   const patches: PatchRequest = [];
-  appendJSONPatch({
-    patches,
-    newValue: values.repoType,
-    originalValue: repository.spec.type,
-    path: '/spec/type',
-  });
-  appendJSONPatch({
-    patches,
-    newValue: values.url,
-    originalValue: repository.spec.url,
-    path: '/spec/url',
-  });
+
+  // Handle OCI repository patches first
+  if (values.repoType === RepoSpecType.OCI) {
+    const ociRepoSpec = repository.spec as OciRepoSpec;
+    if (values.ociConfig) {
+      appendJSONPatch({
+        patches,
+        newValue: values.ociConfig.registry,
+        originalValue: ociRepoSpec.registry,
+        path: '/spec/registry',
+      });
+
+      if (!values.useAdvancedConfig) {
+        if (ociRepoSpec.ociAuth) {
+          patches.push({ op: 'remove', path: '/spec/ociAuth' });
+        }
+        if (ociRepoSpec['ca.crt']) {
+          patches.push({ op: 'remove', path: '/spec/ca.crt' });
+        }
+        if (ociRepoSpec.skipServerVerification !== undefined) {
+          patches.push({ op: 'remove', path: '/spec/skipServerVerification' });
+        }
+        if (ociRepoSpec.scheme) {
+          patches.push({ op: 'remove', path: '/spec/scheme' });
+        }
+        if (ociRepoSpec.accessMode) {
+          patches.push({ op: 'remove', path: '/spec/accessMode' });
+        }
+        return patches;
+      }
+
+      appendJSONPatch({
+        patches,
+        newValue: values.ociConfig.scheme || OciRepoSpec.scheme.HTTPS,
+        originalValue: ociRepoSpec.scheme,
+        path: '/spec/scheme',
+      });
+
+      appendJSONPatch({
+        patches,
+        newValue: values.ociConfig.accessMode || OciRepoSpec.accessMode.READ,
+        originalValue: ociRepoSpec.accessMode,
+        path: '/spec/accessMode',
+      });
+
+      appendJSONPatch({
+        patches,
+        newValue: values.ociConfig.skipServerVerification,
+        originalValue: ociRepoSpec.skipServerVerification,
+        path: '/spec/skipServerVerification',
+      });
+
+      if (values.ociConfig.skipServerVerification && ociRepoSpec['ca.crt']) {
+        patches.push({ op: 'remove', path: '/spec/ca.crt' });
+      } else {
+        const caCrt = values.ociConfig.caCrt;
+        appendJSONPatch({
+          patches,
+          newValue: caCrt ? btoa(caCrt) : caCrt,
+          originalValue: ociRepoSpec['ca.crt'],
+          path: '/spec/ca.crt',
+        });
+      }
+
+      const ociAuth = values.ociConfig.ociAuth;
+      if (ociAuth?.use && ociAuth.username && ociAuth.password) {
+        const ociAuthValue: DockerAuth = {
+          authType: OciAuthType.DOCKER,
+          username: ociAuth.username,
+          password: ociAuth.password,
+        };
+        appendJSONPatch({
+          patches,
+          newValue: ociAuthValue,
+          originalValue: ociRepoSpec.ociAuth,
+          path: '/spec/ociAuth',
+        });
+      } else if (ociRepoSpec.ociAuth) {
+        patches.push({ op: 'remove', path: '/spec/ociAuth' });
+      }
+    }
+    return patches;
+  }
+
+  // Handle Git/Http repository patches
+  if ('url' in repository.spec) {
+    appendJSONPatch({
+      patches,
+      newValue: values.url,
+      originalValue: repository.spec.url,
+      path: '/spec/url',
+    });
+  }
 
   if (!values.useAdvancedConfig) {
     if (isHttpRepoSpec(repository.spec)) {
@@ -429,26 +567,14 @@ export const singleResourceSyncSchema = (t: TFunction, existingRSs: ResourceSync
   });
 };
 
+// Regex for registry hostname: FQDN, IP address (IPv4 or IPv6), with optional port, matching as much as possible of the backend pattern
+const registryHostnameRegex =
+  /^(([a-z0-9]([-a-z0-9]*[a-z0-9])?\.)*[a-z]([-a-z0-9]*[a-z0-9])?|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|\[[a-fA-F0-9:]+\])(:[0-9]{1,5})?$/;
+
 export const repositorySchema =
   (t: TFunction, repository: Repository | undefined) => (values: RepositoryFormValues) => {
-    return Yup.object({
+    const baseSchema = {
       name: validKubernetesDnsSubdomain(t, { isRequired: !repository }),
-      url: Yup.string().when('repoType', {
-        is: (repoType: RepoSpecType) => repoType === RepoSpecType.GIT,
-        then: () =>
-          Yup.string()
-            .matches(
-              gitRepoUrlRegex,
-              t('Enter a valid repository URL. Example: {{ demoRepositoryUrl }}', {
-                demoRepositoryUrl: 'https://github.com/flightctl/flightctl-demos',
-              }),
-            )
-            .defined(t('Repository URL is required')),
-        otherwise: () =>
-          Yup.string()
-            .matches(httpRepoUrlRegex, t('Enter a valid HTTP service URL. Example: https://my-service-url'))
-            .defined(t('HTTP service URL is required')),
-      }),
       configType: values.useAdvancedConfig ? Yup.string().required(t('Repository type is required')) : Yup.string(),
       httpConfig: Yup.object({
         basicAuth: Yup.object({
@@ -467,10 +593,89 @@ export const repositorySchema =
       }),
       useResourceSyncs: Yup.boolean(),
       resourceSyncs: values.useResourceSyncs ? repoSyncSchema(t, values.resourceSyncs) : Yup.array(),
+    };
+
+    if (values.repoType === RepoSpecType.OCI) {
+      return Yup.object({
+        ...baseSchema,
+        url: Yup.string(),
+        ociConfig: Yup.object({
+          registry: Yup.string()
+            .matches(
+              registryHostnameRegex,
+              t('Enter a valid registry hostname (e.g., quay.io, registry.redhat.io, myregistry.com:5000)'),
+            )
+            .required(t('Registry hostname is required')),
+          scheme: Yup.string().oneOf([OciRepoSpec.scheme.HTTP, OciRepoSpec.scheme.HTTPS]),
+          accessMode: Yup.string().oneOf([OciRepoSpec.accessMode.READ, OciRepoSpec.accessMode.READ_WRITE]),
+          ociAuth: Yup.object({
+            use: Yup.boolean(),
+            username: values.ociConfig?.ociAuth?.use ? Yup.string().required(t('Username is required')) : Yup.string(),
+            password: values.ociConfig?.ociAuth?.use ? Yup.string().required(t('Password is required')) : Yup.string(),
+          }),
+          caCrt: Yup.string(),
+          skipServerVerification: Yup.boolean(),
+        }),
+      });
+    }
+
+    return Yup.object({
+      ...baseSchema,
+      url: Yup.string().when('repoType', {
+        is: (repoType: RepoSpecType) => repoType === RepoSpecType.GIT,
+        then: () =>
+          Yup.string()
+            .matches(
+              gitRepoUrlRegex,
+              t('Enter a valid repository URL. Example: {{ demoRepositoryUrl }}', {
+                demoRepositoryUrl: 'https://github.com/flightctl/flightctl-demos',
+              }),
+            )
+            .defined(t('Repository URL is required')),
+        otherwise: () =>
+          Yup.string()
+            .matches(httpRepoUrlRegex, t('Enter a valid HTTP service URL. Example: https://my-service-url'))
+            .defined(t('HTTP service URL is required')),
+      }),
+      ociConfig: Yup.object(),
     });
   };
 
 export const getRepository = (values: Omit<RepositoryFormValues, 'useResourceSyncs' | 'resourceSyncs'>): Repository => {
+  if (values.repoType === RepoSpecType.OCI && values.ociConfig) {
+    const ociRepoSpec: OciRepoSpec = {
+      registry: values.ociConfig.registry,
+      type: RepoSpecType.OCI,
+      scheme: values.ociConfig.scheme || OciRepoSpec.scheme.HTTPS,
+      accessMode: values.ociConfig.accessMode || OciRepoSpec.accessMode.READ,
+    };
+
+    if (values.ociConfig.skipServerVerification) {
+      ociRepoSpec.skipServerVerification = true;
+    }
+
+    if (values.ociConfig.caCrt && !values.ociConfig.skipServerVerification) {
+      ociRepoSpec['ca.crt'] = btoa(values.ociConfig.caCrt);
+    }
+
+    if (values.ociConfig.ociAuth?.use && values.ociConfig.ociAuth.username && values.ociConfig.ociAuth.password) {
+      ociRepoSpec.ociAuth = {
+        authType: OciAuthType.DOCKER,
+        username: values.ociConfig.ociAuth.username,
+        password: values.ociConfig.ociAuth.password,
+      };
+    }
+
+    return {
+      apiVersion: API_VERSION,
+      kind: 'Repository',
+      metadata: {
+        name: values.name,
+      },
+      spec: ociRepoSpec,
+    };
+  }
+
   const spec: RepositorySpec = {
     url: values.url,
     type: values.repoType,

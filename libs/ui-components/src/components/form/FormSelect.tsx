@@ -6,7 +6,7 @@ import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 import './FormSelect.css';
 
-type SelectItem = { label: string; description?: string };
+type SelectItem = { label: string; description?: string | React.ReactNode };
 
 type FormSelectProps = {
   name: string;
