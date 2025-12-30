@@ -7,9 +7,9 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "i18n": "i18next \"../../{libs,apps}/*/src/**/*.{js,jsx,ts,tsx}\" [-oc] -c i18next-parser.config.js && git diff --exit-code locales/en/translation.json"
+    "i18n": "i18next-cli extract && git diff --exit-code locales/en/translation.json"
   },
   "devDependencies": {
-    "i18next-parser": "6.5.0"
+    "i18next-cli": "^1.5.11"
   }
 }
