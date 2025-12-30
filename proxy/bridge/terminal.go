@@ -95,6 +95,45 @@ func buildDeviceConsoleURL(r *http.Request) (string, error) {
 	return consoleURL.String(), nil
 }
 
+// checkOrigin validates the Origin header against allowed origins.
+// It allows:
+//   - Requests from the configured BaseUiUrl origin
+//   - Same-origin requests (Origin matches request Host)
+//   - Requests without an Origin header (same-origin from browsers)
+//
+// Host comparisons are case-insensitive per RFC 3986.
+func checkOrigin(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+
+	// If no Origin header is present, allow the request (same-origin from browsers).
+	if origin == "" {
+		return true
+	}
+
+	originURL, err := url.Parse(origin)
+	if err != nil {
+		// Log rejected origin safely using %q to escape user-controlled input and prevent log injection
+		log.Warnf("Rejected WebSocket connection - invalid Origin header: %q", origin)
+		return false
+	}
+
+	baseURL, err := url.Parse(config.BaseUiUrl)
+	if err != nil {
+		log.WithError(err).Warnf("Failed to parse BaseUiUrl for origin check")
+	} else if originURL.Scheme == baseURL.Scheme && strings.EqualFold(originURL.Host, baseURL.Host) {
+		return true
+	}
+
+	// Allow same-origin requests
+	if strings.EqualFold(originURL.Host, r.Host) {
+		return true
+	}
+
+	// Log rejected origin safely using %q to escape user-controlled input and prevent log injection
+	log.Warnf("Rejected WebSocket connection - unauthorized Origin header: %q", origin)
+	return false
+}
+
 func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 	isWebsocket := false
 	upgrades := r.Header["Upgrade"]
@@ -156,7 +195,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 
 	upgrader := &websocket.Upgrader{
 		Subprotocols: websocket.Subprotocols(r),
-		CheckOrigin:  func(r *http.Request) bool { return true },
+		CheckOrigin:  checkOrigin,
 	}
 
 	frontend, err := upgrader.Upgrade(w, r, nil)
