@@ -13,18 +13,36 @@ interface CopyButtonProps {
 const CopyButton = ({ ariaLabel, text, variant }: CopyButtonProps) => {
   const { t } = useTranslation();
 
+  const [copied, setCopied] = React.useState(false);
+
   const onCopy = () => {
     void navigator.clipboard.writeText(text);
+    setCopied(true);
   };
 
+  React.useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    if (copied) {
+      timeout = setTimeout(() => {
+        setCopied(false);
+      }, 1000);
+    }
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [copied]);
+
   return (
-    <Tooltip content={ariaLabel || t('Copy text')}>
+    <Tooltip content={copied ? t('Copied!') : ariaLabel || t('Copy text')}>
       <Button
         variant={variant || 'plain'}
         isInline={variant === 'link'}
+        onClick={onCopy}
         icon={
           <Icon size="sm">
-            <CopyIcon onClick={onCopy} />
+            <CopyIcon />
           </Icon>
         }
         aria-label={ariaLabel || t('Copy text')}
