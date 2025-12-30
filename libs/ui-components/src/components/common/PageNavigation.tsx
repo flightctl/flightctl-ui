@@ -19,6 +19,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { useOrganizationGuardContext } from './OrganizationGuard';
 import OrganizationSelector from './OrganizationSelector';
+import LoginCommandModal from '../modals/LoginCommandModal/LoginCommandModal';
 import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from './PermissionsContext';
 import { useAppContext } from '../../hooks/useAppContext';
@@ -106,15 +107,9 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
   const { checkPermissions } = usePermissionsContext();
   const [isAdmin] = checkPermissions([{ kind: RESOURCE.AUTH_PROVIDER, verb: VERB.CREATE }]);
   const [showOrganizationModal, setShowOrganizationModal] = React.useState(false);
+  const [showLoginCommandModal, setShowLoginCommandModal] = React.useState(false);
   const showOrganizationSelection = availableOrganizations.length > 1;
   const currentOrgDisplayName = currentOrganization?.spec?.displayName || currentOrganization?.metadata?.name || '';
-
-  // Show navigation bar if there's either org selection OR admin button to show
-  const shouldShowNavigation = showOrganizationSelection || isAdmin;
-
-  if (!shouldShowNavigation) {
-    return null;
-  }
 
   return (
     <>
@@ -133,6 +128,17 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
                     />
                   </ToolbarItem>
                 )}
+                <ToolbarItem>
+                  <Tooltip content={t('Copy login command')}>
+                    <Button
+                      variant="link"
+                      aria-label={t('Copy login command')}
+                      onClick={() => setShowLoginCommandModal(true)}
+                    >
+                      {t('Copy login command')}
+                    </Button>
+                  </Tooltip>
+                </ToolbarItem>
                 {isAdmin && showSettings && (
                   <ToolbarItem>
                     <Tooltip content={t('Manage authentication providers')}>
@@ -162,6 +168,14 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
               const targetPath = getRedirectPathAfterOrgSwitch(location.pathname, router.appRoutes);
               window.location.href = targetPath;
             }
+          }}
+        />
+      )}
+
+      {showLoginCommandModal && (
+        <LoginCommandModal
+          onClose={() => {
+            setShowLoginCommandModal(false);
           }}
         />
       )}

@@ -72,6 +72,7 @@ func main() {
 		apiRouter.HandleFunc("/login/info", authHandler.GetUserInfo)
 		apiRouter.HandleFunc("/login/refresh", authHandler.Refresh)
 		apiRouter.HandleFunc("/logout", authHandler.Logout)
+		apiRouter.HandleFunc("/login-command", authHandler.GetLoginCommand)
 	}
 
 	spa := server.SpaHandler{}

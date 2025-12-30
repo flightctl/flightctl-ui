@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
 
 	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
@@ -24,6 +25,16 @@ type UserInfoResponse struct {
 
 type RedirectResponse struct {
 	Url string `json:"url"`
+}
+
+type LoginCommand struct {
+	ProviderName string `json:"providerName"`
+	DisplayName  string `json:"displayName"`
+	Command      string `json:"command"`
+}
+
+type LoginCommandResponse struct {
+	Commands []LoginCommand `json:"commands"`
 }
 
 // UserInfoError is a custom error type that carries a user-facing error message
@@ -641,4 +652,143 @@ func extractUserInfoErrorMessage(err error) string {
 
 	// Fallback: return a generic error message
 	return "Authentication failed. Please try logging in again."
+}
+
+func getDisplayNameFromProviderSpec(providerSpec *v1beta1.AuthProviderSpec) (bool, string) {
+	// Extract display name from the specific provider spec type
+	providerTypeStr, err := providerSpec.Discriminator()
+	if err != nil {
+		return false, ""
+	}
+
+	var displayName string
+
+	isEnabled := false
+	switch providerTypeStr {
+	case ProviderTypeOIDC:
+		oidcSpec, err := providerSpec.AsOIDCProviderSpec()
+		if err == nil && oidcSpec.DisplayName != nil {
+			displayName = *oidcSpec.DisplayName
+		}
+		if oidcSpec.Enabled != nil {
+			isEnabled = *oidcSpec.Enabled
+		}
+	case ProviderTypeOAuth2:
+		oauth2Spec, err := providerSpec.AsOAuth2ProviderSpec()
+		if err == nil && oauth2Spec.DisplayName != nil {
+			displayName = *oauth2Spec.DisplayName
+		}
+		if oauth2Spec.Enabled != nil {
+			isEnabled = *oauth2Spec.Enabled
+		}
+	case ProviderTypeOpenShift:
+		openshiftSpec, err := providerSpec.AsOpenShiftProviderSpec()
+		if err == nil && openshiftSpec.DisplayName != nil {
+			displayName = *openshiftSpec.DisplayName
+		}
+		if openshiftSpec.Enabled != nil {
+			isEnabled = *openshiftSpec.Enabled
+		}
+	case ProviderTypeK8s:
+		k8sSpec, err := providerSpec.AsK8sProviderSpec()
+		if err == nil && k8sSpec.DisplayName != nil {
+			displayName = *k8sSpec.DisplayName
+		}
+		if k8sSpec.Enabled != nil {
+			isEnabled = *k8sSpec.Enabled
+		}
+	case ProviderTypeAAP:
+		aapSpec, err := providerSpec.AsAapProviderSpec()
+		if err == nil && aapSpec.DisplayName != nil {
+			displayName = *aapSpec.DisplayName
+		}
+		if aapSpec.Enabled != nil {
+			isEnabled = *aapSpec.Enabled
+		}
+	}
+	return isEnabled, displayName
+}
+
+// GetLoginCommand generates CLI login commands based on enabled auth providers
+func (a AuthHandler) GetLoginCommand(w http.ResponseWriter, r *http.Request) {
+	authConfig, err := getAuthInfo(a.apiTlsConfig)
+	if err != nil {
+		log.GetLogger().WithError(err).Error("Failed to get auth config for login command")
+		respondWithError(w, http.StatusInternalServerError, "Failed to retrieve authentication configuration")
+		return
+	}
+
+	if authConfig == nil || authConfig.Providers == nil || len(*authConfig.Providers) == 0 {
+		respondWithError(w, http.StatusNotFound, "No authentication providers configured")
+		return
+	}
+
+	providersCount := 0
+	var commands []LoginCommand
+	for _, provider := range *authConfig.Providers {
+		if provider.Metadata.Name == nil {
+			continue
+		}
+		providerName := *provider.Metadata.Name
+
+		providerTypeStr, err := provider.Spec.Discriminator()
+		if err != nil {
+			log.GetLogger().WithError(err).Warnf("Failed to determine provider type for %s", providerName)
+			continue
+		}
+
+		isEnabled, displayName := getDisplayNameFromProviderSpec(&provider.Spec)
+		if !isEnabled {
+			continue
+		}
+		providersCount++
+
+		var command string
+
+		providerFlag := "web"
+		if providerTypeStr == ProviderTypeK8s {
+			providerFlag = "token=<your-token>"
+		}
+
+		if providersCount == 1 || providerTypeStr == ProviderTypeK8s {
+			// --token cannot be used with --provider
+			command = fmt.Sprintf("flightctl login %s --%s", config.FctlApiExternalUrl, providerFlag)
+		} else {
+			command = fmt.Sprintf("flightctl login %s --provider=%s --%s", config.FctlApiExternalUrl, providerName, providerFlag)
+		}
+		commands = append(commands, LoginCommand{ProviderName: providerName, DisplayName: displayName, Command: command})
+	}
+
+	// Sort commands so the default provider comes first
+	defaultProviderName := ""
+	if authConfig.DefaultProvider != nil {
+		defaultProviderName = *authConfig.DefaultProvider
+	}
+	if defaultProviderName != "" {
+		sort.Slice(commands, func(i, j int) bool {
+			// Default provider should come first
+			if commands[i].ProviderName == defaultProviderName {
+				return true
+			}
+			if commands[j].ProviderName == defaultProviderName {
+				return false
+			}
+			// Otherwise maintain original order
+			return i < j
+		})
+	}
+
+	response := LoginCommandResponse{
+		Commands: commands,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		log.GetLogger().WithError(err).Error("Failed to marshal login command response")
+		respondWithError(w, http.StatusInternalServerError, "Failed to generate login command")
+		return
+	}
+
+	w.Write(jsonResponse)
 }
