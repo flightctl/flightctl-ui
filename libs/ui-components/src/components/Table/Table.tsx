@@ -36,6 +36,7 @@ type TableProps<D> = {
   // getSortParams: (columnIndex: number) => ThProps['sort'];
   onSelectAll?: (isSelected: boolean) => void;
   isAllSelected?: boolean;
+  isExpandable?: boolean;
 };
 
 type TableFC = <D>(props: TableProps<D>) => JSX.Element;
@@ -49,6 +50,7 @@ const Table: TableFC = ({
   clearFilters,
   onSelectAll,
   isAllSelected,
+  isExpandable,
   ...rest
 }) => {
   const { t } = useTranslation();
@@ -70,7 +72,7 @@ const Table: TableFC = ({
   }
 
   return (
-    <PFTable {...rest}>
+    <PFTable isExpandable={isExpandable} {...rest}>
       <Thead>
         <Tr>
           {!emptyData && onSelectAll && (
@@ -82,6 +84,7 @@ const Table: TableFC = ({
               }}
             />
           )}
+          {isExpandable && !emptyData && <Th screenReaderText={t('Expand row')} />}
           {columns.map((c) => (
             <Th key={c.name} {...c.thProps} aria-label={c.name}>
               {c.helperText ? (

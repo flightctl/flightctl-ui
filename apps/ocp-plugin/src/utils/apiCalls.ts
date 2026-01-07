@@ -38,6 +38,7 @@ const apiServer = `${window.location.hostname}${
 export const uiProxy = `${window.location.protocol}//${apiServer}`;
 const flightCtlAPI = `${uiProxy}/api/flightctl`;
 const alertsAPI = `${uiProxy}/api/alerts`;
+const imageBuilderPathRegex = /^image(builds|exports)/;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
 export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): Promise<Response> => {
@@ -49,6 +50,9 @@ export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): 
 const getFullApiUrl = (path: string) => {
   if (path.startsWith('alerts')) {
     return { api: 'alerts', url: `${alertsAPI}/api/v2/${path}` };
+  }
+  if (imageBuilderPathRegex.test(path)) {
+    return { api: 'imagebuilder', url: `${uiProxy}/imagebuilder/api/v1/${path}` };
   }
   return { api: 'flightctl', url: `${flightCtlAPI}/api/v1/${path}` };
 };
@@ -102,7 +106,8 @@ const putOrPostData = async <TRequest, TResponse = TRequest>(
 
   const options = addRequiredHeaders(baseOptions);
   try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, options);
+    const { url } = getFullApiUrl(kind);
+    const response = await fetch(url, options);
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error(`Error making ${method} request for ${kind}:`, error);
@@ -124,7 +129,8 @@ export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Pr
 
   const options = addRequiredHeaders(baseOptions);
   try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, options);
+    const { url } = getFullApiUrl(kind);
+    const response = await fetch(url, options);
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making DELETE request:', error);
@@ -144,7 +150,8 @@ export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal
 
   const options = addRequiredHeaders(baseOptions);
   try {
-    const response = await fetch(`${flightCtlAPI}/api/v1/${kind}`, options);
+    const { url } = getFullApiUrl(kind);
+    const response = await fetch(url, options);
     return handleApiJSONResponse(response);
   } catch (error) {
     console.error('Error making PATCH request:', error);

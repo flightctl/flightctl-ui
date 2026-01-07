@@ -46,6 +46,16 @@
     }
   },
   {
+    "type": "console.navigation/href",
+    "properties": {
+      "id": "fctl-imagebuilds",
+      "name": "%plugin__flightctl-plugin~Image builds%",
+      "href": "/edge/imagebuilds",
+      "perspective": "acm",
+      "section": "fctl"
+    }
+  },
+  {
     "type": "console.page/route",
     "properties": {
       "exact": true,
@@ -123,6 +133,22 @@
       "exact": false,
       "path": ["/edge/repositories/:repositoryId"],
       "component": { "$codeRef": "RepositoryDetailsPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/imagebuilds"],
+      "component": { "$codeRef": "ImageBuildsPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": false,
+      "path": ["/edge/imagebuilds/:imageBuildId"],
+      "component": { "$codeRef": "ImageBuildDetailsPage" }
     }
   },
   {

@@ -11,16 +11,22 @@
       "source": "./index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./imagebuilder": {
+      "source": "./imagebuilder/index.ts",
+      "types": "./dist/imagebuilder/index.d.ts",
+      "default": "./dist/imagebuilder/index.js"
     }
   },
   "files": [
     "dist",
-    "index.ts"
+    "index.ts",
+    "imagebuilder"
   ],
   "scripts": {
     "prebuild": "tsc --noEmit && rimraf dist",
     "build": "tsc --build",
-    "gen-types": "rimraf ./models && node ./scripts/openapi-typescript.js && rsync -a --remove-source-files tmp-types/ ./ && npm run build",
+    "gen-types": "node ./scripts/openapi-typescript.js && npm run build",
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}'"
   },
   "devDependencies": {

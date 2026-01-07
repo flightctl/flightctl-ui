@@ -1,6 +1,16 @@
 import * as React from 'react';
 
-import { Button, FormGroup, FormSection, Grid, Split, SplitItem, Stack, StackItem } from '@patternfly/react-core';
+import {
+  Button,
+  Content,
+  FormGroup,
+  FormSection,
+  Grid,
+  Split,
+  SplitItem,
+  Stack,
+  StackItem,
+} from '@patternfly/react-core';
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
@@ -275,11 +285,11 @@ const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
       content={t('Define the application workloads that shall run on the device.')}
     >
       <>
-        <small>
+        <Content component="p">
           {t(
             'Configure containerized applications and services that will run on your fleet devices. You can deploy single containers, Quadlet applications for advanced container orchestration or inline applications with custom files.',
           )}
-        </small>
+        </Content>
         <FieldArray name="applications">
           {({ push, remove }) => (
             <>

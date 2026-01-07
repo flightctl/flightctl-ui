@@ -121,3 +121,6 @@ export const getUpdateCronExpression = (startTime: string, scheduleMode: UpdateS
     .filter((num) => num !== null);
   return `${minutes} ${hours} * * ${weekDayVals.join(',')}`;
 };
+
+// Adds an artificial delay to make sure that the user notices the data is refreshing.
+export const showSpinnerBriefly = (time: number = 450) => new Promise((resolve) => setTimeout(resolve, time));

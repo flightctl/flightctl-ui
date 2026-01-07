@@ -5,7 +5,6 @@ import { createListMatcher } from './matchers';
 const loadInterceptors = () => {
   cy.intercept('GET', '/api/login/info', (req) => {
     req.reply({
-      // CELIA-WIP MOST LIKELY WE NEED TO ADD MORE MOCKS FOR CYPRESS TESTS TO CONTINUE WORKING
       statusCode: 200,
       body: {
         username: 'cypress-user',

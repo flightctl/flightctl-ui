@@ -22,6 +22,8 @@
       "RepositoriesPage": "./src/components/Repositories/RepositoriesPage.tsx",
       "RepositoryDetailsPage": "./src/components/Repositories/RepositoryDetailsPage.tsx",
       "CreateRepositoryPage": "./src/components/Repositories/CreateRepositoryPage.tsx",
+      "ImageBuildsPage": "./src/components/ImageBuilds/ImageBuildsPage.tsx",
+      "ImageBuildDetailsPage": "./src/components/ImageBuilds/ImageBuildDetailsPage.tsx",
       "ResourceSyncToRepositoryPage": "./src/components/ResourceSyncs/ResourceSyncToRepositoryPage.tsx",
       "EnrollmentRequestDetailsPage": "./src/components/EnrollmentRequests/EnrollmentRequestDetailsPage.tsx",
       "appContext": "./src/components/AppContext/AppContext.tsx",

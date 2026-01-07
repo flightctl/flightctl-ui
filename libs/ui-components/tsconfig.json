@@ -23,6 +23,10 @@
     "skipLibCheck": true,
     "declaration": true,
     "declarationMap": true,
+    "paths": {
+      "@flightctl/types": ["../types"],
+      "@flightctl/types/imagebuilder": ["../types/imagebuilder"],
+    },
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js", "**/*.json"],
   "exclude": ["node_modules", "dist"],

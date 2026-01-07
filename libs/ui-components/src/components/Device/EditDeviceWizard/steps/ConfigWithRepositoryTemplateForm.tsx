@@ -1,18 +1,14 @@
 import * as React from 'react';
 import { useFormikContext } from 'formik';
-import { Button, FormGroup, Icon, MenuFooter } from '@patternfly/react-core';
-import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
-import { TFunction, Trans } from 'react-i18next';
+import { FormGroup } from '@patternfly/react-core';
+import { Trans } from 'react-i18next';
 
 import { GenericRepoSpec, HttpRepoSpec, RepoSpecType, Repository } from '@flightctl/types';
 import { DeviceSpecConfigFormValues, GitConfigTemplate, HttpConfigTemplate } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
-import FormSelect from '../../../form/FormSelect';
-import CreateRepositoryModal from '../../../modals/CreateRepositoryModal/CreateRepositoryModal';
+import RepositorySelect from '../../../form/RepositorySelect';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
-import { getRepoUrlOrRegistry } from '../../../Repository/CreateRepository/utils';
 
 type ConfigWithRepositoryTemplateFormProps = {
   repoType: RepoSpecType;
@@ -21,40 +17,6 @@ type ConfigWithRepositoryTemplateFormProps = {
   repoRefetch: VoidFunction;
   isReadOnly?: boolean;
   canCreateRepo: boolean;
-};
-
-const getRepositoryItems = (
-  t: TFunction,
-  repositories: Repository[],
-  repoType: RepoSpecType,
-  forcedRepoName?: string,
-) => {
-  const repositoryItems = repositories.reduce((acc, curr) => {
-    if (curr.spec.type === repoType) {
-      const description = getRepoUrlOrRegistry(curr.spec);
-      const repoName = curr.metadata.name || '';
-      acc[repoName] = {
-        label: repoName,
-        description,
-      };
-    }
-    return acc;
-  }, {});
-  // If there's a broken reference to a repository, we must add an item so the name shows in the dropdown
-  if (forcedRepoName && !repositoryItems[forcedRepoName]) {
-    repositoryItems[forcedRepoName] = {
-      label: forcedRepoName,
-      description: (
-        <>
-          <Icon size="sm" status="danger">
-            <ExclamationCircleIcon />
-          </Icon>{' '}
-          {t('Missing repository')}
-        </>
-      ),
-    };
-  }
-  return repositoryItems;
 };
 
 const GitConfigForm = ({
@@ -161,51 +123,23 @@ const ConfigWithRepositoryTemplateForm = ({
   isReadOnly,
   canCreateRepo,
 }: ConfigWithRepositoryTemplateFormProps) => {
-  const { t } = useTranslation();
-  const { values, setFieldValue } = useFormikContext<DeviceSpecConfigFormValues>();
-  const [createRepoModalOpen, setCreateRepoModalOpen] = React.useState(false);
+  const { values } = useFormikContext<DeviceSpecConfigFormValues>();
 
   const ct = values.configTemplates[index] as HttpConfigTemplate | GitConfigTemplate;
-  const selectedRepoName = ct.repository;
-
-  const repositoryItems = isReadOnly
-    ? {
-        [selectedRepoName]: {
-          label: selectedRepoName,
-          description: '',
-        },
-      }
-    : getRepositoryItems(t, repositories, repoType, selectedRepoName);
-
-  const selectedRepo = repositories.find((repo) => repo.metadata.name === selectedRepoName);
+  const selectedRepo = repositories.find((repo) => repo.metadata.name === ct.repository);
   const repoSpec = selectedRepo?.spec as GenericRepoSpec | HttpRepoSpec | undefined;
+
   return (
     <>
-      <FormGroup label={t('Repository')} isRequired>
-        <FormSelect
-          name={`configTemplates[${index}].repository`}
-          items={repositoryItems}
-          withStatusIcon
-          placeholderText={t('Select a repository')}
-          isDisabled={isReadOnly}
-        >
-          {canCreateRepo && (
-            <MenuFooter>
-              <Button
-                variant="link"
-                isInline
-                icon={<PlusCircleIcon />}
-                onClick={() => {
-                  setCreateRepoModalOpen(true);
-                }}
-                isDisabled={isReadOnly}
-              >
-                {t('Create repository')}
-              </Button>
-            </MenuFooter>
-          )}
-        </FormSelect>
-      </FormGroup>
+      <RepositorySelect
+        name={`configTemplates[${index}].repository`}
+        repositories={repositories}
+        repoType={repoType}
+        canCreateRepo={canCreateRepo}
+        isReadOnly={isReadOnly}
+        repoRefetch={repoRefetch}
+        isRequired
+      />
       {repoType === RepoSpecType.GIT && (
         <GitConfigForm template={ct as GitConfigTemplate} index={index} isReadOnly={isReadOnly} />
       )}
@@ -215,20 +149,6 @@ const ConfigWithRepositoryTemplateForm = ({
           index={index}
           baseURL={repoSpec?.url || ''}
           isReadOnly={isReadOnly}
-        />
-      )}
-      {createRepoModalOpen && (
-        <CreateRepositoryModal
-          onClose={() => setCreateRepoModalOpen(false)}
-          onSuccess={(repo) => {
-            setCreateRepoModalOpen(false);
-            repoRefetch();
-            void setFieldValue(`configTemplates[${index}].repository`, repo.metadata.name, true);
-          }}
-          options={{
-            canUseResourceSyncs: false,
-            allowedRepoTypes: [repoType],
-          }}
         />
       )}
     </>

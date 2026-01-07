@@ -26,7 +26,13 @@ export type DetailsPageProps = {
   children: React.ReactNode;
   error: unknown;
   loading: boolean;
-  resourceType: 'Fleets' | 'Devices' | 'Repositories' | 'Enrollment requests' | 'Authentication providers';
+  resourceType:
+    | 'Fleets'
+    | 'Devices'
+    | 'Repositories'
+    | 'Enrollment requests'
+    | 'Authentication providers'
+    | 'Image builds';
   resourceTypeLabel: string;
   resourceLink: Route;
   actions?: React.ReactNode;

@@ -3,6 +3,7 @@ import {
   ApplicationEnvVars,
   ApplicationVolumeProviderSpec,
   AuthProvider,
+  Condition,
   ConditionType,
   Device,
   EnrollmentRequest,
@@ -12,8 +13,18 @@ import {
   OAuth2ProviderSpec,
   OIDCProviderSpec,
   RelativePath,
+  ResourceKind,
   ResourceSync,
 } from '@flightctl/types';
+import {
+  ImageBuild,
+  ImageBuildCondition,
+  ImageBuildConditionType,
+  ResourceKind as ImageBuilderResourceKind,
+  ImageExport,
+  ImageExportCondition,
+  ImageExportConditionType,
+} from '@flightctl/types/imagebuilder';
 
 export interface FlightCtlLabel {
   key: string;
@@ -32,6 +43,10 @@ export enum DeviceAnnotation {
   TemplateVersion = 'fleet-controller/templateVersion',
   RenderedVersion = 'device-controller/renderedVersion',
 }
+
+export type GenericCondition = Condition | ImageBuildCondition | ImageExportCondition;
+export type GenericConditionType = ConditionType | ImageBuildConditionType | ImageExportConditionType;
+export type FlightctlKind = ResourceKind | ImageBuilderResourceKind;
 
 export const isEnrollmentRequest = (resource: Device | EnrollmentRequest): resource is EnrollmentRequest =>
   resource.kind === 'EnrollmentRequest';
@@ -77,6 +92,12 @@ export type AlertManagerAlert = {
     silencedBy: string[];
   };
   receivers: Array<{ name: string }>;
+};
+
+// ImageBuild with the latest exports for each format
+export type ImageBuildWithExports = Omit<ImageBuild, 'imageexports'> & {
+  imageExports: (ImageExport | undefined)[];
+  exportsCount: number;
 };
 
 // AuthProviders that can be added dynamically to the system can only be OAuth2 or OIDC.

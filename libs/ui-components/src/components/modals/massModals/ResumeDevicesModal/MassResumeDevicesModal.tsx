@@ -35,10 +35,9 @@ import { getApiListCount } from '../../../../utils/api';
 import { fromAPILabel, labelToExactApiMatchString } from '../../../../utils/labels';
 import { useFleets } from '../../../Fleet/useFleets';
 import ResumeAllDevicesConfirmationDialog from './ResumeAllDevicesConfirmationDialog';
+import { showSpinnerBriefly } from '../../../../utils/time';
 
 // Adds an artificial delay to make sure that the user notices the count is refreshing.
-// This is specially needed when users switch between modes, and the selection for the new mode is already valid.
-const showSpinnerBriefly = () => new Promise((resolve) => setTimeout(resolve, 450));
 
 type MassResumeFormValues = {
   mode: SelectionMode;
@@ -55,6 +54,9 @@ enum SelectionMode {
   LABELS = 'labels',
   ALL = 'all',
 }
+
+// Delay needed specially when users switch between modes, and the selection for the new mode is already valid.
+const REFRESH_COUNT_DELAY = 450;
 
 const getSelectedFleetLabels = (fleets: Fleet[], fleetId: string) => {
   const selectedFleet = fleets.find((fleet) => fleet.metadata.name === fleetId);
@@ -115,10 +117,10 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
         }
 
         const deviceResult = await get<DeviceList>(queryEndpoint);
-        await showSpinnerBriefly();
+        await showSpinnerBriefly(REFRESH_COUNT_DELAY);
         setDeviceCountNum(getApiListCount(deviceResult) || 0);
       } catch (error) {
-        await showSpinnerBriefly();
+        await showSpinnerBriefly(REFRESH_COUNT_DELAY);
         setCountError(t('Failed to obtain the number of matching devices'));
       } finally {
         setIsCountLoading(false);
