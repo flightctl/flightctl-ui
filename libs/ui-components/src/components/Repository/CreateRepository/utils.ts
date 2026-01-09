@@ -41,6 +41,17 @@ export const getRepoUrlOrRegistry = (repoSpec: RepositorySpec): string => {
   return repoSpec.url || '';
 };
 
+export const getRepoTypeLabel = (t: TFunction, repoType: RepoSpecType): string => {
+  switch (repoType) {
+    case RepoSpecType.HTTP:
+      return t('HTTP service');
+    case RepoSpecType.OCI:
+      return t('OCI registry');
+    default:
+      return t('Git repository');
+  }
+};
+
 export const getInitValues = ({
   repository,
   resourceSyncs,

@@ -33,7 +33,7 @@ import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from '../common/PermissionsContext';
 import { useRepositories } from './useRepositories';
 import TablePagination from '../Table/TablePagination';
-import { getRepoUrlOrRegistry } from './CreateRepository/utils';
+import { getRepoTypeLabel, getRepoUrlOrRegistry } from './CreateRepository/utils';
 
 const CreateRepositoryButton = ({ buttonText }: { buttonText?: string }) => {
   const { t } = useTranslation();
@@ -133,13 +133,7 @@ const RepositoryTableRow = ({
       <Td dataLabel={t('Name')}>
         <ResourceLink id={repository.metadata.name as string} routeLink={ROUTE.REPO_DETAILS} />
       </Td>
-      <Td dataLabel={t('Type')}>
-        {repository.spec.type === RepoSpecType.OCI
-          ? t('OCI registry')
-          : repository.spec.type === RepoSpecType.HTTP
-            ? t('HTTP service')
-            : t('Git repository')}
-      </Td>
+      <Td dataLabel={t('Type')}>{getRepoTypeLabel(t, repository.spec.type)}</Td>
       <Td dataLabel={repository.spec.type === RepoSpecType.OCI ? t('Registry') : t('URL')}>
         {getRepoUrlOrRegistry(repository.spec) || '-'}
       </Td>

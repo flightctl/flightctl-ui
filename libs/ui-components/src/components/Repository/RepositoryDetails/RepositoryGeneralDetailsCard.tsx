@@ -17,7 +17,13 @@ import { getLastTransitionTimeText, getRepositorySyncStatus } from '../../../uti
 import { useTranslation } from '../../../hooks/useTranslation';
 import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import RepositoryStatus from '../../Status/RepositoryStatus';
-import { getRepoUrlOrRegistry, isHttpRepoSpec, isOciRepoSpec, isSshRepoSpec } from '../CreateRepository/utils';
+import {
+  getRepoTypeLabel,
+  getRepoUrlOrRegistry,
+  isHttpRepoSpec,
+  isOciRepoSpec,
+  isSshRepoSpec,
+} from '../CreateRepository/utils';
 import { GitRepositoryLink, HttpRepositoryUrl } from './RepositorySource';
 
 const RepoPrivacy = ({ repo }: { repo: Repository }) => {
@@ -68,14 +74,7 @@ const RegistryOrUrl = ({ repo }: { repo: Repository }) => {
 const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
   const { t } = useTranslation();
 
-  let repoLabel = '';
-  if (isOciRepoSpec(repoDetails.spec)) {
-    repoLabel = t('OCI registry');
-  } else if (isHttpRepoSpec(repoDetails.spec)) {
-    repoLabel = t('HTTP service');
-  } else {
-    repoLabel = t('Git repository');
-  }
+  const repoLabel = getRepoTypeLabel(t, repoDetails.spec.type);
 
   return (
     <Card>
