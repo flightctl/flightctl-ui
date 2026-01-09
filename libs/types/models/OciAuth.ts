@@ -2,11 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { DockerAuth } from './DockerAuth';
 /**
- * RepoSpecType is the type of the repository.
+ * Authentication for OCI registries.
  */
-export enum RepoSpecType {
-  GIT = 'git',
-  HTTP = 'http',
-  OCI = 'oci',
-}
+export type OciAuth = DockerAuth;
+

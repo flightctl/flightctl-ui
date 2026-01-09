@@ -30,5 +30,9 @@ export type K8sProviderSpec = {
   enabled?: boolean;
   organizationAssignment: AuthOrganizationAssignment;
   roleAssignment: AuthRoleAssignment;
+  /**
+   * Optional suffix to strip from ClusterRole names when normalizing role names. Used for multi-release deployments where ClusterRoles have namespace-specific names (e.g., flightctl-admin-<namespace>).
+   */
+  roleSuffix?: string;
 };
 

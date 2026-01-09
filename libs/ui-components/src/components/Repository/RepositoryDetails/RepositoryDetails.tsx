@@ -93,7 +93,7 @@ const RepositoryDetails = () => {
                         <RepositoryGeneralDetailsCard repoDetails={repoDetails} />
                       </CardBody>
                     </Card>
-                    {canListRS && repoDetails.spec.type !== RepoSpecType.HTTP && (
+                    {canListRS && repoDetails.spec.type === RepoSpecType.GIT && (
                       <Card>
                         <CardBody>
                           <RepositoryResourceSyncsCard repositoryId={repositoryId} />

@@ -11,13 +11,19 @@ import {
 import { LockIcon } from '@patternfly/react-icons/dist/js/icons/lock-icon';
 import { LockOpenIcon } from '@patternfly/react-icons/dist/js/icons/lock-open-icon';
 
-import { RepoSpecType, Repository } from '@flightctl/types';
+import { Repository } from '@flightctl/types';
 
 import { getLastTransitionTimeText, getRepositorySyncStatus } from '../../../utils/status/repository';
 import { useTranslation } from '../../../hooks/useTranslation';
 import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import RepositoryStatus from '../../Status/RepositoryStatus';
-import { isHttpRepoSpec, isSshRepoSpec } from '../CreateRepository/utils';
+import {
+  getRepoTypeLabel,
+  getRepoUrlOrRegistry,
+  isHttpRepoSpec,
+  isOciRepoSpec,
+  isSshRepoSpec,
+} from '../CreateRepository/utils';
 import { GitRepositoryLink, HttpRepositoryUrl } from './RepositorySource';
 
 const RepoPrivacy = ({ repo }: { repo: Repository }) => {
@@ -29,6 +35,10 @@ const RepoPrivacy = ({ repo }: { repo: Repository }) => {
     }
   } else if (isSshRepoSpec(repo.spec)) {
     if (repo.spec.sshConfig.sshPrivateKey) {
+      isPrivate = true;
+    }
+  } else if (isOciRepoSpec(repo.spec)) {
+    if (repo.spec.ociAuth) {
       isPrivate = true;
     }
   }
@@ -50,28 +60,36 @@ const RepoPrivacy = ({ repo }: { repo: Repository }) => {
   );
 };
 
+const RegistryOrUrl = ({ repo }: { repo: Repository }) => {
+  const urlOrRegistry = getRepoUrlOrRegistry(repo.spec);
+  if (isOciRepoSpec(repo.spec)) {
+    return <div>{urlOrRegistry}</div>;
+  }
+  if (isHttpRepoSpec(repo.spec)) {
+    return <HttpRepositoryUrl url={urlOrRegistry} />;
+  }
+  return <GitRepositoryLink url={urlOrRegistry} />;
+};
+
 const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
   const { t } = useTranslation();
+
+  const repoLabel = getRepoTypeLabel(t, repoDetails.spec.type);
+
   return (
     <Card>
       <CardTitle>{t('Details')}</CardTitle>
       <CardBody>
         <FlightControlDescriptionList columnModifier={{ lg: '3Col' }}>
           <DescriptionListGroup>
-            <DescriptionListTerm>{t('Url')}</DescriptionListTerm>
+            <DescriptionListTerm>{isOciRepoSpec(repoDetails.spec) ? t('Registry') : t('URL')}</DescriptionListTerm>
             <DescriptionListDescription>
-              {repoDetails?.spec.type === RepoSpecType.HTTP ? (
-                <HttpRepositoryUrl url={repoDetails.spec.url} />
-              ) : (
-                <GitRepositoryLink url={repoDetails.spec.url} />
-              )}
+              <RegistryOrUrl repo={repoDetails} />
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Type')}</DescriptionListTerm>
-            <DescriptionListDescription>
-              {repoDetails?.spec.type === RepoSpecType.HTTP ? t('HTTP service') : t('Git repository')}
-            </DescriptionListDescription>
+            <DescriptionListDescription>{repoLabel}</DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup />
           <DescriptionListGroup>

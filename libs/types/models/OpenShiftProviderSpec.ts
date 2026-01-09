@@ -46,5 +46,13 @@ export type OpenShiftProviderSpec = {
    * The OpenShift cluster control plane URL.
    */
   clusterControlPlaneUrl?: string;
+  /**
+   * If specified, only projects with this label will be considered. The label selector should be in the format 'key' or 'key=value'. If only the key is provided, any project with that label (regardless of value) will be included. This enables server-side filtering for better performance.
+   */
+  projectLabelFilter?: string;
+  /**
+   * Optional suffix to strip from ClusterRole names when normalizing role names. Used for multi-release deployments where ClusterRoles have namespace-specific names (e.g., flightctl-admin-<namespace>).
+   */
+  roleSuffix?: string;
 };
 
