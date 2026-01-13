@@ -1,7 +1,6 @@
 import * as Yup from 'yup';
 import { TFunction } from 'i18next';
 import {
-  DockerAuth,
   HttpConfig,
   HttpRepoSpec,
   OciAuthType,
@@ -132,9 +131,7 @@ export const getInitValues = ({
     formValues.useAdvancedConfig = !!(
       repository.spec.ociAuth ||
       repository.spec['ca.crt'] ||
-      repository.spec.skipServerVerification ||
-      repository.spec.scheme ||
-      repository.spec.accessMode
+      repository.spec.skipServerVerification
     );
     formValues.ociConfig = {
       registry: repository.spec.registry,
@@ -255,21 +252,33 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
 
       const ociAuth = values.ociConfig.ociAuth;
       if (ociAuth?.use && ociAuth.username && ociAuth.password) {
-        const usernameChanged = ociAuth.username !== ociRepoSpec.ociAuth?.username;
-        const passwordChanged = ociAuth.password !== ociRepoSpec.ociAuth?.password;
-
-        if (usernameChanged || passwordChanged) {
-          const ociAuthValue: DockerAuth = {
-            authType: OciAuthType.DOCKER,
-            username: ociAuth.username,
-            password: ociAuth.password,
-          };
-          appendJSONPatch({
-            patches,
-            newValue: ociAuthValue,
-            originalValue: ociRepoSpec.ociAuth,
+        if (!ociRepoSpec.ociAuth) {
+          patches.push({
+            op: 'add',
             path: '/spec/ociAuth',
+            value: {
+              authType: OciAuthType.DOCKER,
+              username: ociAuth.username,
+              password: ociAuth.password,
+            },
           });
+        } else {
+          if (ociAuth.username !== ociRepoSpec.ociAuth.username) {
+            appendJSONPatch({
+              patches,
+              newValue: ociAuth.username,
+              originalValue: ociRepoSpec.ociAuth.username,
+              path: '/spec/ociAuth/username',
+            });
+          }
+          if (ociAuth.password !== ociRepoSpec.ociAuth.password) {
+            appendJSONPatch({
+              patches,
+              newValue: ociAuth.password,
+              originalValue: ociRepoSpec.ociAuth.password,
+              path: '/spec/ociAuth/password',
+            });
+          }
         }
       } else if (ociRepoSpec.ociAuth) {
         patches.push({ op: 'remove', path: '/spec/ociAuth' });
@@ -395,18 +404,22 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
           });
         }
       } else {
-        appendJSONPatch({
-          patches,
-          newValue: values.httpConfig?.basicAuth.password,
-          originalValue: repository.spec.httpConfig.password,
-          path: '/spec/httpConfig/password',
-        });
-        appendJSONPatch({
-          patches,
-          newValue: values.httpConfig?.basicAuth.username,
-          originalValue: repository.spec.httpConfig.username,
-          path: '/spec/httpConfig/username',
-        });
+        if (values.httpConfig.basicAuth.password !== repository.spec.httpConfig.password) {
+          appendJSONPatch({
+            patches,
+            newValue: values.httpConfig.basicAuth.password,
+            originalValue: repository.spec.httpConfig.password,
+            path: '/spec/httpConfig/password',
+          });
+        }
+        if (values.httpConfig.basicAuth.username !== repository.spec.httpConfig.username) {
+          appendJSONPatch({
+            patches,
+            newValue: values.httpConfig.basicAuth.username,
+            originalValue: repository.spec.httpConfig.username,
+            path: '/spec/httpConfig/username',
+          });
+        }
       }
 
       if (!values.httpConfig?.mTlsAuth?.use) {
@@ -423,20 +436,24 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
           });
         }
       } else {
-        appendJSONPatch({
-          patches,
-          newValue: values.httpConfig?.mTlsAuth.tlsCrt,
-          originalValue: repository.spec.httpConfig['tls.crt'],
-          path: '/spec/httpConfig/tls.crt',
-          encodeB64: true,
-        });
-        appendJSONPatch({
-          patches,
-          newValue: values.httpConfig?.mTlsAuth.tlsKey,
-          originalValue: repository.spec.httpConfig['tls.key'],
-          path: '/spec/httpConfig/tls.key',
-          encodeB64: true,
-        });
+        if (values.httpConfig.mTlsAuth.tlsCrt !== repository.spec.httpConfig['tls.crt']) {
+          appendJSONPatch({
+            patches,
+            newValue: values.httpConfig.mTlsAuth.tlsCrt,
+            originalValue: repository.spec.httpConfig['tls.crt'],
+            path: '/spec/httpConfig/tls.crt',
+            encodeB64: true,
+          });
+        }
+        if (values.httpConfig.mTlsAuth.tlsKey !== repository.spec.httpConfig['tls.key']) {
+          appendJSONPatch({
+            patches,
+            newValue: values.httpConfig.mTlsAuth.tlsKey,
+            originalValue: repository.spec.httpConfig['tls.key'],
+            path: '/spec/httpConfig/tls.key',
+            encodeB64: true,
+          });
+        }
       }
 
       if (!values.httpConfig?.token) {
@@ -447,12 +464,14 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
           });
         }
       } else {
-        appendJSONPatch({
-          patches,
-          newValue: values.httpConfig?.token,
-          originalValue: repository.spec.httpConfig.token,
-          path: '/spec/httpConfig/token',
-        });
+        if (values.httpConfig.token !== repository.spec.httpConfig.token) {
+          appendJSONPatch({
+            patches,
+            newValue: values.httpConfig.token,
+            originalValue: repository.spec.httpConfig.token,
+            path: '/spec/httpConfig/token',
+          });
+        }
       }
     }
   } else if (values.configType === 'ssh') {
@@ -483,26 +502,30 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
         value,
       });
     } else {
-      appendJSONPatch({
-        patches,
-        newValue: values.sshConfig?.privateKeyPassphrase,
-        originalValue: repository.spec.sshConfig.privateKeyPassphrase,
-        path: '/spec/sshConfig/privateKeyPassphrase',
-      });
+      if (values.sshConfig?.privateKeyPassphrase !== repository.spec.sshConfig.privateKeyPassphrase) {
+        appendJSONPatch({
+          patches,
+          newValue: values.sshConfig?.privateKeyPassphrase,
+          originalValue: repository.spec.sshConfig.privateKeyPassphrase,
+          path: '/spec/sshConfig/privateKeyPassphrase',
+        });
+      }
+
+      if (values.sshConfig?.sshPrivateKey !== repository.spec.sshConfig.sshPrivateKey) {
+        appendJSONPatch({
+          patches,
+          newValue: values.sshConfig?.sshPrivateKey,
+          originalValue: repository.spec.sshConfig.sshPrivateKey,
+          path: '/spec/sshConfig/sshPrivateKey',
+          encodeB64: true,
+        });
+      }
 
       appendJSONPatch({
         patches,
         newValue: values.sshConfig?.skipServerVerification,
         originalValue: repository.spec.sshConfig.skipServerVerification,
         path: '/spec/sshConfig/skipServerVerification',
-      });
-
-      appendJSONPatch({
-        patches,
-        newValue: values.sshConfig?.sshPrivateKey,
-        originalValue: repository.spec.sshConfig.sshPrivateKey,
-        path: '/spec/sshConfig/sshPrivateKey',
-        encodeB64: true,
       });
     }
   }
