@@ -217,12 +217,6 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
         if (ociRepoSpec.skipServerVerification !== undefined) {
           patches.push({ op: 'remove', path: '/spec/skipServerVerification' });
         }
-        if (ociRepoSpec.scheme) {
-          patches.push({ op: 'remove', path: '/spec/scheme' });
-        }
-        if (ociRepoSpec.accessMode) {
-          patches.push({ op: 'remove', path: '/spec/accessMode' });
-        }
         return patches;
       }
 
@@ -261,17 +255,22 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
 
       const ociAuth = values.ociConfig.ociAuth;
       if (ociAuth?.use && ociAuth.username && ociAuth.password) {
-        const ociAuthValue: DockerAuth = {
-          authType: OciAuthType.DOCKER,
-          username: ociAuth.username,
-          password: ociAuth.password,
-        };
-        appendJSONPatch({
-          patches,
-          newValue: ociAuthValue,
-          originalValue: ociRepoSpec.ociAuth,
-          path: '/spec/ociAuth',
-        });
+        const usernameChanged = ociAuth.username !== ociRepoSpec.ociAuth?.username;
+        const passwordChanged = ociAuth.password !== ociRepoSpec.ociAuth?.password;
+
+        if (usernameChanged || passwordChanged) {
+          const ociAuthValue: DockerAuth = {
+            authType: OciAuthType.DOCKER,
+            username: ociAuth.username,
+            password: ociAuth.password,
+          };
+          appendJSONPatch({
+            patches,
+            newValue: ociAuthValue,
+            originalValue: ociRepoSpec.ociAuth,
+            path: '/spec/ociAuth',
+          });
+        }
       } else if (ociRepoSpec.ociAuth) {
         patches.push({ op: 'remove', path: '/spec/ociAuth' });
       }
