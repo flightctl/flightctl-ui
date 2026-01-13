@@ -228,6 +228,7 @@
   "Unable to log in to the application": "Unable to log in to the application",
   "You do not have access to any organizations.": "You do not have access to any organizations.",
   "Please contact your administrator to be granted access to an organization.": "Please contact your administrator to be granted access to an organization.",
+  "You will need to log out and log in again to access the application.": "You will need to log out and log in again to access the application.",
   "We cannot log you in as we could not determine what organizations you have access to.": "We cannot log you in as we could not determine what organizations you have access to.",
   "Please try refreshing the page. If the problem persists, contact your administrator.": "Please try refreshing the page. If the problem persists, contact your administrator.",
   "Error details": "Error details",
