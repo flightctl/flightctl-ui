@@ -9,6 +9,7 @@ import {
   Card,
   CardBody,
   CardTitle,
+  Content,
   Flex,
   FlexItem,
   Menu,
@@ -21,7 +22,6 @@ import {
   PageSection,
   Stack,
   StackItem,
-  Content,
   Title,
 } from '@patternfly/react-core';
 
@@ -227,15 +227,6 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
                 </ActionListGroup>
               </ActionList>
             )}
-            <ActionList className="pf-v6-u-mt-md">
-              <ActionListGroup>
-                <ActionListItem>
-                  <Button variant="primary" onClick={handleRefetch} isDisabled={isReloading}>
-                    {t('Reload organizations')}
-                  </Button>
-                </ActionListItem>
-              </ActionListGroup>
-            </ActionList>
           </Alert>
         </Bullseye>
       </PageSection>

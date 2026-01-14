@@ -3,14 +3,15 @@ import {
   Alert,
   Button,
   ClipboardCopy,
+  Content,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
   Spinner,
   Stack,
   StackItem,
-  Text,
-  TextContent,
-  TextVariants,
 } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
@@ -104,19 +105,17 @@ const LoginCommandModal = ({ onClose }: LoginCommandModalProps) => {
           {!loading && !error && loginCommands.length > 0 && (
             <>
               <StackItem>
-                <TextContent>
-                  <Text>{title}</Text>
-                </TextContent>
+                <Content>{title}</Content>
               </StackItem>
 
               {loginCommands.map((cmd) => (
                 <StackItem key={cmd.providerName}>
                   {loginCommands.length > 1 && (
-                    <Text component={TextVariants.small} className="pf-v5-u-mb-sm">
+                    <Content component="small" className="pf-v6-u-mb-sm">
                       <strong>
                         {t('Provider')}: {cmd.displayName || cmd.providerName}
                       </strong>
-                    </Text>
+                    </Content>
                   )}
                   <ClipboardCopy isReadOnly hoverTip={t('Copy to clipboard')} clickTip={t('Copied!')}>
                     {cmd.command}
