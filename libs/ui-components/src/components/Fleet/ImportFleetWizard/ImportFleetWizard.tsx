@@ -3,20 +3,17 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   Bullseye,
-  Button,
   PageSection,
   Spinner,
   Title,
   Wizard,
-  WizardFooterWrapper,
   WizardStep,
   WizardStepType,
-  useWizardContext,
 } from '@patternfly/react-core';
 import * as React from 'react';
 import * as Yup from 'yup';
 import { TFunction } from 'i18next';
-import { Formik, useFormikContext } from 'formik';
+import { Formik, FormikErrors } from 'formik';
 
 import RepositoryStep, { isRepoStepValid, repositoryStepId } from './steps/RepositoryStep';
 import ReviewStep, { reviewStepId } from './steps/ReviewStep';
@@ -41,6 +38,7 @@ import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { usePermissionsContext } from '../../common/PermissionsContext';
+import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
 import { RESOURCE, VERB } from '../../../types/rbac';
 
 const validationSchema = (t: TFunction) =>
@@ -53,42 +51,17 @@ const validationSchema = (t: TFunction) =>
       : repositorySchema(t, undefined)({ ...values, useResourceSyncs: true, exists: false }),
   );
 
-const ImportFleetWizardFooter = () => {
-  const { t } = useTranslation();
-  const { goToNextStep, goToPrevStep, activeStep } = useWizardContext();
-  const { submitForm, isSubmitting, errors, values } = useFormikContext<ImportFleetFormValues>();
-  const navigate = useNavigate();
-
-  const isReviewStep = activeStep.id === reviewStepId;
-  let isStepValid = true;
-  if (activeStep.id === repositoryStepId) {
-    isStepValid = isRepoStepValid(values, errors);
-  } else if (activeStep.id === resourceSyncStepId) {
-    isStepValid = isResourceSyncStepValid(errors);
+const validateFooterStep = (
+  activeStepId: string,
+  errors: FormikErrors<ImportFleetFormValues>,
+  values: ImportFleetFormValues,
+) => {
+  if (activeStepId === repositoryStepId) {
+    return isRepoStepValid(values, errors);
+  } else if (activeStepId === resourceSyncStepId) {
+    return isResourceSyncStepValid(errors);
   }
-  const primaryBtn = isReviewStep ? (
-    <Button variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
-      {t('Import')}
-    </Button>
-  ) : (
-    <Button variant="primary" onClick={goToNextStep} isDisabled={!isStepValid}>
-      {t('Next')}
-    </Button>
-  );
-
-  return (
-    <WizardFooterWrapper>
-      {primaryBtn}
-      {activeStep.id !== repositoryStepId && (
-        <Button variant="secondary" onClick={goToPrevStep} isDisabled={isSubmitting}>
-          {t('Back')}
-        </Button>
-      )}
-      <Button variant="link" onClick={() => navigate(-1)} isDisabled={isSubmitting}>
-        {t('Cancel')}
-      </Button>
-    </WizardFooterWrapper>
-  );
+  return true;
 };
 
 const ImportFleetWizard = () => {
@@ -160,7 +133,17 @@ const ImportFleetWizard = () => {
         {({ values, errors: formikErrors }) => (
           <>
             <LeaveFormConfirmation />
-            <Wizard footer={<ImportFleetWizardFooter />} onStepChange={(_, step) => setCurrentStep(step)}>
+            <Wizard
+              footer={
+                <FlightCtlWizardFooter<ImportFleetFormValues>
+                  firstStepId={repositoryStepId}
+                  submitStepId={reviewStepId}
+                  validateStep={validateFooterStep}
+                  saveButtonText={t('Import')}
+                />
+              }
+              onStepChange={(_, step) => setCurrentStep(step)}
+            >
               <WizardStep name={t('Select or create repository')} id={repositoryStepId}>
                 {(!currentStep || currentStep?.id === repositoryStepId) && (
                   <RepositoryStep repositories={gitRepositories} hasLoaded={!!repoList} />
