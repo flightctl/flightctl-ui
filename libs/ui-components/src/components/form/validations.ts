@@ -597,7 +597,7 @@ export const validateCPULimit = (cpu: string | undefined): boolean => {
     return true;
   }
 
-  if (!/^[0-9]+$/.test(cpu)) {
+  if (!/^\d+(\.\d+)?$/.test(cpu)) {
     return false;
   }
   const val = Number.parseFloat(cpu);
