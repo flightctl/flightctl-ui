@@ -1,5 +1,16 @@
 import * as React from 'react';
-import { Alert, Button, Modal, ModalVariant, Stack, StackItem, Text, TextContent } from '@patternfly/react-core';
+import {
+  Alert,
+  Button,
+  Content,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Stack,
+  StackItem,
+} from '@patternfly/react-core';
+
 import { DeviceResumeRequest, DeviceResumeResponse } from '@flightctl/types';
 
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -42,12 +53,52 @@ const ResumeDevicesModal = ({ mode, title, selector, expectedCount, onClose }: R
   };
 
   return (
-    <Modal
-      variant={ModalVariant.small}
-      title={t('Resume devices?', { count: pluralCount })}
-      isOpen
-      onClose={() => onClose(hasResumed)}
-      actions={[
+    <Modal isOpen onClose={() => onClose(hasResumed)} variant="small">
+      <ModalHeader title={t('Resume devices?', { count: pluralCount })} />
+      <ModalBody>
+        <Stack hasGutter>
+          <StackItem>
+            <Content component="p">{title}</Content>
+          </StackItem>
+
+          <StackItem>
+            <Content component="p">
+              {t(
+                "This action will resolve the configuration conflict and allow the devices to receive new updates from the server. This action is irreversible, please ensure the devices' assigned configuration is correct before proceeding.",
+                { count: pluralCount },
+              )}
+            </Content>
+          </StackItem>
+
+          {submitError && (
+            <StackItem>
+              <Alert isInline variant="danger" title={t('Resuming devices failed', { count: pluralCount })}>
+                {submitError}
+              </Alert>
+            </StackItem>
+          )}
+
+          {resumedCount === expectedCount && (
+            <StackItem>
+              <Alert isInline variant="success" title={t('Resume successful')}>
+                {t('All {{ resumedCount }} devices resumed successfully', { resumedCount })}
+              </Alert>
+            </StackItem>
+          )}
+
+          {resumedCount !== undefined && resumedCount !== expectedCount && (
+            <StackItem>
+              <Alert isInline variant="warning" title={t('Resume with warnings')}>
+                {t('{{ expectedCount }} devices to resume, and {{ resumedCount }} resumed successfully', {
+                  expectedCount,
+                  resumedCount,
+                })}
+              </Alert>
+            </StackItem>
+          )}
+        </Stack>
+      </ModalBody>
+      <ModalFooter>
         <Button
           key="confirm"
           variant="primary"
@@ -56,57 +107,11 @@ const ResumeDevicesModal = ({ mode, title, selector, expectedCount, onClose }: R
           isDisabled={isSubmitting || resumedCount !== undefined}
         >
           {mode === 'device' ? t('Resume') : t('Resume all')}
-        </Button>,
+        </Button>
         <Button key="cancel" variant="link" onClick={() => onClose(hasResumed)} isDisabled={isSubmitting}>
           {hasResumed ? t('Close') : t('Cancel')}
-        </Button>,
-      ]}
-    >
-      <Stack hasGutter>
-        <StackItem>
-          <TextContent>
-            <Text>{title}</Text>
-          </TextContent>
-        </StackItem>
-
-        <StackItem>
-          <TextContent>
-            <Text>
-              {t(
-                "This action will resolve the configuration conflict and allow the devices to receive new updates from the server. This action is irreversible, please ensure the devices' assigned configuration is correct before proceeding.",
-                { count: pluralCount },
-              )}
-            </Text>
-          </TextContent>
-        </StackItem>
-
-        {submitError && (
-          <StackItem>
-            <Alert isInline variant="danger" title={t('Resuming devices failed', { count: pluralCount })}>
-              {submitError}
-            </Alert>
-          </StackItem>
-        )}
-
-        {resumedCount === expectedCount && (
-          <StackItem>
-            <Alert isInline variant="success" title={t('Resume successful')}>
-              {t('All {{ resumedCount }} devices resumed successfully', { resumedCount })}
-            </Alert>
-          </StackItem>
-        )}
-
-        {resumedCount !== undefined && resumedCount !== expectedCount && (
-          <StackItem>
-            <Alert isInline variant="warning" title={t('Resume with warnings')}>
-              {t('{{ expectedCount }} devices to resume, and {{ resumedCount }} resumed successfully', {
-                expectedCount,
-                resumedCount,
-              })}
-            </Alert>
-          </StackItem>
-        )}
-      </Stack>
+        </Button>
+      </ModalFooter>
     </Modal>
   );
 };

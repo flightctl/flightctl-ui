@@ -120,7 +120,7 @@ const UpdateStepRolloutPolicy = ({ isReadOnly }: { isReadOnly: boolean }) => {
 
   return (
     <>
-      <Alert isInline variant="info" title={t('Batch sequencing')}>
+      <Alert isInline variant="info" title={t('Batch sequencing')} className="pf-v6-u-mb-md">
         {t('Batches will be applied from first to last.')}
         <br />
         {t('Devices that are not part of any batch will be updated last.')}

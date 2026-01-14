@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Card, CardBody, DropdownItem, DropdownList, Grid, GridItem, Nav, NavList } from '@patternfly/react-core';
+import { DropdownItem, DropdownList, Grid, GridItem, Tab } from '@patternfly/react-core';
 
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { RepoSpecType, Repository, ResourceKind } from '@flightctl/types';
@@ -17,7 +17,7 @@ import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
 import EventsCard from '../../Events/EventsCard';
-import NavItem from '../../NavItem/NavItem';
+import TabsNav from '../../TabsNav/TabsNav';
 
 const repositoryDetailsPermissions = [
   { kind: RESOURCE.REPOSITORY, verb: VERB.DELETE },
@@ -70,12 +70,10 @@ const RepositoryDetails = () => {
         )
       }
       nav={
-        <Nav variant="tertiary">
-          <NavList>
-            <NavItem to="details">{t('Details')}</NavItem>
-            <NavItem to="yaml">{t('YAML')}</NavItem>
-          </NavList>
-        </Nav>
+        <TabsNav aria-label="Repository details tabs" tabKeys={['details', 'yaml']}>
+          <Tab eventKey="details" title={t('Details')} />
+          <Tab eventKey="yaml" title={t('YAML')} />
+        </TabsNav>
       }
     >
       {repoDetails && (
@@ -88,19 +86,18 @@ const RepositoryDetails = () => {
               element={
                 <Grid hasGutter>
                   <GridItem md={9}>
-                    <Card>
-                      <CardBody>
+                    <Grid hasGutter>
+                      <GridItem>
                         <RepositoryGeneralDetailsCard repoDetails={repoDetails} />
-                      </CardBody>
-                    </Card>
-                    {canListRS && repoDetails.spec.type === RepoSpecType.GIT && (
-                      <Card>
-                        <CardBody>
+                      </GridItem>
+                      {canListRS && repoDetails.spec.type === RepoSpecType.GIT && (
+                        <GridItem>
                           <RepositoryResourceSyncsCard repositoryId={repositoryId} />
-                        </CardBody>
-                      </Card>
-                    )}
+                        </GridItem>
+                      )}
+                    </Grid>
                   </GridItem>
+
                   <GridItem md={3}>
                     <EventsCard kind={ResourceKind.REPOSITORY} objId={repositoryId} />
                   </GridItem>

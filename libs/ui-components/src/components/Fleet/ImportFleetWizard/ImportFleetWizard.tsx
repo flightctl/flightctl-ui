@@ -5,7 +5,6 @@ import {
   Bullseye,
   Button,
   PageSection,
-  PageSectionVariants,
   Spinner,
   Title,
   Wizard,
@@ -43,8 +42,6 @@ import ErrorBoundary from '../../common/ErrorBoundary';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
-
-import './ImportFleetWizard.css';
 
 const validationSchema = (t: TFunction) =>
   Yup.lazy((values: ImportFleetFormValues) =>
@@ -163,11 +160,7 @@ const ImportFleetWizard = () => {
         {({ values, errors: formikErrors }) => (
           <>
             <LeaveFormConfirmation />
-            <Wizard
-              footer={<ImportFleetWizardFooter />}
-              onStepChange={(_, step) => setCurrentStep(step)}
-              className="fctl-import-fleet"
-            >
+            <Wizard footer={<ImportFleetWizardFooter />} onStepChange={(_, step) => setCurrentStep(step)}>
               <WizardStep name={t('Select or create repository')} id={repositoryStepId}>
                 {(!currentStep || currentStep?.id === repositoryStepId) && (
                   <RepositoryStep repositories={gitRepositories} hasLoaded={!!repoList} />
@@ -198,7 +191,7 @@ const ImportFleetWizard = () => {
 
   return (
     <>
-      <PageSection variant="light" type="breadcrumb">
+      <PageSection hasBodyWrapper={false} type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
             <Link to={ROUTE.FLEETS}>{t('Fleets')}</Link>
@@ -206,12 +199,12 @@ const ImportFleetWizard = () => {
           <BreadcrumbItem isActive>{t('Import fleets')}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false}>
         <Title headingLevel="h1" size="3xl">
           {t('Import fleets')}
         </Title>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light} type="wizard">
+      <PageSection hasBodyWrapper={false} type="wizard">
         <ErrorBoundary>{body}</ErrorBoundary>
       </PageSection>
     </>

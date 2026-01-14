@@ -3,12 +3,16 @@ import {
   Alert,
   Button,
   ExpandableSection,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
   Progress,
   ProgressMeasureLocation,
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
+
 import { Fleet } from '@flightctl/types';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 

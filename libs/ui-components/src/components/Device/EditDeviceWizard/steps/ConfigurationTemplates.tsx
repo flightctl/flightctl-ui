@@ -101,7 +101,6 @@ const ConfigSection = ({
     <ExpandableFormSection
       title={name || t('Configuration {{ configNum }}', { configNum: index + 1 })}
       fieldName={fieldName}
-      description={name}
     >
       <Grid hasGutter>
         <RichValidationTextField

@@ -4,7 +4,7 @@ import { useUserPreferences } from './useUserPreferences';
 export const THEME_LOCAL_STORAGE_KEY = 'flightctl/theme';
 export const OCP_CONSOLE_THEME_LOCAL_STORAGE_KEY = 'bridge/theme';
 
-const THEME_DARK_CLASS = 'pf-v5-theme-dark';
+const THEME_DARK_CLASS = 'pf-v6-theme-dark';
 
 export type Theme = 'dark' | 'light' | 'system';
 export type ResolvedTheme = Exclude<Theme, 'system'>;

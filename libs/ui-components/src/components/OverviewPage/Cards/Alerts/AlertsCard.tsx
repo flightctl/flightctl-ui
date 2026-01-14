@@ -4,12 +4,12 @@ import {
   Card,
   CardBody,
   CardTitle,
+  Content,
   Icon,
   List,
   ListItem,
   Stack,
   StackItem,
-  TextContent,
 } from '@patternfly/react-core';
 import { TFunction } from 'react-i18next';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
@@ -162,22 +162,22 @@ const AlertsCard = () => {
                   <Icon status="danger" size="md">
                     <ExclamationCircleIcon />
                   </Icon>{' '}
-                  <strong>{getAlertTitle(alert, alertTypes[alertName] || alertName)}</strong>
+                  <span style={{ fontWeight: 'var(--pf-t--global--font--weight--body--bold)' }}>
+                    {getAlertTitle(alert, alertTypes[alertName] || alertName)}
+                  </span>
                 </StackItem>
                 <StackItem>
-                  <TextContent>
+                  <Content>
                     {kindLabel}{' '}
                     {resourceKind === ResourceKind.DEVICE ? (
                       <ResourceLink id={alert.labels.resource} />
                     ) : (
                       alert.labels.resource
                     )}
-                  </TextContent>
+                  </Content>
                 </StackItem>
                 <StackItem>
-                  <TextContent>
-                    <small>{getDateDisplay(alert.startsAt || '')}</small>
-                  </TextContent>
+                  <Content component="small">{getDateDisplay(alert.startsAt || '')}</Content>
                 </StackItem>
               </Stack>
             </ListItem>

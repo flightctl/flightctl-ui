@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Flex, FlexItem, PageSection, PageSectionVariants, Title, TitleProps } from '@patternfly/react-core';
+import { Flex, FlexItem, PageSection, Title, TitleProps } from '@patternfly/react-core';
 
 type ListPageProps = {
   title: string;
@@ -10,7 +10,7 @@ type ListPageProps = {
 
 const ListPage: React.FC<ListPageProps> = ({ title, headingLevel = 'h1', children }) => {
   return (
-    <PageSection variant={PageSectionVariants.light}>
+    <PageSection hasBodyWrapper={false}>
       <Flex gap={{ default: 'gapMd' }} alignItems={{ default: 'alignItemsCenter' }}>
         <FlexItem>
           <Title headingLevel={headingLevel} size="3xl">

@@ -31,7 +31,7 @@ export const getStatusItem = (
       };
     default:
       return {
-        title: t('System update status'),
+        title: t('Update status'),
         items: getSystemUpdateStatusItems(t),
       };
   }

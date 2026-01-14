@@ -20,13 +20,6 @@ module.exports = {
       parser: '@typescript-eslint/parser',
       plugins: ['@typescript-eslint'],
       extends: ['plugin:@typescript-eslint/recommended'],
-      overrides: [
-        {
-          // 3) Now we enable eslint-plugin-testing-library rules or preset only for matching testing files!
-          files: ['**/?(*.)+(spec).ts?(x)'],
-          extends: ['plugin:testing-library/react'],
-        },
-      ],
       rules: {
         'react/prop-types': 'off',
         '@typescript-eslint/no-unused-vars': 'error',
@@ -70,11 +63,6 @@ module.exports = {
           },
           {
             name: '@patternfly/react-core',
-            importNames: ['ActionGroup'],
-            message: 'Use FlightCtlActionGroup wrapper',
-          },
-          {
-            name: '@patternfly/react-core',
             importNames: ['DescriptionList'],
             message: 'Use FlightCtlDescriptionList wrapper',
           },
@@ -110,7 +98,6 @@ module.exports = {
     'import/no-unresolved': 'off',
     'import/extensions': 'off',
     'no-console': 'error',
-    'testing-library/prefer-user-event': 'error',
     '@typescript-eslint/no-misused-promises': 'off',
     '@typescript-eslint/no-floating-promises': 'off',
     '@typescript-eslint/no-unsafe-enum-comparison': 'off',

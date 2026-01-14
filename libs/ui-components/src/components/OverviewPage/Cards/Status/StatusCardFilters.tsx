@@ -1,16 +1,17 @@
 import * as React from 'react';
 import {
   Button,
-  Chip,
-  ChipGroup,
   Flex,
   FlexItem,
+  Label,
+  LabelGroup,
   StackItem,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
+
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { labelToString } from '../../../../utils/labels';
 import { FlightCtlLabel } from '../../../../types/extraTypes';
@@ -39,7 +40,7 @@ const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
         <Toolbar id="overview-toolbar" inset={{ default: 'insetNone' }}>
           <ToolbarContent>
             <ToolbarGroup>
-              <ToolbarItem variant="search-filter">
+              <ToolbarItem>
                 <DeviceTableToolbarFilters
                   selectedFleetNames={selectedFleets}
                   setSelectedFleets={setSelectedFleets}
@@ -57,30 +58,35 @@ const StatusCardFilters: React.FC<StatusCardFiltersProps> = ({
           <Flex>
             {!!selectedFleets.length && (
               <FlexItem>
-                <ChipGroup categoryName={t('Fleets')} isClosable onClick={() => setSelectedFleets([])}>
+                <LabelGroup categoryName={t('Fleets')} isClosable onClick={() => setSelectedFleets([])}>
                   {selectedFleets.map((fleet) => (
-                    <Chip key={fleet} onClick={() => setSelectedFleets(selectedFleets.filter((f) => f !== fleet))}>
+                    <Label
+                      variant="outline"
+                      key={fleet}
+                      onClose={() => setSelectedFleets(selectedFleets.filter((f) => f !== fleet))}
+                    >
                       {fleet}
-                    </Chip>
+                    </Label>
                   ))}
-                </ChipGroup>
+                </LabelGroup>
               </FlexItem>
             )}
             {!!selectedLabels.length && (
               <FlexItem>
-                <ChipGroup categoryName={t('Labels')} isClosable onClick={() => setSelectedLabels([])}>
+                <LabelGroup categoryName={t('Labels')} isClosable onClick={() => setSelectedLabels([])}>
                   {selectedLabels.map((l) => {
                     const label = labelToString(l);
                     return (
-                      <Chip
+                      <Label
+                        variant="outline"
                         key={label}
-                        onClick={() => setSelectedLabels(selectedLabels.filter((l) => labelToString(l) !== label))}
+                        onClose={() => setSelectedLabels(selectedLabels.filter((l) => labelToString(l) !== label))}
                       >
                         {label}
-                      </Chip>
+                      </Label>
                     );
                   })}
-                </ChipGroup>
+                </LabelGroup>
               </FlexItem>
             )}
             <FlexItem>

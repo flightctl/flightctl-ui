@@ -75,7 +75,7 @@ const LabelFleetResults = ({
   if (isUpdating) {
     return (
       <div className="fctl-device-toolbar-filters__hint">
-        <Spinner size="md" className="pf-v5-u-mr-sm" />
+        <Spinner size="md" className="pf-v6-u-mr-sm" />
         {t('Searching...')}
       </div>
     );
@@ -231,7 +231,7 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
       isExpanded={isOpen}
       isFullWidth
       icon={
-        <Icon size="md" className="fctl-device-toolbar-filters__search-icon">
+        <Icon size="md">
           <SearchIcon />
         </Icon>
       }
@@ -251,9 +251,12 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
         />
 
         <TextInputGroupUtilities {...(!filterText && { style: { display: 'none' } })}>
-          <Button variant="plain" onClick={onClearButtonClick} aria-label={t('Clear filter text')}>
-            <TimesIcon aria-hidden />
-          </Button>
+          <Button
+            icon={<TimesIcon aria-hidden />}
+            variant="plain"
+            onClick={onClearButtonClick}
+            aria-label={t('Clear filter text')}
+          />
         </TextInputGroupUtilities>
       </TextInputGroup>
     </MenuToggle>
@@ -380,7 +383,11 @@ const DeviceToolbarFilter = ({
               ref={toggleRef}
               onClick={onToggle}
               isExpanded={isSearchTypeExpanded}
-              className="fctl_device-toolbar-filters__typeselect"
+              style={
+                {
+                  width: '250px',
+                } as React.CSSProperties
+              }
             >
               {selectedSearchType === NAME_SEARCH ? t('Name and alias') : t('Labels and fleets')}
             </MenuToggle>

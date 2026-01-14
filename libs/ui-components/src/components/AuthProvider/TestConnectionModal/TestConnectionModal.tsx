@@ -2,16 +2,19 @@ import * as React from 'react';
 import {
   Alert,
   Button,
+  Content,
+  ContentVariants,
   Icon,
   List,
   ListItem,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
   Stack,
   StackItem,
-  Text,
-  TextContent,
-  TextVariants,
 } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
+
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
@@ -80,11 +83,9 @@ const TestConnectionModal = ({ onClose, results }: TestConnectionModalProps) => 
                 <Alert variant="success" title={t('Connection test successful')} />
               </StackItem>
               <StackItem>
-                <TextContent>
-                  <Text component={TextVariants.small}>
-                    {t("Great! We successfully connected to your provider. Here's what we found:")}
-                  </Text>
-                </TextContent>
+                <Content component={ContentVariants.small}>
+                  {t("Great! We successfully connected to your provider. Here's what we found:")}
+                </Content>
               </StackItem>
             </>
           ) : (

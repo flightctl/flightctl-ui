@@ -1,42 +1,39 @@
 import * as React from 'react';
-import { Bullseye, Page, PageSection } from '@patternfly/react-core';
-import { updateThemeClass } from '@flightctl/ui-components/src/hooks/useThemePreferences';
+import { Bullseye, Card, CardBody, CardTitle, Stack, StackItem, Title } from '@patternfly/react-core';
 
-// Hook to detect browser's theme preference for login page (before user has preferences)
-const useBrowserTheme = () => {
-  const [isDark, setIsDark] = React.useState(() => {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
-  React.useEffect(() => {
-    const darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)');
-    updateThemeClass(document.documentElement, darkThemeMq.matches ? 'dark' : 'light');
-
-    // Listen for changes
-    const listener = (e: MediaQueryListEvent) => {
-      setIsDark(e.matches);
-      updateThemeClass(document.documentElement, e.matches ? 'dark' : 'light');
-    };
-
-    darkThemeMq.addEventListener('change', listener);
-
-    return () => {
-      darkThemeMq.removeEventListener('change', listener);
-    };
-  }, []);
-
-  return isDark ? 'dark' : 'light';
-};
+import fcLogo from '@fctl-assets/bgimages/flight-control-logo.svg';
+import rhemLogo from '@fctl-assets/bgimages/RHEM-logo.svg';
+import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
+import { useAppContext } from '@flightctl/ui-components/src/hooks/useAppContext';
 
 const LoginPageLayout = ({ children }: React.PropsWithChildren) => {
-  const theme = useBrowserTheme();
-
+  const { t } = useTranslation();
+  const { settings } = useAppContext();
   return (
-    <Page>
-      <PageSection variant={theme} isFilled>
-        <Bullseye>{children}</Bullseye>
-      </PageSection>
-    </Page>
+    <Bullseye>
+      <Card isLarge style={{ width: '400px', maxWidth: '90vw' }}>
+        <CardBody>
+          <Stack hasGutter>
+            <StackItem>
+              <img
+                src={settings.isRHEM ? rhemLogo : fcLogo}
+                alt={settings.isRHEM ? 'Red Hat Edge Manager' : 'Flight Control'}
+              />
+            </StackItem>
+
+            <StackItem>
+              <CardTitle>
+                <Title headingLevel="h2" size="lg">
+                  {t('Choose login method')}
+                </Title>
+              </CardTitle>
+            </StackItem>
+
+            <StackItem>{children}</StackItem>
+          </Stack>
+        </CardBody>
+      </Card>
+    </Bullseye>
   );
 };
 

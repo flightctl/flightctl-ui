@@ -110,7 +110,6 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
     <ExpandableFormSection
       title={app.name || t('Application {{ appNum }}', { appNum: index + 1 })}
       fieldName={appFieldName}
-      description={app.name}
     >
       <Grid hasGutter>
         <FormGroup label={t('Application type')} isRequired>

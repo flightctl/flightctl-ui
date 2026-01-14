@@ -16,6 +16,8 @@ import YamlEditorBase from './YamlEditorBase';
 
 import './YamlEditor.css';
 
+// CELIA-WIP entire YAML editor needs to be reviewed for PF6.
+// SEe how it works in OCP and ACM, and make sure we are consistent.
 type FlightCtlYamlResource = Fleet | Device | Repository | AuthProvider;
 
 type YamlEditorProps<R extends FlightCtlYamlResource> = Partial<Omit<PfCodeEditorProps, 'ref' | 'code'>> & {

@@ -5,14 +5,13 @@ import {
   CardBody,
   CardHeader,
   CardTitle,
+  Content,
+  ContentVariants,
   Flex,
   FlexItem,
   Spinner,
   Stack,
   StackItem,
-  Text,
-  TextContent,
-  TextVariants,
 } from '@patternfly/react-core';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import ApplicationStatusChart from './ApplicationStatusChart';
@@ -48,9 +47,9 @@ const StatusCard = () => {
     content = (
       <Stack>
         <StackItem>
-          <TextContent>
-            <Text component={TextVariants.small}>{t('{{count}} Devices', { count: devicesSummary?.total || 0 })}</Text>
-          </TextContent>
+          <Content component={ContentVariants.small}>
+            {t('{{count}} Devices', { count: devicesSummary?.total || 0 })}
+          </Content>
         </StackItem>
         <StackItem>
           <Flex justifyContent={{ default: 'justifyContentSpaceAround' }}>

@@ -5,8 +5,6 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { usePendingEnrollmentRequestsCount } from '../../hooks/usePendingEnrollmentRequestsCount';
 import WithTooltip from '../common/WithTooltip';
 
-import './PendingEnrollmentRequestsBadge.css';
-
 const PendingEnrollmentRequestsBadge = () => {
   const { t } = useTranslation();
   const [count] = usePendingEnrollmentRequestsCount();
@@ -16,7 +14,7 @@ const PendingEnrollmentRequestsBadge = () => {
 
   const text = t('{{ count }} devices pending approval', { count });
   return (
-    <Badge className="fctl-pending-ers-badge pf-v5-u-ml-lg" screenReaderText={text}>
+    <Badge className="fctl-pending-ers-badge pf-v6-u-ml-md" screenReaderText={text}>
       <WithTooltip showTooltip content={text}>
         <span>{count}</span>
       </WithTooltip>

@@ -54,7 +54,7 @@ const EditableLabelControl = ({
     <Button
       aria-label={addButtonText || t('Add label')}
       variant="link"
-      className="pf-v5-u-ml-xs"
+      className="pf-v6-u-ml-xs"
       isInline
       isDisabled={!isEditable}
       onClick={() => {

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DropdownItem, DropdownList, Nav, NavList } from '@patternfly/react-core';
+import { DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
 
 import { AuthProvider } from '@flightctl/types';
 
@@ -15,8 +15,8 @@ import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
-import NavItem from '../../NavItem/NavItem';
 import { ProviderType } from '../../../types/extraTypes';
+import TabsNav from '../../TabsNav/TabsNav';
 
 const authProviderDetailsPermissions = [
   { kind: RESOURCE.AUTH_PROVIDER, verb: VERB.DELETE },
@@ -80,12 +80,10 @@ const AuthProviderDetails = () => {
         )
       }
       nav={
-        <Nav variant="tertiary">
-          <NavList>
-            <NavItem to="details">{t('Details')}</NavItem>
-            <NavItem to="yaml">{t('YAML')}</NavItem>
-          </NavList>
-        </Nav>
+        <TabsNav aria-label="Authentication provider details tabs" tabKeys={['details', 'yaml']}>
+          <Tab eventKey="details" title={t('Details')} />
+          <Tab eventKey="yaml" title={t('YAML')} />
+        </TabsNav>
       }
     >
       {authProviderDetails && (

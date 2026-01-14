@@ -40,7 +40,7 @@ export const SystemRestoreBanners = ({
   }
 
   return (
-    <div className={`fctl-system-restore-banners ${className}`}>
+    <div className={`fctl-system-restore-banners ${className || ''}`}>
       {showPendingSyncBanner && <PendingSyncDevicesAlert forSingleDevice={mode === 'device'} />}
 
       {showSuspendedBanner && (

@@ -1,5 +1,8 @@
 import * as React from 'react';
 import {
+  ActionList,
+  ActionListGroup,
+  ActionListItem,
   Alert,
   Bullseye,
   Button,
@@ -7,6 +10,8 @@ import {
   CardBody,
   CardFooter,
   CardHeader,
+  Content,
+  ContentVariants,
   FormGroup,
   FormHelperText,
   FormSection,
@@ -14,10 +19,7 @@ import {
   HelperTextItem,
   Stack,
   StackItem,
-  Text,
   TextArea,
-  TextContent,
-  TextVariants,
   Title,
 } from '@patternfly/react-core';
 import ArrowLeftIcon from '@patternfly/react-icons/dist/js/icons/arrow-left-icon';
@@ -103,33 +105,27 @@ const TokenLoginForm = ({ provider, onBack }: TokenLoginFormProps) => {
       <Card isLarge>
         {onBack && (
           <CardHeader>
-            <Button
-              variant="link"
-              className="pf-v5-u-size-sm"
-              onClick={onBack}
-              isInline
-              isDisabled={isSubmitting}
-              icon={<ArrowLeftIcon />}
-            >
+            <Button variant="link" onClick={onBack} isInline isDisabled={isSubmitting} icon={<ArrowLeftIcon />}>
               {t('Back to login options')}
             </Button>
           </CardHeader>
         )}
         <CardBody>
-          <Stack hasGutter style={{ '--pf-v5-l-stack--m-gutter--Gap': '1.5rem' } as React.CSSProperties}>
+          <Stack hasGutter>
             <StackItem>
-              <Title headingLevel="h2" size="xl">
+              <Title headingLevel="h1" size="2xl">
                 {t('Enter your Kubernetes token')}
               </Title>
             </StackItem>
 
             <StackItem>
-              <TextContent>
-                <Text>{t('Enter your Kubernetes service account token to authenticate with the cluster.')}</Text>
-                <Text component={TextVariants.small}>
-                  {t('You can find this token in your Kubernetes service account credentials.')}
-                </Text>
-              </TextContent>
+              <Content component="p">
+                {t('Enter your Kubernetes service account token to authenticate with the cluster.')}
+              </Content>
+
+              <Content component={ContentVariants.small}>
+                {t('You can find this token in your Kubernetes service account credentials.')}
+              </Content>
             </StackItem>
             <StackItem>
               <FlightCtlForm>
@@ -185,14 +181,27 @@ const TokenLoginForm = ({ provider, onBack }: TokenLoginFormProps) => {
           </Stack>
         </CardBody>
         <CardFooter>
-          <Button
-            variant="primary"
-            isDisabled={!token || !!validationError || isSubmitting}
-            isLoading={isSubmitting}
-            onClick={handleSubmit}
-          >
-            {isSubmitting ? t('Authenticating...') : t('Login')}
-          </Button>
+          <ActionList>
+            <ActionListGroup>
+              <ActionListItem>
+                <Button
+                  variant="primary"
+                  isDisabled={!token || !!validationError || isSubmitting}
+                  isLoading={isSubmitting}
+                  onClick={handleSubmit}
+                >
+                  {isSubmitting ? t('Authenticating...') : t('Login')}
+                </Button>
+              </ActionListItem>
+              {onBack && (
+                <ActionListItem>
+                  <Button variant="link" onClick={onBack} isDisabled={isSubmitting}>
+                    {t('Cancel')}
+                  </Button>
+                </ActionListItem>
+              )}
+            </ActionListGroup>
+          </ActionList>
         </CardFooter>
       </Card>
     </Bullseye>

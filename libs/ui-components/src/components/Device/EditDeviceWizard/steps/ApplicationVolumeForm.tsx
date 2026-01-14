@@ -14,6 +14,8 @@ import ErrorHelperText from '../../../form/FieldHelperText';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 
+import './ApplicationVolumeForm.css';
+
 type ApplicationVolumeFormProps = {
   appFieldName: string;
   volumes: VolumeFormType[];
@@ -40,7 +42,7 @@ const ApplicationVolumeForm = ({
 
   const volumesError = typeof error === 'string' ? error : undefined;
   return (
-    <FormGroup label={t('Volumes')}>
+    <FormGroup label={t('Volumes')} className="fctl-application-volume-form">
       <FieldArray name={`${appFieldName}.volumes`}>
         {({ push, remove }) => (
           <>
@@ -48,7 +50,7 @@ const ApplicationVolumeForm = ({
               const volumeFieldName = `${appFieldName}.volumes[${volumeIndex}]`;
 
               return (
-                <FormSection key={volumeIndex} className="pf-v5-u-mt-md">
+                <FormSection key={volumeIndex}>
                   <Split hasGutter>
                     <SplitItem isFilled>
                       <ExpandableFormSection
@@ -118,7 +120,7 @@ const ApplicationVolumeForm = ({
             })}
             <ErrorHelperText error={volumesError} />
             {!isReadOnly && (
-              <FormGroup className="pf-v5-u-mt-md">
+              <FormGroup>
                 <Button
                   variant="link"
                   icon={<PlusCircleIcon />}

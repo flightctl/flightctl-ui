@@ -1,9 +1,9 @@
 .fctl-shortcut__cell {
-  padding-bottom: var(--pf-v5-global--spacer--md);
+  padding-bottom: var(--pf-t--global--spacer--md);
 }
 
 .fctl-shortcut__cell:first-child {
-  padding-right: var(--pf-v5-global--spacer--md);
+  padding-right: var(--pf-t--global--spacer--md);
   text-align: right;
   white-space: nowrap;
   vertical-align: top;
@@ -14,9 +14,9 @@
 }
 
 .fctl-shortcut__command-key {
-  border: var(--pf-v5-global--BorderWidth--sm) solid var(--pf-v5-global--BorderColor--100);
+  border: 1px solid var(--pf-t--global--border--color--100);
   border-radius: 3px;
-  color: var(--pf-v5-global--Color--200);
-  font-size: var(--pf-v5-global--FontSize--sm);
+  color: var(--pf-t--global--text--color--200);
+  font-size: var(--pf-t--global--font--size--sm);
   padding: 1px 3px;
 }

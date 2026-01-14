@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useField } from 'formik';
 import {
   Button,
   FormGroup,
@@ -18,10 +19,9 @@ import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-cir
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
-import successColor from '@patternfly/react-tokens/dist/js/global_palette_green_500';
-import dangerColor from '@patternfly/react-tokens/dist/js/global_danger_color_100';
-import infoColor from '@patternfly/react-tokens/dist/js/global_palette_blue_300';
-import { useField } from 'formik';
+import dangerColor from '@patternfly/react-tokens/dist/js/t_global_icon_color_status_danger_default';
+import successColor from '@patternfly/react-tokens/dist/js/t_global_icon_color_status_success_default';
+import infoColor from '@patternfly/react-tokens/dist/js/t_global_color_nonstatus_blue_300';
 
 interface RichValidationStatusProps {
   validations: RichValidationTextFieldProps['validations'];
@@ -54,7 +54,7 @@ const RichValidationStatus = ({ isRequired, hasValue, validations, metaError }: 
         }
 
         return (
-          <HelperTextItem key={validation.key} isDynamic component="li" variant={variant} icon={iconType}>
+          <HelperTextItem key={validation.key} component="li" variant={variant} icon={iconType}>
             {validation.message}
           </HelperTextItem>
         );
@@ -131,15 +131,19 @@ const RichValidationTextField = React.forwardRef(
               }
               withFocusTrap={false}
             >
-              <Button variant="plain" aria-label="Validation">
-                {!hasValue ? (
-                  <InfoCircleIcon color={infoColor.value} />
-                ) : !!meta.error ? (
-                  <ExclamationCircleIcon color={dangerColor.value} />
-                ) : (
-                  <CheckCircleIcon color={successColor.value} />
-                )}
-              </Button>
+              <Button
+                icon={
+                  !hasValue ? (
+                    <InfoCircleIcon color={infoColor.value} />
+                  ) : !!meta.error ? (
+                    <ExclamationCircleIcon color={dangerColor.value} />
+                  ) : (
+                    <CheckCircleIcon color={successColor.value} />
+                  )
+                }
+                variant="plain"
+                aria-label="Validation"
+              />
             </Popover>
           </InputGroupItem>
         </InputGroup>

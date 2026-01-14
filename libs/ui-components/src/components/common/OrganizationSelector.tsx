@@ -9,20 +9,21 @@ import {
   Card,
   CardBody,
   CardTitle,
+  Content,
   Flex,
   FlexItem,
   Menu,
   MenuContent,
   MenuItem,
   MenuList,
+  Modal,
+  ModalBody,
+  ModalHeader,
   PageSection,
   Stack,
   StackItem,
-  Text,
-  TextContent,
   Title,
 } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalHeader } from '@patternfly/react-core/next';
 
 import { Organization } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -56,13 +57,11 @@ const OrganizationSelectorContent = ({
   return (
     <Stack hasGutter>
       <StackItem>
-        <TextContent>
-          <Text>
-            {isFirstLogin
-              ? t('You have access to multiple organizations. Please select one to continue.')
-              : t('Please select an organization to continue. This will refresh the application.')}
-          </Text>
-        </TextContent>
+        <Content component="p">
+          {isFirstLogin
+            ? t('You have access to multiple organizations. Please select one to continue.')
+            : t('Please select an organization to continue. This will refresh the application.')}
+        </Content>
       </StackItem>
       {organizations.length > 0 && (
         <StackItem>
@@ -115,7 +114,7 @@ const OrganizationSelectorCustomModal = (props: OrganizationSelectorContentProps
   const { t } = useTranslation();
 
   return (
-    <PageSection variant="light">
+    <PageSection hasBodyWrapper={false}>
       <Bullseye>
         <Card isLarge>
           <CardTitle>
@@ -186,35 +185,39 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
 
   if (selectionError) {
     return (
-      <PageSection variant="light">
+      <PageSection hasBodyWrapper={false}>
         <Bullseye>
           <Alert variant="danger" title={t('Unable to log in to the application')} isInline>
-            <TextContent>
+            <Content>
               {isEmptyOrganizations ? (
                 <>
-                  <Text>{t('You do not have access to any organizations.')}</Text>
-                  <Text>{t('Please contact your administrator to be granted access to an organization.')}</Text>
-                  <Text>{t('You will need to log out and log in again to access the application.')}</Text>
+                  <Content component="p">{t('You do not have access to any organizations.')}</Content>
+                  <Content component="p">
+                    {t('Please contact your administrator to be granted access to an organization.')}
+                  </Content>
+                  <Content component="p">
+                    {t('You will need to log out and log in again to access the application.')}
+                  </Content>
                 </>
               ) : (
                 <>
-                  <Text>
+                  <Content component="p">
                     {t('We cannot log you in as we could not determine what organizations you have access to.')}
-                  </Text>
-                  <Text>
+                  </Content>
+                  <Content component="p">
                     {t('Please try refreshing the page. If the problem persists, contact your administrator.')}
-                  </Text>
-                  <Text component="pre">
+                  </Content>
+                  <Content component="pre">
                     <details>
                       <summary>{t('Error details')}:</summary>
                       {selectionError}
                     </details>
-                  </Text>
+                  </Content>
                 </>
               )}
-            </TextContent>
+            </Content>
             {!isEmptyOrganizations && (
-              <ActionList className="pf-v5-u-mt-md">
+              <ActionList className="pf-v6-u-mt-md">
                 <ActionListGroup>
                   <ActionListItem>
                     <Button variant="primary" onClick={handleRefetch} isDisabled={isReloading}>

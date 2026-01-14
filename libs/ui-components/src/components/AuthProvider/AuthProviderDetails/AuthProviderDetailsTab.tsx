@@ -3,6 +3,8 @@ import {
   Card,
   CardBody,
   ClipboardCopy,
+  Content,
+  ContentVariants,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -12,9 +14,6 @@ import {
   LabelGroup,
   Stack,
   StackItem,
-  Text,
-  TextContent,
-  TextVariants,
   Title,
 } from '@patternfly/react-core';
 import { AuthProvider } from '@flightctl/types';
@@ -60,7 +59,7 @@ const AuthProviderDetailsTab = ({ authProvider }: { authProvider: AuthProvider }
       <StackItem>
         <Card>
           <CardBody>
-            <Title headingLevel="h2" size="lg" className="pf-v5-u-mb-md">
+            <Title headingLevel="h2" size="lg" className="pf-v6-u-mb-md">
               {t('Provider overview')}
             </Title>
             <DescriptionList columnModifier={{ default: '2Col' }}>
@@ -94,7 +93,7 @@ const AuthProviderDetailsTab = ({ authProvider }: { authProvider: AuthProvider }
             <Divider style={{ margin: '24px 0' }} />
 
             <DescriptionList>
-              <Title headingLevel="h2" className="pf-v5-u-mb-md">
+              <Title headingLevel="h2" className="pf-v6-u-mb-md">
                 {t('{{ providerType }} configuration', { providerType: spec.providerType })}
               </Title>
               {isOAuth2 && (
@@ -136,7 +135,7 @@ const AuthProviderDetailsTab = ({ authProvider }: { authProvider: AuthProvider }
       <StackItem>
         <Card>
           <CardBody>
-            <Title headingLevel="h2" size="lg" className="pf-v5-u-mb-md">
+            <Title headingLevel="h2" size="lg" className="pf-v6-u-mb-md">
               {t('Client & claims configuration')}
             </Title>
             <DescriptionList columnModifier={{ default: '2Col' }}>
@@ -157,11 +156,9 @@ const AuthProviderDetailsTab = ({ authProvider }: { authProvider: AuthProvider }
                   {spec.usernameClaim?.length ? (
                     <>
                       <LabelGroup>{spec.usernameClaim?.map((claim) => <Label key={claim}>{claim}</Label>)}</LabelGroup>
-                      <TextContent>
-                        <Text component={TextVariants.small}>
-                          {t('Resulting username claim')}: <strong>{spec.usernameClaim.join('.')}</strong>
-                        </Text>
-                      </TextContent>
+                      <Content component={ContentVariants.small}>
+                        {t('Resulting username claim')}: <strong>{spec.usernameClaim.join('.')}</strong>
+                      </Content>
                     </>
                   ) : (
                     <Label color="grey">{`${DEFAULT_USERNAME_CLAIM} - (${t('Default')})`}</Label>
@@ -183,7 +180,7 @@ const AuthProviderDetailsTab = ({ authProvider }: { authProvider: AuthProvider }
       <StackItem>
         <Card>
           <CardBody>
-            <Title headingLevel="h2" size="lg" className="pf-v5-u-mb-md">
+            <Title headingLevel="h2" size="lg" className="pf-v6-u-mb-md">
               {t('Organization assignment')}
             </Title>
             <DescriptionList isHorizontal>

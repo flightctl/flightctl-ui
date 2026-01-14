@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  ActionGroup,
   Alert,
   Button,
   ButtonVariant,
@@ -7,10 +8,13 @@ import {
   FormGroup,
   FormSection,
   Grid,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
   Split,
   SplitItem,
 } from '@patternfly/react-core';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core/next';
 
 import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
@@ -18,7 +22,6 @@ import { Trans } from 'react-i18next';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
-import FlightCtlActionGroup from '../../form/FlightCtlActionGroup';
 import { RepositoryFormValues } from './types';
 import CreateResourceSyncsForm from './CreateResourceSyncsForm';
 
@@ -418,14 +421,14 @@ const CreateRepositoryFormContent = ({ isEdit, isReadOnly, onClose, children }: 
         </Grid>
       </fieldset>
       {children}
-      <FlightCtlActionGroup>
+      <ActionGroup>
         <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
           {isEdit ? t('Save') : t('Create repository')}
         </Button>
         <Button variant="link" isDisabled={isSubmitting} onClick={onClose}>
           {t('Cancel')}
         </Button>
-      </FlightCtlActionGroup>
+      </ActionGroup>
     </FlightCtlForm>
   );
 };
