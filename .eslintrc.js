@@ -72,6 +72,11 @@ module.exports = {
             message: 'Use FlightCtlForm wrapper',
           },
           {
+            name: '@patternfly/react-core',
+            importNames: ['WizardFooterWrapper', 'WizardFooter'],
+            message: 'Use FlightCtlWizardFooter wrapper',
+          },
+          {
             name: 'react-i18next',
             importNames: ['useTranslation'],
             message: 'Import useTranslation from @flightctl/ui-components/hooks/useTranslation instead',
