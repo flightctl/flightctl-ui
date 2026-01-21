@@ -91,6 +91,15 @@ export type ComposeInlineAppForm = AppBase & {
   files: InlineContent[];
 };
 
+export type HelmImageAppForm = Omit<AppBase, 'variables' | 'volumes'> & {
+  appType: AppType.AppTypeHelm;
+  specType: AppSpecType.OCI_IMAGE;
+  image: string;
+  namespace?: string;
+  valuesFiles: Array<string>;
+  valuesYaml?: string;
+};
+
 export const isGitConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is GitConfigTemplate =>
   configTemplate.type === ConfigType.GIT;
 
@@ -113,23 +122,26 @@ export type AppForm =
   | QuadletInlineAppForm
   | ComposeImageAppForm
   | ComposeInlineAppForm
-  | SingleContainerAppForm;
+  | SingleContainerAppForm
+  | HelmImageAppForm;
 
 export const isImageAppProvider = (
   app: ApplicationProviderSpecFixed,
 ): app is ApplicationProviderSpecFixed & ImageApplicationProviderSpec => 'image' in app;
 
 // Type guards for the 5 explicit types
-export const isQuadletImageAppForm = (app: AppBase): app is QuadletImageAppForm =>
+export const isQuadletImageAppForm = (app: AppForm): app is QuadletImageAppForm =>
   app.appType === AppType.AppTypeQuadlet && app.specType === AppSpecType.OCI_IMAGE;
-export const isQuadletInlineAppForm = (app: AppBase): app is QuadletInlineAppForm =>
+export const isQuadletInlineAppForm = (app: AppForm): app is QuadletInlineAppForm =>
   app.appType === AppType.AppTypeQuadlet && app.specType === AppSpecType.INLINE;
-export const isComposeImageAppForm = (app: AppBase): app is ComposeImageAppForm =>
+export const isComposeImageAppForm = (app: AppForm): app is ComposeImageAppForm =>
   app.appType === AppType.AppTypeCompose && app.specType === AppSpecType.OCI_IMAGE;
-export const isComposeInlineAppForm = (app: AppBase): app is ComposeInlineAppForm =>
+export const isComposeInlineAppForm = (app: AppForm): app is ComposeInlineAppForm =>
   app.appType === AppType.AppTypeCompose && app.specType === AppSpecType.INLINE;
-export const isSingleContainerAppForm = (app: AppBase): app is SingleContainerAppForm =>
+export const isSingleContainerAppForm = (app: AppForm): app is SingleContainerAppForm =>
   app.appType === AppType.AppTypeContainer;
+export const isHelmImageAppForm = (app: AppForm): app is HelmImageAppForm =>
+  app.appType === AppType.AppTypeHelm && app.specType === AppSpecType.OCI_IMAGE;
 
 export type ApplicationVolumeForm = {
   name: string;

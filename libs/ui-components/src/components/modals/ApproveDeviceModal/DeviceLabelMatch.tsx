@@ -11,7 +11,14 @@ export const DeviceLabelMatch = ({ matchStatus }: { matchStatus: DeviceMatchStat
 
   switch (matchStatus.status) {
     case 'unchecked':
-      return <TextInput value="" placeholder={t('Add labels to select a fleet.')} readOnlyVariant="default" />;
+      return (
+        <TextInput
+          value=""
+          aria-label={t('Add labels to select a fleet.')}
+          placeholder={t('Add labels to select a fleet.')}
+          readOnlyVariant="default"
+        />
+      );
     case 'unchecked--invalid':
       return (
         <TextInput

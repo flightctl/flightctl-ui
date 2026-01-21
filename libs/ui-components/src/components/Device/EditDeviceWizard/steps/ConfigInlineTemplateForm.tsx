@@ -48,12 +48,14 @@ const FileForm = ({ fieldName, index, isReadOnly }: { fieldName: string; index: 
         <FormGroup label={t('File path on the device')} isRequired>
           <TextField name={`${fieldName}.path`} isDisabled={isReadOnly} />
         </FormGroup>
-        <UploadField
-          label={t('Content')}
-          name={`${fieldName}.content`}
-          maxFileBytes={MAX_INLINE_FILE_SIZE_BYTES}
-          isDisabled={isReadOnly}
-        />
+        <FormGroup label={t('Content')}>
+          <UploadField
+            ariaLabel={t('Content')}
+            name={`${fieldName}.content`}
+            maxFileBytes={MAX_INLINE_FILE_SIZE_BYTES}
+            isDisabled={isReadOnly}
+          />
+        </FormGroup>
         <FormGroup>
           <CheckboxField name={`${fieldName}.base64`} label={t('Content is base64 encoded')} isDisabled={isReadOnly} />
         </FormGroup>

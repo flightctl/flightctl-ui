@@ -1,3 +1,4 @@
+import yaml from 'js-yaml';
 import {
   AppType,
   // eslint-disable-next-line no-restricted-imports
@@ -38,6 +39,7 @@ import {
   isComposeImageAppForm,
   isGitConfigTemplate,
   isGitProviderSpec,
+  isHelmImageAppForm,
   isHttpConfigTemplate,
   isHttpProviderSpec,
   isImageAppProvider,
@@ -215,6 +217,32 @@ export const getDeviceSpecConfigPatches = (
 };
 
 export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
+  if (isHelmImageAppForm(app)) {
+    const data: ImageApplicationProviderSpec & ApplicationProviderSpec = {
+      name: app.name,
+      image: app.image,
+      appType: app.appType,
+    };
+    if (app.namespace) {
+      data.namespace = app.namespace;
+    }
+    if (app.valuesYaml) {
+      try {
+        const values = yaml.load(app.valuesYaml) as Record<string, unknown>;
+        if (values && Object.keys(values).length > 0) {
+          data.values = values;
+        }
+      } catch (error) {
+        throw new Error('Values content is not valid YAML.');
+      }
+    }
+    const fileNames = app.valuesFiles.filter((file) => file && file.trim() !== '');
+    if (fileNames.length > 0) {
+      data.valuesFiles = fileNames;
+    }
+    return data;
+  }
+
   const envVars = app.variables.reduce((acc, variable) => {
     acc[variable.name] = variable.value;
     return acc;
@@ -265,7 +293,7 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
         limits: appLimits,
       };
     }
-    return data as ApplicationProviderSpec;
+    return data;
   }
 
   if (isQuadletImageAppForm(app) || isComposeImageAppForm(app)) {
@@ -433,13 +461,36 @@ const hasApplicationChanged = (currentApp: ApplicationProviderSpec, updatedApp: 
     return true;
   }
 
-  if (!areEnvVariablesEqual(currentApp.envVars, updatedApp.variables)) {
-    return true;
-  }
-
   // The app is a single container application
   if (isSingleContainerAppForm(updatedApp)) {
     return hasSingleContainerAppChanged(currentApp, updatedApp);
+  }
+
+  // The app is a Helm application
+  if (isHelmImageAppForm(updatedApp)) {
+    const imageApp = currentApp as ImageApplicationProviderSpec;
+    if (imageApp.image !== updatedApp.image || imageApp.namespace !== updatedApp.namespace) {
+      return true;
+    }
+
+    // Compare valuesFiles arrays
+    const currentValuesFiles = (imageApp.valuesFiles || []).filter((file) => file !== '');
+    const updatedValuesFiles = updatedApp.valuesFiles.filter((file) => file !== '');
+    if (currentValuesFiles.length !== updatedValuesFiles.length) {
+      return true;
+    }
+    if (!currentValuesFiles.every((file, index) => file === updatedValuesFiles[index])) {
+      return true;
+    }
+    const updatedValues = yaml.load(updatedApp.valuesYaml || '  ') as Record<string, unknown>;
+    if (JSON.stringify(imageApp.values || {}) !== JSON.stringify(updatedValues)) {
+      return true;
+    }
+    return false;
+  }
+
+  if (!areEnvVariablesEqual(currentApp.envVars, updatedApp.variables)) {
+    return true;
   }
 
   // The app is an image application (Quadlet/Compose image apps)
@@ -595,8 +646,8 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
         }) || [];
 
       return {
-        specType: AppSpecType.OCI_IMAGE,
         appType: AppType.AppTypeContainer,
+        specType: AppSpecType.OCI_IMAGE,
         name: app.name || '',
         image: app.image,
         variables: getAppFormVariables(app),
@@ -611,23 +662,36 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
       };
     }
 
-    // Compose or Quadlet image application
-    if (isImageAppProvider(app)) {
+    // Helm application
+    if (app.appType === AppType.AppTypeHelm && isImageAppProvider(app)) {
       return {
+        appType: AppType.AppTypeHelm,
         specType: AppSpecType.OCI_IMAGE,
         name: app.name || '',
         image: app.image,
+        namespace: app.namespace,
+        valuesYaml: app.values && Object.keys(app.values).length > 0 ? yaml.dump(app.values) : undefined,
+        valuesFiles: app.valuesFiles || [''],
+      };
+    }
+
+    // Compose or Quadlet image application
+    if (isImageAppProvider(app)) {
+      return {
         appType: app.appType,
+        specType: AppSpecType.OCI_IMAGE,
+        name: app.name || '',
+        image: app.image,
         variables: getAppFormVariables(app),
         volumes: convertVolumesToForm(app.volumes),
-      };
+      } as QuadletImageAppForm | ComposeImageAppForm;
     }
 
     // Compose or Quadlet inline application
     const inlineApp = app as InlineApplicationProviderSpec;
     return {
-      specType: AppSpecType.INLINE,
       appType: app.appType,
+      specType: AppSpecType.INLINE,
       name: app.name || '',
       files: inlineApp.inline,
       variables: getAppFormVariables(app),

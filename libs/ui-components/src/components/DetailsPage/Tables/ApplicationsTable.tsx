@@ -5,6 +5,7 @@ import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { DeviceApplicationStatus } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import ApplicationStatus from '../../Status/ApplicationStatus';
+import { getAppTypeLabel } from '../../../utils/apps';
 
 type ApplicationsTableProps = {
   appsStatus: DeviceApplicationStatus[];
@@ -39,7 +40,9 @@ const ApplicationsTable = ({ appsStatus }: ApplicationsTableProps) => {
               </Td>
               <Td dataLabel={t('Ready')}>{app.ready}</Td>
               <Td dataLabel={t('Restarts')}>{app.restarts}</Td>
-              <Td dataLabel={t('Type')}>{app.appType ? <Label variant="outline">{app.appType}</Label> : '-'}</Td>
+              <Td dataLabel={t('Type')}>
+                {app.appType ? <Label variant="outline">{getAppTypeLabel(app.appType, t)}</Label> : '-'}
+              </Td>
               <Td dataLabel={t('Embedded')}>{app.embedded ? t('Yes') : t('No')}</Td>
             </Tr>
           );
