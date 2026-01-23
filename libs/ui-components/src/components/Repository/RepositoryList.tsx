@@ -13,10 +13,10 @@ import { ActionsColumn, IAction, OnSelect, Tbody, Td, Tr } from '@patternfly/rea
 import { RepositoryIcon } from '@patternfly/react-icons/dist/js/icons/repository-icon';
 import { TFunction } from 'i18next';
 
-import { RepoSpecType, Repository } from '@flightctl/types';
+import { Repository } from '@flightctl/types';
 import ListPageBody from '../ListPage/ListPageBody';
 import ListPage from '../ListPage/ListPage';
-import { getLastTransitionTimeText, getRepositorySyncStatus } from '../../utils/status/repository';
+import { getLastTransitionTimeText } from '../../utils/status/repository';
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import DeleteRepositoryModal from './RepositoryDetails/DeleteRepositoryModal';
 import TableTextSearch from '../Table/TableTextSearch';
@@ -134,11 +134,9 @@ const RepositoryTableRow = ({
         <ResourceLink id={repository.metadata.name as string} routeLink={ROUTE.REPO_DETAILS} />
       </Td>
       <Td dataLabel={t('Type')}>{getRepoTypeLabel(t, repository.spec.type)}</Td>
-      <Td dataLabel={repository.spec.type === RepoSpecType.OCI ? t('Registry') : t('URL')}>
-        {getRepoUrlOrRegistry(repository.spec) || '-'}
-      </Td>
+      <Td dataLabel={t('URL')}>{getRepoUrlOrRegistry(repository.spec) || '-'}</Td>
       <Td dataLabel={t('Sync status')}>
-        <RepositoryStatus statusInfo={getRepositorySyncStatus(repository)} />
+        <RepositoryStatus repository={repository} />
       </Td>
       <Td dataLabel={t('Last transition')}>{getLastTransitionTimeText(repository, t).text}</Td>
       {!!actions.length && (

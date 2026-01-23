@@ -23,6 +23,7 @@
     "paths": {
       "@flightctl/ui-components/*": ["../../libs/ui-components/*"],
       "@flightctl/types": ["../../libs/types"],
+      "@flightctl/types/imagebuilder": ["../../libs/types/imagebuilder"],
     },
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js", "**/*.json"],

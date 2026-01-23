@@ -23,6 +23,14 @@ export type KubernetesSecretProviderSpec = {
      * Path in the device's file system at which the secret should be mounted.
      */
     mountPath: string;
+    /**
+     * The file's owner, specified either as a name or numeric ID. Defaults to "root".
+     */
+    user?: string;
+    /**
+     * The file's group, specified either as a name or numeric ID. Defaults to "root".
+     */
+    group?: string;
   };
 };
 

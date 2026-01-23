@@ -3,7 +3,8 @@ import { Button, Icon, List, ListItem, Popover } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 
-import { Condition, ConditionType, Device } from '@flightctl/types';
+import { ConditionType, Device } from '@flightctl/types';
+import { GenericCondition } from '../../../types/extraTypes';
 import { getDeviceFleet } from '../../../utils/devices';
 import { getCondition } from '../../../utils/api';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -28,7 +29,7 @@ const FleetLessDevice = () => {
   );
 };
 
-const MultipleDeviceOwners = ({ multipleOwnersCondition }: { multipleOwnersCondition: Condition }) => {
+const MultipleDeviceOwners = ({ multipleOwnersCondition }: { multipleOwnersCondition: GenericCondition }) => {
   const { t } = useTranslation();
 
   const owners: string[] = (multipleOwnersCondition.message || '').split(',');

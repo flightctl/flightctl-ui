@@ -118,6 +118,16 @@ func NewAlertManagerHandler(tlsConfig *tls.Config) handler {
 	return handler{target: target, proxy: proxy}
 }
 
+func NewImageBuilderHandler(tlsConfig *tls.Config) handler {
+	target, proxy := createReverseProxy(config.FctlImageBuilderApiUrl)
+
+	proxy.Transport = &http.Transport{
+		TLSClientConfig: tlsConfig,
+	}
+
+	return handler{target: target, proxy: proxy}
+}
+
 func UnimplementedHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }

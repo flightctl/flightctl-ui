@@ -3,6 +3,7 @@ import { Organization, OrganizationList } from '@flightctl/types';
 import { useAppContext } from '../../hooks/useAppContext';
 import { getErrorMessage } from '../../utils/error';
 import { getCurrentOrganizationId, storeCurrentOrganizationId } from '../../utils/organizationStorage';
+import { showSpinnerBriefly } from '../../utils/time';
 
 interface OrganizationContextType {
   currentOrganization?: Organization;
@@ -96,7 +97,7 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
     async (addDelay: number = 0) => {
       setIsReloading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, addDelay));
+        await showSpinnerBriefly(addDelay);
         await fetchOrganizations();
       } finally {
         setIsReloading(false);

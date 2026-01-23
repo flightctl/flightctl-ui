@@ -56,16 +56,9 @@ const getValidStepIds = (formikErrors: FormikErrors<FleetFormValues>): string[] 
   return validStepIds;
 };
 
-const isDisabledStep = (stepId: string | undefined, validStepIds: string[]) => {
-  if (!stepId) {
-    return true;
-  }
-
-  const stepIdx = orderedIds.findIndex((stepOrderId) => stepOrderId === stepId);
-
-  return orderedIds.some((orderedId, orderedStepIdx) => {
-    return orderedStepIdx < stepIdx && !validStepIds.includes(orderedId);
-  });
+const isDisabledStep = (stepId: string, validStepIds: string[]) => {
+  const validIndex = validStepIds.indexOf(stepId);
+  return validIndex === -1 || validIndex !== orderedIds.indexOf(stepId);
 };
 
 const CreateFleetWizard = () => {

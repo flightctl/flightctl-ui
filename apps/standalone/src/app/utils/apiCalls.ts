@@ -14,6 +14,8 @@ const apiServer = `${window.location.hostname}${apiPort ? `:${apiPort}` : ''}`;
 const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
 const uiProxyAPI = `${window.location.protocol}//${apiServer}/api`;
 
+const imageBuilderPathRegex = /^image(builds|exports)/;
+
 export const loginAPI = `${window.location.protocol}//${apiServer}/api/login`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
@@ -45,6 +47,9 @@ export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): 
 const getFullApiUrl = (path: string) => {
   if (path.startsWith('alerts')) {
     return { api: 'alerts', url: `${uiProxyAPI}/alerts/api/v2/${path}` };
+  }
+  if (imageBuilderPathRegex.test(path)) {
+    return { api: 'imagebuilder', url: `${uiProxyAPI}/imagebuilder/api/v1/${path}` };
   }
   return { api: 'flightctl', url: `${flightCtlAPI}/api/v1/${path}` };
 };

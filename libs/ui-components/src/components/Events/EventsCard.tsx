@@ -19,16 +19,17 @@ import {
 } from '@patternfly/react-core';
 import SyncAltIcon from '@patternfly/react-icons/dist/js/icons/sync-alt-icon';
 
-import { Event, ResourceKind } from '@flightctl/types';
+import { Event } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { timeSinceEpochText } from '../../utils/dates';
+import { FlightctlKind } from '../../types/extraTypes';
 import useEvents, { DisplayEvent, SelectableEventType } from './useEvents';
 import EventItem from './EventItem';
 
 import './EventsCard.css';
 
 type EventListProps = {
-  kind: ResourceKind;
+  kind: FlightctlKind;
   objId: string;
   type?: Event.type;
 };

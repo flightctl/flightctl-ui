@@ -40,6 +40,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	apiRouter.Handle("/imagebuilder/{forward:.*}", bridge.NewImageBuilderHandler(tlsConfig))
+
 	apiRouter.Handle("/flightctl/{forward:.*}", bridge.NewFlightCtlHandler(tlsConfig))
 
 	alertManagerUrl, alertManagerEnabled := os.LookupEnv("FLIGHTCTL_ALERTMANAGER_PROXY")

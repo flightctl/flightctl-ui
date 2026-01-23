@@ -36,6 +36,7 @@ export type { CertificateSigningRequestList } from './models/CertificateSigningR
 export type { CertificateSigningRequestSpec } from './models/CertificateSigningRequestSpec';
 export type { CertificateSigningRequestStatus } from './models/CertificateSigningRequestStatus';
 export type { Condition } from './models/Condition';
+export type { ConditionBase } from './models/ConditionBase';
 export { ConditionStatus } from './models/ConditionStatus';
 export { ConditionType } from './models/ConditionType';
 export type { ConfigProviderSpec } from './models/ConfigProviderSpec';

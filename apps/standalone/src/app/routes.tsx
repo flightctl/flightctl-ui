@@ -76,6 +76,13 @@ const CreateAuthProvider = React.lazy(
 const AuthProviderDetails = React.lazy(
   () => import('@flightctl/ui-components/src/components/AuthProvider/AuthProviderDetails/AuthProviderDetails'),
 );
+const ImageBuildsPage = React.lazy(() => import('@flightctl/ui-components/src/components/ImageBuilds/ImageBuildsPage'));
+const ImageBuildDetails = React.lazy(
+  () => import('@flightctl/ui-components/src/components/ImageBuilds/ImageBuildDetails/ImageBuildDetailsPage'),
+);
+const CreateImageBuildWizard = React.lazy(
+  () => import('@flightctl/ui-components/src/components/ImageBuilds/CreateImageBuildWizard/CreateImageBuildWizard'),
+);
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -254,6 +261,49 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         element: (
           <TitledRoute title={t('Edit device')}>
             <EditDeviceWizard />
+          </TitledRoute>
+        ),
+      },
+    ],
+  },
+  {
+    path: '/devicemanagement/imagebuilds',
+    showInNav: true,
+    title: t('Image builds'),
+    children: [
+      {
+        index: true,
+        title: t('Image builds'),
+        element: (
+          <TitledRoute title={t('Image builds')}>
+            <ImageBuildsPage />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'create',
+        title: t('Build new image'),
+        element: (
+          <TitledRoute title={t('Build new image')}>
+            <CreateImageBuildWizard />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'edit/:imageBuildId',
+        title: t('Duplicate image build'),
+        element: (
+          <TitledRoute title={t('Duplicate image build')}>
+            <CreateImageBuildWizard />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: ':imageBuildId/*',
+        title: t('Image build'),
+        element: (
+          <TitledRoute title={t('Image build')}>
+            <ImageBuildDetails />
           </TitledRoute>
         ),
       },

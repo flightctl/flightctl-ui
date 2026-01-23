@@ -6,7 +6,7 @@ import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 import './FormSelect.css';
 
-type SelectItem = { label: string; description?: React.ReactNode };
+export type SelectItem = { label: string; description?: React.ReactNode; isDisabled?: boolean };
 
 type FormSelectProps = {
   name: string;
@@ -97,9 +97,14 @@ const FormSelect = ({
           <SelectList className="fctl-form-select__menu">
             {itemKeys.map((key) => {
               const item = items[key];
-              const desc = isItemObject(item) ? item.description : undefined;
+              let desc: React.ReactNode;
+              let isDisabled = false;
+              if (isItemObject(item)) {
+                desc = item.description || '';
+                isDisabled = Boolean(item.isDisabled);
+              }
               return (
-                <SelectOption key={key} value={key} description={desc}>
+                <SelectOption key={key} value={key} description={desc} isDisabled={isDisabled}>
                   {getItemLabel(item)}
                 </SelectOption>
               );

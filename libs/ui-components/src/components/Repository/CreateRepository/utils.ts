@@ -132,9 +132,7 @@ export const getInitValues = ({
     formValues.useAdvancedConfig = !!(
       repository.spec.ociAuth ||
       repository.spec['ca.crt'] ||
-      repository.spec.skipServerVerification ||
-      repository.spec.scheme ||
-      repository.spec.accessMode
+      repository.spec.skipServerVerification
     );
     formValues.ociConfig = {
       registry: repository.spec.registry,

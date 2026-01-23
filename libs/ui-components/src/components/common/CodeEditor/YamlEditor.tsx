@@ -6,6 +6,7 @@ import { compare } from 'fast-json-patch';
 import type * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { AuthProvider, Device, Fleet, PatchRequest, Repository, ResourceKind } from '@flightctl/types';
+import { ImageBuild } from '@flightctl/types/imagebuilder';
 import { fromAPILabel } from '../../../utils/labels';
 import { getLabelPatches } from '../../../utils/patch';
 import { getErrorMessage, isResourceVersionTestFailure } from '../../../utils/error';
@@ -16,9 +17,7 @@ import YamlEditorBase from './YamlEditorBase';
 
 import './YamlEditor.css';
 
-// CELIA-WIP entire YAML editor needs to be reviewed for PF6.
-// SEe how it works in OCP and ACM, and make sure we are consistent.
-type FlightCtlYamlResource = Fleet | Device | Repository | AuthProvider;
+type FlightCtlYamlResource = Fleet | Device | Repository | AuthProvider | ImageBuild;
 
 type YamlEditorProps<R extends FlightCtlYamlResource> = Partial<Omit<PfCodeEditorProps, 'ref' | 'code'>> & {
   /** FlightCtl resource to display in the editor. */
@@ -206,7 +205,7 @@ const YamlEditor = <R extends FlightCtlYamlResource>({
           navigate('../.');
         }}
         onReload={() => {
-          void refetch();
+          refetch();
           setIsSavedSuccessfully(false);
           setSaveError(undefined);
           setDoUpdate(true);

@@ -1,7 +1,5 @@
 import {
-  Condition,
   ConditionStatus,
-  ConditionType,
   DeviceList,
   EnrollmentRequestList,
   FleetList,
@@ -9,10 +7,17 @@ import {
   RepositoryList,
   ResourceSyncList,
 } from '@flightctl/types';
+import { ImageBuildList } from '@flightctl/types/imagebuilder';
 
-import { AnnotationType } from '../types/extraTypes';
+import { AnnotationType, GenericCondition, GenericConditionType } from '../types/extraTypes';
 
-export type ApiList = EnrollmentRequestList | DeviceList | FleetList | RepositoryList | ResourceSyncList;
+export type ApiList =
+  | EnrollmentRequestList
+  | DeviceList
+  | FleetList
+  | RepositoryList
+  | ResourceSyncList
+  | ImageBuildList;
 
 const getApiListCount = (listResponse: ApiList | undefined): number | undefined => {
   if (listResponse === undefined) {
@@ -31,10 +36,10 @@ const getMetadataAnnotation = (metadata: ObjectMeta | undefined, annotation: Ann
 };
 
 const getCondition = (
-  conditions: Condition[] | undefined,
-  type: ConditionType,
+  conditions: GenericCondition[] | undefined,
+  type: GenericConditionType,
   status: ConditionStatus = ConditionStatus.ConditionStatusTrue,
-) => {
+): GenericCondition | undefined => {
   const typeCond = conditions?.filter((c) => c.type === type);
   if (typeCond) {
     return typeCond.find((tc) => tc.status === status);
