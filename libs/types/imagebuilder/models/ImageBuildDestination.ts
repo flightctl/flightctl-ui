@@ -17,6 +17,6 @@ export type ImageBuildDestination = {
   /**
    * The tag of the output image.
    */
-  tag: string;
+  imageTag: string;
 };
 

@@ -18,11 +18,7 @@ import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circl
 
 import { BindingType, ImageExport } from '@flightctl/types/imagebuilder';
 import { getDateDisplay } from '../../../utils/dates';
-import {
-  getExpectedOutputImageReference,
-  getExportFormatLabel,
-  getSourceImageReference,
-} from '../../../utils/imageBuilds';
+import { getExportFormatLabel, getImageReference } from '../../../utils/imageBuilds';
 import { useTranslation } from '../../../hooks/useTranslation';
 import FlightCtlDescriptionList from '../../common/FlightCtlDescriptionList';
 import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
@@ -46,11 +42,11 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
   ) as ImageExport[];
 
   const srcImageReference = React.useMemo(() => {
-    return getSourceImageReference(imageBuild.spec.source, ociRegistries) || '';
+    return getImageReference(ociRegistries, imageBuild.spec.source) || '';
   }, [ociRegistries, imageBuild.spec.source]);
 
   const dstImageReference = React.useMemo(() => {
-    return getExpectedOutputImageReference(imageBuild.spec.destination, ociRegistries) || '';
+    return getImageReference(ociRegistries, imageBuild.spec.destination) || '';
   }, [ociRegistries, imageBuild.spec.destination]);
 
   return (
@@ -168,7 +164,7 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
                   </DescriptionListGroup>
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t('Image output tag')}</DescriptionListTerm>
-                    <DescriptionListDescription>{imageBuild.spec.destination.tag}</DescriptionListDescription>
+                    <DescriptionListDescription>{imageBuild.spec.destination.imageTag}</DescriptionListDescription>
                   </DescriptionListGroup>
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t('Image reference URL')}</DescriptionListTerm>

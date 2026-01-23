@@ -25,7 +25,7 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import { getErrorMessage } from '../../../../utils/error';
 import FlightCtlDescriptionList from '../../../common/FlightCtlDescriptionList';
 import { ImageBuildFormValues, ImageBuildWizardError } from '../types';
-import { getExpectedOutputImageReference, getSourceImageReference } from '../../../../utils/imageBuilds';
+import { getImageReference } from '../../../../utils/imageBuilds';
 import { getExportFormatLabel } from '../../../../utils/imageBuilds';
 import { CERTIFICATE_VALIDITY_IN_YEARS } from '../../../../constants';
 import { useOciRegistriesContext } from '../../OciRegistriesContext';
@@ -43,12 +43,12 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
   const { ociRegistries } = useOciRegistriesContext();
 
   const srcImageReference = React.useMemo(
-    () => getSourceImageReference(values.source, ociRegistries),
+    () => getImageReference(ociRegistries, values.source),
     [ociRegistries, values.source],
   );
 
   const dstImageReference = React.useMemo(
-    () => getExpectedOutputImageReference(values.destination, ociRegistries),
+    () => getImageReference(ociRegistries, values.destination),
     [ociRegistries, values.destination],
   );
 
@@ -100,7 +100,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Image output tag')}</DescriptionListTerm>
-                <DescriptionListDescription>{values.destination.tag}</DescriptionListDescription>
+                <DescriptionListDescription>{values.destination.imageTag}</DescriptionListDescription>
               </DescriptionListGroup>
               {dstImageReference && (
                 <DescriptionListGroup>

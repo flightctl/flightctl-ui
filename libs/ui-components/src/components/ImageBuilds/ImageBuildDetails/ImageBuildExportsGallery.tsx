@@ -10,7 +10,7 @@ import { getImageExportResource } from '../CreateImageBuildWizard/utils';
 import { ViewImageBuildExportCard } from '../ImageExportCards';
 import { useOciRegistriesContext } from '../OciRegistriesContext';
 import { showSpinnerBriefly } from '../../../utils/time';
-import { getExportDownloadResult } from '../../../utils/imageBuilds';
+import { getExportDownloadResult, getImageReference } from '../../../utils/imageBuilds';
 
 type ImageBuildExportsGalleryProps = {
   imageBuild: ImageBuildWithExports;
@@ -51,11 +51,7 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
     setExportingFormat(format);
     setError(undefined);
     try {
-      const imageExport = getImageExportResource(
-        imageBuild.metadata.name as string,
-        imageBuild.spec.destination,
-        format,
-      );
+      const imageExport = getImageExportResource(imageBuild.metadata.name as string, format);
       await post<ImageExport>('imageexports', imageExport);
       // The "Export image" button wouldn't be seen as spinning without this delay.
       await showSpinnerBriefly(REFRESH_IMAGE_BUILD_DELAY);
@@ -108,16 +104,16 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
     <Gallery hasGutter minWidths={{ default: '350px' }}>
       {allFormats.map((format) => {
         const imageExport = imageBuild.imageExports.find((imageExport) => imageExport?.spec.format === format);
-        const isDisabled = exportingFormat !== null && exportingFormat !== format;
-        const repository = ociRegistries.find(
-          (registry) => registry.metadata.name === imageBuild.spec.destination.repository,
-        );
+        const isDisabled = exportingFormat && exportingFormat !== format;
+        // We can only link to the generic destination for the image build.
+        // The individual export artifacts are references to this generic output image.
+        const imageReference = getImageReference(ociRegistries, imageBuild.spec.destination);
 
         const hasError = error?.format === format;
         return (
           <ViewImageBuildExportCard
             key={format}
-            repository={repository}
+            imageReference={imageReference}
             format={format}
             error={hasError ? error : null}
             imageExport={imageExport}

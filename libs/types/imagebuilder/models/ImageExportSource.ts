@@ -3,9 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ImageBuildRefSource } from './ImageBuildRefSource';
-import type { ImageReferenceSource } from './ImageReferenceSource';
 /**
  * ImageExportSource specifies the source image for the export.
  */
-export type ImageExportSource = (ImageBuildRefSource | ImageReferenceSource);
+export type ImageExportSource = ImageBuildRefSource;
 

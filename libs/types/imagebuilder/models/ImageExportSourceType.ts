@@ -7,5 +7,4 @@
  */
 export enum ImageExportSourceType {
   ImageExportSourceTypeImageBuild = 'imageBuild',
-  ImageExportSourceTypeImageReference = 'imageReference',
 }

@@ -12,7 +12,7 @@ import RepositorySelect from '../../../form/RepositorySelect';
 import { usePermissionsContext } from '../../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../../types/rbac';
 import { SelectImageBuildExportCard } from '../../ImageExportCards';
-import { getExpectedOutputImageReference } from '../../../../utils/imageBuilds';
+import { getImageReference } from '../../../../utils/imageBuilds';
 import { isOciRepoSpec } from '../../../Repository/CreateRepository/utils';
 import ImageUrlCard from '../../ImageUrlCard';
 import { useOciRegistriesContext } from '../../OciRegistriesContext';
@@ -24,7 +24,7 @@ export const isOutputImageStepValid = (errors: FormikErrors<ImageBuildFormValues
   if (!destination) {
     return true;
   }
-  return !destination.repository && !destination.imageName && !destination.tag;
+  return !destination.repository && !destination.imageName && !destination.imageTag;
 };
 
 const OutputImageStep = () => {
@@ -57,7 +57,7 @@ const OutputImageStep = () => {
   };
 
   const imageReference = React.useMemo(() => {
-    return getExpectedOutputImageReference(values.destination, ociRegistries);
+    return getImageReference(ociRegistries, values.destination);
   }, [ociRegistries, values.destination]);
 
   return (
@@ -89,7 +89,7 @@ const OutputImageStep = () => {
           </FormGroup>
           <FormGroup label={t('Image tag')} fieldId="image-tag" isRequired>
             <TextField
-              name="destination.tag"
+              name="destination.imageTag"
               aria-label={t('Image tag')}
               helperText={t('Specify the version (e.g., latest or 9.6)')}
             />

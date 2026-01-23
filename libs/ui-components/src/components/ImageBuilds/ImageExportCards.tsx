@@ -21,11 +21,7 @@ import { CloudSecurityIcon } from '@patternfly/react-icons/dist/js/icons/cloud-s
 import { ServerGroupIcon } from '@patternfly/react-icons/dist/js/icons/server-group-icon';
 
 import { ExportFormatType, ImageExport } from '@flightctl/types/imagebuilder';
-import {
-  getExpectedOutputImageReference,
-  getExportFormatDescription,
-  getExportFormatLabel,
-} from '../../utils/imageBuilds';
+import { getExportFormatDescription, getExportFormatLabel } from '../../utils/imageBuilds';
 import { getDateDisplay } from '../../utils/dates';
 import { useTranslation } from '../../hooks/useTranslation';
 import { isImageExportCompleted, isImageExportFailed } from './CreateImageBuildWizard/utils';
@@ -40,7 +36,7 @@ const iconMap: Record<ExportFormatType, React.ReactElement> = {
 };
 
 export type ImageExportFormatCardProps = {
-  repository: Repository | undefined;
+  imageReference: string | undefined;
   format: ExportFormatType;
   error?: { message: string; mode: 'export' | 'download' } | null;
   imageExport?: ImageExport;
@@ -94,7 +90,7 @@ export const SelectImageBuildExportCard = ({ format, isChecked, onToggle }: Sele
 export const ViewImageBuildExportCard = ({
   format,
   imageExport,
-  repository,
+  imageReference,
   onExportImage,
   onDownload,
   onDismissError,
@@ -110,11 +106,6 @@ export const ViewImageBuildExportCard = ({
   const title = getExportFormatLabel(format);
   const description = getExportFormatDescription(t, format);
 
-  let imageReference: string | undefined;
-  if (completedExport && repository) {
-    imageReference = getExpectedOutputImageReference(imageExport.spec.destination, [repository]);
-  }
-
   return (
     <Card isLarge className="fctl-imageexport-card">
       <CardHeader>
@@ -129,7 +120,10 @@ export const ViewImageBuildExportCard = ({
               </FlexItem>
               {exists && (
                 <FlexItem className="fctl-imageexport-card__status">
-                  <ImageExportStatusDisplay imageStatus={imageExport.status} imageReference={imageReference} />
+                  <ImageExportStatusDisplay
+                    imageStatus={imageExport.status}
+                    imageReference={completedExport ? imageReference : undefined}
+                  />
                 </FlexItem>
               )}
             </Flex>

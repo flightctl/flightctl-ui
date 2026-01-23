@@ -10,7 +10,7 @@ import TextField from '../../../form/TextField';
 import RepositorySelect from '../../../form/RepositorySelect';
 import { usePermissionsContext } from '../../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../../types/rbac';
-import { getSourceImageReference } from '../../../../utils/imageBuilds';
+import { getImageReference } from '../../../../utils/imageBuilds';
 import ImageUrlCard from '../../ImageUrlCard';
 import { useOciRegistriesContext } from '../../OciRegistriesContext';
 
@@ -32,7 +32,7 @@ const SourceImageStep = () => {
   const { ociRegistries, refetch } = useOciRegistriesContext();
 
   const imageReference = React.useMemo(() => {
-    return getSourceImageReference(values.source, ociRegistries);
+    return getImageReference(ociRegistries, values.source);
   }, [ociRegistries, values.source]);
 
   return (

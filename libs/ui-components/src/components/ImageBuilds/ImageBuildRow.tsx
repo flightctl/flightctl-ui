@@ -7,7 +7,7 @@ import { ImageBuild } from '@flightctl/types/imagebuilder';
 import { ImageBuildWithExports } from '../../types/extraTypes';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
-import { getImageBuildDestinationImage, getImageBuildSourceImage, hasImageBuildFailed } from '../../utils/imageBuilds';
+import { getImageBuildImage, hasImageBuildFailed } from '../../utils/imageBuilds';
 import { getDateDisplay } from '../../utils/dates';
 import ResourceLink from '../common/ResourceLink';
 import { ImageBuildStatusDisplay } from './ImageBuildAndExportStatus';
@@ -61,8 +61,8 @@ const ImageBuildRow = ({
     });
   }
 
-  const sourceImage = getImageBuildSourceImage(imageBuild);
-  const destinationImage = getImageBuildDestinationImage(imageBuild);
+  const sourceImage = getImageBuildImage(imageBuild.spec.source);
+  const destinationImage = getImageBuildImage(imageBuild.spec.destination);
 
   const hasError = hasImageBuildFailed(imageBuild);
 

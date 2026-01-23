@@ -6,25 +6,15 @@ import {
   ImageBuildConditionType,
   ImageBuildDestination,
   ImageBuildSource,
-  ImageExport,
 } from '@flightctl/types/imagebuilder';
 import { Repository } from '@flightctl/types';
 import { isOciRepoSpec } from '../components/Repository/CreateRepository/utils';
 
-export const getImageBuildSourceImage = (imageBuild: ImageBuild | undefined) => {
-  if (!imageBuild) {
+export const getImageBuildImage = (srcOrDst: ImageBuildSource | ImageBuildDestination | undefined) => {
+  if (!srcOrDst) {
     return '-';
   }
-  const { source } = imageBuild.spec;
-  return `${source.imageName}:${source.imageTag}`;
-};
-
-export const getImageBuildDestinationImage = (imageBuild: ImageBuild | undefined) => {
-  if (!imageBuild) {
-    return '-';
-  }
-  const { destination } = imageBuild.spec;
-  return `${destination.imageName}:${destination.tag}`;
+  return `${srcOrDst.imageName}:${srcOrDst.imageTag}`;
 };
 
 export const getExportFormatDescription = (t: TFunction, format: ExportFormatType) => {
@@ -48,7 +38,10 @@ const getOciRepositoryUrl = (repositories: Repository[], repositoryName: string)
   return repo.spec.registry;
 };
 
-const getImageReference = (repositories: Repository[], imageTarget: ImageBuildSource) => {
+export const getImageReference = (
+  repositories: Repository[],
+  imageTarget: ImageBuildSource | ImageBuildDestination,
+) => {
   const registryUrl = getOciRepositoryUrl(repositories, imageTarget.repository);
   if (!registryUrl) {
     return undefined;
@@ -57,51 +50,6 @@ const getImageReference = (repositories: Repository[], imageTarget: ImageBuildSo
     return undefined;
   }
   return `${registryUrl}/${imageTarget.imageName}:${imageTarget.imageTag}`;
-};
-
-// Represents the actual URL for the source image
-export const getSourceImageReference = (imageTarget: ImageBuildSource, repositories: Repository[]) => {
-  if (!imageTarget) {
-    return undefined;
-  }
-  return getImageReference(repositories, imageTarget);
-};
-
-// Represents the actual URL for the image export, which is in the form registry/imageName:manifestDigest
-// If manifestDigest is available, use it as the tag, otherwise fallback to the expected tag
-export const getActualImageExportReference = (imageExport: ImageExport, repositories: Repository[]) => {
-  if (!imageExport) {
-    return undefined;
-  }
-
-  const { destination } = imageExport.spec;
-  const registryUrl = getOciRepositoryUrl(repositories, destination.repository);
-  if (!registryUrl) {
-    return undefined;
-  }
-
-  return getImageReference(repositories, {
-    repository: destination.repository,
-    imageName: destination.imageName,
-    imageTag: imageExport.status?.manifestDigest || destination.tag,
-  });
-};
-
-// Represents the expected URL for the output image
-// It won't actually match the URL of the image, as it gets tagged with the digest therefore it can't be known beforehand
-export const getExpectedOutputImageReference = (
-  imageDestination: ImageBuildDestination,
-  repositories: Repository[],
-) => {
-  if (!imageDestination) {
-    return undefined;
-  }
-
-  return getImageReference(repositories, {
-    repository: imageDestination.repository,
-    imageName: imageDestination.imageName,
-    imageTag: imageDestination.tag, // both field names should be consistent but the API has named them differently
-  });
 };
 
 export const hasImageBuildFailed = (imageBuild: ImageBuild): boolean => {

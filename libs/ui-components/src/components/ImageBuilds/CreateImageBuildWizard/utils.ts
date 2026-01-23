@@ -26,7 +26,7 @@ export const getValidationSchema = (t: TFunction) => {
     destination: Yup.object<ImageBuildDestination>({
       repository: Yup.string().required(t('Target repository is required')),
       imageName: Yup.string().required(t('Image name is required')),
-      tag: Yup.string().required(t('Image tag is required')),
+      imageTag: Yup.string().required(t('Image tag is required')),
     }).required(t('Target image is required')),
     bindingType: Yup.string<BindingType>().required(t('Binding type is required')),
   });
@@ -107,7 +107,7 @@ export const getInitialValues = (imageBuild?: ImageBuildWithExports): ImageBuild
     destination: {
       repository: '',
       imageName: '',
-      tag: '',
+      imageTag: '',
     },
     bindingType: BindingType.BindingTypeEarly,
     exportFormats: [],
@@ -143,11 +143,7 @@ export const getImageBuildResource = (values: ImageBuildFormValues): ImageBuild 
   };
 };
 
-export const getImageExportResource = (
-  imageBuildName: string,
-  destination: ImageBuildDestination,
-  format: ExportFormatType,
-): ImageExport => {
+export const getImageExportResource = (imageBuildName: string, format: ExportFormatType): ImageExport => {
   const exportName = generateExportName(imageBuildName, format);
 
   return {
@@ -161,7 +157,6 @@ export const getImageExportResource = (
         type: 'imageBuild',
         imageBuildRef: imageBuildName,
       },
-      destination,
       format,
     },
   };
@@ -172,7 +167,7 @@ export const getImageExportResources = (values: ImageBuildFormValues, imageBuild
     return [];
   }
 
-  return values.exportFormats.map((format) => getImageExportResource(imageBuildName, values.destination, format));
+  return values.exportFormats.map((format) => getImageExportResource(imageBuildName, format));
 };
 
 export const isImageExportFailed = (imageExport: ImageExport): boolean => {

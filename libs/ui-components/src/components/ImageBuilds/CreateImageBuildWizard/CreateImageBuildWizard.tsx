@@ -140,15 +140,18 @@ const CreateImageBuildWizard = () => {
                     imageExports.map((imageExport) => post('imageexports', imageExport)),
                   );
 
-                  const exportErrors: Array<{ format: ExportFormatType; error: unknown }> = [];
-                  exportResults.forEach((result, index) => {
-                    if (isPromiseRejected(result)) {
-                      exportErrors.push({
-                        format: values.exportFormats[index],
-                        error: result.reason,
-                      });
-                    }
-                  });
+                  const exportErrors = exportResults.reduce(
+                    (acc, result, index) => {
+                      if (isPromiseRejected(result)) {
+                        acc.push({
+                          format: values.exportFormats[index],
+                          error: result.reason,
+                        });
+                      }
+                      return acc;
+                    },
+                    [] as Array<{ format: ExportFormatType; error: unknown }>,
+                  );
 
                   if (exportErrors.length > 0) {
                     setError({

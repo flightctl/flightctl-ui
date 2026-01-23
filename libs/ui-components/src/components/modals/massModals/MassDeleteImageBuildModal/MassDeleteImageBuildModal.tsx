@@ -20,7 +20,7 @@ import { getErrorMessage } from '../../../../utils/error';
 import { useFetch } from '../../../../hooks/useFetch';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { isPromiseRejected } from '../../../../types/typeUtils';
-import { getImageBuildDestinationImage, getImageBuildSourceImage } from '../../../../utils/imageBuilds';
+import { getImageBuildImage } from '../../../../utils/imageBuilds';
 
 type MassDeleteImageBuildModalProps = {
   onClose: VoidFunction;
@@ -42,8 +42,8 @@ const MassDeleteImageBuildTable = ({ imageBuilds }: { imageBuilds: Array<ImageBu
       <Tbody>
         {imageBuilds.map((imageBuild) => {
           const name = imageBuild.metadata.name || '';
-          const baseImage = getImageBuildSourceImage(imageBuild);
-          const outputImage = getImageBuildDestinationImage(imageBuild);
+          const baseImage = getImageBuildImage(imageBuild.spec.source);
+          const outputImage = getImageBuildImage(imageBuild.spec.destination);
           return (
             <Tr key={name}>
               <Td dataLabel={t('Name')}>{name}</Td>
