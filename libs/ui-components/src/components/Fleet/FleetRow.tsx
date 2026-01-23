@@ -16,7 +16,7 @@ type FleetRowProps = {
   rowIndex: number;
   onRowSelect: (fleet: Fleet) => OnSelect;
   isRowSelected: (fleet: Fleet) => boolean;
-  onDeleteClick: () => void;
+  onDeleteClick: VoidFunction;
   canDelete: boolean;
   canEdit: boolean;
 };

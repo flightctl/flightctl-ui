@@ -18,7 +18,10 @@ import ImageBuildDetailsTab from './ImageBuildDetailsTab';
 import ImageBuildExportsGallery from './ImageBuildExportsGallery';
 import { hasImageBuildFailed } from '../../../utils/imageBuilds';
 
-const imageBuildDetailsPermissions = [{ kind: RESOURCE.IMAGE_BUILD, verb: VERB.DELETE }];
+const imageBuildDetailsPermissions = [
+  { kind: RESOURCE.IMAGE_BUILD, verb: VERB.CREATE },
+  { kind: RESOURCE.IMAGE_BUILD, verb: VERB.DELETE },
+];
 
 const ImageBuildDetailsPageContent = () => {
   const { t } = useTranslation();
@@ -31,7 +34,7 @@ const ImageBuildDetailsPageContent = () => {
   const [imageBuild, isLoading, error, refetch] = useImageBuild(imageBuildId);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>();
   const { checkPermissions } = usePermissionsContext();
-  const [canDelete] = checkPermissions(imageBuildDetailsPermissions);
+  const [canCreate, canDelete] = checkPermissions(imageBuildDetailsPermissions);
   const hasFailed = imageBuild ? hasImageBuildFailed(imageBuild) : false;
 
   return (
@@ -51,13 +54,17 @@ const ImageBuildDetailsPageContent = () => {
         </TabsNav>
       }
       actions={
-        canDelete && (
+        (canCreate || canDelete) && (
           <DetailsPageActions>
             <DropdownList>
-              <DropdownItem onClick={() => navigate({ route: ROUTE.IMAGE_BUILD_EDIT, postfix: imageBuildId })}>
-                {hasFailed ? t('Retry') : t('Duplicate')}
-              </DropdownItem>
-              <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete image build')}</DropdownItem>
+              {canCreate && (
+                <DropdownItem onClick={() => navigate({ route: ROUTE.IMAGE_BUILD_EDIT, postfix: imageBuildId })}>
+                  {hasFailed ? t('Retry') : t('Duplicate')}
+                </DropdownItem>
+              )}
+              {canDelete && (
+                <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete image build')}</DropdownItem>
+              )}
             </DropdownList>
           </DetailsPageActions>
         )
@@ -77,7 +84,6 @@ const ImageBuildDetailsPageContent = () => {
               imageBuildId={imageBuildId}
               onClose={(hasDeleted?: boolean) => {
                 if (hasDeleted) {
-                  refetch();
                   navigate(ROUTE.IMAGE_BUILDS);
                 }
                 setIsDeleteModalOpen(false);

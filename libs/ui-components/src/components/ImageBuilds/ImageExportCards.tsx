@@ -20,7 +20,6 @@ import { VirtualMachineIcon } from '@patternfly/react-icons/dist/js/icons/virtua
 import { CloudSecurityIcon } from '@patternfly/react-icons/dist/js/icons/cloud-security-icon';
 import { ServerGroupIcon } from '@patternfly/react-icons/dist/js/icons/server-group-icon';
 
-import { Repository } from '@flightctl/types';
 import { ExportFormatType, ImageExport } from '@flightctl/types/imagebuilder';
 import {
   getExpectedOutputImageReference,
@@ -34,10 +33,10 @@ import { ImageExportStatusDisplay } from './ImageBuildAndExportStatus';
 
 import './ImageExportCards.css';
 
-const iconMap: Record<string, React.ReactElement> = {
-  vmdk: <VirtualMachineIcon />,
-  qcow2: <CloudSecurityIcon />,
-  iso: <ServerGroupIcon />,
+const iconMap: Record<ExportFormatType, React.ReactElement> = {
+  [ExportFormatType.ExportFormatTypeVMDK]: <VirtualMachineIcon />,
+  [ExportFormatType.ExportFormatTypeQCOW2]: <CloudSecurityIcon />,
+  [ExportFormatType.ExportFormatTypeISO]: <ServerGroupIcon />,
 };
 
 export type ImageExportFormatCardProps = {
@@ -167,17 +166,14 @@ export const ViewImageBuildExportCard = ({
                     isDisabled={isDisabled || isDownloading}
                     isLoading={isDownloading}
                   >
-                    {isDownloading ? t('Download...') : t('Download')}
+                    {isDownloading ? t('Downloading...') : t('Download')}
                   </Button>
                 </FlexItem>
               )}
-              {exists && (
-                <FlexItem>
+              <FlexItem>
+                {exists ? (
                   <Button variant="secondary">{t('View logs')}</Button>
-                </FlexItem>
-              )}
-              {!exists && (
-                <FlexItem>
+                ) : (
                   <Button
                     variant="secondary"
                     onClick={() => onExportImage(format)}
@@ -186,8 +182,8 @@ export const ViewImageBuildExportCard = ({
                   >
                     {t('Export image')}
                   </Button>
-                </FlexItem>
-              )}
+                )}
+              </FlexItem>
             </Flex>
           </StackItem>
           <StackItem>

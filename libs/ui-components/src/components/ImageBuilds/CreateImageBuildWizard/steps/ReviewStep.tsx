@@ -183,26 +183,24 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
               {getErrorMessage(error.error)}
             </Alert>
           ) : (
-            <StackItem>
-              <Alert isInline variant="warning" title={t('Image build created, but some exports failed')}>
-                <Content>
-                  {t(
-                    'The image build "{{buildName}}" was created successfully, however the following export(s) failed:',
-                    {
-                      buildName: error.buildName,
-                    },
-                  )}
-                </Content>
+            <Alert isInline variant="warning" title={t('Image build created, but some exports failed')}>
+              <Content>
+                {t(
+                  'The image build "{{buildName}}" was created successfully, however the following export(s) failed:',
+                  {
+                    buildName: error.buildName,
+                  },
+                )}
+              </Content>
 
-                <List isPlain>
-                  {error.errors.map(({ format, error: exportError }, index) => (
-                    <ListItem key={index}>
-                      <strong>{getExportFormatLabel(format)}:</strong> {getErrorMessage(exportError)}
-                    </ListItem>
-                  ))}
-                </List>
-              </Alert>
-            </StackItem>
+              <List isPlain>
+                {error.errors.map(({ format, error: exportError }, index) => (
+                  <ListItem key={index}>
+                    <strong>{getExportFormatLabel(format)}:</strong> {getErrorMessage(exportError)}
+                  </ListItem>
+                ))}
+              </List>
+            </Alert>
           )}
         </StackItem>
       )}

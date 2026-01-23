@@ -59,7 +59,7 @@ const SourceImageStep = () => {
             <TextField
               name="source.imageTag"
               aria-label={t('Image tag')}
-              helperText={t('Specify the version (e.g, latest or 9.6)')}
+              helperText={t('Specify the version (e.g., latest or 9.6)')}
             />
           </FormGroup>
           <FormSection>

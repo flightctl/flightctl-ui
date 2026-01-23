@@ -60,7 +60,7 @@ const DeleteImageBuildModal = ({
         <Button
           key="confirm"
           variant="danger"
-          isDisabled={isDeleting || !!error}
+          isDisabled={isDeleting}
           isLoading={isDeleting}
           onClick={async () => {
             setError(undefined);

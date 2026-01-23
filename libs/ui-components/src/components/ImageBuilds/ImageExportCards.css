@@ -7,7 +7,7 @@ In the UI, we replicate the group component "ServiceCard" which is the closest t
   --pf-v6-c-content--h2--FontWeight: normal;
 }
 
-.fctl-imageexport-card .fctl-imageexport-card__status .pf-v6-c-button__text {
+.fctl-imageexport-card .fctl-imageexport-card__status .pf-v6-c-button {
   /* Status is placed in the card title and needs a smaller font */
   --pf-v6-c-button--FontSize: 0.75rem;
 }

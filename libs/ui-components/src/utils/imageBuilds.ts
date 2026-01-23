@@ -138,7 +138,7 @@ const getRedirectUrl = (response: Response): string | undefined => {
   if (redirectUrl) {
     return redirectUrl;
   }
-  if (isDownloadResultRedirect(response)) {
+  if (isDownloadResultRedirect(response) && response.url) {
     return response.url;
   }
   return undefined;
@@ -151,7 +151,10 @@ export type ExportDownloadResult =
 // The download endpoint returns two types of responses: a redirect URL or a blob.
 // If a redirect URL is found, we should use it to trigger the download in the browser.
 // If no redirect URL is found, we should download the blob directly.
-export const getExportDownloadResult = async (response: Response): Promise<ExportDownloadResult> => {
+export const getExportDownloadResult = async (response: Response): Promise<ExportDownloadResult | null> => {
+  if (!response.ok && response.status !== 0) {
+    return null;
+  }
   const redirectUrl = getRedirectUrl(response);
   if (redirectUrl) {
     if (!isValidDownloadUrl(redirectUrl)) {

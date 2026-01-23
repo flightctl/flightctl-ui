@@ -28,7 +28,7 @@ import ErrorBoundary from '../../common/ErrorBoundary';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import SourceImageStep, { isSourceImageStepValid, sourceImageStepId } from './steps/SourceImageStep';
-import ImageOutputStep, { isOutputImageStepValid, outputImageStepId } from './steps/OutputImageStep';
+import OutputImageStep, { isOutputImageStepValid, outputImageStepId } from './steps/OutputImageStep';
 import RegistrationStep, { isRegistrationStepValid, registrationStepId } from './steps/RegistrationStep';
 import CreateImageBuildWizardFooter from './CreateImageBuildWizardFooter';
 import { useFetch } from '../../../hooks/useFetch';
@@ -56,13 +56,8 @@ const getValidStepIds = (formikErrors: FormikErrors<ImageBuildFormValues>): stri
   return validStepIds;
 };
 
-const isDisabledStep = (stepId: string | undefined, validStepIds: string[]) => {
-  if (!stepId) {
-    return true;
-  }
-
+const isDisabledStep = (stepId: string, validStepIds: string[]) => {
   const stepIdx = orderedIds.findIndex((stepOrderId) => stepOrderId === stepId);
-
   return orderedIds.some((orderedId, orderedStepIdx) => {
     return orderedStepIdx < stepIdx && !validStepIds.includes(orderedId);
   });
@@ -131,7 +126,7 @@ const CreateImageBuildWizard = () => {
                   buildName = imageBuild.metadata.name as string;
                   const createdBuild = await post<ImageBuild>('imagebuilds', imageBuild);
                   if (createdBuild.metadata.name !== buildName) {
-                    throw new Error(t('ImageBuild was created but has a different name'));
+                    throw new Error(t('Image build was created but has a different name'));
                   }
                 } catch (err) {
                   // Build creation failed
@@ -191,7 +186,7 @@ const CreateImageBuildWizard = () => {
                         id={outputImageStepId}
                         isDisabled={isDisabledStep(outputImageStepId, validStepIds)}
                       >
-                        {currentStep?.id === outputImageStepId && <ImageOutputStep />}
+                        {currentStep?.id === outputImageStepId && <OutputImageStep />}
                       </WizardStep>
                       <WizardStep
                         name={t('Registration')}

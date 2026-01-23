@@ -42,14 +42,14 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
     format: ExportFormatType;
     message: string;
     mode: 'export' | 'download';
-  } | null>(null);
+  }>();
   const { ociRegistries } = useOciRegistriesContext();
-  const [exportingFormat, setExportingFormat] = React.useState<ExportFormatType | null>(null);
-  const [downloadingFormat, setDownloadingFormat] = React.useState<ExportFormatType | null>(null);
+  const [exportingFormat, setExportingFormat] = React.useState<ExportFormatType>();
+  const [downloadingFormat, setDownloadingFormat] = React.useState<ExportFormatType>();
 
   const handleExportImage = async (format: ExportFormatType) => {
     setExportingFormat(format);
-    setError(null);
+    setError(undefined);
     try {
       const imageExport = getImageExportResource(
         imageBuild.metadata.name as string,
@@ -66,7 +66,7 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
 
       setError({ format, message: getErrorMessage(error), mode: 'export' });
     } finally {
-      setExportingFormat(null);
+      setExportingFormat(undefined);
     }
   };
 
@@ -87,25 +87,25 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
       });
 
       const downloadResult = await getExportDownloadResult(response);
-      if (downloadResult.type === 'redirect') {
-        createDownloadLink(downloadResult.url);
-        await showSpinnerBriefly(DOWNLOAD_REDIRECT_DELAY);
-      } else if (!response.ok && response.status !== 0) {
+      if (downloadResult === null) {
         await showSpinnerBriefly(DOWNLOAD_REDIRECT_DELAY);
         throw new Error(`Download failed: ${response.status} ${response.statusText}`);
+      } else if (downloadResult.type === 'redirect') {
+        createDownloadLink(downloadResult.url);
+        await showSpinnerBriefly(DOWNLOAD_REDIRECT_DELAY);
       } else {
-        const defaultFilename = `image-export-${ieName}.${format.toLowerCase()}`;
+        const defaultFilename = `image-export-${ieName}.${format}`;
         saveAs(downloadResult.blob, downloadResult.filename || defaultFilename);
       }
-    } catch (error) {
-      setError({ format, message: getErrorMessage(error), mode: 'download' });
+    } catch (err) {
+      setError({ format, message: getErrorMessage(err), mode: 'download' });
     } finally {
-      setDownloadingFormat(null);
+      setDownloadingFormat(undefined);
     }
   };
 
   return (
-    <Gallery hasGutter minWidths={{ default: '320px' }}>
+    <Gallery hasGutter minWidths={{ default: '350px' }}>
       {allFormats.map((format) => {
         const imageExport = imageBuild.imageExports.find((imageExport) => imageExport?.spec.format === format);
         const isDisabled = exportingFormat !== null && exportingFormat !== format;
@@ -124,7 +124,7 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
             isCreating={exportingFormat === format}
             isDownloading={downloadingFormat === format}
             isDisabled={isDisabled}
-            onDismissError={() => setError(null)}
+            onDismissError={() => setError(undefined)}
             onExportImage={handleExportImage}
             onDownload={handleDownload}
           />

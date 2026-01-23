@@ -19,12 +19,12 @@ import { ImageBuildWithExports } from '../../../types/extraTypes';
 export const getValidationSchema = (t: TFunction) => {
   return Yup.object<ImageBuildFormValues>({
     source: Yup.object<ImageBuildSource>({
-      repository: Yup.string().required(t('Source registry is required')),
+      repository: Yup.string().required(t('Source repository is required')),
       imageName: Yup.string().required(t('Image name is required')),
       imageTag: Yup.string().required(t('Image tag is required')),
     }).required(t('Source image is required')),
     destination: Yup.object<ImageBuildDestination>({
-      repository: Yup.string().required(t('Target registry is required')),
+      repository: Yup.string().required(t('Target repository is required')),
       imageName: Yup.string().required(t('Image name is required')),
       tag: Yup.string().required(t('Image tag is required')),
     }).required(t('Target image is required')),

@@ -68,14 +68,16 @@ const MassDeleteImageBuildModal = ({ onClose, imageBuilds, onDeleteSuccess }: Ma
   const imageBuildsCount = imageBuilds.length;
 
   const deleteImageBuilds = async () => {
+    setErrors(undefined);
     setProgress(0);
+    setProgressTotal(imageBuilds.length);
     setIsDeleting(true);
+
     const promises = imageBuilds.map(async (imageBuild) => {
       await remove(`imagebuilds/${imageBuild.metadata.name}`);
       setProgress((p) => p + 1);
     });
 
-    setProgressTotal(promises.length);
     const results = await Promise.allSettled(promises);
     setIsDeleting(false);
 
@@ -90,7 +92,7 @@ const MassDeleteImageBuildModal = ({ onClose, imageBuilds, onDeleteSuccess }: Ma
 
   return (
     <Modal isOpen onClose={isDeleting ? undefined : onClose} variant="medium">
-      <ModalHeader title={t('Delete image builds ?')} titleIconVariant="warning" />
+      <ModalHeader title={t('Delete image builds?')} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
           <StackItem>

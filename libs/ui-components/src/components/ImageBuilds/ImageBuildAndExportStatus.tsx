@@ -94,8 +94,6 @@ const ImageBuildAndExportStatus = ({
         </StackItem>
       </Stack>
     );
-  } else if (message) {
-    message = message;
   }
 
   return <StatusDisplayContent label={label} level={level} message={message} />;

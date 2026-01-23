@@ -6,7 +6,7 @@ import ImageUrl from './ImageUrl';
 const ImageUrlCard = ({ imageReference }: { imageReference: string | undefined }) => {
   const { t } = useTranslation();
 
-  let content: React.ReactNode = '';
+  let content: React.ReactNode;
   if (imageReference) {
     content = <ImageUrl imageReference={imageReference} />;
   } else {

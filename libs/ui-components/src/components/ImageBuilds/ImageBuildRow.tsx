@@ -18,8 +18,8 @@ type ImageBuildRowProps = {
   rowIndex: number;
   onRowSelect: (imageBuild: ImageBuild) => OnSelect;
   isRowSelected: (imageBuild: ImageBuild) => boolean;
-  onDeleteClick: () => void;
   canDelete: boolean;
+  onDeleteClick: VoidFunction;
   refetch: VoidFunction;
 };
 
@@ -98,7 +98,7 @@ const ImageBuildRow = ({
         </Td>
       </Tr>
       <Tr isExpanded={isExpanded}>
-        <Td colSpan={7}>
+        <Td colSpan={9}>
           <ExpandableRowContent>
             <Stack hasGutter>
               <StackItem>
@@ -116,7 +116,7 @@ const ImageBuildRow = ({
                         </Icon>
                       </FlexItem>
                       <FlexItem>
-                        <Content>{t('Build failed. Please retry again.')}</Content>
+                        <Content>{t('Build failed. Please retry.')}</Content>
                       </FlexItem>
                       <FlexItem>
                         <Button
