@@ -10,7 +10,6 @@
     "./libs/ui-components",
     "./libs/types",
     "./libs/i18n",
-    "./libs/ansible",
     "./apps/ocp-plugin",
     "./apps/standalone"
   ],
@@ -21,7 +20,7 @@
     "dev:kind": "npm run -w @flightctl/standalone dev:kind",
     "build": "npm run -w @flightctl/standalone build",
     "build:ocp": "npm run -w @flightctl/ocp-plugin build",
-    "build:libs": "npm run -w @flightctl/types build && npm run -w @flightctl/ui-components build && npm run -w @flightctl/ansible build",
+    "build:libs": "npm run -w @flightctl/types build && npm run -w @flightctl/ui-components build",
     "gen-types": "npm run -w @flightctl/types gen-types",
     "integration-tests:ci": "npm run build:libs && npm run -w @flightctl/standalone start-prod",
     "integration-tests:open": "cd libs/cypress && cypress open --config-file cypress.config.ts",
