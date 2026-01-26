@@ -14,6 +14,7 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
+import { Trans } from 'react-i18next';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
 import { BindingType, ImageExport } from '@flightctl/types/imagebuilder';
@@ -48,6 +49,8 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
   const dstImageReference = React.useMemo(() => {
     return getImageReference(ociRegistries, imageBuild.spec.destination) || '';
   }, [ociRegistries, imageBuild.spec.destination]);
+
+  const remoteAccessUsername = imageBuild.spec.userConfiguration?.username || '';
 
   return (
     <Stack hasGutter>
@@ -118,6 +121,16 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
                       </DescriptionListGroup>
                     </>
                   )}
+                  {remoteAccessUsername && (
+                    <DescriptionListGroup>
+                      <DescriptionListTerm>{t('Remote access')}</DescriptionListTerm>
+                      <DescriptionListDescription>
+                        <Trans t={t}>
+                          Enabled for <strong>{remoteAccessUsername}</strong>
+                        </Trans>
+                      </DescriptionListDescription>
+                    </DescriptionListGroup>
+                  )}
                 </FlightCtlDescriptionList>
               </CardBody>
             </DetailsPageCard>
@@ -178,7 +191,7 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
                       {hasExports
                         ? existingImageExports.map((imageExport) => (
                             <Label key={imageExport.spec.format} color="blue" className="pf-v6-u-mr-sm">
-                              {getExportFormatLabel(imageExport.spec.format)}
+                              {getExportFormatLabel(t, imageExport.spec.format)}
                             </Label>
                           ))
                         : t('None')}

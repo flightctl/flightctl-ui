@@ -19,19 +19,25 @@ import {
 import { VirtualMachineIcon } from '@patternfly/react-icons/dist/js/icons/virtual-machine-icon';
 import { CloudSecurityIcon } from '@patternfly/react-icons/dist/js/icons/cloud-security-icon';
 import { ServerGroupIcon } from '@patternfly/react-icons/dist/js/icons/server-group-icon';
+import { WarehouseIcon } from '@patternfly/react-icons/dist/js/icons/warehouse-icon';
 
 import { ExportFormatType, ImageExport } from '@flightctl/types/imagebuilder';
-import { getExportFormatDescription, getExportFormatLabel } from '../../utils/imageBuilds';
+import {
+  getExportFormatDescription,
+  getExportFormatLabel,
+  isImageExportCompleted,
+  isImageExportFailed,
+} from '../../utils/imageBuilds';
 import { getDateDisplay } from '../../utils/dates';
 import { useTranslation } from '../../hooks/useTranslation';
-import { isImageExportCompleted, isImageExportFailed } from './CreateImageBuildWizard/utils';
 import { ImageExportStatusDisplay } from './ImageBuildAndExportStatus';
 
 import './ImageExportCards.css';
 
 const iconMap: Record<ExportFormatType, React.ReactElement> = {
-  [ExportFormatType.ExportFormatTypeVMDK]: <VirtualMachineIcon />,
+  [ExportFormatType.ExportFormatTypeVMDK]: <WarehouseIcon />,
   [ExportFormatType.ExportFormatTypeQCOW2]: <CloudSecurityIcon />,
+  [ExportFormatType.ExportFormatTypeQCOW2DiskContainer]: <VirtualMachineIcon />,
   [ExportFormatType.ExportFormatTypeISO]: <ServerGroupIcon />,
 };
 
@@ -57,7 +63,7 @@ type SelectImageBuildExportCardProps = {
 export const SelectImageBuildExportCard = ({ format, isChecked, onToggle }: SelectImageBuildExportCardProps) => {
   const { t } = useTranslation();
 
-  const title = getExportFormatLabel(format);
+  const title = getExportFormatLabel(t, format);
   const description = getExportFormatDescription(t, format);
 
   const id = `export-format-${format}`;
@@ -103,7 +109,7 @@ export const ViewImageBuildExportCard = ({
   const exists = !!imageExport;
   const failedExport = exists && isImageExportFailed(imageExport);
   const completedExport = exists && isImageExportCompleted(imageExport);
-  const title = getExportFormatLabel(format);
+  const title = getExportFormatLabel(t, format);
   const description = getExportFormatDescription(t, format);
 
   return (

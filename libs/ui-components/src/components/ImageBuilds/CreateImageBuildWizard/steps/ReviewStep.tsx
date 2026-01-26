@@ -117,7 +117,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
                     <>
                       {values.exportFormats.map((format) => (
                         <Label key={format} color="blue" className="pf-v6-u-mr-sm">
-                          {getExportFormatLabel(format)}
+                          {getExportFormatLabel(t, format)}
                         </Label>
                       ))}
                     </>
@@ -196,7 +196,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
               <List isPlain>
                 {error.errors.map(({ format, error: exportError }, index) => (
                   <ListItem key={index}>
-                    <strong>{getExportFormatLabel(format)}:</strong> {getErrorMessage(exportError)}
+                    <strong>{getExportFormatLabel(t, format)}:</strong> {getErrorMessage(exportError)}
                   </ListItem>
                 ))}
               </List>

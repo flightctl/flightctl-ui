@@ -10,7 +10,9 @@ import {
   Divider,
   Flex,
   FlexItem,
+  FormGroup,
   FormSection,
+  Grid,
   Radio,
   Stack,
   StackItem,
@@ -22,6 +24,9 @@ import { BindingType } from '@flightctl/types/imagebuilder';
 import { ImageBuildFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
+import TextField from '../../../form/TextField';
+import UploadField from '../../../form/UploadField';
+import CheckboxField from '../../../form/CheckboxField';
 import { CERTIFICATE_VALIDITY_IN_YEARS } from '../../../../constants';
 
 export const registrationStepId = 'registration';
@@ -43,6 +48,22 @@ const RegistrationStep = () => {
   const handleLateBindingSelect = () => {
     if (values.bindingType !== BindingType.BindingTypeLate) {
       setFieldValue('bindingType', BindingType.BindingTypeLate);
+    }
+  };
+
+  const handleRemoteAccessToggle = (enabled: boolean) => {
+    if (enabled) {
+      // Ensure userConfiguration object exists
+      if (!values.userConfiguration) {
+        setFieldValue('userConfiguration', { username: '', publickey: '', enabled: true });
+      } else {
+        setFieldValue('userConfiguration.enabled', true);
+      }
+    } else {
+      // Clear userConfiguration when disabled
+      setFieldValue('userConfiguration.username', '');
+      setFieldValue('userConfiguration.publickey', '');
+      setFieldValue('userConfiguration.enabled', false);
     }
   };
 
@@ -141,6 +162,28 @@ const RegistrationStep = () => {
           </CardBody>
         </Card>
       </FormSection>
+
+      <Grid lg={5} span={8}>
+        <FormSection title={t('Remote access')}>
+          <CheckboxField
+            name="userConfiguration.enabled"
+            label={t('Provide an SSH public key to enable passwordless login once your image is deployed.')}
+            onChangeCustom={handleRemoteAccessToggle}
+          >
+            <FormGroup label={t('Username')} fieldId="user-config-username">
+              <TextField
+                name="userConfiguration.username"
+                aria-label={t('Username')}
+                helperText={t('The username for the user account')}
+              />
+            </FormGroup>
+            <UploadField name="userConfiguration.publickey" label={t('Public key')} />
+          </CheckboxField>
+          <Content component="small">
+            {t('Paste the content of an SSH public key you want to use to connect to the device.')}
+          </Content>
+        </FormSection>
+      </Grid>
     </FlightCtlForm>
   );
 };
