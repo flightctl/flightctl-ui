@@ -43,7 +43,7 @@ export const getExportFormatDescription = (t: TFunction, format: ExportFormatTyp
 export const getExportFormatLabel = (t: TFunction, format: ExportFormatType) => {
   switch (format) {
     case ExportFormatType.ExportFormatTypeQCOW2DiskContainer:
-      return t('QCOW2 (Disk Container)');
+      return t('QCOW2 (Container)');
     default:
       return format.toUpperCase();
   }

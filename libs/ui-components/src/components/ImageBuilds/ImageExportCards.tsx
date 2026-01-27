@@ -19,7 +19,7 @@ import {
 import { VirtualMachineIcon } from '@patternfly/react-icons/dist/js/icons/virtual-machine-icon';
 import { CloudSecurityIcon } from '@patternfly/react-icons/dist/js/icons/cloud-security-icon';
 import { ServerGroupIcon } from '@patternfly/react-icons/dist/js/icons/server-group-icon';
-import { WarehouseIcon } from '@patternfly/react-icons/dist/js/icons/warehouse-icon';
+import { BuilderImageIcon } from '@patternfly/react-icons/dist/js/icons/builder-image-icon';
 
 import { ExportFormatType, ImageExport } from '@flightctl/types/imagebuilder';
 import {
@@ -37,9 +37,9 @@ import { ROUTE } from '../../hooks/useNavigate';
 import './ImageExportCards.css';
 
 const iconMap: Record<ExportFormatType, React.ReactElement> = {
-  [ExportFormatType.ExportFormatTypeVMDK]: <WarehouseIcon />,
+  [ExportFormatType.ExportFormatTypeVMDK]: <VirtualMachineIcon />,
   [ExportFormatType.ExportFormatTypeQCOW2]: <CloudSecurityIcon />,
-  [ExportFormatType.ExportFormatTypeQCOW2DiskContainer]: <VirtualMachineIcon />,
+  [ExportFormatType.ExportFormatTypeQCOW2DiskContainer]: <BuilderImageIcon />,
   [ExportFormatType.ExportFormatTypeISO]: <ServerGroupIcon />,
 };
 

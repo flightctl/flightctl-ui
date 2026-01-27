@@ -1218,7 +1218,7 @@
   "For virtualized edge workloads.": "For virtualized edge workloads.",
   "For OpenShift Virtualization.": "For OpenShift Virtualization.",
   "For physical edge devices and bare metal.": "For physical edge devices and bare metal.",
-  "QCOW2 (Disk Container)": "QCOW2 (Disk Container)",
+  "QCOW2 (Container)": "QCOW2 (Container)",
   "Error": "Error",
   "Degraded": "Degraded",
   "No applications": "No applications",
