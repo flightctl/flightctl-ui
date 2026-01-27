@@ -13,6 +13,9 @@ import {
 import { ApplicationProviderSpecFixed, FlightCtlLabel } from './extraTypes';
 import { UpdateScheduleMode } from '../utils/time';
 
+export const RUN_AS_DEFAULT_USER = 'flightctl';
+export const RUN_AS_ROOT_USER = 'root';
+
 export enum ConfigType {
   GIT = 'git',
   HTTP = 'http',
@@ -63,6 +66,7 @@ export type SingleContainerAppForm = AppBase & {
   image: string;
   ports?: PortMapping[];
   limits?: ApplicationResourceLimits;
+  runAs?: string;
 };
 
 export type QuadletImageAppForm = AppBase & {

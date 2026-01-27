@@ -34,6 +34,7 @@ import {
   PortMapping,
   QuadletImageAppForm,
   QuadletInlineAppForm,
+  RUN_AS_DEFAULT_USER,
   SpecConfigTemplate,
   SystemdUnitFormValue,
   isComposeImageAppForm,
@@ -280,6 +281,7 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
     if (app.ports) {
       data.ports = app.ports.map((p) => `${p.hostPort}:${p.containerPort}`);
     }
+    data.runAs = app.runAs || RUN_AS_DEFAULT_USER;
     // Removed fields must not appear in the resources object
     const appLimits: ApplicationResourceLimits = {};
     if (app.limits?.cpu) {
@@ -445,6 +447,9 @@ const hasSingleContainerAppChanged = (currentApp: ApplicationProviderSpec, updat
     return true;
   }
 
+  if ((imageApp.runAs || '') !== (updatedApp.runAs || '')) {
+    return true;
+  }
   return !areVolumesEqual(imageApp.volumes || [], updatedApp.volumes || []);
 };
 
@@ -659,6 +664,7 @@ export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
               memory: imageApp.resources.limits.memory || '',
             }
           : undefined,
+        runAs: app.runAs || RUN_AS_DEFAULT_USER,
       };
     }
 
