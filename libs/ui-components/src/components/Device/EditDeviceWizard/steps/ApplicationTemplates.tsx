@@ -20,7 +20,6 @@ import {
   AppForm,
   AppSpecType,
   DeviceSpecConfigFormValues,
-  RUN_AS_DEFAULT_USER,
   isComposeImageAppForm,
   isComposeInlineAppForm,
   isHelmImageAppForm,
@@ -28,6 +27,7 @@ import {
   isQuadletInlineAppForm,
   isSingleContainerAppForm,
 } from '../../../../types/deviceSpec';
+import { createInitialAppForm } from '../deviceSpecUtils';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import FormSelect from '../../../form/FormSelect';
@@ -65,70 +65,10 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
   const appTypesOptions = appTypeOptions(t);
 
   React.useEffect(() => {
-    if (!shouldResetApp) {
-      return;
-    }
-    // When switching appType to Container, initialize Container-specific fields
-    if (appType === AppType.AppTypeContainer) {
-      setValue(
-        {
-          appType: AppType.AppTypeContainer,
-          specType: AppSpecType.OCI_IMAGE,
-          name: appName || '',
-          image: '',
-          variables: [],
-          ports: [],
-          volumes: [],
-          runAs: RUN_AS_DEFAULT_USER,
-        } as AppForm,
-        false,
-      );
-      return;
-    }
-
-    if (appType === AppType.AppTypeHelm) {
-      setValue(
-        {
-          appType: AppType.AppTypeHelm,
-          specType: AppSpecType.OCI_IMAGE,
-          name: appName || '',
-          image: '',
-          namespace: undefined,
-          valuesYaml: '',
-          valuesFiles: [''], // We want to show a "values files" field by default
-        } as AppForm,
-        false,
-      );
-      return;
-    }
-
-    // When switching specType, the app becomes "incomplete" and we must add the required fields for the new type
-    if (specType === AppSpecType.INLINE) {
-      // Switching to inline - need files
-      setValue(
-        {
-          specType: AppSpecType.INLINE,
-          appType,
-          name: appName || '',
-          files: [{ path: '', content: '' }],
-          variables: [],
-          volumes: [],
-        } as AppForm,
-        false,
-      );
-    } else if (specType === AppSpecType.OCI_IMAGE) {
-      // Switching to image - need image field
-      setValue(
-        {
-          specType: AppSpecType.OCI_IMAGE,
-          appType,
-          name: appName || '',
-          image: '',
-          variables: [],
-          volumes: [],
-        } as AppForm,
-        false,
-      );
+    // When switching types we must ensure all mandatory fields are initialized for the new type
+    if (shouldResetApp) {
+      const app = createInitialAppForm(appType, specType, appName || '');
+      setValue(app, false);
     }
   }, [shouldResetApp, specType, appType, appName, setValue]);
 
@@ -344,16 +284,7 @@ const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
                       icon={<PlusCircleIcon />}
                       iconPosition="start"
                       onClick={() => {
-                        push({
-                          appType: AppType.AppTypeContainer,
-                          specType: AppSpecType.OCI_IMAGE,
-                          name: '',
-                          image: '',
-                          variables: [],
-                          ports: [],
-                          volumes: [],
-                          runAs: RUN_AS_DEFAULT_USER,
-                        });
+                        push(createInitialAppForm(AppType.AppTypeContainer, AppSpecType.OCI_IMAGE));
                       }}
                     >
                       {t('Add application')}
