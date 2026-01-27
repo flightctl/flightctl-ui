@@ -25,6 +25,10 @@ export type DeviceApplicationStatus = {
   embedded: boolean;
   appType: AppType;
   /**
+   * The username of the system user this application is runing under. If blank, the application is run as the same user as the agent (generally root).
+   */
+  runAs?: string;
+  /**
    * Status of volumes used by this application.
    */
   volumes?: Array<ApplicationVolumeStatus>;

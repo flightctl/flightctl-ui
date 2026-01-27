@@ -704,6 +704,7 @@ export const validApplicationsSchema = (t: TFunction) => {
             }),
             volumes: singleContainerVolumesSchema(t),
             variables: appVariablesSchema(t),
+            runAs: Yup.string(),
           });
         }
 

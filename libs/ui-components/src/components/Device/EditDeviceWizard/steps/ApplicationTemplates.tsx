@@ -20,6 +20,7 @@ import {
   AppForm,
   AppSpecType,
   DeviceSpecConfigFormValues,
+  RUN_AS_DEFAULT_USER,
   isComposeImageAppForm,
   isComposeInlineAppForm,
   isHelmImageAppForm,
@@ -78,6 +79,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
           variables: [],
           ports: [],
           volumes: [],
+          runAs: RUN_AS_DEFAULT_USER,
         } as AppForm,
         false,
       );
@@ -350,6 +352,7 @@ const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
                           variables: [],
                           ports: [],
                           volumes: [],
+                          runAs: RUN_AS_DEFAULT_USER,
                         });
                       }}
                     >
