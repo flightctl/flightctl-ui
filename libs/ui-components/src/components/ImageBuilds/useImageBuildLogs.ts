@@ -8,7 +8,7 @@ export enum LogResourceType {
 
 /**
  * Extracts the content of log lines from SSE format.
- * Filters lines starting with 'data: ' and removes the prefix.
+ * Lines can start with 'data:' or 'data: ', and we remove the prefix.
  * @param lines - Array of lines to process
  * @returns Log text content
  */
@@ -16,8 +16,9 @@ const getLogContent = (lines: string[]): string => {
   const logLines: string[] = [];
 
   for (const line of lines) {
-    if (line.startsWith('data: ')) {
-      const logLine = line.slice(6); // Remove 'data: ' prefix
+    if (line.startsWith('data:')) {
+      const prefixLen = line.startsWith('data: ') ? 6 : 5;
+      const logLine = line.slice(prefixLen);
       logLines.push(logLine);
     }
   }
@@ -141,6 +142,8 @@ export const useImageBuildLogs = (
       }
     };
 
+    // Clear stale logs when the entity changes (another one is selected or it's the same one but it changes to inactive)
+    setLogs('');
     void fetchLogs();
 
     return () => {
