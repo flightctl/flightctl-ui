@@ -31,6 +31,8 @@ import {
 import { getDateDisplay } from '../../utils/dates';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ImageExportStatusDisplay } from './ImageBuildAndExportStatus';
+import { useAppContext } from '../../hooks/useAppContext';
+import { ROUTE } from '../../hooks/useNavigate';
 
 import './ImageExportCards.css';
 
@@ -42,6 +44,7 @@ const iconMap: Record<ExportFormatType, React.ReactElement> = {
 };
 
 export type ImageExportFormatCardProps = {
+  imageBuildId: string;
   imageReference: string | undefined;
   format: ExportFormatType;
   error?: { message: string; mode: 'export' | 'download' } | null;
@@ -94,6 +97,7 @@ export const SelectImageBuildExportCard = ({ format, isChecked, onToggle }: Sele
 };
 
 export const ViewImageBuildExportCard = ({
+  imageBuildId,
   format,
   imageExport,
   imageReference,
@@ -106,11 +110,20 @@ export const ViewImageBuildExportCard = ({
   error,
 }: ImageExportFormatCardProps) => {
   const { t } = useTranslation();
+  const {
+    router: { useNavigate: useRouterNavigate, appRoutes },
+  } = useAppContext();
+  const routerNavigate = useRouterNavigate();
   const exists = !!imageExport;
   const failedExport = exists && isImageExportFailed(imageExport);
   const completedExport = exists && isImageExportCompleted(imageExport);
   const title = getExportFormatLabel(t, format);
   const description = getExportFormatDescription(t, format);
+
+  const handleViewLogs = () => {
+    const baseRoute = appRoutes[ROUTE.IMAGE_BUILD_DETAILS];
+    routerNavigate(`${baseRoute}/${imageBuildId}/logs`);
+  };
 
   return (
     <Card isLarge className="fctl-imageexport-card">
@@ -172,7 +185,9 @@ export const ViewImageBuildExportCard = ({
               )}
               <FlexItem>
                 {exists ? (
-                  <Button variant="secondary">{t('View logs')}</Button>
+                  <Button variant="secondary" onClick={handleViewLogs}>
+                    {t('View logs')}
+                  </Button>
                 ) : (
                   <Button
                     variant="secondary"

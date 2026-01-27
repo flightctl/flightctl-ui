@@ -40,12 +40,13 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
   const { ociRegistries } = useOciRegistriesContext();
   const [exportingFormat, setExportingFormat] = React.useState<ExportFormatType>();
   const [downloadingFormat, setDownloadingFormat] = React.useState<ExportFormatType>();
+  const imageBuildId = imageBuild.metadata.name as string;
 
   const handleExportImage = async (format: ExportFormatType) => {
     setExportingFormat(format);
     setError(undefined);
     try {
-      const imageExport = getImageExportResource(imageBuild.metadata.name as string, format);
+      const imageExport = getImageExportResource(imageBuildId, format);
       await post<ImageExport>('imageexports', imageExport);
       // The "Export image" button wouldn't be seen as spinning without this delay.
       await showSpinnerBriefly(REFRESH_IMAGE_BUILD_DELAY);
@@ -106,6 +107,7 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
         const hasError = error?.format === format;
         return (
           <ViewImageBuildExportCard
+            imageBuildId={imageBuildId}
             key={format}
             imageReference={imageReference}
             format={format}
