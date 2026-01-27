@@ -73,6 +73,7 @@ export type QuadletImageAppForm = AppBase & {
   appType: AppType.AppTypeQuadlet;
   specType: AppSpecType.OCI_IMAGE;
   image: string;
+  runAs?: string;
 };
 
 export type QuadletInlineAppForm = AppBase & {
@@ -80,6 +81,7 @@ export type QuadletInlineAppForm = AppBase & {
   specType: AppSpecType.INLINE;
   name: string; // transforms the field in required
   files: InlineContent[];
+  runAs?: string;
 };
 
 export type ComposeImageAppForm = AppBase & {
