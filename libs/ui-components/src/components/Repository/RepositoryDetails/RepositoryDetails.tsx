@@ -90,7 +90,7 @@ const RepositoryDetails = () => {
                       <GridItem>
                         <RepositoryGeneralDetailsCard repoDetails={repoDetails} />
                       </GridItem>
-                      {canListRS && repoDetails.spec.type === RepoSpecType.GIT && (
+                      {canListRS && repoDetails.spec.type === RepoSpecType.RepoSpecTypeGit && (
                         <GridItem>
                           <RepositoryResourceSyncsCard repositoryId={repositoryId} />
                         </GridItem>

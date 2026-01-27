@@ -2,12 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { GenericRepoSpec } from './GenericRepoSpec';
+import type { GitRepoSpec } from './GitRepoSpec';
 import type { HttpRepoSpec } from './HttpRepoSpec';
 import type { OciRepoSpec } from './OciRepoSpec';
-import type { SshRepoSpec } from './SshRepoSpec';
 /**
  * RepositorySpec describes a configuration repository.
  */
-export type RepositorySpec = (GenericRepoSpec | HttpRepoSpec | SshRepoSpec | OciRepoSpec);
+export type RepositorySpec = (GitRepoSpec | HttpRepoSpec | OciRepoSpec);
 

@@ -43,7 +43,7 @@ const SourceImageStep = () => {
             name="source.repository"
             label={t('Source repository')}
             repositories={ociRegistries}
-            repoType={RepoSpecType.OCI}
+            repoType={RepoSpecType.RepoSpecTypeOci}
             canCreateRepo={canCreateRepo}
             repoRefetch={refetch}
             isRequired
