@@ -321,7 +321,7 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
   const inlineData: ApplicationProviderSpec = {
     name: app.name,
     appType: app.appType,
-    inline: toInlineFiles(app.files),
+    inline: toAPIFiles(app.files),
     envVars,
     volumes,
   };
@@ -638,11 +638,19 @@ export const getApiConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
 const getAppFormVariables = (envVars: Record<string, string> | undefined) =>
   Object.entries(envVars || {}).map(([varName, varValue]) => ({ name: varName, value: varValue }));
 
-const toInlineFiles = (files: InlineApplicationFileFixed[]) => {
+const toFormFiles = (files: InlineApplicationFileFixed[]) => {
   return files.map((file) => ({
     path: file.path || '',
     content: file.content || '',
     base64: file.contentEncoding === EncodingType.EncodingBase64,
+  }));
+};
+
+const toAPIFiles = (files: ComposeInlineAppForm['files']) => {
+  return files.map((file) => ({
+    path: file.path,
+    content: file.content || '',
+    contentEncoding: file.base64 ? EncodingType.EncodingBase64 : EncodingType.EncodingPlain,
   }));
 };
 
@@ -727,7 +735,7 @@ const createQuadletInlineApp = (
     appType: AppType.AppTypeQuadlet,
     specType: AppSpecType.INLINE,
     name: quadletApp?.name || '',
-    files: toInlineFiles(quadletApp?.inline || []),
+    files: toFormFiles(quadletApp?.inline || []),
     variables: getAppFormVariables(quadletApp?.envVars),
     volumes: convertVolumesToForm(quadletApp?.volumes),
     runAs: quadletApp?.runAs || RUN_AS_DEFAULT_USER,
@@ -754,7 +762,7 @@ const createComposeInlineApp = (
     appType: AppType.AppTypeCompose,
     specType: AppSpecType.INLINE,
     name: composeApp?.name || '',
-    files: toInlineFiles(composeApp?.inline || []),
+    files: toFormFiles(composeApp?.inline || []),
     variables: getAppFormVariables(composeApp?.envVars),
     volumes: convertVolumesToForm(composeApp?.volumes),
   };
