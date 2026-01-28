@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 import { TFunction } from 'i18next';
 import countBy from 'lodash/countBy';
+import yaml from 'js-yaml';
 
 import { AppType, ImagePullPolicy } from '@flightctl/types';
 import { FlightCtlLabel } from '../../types/extraTypes';
@@ -13,6 +14,7 @@ import {
   ComposeInlineAppForm,
   DisruptionBudgetForm,
   GitConfigTemplate,
+  HelmImageAppForm,
   HttpConfigTemplate,
   InlineConfigTemplate,
   KubeSecretTemplate,
@@ -26,6 +28,7 @@ import {
   getAppIdentifier,
   isComposeImageAppForm,
   isGitConfigTemplate,
+  isHelmImageAppForm,
   isHttpConfigTemplate,
   isInlineConfigTemplate,
   isKubeSecretTemplate,
@@ -704,6 +707,36 @@ export const validApplicationsSchema = (t: TFunction) => {
           });
         }
 
+        // Helm applications
+        if (isHelmImageAppForm(value)) {
+          return Yup.object<HelmImageAppForm>().shape({
+            specType: Yup.string()
+              .oneOf([AppSpecType.OCI_IMAGE])
+              .required(t('Definition source must be image for this type of applications')),
+            appType: Yup.string().oneOf([AppType.AppTypeHelm]).required(t('Application type is required')),
+            name: validApplicationAndVolumeName(t),
+            image: Yup.string()
+              .required(t('Image is required.'))
+              .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
+            namespace: Yup.string(),
+            valuesYaml: Yup.string().test('valid-yaml', t('YAML content is invalid.'), (value) => {
+              if (!value || value.trim() === '') {
+                return true;
+              }
+              try {
+                yaml.load(value);
+              } catch (error) {
+                return false;
+              }
+              return true;
+            }),
+            // Values files don't need to be validated.
+            // Since the UX design has the first field added by default, we will ignore all empty values files.
+            // The user can't add more values files if any is empty (though they can clear existing ones).
+            valuesFiles: Yup.array().of(Yup.string()),
+          });
+        }
+
         // Image applications (Quadlet or Compose)
         if (isQuadletImageAppForm(value) || isComposeImageAppForm(value)) {
           return Yup.object<QuadletImageAppForm | ComposeImageAppForm>().shape({
@@ -767,7 +800,7 @@ export const validApplicationsSchema = (t: TFunction) => {
       }
 
       const errors = apps.reduce((errors, app, appIndex) => {
-        if (duplicateIds.includes(appIds[appIndex])) {
+        if (duplicateIds.includes(appIds[appIndex] || '')) {
           const error = app.name
             ? new Yup.ValidationError(t('Application name must be unique.'), '', `applications[${appIndex}].name`)
             : new Yup.ValidationError(

@@ -14,7 +14,6 @@ import {
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import { TFunction } from 'i18next';
 
 import { AppType } from '@flightctl/types';
 import {
@@ -23,6 +22,7 @@ import {
   DeviceSpecConfigFormValues,
   isComposeImageAppForm,
   isComposeInlineAppForm,
+  isHelmImageAppForm,
   isQuadletImageAppForm,
   isQuadletInlineAppForm,
   isSingleContainerAppForm,
@@ -34,18 +34,14 @@ import RadioField from '../../../form/RadioField';
 import ErrorHelperText from '../../../form/FieldHelperText';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
+import { appTypeOptions } from '../../../../utils/apps';
 import ApplicationImageForm from './ApplicationImageForm';
 import ApplicationInlineForm from './ApplicationInlineForm';
 import ApplicationContainerForm from './ApplicationContainerForm';
+import ApplicationHelmForm from './ApplicationHelmForm';
 import ApplicationVolumeForm from './ApplicationVolumeForm';
 
 import './ApplicationsForm.css';
-
-const appTypeOptions = (t: TFunction) => ({
-  [AppType.AppTypeContainer]: t('Single Container application'),
-  [AppType.AppTypeQuadlet]: t('Quadlet application'),
-  [AppType.AppTypeCompose]: t('Compose application'),
-});
 
 const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
@@ -54,11 +50,13 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
   const { appType, specType, name: appName } = app;
 
   const isContainer = isSingleContainerAppForm(app);
+  const isHelm = isHelmImageAppForm(app);
   const isImageIncomplete = !isContainer && specType === AppSpecType.OCI_IMAGE && !('image' in app);
   const isInlineIncomplete = !isContainer && specType === AppSpecType.INLINE && !('files' in app);
   const isContainerIncomplete = isContainer && (!('ports' in app) || !('volumes' in app));
+  const isHelmIncomplete = isHelm && !('valuesFiles' in app);
 
-  const shouldResetApp = isInlineIncomplete || isImageIncomplete || isContainerIncomplete;
+  const shouldResetApp = isInlineIncomplete || isImageIncomplete || isContainerIncomplete || isHelmIncomplete;
 
   // @ts-expect-error Formik error object includes "variables"
   const appVarsError = typeof error?.variables === 'string' ? (error.variables as string) : undefined; // eslint-disable @typescript-eslint/no-unsafe-assignment
@@ -70,7 +68,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
       return;
     }
     // When switching appType to Container, initialize Container-specific fields
-    if (isContainer) {
+    if (appType === AppType.AppTypeContainer) {
       setValue(
         {
           appType: AppType.AppTypeContainer,
@@ -80,6 +78,22 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
           variables: [],
           ports: [],
           volumes: [],
+        } as AppForm,
+        false,
+      );
+      return;
+    }
+
+    if (appType === AppType.AppTypeHelm) {
+      setValue(
+        {
+          appType: AppType.AppTypeHelm,
+          specType: AppSpecType.OCI_IMAGE,
+          name: appName || '',
+          image: '',
+          namespace: undefined,
+          valuesYaml: '',
+          valuesFiles: [''], // We want to show a "values files" field by default
         } as AppForm,
         false,
       );
@@ -114,7 +128,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
         false,
       );
     }
-  }, [shouldResetApp, isContainer, specType, appType, appName, setValue]);
+  }, [shouldResetApp, specType, appType, appName, setValue]);
 
   return (
     <ExpandableFormSection
@@ -133,6 +147,8 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
 
         {isContainer ? (
           <ApplicationContainerForm app={app} index={index} isReadOnly={isReadOnly} />
+        ) : isHelm ? (
+          <ApplicationHelmForm app={app} index={index} isReadOnly={isReadOnly} />
         ) : (
           <>
             <FormGroupWithHelperText
@@ -201,72 +217,76 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
           </>
         )}
 
-        <ApplicationVolumeForm
-          appFieldName={appFieldName}
-          volumes={app.volumes || []}
-          isReadOnly={isReadOnly}
-          isSingleContainerApp={isContainer}
-        />
-        <FieldArray name={`${appFieldName}.variables`}>
-          {({ push, remove }) => (
-            <>
-              {app.variables.map((variable, varIndex) => (
-                <Split hasGutter key={varIndex}>
-                  <SplitItem className="fctl-application-template__variable-name">
-                    <FormGroup label={t('Variable {{ number }}', { number: varIndex + 1 })} />
-                  </SplitItem>
-                  <SplitItem>
-                    <FormGroup label={t('Name')} isRequired>
-                      <TextField
-                        aria-label={t('Name')}
-                        name={`${appFieldName}.variables.${varIndex}.name`}
-                        value={variable.name}
-                        isDisabled={isReadOnly}
-                      />
-                    </FormGroup>
-                  </SplitItem>
-                  <SplitItem isFilled>
-                    <FormGroup label={t('Value')} isRequired>
-                      <TextField
-                        aria-label={t('Value')}
-                        name={`${appFieldName}.variables.${varIndex}.value`}
-                        value={variable.value}
-                        isDisabled={isReadOnly}
-                      />
-                    </FormGroup>
-                  </SplitItem>
+        {!isHelm && (
+          <>
+            <ApplicationVolumeForm
+              appFieldName={appFieldName}
+              volumes={app.volumes || []}
+              isReadOnly={isReadOnly}
+              isSingleContainerApp={isContainer}
+            />
+            <FieldArray name={`${appFieldName}.variables`}>
+              {({ push, remove }) => (
+                <>
+                  {app.variables?.map((variable, varIndex) => (
+                    <Split hasGutter key={varIndex}>
+                      <SplitItem className="fctl-application-template__variable-name">
+                        <FormGroup label={t('Variable {{ number }}', { number: varIndex + 1 })} />
+                      </SplitItem>
+                      <SplitItem>
+                        <FormGroup label={t('Name')} isRequired>
+                          <TextField
+                            aria-label={t('Name')}
+                            name={`${appFieldName}.variables.${varIndex}.name`}
+                            value={variable.name}
+                            isDisabled={isReadOnly}
+                          />
+                        </FormGroup>
+                      </SplitItem>
+                      <SplitItem isFilled>
+                        <FormGroup label={t('Value')} isRequired>
+                          <TextField
+                            aria-label={t('Value')}
+                            name={`${appFieldName}.variables.${varIndex}.value`}
+                            value={variable.value}
+                            isDisabled={isReadOnly}
+                          />
+                        </FormGroup>
+                      </SplitItem>
+                      {!isReadOnly && (
+                        <SplitItem>
+                          <Button
+                            aria-label={t('Delete variable')}
+                            variant="link"
+                            icon={<MinusCircleIcon />}
+                            iconPosition="end"
+                            onClick={() => remove(varIndex)}
+                          />
+                        </SplitItem>
+                      )}
+                    </Split>
+                  ))}
+                  <ErrorHelperText error={appVarsError} />
                   {!isReadOnly && (
-                    <SplitItem>
+                    <FormGroup>
                       <Button
-                        aria-label={t('Delete variable')}
                         variant="link"
-                        icon={<MinusCircleIcon />}
-                        iconPosition="end"
-                        onClick={() => remove(varIndex)}
-                      />
-                    </SplitItem>
+                        style={{ paddingInline: 0 }}
+                        icon={<PlusCircleIcon />}
+                        iconPosition="start"
+                        onClick={() => {
+                          push({ name: '', value: '' });
+                        }}
+                      >
+                        {t('Add an application variable')}
+                      </Button>
+                    </FormGroup>
                   )}
-                </Split>
-              ))}
-              <ErrorHelperText error={appVarsError} />
-              {!isReadOnly && (
-                <FormGroup>
-                  <Button
-                    variant="link"
-                    style={{ paddingInline: 0 }}
-                    icon={<PlusCircleIcon />}
-                    iconPosition="start"
-                    onClick={() => {
-                      push({ name: '', value: '' });
-                    }}
-                  >
-                    {t('Add an application variable')}
-                  </Button>
-                </FormGroup>
+                </>
               )}
-            </>
-          )}
-        </FieldArray>
+            </FieldArray>
+          </>
+        )}
       </Grid>
     </ExpandableFormSection>
   );

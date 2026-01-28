@@ -32,12 +32,15 @@ const InlineApplicationFileForm = ({ file, fileIndex, fileFieldName, isReadOnly 
         <FormGroup label={t('File path on the device (relative)')} isRequired>
           <TextField name={`${fileFieldName}.path`} isDisabled={isReadOnly} />
         </FormGroup>
-        <UploadField
-          label={t('Content')}
-          name={`${fileFieldName}.content`}
-          maxFileBytes={MAX_INLINE_FILE_SIZE_BYTES}
-          isDisabled={isReadOnly}
-        />
+
+        <FormGroup label={t('Content')}>
+          <UploadField
+            ariaLabel={t('Content')}
+            name={`${fileFieldName}.content`}
+            maxFileBytes={MAX_INLINE_FILE_SIZE_BYTES}
+            isDisabled={isReadOnly}
+          />
+        </FormGroup>
 
         <FormGroup>
           <CheckboxField

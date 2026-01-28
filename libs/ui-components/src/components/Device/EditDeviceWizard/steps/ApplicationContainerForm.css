@@ -3,3 +3,15 @@
   border: 1px solid gray !important;
   margin-top: 1rem;
 }
+
+/*
+The tooltip text has the same color as the background, making the text unreadable in light and dark modes.
+ Due to Patternfly targets the tooltip content ([class*='pf-v6-c-content']), just using the CSS variables does not work.
+ */
+.fctl-application-helm-form__tooltip [class*='pf-v6-c-content'] {
+  color: var(--pf-t--global--text--color--300, white);
+}
+
+.pf-v6-theme-dark .fctl-application-helm-form__tooltip [class*='pf-v6-c-content'] {
+  color: var(--pf-t--global--text--color--100, gray);
+}

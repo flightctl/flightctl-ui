@@ -7,7 +7,7 @@ import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 type UploadFieldProps = {
   name: string;
   isRequired?: boolean;
-  label: string;
+  ariaLabel: string;
   isDisabled?: boolean;
   getErrorText?: (error: string) => React.ReactNode | undefined;
   placeholder?: string;
@@ -55,7 +55,7 @@ const UploadHelperText = ({
   return defaultContent;
 };
 
-const UploadField = ({ label, maxFileBytes, isRequired, name }: UploadFieldProps) => {
+const UploadField = ({ ariaLabel, maxFileBytes, isRequired, name }: UploadFieldProps) => {
   const { t } = useTranslation();
   const fieldId = `fileuploadfield-${name}`;
 
@@ -89,7 +89,7 @@ const UploadField = ({ label, maxFileBytes, isRequired, name }: UploadFieldProps
   };
 
   return (
-    <FormGroup fieldId={fieldId} label={label} isRequired={isRequired}>
+    <FormGroup fieldId={fieldId} aria-label={ariaLabel} isRequired={isRequired}>
       <FileUpload
         type="text"
         id={field.name}
@@ -97,6 +97,7 @@ const UploadField = ({ label, maxFileBytes, isRequired, name }: UploadFieldProps
         filenamePlaceholder={t('Drag a file or browse to upload')}
         browseButtonText={t('Browse...')}
         clearButtonText={t('Clear')}
+        allowEditingUploadedText
         style={{ resize: 'vertical' }}
         validated={isValid || isFileUploading ? 'default' : 'error'}
         value={field.value as string}
@@ -131,17 +132,15 @@ const UploadField = ({ label, maxFileBytes, isRequired, name }: UploadFieldProps
   );
 };
 
-const UploadFieldWrapper = ({ name, label, maxFileBytes, isRequired, ...rest }: UploadFieldProps) => {
+const UploadFieldWrapper = ({ name, ariaLabel, maxFileBytes, isRequired, ...rest }: UploadFieldProps) => {
   const [{ value }] = useField<string>(name);
 
   if (rest.isDisabled) {
-    return (
-      <FormGroup label={label} isRequired={isRequired}>
-        <TextArea aria-label={label} name={name} value={value} {...rest} isDisabled />
-      </FormGroup>
-    );
+    return <TextArea aria-label={ariaLabel} name={name} value={value} {...rest} isDisabled />;
   }
-  return <UploadField name={name} label={label} maxFileBytes={maxFileBytes} isRequired={isRequired} {...rest} />;
+  return (
+    <UploadField name={name} ariaLabel={ariaLabel} maxFileBytes={maxFileBytes} isRequired={isRequired} {...rest} />
+  );
 };
 
 export default UploadFieldWrapper;
