@@ -3,15 +3,15 @@ import { Button, Content, Flex, FlexItem, Icon, Stack, StackItem, Title } from '
 import { ActionsColumn, ExpandableRowContent, IAction, OnSelect, Tbody, Td, Tr } from '@patternfly/react-table';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
-import { ImageBuild } from '@flightctl/types/imagebuilder';
+import { ImageBuild, ImageBuildConditionReason } from '@flightctl/types/imagebuilder';
 import { ImageBuildWithExports } from '../../types/extraTypes';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
-import { getImageBuildImage, hasImageBuildFailed } from '../../utils/imageBuilds';
+import { getImageBuildImage, getImageBuildStatusReason } from '../../utils/imageBuilds';
 import { getDateDisplay } from '../../utils/dates';
 import ResourceLink from '../common/ResourceLink';
-import { ImageBuildStatusDisplay } from './ImageBuildAndExportStatus';
 import ImageBuildExportsGallery from './ImageBuildDetails/ImageBuildExportsGallery';
+import { ImageBuildStatusDisplay } from './ImageBuildAndExportStatus';
 
 type ImageBuildRowProps = {
   imageBuild: ImageBuildWithExports;
@@ -37,6 +37,7 @@ const ImageBuildRow = ({
   const [isExpanded, setIsExpanded] = React.useState(false);
 
   const imageBuildName = imageBuild.metadata.name || '';
+  const buildReason = getImageBuildStatusReason(imageBuild);
 
   const actions: IAction[] = [
     {
@@ -48,7 +49,7 @@ const ImageBuildRow = ({
   ];
 
   actions.push({
-    title: hasImageBuildFailed(imageBuild) ? t('Retry') : t('Duplicate'),
+    title: buildReason === ImageBuildConditionReason.ImageBuildConditionReasonFailed ? t('Retry') : t('Duplicate'),
     onClick: () => {
       navigate({ route: ROUTE.IMAGE_BUILD_EDIT, postfix: imageBuildName });
     },
@@ -63,8 +64,6 @@ const ImageBuildRow = ({
 
   const sourceImage = getImageBuildImage(imageBuild.spec.source);
   const destinationImage = getImageBuildImage(imageBuild.spec.destination);
-
-  const hasError = hasImageBuildFailed(imageBuild);
 
   return (
     <Tbody isExpanded={isExpanded}>
@@ -108,7 +107,7 @@ const ImageBuildRow = ({
                       {t('Build information')}
                     </Title>
                   </StackItem>
-                  {hasError && (
+                  {buildReason === ImageBuildConditionReason.ImageBuildConditionReasonFailed && (
                     <Flex alignItems={{ default: 'alignItemsCenter' }}>
                       <FlexItem>
                         <Icon status="danger">

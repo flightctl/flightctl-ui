@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
 
+import { ImageBuildConditionReason } from '@flightctl/types/imagebuilder';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { getImageBuildStatusReason } from '../../../utils/imageBuilds';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
 import DeleteImageBuildModal from '../DeleteImageBuildModal/DeleteImageBuildModal';
@@ -17,7 +19,6 @@ import ImageBuildYaml from './ImageBuildYaml';
 import ImageBuildDetailsTab from './ImageBuildDetailsTab';
 import ImageBuildExportsGallery from './ImageBuildExportsGallery';
 import ImageBuildLogsTab from './ImageBuildLogsTab';
-import { hasImageBuildFailed } from '../../../utils/imageBuilds';
 
 const imageBuildDetailsPermissions = [
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.CREATE },
@@ -36,7 +37,7 @@ const ImageBuildDetailsPageContent = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>();
   const { checkPermissions } = usePermissionsContext();
   const [canCreate, canDelete] = checkPermissions(imageBuildDetailsPermissions);
-  const hasFailed = imageBuild ? hasImageBuildFailed(imageBuild) : false;
+  const buildReason = imageBuild ? getImageBuildStatusReason(imageBuild) : undefined;
 
   return (
     <DetailsPage
@@ -60,7 +61,9 @@ const ImageBuildDetailsPageContent = () => {
             <DropdownList>
               {canCreate && (
                 <DropdownItem onClick={() => navigate({ route: ROUTE.IMAGE_BUILD_EDIT, postfix: imageBuildId })}>
-                  {hasFailed ? t('Retry') : t('Duplicate')}
+                  {buildReason === ImageBuildConditionReason.ImageBuildConditionReasonFailed
+                    ? t('Retry')
+                    : t('Duplicate')}
                 </DropdownItem>
               )}
               {canDelete && (

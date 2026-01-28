@@ -71,65 +71,41 @@ export const getImageReference = (
   return `${registryUrl}/${imageTarget.imageName}:${imageTarget.imageTag}`;
 };
 
-export const hasImageBuildFailed = (imageBuild: ImageBuild): boolean => {
+export const getImageBuildStatusReason = (imageBuild: ImageBuild): ImageBuildConditionReason => {
   const readyCondition = imageBuild.status?.conditions?.find(
     (c) => c.type === ImageBuildConditionType.ImageBuildConditionTypeReady,
   );
-  return readyCondition?.reason === ImageBuildConditionReason.ImageBuildConditionReasonFailed;
-};
-
-export const shouldHaveImageBuildLogs = (imageBuild: ImageBuild): boolean => {
-  const readyCondition = imageBuild.status?.conditions?.find(
-    (c) => c.type === ImageBuildConditionType.ImageBuildConditionTypeReady,
-  );
-  if (!readyCondition) {
-    return true;
-  }
-
   return (
-    readyCondition.reason === ImageBuildConditionReason.ImageBuildConditionReasonPending ||
-    readyCondition.reason === ImageBuildConditionReason.ImageBuildConditionReasonBuilding ||
-    readyCondition.reason === ImageBuildConditionReason.ImageBuildConditionReasonPushing
+    (readyCondition?.reason as ImageBuildConditionReason) || ImageBuildConditionReason.ImageBuildConditionReasonPending
   );
 };
 
-export const isImageBuildComplete = (imageBuild: ImageBuild): boolean => {
-  const readyCondition = imageBuild.status?.conditions?.find(
-    (c) => c.type === ImageBuildConditionType.ImageBuildConditionTypeReady,
-  );
-  if (!readyCondition) {
-    return false;
-  }
-
-  return readyCondition.reason === ImageBuildConditionReason.ImageBuildConditionReasonCompleted;
-};
-
-export const shouldHaveImageExportLogs = (imageExport: ImageExport): boolean => {
-  const exportReadyCondition = imageExport.status?.conditions?.find(
-    (c) => c.type === ImageExportConditionType.ImageExportConditionTypeReady,
-  );
-  if (!exportReadyCondition) {
-    return true;
-  }
-  return (
-    exportReadyCondition.reason === ImageExportConditionReason.ImageExportConditionReasonPending ||
-    exportReadyCondition.reason === ImageExportConditionReason.ImageExportConditionReasonConverting ||
-    exportReadyCondition.reason === ImageExportConditionReason.ImageExportConditionReasonPushing
-  );
-};
-
-export const isImageExportFailed = (imageExport: ImageExport): boolean => {
+export const getImageExportStatusReason = (imageExport: ImageExport): ImageExportConditionReason => {
   const readyCondition = imageExport.status?.conditions?.find(
     (c) => c.type === ImageExportConditionType.ImageExportConditionTypeReady,
   );
-  return readyCondition?.reason === ImageExportConditionReason.ImageExportConditionReasonFailed;
+  return (
+    (readyCondition?.reason as ImageExportConditionReason) ||
+    ImageExportConditionReason.ImageExportConditionReasonPending
+  );
 };
 
-export const isImageExportCompleted = (imageExport: ImageExport): boolean => {
-  const readyCondition = imageExport.status?.conditions?.find(
-    (c) => c.type === ImageExportConditionType.ImageExportConditionTypeReady,
+export const isImageBuildActiveReason = (reason: ImageBuildConditionReason): boolean => {
+  return (
+    reason === ImageBuildConditionReason.ImageBuildConditionReasonPending ||
+    reason === ImageBuildConditionReason.ImageBuildConditionReasonBuilding ||
+    reason === ImageBuildConditionReason.ImageBuildConditionReasonPushing ||
+    reason === ImageBuildConditionReason.ImageBuildConditionReasonCanceling
   );
-  return readyCondition?.reason === ImageExportConditionReason.ImageExportConditionReasonCompleted;
+};
+
+export const isImageExportActiveReason = (reason: ImageExportConditionReason): boolean => {
+  return (
+    reason === ImageExportConditionReason.ImageExportConditionReasonPending ||
+    reason === ImageExportConditionReason.ImageExportConditionReasonConverting ||
+    reason === ImageExportConditionReason.ImageExportConditionReasonPushing ||
+    reason === ImageExportConditionReason.ImageExportConditionReasonCanceling
+  );
 };
 
 const isDownloadResultRedirect = (response: Response): boolean => {
