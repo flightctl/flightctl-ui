@@ -22,14 +22,13 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 
-import { ExportFormatType } from '@flightctl/types/imagebuilder';
+import { ExportFormatType, ImageBuildConditionReason, ImageExportConditionReason } from '@flightctl/types/imagebuilder';
 import { useTranslation } from '../../../hooks/useTranslation';
 import {
-  hasImageBuildFailed,
-  isImageBuildComplete,
-  isImageExportFailed,
-  shouldHaveImageBuildLogs,
-  shouldHaveImageExportLogs,
+  getImageBuildStatusReason,
+  getImageExportStatusReason,
+  isImageBuildActiveReason,
+  isImageExportActiveReason,
 } from '../../../utils/imageBuilds';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
 import { LogResourceType, useImageBuildLogs } from '../useImageBuildLogs';
@@ -41,7 +40,7 @@ type LogEntity = {
   id: string;
   label: string;
   isActive: boolean;
-  isFailed: boolean;
+  status: ImageBuildConditionReason | ImageExportConditionReason;
 };
 
 const getExportFormatText = (t: TFunction, format: ExportFormatType) => {
@@ -57,19 +56,29 @@ const getExportFormatText = (t: TFunction, format: ExportFormatType) => {
   }
 };
 
-const ImageBuildAndExportLogStatus = ({ isActive, isFailed }: { isActive: boolean; isFailed: boolean }) => {
+const ImageBuildAndExportLogStatus = ({
+  status,
+}: {
+  status: ImageBuildConditionReason | ImageExportConditionReason;
+}) => {
   const { t } = useTranslation();
   let label: string;
   let level: StatusLevel;
-  if (isFailed) {
-    level = 'danger';
-    label = t('Failed');
-  } else if (isActive) {
-    level = 'info';
-    label = t('In progress');
-  } else {
+  if (status === ImageBuildConditionReason.ImageBuildConditionReasonCompleted) {
     level = 'success';
     label = t('Completed');
+  } else if (status === ImageBuildConditionReason.ImageBuildConditionReasonFailed) {
+    level = 'danger';
+    label = t('Failed');
+  } else if (
+    status === ImageBuildConditionReason.ImageBuildConditionReasonCanceling ||
+    status === ImageBuildConditionReason.ImageBuildConditionReasonCanceled
+  ) {
+    level = 'warning';
+    label = t('Canceled');
+  } else {
+    level = 'info';
+    label = t('In progress');
   }
   return <StatusDisplayContent label={label} level={level} />;
 };
@@ -82,16 +91,18 @@ const ImageBuildLogsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }
   const { selectableEntities, hasExports } = React.useMemo(() => {
     const entities: LogEntity[] = [];
     const buildName = imageBuild.metadata.name as string;
+
+    const buildReason = getImageBuildStatusReason(imageBuild);
     entities.push({
       type: LogResourceType.BUILD,
       id: buildName,
       label: buildName,
-      isActive: shouldHaveImageBuildLogs(imageBuild),
-      isFailed: hasImageBuildFailed(imageBuild),
+      isActive: isImageBuildActiveReason(buildReason),
+      status: buildReason,
     });
 
     // ImageExports can only exist once the ImageBuild is complete
-    if (!isImageBuildComplete(imageBuild)) {
+    if (buildReason !== ImageBuildConditionReason.ImageBuildConditionReasonCompleted) {
       return { selectableEntities: entities, availableExportFormats: [] as ExportFormatType[], failedExportsCount: 0 };
     }
 
@@ -99,14 +110,14 @@ const ImageBuildLogsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }
     imageBuild.imageExports.forEach((ie) => {
       const format = ie?.spec.format;
       if (format) {
-        const isFailed = isImageExportFailed(ie);
+        const exportReason = getImageExportStatusReason(ie);
         hasExports = true;
         entities.push({
           type: LogResourceType.EXPORT,
           id: ie.metadata.name as string,
           label: getExportFormatText(t, format),
-          isActive: shouldHaveImageExportLogs(ie),
-          isFailed,
+          isActive: isImageExportActiveReason(exportReason),
+          status: exportReason,
         });
       }
     });
@@ -237,7 +248,7 @@ const ImageBuildLogsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }
             </ToolbarGroup>
             <ToolbarGroup align={{ default: 'alignEnd' }}>
               <ToolbarItem>
-                <ImageBuildAndExportLogStatus isActive={selectedEntity.isActive} isFailed={selectedEntity.isFailed} />
+                <ImageBuildAndExportLogStatus status={selectedEntity.status} />
               </ToolbarItem>
             </ToolbarGroup>
           </ToolbarContent>
