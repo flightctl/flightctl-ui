@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Trans } from 'react-i18next';
 import {
   Alert,
   Card,
@@ -53,6 +54,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
   );
 
   const isEarlyBinding = values.bindingType === BindingType.BindingTypeEarly;
+  const remoteAccessUsername = values.userConfiguration?.enabled ? values.userConfiguration?.username || '' : '';
 
   return (
     <Stack hasGutter>
@@ -169,6 +171,16 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
                       </FlexItem>
                       <FlexItem>{t('Cloud-init and ignition are enabled automatically')}</FlexItem>
                     </Flex>
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+              )}
+              {remoteAccessUsername && (
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('Remote access')}</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <Trans t={t}>
+                      Enabled for <strong>{remoteAccessUsername}</strong>
+                    </Trans>
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               )}

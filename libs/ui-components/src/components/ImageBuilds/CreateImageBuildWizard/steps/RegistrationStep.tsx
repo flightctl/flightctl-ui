@@ -52,19 +52,11 @@ const RegistrationStep = () => {
   };
 
   const handleRemoteAccessToggle = (enabled: boolean) => {
-    if (enabled) {
-      // Ensure userConfiguration object exists
-      if (!values.userConfiguration) {
-        setFieldValue('userConfiguration', { username: '', publickey: '', enabled: true });
-      } else {
-        setFieldValue('userConfiguration.enabled', true);
-      }
-    } else {
-      // Clear userConfiguration when disabled
-      setFieldValue('userConfiguration.username', '');
-      setFieldValue('userConfiguration.publickey', '');
-      setFieldValue('userConfiguration.enabled', false);
+    if (enabled && !values.userConfiguration) {
+      setFieldValue('userConfiguration', { username: '', publickey: '', enabled: true });
+      return;
     }
+    setFieldValue('userConfiguration.enabled', enabled);
   };
 
   return (
@@ -177,7 +169,9 @@ const RegistrationStep = () => {
                 helperText={t('The username for the user account')}
               />
             </FormGroup>
-            <UploadField name="userConfiguration.publickey" label={t('Public key')} />
+            <FormGroup label={t('SSH public key')} fieldId="user-config-publickey">
+              <UploadField name="userConfiguration.publickey" ariaLabel={t('SSH public key')} />
+            </FormGroup>
           </CheckboxField>
           <Content component="small">
             {t('Paste the content of an SSH public key you want to use to connect to the device.')}

@@ -2,13 +2,10 @@ import * as React from 'react';
 import { TFunction } from 'react-i18next';
 import {
   Alert,
-  Badge,
   Bullseye,
   Card,
   CardBody,
   Divider,
-  Flex,
-  FlexItem,
   MenuContent,
   MenuGroup,
   MenuItem,
@@ -82,7 +79,7 @@ const ImageBuildLogsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }
   const [isLogSelectOpen, setIsLogSelectOpen] = React.useState(false);
   const logsRef = React.useRef<HTMLTextAreaElement>(null);
 
-  const { selectableEntities, hasExports, failedExportsCount } = React.useMemo(() => {
+  const { selectableEntities, hasExports } = React.useMemo(() => {
     const entities: LogEntity[] = [];
     const buildName = imageBuild.metadata.name as string;
     entities.push({
@@ -98,15 +95,11 @@ const ImageBuildLogsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }
       return { selectableEntities: entities, availableExportFormats: [] as ExportFormatType[], failedExportsCount: 0 };
     }
 
-    let failedExportsCount = 0;
     let hasExports = false;
     imageBuild.imageExports.forEach((ie) => {
       const format = ie?.spec.format;
       if (format) {
         const isFailed = isImageExportFailed(ie);
-        if (isFailed) {
-          failedExportsCount++;
-        }
         hasExports = true;
         entities.push({
           type: LogResourceType.EXPORT,
@@ -119,7 +112,6 @@ const ImageBuildLogsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }
     });
     return {
       selectableEntities: entities,
-      failedExportsCount,
       hasExports,
     };
   }, [imageBuild, t]);
@@ -191,24 +183,7 @@ const ImageBuildLogsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }
                       onClick={() => setIsLogSelectOpen(!isLogSelectOpen)}
                       isExpanded={isLogSelectOpen}
                     >
-                      <Flex alignItems={{ default: 'alignItemsCenter' }} spaceItems={{ default: 'spaceItemsSm' }}>
-                        <FlexItem>{selectedEntity.label}</FlexItem>
-                        {selectedEntity.type === LogResourceType.EXPORT && failedExportsCount > 0 && (
-                          <FlexItem>
-                            <Badge
-                              isRead={false}
-                              style={
-                                {
-                                  '--pf-v6-c-badge--BackgroundColor':
-                                    'var(--pf-t--global--icon--color--status--danger--default, #c9190b)',
-                                } as React.CSSProperties
-                              }
-                            >
-                              {failedExportsCount}
-                            </Badge>
-                          </FlexItem>
-                        )}
-                      </Flex>
+                      {selectedEntity.label}
                     </MenuToggle>
                   )}
                   shouldFocusToggleOnSelect

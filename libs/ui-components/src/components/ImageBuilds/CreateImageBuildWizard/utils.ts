@@ -151,10 +151,13 @@ export const getImageBuildResource = (values: ImageBuildFormValues): ImageBuild 
     },
   };
 
-  if (values.userConfiguration?.username && values.userConfiguration?.publickey) {
+  // Allow the user to uncheck the toggle without having cleared the fields
+  const username = values.userConfiguration?.username || '';
+  const publickey = values.userConfiguration?.publickey || '';
+  if (values.userConfiguration?.enabled && username && publickey) {
     spec.userConfiguration = {
-      username: values.userConfiguration.username,
-      publickey: values.userConfiguration.publickey,
+      username,
+      publickey,
     };
   }
 
