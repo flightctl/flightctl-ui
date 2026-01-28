@@ -11,4 +11,6 @@ export enum ImageExportConditionReason {
   ImageExportConditionReasonPushing = 'Pushing',
   ImageExportConditionReasonCompleted = 'Completed',
   ImageExportConditionReasonFailed = 'Failed',
+  ImageExportConditionReasonCanceling = 'Canceling',
+  ImageExportConditionReasonCanceled = 'Canceled',
 }
