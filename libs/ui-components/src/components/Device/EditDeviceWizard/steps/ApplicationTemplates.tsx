@@ -41,6 +41,7 @@ import ApplicationInlineForm from './ApplicationInlineForm';
 import ApplicationContainerForm from './ApplicationContainerForm';
 import ApplicationHelmForm from './ApplicationHelmForm';
 import ApplicationVolumeForm from './ApplicationVolumeForm';
+import ApplicationIntegritySettings from './ApplicationIntegritySettings';
 
 import './ApplicationsForm.css';
 
@@ -52,6 +53,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
 
   const isContainer = isSingleContainerAppForm(app);
   const isHelm = isHelmImageAppForm(app);
+  const isQuadlet = isQuadletImageAppForm(app) || isQuadletInlineAppForm(app);
   const isImageIncomplete = !isContainer && specType === AppSpecType.OCI_IMAGE && !('image' in app);
   const isInlineIncomplete = !isContainer && specType === AppSpecType.INLINE && !('files' in app);
   const isContainerIncomplete = isContainer && (!('ports' in app) || !('volumes' in app));
@@ -156,6 +158,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
             {(isQuadletInlineAppForm(app) || isComposeInlineAppForm(app)) && (
               <ApplicationInlineForm app={app} index={index} isReadOnly={isReadOnly} />
             )}
+            {isQuadlet && <ApplicationIntegritySettings index={index} isReadOnly={isReadOnly} />}
           </>
         )}
 
