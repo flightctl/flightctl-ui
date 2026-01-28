@@ -9,6 +9,7 @@ import ErrorHelperText from '../../../form/FieldHelperText';
 import { isDuplicatePortMapping, isValidPortMapping, validatePortNumber } from '../../../form/validations';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { PortMapping, SingleContainerAppForm } from '../../../../types/deviceSpec';
+import ApplicationIntegritySettings from './ApplicationIntegritySettings';
 
 import './ApplicationContainerForm.css';
 
@@ -24,6 +25,7 @@ const ApplicationContainerForm = ({
   const { t } = useTranslation();
   const appFieldName = `applications[${index}]`;
   const [{ value: ports }, , { setValue: setPorts, setTouched }] = useField<PortMapping[]>(`${appFieldName}.ports`);
+
   const [hostPort, setHostPort] = React.useState('');
   const [containerPort, setContainerPort] = React.useState('');
   const [hostPortTouched, setHostPortTouched] = React.useState(false);
@@ -293,6 +295,7 @@ const ApplicationContainerForm = ({
           </FormGroupWithHelperText>
         </Grid>
       </FormGroup>
+      <ApplicationIntegritySettings index={index} isReadOnly={isReadOnly} />
     </Grid>
   );
 };

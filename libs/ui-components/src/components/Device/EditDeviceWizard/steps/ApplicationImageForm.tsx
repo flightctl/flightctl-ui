@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Grid } from '@patternfly/react-core';
 
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
@@ -20,22 +21,25 @@ const ApplicationImageForm = ({
   const createAppLink = useAppLinks('createApp');
 
   return (
-    <FormGroupWithHelperText
-      label={t('Image')}
-      content={
-        <span>
-          {t('The application image. Learn how to create one')} <LearnMoreLink text={t('here')} link={createAppLink} />
-        </span>
-      }
-      isRequired
-    >
-      <TextField
-        aria-label={t('Image')}
-        name={`applications.${index}.image`}
-        value={app.image || ''}
-        isDisabled={isReadOnly}
-      />
-    </FormGroupWithHelperText>
+    <Grid hasGutter>
+      <FormGroupWithHelperText
+        label={t('Image')}
+        content={
+          <span>
+            {t('The application image. Learn how to create one')}{' '}
+            <LearnMoreLink text={t('here')} link={createAppLink} />
+          </span>
+        }
+        isRequired
+      >
+        <TextField
+          aria-label={t('Image')}
+          name={`applications.${index}.image`}
+          value={app.image || ''}
+          isDisabled={isReadOnly}
+        />
+      </FormGroupWithHelperText>
+    </Grid>
   );
 };
 

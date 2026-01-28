@@ -13,6 +13,9 @@ import {
 import { ApplicationProviderSpecFixed, FlightCtlLabel } from './extraTypes';
 import { UpdateScheduleMode } from '../utils/time';
 
+export const RUN_AS_DEFAULT_USER = 'flightctl';
+export const RUN_AS_ROOT_USER = 'root';
+
 export enum ConfigType {
   GIT = 'git',
   HTTP = 'http',
@@ -63,12 +66,14 @@ export type SingleContainerAppForm = AppBase & {
   image: string;
   ports?: PortMapping[];
   limits?: ApplicationResourceLimits;
+  runAs?: string;
 };
 
 export type QuadletImageAppForm = AppBase & {
   appType: AppType.AppTypeQuadlet;
   specType: AppSpecType.OCI_IMAGE;
   image: string;
+  runAs?: string;
 };
 
 export type QuadletInlineAppForm = AppBase & {
@@ -76,6 +81,7 @@ export type QuadletInlineAppForm = AppBase & {
   specType: AppSpecType.INLINE;
   name: string; // transforms the field in required
   files: InlineContent[];
+  runAs?: string;
 };
 
 export type ComposeImageAppForm = AppBase & {

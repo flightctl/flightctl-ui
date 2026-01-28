@@ -28,12 +28,15 @@ import {
   ConfigSourceProvider,
   ConfigType,
   GitConfigTemplate,
+  HelmImageAppForm,
   HttpConfigTemplate,
   InlineConfigTemplate,
   KubeSecretTemplate,
   PortMapping,
   QuadletImageAppForm,
   QuadletInlineAppForm,
+  RUN_AS_DEFAULT_USER,
+  SingleContainerAppForm,
   SpecConfigTemplate,
   SystemdUnitFormValue,
   isComposeImageAppForm,
@@ -47,9 +50,10 @@ import {
   isKubeProviderSpec,
   isKubeSecretTemplate,
   isQuadletImageAppForm,
+  isQuadletInlineAppForm,
   isSingleContainerAppForm,
 } from '../../../types/deviceSpec';
-import { ApplicationProviderSpecFixed, InlineApplicationFileFixed } from '../../../types/extraTypes';
+import { InlineApplicationFileFixed } from '../../../types/extraTypes';
 
 const DEFAULT_INLINE_FILE_MODE = 420; // In Octal: 0644
 const DEFAULT_INLINE_FILE_USER = 'root';
@@ -293,6 +297,7 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
         limits: appLimits,
       };
     }
+    data.runAs = app.runAs || RUN_AS_DEFAULT_USER;
     return data;
   }
 
@@ -306,23 +311,24 @@ export const toAPIApplication = (app: AppForm): ApplicationProviderSpec => {
     if (app.name) {
       data.name = app.name;
     }
+    if (isQuadletImageAppForm(app) && app.runAs) {
+      data.runAs = app.runAs;
+    }
     return data;
   }
 
   // Inline applications (Quadlet or Compose)
-  return {
+  const inlineData: ApplicationProviderSpec = {
     name: app.name,
     appType: app.appType,
-    inline: app.files.map(
-      (file): InlineApplicationFileFixed => ({
-        path: file.path,
-        content: file.content || '',
-        contentEncoding: file.base64 ? EncodingType.EncodingBase64 : EncodingType.EncodingPlain,
-      }),
-    ),
+    inline: toAPIFiles(app.files),
     envVars,
     volumes,
   };
+  if (isQuadletInlineAppForm(app) && app.runAs) {
+    inlineData.runAs = app.runAs;
+  }
+  return inlineData;
 };
 
 const hasInlineApplicationChanged = (
@@ -344,6 +350,15 @@ const hasInlineApplicationChanged = (
   if (filesChanged) {
     return true;
   }
+
+  // Check runAs for Quadlet inline apps
+  if (isQuadletInlineAppForm(updatedApp)) {
+    const currentAppWithRunAs = currentApp as InlineApplicationProviderSpec & { runAs?: string };
+    if ((currentAppWithRunAs.runAs || RUN_AS_DEFAULT_USER) !== (updatedApp.runAs || RUN_AS_DEFAULT_USER)) {
+      return true;
+    }
+  }
+
   return !areVolumesEqual(currentApp.volumes || [], updatedApp.volumes || []);
 };
 
@@ -445,6 +460,9 @@ const hasSingleContainerAppChanged = (currentApp: ApplicationProviderSpec, updat
     return true;
   }
 
+  if ((imageApp.runAs || RUN_AS_DEFAULT_USER) !== (updatedApp.runAs || RUN_AS_DEFAULT_USER)) {
+    return true;
+  }
   return !areVolumesEqual(imageApp.volumes || [], updatedApp.volumes || []);
 };
 
@@ -499,6 +517,13 @@ const hasApplicationChanged = (currentApp: ApplicationProviderSpec, updatedApp: 
     const updatedImageApp = updatedApp as QuadletImageAppForm | ComposeImageAppForm;
     if (imageApp.image !== updatedImageApp.image) {
       return true;
+    }
+
+    // Check runAs for Quadlet image apps
+    if (isQuadletImageAppForm(updatedApp)) {
+      if ((currentApp.runAs || RUN_AS_DEFAULT_USER) !== (updatedApp.runAs || RUN_AS_DEFAULT_USER)) {
+        return true;
+      }
     }
 
     return !areVolumesEqual(imageApp.volumes || [], updatedApp.volumes || []);
@@ -610,8 +635,24 @@ export const getApiConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
   };
 };
 
-const getAppFormVariables = (app: ApplicationProviderSpecFixed) =>
-  Object.entries(app.envVars || {}).map(([varName, varValue]) => ({ name: varName, value: varValue }));
+const getAppFormVariables = (envVars: Record<string, string> | undefined) =>
+  Object.entries(envVars || {}).map(([varName, varValue]) => ({ name: varName, value: varValue }));
+
+const toFormFiles = (files: InlineApplicationFileFixed[]) => {
+  return files.map((file) => ({
+    path: file.path || '',
+    content: file.content || '',
+    base64: file.contentEncoding === EncodingType.EncodingBase64,
+  }));
+};
+
+const toAPIFiles = (files: ComposeInlineAppForm['files']) => {
+  return files.map((file) => ({
+    path: file.path,
+    content: file.content || '',
+    contentEncoding: file.base64 ? EncodingType.EncodingBase64 : EncodingType.EncodingPlain,
+  }));
+};
 
 const convertVolumesToForm = (volumes?: ApplicationVolume[]) => {
   if (!volumes) return [];
@@ -630,73 +671,144 @@ const convertVolumesToForm = (volumes?: ApplicationVolume[]) => {
   });
 };
 
+const createContainerApp = (
+  containerApp: (ApplicationProviderSpec & ImageApplicationProviderSpec) | undefined,
+): SingleContainerAppForm => {
+  const ports =
+    containerApp?.ports?.map((portString) => {
+      const [hostPort, containerPort] = portString.split(':');
+      return { hostPort: hostPort || '', containerPort: containerPort || '' };
+    }) || [];
+
+  const limits = containerApp?.resources?.limits;
+  return {
+    appType: AppType.AppTypeContainer,
+    specType: AppSpecType.OCI_IMAGE,
+    name: containerApp?.name || '',
+    image: containerApp?.image || '',
+    variables: getAppFormVariables(containerApp?.envVars),
+    volumes: convertVolumesToForm(containerApp?.volumes),
+    ports,
+    limits: limits
+      ? {
+          cpu: limits.cpu || '',
+          memory: limits.memory || '',
+        }
+      : undefined,
+    runAs: containerApp?.runAs || RUN_AS_DEFAULT_USER,
+  };
+};
+
+const createHelmApp = (
+  helmApp: (ApplicationProviderSpec & ImageApplicationProviderSpec) | undefined,
+): HelmImageAppForm => {
+  const values = helmApp?.values || {};
+  return {
+    appType: AppType.AppTypeHelm,
+    specType: AppSpecType.OCI_IMAGE,
+    name: helmApp?.name || '',
+    image: helmApp?.image || '',
+    namespace: helmApp?.namespace,
+    valuesYaml: Object.keys(values).length > 0 ? yaml.dump(values) : '',
+    valuesFiles: helmApp?.valuesFiles || [''],
+  };
+};
+
+const createQuadletImageApp = (
+  quadletApp: (ApplicationProviderSpec & ImageApplicationProviderSpec) | undefined,
+): QuadletImageAppForm => {
+  return {
+    appType: AppType.AppTypeQuadlet,
+    specType: AppSpecType.OCI_IMAGE,
+    name: quadletApp?.name || '',
+    image: quadletApp?.image || '',
+    variables: getAppFormVariables(quadletApp?.envVars),
+    volumes: convertVolumesToForm(quadletApp?.volumes),
+    runAs: quadletApp?.runAs || RUN_AS_DEFAULT_USER,
+  };
+};
+
+const createQuadletInlineApp = (
+  quadletApp: (ApplicationProviderSpec & InlineApplicationProviderSpec) | undefined,
+): QuadletInlineAppForm => {
+  return {
+    appType: AppType.AppTypeQuadlet,
+    specType: AppSpecType.INLINE,
+    name: quadletApp?.name || '',
+    files: toFormFiles(quadletApp?.inline || []),
+    variables: getAppFormVariables(quadletApp?.envVars),
+    volumes: convertVolumesToForm(quadletApp?.volumes),
+    runAs: quadletApp?.runAs || RUN_AS_DEFAULT_USER,
+  };
+};
+
+const createComposeImageApp = (
+  composeApp: (ApplicationProviderSpec & ImageApplicationProviderSpec) | undefined,
+): ComposeImageAppForm => {
+  return {
+    appType: AppType.AppTypeCompose,
+    specType: AppSpecType.OCI_IMAGE,
+    name: composeApp?.name || '',
+    image: composeApp?.image || '',
+    variables: getAppFormVariables(composeApp?.envVars),
+    volumes: convertVolumesToForm(composeApp?.volumes),
+  };
+};
+
+const createComposeInlineApp = (
+  composeApp: (ApplicationProviderSpec & InlineApplicationProviderSpec) | undefined,
+): ComposeInlineAppForm => {
+  return {
+    appType: AppType.AppTypeCompose,
+    specType: AppSpecType.INLINE,
+    name: composeApp?.name || '',
+    files: toFormFiles(composeApp?.inline || []),
+    variables: getAppFormVariables(composeApp?.envVars),
+    volumes: convertVolumesToForm(composeApp?.volumes),
+  };
+};
+
+export const createInitialAppForm = (appType: AppType, specType: AppSpecType, name: string = ''): AppForm => {
+  let app: AppForm;
+  switch (appType) {
+    case AppType.AppTypeContainer:
+      app = createContainerApp(undefined);
+      break;
+    case AppType.AppTypeHelm:
+      app = createHelmApp(undefined);
+      break;
+    case AppType.AppTypeQuadlet:
+      app = specType === AppSpecType.OCI_IMAGE ? createQuadletImageApp(undefined) : createQuadletInlineApp(undefined);
+      break;
+    case AppType.AppTypeCompose:
+      app = specType === AppSpecType.OCI_IMAGE ? createComposeImageApp(undefined) : createComposeInlineApp(undefined);
+      break;
+  }
+  app.name = name;
+  return app;
+};
+
 export const getApplicationValues = (deviceSpec?: DeviceSpec): AppForm[] => {
   const apps = deviceSpec?.applications || [];
   return apps.map((app) => {
     if (!app.appType) {
       throw new Error('Application appType is required');
     }
-    // Single container application
-    if (app.appType === AppType.AppTypeContainer && isImageAppProvider(app)) {
-      const imageApp = app as ImageApplicationProviderSpec;
-      const ports =
-        imageApp.ports?.map((portString) => {
-          const [hostPort, containerPort] = portString.split(':');
-          return { hostPort: hostPort || '', containerPort: containerPort || '' };
-        }) || [];
 
-      return {
-        appType: AppType.AppTypeContainer,
-        specType: AppSpecType.OCI_IMAGE,
-        name: app.name || '',
-        image: app.image,
-        variables: getAppFormVariables(app),
-        volumes: convertVolumesToForm(app.volumes),
-        ports,
-        limits: imageApp.resources?.limits
-          ? {
-              cpu: imageApp.resources.limits.cpu || '',
-              memory: imageApp.resources.limits.memory || '',
-            }
-          : undefined,
-      };
+    switch (app.appType) {
+      case AppType.AppTypeContainer:
+        return createContainerApp(app as ApplicationProviderSpec & ImageApplicationProviderSpec);
+      case AppType.AppTypeHelm:
+        return createHelmApp(app as ApplicationProviderSpec & ImageApplicationProviderSpec);
+      case AppType.AppTypeQuadlet:
+        return isImageAppProvider(app)
+          ? createQuadletImageApp(app)
+          : createQuadletInlineApp(app as ApplicationProviderSpec & InlineApplicationProviderSpec & { runAs?: string });
+      case AppType.AppTypeCompose:
+        return isImageAppProvider(app)
+          ? createComposeImageApp(app)
+          : createComposeInlineApp(app as ApplicationProviderSpec & InlineApplicationProviderSpec);
     }
-
-    // Helm application
-    if (app.appType === AppType.AppTypeHelm && isImageAppProvider(app)) {
-      return {
-        appType: AppType.AppTypeHelm,
-        specType: AppSpecType.OCI_IMAGE,
-        name: app.name || '',
-        image: app.image,
-        namespace: app.namespace,
-        valuesYaml: app.values && Object.keys(app.values).length > 0 ? yaml.dump(app.values) : undefined,
-        valuesFiles: app.valuesFiles || [''],
-      };
-    }
-
-    // Compose or Quadlet image application
-    if (isImageAppProvider(app)) {
-      return {
-        appType: app.appType,
-        specType: AppSpecType.OCI_IMAGE,
-        name: app.name || '',
-        image: app.image,
-        variables: getAppFormVariables(app),
-        volumes: convertVolumesToForm(app.volumes),
-      } as QuadletImageAppForm | ComposeImageAppForm;
-    }
-
-    // Compose or Quadlet inline application
-    const inlineApp = app as InlineApplicationProviderSpec;
-    return {
-      appType: app.appType,
-      specType: AppSpecType.INLINE,
-      name: app.name || '',
-      files: inlineApp.inline,
-      variables: getAppFormVariables(app),
-      volumes: convertVolumesToForm(app.volumes),
-    } as QuadletInlineAppForm | ComposeInlineAppForm;
   });
 };
 
