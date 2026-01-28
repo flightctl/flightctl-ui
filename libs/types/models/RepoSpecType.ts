@@ -6,7 +6,7 @@
  * RepoSpecType is the type of the repository.
  */
 export enum RepoSpecType {
-  GIT = 'git',
-  HTTP = 'http',
-  OCI = 'oci',
+  RepoSpecTypeGit = 'git',
+  RepoSpecTypeHttp = 'http',
+  RepoSpecTypeOci = 'oci',
 }

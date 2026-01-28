@@ -2,6 +2,7 @@ import * as Yup from 'yup';
 import { TFunction } from 'i18next';
 import {
   DockerAuth,
+  GitRepoSpec,
   HttpConfig,
   HttpRepoSpec,
   OciAuthType,
@@ -12,7 +13,6 @@ import {
   RepositorySpec,
   ResourceSync,
   SshConfig,
-  SshRepoSpec,
 } from '@flightctl/types';
 
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
@@ -30,22 +30,427 @@ const pathRegex = /\/.+/;
 const jwtTokenRegexp = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
 
 export const isHttpRepoSpec = (repoSpec: RepositorySpec): repoSpec is HttpRepoSpec =>
-  !!(repoSpec['httpConfig'] || (repoSpec as HttpRepoSpec).validationSuffix);
-export const isSshRepoSpec = (repoSpec: RepositorySpec): repoSpec is SshRepoSpec => !!repoSpec['sshConfig'];
-export const isOciRepoSpec = (repoSpec: RepositorySpec): repoSpec is OciRepoSpec => repoSpec.type === RepoSpecType.OCI;
+  repoSpec.type === RepoSpecType.RepoSpecTypeHttp;
+export const isGitRepoSpec = (repoSpec: RepositorySpec): repoSpec is GitRepoSpec =>
+  repoSpec.type === RepoSpecType.RepoSpecTypeGit;
+export const isOciRepoSpec = (repoSpec: RepositorySpec): repoSpec is OciRepoSpec =>
+  repoSpec.type === RepoSpecType.RepoSpecTypeOci;
+
+export const hasCredentialsSettings = (repoSpec: RepositorySpec): boolean => {
+  // The credentials settings can be in different fields depending on the repository type
+  if ('sshConfig' in repoSpec) {
+    return Boolean(repoSpec.sshConfig?.sshPrivateKey);
+  } else if ('httpConfig' in repoSpec) {
+    return Boolean(
+      repoSpec.httpConfig?.password || repoSpec.httpConfig?.['tls.crt'] || repoSpec.httpConfig?.['tls.key'],
+    );
+  } else if ('ociAuth' in repoSpec) {
+    return Boolean(repoSpec.ociAuth);
+  }
+  return false;
+};
+
+const addHttpConfigPatches = (
+  patches: PatchRequest,
+  values: RepositoryFormValues,
+  httpConfig: HttpConfig | undefined,
+) => {
+  // If httpConfig doesn't exist, create it as a whole object
+  if (!httpConfig) {
+    const value: HttpConfig = {
+      skipServerVerification: values.httpConfig?.skipServerVerification,
+    };
+
+    if (values.httpConfig?.caCrt && !value.skipServerVerification) {
+      value['ca.crt'] = btoa(values.httpConfig.caCrt);
+    }
+
+    if (values.httpConfig?.basicAuth?.use) {
+      value.password = values.httpConfig.basicAuth.password;
+      value.username = values.httpConfig.basicAuth.username;
+    }
+    if (values.httpConfig?.mTlsAuth?.use) {
+      if (values.httpConfig.mTlsAuth.tlsCrt) {
+        value['tls.crt'] = btoa(values.httpConfig.mTlsAuth.tlsCrt);
+      }
+      if (values.httpConfig.mTlsAuth.tlsKey) {
+        value['tls.key'] = btoa(values.httpConfig.mTlsAuth.tlsKey);
+      }
+    }
+    if (values.httpConfig?.token) {
+      value.token = values.httpConfig.token;
+    }
+    patches.push({
+      op: 'add',
+      path: '/spec/httpConfig',
+      value,
+    });
+    return;
+  }
+
+  // httpConfig exists, patch individual properties
+  appendJSONPatch({
+    patches,
+    newValue: values.httpConfig?.skipServerVerification,
+    originalValue: httpConfig?.skipServerVerification,
+    path: '/spec/httpConfig/skipServerVerification',
+  });
+  if (values.httpConfig?.skipServerVerification) {
+    if (httpConfig?.['ca.crt']) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/httpConfig/ca.crt',
+      });
+    }
+  } else {
+    const caCrt = values.httpConfig?.caCrt;
+    appendJSONPatch({
+      patches,
+      newValue: caCrt ? btoa(caCrt) : caCrt,
+      originalValue: httpConfig?.['ca.crt'],
+      path: '/spec/httpConfig/ca.crt',
+    });
+  }
+
+  if (!values.httpConfig?.basicAuth?.use) {
+    if (httpConfig?.password) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/httpConfig/password',
+      });
+    }
+    if (httpConfig?.username) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/httpConfig/username',
+      });
+    }
+  } else {
+    appendJSONPatch({
+      patches,
+      newValue: values.httpConfig?.basicAuth.password,
+      originalValue: httpConfig?.password,
+      path: '/spec/httpConfig/password',
+    });
+    appendJSONPatch({
+      patches,
+      newValue: values.httpConfig?.basicAuth.username,
+      originalValue: httpConfig?.username,
+      path: '/spec/httpConfig/username',
+    });
+  }
+
+  if (!values.httpConfig?.mTlsAuth?.use) {
+    if (httpConfig?.['tls.crt']) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/httpConfig/tls.crt',
+      });
+    }
+    if (httpConfig?.['tls.key']) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/httpConfig/tls.key',
+      });
+    }
+  } else {
+    appendJSONPatch({
+      patches,
+      newValue: values.httpConfig?.mTlsAuth.tlsCrt,
+      originalValue: httpConfig?.['tls.crt'],
+      path: '/spec/httpConfig/tls.crt',
+      encodeB64: true,
+    });
+    appendJSONPatch({
+      patches,
+      newValue: values.httpConfig?.mTlsAuth.tlsKey,
+      originalValue: httpConfig?.['tls.key'],
+      path: '/spec/httpConfig/tls.key',
+      encodeB64: true,
+    });
+  }
+
+  if (!values.httpConfig?.token) {
+    if (httpConfig?.token) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/httpConfig/token',
+      });
+    }
+  } else {
+    appendJSONPatch({
+      patches,
+      newValue: values.httpConfig?.token,
+      originalValue: httpConfig?.token,
+      path: '/spec/httpConfig/token',
+    });
+  }
+};
+
+const getHttpRepositoryPatches = (values: RepositoryFormValues, repoSpec: HttpRepoSpec): PatchRequest => {
+  const patches: PatchRequest = [];
+
+  appendJSONPatch({
+    patches,
+    newValue: values.url,
+    originalValue: repoSpec.url,
+    path: '/spec/url',
+  });
+
+  if (!values.useAdvancedConfig) {
+    if (repoSpec.validationSuffix) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/validationSuffix',
+      });
+    }
+    patches.push({
+      op: 'remove',
+      path: '/spec/httpConfig',
+    });
+    return patches;
+  }
+
+  // The rest of the fields are part of advanced settings
+  appendJSONPatch({
+    patches,
+    newValue: values.validationSuffix,
+    originalValue: repoSpec.validationSuffix,
+    path: '/spec/validationSuffix',
+  });
+
+  addHttpConfigPatches(patches, values, repoSpec.httpConfig);
+
+  return patches;
+};
+
+const getOciRepositoryPatches = (values: RepositoryFormValues, repoSpec: OciRepoSpec): PatchRequest => {
+  const formOciConfig = values.ociConfig;
+  if (!formOciConfig) {
+    return [];
+  }
+
+  const patches: PatchRequest = [];
+  appendJSONPatch({
+    patches,
+    newValue: formOciConfig.registry,
+    originalValue: repoSpec.registry,
+    path: '/spec/registry',
+  });
+  appendJSONPatch({
+    patches,
+    newValue: formOciConfig.scheme || OciRepoSpec.scheme.HTTPS,
+    originalValue: repoSpec.scheme,
+    path: '/spec/scheme',
+  });
+
+  appendJSONPatch({
+    patches,
+    newValue: formOciConfig.accessMode || OciRepoSpec.accessMode.READ,
+    originalValue: repoSpec.accessMode,
+    path: '/spec/accessMode',
+  });
+
+  if (!values.useAdvancedConfig) {
+    if (repoSpec.ociAuth) {
+      patches.push({ op: 'remove', path: '/spec/ociAuth' });
+    }
+    if (repoSpec['ca.crt']) {
+      patches.push({ op: 'remove', path: '/spec/ca.crt' });
+    }
+    if (repoSpec.skipServerVerification !== undefined) {
+      patches.push({ op: 'remove', path: '/spec/skipServerVerification' });
+    }
+    return patches;
+  }
+
+  appendJSONPatch({
+    patches,
+    newValue: formOciConfig.skipServerVerification,
+    originalValue: repoSpec.skipServerVerification,
+    path: '/spec/skipServerVerification',
+  });
+
+  if (formOciConfig.skipServerVerification && repoSpec['ca.crt']) {
+    patches.push({ op: 'remove', path: '/spec/ca.crt' });
+  } else {
+    const caCrt = formOciConfig.caCrt;
+    appendJSONPatch({
+      patches,
+      newValue: caCrt ? btoa(caCrt) : caCrt,
+      originalValue: repoSpec['ca.crt'],
+      path: '/spec/ca.crt',
+    });
+  }
+
+  const ociAuth = formOciConfig.ociAuth;
+  if (ociAuth?.use && ociAuth.username && ociAuth.password) {
+    if (!repoSpec.ociAuth) {
+      const ociAuthValue: DockerAuth = {
+        authType: OciAuthType.DOCKER,
+        username: ociAuth.username,
+        password: ociAuth.password,
+      };
+      patches.push({
+        op: 'add',
+        path: '/spec/ociAuth',
+        value: ociAuthValue,
+      });
+    } else {
+      if (ociAuth.username !== repoSpec.ociAuth.username) {
+        appendJSONPatch({
+          patches,
+          newValue: ociAuth.username,
+          originalValue: repoSpec.ociAuth.username,
+          path: '/spec/ociAuth/username',
+        });
+      }
+
+      if (ociAuth.password !== repoSpec.ociAuth.password) {
+        appendJSONPatch({
+          patches,
+          newValue: ociAuth.password,
+          originalValue: repoSpec.ociAuth.password,
+          path: '/spec/ociAuth/password',
+        });
+      }
+    }
+  } else if (repoSpec.ociAuth) {
+    patches.push({ op: 'remove', path: '/spec/ociAuth' });
+  }
+  return patches;
+};
+
+const getGitRepositoryPatches = (values: RepositoryFormValues, gitRepoSpec: GitRepoSpec): PatchRequest => {
+  const patches: PatchRequest = [];
+
+  appendJSONPatch({
+    patches,
+    newValue: values.url,
+    originalValue: gitRepoSpec.url,
+    path: '/spec/url',
+  });
+
+  if (!values.useAdvancedConfig) {
+    if (gitRepoSpec.httpConfig) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/httpConfig',
+      });
+    }
+    if (gitRepoSpec.sshConfig) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/sshConfig',
+      });
+    }
+    return patches;
+  }
+
+  // Determine which config is being used based on form values (configType)
+  const usingHttpConfig = values.configType === 'http';
+  const usingSshConfig = values.configType === 'ssh';
+
+  if (usingHttpConfig) {
+    // Switching from SSH to HTTP or editing HTTP config
+    if (gitRepoSpec.sshConfig) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/sshConfig',
+      });
+    }
+
+    addHttpConfigPatches(patches, values, gitRepoSpec.httpConfig);
+  } else if (usingSshConfig) {
+    // Switching from HTTP to SSH or editing SSH config
+    if (gitRepoSpec.httpConfig) {
+      patches.push({
+        op: 'remove',
+        path: '/spec/httpConfig',
+      });
+    }
+
+    const sshConfig = gitRepoSpec.sshConfig;
+    // If sshConfig doesn't exist, create it as a whole object
+    if (!sshConfig) {
+      const value: SshConfig = {
+        privateKeyPassphrase: values.sshConfig?.privateKeyPassphrase,
+        skipServerVerification: values.sshConfig?.skipServerVerification,
+      };
+      if (values.sshConfig?.sshPrivateKey) {
+        value.sshPrivateKey = btoa(values.sshConfig.sshPrivateKey);
+      }
+
+      patches.push({
+        op: 'add',
+        path: '/spec/sshConfig',
+        value,
+      });
+    } else {
+      // sshConfig exists, patch individual properties
+      appendJSONPatch({
+        patches,
+        newValue: values.sshConfig?.privateKeyPassphrase,
+        originalValue: sshConfig?.privateKeyPassphrase,
+        path: '/spec/sshConfig/privateKeyPassphrase',
+      });
+
+      appendJSONPatch({
+        patches,
+        newValue: values.sshConfig?.skipServerVerification,
+        originalValue: sshConfig?.skipServerVerification,
+        path: '/spec/sshConfig/skipServerVerification',
+      });
+
+      appendJSONPatch({
+        patches,
+        newValue: values.sshConfig?.sshPrivateKey,
+        originalValue: sshConfig?.sshPrivateKey,
+        path: '/spec/sshConfig/sshPrivateKey',
+        encodeB64: true,
+      });
+    }
+  }
+  return patches;
+};
+
+/**
+ * Converts HttpConfig from the repository spec to form values format
+ */
+export const httpConfigToFormValues = (httpConfig?: HttpConfig): RepositoryFormValues['httpConfig'] => {
+  if (!httpConfig) {
+    return undefined;
+  }
+
+  return {
+    caCrt: httpConfig['ca.crt'] ? atob(httpConfig['ca.crt']) : undefined,
+    basicAuth: {
+      username: httpConfig.username,
+      password: httpConfig.password,
+      use: !!httpConfig.username || !!httpConfig.password,
+    },
+    mTlsAuth: {
+      tlsCrt: httpConfig['tls.crt'],
+      tlsKey: httpConfig['tls.key'],
+      use: !!httpConfig['tls.crt'] || !!httpConfig['tls.key'],
+    },
+    skipServerVerification: httpConfig.skipServerVerification,
+    token: httpConfig.token,
+  };
+};
 
 export const getRepoUrlOrRegistry = (repoSpec: RepositorySpec): string => {
-  if (isOciRepoSpec(repoSpec)) {
+  if (repoSpec.type === RepoSpecType.RepoSpecTypeOci) {
     return repoSpec.registry || '';
   }
   return repoSpec.url || '';
 };
 
-export const getRepoTypeLabel = (t: TFunction, repoType: RepoSpecType): string => {
+export const getRepoTypeLabel = (t: TFunction, repoType: RepositorySpec['type']): string => {
   switch (repoType) {
-    case RepoSpecType.HTTP:
+    case RepoSpecType.RepoSpecTypeHttp:
       return t('HTTP service');
-    case RepoSpecType.OCI:
+    case RepoSpecType.RepoSpecTypeOci:
       return t('OCI registry');
     default:
       return t('Git repository');
@@ -68,8 +473,9 @@ export const getInitValues = ({
   const configAllowsResourceSyncs = options?.canUseResourceSyncs ?? true;
 
   if (!repository) {
-    const selectedRepoType = options?.allowedRepoTypes?.length === 1 ? options.allowedRepoTypes[0] : RepoSpecType.GIT;
-    const canUseRSs = selectedRepoType === RepoSpecType.GIT && configAllowsResourceSyncs;
+    const selectedRepoType =
+      options?.allowedRepoTypes?.length === 1 ? options.allowedRepoTypes[0] : RepoSpecType.RepoSpecTypeGit;
+    const canUseRSs = selectedRepoType === RepoSpecType.RepoSpecTypeGit && configAllowsResourceSyncs;
 
     const initValues: RepositoryFormValues = {
       exists: false,
@@ -91,7 +497,7 @@ export const getInitValues = ({
       ],
     };
 
-    if (selectedRepoType === RepoSpecType.OCI) {
+    if (selectedRepoType === RepoSpecType.RepoSpecTypeOci) {
       initValues.ociConfig = {
         registry: '',
         scheme: OciRepoSpec.scheme.HTTPS,
@@ -102,13 +508,13 @@ export const getInitValues = ({
     return initValues;
   }
 
-  const canUseRSs = repository.spec.type === RepoSpecType.GIT && configAllowsResourceSyncs;
+  const canUseRSs = repository.spec.type === RepoSpecType.RepoSpecTypeGit && configAllowsResourceSyncs;
 
   const formValues: RepositoryFormValues = {
     exists: true,
     name: repository.metadata.name || '',
-    url: isOciRepoSpec(repository.spec) ? '' : repository.spec.url || '',
-    repoType: repository.spec.type,
+    url: repository.spec.type === RepoSpecType.RepoSpecTypeOci ? '' : repository.spec.url || '',
+    repoType: repository.spec.type as RepoSpecType,
     validationSuffix: 'validationSuffix' in repository.spec ? repository.spec.validationSuffix : '',
     allowedRepoTypes: options?.allowedRepoTypes,
     showRepoTypes: options?.showRepoTypes ?? true,
@@ -128,7 +534,7 @@ export const getInitValues = ({
       : [{ name: '', path: '', targetRevision: '' }],
   };
 
-  if (isOciRepoSpec(repository.spec)) {
+  if (repository.spec.type === RepoSpecType.RepoSpecTypeOci) {
     formValues.useAdvancedConfig = !!(
       repository.spec.ociAuth ||
       repository.spec['ca.crt'] ||
@@ -148,32 +554,30 @@ export const getInitValues = ({
       caCrt: repository.spec['ca.crt'] ? atob(repository.spec['ca.crt']) : undefined,
       skipServerVerification: repository.spec.skipServerVerification,
     };
-  } else if (isHttpRepoSpec(repository.spec)) {
-    formValues.useAdvancedConfig = true;
+  } else if (repository.spec.type === RepoSpecType.RepoSpecTypeHttp) {
     formValues.configType = 'http';
-    formValues.httpConfig = {
-      caCrt: repository.spec.httpConfig['ca.crt'] ? atob(repository.spec.httpConfig['ca.crt']) : undefined,
-      basicAuth: {
-        username: repository.spec.httpConfig.username,
-        password: repository.spec.httpConfig.password,
-        use: !!repository.spec.httpConfig.username || !!repository.spec.httpConfig.password,
-      },
-      mTlsAuth: {
-        tlsCrt: repository.spec.httpConfig['tls.crt'],
-        tlsKey: repository.spec.httpConfig['tls.key'],
-        use: !!repository.spec.httpConfig['tls.crt'] || !!repository.spec.httpConfig['tls.key'],
-      },
-      skipServerVerification: repository.spec.httpConfig.skipServerVerification,
-      token: repository.spec.httpConfig.token,
-    };
-  } else if (isSshRepoSpec(repository.spec)) {
-    formValues.useAdvancedConfig = true;
-    formValues.configType = 'ssh';
-    formValues.sshConfig = {
-      privateKeyPassphrase: repository.spec.sshConfig.privateKeyPassphrase,
-      skipServerVerification: repository.spec.sshConfig.skipServerVerification,
-      sshPrivateKey: repository.spec.sshConfig.sshPrivateKey,
-    };
+    formValues.validationSuffix = repository.spec.validationSuffix;
+
+    const valuesHttpConfig = httpConfigToFormValues(repository.spec.httpConfig);
+    if (valuesHttpConfig) {
+      formValues.httpConfig = valuesHttpConfig;
+    }
+    formValues.useAdvancedConfig = !!formValues.httpConfig || !!formValues.validationSuffix;
+  } else if (repository.spec.type === RepoSpecType.RepoSpecTypeGit) {
+    const gitRepoSpec = repository.spec;
+    if (gitRepoSpec.httpConfig) {
+      formValues.configType = 'http';
+      formValues.useAdvancedConfig = true;
+      formValues.httpConfig = httpConfigToFormValues(gitRepoSpec.httpConfig);
+    } else if (gitRepoSpec.sshConfig) {
+      formValues.configType = 'ssh';
+      formValues.useAdvancedConfig = true;
+      formValues.sshConfig = {
+        privateKeyPassphrase: gitRepoSpec.sshConfig.privateKeyPassphrase,
+        skipServerVerification: gitRepoSpec.sshConfig.skipServerVerification,
+        sshPrivateKey: gitRepoSpec.sshConfig.sshPrivateKey,
+      };
+    }
   }
 
   return formValues;
@@ -192,321 +596,20 @@ export const getRepositoryPatches = (values: RepositoryFormValues, repository: R
     ];
   }
 
-  const patches: PatchRequest = [];
-
-  // Handle OCI repository patches first
-  if (values.repoType === RepoSpecType.OCI) {
-    const ociRepoSpec = repository.spec as OciRepoSpec;
-    if (values.ociConfig) {
-      appendJSONPatch({
-        patches,
-        newValue: values.ociConfig.registry,
-        originalValue: ociRepoSpec.registry,
-        path: '/spec/registry',
-      });
-
-      if (!values.useAdvancedConfig) {
-        if (ociRepoSpec.ociAuth) {
-          patches.push({ op: 'remove', path: '/spec/ociAuth' });
-        }
-        if (ociRepoSpec['ca.crt']) {
-          patches.push({ op: 'remove', path: '/spec/ca.crt' });
-        }
-        if (ociRepoSpec.skipServerVerification !== undefined) {
-          patches.push({ op: 'remove', path: '/spec/skipServerVerification' });
-        }
-        if (ociRepoSpec.scheme) {
-          patches.push({ op: 'remove', path: '/spec/scheme' });
-        }
-        if (ociRepoSpec.accessMode) {
-          patches.push({ op: 'remove', path: '/spec/accessMode' });
-        }
-        return patches;
-      }
-
-      appendJSONPatch({
-        patches,
-        newValue: values.ociConfig.scheme || OciRepoSpec.scheme.HTTPS,
-        originalValue: ociRepoSpec.scheme,
-        path: '/spec/scheme',
-      });
-
-      appendJSONPatch({
-        patches,
-        newValue: values.ociConfig.accessMode || OciRepoSpec.accessMode.READ,
-        originalValue: ociRepoSpec.accessMode,
-        path: '/spec/accessMode',
-      });
-
-      appendJSONPatch({
-        patches,
-        newValue: values.ociConfig.skipServerVerification,
-        originalValue: ociRepoSpec.skipServerVerification,
-        path: '/spec/skipServerVerification',
-      });
-
-      if (values.ociConfig.skipServerVerification && ociRepoSpec['ca.crt']) {
-        patches.push({ op: 'remove', path: '/spec/ca.crt' });
-      } else {
-        const caCrt = values.ociConfig.caCrt;
-        appendJSONPatch({
-          patches,
-          newValue: caCrt ? btoa(caCrt) : caCrt,
-          originalValue: ociRepoSpec['ca.crt'],
-          path: '/spec/ca.crt',
-        });
-      }
-
-      const ociAuth = values.ociConfig.ociAuth;
-      if (ociAuth?.use && ociAuth.username && ociAuth.password) {
-        const ociAuthValue: DockerAuth = {
-          authType: OciAuthType.DOCKER,
-          username: ociAuth.username,
-          password: ociAuth.password,
-        };
-        appendJSONPatch({
-          patches,
-          newValue: ociAuthValue,
-          originalValue: ociRepoSpec.ociAuth,
-          path: '/spec/ociAuth',
-        });
-      } else if (ociRepoSpec.ociAuth) {
-        patches.push({ op: 'remove', path: '/spec/ociAuth' });
-      }
-    }
-    return patches;
+  // Otherwise, we have the same type of repository, and we must patch only the fields that changed
+  if (values.repoType === RepoSpecType.RepoSpecTypeOci) {
+    return getOciRepositoryPatches(values, repository.spec as OciRepoSpec);
   }
 
-  // Handle Git/Http repository patches
-  if ('url' in repository.spec) {
-    appendJSONPatch({
-      patches,
-      newValue: values.url,
-      originalValue: repository.spec.url,
-      path: '/spec/url',
-    });
+  if (values.repoType === RepoSpecType.RepoSpecTypeHttp) {
+    return getHttpRepositoryPatches(values, repository.spec as HttpRepoSpec);
   }
 
-  if (!values.useAdvancedConfig) {
-    if (isHttpRepoSpec(repository.spec)) {
-      patches.push({
-        op: 'remove',
-        path: '/spec/httpConfig',
-      });
-      patches.push({
-        op: 'remove',
-        path: '/spec/validationSuffix',
-      });
-    }
-    if (isSshRepoSpec(repository.spec)) {
-      patches.push({
-        op: 'remove',
-        path: '/spec/sshConfig',
-      });
-    }
-    return patches;
+  if (values.repoType === RepoSpecType.RepoSpecTypeGit) {
+    return getGitRepositoryPatches(values, repository.spec as GitRepoSpec);
   }
 
-  if (values.configType === 'http') {
-    if (isSshRepoSpec(repository.spec)) {
-      patches.push({
-        op: 'remove',
-        path: '/spec/sshConfig',
-      });
-    }
-    if (!isHttpRepoSpec(repository.spec)) {
-      const value: HttpConfig = {
-        skipServerVerification: values.httpConfig?.skipServerVerification,
-      };
-
-      if (values.httpConfig?.caCrt && !value.skipServerVerification) {
-        value['ca.crt'] = btoa(values.httpConfig.caCrt);
-      }
-
-      if (values.httpConfig?.basicAuth?.use) {
-        value.password = values.httpConfig.basicAuth.password;
-        value.username = values.httpConfig.basicAuth.username;
-      }
-      if (values.httpConfig?.mTlsAuth?.use) {
-        if (values.httpConfig.mTlsAuth.tlsCrt) {
-          value['tls.crt'] = btoa(values.httpConfig.mTlsAuth.tlsCrt);
-        }
-        if (values.httpConfig.mTlsAuth.tlsKey) {
-          value['tls.key'] = btoa(values.httpConfig.mTlsAuth.tlsKey);
-        }
-      }
-      if (values.httpConfig?.token) {
-        value.token = values.httpConfig.token;
-      }
-      patches.push({
-        op: 'add',
-        path: '/spec/httpConfig',
-        value,
-      });
-      appendJSONPatch({
-        patches,
-        newValue: values.validationSuffix,
-        originalValue: undefined,
-        path: '/spec/validationSuffix',
-      });
-    } else {
-      appendJSONPatch({
-        patches,
-        newValue: values.repoType === RepoSpecType.HTTP ? values.validationSuffix : undefined,
-        originalValue: repository.spec.validationSuffix,
-        path: '/spec/validationSuffix',
-      });
-
-      appendJSONPatch({
-        patches,
-        newValue: values.httpConfig?.skipServerVerification,
-        originalValue: repository.spec.httpConfig.skipServerVerification,
-        path: '/spec/httpConfig/skipServerVerification',
-      });
-      if (values.httpConfig?.skipServerVerification) {
-        if (repository.spec.httpConfig['ca.crt']) {
-          patches.push({
-            op: 'remove',
-            path: '/spec/httpConfig/ca.crt',
-          });
-        }
-      } else {
-        const caCrt = values.httpConfig?.caCrt;
-        appendJSONPatch({
-          patches,
-          newValue: caCrt ? btoa(caCrt) : caCrt,
-          originalValue: repository.spec.httpConfig['ca.crt'],
-          path: '/spec/httpConfig/ca.crt',
-        });
-      }
-
-      if (!values.httpConfig?.basicAuth?.use) {
-        if (repository.spec.httpConfig.password) {
-          patches.push({
-            op: 'remove',
-            path: '/spec/httpConfig/password',
-          });
-        }
-        if (repository.spec.httpConfig.username) {
-          patches.push({
-            op: 'remove',
-            path: '/spec/httpConfig/username',
-          });
-        }
-      } else {
-        appendJSONPatch({
-          patches,
-          newValue: values.httpConfig?.basicAuth.password,
-          originalValue: repository.spec.httpConfig.password,
-          path: '/spec/httpConfig/password',
-        });
-        appendJSONPatch({
-          patches,
-          newValue: values.httpConfig?.basicAuth.username,
-          originalValue: repository.spec.httpConfig.username,
-          path: '/spec/httpConfig/username',
-        });
-      }
-
-      if (!values.httpConfig?.mTlsAuth?.use) {
-        if (repository.spec.httpConfig['tls.crt']) {
-          patches.push({
-            op: 'remove',
-            path: '/spec/httpConfig/tls.crt',
-          });
-        }
-        if (repository.spec.httpConfig['tls.key']) {
-          patches.push({
-            op: 'remove',
-            path: '/spec/httpConfig/tls.key',
-          });
-        }
-      } else {
-        appendJSONPatch({
-          patches,
-          newValue: values.httpConfig?.mTlsAuth.tlsCrt,
-          originalValue: repository.spec.httpConfig['tls.crt'],
-          path: '/spec/httpConfig/tls.crt',
-          encodeB64: true,
-        });
-        appendJSONPatch({
-          patches,
-          newValue: values.httpConfig?.mTlsAuth.tlsKey,
-          originalValue: repository.spec.httpConfig['tls.key'],
-          path: '/spec/httpConfig/tls.key',
-          encodeB64: true,
-        });
-      }
-
-      if (!values.httpConfig?.token) {
-        if (repository.spec.httpConfig.token) {
-          patches.push({
-            op: 'remove',
-            path: '/spec/httpConfig/token',
-          });
-        }
-      } else {
-        appendJSONPatch({
-          patches,
-          newValue: values.httpConfig?.token,
-          originalValue: repository.spec.httpConfig.token,
-          path: '/spec/httpConfig/token',
-        });
-      }
-    }
-  } else if (values.configType === 'ssh') {
-    if (isHttpRepoSpec(repository.spec)) {
-      patches.push({
-        op: 'remove',
-        path: '/spec/httpConfig',
-      });
-      if (repository.spec.validationSuffix) {
-        patches.push({
-          op: 'remove',
-          path: '/spec/validationSuffix',
-        });
-      }
-    }
-    if (!isSshRepoSpec(repository.spec)) {
-      const value: SshConfig = {
-        privateKeyPassphrase: values.sshConfig?.privateKeyPassphrase,
-        skipServerVerification: values.sshConfig?.skipServerVerification,
-      };
-      if (values.sshConfig?.sshPrivateKey) {
-        value.sshPrivateKey = btoa(values.sshConfig.sshPrivateKey);
-      }
-
-      patches.push({
-        op: 'add',
-        path: '/spec/sshConfig',
-        value,
-      });
-    } else {
-      appendJSONPatch({
-        patches,
-        newValue: values.sshConfig?.privateKeyPassphrase,
-        originalValue: repository.spec.sshConfig.privateKeyPassphrase,
-        path: '/spec/sshConfig/privateKeyPassphrase',
-      });
-
-      appendJSONPatch({
-        patches,
-        newValue: values.sshConfig?.skipServerVerification,
-        originalValue: repository.spec.sshConfig.skipServerVerification,
-        path: '/spec/sshConfig/skipServerVerification',
-      });
-
-      appendJSONPatch({
-        patches,
-        newValue: values.sshConfig?.sshPrivateKey,
-        originalValue: repository.spec.sshConfig.sshPrivateKey,
-        path: '/spec/sshConfig/sshPrivateKey',
-        encodeB64: true,
-      });
-    }
-  }
-
-  return patches;
+  return [];
 };
 
 export const getResourceSyncEditPatch = (rs: ResourceSyncFormValue) => {
@@ -604,7 +707,7 @@ export const repositorySchema =
       resourceSyncs: values.useResourceSyncs ? repoSyncSchema(t, values.resourceSyncs) : Yup.array(),
     };
 
-    if (values.repoType === RepoSpecType.OCI) {
+    if (values.repoType === RepoSpecType.RepoSpecTypeOci) {
       return Yup.object({
         ...baseSchema,
         url: Yup.string(),
@@ -631,7 +734,7 @@ export const repositorySchema =
     return Yup.object({
       ...baseSchema,
       url: Yup.string().when('repoType', {
-        is: (repoType: RepoSpecType) => repoType === RepoSpecType.GIT,
+        is: (repoType: RepoSpecType) => repoType === RepoSpecType.RepoSpecTypeGit,
         then: () =>
           Yup.string()
             .matches(
@@ -651,10 +754,10 @@ export const repositorySchema =
   };
 
 export const getRepository = (values: Omit<RepositoryFormValues, 'useResourceSyncs' | 'resourceSyncs'>): Repository => {
-  if (values.repoType === RepoSpecType.OCI && values.ociConfig) {
+  if (values.repoType === RepoSpecType.RepoSpecTypeOci && values.ociConfig) {
     const ociRepoSpec: OciRepoSpec = {
       registry: values.ociConfig.registry,
-      type: RepoSpecType.OCI,
+      type: RepoSpecType.RepoSpecTypeOci,
       scheme: values.ociConfig.scheme || OciRepoSpec.scheme.HTTPS,
       accessMode: values.ociConfig.accessMode || OciRepoSpec.accessMode.READ,
     };
@@ -685,57 +788,91 @@ export const getRepository = (values: Omit<RepositoryFormValues, 'useResourceSyn
     };
   }
 
-  const spec: RepositorySpec = {
-    url: values.url,
-    type: values.repoType,
-  };
-  if (values.configType === 'http' && values.validationSuffix) {
-    const httpRepoSpec = spec as HttpRepoSpec;
-    httpRepoSpec.validationSuffix = values.validationSuffix;
-    // httpConfig must be included as "validationSuffix" is only allowed for HttpRepoSpec
-    httpRepoSpec.httpConfig = {
-      skipServerVerification: false,
+  let spec: GitRepoSpec | HttpRepoSpec;
+
+  if (values.repoType === RepoSpecType.RepoSpecTypeGit) {
+    spec = {
+      url: values.url,
+      type: RepoSpecType.RepoSpecTypeGit,
+    };
+  } else {
+    spec = {
+      url: values.url,
+      type: RepoSpecType.RepoSpecTypeHttp,
     };
   }
 
-  if (values.configType === 'http' && values.httpConfig) {
-    const httpRepoSpec = spec as HttpRepoSpec;
-    httpRepoSpec.httpConfig = {
-      skipServerVerification: values.httpConfig.skipServerVerification,
-    };
-    const caCrt = values.httpConfig.caCrt;
-    if (caCrt && !values.httpConfig.skipServerVerification) {
-      httpRepoSpec.httpConfig['ca.crt'] = btoa(caCrt);
-    }
-    if (values.httpConfig.basicAuth?.use) {
-      httpRepoSpec.httpConfig.username = values.httpConfig.basicAuth.username;
-      httpRepoSpec.httpConfig.password = values.httpConfig.basicAuth.password;
+  // Handle config based on repository type
+  if (spec.type === RepoSpecType.RepoSpecTypeHttp) {
+    if (values.validationSuffix) {
+      spec.httpConfig = {
+        skipServerVerification: false,
+      };
+      spec.validationSuffix = values.validationSuffix;
     }
 
-    if (values.httpConfig.mTlsAuth?.use) {
-      const tlsCrt = values.httpConfig.mTlsAuth.tlsCrt;
-      if (tlsCrt) {
-        httpRepoSpec.httpConfig['tls.crt'] = btoa(tlsCrt);
+    if (values.httpConfig) {
+      spec.httpConfig = {
+        skipServerVerification: values.httpConfig.skipServerVerification,
+      };
+      const caCrt = values.httpConfig.caCrt;
+      if (caCrt && !values.httpConfig.skipServerVerification) {
+        spec.httpConfig['ca.crt'] = btoa(caCrt);
       }
-      const tlsKey = values.httpConfig.mTlsAuth.tlsKey;
-      if (tlsKey) {
-        httpRepoSpec.httpConfig['tls.key'] = btoa(tlsKey);
+      if (values.httpConfig.basicAuth?.use) {
+        spec.httpConfig.username = values.httpConfig.basicAuth.username;
+        spec.httpConfig.password = values.httpConfig.basicAuth.password;
+      }
+
+      if (values.httpConfig.mTlsAuth?.use) {
+        const tlsCrt = values.httpConfig.mTlsAuth.tlsCrt;
+        if (tlsCrt) {
+          spec.httpConfig['tls.crt'] = btoa(tlsCrt);
+        }
+        const tlsKey = values.httpConfig.mTlsAuth.tlsKey;
+        if (tlsKey) {
+          spec.httpConfig['tls.key'] = btoa(tlsKey);
+        }
+      }
+      if (values.httpConfig.token) {
+        spec.httpConfig.token = values.httpConfig.token;
       }
     }
-    if (spec.type === RepoSpecType.HTTP && values.httpConfig.token) {
-      httpRepoSpec.httpConfig.token = values.httpConfig.token;
-    }
-  } else if (values.configType === 'ssh' && values.sshConfig) {
-    const sshRepoSpec = spec as SshRepoSpec;
+  } else if (spec.type === RepoSpecType.RepoSpecTypeGit) {
+    if (values.configType === 'http' && values.httpConfig) {
+      spec.httpConfig = {
+        skipServerVerification: values.httpConfig.skipServerVerification,
+      };
+      const caCrt = values.httpConfig.caCrt;
+      if (caCrt && !values.httpConfig.skipServerVerification) {
+        spec.httpConfig['ca.crt'] = btoa(caCrt);
+      }
+      if (values.httpConfig.basicAuth?.use) {
+        spec.httpConfig.username = values.httpConfig.basicAuth.username;
+        spec.httpConfig.password = values.httpConfig.basicAuth.password;
+      }
 
-    sshRepoSpec.sshConfig = {
-      privateKeyPassphrase: values.sshConfig.privateKeyPassphrase,
-      skipServerVerification: values.sshConfig.skipServerVerification,
-    };
+      if (values.httpConfig.mTlsAuth?.use) {
+        const tlsCrt = values.httpConfig.mTlsAuth.tlsCrt;
+        if (tlsCrt) {
+          spec.httpConfig['tls.crt'] = btoa(tlsCrt);
+        }
+        const tlsKey = values.httpConfig.mTlsAuth.tlsKey;
+        if (tlsKey) {
+          spec.httpConfig['tls.key'] = btoa(tlsKey);
+        }
+      }
+      // Note: GitRepoSpec doesn't support token
+    } else if (values.configType === 'ssh' && values.sshConfig) {
+      spec.sshConfig = {
+        privateKeyPassphrase: values.sshConfig.privateKeyPassphrase,
+        skipServerVerification: values.sshConfig.skipServerVerification,
+      };
 
-    const sshPrivateKey = values.sshConfig.sshPrivateKey;
-    if (sshPrivateKey) {
-      sshRepoSpec.sshConfig.sshPrivateKey = btoa(sshPrivateKey);
+      const sshPrivateKey = values.sshConfig.sshPrivateKey;
+      if (sshPrivateKey) {
+        spec.sshConfig.sshPrivateKey = btoa(sshPrivateKey);
+      }
     }
   }
 

@@ -111,9 +111,9 @@ export { FleetRolloutStartedDetails } from './models/FleetRolloutStartedDetails'
 export type { FleetRolloutStatus } from './models/FleetRolloutStatus';
 export type { FleetSpec } from './models/FleetSpec';
 export type { FleetStatus } from './models/FleetStatus';
-export type { GenericRepoSpec } from './models/GenericRepoSpec';
 export type { GitConfigProviderSpec } from './models/GitConfigProviderSpec';
 export type { GitHubIntrospectionSpec } from './models/GitHubIntrospectionSpec';
+export type { GitRepoSpec } from './models/GitRepoSpec';
 export type { HookAction } from './models/HookAction';
 export type { HookActionRun } from './models/HookActionRun';
 export type { HookCondition } from './models/HookCondition';
@@ -180,7 +180,6 @@ export type { RolloutDeviceSelection } from './models/RolloutDeviceSelection';
 export type { RolloutPolicy } from './models/RolloutPolicy';
 export { RolloutStrategy } from './models/RolloutStrategy';
 export type { SshConfig } from './models/SshConfig';
-export type { SshRepoSpec } from './models/SshRepoSpec';
 export type { Status } from './models/Status';
 export { SystemdActiveStateType } from './models/SystemdActiveStateType';
 export { SystemdEnableStateType } from './models/SystemdEnableStateType';

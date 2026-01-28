@@ -72,7 +72,7 @@ const OutputImageStep = () => {
           <RepositorySelect
             name="destination.repository"
             repositories={ociRegistries}
-            repoType={RepoSpecType.OCI}
+            repoType={RepoSpecType.RepoSpecTypeOci}
             canCreateRepo={canCreateRepo}
             repoRefetch={refetch}
             label={t('Target repository')}
