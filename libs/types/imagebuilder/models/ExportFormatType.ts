@@ -9,4 +9,5 @@ export enum ExportFormatType {
   ExportFormatTypeVMDK = 'vmdk',
   ExportFormatTypeQCOW2 = 'qcow2',
   ExportFormatTypeISO = 'iso',
+  ExportFormatTypeQCOW2DiskContainer = 'qcow2-disk-container',
 }

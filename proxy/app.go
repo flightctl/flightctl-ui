@@ -97,7 +97,7 @@ func main() {
 	srv := &http.Server{
 		Handler:      corsHandler(router),
 		Addr:         config.BridgePort,
-		WriteTimeout: 15 * time.Second,
+		WriteTimeout: 15 * time.Minute, // Long timeout for streaming responses (SSE, chunked encoding)
 		ReadTimeout:  15 * time.Second,
 	}
 

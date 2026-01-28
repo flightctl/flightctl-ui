@@ -10,7 +10,7 @@ import { getImageExportResource } from '../CreateImageBuildWizard/utils';
 import { ViewImageBuildExportCard } from '../ImageExportCards';
 import { useOciRegistriesContext } from '../OciRegistriesContext';
 import { showSpinnerBriefly } from '../../../utils/time';
-import { getExportDownloadResult, getImageReference } from '../../../utils/imageBuilds';
+import { getAllExportFormats, getExportDownloadResult, getImageReference } from '../../../utils/imageBuilds';
 
 type ImageBuildExportsGalleryProps = {
   imageBuild: ImageBuildWithExports;
@@ -20,12 +20,6 @@ type ImageBuildExportsGalleryProps = {
 const REFRESH_IMAGE_BUILD_DELAY = 450;
 // Delay to keep loading state while browser processes redirect
 const DOWNLOAD_REDIRECT_DELAY = 1000;
-
-const allFormats = [
-  ExportFormatType.ExportFormatTypeVMDK,
-  ExportFormatType.ExportFormatTypeQCOW2,
-  ExportFormatType.ExportFormatTypeISO,
-];
 
 const createDownloadLink = (url: string) => {
   const link = document.createElement('a');
@@ -46,12 +40,13 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
   const { ociRegistries } = useOciRegistriesContext();
   const [exportingFormat, setExportingFormat] = React.useState<ExportFormatType>();
   const [downloadingFormat, setDownloadingFormat] = React.useState<ExportFormatType>();
+  const imageBuildId = imageBuild.metadata.name as string;
 
   const handleExportImage = async (format: ExportFormatType) => {
     setExportingFormat(format);
     setError(undefined);
     try {
-      const imageExport = getImageExportResource(imageBuild.metadata.name as string, format);
+      const imageExport = getImageExportResource(imageBuildId, format);
       await post<ImageExport>('imageexports', imageExport);
       // The "Export image" button wouldn't be seen as spinning without this delay.
       await showSpinnerBriefly(REFRESH_IMAGE_BUILD_DELAY);
@@ -102,7 +97,7 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
 
   return (
     <Gallery hasGutter minWidths={{ default: '350px' }}>
-      {allFormats.map((format) => {
+      {getAllExportFormats().map((format) => {
         const imageExport = imageBuild.imageExports.find((imageExport) => imageExport?.spec.format === format);
         const isDisabled = exportingFormat && exportingFormat !== format;
         // We can only link to the generic destination for the image build.
@@ -112,6 +107,7 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
         const hasError = error?.format === format;
         return (
           <ViewImageBuildExportCard
+            imageBuildId={imageBuildId}
             key={format}
             imageReference={imageReference}
             format={format}

@@ -17,6 +17,7 @@ export type { ImageBuildRefSource } from './models/ImageBuildRefSource';
 export type { ImageBuildSource } from './models/ImageBuildSource';
 export type { ImageBuildSpec } from './models/ImageBuildSpec';
 export type { ImageBuildStatus } from './models/ImageBuildStatus';
+export type { ImageBuildUserConfiguration } from './models/ImageBuildUserConfiguration';
 export type { ImageExport } from './models/ImageExport';
 export type { ImageExportCondition } from './models/ImageExportCondition';
 export { ImageExportConditionReason } from './models/ImageExportConditionReason';

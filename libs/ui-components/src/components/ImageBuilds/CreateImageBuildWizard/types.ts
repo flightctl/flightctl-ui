@@ -1,5 +1,14 @@
-import { BindingType, ImageBuildDestination, ImageBuildSource } from '@flightctl/types/imagebuilder';
+import {
+  BindingType,
+  ImageBuildDestination,
+  ImageBuildSource,
+  ImageBuildUserConfiguration,
+} from '@flightctl/types/imagebuilder';
 import { ExportFormatType } from '@flightctl/types/imagebuilder';
+
+type ImageBuildUserConfigurationForm = ImageBuildUserConfiguration & {
+  enabled?: boolean;
+};
 
 export type ImageBuildFormValues = {
   // name is autogenereated by us
@@ -7,6 +16,7 @@ export type ImageBuildFormValues = {
   destination: ImageBuildDestination;
   bindingType: BindingType;
   exportFormats: ExportFormatType[];
+  userConfiguration?: ImageBuildUserConfigurationForm;
 };
 
 export type ImageBuildWizardError =

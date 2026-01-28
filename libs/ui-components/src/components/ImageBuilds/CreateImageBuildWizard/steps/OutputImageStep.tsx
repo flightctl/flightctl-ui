@@ -12,10 +12,10 @@ import RepositorySelect from '../../../form/RepositorySelect';
 import { usePermissionsContext } from '../../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../../types/rbac';
 import { SelectImageBuildExportCard } from '../../ImageExportCards';
-import { getImageReference } from '../../../../utils/imageBuilds';
+import { getAllExportFormats, getImageReference } from '../../../../utils/imageBuilds';
 import { isOciRepoSpec } from '../../../Repository/CreateRepository/utils';
-import ImageUrlCard from '../../ImageUrlCard';
 import { useOciRegistriesContext } from '../../OciRegistriesContext';
+import ImageUrlCard from '../../ImageUrlCard';
 
 export const outputImageStepId = 'output-image';
 
@@ -102,21 +102,14 @@ const OutputImageStep = () => {
               )}
             </Content>
             <Gallery hasGutter minWidths={{ default: '320px' }}>
-              <SelectImageBuildExportCard
-                format={ExportFormatType.ExportFormatTypeVMDK}
-                isChecked={values.exportFormats.includes(ExportFormatType.ExportFormatTypeVMDK)}
-                onToggle={handleFormatToggle}
-              />
-              <SelectImageBuildExportCard
-                format={ExportFormatType.ExportFormatTypeQCOW2}
-                isChecked={values.exportFormats.includes(ExportFormatType.ExportFormatTypeQCOW2)}
-                onToggle={handleFormatToggle}
-              />
-              <SelectImageBuildExportCard
-                format={ExportFormatType.ExportFormatTypeISO}
-                isChecked={values.exportFormats.includes(ExportFormatType.ExportFormatTypeISO)}
-                onToggle={handleFormatToggle}
-              />
+              {getAllExportFormats().map((format) => (
+                <SelectImageBuildExportCard
+                  key={format}
+                  format={format}
+                  isChecked={values.exportFormats.includes(format)}
+                  onToggle={handleFormatToggle}
+                />
+              ))}
             </Gallery>
           </FormGroup>
           {values.exportFormats.length > 0 && (

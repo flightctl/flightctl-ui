@@ -6,9 +6,19 @@ import {
   ImageBuildConditionType,
   ImageBuildDestination,
   ImageBuildSource,
+  ImageExport,
+  ImageExportConditionReason,
+  ImageExportConditionType,
 } from '@flightctl/types/imagebuilder';
 import { Repository } from '@flightctl/types';
 import { isOciRepoSpec } from '../components/Repository/CreateRepository/utils';
+
+export const getAllExportFormats = () => [
+  ExportFormatType.ExportFormatTypeISO,
+  ExportFormatType.ExportFormatTypeQCOW2DiskContainer,
+  ExportFormatType.ExportFormatTypeQCOW2,
+  ExportFormatType.ExportFormatTypeVMDK,
+];
 
 export const getImageBuildImage = (srcOrDst: ImageBuildSource | ImageBuildDestination | undefined) => {
   if (!srcOrDst) {
@@ -22,13 +32,22 @@ export const getExportFormatDescription = (t: TFunction, format: ExportFormatTyp
     case ExportFormatType.ExportFormatTypeVMDK:
       return t('For enterprise virtualization platforms.');
     case ExportFormatType.ExportFormatTypeQCOW2:
-      return t('For virtualized edge workloads and OpenShift Virtualization.');
+      return t('For virtualized edge workloads.');
+    case ExportFormatType.ExportFormatTypeQCOW2DiskContainer:
+      return t('For OpenShift Virtualization.');
     case ExportFormatType.ExportFormatTypeISO:
       return t('For physical edge devices and bare metal.');
   }
 };
 
-export const getExportFormatLabel = (format: ExportFormatType) => `.${format.toUpperCase()}`;
+export const getExportFormatLabel = (t: TFunction, format: ExportFormatType) => {
+  switch (format) {
+    case ExportFormatType.ExportFormatTypeQCOW2DiskContainer:
+      return t('QCOW2 (Container)');
+    default:
+      return format.toUpperCase();
+  }
+};
 
 const getOciRepositoryUrl = (repositories: Repository[], repositoryName: string): string | undefined => {
   const repo = repositories.find((r) => r.metadata.name === repositoryName);
@@ -57,6 +76,60 @@ export const hasImageBuildFailed = (imageBuild: ImageBuild): boolean => {
     (c) => c.type === ImageBuildConditionType.ImageBuildConditionTypeReady,
   );
   return readyCondition?.reason === ImageBuildConditionReason.ImageBuildConditionReasonFailed;
+};
+
+export const shouldHaveImageBuildLogs = (imageBuild: ImageBuild): boolean => {
+  const readyCondition = imageBuild.status?.conditions?.find(
+    (c) => c.type === ImageBuildConditionType.ImageBuildConditionTypeReady,
+  );
+  if (!readyCondition) {
+    return true;
+  }
+
+  return (
+    readyCondition.reason === ImageBuildConditionReason.ImageBuildConditionReasonPending ||
+    readyCondition.reason === ImageBuildConditionReason.ImageBuildConditionReasonBuilding ||
+    readyCondition.reason === ImageBuildConditionReason.ImageBuildConditionReasonPushing
+  );
+};
+
+export const isImageBuildComplete = (imageBuild: ImageBuild): boolean => {
+  const readyCondition = imageBuild.status?.conditions?.find(
+    (c) => c.type === ImageBuildConditionType.ImageBuildConditionTypeReady,
+  );
+  if (!readyCondition) {
+    return false;
+  }
+
+  return readyCondition.reason === ImageBuildConditionReason.ImageBuildConditionReasonCompleted;
+};
+
+export const shouldHaveImageExportLogs = (imageExport: ImageExport): boolean => {
+  const exportReadyCondition = imageExport.status?.conditions?.find(
+    (c) => c.type === ImageExportConditionType.ImageExportConditionTypeReady,
+  );
+  if (!exportReadyCondition) {
+    return true;
+  }
+  return (
+    exportReadyCondition.reason === ImageExportConditionReason.ImageExportConditionReasonPending ||
+    exportReadyCondition.reason === ImageExportConditionReason.ImageExportConditionReasonConverting ||
+    exportReadyCondition.reason === ImageExportConditionReason.ImageExportConditionReasonPushing
+  );
+};
+
+export const isImageExportFailed = (imageExport: ImageExport): boolean => {
+  const readyCondition = imageExport.status?.conditions?.find(
+    (c) => c.type === ImageExportConditionType.ImageExportConditionTypeReady,
+  );
+  return readyCondition?.reason === ImageExportConditionReason.ImageExportConditionReasonFailed;
+};
+
+export const isImageExportCompleted = (imageExport: ImageExport): boolean => {
+  const readyCondition = imageExport.status?.conditions?.find(
+    (c) => c.type === ImageExportConditionType.ImageExportConditionTypeReady,
+  );
+  return readyCondition?.reason === ImageExportConditionReason.ImageExportConditionReasonCompleted;
 };
 
 const isDownloadResultRedirect = (response: Response): boolean => {

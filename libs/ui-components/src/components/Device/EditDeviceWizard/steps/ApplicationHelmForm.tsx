@@ -133,7 +133,7 @@ const ApplicationHelmForm = ({
                 variant="info"
                 className="pf-v6-u-mt-md"
                 title={t(
-                  'Order of precedence: Files are applied in the ordered listed. If the same parameter is defined in multiple files, the value in the last file takes precedence and overrides previous values.',
+                  'Order of precedence: Files are applied in the order listed. If the same parameter is defined in multiple files, the value in the last file takes precedence and overrides previous values.',
                 )}
               />
             </>

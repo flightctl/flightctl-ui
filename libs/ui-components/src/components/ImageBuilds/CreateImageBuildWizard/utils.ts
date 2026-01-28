@@ -8,8 +8,6 @@ import {
   ImageBuildDestination,
   ImageBuildSource,
   ImageExport,
-  ImageExportConditionReason,
-  ImageExportConditionType,
   ResourceKind,
 } from '@flightctl/types/imagebuilder';
 import { API_VERSION } from '../../../constants';
@@ -62,9 +60,10 @@ const getImageExportsByFormat = (
 
   return {
     imageExports: [
-      formatMap[ExportFormatType.ExportFormatTypeVMDK],
-      formatMap[ExportFormatType.ExportFormatTypeQCOW2],
       formatMap[ExportFormatType.ExportFormatTypeISO],
+      formatMap[ExportFormatType.ExportFormatTypeQCOW2DiskContainer],
+      formatMap[ExportFormatType.ExportFormatTypeQCOW2],
+      formatMap[ExportFormatType.ExportFormatTypeVMDK],
     ],
     exportsCount: imageExports?.length || 0,
   };
@@ -90,11 +89,23 @@ export const getInitialValues = (imageBuild?: ImageBuildWithExports): ImageBuild
     const exportFormats = imageBuild.imageExports
       .filter((ie): ie is ImageExport => ie !== undefined)
       .map((imageExport) => imageExport.spec.format);
+    const userConfig = imageBuild.spec.userConfiguration;
+    const userConfiguration = userConfig
+      ? {
+          ...userConfig,
+          enabled: !!(userConfig.username || userConfig.publickey),
+        }
+      : {
+          username: '',
+          publickey: '',
+          enabled: false,
+        };
     return {
       source: imageBuild.spec.source,
       destination: imageBuild.spec.destination,
       bindingType: imageBuild.spec.binding.type as BindingType,
       exportFormats: exportFormats || [],
+      userConfiguration,
     };
   }
 
@@ -111,6 +122,11 @@ export const getInitialValues = (imageBuild?: ImageBuildWithExports): ImageBuild
     },
     bindingType: BindingType.BindingTypeEarly,
     exportFormats: [],
+    userConfiguration: {
+      username: '',
+      publickey: '',
+      enabled: false,
+    },
   };
 };
 
@@ -127,19 +143,31 @@ const generateExportName = (imageBuildName: string, format: ExportFormatType) =>
 
 export const getImageBuildResource = (values: ImageBuildFormValues): ImageBuild => {
   const name = generateBuildName();
+  const spec: ImageBuild['spec'] = {
+    source: values.source,
+    destination: values.destination,
+    binding: {
+      type: values.bindingType,
+    },
+  };
+
+  // Allow the user to uncheck the toggle without having cleared the fields
+  const username = values.userConfiguration?.username || '';
+  const publickey = values.userConfiguration?.publickey || '';
+  if (values.userConfiguration?.enabled && username && publickey) {
+    spec.userConfiguration = {
+      username,
+      publickey,
+    };
+  }
+
   return {
     apiVersion: API_VERSION,
     kind: ResourceKind.IMAGE_BUILD,
     metadata: {
       name,
     },
-    spec: {
-      source: values.source,
-      destination: values.destination,
-      binding: {
-        type: values.bindingType,
-      },
-    },
+    spec,
   };
 };
 
@@ -168,18 +196,4 @@ export const getImageExportResources = (values: ImageBuildFormValues, imageBuild
   }
 
   return values.exportFormats.map((format) => getImageExportResource(imageBuildName, format));
-};
-
-export const isImageExportFailed = (imageExport: ImageExport): boolean => {
-  const readyCondition = imageExport.status?.conditions?.find(
-    (c) => c.type === ImageExportConditionType.ImageExportConditionTypeReady,
-  );
-  return readyCondition?.reason === ImageExportConditionReason.ImageExportConditionReasonFailed;
-};
-
-export const isImageExportCompleted = (imageExport: ImageExport): boolean => {
-  const readyCondition = imageExport.status?.conditions?.find(
-    (c) => c.type === ImageExportConditionType.ImageExportConditionTypeReady,
-  );
-  return readyCondition?.reason === ImageExportConditionReason.ImageExportConditionReasonCompleted;
 };

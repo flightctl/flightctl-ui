@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Trans } from 'react-i18next';
 import {
   Alert,
   Card,
@@ -53,6 +54,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
   );
 
   const isEarlyBinding = values.bindingType === BindingType.BindingTypeEarly;
+  const remoteAccessUsername = values.userConfiguration?.enabled ? values.userConfiguration?.username || '' : '';
 
   return (
     <Stack hasGutter>
@@ -117,7 +119,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
                     <>
                       {values.exportFormats.map((format) => (
                         <Label key={format} color="blue" className="pf-v6-u-mr-sm">
-                          {getExportFormatLabel(format)}
+                          {getExportFormatLabel(t, format)}
                         </Label>
                       ))}
                     </>
@@ -172,6 +174,16 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               )}
+              {remoteAccessUsername && (
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('Remote access')}</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <Trans t={t}>
+                      Enabled for <strong>{remoteAccessUsername}</strong>
+                    </Trans>
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+              )}
             </FlightCtlDescriptionList>
           </CardBody>
         </Card>
@@ -196,7 +208,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
               <List isPlain>
                 {error.errors.map(({ format, error: exportError }, index) => (
                   <ListItem key={index}>
-                    <strong>{getExportFormatLabel(format)}:</strong> {getErrorMessage(exportError)}
+                    <strong>{getExportFormatLabel(t, format)}:</strong> {getErrorMessage(exportError)}
                   </ListItem>
                 ))}
               </List>

@@ -16,6 +16,7 @@ import { OciRegistriesContextProvider } from '../OciRegistriesContext';
 import ImageBuildYaml from './ImageBuildYaml';
 import ImageBuildDetailsTab from './ImageBuildDetailsTab';
 import ImageBuildExportsGallery from './ImageBuildExportsGallery';
+import ImageBuildLogsTab from './ImageBuildLogsTab';
 import { hasImageBuildFailed } from '../../../utils/imageBuilds';
 
 const imageBuildDetailsPermissions = [
@@ -77,7 +78,7 @@ const ImageBuildDetailsPageContent = () => {
             <Route path="details" element={<ImageBuildDetailsTab imageBuild={imageBuild} />} />
             <Route path="exports" element={<ImageBuildExportsGallery imageBuild={imageBuild} refetch={refetch} />} />
             <Route path="yaml" element={<ImageBuildYaml imageBuild={imageBuild} refetch={refetch} />} />
-            <Route path="logs" element={<div>TODO Logs</div>} />
+            <Route path="logs" element={<ImageBuildLogsTab imageBuild={imageBuild} />} />
           </Routes>
           {isDeleteModalOpen && (
             <DeleteImageBuildModal
