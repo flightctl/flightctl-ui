@@ -12,5 +12,9 @@ export type ApplicationProviderSpec = (ApplicationEnvVars & {
    */
   name?: string;
   appType: AppType;
+  /**
+   * The username of the system user this application should be run under. This is not the same as the user within any containers of the application (if applicable). Defaults to the user that the agent runs as (generally root) if not specified.
+   */
+  runAs?: string;
 } & (ImageApplicationProviderSpec | InlineApplicationProviderSpec));
 

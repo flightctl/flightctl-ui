@@ -70,57 +70,59 @@ const ApplicationInlineForm = ({
   }
 
   return (
-    <FieldArray name={`applications.${index}.files`}>
-      {({ push, remove }) => (
-        <>
-          {app.files?.map((file, fileIndex) => {
-            const fieldName = `applications[${index}].files[${fileIndex}]`;
-            return (
-              <Split key={fileIndex} hasGutter>
-                <SplitItem isFilled>
-                  <InlineApplicationFileForm
-                    file={file}
-                    fileIndex={fileIndex}
-                    fileFieldName={fieldName}
-                    isReadOnly={isReadOnly}
-                  />
-                </SplitItem>
-                {!isReadOnly && app.files.length > 1 && (
-                  <SplitItem>
-                    <Button
-                      aria-label={t('Delete file')}
-                      variant="link"
-                      icon={<MinusCircleIcon />}
-                      iconPosition="start"
-                      onClick={() => remove(fileIndex)}
+    <Grid hasGutter>
+      <FieldArray name={`applications.${index}.files`}>
+        {({ push, remove }) => (
+          <>
+            {app.files?.map((file, fileIndex) => {
+              const fieldName = `applications[${index}].files[${fileIndex}]`;
+              return (
+                <Split key={fileIndex} hasGutter>
+                  <SplitItem isFilled>
+                    <InlineApplicationFileForm
+                      file={file}
+                      fileIndex={fileIndex}
+                      fileFieldName={fieldName}
+                      isReadOnly={isReadOnly}
                     />
                   </SplitItem>
-                )}
-              </Split>
-            );
-          })}
+                  {!isReadOnly && app.files.length > 1 && (
+                    <SplitItem>
+                      <Button
+                        aria-label={t('Delete file')}
+                        variant="link"
+                        icon={<MinusCircleIcon />}
+                        iconPosition="start"
+                        onClick={() => remove(fileIndex)}
+                      />
+                    </SplitItem>
+                  )}
+                </Split>
+              );
+            })}
 
-          {!isReadOnly && (
-            <FormGroup>
-              <Button
-                variant="link"
-                icon={<PlusCircleIcon />}
-                iconPosition="start"
-                onClick={() => {
-                  push({
-                    path: '',
-                    content: '',
-                    base64: false,
-                  });
-                }}
-              >
-                {t('Add file')}
-              </Button>
-            </FormGroup>
-          )}
-        </>
-      )}
-    </FieldArray>
+            {!isReadOnly && (
+              <FormGroup>
+                <Button
+                  variant="link"
+                  icon={<PlusCircleIcon />}
+                  iconPosition="start"
+                  onClick={() => {
+                    push({
+                      path: '',
+                      content: '',
+                      base64: false,
+                    });
+                  }}
+                >
+                  {t('Add file')}
+                </Button>
+              </FormGroup>
+            )}
+          </>
+        )}
+      </FieldArray>
+    </Grid>
   );
 };
 
