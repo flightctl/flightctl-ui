@@ -3,7 +3,7 @@ import { useFormikContext } from 'formik';
 import { FormGroup } from '@patternfly/react-core';
 import { Trans } from 'react-i18next';
 
-import { GenericRepoSpec, HttpRepoSpec, RepoSpecType, Repository } from '@flightctl/types';
+import { GitRepoSpec, HttpRepoSpec, RepoSpecType, Repository } from '@flightctl/types';
 import { DeviceSpecConfigFormValues, GitConfigTemplate, HttpConfigTemplate } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
@@ -127,7 +127,7 @@ const ConfigWithRepositoryTemplateForm = ({
 
   const ct = values.configTemplates[index] as HttpConfigTemplate | GitConfigTemplate;
   const selectedRepo = repositories.find((repo) => repo.metadata.name === ct.repository);
-  const repoSpec = selectedRepo?.spec as GenericRepoSpec | HttpRepoSpec | undefined;
+  const repoSpec = selectedRepo?.spec as GitRepoSpec | HttpRepoSpec | undefined;
 
   return (
     <>
@@ -140,10 +140,10 @@ const ConfigWithRepositoryTemplateForm = ({
         repoRefetch={repoRefetch}
         isRequired
       />
-      {repoType === RepoSpecType.GIT && (
+      {repoType === RepoSpecType.RepoSpecTypeGit && (
         <GitConfigForm template={ct as GitConfigTemplate} index={index} isReadOnly={isReadOnly} />
       )}
-      {repoType === RepoSpecType.HTTP && (
+      {repoType === RepoSpecType.RepoSpecTypeHttp && (
         <HttpConfigForm
           template={ct as HttpConfigTemplate}
           index={index}

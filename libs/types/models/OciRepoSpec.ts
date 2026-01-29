@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { OciAuth } from './OciAuth';
-import type { RepoSpecType } from './RepoSpecType';
 /**
  * OCI container registry specification.
  */
@@ -16,7 +15,10 @@ export type OciRepoSpec = {
    * URL scheme for connecting to the registry.
    */
   scheme?: OciRepoSpec.scheme;
-  type: RepoSpecType;
+  /**
+   * The repository type discriminator.
+   */
+  type: 'oci';
   /**
    * Access mode for the registry: "Read" for read-only (pull), "ReadWrite" for read-write (pull and push).
    */

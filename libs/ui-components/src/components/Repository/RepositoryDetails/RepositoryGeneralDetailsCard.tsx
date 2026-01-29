@@ -20,28 +20,16 @@ import RepositoryStatus from '../../Status/RepositoryStatus';
 import {
   getRepoTypeLabel,
   getRepoUrlOrRegistry,
+  hasCredentialsSettings,
   isHttpRepoSpec,
   isOciRepoSpec,
-  isSshRepoSpec,
 } from '../CreateRepository/utils';
 import { GitRepositoryLink, HttpRepositoryUrl } from './RepositorySource';
 
 const RepoPrivacy = ({ repo }: { repo: Repository }) => {
   const { t } = useTranslation();
-  let isPrivate = false;
-  if (isHttpRepoSpec(repo.spec)) {
-    if (repo.spec.httpConfig.password || repo.spec.httpConfig['tls.crt'] || repo.spec.httpConfig['tls.key']) {
-      isPrivate = true;
-    }
-  } else if (isSshRepoSpec(repo.spec)) {
-    if (repo.spec.sshConfig.sshPrivateKey) {
-      isPrivate = true;
-    }
-  } else if (isOciRepoSpec(repo.spec)) {
-    if (repo.spec.ociAuth) {
-      isPrivate = true;
-    }
-  }
+
+  const isPrivate = hasCredentialsSettings(repo.spec);
 
   return isPrivate ? (
     <>

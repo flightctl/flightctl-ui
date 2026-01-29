@@ -15,7 +15,7 @@ const OciRegistriesContext = React.createContext<OciRegistriesContextType | unde
 
 export const OciRegistriesContextProvider = ({ children }: React.PropsWithChildren) => {
   const [repoList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>({
-    endpoint: `repositories?fieldSelector=spec.type=${RepoSpecType.OCI}`,
+    endpoint: `repositories?fieldSelector=spec.type=${RepoSpecType.RepoSpecTypeOci}`,
   });
 
   const ociRegistries = React.useMemo(() => repoList?.items || [], [repoList]);
