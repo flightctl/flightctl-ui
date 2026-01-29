@@ -21,13 +21,8 @@ import { CloudSecurityIcon } from '@patternfly/react-icons/dist/js/icons/cloud-s
 import { ServerGroupIcon } from '@patternfly/react-icons/dist/js/icons/server-group-icon';
 import { BuilderImageIcon } from '@patternfly/react-icons/dist/js/icons/builder-image-icon';
 
-import { ExportFormatType, ImageExport } from '@flightctl/types/imagebuilder';
-import {
-  getExportFormatDescription,
-  getExportFormatLabel,
-  isImageExportCompleted,
-  isImageExportFailed,
-} from '../../utils/imageBuilds';
+import { ExportFormatType, ImageExport, ImageExportConditionReason } from '@flightctl/types/imagebuilder';
+import { getExportFormatDescription, getExportFormatLabel, getImageExportStatusReason } from '../../utils/imageBuilds';
 import { getDateDisplay } from '../../utils/dates';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ImageExportStatusDisplay } from './ImageBuildAndExportStatus';
@@ -115,8 +110,8 @@ export const ViewImageBuildExportCard = ({
   } = useAppContext();
   const routerNavigate = useRouterNavigate();
   const exists = !!imageExport;
-  const failedExport = exists && isImageExportFailed(imageExport);
-  const completedExport = exists && isImageExportCompleted(imageExport);
+
+  const exportReason = exists ? getImageExportStatusReason(imageExport) : undefined;
   const title = getExportFormatLabel(t, format);
   const description = getExportFormatDescription(t, format);
 
@@ -141,7 +136,11 @@ export const ViewImageBuildExportCard = ({
                 <FlexItem className="fctl-imageexport-card__status">
                   <ImageExportStatusDisplay
                     imageStatus={imageExport.status}
-                    imageReference={completedExport ? imageReference : undefined}
+                    imageReference={
+                      exportReason === ImageExportConditionReason.ImageExportConditionReasonCompleted
+                        ? imageReference
+                        : undefined
+                    }
                   />
                 </FlexItem>
               )}
@@ -159,7 +158,7 @@ export const ViewImageBuildExportCard = ({
         <Stack hasGutter>
           <StackItem>
             <Flex>
-              {failedExport && (
+              {exportReason === ImageExportConditionReason.ImageExportConditionReasonFailed && (
                 <FlexItem>
                   <Button
                     variant="primary"
@@ -171,7 +170,7 @@ export const ViewImageBuildExportCard = ({
                   </Button>
                 </FlexItem>
               )}
-              {completedExport && (
+              {exportReason === ImageExportConditionReason.ImageExportConditionReasonCompleted && (
                 <FlexItem>
                   <Button
                     variant="secondary"

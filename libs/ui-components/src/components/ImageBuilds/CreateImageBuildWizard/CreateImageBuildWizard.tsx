@@ -13,7 +13,7 @@ import {
 } from '@patternfly/react-core';
 import { Formik, FormikErrors } from 'formik';
 
-import { ExportFormatType, ImageBuild } from '@flightctl/types/imagebuilder';
+import { ExportFormatType, ImageBuild, ImageBuildConditionReason } from '@flightctl/types/imagebuilder';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
@@ -34,7 +34,7 @@ import CreateImageBuildWizardFooter from './CreateImageBuildWizardFooter';
 import { useFetch } from '../../../hooks/useFetch';
 import { useEditImageBuild } from './useEditImageBuild';
 import { OciRegistriesContextProvider, useOciRegistriesContext } from '../OciRegistriesContext';
-import { hasImageBuildFailed } from '../../../utils/imageBuilds';
+import { getImageBuildStatusReason } from '../../../utils/imageBuilds';
 
 const orderedIds = [sourceImageStepId, outputImageStepId, registrationStepId, reviewStepId];
 
@@ -73,11 +73,14 @@ const CreateImageBuildWizard = () => {
   const { isLoading: registriesLoading, error: registriesError } = useOciRegistriesContext();
 
   const isEdit = !!imageBuildId;
-  const hasFailed = imageBuild ? hasImageBuildFailed(imageBuild) : false;
+  const buildReason = imageBuild ? getImageBuildStatusReason(imageBuild) : undefined;
 
   let title: string;
   if (isEdit) {
-    title = hasFailed ? t('Retry image build') : t('Duplicate image build');
+    title =
+      buildReason === ImageBuildConditionReason.ImageBuildConditionReasonFailed
+        ? t('Retry image build')
+        : t('Duplicate image build');
   } else {
     title = t('Build new image');
   }

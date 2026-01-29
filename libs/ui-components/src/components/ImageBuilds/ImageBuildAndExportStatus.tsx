@@ -48,6 +48,10 @@ const getImageBuildStatusInfo = (condition: ImageBuildCondition | undefined, t: 
       return { level: 'success', label: t('Complete') };
     case ImageBuildConditionReason.ImageBuildConditionReasonFailed:
       return { level: 'danger', label: t('Failed') };
+    case ImageBuildConditionReason.ImageBuildConditionReasonCanceling:
+      return { level: 'warning', label: t('Canceling') };
+    case ImageBuildConditionReason.ImageBuildConditionReasonCanceled:
+      return { level: 'warning', label: t('Canceled') };
     default:
       return { level: 'unknown', label: t('Unknown') };
   }
@@ -68,6 +72,10 @@ const getImageExportStatusInfo = (condition: ImageExportCondition | undefined, t
       return { level: 'success', label: t('Complete') };
     case ImageExportConditionReason.ImageExportConditionReasonFailed:
       return { level: 'danger', label: t('Failed') };
+    case ImageExportConditionReason.ImageExportConditionReasonCanceling:
+      return { level: 'warning', label: t('Canceling') };
+    case ImageExportConditionReason.ImageExportConditionReasonCanceled:
+      return { level: 'warning', label: t('Canceled') };
     default:
       return { level: 'unknown', label: t('Unknown') };
   }

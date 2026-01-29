@@ -11,4 +11,6 @@ export enum ImageBuildConditionReason {
   ImageBuildConditionReasonPushing = 'Pushing',
   ImageBuildConditionReasonCompleted = 'Completed',
   ImageBuildConditionReasonFailed = 'Failed',
+  ImageBuildConditionReasonCanceling = 'Canceling',
+  ImageBuildConditionReasonCanceled = 'Canceled',
 }
