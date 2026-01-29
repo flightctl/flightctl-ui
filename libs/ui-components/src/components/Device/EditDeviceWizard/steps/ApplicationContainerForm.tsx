@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useField } from 'formik';
+import { useField, useFormikContext } from 'formik';
 import { Button, FormGroup, Grid, Label, LabelGroup, Split, SplitItem, TextInput } from '@patternfly/react-core';
 import { ArrowRightIcon } from '@patternfly/react-icons/dist/js/icons/arrow-right-icon';
 
@@ -13,18 +13,12 @@ import ApplicationIntegritySettings from './ApplicationIntegritySettings';
 
 import './ApplicationContainerForm.css';
 
-const ApplicationContainerForm = ({
-  app,
-  index,
-  isReadOnly,
-}: {
-  app: SingleContainerAppForm;
-  index: number;
-  isReadOnly?: boolean;
-}) => {
+const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
   const appFieldName = `applications[${index}]`;
-  const [{ value: ports }, , { setValue: setPorts, setTouched }] = useField<PortMapping[]>(`${appFieldName}.ports`);
+  const [{ value: app }] = useField<SingleContainerAppForm>(`${appFieldName}`);
+  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const ports = React.useMemo(() => app.ports || [], [app.ports]);
 
   const [hostPort, setHostPort] = React.useState('');
   const [containerPort, setContainerPort] = React.useState('');
@@ -33,7 +27,7 @@ const ApplicationContainerForm = ({
   const [editingPortIndex, setEditingPortIndex] = React.useState<number | null>(null);
   const [editingPortError, setEditingPortError] = React.useState<string | undefined>(undefined);
 
-  const canAddPorts = !editingPortError && isValidPortMapping(hostPort, containerPort, ports || []) && !isReadOnly;
+  const canAddPorts = !editingPortError && isValidPortMapping(hostPort, containerPort, ports) && !isReadOnly;
 
   const validatePort = (port: string): string | undefined => {
     const error = validatePortNumber(port, t);
@@ -41,7 +35,7 @@ const ApplicationContainerForm = ({
       return error;
     }
     // Check for duplicate if both ports match the number pattern
-    if (isDuplicatePortMapping(port, containerPort, ports || [])) {
+    if (isDuplicatePortMapping(port, containerPort, ports)) {
       return t('This port mapping already exists');
     }
     return undefined;
@@ -51,13 +45,13 @@ const ApplicationContainerForm = ({
   const containerPortError = containerPortTouched ? validatePort(containerPort) : undefined;
 
   const updatePorts = async (newPorts: PortMapping[]) => {
-    await setPorts(newPorts, true);
-    setTouched(true);
+    await setFieldValue(`${appFieldName}.ports`, newPorts, true);
+    setFieldTouched(`${appFieldName}.ports`, true);
   };
 
   const onAddPort = () => {
-    if (isValidPortMapping(hostPort, containerPort, ports || [])) {
-      updatePorts([...(ports || []), { hostPort, containerPort }]);
+    if (isValidPortMapping(hostPort, containerPort, ports)) {
+      updatePorts([...ports, { hostPort, containerPort }]);
       setHostPort('');
       setContainerPort('');
       setHostPortTouched(false);
@@ -68,7 +62,7 @@ const ApplicationContainerForm = ({
   };
 
   const onDeletePort = async (index: number) => {
-    const newPorts = [...(ports || [])];
+    const newPorts = [...ports];
     newPorts.splice(index, 1);
     await updatePorts(newPorts);
     // Clear error state if the deleted port was being edited
@@ -107,7 +101,7 @@ const ApplicationContainerForm = ({
     }
 
     // Check for duplicates, excluding the current port being edited
-    const otherPorts = excludeIndex !== undefined ? (ports || []).filter((_, i) => i !== excludeIndex) : ports || [];
+    const otherPorts = excludeIndex !== undefined ? ports.filter((_, i) => i !== excludeIndex) : ports;
     if (isDuplicatePortMapping(hostPortValue, containerPortValue, otherPorts)) {
       return t('This port mapping already exists');
     }
@@ -127,7 +121,7 @@ const ApplicationContainerForm = ({
       return;
     }
 
-    const newPorts = [...(ports || [])];
+    const newPorts = [...ports];
     newPorts[index] = { hostPort: newHostPort || '', containerPort: newContainerPort || '' };
     await updatePorts(newPorts);
 
@@ -146,7 +140,7 @@ const ApplicationContainerForm = ({
 
   // Clear error state if the editing index becomes invalid (e.g., port was deleted externally)
   React.useEffect(() => {
-    if (editingPortIndex !== null && (!ports || editingPortIndex >= ports.length)) {
+    if (editingPortIndex !== null && editingPortIndex >= ports.length) {
       setEditingPortIndex(null);
       setEditingPortError(undefined);
     }
@@ -172,7 +166,6 @@ const ApplicationContainerForm = ({
         <TextField
           aria-label={t('Image')}
           name={`${appFieldName}.image`}
-          value={app.image || ''}
           isDisabled={isReadOnly}
           helperText={t('Provide a valid image reference')}
         />
@@ -271,8 +264,8 @@ const ApplicationContainerForm = ({
           >
             <TextField
               aria-label={t('CPU limit')}
-              name={`${appFieldName}.limits.cpu`}
-              value={app.limits?.cpu || ''}
+              name={`${appFieldName}.cpuLimit`}
+              value={app.cpuLimit || ''}
               placeholder={t('Enter numeric value')}
               isDisabled={isReadOnly}
               helperText={t('Provide a valid CPU value (e.g., "0.4" or "2").')}
@@ -286,8 +279,8 @@ const ApplicationContainerForm = ({
           >
             <TextField
               aria-label={t('Memory limit')}
-              name={`${appFieldName}.limits.memory`}
-              value={app.limits?.memory || ''}
+              name={`${appFieldName}.memoryLimit`}
+              value={app.memoryLimit || ''}
               placeholder={t('Enter numeric value with optional unit')}
               isDisabled={isReadOnly}
               helperText={t('Provide a valid memory value (e.g., "512", "512m", "2g", "1024k").')}

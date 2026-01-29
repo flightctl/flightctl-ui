@@ -1,7 +1,4 @@
 import {
-  AppType,
-  ApplicationEnvVars,
-  ApplicationVolumeProviderSpec,
   AuthProvider,
   Condition,
   ConditionType,
@@ -9,7 +6,6 @@ import {
   EnrollmentRequest,
   FileContent,
   Fleet,
-  ImageApplicationProviderSpec,
   OAuth2ProviderSpec,
   OIDCProviderSpec,
   RelativePath,
@@ -55,15 +51,9 @@ export type AnnotationType = DeviceAnnotation; // Add more types when they are a
 
 export const isFleet = (resource: ResourceSync | Fleet): resource is Fleet => resource.kind === 'Fleet';
 
-// ApplicationProviderSpec's definition for inline files adds a Record<string, any>. We use the fixed types to get full Typescript checks for the field
+// ApplicationProviderSpec's definition for inline files adds a Record<string, any>.
+// We use the fixed type to get proper Typescript checks for the field
 export type InlineApplicationFileFixed = FileContent & RelativePath;
-
-// "FixedApplicationProviderSpec" will need to be manually adjusted whenever the API definition changes
-export type ApplicationProviderSpecFixed = ApplicationEnvVars &
-  ApplicationVolumeProviderSpec & {
-    name?: string;
-    appType: AppType;
-  } & (ImageApplicationProviderSpec | { inline: InlineApplicationFileFixed[] });
 
 type CliArtifact = {
   os: string;
