@@ -64,6 +64,8 @@ const appRoutes = {
   [ROUTE.AUTH_PROVIDER_CREATE]: '/',
   [ROUTE.AUTH_PROVIDER_EDIT]: '/',
   [ROUTE.AUTH_PROVIDER_DETAILS]: '/',
+  [ROUTE.CATALOG]: '/edge/catalog',
+  [ROUTE.CATALOG_INSTALL]: '/edge/catalog/install',
 };
 
 export const useValuesAppContext = (): AppContextProps => {

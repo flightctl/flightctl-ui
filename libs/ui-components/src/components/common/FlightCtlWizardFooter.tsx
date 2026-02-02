@@ -20,6 +20,8 @@ export type FlightCtlWizardFooterProps<T extends Record<string, unknown>> = {
   isReadOnly?: boolean;
   /** Text for the primary button when it will actually perform a save operation */
   saveButtonText?: string;
+  /** When provided (e.g. in a modal), Cancel button calls this instead of navigate(-1) */
+  onCancel?: VoidFunction;
 };
 
 const FlightCtlWizardFooter = <T extends Record<string, unknown>>({
@@ -28,6 +30,7 @@ const FlightCtlWizardFooter = <T extends Record<string, unknown>>({
   validateStep,
   isReadOnly = false,
   saveButtonText,
+  onCancel,
 }: FlightCtlWizardFooterProps<T>) => {
   const { t } = useTranslation();
   const { goToNextStep, goToPrevStep, activeStep } = useWizardContext();
@@ -82,7 +85,7 @@ const FlightCtlWizardFooter = <T extends Record<string, unknown>>({
         </ActionListGroup>
         <ActionListGroup>
           <ActionListItem>
-            <Button variant="link" onClick={() => navigate(-1)} isDisabled={isSubmitting}>
+            <Button variant="link" onClick={onCancel ?? (() => navigate(-1))} isDisabled={isSubmitting}>
               {t('Cancel')}
             </Button>
           </ActionListItem>

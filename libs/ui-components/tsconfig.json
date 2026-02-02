@@ -25,6 +25,7 @@
     "paths": {
       "@flightctl/types": ["../types"],
       "@flightctl/types/imagebuilder": ["../types/imagebuilder"],
+      "@flightctl/types/alpha": ["../types/types/alpha"],
     },
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js", "**/*.json"],

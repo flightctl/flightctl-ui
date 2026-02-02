@@ -1,0 +1,12 @@
+.fctl-yaml-editor .monaco-editor {
+  min-height: 400px;
+}
+
+/* Style of the bar with the line numbers for light and dark themes */
+.fctl-yaml-editor .monaco-editor .margin {
+  --vscode-editorGutter-background: #f5f5f5;
+}
+
+.pf-v6-theme-dark .fctl-yaml-editor .monaco-editor .margin {
+  --vscode-editorGutter-background: #292e34;
+}

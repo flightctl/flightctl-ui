@@ -74,6 +74,7 @@
     "@patternfly/react-icons": "^6.4.0",
     "@patternfly/react-styles": "^6.4.0",
     "@patternfly/react-table": "^6.4.0",
+    "@patternfly/react-topology": "^6.4.0",
     "@types/react-redux": "^7.1.33",
     "formik": "^2.4.5",
     "fuzzysearch": "^1.0.3",

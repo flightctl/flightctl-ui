@@ -12,6 +12,7 @@ import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import ResourceLink from '../../common/ResourceLink';
+import { ApiSortTableColumn } from '../../Table/Table';
 
 type EnrolledDeviceTableRowProps = {
   device: Device;
@@ -23,6 +24,9 @@ type EnrolledDeviceTableRowProps = {
   decommissionAction: ListAction;
   canResume: boolean;
   resumeAction: ListAction;
+  singleSelect?: boolean;
+  hideActions?: boolean;
+  deviceColumns: ApiSortTableColumn[];
 };
 
 const EnrolledDeviceTableRow = ({
@@ -35,6 +39,9 @@ const EnrolledDeviceTableRow = ({
   decommissionAction,
   canResume,
   resumeAction,
+  singleSelect,
+  hideActions,
+  deviceColumns,
 }: EnrolledDeviceTableRowProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -44,6 +51,8 @@ const EnrolledDeviceTableRow = ({
   const decommissionDisabledReason = getDecommissionDisabledReason(device, t);
   const resumeDisabledReason = getResumeDisabledReason(device, t);
 
+  const columnIds = React.useMemo(() => deviceColumns.map(({ id }) => id), [deviceColumns]);
+
   return (
     <Tr>
       <Td
@@ -51,63 +60,78 @@ const EnrolledDeviceTableRow = ({
           rowIndex,
           onSelect: onRowSelect(device),
           isSelected: isRowSelected(device),
+          variant: singleSelect ? 'radio' : 'checkbox',
         }}
       />
-      <Td dataLabel={t('Alias')}>
-        <ResourceLink id={deviceName} name={deviceAlias || t('Untitled')} routeLink={ROUTE.DEVICE_DETAILS} />
-      </Td>
-      <Td dataLabel={t('Name')}>
-        <ResourceLink id={deviceName} />
-      </Td>
-      <Td dataLabel={t('Fleet')}>
-        <DeviceFleet device={device} />
-      </Td>
-      <Td dataLabel={t('Application status')}>
-        <ApplicationSummaryStatus statusSummary={device.status?.applicationsSummary} />
-      </Td>
-      <Td dataLabel={t('Device status')}>
-        <DeviceStatus deviceStatus={device.status} />
-      </Td>
-      <Td dataLabel={t('Update status')}>
-        <SystemUpdateStatus deviceStatus={device.status} />
-      </Td>
-      <Td isActionCell>
-        <ActionsColumn
-          items={[
-            ...(canEdit
-              ? [
-                  {
-                    title: t('Edit device configurations'),
-                    onClick: () => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceName }),
-                    ...editActionProps,
-                  },
-                ]
-              : []),
-            {
-              title: t('View device details'),
-              onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
-            },
-            ...(canResume
-              ? [
-                  resumeAction({
-                    resourceId: deviceName,
-                    resourceName: deviceAlias,
-                    disabledReason: resumeDisabledReason,
-                  }),
-                ]
-              : []),
-            ...(canDecommission
-              ? [
-                  decommissionAction({
-                    resourceId: deviceName,
-                    resourceName: deviceAlias,
-                    disabledReason: decommissionDisabledReason,
-                  }),
-                ]
-              : []),
-          ]}
-        />
-      </Td>
+      {columnIds.includes('alias') && (
+        <Td dataLabel={t('Alias')}>
+          <ResourceLink id={deviceName} name={deviceAlias || t('Untitled')} routeLink={ROUTE.DEVICE_DETAILS} />
+        </Td>
+      )}
+      {columnIds.includes('name') && (
+        <Td dataLabel={t('Name')}>
+          <ResourceLink id={deviceName} />
+        </Td>
+      )}
+      {columnIds.includes('fleet') && (
+        <Td dataLabel={t('Fleet')}>
+          <DeviceFleet device={device} />
+        </Td>
+      )}
+      {columnIds.includes('appStatus') && (
+        <Td dataLabel={t('Application status')}>
+          <ApplicationSummaryStatus statusSummary={device.status?.applicationsSummary} />
+        </Td>
+      )}
+      {columnIds.includes('deviceStatus') && (
+        <Td dataLabel={t('Device status')}>
+          <DeviceStatus deviceStatus={device.status} />
+        </Td>
+      )}
+      {columnIds.includes('updateStatus') && (
+        <Td dataLabel={t('Update status')}>
+          <SystemUpdateStatus deviceStatus={device.status} />
+        </Td>
+      )}
+      {!hideActions && (
+        <Td isActionCell>
+          <ActionsColumn
+            items={[
+              ...(canEdit
+                ? [
+                    {
+                      title: t('Edit device configurations'),
+                      onClick: () => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceName }),
+                      ...editActionProps,
+                    },
+                  ]
+                : []),
+              {
+                title: t('View device details'),
+                onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
+              },
+              ...(canResume
+                ? [
+                    resumeAction({
+                      resourceId: deviceName,
+                      resourceName: deviceAlias,
+                      disabledReason: resumeDisabledReason,
+                    }),
+                  ]
+                : []),
+              ...(canDecommission
+                ? [
+                    decommissionAction({
+                      resourceId: deviceName,
+                      resourceName: deviceAlias,
+                      disabledReason: decommissionDisabledReason,
+                    }),
+                  ]
+                : []),
+            ]}
+          />
+        </Td>
+      )}
     </Tr>
   );
 };

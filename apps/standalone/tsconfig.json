@@ -25,6 +25,7 @@
       "@flightctl/ui-components/*": ["../../libs/ui-components/*"],
       "@flightctl/types": ["../../libs/types"],
       "@flightctl/types/imagebuilder": ["../../libs/types/imagebuilder"],
+      "@flightctl/types/alpha": ["../../libs/types/alpha"],
     },
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js", "**/*.json"],

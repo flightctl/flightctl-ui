@@ -109,6 +109,7 @@ const config: Configuration & {
         include: [
           path.resolve(__dirname, 'src'),
           path.resolve(__dirname, 'src/assets/images'),
+          path.resolve(__dirname, '../../libs/ui-components/assets'),
           path.resolve(__dirname, 'node_modules/patternfly'),
           path.resolve(__dirname, 'node_modules/@patternfly/patternfly/assets/images'),
           path.resolve(__dirname, 'node_modules/@patternfly/react-styles/css/assets/images'),
@@ -127,15 +128,6 @@ const config: Configuration & {
           ),
         ],
         type: 'asset/inline',
-        use: [
-          {
-            options: {
-              limit: 5000,
-              outputPath: 'images',
-              name: '[name].[ext]',
-            },
-          },
-        ],
       },
     ],
   },
