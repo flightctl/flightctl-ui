@@ -16,6 +16,7 @@ const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
 const uiProxyAPI = `${window.location.protocol}//${apiServer}/api`;
 
 const imageBuilderPathRegex = /^image(builds|exports)/;
+const catalogPathRegex = /^(catalogs|catalogitems)/;
 
 export const loginAPI = `${window.location.protocol}//${apiServer}/api/login`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
@@ -45,12 +46,18 @@ export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): 
   return await fetch(`${uiProxyAPI}/${endpoint}`, options);
 };
 
-const getFullApiUrl = (path: string): { api: 'flightctl' | 'imagebuilder' | 'alerts'; url: string } => {
+const getFullApiUrl = (path: string): { api: 'flightctl' | 'imagebuilder' | 'alerts' | 'catalog'; url: string } => {
   if (path.startsWith('alerts')) {
     return { api: 'alerts', url: `${uiProxyAPI}/alerts/api/v2/${path}` };
   }
   if (imageBuilderPathRegex.test(path)) {
     return { api: 'imagebuilder', url: `${uiProxyAPI}/imagebuilder/api/v1/${path}` };
+  }
+  if (catalogPathRegex.test(path)) {
+    return {
+      api: 'catalog',
+      url: `${flightCtlAPI}/api/v1/${path}`,
+    };
   }
   return { api: 'flightctl', url: `${flightCtlAPI}/api/v1/${path}` };
 };

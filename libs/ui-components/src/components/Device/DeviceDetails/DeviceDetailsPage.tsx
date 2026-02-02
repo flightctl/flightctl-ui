@@ -32,6 +32,7 @@ import PageWithPermissions from '../../common/PageWithPermissions';
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
 import DeviceAliasEdit from './DeviceAliasEdit';
 import { SystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
+import DeviceDetailsCatalog from './DeviceDetailsCatalog';
 
 type DeviceDetailsPageProps = React.PropsWithChildren<{ hideTerminal?: boolean }>;
 
@@ -149,8 +150,9 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
       resourceType="Devices"
       resourceTypeLabel={t('Devices')}
       nav={
-        <TabsNav aria-label="Device details tabs" tabKeys={['details', 'yaml', 'terminal', 'events']}>
+        <TabsNav aria-label="Device details tabs" tabKeys={['details', 'catalog', 'yaml', 'terminal', 'events']}>
           <Tab eventKey="details" title={t('Details')} />
+          {isEnrolled && <Tab eventKey="catalog" title={t('Catalog')} />}
           <Tab eventKey="yaml" title={t('YAML')} />
           {!hideTerminal && canOpenTerminal && <Tab eventKey="terminal" title={t('Terminal')} />}
           <Tab eventKey="events" title={t('Events')} />
@@ -192,6 +194,12 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
               </DeviceDetailsTab>
             }
           />
+          {isEnrolled && (
+            <Route
+              path="catalog"
+              element={<DeviceDetailsCatalog device={device} refetch={refetch} canEdit={hasEditPermissions} />}
+            />
+          )}
           <Route
             path="yaml"
             element={

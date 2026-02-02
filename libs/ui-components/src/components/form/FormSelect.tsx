@@ -15,6 +15,7 @@ type FormSelectProps = {
   children?: React.ReactNode;
   placeholderText?: string;
   withStatusIcon?: boolean;
+  onChange?: (value: string) => void;
 };
 
 const isItemObject = (item: string | SelectItem): item is SelectItem => typeof item === 'object';
@@ -28,6 +29,7 @@ const FormSelect = ({
   helperText,
   placeholderText,
   children,
+  onChange,
 }: React.PropsWithChildren<FormSelectProps>) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [field, meta, { setValue, setTouched }] = useField<string>({
@@ -63,6 +65,7 @@ const FormSelect = ({
         id={fieldId}
         selected={field.value}
         onSelect={(_, value) => {
+          onChange?.(value as string);
           setValue(value as string, true);
           setIsOpen(false);
         }}

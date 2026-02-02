@@ -15,6 +15,7 @@ type FleetsEndpointArgs = {
   name?: string;
   nextContinue?: string;
   addDevicesSummary?: boolean;
+  limit?: number;
 };
 
 export const useFleetBackendFilters = () => {

@@ -41,7 +41,13 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
     onlyDecommissioned ? undefined : removeDecommissionedDevices,
   );
 
-  const [data, loading, error, updating, refetch] = useDevices({
+  const {
+    devices: data,
+    isLoading: loading,
+    error,
+    isUpdating: updating,
+    refetch,
+  } = useDevices({
     nameOrAlias,
     ownerFleets,
     onlyDecommissioned,

@@ -30,7 +30,7 @@ type YamlEditorProps<R extends FlightCtlYamlResource> = Partial<Omit<PfCodeEdito
   canEdit?: boolean;
 };
 
-const convertObjToYAMLString = (obj: FlightCtlYamlResource) => {
+export const convertObjToYAMLString = (obj: unknown) => {
   let yaml = '';
   if (obj) {
     try {
