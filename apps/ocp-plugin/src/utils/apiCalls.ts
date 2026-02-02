@@ -7,6 +7,7 @@ import {
   getErrorMsgFromApiResponse,
 } from '@flightctl/ui-components/src/utils/apiCalls';
 import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
+import { API_VERSION } from '@flightctl/ui-components/src/constants';
 
 declare global {
   interface Window {
@@ -15,12 +16,15 @@ declare global {
   }
 }
 
-const addRequiredHeaders = (options: RequestInit): RequestInit => {
+const addRequiredHeaders = (options: RequestInit, apiVersion?: string): RequestInit => {
   const token = getCSRFToken();
   const orgId = localStorage.getItem(ORGANIZATION_STORAGE_KEY);
 
   const headers = new Headers(options.headers || {});
   headers.set('X-CSRFToken', token);
+  if (apiVersion) {
+    headers.set('Flightctl-API-Version', apiVersion);
+  }
   if (orgId) {
     headers.set('X-FlightCtl-Organization-ID', orgId);
   }
@@ -104,9 +108,9 @@ const putOrPostData = async <TRequest, TResponse = TRequest>(
     body: JSON.stringify(data),
   };
 
-  const options = addRequiredHeaders(baseOptions);
+  const { api, url } = getFullApiUrl(kind);
+  const options = addRequiredHeaders(baseOptions, api === 'flightctl' ? API_VERSION : undefined);
   try {
-    const { url } = getFullApiUrl(kind);
     const response = await fetch(url, options);
     return handleApiJSONResponse(response);
   } catch (error) {
@@ -127,9 +131,9 @@ export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Pr
     signal: abortSignal,
   };
 
-  const options = addRequiredHeaders(baseOptions);
+  const { api, url } = getFullApiUrl(kind);
+  const options = addRequiredHeaders(baseOptions, api === 'flightctl' ? API_VERSION : undefined);
   try {
-    const { url } = getFullApiUrl(kind);
     const response = await fetch(url, options);
     return handleApiJSONResponse(response);
   } catch (error) {
@@ -148,9 +152,9 @@ export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal
     signal: abortSignal,
   };
 
-  const options = addRequiredHeaders(baseOptions);
+  const { api, url } = getFullApiUrl(kind);
+  const options = addRequiredHeaders(baseOptions, api === 'flightctl' ? API_VERSION : undefined);
   try {
-    const { url } = getFullApiUrl(kind);
     const response = await fetch(url, options);
     return handleApiJSONResponse(response);
   } catch (error) {
@@ -167,7 +171,7 @@ export const fetchData = async <R>(path: string, abortSignal?: AbortSignal): Pro
       signal: abortSignal,
     };
 
-    const options = addRequiredHeaders(baseOptions);
+    const options = addRequiredHeaders(baseOptions, api === 'flightctl' ? API_VERSION : undefined);
 
     const response = await fetch(url, options);
     if (api === 'alerts') {
