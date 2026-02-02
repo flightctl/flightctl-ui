@@ -1,16 +1,20 @@
 import {
-  AppType,
-  ApplicationResourceLimits,
+  ApplicationProviderSpec,
+  ComposeApplication,
   ConfigProviderSpec,
+  ContainerApplication,
   DisruptionBudget,
   GitConfigProviderSpec,
+  HelmApplication,
   HttpConfigProviderSpec,
   ImageApplicationProviderSpec,
   ImagePullPolicy,
+  InlineApplicationProviderSpec,
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
+  QuadletApplication,
 } from '@flightctl/types';
-import { ApplicationProviderSpecFixed, FlightCtlLabel } from './extraTypes';
+import { FlightCtlLabel } from './extraTypes';
 import { UpdateScheduleMode } from '../utils/time';
 
 export const RUN_AS_DEFAULT_USER = 'flightctl';
@@ -35,76 +39,11 @@ export type GitConfigTemplate = ConfigTemplate & {
   path: string;
 };
 
+/** Used when adding a Compose/Quadlet app to choose image vs inline source. */
 export enum AppSpecType {
   OCI_IMAGE = 'image',
   INLINE = 'inline',
 }
-
-type InlineContent = {
-  content?: string;
-  path: string;
-  base64?: boolean;
-};
-
-type AppBase = {
-  appType: AppType;
-  specType: AppSpecType;
-  name?: string;
-  variables: { name: string; value: string }[];
-  volumes?: ApplicationVolumeForm[];
-};
-
-export type PortMapping = {
-  hostPort: string;
-  containerPort: string;
-};
-
-export type SingleContainerAppForm = AppBase & {
-  appType: AppType.AppTypeContainer;
-  specType: AppSpecType.OCI_IMAGE;
-  name: string;
-  image: string;
-  ports?: PortMapping[];
-  limits?: ApplicationResourceLimits;
-  runAs?: string;
-};
-
-export type QuadletImageAppForm = AppBase & {
-  appType: AppType.AppTypeQuadlet;
-  specType: AppSpecType.OCI_IMAGE;
-  image: string;
-  runAs?: string;
-};
-
-export type QuadletInlineAppForm = AppBase & {
-  appType: AppType.AppTypeQuadlet;
-  specType: AppSpecType.INLINE;
-  name: string; // transforms the field in required
-  files: InlineContent[];
-  runAs?: string;
-};
-
-export type ComposeImageAppForm = AppBase & {
-  appType: AppType.AppTypeCompose;
-  specType: AppSpecType.OCI_IMAGE;
-  image: string;
-};
-
-export type ComposeInlineAppForm = AppBase & {
-  appType: AppType.AppTypeCompose;
-  specType: AppSpecType.INLINE;
-  name: string;
-  files: InlineContent[];
-};
-
-export type HelmImageAppForm = Omit<AppBase, 'variables' | 'volumes'> & {
-  appType: AppType.AppTypeHelm;
-  specType: AppSpecType.OCI_IMAGE;
-  image: string;
-  namespace?: string;
-  valuesFiles: Array<string>;
-  valuesYaml?: string;
-};
 
 export const isGitConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is GitConfigTemplate =>
   configTemplate.type === ConfigType.GIT;
@@ -123,50 +62,70 @@ export type RepoConfig = GitConfigProviderSpec | HttpConfigProviderSpec;
 export const isRepoConfig = (config: ConfigSourceProvider): config is RepoConfig =>
   isGitProviderSpec(config) || isHttpProviderSpec(config);
 
-export type AppForm =
-  | QuadletImageAppForm
-  | QuadletInlineAppForm
-  | ComposeImageAppForm
-  | ComposeInlineAppForm
-  | SingleContainerAppForm
-  | HelmImageAppForm;
-
-export const isImageAppProvider = (
-  app: ApplicationProviderSpecFixed,
-): app is ApplicationProviderSpecFixed & ImageApplicationProviderSpec => 'image' in app;
-
-// Type guards for the 5 explicit types
-export const isQuadletImageAppForm = (app: AppForm): app is QuadletImageAppForm =>
-  app.appType === AppType.AppTypeQuadlet && app.specType === AppSpecType.OCI_IMAGE;
-export const isQuadletInlineAppForm = (app: AppForm): app is QuadletInlineAppForm =>
-  app.appType === AppType.AppTypeQuadlet && app.specType === AppSpecType.INLINE;
-export const isComposeImageAppForm = (app: AppForm): app is ComposeImageAppForm =>
-  app.appType === AppType.AppTypeCompose && app.specType === AppSpecType.OCI_IMAGE;
-export const isComposeInlineAppForm = (app: AppForm): app is ComposeInlineAppForm =>
-  app.appType === AppType.AppTypeCompose && app.specType === AppSpecType.INLINE;
-export const isSingleContainerAppForm = (app: AppForm): app is SingleContainerAppForm =>
-  app.appType === AppType.AppTypeContainer;
-export const isHelmImageAppForm = (app: AppForm): app is HelmImageAppForm =>
-  app.appType === AppType.AppTypeHelm && app.specType === AppSpecType.OCI_IMAGE;
+export const isImageVariantApp = (
+  app: ApplicationProviderSpec,
+): app is ApplicationProviderSpec & ImageApplicationProviderSpec => 'image' in app;
+export const isInlineVariantApp = (
+  app: ApplicationProviderSpec,
+): app is ApplicationProviderSpec & InlineApplicationProviderSpec => 'inline' in app;
 
 export type ApplicationVolumeForm = {
   name: string;
-  imageRef?: string;
-  imagePullPolicy?: ImagePullPolicy;
-  mountPath?: string;
+  imageRef: string;
+  imagePullPolicy: ImagePullPolicy;
+  mountPath: string;
 };
+
+export type PortMapping = {
+  hostPort: string;
+  containerPort: string;
+};
+
+export type VariablesForm = { name: string; value: string }[];
+
+export type InlineFileForm = { path: string; content?: string; base64?: boolean };
+
+type InlineOrImageVariantForm = {
+  specType: AppSpecType;
+  image: string;
+  files: InlineFileForm[];
+};
+
+export type SingleContainerAppForm = Omit<ContainerApplication, 'ports' | 'resources' | 'envVars' | 'volumes'> & {
+  specType: AppSpecType.OCI_IMAGE;
+  ports: PortMapping[];
+  cpuLimit: string;
+  memoryLimit: string;
+  variables: VariablesForm;
+  volumes: ApplicationVolumeForm[];
+};
+
+export type HelmAppForm = Omit<HelmApplication, 'values'> & {
+  specType: AppSpecType.OCI_IMAGE;
+  valuesYaml?: string;
+  valuesFiles: string[];
+};
+
+export type QuadletAppForm = Omit<QuadletApplication, 'envVars' | 'volumes' | 'image' | 'inline'> &
+  InlineOrImageVariantForm & {
+    variables: VariablesForm;
+    volumes: ApplicationVolumeForm[];
+  };
+
+export type ComposeAppForm = Omit<ComposeApplication, 'envVars' | 'volumes' | 'image' | 'inline'> &
+  InlineOrImageVariantForm & {
+    variables: VariablesForm;
+    volumes: ApplicationVolumeForm[];
+  };
+
+export type AppForm = SingleContainerAppForm | HelmAppForm | QuadletAppForm | ComposeAppForm;
 
 const hasTemplateVariables = (str: string) => /{{.+?}}/.test(str);
 
-export const getAppIdentifier = (app: AppForm) => {
-  if (isSingleContainerAppForm(app)) {
-    return app.name || app.image;
-  }
-  if (isQuadletImageAppForm(app) || isComposeImageAppForm(app)) {
-    return app.name || app.image;
-  }
-  // Name is mandatory for inline applications
-  return app.name;
+export const getAppIdentifier = (app: AppForm | ApplicationProviderSpec): string => {
+  if (app.name) return app.name;
+  if ('image' in app && app.image) return app.image;
+  return '';
 };
 
 const removeSlashes = (url: string | undefined) => (url || '').replace(/^\/+|\/+$/g, '');
@@ -214,7 +173,7 @@ export const isKubeProviderSpec = (providerSpec: ConfigProviderSpec): providerSp
 
 export type InlineConfigTemplate = ConfigTemplate & {
   type: ConfigType.INLINE;
-  files: Array<InlineContent & { permissions?: string; user?: string; group?: string }>;
+  files: Array<InlineFileForm & { permissions?: string; user?: string; group?: string }>;
 };
 
 export const isInlineConfigTemplate = (configTemplate: ConfigTemplate): configTemplate is InlineConfigTemplate =>
