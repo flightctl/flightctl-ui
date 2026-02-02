@@ -145,9 +145,10 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
             {specType === AppSpecType.INLINE && (
               <ApplicationInlineForm files={app.files || []} index={index} isReadOnly={isReadOnly} />
             )}
-            {(isQuadlet || isContainer) && <ApplicationIntegritySettings index={index} isReadOnly={isReadOnly} />}
           </>
         )}
+
+        {(isQuadlet || isContainer) && <ApplicationIntegritySettings index={index} isReadOnly={isReadOnly} />}
 
         {!isHelm && (
           <>

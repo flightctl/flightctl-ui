@@ -9,7 +9,6 @@ import ErrorHelperText from '../../../form/FieldHelperText';
 import { isDuplicatePortMapping, isValidPortMapping, validatePortNumber } from '../../../form/validations';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { PortMapping, SingleContainerAppForm } from '../../../../types/deviceSpec';
-import ApplicationIntegritySettings from './ApplicationIntegritySettings';
 
 import './ApplicationContainerForm.css';
 
@@ -288,7 +287,6 @@ const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isRead
           </FormGroupWithHelperText>
         </Grid>
       </FormGroup>
-      <ApplicationIntegritySettings index={index} isReadOnly={isReadOnly} />
     </Grid>
   );
 };
