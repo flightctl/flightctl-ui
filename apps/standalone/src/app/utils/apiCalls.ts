@@ -5,7 +5,6 @@ import {
   getErrorMsgFromApiResponse,
 } from '@flightctl/ui-components/src/utils/apiCalls';
 import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
-import { API_VERSION } from '@flightctl/ui-components/src/constants';
 
 import { lastRefresh } from '../context/AuthContext';
 
@@ -108,13 +107,6 @@ const fetchWithRetry = async <R>(path: string, init?: RequestInit): Promise<R> =
 
   // Add organization header if available
   const options = addOrganizationHeader({ ...init });
-
-  // Add version header only for FlightCtl API
-  if (api === 'flightctl') {
-    const headers = new Headers(options.headers);
-    headers.set('Flightctl-API-Version', API_VERSION);
-    options.headers = headers;
-  }
 
   const prevRefresh = lastRefresh;
   let response = await fetch(url, options);
