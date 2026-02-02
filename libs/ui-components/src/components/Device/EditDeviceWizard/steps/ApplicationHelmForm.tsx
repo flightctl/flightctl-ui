@@ -8,20 +8,13 @@ import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
 import UploadField from '../../../form/UploadField';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { AppSpecType, HelmImageAppForm } from '../../../../types/deviceSpec';
+import { AppSpecType, HelmAppForm } from '../../../../types/deviceSpec';
 
-const ApplicationHelmForm = ({
-  app,
-  index,
-  isReadOnly,
-}: {
-  app: HelmImageAppForm;
-  index: number;
-  isReadOnly?: boolean;
-}) => {
+const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
   const appFieldName = `applications[${index}]`;
-  const [{ value: valuesFiles }] = useField<Array<string>>(`${appFieldName}.valuesFiles`);
+  const [{ value: app }] = useField<HelmAppForm>(`${appFieldName}`);
+  const valuesFiles = app.valuesFiles || [];
   const canAddValuesFile = valuesFiles && valuesFiles.every((file) => file && file.trim() !== '');
 
   return (
@@ -48,7 +41,6 @@ const ApplicationHelmForm = ({
         <TextField
           aria-label={t('Image')}
           name={`${appFieldName}.image`}
-          value={app.image || ''}
           isDisabled={isReadOnly}
           helperText={t('Provide a valid image reference')}
         />

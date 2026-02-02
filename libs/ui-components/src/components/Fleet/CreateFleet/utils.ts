@@ -34,7 +34,7 @@ import {
   getDeviceSpecConfigPatches,
   getSystemdUnitsValues,
   hasMicroshiftRegistrationConfig,
-  toAPIApplication,
+  toApiApplication,
 } from '../../Device/EditDeviceWizard/deviceSpecUtils';
 import { getDisruptionBudgetValues, getRolloutPolicyValues, getUpdatePolicyValues } from './fleetSpecUtils';
 import { FleetFormValues, UpdatePolicyForm } from '../../../types/deviceSpec';
@@ -197,7 +197,7 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
         spec: {
           os: values.osImage ? { image: values.osImage || '' } : undefined,
           config: values.configTemplates.map(getApiConfig),
-          applications: values.applications.map(toAPIApplication),
+          applications: values.applications.map(toApiApplication),
           ...systemdPatterns,
         },
       },

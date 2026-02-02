@@ -85,11 +85,6 @@ module.exports = {
             name: 'lodash',
             message: 'Import using full path `lodash/<function>` instead',
           },
-          {
-            name: '@flightctl/types',
-            importNames: ['ApplicationProviderSpec'],
-            message: 'Use FixedApplicationProviderSpec instead',
-          },
         ],
       },
     ],

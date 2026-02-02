@@ -18,7 +18,6 @@ import './ApplicationVolumeForm.css';
 
 type ApplicationVolumeFormProps = {
   appFieldName: string;
-  volumes: VolumeFormType[];
   isReadOnly?: boolean;
   isSingleContainerApp?: boolean;
 };
@@ -31,16 +30,15 @@ const getPullPolicyOptions = (t: TFunction) => ({
 
 const ApplicationVolumeForm = ({
   appFieldName,
-  volumes,
   isReadOnly,
   isSingleContainerApp = false,
 }: ApplicationVolumeFormProps) => {
   const { t } = useTranslation();
-  const [, { error }] = useField<VolumeFormType[]>(`${appFieldName}.volumes`);
-
   const pullPolicyOptions = React.useMemo(() => getPullPolicyOptions(t), [t]);
 
+  const [{ value: volumes = [] }, { error }] = useField<VolumeFormType[]>(`${appFieldName}.volumes`);
   const volumesError = typeof error === 'string' ? error : undefined;
+
   return (
     <FormGroup label={t('Volumes')} className="fctl-application-volume-form">
       <FieldArray name={`${appFieldName}.volumes`}>
@@ -126,15 +124,12 @@ const ApplicationVolumeForm = ({
                   icon={<PlusCircleIcon />}
                   iconPosition="start"
                   onClick={() => {
-                    const emptyVolume: VolumeFormType = {
+                    push({
                       name: '',
                       imageRef: '',
                       imagePullPolicy: ImagePullPolicy.PullIfNotPresent,
-                    };
-                    if (isSingleContainerApp) {
-                      emptyVolume.mountPath = '';
-                    }
-                    push(emptyVolume);
+                      mountPath: '',
+                    });
                   }}
                 >
                   {t('Add volume')}
