@@ -4,8 +4,8 @@ import {
   getErrorMsgFromAlertsApiResponse,
   getErrorMsgFromApiResponse,
 } from '@flightctl/ui-components/src/utils/apiCalls';
+import { getApiVersion } from '@flightctl/ui-components/src/constants';
 import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
-import { API_VERSION } from '@flightctl/ui-components/src/constants';
 
 import { lastRefresh } from '../context/AuthContext';
 
@@ -45,7 +45,7 @@ export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): 
   return await fetch(`${uiProxyAPI}/${endpoint}`, options);
 };
 
-const getFullApiUrl = (path: string) => {
+const getFullApiUrl = (path: string): { api: 'flightctl' | 'imagebuilder' | 'alerts'; url: string } => {
   if (path.startsWith('alerts')) {
     return { api: 'alerts', url: `${uiProxyAPI}/alerts/api/v2/${path}` };
   }
@@ -106,13 +106,11 @@ const handleAlertsJSONResponse = async <R>(response: Response): Promise<R> => {
 const fetchWithRetry = async <R>(path: string, init?: RequestInit): Promise<R> => {
   const { api, url } = getFullApiUrl(path);
 
-  // Add organization header if available
   const options = addOrganizationHeader({ ...init });
-
-  // Add version header only for FlightCtl API
-  if (api === 'flightctl') {
+  const apiVersion = getApiVersion(api);
+  if (apiVersion) {
     const headers = new Headers(options.headers);
-    headers.set('Flightctl-API-Version', API_VERSION);
+    headers.set('Flightctl-API-Version', apiVersion);
     options.headers = headers;
   }
 

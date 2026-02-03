@@ -1,7 +1,7 @@
 import { Fleet, PatchRequest } from '@flightctl/types';
 import { TFunction } from 'i18next';
 import * as Yup from 'yup';
-import { API_VERSION } from '../../../constants';
+import { CORE_API_VERSION } from '../../../constants';
 import { toAPILabel } from '../../../utils/labels';
 import {
   systemdUnitListValidationSchema,
@@ -178,7 +178,7 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
           },
         };
   const fleet: Fleet = {
-    apiVersion: API_VERSION,
+    apiVersion: CORE_API_VERSION,
     kind: 'Fleet',
     metadata: {
       name: values.name,
