@@ -16,7 +16,7 @@ import {
 } from '@flightctl/types';
 
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
-import { API_VERSION } from '../../../constants';
+import { CORE_API_VERSION } from '../../../constants';
 import { getErrorMessage } from '../../../utils/error';
 import { appendJSONPatch } from '../../../utils/patch';
 import { MAX_TARGET_REVISION_LENGTH, maxLengthString, validKubernetesDnsSubdomain } from '../../form/validations';
@@ -779,7 +779,7 @@ export const getRepository = (values: Omit<RepositoryFormValues, 'useResourceSyn
     }
 
     return {
-      apiVersion: API_VERSION,
+      apiVersion: CORE_API_VERSION,
       kind: 'Repository',
       metadata: {
         name: values.name,
@@ -877,7 +877,7 @@ export const getRepository = (values: Omit<RepositoryFormValues, 'useResourceSyn
   }
 
   return {
-    apiVersion: API_VERSION,
+    apiVersion: CORE_API_VERSION,
     kind: 'Repository',
     metadata: {
       name: values.name,
@@ -888,7 +888,7 @@ export const getRepository = (values: Omit<RepositoryFormValues, 'useResourceSyn
 
 export const getResourceSync = (repositoryId: string, values: ResourceSyncFormValue): ResourceSync => {
   return {
-    apiVersion: API_VERSION,
+    apiVersion: CORE_API_VERSION,
     kind: 'ResourceSync',
     metadata: {
       name: values.name,

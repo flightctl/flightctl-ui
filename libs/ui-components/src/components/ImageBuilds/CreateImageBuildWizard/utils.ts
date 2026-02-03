@@ -10,7 +10,7 @@ import {
   ImageExport,
   ResourceKind,
 } from '@flightctl/types/imagebuilder';
-import { API_VERSION } from '../../../constants';
+import { IMAGEBUILDER_API_VERSION } from '../../../constants';
 import { ImageBuildFormValues } from './types';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
 
@@ -162,7 +162,7 @@ export const getImageBuildResource = (values: ImageBuildFormValues): ImageBuild 
   }
 
   return {
-    apiVersion: API_VERSION,
+    apiVersion: IMAGEBUILDER_API_VERSION,
     kind: ResourceKind.IMAGE_BUILD,
     metadata: {
       name,
@@ -175,7 +175,7 @@ export const getImageExportResource = (imageBuildName: string, format: ExportFor
   const exportName = generateExportName(imageBuildName, format);
 
   return {
-    apiVersion: API_VERSION,
+    apiVersion: IMAGEBUILDER_API_VERSION,
     kind: ResourceKind.IMAGE_EXPORT,
     metadata: {
       name: exportName,
