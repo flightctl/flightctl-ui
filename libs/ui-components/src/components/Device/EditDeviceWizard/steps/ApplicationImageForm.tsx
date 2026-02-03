@@ -6,17 +6,8 @@ import TextField from '../../../form/TextField';
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useAppLinks } from '../../../../hooks/useAppLinks';
-import { ComposeImageAppForm, QuadletImageAppForm } from '../../../../types/deviceSpec';
 
-const ApplicationImageForm = ({
-  app,
-  index,
-  isReadOnly,
-}: {
-  app: QuadletImageAppForm | ComposeImageAppForm;
-  index: number;
-  isReadOnly?: boolean;
-}) => {
+const ApplicationImageForm = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
   const createAppLink = useAppLinks('createApp');
 
@@ -32,12 +23,7 @@ const ApplicationImageForm = ({
         }
         isRequired
       >
-        <TextField
-          aria-label={t('Image')}
-          name={`applications.${index}.image`}
-          value={app.image || ''}
-          isDisabled={isReadOnly}
-        />
+        <TextField aria-label={t('Image')} name={`applications.${index}.image`} isDisabled={isReadOnly} />
       </FormGroupWithHelperText>
     </Grid>
   );

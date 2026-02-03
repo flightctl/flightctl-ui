@@ -9,12 +9,12 @@ import CheckboxField from '../../../form/CheckboxField';
 import UploadField from '../../../form/UploadField';
 import TextField from '../../../form/TextField';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
-import { ComposeInlineAppForm, QuadletInlineAppForm } from '../../../../types/deviceSpec';
+import { InlineFileForm } from '../../../../types/deviceSpec';
 
 const MAX_INLINE_FILE_SIZE_BYTES = 1024 * 1024;
 
 type InlineApplicationFileFormProps = {
-  file: (QuadletInlineAppForm | ComposeInlineAppForm)['files'][0];
+  file: InlineFileForm;
   fileFieldName: string;
   fileIndex: number;
   isReadOnly?: boolean;
@@ -55,17 +55,18 @@ const InlineApplicationFileForm = ({ file, fileIndex, fileFieldName, isReadOnly 
 };
 
 const ApplicationInlineForm = ({
-  app,
+  files,
   index,
   isReadOnly,
 }: {
-  app: QuadletInlineAppForm | ComposeInlineAppForm;
+  files: InlineFileForm[];
   index: number;
   isReadOnly?: boolean;
 }) => {
   const { t } = useTranslation();
 
-  if (isReadOnly && !app.files?.length) {
+  const fileList = files || [];
+  if (isReadOnly && fileList.length === 0) {
     return null;
   }
 
@@ -74,7 +75,7 @@ const ApplicationInlineForm = ({
       <FieldArray name={`applications.${index}.files`}>
         {({ push, remove }) => (
           <>
-            {app.files?.map((file, fileIndex) => {
+            {fileList.map((file, fileIndex) => {
               const fieldName = `applications[${index}].files[${fileIndex}]`;
               return (
                 <Split key={fileIndex} hasGutter>
@@ -86,7 +87,7 @@ const ApplicationInlineForm = ({
                       isReadOnly={isReadOnly}
                     />
                   </SplitItem>
-                  {!isReadOnly && app.files.length > 1 && (
+                  {!isReadOnly && fileList.length > 1 && (
                     <SplitItem>
                       <Button
                         aria-label={t('Delete file')}
