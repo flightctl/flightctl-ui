@@ -10,7 +10,10 @@ const { rimraf, copyDir, fixImagebuilderCoreReferences } = require('./openapi-ut
 const CORE_API = 'core';
 const IMAGEBUILDER_API = 'imagebuilder';
 
-const getSwaggerUrl = (api) => `https://raw.githubusercontent.com/flightctl/flightctl/main/api/${api}/v1beta1`;
+const getSwaggerUrl = (api) => {
+  const apiVersion = api === CORE_API ? 'v1beta1' : 'v1alpha1';
+  return `https://raw.githubusercontent.com/flightctl/flightctl/main/api/${api}/${apiVersion}/openapi.yaml`;
+};
 
 const processJsonAPI = (jsonString) => {
   const json = YAML.load(jsonString);
@@ -29,12 +32,12 @@ const processJsonAPI = (jsonString) => {
 async function generateTypes(mode) {
   const config = {
     [CORE_API]: {
-      swaggerUrl: `${getSwaggerUrl(CORE_API)}/openapi.yaml`,
+      swaggerUrl: getSwaggerUrl(CORE_API),
       output: path.resolve(__dirname, '../tmp-types'),
       finalDir: path.resolve(__dirname, '../models'),
     },
     [IMAGEBUILDER_API]: {
-      swaggerUrl: `${getSwaggerUrl(IMAGEBUILDER_API)}/openapi.yaml`,
+      swaggerUrl: getSwaggerUrl(IMAGEBUILDER_API),
       output: path.resolve(__dirname, '../tmp-imagebuilder-types'),
       finalDir: path.resolve(__dirname, '../imagebuilder/models'),
     },
