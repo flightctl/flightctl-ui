@@ -17,8 +17,9 @@ import {
 import { FlightCtlLabel } from './extraTypes';
 import { UpdateScheduleMode } from '../utils/time';
 
-export const RUN_AS_DEFAULT_USER = 'flightctl';
+// At the moment the "root" user is the default user when no user is specified.
 export const RUN_AS_ROOT_USER = 'root';
+export const RUN_AS_FLIGHTCTL_USER = 'flightctl';
 
 export enum ConfigType {
   GIT = 'git',
