@@ -5,7 +5,7 @@ import { Content, FormGroup, FormSection, Switch } from '@patternfly/react-core'
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import { DefaultHelperText } from '../../../form/FieldHelperText';
-import { RUN_AS_DEFAULT_USER, RUN_AS_ROOT_USER } from '../../../../types/deviceSpec';
+import { RUN_AS_FLIGHTCTL_USER, RUN_AS_ROOT_USER } from '../../../../types/deviceSpec';
 
 type ApplicationIntegritySettingsProps = {
   index: number;
@@ -27,7 +27,7 @@ const ApplicationIntegritySettings = ({ index, isReadOnly }: ApplicationIntegrit
           label={isRootless ? t('System integrity protection enabled') : t('System integrity protection disabled')}
           isChecked={isRootless}
           onChange={async (_, checked) => {
-            await setRunAs(checked ? RUN_AS_DEFAULT_USER : RUN_AS_ROOT_USER);
+            await setRunAs(checked ? RUN_AS_FLIGHTCTL_USER : RUN_AS_ROOT_USER);
           }}
           isDisabled={isReadOnly}
         />
@@ -46,13 +46,13 @@ const ApplicationIntegritySettings = ({ index, isReadOnly }: ApplicationIntegrit
           <TextField
             aria-label={t('Rootless user identity')}
             name={`${appFieldName}.runAs`}
-            value={runAs || RUN_AS_DEFAULT_USER}
+            value={runAs}
             isDisabled
             readOnly
             helperText={t(
-              "By default, workloads run as the '{{ runAsUser }}' user. To specify a custom user identity, edit the application configuration via YAML or CLI.",
+              "The recommended user identity is '{{ runAsUser }}'. To specify a custom user identity, edit the application configuration via YAML or CLI.",
               {
-                runAsUser: RUN_AS_DEFAULT_USER,
+                runAsUser: RUN_AS_FLIGHTCTL_USER,
               },
             )}
           />
