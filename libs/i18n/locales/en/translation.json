@@ -407,7 +407,7 @@
   "System integrity protection disabled": "System integrity protection disabled",
   "Prevents this workload from modifying critical host operating system files. We recommend keeping this enabled to maintain system integrity.": "Prevents this workload from modifying critical host operating system files. We recommend keeping this enabled to maintain system integrity.",
   "Rootless user identity": "Rootless user identity",
-  "By default, workloads run as the '{{ runAsUser }}' user. To specify a custom user identity, edit the application configuration via YAML or CLI.": "By default, workloads run as the '{{ runAsUser }}' user. To specify a custom user identity, edit the application configuration via YAML or CLI.",
+  "The recommended user identity is '{{ runAsUser }}'. To specify a custom user identity, edit the application configuration via YAML or CLI.": "The recommended user identity is '{{ runAsUser }}'. To specify a custom user identity, edit the application configuration via YAML or CLI.",
   "Application {{ appNum }}": "Application {{ appNum }}",
   "Application type": "Application type",
   "Select an application type": "Select an application type",

@@ -6,7 +6,7 @@ import { DeviceApplicationStatus } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import ApplicationStatus from '../../Status/ApplicationStatus';
 import { getAppTypeLabel } from '../../../utils/apps';
-import { RUN_AS_DEFAULT_USER } from '../../../types/deviceSpec';
+import { RUN_AS_ROOT_USER } from '../../../types/deviceSpec';
 
 type ApplicationsTableProps = {
   appsStatus: DeviceApplicationStatus[];
@@ -45,7 +45,7 @@ const ApplicationsTable = ({ appsStatus }: ApplicationsTableProps) => {
               <Td dataLabel={t('Type')}>
                 {app.appType ? <Label variant="outline">{getAppTypeLabel(app.appType, t)}</Label> : '-'}
               </Td>
-              <Td dataLabel={t('Run as user')}>{app.runAs || RUN_AS_DEFAULT_USER}</Td>
+              <Td dataLabel={t('Run as user')}>{app.runAs || RUN_AS_ROOT_USER}</Td>
               <Td dataLabel={t('Embedded')}>{app.embedded ? t('Yes') : t('No')}</Td>
             </Tr>
           );
