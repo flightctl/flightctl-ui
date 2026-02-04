@@ -18,6 +18,7 @@ type ImageBuildRowProps = {
   rowIndex: number;
   onRowSelect: (imageBuild: ImageBuild) => OnSelect;
   isRowSelected: (imageBuild: ImageBuild) => boolean;
+  canCreate: boolean;
   canDelete: boolean;
   onDeleteClick: VoidFunction;
   refetch: VoidFunction;
@@ -29,6 +30,7 @@ const ImageBuildRow = ({
   onRowSelect,
   isRowSelected,
   onDeleteClick,
+  canCreate,
   canDelete,
   refetch,
 }: ImageBuildRowProps) => {
@@ -48,12 +50,14 @@ const ImageBuildRow = ({
     },
   ];
 
-  actions.push({
-    title: buildReason === ImageBuildConditionReason.ImageBuildConditionReasonFailed ? t('Retry') : t('Duplicate'),
-    onClick: () => {
-      navigate({ route: ROUTE.IMAGE_BUILD_EDIT, postfix: imageBuildName });
-    },
-  });
+  if (canCreate) {
+    actions.push({
+      title: buildReason === ImageBuildConditionReason.ImageBuildConditionReasonFailed ? t('Retry') : t('Duplicate'),
+      onClick: () => {
+        navigate({ route: ROUTE.IMAGE_BUILD_EDIT, postfix: imageBuildName });
+      },
+    });
+  }
 
   if (canDelete) {
     actions.push({
@@ -114,17 +118,25 @@ const ImageBuildRow = ({
                           <ExclamationCircleIcon />
                         </Icon>
                       </FlexItem>
-                      <FlexItem>
-                        <Content>{t('Build failed. Please retry.')}</Content>
-                      </FlexItem>
-                      <FlexItem>
-                        <Button
-                          variant="link"
-                          onClick={() => navigate({ route: ROUTE.IMAGE_BUILD_EDIT, postfix: imageBuildName })}
-                        >
-                          {t('Retry')}
-                        </Button>
-                      </FlexItem>
+                      {canCreate ? (
+                        <>
+                          <FlexItem>
+                            <Content>{t('Build failed. Please retry.')}</Content>
+                          </FlexItem>
+                          <FlexItem>
+                            <Button
+                              variant="link"
+                              onClick={() => navigate({ route: ROUTE.IMAGE_BUILD_EDIT, postfix: imageBuildName })}
+                            >
+                              {t('Retry')}
+                            </Button>
+                          </FlexItem>
+                        </>
+                      ) : (
+                        <FlexItem>
+                          <Content>{t('Build failed.')}</Content>
+                        </FlexItem>
+                      )}
                     </Flex>
                   )}
                   <StackItem>
