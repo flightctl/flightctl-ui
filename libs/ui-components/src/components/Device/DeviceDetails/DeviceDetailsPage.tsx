@@ -59,9 +59,10 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
   const isEnrolled = !device || isDeviceEnrolled(device);
 
   const { checkPermissions } = usePermissionsContext();
-  const [hasTerminalAccess, canDelete, canEdit, canDecommission, canResume] =
+  const [hasTerminalAccess, canDelete, hasEditPermissions, canDecommission, canResume] =
     checkPermissions(deviceDetailsPermissions);
 
+  const canEdit = hasEditPermissions && isEnrolled;
   const canOpenTerminal = hasTerminalAccess && isEnrolled;
 
   const { deleteAction, deleteModal } = useDeleteAction({
@@ -159,7 +160,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
         isEnrolled ? (
           <DetailsPageActions>
             <DropdownList>
-              {canEdit && (
+              {hasEditPermissions && (
                 <DropdownItem
                   onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}
                   {...editActionProps}
@@ -186,7 +187,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
           <Route
             path="details"
             element={
-              <DeviceDetailsTab device={device} refetch={refetch} canEdit={canEdit}>
+              <DeviceDetailsTab device={device} refetch={refetch} canEdit={hasEditPermissions}>
                 {children}
               </DeviceDetailsTab>
             }
@@ -194,7 +195,12 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
           <Route
             path="yaml"
             element={
-              <YamlEditor apiObj={device} refetch={refetch} disabledEditReason={editDisabledReason} canEdit={canEdit} />
+              <YamlEditor
+                apiObj={device}
+                refetch={refetch}
+                disabledEditReason={editDisabledReason}
+                canEdit={hasEditPermissions}
+              />
             }
           />
           {!hideTerminal && canOpenTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
