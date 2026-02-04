@@ -154,13 +154,9 @@ const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isRead
 
   return (
     <Grid hasGutter>
-      <FormGroupWithHelperText
-        label={t('Application name')}
-        content={t('If not specified, the image name will be used. Application name must be unique.')}
-        isRequired
-      >
+      <FormGroup label={t('Application name')} isRequired>
         <TextField aria-label={t('Application name')} name={`${appFieldName}.name`} isDisabled={isReadOnly} />
-      </FormGroupWithHelperText>
+      </FormGroup>
       <FormGroup label={t('Image')} isRequired>
         <TextField
           aria-label={t('Image')}
