@@ -38,7 +38,8 @@ import {
   InlineFileForm,
   KubeSecretTemplate,
   QuadletAppForm,
-  RUN_AS_DEFAULT_USER,
+  RUN_AS_FLIGHTCTL_USER,
+  RUN_AS_ROOT_USER,
   SingleContainerAppForm,
   SpecConfigTemplate,
   SystemdUnitFormValue,
@@ -292,6 +293,15 @@ const haveValuesFilesChanged = (current: string[], updated: string[]): boolean =
 const haveHelmValuesChanged = (current: Record<string, unknown>, updated: Record<string, unknown>): boolean =>
   JSON.stringify(current) !== JSON.stringify(updated);
 
+const hasRunAsChanged = (current: string | undefined, updated: string | undefined): boolean => {
+  if (!current) {
+    // For empty "runAs", we mark the app as changed.
+    // This means that we'll set the field explicitly to the default user (currently "root").
+    return true;
+  }
+  return current !== updated;
+};
+
 // Single container apps always have an image, and it doesn't have an inline variant
 const hasContainerAppChanged = (current: ContainerApplication, updated: ContainerApplication): boolean =>
   hasStringChanged(current.name, updated.name) ||
@@ -299,7 +309,7 @@ const hasContainerAppChanged = (current: ContainerApplication, updated: Containe
   havePortsChanged(current.ports || [], updated.ports || []) ||
   haveResourceLimitsChanged(current.resources?.limits, updated.resources?.limits) ||
   haveEnvVarsChanged(current.envVars || {}, updated.envVars || {}) ||
-  hasStringChanged(current.runAs, updated.runAs, RUN_AS_DEFAULT_USER) ||
+  hasRunAsChanged(current.runAs, updated.runAs) ||
   haveVolumesChanged(current.volumes || [], updated.volumes || []);
 
 // Helm apps always have an image (chart), and it doesn't have an inline variant
@@ -346,7 +356,7 @@ const hasQuadletAppChanged = (
   if (baseChanged) {
     return true;
   }
-  return hasStringChanged(current.runAs, updated.runAs, RUN_AS_DEFAULT_USER);
+  return hasRunAsChanged(current.runAs, updated.runAs);
 };
 
 const hasApplicationChanged = (current: ApplicationProviderSpec, updated: ApplicationProviderSpec): boolean => {
@@ -452,7 +462,7 @@ const toApiContainerApp = (app: SingleContainerAppForm): ContainerApplication =>
     name: app.name,
     image: app.image,
     appType: app.appType,
-    runAs: app.runAs || RUN_AS_DEFAULT_USER,
+    runAs: app.runAs || RUN_AS_ROOT_USER,
     envVars: variablesToEnvVars(app.variables || []),
     volumes: formVolumesToApi(app.volumes || [], AppType.AppTypeContainer),
   };
@@ -494,7 +504,7 @@ const toApiComposeApp = (app: ComposeAppForm): ComposeApplication => {
 // Quadlet apps are currently the same as Compose apps, plus an optional "runAs" field.
 const toApiQuadletApp = (app: QuadletAppForm): QuadletApplication => {
   const baseApp = toApiComposeApp(app);
-  return { ...baseApp, appType: AppType.AppTypeQuadlet, runAs: app.runAs || RUN_AS_DEFAULT_USER };
+  return { ...baseApp, appType: AppType.AppTypeQuadlet, runAs: app.runAs || RUN_AS_ROOT_USER };
 };
 
 export const toApiApplication = (app: AppForm): ApplicationProviderSpec => {
@@ -626,6 +636,15 @@ export const getApiConfig = (ct: SpecConfigTemplate): ConfigSourceProvider => {
   };
 };
 
+const getRunAsUser = (app: ContainerApplication | QuadletApplication | undefined): string => {
+  if (app) {
+    // Existing apps that don't have a "runAs" user are actually running as the "root" user.
+    return app.runAs || RUN_AS_ROOT_USER;
+  }
+  // For new applications, we want to promote "flightctl" as the default user.
+  return RUN_AS_FLIGHTCTL_USER;
+};
+
 const toContainerAppForm = (containerApp: ContainerApplication | undefined): SingleContainerAppForm => {
   const ports =
     containerApp?.ports?.map((portString) => {
@@ -645,7 +664,7 @@ const toContainerAppForm = (containerApp: ContainerApplication | undefined): Sin
     ports,
     cpuLimit: limits?.cpu || '',
     memoryLimit: limits?.memory || '',
-    runAs: containerApp?.runAs || RUN_AS_DEFAULT_USER,
+    runAs: getRunAsUser(containerApp),
   };
 };
 
@@ -690,10 +709,11 @@ const toComposeAppForm = (app: ComposeApplication | undefined): ComposeAppForm =
 
 const toQuadletAppForm = (app: QuadletApplication | undefined): QuadletAppForm => {
   const baseApp = toComposeAppForm(app);
+
   return {
     ...baseApp,
     appType: AppType.AppTypeQuadlet,
-    runAs: app?.runAs || RUN_AS_DEFAULT_USER,
+    runAs: getRunAsUser(app),
   };
 };
 
