@@ -402,6 +402,7 @@ const CreateRepositoryFormContent = ({ isEdit, isReadOnly, onClose, children }: 
           {showResourceSyncs && canCreateRS && (
             <Checkbox
               id="use-resource-syncs"
+              className="fctl-create-repo__rs-checkbox"
               label={
                 <LabelWithHelperText
                   label={t('Use resource syncs')}

@@ -3,5 +3,9 @@
 }
 
 .fctl-create-repo__adv-section--nested {
-    margin-left: 1.5rem;
+  margin-left: 1.5rem;
+}
+
+.fctl-create-repo__rs-checkbox {
+  --pf-v6-c-check__input--TranslateY: 0.75rem;
 }
