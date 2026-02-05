@@ -60,7 +60,7 @@ const getFullApiUrl = (path: string): { api: Api; url: string } => {
     return { api: 'alerts', url: `${alertsAPI}/api/v2/${path}` };
   }
   if (imageBuilderPathRegex.test(path)) {
-    return { api: 'imagebuilder', url: `${uiProxy}/imagebuilder/api/v1/${path}` };
+    return { api: 'imagebuilder', url: `${uiProxy}/api/imagebuilder/api/v1/${path}` };
   }
   return { api: 'flightctl', url: `${flightCtlAPI}/api/v1/${path}` };
 };
