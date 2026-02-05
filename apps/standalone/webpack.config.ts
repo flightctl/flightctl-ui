@@ -1,4 +1,4 @@
-import { Configuration, DefinePlugin } from 'webpack';
+import { Configuration, DefinePlugin, ResolvePluginInstance, WebpackPluginInstance } from 'webpack';
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyPlugin from 'copy-webpack-plugin';
@@ -14,7 +14,8 @@ dotenv.config();
 const BG_IMAGES_DIRNAME = 'bgimages';
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 
-const NODE_ENV = (process.env.NODE_ENV || 'development') as Configuration['mode'];
+const NODE_ENV: Configuration['mode'] =
+  process.env.NODE_ENV === 'production' ? 'production' : 'development';
 
 const config: Configuration & {
   devServer?: WebpackDevServerConfiguration;
@@ -159,14 +160,14 @@ const config: Configuration & {
     new CopyPlugin({
       patterns: [{ from: '../../libs/i18n/locales', to: 'locales' }],
     }),
-  ],
+  ] as unknown as WebpackPluginInstance[],
   resolve: {
     extensions: ['.js', '.ts', '.tsx', '.jsx'],
     plugins: [
       new TsconfigPathsPlugin({
         configFile: path.resolve(__dirname, './tsconfig.json'),
       }),
-    ],
+    ] as unknown as ResolvePluginInstance[],
     symlinks: false,
     cacheWithContext: false,
   },
@@ -192,12 +193,12 @@ if (NODE_ENV === 'production') {
         preset: ['default', { mergeLonghand: false }],
       },
     }),
-  ];
+  ] as unknown as WebpackPluginInstance[];
   config.plugins?.push(
     new MiniCssExtractPlugin({
       filename: '[name]-[contenthash].css',
       chunkFilename: '[name].bundle-[contenthash].css',
-    }),
+    }) as unknown as WebpackPluginInstance,
   );
   config.devtool = 'source-map';
 } else {
