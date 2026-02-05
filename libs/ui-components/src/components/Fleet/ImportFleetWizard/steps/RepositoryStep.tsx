@@ -14,6 +14,7 @@ import FormSelect from '../../../form/FormSelect';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { usePermissionsContext } from '../../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../../types/rbac';
+import WithTooltip from '../../../common/WithTooltip';
 
 export const repositoryStepId = 'repository';
 
@@ -93,14 +94,16 @@ const RepositoryStep = ({ repositories, hasLoaded }: { repositories: Repository[
         {canCreateRepo && (
           <FormSection>
             <FormGroup isInline>
-              <Radio
-                isChecked={values.useExistingRepo}
-                onChange={() => setFieldValue('useExistingRepo', true, true)}
-                id="existing-repo"
-                name="repo"
-                label={t('Use an existing Git repository')}
-                isDisabled={noRepositoriesExist}
-              />
+              <WithTooltip showTooltip={noRepositoriesExist} content={t('No Git repositories found')}>
+                <Radio
+                  isChecked={values.useExistingRepo}
+                  onChange={() => setFieldValue('useExistingRepo', true, true)}
+                  id="existing-repo"
+                  name="repo"
+                  label={t('Use an existing Git repository')}
+                  isDisabled={noRepositoriesExist}
+                />
+              </WithTooltip>
               <Radio
                 isChecked={!values.useExistingRepo}
                 onChange={() => setFieldValue('useExistingRepo', false, true)}
