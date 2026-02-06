@@ -4,7 +4,9 @@ import { saveAs } from 'file-saver';
 
 import { ExportFormatType, ImageExport } from '@flightctl/types/imagebuilder';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
+import { RESOURCE, VERB } from '../../../types/rbac';
 import { useFetch } from '../../../hooks/useFetch';
+import { usePermissionsContext } from '../../common/PermissionsContext';
 import { getErrorMessage } from '../../../utils/error';
 import { getImageExportResource } from '../CreateImageBuildWizard/utils';
 import { ViewImageBuildExportCard } from '../ImageExportCards';
@@ -30,8 +32,15 @@ const createDownloadLink = (url: string) => {
   document.body.removeChild(link);
 };
 
+const imageBuildExportsPermissions = [
+  { kind: RESOURCE.IMAGE_EXPORT, verb: VERB.CREATE },
+  { kind: RESOURCE.IMAGE_EXPORT_DOWNLOAD, verb: VERB.GET },
+];
+
 const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGalleryProps) => {
   const { post, proxyFetch } = useFetch();
+  const { checkPermissions } = usePermissionsContext();
+  const [canCreateExport, canDownload] = checkPermissions(imageBuildExportsPermissions);
   const [error, setError] = React.useState<{
     format: ExportFormatType;
     message: string;
@@ -117,8 +126,8 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
             isDownloading={downloadingFormat === format}
             isDisabled={isDisabled}
             onDismissError={() => setError(undefined)}
-            onExportImage={handleExportImage}
-            onDownload={handleDownload}
+            onExportImage={canCreateExport ? handleExportImage : undefined}
+            onDownload={canDownload ? handleDownload : undefined}
           />
         );
       })}

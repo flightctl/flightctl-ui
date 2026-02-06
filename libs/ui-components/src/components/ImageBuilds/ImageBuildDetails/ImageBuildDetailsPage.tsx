@@ -23,6 +23,8 @@ import ImageBuildLogsTab from './ImageBuildLogsTab';
 const imageBuildDetailsPermissions = [
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.CREATE },
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.DELETE },
+  // Users that can view logs for imagebuilds also can view logs for imageexports
+  { kind: RESOURCE.IMAGE_BUILD_LOG, verb: VERB.GET },
 ];
 
 const ImageBuildDetailsPageContent = () => {
@@ -36,8 +38,13 @@ const ImageBuildDetailsPageContent = () => {
   const [imageBuild, isLoading, error, refetch] = useImageBuild(imageBuildId);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>();
   const { checkPermissions } = usePermissionsContext();
-  const [canCreate, canDelete] = checkPermissions(imageBuildDetailsPermissions);
+  const [canCreate, canDelete, canViewLogs] = checkPermissions(imageBuildDetailsPermissions);
   const buildReason = imageBuild ? getImageBuildStatusReason(imageBuild) : undefined;
+
+  const tabKeys = React.useMemo(
+    () => (canViewLogs ? ['details', 'exports', 'yaml', 'logs'] : ['details', 'exports', 'yaml']),
+    [canViewLogs],
+  );
 
   return (
     <DetailsPage
@@ -48,11 +55,11 @@ const ImageBuildDetailsPageContent = () => {
       resourceType="Image builds"
       resourceTypeLabel={t('Image builds')}
       nav={
-        <TabsNav aria-label="Image build details tabs" tabKeys={['details', 'exports', 'yaml', 'logs']}>
+        <TabsNav aria-label="Image build details tabs" tabKeys={tabKeys}>
           <Tab eventKey="details" title={t('Image details')} />
           <Tab eventKey="exports" title={t('Export images')} />
           <Tab eventKey="yaml" title={t('YAML')} />
-          <Tab eventKey="logs" title={t('Logs')} />
+          {canViewLogs && <Tab eventKey="logs" title={t('Logs')} />}
         </TabsNav>
       }
       actions={
@@ -81,7 +88,7 @@ const ImageBuildDetailsPageContent = () => {
             <Route path="details" element={<ImageBuildDetailsTab imageBuild={imageBuild} />} />
             <Route path="exports" element={<ImageBuildExportsGallery imageBuild={imageBuild} refetch={refetch} />} />
             <Route path="yaml" element={<ImageBuildYaml imageBuild={imageBuild} refetch={refetch} />} />
-            <Route path="logs" element={<ImageBuildLogsTab imageBuild={imageBuild} />} />
+            {canViewLogs && <Route path="logs" element={<ImageBuildLogsTab imageBuild={imageBuild} />} />}
           </Routes>
           {isDeleteModalOpen && (
             <DeleteImageBuildModal
