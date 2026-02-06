@@ -910,6 +910,7 @@
   "Image builds cannot be edited. Use Retry to create a new image build based on this one.": "Image builds cannot be edited. Use Retry to create a new image build based on this one.",
   "Date": "Date",
   "Build failed. Please retry.": "Build failed. Please retry.",
+  "Build failed.": "Build failed.",
   "View more": "View more",
   "There are no image builds in your environment.": "There are no image builds in your environment.",
   "Generate system images for consistent deployment to edge devices.": "Generate system images for consistent deployment to edge devices.",

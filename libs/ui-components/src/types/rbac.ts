@@ -21,4 +21,8 @@ export enum RESOURCE {
   ALERTS = 'alerts',
   AUTH_PROVIDER = 'authproviders',
   IMAGE_BUILD = 'imagebuilds',
+  IMAGE_BUILD_LOG = 'imagebuilds/log',
+  IMAGE_EXPORT = 'imageexports',
+  IMAGE_EXPORT_LOG = 'imageexports/log',
+  IMAGE_EXPORT_DOWNLOAD = 'imageexports/download',
 }
