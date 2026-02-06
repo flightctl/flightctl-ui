@@ -99,6 +99,14 @@ export const isImageBuildActiveReason = (reason: ImageBuildConditionReason): boo
   );
 };
 
+export const isImageBuildCancelable = (reason: ImageBuildConditionReason): boolean => {
+  return (
+    reason === ImageBuildConditionReason.ImageBuildConditionReasonPending ||
+    reason === ImageBuildConditionReason.ImageBuildConditionReasonBuilding ||
+    reason === ImageBuildConditionReason.ImageBuildConditionReasonPushing
+  );
+};
+
 export const isImageExportActiveReason = (reason: ImageExportConditionReason): boolean => {
   return (
     reason === ImageExportConditionReason.ImageExportConditionReasonPending ||

@@ -22,7 +22,9 @@ export enum RESOURCE {
   AUTH_PROVIDER = 'authproviders',
   IMAGE_BUILD = 'imagebuilds',
   IMAGE_BUILD_LOG = 'imagebuilds/log',
+  IMAGE_BUILD_CANCEL = 'imagebuilds/cancel',
   IMAGE_EXPORT = 'imageexports',
   IMAGE_EXPORT_LOG = 'imageexports/log',
+  IMAGE_EXPORT_CANCEL = 'imageexports/cancel',
   IMAGE_EXPORT_DOWNLOAD = 'imageexports/download',
 }
