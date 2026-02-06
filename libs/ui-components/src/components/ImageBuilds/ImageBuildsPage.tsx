@@ -58,18 +58,20 @@ const imageBuildTablePermissions = [
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.DELETE },
 ];
 
-const ImageBuildsEmptyState = ({ onCreateClick }: { onCreateClick: () => void }) => {
+const ImageBuildsEmptyState = ({ onCreateClick }: { onCreateClick?: VoidFunction }) => {
   const { t } = useTranslation();
   return (
     <ResourceListEmptyState icon={PlusCircleIcon} titleText={t('There are no image builds in your environment.')}>
       <EmptyStateBody>{t('Generate system images for consistent deployment to edge devices.')}</EmptyStateBody>
-      <EmptyStateFooter>
-        <EmptyStateActions>
-          <Button variant="primary" onClick={onCreateClick} icon={<PlusIcon />}>
-            {t('Build new image')}
-          </Button>
-        </EmptyStateActions>
-      </EmptyStateFooter>
+      {onCreateClick && (
+        <EmptyStateFooter>
+          <EmptyStateActions>
+            <Button variant="primary" onClick={onCreateClick} icon={<PlusIcon />}>
+              {t('Build new image')}
+            </Button>
+          </EmptyStateActions>
+        </EmptyStateFooter>
+      )}
     </ResourceListEmptyState>
   );
 };
@@ -138,6 +140,7 @@ const ImageBuildTable = () => {
               key={name}
               imageBuild={imageBuild}
               rowIndex={rowIndex}
+              canCreate={canCreate}
               canDelete={canDelete}
               onDeleteClick={() => {
                 setImageBuildToDeleteId(name);
@@ -150,7 +153,9 @@ const ImageBuildTable = () => {
         })}
       </Table>
       <TablePagination pagination={pagination} isUpdating={isUpdating} />
-      {!isUpdating && imageBuilds.length === 0 && !name && <ImageBuildsEmptyState onCreateClick={handleCreateClick} />}
+      {!isUpdating && imageBuilds.length === 0 && !name && (
+        <ImageBuildsEmptyState onCreateClick={canCreate ? handleCreateClick : undefined} />
+      )}
 
       {imageBuildToDeleteId && (
         <DeleteImageBuildModal

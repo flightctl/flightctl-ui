@@ -24,10 +24,12 @@ import { BuilderImageIcon } from '@patternfly/react-icons/dist/js/icons/builder-
 import { ExportFormatType, ImageExport, ImageExportConditionReason } from '@flightctl/types/imagebuilder';
 import { getExportFormatDescription, getExportFormatLabel, getImageExportStatusReason } from '../../utils/imageBuilds';
 import { getDateDisplay } from '../../utils/dates';
+import { usePermissionsContext } from '../common/PermissionsContext';
+import { RESOURCE, VERB } from '../../types/rbac';
 import { useTranslation } from '../../hooks/useTranslation';
-import { ImageExportStatusDisplay } from './ImageBuildAndExportStatus';
 import { useAppContext } from '../../hooks/useAppContext';
 import { ROUTE } from '../../hooks/useNavigate';
+import { ImageExportStatusDisplay } from './ImageBuildAndExportStatus';
 
 import './ImageExportCards.css';
 
@@ -44,8 +46,8 @@ export type ImageExportFormatCardProps = {
   format: ExportFormatType;
   error?: { message: string; mode: 'export' | 'download' } | null;
   imageExport?: ImageExport;
-  onExportImage: (format: ExportFormatType) => void;
-  onDownload: (format: ExportFormatType) => void;
+  onExportImage?: (format: ExportFormatType) => void;
+  onDownload?: (format: ExportFormatType) => void;
   onDismissError: VoidFunction;
   isCreating: boolean;
   isDownloading?: boolean;
@@ -60,11 +62,8 @@ type SelectImageBuildExportCardProps = {
 
 export const SelectImageBuildExportCard = ({ format, isChecked, onToggle }: SelectImageBuildExportCardProps) => {
   const { t } = useTranslation();
-
-  const title = getExportFormatLabel(t, format);
-  const description = getExportFormatDescription(t, format);
-
   const id = `export-format-${format}`;
+
   return (
     <Card id={id} isSelectable isSelected={isChecked} className="fctl-imageexport-card">
       <CardHeader
@@ -81,12 +80,12 @@ export const SelectImageBuildExportCard = ({ format, isChecked, onToggle }: Sele
           </FlexItem>
           <FlexItem>
             <Content>
-              <Content component={ContentVariants.h2}>{title}</Content>
+              <Content component={ContentVariants.h2}>{getExportFormatLabel(t, format)}</Content>
             </Content>
           </FlexItem>
         </Flex>
       </CardHeader>
-      <CardBody>{description}</CardBody>
+      <CardBody>{getExportFormatDescription(t, format)}</CardBody>
     </Card>
   );
 };
@@ -110,15 +109,9 @@ export const ViewImageBuildExportCard = ({
   } = useAppContext();
   const routerNavigate = useRouterNavigate();
   const exists = !!imageExport;
-
   const exportReason = exists ? getImageExportStatusReason(imageExport) : undefined;
-  const title = getExportFormatLabel(t, format);
-  const description = getExportFormatDescription(t, format);
-
-  const handleViewLogs = () => {
-    const baseRoute = appRoutes[ROUTE.IMAGE_BUILD_DETAILS];
-    routerNavigate(`${baseRoute}/${imageBuildId}/logs`);
-  };
+  const { checkPermissions } = usePermissionsContext();
+  const [canViewLogs] = checkPermissions([{ kind: RESOURCE.IMAGE_EXPORT_LOG, verb: VERB.GET }]);
 
   return (
     <Card isLarge className="fctl-imageexport-card">
@@ -148,17 +141,17 @@ export const ViewImageBuildExportCard = ({
           </FlexItem>
           <FlexItem>
             <Content>
-              <Content component={ContentVariants.h2}>{title}</Content>
+              <Content component={ContentVariants.h2}>{getExportFormatLabel(t, format)}</Content>
             </Content>
           </FlexItem>
         </Flex>
       </CardHeader>
-      <CardBody>{description}</CardBody>
+      <CardBody>{getExportFormatDescription(t, format)}</CardBody>
       <CardFooter>
         <Stack hasGutter>
           <StackItem>
             <Flex>
-              {exportReason === ImageExportConditionReason.ImageExportConditionReasonFailed && (
+              {exportReason === ImageExportConditionReason.ImageExportConditionReasonFailed && onExportImage && (
                 <FlexItem>
                   <Button
                     variant="primary"
@@ -170,7 +163,7 @@ export const ViewImageBuildExportCard = ({
                   </Button>
                 </FlexItem>
               )}
-              {exportReason === ImageExportConditionReason.ImageExportConditionReasonCompleted && (
+              {exportReason === ImageExportConditionReason.ImageExportConditionReasonCompleted && onDownload && (
                 <FlexItem>
                   <Button
                     variant="secondary"
@@ -182,12 +175,21 @@ export const ViewImageBuildExportCard = ({
                   </Button>
                 </FlexItem>
               )}
-              <FlexItem>
-                {exists ? (
-                  <Button variant="secondary" onClick={handleViewLogs}>
+              {exists && canViewLogs && (
+                <FlexItem>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      const baseRoute = appRoutes[ROUTE.IMAGE_BUILD_DETAILS];
+                      routerNavigate(`${baseRoute}/${imageBuildId}/logs`);
+                    }}
+                  >
                     {t('View logs')}
                   </Button>
-                ) : (
+                </FlexItem>
+              )}
+              {!exists && onExportImage && (
+                <FlexItem>
                   <Button
                     variant="secondary"
                     onClick={() => onExportImage(format)}
@@ -196,8 +198,8 @@ export const ViewImageBuildExportCard = ({
                   >
                     {t('Export image')}
                   </Button>
-                )}
-              </FlexItem>
+                </FlexItem>
+              )}
             </Flex>
           </StackItem>
           <StackItem>
