@@ -27,6 +27,7 @@ import TableTextSearch from '../Table/TableTextSearch';
 import Table, { ApiSortTableColumn } from '../Table/Table';
 
 import MassDeleteImageBuildModal from '../modals/massModals/MassDeleteImageBuildModal/MassDeleteImageBuildModal';
+import CancelImageBuildModal from './CancelImageBuildModal/CancelImageBuildModal';
 import DeleteImageBuildModal from './DeleteImageBuildModal/DeleteImageBuildModal';
 import { useImageBuilds, useImageBuildsBackendFilters } from './useImageBuilds';
 import ImageBuildRow from './ImageBuildRow';
@@ -55,6 +56,7 @@ const getColumns = (t: TFunction): ApiSortTableColumn[] => [
 
 const imageBuildTablePermissions = [
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.CREATE },
+  { kind: RESOURCE.IMAGE_BUILD_CANCEL, verb: VERB.CREATE },
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.DELETE },
 ];
 
@@ -82,16 +84,15 @@ const ImageBuildTable = () => {
 
   const imageBuildColumns = React.useMemo(() => getColumns(t), [t]);
   const { name, setName, hasFiltersEnabled } = useImageBuildsBackendFilters();
-
   const { imageBuilds, isLoading, error, isUpdating, refetch, pagination } = useImageBuilds({ name });
-
-  const [imageBuildToDeleteId, setImageBuildToDeleteId] = React.useState<string>();
-  const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
-
   const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
 
   const { checkPermissions } = usePermissionsContext();
-  const [canCreate, canDelete] = checkPermissions(imageBuildTablePermissions);
+  const [canCreate, canCancel, canDelete] = checkPermissions(imageBuildTablePermissions);
+
+  const [imageBuildToDeleteId, setImageBuildToDeleteId] = React.useState<string>();
+  const [imageBuildToCancelId, setImageBuildToCancelId] = React.useState<string>();
+  const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
 
   const handleCreateClick = React.useCallback(() => {
     navigate(ROUTE.IMAGE_BUILD_CREATE);
@@ -142,9 +143,11 @@ const ImageBuildTable = () => {
               rowIndex={rowIndex}
               canCreate={canCreate}
               canDelete={canDelete}
+              canCancel={canCancel}
               onDeleteClick={() => {
                 setImageBuildToDeleteId(name);
               }}
+              onCancelClick={() => setImageBuildToCancelId(name)}
               isRowSelected={() => isRowSelected(imageBuild)}
               onRowSelect={() => onRowSelect(imageBuild)}
               refetch={refetch}
@@ -157,6 +160,17 @@ const ImageBuildTable = () => {
         <ImageBuildsEmptyState onCreateClick={canCreate ? handleCreateClick : undefined} />
       )}
 
+      {imageBuildToCancelId && (
+        <CancelImageBuildModal
+          imageBuildId={imageBuildToCancelId}
+          onClose={(confirmed) => {
+            setImageBuildToCancelId(undefined);
+            if (confirmed) {
+              refetch();
+            }
+          }}
+        />
+      )}
       {imageBuildToDeleteId && (
         <DeleteImageBuildModal
           imageBuildId={imageBuildToDeleteId}

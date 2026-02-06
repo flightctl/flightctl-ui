@@ -30,3 +30,4 @@ export type { ImageExportSpec } from './models/ImageExportSpec';
 export type { ImageExportStatus } from './models/ImageExportStatus';
 export type { LateBinding } from './models/LateBinding';
 export { ResourceKind } from './models/ResourceKind';
+export type { Status } from './models/Status';
