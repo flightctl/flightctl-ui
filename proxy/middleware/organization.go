@@ -56,22 +56,21 @@ func isAlertsAPICall(path string) bool {
 	return strings.HasPrefix(path, "/api/alerts/")
 }
 
-// Determines whether to add the org_id to the request from the custom header.
-//
-// Requests that need to have "org_id" query parameter added:
-// - /api/flightctl: General flightctl API calls (see exclusions below)
-// - /api/alerts: Alerts API calls
-//
-// Requests that do not need to have "org_id" query parameter added:
-// - /api/flightctl/api/v1/organizations: To retrieve all possible organizations, "org_id" must not be sent
-// - /api/terminal: Since websocket connections cannot use custom headers, "org_id" is already added to the original URL
-func shouldAddOrgIDFromHeader(path string) bool {
-	if strings.HasPrefix(path, "/api/flightctl/api/v1/organizations") {
-		return false
-	}
-	if strings.HasPrefix(path, "/api/flightctl/api/v1/auth/config") {
-		return false
-	}
+func isImageBuilderAPICall(path string) bool {
+	return strings.HasPrefix(path, "/api/imagebuilder/")
+}
 
-	return isFlightCtlAPICall(path) || isAlertsAPICall(path)
+func shouldAddOrgIDFromHeader(path string) bool {
+	if isFlightCtlAPICall(path) {
+		// This request is used to fetch all existing organizations
+		if strings.HasPrefix(path, "/api/flightctl/api/v1/organizations") {
+			return false
+		}
+		// This request is used to fetch authentication providers from all organizations
+		if strings.HasPrefix(path, "/api/flightctl/api/v1/auth/config") {
+			return false
+		}
+		return true
+	}
+	return isAlertsAPICall(path) || isImageBuilderAPICall(path)
 }
