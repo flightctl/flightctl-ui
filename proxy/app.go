@@ -64,17 +64,20 @@ func main() {
 	testAuthHandler := bridge.NewTestAuthHandler(tlsConfig)
 	apiRouter.HandleFunc("/test-auth-provider-connection", testAuthHandler.TestConnection)
 
+	authHandler, err := auth.NewAuth(tlsConfig)
+	if err != nil {
+		log.WithError(err).Error("Failed to initialize authentication")
+		os.Exit(1)
+	}
+	// Viewing the login command is always available
+	apiRouter.HandleFunc("/login-command", authHandler.GetLoginCommand)
+
+	// Login/logout actions are only available in the standalone UI
 	if config.OcpPlugin != "true" {
-		authHandler, err := auth.NewAuth(tlsConfig)
-		if err != nil {
-			log.WithError(err).Error("Failed to initialize authentication")
-			os.Exit(1)
-		}
 		apiRouter.HandleFunc("/login", authHandler.Login)
 		apiRouter.HandleFunc("/login/info", authHandler.GetUserInfo)
 		apiRouter.HandleFunc("/login/refresh", authHandler.Refresh)
 		apiRouter.HandleFunc("/logout", authHandler.Logout)
-		apiRouter.HandleFunc("/login-command", authHandler.GetLoginCommand)
 	}
 
 	spa := server.SpaHandler{}
