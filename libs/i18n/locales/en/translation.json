@@ -770,7 +770,6 @@
   "Image reference is required for this volume type": "Image reference is required for this volume type",
   "Definition source must be image for this type of applications": "Definition source must be image for this type of applications",
   "Application type is required": "Application type is required",
-  "Name is required for single container applications.": "Name is required for single container applications.",
   "Image is required.": "Image is required.",
   "Application image includes invalid characters.": "Application image includes invalid characters.",
   "Host port is required": "Host port is required",
