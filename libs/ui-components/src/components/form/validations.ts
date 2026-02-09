@@ -68,6 +68,9 @@ const relativePathRegex = /^(?!\.\.\/|\.\.\$|\.\/)(\.\/)*[\w.-]+(?:\/[\w.-]+)*\/
 export const MAX_TARGET_REVISION_LENGTH = 244;
 const MAX_FILE_PATH_LENGTH = 253;
 
+const HELM_NAMESPACE_MAX_LENGTH = 63;
+const HELM_VALUES_FILE_EXT_REGEXP = /\.(yaml|yml)$/i;
+
 const isInteger = (val: number | undefined) => val === undefined || Number.isInteger(val);
 
 const validComposeFileNames = [
@@ -258,6 +261,48 @@ export const validOsImage = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
       return BASIC_DEVICE_OS_IMAGE_REGEXP.test(validateOsImage);
     },
   );
+
+export const validHelmNamespace = (t: TFunction) =>
+  Yup.string()
+    .max(
+      HELM_NAMESPACE_MAX_LENGTH,
+      t('Namespace must not exceed {{ max }} characters.', { max: HELM_NAMESPACE_MAX_LENGTH }),
+    )
+    .test(
+      'helm-namespace-format',
+      t(
+        'Namespace must only include lowercase letters, numbers, and hyphens. It must start and end with a letter or number.',
+      ),
+      (value) => {
+        return !value || APPLICATION_NAME_REGEXP.test(value);
+      },
+    );
+
+export const validHelmValuesFile = (t: TFunction) =>
+  Yup.string().test('helm-values-file', function (filename) {
+    if (!filename) {
+      return true;
+    }
+    if (filename.length > MAX_FILE_PATH_LENGTH) {
+      return this.createError({
+        message: t('Values file path must not exceed {{ max }} characters.', {
+          max: MAX_FILE_PATH_LENGTH,
+        }),
+      });
+    }
+    if (filename.startsWith('/') || filename.includes('..')) {
+      return this.createError({
+        message: t('Values file path must be relative and cannot contain parent directory references (..).'),
+      });
+    }
+
+    if (!HELM_VALUES_FILE_EXT_REGEXP.test(filename)) {
+      return this.createError({
+        message: t('Values file must have .yaml or .yml extension.'),
+      });
+    }
+    return true;
+  });
 
 export const validLabelsSchema = (t: TFunction, forbiddenLabels?: string[]) =>
   Yup.array()
@@ -707,7 +752,7 @@ export const validApplicationsSchema = (t: TFunction) => {
             image: Yup.string()
               .required(t('Image is required.'))
               .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
-            namespace: Yup.string(),
+            namespace: validHelmNamespace(t),
             valuesYaml: Yup.string().test('valid-yaml', t('YAML content is invalid.'), (value) => {
               if (!value || value.trim() === '') {
                 return true;
@@ -719,10 +764,7 @@ export const validApplicationsSchema = (t: TFunction) => {
               }
               return true;
             }),
-            // Values files don't need to be validated.
-            // Since the UX design has the first field added by default, we will ignore all empty values files.
-            // The user can't add more values files if any is empty (though they can clear existing ones).
-            valuesFiles: Yup.array().of(Yup.string()),
+            valuesFiles: Yup.array().of(validHelmValuesFile(t)),
           });
         }
 
