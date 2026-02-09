@@ -664,7 +664,7 @@ export const validApplicationsSchema = (t: TFunction) => {
               .oneOf([AppSpecType.OCI_IMAGE])
               .required(t('Definition source must be image for this type of applications')),
             appType: Yup.string().oneOf([AppType.AppTypeContainer]).required(t('Application type is required')),
-            name: validApplicationAndVolumeName(t).required(t('Name is required for single container applications.')),
+            name: validApplicationAndVolumeName(t),
             image: Yup.string()
               .required(t('Image is required.'))
               .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),

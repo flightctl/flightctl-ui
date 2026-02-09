@@ -459,13 +459,15 @@ const toApiHelmApp = (app: HelmAppForm): HelmApplication => {
 
 const toApiContainerApp = (app: SingleContainerAppForm): ContainerApplication => {
   const containerApp: ContainerApplication = {
-    name: app.name,
     image: app.image,
     appType: app.appType,
     runAs: app.runAs || RUN_AS_ROOT_USER,
     envVars: variablesToEnvVars(app.variables || []),
     volumes: formVolumesToApi(app.volumes || [], AppType.AppTypeContainer),
   };
+  if (app.name) {
+    containerApp.name = app.name;
+  }
   if (app.ports.length > 0) {
     containerApp.ports = app.ports.map((p) => `${p.hostPort}:${p.containerPort}`);
   }
@@ -488,11 +490,13 @@ const toApiContainerApp = (app: SingleContainerAppForm): ContainerApplication =>
 
 const toApiComposeApp = (app: ComposeAppForm): ComposeApplication => {
   const formApp: Partial<ComposeApplication> = {
-    name: app.name,
     appType: app.appType,
     envVars: variablesToEnvVars(app.variables || []),
     volumes: formVolumesToApi(app.volumes || [], app.appType),
   };
+  if (app.name) {
+    formApp.name = app.name;
+  }
   if (app.specType === AppSpecType.OCI_IMAGE) {
     (formApp as ImageApplicationProviderSpec).image = app.image;
   } else {
