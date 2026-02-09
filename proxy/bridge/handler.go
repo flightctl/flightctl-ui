@@ -152,6 +152,8 @@ func (t *imagebuilderDownloadRewriteTransport) RoundTrip(req *http.Request) (*ht
 	resp.Status = "200 OK"
 	resp.Header = http.Header{}
 	resp.Header.Set("Content-Type", "application/json")
+	// Prevent caching the redirect URL which may include a time-limited signed URL
+	resp.Header.Set("Cache-Control", "no-store")
 	resp.ContentLength = int64(len(body))
 	resp.Body = io.NopCloser(bytes.NewReader(body))
 	return resp, nil
