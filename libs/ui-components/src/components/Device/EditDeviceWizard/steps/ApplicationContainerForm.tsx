@@ -157,7 +157,6 @@ const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isRead
       <FormGroupWithHelperText
         label={t('Application name')}
         content={t('If not specified, the image name will be used. Application name must be unique.')}
-        isRequired
       >
         <TextField aria-label={t('Application name')} name={`${appFieldName}.name`} isDisabled={isReadOnly} />
       </FormGroupWithHelperText>
