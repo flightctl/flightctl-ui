@@ -1,11 +1,15 @@
 package bridge
 
 import (
+	"bytes"
 	"crypto/tls"
+	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/gorilla/mux"
 
@@ -118,12 +122,48 @@ func NewAlertManagerHandler(tlsConfig *tls.Config) handler {
 	return handler{target: target, proxy: proxy}
 }
 
+// To be able to trigger the download in the browser, the UI must be able to obtain the "Location" header for a redirect.
+// With both "redirect:follow/manual", we wouldn't be able to obtain the "Location" header or have the browser trigger the download.
+// To solve this, we rewrite the response from ImageBuilder API to 200 with JSON body {"redirectUrl": "<Location>"}
+type imagebuilderDownloadRewriteTransport struct {
+	base http.RoundTripper
+}
+
+func (t *imagebuilderDownloadRewriteTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	resp, err := t.base.RoundTrip(req)
+	if err != nil || resp == nil {
+		return resp, err
+	}
+	if !strings.HasSuffix(strings.TrimSuffix(req.URL.Path, "/"), "/download") {
+		return resp, nil
+	}
+
+	if resp.StatusCode != http.StatusFound && resp.StatusCode != http.StatusMovedPermanently &&
+		resp.StatusCode != http.StatusTemporaryRedirect && resp.StatusCode != http.StatusPermanentRedirect {
+		return resp, nil
+	}
+	location := resp.Header.Get("Location")
+	if location == "" {
+		return resp, nil
+	}
+	body, _ := json.Marshal(map[string]string{"redirectUrl": location})
+	_ = resp.Body.Close()
+	resp.StatusCode = http.StatusOK
+	resp.Status = "200 OK"
+	resp.Header = http.Header{}
+	resp.Header.Set("Content-Type", "application/json")
+	resp.ContentLength = int64(len(body))
+	resp.Body = io.NopCloser(bytes.NewReader(body))
+	return resp, nil
+}
+
 func NewImageBuilderHandler(tlsConfig *tls.Config) handler {
 	target, proxy := createReverseProxy(config.FctlImageBuilderApiUrl)
 
-	proxy.Transport = &http.Transport{
+	baseTransport := &http.Transport{
 		TLSClientConfig: tlsConfig,
 	}
+	proxy.Transport = &imagebuilderDownloadRewriteTransport{base: baseTransport}
 
 	return handler{target: target, proxy: proxy}
 }
