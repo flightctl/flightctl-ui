@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { TFunction } from 'react-i18next';
 import {
   Alert,
   AlertActionCloseButton,
@@ -10,9 +11,14 @@ import {
   CardHeader,
   Content,
   ContentVariants,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
   Flex,
   FlexItem,
   Icon,
+  MenuToggle,
+  MenuToggleElement,
   Stack,
   StackItem,
 } from '@patternfly/react-core';
@@ -24,15 +30,81 @@ import { BuilderImageIcon } from '@patternfly/react-icons/dist/js/icons/builder-
 import { ExportFormatType, ImageExport, ImageExportConditionReason } from '@flightctl/types/imagebuilder';
 import { getExportFormatDescription, getExportFormatLabel, getImageExportStatusReason } from '../../utils/imageBuilds';
 import { getDateDisplay } from '../../utils/dates';
-import { usePermissionsContext } from '../common/PermissionsContext';
-import { RESOURCE, VERB } from '../../types/rbac';
 import { useTranslation } from '../../hooks/useTranslation';
-import { useAppContext } from '../../hooks/useAppContext';
-import { ROUTE } from '../../hooks/useNavigate';
+import ConfirmDeleteOrCancelImageExportModal, {
+  ConfirmImageExportAction,
+} from './ConfirmImageExportModal/ConfirmImageExportModal';
 import { ImageExportStatusDisplay } from './ImageBuildAndExportStatus';
 
 import './ImageExportCards.css';
 
+export type ImageExportAction = 'cancel' | 'delete' | 'viewLogs' | 'download' | 'retry' | 'rebuild' | 'createExport';
+
+const getActionsForStatus = (
+  exportReason: ImageExportConditionReason | undefined,
+  actionPermissions: ImageExportAction[],
+): ImageExportAction[] => {
+  const actions: ImageExportAction[] = [];
+  switch (exportReason) {
+    case ImageExportConditionReason.ImageExportConditionReasonPending:
+      actions.push('cancel', 'delete');
+      break;
+    case ImageExportConditionReason.ImageExportConditionReasonConverting:
+    case ImageExportConditionReason.ImageExportConditionReasonPushing:
+      actions.push('cancel', 'viewLogs');
+      break;
+    case ImageExportConditionReason.ImageExportConditionReasonCompleted:
+      actions.push('download', 'viewLogs', 'delete', 'rebuild');
+      break;
+    case ImageExportConditionReason.ImageExportConditionReasonFailed:
+    case ImageExportConditionReason.ImageExportConditionReasonCanceled:
+      actions.push('retry', 'viewLogs', 'delete');
+      break;
+    case ImageExportConditionReason.ImageExportConditionReasonCanceling:
+      actions.push('viewLogs');
+      break;
+    default:
+      actions.push('createExport');
+      break;
+  }
+  return actions.filter((action) => actionPermissions.includes(action));
+};
+
+const getErrorTitle = (t: TFunction, action: ImageExportAction) => {
+  switch (action) {
+    case 'createExport':
+      return t("We couldn't export your image");
+    case 'download':
+      return t("We couldn't download your image");
+    case 'cancel':
+      return t("We couldn't cancel your image export");
+    case 'delete':
+      return t("We couldn't delete your image export");
+    default:
+      return t("We couldn't perform the action you requested");
+  }
+};
+
+const getActionTitle = (t: TFunction, action: ImageExportAction, inProgress: boolean) => {
+  switch (action) {
+    case 'cancel':
+      return inProgress ? t('Canceling...') : t('Cancel');
+    case 'delete':
+      return inProgress ? t('Deleting...') : t('Delete');
+    case 'viewLogs':
+      return t('View logs');
+    case 'download':
+      return inProgress ? t('Downloading...') : t('Download');
+    case 'retry':
+      return inProgress ? t('Retrying...') : t('Retry');
+    case 'rebuild':
+      return inProgress ? t('Rebuilding...') : t('Rebuild');
+    case 'createExport':
+      return inProgress ? t('Exporting...') : t('Export image');
+    default:
+      return t('Action');
+  }
+};
 const iconMap: Record<ExportFormatType, React.ReactElement> = {
   [ExportFormatType.ExportFormatTypeVMDK]: <VirtualMachineIcon />,
   [ExportFormatType.ExportFormatTypeQCOW2]: <CloudSecurityIcon />,
@@ -41,17 +113,14 @@ const iconMap: Record<ExportFormatType, React.ReactElement> = {
 };
 
 export type ImageExportFormatCardProps = {
-  imageBuildId: string;
   imageReference: string | undefined;
   format: ExportFormatType;
-  error?: { message: string; mode: 'export' | 'download' } | null;
   imageExport?: ImageExport;
-  onExportImage?: (format: ExportFormatType) => void;
-  onDownload?: (format: ExportFormatType) => void;
+  actionPermissions: ImageExportAction[];
+  activeAction: ImageExportAction | undefined;
+  onCardAction: ({ format, action }: { format: ExportFormatType; action: ImageExportAction }) => void;
+  error?: { message: string; action: ImageExportAction } | null;
   onDismissError: VoidFunction;
-  isCreating: boolean;
-  isDownloading?: boolean;
-  isDisabled?: boolean;
 };
 
 type SelectImageBuildExportCardProps = {
@@ -91,27 +160,77 @@ export const SelectImageBuildExportCard = ({ format, isChecked, onToggle }: Sele
 };
 
 export const ViewImageBuildExportCard = ({
-  imageBuildId,
   format,
   imageExport,
   imageReference,
-  onExportImage,
-  onDownload,
-  onDismissError,
-  isCreating = false,
-  isDownloading = false,
-  isDisabled = false,
+  actionPermissions,
+  onCardAction,
+  activeAction,
   error,
+  onDismissError,
 }: ImageExportFormatCardProps) => {
   const { t } = useTranslation();
-  const {
-    router: { useNavigate: useRouterNavigate, appRoutes },
-  } = useAppContext();
-  const routerNavigate = useRouterNavigate();
+  const [actionsDropdownOpen, setActionsDropdownOpen] = React.useState(false);
+  const [pendingConfirmAction, setPendingConfirmAction] = React.useState<ConfirmImageExportAction>();
   const exists = !!imageExport;
+
+  const handleCardAction = (action: ImageExportAction) => {
+    if (action === 'cancel' || action === 'delete') {
+      setPendingConfirmAction(action);
+    } else {
+      onCardAction({ format, action });
+    }
+  };
+
+  const handleConfirmAction = (isConfirmed: boolean) => {
+    if (pendingConfirmAction && isConfirmed) {
+      onCardAction({ format, action: pendingConfirmAction });
+    }
+    setPendingConfirmAction(undefined);
+  };
+
   const exportReason = exists ? getImageExportStatusReason(imageExport) : undefined;
-  const { checkPermissions } = usePermissionsContext();
-  const [canViewLogs] = checkPermissions([{ kind: RESOURCE.IMAGE_EXPORT_LOG, verb: VERB.GET }]);
+  const { primaryAction, remainingActions } = React.useMemo(() => {
+    const allActions = getActionsForStatus(exportReason, actionPermissions);
+    const primaryAction = allActions.length > 0 ? allActions[0] : undefined;
+    const remainingActions = allActions.length > 1 ? allActions.slice(1) : [];
+    return { primaryAction, remainingActions };
+  }, [exportReason, actionPermissions]);
+
+  const renderActionButton = (exportAction: ImageExportAction, variant: 'primary' | 'secondary' = 'secondary') => {
+    const isDisabled = activeAction !== undefined;
+    const isLoading = exportAction === activeAction;
+
+    return (
+      <Button
+        variant={variant}
+        onClick={() => handleCardAction(exportAction)}
+        isDisabled={isDisabled}
+        isLoading={isLoading}
+      >
+        {getActionTitle(t, exportAction, isLoading)}
+      </Button>
+    );
+  };
+
+  const renderDropdownItem = (exportAction: ImageExportAction) => {
+    const isDisabled = activeAction !== undefined;
+    const isLoading = exportAction === activeAction;
+
+    return (
+      <DropdownItem
+        key={exportAction}
+        onClick={() => {
+          setActionsDropdownOpen(false);
+          handleCardAction(exportAction);
+        }}
+        isDisabled={isDisabled}
+        isLoading={isLoading}
+      >
+        {getActionTitle(t, exportAction, false)}
+      </DropdownItem>
+    );
+  };
 
   return (
     <Card isLarge className="fctl-imageexport-card">
@@ -150,57 +269,34 @@ export const ViewImageBuildExportCard = ({
       <CardFooter>
         <Stack hasGutter>
           <StackItem>
-            <Flex>
-              {exportReason === ImageExportConditionReason.ImageExportConditionReasonFailed && onExportImage && (
-                <FlexItem>
-                  <Button
-                    variant="primary"
-                    onClick={() => onExportImage(format)}
-                    isDisabled={isDisabled}
-                    isLoading={isCreating}
-                  >
-                    {t('Retry')}
-                  </Button>
-                </FlexItem>
-              )}
-              {exportReason === ImageExportConditionReason.ImageExportConditionReasonCompleted && onDownload && (
-                <FlexItem>
-                  <Button
-                    variant="secondary"
-                    onClick={() => onDownload(format)}
-                    isDisabled={isDisabled || isDownloading}
-                    isLoading={isDownloading}
-                  >
-                    {isDownloading ? t('Downloading...') : t('Download')}
-                  </Button>
-                </FlexItem>
-              )}
-              {exists && canViewLogs && (
-                <FlexItem>
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      const baseRoute = appRoutes[ROUTE.IMAGE_BUILD_DETAILS];
-                      routerNavigate(`${baseRoute}/${imageBuildId}/logs`);
-                    }}
-                  >
-                    {t('View logs')}
-                  </Button>
-                </FlexItem>
-              )}
-              {!exists && onExportImage && (
-                <FlexItem>
-                  <Button
-                    variant="secondary"
-                    onClick={() => onExportImage(format)}
-                    isDisabled={isDisabled}
-                    isLoading={isCreating}
-                  >
-                    {t('Export image')}
-                  </Button>
-                </FlexItem>
-              )}
-            </Flex>
+            {primaryAction && (
+              <Flex>
+                <FlexItem>{renderActionButton(primaryAction)}</FlexItem>
+                {remainingActions.length === 1 && <FlexItem>{renderActionButton(remainingActions[0])}</FlexItem>}
+                {remainingActions.length > 1 && (
+                  <FlexItem>
+                    <Dropdown
+                      isOpen={actionsDropdownOpen}
+                      onSelect={() => setActionsDropdownOpen(false)}
+                      onOpenChange={(isOpen: boolean) => setActionsDropdownOpen(isOpen)}
+                      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                        <MenuToggle
+                          ref={toggleRef}
+                          isExpanded={actionsDropdownOpen}
+                          onClick={() => setActionsDropdownOpen(!actionsDropdownOpen)}
+                          variant="secondary"
+                          isDisabled={activeAction !== undefined}
+                        >
+                          {t('Action')}
+                        </MenuToggle>
+                      )}
+                    >
+                      <DropdownList>{remainingActions.map((actionKey) => renderDropdownItem(actionKey))}</DropdownList>
+                    </Dropdown>
+                  </FlexItem>
+                )}
+              </Flex>
+            )}
           </StackItem>
           <StackItem>
             <Content component={ContentVariants.small}>
@@ -211,9 +307,7 @@ export const ViewImageBuildExportCard = ({
             <AlertGroup isToast>
               <Alert
                 variant="danger"
-                title={
-                  error.mode === 'export' ? t("We couldn't export your image") : t("We couldn't download your image")
-                }
+                title={getErrorTitle(t, error.action)}
                 actionClose={<AlertActionCloseButton onClose={onDismissError} />}
               >
                 {t('Something went wrong on our end. Please review the error details and try again.')}
@@ -223,6 +317,9 @@ export const ViewImageBuildExportCard = ({
           )}
         </Stack>
       </CardFooter>
+      {pendingConfirmAction && (
+        <ConfirmDeleteOrCancelImageExportModal action={pendingConfirmAction} onClose={handleConfirmAction} />
+      )}
     </Card>
   );
 };
