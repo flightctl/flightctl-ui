@@ -2,6 +2,7 @@ import { TFunction } from 'i18next';
 import * as Yup from 'yup';
 
 import {
+  ApiVersion,
   BindingType,
   ExportFormatType,
   ImageBuild,
@@ -10,7 +11,6 @@ import {
   ImageExport,
   ResourceKind,
 } from '@flightctl/types/imagebuilder';
-import { IMAGEBUILDER_API_VERSION } from '../../../constants';
 import { ImageBuildFormValues } from './types';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
 
@@ -162,7 +162,7 @@ export const getImageBuildResource = (values: ImageBuildFormValues): ImageBuild 
   }
 
   return {
-    apiVersion: IMAGEBUILDER_API_VERSION,
+    apiVersion: ApiVersion.ApiVersionV1alpha1,
     kind: ResourceKind.IMAGE_BUILD,
     metadata: {
       name,
@@ -175,7 +175,7 @@ export const getImageExportResource = (imageBuildName: string, format: ExportFor
   const exportName = generateExportName(imageBuildName, format);
 
   return {
-    apiVersion: IMAGEBUILDER_API_VERSION,
+    apiVersion: ApiVersion.ApiVersionV1alpha1,
     kind: ResourceKind.IMAGE_EXPORT,
     metadata: {
       name: exportName,
