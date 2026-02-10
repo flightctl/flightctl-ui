@@ -7,7 +7,7 @@ import { ImageBuild, ImageBuildConditionReason } from '@flightctl/types/imagebui
 import { ImageBuildWithExports } from '../../types/extraTypes';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
-import { getImageBuildImage, getImageBuildStatusReason } from '../../utils/imageBuilds';
+import { getImageBuildImage, getImageBuildStatusReason, isImageBuildCancelable } from '../../utils/imageBuilds';
 import { getDateDisplay } from '../../utils/dates';
 import ResourceLink from '../common/ResourceLink';
 import ImageBuildExportsGallery from './ImageBuildDetails/ImageBuildExportsGallery';
@@ -19,8 +19,10 @@ type ImageBuildRowProps = {
   onRowSelect: (imageBuild: ImageBuild) => OnSelect;
   isRowSelected: (imageBuild: ImageBuild) => boolean;
   canCreate: boolean;
-  canDelete: boolean;
   onDeleteClick: VoidFunction;
+  canDelete: boolean;
+  onCancelClick: VoidFunction;
+  canCancel: boolean;
   refetch: VoidFunction;
 };
 
@@ -32,6 +34,8 @@ const ImageBuildRow = ({
   onDeleteClick,
   canCreate,
   canDelete,
+  onCancelClick,
+  canCancel,
   refetch,
 }: ImageBuildRowProps) => {
   const { t } = useTranslation();
@@ -59,7 +63,12 @@ const ImageBuildRow = ({
     });
   }
 
-  if (canDelete) {
+  if (canCancel && isImageBuildCancelable(buildReason)) {
+    actions.push({
+      title: t('Cancel image build'),
+      onClick: onCancelClick,
+    });
+  } else if (canDelete) {
     actions.push({
       title: t('Delete image build'),
       onClick: onDeleteClick,

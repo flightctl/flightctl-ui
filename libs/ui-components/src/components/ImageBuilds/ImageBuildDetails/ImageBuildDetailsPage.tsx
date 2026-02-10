@@ -8,7 +8,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { getImageBuildStatusReason } from '../../../utils/imageBuilds';
+import { getImageBuildStatusReason, isImageBuildCancelable } from '../../../utils/imageBuilds';
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions from '../../DetailsPage/DetailsPageActions';
 import DeleteImageBuildModal from '../DeleteImageBuildModal/DeleteImageBuildModal';
@@ -19,9 +19,11 @@ import ImageBuildYaml from './ImageBuildYaml';
 import ImageBuildDetailsTab from './ImageBuildDetailsTab';
 import ImageBuildExportsGallery from './ImageBuildExportsGallery';
 import ImageBuildLogsTab from './ImageBuildLogsTab';
+import CancelImageBuildModal from '../CancelImageBuildModal/CancelImageBuildModal';
 
 const imageBuildDetailsPermissions = [
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.CREATE },
+  { kind: RESOURCE.IMAGE_BUILD_CANCEL, verb: VERB.CREATE },
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.DELETE },
   // Users that can view logs for imagebuilds also can view logs for imageexports
   { kind: RESOURCE.IMAGE_BUILD_LOG, verb: VERB.GET },
@@ -36,15 +38,17 @@ const ImageBuildDetailsPageContent = () => {
 
   const { imageBuildId } = useParams() as { imageBuildId: string };
   const [imageBuild, isLoading, error, refetch] = useImageBuild(imageBuildId);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>();
   const { checkPermissions } = usePermissionsContext();
-  const [canCreate, canDelete, canViewLogs] = checkPermissions(imageBuildDetailsPermissions);
   const buildReason = imageBuild ? getImageBuildStatusReason(imageBuild) : undefined;
+  const [canCreate, hasCancelPermission, canDelete, canViewLogs] = checkPermissions(imageBuildDetailsPermissions);
+  const canCancel = hasCancelPermission && buildReason && isImageBuildCancelable(buildReason);
 
   const tabKeys = React.useMemo(
     () => (canViewLogs ? ['details', 'exports', 'yaml', 'logs'] : ['details', 'exports', 'yaml']),
     [canViewLogs],
   );
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>();
+  const [isCancelModalOpen, setIsCancelModalOpen] = React.useState<boolean>();
 
   return (
     <DetailsPage
@@ -73,7 +77,10 @@ const ImageBuildDetailsPageContent = () => {
                     : t('Duplicate')}
                 </DropdownItem>
               )}
-              {canDelete && (
+              {canCancel && (
+                <DropdownItem onClick={() => setIsCancelModalOpen(true)}>{t('Cancel image build')}</DropdownItem>
+              )}
+              {canDelete && !canCancel && (
                 <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete image build')}</DropdownItem>
               )}
             </DropdownList>
@@ -101,17 +108,20 @@ const ImageBuildDetailsPageContent = () => {
               }}
             />
           )}
+          {isCancelModalOpen && (
+            <CancelImageBuildModal
+              imageBuildId={imageBuildId}
+              onClose={(confirmed) => {
+                setIsCancelModalOpen(false);
+                if (confirmed) {
+                  refetch();
+                }
+              }}
+            />
+          )}
         </>
       )}
     </DetailsPage>
-  );
-};
-
-const ImageBuildDetailsPage = () => {
-  return (
-    <OciRegistriesContextProvider>
-      <ImageBuildDetailsPageContent />
-    </OciRegistriesContextProvider>
   );
 };
 
@@ -120,7 +130,9 @@ const ImageBuildDetailsWithPermissions = () => {
   const [allowed] = checkPermissions([{ kind: RESOURCE.IMAGE_BUILD, verb: VERB.GET }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
-      <ImageBuildDetailsPage />
+      <OciRegistriesContextProvider>
+        <ImageBuildDetailsPageContent />
+      </OciRegistriesContextProvider>
     </PageWithPermissions>
   );
 };
