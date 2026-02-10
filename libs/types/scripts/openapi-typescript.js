@@ -23,6 +23,10 @@ const processJsonAPI = (jsonString) => {
       if (schema && typeof schema.type === 'undefined') {
         schema.type = 'object';
       }
+      // Remove empty string enum values that produce invalid TypeScript enums
+      if (schema && Array.isArray(schema.enum)) {
+        schema.enum = schema.enum.filter((v) => v !== '');
+      }
     });
   }
   return json;

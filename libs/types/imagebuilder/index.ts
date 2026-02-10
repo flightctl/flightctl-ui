@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
+export { ApiVersion } from './models/ApiVersion';
 export { BindingType } from './models/BindingType';
 export type { EarlyBinding } from './models/EarlyBinding';
 export { ExportFormatType } from './models/ExportFormatType';
