@@ -188,7 +188,23 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 				log.Warnf("%s Status: '%v' URL: '%v'", errMsg, resp.Status, resp.Request.URL)
 			}
 		}
-		http.Error(w, errMsg, statusCode)
+		log.Warnf("dial statusCode: '%v'", statusCode)
+
+		// On any backend error, upgrade the client to WebSocket to send a close frame
+		// The UI will receive a CloseEvent with a websocket code error and reason.
+		closeReason := fmt.Sprintf("%d %s", statusCode, http.StatusText(statusCode))
+		closeCode := websocket.CloseInternalServerErr
+		upgrader := &websocket.Upgrader{
+			Subprotocols: websocket.Subprotocols(r),
+			CheckOrigin:  checkOrigin,
+		}
+		frontend, upgErr := upgrader.Upgrade(w, r, nil)
+		if upgErr != nil {
+			log.Warnf("Failed to upgrade websocket for error response: %v", upgErr)
+			return
+		}
+		_ = frontend.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(closeCode, closeReason), time.Now().Add(5*time.Second))
+		frontend.Close()
 		return
 	}
 	defer backend.Close()

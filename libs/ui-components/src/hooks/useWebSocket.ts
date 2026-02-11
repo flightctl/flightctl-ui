@@ -11,6 +11,8 @@ const msgToBytes = (msg: string, resize?: boolean) => {
   return result;
 };
 
+const isErrorCloseEvent = (evt: CloseEvent) => evt.code !== 1000 && evt.code !== 1001;
+
 export type WsMetadata = {
   tty: boolean;
   term: string;
@@ -40,7 +42,10 @@ export const useWebSocket = <T>(
   const [reset, setReset] = React.useState<number>(0);
 
   const sendMessage = React.useCallback((data: string, resize?: boolean) => {
-    wsRef.current?.send(msgToBytes(data, resize));
+    const ws = wsRef.current;
+    if (ws?.readyState === WebSocket.OPEN) {
+      ws.send(msgToBytes(data, resize));
+    }
   }, []);
 
   React.useEffect(() => {
@@ -54,6 +59,7 @@ export const useWebSocket = <T>(
     try {
       setIsConnecting(true);
       setIsClosed(false);
+      setError(undefined);
       const wsEndpoint = getWsEndpoint(deviceId);
       const wsMeta = JSON.stringify(wsMetadata);
       const params = new URLSearchParams({
@@ -73,9 +79,14 @@ export const useWebSocket = <T>(
         }
       };
 
-      const handleClose = () => {
+      const handleClose = (evt: CloseEvent) => {
         if (isMountedRef.current) {
+          setIsConnecting(false);
           setIsClosed(true);
+          if (isErrorCloseEvent(evt)) {
+            const reason = evt.reason || t('Unknown error');
+            setError(t('Failed to connect to device terminal: {{reason}}', { reason }));
+          }
         }
         wsRef.current = undefined;
       };
@@ -84,7 +95,8 @@ export const useWebSocket = <T>(
         // eslint-disable-next-line no-console
         console.error('Error creating websocket:', evt);
         if (isMountedRef.current) {
-          setError(t('Websocket error occured'));
+          setIsConnecting(false);
+          setError(t('Failed to connect to device terminal'));
         }
       };
 
