@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 import { TFunction } from 'i18next';
 import {
+  ApiVersion,
   AuthDynamicRoleAssignment,
   AuthOrganizationAssignment,
   AuthProvider,
@@ -25,7 +26,6 @@ import {
 } from './types';
 import { validKubernetesDnsSubdomain } from '../../form/validations';
 import { DynamicAuthProviderSpec, ProviderType } from '../../../types/extraTypes';
-import { CORE_API_VERSION } from '../../../constants';
 
 export const getAssignmentTypeLabel = (
   type: AuthOrganizationAssignment['type'] | AuthRoleAssignment['type'] | undefined,
@@ -317,7 +317,7 @@ export const getAuthProvider = (values: AuthProviderFormValues): AuthProvider =>
   }
 
   return {
-    apiVersion: CORE_API_VERSION,
+    apiVersion: ApiVersion.ApiVersionV1beta1,
     kind: 'AuthProvider',
     metadata: {
       name: values.name,

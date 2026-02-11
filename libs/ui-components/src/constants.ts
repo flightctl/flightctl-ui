@@ -1,7 +1,7 @@
-export const APP_TITLE = 'Edge Manager';
-export const CORE_API_VERSION = 'v1beta1';
-export const IMAGEBUILDER_API_VERSION = 'v1alpha1';
+import { ApiVersion } from '@flightctl/types';
+import { ApiVersion as ImageBuilderApiVersion } from '@flightctl/types/imagebuilder';
 
+export const APP_TITLE = 'Edge Manager';
 export const PAGE_SIZE = 15;
 export const EVENT_PAGE_SIZE = 200; // It's 500 in OCP console
 
@@ -10,9 +10,9 @@ export const CERTIFICATE_VALIDITY_IN_YEARS = 1;
 export const getApiVersion = (api: 'flightctl' | 'imagebuilder' | 'alerts'): string | undefined => {
   switch (api) {
     case 'flightctl':
-      return CORE_API_VERSION;
+      return ApiVersion.ApiVersionV1beta1;
     case 'imagebuilder':
-      return IMAGEBUILDER_API_VERSION;
+      return ImageBuilderApiVersion.ApiVersionV1alpha1;
     case 'alerts':
     default:
       return undefined;
