@@ -97,7 +97,15 @@ const TerminalTab = ({ device }: TerminalTabProps) => {
   }
 
   if (error) {
-    return <ErrorAlert error={error} />;
+    return (
+      <ErrorAlert
+        error={error}
+        onRetry={() => {
+          terminal.current?.reset();
+          reconnect();
+        }}
+      />
+    );
   }
 
   return (
