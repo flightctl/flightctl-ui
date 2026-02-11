@@ -110,14 +110,13 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
     const response = await proxyFetch(`imagebuilder/api/v1/imageexports/${ieName}/download`, {
       method: 'GET',
       credentials: 'include',
-      redirect: 'manual', // Prevent automatic redirect following to avoid CORS issues
     });
-
     const downloadResult = await getExportDownloadResult(response);
     if (downloadResult === null) {
       await showSpinnerBriefly(DOWNLOAD_REDIRECT_DELAY);
       throw new Error(`Download failed: ${response.status} ${response.statusText}`);
-    } else if (downloadResult.type === 'redirect') {
+    }
+    if (downloadResult.type === 'redirect') {
       createDownloadLink(downloadResult.url);
       await showSpinnerBriefly(DOWNLOAD_REDIRECT_DELAY);
     } else {

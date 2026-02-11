@@ -116,17 +116,6 @@ export const isImageExportActiveReason = (reason: ImageExportConditionReason): b
   );
 };
 
-const isDownloadResultRedirect = (response: Response): boolean => {
-  return (
-    response.status === 302 ||
-    response.status === 301 ||
-    response.status === 307 ||
-    response.status === 308 ||
-    response.type === 'opaqueredirect' ||
-    response.status === 0
-  );
-};
-
 // Validate that a URL is safe to use for download (only http/https protocols)
 const isValidDownloadUrl = (url: string): boolean => {
   try {
@@ -137,37 +126,30 @@ const isValidDownloadUrl = (url: string): boolean => {
   }
 };
 
-const getRedirectUrl = (response: Response): string | undefined => {
-  // If the Location header is present, it indicates a redirect.
-  const redirectUrl = response.headers.get('Location');
-  if (redirectUrl) {
-    return redirectUrl;
-  }
-  if (isDownloadResultRedirect(response) && response.url) {
-    return response.url;
-  }
-  return undefined;
-};
-
 export type ExportDownloadResult =
   | { type: 'redirect'; url: string }
   | { type: 'blob'; blob: Blob; filename: string | undefined };
 
-// The download endpoint returns two types of responses: a redirect URL or a blob.
-// If a redirect URL is found, we should use it to trigger the download in the browser.
-// If no redirect URL is found, we should download the blob directly.
+// The ImageBuilder API download endpoint returns two types of responses: a redirect URL or a blob.
+// When it returns a redirect URL, the UI proxy rewrites the response to 200 with { redirectUrl: CDN_URL }
+// When no redirect URL is found, we should download the blob directly.
 export const getExportDownloadResult = async (response: Response): Promise<ExportDownloadResult | null> => {
-  if (!response.ok && response.status !== 0) {
+  if (!response.ok || response.type === 'opaqueredirect' || response.status === 0) {
     return null;
   }
-  const redirectUrl = getRedirectUrl(response);
-  if (redirectUrl) {
-    if (!isValidDownloadUrl(redirectUrl)) {
-      throw new Error('Invalid redirect URL received from server');
+
+  // Extract the redirect URL returned by the UI proxy
+  const contentType = response.headers.get('Content-Type') || '';
+  if (response.ok && contentType.includes('application/json')) {
+    const data = (await response.json()) as { redirectUrl?: string };
+    const url = data?.redirectUrl;
+    if (url && isValidDownloadUrl(url)) {
+      return { type: 'redirect', url };
     }
-    return { type: 'redirect', url: redirectUrl };
+    return null;
   }
 
+  // Download the blob directly
   const blob = await response.blob();
 
   let filename = '';
