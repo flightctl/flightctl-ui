@@ -7,7 +7,7 @@ import {
 import { ExportFormatType } from '@flightctl/types/imagebuilder';
 
 export type ImageBuildFormValues = {
-  // name is autogenereated by us
+  buildName: string;
   source: ImageBuildSource;
   destination: ImageBuildDestination;
   bindingType: BindingType;

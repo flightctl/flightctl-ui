@@ -12,6 +12,7 @@ import {
   ImageExport,
   ResourceKind,
 } from '@flightctl/types/imagebuilder';
+import { validImageBuildName } from '../../form/validations';
 import { ImageBuildFormValues } from './types';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
 
@@ -67,6 +68,7 @@ const getPublicKeyValidationError = (publicKey: string, t: TFunction): string | 
 export const getValidationSchema = (t: TFunction) => {
   return Yup.lazy((values: ImageBuildFormValues) =>
     Yup.object<ImageBuildFormValues>({
+      buildName: validImageBuildName(t),
       source: Yup.object<ImageBuildSource>({
         repository: Yup.string().required(t('Source repository is required')),
         imageName: Yup.string().required(t('Image name is required')),
@@ -171,6 +173,8 @@ export const getInitialValues = (
       .map((imageExport) => imageExport.spec.format);
     const userConfig = imageBuild.spec.userConfiguration;
     return {
+      // Since we're always creating new imageBuilds, we don't copy the current name
+      buildName: '',
       source: getExistingImageData(imageBuild.spec.source, repoIds),
       destination: getExistingImageData(imageBuild.spec.destination, repoIds),
       bindingType: imageBuild.spec.binding.type as BindingType,
@@ -181,6 +185,7 @@ export const getInitialValues = (
   }
 
   return {
+    buildName: '',
     source: {
       repository: '',
       imageName: '',
@@ -207,14 +212,13 @@ const getHash = () =>
     .toString(16)
     .padStart(6, '0');
 
-const generateBuildName = () => `imagebuild-${getHash()}`;
 const generateExportName = (imageBuildName: string, format: ExportFormatType) => {
   const formatKey = format === ExportFormatType.ExportFormatTypeQCOW2DiskContainer ? 'qcow2-disk' : format;
   return `${imageBuildName}-${formatKey}-${getHash()}`;
 };
 
 export const getImageBuildResource = (values: ImageBuildFormValues): ImageBuild => {
-  const name = generateBuildName();
+  const name = values.buildName;
   const spec: ImageBuild['spec'] = {
     source: values.source,
     destination: values.destination,
