@@ -5,6 +5,7 @@
 
 export type { AapProviderSpec } from './models/AapProviderSpec';
 export type { AbsolutePath } from './models/AbsolutePath';
+export { ApiVersion } from './models/ApiVersion';
 export type { ApplicationContent } from './models/ApplicationContent';
 export type { ApplicationEnvVars } from './models/ApplicationEnvVars';
 export type { ApplicationPort } from './models/ApplicationPort';

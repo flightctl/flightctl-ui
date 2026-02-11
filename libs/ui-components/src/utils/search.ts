@@ -1,5 +1,5 @@
 import fuzzy from 'fuzzysearch';
-import { CORE_API_VERSION } from '../constants';
+import { ApiVersion } from '@flightctl/types';
 
 // Must be an even number for "getSearchResultsCount" to work
 export const MAX_TOTAL_SEARCH_RESULTS = 10;
@@ -26,7 +26,7 @@ export const getSearchResultsCount = (labelCount: number, fleetCount: number) =>
 };
 
 export const getEmptyFleetSearch = () => ({
-  apiVersion: CORE_API_VERSION,
+  apiVersion: ApiVersion.ApiVersionV1beta1,
   kind: 'Fleet',
   metadata: {},
   items: [],

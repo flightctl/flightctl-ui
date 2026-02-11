@@ -1,1 +1,3 @@
-export const API_VERSION = 'v1beta1';
+import { ApiVersion } from '@flightctl/types';
+
+export const API_VERSION = ApiVersion.ApiVersionV1beta1;
