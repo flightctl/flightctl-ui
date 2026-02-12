@@ -54,7 +54,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
   );
 
   const isEarlyBinding = values.bindingType === BindingType.BindingTypeEarly;
-  const remoteAccessUsername = values.userConfiguration?.enabled ? values.userConfiguration?.username || '' : '';
+  const remoteAccessUsername = values.remoteAccessEnabled ? values.userConfiguration.username || '' : '';
 
   return (
     <Stack hasGutter>

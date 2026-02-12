@@ -8,26 +8,92 @@ import {
   ImageBuild,
   ImageBuildDestination,
   ImageBuildSource,
+  ImageBuildUserConfiguration,
   ImageExport,
   ResourceKind,
 } from '@flightctl/types/imagebuilder';
 import { ImageBuildFormValues } from './types';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
 
+const PUBLIC_KEY_MAX_LENGTH = 8192;
+const VALID_SSH_PUBLIC_KEY_TYPES = [
+  'ssh-rsa',
+  'ssh-ed25519',
+  'ecdsa-sha2-nistp256',
+  'ecdsa-sha2-nistp384',
+  'ecdsa-sha2-nistp521',
+  'ssh-dss',
+];
+
+const SSH_PUBLIC_KEY_BASE64_DATA_REGEX = /^(?=.{50,}$)[A-Za-z0-9+/]+=*$/;
+// Characters that could be used for injection attacks
+const MALICIOUS_PUBLIC_KEY_CHARACTERS = /[;|&`()[\]{}<>"'\\\t$]/;
+
+const getPublicKeyValidationError = (publicKey: string, t: TFunction): string | undefined => {
+  if (publicKey.length > PUBLIC_KEY_MAX_LENGTH) {
+    return t('SSH public key is too long (max 8192 characters)');
+  }
+
+  // Allow newlines only at the end
+  const trimmedKey = publicKey.replace(/[\r\n]+$/g, '');
+  if (/[\r\n]/.test(trimmedKey)) {
+    return t('A single public key can be provided only');
+  }
+
+  if (MALICIOUS_PUBLIC_KEY_CHARACTERS.test(trimmedKey)) {
+    return t('Invalid SSH public key');
+  }
+
+  const parts = trimmedKey.trim().split(/\s+/);
+  if (parts.length < 2) {
+    return t('Invalid SSH public key format. Expected: "[TYPE] key [comment]"');
+  }
+
+  const keyType = parts[0];
+  if (!VALID_SSH_PUBLIC_KEY_TYPES.includes(keyType)) {
+    return t('Unsupported SSH public key type. Supported types: {{supportedTypes}}', {
+      supportedTypes: VALID_SSH_PUBLIC_KEY_TYPES.join(', '),
+    });
+  }
+
+  const base64Data = parts[1];
+  if (!SSH_PUBLIC_KEY_BASE64_DATA_REGEX.test(base64Data)) {
+    return t('Invalid SSH public key data');
+  }
+
+  return undefined;
+};
+
 export const getValidationSchema = (t: TFunction) => {
-  return Yup.object<ImageBuildFormValues>({
-    source: Yup.object<ImageBuildSource>({
-      repository: Yup.string().required(t('Source repository is required')),
-      imageName: Yup.string().required(t('Image name is required')),
-      imageTag: Yup.string().required(t('Image tag is required')),
-    }).required(t('Source image is required')),
-    destination: Yup.object<ImageBuildDestination>({
-      repository: Yup.string().required(t('Target repository is required')),
-      imageName: Yup.string().required(t('Image name is required')),
-      imageTag: Yup.string().required(t('Image tag is required')),
-    }).required(t('Target image is required')),
-    bindingType: Yup.string<BindingType>().required(t('Binding type is required')),
-  });
+  return Yup.lazy((values: ImageBuildFormValues) =>
+    Yup.object<ImageBuildFormValues>({
+      source: Yup.object<ImageBuildSource>({
+        repository: Yup.string().required(t('Source repository is required')),
+        imageName: Yup.string().required(t('Image name is required')),
+        imageTag: Yup.string().required(t('Image tag is required')),
+      }).required(t('Source image is required')),
+      destination: Yup.object<ImageBuildDestination>({
+        repository: Yup.string().required(t('Target repository is required')),
+        imageName: Yup.string().required(t('Image name is required')),
+        imageTag: Yup.string().required(t('Image tag is required')),
+      }).required(t('Target image is required')),
+      bindingType: Yup.string<BindingType>().required(t('Binding type is required')),
+      userConfiguration: Yup.object<ImageBuildUserConfiguration>({
+        username: values.remoteAccessEnabled ? Yup.string().required(t('Username is required')) : Yup.string(),
+        publickey: values.remoteAccessEnabled
+          ? Yup.string()
+              .required(t('SSH public key is required'))
+              .test('flightctl-ssh-public-key', function (publicKey) {
+                if (!publicKey) {
+                  return true;
+                }
+                const error = getPublicKeyValidationError(publicKey, t);
+                return error ? this.createError({ message: error }) : true;
+              })
+          : Yup.string(),
+      }),
+    }),
+  );
 };
 
 // Returns an array with one item per format (VMDK, QCOW2, ISO), where each item is either
@@ -90,22 +156,13 @@ export const getInitialValues = (imageBuild?: ImageBuildWithExports): ImageBuild
       .filter((ie): ie is ImageExport => ie !== undefined)
       .map((imageExport) => imageExport.spec.format);
     const userConfig = imageBuild.spec.userConfiguration;
-    const userConfiguration = userConfig
-      ? {
-          ...userConfig,
-          enabled: !!(userConfig.username || userConfig.publickey),
-        }
-      : {
-          username: '',
-          publickey: '',
-          enabled: false,
-        };
     return {
       source: imageBuild.spec.source,
       destination: imageBuild.spec.destination,
       bindingType: imageBuild.spec.binding.type as BindingType,
       exportFormats: exportFormats || [],
-      userConfiguration,
+      remoteAccessEnabled: !!(userConfig?.username || userConfig?.publickey),
+      userConfiguration: userConfig || { username: '', publickey: '' },
     };
   }
 
@@ -122,10 +179,10 @@ export const getInitialValues = (imageBuild?: ImageBuildWithExports): ImageBuild
     },
     bindingType: BindingType.BindingTypeEarly,
     exportFormats: [],
+    remoteAccessEnabled: false,
     userConfiguration: {
       username: '',
       publickey: '',
-      enabled: false,
     },
   };
 };
@@ -152,9 +209,9 @@ export const getImageBuildResource = (values: ImageBuildFormValues): ImageBuild 
   };
 
   // Allow the user to uncheck the toggle without having cleared the fields
-  const username = values.userConfiguration?.username || '';
-  const publickey = values.userConfiguration?.publickey || '';
-  if (values.userConfiguration?.enabled && username && publickey) {
+  const username = values.userConfiguration.username || '';
+  const publickey = values.userConfiguration.publickey || '';
+  if (values.remoteAccessEnabled && username && publickey) {
     spec.userConfiguration = {
       username,
       publickey,

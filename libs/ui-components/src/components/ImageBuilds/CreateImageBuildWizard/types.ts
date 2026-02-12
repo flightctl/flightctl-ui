@@ -6,17 +6,14 @@ import {
 } from '@flightctl/types/imagebuilder';
 import { ExportFormatType } from '@flightctl/types/imagebuilder';
 
-type ImageBuildUserConfigurationForm = ImageBuildUserConfiguration & {
-  enabled?: boolean;
-};
-
 export type ImageBuildFormValues = {
   // name is autogenereated by us
   source: ImageBuildSource;
   destination: ImageBuildDestination;
   bindingType: BindingType;
   exportFormats: ExportFormatType[];
-  userConfiguration?: ImageBuildUserConfigurationForm;
+  remoteAccessEnabled: boolean;
+  userConfiguration: ImageBuildUserConfiguration;
 };
 
 export type ImageBuildWizardError =
