@@ -16,6 +16,7 @@ import { showSpinnerBriefly } from '../../../utils/time';
 import { getAllExportFormats, getExportDownloadResult, getImageReference } from '../../../utils/imageBuilds';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { ROUTE } from '../../../hooks/useNavigate';
+import { IMAGE_EXPORT_ID_PARAM } from './ImageBuildLogsTab';
 
 type ImageBuildExportsGalleryProps = {
   imageBuild: ImageBuildWithExports;
@@ -102,11 +103,6 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
   >();
   const imageBuildId = imageBuild.metadata.name as string;
 
-  const handleViewLogs = () => {
-    const baseRoute = appRoutes[ROUTE.IMAGE_BUILD_DETAILS];
-    routerNavigate(`${baseRoute}/${imageBuildId}/logs`);
-  };
-
   const handleCreateNewExport = async (format: ExportFormatType) => {
     try {
       const imageExport = getImageExportResource(imageBuildId, format);
@@ -178,7 +174,9 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
           await handleDelete(ieName);
           break;
         case 'viewLogs':
-          handleViewLogs();
+          routerNavigate(
+            `${appRoutes[ROUTE.IMAGE_BUILD_DETAILS]}/${imageBuildId}/logs?${IMAGE_EXPORT_ID_PARAM}=${ieName}`,
+          );
           break;
       }
     } catch (error) {
