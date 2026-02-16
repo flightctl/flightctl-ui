@@ -34,8 +34,7 @@ const links = {
 type AppLink = 'createApp' | 'useTemplateVars' | 'addNewDevice' | 'createAcmRepo';
 
 const getLinkSource = (appType: FlightCtlApp, isRHEM?: boolean) => {
-  // Default doc links are AAP's and apply when using RHEM branding
-  if (isRHEM || appType === FlightCtlApp.AAP) {
+  if (isRHEM && appType === FlightCtlApp.STANDALONE) {
     return links.aap;
   }
   return appType === FlightCtlApp.STANDALONE ? links.fc : links.acm;

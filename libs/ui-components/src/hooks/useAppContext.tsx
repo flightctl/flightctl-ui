@@ -44,11 +44,9 @@ export const appRoutes = {
 };
 
 export type NavLinkFC = React.FC<{ to: string; children: (props: { isActive: boolean }) => React.ReactNode }>;
-export type PromptFC = React.FC<{ message: string }>;
 export enum FlightCtlApp {
   STANDALONE = 'standalone',
   OCP = 'ocp',
-  AAP = 'aap',
 }
 
 export type AppContextProps = {
@@ -66,13 +64,12 @@ export type AppContextProps = {
     appRoutes: Record<ROUTE, string>;
     NavLink: NavLinkFC;
     useSearchParams: typeof useSearchParams;
-    useBlocker?: typeof useBlocker;
+    useBlocker: typeof useBlocker;
     useParams: typeof useParams;
     Navigate: typeof Navigate;
     Route: typeof Route;
     Routes: typeof Routes;
     useLocation: typeof useLocation;
-    Prompt?: PromptFC;
   };
   fetch: {
     getWsEndpoint: (deviceId: string) => string;

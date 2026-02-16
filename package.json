@@ -29,6 +29,8 @@
     "i18n": "npm run -w @flightctl/i18n i18n"
   },
   "devDependencies": {
+    "@openshift-console/dynamic-plugin-sdk": "4.19.1",
+    "@openshift-console/dynamic-plugin-sdk-webpack": "4.19.0",
     "@babel/preset-env": "^7.24.0",
     "@babel/preset-react": "^7.23.3",
     "@babel/preset-typescript": "^7.23.3",
@@ -45,7 +47,9 @@
     "rimraf": "^5.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.1.6",
-    "webpack-cli": "^5.1.4"
+    "webpack": "5.76.3",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.2.3"
   },
   "dependencies": {
     "fast-json-patch": "^3.1.1",
