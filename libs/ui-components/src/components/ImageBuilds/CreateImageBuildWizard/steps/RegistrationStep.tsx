@@ -31,7 +31,14 @@ import { CERTIFICATE_VALIDITY_IN_YEARS } from '../../../../constants';
 
 export const registrationStepId = 'registration';
 
-export const isRegistrationStepValid = (errors: FormikErrors<ImageBuildFormValues>) => !errors.bindingType;
+export const isRegistrationStepValid = (errors: FormikErrors<ImageBuildFormValues>) => {
+  const { userConfiguration } = errors;
+  if (!userConfiguration) {
+    return true;
+  }
+
+  return !userConfiguration.username && !userConfiguration.publickey;
+};
 
 const RegistrationStep = () => {
   const { t } = useTranslation();
@@ -52,11 +59,7 @@ const RegistrationStep = () => {
   };
 
   const handleRemoteAccessToggle = (enabled: boolean) => {
-    if (enabled && !values.userConfiguration) {
-      setFieldValue('userConfiguration', { username: '', publickey: '', enabled: true });
-      return;
-    }
-    setFieldValue('userConfiguration.enabled', enabled);
+    setFieldValue('remoteAccessEnabled', enabled);
   };
 
   return (
@@ -158,18 +161,18 @@ const RegistrationStep = () => {
       <Grid lg={5} span={8}>
         <FormSection title={t('Remote access')}>
           <CheckboxField
-            name="userConfiguration.enabled"
+            name="remoteAccessEnabled"
             label={t('Provide an SSH public key to enable passwordless login once your image is deployed.')}
             onChangeCustom={handleRemoteAccessToggle}
           >
-            <FormGroup label={t('Username')} fieldId="user-config-username">
+            <FormGroup label={t('Username')} fieldId="user-config-username" isRequired>
               <TextField
                 name="userConfiguration.username"
                 aria-label={t('Username')}
                 helperText={t('The username for the user account')}
               />
             </FormGroup>
-            <FormGroup label={t('SSH public key')} fieldId="user-config-publickey">
+            <FormGroup label={t('SSH public key')} fieldId="user-config-publickey" isRequired>
               <UploadField name="userConfiguration.publickey" ariaLabel={t('SSH public key')} />
             </FormGroup>
           </CheckboxField>

@@ -83,8 +83,9 @@ const UploadField = ({ ariaLabel, maxFileBytes, isRequired, name }: UploadFieldP
       }
     }
 
-    void setValue(file);
+    // To prevent timing issues with validations, we must touch the field before we set the new value
     void setTouched(true);
+    void setValue(file, true);
     setIsRejected(false);
   };
 
@@ -122,8 +123,10 @@ const UploadField = ({ ariaLabel, maxFileBytes, isRequired, name }: UploadFieldP
         }}
         onClearClick={() => {
           setFilename('');
+          if (!isRequired) {
+            void setTouched(false);
+          }
           void setValue('');
-          void setTouched(false);
         }}
       />
 
