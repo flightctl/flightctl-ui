@@ -189,7 +189,7 @@ const CreateImageBuildWizard = () => {
                         setCurrentStep(step);
                       }}
                     >
-                      <WizardStep name={t('Image details')} id={sourceImageStepId}>
+                      <WizardStep name={t('Base image')} id={sourceImageStepId}>
                         {(!currentStep || currentStep?.id === sourceImageStepId) && <SourceImageStep />}
                       </WizardStep>
                       <WizardStep
