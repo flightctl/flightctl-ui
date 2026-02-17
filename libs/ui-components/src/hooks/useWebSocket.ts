@@ -36,6 +36,7 @@ export const useWebSocket = <T>(
   const { t } = useTranslation();
   const wsRef = React.useRef<WebSocket>();
   const isMountedRef = React.useRef(true);
+  const hasReceivedMessageRef = React.useRef(false);
   const [isConnecting, setIsConnecting] = React.useState(true);
   const [isClosed, setIsClosed] = React.useState(false);
   const [error, setError] = React.useState<unknown>();
@@ -60,6 +61,7 @@ export const useWebSocket = <T>(
       setIsConnecting(true);
       setIsClosed(false);
       setError(undefined);
+      hasReceivedMessageRef.current = false;
       const wsEndpoint = getWsEndpoint(deviceId);
       const wsMeta = JSON.stringify(wsMetadata);
       const params = new URLSearchParams({
@@ -83,7 +85,9 @@ export const useWebSocket = <T>(
         if (isMountedRef.current) {
           setIsConnecting(false);
           setIsClosed(true);
-          if (isErrorCloseEvent(evt)) {
+          // If we never received any data from the backend, treat an error close as a failure
+          // Otherwise it may be a normal session close, and we'll show the "Reconnect" banner.
+          if (isErrorCloseEvent(evt) && !hasReceivedMessageRef.current) {
             const reason = evt.reason || t('Unknown error');
             setError(t('Failed to connect to device terminal: {{reason}}', { reason }));
           }
@@ -96,7 +100,12 @@ export const useWebSocket = <T>(
         console.error('Error creating websocket:', evt);
         if (isMountedRef.current) {
           setIsConnecting(false);
-          setError(t('Failed to connect to device terminal'));
+          if (!hasReceivedMessageRef.current) {
+            setError(t('Failed to connect to device terminal'));
+          } else {
+            // User may have closed the session, so we'll show the "Reconnect" banner.
+            setIsClosed(true);
+          }
         }
       };
 
@@ -132,6 +141,7 @@ export const useWebSocket = <T>(
   React.useEffect(() => {
     const listener = (evt: MessageEvent<T>) => {
       if (isMountedRef.current) {
+        hasReceivedMessageRef.current = true;
         onMsgReceived(evt.data);
       }
     };
