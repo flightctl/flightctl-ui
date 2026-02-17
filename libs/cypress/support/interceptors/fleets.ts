@@ -22,7 +22,7 @@ const buildNewFleet = (newFleetName: string): Fleet => {
 
 const loadInterceptors = () => {
   cy.intercept('GET', createListMatcher('fleets'), (req) => {
-    const newFleetName = Cypress.env('FLIGHTCTL_ADD_FLEET');
+    const newFleetName = Cypress.expose('FLIGHTCTL_ADD_FLEET');
     const allFleets = [...basicFleets];
     if (newFleetName) {
       allFleets.push(buildNewFleet(newFleetName));
@@ -33,7 +33,7 @@ const loadInterceptors = () => {
   }).as('fleets');
 
   cy.intercept('GET', createDetailMatcher('fleets'), (req) => {
-    const newFleetName = Cypress.env('FLIGHTCTL_ADD_FLEET') as string;
+    const newFleetName = Cypress.expose('FLIGHTCTL_ADD_FLEET') as string;
     const requestFleetName = extractResourceName(req.url, 'fleets');
 
     if (!requestFleetName) {
