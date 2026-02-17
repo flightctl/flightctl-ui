@@ -195,7 +195,8 @@ const getHash = () =>
 
 const generateBuildName = () => `imagebuild-${getHash()}`;
 const generateExportName = (imageBuildName: string, format: ExportFormatType) => {
-  return `${imageBuildName}-${format}-${getHash()}`;
+  const formatKey = format === ExportFormatType.ExportFormatTypeQCOW2DiskContainer ? 'qcow2-disk' : format;
+  return `${imageBuildName}-${formatKey}-${getHash()}`;
 };
 
 export const getImageBuildResource = (values: ImageBuildFormValues): ImageBuild => {
