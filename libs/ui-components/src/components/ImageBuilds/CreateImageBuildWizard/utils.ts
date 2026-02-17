@@ -15,7 +15,7 @@ import {
 import { ImageBuildFormValues } from './types';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
 
-const PUBLIC_KEY_MAX_LENGTH = 8192;
+export const PUBLIC_KEY_MAX_LENGTH = 8 * 1024; // (8 KB)
 const VALID_SSH_PUBLIC_KEY_TYPES = [
   'ssh-rsa',
   'ssh-ed25519',
@@ -31,7 +31,7 @@ const MALICIOUS_PUBLIC_KEY_CHARACTERS = /[;|&`()[\]{}<>"'\\\t$]/;
 
 const getPublicKeyValidationError = (publicKey: string, t: TFunction): string | undefined => {
   if (publicKey.length > PUBLIC_KEY_MAX_LENGTH) {
-    return t('SSH public key is too long (max 8192 characters)');
+    return t('SSH public key is too long');
   }
 
   // Allow newlines only at the end
