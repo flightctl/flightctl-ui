@@ -22,6 +22,7 @@ import { FormikErrors, useFormikContext } from 'formik';
 
 import { BindingType } from '@flightctl/types/imagebuilder';
 import { ImageBuildFormValues } from '../types';
+import { PUBLIC_KEY_MAX_LENGTH } from '../utils';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import TextField from '../../../form/TextField';
@@ -173,7 +174,11 @@ const RegistrationStep = () => {
               />
             </FormGroup>
             <FormGroup label={t('SSH public key')} fieldId="user-config-publickey" isRequired>
-              <UploadField name="userConfiguration.publickey" ariaLabel={t('SSH public key')} />
+              <UploadField
+                name="userConfiguration.publickey"
+                ariaLabel={t('SSH public key')}
+                maxFileBytes={PUBLIC_KEY_MAX_LENGTH}
+              />
             </FormGroup>
           </CheckboxField>
           <Content component="small">

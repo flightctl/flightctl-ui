@@ -15,44 +15,38 @@ type UploadFieldProps = {
   maxFileBytes?: number;
 };
 
-const UploadHelperText = ({
+const ONE_MB = 1024 * 1024;
+
+const UploadMaxFileSizeHelperText = ({ maxFileBytes }: { maxFileBytes: number }) => {
+  const { t } = useTranslation();
+
+  const showKB = maxFileBytes < ONE_MB;
+  const maxFileSize = maxFileBytes / (showKB ? 1024 : ONE_MB);
+
+  const helperText = showKB
+    ? t('Max file size {{ maxFileSize }} KB', { maxFileSize })
+    : t('Max file size {{ maxFileSize }} MB', { maxFileSize });
+
+  return <DefaultHelperText helperText={helperText} />;
+};
+
+const UploadErrorHelperText = ({
   meta,
   isUploading,
   isRejected,
-  maxFileBytes,
 }: {
   meta?: FieldMetaProps<unknown>;
   isUploading: boolean;
   isRejected: boolean;
-  maxFileBytes?: number;
 }) => {
   const { t } = useTranslation();
 
-  const maxFileMB = (maxFileBytes || 0) / (1024 * 1024);
-
-  const defaultContent = maxFileBytes ? (
-    <DefaultHelperText helperText={t('Max file size {{ maxFileSize }} MB', { maxFileSize: maxFileMB })} />
-  ) : null;
   if (isRejected) {
-    return (
-      <>
-        {defaultContent}
-        <ErrorHelperText
-          error={t('Content exceeds max file size of {{ maxFileSize }} MB', {
-            maxFileSize: maxFileMB,
-          })}
-        />
-      </>
-    );
+    return <ErrorHelperText error={t('File exceeds maximum allowed size.')} />;
   } else if (!isUploading && !!meta?.error) {
-    return (
-      <>
-        {defaultContent}
-        <ErrorHelperText meta={meta} />
-      </>
-    );
+    return <ErrorHelperText meta={meta} />;
   }
-  return defaultContent;
+  return null;
 };
 
 const UploadField = ({ ariaLabel, maxFileBytes, isRequired, name }: UploadFieldProps) => {
@@ -106,7 +100,9 @@ const UploadField = ({ ariaLabel, maxFileBytes, isRequired, name }: UploadFieldP
         onDataChange={handleFileChange}
         onTextChange={handleFileChange}
         onFileInputChange={(_event, file) => {
-          if (!maxFileBytes || file.size <= maxFileBytes) {
+          if (maxFileBytes && file.size > maxFileBytes) {
+            handleFileRejected(true);
+          } else {
             setFilename(file.name);
             setIsRejected(false);
           }
@@ -129,8 +125,8 @@ const UploadField = ({ ariaLabel, maxFileBytes, isRequired, name }: UploadFieldP
           void setValue('');
         }}
       />
-
-      <UploadHelperText maxFileBytes={maxFileBytes} meta={meta} isUploading={isFileUploading} isRejected={isRejected} />
+      {maxFileBytes && <UploadMaxFileSizeHelperText maxFileBytes={maxFileBytes} />}
+      <UploadErrorHelperText meta={meta} isUploading={isFileUploading} isRejected={isRejected} />
     </FormGroup>
   );
 };
