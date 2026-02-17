@@ -31,7 +31,7 @@ import { ExportFormatType, ImageExport, ImageExportConditionReason } from '@flig
 import { getExportFormatDescription, getExportFormatLabel, getImageExportStatusReason } from '../../utils/imageBuilds';
 import { getDateDisplay } from '../../utils/dates';
 import { useTranslation } from '../../hooks/useTranslation';
-import ConfirmDeleteOrCancelImageExportModal, {
+import ConfirmImageExportActionModal, {
   ConfirmImageExportAction,
 } from './ConfirmImageExportModal/ConfirmImageExportModal';
 import { ImageExportStatusDisplay } from './ImageBuildAndExportStatus';
@@ -102,7 +102,7 @@ const getActionTitle = (t: TFunction, action: ImageExportAction, inProgress: boo
     case 'createExport':
       return inProgress ? t('Exporting...') : t('Export image');
     default:
-      return t('Action');
+      return t('Actions');
   }
 };
 const iconMap: Record<ExportFormatType, React.ReactElement> = {
@@ -173,9 +173,14 @@ export const ViewImageBuildExportCard = ({
   const [actionsDropdownOpen, setActionsDropdownOpen] = React.useState(false);
   const [pendingConfirmAction, setPendingConfirmAction] = React.useState<ConfirmImageExportAction>();
   const exists = !!imageExport;
+  const exportReason = exists ? getImageExportStatusReason(imageExport) : undefined;
 
   const handleCardAction = (action: ImageExportAction) => {
-    if (action === 'cancel' || action === 'delete') {
+    if (
+      action === 'cancel' ||
+      action === 'delete' ||
+      (action === 'rebuild' && exportReason === ImageExportConditionReason.ImageExportConditionReasonCompleted)
+    ) {
       setPendingConfirmAction(action);
     } else {
       onCardAction({ format, action });
@@ -189,7 +194,6 @@ export const ViewImageBuildExportCard = ({
     setPendingConfirmAction(undefined);
   };
 
-  const exportReason = exists ? getImageExportStatusReason(imageExport) : undefined;
   const { primaryAction, remainingActions } = React.useMemo(() => {
     const allActions = getActionsForStatus(exportReason, actionPermissions);
     const primaryAction = allActions.length > 0 ? allActions[0] : undefined;
@@ -287,7 +291,7 @@ export const ViewImageBuildExportCard = ({
                           variant="secondary"
                           isDisabled={activeAction !== undefined}
                         >
-                          {t('Action')}
+                          {t('Actions')}
                         </MenuToggle>
                       )}
                     >
@@ -318,7 +322,7 @@ export const ViewImageBuildExportCard = ({
         </Stack>
       </CardFooter>
       {pendingConfirmAction && (
-        <ConfirmDeleteOrCancelImageExportModal action={pendingConfirmAction} onClose={handleConfirmAction} />
+        <ConfirmImageExportActionModal action={pendingConfirmAction} onClose={handleConfirmAction} />
       )}
     </Card>
   );

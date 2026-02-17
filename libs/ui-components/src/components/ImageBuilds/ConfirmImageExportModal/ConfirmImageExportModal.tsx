@@ -3,9 +3,9 @@ import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/
 
 import { useTranslation } from '../../../hooks/useTranslation';
 
-export type ConfirmImageExportAction = 'cancel' | 'delete';
+export type ConfirmImageExportAction = 'cancel' | 'delete' | 'rebuild';
 
-const ConfirmDeleteOrCancelImageExportModal = ({
+const ConfirmImageExportActionModal = ({
   action,
   onClose,
 }: {
@@ -17,16 +17,27 @@ const ConfirmDeleteOrCancelImageExportModal = ({
   let title = '';
   let message = '';
   let confirmButtonTitle = '';
-  if (action === 'cancel') {
-    title = t('Cancel image export?');
-    message = t('This will immediately stop the current process. As a result, no images will be exported.');
-    confirmButtonTitle = t('Cancel image export');
-  } else if (action === 'delete') {
-    title = t('Delete image export?');
-    message = t(
-      'This image export will be permanently removed. The actual image files in your storage will not be deleted.',
-    );
-    confirmButtonTitle = t('Delete');
+
+  switch (action) {
+    case 'cancel':
+      title = t('Cancel image export?');
+      message = t('This will immediately stop the current process. As a result, no images will be exported.');
+      confirmButtonTitle = t('Cancel image export');
+      break;
+    case 'delete':
+      title = t('Delete image export?');
+      message = t(
+        'This image export will be permanently removed. The actual image files in your storage will not be deleted.',
+      );
+      confirmButtonTitle = t('Delete');
+      break;
+    case 'rebuild':
+      title = t('Rebuild image export?');
+      message = t(
+        'Rebuilding updates the image currently displayed in the console. Previous versions remain accessible via the flightctl CLI.',
+      );
+      confirmButtonTitle = t('Rebuild');
+      break;
   }
 
   return (
@@ -34,15 +45,15 @@ const ConfirmDeleteOrCancelImageExportModal = ({
       <ModalHeader title={title} />
       <ModalBody>{message}</ModalBody>
       <ModalFooter>
-        <Button key="confirm" variant="danger" onClick={() => onClose(true)}>
+        <Button key="confirm" variant={action === 'rebuild' ? 'primary' : 'danger'} onClick={() => onClose(true)}>
           {confirmButtonTitle}
         </Button>
         <Button key="cancel" variant="link" onClick={() => onClose(false)}>
-          {t('Close')}
+          {action === 'cancel' ? t('Close') : t('Cancel')}
         </Button>
       </ModalFooter>
     </Modal>
   );
 };
 
-export default ConfirmDeleteOrCancelImageExportModal;
+export default ConfirmImageExportActionModal;
