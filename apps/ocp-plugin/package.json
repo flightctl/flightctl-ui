@@ -78,7 +78,7 @@
     "formik": "^2.4.5",
     "fuzzysearch": "^1.0.3",
     "i18next": "^21.8.14",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "monaco-editor": "^0.51.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",
