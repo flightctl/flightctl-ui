@@ -435,10 +435,12 @@ const toFormFiles = (files: ApplicationContent[]) =>
 
 const toApiHelmApp = (app: HelmAppForm): HelmApplication => {
   const helmApp: HelmApplication = {
-    name: app.name,
     image: app.image,
     appType: app.appType,
   };
+  if (app.name) {
+    helmApp.name = app.name;
+  }
   if (app.namespace) {
     helmApp.namespace = app.namespace;
   }

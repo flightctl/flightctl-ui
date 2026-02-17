@@ -47,9 +47,9 @@ const K8S_DNS_SUBDOMAIN_START_END = /^[a-z0-9](.*[a-z0-9])?$/;
 const K8S_DNS_SUBDOMAIN_ALLOWED_CHARACTERS = /^[a-z0-9.-]*$/;
 const K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH = 253;
 
-// https://issues.redhat.com/browse/MGMT-18349 to make the validation more robust
-const BASIC_DEVICE_OS_IMAGE_REGEXP = /^[a-zA-Z0-9.\-\/:@_+]*$/;
-const APPLICATION_IMAGE_REGEXP = BASIC_DEVICE_OS_IMAGE_REGEXP;
+const OCI_IMAGE_FULL_REGEXP = /^(?![./_])[a-zA-Z0-9.\-\/:@_+]*$/;
+// Accepts all characters from the above regex, but it rejects leading dot, slash, or underscore
+const OCI_IMAGE_ALLOWED_CHARS_REGEXP = /^[a-zA-Z0-9.\-\/:@_+]*$/;
 const APPLICATION_NAME_REGEXP = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
 const APPLICATION_VAR_NAME_REGEXP = /^[a-zA-Z_]+[a-zA-Z0-9_]*$/;
 
@@ -258,7 +258,7 @@ export const validOsImage = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
         }
       }
 
-      return BASIC_DEVICE_OS_IMAGE_REGEXP.test(validateOsImage);
+      return OCI_IMAGE_FULL_REGEXP.test(validateOsImage);
     },
   );
 
@@ -654,16 +654,26 @@ export const validateMemoryLimit = (memory: string | undefined): boolean => {
   return true;
 };
 
-// Common volume validation helpers
-const volumeNameSchema = (t: TFunction) => validApplicationAndVolumeName(t).required(t('Volume name is required'));
-
-const optionalImageRefSchema = (t: TFunction) =>
-  Yup.string().test('image-ref-format', t('Image reference includes invalid characters.'), (value) => {
-    if (!value || value.length === 0) {
-      return true; // Empty is allowed
+const ociImageSchema = (t: TFunction) =>
+  Yup.string().test('oci-image-format', (value, testContext) => {
+    if (!value) return true;
+    if (!OCI_IMAGE_ALLOWED_CHARS_REGEXP.test(value)) {
+      return testContext.createError({
+        message: t('Image includes invalid characters.'),
+      });
     }
-    return APPLICATION_IMAGE_REGEXP.test(value);
+    if (!OCI_IMAGE_FULL_REGEXP.test(value)) {
+      return testContext.createError({
+        message: t('Image must not start with a dot (.), slash (/), or underscore (_).'),
+      });
+    }
+    return true;
   });
+
+const requiredOciImageSchema = (t: TFunction, requiredMessage?: string) =>
+  ociImageSchema(t).required(requiredMessage || t('Image is required.'));
+
+const volumeNameSchema = (t: TFunction) => validApplicationAndVolumeName(t).required(t('Volume name is required'));
 
 const imagePullPolicySchema = (t: TFunction) =>
   Yup.string()
@@ -678,12 +688,11 @@ const mountPathSchema = (t: TFunction, isRequired: boolean = true) => {
   return isRequired ? schema.required(t('Mount path is required for this volume type')) : schema;
 };
 
-// Volume validation schemas
 const singleContainerVolumesSchema = (t: TFunction) =>
   Yup.array().of(
     Yup.object().shape({
       name: volumeNameSchema(t),
-      imageRef: optionalImageRefSchema(t),
+      imageRef: ociImageSchema(t),
       imagePullPolicy: Yup.string(),
       mountPath: mountPathSchema(t, true),
     }),
@@ -693,7 +702,7 @@ const composeQuadletVolumesSchema = (t: TFunction) =>
   Yup.array().of(
     Yup.object().shape({
       name: volumeNameSchema(t),
-      imageRef: optionalImageRefSchema(t).required(t('Image reference is required for this volume type')),
+      imageRef: requiredOciImageSchema(t, t('Image reference is required for this volume type')),
       imagePullPolicy: imagePullPolicySchema(t),
     }),
   );
@@ -710,9 +719,7 @@ export const validApplicationsSchema = (t: TFunction) => {
               .required(t('Definition source must be image for this type of applications')),
             appType: Yup.string().oneOf([AppType.AppTypeContainer]).required(t('Application type is required')),
             name: validApplicationAndVolumeName(t),
-            image: Yup.string()
-              .required(t('Image is required.'))
-              .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
+            image: requiredOciImageSchema(t),
             ports: Yup.array().of(
               Yup.object()
                 .shape({
@@ -749,9 +756,7 @@ export const validApplicationsSchema = (t: TFunction) => {
               .required(t('Definition source must be image for this type of applications')),
             appType: Yup.string().oneOf([AppType.AppTypeHelm]).required(t('Application type is required')),
             name: validApplicationAndVolumeName(t),
-            image: Yup.string()
-              .required(t('Image is required.'))
-              .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
+            image: requiredOciImageSchema(t),
             namespace: validHelmNamespace(t),
             valuesYaml: Yup.string().test('valid-yaml', t('YAML content is invalid.'), (value) => {
               if (!value || value.trim() === '') {
@@ -778,9 +783,7 @@ export const validApplicationsSchema = (t: TFunction) => {
               .oneOf([AppType.AppTypeCompose, AppType.AppTypeQuadlet])
               .required(t('Application type is required')),
             name: validApplicationAndVolumeName(t),
-            image: Yup.string()
-              .required(t('Image is required.'))
-              .matches(APPLICATION_IMAGE_REGEXP, t('Application image includes invalid characters.')),
+            image: requiredOciImageSchema(t),
             volumes: composeQuadletVolumesSchema(t),
             variables: appVariablesSchema(t),
           });

@@ -19,7 +19,7 @@ const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?
 
   return (
     <Grid hasGutter>
-      <FormGroup label={t('Application name')} isRequired>
+      <FormGroup label={t('Application name')}>
         <TextField aria-label={t('Application name')} name={`${appFieldName}.name`} isDisabled={isReadOnly} />
       </FormGroup>
 
