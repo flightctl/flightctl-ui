@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { TFunction } from 'react-i18next';
 import {
   Alert,
   Bullseye,
@@ -25,6 +24,7 @@ import {
 import { ExportFormatType, ImageBuildConditionReason, ImageExportConditionReason } from '@flightctl/types/imagebuilder';
 import { useTranslation } from '../../../hooks/useTranslation';
 import {
+  getExportFormatLabel,
   getImageBuildStatusReason,
   getImageExportStatusReason,
   isImageBuildActiveReason,
@@ -41,19 +41,6 @@ type LogEntity = {
   label: string;
   isActive: boolean;
   status: ImageBuildConditionReason | ImageExportConditionReason;
-};
-
-const getExportFormatText = (t: TFunction, format: ExportFormatType) => {
-  switch (format) {
-    case ExportFormatType.ExportFormatTypeVMDK:
-      return t('Virtualization (VMDK)');
-    case ExportFormatType.ExportFormatTypeQCOW2:
-      return t('OpenStack/KVM (QCOW2)');
-    case ExportFormatType.ExportFormatTypeQCOW2DiskContainer:
-      return t('OpenShift Virtualization (QCOW2)');
-    case ExportFormatType.ExportFormatTypeISO:
-      return t('Metal installer (ISO)');
-  }
 };
 
 const ImageBuildAndExportLogStatus = ({
@@ -96,7 +83,7 @@ const ImageBuildLogsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }
     entities.push({
       type: LogResourceType.BUILD,
       id: buildName,
-      label: buildName,
+      label: t('Image build'),
       isActive: isImageBuildActiveReason(buildReason),
       status: buildReason,
     });
@@ -115,7 +102,7 @@ const ImageBuildLogsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }
         entities.push({
           type: LogResourceType.EXPORT,
           id: ie.metadata.name as string,
-          label: getExportFormatText(t, format),
+          label: getExportFormatLabel(t, format),
           isActive: isImageExportActiveReason(exportReason),
           status: exportReason,
         });
@@ -209,13 +196,8 @@ const ImageBuildLogsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }
                         {selectableEntities
                           .filter((entity) => entity.type === LogResourceType.BUILD)
                           .map((entity) => (
-                            <MenuItem
-                              key={entity.id}
-                              itemId={entity.id}
-                              isSelected={selectedEntityId === entity.id}
-                              description={entity.id}
-                            >
-                              {entity.label}
+                            <MenuItem key={entity.id} itemId={entity.id} isSelected={selectedEntityId === entity.id}>
+                              {entity.id}
                             </MenuItem>
                           ))}
                       </MenuList>
