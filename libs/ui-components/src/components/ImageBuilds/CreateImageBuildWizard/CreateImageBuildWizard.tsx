@@ -70,10 +70,15 @@ const CreateImageBuildWizard = () => {
   const [error, setError] = React.useState<ImageBuildWizardError>();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
   const [imageBuildId, imageBuild, imageBuildLoading, editError] = useEditImageBuild();
-  const { isLoading: registriesLoading, error: registriesError } = useOciRegistriesContext();
+  const { ociRegistries, isLoading: registriesLoading, error: registriesError } = useOciRegistriesContext();
 
   const isEdit = !!imageBuildId;
   const buildReason = imageBuild ? getImageBuildStatusReason(imageBuild) : undefined;
+
+  const availableRepositoryIds = React.useMemo(
+    () => new Set(ociRegistries.map((r) => r.metadata?.name as string)),
+    [ociRegistries],
+  );
 
   let title: string;
   if (isEdit) {
@@ -117,7 +122,7 @@ const CreateImageBuildWizard = () => {
             </Alert>
           ) : (
             <Formik<ImageBuildFormValues>
-              initialValues={getInitialValues(imageBuild)}
+              initialValues={getInitialValues(imageBuild, availableRepositoryIds)}
               validationSchema={getValidationSchema(t)}
               validateOnMount
               onSubmit={async (values) => {
