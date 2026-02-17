@@ -214,6 +214,7 @@ const RepositorySelect = ({
           type={repoType}
           onClose={() => setCreateRepoModalOpen(false)}
           onSuccess={handleCreateRepository}
+          validateBeforeCreate={validateRepoSelection}
         />
       )}
     </>

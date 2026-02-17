@@ -439,6 +439,8 @@ export type CreateRepositoryFormProps = {
   onSuccess: (repository: Repository) => void;
   repository?: Repository;
   resourceSyncs?: ResourceSync[];
+  // If provided, the repository submission will be blocked if the validation fails
+  validateBefore?: (repo: Repository) => string | undefined;
   options?: {
     isReadOnly?: boolean;
     canUseResourceSyncs?: boolean;
@@ -447,13 +449,14 @@ export type CreateRepositoryFormProps = {
   };
 };
 
-const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
+const CreateRepositoryForm = ({
   repository,
   resourceSyncs,
+  validateBefore,
   options,
   onClose,
   onSuccess,
-}) => {
+}: CreateRepositoryFormProps) => {
   const [errors, setErrors] = React.useState<string[]>();
   const { patch, remove, post } = useFetch();
   const { t } = useTranslation();
@@ -513,8 +516,14 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
             setErrors([getErrorMessage(e)]);
           }
         } else {
+          const repoToCreate = getRepository(values);
+          const validationError = validateBefore?.(repoToCreate);
+          if (validationError) {
+            setErrors([validationError]);
+            return;
+          }
           try {
-            const repo = await post<Repository>('repositories', getRepository(values));
+            const repo = await post<Repository>('repositories', repoToCreate);
             if (values.useResourceSyncs) {
               const resourceSyncPromises = values.resourceSyncs.map((rs) =>
                 post<ResourceSync>('resourcesyncs', getResourceSync(values.name, rs)),
@@ -534,7 +543,7 @@ const CreateRepositoryForm: React.FC<CreateRepositoryFormProps> = ({
     >
       <CreateRepositoryFormContent isEdit={!!repository} onClose={onClose} isReadOnly={!!options?.isReadOnly}>
         {errors?.length && (
-          <Alert isInline variant="danger" title={t('An error occurred')}>
+          <Alert isInline variant="danger" title={t('Repository could not be saved')}>
             {errors.map((e, index) => (
               <div key={index}>{e}</div>
             ))}
