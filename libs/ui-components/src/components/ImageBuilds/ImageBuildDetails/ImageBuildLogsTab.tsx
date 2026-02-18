@@ -34,6 +34,9 @@ import { ImageBuildWithExports } from '../../../types/extraTypes';
 import { LogResourceType, useImageBuildLogs } from '../useImageBuildLogs';
 import { StatusDisplayContent } from '../../Status/StatusDisplay';
 import { StatusLevel } from '../../../utils/status/common';
+import { useAppContext } from '../../../hooks/useAppContext';
+
+export const IMAGE_EXPORT_ID_PARAM = 'exportId';
 
 type LogEntity = {
   type: LogResourceType;
@@ -72,12 +75,17 @@ const ImageBuildAndExportLogStatus = ({
 
 const ImageBuildLogsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }) => {
   const { t } = useTranslation();
+  const {
+    router: { useSearchParams },
+  } = useAppContext();
+  const [searchParams] = useSearchParams();
   const [isLogSelectOpen, setIsLogSelectOpen] = React.useState(false);
   const logsRef = React.useRef<HTMLTextAreaElement>(null);
 
+  const buildName = imageBuild.metadata.name as string;
+
   const { selectableEntities, hasExports } = React.useMemo(() => {
     const entities: LogEntity[] = [];
-    const buildName = imageBuild.metadata.name as string;
 
     const buildReason = getImageBuildStatusReason(imageBuild);
     entities.push({
@@ -112,9 +120,15 @@ const ImageBuildLogsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }
       selectableEntities: entities,
       hasExports,
     };
-  }, [imageBuild, t]);
+  }, [imageBuild, buildName, t]);
 
-  const [selectedEntityId, setSelectedEntityId] = React.useState<string>(imageBuild.metadata.name as string);
+  const [selectedEntityId, setSelectedEntityId] = React.useState<string>(() => {
+    const selectedId = searchParams.get(IMAGE_EXPORT_ID_PARAM);
+    if (selectedId && selectableEntities.some((e) => e.id === selectedId)) {
+      return selectedId;
+    }
+    return buildName;
+  });
   const selectedEntity = selectableEntities.find((entity) => entity.id === selectedEntityId) || selectableEntities[0];
   const { logs, isLoading, error, isStreaming } = useImageBuildLogs(
     selectedEntity.id,
