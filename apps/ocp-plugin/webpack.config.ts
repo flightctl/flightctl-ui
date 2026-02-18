@@ -8,8 +8,7 @@ import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import TerserJSPlugin from 'terser-webpack-plugin';
 import { ConsoleRemotePlugin } from '@openshift-console/dynamic-plugin-sdk-webpack';
 
-const NODE_ENV: Configuration['mode'] =
-  process.env.NODE_ENV === 'production' ? 'production' : 'development';
+const NODE_ENV: Configuration['mode'] = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 
 const config: Configuration & {
   devServer?: WebpackDevServerConfiguration;
@@ -68,7 +67,10 @@ const config: Configuration & {
     new CopyPlugin({
       patterns: [{ from: '../../libs/i18n/locales', to: 'locales' }],
     }),
-    new ConsoleRemotePlugin(),
+    // Plugin uses react-router-dom 5.3.x and Console provides 5.3.x at runtime.
+    // The SDK resolves shared module versions from the monorepo root node_modules (where it sees 6.x from the standalone app),
+    //  so we disable this check.
+    new ConsoleRemotePlugin({ validateSharedModules: false }),
   ] as unknown as WebpackPluginInstance[],
   resolve: {
     plugins: [
