@@ -26,11 +26,13 @@ import { VirtualMachineIcon } from '@patternfly/react-icons/dist/js/icons/virtua
 import { CloudSecurityIcon } from '@patternfly/react-icons/dist/js/icons/cloud-security-icon';
 import { ServerGroupIcon } from '@patternfly/react-icons/dist/js/icons/server-group-icon';
 import { BuilderImageIcon } from '@patternfly/react-icons/dist/js/icons/builder-image-icon';
+import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
 import { ExportFormatType, ImageExport, ImageExportConditionReason } from '@flightctl/types/imagebuilder';
 import { getExportFormatDescription, getExportFormatLabel, getImageExportStatusReason } from '../../utils/imageBuilds';
 import { getDateDisplay } from '../../utils/dates';
 import { useTranslation } from '../../hooks/useTranslation';
+import WithTooltip from '../common/WithTooltip';
 import ConfirmImageExportActionModal, {
   ConfirmImageExportAction,
 } from './ConfirmImageExportModal/ConfirmImageExportModal';
@@ -263,9 +265,18 @@ export const ViewImageBuildExportCard = ({
             </Flex>
           </FlexItem>
           <FlexItem>
-            <Content>
-              <Content component={ContentVariants.h2}>{getExportFormatLabel(t, format)}</Content>
-            </Content>
+            <Flex gap={{ default: 'gapSm' }}>
+              <FlexItem>
+                <Content component={ContentVariants.h2}>{getExportFormatLabel(t, format)}</Content>
+              </FlexItem>
+              {imageExport?.metadata?.name && (
+                <FlexItem>
+                  <WithTooltip showTooltip content={imageExport.metadata.name}>
+                    <InfoCircleIcon />
+                  </WithTooltip>
+                </FlexItem>
+              )}
+            </Flex>
           </FlexItem>
         </Flex>
       </CardHeader>
