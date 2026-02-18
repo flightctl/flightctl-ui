@@ -217,7 +217,7 @@ export const getInitialValues = (
 ): ImageBuildFormValues => {
   if (imageBuild) {
     const exportFormats = imageBuild.imageExports
-      .filter((ie): ie is ImageExport => ie !== undefined)
+      .filter((ie) => ie !== undefined)
       .map((imageExport) => imageExport.spec.format);
     const userConfig = imageBuild.spec.userConfiguration;
     return {
