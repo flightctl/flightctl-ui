@@ -552,6 +552,6 @@ export const getResourceSync = (repositoryId: string, values: ResourceSyncFormVa
 
 export const handlePromises = async (promises: Promise<unknown>[]): Promise<string[]> => {
   const results = await Promise.allSettled(promises);
-  const failedPromises = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+  const failedPromises = results.filter((r) => r.status === 'rejected');
   return failedPromises.map((fp) => getErrorMessage(fp.reason));
 };
