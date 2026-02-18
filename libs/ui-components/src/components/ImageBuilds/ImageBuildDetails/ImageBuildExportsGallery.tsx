@@ -2,8 +2,9 @@ import * as React from 'react';
 import { Gallery } from '@patternfly/react-core';
 import { saveAs } from 'file-saver';
 
-import { ExportFormatType, ImageExport } from '@flightctl/types/imagebuilder';
+import { ExportFormatType, ImageBuildConditionReason, ImageExport } from '@flightctl/types/imagebuilder';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
+import { getImageBuildStatusReason } from '../../../utils/imageBuilds';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useFetch } from '../../../hooks/useFetch';
 import { usePermissionsContext } from '../../common/PermissionsContext';
@@ -50,8 +51,21 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
   const [canCreateExport, canDelete, canViewLogs, canDownload, canCancel] =
     checkPermissions(imageBuildExportsPermissions);
 
+  const buildReason = getImageBuildStatusReason(imageBuild);
+
   const actionPermissions = React.useMemo(() => {
     const actions: ImageExportAction[] = [];
+    if (
+      buildReason === ImageBuildConditionReason.ImageBuildConditionReasonFailed ||
+      buildReason === ImageBuildConditionReason.ImageBuildConditionReasonCanceled ||
+      buildReason === ImageBuildConditionReason.ImageBuildConditionReasonCanceling
+    ) {
+      if (canDelete) {
+        actions.push('delete');
+      }
+      return actions;
+    }
+
     if (canCreateExport) {
       actions.push('createExport');
       actions.push('rebuild');
@@ -70,7 +84,7 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
       actions.push('cancel');
     }
     return actions;
-  }, [canCreateExport, canDelete, canViewLogs, canDownload, canCancel]);
+  }, [buildReason, canCreateExport, canDelete, canViewLogs, canDownload, canCancel]);
 
   const {
     router: { useNavigate: useRouterNavigate, appRoutes },

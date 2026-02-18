@@ -43,6 +43,7 @@ import './ImageExportCards.css';
 export type ImageExportAction = 'cancel' | 'delete' | 'viewLogs' | 'download' | 'retry' | 'rebuild' | 'createExport';
 
 const getActionsForStatus = (
+  format: ExportFormatType,
   exportReason: ImageExportConditionReason | undefined,
   actionPermissions: ImageExportAction[],
 ): ImageExportAction[] => {
@@ -56,7 +57,10 @@ const getActionsForStatus = (
       actions.push('cancel', 'viewLogs');
       break;
     case ImageExportConditionReason.ImageExportConditionReasonCompleted:
-      actions.push('download', 'viewLogs', 'delete', 'rebuild');
+      if (format !== ExportFormatType.ExportFormatTypeQCOW2DiskContainer) {
+        actions.push('download');
+      }
+      actions.push('viewLogs', 'delete', 'rebuild');
       break;
     case ImageExportConditionReason.ImageExportConditionReasonFailed:
     case ImageExportConditionReason.ImageExportConditionReasonCanceled:
@@ -197,11 +201,11 @@ export const ViewImageBuildExportCard = ({
   };
 
   const { primaryAction, remainingActions } = React.useMemo(() => {
-    const allActions = getActionsForStatus(exportReason, actionPermissions);
+    const allActions = getActionsForStatus(format, exportReason, actionPermissions);
     const primaryAction = allActions.length > 0 ? allActions[0] : undefined;
     const remainingActions = allActions.length > 1 ? allActions.slice(1) : [];
     return { primaryAction, remainingActions };
-  }, [exportReason, actionPermissions]);
+  }, [format, exportReason, actionPermissions]);
 
   const renderActionButton = (exportAction: ImageExportAction, variant: 'primary' | 'secondary' = 'secondary') => {
     const isDisabled = activeAction !== undefined;

@@ -830,7 +830,7 @@
   "Failed to cancel image build": "Failed to cancel image build",
   "Cancel image build": "Cancel image build",
   "Cancel image export?": "Cancel image export?",
-  "This will immediately stop the current process. As a result, no images will be exported.": "This will immediately stop the current process. As a result, no images will be exported.",
+  "This will immediately stop the current process. As a result, the image will not be exported in this format.": "This will immediately stop the current process. As a result, the image will not be exported in this format.",
   "Cancel image export": "Cancel image export",
   "Delete image export?": "Delete image export?",
   "This image export will be permanently removed. The actual image files in your storage will not be deleted.": "This image export will be permanently removed. The actual image files in your storage will not be deleted.",
