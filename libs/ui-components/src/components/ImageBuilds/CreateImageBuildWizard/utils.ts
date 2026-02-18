@@ -150,15 +150,29 @@ export const toImageBuildWithExports = (imageBuild: ImageBuild): ImageBuildWithE
   };
 };
 
-export const getInitialValues = (imageBuild?: ImageBuildWithExports): ImageBuildFormValues => {
+const getExistingImageData = (image: ImageBuildSource | ImageBuildDestination, repoIds: Set<string>) => {
+  if (repoIds.has(image.repository)) {
+    return image;
+  }
+  // When copying the image build, drop the reference to the repository if it doesn't exist anymore
+  return {
+    ...image,
+    repository: '',
+  };
+};
+
+export const getInitialValues = (
+  imageBuild: ImageBuildWithExports | undefined,
+  repoIds: Set<string>,
+): ImageBuildFormValues => {
   if (imageBuild) {
     const exportFormats = imageBuild.imageExports
       .filter((ie): ie is ImageExport => ie !== undefined)
       .map((imageExport) => imageExport.spec.format);
     const userConfig = imageBuild.spec.userConfiguration;
     return {
-      source: imageBuild.spec.source,
-      destination: imageBuild.spec.destination,
+      source: getExistingImageData(imageBuild.spec.source, repoIds),
+      destination: getExistingImageData(imageBuild.spec.destination, repoIds),
       bindingType: imageBuild.spec.binding.type as BindingType,
       exportFormats: exportFormats || [],
       remoteAccessEnabled: !!(userConfig?.username || userConfig?.publickey),
