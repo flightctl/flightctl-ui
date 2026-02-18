@@ -12,6 +12,7 @@ import {
   ImageExport,
   ResourceKind,
 } from '@flightctl/types/imagebuilder';
+import { validImageBuildName } from '../../form/validations';
 import { ImageBuildFormValues } from './types';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
 
@@ -28,6 +29,43 @@ const VALID_SSH_PUBLIC_KEY_TYPES = [
 const SSH_PUBLIC_KEY_BASE64_DATA_REGEX = /^(?=.{50,}$)[A-Za-z0-9+/]+=*$/;
 // Characters that could be used for injection attacks
 const MALICIOUS_PUBLIC_KEY_CHARACTERS = /[;|&`()[\]{}<>"'\\\t$]/;
+
+const OCI_IMAGE_NAME_MAX_LENGTH = 255;
+const OCI_IMAGE_NAME_REGEX = /^[a-z0-9]+(?:[._-]+[a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-]+[a-z0-9]+)*)*$/;
+const OCI_IMAGE_NAME_VALID_CHARS = /^[a-z0-9._/-]+$/;
+
+const OCI_IMAGE_TAG_MAX_LENGTH = 128;
+const OCI_IMAGE_TAG_REGEX = /^[\w][\w.-]{0,127}$/;
+const OCI_IMAGE_TAG_VALID_CHARS = /^[\w.-]+$/;
+
+/** Returns an error message for image name: invalid chars, or invalid format. */
+const getImageNameValidationError = (value: string, t: TFunction): string | undefined => {
+  if (!value) return undefined;
+  if (value.length > OCI_IMAGE_NAME_MAX_LENGTH) {
+    return t('Image name must not exceed {{max}} characters.', { max: OCI_IMAGE_NAME_MAX_LENGTH });
+  }
+  if (!OCI_IMAGE_NAME_VALID_CHARS.test(value)) {
+    return t('Image name may only contain alphanumeric characters, dots, underscores, hyphens, and slashes.');
+  }
+  if (!OCI_IMAGE_NAME_REGEX.test(value)) {
+    return t('Only alphanumeric characters are allowed at the start and end of each path component.');
+  }
+  return undefined;
+};
+
+const getImageTagValidationError = (value: string, t: TFunction): string | undefined => {
+  if (!value) return undefined;
+  if (value.length > OCI_IMAGE_TAG_MAX_LENGTH) {
+    return t('Image tag must not exceed {{max}} characters.', { max: OCI_IMAGE_TAG_MAX_LENGTH });
+  }
+  if (!OCI_IMAGE_TAG_VALID_CHARS.test(value)) {
+    return t('Image tag may only contain letters, numbers, underscores, dots, and hyphens.');
+  }
+  if (!OCI_IMAGE_TAG_REGEX.test(value)) {
+    return t('Image tag must start with a letter, number, or underscore.');
+  }
+  return undefined;
+};
 
 const getPublicKeyValidationError = (publicKey: string, t: TFunction): string | undefined => {
   if (publicKey.length > PUBLIC_KEY_MAX_LENGTH) {
@@ -64,19 +102,31 @@ const getPublicKeyValidationError = (publicKey: string, t: TFunction): string | 
   return undefined;
 };
 
+const validImageBuildImageFields = (t: TFunction) =>
+  Yup.object<ImageBuildSource | ImageBuildDestination>({
+    repository: Yup.string().required(t('Repository is required')),
+    imageName: Yup.string()
+      .required(t('Image name is required'))
+      .test('oci-image-name', function (value) {
+        if (!value) return true;
+        const error = getImageNameValidationError(value, t);
+        return error ? this.createError({ message: error }) : true;
+      }),
+    imageTag: Yup.string()
+      .required(t('Image tag is required'))
+      .test('oci-image-tag', function (value) {
+        if (!value) return true;
+        const error = getImageTagValidationError(value, t);
+        return error ? this.createError({ message: error }) : true;
+      }),
+  });
+
 export const getValidationSchema = (t: TFunction) => {
   return Yup.lazy((values: ImageBuildFormValues) =>
     Yup.object<ImageBuildFormValues>({
-      source: Yup.object<ImageBuildSource>({
-        repository: Yup.string().required(t('Source repository is required')),
-        imageName: Yup.string().required(t('Image name is required')),
-        imageTag: Yup.string().required(t('Image tag is required')),
-      }).required(t('Source image is required')),
-      destination: Yup.object<ImageBuildDestination>({
-        repository: Yup.string().required(t('Target repository is required')),
-        imageName: Yup.string().required(t('Image name is required')),
-        imageTag: Yup.string().required(t('Image tag is required')),
-      }).required(t('Target image is required')),
+      buildName: validImageBuildName(t),
+      source: validImageBuildImageFields(t).required(t('Source image is required')),
+      destination: validImageBuildImageFields(t).required(t('Target image is required')),
       bindingType: Yup.string<BindingType>().required(t('Binding type is required')),
       userConfiguration: Yup.object<ImageBuildUserConfiguration>({
         username: values.remoteAccessEnabled ? Yup.string().required(t('Username is required')) : Yup.string(),
@@ -171,6 +221,8 @@ export const getInitialValues = (
       .map((imageExport) => imageExport.spec.format);
     const userConfig = imageBuild.spec.userConfiguration;
     return {
+      // Since we're always creating new imageBuilds, we don't copy the current name
+      buildName: '',
       source: getExistingImageData(imageBuild.spec.source, repoIds),
       destination: getExistingImageData(imageBuild.spec.destination, repoIds),
       bindingType: imageBuild.spec.binding.type as BindingType,
@@ -181,6 +233,7 @@ export const getInitialValues = (
   }
 
   return {
+    buildName: '',
     source: {
       repository: '',
       imageName: '',
@@ -207,14 +260,13 @@ const getHash = () =>
     .toString(16)
     .padStart(6, '0');
 
-const generateBuildName = () => `imagebuild-${getHash()}`;
 const generateExportName = (imageBuildName: string, format: ExportFormatType) => {
   const formatKey = format === ExportFormatType.ExportFormatTypeQCOW2DiskContainer ? 'qcow2-disk' : format;
   return `${imageBuildName}-${formatKey}-${getHash()}`;
 };
 
 export const getImageBuildResource = (values: ImageBuildFormValues): ImageBuild => {
-  const name = generateBuildName();
+  const name = values.buildName;
   const spec: ImageBuild['spec'] = {
     source: values.source,
     destination: values.destination,

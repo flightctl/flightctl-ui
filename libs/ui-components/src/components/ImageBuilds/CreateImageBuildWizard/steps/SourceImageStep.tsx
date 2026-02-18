@@ -6,6 +6,7 @@ import { RepoSpecType } from '@flightctl/types';
 import { ImageBuildFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
+import NameField from '../../../form/NameField';
 import TextField from '../../../form/TextField';
 import RepositorySelect from '../../../form/RepositorySelect';
 import { usePermissionsContext } from '../../../common/PermissionsContext';
@@ -13,11 +14,15 @@ import { RESOURCE, VERB } from '../../../../types/rbac';
 import { getImageReference } from '../../../../utils/imageBuilds';
 import ImageUrlCard from '../../ImageUrlCard';
 import { useOciRegistriesContext } from '../../OciRegistriesContext';
+import { getBuildNameValidations } from '../../../form/validations';
 
 export const sourceImageStepId = 'source-image';
 
 export const isSourceImageStepValid = (errors: FormikErrors<ImageBuildFormValues>) => {
-  const { source } = errors;
+  const { buildName, source } = errors;
+  if (buildName) {
+    return false;
+  }
   if (!source) {
     return true;
   }
@@ -39,6 +44,13 @@ const SourceImageStep = () => {
     <FlightCtlForm>
       <Grid lg={5} span={8}>
         <FormSection>
+          <NameField
+            name="buildName"
+            aria-label={t('Build name')}
+            isRequired
+            resourceType="imagebuilds"
+            validations={getBuildNameValidations(t)}
+          />
           <RepositorySelect
             name="source.repository"
             label={t('Source repository')}

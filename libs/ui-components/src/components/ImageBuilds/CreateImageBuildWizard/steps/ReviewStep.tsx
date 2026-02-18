@@ -64,6 +64,10 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
           <CardBody>
             <FlightCtlDescriptionList isHorizontal isCompact>
               <DescriptionListGroup>
+                <DescriptionListTerm>{t('Build name')}</DescriptionListTerm>
+                <DescriptionListDescription>{values.buildName}</DescriptionListDescription>
+              </DescriptionListGroup>
+              <DescriptionListGroup>
                 <DescriptionListTerm>{t('Source repository')}</DescriptionListTerm>
                 <DescriptionListDescription>{values.source.repository}</DescriptionListDescription>
               </DescriptionListGroup>
