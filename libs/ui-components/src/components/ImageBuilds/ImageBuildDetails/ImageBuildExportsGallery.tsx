@@ -14,8 +14,7 @@ import { ImageExportAction, ViewImageBuildExportCard } from '../ImageExportCards
 import { useOciRegistriesContext } from '../OciRegistriesContext';
 import { showSpinnerBriefly } from '../../../utils/time';
 import { getAllExportFormats, getExportDownloadResult, getImageReference } from '../../../utils/imageBuilds';
-import { useAppContext } from '../../../hooks/useAppContext';
-import { ROUTE } from '../../../hooks/useNavigate';
+import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { IMAGE_EXPORT_ID_PARAM } from './ImageBuildLogsTab';
 
 type ImageBuildExportsGalleryProps = {
@@ -87,10 +86,7 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
     return actions;
   }, [buildReason, canCreateExport, canDelete, canViewLogs, canDownload, canCancel]);
 
-  const {
-    router: { useNavigate: useRouterNavigate, appRoutes },
-  } = useAppContext();
-  const routerNavigate = useRouterNavigate();
+  const navigate = useNavigate();
   const [error, setError] = React.useState<{
     format: ExportFormatType;
     action: ImageExportAction;
@@ -173,11 +169,13 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
         case 'delete':
           await handleDelete(ieName);
           break;
-        case 'viewLogs':
-          routerNavigate(
-            `${appRoutes[ROUTE.IMAGE_BUILD_DETAILS]}/${imageBuildId}/logs?${IMAGE_EXPORT_ID_PARAM}=${ieName}`,
-          );
+        case 'viewLogs': {
+          const searchParams = new URLSearchParams({
+            [IMAGE_EXPORT_ID_PARAM]: ieName,
+          });
+          navigate({ route: ROUTE.IMAGE_BUILD_DETAILS, postfix: `${imageBuildId}/logs?${searchParams.toString()}` });
           break;
+        }
       }
     } catch (error) {
       setError({ format, message: getErrorMessage(error), action });
