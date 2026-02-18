@@ -77,6 +77,9 @@ const OutputImageStep = () => {
             repoRefetch={refetch}
             label={t('Target repository')}
             isRequired
+            options={{
+              writeAccessOnly: true,
+            }}
             validateRepoSelection={writableRepoValidation}
             helperText={t('Storage repository for your completed image.')}
           />

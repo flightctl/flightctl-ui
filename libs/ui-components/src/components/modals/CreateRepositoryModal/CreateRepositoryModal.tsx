@@ -9,10 +9,12 @@ type CreateRepositoryModalProps = {
   type: RepoSpecType;
   onClose: VoidFunction;
   onSuccess: (repository: Repository) => void;
-  validateBeforeCreate?: (repo: Repository) => string | undefined;
+  options?: {
+    writeAccessOnly?: boolean;
+  };
 };
 
-const CreateRepositoryModal = ({ type, onClose, onSuccess, validateBeforeCreate }: CreateRepositoryModalProps) => {
+const CreateRepositoryModal = ({ type, onClose, onSuccess, options }: CreateRepositoryModalProps) => {
   const { t } = useTranslation();
   return (
     <Modal variant="medium" isOpen>
@@ -21,10 +23,10 @@ const CreateRepositoryModal = ({ type, onClose, onSuccess, validateBeforeCreate 
         <CreateRepositoryForm
           onClose={onClose}
           onSuccess={onSuccess}
-          validateBefore={validateBeforeCreate}
           options={{
             canUseResourceSyncs: false,
             allowedRepoTypes: [type],
+            writeAccessOnly: options?.writeAccessOnly,
           }}
         />
       </ModalBody>
