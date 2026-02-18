@@ -60,7 +60,7 @@ const ImageBuildDetailsPageContent = () => {
       resourceTypeLabel={t('Image builds')}
       nav={
         <TabsNav aria-label="Image build details tabs" tabKeys={tabKeys}>
-          <Tab eventKey="details" title={t('Image details')} />
+          <Tab eventKey="details" title={t('Base image')} />
           <Tab eventKey="exports" title={t('Export images')} />
           <Tab eventKey="yaml" title={t('YAML')} />
           {canViewLogs && <Tab eventKey="logs" title={t('Logs')} />}

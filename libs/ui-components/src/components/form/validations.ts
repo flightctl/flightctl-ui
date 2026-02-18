@@ -230,6 +230,23 @@ export const validApplicationAndVolumeName = (t: TFunction) =>
     t('Use lowercase alphanumeric characters, or dash (-). Must start and end with an alphanumeric character.'),
   );
 
+export const getBuildNameValidations = (t: TFunction) => [
+  {
+    key: 'imageBuildName',
+    message: t(
+      'Use lowercase alphanumeric characters, or dash (-). Must start and end with an alphanumeric character.',
+    ),
+  },
+];
+
+export const validImageBuildName = (t: TFunction) =>
+  Yup.string()
+    .required(t('Build name is required'))
+    .test('imageBuildName', function (value: string | undefined) {
+      if (!value) return true;
+      return APPLICATION_NAME_REGEXP.test(value) || this.createError({ message: { imageBuildName: 'failed' } });
+    });
+
 export const maxLengthString = (t: TFunction, props: { maxLength: number; fieldName: string }) =>
   Yup.string().max(props.maxLength, t('{{ fieldName }} must not exceed {{ maxLength }} characters', props));
 
