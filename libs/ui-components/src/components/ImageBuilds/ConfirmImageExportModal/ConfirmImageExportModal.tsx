@@ -21,7 +21,9 @@ const ConfirmImageExportActionModal = ({
   switch (action) {
     case 'cancel':
       title = t('Cancel image export?');
-      message = t('This will immediately stop the current process. As a result, no images will be exported.');
+      message = t(
+        'This will immediately stop the current process. As a result, the image will not be exported in this format.',
+      );
       confirmButtonTitle = t('Cancel image export');
       break;
     case 'delete':
