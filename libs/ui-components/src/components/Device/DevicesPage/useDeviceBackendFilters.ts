@@ -68,7 +68,7 @@ export const useDeviceBackendFilters = () => {
     return activeStatuses;
   }, [searchParams]);
 
-  const selectedLabels = (searchParams.getAll(FilterSearchParams.Label) || []).map<FlightCtlLabel>((l) => {
+  const selectedLabels: FlightCtlLabel[] = (searchParams.getAll(FilterSearchParams.Label) || []).map((l: string) => {
     const labelParts = l.split('=');
     if (labelParts.length === 1) {
       return {
