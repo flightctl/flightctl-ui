@@ -84,6 +84,11 @@ const CreateImageBuildWizard = React.lazy(
   () => import('@flightctl/ui-components/src/components/ImageBuilds/CreateImageBuildWizard/CreateImageBuildWizard'),
 );
 
+const CatalogPage = React.lazy(() => import('@flightctl/ui-components/src/components/Catalog/CatalogPage'));
+const CatalogInstallWizard = React.lazy(
+  () => import('@flightctl/ui-components/src/components/Catalog/InstallWizard/InstallWizard'),
+);
+
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
   showInNav?: boolean;
@@ -149,6 +154,31 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         <OverviewPage />
       </TitledRoute>
     ),
+  },
+  {
+    path: '/catalog',
+    title: t('Catalog'),
+    showInNav: true,
+    children: [
+      {
+        index: true,
+        title: t('Catalog'),
+        element: (
+          <TitledRoute title={t('Catalog')}>
+            <CatalogPage />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'install/:catalogId/:itemId',
+        title: t('Install Catalog item'),
+        element: (
+          <TitledRoute title={t('Install Catalog item')}>
+            <CatalogInstallWizard />
+          </TitledRoute>
+        ),
+      },
+    ],
   },
   {
     // Route is only exposed for the standalone app

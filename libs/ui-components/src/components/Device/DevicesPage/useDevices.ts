@@ -7,15 +7,18 @@ import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { FilterStatusMap } from './types';
 import { PAGE_SIZE } from '../../../constants';
+import { PaginationDetails, useTablePagination } from '../../../hooks/useTablePagination';
 
 type DevicesEndpointArgs = {
   nameOrAlias?: string;
   ownerFleets?: string[];
+  onlyFleetless?: boolean;
   activeStatuses?: FilterStatusMap;
   onlyDecommissioned?: boolean;
   labels?: FlightCtlLabel[];
   summaryOnly?: boolean;
   nextContinue?: string;
+  limit?: number;
 };
 
 const enrolledStatuses = [
@@ -36,6 +39,8 @@ const getDevicesEndpoint = ({
   onlyDecommissioned,
   nextContinue,
   summaryOnly,
+  limit,
+  onlyFleetless,
 }: DevicesEndpointArgs) => {
   const filterByAppStatus = activeStatuses?.[FilterSearchParams.AppStatus];
   const filterByDevStatus = activeStatuses?.[FilterSearchParams.DeviceStatus];
@@ -57,6 +62,10 @@ const getDevicesEndpoint = ({
     );
   }
 
+  if (onlyFleetless) {
+    fieldSelectors.push('!metadata.owner');
+  }
+
   if (onlyDecommissioned) {
     queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', decommissionedStatuses);
   } else if (summaryOnly) {
@@ -71,7 +80,9 @@ const getDevicesEndpoint = ({
   if (summaryOnly) {
     params.set('summaryOnly', 'true');
   }
-  if (nextContinue !== undefined) {
+  if (limit !== undefined) {
+    params.set('limit', `${limit}`);
+  } else if (nextContinue !== undefined) {
     params.set('limit', `${PAGE_SIZE}`);
   }
   if (nextContinue) {
@@ -102,6 +113,15 @@ export const useDevicesSummary = ({
   return [deviceList?.summary, listLoading];
 };
 
+export type DevicesResult = {
+  devices: Device[];
+  isLoading: boolean;
+  error: unknown;
+  isUpdating: boolean;
+  refetch: VoidFunction;
+  hasMore: boolean;
+};
+
 export const useDevices = (args: {
   nameOrAlias?: string;
   ownerFleets?: string[];
@@ -109,8 +129,10 @@ export const useDevices = (args: {
   labels?: FlightCtlLabel[];
   onlyDecommissioned: boolean;
   nextContinue?: string;
+  limit?: number;
+  onlyFleetless?: boolean;
   onPageFetched?: (data: DeviceList) => void;
-}): [Device[], boolean, unknown, boolean, VoidFunction] => {
+}): DevicesResult => {
   const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint(args);
 
   const [devicesList, devicesLoading, devicesError, devicesRefetch, updating] = useFetchPeriodically<DeviceList>(
@@ -120,5 +142,56 @@ export const useDevices = (args: {
     args.onPageFetched,
   );
 
-  return [devicesList?.items || [], devicesLoading, devicesError, updating || devicesDebouncing, devicesRefetch];
+  const hasMore = !!devicesList?.metadata?.continue || (devicesList?.metadata?.remainingItemCount ?? 0) > 0;
+
+  return {
+    devices: devicesList?.items || [],
+    isLoading: devicesLoading,
+    error: devicesError,
+    isUpdating: updating || devicesDebouncing,
+    refetch: devicesRefetch,
+    hasMore,
+  };
+};
+
+export type DevicesPaginatedResult = {
+  devices: Device[];
+  isLoading: boolean;
+  error: unknown;
+  isUpdating: boolean;
+  refetch: VoidFunction;
+  pagination: PaginationDetails<DeviceList>;
+};
+
+/**
+ * Hook for fetching devices with built-in pagination support.
+ * Use this for paginated tables/modals.
+ */
+export const useDevicesPaginated = (args: {
+  nameOrAlias?: string;
+  ownerFleets?: string[];
+  onlyDecommissioned: boolean;
+  onlyFleetless?: boolean;
+}): DevicesPaginatedResult => {
+  const pagination = useTablePagination<DeviceList>();
+  const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint({
+    ...args,
+    nextContinue: pagination.nextContinue,
+  });
+
+  const [devicesList, devicesLoading, devicesError, devicesRefetch, updating] = useFetchPeriodically<DeviceList>(
+    {
+      endpoint: devicesEndpoint,
+    },
+    pagination.onPageFetched,
+  );
+
+  return {
+    devices: devicesList?.items || [],
+    isLoading: devicesLoading,
+    error: devicesError,
+    isUpdating: updating || devicesDebouncing,
+    refetch: devicesRefetch,
+    pagination,
+  };
 };

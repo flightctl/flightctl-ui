@@ -48,25 +48,31 @@ interface EnrolledDeviceTableProps {
   // getSortParams: (columnIndex: number) => ThProps['sort'];
 }
 
-const getDeviceColumns = (t: TFunction): ApiSortTableColumn[] => [
+export const getDeviceTableColumns = (t: TFunction): ApiSortTableColumn[] => [
   {
+    id: 'alias',
     name: t('Alias'),
   },
   {
+    id: 'name',
     name: t('Name'),
   },
   {
+    id: 'fleet',
     name: t('Fleet'),
   },
   {
+    id: 'appStatus',
     name: t('Application status'),
     helperText: getApplicationStatusHelperText(t),
   },
   {
+    id: 'deviceStatus',
     name: t('Device status'),
     helperText: getDeviceStatusHelperText(t),
   },
   {
+    id: 'updateStatus',
     name: t('Update status'),
     helperText: getUpdateStatusHelperText(t),
   },
@@ -99,7 +105,7 @@ const EnrolledDevicesTable = ({
 
   const [addDeviceModal, setAddDeviceModal] = React.useState(false);
   const [isMassDecommissionModalOpen, setIsMassDecommissionModalOpen] = React.useState(false);
-  const deviceColumns = React.useMemo(() => getDeviceColumns(t), [t]);
+  const deviceColumns = React.useMemo(() => getDeviceTableColumns(t), [t]);
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
@@ -197,6 +203,7 @@ const EnrolledDevicesTable = ({
               decommissionAction={decommissionDeviceAction}
               canResume={canResume}
               resumeAction={resumeDeviceAction}
+              deviceColumns={deviceColumns}
             />
           ))}
         </Tbody>

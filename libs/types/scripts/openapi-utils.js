@@ -109,8 +109,34 @@ async function fixImagebuilderCoreReferences(modelsDir) {
   );
 }
 
+async function fixCoreReferences(modelsDir) {
+  const files = findTsFiles(modelsDir);
+
+  await Promise.all(
+    files.map(async (filePath) => {
+      let content = await fsPromises.readFile(filePath, 'utf8');
+      const originalContent = content;
+
+      // Modify the path to properly point to the type from the "core" module
+      content = content.replace(
+        /from\s+['"]\.\/v1beta1_openapi_yaml_components_schemas_([A-Za-z][A-Za-z0-9]*)['"]/g,
+        "from '../../models/$1'",
+      );
+
+      // Correct the import name and the references to this type by removing the prefix
+      content = content.replace(/\bv1beta1_openapi_yaml_components_schemas_([A-Za-z][A-Za-z0-9]*)\b/g, '$1');
+
+      // Only write if content changed
+      if (content !== originalContent) {
+        await fsPromises.writeFile(filePath, content, 'utf8');
+      }
+    }),
+  );
+}
+
 module.exports = {
   rimraf,
   copyDir,
   fixImagebuilderCoreReferences,
+  fixCoreReferences,
 };

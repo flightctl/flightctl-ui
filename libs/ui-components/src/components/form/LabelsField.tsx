@@ -7,6 +7,7 @@ import EditableLabelControl from '../common/EditableLabelControl';
 import LabelsView from '../common/LabelsView';
 import { toAPILabel } from '../../utils/labels';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
+import { CATALOG_LABEL } from '../Catalog/const';
 
 type LabelsFieldProps = {
   name: string;
@@ -76,35 +77,37 @@ const LabelsField = ({ name, onChangeCallback, addButtonText, helperText, isLoad
           />
         }
       >
-        {labels.map(({ key, value, isDefault }, index) => {
-          const text = value ? `${key}=${value}` : key;
-          const elKey = `${key}__${index}`;
-          if (isDefault) {
+        {labels
+          .filter((l) => !l.key.includes(CATALOG_LABEL))
+          .map(({ key, value, isDefault }, index) => {
+            const text = value ? `${key}=${value}` : key;
+            const elKey = `${key}__${index}`;
+            if (isDefault) {
+              return (
+                <Label key={elKey} textMaxWidth={maxWidthDefaultLabel}>
+                  {text}
+                </Label>
+              );
+            }
+
+            const closeButtonProps = isLoading && { isDisabled: true };
+            const isLabelEditable = !isLoading && !isDefault;
             return (
-              <Label key={elKey} textMaxWidth={maxWidthDefaultLabel}>
+              <Label
+                key={elKey}
+                textMaxWidth={maxWidthNonDefaultLabel}
+                closeBtnProps={closeButtonProps}
+                onClose={(e) => onDelete(e, index)}
+                onEditCancel={(_, prevText) => onEdit(index, prevText)}
+                onEditComplete={(_, newText) => onEdit(index, newText)}
+                /* Add a basic tooltip as the PF tooltip doesn't work for editable labels */
+                title={isLabelEditable ? text : undefined}
+                isEditable={isLabelEditable}
+              >
                 {text}
               </Label>
             );
-          }
-
-          const closeButtonProps = isLoading && { isDisabled: true };
-          const isLabelEditable = !isLoading && !isDefault;
-          return (
-            <Label
-              key={elKey}
-              textMaxWidth={maxWidthNonDefaultLabel}
-              closeBtnProps={closeButtonProps}
-              onClose={(e) => onDelete(e, index)}
-              onEditCancel={(_, prevText) => onEdit(index, prevText)}
-              onEditComplete={(_, newText) => onEdit(index, newText)}
-              /* Add a basic tooltip as the PF tooltip doesn't work for editable labels */
-              title={isLabelEditable ? text : undefined}
-              isEditable={isLabelEditable}
-            >
-              {text}
-            </Label>
-          );
-        })}
+          })}
       </LabelGroup>
       <DefaultHelperText helperText={helperText} />
       <ErrorHelperText meta={meta} touchRequired={false} />

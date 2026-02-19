@@ -21,15 +21,17 @@ loader.config({ monaco });
 
 type Monaco = typeof monacoEditor;
 type YamlEditorBaseProps = {
-  filename: string;
+  filename?: string;
   code?: string;
-  onCancel: VoidFunction;
+  onCancel?: VoidFunction;
   onReload?: VoidFunction;
   onSave?: (yamlContent: string | undefined) => Promise<void>;
   isSaving: boolean;
   disabledEditReason?: string;
   editorRef?: React.MutableRefObject<monacoEditor.editor.IStandaloneCodeEditor | null>;
   readOnly?: boolean;
+  showActions?: boolean;
+  onChange?: (val: string) => void;
 };
 
 const YamlEditorBase = ({
@@ -42,6 +44,8 @@ const YamlEditorBase = ({
   disabledEditReason,
   editorRef,
   readOnly = false,
+  showActions = true,
+  onChange,
 }: YamlEditorBaseProps) => {
   const { t } = useTranslation();
   const monacoRef = React.useRef<typeof monacoEditor | null>(null);
@@ -116,42 +120,49 @@ const YamlEditorBase = ({
             theme: `console-${resolvedTheme}`,
             readOnly: readOnly || !!disabledEditReason,
           }}
+          onChange={(val) => onChange?.(val)}
         />
-        <ActionGroup className="fctl-yaml-editor-base__action-group">
-          {onSave && (
-            <>
-              {disabledEditReason && <Tooltip content={disabledEditReason} triggerRef={saveButtonRef} />}
-              <Button
-                ref={saveButtonRef}
-                variant="primary"
-                aria-label={t('Save')}
-                onClick={handleSave}
-                isLoading={isSaving}
-                isAriaDisabled={isSaving || !!disabledEditReason}
-              >
-                {t('Save')}
+        {showActions && (
+          <ActionGroup className="fctl-yaml-editor-base__action-group">
+            {onSave && (
+              <>
+                {disabledEditReason && <Tooltip content={disabledEditReason} triggerRef={saveButtonRef} />}
+                <Button
+                  ref={saveButtonRef}
+                  variant="primary"
+                  aria-label={t('Save')}
+                  onClick={handleSave}
+                  isLoading={isSaving}
+                  isAriaDisabled={isSaving || !!disabledEditReason}
+                >
+                  {t('Save')}
+                </Button>
+              </>
+            )}
+            {onReload && (
+              <Button variant="secondary" aria-label={t('Reload')} onClick={onReload}>
+                {t('Reload')}
               </Button>
-            </>
-          )}
-          {onReload && (
-            <Button variant="secondary" aria-label={t('Reload')} onClick={onReload}>
-              {t('Reload')}
-            </Button>
-          )}
-          <Button variant="secondary" aria-label={t('Cancel')} onClick={onCancel}>
-            {t('Cancel')}
-          </Button>
-          <Button
-            icon={<DownloadIcon />}
-            type="submit"
-            variant="secondary"
-            className="pf-v6-u-ml-auto"
-            aria-label={t('Download')}
-            onClick={downloadYaml}
-          >
-            {t('Download')}
-          </Button>
-        </ActionGroup>
+            )}
+            {onCancel && (
+              <Button variant="secondary" aria-label={t('Cancel')} onClick={onCancel}>
+                {t('Cancel')}
+              </Button>
+            )}
+            {filename && (
+              <Button
+                icon={<DownloadIcon />}
+                type="submit"
+                variant="secondary"
+                className="pf-v6-u-ml-auto"
+                aria-label={t('Download')}
+                onClick={downloadYaml}
+              >
+                {t('Download')}
+              </Button>
+            )}
+          </ActionGroup>
+        )}
       </FlightCtlForm>
     </ErrorBoundary>
   );

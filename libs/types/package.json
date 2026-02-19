@@ -16,6 +16,11 @@
       "source": "./imagebuilder/index.ts",
       "types": "./dist/imagebuilder/index.d.ts",
       "default": "./dist/imagebuilder/index.js"
+    },
+    "./alpha": {
+      "source": "./alpha/index.ts",
+      "types": "./dist/alpha/index.d.ts",
+      "default": "./dist/alpha/index.js"
     }
   },
   "files": [

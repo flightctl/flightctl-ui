@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { Button, EmptyState, EmptyStateActions, EmptyStateBody, Spinner } from '@patternfly/react-core';
-import { Table as PFTable, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
+import { Table as PFTable, TableProps as PFTableProps, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
 import { useTranslation } from '../../hooks/useTranslation';
 import LabelWithHelperText from '../common/WithHelperText';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons';
 
 export type ApiSortTableColumn = {
+  id?: string;
   name: string;
   sortableField?: string;
   defaultSort?: boolean;
@@ -25,7 +26,7 @@ export type TableColumn<D> = {
   };
 };
 
-type TableProps<D> = {
+type TableProps<D> = Pick<PFTableProps, 'variant'> & {
   columns: TableColumn<D>[];
   children: React.ReactNode;
   loading: boolean;
@@ -37,6 +38,7 @@ type TableProps<D> = {
   onSelectAll?: (isSelected: boolean) => void;
   isAllSelected?: boolean;
   isExpandable?: boolean;
+  singleSelect?: boolean;
 };
 
 type TableFC = <D>(props: TableProps<D>) => JSX.Element;
@@ -51,6 +53,7 @@ const Table: TableFC = ({
   onSelectAll,
   isAllSelected,
   isExpandable,
+  singleSelect,
   ...rest
 }) => {
   const { t } = useTranslation();
@@ -84,6 +87,7 @@ const Table: TableFC = ({
               }}
             />
           )}
+          {!emptyData && singleSelect && <Th screenReaderText={t('Row select')} />}
           {isExpandable && !emptyData && <Th screenReaderText={t('Expand row')} />}
           {columns.map((c) => (
             <Th key={c.name} {...c.thProps} aria-label={c.name}>
