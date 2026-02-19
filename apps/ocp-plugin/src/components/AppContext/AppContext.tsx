@@ -18,7 +18,7 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom-v5-compat';
-import { Prompt } from 'react-router-dom';
+import { Prompt } from '../../utils/react-router-prompt';
 import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/reducers';
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
