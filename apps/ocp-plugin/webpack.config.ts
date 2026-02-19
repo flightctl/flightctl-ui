@@ -1,4 +1,4 @@
-import { Configuration, DefinePlugin } from 'webpack';
+import { Configuration, DefinePlugin, ResolvePluginInstance, WebpackPluginInstance } from 'webpack';
 import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 import CopyPlugin from 'copy-webpack-plugin';
@@ -8,7 +8,7 @@ import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import TerserJSPlugin from 'terser-webpack-plugin';
 import { ConsoleRemotePlugin } from '@openshift-console/dynamic-plugin-sdk-webpack';
 
-const NODE_ENV = (process.env.NODE_ENV || 'development') as Configuration['mode'];
+const NODE_ENV: Configuration['mode'] = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 
 const config: Configuration & {
   devServer?: WebpackDevServerConfiguration;
@@ -67,14 +67,17 @@ const config: Configuration & {
     new CopyPlugin({
       patterns: [{ from: '../../libs/i18n/locales', to: 'locales' }],
     }),
-    new ConsoleRemotePlugin(),
-  ],
+    // Plugin uses react-router-dom 5.3.x and Console provides 5.3.x at runtime.
+    // When building the app, the ConsoleRemotePlugin sees the package from root node_modules that has v6.x
+    // We disable validation to avoid build errors.
+    new ConsoleRemotePlugin({ validateSharedModules: false }),
+  ] as unknown as WebpackPluginInstance[],
   resolve: {
     plugins: [
       new TsconfigPathsPlugin({
         configFile: path.resolve(__dirname, './tsconfig.json'),
       }),
-    ],
+    ] as unknown as ResolvePluginInstance[],
     extensions: ['.js', '.ts', '.tsx', '.jsx'],
     symlinks: false,
     cacheWithContext: false,
@@ -97,13 +100,13 @@ if (NODE_ENV === 'production') {
           preset: ['default', { mergeLonghand: false }],
         },
       }),
-    ],
+    ] as unknown as WebpackPluginInstance[],
   };
   config.plugins?.push(
     new MiniCssExtractPlugin({
       filename: '[name]-[contenthash].css',
       chunkFilename: '[name].bundle-[contenthash].css',
-    }),
+    }) as unknown as WebpackPluginInstance,
   );
   config.devtool = 'source-map';
 } else {
