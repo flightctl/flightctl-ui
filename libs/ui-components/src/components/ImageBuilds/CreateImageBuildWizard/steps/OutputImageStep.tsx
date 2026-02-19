@@ -37,7 +37,7 @@ const OutputImageStep = () => {
   const writableRepoValidation = React.useCallback(
     (repo: Repository) => {
       if (isOciRepoSpec(repo.spec) && repo.spec.accessMode === OciRepoSpec.accessMode.READ) {
-        return t('Repository is read-only and cannot be used as the target repository.');
+        return t('Repositories used for output images must be writable.');
       }
       return undefined;
     },
