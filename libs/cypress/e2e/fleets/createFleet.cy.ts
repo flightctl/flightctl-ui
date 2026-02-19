@@ -51,7 +51,7 @@ describe('Create fleet form', () => {
       expect(request.body, 'Create fleet request').to.nested.include({
         'metadata.name': newFleetName,
       });
-      Cypress.env('FLIGHTCTL_ADD_FLEET', newFleetName);
+      Cypress.expose('FLIGHTCTL_ADD_FLEET', newFleetName);
     });
 
     const fleetDetailsPage = new FleetDetailsPage();
