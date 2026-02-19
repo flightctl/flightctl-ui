@@ -81,7 +81,7 @@
     "react-i18next": "^11.7.3",
     "react-redux": "7.2.2",
     "react-router-dom": "^5.3.x",
-    "react-router-dom-v5-compat": "6.11.2",
+    "react-router-dom-v5-compat": "6.30.3",
     "yup": "^1.3.3"
   }
 }
