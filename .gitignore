@@ -13,3 +13,5 @@ certs/
 **/helm/flightctl-ui/values-*.yaml
 **/ocp-console/
 *.tsbuildinfo
+
+.cursor/
