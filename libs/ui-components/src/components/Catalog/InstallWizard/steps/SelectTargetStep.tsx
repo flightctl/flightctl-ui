@@ -19,7 +19,6 @@ import { getDeviceTableColumns } from '../../../Device/DevicesPage/EnrolledDevic
 import EnrolledDeviceTableRow from '../../../Device/DevicesPage/EnrolledDeviceTableRow';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { InstallAppFormik, InstallOsFormik } from '../types';
-import { ListAction } from '../../../ListPage/types';
 import FormSelect from '../../../form/FormSelect';
 import { getFullReferenceURI } from '../../utils';
 import ImageUrl from '../../../ImageBuilds/ImageUrl';
@@ -27,8 +26,6 @@ import ImageUrl from '../../../ImageBuilds/ImageUrl';
 export const isSelectTargetStepValid = (errors: FormikErrors<InstallAppFormik>) => {
   return !errors.device && !errors.fleet;
 };
-
-const noopListAction: ListAction = () => ({ title: '', onClick: () => {} });
 
 const DeviceTarget = () => {
   const { t } = useTranslation();
@@ -101,11 +98,6 @@ const DeviceTarget = () => {
                   onRowSelect={(device) => () => handleDeviceSelect(device)}
                   isRowSelected={isDeviceSelected}
                   rowIndex={index}
-                  canEdit={false}
-                  canDecommission={false}
-                  decommissionAction={noopListAction}
-                  canResume={false}
-                  resumeAction={noopListAction}
                   singleSelect
                   hideActions
                   deviceColumns={deviceColumns}
@@ -187,11 +179,8 @@ const FleetTarget = () => {
                   key={getResourceId(fleet)}
                   fleet={fleet}
                   rowIndex={rowIndex}
-                  canDelete={false}
-                  onDeleteClick={() => {}}
                   isRowSelected={isFleetSelected}
                   onRowSelect={(fleet) => () => handleFleetSelect(fleet)}
-                  canEdit={false}
                   singleSelect
                   hideActions
                 />
@@ -257,13 +246,13 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
     return catalogItem.spec.reference.artifacts?.sort((a, b) =>
       getArtifactLabel(a, t).localeCompare(getArtifactLabel(b, t)),
     );
-  }, [catalogItem]);
+  }, [catalogItem, t]);
 
   React.useEffect(() => {
     if (!values.deploymentTarget && artifacts?.length) {
       setFieldValue('deploymentTarget', artifacts[0].uri);
     }
-  }, [values, artifacts]);
+  }, [values, artifacts, setFieldValue]);
 
   const currentVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
 
@@ -315,7 +304,6 @@ type SelectTargetStepProps = {
 };
 
 const SelectTargetStep = ({ catalogItem }: SelectTargetStepProps) => {
-  const { t } = useTranslation();
   const { values } = useFormikContext<InstallOsFormik>();
 
   switch (values.target) {

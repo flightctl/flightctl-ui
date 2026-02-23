@@ -19,11 +19,11 @@ type EnrolledDeviceTableRowProps = {
   rowIndex: number;
   onRowSelect: (device: Device) => OnSelect;
   isRowSelected: (device: Device) => boolean;
-  canEdit: boolean;
-  canDecommission: boolean;
-  decommissionAction: ListAction;
-  canResume: boolean;
-  resumeAction: ListAction;
+  canEdit?: boolean;
+  canDecommission?: boolean;
+  decommissionAction?: ListAction;
+  canResume?: boolean;
+  resumeAction?: ListAction;
   singleSelect?: boolean;
   hideActions?: boolean;
   deviceColumns: ApiSortTableColumn[];
@@ -110,7 +110,7 @@ const EnrolledDeviceTableRow = ({
                 title: t('View device details'),
                 onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
               },
-              ...(canResume
+              ...(canResume && resumeAction
                 ? [
                     resumeAction({
                       resourceId: deviceName,
@@ -119,7 +119,7 @@ const EnrolledDeviceTableRow = ({
                     }),
                   ]
                 : []),
-              ...(canDecommission
+              ...(canDecommission && decommissionAction
                 ? [
                     decommissionAction({
                       resourceId: deviceName,

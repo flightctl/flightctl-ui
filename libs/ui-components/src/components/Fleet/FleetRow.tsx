@@ -16,9 +16,9 @@ type FleetRowProps = {
   rowIndex: number;
   onRowSelect: (fleet: Fleet) => OnSelect;
   isRowSelected: (fleet: Fleet) => boolean;
-  onDeleteClick: VoidFunction;
-  canDelete: boolean;
-  canEdit: boolean;
+  onDeleteClick?: VoidFunction;
+  canDelete?: boolean;
+  canEdit?: boolean;
   singleSelect?: boolean;
   hideActions?: boolean;
 };
@@ -47,8 +47,8 @@ const FleetRow: React.FC<FleetRowProps> = ({
   onRowSelect,
   isRowSelected,
   onDeleteClick,
-  canDelete,
-  canEdit,
+  canDelete = false,
+  canEdit = false,
   singleSelect,
   hideActions,
 }) => {

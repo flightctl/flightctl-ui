@@ -4,7 +4,6 @@ import { ActionsColumn, IAction, Table, Tbody, Td, Tr } from '@patternfly/react-
 import * as React from 'react';
 import { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
 import {
-  Alert,
   Button,
   Card,
   CardBody,
@@ -15,7 +14,6 @@ import {
   EmptyStateBody,
   Flex,
   FlexItem,
-  GridItem,
   Label,
   Popover,
   Spinner,
