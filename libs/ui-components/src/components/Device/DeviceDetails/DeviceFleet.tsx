@@ -3,9 +3,10 @@ import { Button, Icon, List, ListItem, Popover } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 
-import { Device } from '@flightctl/types';
+import { ConditionType, Device } from '@flightctl/types';
 import { GenericCondition } from '../../../types/extraTypes';
 import { getDeviceFleet } from '../../../utils/devices';
+import { getCondition } from '../../../utils/api';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
 
@@ -77,7 +78,7 @@ const DeviceFleet = ({ device }: { device?: Device }) => {
     return '-';
   }
 
-  const multipleOwnersCondition = false;
+  const multipleOwnersCondition = getCondition(device.status?.conditions, ConditionType.DeviceMultipleOwners);
   let fleetNameEl: React.ReactNode = null;
   const fleetName = getDeviceFleet(device.metadata);
   if (fleetName) {
