@@ -4,6 +4,7 @@ import { ActionsColumn, IAction, Table, Tbody, Td, Tr } from '@patternfly/react-
 import * as React from 'react';
 import { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
 import {
+  Alert,
   Button,
   Card,
   CardBody,
@@ -14,6 +15,9 @@ import {
   EmptyStateBody,
   Flex,
   FlexItem,
+  GridItem,
+  Label,
+  Popover,
   Spinner,
   Stack,
   StackItem,
@@ -283,6 +287,19 @@ const InstalledSoftware = ({
                       <CatalogItemTitle item={osItem} channel={osChannel} version={catalogItemVersion.version} />
                     </Td>
                     <Td>
+                      {(osItem.spec.deprecation || catalogItemVersion.deprecation) && (
+                        <Popover
+                          bodyContent={osItem.spec.deprecation?.message || catalogItemVersion.deprecation?.message}
+                          withFocusTrap
+                          triggerAction="click"
+                        >
+                          <Label variant="outline" color="orange">
+                            {t('Deprecated')}
+                          </Label>
+                        </Popover>
+                      )}
+                    </Td>
+                    <Td>
                       <UpdateOsColumn
                         catalogItem={osItem}
                         catalogItemVersion={catalogItemVersion}
@@ -335,6 +352,19 @@ const InstalledSoftware = ({
                             version={itemVersion?.version}
                             appName={app.name}
                           />
+                        </Td>
+                        <Td>
+                          {(app.item.spec.deprecation || itemVersion?.deprecation) && (
+                            <Popover
+                              bodyContent={app.item.spec.deprecation?.message || itemVersion?.deprecation?.message}
+                              withFocusTrap
+                              triggerAction="click"
+                            >
+                              <Label variant="outline" color="orange">
+                                {t('Deprecated')}
+                              </Label>
+                            </Popover>
+                          )}
                         </Td>
                         <Td>
                           {itemVersion && canEdit && spec && (

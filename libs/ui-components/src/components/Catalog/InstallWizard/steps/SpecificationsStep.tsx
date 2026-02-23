@@ -1,14 +1,18 @@
 import { CatalogItem } from '@flightctl/types/alpha';
 import {
+  Alert,
   Button,
   Content,
   EmptyState,
   FormGroup,
   Grid,
   GridItem,
+  Label,
   Modal,
   ModalBody,
   Spinner,
+  Split,
+  SplitItem,
   Stack,
   StackItem,
   Title,
@@ -63,6 +67,13 @@ export const InstallSpec = ({
   return (
     <>
       <Grid hasGutter style={{ alignItems: 'flex-end' }}>
+        {catalogItem.spec.deprecation && (
+          <GridItem>
+            <Alert isInline variant="warning" title={t('This catalog item is deprecated')}>
+              {catalogItem.spec.deprecation.message}
+            </Alert>
+          </GridItem>
+        )}
         <GridItem span={4}>
           <FormGroup label={t('Channel')}>
             <FormSelect
@@ -91,7 +102,21 @@ export const InstallSpec = ({
               items={channelVersions.reduce((acc, v) => {
                 return {
                   ...acc,
-                  [v.version]: v.version,
+                  [v.version]: {
+                    label: (
+                      <Split hasGutter>
+                        <SplitItem>{v.version}</SplitItem>
+                        {v.deprecation && (
+                          <SplitItem>
+                            <Label variant="outline" color="orange">
+                              {t('Deprecated')}
+                            </Label>
+                          </SplitItem>
+                        )}
+                      </Split>
+                    ),
+                    selectedLabel: v.version,
+                  },
                 };
               }, {})}
             />
@@ -102,6 +127,13 @@ export const InstallSpec = ({
             <Button onClick={() => setShowReadme(true)} variant="link">
               {t('Show readme')}
             </Button>
+          </GridItem>
+        )}
+        {currentVersion?.deprecation && (
+          <GridItem>
+            <Alert isInline variant="warning" title={t('This version is deprecated')}>
+              {currentVersion.deprecation.message}
+            </Alert>
           </GridItem>
         )}
       </Grid>

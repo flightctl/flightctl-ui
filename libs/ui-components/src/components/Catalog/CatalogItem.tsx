@@ -5,6 +5,7 @@ import {
   CardHeader,
   Content,
   ContentVariants,
+  Label,
   Split,
   SplitItem,
   Stack,
@@ -62,6 +63,13 @@ const CatalogItem: React.FC<CatalogItemProps> = ({ catalogItem, onSelect }) => {
             </Stack>
           </StackItem>
           {catalogItem.spec.shortDescription && <StackItem>{catalogItem.spec.shortDescription}</StackItem>}
+          {catalogItem.spec.deprecation && (
+            <StackItem>
+              <Label variant="outline" color="orange">
+                {t('Deprecated')}
+              </Label>
+            </StackItem>
+          )}
         </Stack>
       </CardBody>
     </Card>
