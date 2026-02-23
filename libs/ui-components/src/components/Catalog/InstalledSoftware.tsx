@@ -193,8 +193,13 @@ const InstalledSoftware = ({
   const [appItems, setAppItems] = React.useState<AppItem[]>();
   const [appsLoading, setAppsLoading] = React.useState(true);
   const [deleteOs, setDeleteOs] = React.useState(false);
-  const [appToDelete, setAppToDelete] = React.useState<string | null>(null);
-  const [appToEdit, setAppToEdit] = React.useState<string | null>(null);
+  const [appToDelete, setAppToDelete] = React.useState<string>();
+  const [appToEdit, setAppToEdit] = React.useState<{
+    name: string;
+    item: CatalogItem;
+    channel: string;
+    version: CatalogItemVersion;
+  }>();
   const osItemId = labels?.[OS_ITEM_LABEL_KEY];
   const osChannel = labels?.[OS_CHANNEL_LABEL_KEY];
   const osCatalog = labels?.[OS_CATALOG_LABEL_KEY];
@@ -332,10 +337,18 @@ const InstalledSoftware = ({
                       return imageMatches && v.channels.includes(appChannel);
                     });
                   const actions: IAction[] = [
-                    {
-                      title: t('Edit'),
-                      onClick: () => setAppToEdit(app.name),
-                    },
+                    itemVersion
+                      ? {
+                          title: t('Edit'),
+                          onClick: () =>
+                            setAppToEdit({
+                              item: app.item,
+                              name: app.name,
+                              channel: appChannel,
+                              version: itemVersion,
+                            }),
+                        }
+                      : {},
                     {
                       title: t('Delete'),
                       onClick: () => setAppToDelete(app.name),
@@ -380,18 +393,6 @@ const InstalledSoftware = ({
                         </Td>
                         <Td isActionCell>{canEdit && <ActionsColumn items={actions} />}</Td>
                       </Tr>
-                      {appToEdit && appSpec && itemVersion && (
-                        <EditAppModal
-                          currentApps={spec?.applications}
-                          onClose={() => setAppToEdit(null)}
-                          appSpec={appSpec}
-                          catalogItem={app.item}
-                          currentVersion={itemVersion}
-                          onSubmit={onUpdateApp}
-                          currentChannel={appChannel}
-                          exisingLabels={labels}
-                        />
-                      )}
                     </React.Fragment>
                   );
                 })}
@@ -413,13 +414,25 @@ const InstalledSoftware = ({
       )}
       {appToDelete && (
         <DeleteModal
-          onClose={() => setAppToDelete(null)}
+          onClose={() => setAppToDelete(undefined)}
           onDelete={async () => {
             await onDeleteApp(appToDelete);
-            setAppToDelete(null);
+            setAppToDelete(undefined);
           }}
           resourceName={appToDelete}
           resourceType={t('application')}
+        />
+      )}
+      {appToEdit && (
+        <EditAppModal
+          currentApps={spec?.applications}
+          onClose={() => setAppToEdit(undefined)}
+          appSpec={spec?.applications?.find((app) => app.name === appToEdit.name)}
+          catalogItem={appToEdit.item}
+          currentVersion={appToEdit.version}
+          onSubmit={onUpdateApp}
+          currentChannel={appToEdit.channel}
+          exisingLabels={labels}
         />
       )}
     </>
