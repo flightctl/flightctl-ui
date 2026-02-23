@@ -90,7 +90,7 @@ const InstallAppWizardContent = ({
             !isAppConfigStepValid(values, errors) || !isSpecsStepValid(errors) || !isSelectTargetStepValid(errors)
           }
         >
-          {currentStep?.id === reviewStepId && <ReviewStep isApp error={error} />}
+          {currentStep?.id === reviewStepId && <ReviewStep error={error} catalogItem={catalogItem} />}
         </WizardStep>
       </Wizard>
     </>
