@@ -45,15 +45,13 @@ const OsUpdateModal: React.FC<OsUpdateModalProps> = ({
     <Modal isOpen onClose={onClose} variant="large">
       <ModalHeader title={t('Update Operating system')} />
       <ModalBody>
-        <div style={{ height: '400px' }}>
-          <UpdateGraph
-            selectedNodeId={selectedVersion}
-            currentVersion={currentVersion}
-            currentChannel={currentChannel}
-            onSelectionChange={handleSelectionChange}
-            updates={updates}
-          />
-        </div>
+        <UpdateGraph
+          selectedVersion={selectedVersion}
+          currentVersion={currentVersion}
+          currentChannel={currentChannel}
+          onSelectionChange={handleSelectionChange}
+          updates={updates}
+        />
       </ModalBody>
       <ModalFooter>
         <Button

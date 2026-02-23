@@ -1,4 +1,4 @@
-import { Label } from '@patternfly/react-core';
+import { Alert, Label, Stack, StackItem } from '@patternfly/react-core';
 import semver from 'semver';
 import * as React from 'react';
 import {
@@ -45,6 +45,7 @@ type VersionNodeData = {
   version: string;
   channel: string;
   isCurrentVersion: boolean;
+  isDeprecated: boolean;
   entryName: string;
 };
 
@@ -61,18 +62,23 @@ const VersionNodeComponent: React.FC<VersionNodeProps> = observer(({ element, se
   return (
     <DefaultNode element={element} selected={selected} onSelect={onSelect} showLabel={false}>
       <g transform={`translate(${NODE_DIAMETER / 2}, ${NODE_DIAMETER / 2})`}>
-        <text
-          textAnchor="middle"
-          dy={data.isCurrentVersion ? '-0.3em' : '0.35em'}
-          style={{ fontSize: '14px', fontWeight: 'bold' }}
-        >
+        <text textAnchor="middle" dy="0.35em" style={{ fontSize: '14px', fontWeight: 'bold' }}>
           {data.version}
         </text>
         {data.isCurrentVersion && (
-          <foreignObject x={-30} y={5} width={60} height={24}>
+          <foreignObject x={-30} y={NODE_DIAMETER / 2 + 4} width={60} height={24}>
             <Label color="blue" isCompact>
               {t('Current')}
             </Label>
+          </foreignObject>
+        )}
+        {data.isDeprecated && !data.isCurrentVersion && (
+          <foreignObject x={-40} y={NODE_DIAMETER / 2 + 4} width={80} height={24}>
+            <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+              <Label color="orange" isCompact>
+                {t('Deprecated')}
+              </Label>
+            </div>
           </foreignObject>
         )}
       </g>
@@ -140,6 +146,7 @@ const buildTopologyModel = (
         version: versionName,
         channel: currentChannel,
         isCurrentVersion: versionName === currentVersionEntry.version,
+        isDeprecated: !!versionEntry.deprecation?.message,
         entryName: versionName,
       } as VersionNodeData,
     });
@@ -210,12 +217,13 @@ const buildTopologyModel = (
 };
 
 const UpdateGraph: React.FC<{
-  selectedNodeId: string;
+  selectedVersion: string;
   currentVersion: CatalogItemVersion;
   updates: CatalogItemVersion[];
   currentChannel: string;
   onSelectionChange: (nodeId: string, tag: string) => void;
-}> = ({ selectedNodeId, currentVersion, currentChannel, updates, onSelectionChange }) => {
+}> = ({ selectedVersion, currentVersion, currentChannel, updates, onSelectionChange }) => {
+  const { t } = useTranslation();
   const controller = React.useMemo(() => {
     const newController = new Visualization();
     newController.registerComponentFactory(customComponentFactory);
@@ -243,27 +251,49 @@ const UpdateGraph: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const update = updates.find((v) => v.version === selectedVersion);
+
   return (
-    <VisualizationProvider controller={controller}>
-      <TopologyView
-        controlBar={
-          <TopologyControlBar
-            controlButtons={createTopologyControlButtons({
-              ...defaultControlButtonsOptions,
-              fitToScreenCallback: action(() => {
-                controller.getGraph().fit(80);
-              }),
-              zoomIn: false,
-              zoomOut: false,
-              resetView: false,
-              legend: false,
-            })}
-          />
-        }
-      >
-        <VisualizationSurface state={{ selectedIds: [selectedNodeId] }} />
-      </TopologyView>
-    </VisualizationProvider>
+    <Stack hasGutter>
+      <StackItem>
+        <div style={{ height: '400px' }}>
+          <VisualizationProvider controller={controller}>
+            <TopologyView
+              controlBar={
+                <TopologyControlBar
+                  controlButtons={createTopologyControlButtons({
+                    ...defaultControlButtonsOptions,
+                    fitToScreenCallback: action(() => {
+                      controller.getGraph().fit(80);
+                    }),
+                    zoomIn: false,
+                    zoomOut: false,
+                    resetView: false,
+                    legend: false,
+                  })}
+                />
+              }
+            >
+              <VisualizationSurface state={{ selectedIds: [selectedVersion] }} />
+            </TopologyView>
+          </VisualizationProvider>
+        </div>
+      </StackItem>
+      {!update && currentVersion.deprecation && (
+        <StackItem>
+          <Alert isInline variant="warning" title={t('The current version is deprecated')}>
+            {currentVersion.deprecation.message}
+          </Alert>
+        </StackItem>
+      )}
+      {update?.deprecation && (
+        <StackItem>
+          <Alert isInline variant="warning" title={t('The selected version is deprecated')}>
+            {update.deprecation.message}
+          </Alert>
+        </StackItem>
+      )}
+    </Stack>
   );
 };
 

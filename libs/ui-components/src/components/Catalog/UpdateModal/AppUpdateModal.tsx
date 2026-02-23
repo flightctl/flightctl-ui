@@ -99,19 +99,17 @@ const AppUpdateModalContent: React.FC<AppUpdateModalContentProps> = ({
         <WizardStep name={t('Version')} id={versionStepId}>
           <FlightCtlForm>
             <FormGroup label={t('Select new version')} isRequired>
-              <div style={{ height: '400px' }}>
-                <UpdateGraph
-                  selectedNodeId={values.version}
-                  currentVersion={currentVersion}
-                  currentChannel={initialValues.channel}
-                  onSelectionChange={(version) => {
-                    const appConfig = getInitialAppConfig(catalogItem, version, appSpec);
-                    applyInitialConfig(setFieldValue, appConfig);
-                    setFieldValue('version', version);
-                  }}
-                  updates={updates}
-                />
-              </div>
+              <UpdateGraph
+                selectedVersion={values.version}
+                currentVersion={currentVersion}
+                currentChannel={initialValues.channel}
+                onSelectionChange={(version) => {
+                  const appConfig = getInitialAppConfig(catalogItem, version, appSpec);
+                  applyInitialConfig(setFieldValue, appConfig);
+                  setFieldValue('version', version);
+                }}
+                updates={updates}
+              />
             </FormGroup>
           </FlightCtlForm>
         </WizardStep>
