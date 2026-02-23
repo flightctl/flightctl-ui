@@ -1,18 +1,8 @@
 import { Device, Fleet } from '@flightctl/types';
-import {
-  Button,
-  FormGroup,
-  Stack,
-  StackItem,
-  Title,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem,
-} from '@patternfly/react-core';
+import { FormGroup, Stack, StackItem, Title, Toolbar, ToolbarContent, ToolbarItem } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 import { FormikErrors, useFormikContext } from 'formik';
 import * as React from 'react';
-import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons';
 import { CatalogItem, CatalogItemArtifact, CatalogItemArtifactType } from '@flightctl/types/alpha';
 import { TFunction } from 'i18next';
 
@@ -32,6 +22,7 @@ import { InstallAppFormik, InstallOsFormik } from '../types';
 import { ListAction } from '../../../ListPage/types';
 import FormSelect from '../../../form/FormSelect';
 import { getFullReferenceURI } from '../../utils';
+import ImageUrl from '../../../ImageBuilds/ImageUrl';
 
 export const isSelectTargetStepValid = (errors: FormikErrors<InstallAppFormik>) => {
   return !errors.device && !errors.fleet;
@@ -217,26 +208,41 @@ const getArtifactLabel = (artifact: CatalogItemArtifact, t: TFunction) => {
   if (artifact.name) {
     return artifact.name;
   }
+  if (!artifact.type) {
+    return t('Unknown');
+  }
+
+  let artifactType: CatalogItemArtifactType;
   switch (artifact.type) {
     case CatalogItemArtifactType.CatalogItemArtifactTypeQcow2:
-      return t('OpenShift Virtualization ({{type}})', { type: CatalogItemArtifactType.CatalogItemArtifactTypeQcow2 });
+      artifactType = t('OpenShift Virtualization');
+      break;
     case CatalogItemArtifactType.CatalogItemArtifactTypeIso:
-      return t('Bare Metal ({{type}})', { type: CatalogItemArtifactType.CatalogItemArtifactTypeIso });
+      artifactType = t('Bare Metal');
+      break;
     case CatalogItemArtifactType.CatalogItemArtifactTypeAmi:
-      return t('Amazon Web Services ({{type}})', { type: CatalogItemArtifactType.CatalogItemArtifactTypeAmi });
+      artifactType = t('Amazon Web Services');
+      break;
     case CatalogItemArtifactType.CatalogItemArtifactTypeAnacondaIso:
-      return t('Anaconda Installer ({{type}})', { type: CatalogItemArtifactType.CatalogItemArtifactTypeAnacondaIso });
+      artifactType = t('Anaconda Installer');
+      break;
     case CatalogItemArtifactType.CatalogItemArtifactTypeGce:
-      return t('Google Cloud ({{type}})', { type: CatalogItemArtifactType.CatalogItemArtifactTypeGce });
+      artifactType = t('Google Cloud');
+      break;
     case CatalogItemArtifactType.CatalogItemArtifactTypeRaw:
-      return t('KVM/custom cloud import ({{type}})', { type: CatalogItemArtifactType.CatalogItemArtifactTypeRaw });
+      artifactType = t('KVM/custom cloud import');
+      break;
     case CatalogItemArtifactType.CatalogItemArtifactTypeVhd:
-      return t('Microsoft Hyper-V ({{type}})', { type: CatalogItemArtifactType.CatalogItemArtifactTypeVhd });
+      artifactType = t('Microsoft Hyper-V');
+      break;
     case CatalogItemArtifactType.CatalogItemArtifactTypeVmdk:
-      return t('VMware vSphere ({{type}})', { type: CatalogItemArtifactType.CatalogItemArtifactTypeVmdk });
+      artifactType = t('VMware vSphere');
+      break;
     default:
-      return t('Cloud native ({{type}})', { type: CatalogItemArtifactType.CatalogItemArtifactTypeContainer });
+      artifactType = t('Cloud native');
   }
+
+  return `${artifactType} (${artifact.type})`;
 };
 
 type NewDeviceTargetProps = {
@@ -255,21 +261,15 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
 
   React.useEffect(() => {
     if (!values.deploymentTarget && artifacts?.length) {
-      setFieldValue('deploymentTarget', artifacts[0].type || artifacts[0].name);
+      setFieldValue('deploymentTarget', artifacts[0].uri);
     }
   }, [values, artifacts]);
-
-  const currentDeploymentTarget = values.deploymentTarget
-    ? catalogItem.spec.reference.artifacts?.find(
-        (a) => a.type === values.deploymentTarget || a.name === values.deploymentTarget,
-      )
-    : undefined;
 
   const currentVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
 
   const artifactUrl =
-    currentDeploymentTarget && currentVersion
-      ? getFullReferenceURI(currentDeploymentTarget.uri, currentVersion)
+    values.deploymentTarget && currentVersion
+      ? getFullReferenceURI(values.deploymentTarget, currentVersion)
       : undefined;
 
   return (
@@ -279,13 +279,13 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
           <Title headingLevel="h3">{t('Installation specifications')}</Title>
         </StackItem>
         <StackItem>
-          <FormGroup title={t('Deployment target')} isRequired>
+          <FormGroup label={t('Deployment target')} isRequired>
             <FormSelect
               name="deploymentTarget"
               items={
                 artifacts
                   ? artifacts.reduce((acc, curr) => {
-                      acc[curr.type || curr.name || ''] = {
+                      acc[curr.uri] = {
                         label: getArtifactLabel(curr, t),
                       };
                       return acc;
@@ -302,18 +302,7 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
         </StackItem>
         {artifactUrl && (
           <StackItem>
-            <Button
-              component="a"
-              variant="link"
-              isInline
-              iconPosition="end"
-              icon={<ExternalLinkAltIcon />}
-              target="_blank"
-              rel="noopener noreferrer"
-              href={artifactUrl}
-            >
-              {artifactUrl}
-            </Button>
+            <ImageUrl imageReference={artifactUrl} />
           </StackItem>
         )}
       </Stack>
