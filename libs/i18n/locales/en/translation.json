@@ -1131,6 +1131,7 @@
   "Read only": "Read only",
   "Read and write": "Read and write",
   "Use advanced configurations": "Use advanced configurations",
+  "Access mode must be set to read and write for this repository type": "Access mode must be set to read and write for this repository type",
   "Use resource syncs": "Use resource syncs",
   "Repository could not be saved": "Repository could not be saved",
   "Resource sync name": "Resource sync name",
