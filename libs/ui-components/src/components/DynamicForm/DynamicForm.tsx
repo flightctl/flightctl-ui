@@ -3,6 +3,8 @@ import Form from '@rjsf/core';
 import { RJSFSchema, RegistryWidgetsType, TemplatesType } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 import { CatalogItem } from '@flightctl/types/alpha';
+import AJV8Validator from '@rjsf/validator-ajv8/lib/validator';
+
 import {
   PFCheckboxWidget,
   PFEmailWidget,
@@ -20,7 +22,6 @@ import {
   PFObjectFieldTemplate,
   pfFields,
 } from './FieldTemplate';
-import AJV8Validator from '@rjsf/validator-ajv8/lib/validator';
 
 export type AssetSelection = {
   volumeIndex: number;

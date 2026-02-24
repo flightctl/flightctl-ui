@@ -36,7 +36,6 @@ import PFCatalogItem from '../Catalog/CatalogItem';
 import { getFullReferenceURI } from '../Catalog/utils';
 import FieldErrors from './FieldErrors';
 import { DynamicFormContext } from './DynamicForm';
-import { getVolumeIndexFromId } from './volumeImageFieldUtils';
 import { useTranslation } from '../../hooks/useTranslation';
 import TableTextSearch from '../Table/TableTextSearch';
 import TablePagination from '../Table/TablePagination';
@@ -53,6 +52,22 @@ import { PaginationDetails } from '../../hooks/useTablePagination';
 import { getErrorMessage } from '../../utils/error';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { CatalogItemTitle } from '../Catalog/InstalledSoftware';
+
+/**
+ * Regex for volume image field IDs.
+ * Matches IDs like: root_volumes_0_image, root_volumes_1_image, etc.
+ * Capture group 1 is the volume index.
+ */
+export const ROOT_VOLUMES_IMAGE_FIELD_REGEX = /root_volumes_(\d+)_image$/;
+
+/**
+ * Extract the volume index from the field ID.
+ * Field ID format: "root_volumes_0_image" -> extracts index 0
+ */
+export const getVolumeIndexFromId = (fieldId: string): number => {
+  const match = fieldId.match(ROOT_VOLUMES_IMAGE_FIELD_REGEX);
+  return match ? parseInt(match[1], 10) : -1;
+};
 
 type SelectAssetModalProps = {
   onClose: VoidFunction;

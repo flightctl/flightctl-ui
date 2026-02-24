@@ -21,15 +21,16 @@ import {
   RegistryFieldsType,
 } from '@rjsf/utils';
 import { getDefaultRegistry } from '@rjsf/core';
-import VolumeImageField, { ROOT_VOLUMES_IMAGE_FIELD_REGEX } from './VolumeImageField';
 
-// Get the default ObjectField from rjsf to use as fallback
-const defaultRegistry = getDefaultRegistry();
-const DefaultObjectField = defaultRegistry.fields.ObjectField;
+import VolumeImageField, { ROOT_VOLUMES_IMAGE_FIELD_REGEX } from './VolumeImageField';
 import FieldErrors from './FieldErrors';
 import { PFEmailWidget, PFPasswordWidget, PFTextWidget, PFURLWidget } from './FormWidget';
 import { useTranslation } from '../../hooks/useTranslation';
 import { DynamicFormContext } from './DynamicForm';
+
+// Get the default ObjectField from rjsf to use as fallback
+const defaultRegistry = getDefaultRegistry();
+const DefaultObjectField = defaultRegistry.fields.ObjectField;
 
 // Helper component for description text
 const DescriptionText = ({ description }: { description?: React.ReactNode }) =>

@@ -255,22 +255,26 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
 };
 
 export const getDefaultChannelAndVersion = (item: CatalogItem) => {
-  const channels = item.spec.versions.reduce((acc, v) => {
-    v.channels.forEach((c) => (acc[c] = c));
-    return acc;
-  }, {});
+  if (!item.spec.versions.length) {
+    return {
+      version: '',
+      channel: '',
+    };
+  }
 
-  const versions = item.spec.versions.sort((v1, v2) => semver.compare(v2.version, v1.version));
-  const channel = Object.keys(channels)[0];
-  const channelVersions = versions.find((v) => v.channels.includes(channel));
+  const versions = item.spec.versions.sort((v1, v2) => semver.rcompare(v1.version, v2.version));
+
+  // release then prerelease
+  const latestVersion = versions.find((v) => !semver.prerelease(v.version)) || versions[0];
+
   return {
-    version: channelVersions?.version || '',
-    channel,
+    version: latestVersion.version,
+    channel: latestVersion.channels[0],
   };
 };
 
 const CatalogItemDetails = ({ item, onInstall, ...rest }: CatalogItemDetailsProps) => {
-  //reinitialize when item changes
+  // reinitialize when item changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const initialValues = React.useMemo(() => getDefaultChannelAndVersion(item), [item.metadata.name]);
 
