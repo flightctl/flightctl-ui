@@ -30,4 +30,4 @@ LABEL \
   name="flightctl-ui" \
   summary="Flight Control User Interface Service"
 EXPOSE 8080
-CMD ./flightctl-ui
+CMD ["./flightctl-ui"]
