@@ -17,6 +17,7 @@ import { ImageBuildFormValues } from './types';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
 
 export const PUBLIC_KEY_MAX_LENGTH = 8 * 1024; // (8 KB)
+
 const VALID_SSH_PUBLIC_KEY_TYPES = [
   'ssh-rsa',
   'ssh-ed25519',
@@ -37,6 +38,9 @@ const OCI_IMAGE_NAME_VALID_CHARS = /^[a-z0-9._/-]+$/;
 const OCI_IMAGE_TAG_MAX_LENGTH = 128;
 const OCI_IMAGE_TAG_REGEX = /^[\w][\w.-]{0,127}$/;
 const OCI_IMAGE_TAG_VALID_CHARS = /^[\w.-]+$/;
+
+const USERNAME_MAX_LENGTH = 256;
+const USERNAME_REGEX = /^[A-Za-z0-9_.][A-Za-z0-9_.-]*\$?$/;
 
 /** Returns an error message for image name: invalid chars, or invalid format. */
 const getImageNameValidationError = (value: string, t: TFunction): string | undefined => {
@@ -102,6 +106,21 @@ const getPublicKeyValidationError = (publicKey: string, t: TFunction): string | 
   return undefined;
 };
 
+const getUsernameValidationError = (username: string, t: TFunction): string | undefined => {
+  if (/\s/.test(username)) {
+    return t('Username cannot contain spaces');
+  }
+  if (username.length > USERNAME_MAX_LENGTH) {
+    return t('Username must not exceed {{max}} characters.', { max: USERNAME_MAX_LENGTH });
+  }
+  if (!USERNAME_REGEX.test(username)) {
+    return t(
+      "Must start with a letter, digit, underscore, or dot. It may include hyphens, and can end with a trailing '$'.",
+    );
+  }
+  return undefined;
+};
+
 const validImageBuildImageFields = (t: TFunction) =>
   Yup.object<ImageBuildSource | ImageBuildDestination>({
     repository: Yup.string().required(t('Repository is required')),
@@ -129,7 +148,15 @@ export const getValidationSchema = (t: TFunction) => {
       destination: validImageBuildImageFields(t).required(t('Target image is required')),
       bindingType: Yup.string<BindingType>().required(t('Binding type is required')),
       userConfiguration: Yup.object<ImageBuildUserConfiguration>({
-        username: values.remoteAccessEnabled ? Yup.string().required(t('Username is required')) : Yup.string(),
+        username: values.remoteAccessEnabled
+          ? Yup.string()
+              .required(t('Username is required'))
+              .test('flightctl-username', function (value) {
+                if (!value) return true;
+                const error = getUsernameValidationError(value, t);
+                return error ? this.createError({ message: error }) : true;
+              })
+          : Yup.string(),
         publickey: values.remoteAccessEnabled
           ? Yup.string()
               .required(t('SSH public key is required'))
