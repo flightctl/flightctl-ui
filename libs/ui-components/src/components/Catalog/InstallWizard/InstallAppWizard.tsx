@@ -21,6 +21,7 @@ import FlightCtlWizardFooter, { FlightCtlWizardFooterProps } from '../../common/
 import { useAppContext } from '../../../hooks/useAppContext';
 import { getInitialAppConfig } from './utils';
 import { useSubmitCatalogForm } from '../useSubmitCatalogForm';
+import { validApplicationAndVolumeName } from '../../form/validations';
 
 export const validateAppWizardStep: FlightCtlWizardFooterProps<InstallAppFormik>['validateStep'] = (
   activeStepId,
@@ -121,7 +122,7 @@ const InstallAppWizard = ({ catalogItem }: InstallAppWizardProps) => {
       version: Yup.string().required(t('Version must be selected')),
       device: values.target === 'device' ? Yup.object().required(t('Device must be selected')) : Yup.object(),
       fleet: values.target === 'fleet' ? Yup.object().required(t('Fleet must be selected')) : Yup.object(),
-      appName: Yup.string()
+      appName: validApplicationAndVolumeName(t)
         .required(t('Application name is required'))
         .test('is-unique', t('Application with the same name already exists.'), (value) => {
           if (!value || value.length === 0 || !values.target) {

@@ -126,7 +126,7 @@ const UpdateOsColumn = ({ onUpdate, catalogItem, channel, catalogItemVersion }: 
   );
 };
 
-const CatalogItemTitle = ({
+export const CatalogItemTitle = ({
   item,
   appName,
   version,

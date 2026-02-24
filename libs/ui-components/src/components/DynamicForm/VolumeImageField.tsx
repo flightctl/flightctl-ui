@@ -3,14 +3,10 @@ import {
   Alert,
   Bullseye,
   Button,
-  Content,
-  ContentVariants,
   Divider,
   EmptyState,
   EmptyStateActions,
   EmptyStateBody,
-  Flex,
-  FlexItem,
   FormGroup,
   FormHelperText,
   Gallery,
@@ -26,7 +22,6 @@ import {
   Stack,
   StackItem,
   TextInput,
-  Title,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -38,13 +33,17 @@ import { FieldProps } from '@rjsf/utils';
 import { CatalogItem, CatalogItemList, CatalogItemType, CatalogItemVersion } from '@flightctl/types/alpha';
 
 import PFCatalogItem from '../Catalog/CatalogItem';
-import { getCatalogItemIcon, getFullReferenceURI } from '../Catalog/utils';
+import { getFullReferenceURI } from '../Catalog/utils';
 import FieldErrors from './FieldErrors';
 import { DynamicFormContext } from './DynamicForm';
 import { useTranslation } from '../../hooks/useTranslation';
 import TableTextSearch from '../Table/TableTextSearch';
 import TablePagination from '../Table/TablePagination';
-import { CatalogItemDetailsContent, getDefaultChannelAndVersion } from '../Catalog/CatalogItemDetails';
+import {
+  CatalogItemDetailsContent,
+  CatalogItemDetailsHeader,
+  getDefaultChannelAndVersion,
+} from '../Catalog/CatalogItemDetails';
 import { Formik } from 'formik';
 import { InstallSpec, InstallSpecFormik } from '../Catalog/InstallWizard/steps/SpecificationsStep';
 import FlightCtlForm from '../form/FlightCtlForm';
@@ -52,6 +51,7 @@ import { useCatalogItems } from '../Catalog/useCatalogs';
 import { PaginationDetails } from '../../hooks/useTablePagination';
 import { getErrorMessage } from '../../utils/error';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
+import { CatalogItemTitle } from '../Catalog/InstalledSoftware';
 
 type SelectAssetModalProps = {
   onClose: VoidFunction;
@@ -215,17 +215,7 @@ const CatalogItemDetails = ({
       {({ submitForm }) => (
         <>
           <ModalHeader>
-            <Split hasGutter>
-              <SplitItem>
-                <img src={getCatalogItemIcon(item)} alt={`${item.metadata.name} icon`} style={{ maxWidth: '60px' }} />
-              </SplitItem>
-              <SplitItem>
-                <Title headingLevel="h1">{item.spec.displayName || item.metadata.name}</Title>
-                <Content component={ContentVariants.small}>
-                  {t('Provided by {{provider}}', { provider: item.spec.provider })}
-                </Content>
-              </SplitItem>
-            </Split>
+            <CatalogItemDetailsHeader item={item} />
           </ModalHeader>
           <ModalBody>
             <Stack hasGutter>
@@ -325,28 +315,11 @@ const VolumeImageField: React.FC<FieldProps> = ({
         {assetItem ? (
           <Split hasGutter>
             <SplitItem isFilled>
-              <Flex alignItems={{ default: 'alignItemsCenter' }} alignContent={{ default: 'alignContentCenter' }}>
-                <FlexItem>
-                  <img
-                    src={getCatalogItemIcon(assetItem)}
-                    alt={`${assetItem.metadata.name} icon`}
-                    style={{ maxWidth: '30px' }}
-                  />
-                </FlexItem>
-                <FlexItem>
-                  <Stack>
-                    <StackItem>
-                      <Title headingLevel="h3">{assetItem.spec.displayName || assetItem.metadata.name}</Title>
-                    </StackItem>
-                    <StackItem>
-                      <Content component={ContentVariants.small}>
-                        Version: {selectedAssets[volumeIndex].assetVersion}, Channel{' '}
-                        {selectedAssets[volumeIndex].assetChannel}
-                      </Content>
-                    </StackItem>
-                  </Stack>
-                </FlexItem>
-              </Flex>
+              <CatalogItemTitle
+                item={assetItem}
+                channel={selectedAssets[volumeIndex].assetChannel}
+                version={selectedAssets[volumeIndex].assetVersion}
+              />
             </SplitItem>
             <SplitItem>
               <Button

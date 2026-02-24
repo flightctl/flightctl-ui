@@ -31,6 +31,9 @@ const CatalogItem: React.FC<CatalogItemProps> = ({ catalogItem, onSelect }) => {
         selectableActions={{
           onClickAction: onSelect,
           onChange: onSelect,
+          selectableActionAriaLabel: t('Select {{ name }}', {
+            name: catalogItem.spec.displayName || catalogItem.metadata.name,
+          }),
         }}
       >
         <Split>

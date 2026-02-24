@@ -84,6 +84,29 @@ const usePageContentTop = () => {
   return topOffset;
 };
 
+type CatalogItemDetailsHeaderProps = {
+  item: CatalogItem;
+};
+
+export const CatalogItemDetailsHeader = ({ item }: CatalogItemDetailsHeaderProps) => {
+  const { t } = useTranslation();
+  return (
+    <Split hasGutter>
+      <SplitItem>
+        <img src={getCatalogItemIcon(item)} alt={`${item.metadata.name} icon`} style={{ maxWidth: '60px' }} />
+      </SplitItem>
+      <SplitItem isFilled>
+        <Title headingLevel="h1">{item.spec.displayName || item.metadata.name}</Title>
+        {item.spec.provider && (
+          <Content component={ContentVariants.small}>
+            {t('Provided by {{provider}}', { provider: item.spec.provider })}
+          </Content>
+        )}
+      </SplitItem>
+    </Split>
+  );
+};
+
 const CatalogItemDetailsPanel = ({ item, onClose, canInstall }: CatalogItemDetailsPanelProps) => {
   const { t } = useTranslation();
   const topOffset = usePageContentTop();
@@ -106,19 +129,7 @@ const CatalogItemDetailsPanel = ({ item, onClose, canInstall }: CatalogItemDetai
       style={{ pointerEvents: 'auto', boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.15)' }}
     >
       <DrawerHead>
-        <Split hasGutter>
-          <SplitItem>
-            <img src={getCatalogItemIcon(item)} alt={`${item.metadata.name} icon`} style={{ maxWidth: '60px' }} />
-          </SplitItem>
-          <SplitItem isFilled>
-            <Title headingLevel="h1">{item.spec.displayName || item.metadata.name}</Title>
-            {item.spec.provider && (
-              <Content component={ContentVariants.small}>
-                {t('Provided by {{provider}}', { provider: item.spec.provider })}
-              </Content>
-            )}
-          </SplitItem>
-        </Split>
+        <CatalogItemDetailsHeader item={item} />
         <DrawerActions>
           <DrawerCloseButton onClose={onClose} />
         </DrawerActions>
