@@ -21,7 +21,7 @@ import {
   RegistryFieldsType,
 } from '@rjsf/utils';
 import { getDefaultRegistry } from '@rjsf/core';
-import VolumeImageField from './VolumeImageField';
+import VolumeImageField, { ROOT_VOLUMES_IMAGE_FIELD_REGEX } from './VolumeImageField';
 
 // Get the default ObjectField from rjsf to use as fallback
 const defaultRegistry = getDefaultRegistry();
@@ -104,21 +104,12 @@ const PFObjectFieldTemplate: React.FC<ObjectFieldTemplateProps> = ({ title, desc
   );
 };
 
-/**
- * Checks if the current field is an "image" object inside a volumes array item.
- * The id pattern would be like: root_volumes_0_image, root_volumes_1_image, etc.
- */
-const isVolumeImageField = (id: string): boolean => {
-  // Match pattern: root_volumes_<index>_image
-  return /^root_volumes_\d+_image$/.test(id);
-};
-
 // Custom Object Field - checks for special field types and renders custom fields
 const CustomObjectField: React.FC<FieldProps> = (props) => {
   const { idSchema, schema } = props;
 
   // Check if this is an "image" object inside a volumes array item
-  if (isVolumeImageField(idSchema.$id) && schema.type === 'object') {
+  if (ROOT_VOLUMES_IMAGE_FIELD_REGEX.test(idSchema.$id) && schema.type === 'object') {
     return <VolumeImageField {...props} />;
   }
 

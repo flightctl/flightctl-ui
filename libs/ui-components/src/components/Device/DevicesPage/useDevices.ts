@@ -18,7 +18,6 @@ type DevicesEndpointArgs = {
   labels?: FlightCtlLabel[];
   summaryOnly?: boolean;
   nextContinue?: string;
-  limit?: number;
 };
 
 const enrolledStatuses = [
@@ -126,7 +125,6 @@ export const useDevices = (args: {
   labels?: FlightCtlLabel[];
   onlyDecommissioned: boolean;
   nextContinue?: string;
-  limit?: number;
   onlyFleetless?: boolean;
   onPageFetched?: (data: DeviceList) => void;
 }): DevicesResult => {

@@ -36,6 +36,7 @@ import PFCatalogItem from '../Catalog/CatalogItem';
 import { getFullReferenceURI } from '../Catalog/utils';
 import FieldErrors from './FieldErrors';
 import { DynamicFormContext } from './DynamicForm';
+import { getVolumeIndexFromId } from './volumeImageFieldUtils';
 import { useTranslation } from '../../hooks/useTranslation';
 import TableTextSearch from '../Table/TableTextSearch';
 import TablePagination from '../Table/TablePagination';
@@ -249,15 +250,6 @@ const CatalogItemDetails = ({
 
 type VolumeImageValue = {
   reference?: string;
-};
-
-/**
- * Extract the volume index from the field ID.
- * Field ID format: "root_volumes_0_image" -> extracts index 0
- */
-const getVolumeIndexFromId = (fieldId: string): number => {
-  const match = fieldId.match(/_(\d+)_image$/);
-  return match ? parseInt(match[1], 10) : -1;
 };
 
 /**
