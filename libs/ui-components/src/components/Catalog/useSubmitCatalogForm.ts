@@ -17,6 +17,7 @@ export const useSubmitCatalogForm = <
   onSubmit: (values: F) => Promise<boolean>;
   error?: string;
   schemaErrors?: RJSFValidationError[];
+  setError: (err: string | undefined) => void;
 } => {
   const { t } = useTranslation();
   const [error, setError] = React.useState<string>();
@@ -54,5 +55,6 @@ export const useSubmitCatalogForm = <
     onSubmit,
     error,
     schemaErrors,
+    setError,
   };
 };

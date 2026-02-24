@@ -34,6 +34,7 @@ type InstallOsWizardContentProps = {
   error: string | undefined;
   catalogItem: CatalogItem;
   isSuccessful: boolean;
+  setError: (err: string | undefined) => void;
 };
 
 const InstallOsWizardContent = ({
@@ -42,6 +43,7 @@ const InstallOsWizardContent = ({
   error,
   catalogItem,
   isSuccessful,
+  setError,
 }: InstallOsWizardContentProps) => {
   const { t } = useTranslation();
   const { values, errors } = useFormikContext<InstallOsFormik>();
@@ -59,7 +61,12 @@ const InstallOsWizardContent = ({
             saveButtonText={values.target === 'new-device' ? t('Close') : t('Deploy')}
           />
         }
-        onStepChange={(_, step) => setCurrentStep(step)}
+        onStepChange={(_, step) => {
+          if (error) {
+            setError(undefined);
+          }
+          setCurrentStep(step);
+        }}
       >
         <WizardStep name={t('Specifications')} id={specificationsStepId}>
           {(!currentStep || currentStep?.id === specificationsStepId) && (
@@ -180,6 +187,7 @@ const InstallOsWizard = ({ catalogItem }: InstallOsWizardProps) => {
         error={error}
         isSuccessful={isSuccessful}
         setCurrentStep={setCurrentStep}
+        setError={setError}
       />
     </Formik>
   );

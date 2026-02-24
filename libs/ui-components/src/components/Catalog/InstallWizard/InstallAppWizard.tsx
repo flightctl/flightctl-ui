@@ -41,6 +41,7 @@ type InstallAppWizardContentProps = {
   schemaErrors: RJSFValidationError[] | undefined;
   catalogItem: CatalogItem;
   isSuccessful: boolean;
+  setError: (err: string | undefined) => void;
 };
 
 const InstallAppWizardContent = ({
@@ -50,6 +51,7 @@ const InstallAppWizardContent = ({
   schemaErrors,
   catalogItem,
   isSuccessful,
+  setError,
 }: InstallAppWizardContentProps) => {
   const { t } = useTranslation();
   const { values, errors } = useFormikContext<InstallAppFormik>();
@@ -67,7 +69,12 @@ const InstallAppWizardContent = ({
             saveButtonText={t('Deploy')}
           />
         }
-        onStepChange={(_, step) => setCurrentStep(step)}
+        onStepChange={(_, step) => {
+          if (error) {
+            setError(undefined);
+          }
+          setCurrentStep(step);
+        }}
       >
         <WizardStep name={t('Specifications')} id={specificationsStepId}>
           {(!currentStep || currentStep?.id === specificationsStepId) && (
@@ -153,7 +160,7 @@ const InstallAppWizard = ({ catalogItem }: InstallAppWizardProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const { onSubmit, error, schemaErrors } = useSubmitCatalogForm<InstallAppFormik>(async (values) => {
+  const { onSubmit, error, schemaErrors, setError } = useSubmitCatalogForm<InstallAppFormik>(async (values) => {
     if (values.target !== 'fleet' && values.target !== 'device') {
       return;
     }
@@ -212,6 +219,7 @@ const InstallAppWizard = ({ catalogItem }: InstallAppWizardProps) => {
         schemaErrors={schemaErrors}
         catalogItem={catalogItem}
         isSuccessful={isSuccessful}
+        setError={setError}
       />
     </Formik>
   );
