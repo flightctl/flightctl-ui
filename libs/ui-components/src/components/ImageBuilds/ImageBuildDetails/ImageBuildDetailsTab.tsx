@@ -17,7 +17,7 @@ import {
 import { Trans } from 'react-i18next';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
-import { BindingType, ImageExport } from '@flightctl/types/imagebuilder';
+import { BindingType } from '@flightctl/types/imagebuilder';
 import { getDateDisplay } from '../../../utils/dates';
 import { getExportFormatLabel, getImageReference } from '../../../utils/imageBuilds';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -38,9 +38,7 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
   const isEarlyBinding = imageBuild.spec.binding.type === BindingType.BindingTypeEarly;
 
   const hasExports = imageBuild.exportsCount > 0;
-  const existingImageExports = imageBuild.imageExports.filter(
-    (imageExport) => imageExport !== undefined,
-  ) as ImageExport[];
+  const existingImageExports = imageBuild.imageExports.filter((imageExport) => imageExport !== undefined);
 
   const srcImageReference = React.useMemo(() => {
     return getImageReference(ociRegistries, imageBuild.spec.source) || '';

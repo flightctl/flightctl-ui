@@ -4,9 +4,9 @@
   "exclude": ["node_modules"],
   "compilerOptions": {
     "noEmit": false,
-    "target": "es5",
+    "target": "es2018",
     "sourceMap": false,
-    "lib": ["es5", "dom", "ES2015"],
+    "lib": ["es2018", "dom"],
     "types": ["cypress"],
     "paths": {
       "@flightctl/types": ["../types"],
