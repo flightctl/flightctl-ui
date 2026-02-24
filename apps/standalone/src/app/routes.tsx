@@ -156,31 +156,6 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
     ),
   },
   {
-    path: '/catalog',
-    title: t('Catalog'),
-    showInNav: true,
-    children: [
-      {
-        index: true,
-        title: t('Catalog'),
-        element: (
-          <TitledRoute title={t('Catalog')}>
-            <CatalogPage />
-          </TitledRoute>
-        ),
-      },
-      {
-        path: 'install/:catalogId/:itemId',
-        title: t('Install Catalog item'),
-        element: (
-          <TitledRoute title={t('Install Catalog item')}>
-            <CatalogInstallWizard />
-          </TitledRoute>
-        ),
-      },
-    ],
-  },
-  {
     // Route is only exposed for the standalone app
     path: '/command-line-tools',
     title: t('Command line tools'),
@@ -291,6 +266,31 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         element: (
           <TitledRoute title={t('Edit device')}>
             <EditDeviceWizard />
+          </TitledRoute>
+        ),
+      },
+    ],
+  },
+  {
+    path: '/catalog',
+    title: t('Software Catalog'),
+    showInNav: true,
+    children: [
+      {
+        index: true,
+        title: t('Software Catalog'),
+        element: (
+          <TitledRoute title={t('Catalog')}>
+            <CatalogPage />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'install/:catalogId/:itemId',
+        title: t('Install Catalog item'),
+        element: (
+          <TitledRoute title={t('Install Catalog item')}>
+            <CatalogInstallWizard />
           </TitledRoute>
         ),
       },
