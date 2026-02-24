@@ -1,11 +1,13 @@
 import * as React from 'react';
 
 import {
+  Alert,
   Button,
   Content,
   FormGroup,
   FormSection,
   Grid,
+  GridItem,
   Split,
   SplitItem,
   Stack,
@@ -32,10 +34,19 @@ import ApplicationHelmForm from './ApplicationHelmForm';
 import ApplicationVolumeForm from './ApplicationVolumeForm';
 import ApplicationVariablesForm from './ApplicationVariablesForm';
 import ApplicationIntegritySettings from './ApplicationIntegritySettings';
+import { APP_CATALOG_LABEL_KEY } from '../../../Catalog/const';
 
 import './ApplicationsForm.css';
 
-const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
+const ApplicationSection = ({
+  index,
+  isReadOnly,
+  managedByCatalog,
+}: {
+  index: number;
+  isReadOnly?: boolean;
+  managedByCatalog: boolean;
+}) => {
   const { t } = useTranslation();
   const appFieldName = `applications[${index}]`;
   const [{ value: app }, , { setValue }] = useField<AppForm>(appFieldName);
@@ -69,6 +80,11 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
       fieldName={appFieldName}
     >
       <Grid hasGutter>
+        {managedByCatalog && (
+          <GridItem>
+            <Alert isInline variant="info" title={t('Application is managed by Software Catalog')} />
+          </GridItem>
+        )}
         <FormGroup label={t('Application type')} isRequired>
           <FormSelect
             items={appTypesOptions}
@@ -165,7 +181,13 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
   );
 };
 
-const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
+const ApplicationTemplates = ({
+  isReadOnly,
+  labels,
+}: {
+  isReadOnly?: boolean;
+  labels: Record<string, string> | undefined;
+}) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
   if (isReadOnly && values.applications.length === 0) {
@@ -186,26 +208,33 @@ const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
         <FieldArray name="applications">
           {({ push, remove }) => (
             <>
-              {values.applications.map((_app, index) => (
-                <FormSection key={index}>
-                  <Split hasGutter>
-                    <SplitItem isFilled>
-                      <ApplicationSection index={index} isReadOnly={isReadOnly} />
-                    </SplitItem>
-                    {!isReadOnly && (
-                      <SplitItem>
-                        <Button
-                          aria-label={t('Delete application')}
-                          variant="link"
-                          icon={<MinusCircleIcon />}
-                          iconPosition="start"
-                          onClick={() => remove(index)}
+              {values.applications.map((_app, index) => {
+                const appCatalog = !!_app.name && !!labels?.[`${_app.name}.${APP_CATALOG_LABEL_KEY}`];
+                return (
+                  <FormSection key={index}>
+                    <Split hasGutter>
+                      <SplitItem isFilled>
+                        <ApplicationSection
+                          index={index}
+                          isReadOnly={isReadOnly || appCatalog}
+                          managedByCatalog={appCatalog}
                         />
                       </SplitItem>
-                    )}
-                  </Split>
-                </FormSection>
-              ))}
+                      {!isReadOnly && !appCatalog && (
+                        <SplitItem>
+                          <Button
+                            aria-label={t('Delete application')}
+                            variant="link"
+                            icon={<MinusCircleIcon />}
+                            iconPosition="start"
+                            onClick={() => remove(index)}
+                          />
+                        </SplitItem>
+                      )}
+                    </Split>
+                  </FormSection>
+                );
+              })}
 
               {!isReadOnly && (
                 <FormSection>

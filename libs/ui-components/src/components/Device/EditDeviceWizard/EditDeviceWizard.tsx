@@ -133,7 +133,7 @@ const EditDeviceWizard = () => {
                   <GeneralInfoStep />
                 </WizardStep>
                 <WizardStep name={t('Device template')} id={deviceTemplateStepId} isDisabled={isTemplateStepDisabled}>
-                  <DeviceTemplateStep isFleet={false} />
+                  <DeviceTemplateStep isFleet={false} labels={device.metadata.labels} />
                 </WizardStep>
                 <WizardStep name={t('Updates')} id={deviceUpdatePolicyStepId} isDisabled={isUpdateStepDisabled}>
                   <DeviceUpdateStep />

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, CodeBlock, CodeBlockCode, FormGroup, Grid, Spinner } from '@patternfly/react-core';
+import { Alert, CodeBlock, CodeBlockCode, FormGroup, Grid, Spinner, Stack, StackItem } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 import { Trans } from 'react-i18next';
 import { Repository } from '@flightctl/types';
@@ -18,6 +18,7 @@ import { useAppLinks } from '../../../../hooks/useAppLinks';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { FlightCtlApp, useAppContext } from '../../../../hooks/useAppContext';
 import { ACM_REPO_NAME } from '../deviceSpecUtils';
+import { OS_CATALOG_LABEL_KEY } from '../../../Catalog/const';
 
 export const deviceTemplateStepId = 'device-template';
 
@@ -103,11 +104,21 @@ const MicroShiftCheckbox = ({ isFleet, isReadOnly }: { isFleet: boolean; isReadO
   );
 };
 
-const DeviceTemplateStep = ({ isFleet, isReadOnly }: { isFleet: boolean; isReadOnly?: boolean }) => {
+const DeviceTemplateStep = ({
+  labels,
+  isFleet,
+  isReadOnly,
+}: {
+  isFleet: boolean;
+  isReadOnly?: boolean;
+  labels: Record<string, string> | undefined;
+}) => {
   const { appType } = useAppContext();
   const { t } = useTranslation();
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
   const useTemplateVarsLink = useAppLinks('useTemplateVars');
+
+  const catalogOs = !!labels?.[OS_CATALOG_LABEL_KEY];
 
   return (
     <Grid span={8}>
@@ -133,18 +144,27 @@ const DeviceTemplateStep = ({ isFleet, isReadOnly }: { isFleet: boolean; isReadO
               : t('The target system image for this device.')
           }
         >
-          <TextField
-            name="osImage"
-            aria-label={t('System image')}
-            value={values.osImage}
-            isDisabled={isReadOnly}
-            helperText={t(
-              'Must be a reference to a bootable container image (such as "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). If you do not want to manage your OS from Edge management, leave this field empty.',
+          <Stack hasGutter>
+            {catalogOs && (
+              <StackItem>
+                <Alert isInline variant="info" title={t('System image is managed by Software Catalog')} />
+              </StackItem>
             )}
-          />
+            <StackItem>
+              <TextField
+                name="osImage"
+                aria-label={t('System image')}
+                value={values.osImage}
+                isDisabled={isReadOnly || catalogOs}
+                helperText={t(
+                  'Must be a reference to a bootable container image (such as "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). If you do not want to manage your OS from Edge management, leave this field empty.',
+                )}
+              />
+            </StackItem>
+          </Stack>
         </FormGroupWithHelperText>
         <ConfigurationTemplates isReadOnly={isReadOnly} />
-        <ApplicationsForm isReadOnly={isReadOnly} />
+        <ApplicationsForm isReadOnly={isReadOnly} labels={labels} />
         <SystemdUnitsForm isReadOnly={isReadOnly} />
         {appType === FlightCtlApp.OCP && <MicroShiftCheckbox isFleet={isFleet} isReadOnly={isReadOnly} />}
       </FlightCtlForm>
