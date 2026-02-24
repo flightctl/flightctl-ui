@@ -38,6 +38,16 @@
   {
     "type": "console.navigation/href",
     "properties": {
+      "id": "fctl-catalog",
+      "name": "%plugin__flightctl-plugin~Software Catalog%",
+      "href": "/edge/catalog",
+      "perspective": "acm",
+      "section": "fctl"
+    }
+  },
+  {
+    "type": "console.navigation/href",
+    "properties": {
       "id": "fctl-repositories",
       "name": "%plugin__flightctl-plugin~Repositories%",
       "href": "/edge/repositories",
@@ -109,6 +119,22 @@
       "exact": true,
       "path": ["/edge/devices/edit/:deviceId"],
       "component": { "$codeRef": "EditDeviceWizardPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/catalog"],
+      "component": { "$codeRef": "CatalogPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": false,
+      "path": ["/edge/catalog/install/:catalogId/:itemId"],
+      "component": { "$codeRef": "CatalogInstallWizard" }
     }
   },
   {

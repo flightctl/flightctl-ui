@@ -284,7 +284,7 @@ const CatalogPage = () => {
   const [canEditFleet, canEditDevice] = checkPermissions(catalogInstallPermissions);
 
   return (
-    <ListPage title={t('Catalog')}>
+    <ListPage title={t('Software Catalog')}>
       <CatalogPageContent
         canInstall={canEditFleet || canEditDevice}
         selectedItem={selectedItem}

@@ -54,7 +54,7 @@ const PFTextareaWidget: React.FC<WidgetProps> = ({
 };
 
 // PatternFly Checkbox Widget
-const PFCheckboxWidget: React.FC<WidgetProps> = ({ id, value, onChange, disabled, readonly, label, rawErrors }) => {
+const PFCheckboxWidget: React.FC<WidgetProps> = ({ id, value, onChange, disabled, readonly, label }) => {
   return (
     <Checkbox
       id={id}

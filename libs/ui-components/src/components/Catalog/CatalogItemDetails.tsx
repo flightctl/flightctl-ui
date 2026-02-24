@@ -51,12 +51,12 @@ type CatalogItemDetailsProps = CatalogItemDetailsPanelProps & {
 const getPageContentTop = () => {
   // Try multiple selectors to find the masthead
   const masthead =
-    document.getElementById('stack-inline-masthead') ||
-    document.querySelector('.pf-v5-c-masthead') ||
-    document.querySelector('.pf-c-masthead') ||
-    document.querySelector('[class*="masthead"]');
+    document.getElementById('stack-inline-masthead') || // Standalone masthead
+    document.getElementById('page-main-header'); // OCP Console masthead
 
-  return masthead?.getBoundingClientRect()?.bottom || 60;
+  const pageTop = document.getElementById('fctl-cmd-panel');
+
+  return masthead?.getBoundingClientRect()?.bottom || pageTop?.getBoundingClientRect()?.top || 60;
 };
 
 const usePageContentTop = () => {

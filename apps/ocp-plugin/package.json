@@ -28,7 +28,9 @@
       "ResourceSyncToRepositoryPage": "./src/components/ResourceSyncs/ResourceSyncToRepositoryPage.tsx",
       "EnrollmentRequestDetailsPage": "./src/components/EnrollmentRequests/EnrollmentRequestDetailsPage.tsx",
       "appContext": "./src/components/AppContext/AppContext.tsx",
-      "OverviewTab": "./src/components/OverviewTab/OverviewTab.tsx"
+      "OverviewTab": "./src/components/OverviewTab/OverviewTab.tsx",
+      "CatalogPage": "./src/components/Catalog/CatalogPage.tsx",
+      "CatalogInstallWizard": "./src/components/Catalog/CatalogInstallWizard.tsx"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
