@@ -71,7 +71,7 @@ export const InstallSpec = ({
       <Grid hasGutter style={{ alignItems: 'flex-end' }}>
         {catalogItem.spec.deprecation && (
           <GridItem>
-            <Alert isInline variant="warning" title={t('This catalog item is deprecated')}>
+            <Alert isInline variant="warning" title={t('Deprecated')}>
               {catalogItem.spec.deprecation.message}
             </Alert>
           </GridItem>

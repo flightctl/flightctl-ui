@@ -82,7 +82,7 @@ const InstallOsWizardContent = ({
             id={reviewStepId}
             isDisabled={!isSpecsStepValid(errors) || !isSelectTargetStepValid(errors)}
           >
-            {currentStep?.id === reviewStepId && <ReviewStep isOs error={error} catalogItem={catalogItem} />}
+            {currentStep?.id === reviewStepId && <ReviewStep error={error} catalogItem={catalogItem} />}
           </WizardStep>
         )}
       </Wizard>

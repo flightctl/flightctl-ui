@@ -13,7 +13,7 @@ import {
 } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 import * as React from 'react';
-import { CatalogItem } from '@flightctl/types/alpha';
+import { CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
@@ -44,6 +44,10 @@ type UpdateAlertsProps = {
 const UpdateAlerts = ({ catalogItem }: UpdateAlertsProps) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<InstallOsFormik>();
+
+  if (catalogItem.spec.type !== CatalogItemType.CatalogItemTypeOS) {
+    return false;
+  }
 
   const osImageName = `${catalogItem.spec.displayName || catalogItem.metadata.name}:${values.version}`;
 
@@ -119,11 +123,10 @@ const UpdateAlerts = ({ catalogItem }: UpdateAlertsProps) => {
 
 type ReviewStepProps = {
   catalogItem: CatalogItem;
-  isOs?: boolean;
   error?: string;
 };
 
-const ReviewStep = ({ error, catalogItem, isOs }: ReviewStepProps) => {
+const ReviewStep = ({ error, catalogItem }: ReviewStepProps) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<InstallOsFormik | InstallAppFormik>();
 
@@ -133,7 +136,7 @@ const ReviewStep = ({ error, catalogItem, isOs }: ReviewStepProps) => {
         <StackItem>
           <Title headingLevel="h3">{t('Review installation specifications')}</Title>
         </StackItem>
-        {isOs && <UpdateAlerts catalogItem={catalogItem} />}
+        <UpdateAlerts catalogItem={catalogItem} />
         <StackItem>
           <Card>
             <CardTitle>{t('Installation specifications')}</CardTitle>
