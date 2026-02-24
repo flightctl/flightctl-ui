@@ -44,7 +44,12 @@ type UpdateColumnProps = {
   catalogItem: CatalogItem;
   channel: string;
   catalogItemVersion: CatalogItemVersion;
-  onUpdate: (catalogItem: CatalogItem, version: string, channel: string, values: AppUpdateFormik) => Promise<void>;
+  onUpdate: (
+    catalogItem: CatalogItem,
+    catalogItemVersion: CatalogItemVersion,
+    channel: string,
+    values: AppUpdateFormik,
+  ) => Promise<void>;
   appSpec: ApplicationProviderSpec;
   exisingLabels: Record<string, string> | undefined;
 };
@@ -61,8 +66,8 @@ const UpdateAppColumn = ({
   const [openModal, setOpenModal] = React.useState(false);
   const updates = getUpdates(catalogItem, channel, catalogItemVersion.version);
 
-  const handleUpdate = async (version: string, channel: string, values: AppUpdateFormik) => {
-    await onUpdate(catalogItem, version, channel, values);
+  const handleUpdate = async (catalogItemVersion: CatalogItemVersion, channel: string, values: AppUpdateFormik) => {
+    await onUpdate(catalogItem, catalogItemVersion, channel, values);
     setOpenModal(false);
   };
 
@@ -93,7 +98,7 @@ type UpdateOsColumnProps = {
   catalogItem: CatalogItem;
   channel: string;
   catalogItemVersion: CatalogItemVersion;
-  onUpdate: (catalogItem: CatalogItem, version: string, channel: string) => Promise<void>;
+  onUpdate: (catalogItem: CatalogItem, catalogItemVersion: CatalogItemVersion, channel: string) => Promise<void>;
 };
 
 const UpdateOsColumn = ({ onUpdate, catalogItem, channel, catalogItemVersion }: UpdateOsColumnProps) => {
@@ -101,8 +106,8 @@ const UpdateOsColumn = ({ onUpdate, catalogItem, channel, catalogItemVersion }: 
   const [openModal, setOpenModal] = React.useState(false);
   const updates = getUpdates(catalogItem, channel, catalogItemVersion.version);
 
-  const handleUpdate = async (version: string, channel: string) => {
-    await onUpdate(catalogItem, version, channel);
+  const handleUpdate = async (catalogItemVersion: CatalogItemVersion, channel: string) => {
+    await onUpdate(catalogItem, catalogItemVersion, channel);
     setOpenModal(false);
   };
 
@@ -115,6 +120,7 @@ const UpdateOsColumn = ({ onUpdate, catalogItem, channel, catalogItemVersion }: 
       )}
       {openModal && (
         <OsUpdateModal
+          catalogItem={catalogItem}
           onClose={() => setOpenModal(false)}
           currentVersion={catalogItemVersion}
           currentChannel={channel}
@@ -169,10 +175,15 @@ export const CatalogItemTitle = ({
 type InstalledSoftwareProps = {
   labels: Record<string, string> | undefined;
   spec: DeviceSpec | undefined;
-  onUpdateOs: (catalogItem: CatalogItem, version: string, channel: string) => Promise<void>;
+  onUpdateOs: (catalogItem: CatalogItem, catalogItemVersion: CatalogItemVersion, channel: string) => Promise<void>;
   onDeleteOs: () => Promise<void>;
   onDeleteApp: (appName: string) => Promise<void>;
-  onUpdateApp: (catalogItem: CatalogItem, version: string, channel: string, values: AppUpdateFormik) => Promise<void>;
+  onUpdateApp: (
+    catalogItem: CatalogItem,
+    catalogItemVersion: CatalogItemVersion,
+    channel: string,
+    values: AppUpdateFormik,
+  ) => Promise<void>;
   canEdit: boolean;
 };
 

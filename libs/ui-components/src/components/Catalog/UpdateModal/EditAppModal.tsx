@@ -94,7 +94,12 @@ type EditAppModalProps = {
   onClose: VoidFunction;
   currentVersion: CatalogItemVersion;
   currentChannel: string;
-  onSubmit: (catalogItem: CatalogItem, version: string, channel: string, values: AppUpdateFormik) => Promise<void>;
+  onSubmit: (
+    catalogItem: CatalogItem,
+    catalogItemVersion: CatalogItemVersion,
+    channel: string,
+    values: AppUpdateFormik,
+  ) => Promise<void>;
   appSpec?: ApplicationProviderSpec;
   exisingLabels: Record<string, string> | undefined;
 };
@@ -158,7 +163,11 @@ const EditAppModal = ({
     error,
     schemaErrors,
   } = useSubmitCatalogForm<DynamicFormConfigFormik>(async (values) => {
-    await onSubmit(catalogItem, currentVersion.version, currentChannel, values);
+    const catalogItemVersion = catalogItem.spec.versions.find((v) => v.version === currentVersion.version);
+    if (!catalogItemVersion) {
+      throw t('Version {{version}} not found', { version: currentVersion.version });
+    }
+    await onSubmit(catalogItem, catalogItemVersion, currentChannel, values);
   });
 
   return (

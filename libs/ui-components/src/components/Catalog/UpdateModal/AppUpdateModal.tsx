@@ -179,7 +179,7 @@ type AppUpdateModalProps = {
   onClose: VoidFunction;
   currentVersion: CatalogItemVersion;
   updates: CatalogItemVersion[];
-  onUpdate: (selectedEntry: string, channel: string, values: AppUpdateFormik) => Promise<void>;
+  onUpdate: (catalogItemVersion: CatalogItemVersion, channel: string, values: AppUpdateFormik) => Promise<void>;
   currentChannel: string;
   appSpec: ApplicationProviderSpec;
   exisingLabels: Record<string, string> | undefined;
@@ -204,7 +204,12 @@ const AppUpdateModal: React.FC<AppUpdateModalProps> = ({
   });
 
   const { onSubmit, error, schemaErrors } = useSubmitCatalogForm<AppUpdateFormik>(async (values) => {
-    await onUpdate(values.version, currentChannel, values);
+    const catalogItemVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
+    if (!catalogItemVersion) {
+      throw t('Version {{version}} not found', { version: values.version });
+      return;
+    }
+    await onUpdate(catalogItemVersion, currentChannel, values);
   });
 
   return (

@@ -9,6 +9,7 @@ import EditAppModal, { AppUpdateFormik } from '../../Catalog/UpdateModal/EditApp
 import EditOsModal from '../../Catalog/UpdateModal/EditOsModal';
 import { CatalogPageContent } from '../../Catalog/CatalogPage';
 import InstalledSoftware from '../../Catalog/InstalledSoftware';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 import './ResourceCatalogPage.css';
 
@@ -21,45 +22,41 @@ type ResourceCatalogPageProps = {
 };
 
 const ResourceCatalogPage = ({ currentLabels, spec, onPatch, specPath, canEdit }: ResourceCatalogPageProps) => {
+  const { t } = useTranslation();
   const [selectedItem, setSelectedItem] = React.useState<{ itemName: string; catalog: string }>();
   const [installItem, setInstallItem] = React.useState<{ item: CatalogItem; channel: string; version: string }>();
 
-  const onUpdateOs = async (catalogItem: CatalogItem, version: string, channel: string) => {
-    const catalogItemVersion = catalogItem.spec.versions.find(
-      ({ version: v, channels }) => v === version && channels.includes(channel),
-    );
-    if (catalogItemVersion) {
-      const allPatches = getOsPatches({
-        currentOsImage: spec?.os?.image,
-        currentLabels,
-        catalogItem,
-        catalogItemVersion,
-        channel,
-        specPath,
-      });
-      await onPatch(allPatches);
-    }
+  const onUpdateOs = async (catalogItem: CatalogItem, catalogItemVersion: CatalogItemVersion, channel: string) => {
+    const allPatches = getOsPatches({
+      currentOsImage: spec?.os?.image,
+      currentLabels,
+      catalogItem,
+      catalogItemVersion,
+      channel,
+      specPath,
+    });
+    await onPatch(allPatches);
   };
 
-  const onUpdateApp = async (catalogItem: CatalogItem, version: string, channel: string, values: AppUpdateFormik) => {
-    const catalogItemVersion = catalogItem.spec.versions.find(
-      ({ version: v, channels }) => v === version && channels.includes(channel),
-    );
-    if (catalogItemVersion) {
-      const allPatches = getAppPatches({
-        appName: values.appName,
-        catalogItem,
-        catalogItemVersion,
-        channel,
-        specPath,
-        currentApps: spec?.applications,
-        currentLabels,
-        formValues:
-          values.configureVia === 'form' ? values.formValues : (load(values.editorContent) as Record<string, unknown>),
-        selectedAssets: values.selectedAssets,
-      });
-      await onPatch(allPatches);
-    }
+  const onUpdateApp = async (
+    catalogItem: CatalogItem,
+    catalogItemVersion: CatalogItemVersion,
+    channel: string,
+    values: AppUpdateFormik,
+  ) => {
+    const allPatches = getAppPatches({
+      appName: values.appName,
+      catalogItem,
+      catalogItemVersion,
+      channel,
+      specPath,
+      currentApps: spec?.applications,
+      currentLabels,
+      formValues:
+        values.configureVia === 'form' ? values.formValues : (load(values.editorContent) as Record<string, unknown>),
+      selectedAssets: values.selectedAssets,
+    });
+    await onPatch(allPatches);
   };
 
   const onDeleteOs = async () => {
@@ -107,8 +104,8 @@ const ResourceCatalogPage = ({ currentLabels, spec, onPatch, specPath, canEdit }
           currentChannel={installItem.channel}
           exisingLabels={currentLabels}
           onClose={() => setInstallItem(undefined)}
-          onSubmit={async (catalogItem, version, channel, values) => {
-            await onUpdateApp(catalogItem, version, channel, values);
+          onSubmit={async (catalogItem, catalogItemVersion, channel, values) => {
+            await onUpdateApp(catalogItem, catalogItemVersion, channel, values);
             setSelectedItem(undefined);
           }}
           currentVersion={
@@ -121,7 +118,11 @@ const ResourceCatalogPage = ({ currentLabels, spec, onPatch, specPath, canEdit }
           onClose={() => setInstallItem(undefined)}
           item={installItem.item}
           onSubmit={async () => {
-            await onUpdateOs(installItem.item, installItem.version, installItem.channel);
+            const catalogItemVersion = installItem.item.spec.versions.find((v) => v.version === installItem.version);
+            if (!catalogItemVersion) {
+              throw t('Version {{version}} not found', { version: installItem.version });
+            }
+            await onUpdateOs(installItem.item, catalogItemVersion, installItem.channel);
             setSelectedItem(undefined);
           }}
         />

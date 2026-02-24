@@ -1,15 +1,17 @@
-import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core';
+import { Alert, Button, Modal, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
 import * as React from 'react';
-import { CatalogItemVersion } from '@flightctl/types/alpha';
+import { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../hooks/useTranslation';
+import { getErrorMessage } from '../../../utils/error';
 import UpdateGraph from './UpdateGraph';
 
 type OsUpdateModalProps = {
+  catalogItem: CatalogItem;
   onClose: VoidFunction;
   currentVersion: CatalogItemVersion;
   updates: CatalogItemVersion[];
-  onUpdate: (selectedEntry: string, channel: string) => Promise<void>;
+  onUpdate: (catalogItemVersion: CatalogItemVersion, channel: string) => Promise<void>;
   currentChannel: string;
 };
 
@@ -19,21 +21,30 @@ const OsUpdateModal: React.FC<OsUpdateModalProps> = ({
   onUpdate,
   currentChannel,
   updates,
+  catalogItem,
 }) => {
   const { t } = useTranslation();
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [selectedVersion, setSelectedVersion] = React.useState(currentVersion.version);
+  const [error, setError] = React.useState<string>();
 
   const handleSelectionChange = React.useCallback((_nodeId: string, version: string) => {
     setSelectedVersion(version);
   }, []);
 
   const handleUpdate = async () => {
+    setError(undefined);
     setIsUpdating(true);
+    const catalogItemVersion = catalogItem.spec.versions.find((v) => v.version === selectedVersion);
+    if (!catalogItemVersion) {
+      setError(t('Version {{version}} not found', { version: selectedVersion }));
+      return;
+    }
     try {
-      await onUpdate(selectedVersion, currentChannel);
+      await onUpdate(catalogItemVersion, currentChannel);
       onClose();
     } catch (e) {
+      setError(getErrorMessage(e));
     } finally {
       setIsUpdating(false);
     }
@@ -45,13 +56,24 @@ const OsUpdateModal: React.FC<OsUpdateModalProps> = ({
     <Modal isOpen onClose={onClose} variant="large">
       <ModalHeader title={t('Update Operating system')} />
       <ModalBody>
-        <UpdateGraph
-          selectedVersion={selectedVersion}
-          currentVersion={currentVersion}
-          currentChannel={currentChannel}
-          onSelectionChange={handleSelectionChange}
-          updates={updates}
-        />
+        <Stack hasGutter>
+          <StackItem>
+            <UpdateGraph
+              selectedVersion={selectedVersion}
+              currentVersion={currentVersion}
+              currentChannel={currentChannel}
+              onSelectionChange={handleSelectionChange}
+              updates={updates}
+            />
+          </StackItem>
+          {error && (
+            <StackItem>
+              <Alert isInline variant="danger" title={t('Failed to update OS')}>
+                {error}
+              </Alert>
+            </StackItem>
+          )}
+        </Stack>
       </ModalBody>
       <ModalFooter>
         <Button
