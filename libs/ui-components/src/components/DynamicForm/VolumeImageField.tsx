@@ -273,6 +273,7 @@ const VolumeImageField: React.FC<FieldProps> = ({
   formContext,
   disabled,
   readonly,
+  required,
 }) => {
   const { t } = useTranslation();
   const { onAssetSelected, selectedAssets, onAssetCleared } = formContext as DynamicFormContext;
@@ -304,14 +305,7 @@ const VolumeImageField: React.FC<FieldProps> = ({
 
   return (
     <>
-      <FormGroup fieldId={idSchema.$id} label={schema.title || t('Image')}>
-        {schema.description && (
-          <FormHelperText>
-            <HelperText>
-              <HelperTextItem variant="default">{schema.description}</HelperTextItem>
-            </HelperText>
-          </FormHelperText>
-        )}
+      <FormGroup fieldId={idSchema.$id} label={schema.title || t('Image')} isRequired={required}>
         {assetItem ? (
           <Split hasGutter>
             <SplitItem isFilled>
@@ -353,6 +347,13 @@ const VolumeImageField: React.FC<FieldProps> = ({
               </Button>
             </SplitItem>
           </Split>
+        )}
+        {schema.description && (
+          <FormHelperText>
+            <HelperText>
+              <HelperTextItem variant="default">{schema.description}</HelperTextItem>
+            </HelperText>
+          </FormHelperText>
         )}
         <FieldErrors errors={rawErrors} />
       </FormGroup>

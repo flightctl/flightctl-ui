@@ -10,25 +10,21 @@ import {
 } from '@patternfly/react-core';
 import { WidgetProps } from '@rjsf/utils';
 import * as React from 'react';
-import FieldErrors from './FieldErrors';
 
 // PatternFly Text Widget
 const PFTextWidget: React.FC<WidgetProps> = ({ id, value, onChange, disabled, readonly, rawErrors, placeholder }) => {
   const hasError = !!rawErrors?.length;
   return (
-    <>
-      <TextInput
-        id={id}
-        value={(value as string) ?? ''}
-        type="text"
-        onChange={(_event, val) => onChange(val)}
-        isDisabled={disabled}
-        readOnlyVariant={readonly ? 'default' : undefined}
-        validated={hasError ? 'error' : 'default'}
-        placeholder={placeholder}
-      />
-      <FieldErrors errors={rawErrors} />
-    </>
+    <TextInput
+      id={id}
+      value={(value as string) ?? ''}
+      type="text"
+      onChange={(_event, val) => onChange(val)}
+      isDisabled={disabled}
+      readOnlyVariant={readonly ? 'default' : undefined}
+      validated={hasError ? 'error' : 'default'}
+      placeholder={placeholder}
+    />
   );
 };
 
@@ -44,35 +40,29 @@ const PFTextareaWidget: React.FC<WidgetProps> = ({
 }) => {
   const hasError = !!rawErrors?.length;
   return (
-    <>
-      <TextArea
-        id={id}
-        value={(value as string) ?? ''}
-        onChange={(_event, val) => onChange(val)}
-        isDisabled={disabled}
-        readOnly={readonly}
-        validated={hasError ? 'error' : 'default'}
-        placeholder={placeholder}
-        style={{ minHeight: '6rem' }}
-      />
-      <FieldErrors errors={rawErrors} />
-    </>
+    <TextArea
+      id={id}
+      value={(value as string) ?? ''}
+      onChange={(_event, val) => onChange(val)}
+      isDisabled={disabled}
+      readOnly={readonly}
+      validated={hasError ? 'error' : 'default'}
+      placeholder={placeholder}
+      style={{ minHeight: '6rem' }}
+    />
   );
 };
 
 // PatternFly Checkbox Widget
 const PFCheckboxWidget: React.FC<WidgetProps> = ({ id, value, onChange, disabled, readonly, label, rawErrors }) => {
   return (
-    <>
-      <Checkbox
-        id={id}
-        isChecked={!!value}
-        onChange={(_event, checked) => onChange(checked)}
-        isDisabled={disabled || readonly}
-        label={label}
-      />
-      <FieldErrors errors={rawErrors} />
-    </>
+    <Checkbox
+      id={id}
+      isChecked={!!value}
+      onChange={(_event, checked) => onChange(checked)}
+      isDisabled={disabled || readonly}
+      label={label}
+    />
   );
 };
 
@@ -95,40 +85,37 @@ const PFSelectWidget: React.FC<WidgetProps> = ({
   const displayValue = selectedOption?.label ?? placeholder ?? 'Select...';
 
   return (
-    <>
-      <Select
-        id={id}
-        isOpen={isOpen}
-        selected={value as string}
-        onSelect={(_event, val) => {
-          onChange(val);
-          setIsOpen(false);
-        }}
-        onOpenChange={setIsOpen}
-        toggle={(toggleRef) => (
-          <MenuToggle
-            ref={toggleRef}
-            onClick={() => setIsOpen(!isOpen)}
-            isExpanded={isOpen}
-            isDisabled={disabled || readonly}
-            status={hasError ? 'danger' : undefined}
-            style={{ width: '100%' }}
-          >
-            {displayValue}
-          </MenuToggle>
-        )}
-        shouldFocusToggleOnSelect
-      >
-        <SelectList>
-          {enumOptions.map((option) => (
-            <SelectOption key={String(option.value as string)} value={option.value as string}>
-              {option.label}
-            </SelectOption>
-          ))}
-        </SelectList>
-      </Select>
-      <FieldErrors errors={rawErrors} />
-    </>
+    <Select
+      id={id}
+      isOpen={isOpen}
+      selected={value as string}
+      onSelect={(_event, val) => {
+        onChange(val);
+        setIsOpen(false);
+      }}
+      onOpenChange={setIsOpen}
+      toggle={(toggleRef) => (
+        <MenuToggle
+          ref={toggleRef}
+          onClick={() => setIsOpen(!isOpen)}
+          isExpanded={isOpen}
+          isDisabled={disabled || readonly}
+          status={hasError ? 'danger' : undefined}
+          style={{ width: '100%' }}
+        >
+          {displayValue}
+        </MenuToggle>
+      )}
+      shouldFocusToggleOnSelect
+    >
+      <SelectList>
+        {enumOptions.map((option) => (
+          <SelectOption key={String(option.value as string)} value={option.value as string}>
+            {option.label}
+          </SelectOption>
+        ))}
+      </SelectList>
+    </Select>
   );
 };
 
@@ -146,20 +133,17 @@ const PFNumberWidget: React.FC<WidgetProps> = ({ id, value, onChange, disabled, 
   };
 
   return (
-    <>
-      <NumberInput
-        id={id}
-        value={numValue}
-        min={min}
-        max={max}
-        onMinus={() => onChange(numValue - 1)}
-        onPlus={() => onChange(numValue + 1)}
-        onChange={handleChange}
-        isDisabled={disabled || readonly}
-        validated={hasError ? 'error' : 'default'}
-      />
-      <FieldErrors errors={rawErrors} />
-    </>
+    <NumberInput
+      id={id}
+      value={numValue}
+      min={min}
+      max={max}
+      onMinus={() => onChange(numValue - 1)}
+      onPlus={() => onChange(numValue + 1)}
+      onChange={handleChange}
+      isDisabled={disabled || readonly}
+      validated={hasError ? 'error' : 'default'}
+    />
   );
 };
 
@@ -175,19 +159,16 @@ const PFPasswordWidget: React.FC<WidgetProps> = ({
 }) => {
   const hasError = !!rawErrors?.length;
   return (
-    <>
-      <TextInput
-        id={id}
-        value={(value as string) ?? ''}
-        type="password"
-        onChange={(_event, val) => onChange(val)}
-        isDisabled={disabled}
-        readOnlyVariant={readonly ? 'default' : undefined}
-        validated={hasError ? 'error' : 'default'}
-        placeholder={placeholder}
-      />
-      <FieldErrors errors={rawErrors} />
-    </>
+    <TextInput
+      id={id}
+      value={(value as string) ?? ''}
+      type="password"
+      onChange={(_event, val) => onChange(val)}
+      isDisabled={disabled}
+      readOnlyVariant={readonly ? 'default' : undefined}
+      validated={hasError ? 'error' : 'default'}
+      placeholder={placeholder}
+    />
   );
 };
 
@@ -195,19 +176,16 @@ const PFPasswordWidget: React.FC<WidgetProps> = ({
 const PFEmailWidget: React.FC<WidgetProps> = ({ id, value, onChange, disabled, readonly, rawErrors, placeholder }) => {
   const hasError = !!rawErrors?.length;
   return (
-    <>
-      <TextInput
-        id={id}
-        value={(value as string) ?? ''}
-        type="email"
-        onChange={(_event, val) => onChange(val)}
-        isDisabled={disabled}
-        readOnlyVariant={readonly ? 'default' : undefined}
-        validated={hasError ? 'error' : 'default'}
-        placeholder={placeholder}
-      />
-      <FieldErrors errors={rawErrors} />
-    </>
+    <TextInput
+      id={id}
+      value={(value as string) ?? ''}
+      type="email"
+      onChange={(_event, val) => onChange(val)}
+      isDisabled={disabled}
+      readOnlyVariant={readonly ? 'default' : undefined}
+      validated={hasError ? 'error' : 'default'}
+      placeholder={placeholder}
+    />
   );
 };
 
@@ -215,19 +193,16 @@ const PFEmailWidget: React.FC<WidgetProps> = ({ id, value, onChange, disabled, r
 const PFURLWidget: React.FC<WidgetProps> = ({ id, value, onChange, disabled, readonly, rawErrors, placeholder }) => {
   const hasError = !!rawErrors?.length;
   return (
-    <>
-      <TextInput
-        id={id}
-        value={(value as string) ?? ''}
-        type="url"
-        onChange={(_event, val) => onChange(val)}
-        isDisabled={disabled}
-        readOnlyVariant={readonly ? 'default' : undefined}
-        validated={hasError ? 'error' : 'default'}
-        placeholder={placeholder}
-      />
-      <FieldErrors errors={rawErrors} />
-    </>
+    <TextInput
+      id={id}
+      value={(value as string) ?? ''}
+      type="url"
+      onChange={(_event, val) => onChange(val)}
+      isDisabled={disabled}
+      readOnlyVariant={readonly ? 'default' : undefined}
+      validated={hasError ? 'error' : 'default'}
+      placeholder={placeholder}
+    />
   );
 };
 

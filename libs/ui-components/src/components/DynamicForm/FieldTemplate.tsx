@@ -50,6 +50,7 @@ const PFFieldTemplate: React.FC<FieldTemplateProps> = ({
   children,
   schema,
   displayLabel,
+  rawErrors,
 }) => {
   // Don't wrap object or array types with FormGroup - they handle their own layout
   if (schema.type === 'object' || schema.type === 'array') {
@@ -62,6 +63,7 @@ const PFFieldTemplate: React.FC<FieldTemplateProps> = ({
       <FormGroup fieldId={id}>
         {children}
         <DescriptionText description={description} />
+        <FieldErrors errors={rawErrors} />
       </FormGroup>
     );
   }
@@ -70,6 +72,7 @@ const PFFieldTemplate: React.FC<FieldTemplateProps> = ({
     <FormGroup fieldId={id} label={displayLabel ? label : undefined} isRequired={required}>
       {children}
       <DescriptionText description={description} />
+      <FieldErrors errors={rawErrors} />
     </FormGroup>
   );
 };
