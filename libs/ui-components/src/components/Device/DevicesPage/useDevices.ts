@@ -39,7 +39,6 @@ const getDevicesEndpoint = ({
   onlyDecommissioned,
   nextContinue,
   summaryOnly,
-  limit,
   onlyFleetless,
 }: DevicesEndpointArgs) => {
   const filterByAppStatus = activeStatuses?.[FilterSearchParams.AppStatus];
@@ -80,9 +79,7 @@ const getDevicesEndpoint = ({
   if (summaryOnly) {
     params.set('summaryOnly', 'true');
   }
-  if (limit !== undefined) {
-    params.set('limit', `${limit}`);
-  } else if (nextContinue !== undefined) {
+  if (nextContinue !== undefined) {
     params.set('limit', `${PAGE_SIZE}`);
   }
   if (nextContinue) {
