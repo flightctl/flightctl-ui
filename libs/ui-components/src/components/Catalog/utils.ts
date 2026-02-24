@@ -145,18 +145,13 @@ export const getOsPatches = ({
 }) => {
   const allPatches: PatchRequest = [];
   const newOsImage = getFullReferenceURI(catalogItem.spec.reference.uri, catalogItemVersion);
-  if (!currentOsImage && newOsImage) {
+  if (!currentOsImage) {
     allPatches.push({
       path: `${specPath}spec/os`,
       op: 'add',
       value: { image: newOsImage },
     });
-  } else if (!newOsImage && currentOsImage) {
-    allPatches.push({
-      path: `${specPath}spec/os`,
-      op: 'remove',
-    });
-  } else if (newOsImage && currentOsImage !== newOsImage) {
+  } else if (currentOsImage !== newOsImage) {
     appendJSONPatch({
       path: `${specPath}spec/os/image`,
       patches: allPatches,
