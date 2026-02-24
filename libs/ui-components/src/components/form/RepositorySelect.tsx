@@ -116,6 +116,9 @@ type RepositorySelectProps = {
   canCreateRepo: boolean;
   isReadOnly?: boolean;
   repoRefetch?: VoidFunction;
+  options?: {
+    writeAccessOnly?: boolean;
+  };
   isRequired?: boolean;
   validateRepoSelection?: (repo: Repository) => string | undefined;
 };
@@ -148,6 +151,7 @@ const RepositorySelect = ({
   repoRefetch,
   label,
   helperText,
+  options,
   isRequired,
   validateRepoSelection,
 }: RepositorySelectProps) => {
@@ -214,7 +218,7 @@ const RepositorySelect = ({
           type={repoType}
           onClose={() => setCreateRepoModalOpen(false)}
           onSuccess={handleCreateRepository}
-          validateBeforeCreate={validateRepoSelection}
+          options={options}
         />
       )}
     </>

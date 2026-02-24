@@ -468,6 +468,7 @@ export const getInitValues = ({
     canUseResourceSyncs?: boolean;
     allowedRepoTypes?: RepoSpecType[];
     showRepoTypes?: boolean;
+    writeAccessOnly?: boolean;
   };
 }): RepositoryFormValues => {
   const configAllowsResourceSyncs = options?.canUseResourceSyncs ?? true;
@@ -501,7 +502,7 @@ export const getInitValues = ({
       initValues.ociConfig = {
         registry: '',
         scheme: OciRepoSpec.scheme.HTTPS,
-        accessMode: OciRepoSpec.accessMode.READ,
+        accessMode: options?.writeAccessOnly ? OciRepoSpec.accessMode.READ_WRITE : OciRepoSpec.accessMode.READ,
       };
     }
 
