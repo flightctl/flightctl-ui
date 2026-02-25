@@ -47,8 +47,8 @@ export const getInitialAppConfig = (
       {} as Record<string, unknown>,
     );
 
-    formValues = merge(formValues, appConfig);
-    defaultConfig = merge(defaultConfig || {}, appConfig);
+    formValues = merge({}, formValues, appConfig);
+    defaultConfig = merge({}, defaultConfig || {}, appConfig);
 
     if (existingLabels) {
       const existingVolumes = formValues['volumes'];

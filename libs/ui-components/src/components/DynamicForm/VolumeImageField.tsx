@@ -96,7 +96,7 @@ const SelectAssetModal = ({ onClose, onSelect }: SelectAssetModalProps) => {
           }}
         />
       ) : (
-        <CatalogItemList
+        <AssetsList
           onSelect={setSelectedAsset}
           onClose={onClose}
           assetCatalogItems={assetCatalogItems}
@@ -112,7 +112,7 @@ const SelectAssetModal = ({ onClose, onSelect }: SelectAssetModalProps) => {
   );
 };
 
-type CatalogItemListProps = {
+type AssetsListProps = {
   assetCatalogItems: CatalogItem[];
   isLoading: boolean;
   isUpdating: boolean;
@@ -124,7 +124,7 @@ type CatalogItemListProps = {
   setNameFilter: (name: string) => void;
 };
 
-const CatalogItemList = ({
+const AssetsList = ({
   assetCatalogItems,
   isLoading,
   isUpdating,
@@ -134,7 +134,7 @@ const CatalogItemList = ({
   onClose,
   nameFilter,
   setNameFilter,
-}: CatalogItemListProps) => {
+}: AssetsListProps) => {
   const { t } = useTranslation();
   const hasFilters = !!nameFilter?.trim();
 
@@ -328,6 +328,7 @@ const VolumeImageField: React.FC<FieldProps> = ({
                 variant="link"
                 icon={<MinusCircleIcon />}
                 iconPosition="start"
+                isDisabled={disabled || readonly}
                 onClick={() => {
                   onAssetCleared(volumeIndex);
                   onChange({ ...value, reference: undefined });

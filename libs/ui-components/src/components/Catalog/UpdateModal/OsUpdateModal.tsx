@@ -54,7 +54,7 @@ const OsUpdateModal: React.FC<OsUpdateModalProps> = ({
   const isUpdateDisabled = isUpdating || selectedVersion === currentVersion.version;
 
   return (
-    <Modal isOpen onClose={onClose} variant="large">
+    <Modal isOpen onClose={isUpdating ? undefined : onClose} variant="large">
       <ModalHeader title={t('Update Operating system')} />
       <ModalBody>
         <Stack hasGutter>

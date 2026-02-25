@@ -11,5 +11,6 @@ export const APP_VOLUME_CATALOG_LABEL_KEY = 'volume.catalog.flightctl.io/catalog
 export const APP_VOLUME_ITEM_LABEL_KEY = 'volume.catalog.flightctl.io/item';
 
 export const getAppVolumeName = (appName: string | undefined, volumeName: string, label: string) => {
-  return `${appName || ''}.${volumeName}.${label}`;
+  const appPrefix = appName ? `${appName}.` : '';
+  return `${appPrefix}${volumeName}.${label}`;
 };

@@ -176,8 +176,8 @@ const InstallAppWizard = ({ catalogItem }: InstallAppWizardProps) => {
     const specPath = installToDevice ? '/' : '/spec/template/';
     const catalogItemVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
 
-    if (!catalogItemVersion || !values.channel) {
-      return;
+    if (!catalogItemVersion) {
+      throw t('Failed to find requested version {{version}}', { version: values.version });
     }
     const currentApps = installToDevice
       ? (res as Device)?.spec?.applications

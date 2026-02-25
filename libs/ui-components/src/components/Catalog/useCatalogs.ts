@@ -44,12 +44,12 @@ const buildCatalogItemsFieldSelector = (
 
     if (categories.length === 1) {
       parts.push(`spec.category==${categories[0]}`);
-    } else if (categories?.length || 0 > 1) {
+    } else if (categories.length > 1) {
       parts.push(`spec.category in (${categories.join(',')})`);
     }
     if (types.length === 1) {
       parts.push(`spec.type==${types[0]}`);
-    } else if (types.length || 0 > 1) {
+    } else if (types.length > 1) {
       parts.push(`spec.type in (${types?.join(',')})`);
     }
   }
