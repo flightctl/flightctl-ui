@@ -2,9 +2,12 @@ import * as React from 'react';
 
 import {
   Button,
+  ExpandableSection,
   FormGroup,
   FormHelperText,
   FormSection,
+  Grid,
+  GridItem,
   HelperText,
   HelperTextItem,
   Split,
@@ -22,15 +25,20 @@ import {
 } from '@rjsf/utils';
 import { getDefaultRegistry } from '@rjsf/core';
 
-import VolumeImageField, { ROOT_VOLUMES_IMAGE_FIELD_REGEX } from './VolumeImageField';
+import VolumeImageField, { ROOT_VOLUMES_IMAGE_REFERENCE_FIELD_REGEX } from './VolumeImageField';
 import FieldErrors from './FieldErrors';
 import { PFEmailWidget, PFPasswordWidget, PFTextWidget, PFURLWidget } from './FormWidget';
 import { useTranslation } from '../../hooks/useTranslation';
 import { DynamicFormContext } from './DynamicForm';
+import { FormGroupWithHelperText } from '../common/WithHelperText';
 
-// Get the default ObjectField from rjsf to use as fallback
+/** When true, the object template should hide its title (used for array item objects). */
+const DirectArrayItemContext = React.createContext<boolean>(false);
+
+// Get default fields from rjsf to use as fallbacks
 const defaultRegistry = getDefaultRegistry();
 const DefaultObjectField = defaultRegistry.fields.ObjectField;
+const DefaultStringField = defaultRegistry.fields.StringField;
 
 // Helper component for description text
 const DescriptionText = ({ description }: { description?: React.ReactNode }) =>
@@ -81,10 +89,11 @@ const PFFieldTemplate: React.FC<FieldTemplateProps> = ({
 // Object Field Template - layout for object properties using PatternFly FormFieldGroup
 const PFObjectFieldTemplate: React.FC<ObjectFieldTemplateProps> = ({ title, description, properties, idSchema }) => {
   const isRoot = idSchema.$id === 'root';
+  const isDirectArrayItem = React.useContext(DirectArrayItemContext);
 
-  // For root level, render without the FormFieldGroup wrapper
-  if (isRoot) {
-    return (
+  // For root or direct array item object, render without title (array template already shows item title)
+  if (isRoot || isDirectArrayItem) {
+    const content = (
       <>
         {description && <DescriptionText description={description} />}
         {properties.map((prop) => (
@@ -92,38 +101,50 @@ const PFObjectFieldTemplate: React.FC<ObjectFieldTemplateProps> = ({ title, desc
         ))}
       </>
     );
+    return isDirectArrayItem ? (
+      <DirectArrayItemContext.Provider value={false}>{content}</DirectArrayItemContext.Provider>
+    ) : (
+      content
+    );
   }
 
-  // For nested objects, use FormFieldGroup
+  // For other nested objects, use FormSection with title
   return (
-    <FormSection title={title} titleElement="h2">
-      {description && <DescriptionText description={description} />}
-      {properties.map((prop) => (
-        <React.Fragment key={prop.name}>{prop.content}</React.Fragment>
-      ))}
+    <FormSection>
+      <FormGroupWithHelperText label={title} content={description}>
+        <Grid hasGutter>
+          {properties.map((prop) => (
+            <GridItem key={prop.name}>{prop.content}</GridItem>
+          ))}
+        </Grid>
+      </FormGroupWithHelperText>
     </FormSection>
   );
 };
 
-// Custom Object Field - checks for special field types and renders custom fields
+// Custom Object Field - can be extended for other special object types
 const CustomObjectField: React.FC<FieldProps> = (props) => {
+  return <DefaultObjectField {...props} />;
+};
+
+// Custom String Field - use VolumeImageField for volume image reference only
+const CustomStringField: React.FC<FieldProps> = (props) => {
   const { idSchema, schema } = props;
 
-  // Check if this is an "image" object inside a volumes array item
-  if (ROOT_VOLUMES_IMAGE_FIELD_REGEX.test(idSchema.$id) && schema.type === 'object') {
+  if (schema.type === 'string' && ROOT_VOLUMES_IMAGE_REFERENCE_FIELD_REGEX.test(idSchema.$id)) {
     return <VolumeImageField {...props} />;
   }
 
-  // Fall back to the default ObjectField from rjsf (not from registry to avoid infinite loop)
-  return <DefaultObjectField {...props} />;
+  return <DefaultStringField {...props} />;
 };
 
 // Custom fields registry
 const pfFields: RegistryFieldsType = {
   ObjectField: CustomObjectField,
+  StringField: CustomStringField,
 };
 
-// Array Field Template
+// Array Field Template - each array item is an expandable section (aligned with ExpandableFormSection)
 const PFArrayFieldTemplate: React.FC<ArrayFieldTemplateProps> = ({
   title,
   items,
@@ -135,39 +156,72 @@ const PFArrayFieldTemplate: React.FC<ArrayFieldTemplateProps> = ({
 }) => {
   const { t } = useTranslation();
   const onBeforeArrayItemRemoved = (formContext as DynamicFormContext)?.onBeforeArrayItemRemoved;
+  const sectionTitle = title || t('Items');
+  const [expandedItems, setExpandedItems] = React.useState<Record<number, boolean>>(() =>
+    items.reduce<Record<number, boolean>>((acc, item) => {
+      acc[item.index] = true;
+      return acc;
+    }, {}),
+  );
+
+  // Keep expanded state in sync when items are added/removed
+  React.useEffect(() => {
+    setExpandedItems((prev) => {
+      const next = { ...prev };
+      items.forEach((item) => {
+        if (next[item.index] === undefined) next[item.index] = true;
+      });
+      return next;
+    });
+  }, [items.length]);
+
   return (
-    <FormGroup fieldId={idSchema.$id} label={title}>
-      {items.map((item) => (
-        <FormSection key={item.key}>
-          <Split hasGutter>
-            <SplitItem isFilled>{item.children}</SplitItem>
-            {item.hasRemove && (
-              <SplitItem>
-                <Button
-                  aria-label={t('Delete item')}
-                  variant="link"
-                  icon={<MinusCircleIcon />}
-                  iconPosition="start"
-                  onClick={() => {
-                    onBeforeArrayItemRemoved?.(idSchema.$id, item.index);
-                    item.onDropIndexClick(item.index)();
+    <FormGroup fieldId={idSchema.$id} label={sectionTitle}>
+      <Grid hasGutter>
+        {items.map((item) => (
+          <GridItem key={item.index}>
+            <Split hasGutter>
+              <SplitItem isFilled>
+                <ExpandableSection
+                  key={item.key}
+                  toggleContent={`${sectionTitle} ${item.index + 1}`}
+                  isIndented
+                  isExpanded={expandedItems[item.index] !== false}
+                  onToggle={(_, expanded) => {
+                    setExpandedItems((prev) => ({ ...prev, [item.index]: expanded }));
                   }}
-                />
+                >
+                  <DirectArrayItemContext.Provider value={true}>{item.children}</DirectArrayItemContext.Provider>
+                </ExpandableSection>
               </SplitItem>
-            )}
-          </Split>
-        </FormSection>
-      ))}
-      {canAdd && (
-        <FormSection>
-          <FormGroup>
+              {item.hasRemove && (
+                <SplitItem>
+                  <Button
+                    aria-label={t('Delete item')}
+                    variant="link"
+                    icon={<MinusCircleIcon />}
+                    iconPosition="start"
+                    onClick={() => {
+                      onBeforeArrayItemRemoved?.(idSchema.$id, item.index);
+                      item.onDropIndexClick(item.index)();
+                    }}
+                  />
+                </SplitItem>
+              )}
+            </Split>
+          </GridItem>
+        ))}
+        {canAdd && (
+          <GridItem>
             <Button variant="link" icon={<PlusCircleIcon />} iconPosition="start" onClick={onAddClick}>
               {t('Add item')}
             </Button>
-          </FormGroup>
-        </FormSection>
-      )}
-      <FieldErrors errors={rawErrors} />
+          </GridItem>
+        )}
+        <GridItem>
+          <FieldErrors errors={rawErrors} />
+        </GridItem>
+      </Grid>
     </FormGroup>
   );
 };

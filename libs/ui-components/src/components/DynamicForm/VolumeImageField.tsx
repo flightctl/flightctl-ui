@@ -7,7 +7,6 @@ import {
   EmptyState,
   EmptyStateActions,
   EmptyStateBody,
-  FormGroup,
   FormHelperText,
   Gallery,
   HelperText,
@@ -34,7 +33,6 @@ import { CatalogItem, CatalogItemList, CatalogItemType, CatalogItemVersion } fro
 
 import CatalogItemCard from '../Catalog/CatalogItemCard';
 import { getFullReferenceURI } from '../Catalog/utils';
-import FieldErrors from './FieldErrors';
 import { DynamicFormContext } from './DynamicForm';
 import { useTranslation } from '../../hooks/useTranslation';
 import TableTextSearch from '../Table/TableTextSearch';
@@ -54,18 +52,18 @@ import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { CatalogItemTitle } from '../Catalog/InstalledSoftware';
 
 /**
- * Regex for volume image field IDs.
- * Matches IDs like: root_volumes_0_image, root_volumes_1_image, etc.
+ * Regex for volume image reference field IDs.
+ * Matches IDs like: root_volumes_0_image_reference, root_volumes_1_image_reference, etc.
  * Capture group 1 is the volume index.
  */
-export const ROOT_VOLUMES_IMAGE_FIELD_REGEX = /root_volumes_(\d+)_image$/;
+export const ROOT_VOLUMES_IMAGE_REFERENCE_FIELD_REGEX = /root_volumes_(\d+)_image_reference$/;
 
 /**
  * Extract the volume index from the field ID.
- * Field ID format: "root_volumes_0_image" -> extracts index 0
+ * Field ID format: "root_volumes_0_image_reference" -> extracts index 0
  */
 export const getVolumeIndexFromId = (fieldId: string): number => {
-  const match = fieldId.match(ROOT_VOLUMES_IMAGE_FIELD_REGEX);
+  const match = fieldId.match(ROOT_VOLUMES_IMAGE_REFERENCE_FIELD_REGEX);
   return match ? parseInt(match[1], 10) : -1;
 };
 
@@ -249,10 +247,10 @@ const CatalogItemDetails = ({
             </Stack>
           </ModalBody>
           <ModalFooter>
-            <Button onClick={submitForm}>{t('Select')}</Button>
             <Button variant="secondary" onClick={onBack}>
               {t('Back')}
             </Button>
+            <Button onClick={submitForm}>{t('Select')}</Button>
             <Button variant="link" onClick={onCancel}>
               {t('Cancel')}
             </Button>
@@ -263,13 +261,10 @@ const CatalogItemDetails = ({
   );
 };
 
-type VolumeImageValue = {
-  reference?: string;
-};
-
 /**
- * Custom field for rendering volume image selection via Asset catalog items.
- * Displays a text field for image.reference with a button to pick from Asset catalog.
+ * Custom field for the volume image "reference" property.
+ * Renders a text input plus "Choose from catalog" for Asset selection.
+ * Used only when the field ID matches root_volumes_N_image_reference.
  */
 const VolumeImageField: React.FC<FieldProps> = ({
   idSchema,
@@ -284,13 +279,13 @@ const VolumeImageField: React.FC<FieldProps> = ({
 }) => {
   const { t } = useTranslation();
   const { onAssetSelected, selectedAssets, onAssetCleared } = formContext as DynamicFormContext;
-  const value = (formData as VolumeImageValue) || {};
+  const referenceValue = typeof formData === 'string' ? formData : '';
   const volumeIndex = getVolumeIndexFromId(idSchema.$id);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const handleTextChange = (_event: React.FormEvent<HTMLInputElement>, newReference: string) => {
-    onChange({ ...value, reference: newReference });
+    onChange(newReference);
   };
 
   const onSelect = (item: CatalogItem, version: CatalogItemVersion, channel: string) => {
@@ -303,68 +298,65 @@ const VolumeImageField: React.FC<FieldProps> = ({
       assetCatalog: item.metadata.catalog,
       assetItemName: item.metadata.name || '',
     });
-    onChange({ ...value, reference });
+    onChange(reference);
   };
 
   const hasErrors = !!rawErrors?.length;
-
   const selectedAsset = selectedAssets.find((a) => a.volumeIndex === volumeIndex);
 
+  // Render only the control content; parent FieldTemplate provides the FormGroup label and errors
   return (
     <>
-      <FormGroup fieldId={idSchema.$id} label={schema.title || t('Image')} isRequired={required}>
-        {selectedAsset?.assetItem ? (
-          <Split hasGutter>
-            <SplitItem isFilled>
-              <CatalogItemTitle
-                item={selectedAsset.assetItem}
-                channel={selectedAsset.assetChannel}
-                version={selectedAsset.assetVersion}
-              />
-            </SplitItem>
-            <SplitItem>
-              <Button
-                aria-label={t('Delete item')}
-                variant="link"
-                icon={<MinusCircleIcon />}
-                iconPosition="start"
-                isDisabled={disabled || readonly}
-                onClick={() => {
-                  onAssetCleared(volumeIndex);
-                  onChange({ ...value, reference: undefined });
-                }}
-              />
-            </SplitItem>
-          </Split>
-        ) : (
-          <Split hasGutter>
-            <SplitItem isFilled>
-              <TextInput
-                id={idSchema.$id}
-                value={value.reference || ''}
-                onChange={handleTextChange}
-                isDisabled={disabled}
-                readOnlyVariant={readonly ? 'default' : undefined}
-                validated={hasErrors ? 'error' : 'default'}
-                placeholder={t('Enter image reference or choose from catalog')}
-              />
-            </SplitItem>
-            <SplitItem>
-              <Button variant="secondary" onClick={() => setIsModalOpen(true)} isDisabled={disabled || readonly}>
-                {t('Choose from catalog')}
-              </Button>
-            </SplitItem>
-          </Split>
-        )}
-        {schema.description && (
-          <FormHelperText>
-            <HelperText>
-              <HelperTextItem variant="default">{schema.description}</HelperTextItem>
-            </HelperText>
-          </FormHelperText>
-        )}
-        <FieldErrors errors={rawErrors} />
-      </FormGroup>
+      {selectedAsset?.assetItem ? (
+        <Split hasGutter>
+          <SplitItem isFilled>
+            <CatalogItemTitle
+              item={selectedAsset.assetItem}
+              channel={selectedAsset.assetChannel}
+              version={selectedAsset.assetVersion}
+            />
+          </SplitItem>
+          <SplitItem>
+            <Button
+              aria-label={t('Delete item')}
+              variant="link"
+              icon={<MinusCircleIcon />}
+              iconPosition="start"
+              isDisabled={disabled || readonly}
+              onClick={() => {
+                onAssetCleared(volumeIndex);
+                onChange('');
+              }}
+            />
+          </SplitItem>
+        </Split>
+      ) : (
+        <Split hasGutter>
+          <SplitItem isFilled>
+            <TextInput
+              id={idSchema.$id}
+              value={referenceValue}
+              onChange={handleTextChange}
+              isDisabled={disabled}
+              readOnlyVariant={readonly ? 'default' : undefined}
+              validated={hasErrors ? 'error' : 'default'}
+              placeholder={t('Enter image reference or choose from catalog')}
+            />
+          </SplitItem>
+          <SplitItem>
+            <Button variant="secondary" onClick={() => setIsModalOpen(true)} isDisabled={disabled || readonly}>
+              {t('Choose from catalog')}
+            </Button>
+          </SplitItem>
+        </Split>
+      )}
+      {schema.description && (
+        <FormHelperText>
+          <HelperText>
+            <HelperTextItem variant="default">{schema.description}</HelperTextItem>
+          </HelperText>
+        </FormHelperText>
+      )}
 
       {isModalOpen && <SelectAssetModal onClose={() => setIsModalOpen(false)} onSelect={onSelect} />}
     </>

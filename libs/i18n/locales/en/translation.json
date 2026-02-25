@@ -656,6 +656,7 @@
   "Maximum unavailable devices: {{ maxUnavailable }}": "Maximum unavailable devices: {{ maxUnavailable }}",
   "Add service": "Add service",
   "Tracked systemd services": "Tracked systemd services",
+  "Items": "Items",
   "Delete item": "Delete item",
   "Add item": "Add item",
   "Choose asset from catalog": "Choose asset from catalog",
