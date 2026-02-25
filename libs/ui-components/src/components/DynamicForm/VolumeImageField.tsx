@@ -32,7 +32,7 @@ import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-cir
 import { FieldProps } from '@rjsf/utils';
 import { CatalogItem, CatalogItemList, CatalogItemType, CatalogItemVersion } from '@flightctl/types/alpha';
 
-import PFCatalogItem from '../Catalog/CatalogItem';
+import CatalogItemCard from '../Catalog/CatalogItemCard';
 import { getFullReferenceURI } from '../Catalog/utils';
 import FieldErrors from './FieldErrors';
 import { DynamicFormContext } from './DynamicForm';
@@ -170,7 +170,7 @@ const CatalogItemList = ({
       ) : (
         <Gallery hasGutter>
           {assetCatalogItems.map((asset) => (
-            <PFCatalogItem key={asset.metadata.name} catalogItem={asset} onSelect={() => onSelect(asset)} />
+            <CatalogItemCard key={asset.metadata.name} catalogItem={asset} onSelect={() => onSelect(asset)} />
           ))}
         </Gallery>
       )}

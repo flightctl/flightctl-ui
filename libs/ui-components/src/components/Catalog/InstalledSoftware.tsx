@@ -147,7 +147,7 @@ export const CatalogItemTitle = ({
   return (
     <Flex alignItems={{ default: 'alignItemsCenter' }} alignContent={{ default: 'alignContentCenter' }}>
       <FlexItem>
-        <img src={getCatalogItemIcon(item)} alt={`${item.metadata.name} icon`} style={{ maxWidth: '30px' }} />
+        <img src={getCatalogItemIcon(item)} alt={`${item.metadata.name} icon`} style={{ maxWidth: '40px' }} />
       </FlexItem>
       <FlexItem>
         <Stack>

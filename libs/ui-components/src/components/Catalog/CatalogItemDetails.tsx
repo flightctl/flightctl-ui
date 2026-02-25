@@ -93,7 +93,7 @@ export const CatalogItemDetailsHeader = ({ item }: CatalogItemDetailsHeaderProps
   return (
     <Split hasGutter>
       <SplitItem>
-        <img src={getCatalogItemIcon(item)} alt={`${item.metadata.name} icon`} style={{ maxWidth: '60px' }} />
+        <img src={getCatalogItemIcon(item)} alt={`${item.metadata.name} icon`} style={{ maxWidth: '40px' }} />
       </SplitItem>
       <SplitItem isFilled>
         <Title headingLevel="h1">{item.spec.displayName || item.metadata.name}</Title>

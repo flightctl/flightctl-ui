@@ -19,10 +19,10 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
 import * as React from 'react';
-import { CatalogItemCategory, CatalogItemType } from '@flightctl/types/alpha';
+import { CatalogItem, CatalogItemCategory, CatalogItemType } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import CatalogItem from './CatalogItem';
+import CatalogItemCard from './CatalogItemCard';
 import CatalogPageToolbar from './CatalogPageToolbar';
 import { CatalogFilter, useCatalogFilter } from './useCatalogFilter';
 import CatalogItemDetails from './CatalogItemDetails';
@@ -235,7 +235,7 @@ export const CatalogPageContent = ({
                 ) : (
                   <Gallery hasGutter>
                     {catalogItems.map((ci) => (
-                      <CatalogItem
+                      <CatalogItemCard
                         catalogItem={ci}
                         key={ci.metadata.name}
                         onSelect={() =>

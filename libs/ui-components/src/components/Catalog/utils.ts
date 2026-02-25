@@ -31,13 +31,25 @@ export const getFullReferenceURI = (refURI: string, version: CatalogItemVersion)
   return `${refURI}@${version.version}`;
 };
 
-export const getCatalogItemTitles = (category: CatalogItemCategory | undefined, t: TFunction) => {
-  switch (category) {
-    case CatalogItemCategory.CatalogItemCategoryApplication: {
-      return t('Application');
+export const getCatalogItemBadge = (itemType: CatalogItemType | undefined, t: TFunction) => {
+  switch (itemType) {
+    case CatalogItemType.CatalogItemTypeCompose: {
+      return t('Compose');
     }
-    case CatalogItemCategory.CatalogItemCategorySystem: {
-      return t('System');
+    case CatalogItemType.CatalogItemTypeContainer: {
+      return t('Container');
+    }
+    case CatalogItemType.CatalogItemTypeData: {
+      return t('Data');
+    }
+    case CatalogItemType.CatalogItemTypeHelm: {
+      return t('Helm');
+    }
+    case CatalogItemType.CatalogItemTypeQuadlet: {
+      return t('Quadlet');
+    }
+    case CatalogItemType.CatalogItemTypeOS: {
+      return t('OS image');
     }
     default: {
       return t('Unknown');

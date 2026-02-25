@@ -24,7 +24,9 @@ const UpdateSuccessPage = () => {
   return (
     <EmptyState status={EmptyStateStatus.success} titleText={t('Update configuration successful')}>
       <EmptyStateBody>
-        {t('Devices will download and apply the update according to the configured update policies.')}
+        {target === 'device'
+          ? t('Device will download and apply the update according to the configured update policies.')
+          : t('Devices will download and apply the update according to the configured update policies.')}
       </EmptyStateBody>
       <EmptyStateFooter>
         <EmptyStateActions>

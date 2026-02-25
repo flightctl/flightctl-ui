@@ -13,17 +13,17 @@ import {
   Title,
 } from '@patternfly/react-core';
 import * as React from 'react';
-import { CatalogItem } from '@flightctl/types/alpha';
+import { CatalogItem, CatalogItemCategory } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { getCatalogItemIcon, getCatalogItemTitles } from './utils';
+import { getCatalogItemIcon, getCatalogItemBadge } from './utils';
 
-export type CatalogItemProps = {
+export type CatalogItemCardProps = {
   catalogItem: CatalogItem;
   onSelect: VoidFunction;
 };
 
-const CatalogItem: React.FC<CatalogItemProps> = ({ catalogItem, onSelect }) => {
+const CatalogItemCard: React.FC<CatalogItemCardProps> = ({ catalogItem, onSelect }) => {
   const { t } = useTranslation();
   return (
     <Card isCompact isClickable>
@@ -41,11 +41,16 @@ const CatalogItem: React.FC<CatalogItemProps> = ({ catalogItem, onSelect }) => {
             <img
               src={getCatalogItemIcon(catalogItem)}
               alt={`${catalogItem.metadata.name} icon`}
-              style={{ maxWidth: '60px' }}
+              style={{ maxWidth: '40px' }}
             />
           </SplitItem>
           <SplitItem>
-            <Badge isRead>{getCatalogItemTitles(catalogItem.spec.category, t)}</Badge>
+            <Label
+              variant="outline"
+              color={catalogItem.spec.category === CatalogItemCategory.CatalogItemCategorySystem ? 'teal' : 'purple'}
+            >
+              {getCatalogItemBadge(catalogItem.spec.type, t)}
+            </Label>
           </SplitItem>
         </Split>
       </CardHeader>
@@ -79,4 +84,4 @@ const CatalogItem: React.FC<CatalogItemProps> = ({ catalogItem, onSelect }) => {
   );
 };
 
-export default CatalogItem;
+export default CatalogItemCard;
