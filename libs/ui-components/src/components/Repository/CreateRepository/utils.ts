@@ -22,6 +22,20 @@ import { appendJSONPatch } from '../../../utils/patch';
 import { MAX_TARGET_REVISION_LENGTH, maxLengthString, validKubernetesDnsSubdomain } from '../../form/validations';
 
 const MAX_PATH_LENGTH = 2048;
+
+// OCI registry address format — mirrors backend ValidateOciRegistryAddress
+const OCI_REGISTRY_ADDRESS_MAX = 2048;
+const dns1123LabelFmt = '[a-z0-9]([-a-z0-9]*[a-z0-9])?';
+const hostnameOrFQDNLastLabelFmt = '[a-z]([-a-z0-9]*[a-z0-9])?';
+const hostnameOrFQDNFmt = `(${dns1123LabelFmt}\\.)*${hostnameOrFQDNLastLabelFmt}`;
+const portFmt = ':[0-9]{1,5}';
+const ipv4Fmt = '[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}';
+const ipv6Fmt = '\\[[a-fA-F0-9:]+\\]';
+const hostIPOrFQDNWithOptionalPortFmt = `(${hostnameOrFQDNFmt}|${ipv4Fmt}|${ipv6Fmt})(${portFmt})?`;
+const ociRegistryPathSegmentFmt = '[a-zA-Z0-9][a-zA-Z0-9._-]*';
+const ociRegistryAddressFmt = `${hostIPOrFQDNWithOptionalPortFmt}(/${ociRegistryPathSegmentFmt})*`;
+const ociRegistryAddressRegex = new RegExp(`^${ociRegistryAddressFmt}$`);
+
 const gitRepoUrlRegex = new RegExp(
   /^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/,
 );
@@ -680,9 +694,15 @@ export const singleResourceSyncSchema = (t: TFunction, existingRSs: ResourceSync
   });
 };
 
-// Regex for registry hostname: FQDN, IP address (IPv4 or IPv6), with optional port, matching as much as possible of the backend pattern
-const registryHostnameRegex =
-  /^(([a-z0-9]([-a-z0-9]*[a-z0-9])?\.)*[a-z]([-a-z0-9]*[a-z0-9])?|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|\[[a-fA-F0-9:]+\])(:[0-9]{1,5})?$/;
+function validateOciRegistryPort(value: string): boolean {
+  const hostPort = value.includes('/') ? value.slice(0, value.indexOf('/')) : value;
+  const colonIdx = hostPort.lastIndexOf(':');
+  if (colonIdx === -1) return true;
+  const portStr = hostPort.slice(colonIdx + 1);
+  if (!portStr) return true;
+  const port = parseInt(portStr, 10);
+  return !Number.isNaN(port) && port >= 1 && port <= 65535 && port.toString() === portStr;
+}
 
 export const repositorySchema =
   (t: TFunction, repository: Repository | undefined) => (values: RepositoryFormValues) => {
@@ -714,11 +734,22 @@ export const repositorySchema =
         url: Yup.string(),
         ociConfig: Yup.object({
           registry: Yup.string()
-            .matches(
-              registryHostnameRegex,
-              t('Enter a valid registry hostname (e.g., quay.io, registry.redhat.io, myregistry.com:5000)'),
+            .max(
+              OCI_REGISTRY_ADDRESS_MAX,
+              t('Registry address must not exceed {{ max }} characters.', { max: OCI_REGISTRY_ADDRESS_MAX }),
             )
-            .required(t('Registry hostname is required')),
+            .matches(
+              ociRegistryAddressRegex,
+              t(
+                'Enter a valid registry address (e.g., quay.io, registry.redhat.io, myregistry.com:5000, satellite.example.com/my-repo)',
+              ),
+            )
+            .test(
+              'oci-registry-port',
+              t('Port must be between 1 and 65535'),
+              (val) => !val || validateOciRegistryPort(val),
+            )
+            .required(t('Registry address is required')),
           scheme: Yup.string().oneOf([OciRepoSpec.scheme.HTTP, OciRepoSpec.scheme.HTTPS]),
           accessMode: Yup.string().oneOf([OciRepoSpec.accessMode.READ, OciRepoSpec.accessMode.READ_WRITE]),
           ociAuth: Yup.object({

@@ -322,11 +322,13 @@ export const RepositoryForm = ({
         validations={getDnsSubdomainValidations(t)}
       />
       {isOciRepo ? (
-        <FormGroup label={t('Registry hostname')} isRequired>
+        <FormGroup label={t('Registry address')} isRequired>
           <TextField
             name="ociConfig.registry"
-            aria-label={t('Registry hostname')}
-            helperText={t('For example: quay.io, registry.redhat.io, myregistry.com:5000')}
+            aria-label={t('Registry address')}
+            helperText={t(
+              'For example: quay.io, registry.redhat.io, myregistry.com:5000, satellite.example.com/my-repo',
+            )}
           />
         </FormGroup>
       ) : (
