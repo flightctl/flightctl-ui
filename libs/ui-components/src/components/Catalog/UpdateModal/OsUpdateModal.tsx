@@ -38,6 +38,7 @@ const OsUpdateModal: React.FC<OsUpdateModalProps> = ({
     const catalogItemVersion = catalogItem.spec.versions.find((v) => v.version === selectedVersion);
     if (!catalogItemVersion) {
       setError(t('Version {{version}} not found', { version: selectedVersion }));
+      setIsUpdating(false);
       return;
     }
     try {

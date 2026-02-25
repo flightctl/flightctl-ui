@@ -308,18 +308,18 @@ const VolumeImageField: React.FC<FieldProps> = ({
 
   const hasErrors = !!rawErrors?.length;
 
-  const assetItem = selectedAssets[volumeIndex] && selectedAssets[volumeIndex].assetItem;
+  const selectedAsset = selectedAssets.find((a) => a.volumeIndex === volumeIndex);
 
   return (
     <>
       <FormGroup fieldId={idSchema.$id} label={schema.title || t('Image')} isRequired={required}>
-        {assetItem ? (
+        {selectedAsset?.assetItem ? (
           <Split hasGutter>
             <SplitItem isFilled>
               <CatalogItemTitle
-                item={assetItem}
-                channel={selectedAssets[volumeIndex].assetChannel}
-                version={selectedAssets[volumeIndex].assetVersion}
+                item={selectedAsset.assetItem}
+                channel={selectedAsset.assetChannel}
+                version={selectedAsset.assetVersion}
               />
             </SplitItem>
             <SplitItem>

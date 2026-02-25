@@ -1,5 +1,5 @@
 import { AppType, ApplicationProviderSpec, ContainerApplication, PatchRequest } from '@flightctl/types';
-import { CatalogItem, CatalogItemCategory, CatalogItemType, CatalogItemVersion } from '@flightctl/types/alpha';
+import { CatalogItem, CatalogItemType, CatalogItemVersion } from '@flightctl/types/alpha';
 import { TFunction } from 'i18next';
 import semver from 'semver';
 

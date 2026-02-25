@@ -78,10 +78,11 @@ const LabelsField = ({ name, onChangeCallback, addButtonText, helperText, isLoad
         }
       >
         {labels
+          .map((label, originalIndex) => ({ ...label, originalIndex }))
           .filter((l) => !l.key.includes(CATALOG_LABEL))
-          .map(({ key, value, isDefault }, index) => {
+          .map(({ key, value, isDefault, originalIndex }) => {
             const text = value ? `${key}=${value}` : key;
-            const elKey = `${key}__${index}`;
+            const elKey = `${key}__${originalIndex}`;
             if (isDefault) {
               return (
                 <Label key={elKey} textMaxWidth={maxWidthDefaultLabel}>
@@ -97,9 +98,9 @@ const LabelsField = ({ name, onChangeCallback, addButtonText, helperText, isLoad
                 key={elKey}
                 textMaxWidth={maxWidthNonDefaultLabel}
                 closeBtnProps={closeButtonProps}
-                onClose={(e) => onDelete(e, index)}
-                onEditCancel={(_, prevText) => onEdit(index, prevText)}
-                onEditComplete={(_, newText) => onEdit(index, newText)}
+                onClose={(e) => onDelete(e, originalIndex)}
+                onEditCancel={(_, prevText) => onEdit(originalIndex, prevText)}
+                onEditComplete={(_, newText) => onEdit(originalIndex, newText)}
                 /* Add a basic tooltip as the PF tooltip doesn't work for editable labels */
                 title={isLabelEditable ? text : undefined}
                 isEditable={isLabelEditable}

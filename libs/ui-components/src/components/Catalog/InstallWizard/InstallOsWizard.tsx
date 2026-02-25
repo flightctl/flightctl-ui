@@ -136,6 +136,7 @@ const InstallOsWizard = ({ catalogItem }: InstallOsWizardProps) => {
     setError(undefined);
     if (values.target === 'new-device') {
       navigate(-1);
+      return;
     }
     const selectedDevice = values.device;
     const selectedFleet = values.fleet;
