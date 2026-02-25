@@ -66,67 +66,25 @@ function findTsFiles(dir) {
   return files;
 }
 
-/**
- * Fixes references from the auto-generated imagebuilder types so they point to the correct types of the "core" API module.
- * The generated types are in the form of:
- * import type { core_v1beta1_openapi_yaml_components_schemas_ObjectMeta } from './core_v1beta1_openapi_yaml_components_schemas_ObjectMeta';
- * type SomeType = {
- *  ...
- *  someField: core_v1beta1_openapi_yaml_components_schemas_ObjectMeta;
- * }
- *
- * The fixed types will be like this:
- * import type { ObjectMeta } from '../../models/ObjectMeta';
- * type SomeType = {
- *  ...
- *  someField: ObjectMeta;
- * }
- *
- * @param {string} modelsDir - Directory containing TypeScript files to fix
- */
-async function fixImagebuilderCoreReferences(modelsDir) {
+async function fixCoreReferences(modelsDir, prefix) {
   const files = findTsFiles(modelsDir);
+
+  // Pre-construct the Regex patterns using the dynamic prefix
+  // We escape special characters in the prefix if needed, though usually not for schema names
+  const importRegex = new RegExp(`from\\s+['"]\\.\\/${prefix}_([A-Za-z][A-Za-z0-9]*)['"]`, 'g');
+  const typeRegex = new RegExp(`\\b${prefix}_([A-Za-z][A-Za-z0-9]*)\\b`, 'g');
 
   await Promise.all(
     files.map(async (filePath) => {
       let content = await fsPromises.readFile(filePath, 'utf8');
       const originalContent = content;
 
-      // Modify the path to properly point to the type from the "core" module
-      content = content.replace(
-        /from\s+['"]\.\/core_v1beta1_openapi_yaml_components_schemas_([A-Za-z][A-Za-z0-9]*)['"]/g,
-        "from '../../models/$1'",
-      );
+      // 1. Modify the import path
+      content = content.replace(importRegex, "from '../../models/$1'");
 
-      // Correct the import name and the references to this type by removing the prefix
-      content = content.replace(/\bcore_v1beta1_openapi_yaml_components_schemas_([A-Za-z][A-Za-z0-9]*)\b/g, '$1');
+      // 2. Correct the name references by removing the prefix
+      content = content.replace(typeRegex, '$1');
 
-      // Only write if content changed
-      if (content !== originalContent) {
-        await fsPromises.writeFile(filePath, content, 'utf8');
-      }
-    }),
-  );
-}
-
-async function fixCoreReferences(modelsDir) {
-  const files = findTsFiles(modelsDir);
-
-  await Promise.all(
-    files.map(async (filePath) => {
-      let content = await fsPromises.readFile(filePath, 'utf8');
-      const originalContent = content;
-
-      // Modify the path to properly point to the type from the "core" module
-      content = content.replace(
-        /from\s+['"]\.\/v1beta1_openapi_yaml_components_schemas_([A-Za-z][A-Za-z0-9]*)['"]/g,
-        "from '../../models/$1'",
-      );
-
-      // Correct the import name and the references to this type by removing the prefix
-      content = content.replace(/\bv1beta1_openapi_yaml_components_schemas_([A-Za-z][A-Za-z0-9]*)\b/g, '$1');
-
-      // Only write if content changed
       if (content !== originalContent) {
         await fsPromises.writeFile(filePath, content, 'utf8');
       }
@@ -137,6 +95,5 @@ async function fixCoreReferences(modelsDir) {
 module.exports = {
   rimraf,
   copyDir,
-  fixImagebuilderCoreReferences,
   fixCoreReferences,
 };

@@ -275,7 +275,6 @@ const VolumeImageField: React.FC<FieldProps> = ({
   formContext,
   disabled,
   readonly,
-  required,
 }) => {
   const { t } = useTranslation();
   const { onAssetSelected, selectedAssets, onAssetCleared } = formContext as DynamicFormContext;

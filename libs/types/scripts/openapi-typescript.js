@@ -5,7 +5,7 @@ const path = require('path');
 const OpenAPI = require('openapi-typescript-codegen');
 const YAML = require('js-yaml');
 
-const { rimraf, copyDir, fixImagebuilderCoreReferences, fixCoreReferences } = require('./openapi-utils');
+const { rimraf, copyDir, fixCoreReferences } = require('./openapi-utils');
 
 const CORE_API = 'core';
 const ALPHA_CORE_API = 'alphacore';
@@ -40,11 +40,15 @@ async function generateTypes(mode) {
       swaggerUrl: getSwaggerUrl('core/v1alpha1'),
       output: path.resolve(__dirname, '../tmp-alpha-types'),
       finalDir: path.resolve(__dirname, '../alpha/models'),
+      coreRef: 'v1beta1_openapi_yaml_components_schemas',
+      outputDir: path.resolve(__dirname, '../alpha'),
     },
     [IMAGEBUILDER_API]: {
       swaggerUrl: getSwaggerUrl('imagebuilder/v1alpha1'),
       output: path.resolve(__dirname, '../tmp-imagebuilder-types'),
       finalDir: path.resolve(__dirname, '../imagebuilder/models'),
+      coreRef: 'core_v1beta1_openapi_yaml_components_schemas',
+      outputDir: path.resolve(__dirname, '../imagebuilder'),
     },
   };
 
@@ -74,44 +78,23 @@ async function generateTypes(mode) {
     await rimraf(finalDir);
     await copyDir(output, path.resolve(__dirname, '..'));
     await rimraf(output);
-  } else if (mode === ALPHA_CORE_API) {
-    // Image builder types need to be fixed before they can be moved to their final location
-    await rimraf(finalDir);
-    const modelsDir = path.join(output, 'models');
-    if (fs.existsSync(modelsDir)) {
-      await copyDir(modelsDir, finalDir);
-    }
-    console.log(`Fixing references to core API types...`);
-    await fixCoreReferences(finalDir);
-
-    // Copy the generated index.ts to imagebuilder/index.ts
-    const indexPath = path.join(output, 'index.ts');
-    if (fs.existsSync(indexPath)) {
-      const imagebuilderDir = path.resolve(__dirname, '../alpha');
-      if (!fs.existsSync(imagebuilderDir)) {
-        fs.mkdirSync(imagebuilderDir, { recursive: true });
-      }
-      await fsPromises.copyFile(indexPath, path.join(imagebuilderDir, 'index.ts'));
-    }
-    await rimraf(output);
   } else {
-    // Image builder types need to be fixed before they can be moved to their final location
+    // Image builder and alpha types need to be fixed before they can be moved to their final location
     await rimraf(finalDir);
     const modelsDir = path.join(output, 'models');
     if (fs.existsSync(modelsDir)) {
       await copyDir(modelsDir, finalDir);
     }
     console.log(`Fixing references to core API types...`);
-    await fixImagebuilderCoreReferences(finalDir);
+    await fixCoreReferences(finalDir, config[mode].coreRef);
 
     // Copy the generated index.ts to imagebuilder/index.ts
     const indexPath = path.join(output, 'index.ts');
     if (fs.existsSync(indexPath)) {
-      const imagebuilderDir = path.resolve(__dirname, '../imagebuilder');
-      if (!fs.existsSync(imagebuilderDir)) {
-        fs.mkdirSync(imagebuilderDir, { recursive: true });
+      if (!fs.existsSync(config[mode].outputDir)) {
+        fs.mkdirSync(config[mode].outputDir, { recursive: true });
       }
-      await fsPromises.copyFile(indexPath, path.join(imagebuilderDir, 'index.ts'));
+      await fsPromises.copyFile(indexPath, path.join(config[mode].outputDir, 'index.ts'));
     }
     await rimraf(output);
   }

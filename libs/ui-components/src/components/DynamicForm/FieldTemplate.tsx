@@ -173,6 +173,7 @@ const PFArrayFieldTemplate: React.FC<ArrayFieldTemplateProps> = ({
       });
       return next;
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items.length]);
 
   return (
