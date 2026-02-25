@@ -62,8 +62,8 @@
     "webpack-dev-server": "^5.2.3"
   },
   "dependencies": {
-    "@openshift-console/dynamic-plugin-sdk": "^1.0.0",
-    "@openshift-console/dynamic-plugin-sdk-webpack": "^1.0.0",
+    "@openshift-console/dynamic-plugin-sdk": "4.19.1",
+    "@openshift-console/dynamic-plugin-sdk-webpack": "4.19.0",
     "@patternfly/react-core": "^5.0.0 <= 5.4.8",
     "@patternfly/react-icons": "^5.0.0 <= 5.4.2",
     "@patternfly/react-styles": "^5.1.2 <= 5.4.1",
@@ -81,7 +81,7 @@
     "react-i18next": "^11.7.3",
     "react-redux": "7.2.2",
     "react-router-dom": "^5.3.x",
-    "react-router-dom-v5-compat": "6.11.2",
+    "react-router-dom-v5-compat": "6.30.3",
     "yup": "^1.3.3"
   }
 }
