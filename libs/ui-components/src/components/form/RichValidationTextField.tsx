@@ -141,7 +141,7 @@ const RichValidationTextField = React.forwardRef(
                     <CheckCircleIcon color={successColor.value} />
                   )
                 }
-                variant="plain"
+                variant="control"
                 aria-label="Validation"
               />
             </Popover>
