@@ -696,10 +696,27 @@ export const singleResourceSyncSchema = (t: TFunction, existingRSs: ResourceSync
 
 function validateOciRegistryPort(value: string): boolean {
   const hostPort = value.includes('/') ? value.slice(0, value.indexOf('/')) : value;
-  const colonIdx = hostPort.lastIndexOf(':');
-  if (colonIdx === -1) return true;
-  const portStr = hostPort.slice(colonIdx + 1);
-  if (!portStr) return true;
+
+  let portStr = '';
+  if (hostPort.startsWith('[')) {
+    // IPv6: it may not contain a port, e.g. [::1]:5000 or [::1] are valid
+    const closeBracket = hostPort.indexOf(']');
+    if (closeBracket !== -1 && hostPort.length > closeBracket + 1 && hostPort[closeBracket + 1] === ':') {
+      portStr = hostPort.slice(closeBracket + 2);
+    }
+  } else {
+    // Hostname or IPv4: port is after the last colon
+    const colonIdx = hostPort.lastIndexOf(':');
+    if (colonIdx !== -1) {
+      portStr = hostPort.slice(colonIdx + 1);
+    }
+  }
+
+  // Return valid if no port found, or expression is invalid (caught by regex)
+  if (!portStr) {
+    return true;
+  }
+
   const port = parseInt(portStr, 10);
   return !Number.isNaN(port) && port >= 1 && port <= 65535 && port.toString() === portStr;
 }
