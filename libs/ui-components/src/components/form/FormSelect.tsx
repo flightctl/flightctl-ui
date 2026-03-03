@@ -6,7 +6,12 @@ import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 import './FormSelect.css';
 
-export type SelectItem = { label: string; description?: React.ReactNode; isDisabled?: boolean };
+export type SelectItem = {
+  label: React.ReactNode;
+  description?: React.ReactNode;
+  isDisabled?: boolean;
+  selectedLabel?: React.ReactNode;
+};
 
 type FormSelectProps = {
   name: string;
@@ -15,11 +20,15 @@ type FormSelectProps = {
   children?: React.ReactNode;
   placeholderText?: string;
   withStatusIcon?: boolean;
+  onChange?: (value: string) => void;
 };
 
 const isItemObject = (item: string | SelectItem): item is SelectItem => typeof item === 'object';
 
 const getItemLabel = (item: string | SelectItem) => (isItemObject(item) ? item.label : item);
+
+const getItemSelectLabel = (item: string | SelectItem) =>
+  isItemObject(item) ? item.selectedLabel || item.label : item;
 
 const FormSelect = ({
   name,
@@ -28,6 +37,7 @@ const FormSelect = ({
   helperText,
   placeholderText,
   children,
+  onChange,
 }: React.PropsWithChildren<FormSelectProps>) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [field, meta, { setValue, setTouched }] = useField<string>({
@@ -44,7 +54,7 @@ const FormSelect = ({
     }
   }, [itemKeys, field.value, setValue]);
 
-  const selectedText = field.value ? getItemLabel(items[field.value]) : placeholderText;
+  const selectedText = field.value ? getItemSelectLabel(items[field.value]) : placeholderText;
 
   let statusToggle: MenuToggleStatus;
   if (withStatusIcon) {
@@ -63,6 +73,7 @@ const FormSelect = ({
         id={fieldId}
         selected={field.value}
         onSelect={(_, value) => {
+          onChange?.(value as string);
           setValue(value as string, true);
           setIsOpen(false);
         }}
