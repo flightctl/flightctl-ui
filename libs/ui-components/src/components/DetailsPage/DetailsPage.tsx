@@ -38,6 +38,8 @@ export type DetailsPageProps = {
   actions?: React.ReactNode;
   nav?: React.ReactNode;
   banner?: React.ReactNode;
+  /** Optional data-testid for the title (e.g. "device-details-title") */
+  titleDataTestId?: string;
 };
 
 const DetailsPage = ({
@@ -53,6 +55,7 @@ const DetailsPage = ({
   actions,
   nav,
   banner,
+  titleDataTestId,
 }: DetailsPageProps) => {
   const { t } = useTranslation();
   let content = children;
@@ -87,7 +90,12 @@ const DetailsPage = ({
       <PageSection hasBodyWrapper={false}>
         <Split hasGutter>
           <SplitItem isFilled>
-            <Title headingLevel="h1" size="3xl" role="heading">
+            <Title
+              headingLevel="h1"
+              size="3xl"
+              role="heading"
+              {...(titleDataTestId && { 'data-testid': titleDataTestId })}
+            >
               {title || id}
             </Title>
           </SplitItem>

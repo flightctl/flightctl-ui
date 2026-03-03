@@ -162,6 +162,7 @@ const EnrolledDevicesTable = ({
               isDisabled={!hasSelectedRows}
               onClick={() => setIsMassDecommissionModalOpen(true)}
               variant="secondary"
+              data-testid="toolbar-decommission-devices"
             >
               {t('Decommission devices')}
             </Button>
@@ -177,6 +178,7 @@ const EnrolledDevicesTable = ({
               setOnlyDecommissioned(true);
             }}
             ouiaId={t('Show decommissioned devices')}
+            data-testid="show-decommissioned-devices-switch"
           />
         </ToolbarItem>
       </DeviceTableToolbar>
@@ -189,6 +191,7 @@ const EnrolledDevicesTable = ({
         emptyData={devices.length === 0}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
+        data-testid="enrolled-devices-table"
       >
         <Tbody>
           {devices.map((device, index) => (
