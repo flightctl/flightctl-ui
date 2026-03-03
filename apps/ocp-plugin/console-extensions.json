@@ -100,6 +100,14 @@
   {
     "type": "console.page/route",
     "properties": {
+      "exact": false,
+      "path": ["/edge/fleets/catalog/:fleetId/:catalogId/:itemId"],
+      "component": { "$codeRef": "CatalogEditFleetWizard" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
       "exact": true,
       "path": ["/edge/devices"],
       "component": { "$codeRef": "DevicesPage" }
@@ -119,6 +127,14 @@
       "exact": true,
       "path": ["/edge/devices/edit/:deviceId"],
       "component": { "$codeRef": "EditDeviceWizardPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": false,
+      "path": ["/edge/devices/catalog/:deviceId/:catalogId/:itemId"],
+      "component": { "$codeRef": "CatalogEditDeviceWizard" }
     }
   },
   {

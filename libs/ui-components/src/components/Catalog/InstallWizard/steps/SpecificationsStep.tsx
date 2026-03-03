@@ -237,7 +237,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
     <FlightCtlForm>
       <Stack hasGutter>
         <StackItem>
-          <Title headingLevel="h3">{t('Install specifications')}</Title>
+          <Title headingLevel="h3">{t('Deployment specifications')}</Title>
         </StackItem>
         <StackItem>
           <Grid>

@@ -1,15 +1,11 @@
 import { DeviceSpec, PatchRequest } from '@flightctl/types';
 import * as React from 'react';
-import { load } from 'js-yaml';
 import { Stack, StackItem } from '@patternfly/react-core';
 
-import { CatalogItem, CatalogItemCategory, CatalogItemVersion } from '@flightctl/types/alpha';
-import { getAppPatches, getOsPatches, getRemoveAppPatches, getRemoveOsPatches } from '../../Catalog/utils';
-import EditAppModal, { AppUpdateFormik } from '../../Catalog/UpdateModal/EditAppModal';
-import EditOsModal from '../../Catalog/UpdateModal/EditOsModal';
+import { CatalogItem } from '@flightctl/types/alpha';
+import { getRemoveAppPatches, getRemoveOsPatches } from '../../Catalog/utils';
 import { CatalogPageContent } from '../../Catalog/CatalogPage';
 import InstalledSoftware from '../../Catalog/InstalledSoftware';
-import { useTranslation } from '../../../hooks/useTranslation';
 
 import './ResourceCatalogPage.css';
 
@@ -19,46 +15,19 @@ type ResourceCatalogPageProps = {
   spec: DeviceSpec | undefined;
   currentLabels: Record<string, string> | undefined;
   onPatch: (allPatches: PatchRequest) => Promise<void>;
+  onEdit: (catalogId: string, catalogItemId: string, appName?: string) => void;
+  onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
 };
 
-const ResourceCatalogPage = ({ currentLabels, spec, onPatch, specPath, canEdit }: ResourceCatalogPageProps) => {
-  const { t } = useTranslation();
-  const [selectedItem, setSelectedItem] = React.useState<{ itemName: string; catalog: string }>();
-  const [installItem, setInstallItem] = React.useState<{ item: CatalogItem; channel: string; version: string }>();
-
-  const onUpdateOs = async (catalogItem: CatalogItem, catalogItemVersion: CatalogItemVersion, channel: string) => {
-    const allPatches = getOsPatches({
-      currentOsImage: spec?.os?.image,
-      currentLabels,
-      catalogItem,
-      catalogItemVersion,
-      channel,
-      specPath,
-    });
-    await onPatch(allPatches);
-  };
-
-  const onUpdateApp = async (
-    catalogItem: CatalogItem,
-    catalogItemVersion: CatalogItemVersion,
-    channel: string,
-    values: AppUpdateFormik,
-  ) => {
-    const allPatches = getAppPatches({
-      appName: values.appName,
-      catalogItem,
-      catalogItemVersion,
-      channel,
-      specPath,
-      currentApps: spec?.applications,
-      currentLabels,
-      formValues:
-        values.configureVia === 'form' ? values.formValues : (load(values.editorContent) as Record<string, unknown>),
-      selectedAssets: values.selectedAssets,
-    });
-    await onPatch(allPatches);
-  };
-
+const ResourceCatalogPage = ({
+  currentLabels,
+  spec,
+  onPatch,
+  specPath,
+  canEdit,
+  onEdit,
+  onInstall,
+}: ResourceCatalogPageProps) => {
   const onDeleteOs = async () => {
     const allPatches = getRemoveOsPatches({ currentLabels, specPath });
     await onPatch(allPatches);
@@ -81,52 +50,16 @@ const ResourceCatalogPage = ({ currentLabels, spec, onPatch, specPath, canEdit }
           <InstalledSoftware
             labels={currentLabels}
             spec={spec}
-            onUpdateOs={onUpdateOs}
             onDeleteOs={onDeleteOs}
-            onUpdateApp={onUpdateApp}
+            onEdit={onEdit}
             onDeleteApp={onDeleteApp}
             canEdit={canEdit}
           />
         </StackItem>
         <StackItem className="fctl-resource-catalog-page">
-          <CatalogPageContent
-            canInstall={canEdit}
-            onInstall={setInstallItem}
-            selectedItem={selectedItem}
-            setSelectedItem={setSelectedItem}
-          />
+          <CatalogPageContent canInstall={canEdit} onInstall={onInstall} />
         </StackItem>
       </Stack>
-      {installItem?.item.spec.category === CatalogItemCategory.CatalogItemCategoryApplication && (
-        <EditAppModal
-          currentApps={spec?.applications}
-          catalogItem={installItem.item}
-          currentChannel={installItem.channel}
-          exisingLabels={currentLabels}
-          onClose={() => setInstallItem(undefined)}
-          onSubmit={async (catalogItem, catalogItemVersion, channel, values) => {
-            await onUpdateApp(catalogItem, catalogItemVersion, channel, values);
-            setSelectedItem(undefined);
-          }}
-          currentVersion={
-            installItem.item.spec.versions.find((v) => v.version === installItem.version) as CatalogItemVersion
-          }
-        />
-      )}
-      {installItem?.item.spec.category === CatalogItemCategory.CatalogItemCategorySystem && (
-        <EditOsModal
-          onClose={() => setInstallItem(undefined)}
-          item={installItem.item}
-          onSubmit={async () => {
-            const catalogItemVersion = installItem.item.spec.versions.find((v) => v.version === installItem.version);
-            if (!catalogItemVersion) {
-              throw t('Version {{version}} not found', { version: installItem.version });
-            }
-            await onUpdateOs(installItem.item, catalogItemVersion, installItem.channel);
-            setSelectedItem(undefined);
-          }}
-        />
-      )}
     </>
   );
 };

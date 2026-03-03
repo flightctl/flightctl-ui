@@ -2,6 +2,7 @@ import { Device, PatchRequest } from '@flightctl/types';
 import * as React from 'react';
 import { useFetch } from '../../../hooks/useFetch';
 import ResourceCatalogPage from '../../Catalog/ResourceCatalog/ResourceCatalogPage';
+import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 
 type DeviceDetailsCatalogProps = {
   device: Device;
@@ -11,6 +12,7 @@ type DeviceDetailsCatalogProps = {
 
 const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalogProps) => {
   const { patch } = useFetch();
+  const navigate = useNavigate();
   const onPatch = React.useCallback(
     async (allPatches: PatchRequest) => {
       await patch(`devices/${device.metadata.name}`, allPatches);
@@ -26,6 +28,31 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
       onPatch={onPatch}
       spec={device.spec}
       specPath="/"
+      onEdit={(catalogId, catalogItemId, appName) => {
+        let path = `${device.metadata.name}/${catalogId}/${catalogItemId}`;
+        if (appName) {
+          const params = new URLSearchParams({
+            appName,
+          });
+          path = `${path}?${params.toString()}`;
+        }
+        navigate({
+          route: ROUTE.CATALOG_DEVICE_EDIT,
+          postfix: path,
+        });
+      }}
+      onInstall={({ item, version, channel }) => {
+        const params = new URLSearchParams({
+          version,
+          channel,
+        });
+
+        const path = `${device.metadata.name}/${item.metadata.catalog}/${item.metadata.name}?${params.toString()}`;
+        navigate({
+          route: ROUTE.CATALOG_DEVICE_EDIT,
+          postfix: path,
+        });
+      }}
     />
   );
 };

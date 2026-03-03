@@ -29,11 +29,10 @@ import './AppConfigStep.css';
 
 type DynamicAppFormProps = {
   schemaErrors?: RJSFValidationError[];
-  isInModal?: boolean;
   isEdit: boolean;
 };
 
-export const DynamicAppForm = ({ schemaErrors, isInModal, isEdit }: DynamicAppFormProps) => {
+export const DynamicAppForm = ({ schemaErrors, isEdit }: DynamicAppFormProps) => {
   const editorRef = React.useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
   const { t } = useTranslation();
   const { values, setFieldValue, setFieldTouched } = useFormikContext<InstallAppFormik>();
@@ -121,7 +120,7 @@ export const DynamicAppForm = ({ schemaErrors, isInModal, isEdit }: DynamicAppFo
             </StackItem>
             <StackItem>
               <Grid>
-                <GridItem span={isInModal ? 12 : 6}>
+                <GridItem span={6}>
                   <DynamicForm
                     valuesSchema={values.configSchema}
                     formData={values.formValues}
@@ -180,9 +179,10 @@ export const isAppConfigStepValid = (values: DynamicFormConfigFormik, errors: Fo
 
 type AppConfigStepProps = {
   schemaErrors?: RJSFValidationError[];
+  isEdit?: boolean;
 };
 
-const AppConfigStep = ({ schemaErrors }: AppConfigStepProps) => {
+const AppConfigStep = ({ schemaErrors, isEdit }: AppConfigStepProps) => {
   const { t } = useTranslation();
 
   return (
@@ -192,7 +192,7 @@ const AppConfigStep = ({ schemaErrors }: AppConfigStepProps) => {
           <Title headingLevel="h3">{t('Application configuration')}</Title>
         </StackItem>
         <StackItem>
-          <DynamicAppForm schemaErrors={schemaErrors} isEdit={false} />
+          <DynamicAppForm schemaErrors={schemaErrors} isEdit={!!isEdit} />
         </StackItem>
       </Stack>
     </FlightCtlForm>

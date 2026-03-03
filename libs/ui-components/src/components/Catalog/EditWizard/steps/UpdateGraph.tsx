@@ -1,4 +1,4 @@
-import { Alert, Label, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, Card, CardBody, Stack, StackItem } from '@patternfly/react-core';
 import semver from 'semver';
 import * as React from 'react';
 import {
@@ -34,12 +34,20 @@ import {
   withSelection,
 } from '@patternfly/react-topology';
 import { CatalogItemVersion } from '@flightctl/types/alpha';
+import warningColor from '@patternfly/react-tokens/dist/js/t_global_icon_color_status_warning_default';
+import successColor from '@patternfly/react-tokens/dist/js/t_global_icon_color_status_success_default';
+import blueColor from '@patternfly/react-tokens/dist/js/chart_color_blue_400';
+import { ArrowCircleUpIcon, CheckCircleIcon, WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons';
 
-import { useTranslation } from '../../../hooks/useTranslation';
+import { useTranslation } from '../../../../hooks/useTranslation';
 
 import '@patternfly/react-topology/dist/esm/css/topology-components.css';
 import '@patternfly/react-topology/dist/esm/css/topology-controlbar.css';
 import '@patternfly/react-topology/dist/esm/css/topology-view.css';
+
+import './UpdateGraph.css';
+
+const ICON_SIZE = 12;
 
 type VersionNodeData = {
   version: string;
@@ -49,38 +57,31 @@ type VersionNodeData = {
   entryName: string;
 };
 
-const NODE_DIAMETER = 90;
+const NODE_DIAMETER = 20;
 
 type VersionNodeProps = {
   element: Node;
 } & WithSelectionProps;
 
 const VersionNodeComponent: React.FC<VersionNodeProps> = observer(({ element, selected, onSelect }) => {
-  const { t } = useTranslation();
   const data = element.getData() as VersionNodeData;
+
+  let nodeIcon: React.ReactNode = undefined;
+  if (data.isCurrentVersion) {
+    nodeIcon = <CheckCircleIcon width={ICON_SIZE} height={ICON_SIZE} style={{ fill: successColor.value }} />;
+  } else if (data.isDeprecated) {
+    nodeIcon = <WarningTriangleIcon width={ICON_SIZE} height={ICON_SIZE} style={{ fill: warningColor.value }} />;
+  } else if (selected) {
+    nodeIcon = <ArrowCircleUpIcon width={ICON_SIZE} height={ICON_SIZE} style={{ fill: blueColor.value }} />;
+  }
 
   return (
     <DefaultNode element={element} selected={selected} onSelect={onSelect} showLabel={false}>
       <g transform={`translate(${NODE_DIAMETER / 2}, ${NODE_DIAMETER / 2})`}>
-        <text textAnchor="middle" dy="0.35em" style={{ fontSize: '14px', fontWeight: 'bold' }}>
+        <text textAnchor="middle" y={-20} style={{ fontSize: '12px' }}>
           {data.version}
         </text>
-        {data.isCurrentVersion && (
-          <foreignObject x={-30} y={NODE_DIAMETER / 2 + 4} width={60} height={24}>
-            <Label color="blue" isCompact>
-              {t('Current')}
-            </Label>
-          </foreignObject>
-        )}
-        {data.isDeprecated && !data.isCurrentVersion && (
-          <foreignObject x={-40} y={NODE_DIAMETER / 2 + 4} width={80} height={24}>
-            <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-              <Label color="orange" isCompact>
-                {t('Deprecated')}
-              </Label>
-            </div>
-          </foreignObject>
-        )}
+        {nodeIcon && <g transform={`translate(${-ICON_SIZE / 2}, ${-ICON_SIZE / 2})`}>{nodeIcon}</g>}
       </g>
     </DefaultNode>
   );
@@ -152,6 +153,13 @@ const buildTopologyModel = (
     });
   });
 
+  const latestVersion = allEntries
+    .filter((e) => e.version !== currentVersionEntry.version)
+    .sort((a, b) => semver.rcompare(a.version, b.version))[0]?.version;
+
+  const getEdgeStyle = (source: string, target: string) =>
+    source === currentVersionEntry.version && target === latestVersion ? EdgeStyle.default : EdgeStyle.dashed;
+
   // Create edges based on replaces, skips, and skipRange
   allEntries.forEach((entry) => {
     const targetNodeId = versionToNodeId.get(entry.version);
@@ -166,7 +174,7 @@ const buildTopologyModel = (
           type: 'edge',
           source: sourceNodeId,
           target: targetNodeId,
-          edgeStyle: EdgeStyle.default,
+          edgeStyle: getEdgeStyle(sourceNodeId, targetNodeId),
         });
       }
     }
@@ -180,7 +188,7 @@ const buildTopologyModel = (
           type: 'edge',
           source: sourceNodeId,
           target: targetNodeId,
-          edgeStyle: EdgeStyle.dashed,
+          edgeStyle: getEdgeStyle(sourceNodeId, targetNodeId),
         });
       }
     });
@@ -188,7 +196,7 @@ const buildTopologyModel = (
     // Edges from skipRange - find all versions in the graph that satisfy the range
     if (entry.skipRange) {
       allEntries.forEach((sourceEntry) => {
-        if (sourceEntry.version === entry.version) return; // Skip self
+        if (sourceEntry.version === entry.version) return;
         if (semver.satisfies(sourceEntry.version, entry.skipRange!, { includePrerelease: true })) {
           const sourceNodeId = versionToNodeId.get(sourceEntry.version);
           if (sourceNodeId) {
@@ -197,7 +205,7 @@ const buildTopologyModel = (
               type: 'edge',
               source: sourceNodeId,
               target: targetNodeId,
-              edgeStyle: EdgeStyle.dashed,
+              edgeStyle: getEdgeStyle(sourceNodeId, targetNodeId),
             });
           }
         }
@@ -249,35 +257,40 @@ const UpdateGraph: React.FC<{
 
     return newController;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentChannel]);
 
   const update = updates.find((v) => v.version === selectedVersion);
 
   return (
     <Stack hasGutter>
       <StackItem>
-        <div style={{ height: '400px' }}>
-          <VisualizationProvider controller={controller}>
-            <TopologyView
-              controlBar={
-                <TopologyControlBar
-                  controlButtons={createTopologyControlButtons({
-                    ...defaultControlButtonsOptions,
-                    fitToScreenCallback: action(() => {
-                      controller.getGraph().fit(80);
-                    }),
-                    zoomIn: false,
-                    zoomOut: false,
-                    resetView: false,
-                    legend: false,
-                  })}
-                />
-              }
-            >
-              <VisualizationSurface state={{ selectedIds: [selectedVersion] }} />
-            </TopologyView>
-          </VisualizationProvider>
-        </div>
+        <Card>
+          <CardBody className="fctl-update-graph">
+            <VisualizationProvider controller={controller}>
+              <TopologyView
+                style={{
+                  backgroundColor: 'unset',
+                }}
+                controlBar={
+                  <TopologyControlBar
+                    controlButtons={createTopologyControlButtons({
+                      ...defaultControlButtonsOptions,
+                      fitToScreenCallback: action(() => {
+                        controller.getGraph().fit(80);
+                      }),
+                      zoomIn: false,
+                      zoomOut: false,
+                      resetView: false,
+                      legend: false,
+                    })}
+                  />
+                }
+              >
+                <VisualizationSurface state={{ selectedIds: [selectedVersion] }} />
+              </TopologyView>
+            </VisualizationProvider>
+          </CardBody>
+        </Card>
       </StackItem>
       {!update && currentVersion.deprecation && (
         <StackItem>

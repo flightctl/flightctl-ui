@@ -1,4 +1,4 @@
-import { ApplicationProviderSpec, ContainerApplication, DeviceSpec } from '@flightctl/types';
+import { ContainerApplication, DeviceSpec } from '@flightctl/types';
 import { ArrowCircleUpIcon } from '@patternfly/react-icons/dist/js/icons/arrow-circle-up-icon';
 import { ActionsColumn, IAction, Table, Tbody, Td, Tr } from '@patternfly/react-table';
 import * as React from 'react';
@@ -27,9 +27,6 @@ import { getCatalogItemIcon, getFullReferenceURI, getUpdates } from './utils';
 import { useFetch } from '../../hooks/useFetch';
 import { useTranslation } from '../../hooks/useTranslation';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
-import OsUpdateModal from './UpdateModal/OsUpdateModal';
-import AppUpdateModal from './UpdateModal/AppUpdateModal';
-import EditAppModal, { AppUpdateFormik } from './UpdateModal/EditAppModal';
 import {
   APP_CATALOG_LABEL_KEY,
   APP_CHANNEL_LABEL_KEY,
@@ -44,51 +41,20 @@ type UpdateColumnProps = {
   catalogItem: CatalogItem;
   channel: string;
   catalogItemVersion: CatalogItemVersion;
-  onUpdate: (
-    catalogItem: CatalogItem,
-    catalogItemVersion: CatalogItemVersion,
-    channel: string,
-    values: AppUpdateFormik,
-  ) => Promise<void>;
-  appSpec: ApplicationProviderSpec;
-  exisingLabels: Record<string, string> | undefined;
+  appName: string | undefined;
+  onEditApp: VoidFunction;
 };
 
-const UpdateAppColumn = ({
-  onUpdate,
-  catalogItem,
-  channel,
-  catalogItemVersion,
-  appSpec,
-  exisingLabels,
-}: UpdateColumnProps) => {
+const UpdateAppColumn = ({ catalogItem, channel, catalogItemVersion, onEditApp }: UpdateColumnProps) => {
   const { t } = useTranslation();
-  const [openModal, setOpenModal] = React.useState(false);
   const updates = getUpdates(catalogItem, channel, catalogItemVersion.version);
-
-  const handleUpdate = async (catalogItemVersion: CatalogItemVersion, channel: string, values: AppUpdateFormik) => {
-    await onUpdate(catalogItem, catalogItemVersion, channel, values);
-    setOpenModal(false);
-  };
 
   return (
     <>
       {!!updates.length && (
-        <Button variant="link" isInline onClick={() => setOpenModal(true)} icon={<ArrowCircleUpIcon />}>
+        <Button variant="link" isInline onClick={onEditApp} icon={<ArrowCircleUpIcon />}>
           {t('Update available')}
         </Button>
-      )}
-      {openModal && (
-        <AppUpdateModal
-          onClose={() => setOpenModal(false)}
-          catalogItem={catalogItem}
-          currentVersion={catalogItemVersion}
-          currentChannel={channel}
-          onUpdate={handleUpdate}
-          updates={updates}
-          appSpec={appSpec}
-          exisingLabels={exisingLabels}
-        />
       )}
     </>
   );
@@ -98,35 +64,19 @@ type UpdateOsColumnProps = {
   catalogItem: CatalogItem;
   channel: string;
   catalogItemVersion: CatalogItemVersion;
-  onUpdate: (catalogItem: CatalogItem, catalogItemVersion: CatalogItemVersion, channel: string) => Promise<void>;
+  onEditOs: VoidFunction;
 };
 
-const UpdateOsColumn = ({ onUpdate, catalogItem, channel, catalogItemVersion }: UpdateOsColumnProps) => {
+const UpdateOsColumn = ({ onEditOs, catalogItem, channel, catalogItemVersion }: UpdateOsColumnProps) => {
   const { t } = useTranslation();
-  const [openModal, setOpenModal] = React.useState(false);
   const updates = getUpdates(catalogItem, channel, catalogItemVersion.version);
-
-  const handleUpdate = async (catalogItemVersion: CatalogItemVersion, channel: string) => {
-    await onUpdate(catalogItem, catalogItemVersion, channel);
-    setOpenModal(false);
-  };
 
   return (
     <>
       {!!updates.length && (
-        <Button variant="link" isInline onClick={() => setOpenModal(true)} icon={<ArrowCircleUpIcon />}>
+        <Button variant="link" isInline onClick={onEditOs} icon={<ArrowCircleUpIcon />}>
           {t('Update available')}
         </Button>
-      )}
-      {openModal && (
-        <OsUpdateModal
-          catalogItem={catalogItem}
-          onClose={() => setOpenModal(false)}
-          currentVersion={catalogItemVersion}
-          currentChannel={channel}
-          onUpdate={handleUpdate}
-          updates={updates}
-        />
       )}
     </>
   );
@@ -175,40 +125,20 @@ export const CatalogItemTitle = ({
 type InstalledSoftwareProps = {
   labels: Record<string, string> | undefined;
   spec: DeviceSpec | undefined;
-  onUpdateOs: (catalogItem: CatalogItem, catalogItemVersion: CatalogItemVersion, channel: string) => Promise<void>;
   onDeleteOs: () => Promise<void>;
   onDeleteApp: (appName: string) => Promise<void>;
-  onUpdateApp: (
-    catalogItem: CatalogItem,
-    catalogItemVersion: CatalogItemVersion,
-    channel: string,
-    values: AppUpdateFormik,
-  ) => Promise<void>;
+  onEdit: (catalogId: string, catalogItemId: string, appName?: string) => void;
   canEdit: boolean;
 };
 
 type AppItem = { item: CatalogItem; name: string };
 
-const InstalledSoftware = ({
-  labels,
-  spec,
-  onUpdateOs,
-  onDeleteOs,
-  onDeleteApp,
-  onUpdateApp,
-  canEdit,
-}: InstalledSoftwareProps) => {
+const InstalledSoftware = ({ labels, spec, onDeleteOs, onDeleteApp, onEdit, canEdit }: InstalledSoftwareProps) => {
   const { t } = useTranslation();
   const [appItems, setAppItems] = React.useState<AppItem[]>();
   const [appsLoading, setAppsLoading] = React.useState(true);
   const [deleteOs, setDeleteOs] = React.useState(false);
   const [appToDelete, setAppToDelete] = React.useState<string>();
-  const [appToEdit, setAppToEdit] = React.useState<{
-    name: string;
-    item: CatalogItem;
-    channel: string;
-    version: CatalogItemVersion;
-  }>();
   const osItemId = labels?.[OS_ITEM_LABEL_KEY];
   const osChannel = labels?.[OS_CHANNEL_LABEL_KEY];
   const osCatalog = labels?.[OS_CATALOG_LABEL_KEY];
@@ -318,13 +248,17 @@ const InstalledSoftware = ({
                         catalogItem={osItem}
                         catalogItemVersion={catalogItemVersion}
                         channel={osChannel}
-                        onUpdate={onUpdateOs}
+                        onEditOs={() => onEdit(osItem.metadata.catalog, osItem.metadata.name || '')}
                       />
                     </Td>
                     <Td isActionCell>
                       {canEdit && (
                         <ActionsColumn
                           items={[
+                            {
+                              title: t('Edit'),
+                              onClick: () => onEdit(osItem.metadata.catalog, osItem.metadata.name || ''),
+                            },
                             {
                               title: t('Delete'),
                               onClick: () => setDeleteOs(true),
@@ -346,18 +280,14 @@ const InstalledSoftware = ({
                       return imageMatches && v.channels.includes(appChannel);
                     });
                   const actions: IAction[] = [
-                    itemVersion
-                      ? {
-                          title: t('Edit'),
-                          onClick: () =>
-                            setAppToEdit({
-                              item: app.item,
-                              name: app.name,
-                              channel: appChannel,
-                              version: itemVersion,
-                            }),
-                        }
-                      : {},
+                    ...(itemVersion
+                      ? [
+                          {
+                            title: t('Edit'),
+                            onClick: () => onEdit(app.item.metadata.catalog, app.item.metadata.name || '', app.name),
+                          },
+                        ]
+                      : []),
                     {
                       title: t('Delete'),
                       onClick: () => setAppToDelete(app.name),
@@ -394,9 +324,10 @@ const InstalledSoftware = ({
                               catalogItem={app.item}
                               catalogItemVersion={itemVersion}
                               channel={appChannel}
-                              onUpdate={onUpdateApp}
-                              appSpec={appSpec}
-                              exisingLabels={labels}
+                              appName={appSpec.name}
+                              onEditApp={() =>
+                                onEdit(app.item.metadata.catalog, app.item.metadata.name || '', app.name)
+                              }
                             />
                           )}
                         </Td>
@@ -430,18 +361,6 @@ const InstalledSoftware = ({
           }}
           resourceName={appToDelete}
           resourceType={t('application')}
-        />
-      )}
-      {appToEdit && (
-        <EditAppModal
-          currentApps={spec?.applications}
-          onClose={() => setAppToEdit(undefined)}
-          appSpec={spec?.applications?.find((app) => app.name === appToEdit.name)}
-          catalogItem={appToEdit.item}
-          currentVersion={appToEdit.version}
-          onSubmit={onUpdateApp}
-          currentChannel={appToEdit.channel}
-          exisingLabels={labels}
         />
       )}
     </>

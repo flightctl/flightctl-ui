@@ -39,21 +39,6 @@ import './CatalogPage.css';
 type CatalogPageContentProps = {
   canInstall: boolean;
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
-  selectedItem:
-    | {
-        catalog: string;
-        itemName: string;
-      }
-    | undefined;
-  setSelectedItem: React.Dispatch<
-    React.SetStateAction<
-      | {
-          itemName: string;
-          catalog: string;
-        }
-      | undefined
-    >
-  >;
 };
 
 type CatalogEmptyStateProps = {
@@ -187,12 +172,8 @@ const CatalogPageFilter = ({ catalogFilter }: { catalogFilter: CatalogFilter }) 
   return <TreeView hasAnimations data={filterData} onCheck={handleCheck} hasCheckboxes />;
 };
 
-export const CatalogPageContent = ({
-  canInstall,
-  onInstall,
-  selectedItem,
-  setSelectedItem,
-}: CatalogPageContentProps) => {
+export const CatalogPageContent = ({ canInstall, onInstall }: CatalogPageContentProps) => {
+  const [selectedItem, setSelectedItem] = React.useState<{ itemName: string; catalog: string }>();
   const { t } = useTranslation();
 
   const catalogFilter = useCatalogFilter();
@@ -205,7 +186,7 @@ export const CatalogPageContent = ({
       )
     : undefined;
 
-  const filterIsEmpty = !catalogFilter.itemType;
+  const filterIsEmpty = catalogFilter.itemType.length === 0;
 
   return (
     <>
@@ -237,7 +218,7 @@ export const CatalogPageContent = ({
                     {catalogItems.map((ci) => (
                       <CatalogItemCard
                         catalogItem={ci}
-                        key={ci.metadata.name}
+                        key={`${ci.metadata.catalog}/${ci.metadata.name}`}
                         onSelect={() =>
                           setSelectedItem((val) => {
                             if (!val || val.itemName !== ci.metadata.name || val.catalog !== ci.metadata.catalog) {
@@ -277,7 +258,6 @@ const catalogInstallPermissions = [
 ];
 
 const CatalogPage = () => {
-  const [selectedItem, setSelectedItem] = React.useState<{ itemName: string; catalog: string }>();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { checkPermissions } = usePermissionsContext();
@@ -287,8 +267,6 @@ const CatalogPage = () => {
     <ListPage title={t('Software Catalog')}>
       <CatalogPageContent
         canInstall={canEditFleet || canEditDevice}
-        selectedItem={selectedItem}
-        setSelectedItem={setSelectedItem}
         onInstall={({ item, channel, version }) => {
           const params = new URLSearchParams({
             channel,

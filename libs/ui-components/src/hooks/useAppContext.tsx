@@ -43,6 +43,8 @@ export const appRoutes = {
   [ROUTE.IMAGE_BUILD_EDIT]: '/devicemanagement/imagebuilds/edit',
   [ROUTE.CATALOG]: '/catalog',
   [ROUTE.CATALOG_INSTALL]: '/catalog/install',
+  [ROUTE.CATALOG_FLEET_EDIT]: '/devicemanagement/fleets/catalog',
+  [ROUTE.CATALOG_DEVICE_EDIT]: '/devicemanagement/devices/catalog',
 };
 
 export type NavLinkFC = React.FC<{ to: string; children: (props: { isActive: boolean }) => React.ReactNode }>;

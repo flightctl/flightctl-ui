@@ -134,7 +134,7 @@ const ReviewStep = ({ error, catalogItem }: ReviewStepProps) => {
     <FlightCtlForm>
       <Stack hasGutter>
         <StackItem>
-          <Title headingLevel="h3">{t('Review installation specifications')}</Title>
+          <Title headingLevel="h3">{t('Review deployment specifications')}</Title>
         </StackItem>
         <UpdateAlerts catalogItem={catalogItem} />
         <StackItem>
@@ -179,7 +179,7 @@ const ReviewStep = ({ error, catalogItem }: ReviewStepProps) => {
         </StackItem>
         {error && (
           <StackItem>
-            <Alert variant="danger" title={t('Failed to install')} isInline>
+            <Alert variant="danger" title={t('Failed to deploy')} isInline>
               {error}
             </Alert>
           </StackItem>

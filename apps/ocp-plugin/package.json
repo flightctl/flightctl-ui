@@ -30,7 +30,9 @@
       "appContext": "./src/components/AppContext/AppContext.tsx",
       "OverviewTab": "./src/components/OverviewTab/OverviewTab.tsx",
       "CatalogPage": "./src/components/Catalog/CatalogPage.tsx",
-      "CatalogInstallWizard": "./src/components/Catalog/CatalogInstallWizard.tsx"
+      "CatalogInstallWizard": "./src/components/Catalog/CatalogInstallWizard.tsx",
+      "CatalogEditDeviceWizard": "./src/components/Catalog/CatalogEditDeviceWizard.tsx",
+      "CatalogEditFleetWizard": "./src/components/Catalog/CatalogEditFleetWizard.tsx"
     },
     "dependencies": {
       "@console/pluginAPI": "*"

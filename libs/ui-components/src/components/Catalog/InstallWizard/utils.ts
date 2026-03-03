@@ -21,7 +21,7 @@ export const getInitialAppConfig = (
   catalogItem: CatalogItem,
   version: string | undefined,
   existingApp?: ApplicationProviderSpec,
-  existingLabels?: Record<string, string>,
+  currentLabels?: Record<string, string>,
 ): DynamicFormConfigFormik => {
   const configSchema =
     catalogItem.spec.versions.find((v) => v.version === version)?.configSchema ??
@@ -50,18 +50,18 @@ export const getInitialAppConfig = (
     formValues = merge({}, formValues, appConfig);
     defaultConfig = merge({}, defaultConfig || {}, appConfig);
 
-    if (existingLabels) {
+    if (currentLabels) {
       const existingVolumes = formValues['volumes'];
       if (Array.isArray(existingVolumes)) {
         (existingVolumes as ApplicationVolume[]).forEach((vol, idx) => {
           const volumeName = vol.name;
           if (volumeName) {
             const volumeCatalog =
-              existingLabels[`${getAppVolumeName(existingApp.name, volumeName, APP_VOLUME_CATALOG_LABEL_KEY)}`];
+              currentLabels[`${getAppVolumeName(existingApp.name, volumeName, APP_VOLUME_CATALOG_LABEL_KEY)}`];
             const volumeChannel =
-              existingLabels[`${getAppVolumeName(existingApp.name, volumeName, APP_VOLUME_CHANNEL_LABEL_KEY)}`];
+              currentLabels[`${getAppVolumeName(existingApp.name, volumeName, APP_VOLUME_CHANNEL_LABEL_KEY)}`];
             const volumeItem =
-              existingLabels[`${getAppVolumeName(existingApp.name, volumeName, APP_VOLUME_ITEM_LABEL_KEY)}`];
+              currentLabels[`${getAppVolumeName(existingApp.name, volumeName, APP_VOLUME_ITEM_LABEL_KEY)}`];
 
             if (volumeCatalog && volumeChannel && volumeItem) {
               selectedAssets.push({

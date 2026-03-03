@@ -88,6 +88,17 @@ const CatalogPage = React.lazy(() => import('@flightctl/ui-components/src/compon
 const CatalogInstallWizard = React.lazy(
   () => import('@flightctl/ui-components/src/components/Catalog/InstallWizard/InstallWizard'),
 );
+const CatalogEditFleetWizard = React.lazy(() =>
+  import('@flightctl/ui-components/src/components/Catalog/EditWizard/EditWizard').then((module) => ({
+    default: module.EditFleetWizard,
+  })),
+);
+
+const CatalogEditDeviceWizard = React.lazy(() =>
+  import('@flightctl/ui-components/src/components/Catalog/EditWizard/EditWizard').then((module) => ({
+    default: module.EditDeviceWizard,
+  })),
+);
 
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
@@ -221,6 +232,15 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         ),
       },
       {
+        path: 'catalog/:fleetId/:catalogId/:itemId',
+        title: t('Edit Fleet'),
+        element: (
+          <TitledRoute title={t('Edit Fleet')}>
+            <CatalogEditFleetWizard />
+          </TitledRoute>
+        ),
+      },
+      {
         path: ':fleetId/*',
         title: t('Fleet Details'),
         element: (
@@ -266,6 +286,15 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         element: (
           <TitledRoute title={t('Edit device')}>
             <EditDeviceWizard />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'catalog/:deviceId/:catalogId/:itemId',
+        title: t('Edit device'),
+        element: (
+          <TitledRoute title={t('Edit device')}>
+            <CatalogEditDeviceWizard />
           </TitledRoute>
         ),
       },

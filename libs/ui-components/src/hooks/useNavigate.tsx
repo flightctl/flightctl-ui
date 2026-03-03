@@ -35,6 +35,8 @@ export enum ROUTE {
   IMAGE_BUILD_EDIT = 'IMAGE_BUILD_EDIT',
   CATALOG = 'CATALOG',
   CATALOG_INSTALL = 'CATALOG_INSTALL',
+  CATALOG_FLEET_EDIT = 'CATALOG_FLEET_EDIT',
+  CATALOG_DEVICE_EDIT = 'CATALOG_DEVICE_EDIT',
 }
 
 export type RouteWithPostfix =
@@ -50,7 +52,9 @@ export type RouteWithPostfix =
   | ROUTE.AUTH_PROVIDER_DETAILS
   | ROUTE.IMAGE_BUILD_DETAILS
   | ROUTE.IMAGE_BUILD_EDIT
-  | ROUTE.CATALOG_INSTALL;
+  | ROUTE.CATALOG_INSTALL
+  | ROUTE.CATALOG_FLEET_EDIT
+  | ROUTE.CATALOG_DEVICE_EDIT;
 export type Route = Exclude<ROUTE, RouteWithPostfix>;
 
 type ToObj = { route: RouteWithPostfix; postfix: string | undefined };
