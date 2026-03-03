@@ -27,12 +27,12 @@ import { getEditDisabledReason, getResumeDisabledReason, isDeviceEnrolled } from
 import TabsNav from '../../TabsNav/TabsNav';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { usePermissionsContext } from '../../common/PermissionsContext';
-import EventsCard from '../../Events/EventsCard';
 import PageWithPermissions from '../../common/PageWithPermissions';
-import YamlEditor from '../../common/CodeEditor/YamlEditor';
-import DeviceAliasEdit from './DeviceAliasEdit';
 import { SystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 import DeviceDetailsCatalog from './DeviceDetailsCatalog';
+import EventsCard from '../../Events/EventsCard';
+import DeviceAliasEdit from './DeviceAliasEdit';
+import DeviceYamlTab from './DeviceYamlTab';
 
 type DeviceDetailsPageProps = React.PropsWithChildren<{ hideTerminal?: boolean }>;
 
@@ -203,10 +203,10 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
           <Route
             path="yaml"
             element={
-              <YamlEditor
-                apiObj={device}
+              <DeviceYamlTab
+                device={device}
                 refetch={refetch}
-                disabledEditReason={editDisabledReason}
+                editDisabledReason={editDisabledReason}
                 canEdit={hasEditPermissions}
               />
             }
