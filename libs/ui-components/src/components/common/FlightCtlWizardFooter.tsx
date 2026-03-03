@@ -70,7 +70,8 @@ const FlightCtlWizardFooter = <T extends Record<string, unknown>>({
   }
   return (
     <WizardFooterWrapper>
-      <ActionList>
+      {/* Overwrite the justifyContent: 'space-between' set incorrectly by the OCP console */}
+      <ActionList style={{ justifyContent: 'normal' }}>
         <ActionListGroup>
           <ActionListItem>
             <Button
