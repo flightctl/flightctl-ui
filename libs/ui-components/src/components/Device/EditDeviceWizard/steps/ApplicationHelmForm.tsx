@@ -70,7 +70,7 @@ const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?
         )}
       >
         <FieldArray name={`${appFieldName}.valuesFiles`}>
-          {({ push, remove }) => (
+          {(arrayHelpers) => (
             <>
               {(valuesFiles || []).map((file, fileIndex) => (
                 <Split hasGutter key={fileIndex} className="pf-v6-u-mb-sm">
@@ -91,7 +91,7 @@ const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?
                         variant="link"
                         icon={<MinusCircleIcon />}
                         iconPosition="end"
-                        onClick={() => remove(fileIndex)}
+                        onClick={() => arrayHelpers.remove(fileIndex)}
                       />
                     </SplitItem>
                   )}
@@ -111,7 +111,7 @@ const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?
                       iconPosition="start"
                       isAriaDisabled={!canAddValuesFile}
                       onClick={() => {
-                        push('');
+                        arrayHelpers.push('');
                       }}
                     >
                       {t('Add values file')}

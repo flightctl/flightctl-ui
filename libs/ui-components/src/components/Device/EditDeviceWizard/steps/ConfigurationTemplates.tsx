@@ -160,7 +160,7 @@ const ConfigurationTemplatesForm = ({
       )}
     >
       <FieldArray name="configTemplates">
-        {({ push, remove }) => (
+        {(arrayHelpers) => (
           <>
             {values.configTemplates.map((_, index) => (
               <FormSection key={index}>
@@ -182,7 +182,7 @@ const ConfigurationTemplatesForm = ({
                         variant="link"
                         icon={<MinusCircleIcon />}
                         iconPosition="start"
-                        onClick={() => remove(index)}
+                        onClick={() => arrayHelpers.remove(index)}
                       />
                     </SplitItem>
                   )}
@@ -197,7 +197,7 @@ const ConfigurationTemplatesForm = ({
                     icon={<PlusCircleIcon />}
                     iconPosition="start"
                     onClick={() => {
-                      push({
+                      arrayHelpers.push({
                         name: '',
                         type: '',
                       });
