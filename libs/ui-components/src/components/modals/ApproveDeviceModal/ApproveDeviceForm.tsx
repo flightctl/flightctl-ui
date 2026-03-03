@@ -59,6 +59,7 @@ const ApproveDeviceForm: React.FC<ApproveDeviceFormProps> = ({ enrollmentRequest
           onClick={submitForm}
           isDisabled={disableSubmit || isSubmitting}
           isLoading={isSubmitting}
+          data-testid="approve-device-form-submit"
         >
           {t('Approve')}
         </Button>

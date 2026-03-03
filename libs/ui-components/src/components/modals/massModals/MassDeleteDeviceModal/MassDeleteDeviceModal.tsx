@@ -112,7 +112,14 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
         </Stack>
       </ModalBody>
       <ModalFooter>
-        <Button key="delete" variant="danger" onClick={deleteResources} isLoading={isDeleting} isDisabled={isDeleting}>
+        <Button
+          key="delete"
+          variant="danger"
+          onClick={deleteResources}
+          isLoading={isDeleting}
+          isDisabled={isDeleting}
+          data-testid="modal-delete-devices-confirm"
+        >
           {t('Delete devices')}
         </Button>
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
