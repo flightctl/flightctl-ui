@@ -90,7 +90,7 @@ const FleetEmptyState = () => {
   );
 };
 
-const getColumns = (t: TFunction): ApiSortTableColumn[] => [
+export const getFleetTableColumns = (t: TFunction): ApiSortTableColumn[] => [
   {
     name: t('Name'),
   },
@@ -114,7 +114,7 @@ const fleetTablePermissions = [
 const FleetTable = () => {
   const { t } = useTranslation();
 
-  const fleetColumns = React.useMemo(() => getColumns(t), [t]);
+  const fleetColumns = React.useMemo(() => getFleetTableColumns(t), [t]);
   const { name, setName, hasFiltersEnabled } = useFleetBackendFilters();
 
   const { fleets, isLoading, error, isUpdating, refetch, pagination } = useFleets({ name, addDevicesSummary: true });

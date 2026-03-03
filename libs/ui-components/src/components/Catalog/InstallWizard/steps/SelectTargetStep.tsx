@@ -1,0 +1,319 @@
+import { Device, Fleet } from '@flightctl/types';
+import { FormGroup, Stack, StackItem, Title, Toolbar, ToolbarContent, ToolbarItem } from '@patternfly/react-core';
+import { Tbody } from '@patternfly/react-table';
+import { FormikErrors, useFormikContext } from 'formik';
+import * as React from 'react';
+import { CatalogItem, CatalogItemArtifact, CatalogItemArtifactType } from '@flightctl/types/alpha';
+import { TFunction } from 'i18next';
+
+import { useTranslation } from '../../../../hooks/useTranslation';
+import Table from '../../../Table/Table';
+import TablePagination from '../../../Table/TablePagination';
+import TableTextSearch from '../../../Table/TableTextSearch';
+import { getResourceId } from '../../../../utils/resource';
+import { useFleets } from '../../../Fleet/useFleets';
+import { getFleetTableColumns } from '../../../Fleet/FleetsPage';
+import FleetRow from '../../../Fleet/FleetRow';
+import { useDevicesPaginated } from '../../../Device/DevicesPage/useDevices';
+import { getDeviceTableColumns } from '../../../Device/DevicesPage/EnrolledDevicesTable';
+import EnrolledDeviceTableRow from '../../../Device/DevicesPage/EnrolledDeviceTableRow';
+import FlightCtlForm from '../../../form/FlightCtlForm';
+import { InstallAppFormik, InstallOsFormik } from '../types';
+import FormSelect from '../../../form/FormSelect';
+import { getFullReferenceURI } from '../../utils';
+import ImageUrl from '../../../ImageBuilds/ImageUrl';
+
+export const isSelectTargetStepValid = (errors: FormikErrors<InstallAppFormik>) => {
+  return !errors.device && !errors.fleet;
+};
+
+const DeviceTarget = () => {
+  const { t } = useTranslation();
+  const { values, setFieldValue, setFieldTouched } = useFormikContext<InstallOsFormik>();
+  const [deviceNameFilter, setDeviceNameFilter] = React.useState('');
+
+  const {
+    devices,
+    isLoading: devicesLoading,
+    isUpdating: devicesUpdating,
+    pagination: devicePagination,
+  } = useDevicesPaginated({
+    nameOrAlias: deviceNameFilter || undefined,
+    onlyDecommissioned: false,
+    onlyFleetless: true,
+  });
+
+  const handleDeviceSelect = React.useCallback(
+    async (device: Device) => {
+      await setFieldValue('device', device);
+      await setFieldValue('fleet', undefined);
+      await setFieldTouched('device', true);
+    },
+    [setFieldValue, setFieldTouched],
+  );
+
+  const deviceColumns = React.useMemo(() => getDeviceTableColumns(t).filter(({ id }) => id !== 'fleet'), [t]);
+
+  const isDeviceSelected = React.useCallback(
+    (device: Device) => values.device?.metadata.name === device.metadata.name,
+    [values.device?.metadata.name],
+  );
+
+  return (
+    <FlightCtlForm>
+      <Stack hasGutter>
+        <StackItem>
+          <Title headingLevel="h3">{t('Select device')}</Title>
+        </StackItem>
+        <StackItem>
+          <Toolbar inset={{ default: 'insetNone' }}>
+            <ToolbarContent>
+              <ToolbarItem>
+                <TableTextSearch
+                  value={deviceNameFilter}
+                  setValue={setDeviceNameFilter}
+                  placeholder={t('Search by name or alias')}
+                />
+              </ToolbarItem>
+              <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
+                <TablePagination pagination={devicePagination} isUpdating={devicesUpdating} />
+              </ToolbarItem>
+            </ToolbarContent>
+          </Toolbar>
+          <Table
+            aria-label={t('Enrolled devices table')}
+            loading={devicesLoading || devicesUpdating}
+            columns={deviceColumns}
+            hasFilters={!!deviceNameFilter}
+            emptyData={devices.length === 0}
+            clearFilters={() => setDeviceNameFilter('')}
+            variant="compact"
+            singleSelect
+          >
+            <Tbody>
+              {devices.map((device, index) => (
+                <EnrolledDeviceTableRow
+                  key={device.metadata.name || ''}
+                  device={device}
+                  onRowSelect={(device) => () => handleDeviceSelect(device)}
+                  isRowSelected={isDeviceSelected}
+                  rowIndex={index}
+                  singleSelect
+                  hideActions
+                  deviceColumns={deviceColumns}
+                />
+              ))}
+            </Tbody>
+          </Table>
+        </StackItem>
+      </Stack>
+    </FlightCtlForm>
+  );
+};
+
+const FleetTarget = () => {
+  const { t } = useTranslation();
+  const { values, setFieldValue, setFieldTouched } = useFormikContext<InstallOsFormik>();
+  const [fleetNameFilter, setFleetNameFilter] = React.useState('');
+
+  const {
+    fleets,
+    isLoading: fleetsLoading,
+    isUpdating: fleetsUpdating,
+    pagination: fleetPagination,
+  } = useFleets({
+    name: fleetNameFilter || undefined,
+    addDevicesSummary: true,
+  });
+
+  const handleFleetSelect = React.useCallback(
+    async (fleet: Fleet) => {
+      await setFieldValue('fleet', fleet);
+      await setFieldValue('device', undefined);
+      await setFieldTouched('fleet', true);
+    },
+    [setFieldValue, setFieldTouched],
+  );
+
+  const fleetColumns = React.useMemo(() => getFleetTableColumns(t), [t]);
+
+  const isFleetSelected = React.useCallback(
+    (fleet: Fleet) => values.fleet?.metadata.name === fleet.metadata.name,
+    [values.fleet?.metadata.name],
+  );
+
+  return (
+    <FlightCtlForm>
+      <Stack hasGutter>
+        <StackItem>
+          <Title headingLevel="h3">{t('Select fleet')}</Title>
+        </StackItem>
+        <StackItem>
+          <Toolbar inset={{ default: 'insetNone' }}>
+            <ToolbarContent>
+              <ToolbarItem>
+                <TableTextSearch
+                  value={fleetNameFilter}
+                  setValue={setFleetNameFilter}
+                  placeholder={t('Search by name')}
+                />
+              </ToolbarItem>
+              <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
+                <TablePagination pagination={fleetPagination} isUpdating={fleetsUpdating} />
+              </ToolbarItem>
+            </ToolbarContent>
+          </Toolbar>
+          <Table
+            aria-label={t('Fleets table')}
+            loading={fleetsLoading || fleetsUpdating}
+            columns={fleetColumns}
+            hasFilters={!!fleetNameFilter}
+            emptyData={fleets.length === 0}
+            clearFilters={() => setFleetNameFilter('')}
+            variant="compact"
+            singleSelect
+          >
+            <Tbody>
+              {fleets.map((fleet, rowIndex) => (
+                <FleetRow
+                  key={getResourceId(fleet)}
+                  fleet={fleet}
+                  rowIndex={rowIndex}
+                  isRowSelected={isFleetSelected}
+                  onRowSelect={(fleet) => () => handleFleetSelect(fleet)}
+                  singleSelect
+                  hideActions
+                />
+              ))}
+            </Tbody>
+          </Table>
+        </StackItem>
+      </Stack>
+    </FlightCtlForm>
+  );
+};
+
+const getArtifactLabel = (artifact: CatalogItemArtifact, t: TFunction) => {
+  if (artifact.name) {
+    return artifact.name;
+  }
+  if (!artifact.type) {
+    return t('Unknown');
+  }
+
+  let artifactType: CatalogItemArtifactType;
+  switch (artifact.type) {
+    case CatalogItemArtifactType.CatalogItemArtifactTypeQcow2:
+      artifactType = t('OpenShift Virtualization');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeIso:
+      artifactType = t('Bare Metal');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeAmi:
+      artifactType = t('Amazon Web Services');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeAnacondaIso:
+      artifactType = t('Anaconda Installer');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeGce:
+      artifactType = t('Google Cloud');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeRaw:
+      artifactType = t('KVM/custom cloud import');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeVhd:
+      artifactType = t('Microsoft Hyper-V');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeVmdk:
+      artifactType = t('VMware vSphere');
+      break;
+    default:
+      artifactType = t('Cloud native');
+  }
+
+  return `${artifactType} (${artifact.type})`;
+};
+
+type NewDeviceTargetProps = {
+  catalogItem: CatalogItem;
+};
+
+const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
+  const { t } = useTranslation();
+  const { values, setFieldValue } = useFormikContext<InstallOsFormik>();
+
+  const artifacts = React.useMemo(() => {
+    return catalogItem.spec.reference.artifacts?.sort((a, b) =>
+      getArtifactLabel(a, t).localeCompare(getArtifactLabel(b, t)),
+    );
+  }, [catalogItem, t]);
+
+  React.useEffect(() => {
+    if (!values.deploymentTarget && artifacts?.length) {
+      setFieldValue('deploymentTarget', artifacts[0].uri);
+    }
+  }, [values, artifacts, setFieldValue]);
+
+  const currentVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
+
+  const artifactUrl =
+    values.deploymentTarget && currentVersion
+      ? getFullReferenceURI(values.deploymentTarget, currentVersion)
+      : undefined;
+
+  return (
+    <FlightCtlForm>
+      <Stack hasGutter>
+        <StackItem>
+          <Title headingLevel="h3">{t('Installation specifications')}</Title>
+        </StackItem>
+        <StackItem>
+          <FormGroup label={t('Deployment target')} isRequired>
+            <FormSelect
+              name="deploymentTarget"
+              items={
+                artifacts
+                  ? artifacts.reduce((acc, curr) => {
+                      acc[curr.uri] = {
+                        label: getArtifactLabel(curr, t),
+                      };
+                      return acc;
+                    }, {})
+                  : {
+                      'no-items': {
+                        label: t('No items'),
+                        isDisabled: true,
+                      },
+                    }
+              }
+            />
+          </FormGroup>
+        </StackItem>
+        {artifactUrl && (
+          <StackItem>
+            <ImageUrl imageReference={artifactUrl} />
+          </StackItem>
+        )}
+      </Stack>
+    </FlightCtlForm>
+  );
+};
+
+type SelectTargetStepProps = {
+  catalogItem: CatalogItem;
+};
+
+const SelectTargetStep = ({ catalogItem }: SelectTargetStepProps) => {
+  const { values } = useFormikContext<InstallOsFormik>();
+
+  switch (values.target) {
+    case 'device':
+      return <DeviceTarget />;
+    case 'fleet':
+      return <FleetTarget />;
+    default:
+      return <NewDeviceTarget catalogItem={catalogItem} />;
+  }
+};
+
+export default SelectTargetStep;

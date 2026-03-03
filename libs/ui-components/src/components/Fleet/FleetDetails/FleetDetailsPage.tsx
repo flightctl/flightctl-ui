@@ -16,6 +16,7 @@ import FleetDetailsContent from './FleetDetailsContent';
 import FleetRestoreBanner from './FleetRestoreBanner';
 import FleetYaml from './FleetYaml';
 import TabsNav from '../../TabsNav/TabsNav';
+import FleetDetailsCatalog from './FleetDetailsCatalog';
 
 const fleetDetailsPermissions = [
   { kind: RESOURCE.FLEET, verb: VERB.DELETE },
@@ -52,8 +53,9 @@ const FleetDetailPage = () => {
       resourceTypeLabel={t('Fleets')}
       banner={<FleetRestoreBanner fleet={fleet} refetch={refetch} />}
       nav={
-        <TabsNav aria-label="Fleet details tabs" tabKeys={['details', 'yaml']}>
+        <TabsNav aria-label="Fleet details tabs" tabKeys={['details', 'catalog', 'yaml']}>
           <Tab eventKey="details" title={t('Details')} />
+          <Tab eventKey="catalog" title={t('Catalog')} />
           <Tab eventKey="yaml" title={t('YAML')} />
         </TabsNav>
       }
@@ -102,6 +104,7 @@ const FleetDetailPage = () => {
           <Routes>
             <Route index element={<Navigate to="details" replace />} />
             <Route path="details" element={<FleetDetailsContent fleet={fleet} />} />
+            <Route path="catalog" element={<FleetDetailsCatalog fleet={fleet} refetch={refetch} />} />
             <Route path="yaml" element={<FleetYaml fleet={fleet} refetch={refetch} canEdit={canEdit} />} />
           </Routes>
           {isDeleteModalOpen && (

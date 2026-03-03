@@ -113,7 +113,7 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
 
   return (
     <>
-      <Panel className="fctl-subnav_panel">
+      <Panel className="fctl-subnav_panel" id="fctl-cmd-panel">
         <PanelMain>
           <PanelMainBody>
             <Toolbar isFullHeight isStatic className="fctl-subnav_toolbar">

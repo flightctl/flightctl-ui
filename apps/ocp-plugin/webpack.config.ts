@@ -50,7 +50,15 @@ const config: Configuration & {
         use: ['style-loader', 'css-loader'],
       },
       {
-        test: /\.(png|jpg|jpeg|gif|svg|woff2?|ttf|eot|otf)(\?.*$|$)/,
+        test: /\.(jpg|jpeg|png|gif|svg)$/i,
+        include: [path.resolve(__dirname, '../../libs/ui-components/assets')],
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name].[ext]',
+        },
+      },
+      {
+        test: /\.(woff2?|ttf|eot|otf)(\?.*$|$)/,
         loader: 'file-loader',
         options: {
           name: 'assets/[name].[ext]',

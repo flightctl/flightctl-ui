@@ -28,7 +28,11 @@
       "ResourceSyncToRepositoryPage": "./src/components/ResourceSyncs/ResourceSyncToRepositoryPage.tsx",
       "EnrollmentRequestDetailsPage": "./src/components/EnrollmentRequests/EnrollmentRequestDetailsPage.tsx",
       "appContext": "./src/components/AppContext/AppContext.tsx",
-      "OverviewTab": "./src/components/OverviewTab/OverviewTab.tsx"
+      "OverviewTab": "./src/components/OverviewTab/OverviewTab.tsx",
+      "CatalogPage": "./src/components/Catalog/CatalogPage.tsx",
+      "CatalogInstallWizard": "./src/components/Catalog/CatalogInstallWizard.tsx",
+      "CatalogEditDeviceWizard": "./src/components/Catalog/CatalogEditDeviceWizard.tsx",
+      "CatalogEditFleetWizard": "./src/components/Catalog/CatalogEditFleetWizard.tsx"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
@@ -74,6 +78,7 @@
     "@patternfly/react-icons": "^6.4.0",
     "@patternfly/react-styles": "^6.4.0",
     "@patternfly/react-table": "^6.4.0",
+    "@patternfly/react-topology": "^6.4.0",
     "@types/react-redux": "^7.1.33",
     "formik": "^2.4.5",
     "fuzzysearch": "^1.0.3",

@@ -16,9 +16,11 @@ type FleetRowProps = {
   rowIndex: number;
   onRowSelect: (fleet: Fleet) => OnSelect;
   isRowSelected: (fleet: Fleet) => boolean;
-  onDeleteClick: VoidFunction;
-  canDelete: boolean;
-  canEdit: boolean;
+  onDeleteClick?: VoidFunction;
+  canDelete?: boolean;
+  canEdit?: boolean;
+  singleSelect?: boolean;
+  hideActions?: boolean;
 };
 
 const useFleetActions = (fleetName: string, isManaged: boolean, canEdit: boolean) => {
@@ -45,8 +47,10 @@ const FleetRow: React.FC<FleetRowProps> = ({
   onRowSelect,
   isRowSelected,
   onDeleteClick,
-  canDelete,
-  canEdit,
+  canDelete = false,
+  canEdit = false,
+  singleSelect,
+  hideActions,
 }) => {
   const { t } = useTranslation();
   const fleetName = fleet.metadata.name || '';
@@ -77,6 +81,7 @@ const FleetRow: React.FC<FleetRowProps> = ({
           rowIndex,
           onSelect: onRowSelect(fleet),
           isSelected: isRowSelected(fleet),
+          variant: singleSelect ? 'radio' : 'checkbox',
         }}
       />
       <Td dataLabel={t('Name')}>
@@ -95,9 +100,11 @@ const FleetRow: React.FC<FleetRowProps> = ({
       <Td dataLabel={t('Status')}>
         <FleetStatus fleet={fleet} />
       </Td>
-      <Td isActionCell>
-        <ActionsColumn items={actions} />
-      </Td>
+      {!hideActions && (
+        <Td isActionCell>
+          <ActionsColumn items={actions} />
+        </Td>
+      )}
     </Tr>
   );
 };

@@ -38,6 +38,16 @@
   {
     "type": "console.navigation/href",
     "properties": {
+      "id": "fctl-catalog",
+      "name": "%plugin__flightctl-plugin~Software Catalog%",
+      "href": "/edge/catalog",
+      "perspective": "acm",
+      "section": "fctl"
+    }
+  },
+  {
+    "type": "console.navigation/href",
+    "properties": {
       "id": "fctl-repositories",
       "name": "%plugin__flightctl-plugin~Repositories%",
       "href": "/edge/repositories",
@@ -90,6 +100,14 @@
   {
     "type": "console.page/route",
     "properties": {
+      "exact": false,
+      "path": ["/edge/fleets/catalog/:fleetId/:catalogId/:itemId"],
+      "component": { "$codeRef": "CatalogEditFleetWizard" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
       "exact": true,
       "path": ["/edge/devices"],
       "component": { "$codeRef": "DevicesPage" }
@@ -109,6 +127,30 @@
       "exact": true,
       "path": ["/edge/devices/edit/:deviceId"],
       "component": { "$codeRef": "EditDeviceWizardPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": false,
+      "path": ["/edge/devices/catalog/:deviceId/:catalogId/:itemId"],
+      "component": { "$codeRef": "CatalogEditDeviceWizard" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/catalog"],
+      "component": { "$codeRef": "CatalogPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": false,
+      "path": ["/edge/catalog/install/:catalogId/:itemId"],
+      "component": { "$codeRef": "CatalogInstallWizard" }
     }
   },
   {
