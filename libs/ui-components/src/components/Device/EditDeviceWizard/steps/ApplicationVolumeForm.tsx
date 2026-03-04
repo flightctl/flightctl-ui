@@ -42,7 +42,7 @@ const ApplicationVolumeForm = ({
   return (
     <FormGroup label={t('Volumes')} className="fctl-application-volume-form">
       <FieldArray name={`${appFieldName}.volumes`}>
-        {({ push, remove }) => (
+        {(arrayHelpers) => (
           <>
             {volumes.map((volume, volumeIndex) => {
               const volumeFieldName = `${appFieldName}.volumes[${volumeIndex}]`;
@@ -108,7 +108,7 @@ const ApplicationVolumeForm = ({
                           variant="link"
                           icon={<MinusCircleIcon />}
                           iconPosition="start"
-                          onClick={() => remove(volumeIndex)}
+                          onClick={() => arrayHelpers.remove(volumeIndex)}
                         />
                       </SplitItem>
                     )}
@@ -124,7 +124,7 @@ const ApplicationVolumeForm = ({
                   icon={<PlusCircleIcon />}
                   iconPosition="start"
                   onClick={() => {
-                    push({
+                    arrayHelpers.push({
                       name: '',
                       imageRef: '',
                       imagePullPolicy: ImagePullPolicy.PullIfNotPresent,
