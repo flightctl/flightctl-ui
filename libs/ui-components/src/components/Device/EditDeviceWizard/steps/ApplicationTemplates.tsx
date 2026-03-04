@@ -206,7 +206,7 @@ const ApplicationTemplates = ({
           )}
         </Content>
         <FieldArray name="applications">
-          {({ push, remove }) => (
+          {(arrayHelpers) => (
             <>
               {values.applications.map((_app, index) => {
                 const appCatalog = !!_app.name && !!labels?.[`${_app.name}.${APP_CATALOG_LABEL_KEY}`];
@@ -227,7 +227,7 @@ const ApplicationTemplates = ({
                             variant="link"
                             icon={<MinusCircleIcon />}
                             iconPosition="start"
-                            onClick={() => remove(index)}
+                            onClick={() => arrayHelpers.remove(index)}
                           />
                         </SplitItem>
                       )}
@@ -244,7 +244,7 @@ const ApplicationTemplates = ({
                       icon={<PlusCircleIcon />}
                       iconPosition="start"
                       onClick={() => {
-                        push(createInitialAppForm(AppType.AppTypeContainer));
+                        arrayHelpers.push(createInitialAppForm(AppType.AppTypeContainer));
                       }}
                     >
                       {t('Add application')}
