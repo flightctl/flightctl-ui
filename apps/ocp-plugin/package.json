@@ -70,7 +70,7 @@
     "@patternfly/react-table": "^5.0.0 <= 5.4.9",
     "@patternfly/react-charts": "7.2.2",
     "@types/react-redux": "^7.1.33",
-    "formik": "^2.4.5",
+    "formik": "^2.4.9",
     "fuzzysearch": "^1.0.3",
     "i18next": "^21.8.14",
     "js-yaml": "^4.1.0",
