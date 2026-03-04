@@ -16,6 +16,8 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
 
+import './LoginCommandModal.css';
+
 type LoginCommand = {
   providerName: string;
   displayName: string;
@@ -117,7 +119,12 @@ const LoginCommandModal = ({ onClose }: LoginCommandModalProps) => {
                       </strong>
                     </Content>
                   )}
-                  <ClipboardCopy isReadOnly hoverTip={t('Copy to clipboard')} clickTip={t('Copied!')}>
+                  <ClipboardCopy
+                    isReadOnly
+                    hoverTip={t('Copy to clipboard')}
+                    clickTip={t('Copied!')}
+                    className="fctl-login-command-modal__clipboard-copy"
+                  >
                     {cmd.command}
                   </ClipboardCopy>
                 </StackItem>
