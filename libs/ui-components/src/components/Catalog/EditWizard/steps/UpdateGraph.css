@@ -100,12 +100,12 @@
 
 .fctl-channel-version-dot {
   background: var(--pf-t--global--color--brand--default) !important;
-  border-radius: 16px !important;
-  height: 16px !important;
+  border-radius: 18px !important;
+  height: 18px !important;
   padding: 0 !important;
   position: absolute;
   min-width: auto;
-  width: 16px !important;
+  width: 18px !important;
   z-index: 2;
 }
 

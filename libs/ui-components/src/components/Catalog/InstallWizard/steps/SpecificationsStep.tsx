@@ -10,6 +10,7 @@ import {
   Label,
   Modal,
   ModalBody,
+  ModalHeader,
   Spinner,
   Split,
   SplitItem,
@@ -154,6 +155,7 @@ export const InstallSpec = ({
       </Grid>
       {showReadme && currentVersion?.readme && (
         <Modal isOpen onClose={() => setShowReadme(false)} variant="medium">
+          <ModalHeader title={t('Readme')} />
           <ModalBody>
             <Content>
               <ReactMarkdown>{currentVersion.readme}</ReactMarkdown>
@@ -227,6 +229,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
   const [canEditFleet, canListFleet, canEditDevice, canListDevice] = checkPermissions(targetPermissions);
   const fleetRadioRef = React.useRef<HTMLSpanElement>(null);
   const deviceRadioRef = React.useRef<HTMLSpanElement>(null);
+  const newDeviceRadioRef = React.useRef<HTMLSpanElement>(null);
 
   const { fleets, isLoading: fleetsLoading } = useFleets({});
   const { devices, isLoading: devicesLoading } = useDevicesPaginated({
@@ -300,13 +303,20 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                   </StackItem>
                   {showNewDevice && (
                     <StackItem>
-                      <RadioField
-                        id="new-device-radio"
-                        name="target"
-                        checkedValue="new-device"
-                        label={t('New Device')}
-                        description={t('Provision a brand new, unenrolled device')}
-                      />
+                      <WithTooltip
+                        showTooltip={!catalogItem.spec.reference.artifacts?.length}
+                        content={t('This Operating system does not contain any additional formats besides bootc')}
+                        triggerRef={newDeviceRadioRef}
+                      >
+                        <RadioField
+                          id="new-device-radio"
+                          name="target"
+                          checkedValue="new-device"
+                          label={<span ref={newDeviceRadioRef}>{t('New Device')}</span>}
+                          description={t('Provision a brand new, unenrolled device')}
+                          isDisabled={!catalogItem.spec.reference.artifacts?.length}
+                        />
+                      </WithTooltip>
                     </StackItem>
                   )}
                 </Stack>

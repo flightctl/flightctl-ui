@@ -8,6 +8,7 @@ import {
   Icon,
   Modal,
   ModalBody,
+  ModalHeader,
   Title,
 } from '@patternfly/react-core';
 import ArrowRightIcon from '@patternfly/react-icons/dist/js/icons/arrow-right-icon';
@@ -157,6 +158,7 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit }: UpdateStepProps) =>
       </FlightCtlForm>
       {showReadme && updateVersion?.readme && (
         <Modal isOpen onClose={() => setShowReadme(false)} variant="medium">
+          <ModalHeader title={t('Readme')} />
           <ModalBody>
             <Content>
               <ReactMarkdown>{updateVersion.readme}</ReactMarkdown>

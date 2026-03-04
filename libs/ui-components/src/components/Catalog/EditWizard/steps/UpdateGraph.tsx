@@ -36,7 +36,7 @@ const MoreVersions = ({ updates }: { updates: CatalogItemVersion[] }) => {
           );
         }}
       >
-        <Button variant="secondary" className="fctl-channel-more-versions" onClick={() => {}}>
+        <Button variant="secondary" className="fctl-channel-more-versions">
           {t('+ More')}
         </Button>
       </Popover>
@@ -152,7 +152,7 @@ const UpdateGraph = ({ currentChannel, updates, currentVersion }: UpdateGraphPro
     <Channel>
       <ChannelPath>
         <ChannelLine>
-          <ChannelVersion>{`${currentVersion.version} (current)`}</ChannelVersion>
+          <ChannelVersion>{t('{{version}} (current)', { version: currentVersion.version })}</ChannelVersion>
           <ChannelVersionDot version={currentVersion.version} current />
         </ChannelLine>
         {content}
