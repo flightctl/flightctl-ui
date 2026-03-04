@@ -92,7 +92,7 @@ const InstallAppWizardContent = ({
           {currentStep?.id === appConfigStepId && <AppConfigStep schemaErrors={schemaErrors} />}
         </WizardStep>
         <WizardStep
-          name={t('Review')}
+          name={t('Review and deploy')}
           id={reviewStepId}
           isDisabled={
             !isAppConfigStepValid(values, errors) || !isSpecsStepValid(errors) || !isSelectTargetStepValid(errors)

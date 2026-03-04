@@ -8,7 +8,7 @@ import { ApplicationProviderSpec } from '@flightctl/types';
 import semver from 'semver';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import { applyInitialConfig, getInitialAppConfig } from '../InstallWizard/utils';
+import { getInitialAppConfig } from '../InstallWizard/utils';
 import AppConfigStep, { isAppConfigStepValid } from '../InstallWizard/steps/AppConfigStep';
 import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
 import { useSubmitCatalogForm } from '../useSubmitCatalogForm';
@@ -39,7 +39,6 @@ type WizardContentProps = {
   catalogItem: CatalogItem;
   error: string | undefined;
   schemaErrors: RJSFValidationError[] | undefined;
-  currentLabels: Record<string, string> | undefined;
   setError: (err: string | undefined) => void;
 };
 
@@ -49,13 +48,12 @@ const WizardContent: React.FC<WizardContentProps> = ({
   catalogItem,
   error,
   schemaErrors,
-  currentLabels,
   setError,
 }) => {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
 
-  const { values, errors, setFieldValue } = useFormikContext<AppUpdateFormik>();
+  const { values, errors } = useFormikContext<AppUpdateFormik>();
 
   const isVersionStepValid = !!values.version;
   const isConfigStepValid = isAppConfigStepValid(values, errors);
@@ -81,21 +79,17 @@ const WizardContent: React.FC<WizardContentProps> = ({
       >
         <WizardStep name={t('Version')} id={versionStepId}>
           {(!currentStep || currentStep?.id === versionStepId) && (
-            <UpdateStep
-              catalogItem={catalogItem}
-              currentVersion={currentVersion}
-              isEdit={!!appSpec}
-              onVersionChange={(version: string) => {
-                const appConfig = getInitialAppConfig(catalogItem, version, appSpec, currentLabels);
-                applyInitialConfig(setFieldValue, appConfig);
-              }}
-            />
+            <UpdateStep catalogItem={catalogItem} currentVersion={currentVersion} isEdit={!!appSpec} />
           )}
         </WizardStep>
         <WizardStep name={t('Configuration')} id={configStepId} isDisabled={!isVersionStepValid}>
           {currentStep?.id === configStepId && <AppConfigStep isEdit={!!appSpec} />}
         </WizardStep>
-        <WizardStep name={t('Review')} id={reviewStepId} isDisabled={!isVersionStepValid || !isConfigStepValid}>
+        <WizardStep
+          name={t('Review and deploy')}
+          id={reviewStepId}
+          isDisabled={!isVersionStepValid || !isConfigStepValid}
+        >
           {currentStep?.id === reviewStepId && (
             <ReviewStep error={error} schemaErrors={schemaErrors} isEdit={!!appSpec} />
           )}
@@ -178,7 +172,6 @@ const EditAppWizard: React.FC<EditAppWizardProps> = ({
         catalogItem={catalogItem}
         error={error}
         schemaErrors={schemaErrors}
-        currentLabels={currentLabels}
         setError={setError}
       />
     </Formik>

@@ -56,7 +56,6 @@
     "@patternfly/react-icons": "^6.4.0",
     "@patternfly/react-styles": "^6.4.0",
     "@patternfly/react-table": "^6.4.0",
-    "@patternfly/react-topology": "^6.4.0",
     "i18next": "21.8.14 - 23.x",
     "monaco-editor": "^0.51.0",
     "react": "17.0.1 - 18.x",

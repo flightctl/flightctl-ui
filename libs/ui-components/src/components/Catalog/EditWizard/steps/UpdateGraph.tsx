@@ -1,312 +1,168 @@
-import { Alert, Card, CardBody, Stack, StackItem } from '@patternfly/react-core';
-import semver from 'semver';
 import * as React from 'react';
-import {
-  ComponentFactory,
-  DagreLayout,
-  DefaultEdge,
-  DefaultNode,
-  EdgeModel,
-  EdgeStyle,
-  GRAPH_LAYOUT_END_EVENT,
-  Graph,
-  GraphComponent,
-  LEFT_TO_RIGHT,
-  Layout,
-  LayoutFactory,
-  Model,
-  ModelKind,
-  Node,
-  NodeModel,
-  NodeShape,
-  SELECTION_EVENT,
-  TopologyControlBar,
-  TopologyView,
-  Visualization,
-  VisualizationProvider,
-  VisualizationSurface,
-  WithSelectionProps,
-  action,
-  createTopologyControlButtons,
-  defaultControlButtonsOptions,
-  observer,
-  withPanZoom,
-  withSelection,
-} from '@patternfly/react-topology';
+import { useField, useFormikContext } from 'formik';
 import { CatalogItemVersion } from '@flightctl/types/alpha';
-import warningColor from '@patternfly/react-tokens/dist/js/t_global_icon_color_status_warning_default';
-import successColor from '@patternfly/react-tokens/dist/js/t_global_icon_color_status_success_default';
-import blueColor from '@patternfly/react-tokens/dist/js/chart_color_blue_400';
-import { ArrowCircleUpIcon, CheckCircleIcon, WarningTriangleIcon } from '@patternfly/react-icons/dist/js/icons';
+import semver from 'semver';
+import { Button, Popover, Stack } from '@patternfly/react-core';
+import { ArrowCircleUpIcon } from '@patternfly/react-icons/dist/js/icons';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-
-import '@patternfly/react-topology/dist/esm/css/topology-components.css';
-import '@patternfly/react-topology/dist/esm/css/topology-controlbar.css';
-import '@patternfly/react-topology/dist/esm/css/topology-view.css';
+import { InstallSpecFormik } from '../../InstallWizard/types';
 
 import './UpdateGraph.css';
 
-const ICON_SIZE = 12;
-
-type VersionNodeData = {
-  version: string;
-  channel: string;
-  isCurrentVersion: boolean;
-  isDeprecated: boolean;
-  entryName: string;
-};
-
-const NODE_DIAMETER = 20;
-
-type VersionNodeProps = {
-  element: Node;
-} & WithSelectionProps;
-
-const VersionNodeComponent: React.FC<VersionNodeProps> = observer(({ element, selected, onSelect }) => {
-  const data = element.getData() as VersionNodeData;
-
-  let nodeIcon: React.ReactNode = undefined;
-  if (data.isCurrentVersion) {
-    nodeIcon = <CheckCircleIcon width={ICON_SIZE} height={ICON_SIZE} style={{ fill: successColor.value }} />;
-  } else if (data.isDeprecated) {
-    nodeIcon = <WarningTriangleIcon width={ICON_SIZE} height={ICON_SIZE} style={{ fill: warningColor.value }} />;
-  } else if (selected) {
-    nodeIcon = <ArrowCircleUpIcon width={ICON_SIZE} height={ICON_SIZE} style={{ fill: blueColor.value }} />;
-  }
-
-  return (
-    <DefaultNode element={element} selected={selected} onSelect={onSelect} showLabel={false}>
-      <g transform={`translate(${NODE_DIAMETER / 2}, ${NODE_DIAMETER / 2})`}>
-        <text textAnchor="middle" y={-20} style={{ fontSize: '12px' }}>
-          {data.version}
-        </text>
-        {nodeIcon && <g transform={`translate(${-ICON_SIZE / 2}, ${-ICON_SIZE / 2})`}>{nodeIcon}</g>}
-      </g>
-    </DefaultNode>
-  );
-});
-
-const VersionNode = withSelection()(VersionNodeComponent);
-
-const customComponentFactory: ComponentFactory = (kind: ModelKind) => {
-  switch (kind) {
-    case ModelKind.graph:
-      return withPanZoom()(GraphComponent);
-    case ModelKind.node:
-      return VersionNode as never;
-    case ModelKind.edge:
-      return DefaultEdge;
-    default:
-      return undefined;
-  }
-};
-
-const customLayoutFactory: LayoutFactory = (type: string, graph: Graph): Layout | undefined =>
-  new DagreLayout(graph, {
-    rankdir: LEFT_TO_RIGHT,
-    nodesep: 50,
-    ranksep: 80,
-    edgesep: 20,
-  });
-
-const buildTopologyModel = (
-  currentVersionEntry: CatalogItemVersion,
-  directUpgradeEntries: CatalogItemVersion[],
-  currentChannel: string,
-): Model => {
-  const nodes: NodeModel[] = [];
-  const edges: EdgeModel[] = [];
-
-  // Deduplicate entries
-  const entriesMap = new Map<string, CatalogItemVersion>();
-  directUpgradeEntries.forEach((entry) => entriesMap.set(entry.version, entry));
-  if (currentVersionEntry) {
-    entriesMap.set(currentVersionEntry.version, currentVersionEntry);
-  }
-  const allEntries = Array.from(entriesMap.values());
-
-  // Map to track version nodes for edge creation
-  const versionToNodeId = new Map<string, string>();
-
-  // Create version nodes
-  allEntries.forEach((versionEntry) => {
-    const versionName = versionEntry.version;
-    const nodeId = versionName;
-
-    versionToNodeId.set(versionName, nodeId);
-
-    nodes.push({
-      id: nodeId,
-      type: 'node',
-      label: versionName,
-      width: NODE_DIAMETER,
-      height: NODE_DIAMETER,
-      shape: NodeShape.ellipse,
-      data: {
-        version: versionName,
-        channel: currentChannel,
-        isCurrentVersion: versionName === currentVersionEntry.version,
-        isDeprecated: !!versionEntry.deprecation?.message,
-        entryName: versionName,
-      } as VersionNodeData,
-    });
-  });
-
-  const latestVersion = allEntries
-    .filter((e) => e.version !== currentVersionEntry.version)
-    .sort((a, b) => semver.rcompare(a.version, b.version))[0]?.version;
-
-  const getEdgeStyle = (source: string, target: string) =>
-    source === currentVersionEntry.version && target === latestVersion ? EdgeStyle.default : EdgeStyle.dashed;
-
-  // Create edges based on replaces, skips, and skipRange
-  allEntries.forEach((entry) => {
-    const targetNodeId = versionToNodeId.get(entry.version);
-    if (!targetNodeId) return;
-
-    // Edge from replaces (single version string)
-    if (entry.replaces) {
-      const sourceNodeId = versionToNodeId.get(entry.replaces);
-      if (sourceNodeId) {
-        edges.push({
-          id: `edge-${sourceNodeId}-${targetNodeId}`,
-          type: 'edge',
-          source: sourceNodeId,
-          target: targetNodeId,
-          edgeStyle: getEdgeStyle(sourceNodeId, targetNodeId),
-        });
-      }
-    }
-
-    // Edges from skips (array of version strings)
-    entry.skips?.forEach((skippedVersion) => {
-      const sourceNodeId = versionToNodeId.get(skippedVersion);
-      if (sourceNodeId) {
-        edges.push({
-          id: `edge-skip-${sourceNodeId}-${targetNodeId}`,
-          type: 'edge',
-          source: sourceNodeId,
-          target: targetNodeId,
-          edgeStyle: getEdgeStyle(sourceNodeId, targetNodeId),
-        });
-      }
-    });
-
-    // Edges from skipRange - find all versions in the graph that satisfy the range
-    if (entry.skipRange) {
-      allEntries.forEach((sourceEntry) => {
-        if (sourceEntry.version === entry.version) return;
-        if (semver.satisfies(sourceEntry.version, entry.skipRange!, { includePrerelease: true })) {
-          const sourceNodeId = versionToNodeId.get(sourceEntry.version);
-          if (sourceNodeId) {
-            edges.push({
-              id: `edge-skiprange-${sourceNodeId}-${targetNodeId}`,
-              type: 'edge',
-              source: sourceNodeId,
-              target: targetNodeId,
-              edgeStyle: getEdgeStyle(sourceNodeId, targetNodeId),
-            });
-          }
-        }
-      });
-    }
-  });
-
-  return {
-    nodes,
-    edges,
-    graph: {
-      id: 'update-graph',
-      type: 'graph',
-      layout: 'Dagre',
-    },
-  };
-};
-
-const UpdateGraph: React.FC<{
-  selectedVersion: string;
-  currentVersion: CatalogItemVersion;
-  updates: CatalogItemVersion[];
-  currentChannel: string;
-  onSelectionChange: (nodeId: string, tag: string) => void;
-}> = ({ selectedVersion, currentVersion, currentChannel, updates, onSelectionChange }) => {
+const MoreVersions = ({ updates }: { updates: CatalogItemVersion[] }) => {
   const { t } = useTranslation();
-  const controller = React.useMemo(() => {
-    const newController = new Visualization();
-    newController.registerComponentFactory(customComponentFactory);
-    newController.registerLayoutFactory(customLayoutFactory);
-    newController.addEventListener(GRAPH_LAYOUT_END_EVENT, () => {
-      newController.getGraph().fit(80);
-    });
-    newController.addEventListener(SELECTION_EVENT, (ids: string[]) => {
-      const selectedId = ids[0];
-      if (selectedId) {
-        const node = newController.getNodeById(selectedId);
-        if (node) {
-          const data = node.getData() as VersionNodeData | undefined;
-          if (data?.entryName) {
-            onSelectionChange(selectedId, data.entryName);
-          }
-        }
-      }
-    });
+  const [, , { setValue }] = useField<string>('version');
+  return (
+    <ChannelLine>
+      <Popover
+        headerContent={t('Other available paths')}
+        bodyContent={(hide) => {
+          return (
+            <Stack hasGutter>
+              {updates.map((u) => (
+                <Button
+                  key={u.version}
+                  variant="link"
+                  onClick={() => {
+                    setValue(u.version);
+                    hide();
+                  }}
+                >
+                  {u.version}
+                </Button>
+              ))}
+            </Stack>
+          );
+        }}
+      >
+        <Button variant="secondary" className="fctl-channel-more-versions" onClick={() => {}}>
+          {t('+ More')}
+        </Button>
+      </Popover>
+    </ChannelLine>
+  );
+};
 
-    const model = buildTopologyModel(currentVersion, updates, currentChannel);
-    newController.fromModel(model, false);
+const Channel = ({ children }: React.PropsWithChildren) => {
+  return <div className="fctl-channel">{children}</div>;
+};
 
-    return newController;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentChannel]);
+const ChannelLine = ({ children }: React.PropsWithChildren) => {
+  return <li className="fctl-channel-line">{children}</li>;
+};
 
-  const update = updates.find((v) => v.version === selectedVersion);
+export const ChannelName = ({ children }: React.PropsWithChildren) => {
+  return <span className="fctl-channel-name">{children}</span>;
+};
+
+const ChannelPath = ({ children }: React.PropsWithChildren) => {
+  return <ul className="fctl-channel-path">{children}</ul>;
+};
+
+const ChannelVersion = ({ children }: React.PropsWithChildren) => {
+  return <span className="fctl-channel-version">{children}</span>;
+};
+
+const ChannelVersionDot = ({ version, current }: { version: string; current?: boolean }) => {
+  const { t } = useTranslation();
+  const [{ value }, , { setValue }] = useField<string>('version');
+
+  const isSelected = version === value;
+
+  let className = 'fctl-channel-version-dot';
+  let icon: React.ReactNode = undefined;
+  if (current) {
+    className = `${className} fctl-channel-version-dot--current`;
+  } else if (isSelected) {
+    className = `${className} fctl-channel-version-dot--selected`;
+    icon = <ArrowCircleUpIcon />;
+  }
 
   return (
-    <Stack hasGutter>
-      <StackItem>
-        <Card>
-          <CardBody className="fctl-update-graph">
-            <VisualizationProvider controller={controller}>
-              <TopologyView
-                style={{
-                  backgroundColor: 'unset',
-                }}
-                controlBar={
-                  <TopologyControlBar
-                    controlButtons={createTopologyControlButtons({
-                      ...defaultControlButtonsOptions,
-                      fitToScreenCallback: action(() => {
-                        controller.getGraph().fit(80);
-                      }),
-                      zoomIn: false,
-                      zoomOut: false,
-                      resetView: false,
-                      legend: false,
-                    })}
-                  />
-                }
-              >
-                <VisualizationSurface state={{ selectedIds: [selectedVersion] }} />
-              </TopologyView>
-            </VisualizationProvider>
-          </CardBody>
-        </Card>
-      </StackItem>
-      {!update && currentVersion.deprecation && (
-        <StackItem>
-          <Alert isInline variant="warning" title={t('The current version is deprecated')}>
-            {currentVersion.deprecation.message}
-          </Alert>
-        </StackItem>
-      )}
-      {update?.deprecation && (
-        <StackItem>
-          <Alert isInline variant="warning" title={t('The selected version is deprecated')}>
-            {update.deprecation.message}
-          </Alert>
-        </StackItem>
-      )}
-    </Stack>
+    <Button
+      variant="secondary"
+      className={className}
+      icon={icon}
+      aria-label={t('Version {{version}}', { version })}
+      onClick={() => setValue(version)}
+    />
+  );
+};
+
+type UpdateGraphProps = {
+  currentChannel: string;
+  updates: CatalogItemVersion[];
+  currentVersion: CatalogItemVersion;
+};
+
+const UpdateGraph = ({ currentChannel, updates, currentVersion }: UpdateGraphProps) => {
+  const { t } = useTranslation();
+  const { values } = useFormikContext<InstallSpecFormik>();
+
+  const sortedUpdates = updates.sort((a, b) => semver.compare(a.version, b.version));
+
+  let content: React.ReactNode;
+
+  if (sortedUpdates.length === 2) {
+    content = (
+      <ChannelLine>
+        <ChannelVersion>{sortedUpdates[0].version}</ChannelVersion>
+        <ChannelVersionDot version={sortedUpdates[0].version} />
+      </ChannelLine>
+    );
+  } else if (sortedUpdates.length > 2) {
+    const updateIdx = sortedUpdates.findIndex((v) => v.version === values.version);
+    if (updateIdx === -1 || updateIdx === sortedUpdates.length - 1) {
+      //current or latest is selected
+      content = <MoreVersions updates={sortedUpdates.slice(0, -1)} />;
+    } else {
+      const beforeSelectedUpd = sortedUpdates.slice(0, updateIdx);
+      const afterSelectedUpd = sortedUpdates.slice(updateIdx + 1, -1);
+
+      const getContent = (upd: CatalogItemVersion[]) => {
+        if (!upd.length) {
+          return undefined;
+        }
+        if (upd.length === 1) {
+          return (
+            <ChannelLine>
+              <ChannelVersion>{upd[0].version}</ChannelVersion>
+              <ChannelVersionDot version={upd[0].version} />
+            </ChannelLine>
+          );
+        }
+        return <MoreVersions updates={upd} />;
+      };
+
+      content = (
+        <>
+          {getContent(beforeSelectedUpd)}
+          <ChannelLine>
+            <ChannelVersion>{sortedUpdates[updateIdx].version}</ChannelVersion>
+            <ChannelVersionDot version={sortedUpdates[updateIdx].version} />
+          </ChannelLine>
+          {getContent(afterSelectedUpd)}
+        </>
+      );
+    }
+  }
+
+  return (
+    <Channel>
+      <ChannelPath>
+        <ChannelLine>
+          <ChannelVersion>{`${currentVersion.version} (current)`}</ChannelVersion>
+          <ChannelVersionDot version={currentVersion.version} current />
+        </ChannelLine>
+        {content}
+        <ChannelLine>
+          <ChannelVersion>{sortedUpdates[sortedUpdates.length - 1].version}</ChannelVersion>
+          <ChannelVersionDot version={sortedUpdates[sortedUpdates.length - 1].version} />
+        </ChannelLine>
+      </ChannelPath>
+      <ChannelName>{t('{{currentChannel}} channel', { currentChannel })}</ChannelName>
+    </Channel>
   );
 };
 

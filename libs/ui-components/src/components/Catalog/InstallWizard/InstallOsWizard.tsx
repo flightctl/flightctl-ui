@@ -78,7 +78,7 @@ const InstallOsWizardContent = ({
         </WizardStep>
         {values.target !== 'new-device' && (
           <WizardStep
-            name={t('Review')}
+            name={t('Review and deploy')}
             id={reviewStepId}
             isDisabled={!isSpecsStepValid(errors) || !isSelectTargetStepValid(errors)}
           >
