@@ -58,14 +58,19 @@ const CreateResourceSyncsForm = () => {
 
   return (
     <FieldArray name="resourceSyncs">
-      {({ remove, push }) => (
+      {(arrayHelpers) => (
         <>
           {values.resourceSyncs.map((resourceSync, index) => (
             <React.Fragment key={index}>
               <CreateResourceSyncForm rs={resourceSync} index={index} />
               {values.resourceSyncs.length > 1 && (
                 <FormGroup isInline>
-                  <Button variant="link" icon={<MinusCircleIcon />} iconPosition="left" onClick={() => remove(index)}>
+                  <Button
+                    variant="link"
+                    icon={<MinusCircleIcon />}
+                    iconPosition="left"
+                    onClick={() => arrayHelpers.remove(index)}
+                  >
                     {t('Remove resource sync')}
                   </Button>
                 </FormGroup>
@@ -76,7 +81,7 @@ const CreateResourceSyncsForm = () => {
             variant="link"
             icon={<PlusCircleIcon />}
             iconPosition="left"
-            onClick={() => push({ name: '', path: '', targetRevision: '' } as ResourceSyncFormValue)}
+            onClick={() => arrayHelpers.push({ name: '', path: '', targetRevision: '' } as ResourceSyncFormValue)}
           >
             {t('Add another resource sync')}
           </Button>
