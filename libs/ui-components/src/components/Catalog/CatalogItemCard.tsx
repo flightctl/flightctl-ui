@@ -24,6 +24,8 @@ export type CatalogItemCardProps = {
 
 const CatalogItemCard: React.FC<CatalogItemCardProps> = ({ catalogItem, onSelect }) => {
   const { t } = useTranslation();
+
+  const displayName = catalogItem.metadata.name as string;
   return (
     <Card isCompact isClickable>
       <CardHeader
@@ -31,7 +33,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({ catalogItem, onSelect
           onClickAction: onSelect,
           onChange: onSelect,
           selectableActionAriaLabel: t('Select {{ name }}', {
-            name: catalogItem.spec.displayName || catalogItem.metadata.name,
+            name: displayName,
           }),
         }}
       >
@@ -63,7 +65,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({ catalogItem, onSelect
               {catalogItem.spec.provider && (
                 <StackItem>
                   <Content component={ContentVariants.small}>
-                    {t('Provided by {{provider}}', { provider: catalogItem.spec.provider })}
+                    {t('Provided by: {{provider}}', { provider: catalogItem.spec.provider })}
                   </Content>
                 </StackItem>
               )}
