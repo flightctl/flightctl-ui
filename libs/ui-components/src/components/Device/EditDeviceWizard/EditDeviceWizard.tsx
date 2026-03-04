@@ -113,16 +113,16 @@ const EditDeviceWizard = () => {
           const templateStepValid = isDeviceTemplateStepValid(formikErrors);
           const updateStepValid = isUpdatePolicyStepValid(formikErrors);
 
-          const canEditTemplate = !values.fleetMatch;
-          const isTemplateStepDisabled = !(generalStepValid && canEditTemplate);
-          const isUpdateStepDisabled = !templateStepValid;
+          const isFleetless = !values.fleetMatch;
+          const isTemplateStepDisabled = !(generalStepValid && isFleetless);
+          const isUpdateStepDisabled = !(generalStepValid && templateStepValid && isFleetless);
 
           return (
             <>
               <LeaveFormConfirmation />
               <Wizard
                 footer={<EditDeviceWizardFooter />}
-                nav={<EditDeviceWizardNav />}
+                nav={<EditDeviceWizardNav isFleetless={isFleetless} />}
                 onStepChange={() => {
                   if (submitError) {
                     setSubmitError(undefined);
