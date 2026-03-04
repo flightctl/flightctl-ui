@@ -24,7 +24,7 @@ const ApplicationVariablesForm = ({ appFieldName, isReadOnly }: ApplicationVaria
   return (
     <FormGroup label={t('Environment variables')} className="fctl-application-variables-form">
       <FieldArray name={`${appFieldName}.variables`}>
-        {({ push, remove }) => (
+        {(arrayHelpers) => (
           <>
             {variables.map((_variable, variableIndex) => {
               const variableFieldName = `${appFieldName}.variables[${variableIndex}]`;
@@ -56,7 +56,7 @@ const ApplicationVariablesForm = ({ appFieldName, isReadOnly }: ApplicationVaria
                           variant="link"
                           icon={<MinusCircleIcon />}
                           iconPosition="start"
-                          onClick={() => remove(variableIndex)}
+                          onClick={() => arrayHelpers.remove(variableIndex)}
                         />
                       </SplitItem>
                     )}
@@ -71,7 +71,7 @@ const ApplicationVariablesForm = ({ appFieldName, isReadOnly }: ApplicationVaria
                   variant="link"
                   icon={<PlusCircleIcon />}
                   iconPosition="start"
-                  onClick={() => push({ name: '', value: '' })}
+                  onClick={() => arrayHelpers.push({ name: '', value: '' })}
                 >
                   {t('Add variable')}
                 </Button>

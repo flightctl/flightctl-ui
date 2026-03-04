@@ -121,7 +121,7 @@ const ConfigInlineTemplateForm = ({ index, isReadOnly }: ConfigInlineTemplateFor
 
   return (
     <FieldArray name={`configTemplates.${index}.files`}>
-      {({ push, remove }) => (
+      {(arrayHelpers) => (
         <>
           {inlineConfig.files?.map((_, fileIndex) => {
             const fieldName = `configTemplates[${index}].files[${fileIndex}]`;
@@ -137,7 +137,7 @@ const ConfigInlineTemplateForm = ({ index, isReadOnly }: ConfigInlineTemplateFor
                       variant="link"
                       icon={<MinusCircleIcon />}
                       iconPosition="start"
-                      onClick={() => remove(fileIndex)}
+                      onClick={() => arrayHelpers.remove(fileIndex)}
                     />
                   </SplitItem>
                 )}
@@ -151,7 +151,7 @@ const ConfigInlineTemplateForm = ({ index, isReadOnly }: ConfigInlineTemplateFor
                 icon={<PlusCircleIcon />}
                 iconPosition="start"
                 onClick={() => {
-                  push({
+                  arrayHelpers.push({
                     path: '',
                     content: '',
                   });

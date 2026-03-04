@@ -149,7 +149,7 @@ const UpdateStepRolloutPolicy = ({ isReadOnly }: { isReadOnly: boolean }) => {
 
       <FormGroup>
         <FieldArray name="rolloutPolicy.batches">
-          {({ push, remove }) => (
+          {(arrayHelpers) => (
             <>
               {batches.map((_, index) => (
                 <FormSection key={index}>
@@ -164,7 +164,7 @@ const UpdateStepRolloutPolicy = ({ isReadOnly }: { isReadOnly: boolean }) => {
                           variant="link"
                           icon={<MinusCircleIcon />}
                           iconPosition="start"
-                          onClick={() => remove(index)}
+                          onClick={() => arrayHelpers.remove(index)}
                           isDisabled={batches.length === 1}
                         />
                       </SplitItem>
@@ -180,7 +180,7 @@ const UpdateStepRolloutPolicy = ({ isReadOnly }: { isReadOnly: boolean }) => {
                       icon={<PlusCircleIcon />}
                       iconPosition="start"
                       onClick={() => {
-                        push(getEmptyInitializedBatch());
+                        arrayHelpers.push(getEmptyInitializedBatch());
                       }}
                     >
                       {t('Add batch')}
