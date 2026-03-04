@@ -84,6 +84,22 @@ const CreateImageBuildWizard = React.lazy(
   () => import('@flightctl/ui-components/src/components/ImageBuilds/CreateImageBuildWizard/CreateImageBuildWizard'),
 );
 
+const CatalogPage = React.lazy(() => import('@flightctl/ui-components/src/components/Catalog/CatalogPage'));
+const CatalogInstallWizard = React.lazy(
+  () => import('@flightctl/ui-components/src/components/Catalog/InstallWizard/InstallWizard'),
+);
+const CatalogEditFleetWizard = React.lazy(() =>
+  import('@flightctl/ui-components/src/components/Catalog/EditWizard/EditWizard').then((module) => ({
+    default: module.EditFleetWizard,
+  })),
+);
+
+const CatalogEditDeviceWizard = React.lazy(() =>
+  import('@flightctl/ui-components/src/components/Catalog/EditWizard/EditWizard').then((module) => ({
+    default: module.EditDeviceWizard,
+  })),
+);
+
 export type ExtendedRouteObject = RouteObject & {
   title?: string;
   showInNav?: boolean;
@@ -216,6 +232,15 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         ),
       },
       {
+        path: 'catalog/:fleetId/:catalogId/:itemId',
+        title: t('Edit Fleet'),
+        element: (
+          <TitledRoute title={t('Edit Fleet')}>
+            <CatalogEditFleetWizard />
+          </TitledRoute>
+        ),
+      },
+      {
         path: ':fleetId/*',
         title: t('Fleet Details'),
         element: (
@@ -261,6 +286,40 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         element: (
           <TitledRoute title={t('Edit device')}>
             <EditDeviceWizard />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'catalog/:deviceId/:catalogId/:itemId',
+        title: t('Edit device'),
+        element: (
+          <TitledRoute title={t('Edit device')}>
+            <CatalogEditDeviceWizard />
+          </TitledRoute>
+        ),
+      },
+    ],
+  },
+  {
+    path: '/catalog',
+    title: t('Software Catalog'),
+    showInNav: true,
+    children: [
+      {
+        index: true,
+        title: t('Software Catalog'),
+        element: (
+          <TitledRoute title={t('Catalog')}>
+            <CatalogPage />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'install/:catalogId/:itemId',
+        title: t('Install Catalog item'),
+        element: (
+          <TitledRoute title={t('Install Catalog item')}>
+            <CatalogInstallWizard />
           </TitledRoute>
         ),
       },

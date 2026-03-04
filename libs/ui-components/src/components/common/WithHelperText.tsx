@@ -52,7 +52,7 @@ export const FormGroupWithHelperText = ({
 }: React.PropsWithChildren<FormGroupWithHelperTextProps>) => (
   <FormGroup
     label={label}
-    labelHelp={<HelperTextPopover ariaLabel={label} content={content} />}
+    labelHelp={content ? <HelperTextPopover ariaLabel={label} content={content} /> : undefined}
     isRequired={isRequired}
   >
     {children}

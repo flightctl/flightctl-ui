@@ -16,7 +16,7 @@ declare global {
   }
 }
 
-type Api = 'flightctl' | 'imagebuilder' | 'alerts';
+type Api = 'flightctl' | 'imagebuilder' | 'alerts' | 'catalog';
 
 const addRequiredHeaders = (options: RequestInit, api?: Api): RequestInit => {
   const token = getCSRFToken();
@@ -47,6 +47,8 @@ export const uiProxy = `${window.location.protocol}//${apiServer}`;
 const flightCtlAPI = `${uiProxy}/api/flightctl`;
 const alertsAPI = `${uiProxy}/api/alerts`;
 const imageBuilderPathRegex = /^image(builds|exports)/;
+const catalogPathRegex = /^(catalogs|catalogitems)/;
+
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
 export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): Promise<Response> => {
@@ -61,6 +63,12 @@ const getFullApiUrl = (path: string): { api: Api; url: string } => {
   }
   if (imageBuilderPathRegex.test(path)) {
     return { api: 'imagebuilder', url: `${uiProxy}/api/imagebuilder/api/v1/${path}` };
+  }
+  if (catalogPathRegex.test(path)) {
+    return {
+      api: 'catalog',
+      url: `${flightCtlAPI}/api/v1/${path}`,
+    };
   }
   return { api: 'flightctl', url: `${flightCtlAPI}/api/v1/${path}` };
 };
