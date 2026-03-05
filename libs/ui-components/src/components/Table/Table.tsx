@@ -38,6 +38,7 @@ type TableProps<D> = Pick<PFTableProps, 'variant'> & {
   onSelectAll?: (isSelected: boolean) => void;
   isAllSelected?: boolean;
   isExpandable?: boolean;
+  'data-testid'?: string;
   singleSelect?: boolean;
 };
 

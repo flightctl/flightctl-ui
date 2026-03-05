@@ -121,6 +121,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
       error={error}
       id={deviceId}
       breadcrumbTitle={deviceAlias}
+      titleDataTestId="device-details-title"
       title={
         canEdit ? (
           /* key={deviceAlias} is needed for the input field to be initialized with the alias as its value */

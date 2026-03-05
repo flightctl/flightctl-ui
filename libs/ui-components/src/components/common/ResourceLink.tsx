@@ -12,6 +12,7 @@ type ResourceDisplayLinkProps = {
   name?: string;
   variant?: 'shortened' | 'full';
   routeLink?: RouteWithPostfix;
+  'data-testid'?: string;
 };
 
 export const getDisplayText = (name: string | undefined) => {
@@ -24,7 +25,13 @@ export const getDisplayText = (name: string | undefined) => {
   return `${name.substring(0, 6)}...${name.substring(name.length - 7)}`;
 };
 
-const ResourceLink = ({ id, name, variant = 'shortened', routeLink }: ResourceDisplayLinkProps) => {
+const ResourceLink = ({
+  id,
+  name,
+  variant = 'shortened',
+  routeLink,
+  'data-testid': dataTestId,
+}: ResourceDisplayLinkProps) => {
   const nameOrId = name || id;
   const displayText = getDisplayText(nameOrId);
   const showCopy = nameOrId !== displayText;
@@ -33,7 +40,13 @@ const ResourceLink = ({ id, name, variant = 'shortened', routeLink }: ResourceDi
 
   return (
     <span className={`fctl-resource-link fctl-resource-link__${variant}`}>
-      {routeLink ? <Link to={{ route: routeLink, postfix: id }}>{textEl}</Link> : <>{textEl}</>}
+      {routeLink ? (
+        <Link to={{ route: routeLink, postfix: id }} data-testid={dataTestId}>
+          {textEl}
+        </Link>
+      ) : (
+        <span data-testid={dataTestId}>{textEl}</span>
+      )}
       {showCopy && nameOrId && <CopyButton text={nameOrId} />}
     </span>
   );
