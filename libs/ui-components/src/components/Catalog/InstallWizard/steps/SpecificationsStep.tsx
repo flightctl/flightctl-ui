@@ -1,4 +1,4 @@
-import { CatalogItem } from '@flightctl/types/alpha';
+import { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
 import {
   Alert,
   Button,
@@ -10,6 +10,7 @@ import {
   Label,
   Modal,
   ModalBody,
+  ModalHeader,
   Spinner,
   Split,
   SplitItem,
@@ -34,6 +35,45 @@ import { useDevicesPaginated } from '../../../Device/DevicesPage/useDevices';
 import { applyInitialConfig, getInitialAppConfig } from '../utils';
 import { InstallAppFormik } from '../types';
 import WithTooltip from '../../../common/WithTooltip';
+
+type VersionDropdownProps = {
+  catalogItem: CatalogItem;
+  versions: CatalogItemVersion[];
+};
+
+export const VersionDropdown = ({ catalogItem, versions }: VersionDropdownProps) => {
+  const { setFieldValue } = useFormikContext<InstallSpecFormik>();
+  const { t } = useTranslation();
+  return (
+    <FormSelect
+      name="version"
+      onChange={(val) => {
+        const appConfig = getInitialAppConfig(catalogItem, val);
+        applyInitialConfig(setFieldValue, appConfig);
+      }}
+      items={versions.reduce((acc, v) => {
+        return {
+          ...acc,
+          [v.version]: {
+            label: (
+              <Split hasGutter>
+                <SplitItem>{v.version}</SplitItem>
+                {v.deprecation && (
+                  <SplitItem>
+                    <Label variant="outline" color="orange">
+                      {t('Deprecated')}
+                    </Label>
+                  </SplitItem>
+                )}
+              </Split>
+            ),
+            selectedLabel: v.version,
+          },
+        };
+      }, {})}
+    />
+  );
+};
 
 export const isSpecsStepValid = (errors: FormikErrors<InstallAppFormik>) => {
   return !errors.target && !errors.version && !errors.channel;
@@ -95,33 +135,7 @@ export const InstallSpec = ({
         </GridItem>
         <GridItem span={4}>
           <FormGroup label={t('Version')}>
-            <FormSelect
-              name="version"
-              onChange={(val) => {
-                const appConfig = getInitialAppConfig(catalogItem, val);
-                applyInitialConfig(setFieldValue, appConfig);
-              }}
-              items={channelVersions.reduce((acc, v) => {
-                return {
-                  ...acc,
-                  [v.version]: {
-                    label: (
-                      <Split hasGutter>
-                        <SplitItem>{v.version}</SplitItem>
-                        {v.deprecation && (
-                          <SplitItem>
-                            <Label variant="outline" color="orange">
-                              {t('Deprecated')}
-                            </Label>
-                          </SplitItem>
-                        )}
-                      </Split>
-                    ),
-                    selectedLabel: v.version,
-                  },
-                };
-              }, {})}
-            />
+            <VersionDropdown catalogItem={catalogItem} versions={channelVersions} />
           </FormGroup>
         </GridItem>
         {!hideReadmeLink && !!currentVersion?.readme && (
@@ -141,6 +155,7 @@ export const InstallSpec = ({
       </Grid>
       {showReadme && currentVersion?.readme && (
         <Modal isOpen onClose={() => setShowReadme(false)} variant="medium">
+          <ModalHeader title={t('Readme')} />
           <ModalBody>
             <Content>
               <ReactMarkdown>{currentVersion.readme}</ReactMarkdown>
@@ -214,6 +229,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
   const [canEditFleet, canListFleet, canEditDevice, canListDevice] = checkPermissions(targetPermissions);
   const fleetRadioRef = React.useRef<HTMLSpanElement>(null);
   const deviceRadioRef = React.useRef<HTMLSpanElement>(null);
+  const newDeviceRadioRef = React.useRef<HTMLSpanElement>(null);
 
   const { fleets, isLoading: fleetsLoading } = useFleets({});
   const { devices, isLoading: devicesLoading } = useDevicesPaginated({
@@ -264,7 +280,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                         name="target"
                         checkedValue="fleet"
                         label={<span ref={fleetRadioRef}>{t('Existing Fleet')}</span>}
-                        description={t('Install to all devices in a fleet')}
+                        description={t('Deploy to all devices in a fleet')}
                         isDisabled={!!fleetDisabledReason}
                       />
                     </WithTooltip>
@@ -280,20 +296,27 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                         name="target"
                         checkedValue="device"
                         label={<span ref={deviceRadioRef}>{t('Existing Device')}</span>}
-                        description={t('Install to a single fleetless device')}
+                        description={t('Deploy to a single fleetless device')}
                         isDisabled={!!deviceDisabledReason}
                       />
                     </WithTooltip>
                   </StackItem>
                   {showNewDevice && (
                     <StackItem>
-                      <RadioField
-                        id="new-device-radio"
-                        name="target"
-                        checkedValue="new-device"
-                        label={t('New Device')}
-                        description={t('Provision a brand new, unenrolled device')}
-                      />
+                      <WithTooltip
+                        showTooltip={!catalogItem.spec.reference.artifacts?.length}
+                        content={t('This Operating system does not contain any additional formats besides bootc')}
+                        triggerRef={newDeviceRadioRef}
+                      >
+                        <RadioField
+                          id="new-device-radio"
+                          name="target"
+                          checkedValue="new-device"
+                          label={<span ref={newDeviceRadioRef}>{t('New Device')}</span>}
+                          description={t('Provision a brand new, unenrolled device')}
+                          isDisabled={!catalogItem.spec.reference.artifacts?.length}
+                        />
+                      </WithTooltip>
                     </StackItem>
                   )}
                 </Stack>

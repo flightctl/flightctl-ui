@@ -15,6 +15,7 @@ import {
 } from '@patternfly/react-core';
 import { CatalogItemCategory } from '@flightctl/types/alpha';
 import { ApplicationProviderSpec, ContainerApplication, Device, Fleet } from '@flightctl/types';
+import { load } from 'js-yaml';
 
 import ErrorBoundary from '../../common/ErrorBoundary';
 import { getErrorMessage } from '../../../utils/error';
@@ -153,7 +154,10 @@ const EditWizard = ({
                 channel: values.channel,
                 currentApps,
                 currentLabels,
-                formValues: values.formValues,
+                formValues:
+                  values.configureVia === 'editor'
+                    ? (load(values.editorContent) as Record<string, unknown>)
+                    : values.formValues,
                 selectedAssets: values.selectedAssets,
                 specPath,
               });

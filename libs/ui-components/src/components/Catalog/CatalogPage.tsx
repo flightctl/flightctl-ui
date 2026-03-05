@@ -1,13 +1,10 @@
 import {
-  Button,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
   Divider,
-  EmptyStateActions,
   EmptyStateBody,
-  EmptyStateFooter,
   Gallery,
   PageSection,
   Split,
@@ -67,21 +64,6 @@ const CatalogEmptyState = ({ hasFilters }: CatalogEmptyStateProps) => {
           )}
         </Stack>
       </EmptyStateBody>
-      {!hasFilters && (
-        <EmptyStateFooter>
-          <EmptyStateActions>
-            <Button
-              variant="link"
-              component="a"
-              href="https://docs.flightctl.io"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t('Learn about catalogs')}
-            </Button>
-          </EmptyStateActions>
-        </EmptyStateFooter>
-      )}
     </ResourceListEmptyState>
   );
 };

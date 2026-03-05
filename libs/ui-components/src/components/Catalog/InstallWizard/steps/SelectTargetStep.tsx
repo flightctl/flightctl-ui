@@ -265,7 +265,7 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
     <FlightCtlForm>
       <Stack hasGutter>
         <StackItem>
-          <Title headingLevel="h3">{t('Installation specifications')}</Title>
+          <Title headingLevel="h3">{t('Deployment specifications')}</Title>
         </StackItem>
         <StackItem>
           <FormGroup label={t('Deployment target')} isRequired>

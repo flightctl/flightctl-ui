@@ -60,7 +60,7 @@ const InstallWizard = () => {
         <Stack>
           <StackItem>
             <Title headingLevel="h1" size="3xl">
-              {t('Install {{name}}', { name: catalogItem?.spec.displayName || itemId })}
+              {t('Deploy {{name}}', { name: catalogItem?.spec.displayName || itemId })}
             </Title>
           </StackItem>
           <StackItem>
