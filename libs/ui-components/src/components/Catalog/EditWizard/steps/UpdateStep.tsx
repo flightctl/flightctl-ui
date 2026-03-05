@@ -131,28 +131,28 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit }: UpdateStepProps) =>
               </GridItem>
             </Grid>
           </GridItem>
-          {!!updates.length && (
-            <>
-              <GridItem span={12} />
-              {values.version === currentVersion.version && (
-                <GridItem span={6}>
-                  <Alert isInline variant="info" title={t('No version update will be performed')} />
+          <GridItem span={6}>
+            <Grid hasGutter>
+              {!!updates.length && (
+                <>
+                  {values.version === currentVersion.version && (
+                    <GridItem>
+                      <Alert isInline variant="info" title={t('No version update will be performed')} />
+                    </GridItem>
+                  )}
+                  <GridItem>
+                    <UpdateGraph currentChannel={values.channel} currentVersion={currentVersion} updates={updates} />
+                  </GridItem>
+                </>
+              )}
+              {updateVersion?.deprecation && (
+                <GridItem>
+                  <Alert isInline variant="warning" title={t('This version is deprecated')}>
+                    {updateVersion.deprecation.message}
+                  </Alert>
                 </GridItem>
               )}
-              <GridItem span={12} />
-              <GridItem span={6}>
-                <UpdateGraph currentChannel={values.channel} currentVersion={currentVersion} updates={updates} />
-              </GridItem>
-            </>
-          )}
-          <GridItem>
-            {updateVersion?.deprecation && (
-              <GridItem span={6}>
-                <Alert isInline variant="warning" title={t('This version is deprecated')}>
-                  {updateVersion.deprecation.message}
-                </Alert>
-              </GridItem>
-            )}
+            </Grid>
           </GridItem>
         </Grid>
       </FlightCtlForm>
