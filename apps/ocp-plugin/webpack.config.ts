@@ -8,7 +8,15 @@ import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import TerserJSPlugin from 'terser-webpack-plugin';
 import { ConsoleRemotePlugin } from '@openshift-console/dynamic-plugin-sdk-webpack';
 
+const packageJson = require('./package.json');
+
 const NODE_ENV: Configuration['mode'] = process.env.NODE_ENV === 'production' ? 'production' : 'development';
+
+const pluginMetadata = {
+  ...packageJson.consolePlugin,
+  // Use PLUGIN_VERSION to set the ConsolePlugin's version at build time.
+  version: process.env.PLUGIN_VERSION || packageJson.consolePlugin.version,
+};
 
 const config: Configuration & {
   devServer?: WebpackDevServerConfiguration;
@@ -78,7 +86,7 @@ const config: Configuration & {
     // Plugin uses react-router-dom 5.3.x and Console provides 5.3.x at runtime.
     // When building the app, the ConsoleRemotePlugin sees the package from root node_modules that has v6.x
     // We disable validation to avoid build errors.
-    new ConsoleRemotePlugin({ validateSharedModules: false }),
+    new ConsoleRemotePlugin({ validateSharedModules: false, pluginMetadata }),
   ] as unknown as WebpackPluginInstance[],
   resolve: {
     plugins: [
