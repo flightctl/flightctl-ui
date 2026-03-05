@@ -40,7 +40,7 @@ const ReviewStep = ({ error, schemaErrors, isEdit }: ReviewStepProps) => {
         </StackItem>
         <StackItem>
           <Card>
-            <CardTitle>{isEdit ? t('Update specifications') : t('Installation specifications')}</CardTitle>
+            <CardTitle>{isEdit ? t('Update specifications') : t('Deployment specifications')}</CardTitle>
             <CardBody>
               <DescriptionList>
                 <DescriptionListGroup>

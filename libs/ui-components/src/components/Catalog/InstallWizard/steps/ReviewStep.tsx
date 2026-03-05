@@ -139,7 +139,7 @@ const ReviewStep = ({ error, catalogItem }: ReviewStepProps) => {
         <UpdateAlerts catalogItem={catalogItem} />
         <StackItem>
           <Card>
-            <CardTitle>{t('Installation specifications')}</CardTitle>
+            <CardTitle>{t('Deployment specifications')}</CardTitle>
             <CardBody>
               <DescriptionList>
                 <DescriptionListGroup>

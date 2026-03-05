@@ -42,15 +42,11 @@ const buildCatalogItemsFieldSelector = (
       types = types.filter((t) => !appTypeIds.includes(t));
     }
 
-    if (categories.length === 1) {
-      parts.push(`spec.category==${categories[0]}`);
-    } else if (categories.length > 1) {
+    if (categories.length) {
       parts.push(`spec.category in (${categories.join(',')})`);
     }
-    if (types.length === 1) {
-      parts.push(`spec.type==${types[0]}`);
-    } else if (types.length > 1) {
-      parts.push(`spec.type in (${types?.join(',')})`);
+    if (types.length) {
+      parts.push(`spec.type in (${types.join(',')})`);
     }
   }
 
