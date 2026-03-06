@@ -64,7 +64,14 @@ export type UseAllCatalogItemsFilter = {
 export const useCatalogItems = ({
   itemType,
   nameFilter,
-}: UseAllCatalogItemsFilter): [CatalogItem[], boolean, unknown, PaginationDetails<CatalogItemList>, boolean] => {
+}: UseAllCatalogItemsFilter): [
+  CatalogItem[],
+  boolean,
+  unknown,
+  PaginationDetails<CatalogItemList>,
+  boolean,
+  VoidFunction,
+] => {
   const pagination = useTablePagination<CatalogItemList>();
   const fieldSelector = React.useMemo(
     () => (itemType || nameFilter ? buildCatalogItemsFieldSelector(itemType, nameFilter) : undefined),
@@ -91,12 +98,12 @@ export const useCatalogItems = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nameFilter, itemType]);
 
-  const [catalogItemsList, loading, error] = useFetchPeriodically<CatalogItemList>(
+  const [catalogItemsList, loading, error, refetch] = useFetchPeriodically<CatalogItemList>(
     { endpoint: endpointDebounced },
     pagination.onPageFetched,
   );
 
   const isUpdating = loading || isDebouncing;
 
-  return [catalogItemsList?.items || [], loading, error, pagination, isUpdating];
+  return [catalogItemsList?.items || [], loading, error, pagination, isUpdating, refetch];
 };

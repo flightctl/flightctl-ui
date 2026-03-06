@@ -1,10 +1,13 @@
 import {
+  Button,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
   Divider,
+  EmptyStateActions,
   EmptyStateBody,
+  EmptyStateFooter,
   Gallery,
   PageSection,
   Split,
@@ -36,6 +39,7 @@ import './CatalogPage.css';
 type CatalogPageContentProps = {
   canInstall: boolean;
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
+  showCatalogMgmt?: boolean;
 };
 
 type CatalogEmptyStateProps = {
@@ -44,6 +48,7 @@ type CatalogEmptyStateProps = {
 
 const CatalogEmptyState = ({ hasFilters }: CatalogEmptyStateProps) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   return (
     <ResourceListEmptyState
       icon={SearchIcon}
@@ -64,6 +69,15 @@ const CatalogEmptyState = ({ hasFilters }: CatalogEmptyStateProps) => {
           )}
         </Stack>
       </EmptyStateBody>
+      {!hasFilters && (
+        <EmptyStateFooter>
+          <EmptyStateActions>
+            <Button variant="primary" onClick={() => navigate(ROUTE.CATALOG_ADD_ITEM)}>
+              {t('Create catalog item')}
+            </Button>
+          </EmptyStateActions>
+        </EmptyStateFooter>
+      )}
     </ResourceListEmptyState>
   );
 };
@@ -154,13 +168,13 @@ const CatalogPageFilter = ({ catalogFilter }: { catalogFilter: CatalogFilter }) 
   return <TreeView hasAnimations data={filterData} onCheck={handleCheck} hasCheckboxes />;
 };
 
-export const CatalogPageContent = ({ canInstall, onInstall }: CatalogPageContentProps) => {
+export const CatalogPageContent = ({ canInstall, onInstall, showCatalogMgmt }: CatalogPageContentProps) => {
   const [selectedItem, setSelectedItem] = React.useState<{ itemName: string; catalog: string }>();
   const { t } = useTranslation();
 
   const catalogFilter = useCatalogFilter();
 
-  const [catalogItems, isLoading, error, pagination, isUpdating] = useCatalogItems(catalogFilter);
+  const [catalogItems, isLoading, error, pagination, isUpdating, refetch] = useCatalogItems(catalogFilter);
 
   const item = selectedItem
     ? catalogItems?.find(
@@ -174,7 +188,12 @@ export const CatalogPageContent = ({ canInstall, onInstall }: CatalogPageContent
     <>
       <ListPageBody error={error} loading={isLoading}>
         <div>
-          <CatalogPageToolbar {...catalogFilter} pagination={pagination} isUpdating={isUpdating} />
+          <CatalogPageToolbar
+            {...catalogFilter}
+            pagination={pagination}
+            isUpdating={isUpdating}
+            showCatalogMgmt={!!showCatalogMgmt}
+          />
           <PageSection hasBodyWrapper={false} type="wizard">
             <Split hasGutter>
               <SplitItem className="fctl-catalog-page">
@@ -228,6 +247,8 @@ export const CatalogPageContent = ({ canInstall, onInstall }: CatalogPageContent
           item={item}
           canInstall={canInstall}
           onInstall={onInstall}
+          refetch={refetch}
+          showCatalogMgmt={!!showCatalogMgmt}
         />
       )}
     </>
@@ -259,6 +280,7 @@ const CatalogPage = () => {
             postfix: `${item.metadata.catalog}/${item.metadata.name}?${params.toString()}`,
           });
         }}
+        showCatalogMgmt
       />
     </ListPage>
   );
