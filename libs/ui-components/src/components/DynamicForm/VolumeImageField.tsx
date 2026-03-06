@@ -32,7 +32,7 @@ import { FieldProps } from '@rjsf/utils';
 import { CatalogItem, CatalogItemList, CatalogItemType, CatalogItemVersion } from '@flightctl/types/alpha';
 
 import CatalogItemCard from '../Catalog/CatalogItemCard';
-import { getFullReferenceURI } from '../Catalog/utils';
+import { getFullContainerURI } from '../Catalog/utils';
 import { DynamicFormContext } from './DynamicForm';
 import { useTranslation } from '../../hooks/useTranslation';
 import TableTextSearch from '../Table/TableTextSearch';
@@ -43,13 +43,14 @@ import {
   getDefaultChannelAndVersion,
 } from '../Catalog/CatalogItemDetails';
 import { Formik } from 'formik';
-import { InstallSpec, InstallSpecFormik } from '../Catalog/InstallWizard/steps/SpecificationsStep';
+import { InstallSpec } from '../Catalog/InstallWizard/steps/SpecificationsStep';
 import FlightCtlForm from '../form/FlightCtlForm';
 import { useCatalogItems } from '../Catalog/useCatalogs';
 import { PaginationDetails } from '../../hooks/useTablePagination';
 import { getErrorMessage } from '../../utils/error';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { CatalogItemTitle } from '../Catalog/InstalledSoftware';
+import { InstallSpecFormik } from '../Catalog/InstallWizard/types';
 
 /**
  * Regex for volume image reference field IDs.
@@ -288,7 +289,7 @@ const VolumeImageField: React.FC<FieldProps> = ({
   };
 
   const onSelect = (item: CatalogItem, version: CatalogItemVersion, channel: string) => {
-    const reference = getFullReferenceURI(item.spec.reference.uri, version);
+    const reference = getFullContainerURI(item.spec.artifacts, version);
     onAssetSelected({
       volumeIndex,
       assetChannel: channel,

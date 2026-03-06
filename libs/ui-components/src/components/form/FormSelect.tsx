@@ -1,6 +1,16 @@
 import * as React from 'react';
 
-import { FormGroup, MenuToggle, MenuToggleStatus, Select, SelectList, SelectOption } from '@patternfly/react-core';
+import {
+  Button,
+  FormGroup,
+  MenuFooter,
+  MenuToggle,
+  MenuToggleStatus,
+  Select,
+  SelectList,
+  SelectOption,
+} from '@patternfly/react-core';
+import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { useField } from 'formik';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
@@ -13,6 +23,11 @@ export type SelectItem = {
   selectedLabel?: React.ReactNode;
 };
 
+type AddAction = {
+  label: React.ReactNode;
+  onAdd: VoidFunction;
+};
+
 type FormSelectProps = {
   name: string;
   items: Record<string, string | SelectItem>;
@@ -21,6 +36,7 @@ type FormSelectProps = {
   placeholderText?: string;
   withStatusIcon?: boolean;
   onChange?: (value: string) => void;
+  addAction?: AddAction;
 };
 
 const isItemObject = (item: string | SelectItem): item is SelectItem => typeof item === 'object';
@@ -38,6 +54,7 @@ const FormSelect = ({
   placeholderText,
   children,
   onChange,
+  addAction,
 }: React.PropsWithChildren<FormSelectProps>) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [field, meta, { setValue, setTouched }] = useField<string>({
@@ -50,9 +67,12 @@ const FormSelect = ({
   React.useEffect(() => {
     const hasOneItem = itemKeys.length === 1;
     if (hasOneItem && !field.value) {
-      setValue(itemKeys[0], true);
+      const firstItem = items[itemKeys[0]];
+      if (!isItemObject(firstItem) || !firstItem.isDisabled) {
+        setValue(itemKeys[0], true);
+      }
     }
-  }, [itemKeys, field.value, setValue]);
+  }, [itemKeys, field.value, setValue, items]);
 
   const selectedText = field.value ? getItemSelectLabel(items[field.value]) : placeholderText;
 
@@ -123,6 +143,21 @@ const FormSelect = ({
           </SelectList>
         )}
         {children}
+        {addAction && (
+          <MenuFooter>
+            <Button
+              variant="link"
+              isInline
+              icon={<PlusCircleIcon />}
+              onClick={() => {
+                setIsOpen(false);
+                addAction.onAdd();
+              }}
+            >
+              {addAction.label}
+            </Button>
+          </MenuFooter>
+        )}
       </Select>
 
       <DefaultHelperText helperText={helperText} />

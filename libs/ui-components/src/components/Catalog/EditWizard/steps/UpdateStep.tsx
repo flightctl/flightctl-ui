@@ -21,13 +21,13 @@ import ReactMarkdown from 'react-markdown';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelect from '../../../form/FormSelect';
-import { getUpdates } from '../../utils';
 import { InstallSpecFormik } from '../../InstallWizard/types';
 import { StatusDisplayContent } from '../../../Status/StatusDisplay';
 import { InstallSpec, VersionDropdown } from '../../InstallWizard/steps/SpecificationsStep';
 import UpdateGraph from './UpdateGraph';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import { applyInitialConfig, getInitialAppConfig } from '../../InstallWizard/utils';
+import { getUpdates } from '../../utils';
 
 export const isUpdateStepValid = (errors: FormikErrors<InstallSpecFormik>) => {
   return !errors.version && !errors.channel;
@@ -174,7 +174,7 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit }: UpdateStepProps) =>
           <Title headingLevel="h3">{t('Deployment specifications')}</Title>
         </GridItem>
         <GridItem span={6}>
-          <InstallSpec catalogItem={catalogItem} />
+          <InstallSpec catalogItem={catalogItem} targetSet />
         </GridItem>
       </Grid>
     </FlightCtlForm>

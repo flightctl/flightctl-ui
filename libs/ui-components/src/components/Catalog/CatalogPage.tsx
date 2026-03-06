@@ -1,10 +1,15 @@
 import {
+  Button,
+  Content,
+  ContentVariants,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
   Divider,
+  EmptyStateActions,
   EmptyStateBody,
+  EmptyStateFooter,
   Gallery,
   PageSection,
   Split,
@@ -16,7 +21,7 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
 import * as React from 'react';
-import { CatalogItem, CatalogItemCategory, CatalogItemType } from '@flightctl/types/alpha';
+import { CatalogItem, CatalogItemCategory, CatalogItemType, CatalogList } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import CatalogItemCard from './CatalogItemCard';
@@ -30,20 +35,26 @@ import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from '../common/PermissionsContext';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import ListPage from '../ListPage/ListPage';
+import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 
 import './CatalogPage.css';
 
 type CatalogPageContentProps = {
   canInstall: boolean;
+  targetHasOwner?: boolean;
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
+  showCatalogMgmt?: boolean;
+  targetSet?: boolean;
 };
 
 type CatalogEmptyStateProps = {
   hasFilters: boolean;
+  showCatalogMgmt: boolean;
 };
 
-const CatalogEmptyState = ({ hasFilters }: CatalogEmptyStateProps) => {
+const CatalogEmptyState = ({ hasFilters, showCatalogMgmt }: CatalogEmptyStateProps) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   return (
     <ResourceListEmptyState
       icon={SearchIcon}
@@ -64,6 +75,15 @@ const CatalogEmptyState = ({ hasFilters }: CatalogEmptyStateProps) => {
           )}
         </Stack>
       </EmptyStateBody>
+      {!hasFilters && showCatalogMgmt && (
+        <EmptyStateFooter>
+          <EmptyStateActions>
+            <Button variant="primary" onClick={() => navigate(ROUTE.CATALOG_ADD_ITEM)}>
+              {t('Create catalog item')}
+            </Button>
+          </EmptyStateActions>
+        </EmptyStateFooter>
+      )}
     </ResourceListEmptyState>
   );
 };
@@ -154,13 +174,23 @@ const CatalogPageFilter = ({ catalogFilter }: { catalogFilter: CatalogFilter }) 
   return <TreeView hasAnimations data={filterData} onCheck={handleCheck} hasCheckboxes />;
 };
 
-export const CatalogPageContent = ({ canInstall, onInstall }: CatalogPageContentProps) => {
+export const CatalogPageContent = ({
+  canInstall,
+  targetHasOwner,
+  onInstall,
+  showCatalogMgmt,
+  targetSet,
+}: CatalogPageContentProps) => {
   const [selectedItem, setSelectedItem] = React.useState<{ itemName: string; catalog: string }>();
   const { t } = useTranslation();
 
   const catalogFilter = useCatalogFilter();
 
-  const [catalogItems, isLoading, error, pagination, isUpdating] = useCatalogItems(catalogFilter);
+  const [catalogList, catalogsLoading, catalogsErr] = useFetchPeriodically<CatalogList>({
+    endpoint: 'catalogs',
+  });
+
+  const [catalogItems, isLoading, error, pagination, isUpdating, refetch] = useCatalogItems(catalogFilter);
 
   const item = selectedItem
     ? catalogItems?.find(
@@ -172,13 +202,43 @@ export const CatalogPageContent = ({ canInstall, onInstall }: CatalogPageContent
 
   return (
     <>
-      <ListPageBody error={error} loading={isLoading}>
+      <ListPageBody error={error || catalogsErr} loading={isLoading || catalogsLoading}>
         <div>
-          <CatalogPageToolbar {...catalogFilter} pagination={pagination} isUpdating={isUpdating} />
+          <CatalogPageToolbar
+            {...catalogFilter}
+            pagination={pagination}
+            isUpdating={isUpdating}
+            showCatalogMgmt={!!showCatalogMgmt}
+          />
           <PageSection hasBodyWrapper={false} type="wizard">
             <Split hasGutter>
-              <SplitItem className="fctl-catalog-page">
+              <SplitItem className="fctl-catalog-page fctl-catalog-page__filters">
                 <DescriptionList>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Catalog')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      {!!catalogList?.items.length ? (
+                        <TreeView
+                          hasAnimations
+                          onCheck={(_, item) => {
+                            catalogFilter.catalogs.includes(item.id || '')
+                              ? catalogFilter.setCatalogs((catalogs) => catalogs.filter((c) => c !== item.id || ''))
+                              : catalogFilter.setCatalogs((catalogs) => [...catalogs, item.id || '']);
+                          }}
+                          hasCheckboxes
+                          data={catalogList.items.map((c) => ({
+                            name: c.spec.displayName || c.metadata.name || '',
+                            id: c.metadata.name || '',
+                            checkProps: {
+                              checked: !!c.metadata.name && catalogFilter.catalogs.includes(c.metadata.name),
+                            },
+                          }))}
+                        />
+                      ) : (
+                        <Content component={ContentVariants.small}>{t('No catalogs')}</Content>
+                      )}
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t('Category')}</DescriptionListTerm>
                     <DescriptionListDescription>
@@ -194,7 +254,10 @@ export const CatalogPageContent = ({ canInstall, onInstall }: CatalogPageContent
               />
               <SplitItem isFilled className="fctl-catalog-page">
                 {!isLoading && catalogItems.length === 0 ? (
-                  <CatalogEmptyState hasFilters={!filterIsEmpty || !!catalogFilter.nameFilter} />
+                  <CatalogEmptyState
+                    hasFilters={!filterIsEmpty || !!catalogFilter.nameFilter}
+                    showCatalogMgmt={!!showCatalogMgmt}
+                  />
                 ) : (
                   <Gallery hasGutter>
                     {catalogItems.map((ci) => (
@@ -227,7 +290,11 @@ export const CatalogPageContent = ({ canInstall, onInstall }: CatalogPageContent
           onClose={() => setSelectedItem(undefined)}
           item={item}
           canInstall={canInstall}
+          targetHasOwner={targetHasOwner}
           onInstall={onInstall}
+          refetch={refetch}
+          showCatalogMgmt={!!showCatalogMgmt}
+          targetSet={!!targetSet}
         />
       )}
     </>
@@ -259,6 +326,7 @@ const CatalogPage = () => {
             postfix: `${item.metadata.catalog}/${item.metadata.name}?${params.toString()}`,
           });
         }}
+        showCatalogMgmt
       />
     </ListPage>
   );

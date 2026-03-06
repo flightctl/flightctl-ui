@@ -19,7 +19,7 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { InstallAppFormik, InstallOsFormik } from '../types';
 import { OS_ITEM_LABEL_KEY } from '../../const';
-import { getFullReferenceURI } from '../../utils';
+import { getFullContainerURI } from '../../utils';
 import { DeviceSpec } from '@flightctl/types';
 import { Trans } from 'react-i18next';
 
@@ -32,7 +32,8 @@ const isOsUpdate = (
   const existingOsItem = labels?.[OS_ITEM_LABEL_KEY];
   const catalogItemVersion = catalogItem.spec.versions.find((v) => v.version === version);
   if (existingOsItem === catalogItem.metadata.name && catalogItemVersion) {
-    return spec?.os?.image !== getFullReferenceURI(catalogItem.spec.reference.uri, catalogItemVersion);
+    const imgUri = getFullContainerURI(catalogItem.spec.artifacts, catalogItemVersion);
+    return !!imgUri && !!spec?.os?.image && imgUri !== spec.os.image;
   }
   return false;
 };

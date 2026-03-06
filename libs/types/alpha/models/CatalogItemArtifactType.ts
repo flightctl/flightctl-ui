@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Type of artifact format. Includes bootc-image-builder output formats. Defaults to container if only one artifact.
+ * Artifact format discriminator. Must be unique within the artifacts list. Includes bootc-image-builder output formats.
  */
 export enum CatalogItemArtifactType {
   CatalogItemArtifactTypeContainer = 'container',

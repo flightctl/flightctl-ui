@@ -23,7 +23,7 @@ import { Formik, useFormikContext } from 'formik';
 
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { useFetch } from '../../hooks/useFetch';
-import { ResourceSync, ResourceSyncList } from '@flightctl/types';
+import { ResourceSync, ResourceSyncList, ResourceSyncType } from '@flightctl/types';
 import { getObservedHash } from '../../utils/status/repository';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import Table, { TableColumn } from '../Table/Table';
@@ -51,9 +51,19 @@ import { RESOURCE, VERB } from '../../types/rbac';
 
 import './RepositoryResourceSyncList.css';
 
+const getResourceSyncType = (t: TFunction, type?: ResourceSyncType) => {
+  if (type === ResourceSyncType.ResourceSyncTypeCatalog) {
+    return t('Catalog');
+  }
+  return t('Fleet');
+};
+
 const getColumns = (t: TFunction): TableColumn<ResourceSync>[] => [
   {
     name: t('Name'),
+  },
+  {
+    name: t('Type'),
   },
   {
     name: t('Path'),
@@ -132,7 +142,9 @@ const CreateResourceSyncModal = ({
       <ModalHeader title={t('Add a resource sync')} />
       <ModalBody>
         <Formik<SingleResourceSyncValues>
-          initialValues={{ resourceSyncs: [{ name: '', targetRevision: '', path: '' }] }}
+          initialValues={{
+            resourceSyncs: [{ name: '', targetRevision: '', path: '', type: ResourceSyncType.ResourceSyncTypeFleet }],
+          }}
           validationSchema={singleResourceSyncSchema(t, storedRSs)}
           onSubmit={async (values: SingleResourceSyncValues) => {
             const rsToAdd = getResourceSync(repositoryId, values.resourceSyncs[0]);
@@ -208,20 +220,22 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
               </Button>
             </ToolbarItem>
           )}
+          {canCreate && resourceSyncs.length > 0 && (
+            <ToolbarItem>
+              <Button
+                variant="link"
+                icon={<PlusCircleIcon />}
+                className="fctl-rslist__addrsbutton"
+                onClick={() => {
+                  setIsAddRsModalOpen(true);
+                }}
+              >
+                {t('Add a resource sync')}
+              </Button>
+            </ToolbarItem>
+          )}
         </ToolbarContent>
       </Toolbar>
-      {canCreate && resourceSyncs.length > 0 && (
-        <Button
-          variant="link"
-          icon={<PlusCircleIcon />}
-          className="fctl-rslist__addrsbutton"
-          onClick={() => {
-            setIsAddRsModalOpen(true);
-          }}
-        >
-          {t('Add a resource sync')}
-        </Button>
-      )}
       <Table
         aria-label={t('Resource syncs table')}
         loading={isLoading}
@@ -246,6 +260,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
                   }}
                 />
                 <Td dataLabel={t('Name')}>{rsName}</Td>
+                <Td dataLabel={t('Type')}>{getResourceSyncType(t, resourceSync.spec.type)}</Td>
                 <Td dataLabel={t('Path')}>{resourceSync.spec.path || ''}</Td>
                 <Td dataLabel={t('Target revision')}>{resourceSync.spec.targetRevision}</Td>
                 <Td dataLabel={t('Status')}>

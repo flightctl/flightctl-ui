@@ -24,6 +24,7 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
   return (
     <ResourceCatalogPage
       canEdit={canEdit && !device.metadata.owner}
+      hasOwner={!!device.metadata.owner}
       currentLabels={device.metadata.labels}
       onPatch={onPatch}
       spec={device.spec}

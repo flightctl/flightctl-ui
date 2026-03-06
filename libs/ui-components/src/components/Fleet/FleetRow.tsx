@@ -21,6 +21,7 @@ type FleetRowProps = {
   canEdit?: boolean;
   singleSelect?: boolean;
   hideActions?: boolean;
+  isSelectDisabled?: boolean;
 };
 
 const useFleetActions = (fleetName: string, isManaged: boolean, canEdit: boolean) => {
@@ -51,6 +52,7 @@ const FleetRow: React.FC<FleetRowProps> = ({
   canEdit = false,
   singleSelect,
   hideActions,
+  isSelectDisabled,
 }) => {
   const { t } = useTranslation();
   const fleetName = fleet.metadata.name || '';
@@ -82,6 +84,7 @@ const FleetRow: React.FC<FleetRowProps> = ({
           onSelect: onRowSelect(fleet),
           isSelected: isRowSelected(fleet),
           variant: singleSelect ? 'radio' : 'checkbox',
+          isDisabled: isSelectDisabled,
         }}
       />
       <Td dataLabel={t('Name')}>

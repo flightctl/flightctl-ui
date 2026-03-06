@@ -1,4 +1,4 @@
-import { CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
+import { Catalog, CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
 import {
   Alert,
   Button,
@@ -19,6 +19,7 @@ import {
   DrawerPanelContent,
   Grid,
   GridItem,
+  Spinner,
   Split,
   SplitItem,
   Stack,
@@ -30,11 +31,19 @@ import { createPortal } from 'react-dom';
 import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 import { Formik, useFormikContext } from 'formik';
+import { ActionsColumn } from '@patternfly/react-table';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { InstallSpec, InstallSpecFormik } from './InstallWizard/steps/SpecificationsStep';
+import { useFetch } from '../../hooks/useFetch';
+import { ROUTE, useNavigate } from '../../hooks/useNavigate';
+import { InstallSpec } from './InstallWizard/steps/SpecificationsStep';
 import FlightCtlForm from '../form/FlightCtlForm';
-import { getCatalogItemIcon } from './utils';
+import { DeprecateModal, RestoreModal } from './DeprecateModal';
+import { getCatalogItemIcon, getFullContainerURI } from './utils';
+import DeleteModal from '../modals/DeleteModal/DeleteModal';
+import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
+import WithTooltip from '../common/WithTooltip';
+import { InstallSpecFormik } from './InstallWizard/types';
 
 import './CatalogItemDetails.css';
 
@@ -42,6 +51,10 @@ type CatalogItemDetailsPanelProps = {
   item: CatalogItem;
   onClose: VoidFunction;
   canInstall: boolean;
+  targetHasOwner?: boolean;
+  refetch: VoidFunction;
+  showCatalogMgmt: boolean;
+  targetSet: boolean;
 };
 
 type CatalogItemDetailsProps = CatalogItemDetailsPanelProps & {
@@ -107,17 +120,59 @@ export const CatalogItemDetailsHeader = ({ item }: CatalogItemDetailsHeaderProps
   );
 };
 
-const CatalogItemDetailsPanel = ({ item, onClose, canInstall }: CatalogItemDetailsPanelProps) => {
+const CatalogItemDetailsPanel = ({
+  item,
+  onClose,
+  canInstall,
+  targetHasOwner,
+  refetch,
+  showCatalogMgmt,
+  targetSet,
+}: CatalogItemDetailsPanelProps) => {
   const { t } = useTranslation();
   const topOffset = usePageContentTop();
+  const navigate = useNavigate();
+  const { patch, remove } = useFetch();
+  const [isDeprecateModalOpen, setIsDeprecateModalOpen] = React.useState(false);
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = React.useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+
+  const isDeprecated = !!item.spec.deprecation;
 
   const {
     values: { version, channel },
     submitForm,
-    isValid,
   } = useFormikContext<InstallSpecFormik>();
 
-  const installEnabled = !!version && !!channel && canInstall;
+  const deployDisabledReasons = (() => {
+    const reasons: string[] = [];
+    if (targetHasOwner) {
+      reasons.push(t('This resource is managed by an owner and cannot be modified directly'));
+    } else if (!canInstall) {
+      reasons.push(t('You do not have permission to deploy'));
+    }
+    if (!channel) {
+      reasons.push(t('A channel must be selected'));
+    }
+    if (!version) {
+      reasons.push(t('A version must be selected'));
+    }
+
+    const catalogItemVersion = item.spec.versions.find((v) => v.version === version);
+    if (catalogItemVersion) {
+      // if target is given (fleet/device) or App catalog item is chosen, it must have container ref
+      if (
+        (targetSet || item.spec.type !== CatalogItemType.CatalogItemTypeOS) &&
+        !getFullContainerURI(item.spec.artifacts, catalogItemVersion)
+      ) {
+        reasons.push('This catalog item does not have a deployable artifact');
+      }
+    }
+
+    return reasons;
+  })();
+
+  const isManaged = !!item.metadata.owner;
 
   const panelContent = (
     <DrawerPanelContent
@@ -131,6 +186,58 @@ const CatalogItemDetailsPanel = ({ item, onClose, canInstall }: CatalogItemDetai
       <DrawerHead>
         <CatalogItemDetailsHeader item={item} />
         <DrawerActions>
+          {showCatalogMgmt && (
+            <ActionsColumn
+              items={[
+                {
+                  title: isManaged ? t('View') : t('Edit'),
+                  onClick: () => {
+                    navigate({
+                      route: ROUTE.CATALOG_EDIT_ITEM,
+                      postfix: `${item.metadata.catalog}/${item.metadata.name}`,
+                    });
+                  },
+                },
+                isDeprecated
+                  ? {
+                      title: t('Restore'),
+                      onClick: () => setIsRestoreModalOpen(true),
+                      tooltipProps: isManaged
+                        ? {
+                            content: t(
+                              "This catalog item is managed by a resource sync and cannot be directly restored. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
+                            ),
+                          }
+                        : undefined,
+                      isAriaDisabled: isManaged,
+                    }
+                  : {
+                      title: t('Deprecate'),
+                      onClick: () => setIsDeprecateModalOpen(true),
+                      tooltipProps: isManaged
+                        ? {
+                            content: t(
+                              "This catalog item is managed by a resource sync and cannot be directly deprecated. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
+                            ),
+                          }
+                        : undefined,
+                      isAriaDisabled: isManaged,
+                    },
+                {
+                  title: t('Delete'),
+                  onClick: () => setIsDeleteModalOpen(true),
+                  tooltipProps: isManaged
+                    ? {
+                        content: t(
+                          "This catalog item is managed by a resource sync and cannot be directly deleted. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
+                        ),
+                      }
+                    : undefined,
+                  isAriaDisabled: isManaged,
+                },
+              ]}
+            />
+          )}
           <DrawerCloseButton onClose={onClose} />
         </DrawerActions>
       </DrawerHead>
@@ -145,9 +252,20 @@ const CatalogItemDetailsPanel = ({ item, onClose, canInstall }: CatalogItemDetai
             <Alert variant="info" isInline title={t('Data catalog item can be deployed as part of an application.')} />
           ) : (
             <StackItem>
-              <Button onClick={submitForm} isDisabled={!installEnabled || !isValid}>
-                {t('Deploy')}
-              </Button>
+              <WithTooltip
+                showTooltip={!!deployDisabledReasons.length}
+                content={
+                  <Stack>
+                    {deployDisabledReasons.map((reason, index) => (
+                      <StackItem key={index}>{reason}</StackItem>
+                    ))}
+                  </Stack>
+                }
+              >
+                <Button onClick={submitForm} isAriaDisabled={!!deployDisabledReasons.length}>
+                  {t('Deploy')}
+                </Button>
+              </WithTooltip>
             </StackItem>
           )}
           <StackItem>
@@ -186,7 +304,57 @@ const CatalogItemDetailsPanel = ({ item, onClose, canInstall }: CatalogItemDetai
     </div>
   );
 
-  return createPortal(drawerWrapper, document.body);
+  return (
+    <>
+      {createPortal(drawerWrapper, document.body)}
+      {isDeprecateModalOpen && (
+        <DeprecateModal
+          itemName={item.spec.displayName || item.metadata.name || ''}
+          onClose={() => setIsDeprecateModalOpen(false)}
+          onDeprecate={async (message) => {
+            await patch(`catalogs/${item.metadata.catalog}/items/${item.metadata.name}`, [
+              {
+                op: isDeprecated ? 'replace' : 'add',
+                path: '/spec/deprecation',
+                value: { message },
+              },
+            ]);
+            refetch();
+            setIsDeprecateModalOpen(false);
+          }}
+        />
+      )}
+      {isRestoreModalOpen && (
+        <RestoreModal
+          itemName={item.spec.displayName || item.metadata.name || ''}
+          onClose={() => setIsRestoreModalOpen(false)}
+          onRestore={async () => {
+            await patch(`catalogs/${item.metadata.catalog}/items/${item.metadata.name}`, [
+              {
+                op: 'remove',
+                path: '/spec/deprecation',
+              },
+            ]);
+            refetch();
+            setIsRestoreModalOpen(false);
+          }}
+        />
+      )}
+      {isDeleteModalOpen && (
+        <DeleteModal
+          resourceName={item.spec.displayName || item.metadata.name || ''}
+          resourceType={t('catalog item')}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onDelete={async () => {
+            await remove(`catalogs/${item.metadata.catalog}/items/${item.metadata.name}`);
+            refetch();
+            setIsDeleteModalOpen(false);
+            onClose();
+          }}
+        />
+      )}
+    </>
+  );
 };
 
 type CatalogItemDetailsContentProps = {
@@ -200,12 +368,22 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
     values: { version },
   } = useFormikContext<InstallSpecFormik>();
 
+  const [catalog, loading] = useFetchPeriodically<Catalog>({
+    endpoint: `catalogs/${item.metadata.catalog}`,
+  });
+
   const readme = item.spec.versions.find((v) => v.version === version)?.readme;
 
   return (
     <Grid hasGutter>
       <GridItem span={3}>
         <DescriptionList>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Catalog')}</DescriptionListTerm>
+            <DescriptionListDescription className="fctl-catalog-item-details">
+              {loading ? <Spinner /> : catalog?.spec.displayName || item.metadata.catalog}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Provider')}</DescriptionListTerm>
             <DescriptionListDescription className="fctl-catalog-item-details">
@@ -218,6 +396,18 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
               {item.spec.documentationUrl ? (
                 <Button variant="link" href={item.spec.documentationUrl} isInline>
                   {item.spec.documentationUrl}
+                </Button>
+              ) : (
+                t('N/A')
+              )}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Support URL')}</DescriptionListTerm>
+            <DescriptionListDescription className="fctl-catalog-item-details">
+              {item.spec.support ? (
+                <Button variant="link" href={item.spec.support} isInline>
+                  {item.spec.support}
                 </Button>
               ) : (
                 t('N/A')

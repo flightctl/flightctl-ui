@@ -1,3 +1,10 @@
 .fctl-catalog-page {
   padding-top: var(--pf-t--global--spacer--md);
 }
+
+.fctl-catalog-page__filters {
+  width: 250px;
+  min-width: 200px;
+  flex-shrink: 0;
+  overflow-wrap: break-word;
+}

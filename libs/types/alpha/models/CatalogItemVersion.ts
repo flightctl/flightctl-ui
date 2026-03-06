@@ -9,7 +9,7 @@ import type { CatalogItemDeprecation } from './CatalogItemDeprecation';
  * are nodes in an upgrade graph and channels are labels on those nodes.
  * Upgrade edges are defined by replaces (single), skips (multiple), or
  * skipRange (semver range). Includes CatalogItemConfigurable fields that
- * override item-level defaults. Exactly one of tag or digest must be specified.
+ * override item-level defaults.
  *
  */
 export type CatalogItemVersion = (CatalogItemConfigurable & {
@@ -18,13 +18,9 @@ export type CatalogItemVersion = (CatalogItemConfigurable & {
    */
   version: string;
   /**
-   * Image tag to pull. Mutually exclusive with digest.
+   * Map of artifact type to image tag or digest. Keys must match a type in spec.artifacts. Only keyed artifacts are available for this version.
    */
-  tag?: string;
-  /**
-   * OCI digest for immutable reference. Mutually exclusive with tag. Format: sha256:...
-   */
-  digest?: string;
+  references: Record<string, string>;
   /**
    * Channels this version belongs to.
    */
