@@ -30,11 +30,16 @@ import { createPortal } from 'react-dom';
 import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 import { Formik, useFormikContext } from 'formik';
+import { ActionsColumn } from '@patternfly/react-table';
 
 import { useTranslation } from '../../hooks/useTranslation';
+import { useFetch } from '../../hooks/useFetch';
+import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { InstallSpec, InstallSpecFormik } from './InstallWizard/steps/SpecificationsStep';
 import FlightCtlForm from '../form/FlightCtlForm';
+import { DeprecateModal, RestoreModal } from './DeprecateModal';
 import { getCatalogItemIcon } from './utils';
+import DeleteModal from '../modals/DeleteModal/DeleteModal';
 
 import './CatalogItemDetails.css';
 
@@ -42,6 +47,8 @@ type CatalogItemDetailsPanelProps = {
   item: CatalogItem;
   onClose: VoidFunction;
   canInstall: boolean;
+  refetch: VoidFunction;
+  showCatalogMgmt: boolean;
 };
 
 type CatalogItemDetailsProps = CatalogItemDetailsPanelProps & {
@@ -107,9 +114,22 @@ export const CatalogItemDetailsHeader = ({ item }: CatalogItemDetailsHeaderProps
   );
 };
 
-const CatalogItemDetailsPanel = ({ item, onClose, canInstall }: CatalogItemDetailsPanelProps) => {
+const CatalogItemDetailsPanel = ({
+  item,
+  onClose,
+  canInstall,
+  refetch,
+  showCatalogMgmt,
+}: CatalogItemDetailsPanelProps) => {
   const { t } = useTranslation();
   const topOffset = usePageContentTop();
+  const navigate = useNavigate();
+  const { patch, remove } = useFetch();
+  const [isDeprecateModalOpen, setIsDeprecateModalOpen] = React.useState(false);
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = React.useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+
+  const isDeprecated = !!item.spec.deprecation;
 
   const {
     values: { version, channel },
@@ -131,6 +151,34 @@ const CatalogItemDetailsPanel = ({ item, onClose, canInstall }: CatalogItemDetai
       <DrawerHead>
         <CatalogItemDetailsHeader item={item} />
         <DrawerActions>
+          {showCatalogMgmt && (
+            <ActionsColumn
+              items={[
+                {
+                  title: t('Edit'),
+                  onClick: () => {
+                    navigate({
+                      route: ROUTE.CATALOG_EDIT_ITEM,
+                      postfix: `${item.metadata.catalog}/${item.metadata.name}`,
+                    });
+                  },
+                },
+                isDeprecated
+                  ? {
+                      title: t('Restore'),
+                      onClick: () => setIsRestoreModalOpen(true),
+                    }
+                  : {
+                      title: t('Deprecate'),
+                      onClick: () => setIsDeprecateModalOpen(true),
+                    },
+                {
+                  title: t('Delete'),
+                  onClick: () => setIsDeleteModalOpen(true),
+                },
+              ]}
+            />
+          )}
           <DrawerCloseButton onClose={onClose} />
         </DrawerActions>
       </DrawerHead>
@@ -186,7 +234,56 @@ const CatalogItemDetailsPanel = ({ item, onClose, canInstall }: CatalogItemDetai
     </div>
   );
 
-  return createPortal(drawerWrapper, document.body);
+  return (
+    <>
+      {createPortal(drawerWrapper, document.body)}
+      {isDeprecateModalOpen && (
+        <DeprecateModal
+          itemName={item.spec.displayName || item.metadata.name || ''}
+          onClose={() => setIsDeprecateModalOpen(false)}
+          onDeprecate={async (message) => {
+            await patch(`catalogs/${item.metadata.catalog}/items/${item.metadata.name}`, [
+              {
+                op: isDeprecated ? 'replace' : 'add',
+                path: '/spec/deprecation',
+                value: { message },
+              },
+            ]);
+            refetch();
+            setIsDeprecateModalOpen(false);
+          }}
+        />
+      )}
+      {isRestoreModalOpen && (
+        <RestoreModal
+          itemName={item.spec.displayName || item.metadata.name || ''}
+          onClose={() => setIsRestoreModalOpen(false)}
+          onRestore={async () => {
+            await patch(`catalogs/${item.metadata.catalog}/items/${item.metadata.name}`, [
+              {
+                op: 'remove',
+                path: '/spec/deprecation',
+              },
+            ]);
+            refetch();
+            setIsRestoreModalOpen(false);
+          }}
+        />
+      )}
+      {isDeleteModalOpen && (
+        <DeleteModal
+          resourceName={item.spec.displayName || item.metadata.name || ''}
+          resourceType={t('catalog item')}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onDelete={async () => {
+            await remove(`catalogs/${item.metadata.catalog}/items/${item.metadata.name}`);
+            refetch();
+            setIsDeleteModalOpen(false);
+          }}
+        />
+      )}
+    </>
+  );
 };
 
 type CatalogItemDetailsContentProps = {
@@ -218,6 +315,18 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
               {item.spec.documentationUrl ? (
                 <Button variant="link" href={item.spec.documentationUrl} isInline>
                   {item.spec.documentationUrl}
+                </Button>
+              ) : (
+                t('N/A')
+              )}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Support URL')}</DescriptionListTerm>
+            <DescriptionListDescription className="fctl-catalog-item-details">
+              {item.spec.support ? (
+                <Button variant="link" href={item.spec.support} isInline>
+                  {item.spec.support}
                 </Button>
               ) : (
                 t('N/A')

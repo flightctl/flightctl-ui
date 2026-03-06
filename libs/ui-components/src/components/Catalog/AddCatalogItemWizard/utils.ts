@@ -1,0 +1,510 @@
+import * as Yup from 'yup';
+import * as semver from 'semver';
+import validator from '@rjsf/validator-ajv8';
+import { RJSFSchema } from '@rjsf/utils';
+import { dump, load } from 'js-yaml';
+import { TFunction } from 'i18next';
+import isEqual from 'lodash/isEqual';
+import {
+  ApiVersion,
+  CatalogItem,
+  CatalogItemArtifactType,
+  CatalogItemCategory,
+  CatalogItemConfigurable,
+  CatalogItemType,
+  CatalogItemVersion,
+  CatalogItemVisibility,
+} from '@flightctl/types/alpha';
+import { PatchRequest } from '@flightctl/types';
+
+import {
+  AddCatalogItemFormValues,
+  ArtifactFormValue,
+  VersionFormValues,
+  VersionRefType,
+  configurableAppTypes,
+} from './types';
+import { appTypeIds } from '../useCatalogs';
+import { validKubernetesDnsSubdomain } from '../../form/validations';
+import { appendJSONPatch } from '../../../utils/patch';
+
+const parseYamlField = (value: string): Record<string, unknown> | undefined => {
+  if (!value.trim()) {
+    return undefined;
+  }
+  return load(value) as Record<string, unknown>;
+};
+
+const dumpYamlField = (value: Record<string, unknown> | undefined): string => {
+  if (!value || Object.keys(value).length === 0) {
+    return '';
+  }
+  return dump(value, { lineWidth: -1 }).trimEnd();
+};
+
+export const getEmptyVersion = (): VersionFormValues => ({
+  version: '',
+  refType: 'tag',
+  tag: '',
+  digest: '',
+  channels: [],
+  replaces: '',
+  skips: '',
+  skipRange: '',
+  readme: '',
+  config: '',
+  configSchema: '',
+  deprecated: false,
+  deprecationMessage: '',
+});
+
+export const getEmptyArtifact = (): ArtifactFormValue => ({
+  type: '',
+  name: '',
+  uri: '',
+});
+
+export const getInitialValues = (): AddCatalogItemFormValues => ({
+  name: '',
+  displayName: '',
+  shortDescription: '',
+  icon: '',
+  type: '',
+  referenceUri: '',
+  artifacts: [],
+  provider: '',
+  homepage: '',
+  supportUrl: '',
+  documentationUrl: '',
+  versions: [getEmptyVersion()],
+  defaultConfig: '',
+  defaultConfigSchema: '',
+  deprecated: false,
+  deprecationMessage: '',
+  deprecationReplacement: '',
+});
+
+const getCategoryForType = (type: CatalogItemType): CatalogItemCategory => {
+  if (appTypeIds.includes(type)) {
+    return CatalogItemCategory.CatalogItemCategoryApplication;
+  }
+  return CatalogItemCategory.CatalogItemCategorySystem;
+};
+
+const isConfigurableType = (type: CatalogItemType): boolean => configurableAppTypes.includes(type);
+
+const formVersionsToApi = (values: AddCatalogItemFormValues) => {
+  const configurable = isConfigurableType(values.type as CatalogItemType);
+  return values.versions.map((v) => {
+    const skips = v.skips
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const versionDef: CatalogItemVersion = {
+      version: v.version,
+      tag: v.refType === 'tag' && v.tag ? v.tag : undefined,
+      digest: v.refType === 'digest' && v.digest ? v.digest : undefined,
+      channels: v.channels,
+      replaces: v.replaces || undefined,
+      skips: skips.length ? skips : undefined,
+      skipRange: v.skipRange || undefined,
+      readme: v.readme || undefined,
+      config: configurable ? parseYamlField(v.config) : undefined,
+      configSchema: configurable ? parseSchemaField(v.configSchema) : undefined,
+      deprecation: v.deprecated ? { message: v.deprecationMessage } : undefined,
+    };
+
+    return Object.fromEntries(
+      Object.entries(versionDef).filter(([, value]) => value !== undefined),
+    ) as CatalogItemVersion;
+  });
+};
+
+const formArtifactsToApi = (artifacts: ArtifactFormValue[]) =>
+  artifacts.length
+    ? artifacts
+        .filter((a) => a.uri)
+        .map((a) => ({
+          type: a.type || undefined,
+          name: a.name || undefined,
+          uri: a.uri,
+        }))
+    : undefined;
+
+const formDefaultsToApi = (values: AddCatalogItemFormValues): CatalogItemConfigurable | undefined => {
+  if (!isConfigurableType(values.type as CatalogItemType)) {
+    return undefined;
+  }
+  const defaultConfig = parseYamlField(values.defaultConfig);
+  const defaultConfigSchema = parseSchemaField(values.defaultConfigSchema);
+  if (defaultConfig || defaultConfigSchema) {
+    return {
+      config: defaultConfig,
+      configSchema: defaultConfigSchema,
+    };
+  }
+  return undefined;
+};
+
+export const getCatalogItemResource = (values: AddCatalogItemFormValues, catalog: string): CatalogItem => {
+  const type = values.type as CatalogItemType;
+
+  return {
+    apiVersion: ApiVersion.V1ALPHA1,
+    kind: 'CatalogItem',
+    metadata: {
+      name: values.name,
+      catalog,
+    },
+    spec: {
+      type,
+      category: getCategoryForType(type),
+      reference: {
+        uri: values.referenceUri,
+        artifacts: formArtifactsToApi(values.artifacts),
+      },
+      versions: formVersionsToApi(values),
+      defaults: formDefaultsToApi(values),
+      displayName: values.displayName || undefined,
+      shortDescription: values.shortDescription || undefined,
+      icon: values.icon || undefined,
+      provider: values.provider || undefined,
+      homepage: values.homepage || undefined,
+      support: values.supportUrl || undefined,
+      documentationUrl: values.documentationUrl || undefined,
+      deprecation: values.deprecated
+        ? { message: values.deprecationMessage, replacement: values.deprecationReplacement || undefined }
+        : undefined,
+      visibility: CatalogItemVisibility.CatalogItemVisibilityPublished,
+    },
+  };
+};
+
+const getVersionPatches = (
+  patches: PatchRequest,
+  currentVersions: CatalogItemVersion[],
+  newVersions: CatalogItemVersion[],
+) => {
+  const currentLen = currentVersions.length;
+  const newLen = newVersions.length;
+
+  if (currentLen === 0 && newLen > 0) {
+    patches.push({ path: '/spec/versions', op: 'add', value: newVersions });
+  } else if (currentLen > 0 && newLen === 0) {
+    patches.push({ path: '/spec/versions', op: 'remove' });
+  } else if (currentLen !== newLen) {
+    patches.push({ path: '/spec/versions', op: 'replace', value: newVersions });
+  } else {
+    currentVersions.forEach((currentVersion, index) => {
+      const newVersion = newVersions[index];
+      if (!isEqual(currentVersion, newVersion)) {
+        patches.push({
+          path: `/spec/versions/${index}`,
+          op: 'replace',
+          value: newVersion,
+        });
+      }
+    });
+  }
+};
+
+export const getCatalogItemPatches = (values: AddCatalogItemFormValues, original: CatalogItem): PatchRequest => {
+  const patches: PatchRequest = [];
+  const spec = original.spec;
+
+  appendJSONPatch({
+    patches,
+    path: '/spec/reference/uri',
+    newValue: values.referenceUri,
+    originalValue: spec.reference.uri,
+  });
+
+  const newArtifacts = formArtifactsToApi(values.artifacts);
+  appendJSONPatch({
+    patches,
+    path: '/spec/reference/artifacts',
+    newValue: newArtifacts,
+    originalValue: spec.reference.artifacts,
+  });
+
+  getVersionPatches(patches, spec.versions, formVersionsToApi(values));
+
+  const newDefaults = formDefaultsToApi(values);
+  appendJSONPatch({
+    patches,
+    path: '/spec/defaults',
+    newValue: newDefaults,
+    originalValue: spec.defaults,
+  });
+
+  appendJSONPatch({
+    patches,
+    path: '/spec/displayName',
+    newValue: values.displayName || undefined,
+    originalValue: spec.displayName,
+  });
+
+  appendJSONPatch({
+    patches,
+    path: '/spec/shortDescription',
+    newValue: values.shortDescription || undefined,
+    originalValue: spec.shortDescription,
+  });
+
+  appendJSONPatch({
+    patches,
+    path: '/spec/icon',
+    newValue: values.icon || undefined,
+    originalValue: spec.icon,
+  });
+
+  appendJSONPatch({
+    patches,
+    path: '/spec/provider',
+    newValue: values.provider || undefined,
+    originalValue: spec.provider,
+  });
+
+  appendJSONPatch({
+    patches,
+    path: '/spec/homepage',
+    newValue: values.homepage || undefined,
+    originalValue: spec.homepage,
+  });
+
+  appendJSONPatch({
+    patches,
+    path: '/spec/support',
+    newValue: values.supportUrl || undefined,
+    originalValue: spec.support,
+  });
+
+  appendJSONPatch({
+    patches,
+    path: '/spec/documentationUrl',
+    newValue: values.documentationUrl || undefined,
+    originalValue: spec.documentationUrl,
+  });
+
+  const newDeprecation = values.deprecated
+    ? { message: values.deprecationMessage, replacement: values.deprecationReplacement || undefined }
+    : undefined;
+  appendJSONPatch({
+    patches,
+    path: '/spec/deprecation',
+    newValue: newDeprecation,
+    originalValue: spec.deprecation,
+  });
+
+  return patches;
+};
+
+const parseJsonOrYaml = (value: string): unknown => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return load(value);
+  }
+};
+
+const parseSchemaField = (value: string): Record<string, unknown> | undefined => {
+  if (!value.trim()) {
+    return undefined;
+  }
+  return parseJsonOrYaml(value) as Record<string, unknown>;
+};
+
+const jsonSchemaFieldSchema = (t: TFunction) =>
+  Yup.string().test('valid-json-schema', t('Must be a valid JSON Schema (JSON or YAML)'), (value) => {
+    if (!value?.trim()) {
+      return true;
+    }
+    try {
+      const parsed = parseJsonOrYaml(value);
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+        return false;
+      }
+      validator.validateFormData({}, parsed as RJSFSchema);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
+const optionalSemver = (t: TFunction) =>
+  Yup.string().test('valid-semver', t('Must be a valid semantic version (e.g. 1.0.0, v2.1.0-rc1)'), (value) => {
+    if (!value) {
+      return true;
+    }
+    return semver.valid(value) !== null;
+  });
+
+const optionalSemverList = (t: TFunction) =>
+  Yup.string().test(
+    'valid-semver-list',
+    t('Each entry must be a valid semantic version (e.g. 1.0.0, v2.1.0-rc1)'),
+    (value) => {
+      if (!value?.trim()) {
+        return true;
+      }
+      return value
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .every((v) => semver.valid(v) !== null);
+    },
+  );
+
+const optionalSemverRange = (t: TFunction) =>
+  Yup.string().test('valid-semver-range', t('Must be a valid semver range (e.g. >=1.0.0 <2.0.0)'), (value) => {
+    if (!value?.trim()) {
+      return true;
+    }
+    return semver.validRange(value) !== null;
+  });
+
+const yamlFieldSchema = (t: TFunction) =>
+  Yup.string().test('valid-yaml-json', t('Must be a valid YAML or JSON object'), (value) => {
+    if (!value || value.trim() === '') {
+      return true;
+    }
+    try {
+      const parsed = load(value);
+      return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
+    } catch {
+      return false;
+    }
+  });
+
+const versionSchema = (t: TFunction, duplicates: Set<string>) =>
+  Yup.object().shape({
+    version: Yup.string()
+      .required(t('Version is required'))
+      .test('valid-semver', t('Must be a valid semantic version (e.g. 1.0.0, v2.1.0-rc1)'), (value) => {
+        if (!value) {
+          return true;
+        }
+        return semver.valid(value) !== null;
+      })
+      .test('unique-version', t('Version must be unique'), (value) => {
+        if (!value) {
+          return true;
+        }
+        return !duplicates.has(value);
+      }),
+    refType: Yup.string().oneOf(['tag', 'digest']).required(),
+    tag: Yup.string().when('refType', {
+      is: 'tag',
+      then: (schema) => schema.required(t('Tag is required')),
+    }),
+    digest: Yup.string().when('refType', {
+      is: 'digest',
+      then: (schema) => schema.required(t('Digest is required')),
+    }),
+    channels: Yup.array().of(Yup.string().required()).min(1, t('At least one channel is required')),
+    replaces: optionalSemver(t),
+    skips: optionalSemverList(t),
+    skipRange: optionalSemverRange(t),
+    readme: Yup.string(),
+    config: yamlFieldSchema(t),
+    configSchema: jsonSchemaFieldSchema(t),
+    deprecated: Yup.boolean(),
+    deprecationMessage: Yup.string().when('deprecated', {
+      is: true,
+      then: (schema) => schema.required(t('Deprecation message is required')),
+    }),
+  });
+
+export const getValidationSchema = (t: TFunction) =>
+  Yup.object().shape({
+    name: validKubernetesDnsSubdomain(t, { isRequired: true }),
+    displayName: Yup.string(),
+    shortDescription: Yup.string(),
+    type: Yup.string().oneOf(Object.values(CatalogItemType)).required(t('Type is required')),
+    referenceUri: Yup.string()
+      .required(t('Reference URI is required'))
+      .test(
+        'no-tag-or-digest',
+        t('Reference URI must not include a tag (":") or digest ("@"). Specify those in the version fields.'),
+        (value) => {
+          if (!value) {
+            return true;
+          }
+          const path = value.replace(/^[a-z]+:\/\//, '');
+          return !path.includes(':') && !path.includes('@');
+        },
+      ),
+    artifacts: Yup.array().of(
+      Yup.object().shape({
+        type: Yup.string().oneOf([...Object.values(CatalogItemArtifactType), ''], t('Invalid artifact type')),
+        name: Yup.string(),
+        uri: Yup.string().required(t('Artifact URI is required')),
+      }),
+    ),
+    provider: Yup.string(),
+    homepage: Yup.string().url(t('Must be a valid URL')),
+    supportUrl: Yup.string().url(t('Must be a valid URL')),
+    documentationUrl: Yup.string().url(t('Must be a valid URL')),
+    versions: Yup.lazy((versions: VersionFormValues[]) => {
+      const versionNames = (versions || []).map((v) => v.version);
+      const duplicates = new Set(versionNames.filter((name, i) => name && versionNames.indexOf(name) !== i));
+
+      return Yup.array().of(versionSchema(t, duplicates)).min(1, t('At least one version is required'));
+    }) as unknown as Yup.ArraySchema<VersionFormValues[], Yup.AnyObject>,
+    defaultConfig: yamlFieldSchema(t),
+    defaultConfigSchema: jsonSchemaFieldSchema(t),
+    deprecated: Yup.boolean(),
+    deprecationMessage: Yup.string().when('deprecated', {
+      is: true,
+      then: (schema) => schema.required(t('Deprecation message is required')),
+    }),
+    deprecationReplacement: Yup.string(),
+  });
+
+export const getInitialValuesFromItem = (item: CatalogItem): AddCatalogItemFormValues => {
+  const versions: VersionFormValues[] = item.spec.versions.map((v) => {
+    const refType: VersionRefType = v.digest ? 'digest' : 'tag';
+    return {
+      version: v.version,
+      refType,
+      tag: v.tag || '',
+      digest: v.digest || '',
+      channels: [...v.channels],
+      replaces: v.replaces || '',
+      skips: v.skips?.join(', ') || '',
+      skipRange: v.skipRange || '',
+      readme: v.readme || '',
+      config: dumpYamlField(v.config as Record<string, unknown> | undefined),
+      configSchema: dumpYamlField(v.configSchema as Record<string, unknown> | undefined),
+      deprecated: !!v.deprecation,
+      deprecationMessage: v.deprecation?.message || '',
+    };
+  });
+
+  const artifacts: ArtifactFormValue[] = (item.spec.reference.artifacts || []).map((a) => ({
+    type: a.type || '',
+    name: a.name || '',
+    uri: a.uri,
+  }));
+
+  return {
+    name: item.metadata.name!,
+    displayName: item.spec.displayName || '',
+    shortDescription: item.spec.shortDescription || '',
+    icon: item.spec.icon || '',
+    type: item.spec.type,
+    referenceUri: item.spec.reference.uri,
+    artifacts,
+    provider: item.spec.provider || '',
+    homepage: item.spec.homepage || '',
+    supportUrl: item.spec.support || '',
+    documentationUrl: item.spec.documentationUrl || '',
+    versions: versions.length ? versions : [getEmptyVersion()],
+    defaultConfig: dumpYamlField(item.spec.defaults?.config as Record<string, unknown> | undefined),
+    defaultConfigSchema: dumpYamlField(item.spec.defaults?.configSchema as Record<string, unknown> | undefined),
+    deprecated: !!item.spec.deprecation,
+    deprecationMessage: item.spec.deprecation?.message || '',
+    deprecationReplacement: item.spec.deprecation?.replacement || '',
+  };
+};

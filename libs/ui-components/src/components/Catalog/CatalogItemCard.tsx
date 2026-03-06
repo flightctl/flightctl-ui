@@ -45,7 +45,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({ catalogItem, onSelect
           </SplitItem>
           <SplitItem>
             <Label
-              variant="outline"
+              variant="filled"
               color={catalogItem.spec.category === CatalogItemCategory.CatalogItemCategorySystem ? 'teal' : 'purple'}
             >
               {getCatalogItemBadge(catalogItem.spec.type, t)}
@@ -72,7 +72,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({ catalogItem, onSelect
           {catalogItem.spec.shortDescription && <StackItem>{catalogItem.spec.shortDescription}</StackItem>}
           {catalogItem.spec.deprecation && (
             <StackItem>
-              <Label variant="outline" color="orange">
+              <Label variant="outline" status="warning">
                 {t('Deprecated')}
               </Label>
             </StackItem>
