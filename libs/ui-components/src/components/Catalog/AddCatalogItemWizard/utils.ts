@@ -383,7 +383,7 @@ const yamlFieldSchema = (t: TFunction) =>
     }
   });
 
-const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: boolean) =>
+const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: boolean, isApp: boolean) =>
   Yup.object().shape({
     version: Yup.string()
       .required(t('Version is required'))
@@ -401,12 +401,17 @@ const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: bool
       }),
     references: Yup.object().test(
       'at-least-one-reference',
-      t('At least one artifact reference is required'),
+      isApp ? t('Container reference is required') : t('At least one artifact reference is required'),
       (value) => {
         if (!value || typeof value !== 'object') {
           return false;
         }
-        return Object.values(value as Record<string, string>).some((v) => typeof v === 'string' && v.trim() !== '');
+        const refs = value as Record<string, string>;
+        if (isApp) {
+          const containerRef = refs[CatalogItemArtifactType.CatalogItemArtifactTypeContainer];
+          return typeof containerRef === 'string' && containerRef.trim() !== '';
+        }
+        return Object.values(refs).some((v) => typeof v === 'string' && v.trim() !== '');
       },
     ),
     channels: Yup.array().of(Yup.string().required()).min(1, t('At least one channel is required')),
@@ -423,13 +428,13 @@ const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: bool
     }),
   });
 
-const versionsSchema = (t: TFunction, configurable: boolean) =>
+const versionsSchema = (t: TFunction, configurable: boolean, isApp: boolean) =>
   Yup.lazy((versions: VersionFormValues[]) => {
     const versionNames = (versions || []).map((v) => v.version);
     const duplicates = new Set(versionNames.filter((name, i) => name && versionNames.indexOf(name) !== i));
 
     return Yup.array()
-      .of(versionSchema(t, duplicates, configurable))
+      .of(versionSchema(t, duplicates, configurable, isApp))
       .min(1, t('At least one version is required'));
   });
 
@@ -503,10 +508,11 @@ export const getValidationSchema = (t: TFunction) =>
     homepage: validURLSchema(t),
     supportUrl: validURLSchema(t),
     documentationUrl: validURLSchema(t),
-    versions: Yup.mixed().when('type', {
-      is: (type: string) => configurableAppTypes.includes(type as CatalogItemType),
-      then: () => versionsSchema(t, true),
-      otherwise: () => versionsSchema(t, false),
+    versions: Yup.mixed().when('type', ([type]: string[]) => {
+      const itemType = type as CatalogItemType;
+      const configurable = configurableAppTypes.includes(itemType);
+      const isApp = appTypeIds.includes(itemType);
+      return versionsSchema(t, configurable, isApp);
     }) as unknown as Yup.ArraySchema<VersionFormValues[], Yup.AnyObject>,
     defaultConfig: Yup.string().when('type', {
       is: (type: string) => configurableAppTypes.includes(type as CatalogItemType),

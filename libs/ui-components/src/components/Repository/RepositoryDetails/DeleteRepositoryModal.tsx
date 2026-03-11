@@ -31,7 +31,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
   const { get, remove } = useFetch();
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [error, setError] = React.useState<string>();
-  const [rsError, setRsError] = React.useState<string>();
+  const [rsError, setRsError] = React.useState<unknown>();
   const [message, setMessage] = React.useState<string>();
   const [resourceSyncIds, setResourceSyncIds] = React.useState<string[]>();
   const isLoadingRSs = resourceSyncIds === undefined;
@@ -62,15 +62,9 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
       setResourceSyncIds(resourceSyncs.items.map((rs) => rs.metadata.name || ''));
       setRsError(undefined);
     } catch (e) {
-      setRsError(
-        t(
-          `The repository cannot be safely deleted at this moment, as we couldn't determine if the repository contains resource syncs. Detail: {{detail}}`,
-          { detail: getErrorMessage(e) },
-        ),
-      );
+      setRsError(e);
       setResourceSyncIds([]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [get, repositoryId]);
 
   React.useEffect(() => {
@@ -113,7 +107,10 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
           )}
           {rsError ? (
             <Alert isInline variant="warning" title={t('Cannot delete repository')}>
-              {rsError}
+              {t(
+                `The repository cannot be safely deleted at this moment, as we couldn't determine if the repository contains resource syncs. Detail: {{detail}}`,
+                { detail: getErrorMessage(rsError) },
+              )}
             </Alert>
           ) : (
             <StackItem>

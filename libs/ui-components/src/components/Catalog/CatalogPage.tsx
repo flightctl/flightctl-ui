@@ -7,10 +7,14 @@ import {
   DescriptionListGroup,
   DescriptionListTerm,
   Divider,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
   Gallery,
+  MenuToggle,
   PageSection,
   Split,
   SplitItem,
@@ -20,8 +24,9 @@ import {
   TreeViewDataItem,
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
+import { EllipsisVIcon } from '@patternfly/react-icons/dist/js/icons/ellipsis-v-icon';
 import * as React from 'react';
-import { CatalogItem, CatalogItemCategory, CatalogItemType, CatalogList } from '@flightctl/types/alpha';
+import { Catalog, CatalogItem, CatalogItemCategory, CatalogItemType, CatalogList } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import CatalogItemCard from './CatalogItemCard';
@@ -36,6 +41,9 @@ import { usePermissionsContext } from '../common/PermissionsContext';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import ListPage from '../ListPage/ListPage';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
+import DeleteCatalogModal from './DeleteCatalogModal';
+import CreateCatalogModal from './AddCatalogItemWizard/CreateCatalogModal';
+import WithTooltip from '../common/WithTooltip';
 
 import './CatalogPage.css';
 
@@ -44,6 +52,8 @@ type CatalogPageContentProps = {
   targetHasOwner?: boolean;
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
   showCatalogMgmt?: boolean;
+  canEditCatalog?: boolean;
+  canDeleteCatalog?: boolean;
   targetSet?: boolean;
 };
 
@@ -179,14 +189,18 @@ export const CatalogPageContent = ({
   targetHasOwner,
   onInstall,
   showCatalogMgmt,
+  canEditCatalog,
+  canDeleteCatalog,
   targetSet,
 }: CatalogPageContentProps) => {
+  const [catalogMenuOpen, setCatalogMenuOpen] = React.useState<string>();
   const [selectedItem, setSelectedItem] = React.useState<{ itemName: string; catalog: string }>();
+  const [catalogToEdit, setCatalogToEdit] = React.useState<Catalog>();
+  const [catalogToDelete, setCatalogToDelete] = React.useState<Catalog>();
   const { t } = useTranslation();
-
   const catalogFilter = useCatalogFilter();
 
-  const [catalogList, catalogsLoading, catalogsErr] = useFetchPeriodically<CatalogList>({
+  const [catalogList, catalogsLoading, catalogsErr, refetchCatalogs] = useFetchPeriodically<CatalogList>({
     endpoint: 'catalogs',
   });
 
@@ -226,13 +240,61 @@ export const CatalogPageContent = ({
                               : catalogFilter.setCatalogs((catalogs) => [...catalogs, item.id || '']);
                           }}
                           hasCheckboxes
-                          data={catalogList.items.map((c) => ({
-                            name: c.spec.displayName || c.metadata.name || '',
-                            id: c.metadata.name || '',
-                            checkProps: {
-                              checked: !!c.metadata.name && catalogFilter.catalogs.includes(c.metadata.name),
-                            },
-                          }))}
+                          data={catalogList.items.map((c) => {
+                            const canDelete = !c.metadata.owner && canDeleteCatalog;
+                            return {
+                              name: c.spec.displayName || c.metadata.name || '',
+                              id: c.metadata.name || '',
+                              checkProps: {
+                                checked: !!c.metadata.name && catalogFilter.catalogs.includes(c.metadata.name),
+                              },
+                              action: showCatalogMgmt ? (
+                                <Dropdown
+                                  isOpen={catalogMenuOpen === c.metadata.name}
+                                  onOpenChange={(isOpen) => {
+                                    if (isOpen) {
+                                      setCatalogMenuOpen(c.metadata.name);
+                                    } else if (catalogMenuOpen === c.metadata.name) {
+                                      setCatalogMenuOpen(undefined);
+                                    }
+                                  }}
+                                  onSelect={() => setCatalogMenuOpen(undefined)}
+                                  toggle={(toggleRef) => (
+                                    <MenuToggle
+                                      ref={toggleRef}
+                                      isExpanded={catalogMenuOpen === c.metadata.name}
+                                      onClick={() => setCatalogMenuOpen(c.metadata.name)}
+                                      variant="plain"
+                                      icon={<EllipsisVIcon />}
+                                      aria-label={t('Actions dropdown')}
+                                    />
+                                  )}
+                                >
+                                  <DropdownList>
+                                    <DropdownItem
+                                      isAriaDisabled={!c.metadata.owner && !canEditCatalog}
+                                      onClick={() => setCatalogToEdit(c)}
+                                    >
+                                      {c.metadata.owner ? t('View') : t('Edit')}
+                                    </DropdownItem>
+                                    <WithTooltip
+                                      showTooltip={!!c.metadata.owner}
+                                      content={t(
+                                        'This catalog is managed by a resource sync and cannot be directly removed. Either remove the catalog definition from the resource sync configuration, or delete the resource sync first.',
+                                      )}
+                                    >
+                                      <DropdownItem
+                                        isAriaDisabled={!canDelete}
+                                        onClick={canDelete ? () => setCatalogToDelete(c) : undefined}
+                                      >
+                                        {t('Remove')}
+                                      </DropdownItem>
+                                    </WithTooltip>
+                                  </DropdownList>
+                                </Dropdown>
+                              ) : undefined,
+                            };
+                          })}
                         />
                       ) : (
                         <Content component={ContentVariants.small}>{t('No catalogs')}</Content>
@@ -297,25 +359,51 @@ export const CatalogPageContent = ({
           targetSet={!!targetSet}
         />
       )}
+      {!!catalogToEdit && (
+        <CreateCatalogModal
+          catalog={catalogToEdit}
+          onClose={() => setCatalogToEdit(undefined)}
+          onSuccess={() => {
+            setCatalogToEdit(undefined);
+            refetchCatalogs();
+          }}
+        />
+      )}
+      {!!catalogToDelete && (
+        <DeleteCatalogModal
+          catalogId={catalogToDelete.metadata.name || ''}
+          catalogDisplayName={catalogToDelete.spec.displayName || catalogToDelete.metadata.name || ''}
+          onClose={() => setCatalogToDelete(undefined)}
+          onDeleteSuccess={() => {
+            setCatalogToDelete(undefined);
+            refetchCatalogs();
+            refetch();
+          }}
+        />
+      )}
     </>
   );
 };
 
-const catalogInstallPermissions = [
+const catalogPagePermissions = [
   { kind: RESOURCE.FLEET, verb: VERB.PATCH },
   { kind: RESOURCE.DEVICE, verb: VERB.PATCH },
+  { kind: RESOURCE.CATALOG, verb: VERB.PATCH },
+  { kind: RESOURCE.CATALOG, verb: VERB.DELETE },
 ];
 
 const CatalogPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { checkPermissions } = usePermissionsContext();
-  const [canEditFleet, canEditDevice] = checkPermissions(catalogInstallPermissions);
+  const [canEditFleet, canEditDevice, canEditCatalog, canDeleteCatalog] = checkPermissions(catalogPagePermissions);
 
   return (
     <ListPage title={t('Software Catalog')}>
       <CatalogPageContent
         canInstall={canEditFleet || canEditDevice}
+        canEditCatalog={canEditCatalog}
+        canDeleteCatalog={canDeleteCatalog}
         onInstall={({ item, channel, version }) => {
           const params = new URLSearchParams({
             channel,
