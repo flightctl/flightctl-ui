@@ -44,6 +44,7 @@ import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import DeleteCatalogModal from './DeleteCatalogModal';
 import CreateCatalogModal from './AddCatalogItemWizard/CreateCatalogModal';
 import WithTooltip from '../common/WithTooltip';
+import ResourceSyncImportStatus from '../ResourceSync/ResourceSyncImportStatus';
 
 import './CatalogPage.css';
 
@@ -396,24 +397,27 @@ const CatalogPage = () => {
   const [canEditFleet, canEditDevice, canEditCatalog, canDeleteCatalog] = checkPermissions(catalogPagePermissions);
 
   return (
-    <ListPage title={t('Software Catalog')}>
-      <CatalogPageContent
-        canInstall={canEditFleet || canEditDevice}
-        canEditCatalog={canEditCatalog}
-        canDeleteCatalog={canDeleteCatalog}
-        onInstall={({ item, channel, version }) => {
-          const params = new URLSearchParams({
-            channel,
-            version,
-          });
-          navigate({
-            route: ROUTE.CATALOG_INSTALL,
-            postfix: `${item.metadata.catalog}/${item.metadata.name}?${params.toString()}`,
-          });
-        }}
-        showCatalogMgmt
-      />
-    </ListPage>
+    <>
+      <ResourceSyncImportStatus type="catalog" />
+      <ListPage title={t('Software Catalog')}>
+        <CatalogPageContent
+          canInstall={canEditFleet || canEditDevice}
+          canEditCatalog={canEditCatalog}
+          canDeleteCatalog={canDeleteCatalog}
+          onInstall={({ item, channel, version }) => {
+            const params = new URLSearchParams({
+              channel,
+              version,
+            });
+            navigate({
+              route: ROUTE.CATALOG_INSTALL,
+              postfix: `${item.metadata.catalog}/${item.metadata.name}?${params.toString()}`,
+            });
+          }}
+          showCatalogMgmt
+        />
+      </ListPage>
+    </>
   );
 };
 
