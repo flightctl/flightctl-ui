@@ -1,9 +1,10 @@
-import { OciRepoSpec, RepoSpecType } from '@flightctl/types';
+import { OciRepoSpec, RepoSpecType, ResourceSyncType } from '@flightctl/types';
 
 export type ResourceSyncFormValue = {
   name: string;
   targetRevision: string;
   path: string;
+  type: ResourceSyncType;
   exists?: boolean;
 };
 

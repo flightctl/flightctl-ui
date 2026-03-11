@@ -13,6 +13,7 @@ import {
   Repository,
   RepositorySpec,
   ResourceSync,
+  ResourceSyncType,
   SshConfig,
 } from '@flightctl/types';
 
@@ -494,6 +495,7 @@ export const getInitValues = ({
           name: '',
           path: '',
           targetRevision: '',
+          type: ResourceSyncType.ResourceSyncTypeFleet,
         },
       ],
     };
@@ -531,8 +533,9 @@ export const getInitValues = ({
             path: rs.spec.path || '',
             targetRevision: rs.spec.targetRevision || '',
             exists: true,
+            type: rs.spec.type || ResourceSyncType.ResourceSyncTypeFleet,
           }))
-      : [{ name: '', path: '', targetRevision: '' }],
+      : [{ name: '', path: '', targetRevision: '', type: ResourceSyncType.ResourceSyncTypeFleet }],
   };
 
   if (repository.spec.type === RepoSpecType.RepoSpecTypeOci) {
@@ -898,6 +901,7 @@ export const getResourceSync = (repositoryId: string, values: ResourceSyncFormVa
       repository: repositoryId,
       targetRevision: values.targetRevision,
       path: values.path,
+      type: values.type,
     },
   };
 };

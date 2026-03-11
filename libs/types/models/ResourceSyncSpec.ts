@@ -2,10 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ResourceSyncType } from './ResourceSyncType';
 /**
  * ResourceSyncSpec describes the file(s) to sync from a repository.
  */
 export type ResourceSyncSpec = {
+  type?: ResourceSyncType;
   /**
    * The name of the repository resource to use as the sync source.
    */

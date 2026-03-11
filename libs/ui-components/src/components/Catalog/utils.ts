@@ -1,5 +1,11 @@
 import { AppType, ApplicationProviderSpec, ContainerApplication, PatchRequest } from '@flightctl/types';
-import { CatalogItem, CatalogItemType, CatalogItemVersion } from '@flightctl/types/alpha';
+import {
+  CatalogItem,
+  CatalogItemArtifact,
+  CatalogItemArtifactType,
+  CatalogItemType,
+  CatalogItemVersion,
+} from '@flightctl/types/alpha';
 import { TFunction } from 'i18next';
 import semver from 'semver';
 
@@ -21,14 +27,42 @@ import { AssetSelection } from '../DynamicForm/DynamicForm';
 
 import defaultIcon from '../../../assets/flight-control-logo.png';
 
-export const getFullReferenceURI = (refURI: string, version: CatalogItemVersion) => {
-  if (version.digest) {
-    return `${refURI}@${version.digest}`;
+const tagRegex = /^[\w][\w.-]{0,127}$/;
+
+export const getFullArtifactURI = (artifact: CatalogItemArtifact, version: CatalogItemVersion) => {
+  const versionRef = version.references[artifact.type];
+  if (!versionRef) {
+    return undefined;
   }
-  if (version.tag) {
-    return `${refURI}:${version.tag}`;
+
+  try {
+    const url = new URL(versionRef);
+    if (url.host !== '') {
+      return versionRef;
+    }
+  } catch {}
+
+  try {
+    const url = new URL(artifact.uri);
+    if (url.host !== '' && url.protocol !== 'oci:') {
+      return `${artifact.uri}/${versionRef}`;
+    }
+  } catch {}
+
+  if (tagRegex.test(versionRef)) {
+    return `${artifact.uri}:${versionRef}`;
   }
-  return `${refURI}@${version.version}`;
+
+  return `${artifact.uri}@${versionRef}`;
+};
+
+export const getFullContainerURI = (artifacts: CatalogItemArtifact[], version: CatalogItemVersion) => {
+  const containerArtifact = artifacts.find((a) => a.type === CatalogItemArtifactType.CatalogItemArtifactTypeContainer);
+  if (!containerArtifact) {
+    return undefined;
+  }
+
+  return getFullArtifactURI(containerArtifact, version);
 };
 
 export const getCatalogItemBadge = (itemType: CatalogItemType | undefined, t: TFunction) => {
@@ -156,7 +190,7 @@ export const getOsPatches = ({
   specPath: string;
 }) => {
   const allPatches: PatchRequest = [];
-  const newOsImage = getFullReferenceURI(catalogItem.spec.reference.uri, catalogItemVersion);
+  const newOsImage = getFullContainerURI(catalogItem.spec.artifacts, catalogItemVersion);
   if (!currentOsImage) {
     allPatches.push({
       path: `${specPath}spec/os`,
@@ -231,11 +265,16 @@ export const getAppPatches = ({
     throw new Error('Unknown application type');
   }
 
+  const image = getFullContainerURI(catalogItem.spec.artifacts, catalogItemVersion);
+  if (!image) {
+    throw new Error(`Failed to create image uri for ${appName}`);
+  }
+
   const appSpec: ApplicationProviderSpec = {
     ...formValues,
     name: appName,
     appType,
-    image: getFullReferenceURI(catalogItem.spec.reference.uri, catalogItemVersion),
+    image,
   };
   const existingAppIndex = currentApps?.findIndex((app) => app.name === appSpec.name);
 
@@ -294,7 +333,7 @@ export const getAppPatches = ({
 };
 
 export const getUpdates = (catalogItem: CatalogItem, currentChannel: string, currentVersion: string) => {
-  return catalogItem.spec.versions.filter((version) => {
+  const updateVersions = catalogItem.spec.versions.filter((version) => {
     if (!version.channels.includes(currentChannel)) return false;
 
     // Check if current version can upgrade to this version via:
@@ -311,7 +350,52 @@ export const getUpdates = (catalogItem: CatalogItem, currentChannel: string, cur
 
     return false;
   });
+
+  // only versions which have container
+  return updateVersions.filter((v) => !!getFullContainerURI(catalogItem.spec.artifacts, v));
 };
 
 export const getCatalogItemIcon = (catalogItem: CatalogItem): string =>
   catalogItem.spec.icon || (defaultIcon as string);
+
+export const getArtifactLabel = (t: TFunction, type: CatalogItemArtifactType, name?: string) => {
+  let artifactType: CatalogItemArtifactType;
+  switch (type) {
+    case CatalogItemArtifactType.CatalogItemArtifactTypeQcow2:
+      artifactType = t('OpenShift Virtualization');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeIso:
+      artifactType = t('Bare Metal');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeAmi:
+      artifactType = t('Amazon Web Services');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeAnacondaIso:
+      artifactType = t('Anaconda Installer');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeGce:
+      artifactType = t('Google Cloud');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeRaw:
+      artifactType = t('KVM/custom cloud import');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeVhd:
+      artifactType = t('Microsoft Hyper-V');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeVmdk:
+      artifactType = t('VMware vSphere');
+      break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeContainer:
+      artifactType = t('Cloud native');
+      break;
+  }
+
+  if (name) {
+    return `${name} (${type})`;
+  }
+  if (artifactType) {
+    return `${artifactType} (${type})`;
+  }
+
+  return type;
+};

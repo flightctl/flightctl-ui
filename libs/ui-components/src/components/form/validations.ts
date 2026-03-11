@@ -377,7 +377,7 @@ export const validGroupLabelKeysSchema = (t: TFunction) =>
       return uniqueKeys.size === labelKeys?.length;
     });
 
-const appVariablesSchema = (t: TFunction) => {
+export const appVariablesSchema = (t: TFunction) => {
   return Yup.array()
     .of(
       Yup.object().shape({
@@ -705,7 +705,7 @@ const mountPathSchema = (t: TFunction, isRequired: boolean = true) => {
   return isRequired ? schema.required(t('Mount path is required for this volume type')) : schema;
 };
 
-const singleContainerVolumesSchema = (t: TFunction) =>
+export const singleContainerVolumesSchema = (t: TFunction) =>
   Yup.array().of(
     Yup.object().shape({
       name: volumeNameSchema(t),
@@ -715,7 +715,7 @@ const singleContainerVolumesSchema = (t: TFunction) =>
     }),
   );
 
-const composeQuadletVolumesSchema = (t: TFunction) =>
+export const composeQuadletVolumesSchema = (t: TFunction) =>
   Yup.array().of(
     Yup.object().shape({
       name: volumeNameSchema(t),
@@ -1178,3 +1178,5 @@ export const createMassResumeValidationSchema = (t: TFunction) =>
       return Yup.array();
     }),
   });
+
+export const validURLSchema = (t: TFunction) => Yup.string().url(t('Must be a valid URL'));

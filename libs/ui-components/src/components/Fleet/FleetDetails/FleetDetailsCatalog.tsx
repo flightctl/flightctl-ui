@@ -28,7 +28,8 @@ const FleetDetailsCatalog = ({ fleet, refetch }: FleetDetailsCatalogProps) => {
 
   return (
     <ResourceCatalogPage
-      canEdit={canEdit}
+      canEdit={canEdit && !fleet.metadata.owner}
+      hasOwner={!!fleet.metadata.owner}
       currentLabels={fleet.metadata.labels}
       onPatch={onPatch}
       spec={fleet.spec.template.spec}

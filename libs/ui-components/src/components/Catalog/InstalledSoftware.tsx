@@ -24,7 +24,7 @@ import {
 } from '@patternfly/react-core';
 import { CubeIcon } from '@patternfly/react-icons/dist/js/icons/cube-icon';
 
-import { getCatalogItemIcon, getFullReferenceURI, getUpdates } from './utils';
+import { getCatalogItemIcon, getFullContainerURI, getUpdates } from './utils';
 import { useFetch } from '../../hooks/useFetch';
 import { useTranslation } from '../../hooks/useTranslation';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
@@ -187,10 +187,10 @@ const InstalledSoftware = ({ labels, spec, onDeleteOs, onDeleteApp, onEdit, canE
     return <EmptyState titleText={t('Loading installed software')} headingLevel="h4" icon={Spinner} />;
   }
 
-  const catalogItemVersion = osItem?.spec.versions.find(
-    (v) =>
-      getFullReferenceURI(osItem.spec.reference.uri, v) === spec?.os?.image && v.channels.includes(osChannel || ''),
-  );
+  const catalogItemVersion = osItem?.spec.versions.find((v) => {
+    const imageUri = getFullContainerURI(osItem.spec.artifacts, v);
+    return !!imageUri && !!spec?.os?.image && imageUri === spec.os.image && v.channels.includes(osChannel || '');
+  });
 
   const hasOs = !!(osItem && osCatalog && osChannel && catalogItemVersion && spec);
   const hasApps = !!(appItems && appItems.length > 0);
@@ -260,7 +260,7 @@ const InstalledSoftware = ({ labels, spec, onDeleteOs, onDeleteApp, onEdit, canE
                 const itemVersion =
                   appSpec &&
                   app.item.spec.versions.find((v) => {
-                    const refUri = getFullReferenceURI(app.item.spec.reference.uri, v);
+                    const refUri = getFullContainerURI(app.item.spec.artifacts, v);
                     const imageMatches = refUri === (appSpec as ContainerApplication).image;
                     return imageMatches && v.channels.includes(appChannel);
                   });

@@ -1,4 +1,4 @@
-import { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
+import { CatalogItem, CatalogItemArtifactType, CatalogItemVersion } from '@flightctl/types/alpha';
 import {
   Alert,
   Button,
@@ -33,8 +33,9 @@ import { RESOURCE, VERB } from '../../../../types/rbac';
 import { useFleets } from '../../../Fleet/useFleets';
 import { useDevicesPaginated } from '../../../Device/DevicesPage/useDevices';
 import { applyInitialConfig, getInitialAppConfig } from '../utils';
-import { InstallAppFormik } from '../types';
+import { InstallAppFormik, InstallSpecFormik, TargetPickerFormik } from '../types';
 import WithTooltip from '../../../common/WithTooltip';
+import { getFullContainerURI } from '../../utils';
 
 type VersionDropdownProps = {
   catalogItem: CatalogItem;
@@ -79,17 +80,14 @@ export const isSpecsStepValid = (errors: FormikErrors<InstallAppFormik>) => {
   return !errors.target && !errors.version && !errors.channel;
 };
 
-export type InstallSpecFormik = {
-  version: string;
-  channel: string;
-};
-
 export const InstallSpec = ({
   catalogItem,
   hideReadmeLink,
+  targetSet,
 }: {
   catalogItem: CatalogItem;
   hideReadmeLink?: boolean;
+  targetSet?: boolean;
 }) => {
   const { t } = useTranslation();
   const [showReadme, setShowReadme] = React.useState(false);
@@ -102,7 +100,10 @@ export const InstallSpec = ({
 
   const versions = catalogItem.spec.versions.sort((v1, v2) => semver.compare(v2.version, v1.version));
 
-  const channelVersions = versions.filter((v) => v.channels.includes(values.channel));
+  const channelVersions = versions.filter(
+    (v) =>
+      v.channels.includes(values.channel) && (targetSet ? !!getFullContainerURI(catalogItem.spec.artifacts, v) : true),
+  );
 
   const currentVersion = versions.find((v) => v.version === values.version);
 
@@ -193,7 +194,7 @@ const targetPermissions: PermissionCheck[] = [
 
 const getFleetDisabledReason = (
   t: TFunction,
-  { canEdit, canList, size }: { canEdit: boolean; canList: boolean; size: number },
+  { canEdit, canList, size, hasContainer }: { canEdit: boolean; canList: boolean; size: number; hasContainer: boolean },
 ) => {
   if (!canList) {
     return t('You do not have permissions to list fleets');
@@ -204,12 +205,15 @@ const getFleetDisabledReason = (
   if (size === 0) {
     return t('No fleet is available');
   }
+  if (!hasContainer) {
+    return t('Container artifact not available');
+  }
   return undefined;
 };
 
 const getDeviceDisabledReason = (
   t: TFunction,
-  { canEdit, canList, size }: { canEdit: boolean; canList: boolean; size: number },
+  { canEdit, canList, size, hasContainer }: { canEdit: boolean; canList: boolean; size: number; hasContainer: boolean },
 ) => {
   if (!canList) {
     return t('You do not have permissions to list devices');
@@ -220,12 +224,16 @@ const getDeviceDisabledReason = (
   if (size === 0) {
     return t('No device is available');
   }
+  if (!hasContainer) {
+    return t('Container artifact not available');
+  }
   return undefined;
 };
 
 const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepProps) => {
   const { t } = useTranslation();
-  const { checkPermissions } = usePermissionsContext();
+  const { values, setFieldValue } = useFormikContext<InstallSpecFormik & TargetPickerFormik>();
+  const { loading, checkPermissions } = usePermissionsContext();
   const [canEditFleet, canListFleet, canEditDevice, canListDevice] = checkPermissions(targetPermissions);
   const fleetRadioRef = React.useRef<HTMLSpanElement>(null);
   const deviceRadioRef = React.useRef<HTMLSpanElement>(null);
@@ -237,17 +245,37 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
     onlyFleetless: true,
   });
 
+  const unmanagedFleetsCount = fleets.filter((f) => !f.metadata?.owner).length;
+
+  const hasContainer = catalogItem.spec.versions.some(
+    (v) => v.version === values.version && v.references[CatalogItemArtifactType.CatalogItemArtifactTypeContainer],
+  );
+
   const fleetDisabledReason = getFleetDisabledReason(t, {
     canEdit: canEditFleet,
     canList: canListFleet,
-    size: fleets.length,
+    size: unmanagedFleetsCount,
+    hasContainer,
   });
+
+  React.useEffect(() => {
+    if (!loading && !fleetsLoading && fleetDisabledReason && values.target === 'fleet') {
+      setFieldValue('target', undefined);
+    }
+  }, [fleetDisabledReason, setFieldValue, loading, fleetsLoading, values.target]);
 
   const deviceDisabledReason = getDeviceDisabledReason(t, {
     canEdit: canEditDevice,
     canList: canListDevice,
     size: devices.length,
+    hasContainer,
   });
+
+  React.useEffect(() => {
+    if (!loading && !devicesLoading && deviceDisabledReason && values.target === 'device') {
+      setFieldValue('device', undefined);
+    }
+  }, [deviceDisabledReason, setFieldValue, loading, devicesLoading, values.target]);
 
   return (
     <FlightCtlForm>
@@ -257,7 +285,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
         </StackItem>
         <StackItem>
           <Grid>
-            <GridItem span={6}>
+            <GridItem lg={6} md={8} sm={12}>
               <InstallSpec catalogItem={catalogItem} />
             </GridItem>
           </Grid>
@@ -303,20 +331,13 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                   </StackItem>
                   {showNewDevice && (
                     <StackItem>
-                      <WithTooltip
-                        showTooltip={!catalogItem.spec.reference.artifacts?.length}
-                        content={t('This Operating system does not contain any additional formats besides bootc')}
-                        triggerRef={newDeviceRadioRef}
-                      >
-                        <RadioField
-                          id="new-device-radio"
-                          name="target"
-                          checkedValue="new-device"
-                          label={<span ref={newDeviceRadioRef}>{t('New Device')}</span>}
-                          description={t('Provision a brand new, unenrolled device')}
-                          isDisabled={!catalogItem.spec.reference.artifacts?.length}
-                        />
-                      </WithTooltip>
+                      <RadioField
+                        id="new-device-radio"
+                        name="target"
+                        checkedValue="new-device"
+                        label={<span ref={newDeviceRadioRef}>{t('New Device')}</span>}
+                        description={t('Provision a brand new, unenrolled device')}
+                      />
                     </StackItem>
                   )}
                 </Stack>

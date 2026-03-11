@@ -30,6 +30,7 @@
       "appContext": "./src/components/AppContext/AppContext.tsx",
       "OverviewTab": "./src/components/OverviewTab/OverviewTab.tsx",
       "CatalogPage": "./src/components/Catalog/CatalogPage.tsx",
+      "AddCatalogItemWizard": "./src/components/Catalog/AddCatalogItemWizard.tsx",
       "CatalogInstallWizard": "./src/components/Catalog/CatalogInstallWizard.tsx",
       "CatalogEditDeviceWizard": "./src/components/Catalog/CatalogEditDeviceWizard.tsx",
       "CatalogEditFleetWizard": "./src/components/Catalog/CatalogEditFleetWizard.tsx"

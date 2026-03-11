@@ -182,6 +182,7 @@ export type { ResourceSyncCompletedDetails } from './models/ResourceSyncComplete
 export type { ResourceSyncList } from './models/ResourceSyncList';
 export type { ResourceSyncSpec } from './models/ResourceSyncSpec';
 export type { ResourceSyncStatus } from './models/ResourceSyncStatus';
+export { ResourceSyncType } from './models/ResourceSyncType';
 export type { ResourceUpdatedDetails } from './models/ResourceUpdatedDetails';
 export type { Rfc7662IntrospectionSpec } from './models/Rfc7662IntrospectionSpec';
 export type { RolloutDeviceSelection } from './models/RolloutDeviceSelection';

@@ -2,20 +2,22 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CatalogItemArtifact } from './CatalogItemArtifact';
 import type { CatalogItemCategory } from './CatalogItemCategory';
 import type { CatalogItemConfigurable } from './CatalogItemConfigurable';
 import type { CatalogItemDeprecation } from './CatalogItemDeprecation';
-import type { CatalogItemReference } from './CatalogItemReference';
 import type { CatalogItemType } from './CatalogItemType';
 import type { CatalogItemVersion } from './CatalogItemVersion';
-import type { CatalogItemVisibility } from './CatalogItemVisibility';
 /**
  * CatalogItemSpec defines the configuration for a catalog item.
  */
 export type CatalogItemSpec = {
   category?: CatalogItemCategory;
   type: CatalogItemType;
-  reference: CatalogItemReference;
+  /**
+   * Artifact definitions for this catalog item. Defined once; version references resolve each artifact independently. Type must be unique within the list.
+   */
+  artifacts: Array<CatalogItemArtifact>;
   /**
    * Available versions using Cincinnati model. Use replaces for primary edge, skips when stable channel skips intermediate versions.
    */
@@ -33,7 +35,6 @@ export type CatalogItemSpec = {
    * URL or data URI of the catalog item icon for display in UI.
    */
   icon?: string;
-  visibility?: CatalogItemVisibility;
   deprecation?: CatalogItemDeprecation;
   /**
    * Provider or publisher of the catalog item (company or team name).
