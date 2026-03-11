@@ -1,8 +1,13 @@
-import { Device, PatchRequest } from '@flightctl/types';
+import { Device, Fleet, PatchRequest } from '@flightctl/types';
 import * as React from 'react';
+import { Alert, Spinner } from '@patternfly/react-core';
+
 import { useFetch } from '../../../hooks/useFetch';
 import ResourceCatalogPage from '../../Catalog/ResourceCatalog/ResourceCatalogPage';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
+import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
+import { getErrorMessage } from '../../..//utils/error';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 type DeviceDetailsCatalogProps = {
   device: Device;
@@ -12,6 +17,7 @@ type DeviceDetailsCatalogProps = {
 
 const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalogProps) => {
   const { patch } = useFetch();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const onPatch = React.useCallback(
     async (allPatches: PatchRequest) => {
@@ -21,10 +27,35 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
     [refetch, patch, device.metadata.name],
   );
 
-  return (
+  const [ownerFleet, loading, error] = useFetchPeriodically<Fleet>({
+    endpoint: device.metadata.owner ? `fleets/${device.metadata.owner.split('/')[1]}` : '',
+  });
+
+  if (loading) {
+    return <Spinner />;
+  }
+  if (error) {
+    return (
+      <Alert isInline variant="danger" title={t('Failed to fetch owner fleet')}>
+        {getErrorMessage(error)}
+      </Alert>
+    );
+  }
+
+  return device.metadata.owner ? (
     <ResourceCatalogPage
-      canEdit={canEdit && !device.metadata.owner}
-      hasOwner={!!device.metadata.owner}
+      canEdit={false}
+      hasOwner
+      currentLabels={ownerFleet?.metadata?.labels}
+      onPatch={async () => {}}
+      spec={ownerFleet?.spec.template.spec}
+      specPath="/spec/template"
+      onEdit={() => {}}
+      onInstall={() => {}}
+    />
+  ) : (
+    <ResourceCatalogPage
+      canEdit={canEdit}
       currentLabels={device.metadata.labels}
       onPatch={onPatch}
       spec={device.spec}
