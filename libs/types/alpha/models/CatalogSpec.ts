@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CatalogItemVisibility } from './CatalogItemVisibility';
 /**
  * CatalogSpec describes the configuration of a catalog. Catalogs are containers for locally-managed CatalogItems.
  */
@@ -19,7 +18,6 @@ export type CatalogSpec = {
    * URL or data URI of the catalog icon for display in UI.
    */
   icon?: string;
-  visibility?: CatalogItemVisibility;
   /**
    * Provider or publisher of the catalog (company or team name).
    */

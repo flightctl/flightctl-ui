@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FieldArray, useFormikContext } from 'formik';
-import { Button, FormGroup, FormSection } from '@patternfly/react-core';
+import { Button, FormGroup, FormSection, Split, SplitItem } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -10,6 +10,8 @@ import { FormGroupWithHelperText } from '../../common/WithHelperText';
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
 import NameField from '../../form/NameField';
 import { getDnsSubdomainValidations } from '../../form/validations';
+import RadioField from '../../form/RadioField';
+import { ResourceSyncType } from '@flightctl/types';
 
 export const CreateResourceSyncForm = ({ rs, index }: { rs: ResourceSyncFormValue; index: number }) => {
   const { t } = useTranslation();
@@ -24,6 +26,26 @@ export const CreateResourceSyncForm = ({ rs, index }: { rs: ResourceSyncFormValu
         resourceType="resourcesyncs"
         validations={getDnsSubdomainValidations(t)}
       />
+      <FormGroup label={t('Sync type')}>
+        <Split hasGutter>
+          <SplitItem>
+            <RadioField
+              id={`resource-sync-${index}-fleet-type`}
+              name={`resourceSyncs[${index}].type`}
+              label={t('Fleet')}
+              checkedValue={ResourceSyncType.ResourceSyncTypeFleet}
+            />
+          </SplitItem>
+          <SplitItem>
+            <RadioField
+              id={`resource-sync-${index}-catalog-type`}
+              name={`resourceSyncs[${index}].type`}
+              label={t('Catalog')}
+              checkedValue={ResourceSyncType.ResourceSyncTypeCatalog}
+            />
+          </SplitItem>
+        </Split>
+      </FormGroup>
       <FormGroupWithHelperText label={t('Target revision')} content={t('Name of a branch or a tag.')} isRequired>
         <TextField
           name={`resourceSyncs[${index}].targetRevision`}

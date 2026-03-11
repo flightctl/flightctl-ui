@@ -33,17 +33,16 @@ export const useFetchPeriodically = <R>(
             }
 
             const data = (await get<R>(requestQuery, abortController.signal)) as R;
-            if (isLoading) {
-              setIsLoading(false);
-            }
-            setIsUpdating(false);
-
             if (onFetchComplete) {
               onFetchComplete(data); // Data might be mutated at this point
               setData(data);
             } else {
               setData(data);
             }
+            if (isLoading) {
+              setIsLoading(false);
+            }
+            setIsUpdating(false);
             setError(undefined);
           } catch (err) {
             // aborting fetch trows 'AbortError', we can ignore it

@@ -4,16 +4,16 @@
 /* eslint-disable */
 import type { CatalogItemArtifactType } from './CatalogItemArtifactType';
 /**
- * An alternative artifact format.
+ * An artifact reference. The type field is the discriminator and must be unique within the artifacts list.
  */
 export type CatalogItemArtifact = {
-  type?: CatalogItemArtifactType;
+  type: CatalogItemArtifactType;
   /**
    * Optional human-readable display name for this artifact.
    */
   name?: string;
   /**
-   * Artifact URI (OCI reference, URL, S3 path, etc.).
+   * Artifact URI without version qualifier. The version reference (tag or digest) is applied at resolution time.
    */
   uri: string;
 };

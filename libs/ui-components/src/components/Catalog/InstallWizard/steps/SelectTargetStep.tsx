@@ -1,10 +1,22 @@
 import { Device, Fleet } from '@flightctl/types';
-import { FormGroup, Stack, StackItem, Title, Toolbar, ToolbarContent, ToolbarItem } from '@patternfly/react-core';
+import {
+  Alert,
+  Button,
+  FormGroup,
+  Grid,
+  GridItem,
+  Stack,
+  StackItem,
+  Title,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
+} from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 import { FormikErrors, useFormikContext } from 'formik';
 import * as React from 'react';
-import { CatalogItem, CatalogItemArtifact, CatalogItemArtifactType } from '@flightctl/types/alpha';
-import { TFunction } from 'i18next';
+import ExternalLinkAltIcon from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
+import { CatalogItem } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import Table from '../../../Table/Table';
@@ -20,8 +32,9 @@ import EnrolledDeviceTableRow from '../../../Device/DevicesPage/EnrolledDeviceTa
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { InstallAppFormik, InstallOsFormik } from '../types';
 import FormSelect from '../../../form/FormSelect';
-import { getFullReferenceURI } from '../../utils';
-import ImageUrl from '../../../ImageBuilds/ImageUrl';
+import { getArtifactLabel, getFullArtifactURI } from '../../utils';
+import LearnMoreLink from '../../../common/LearnMoreLink';
+import { useAppLinks } from '../../../../hooks/useAppLinks';
 
 export const isSelectTargetStepValid = (errors: FormikErrors<InstallAppFormik>) => {
   return !errors.device && !errors.fleet;
@@ -183,6 +196,7 @@ const FleetTarget = () => {
                   onRowSelect={(fleet) => () => handleFleetSelect(fleet)}
                   singleSelect
                   hideActions
+                  isSelectDisabled={!!fleet.metadata?.owner}
                 />
               ))}
             </Tbody>
@@ -193,92 +207,56 @@ const FleetTarget = () => {
   );
 };
 
-const getArtifactLabel = (artifact: CatalogItemArtifact, t: TFunction) => {
-  if (artifact.name) {
-    return artifact.name;
-  }
-  if (!artifact.type) {
-    return t('Unknown');
-  }
-
-  let artifactType: CatalogItemArtifactType;
-  switch (artifact.type) {
-    case CatalogItemArtifactType.CatalogItemArtifactTypeQcow2:
-      artifactType = t('OpenShift Virtualization');
-      break;
-    case CatalogItemArtifactType.CatalogItemArtifactTypeIso:
-      artifactType = t('Bare Metal');
-      break;
-    case CatalogItemArtifactType.CatalogItemArtifactTypeAmi:
-      artifactType = t('Amazon Web Services');
-      break;
-    case CatalogItemArtifactType.CatalogItemArtifactTypeAnacondaIso:
-      artifactType = t('Anaconda Installer');
-      break;
-    case CatalogItemArtifactType.CatalogItemArtifactTypeGce:
-      artifactType = t('Google Cloud');
-      break;
-    case CatalogItemArtifactType.CatalogItemArtifactTypeRaw:
-      artifactType = t('KVM/custom cloud import');
-      break;
-    case CatalogItemArtifactType.CatalogItemArtifactTypeVhd:
-      artifactType = t('Microsoft Hyper-V');
-      break;
-    case CatalogItemArtifactType.CatalogItemArtifactTypeVmdk:
-      artifactType = t('VMware vSphere');
-      break;
-    default:
-      artifactType = t('Cloud native');
-  }
-
-  return `${artifactType} (${artifact.type})`;
-};
-
 type NewDeviceTargetProps = {
   catalogItem: CatalogItem;
 };
 
 const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
   const { t } = useTranslation();
+  const provisionDeviceLink = useAppLinks('provisionDevice');
   const { values, setFieldValue } = useFormikContext<InstallOsFormik>();
 
   const artifacts = React.useMemo(() => {
-    return catalogItem.spec.reference.artifacts?.sort((a, b) =>
-      getArtifactLabel(a, t).localeCompare(getArtifactLabel(b, t)),
+    return catalogItem.spec.artifacts?.sort((a, b) =>
+      getArtifactLabel(t, a.type, a.name).localeCompare(getArtifactLabel(t, b.type, b.name)),
     );
   }, [catalogItem, t]);
 
   React.useEffect(() => {
     if (!values.deploymentTarget && artifacts?.length) {
-      setFieldValue('deploymentTarget', artifacts[0].uri);
+      setFieldValue('deploymentTarget', artifacts[0].type);
     }
   }, [values, artifacts, setFieldValue]);
 
   const currentVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
 
+  const artifact = catalogItem.spec.artifacts.find((a) => a.type === values.deploymentTarget);
+
   const artifactUrl =
-    values.deploymentTarget && currentVersion
-      ? getFullReferenceURI(values.deploymentTarget, currentVersion)
-      : undefined;
+    values.deploymentTarget && currentVersion && artifact ? getFullArtifactURI(artifact, currentVersion) : undefined;
+
+  const versionRefs = catalogItem.spec.versions.find((v) => v.version === values.version)?.references || {};
 
   return (
     <FlightCtlForm>
-      <Stack hasGutter>
-        <StackItem>
+      <Grid hasGutter>
+        <GridItem>
           <Title headingLevel="h3">{t('Deployment specifications')}</Title>
-        </StackItem>
-        <StackItem>
+        </GridItem>
+        <GridItem lg={6} md={8} sm={12}>
           <FormGroup label={t('Deployment target')} isRequired>
             <FormSelect
               name="deploymentTarget"
               items={
                 artifacts
-                  ? artifacts.reduce((acc, curr) => {
-                      acc[curr.uri] = {
-                        label: getArtifactLabel(curr, t),
-                      };
-                      return acc;
-                    }, {})
+                  ? artifacts
+                      .filter((a) => Object.keys(versionRefs).includes(a.type))
+                      .reduce((acc, curr) => {
+                        acc[curr.type] = {
+                          label: getArtifactLabel(t, curr.type, curr.name),
+                        };
+                        return acc;
+                      }, {})
                   : {
                       'no-items': {
                         label: t('No items'),
@@ -288,13 +266,32 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
               }
             />
           </FormGroup>
-        </StackItem>
+        </GridItem>
         {artifactUrl && (
-          <StackItem>
-            <ImageUrl imageReference={artifactUrl} />
-          </StackItem>
+          <>
+            <GridItem>
+              {t('Download your image at')}{' '}
+              <Button
+                component="a"
+                variant="link"
+                isInline
+                iconPosition="end"
+                icon={<ExternalLinkAltIcon />}
+                target="_blank"
+                rel="noopener noreferrer"
+                href={artifactUrl}
+              >
+                {artifactUrl}
+              </Button>
+            </GridItem>
+            <GridItem>
+              <Alert isInline variant="info" title={t('Learn more about provisioning devices')}>
+                <LearnMoreLink link={provisionDeviceLink} />
+              </Alert>
+            </GridItem>
+          </>
         )}
-      </Stack>
+      </Grid>
     </FlightCtlForm>
   );
 };

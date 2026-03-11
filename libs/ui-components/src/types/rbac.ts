@@ -9,6 +9,7 @@ export enum VERB {
 }
 
 export enum RESOURCE {
+  CATALOG = 'catalogs',
   FLEET = 'fleets',
   DEVICE = 'devices',
   DEVICE_CONSOLE = 'devices/console',
