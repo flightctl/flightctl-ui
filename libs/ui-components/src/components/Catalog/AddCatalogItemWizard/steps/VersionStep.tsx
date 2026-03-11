@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Button, FormGroup, FormSection, Grid, GridItem, Split, SplitItem, Title } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import { FieldArray, FormikErrors, useFormikContext } from 'formik';
+import { FieldArray, FormikErrors, useField, useFormikContext } from 'formik';
 
 import { CatalogItemArtifactType } from '@flightctl/types/alpha';
 
@@ -17,6 +17,7 @@ import FlightCtlForm from '../../../form/FlightCtlForm';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import ChannelsSelect from '../ChannelsSelect';
 import UploadField from '../../../form/UploadField';
+import ErrorHelperText from '../../../form/FieldHelperText';
 import { getArtifactLabel } from '../../utils';
 
 export const versionStepId = 'version';
@@ -125,16 +126,19 @@ const ReferencesField = ({ index, isReadOnly }: { index: number; isReadOnly?: bo
   const { values } = useFormikContext<AddCatalogItemFormValues>();
   const prefix = `versions.${index}`;
   const isApp = !!values.type && appTypeIds.includes(values.type);
+  const [, refsMeta] = useField(`${prefix}.references`);
+  const refsError = refsMeta.touched && typeof refsMeta.error === 'string' ? refsMeta.error : undefined;
 
   if (isApp) {
     return (
-      <FormGroup label={t('Container reference')}>
+      <FormGroup label={t('Container reference')} isRequired>
         <TextField
           name={`${prefix}.references.${CatalogItemArtifactType.CatalogItemArtifactTypeContainer}`}
           aria-label={t('Container reference')}
           isDisabled={isReadOnly}
           helperText={t('Tag, digest, or complete image reference')}
         />
+        <ErrorHelperText error={refsError} />
       </FormGroup>
     );
   }
@@ -162,6 +166,7 @@ const ReferencesField = ({ index, isReadOnly }: { index: number; isReadOnly?: bo
           </FormGroup>
         );
       })}
+      <ErrorHelperText error={refsError} />
     </FormSection>
   );
 };

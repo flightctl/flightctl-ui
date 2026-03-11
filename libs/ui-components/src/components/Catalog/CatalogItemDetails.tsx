@@ -144,33 +144,29 @@ const CatalogItemDetailsPanel = ({
     submitForm,
   } = useFormikContext<InstallSpecFormik>();
 
-  const deployDisabledReasons = (() => {
-    const reasons: string[] = [];
-    if (targetHasOwner) {
-      reasons.push(t('This resource is managed by an owner and cannot be modified directly'));
-    } else if (!canInstall) {
-      reasons.push(t('You do not have permission to deploy'));
-    }
-    if (!channel) {
-      reasons.push(t('A channel must be selected'));
-    }
-    if (!version) {
-      reasons.push(t('A version must be selected'));
-    }
+  const deployDisabledReasons: string[] = [];
+  if (targetHasOwner) {
+    deployDisabledReasons.push(t('This resource is managed by an owner and cannot be modified directly'));
+  } else if (!canInstall) {
+    deployDisabledReasons.push(t('You do not have permission to deploy'));
+  }
+  if (!channel) {
+    deployDisabledReasons.push(t('A channel must be selected'));
+  }
+  if (!version) {
+    deployDisabledReasons.push(t('A version must be selected'));
+  }
 
-    const catalogItemVersion = item.spec.versions.find((v) => v.version === version);
-    if (catalogItemVersion) {
-      // if target is given (fleet/device) or App catalog item is chosen, it must have container ref
-      if (
-        (targetSet || item.spec.type !== CatalogItemType.CatalogItemTypeOS) &&
-        !getFullContainerURI(item.spec.artifacts, catalogItemVersion)
-      ) {
-        reasons.push('This catalog item does not have a deployable artifact');
-      }
+  const catalogItemVersion = item.spec.versions.find((v) => v.version === version);
+  if (catalogItemVersion) {
+    // if target is given (fleet/device) or App catalog item is chosen, it must have container ref
+    if (
+      (targetSet || item.spec.type !== CatalogItemType.CatalogItemTypeOS) &&
+      !getFullContainerURI(item.spec.artifacts, catalogItemVersion)
+    ) {
+      deployDisabledReasons.push('This catalog item does not have a deployable artifact');
     }
-
-    return reasons;
-  })();
+  }
 
   const isManaged = !!item.metadata.owner;
 

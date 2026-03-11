@@ -8,6 +8,7 @@ import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../..//utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { getOwnerName } from '../../Fleet/FleetDetails/FleetOwnerLink';
 
 type DeviceDetailsCatalogProps = {
   device: Device;
@@ -28,7 +29,7 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
   );
 
   const [ownerFleet, loading, error] = useFetchPeriodically<Fleet>({
-    endpoint: device.metadata.owner ? `fleets/${device.metadata.owner.split('/')[1]}` : '',
+    endpoint: device.metadata.owner ? `fleets/${getOwnerName(device.metadata.owner)}` : '',
   });
 
   if (loading) {

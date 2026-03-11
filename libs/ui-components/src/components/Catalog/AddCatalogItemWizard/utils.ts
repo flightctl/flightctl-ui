@@ -19,7 +19,7 @@ import { PatchRequest } from '@flightctl/types';
 
 import { AddCatalogItemFormValues, ArtifactFormValue, VersionFormValues, configurableAppTypes } from './types';
 import { appTypeIds } from '../useCatalogs';
-import { validKubernetesDnsSubdomain } from '../../form/validations';
+import { validKubernetesDnsSubdomain, validURLSchema } from '../../form/validations';
 import { appendJSONPatch } from '../../../utils/patch';
 
 const parseYamlField = (value: string): Record<string, unknown> | undefined => {
@@ -194,7 +194,7 @@ export const getCatalogItemResource = (values: AddCatalogItemFormValues, catalog
   };
 };
 
-const getVersionPatches = (
+const addVersionPatches = (
   patches: PatchRequest,
   currentVersions: CatalogItemVersion[],
   newVersions: CatalogItemVersion[],
@@ -234,7 +234,7 @@ export const getCatalogItemPatches = (values: AddCatalogItemFormValues, original
     originalValue: spec.artifacts,
   });
 
-  getVersionPatches(patches, spec.versions, formVersionsToApi(values));
+  addVersionPatches(patches, spec.versions, formVersionsToApi(values));
 
   const newDefaults = formDefaultsToApi(values);
   appendJSONPatch({
@@ -433,6 +433,22 @@ const versionsSchema = (t: TFunction, configurable: boolean) =>
       .min(1, t('At least one version is required'));
   });
 
+const artifactURISchema = (t: TFunction) =>
+  Yup.string()
+    .required(t('Container image URI is required'))
+    .test(
+      'no-tag-or-digest',
+      t('URI must not include a tag (":") or digest ("@"). Specify those in the version fields.'),
+      (value) => {
+        if (!value) {
+          return true;
+        }
+        const path = value.replace(/^[a-z]+:\/\//, '');
+        const imageName = path.includes('/') ? path.substring(path.lastIndexOf('/') + 1) : path;
+        return !imageName.includes(':') && !imageName.includes('@');
+      },
+    );
+
 export const getValidationSchema = (t: TFunction) =>
   Yup.object().shape({
     catalog: Yup.string().required(t('Catalog is required')),
@@ -447,21 +463,7 @@ export const getValidationSchema = (t: TFunction) =>
     type: Yup.string().oneOf(Object.values(CatalogItemType)).required(t('Type is required')),
     containerUri: Yup.string().when('type', {
       is: (type: string) => appTypeIds.includes(type as CatalogItemType),
-      then: (schema) =>
-        schema
-          .required(t('Container image URI is required'))
-          .test(
-            'no-tag-or-digest',
-            t('URI must not include a tag (":") or digest ("@"). Specify those in the version fields.'),
-            (value) => {
-              if (!value) {
-                return true;
-              }
-              const path = value.replace(/^[a-z]+:\/\//, '');
-              const imageName = path.includes('/') ? path.substring(path.lastIndexOf('/') + 1) : path;
-              return !imageName.includes(':') && !imageName.includes('@');
-            },
-          ),
+      then: () => artifactURISchema(t),
       otherwise: () => Yup.string(),
     }),
     artifacts: Yup.mixed().when('type', {
@@ -490,7 +492,7 @@ export const getValidationSchema = (t: TFunction) =>
                     return !duplicateTypes.has(value);
                   }),
                 name: Yup.string(),
-                uri: Yup.string().required(t('Artifact URI is required')),
+                uri: artifactURISchema(t),
               }),
             )
             .min(1, t('At least one artifact is required'));
@@ -498,9 +500,9 @@ export const getValidationSchema = (t: TFunction) =>
       otherwise: () => Yup.array(),
     }),
     provider: Yup.string(),
-    homepage: Yup.string().url(t('Must be a valid URL')),
-    supportUrl: Yup.string().url(t('Must be a valid URL')),
-    documentationUrl: Yup.string().url(t('Must be a valid URL')),
+    homepage: validURLSchema(t),
+    supportUrl: validURLSchema(t),
+    documentationUrl: validURLSchema(t),
     versions: Yup.mixed().when('type', {
       is: (type: string) => configurableAppTypes.includes(type as CatalogItemType),
       then: () => versionsSchema(t, true),

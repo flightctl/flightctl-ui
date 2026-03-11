@@ -14,7 +14,7 @@ import FormSelect from '../../../form/FormSelect';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import UploadField from '../../../form/UploadField';
-import { getArtifactLabel } from '../../utils';
+import { getArtifactLabel, getCatalogItemBadge } from '../../utils';
 
 export const typeConfigStepId = 'type-config';
 
@@ -30,12 +30,12 @@ const catalogItemTypeLabels = (
   Exclude<CatalogItemType, CatalogItemType.CatalogItemTypeDriver | CatalogItemType.CatalogItemTypeFirmware>,
   string
 > => ({
-  [CatalogItemType.CatalogItemTypeOS]: t('Operating system'),
-  [CatalogItemType.CatalogItemTypeContainer]: t('Single Container application'),
-  [CatalogItemType.CatalogItemTypeHelm]: t('Helm application'),
-  [CatalogItemType.CatalogItemTypeQuadlet]: t('Quadlet application'),
-  [CatalogItemType.CatalogItemTypeCompose]: t('Compose application'),
-  [CatalogItemType.CatalogItemTypeData]: t('Data'),
+  [CatalogItemType.CatalogItemTypeOS]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeOS, t),
+  [CatalogItemType.CatalogItemTypeContainer]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeContainer, t),
+  [CatalogItemType.CatalogItemTypeHelm]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeHelm, t),
+  [CatalogItemType.CatalogItemTypeQuadlet]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeQuadlet, t),
+  [CatalogItemType.CatalogItemTypeCompose]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeCompose, t),
+  [CatalogItemType.CatalogItemTypeData]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeData, t),
 });
 
 const getArtifactTitle = (artifact: ArtifactFormValue, index: number, t: ReturnType<typeof useTranslation>['t']) => {

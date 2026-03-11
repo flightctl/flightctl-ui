@@ -1178,3 +1178,5 @@ export const createMassResumeValidationSchema = (t: TFunction) =>
       return Yup.array();
     }),
   });
+
+export const validURLSchema = (t: TFunction) => Yup.string().url(t('Must be a valid URL'));
