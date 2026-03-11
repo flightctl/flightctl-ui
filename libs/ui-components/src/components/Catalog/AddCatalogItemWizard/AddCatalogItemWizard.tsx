@@ -131,7 +131,9 @@ const AddCatalogItemWizard = () => {
             try {
               if (isEdit) {
                 const patchRequest = getCatalogItemPatches(values, editItem!);
-                await patch<CatalogItem>(`catalogs/${catalogId}/items/${itemId}`, patchRequest);
+                if (patchRequest.length) {
+                  await patch<CatalogItem>(`catalogs/${catalogId}/items/${itemId}`, patchRequest);
+                }
               } else {
                 const resource = getCatalogItemResource(values, values.catalog);
                 await post<CatalogItem>(`catalogs/${values.catalog}/items`, resource);

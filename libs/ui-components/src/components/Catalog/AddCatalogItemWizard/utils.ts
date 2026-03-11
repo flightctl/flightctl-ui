@@ -119,12 +119,17 @@ const formVersionsToApi = (values: AddCatalogItemFormValues) => {
 
 const formArtifactsToApi = (artifacts: ArtifactFormValue[]) =>
   artifacts
-    .filter((a) => a.uri)
-    .map((a) => ({
-      type: a.type || undefined,
-      name: a.name || undefined,
-      uri: a.uri,
-    })) as CatalogItemArtifact[];
+    .filter((a) => a.uri && a.type)
+    .map((a) => {
+      const apiArtifact = {
+        type: a.type,
+        uri: a.uri,
+      } as CatalogItemArtifact;
+      if (a.name) {
+        apiArtifact.name = a.name;
+      }
+      return apiArtifact;
+    });
 
 const formDefaultsToApi = (values: AddCatalogItemFormValues): CatalogItemConfigurable | undefined => {
   if (!isConfigurableType(values.type as CatalogItemType)) {
@@ -142,11 +147,21 @@ const formDefaultsToApi = (values: AddCatalogItemFormValues): CatalogItemConfigu
 };
 
 const formValuesToArtifacts = (values: AddCatalogItemFormValues): CatalogItemArtifact[] => {
-  const type = values.type as CatalogItemType;
-  if (isAppType(type)) {
-    return [{ type: CatalogItemArtifactType.CatalogItemArtifactTypeContainer, uri: values.containerUri }];
+  const artifacts = formArtifactsToApi(values.artifacts);
+  if (isAppType(values.type as CatalogItemType)) {
+    const containerArtifact = artifacts.find(
+      (a) => a.type === CatalogItemArtifactType.CatalogItemArtifactTypeContainer,
+    );
+    if (containerArtifact) {
+      containerArtifact.uri = values.containerUri;
+    } else {
+      artifacts.push({
+        type: CatalogItemArtifactType.CatalogItemArtifactTypeContainer,
+        uri: values.containerUri,
+      });
+    }
   }
-  return formArtifactsToApi(values.artifacts);
+  return artifacts;
 };
 
 export const getCatalogItemResource = (values: AddCatalogItemFormValues, catalog: string): CatalogItem => {
@@ -526,17 +541,13 @@ export const getInitialValuesFromItem = (item: CatalogItem): AddCatalogItemFormV
     };
   });
 
-  const isApp = isAppType(item.spec.type);
-  const mappedArtifacts: ArtifactFormValue[] = isApp
-    ? []
-    : (item.spec.artifacts || []).map((a) => ({
-        type: a.type || '',
-        name: a.name || '',
-        uri: a.uri,
-      }));
-  const artifacts = mappedArtifacts.length > 0 ? mappedArtifacts : [getEmptyArtifact()];
+  const artifacts: ArtifactFormValue[] = item.spec.artifacts?.map((a) => ({
+    type: a.type || '',
+    name: a.name || '',
+    uri: a.uri,
+  })) || [getEmptyArtifact()];
 
-  const containerArtifact = isApp
+  const containerArtifact = isAppType(item.spec.type)
     ? item.spec.artifacts.find((a) => a.type === CatalogItemArtifactType.CatalogItemArtifactTypeContainer)
     : undefined;
 

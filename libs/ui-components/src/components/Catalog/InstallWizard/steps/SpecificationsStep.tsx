@@ -285,7 +285,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
         </StackItem>
         <StackItem>
           <Grid>
-            <GridItem span={6}>
+            <GridItem lg={6} md={8} sm={12}>
               <InstallSpec catalogItem={catalogItem} />
             </GridItem>
           </Grid>

@@ -543,6 +543,7 @@
   "Edit alias": "Edit alias",
   "Device alias could not be updated": "Device alias could not be updated",
   "Applications": "Applications",
+  "Failed to fetch owner fleet": "Failed to fetch owner fleet",
   "Delete forever": "Delete forever",
   "You are about to resume <1>{deviceNameOrAlias}</1>": "You are about to resume <1>{deviceNameOrAlias}</1>",
   "Terminal": "Terminal",
