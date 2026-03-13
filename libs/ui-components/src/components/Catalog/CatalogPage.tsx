@@ -271,11 +271,8 @@ export const CatalogPageContent = ({
                                   )}
                                 >
                                   <DropdownList>
-                                    <DropdownItem
-                                      isAriaDisabled={!c.metadata.owner || !canEditCatalog}
-                                      onClick={() => setCatalogToEdit(c)}
-                                    >
-                                      {c.metadata.owner ? t('View') : t('Edit')}
+                                    <DropdownItem onClick={() => setCatalogToEdit(c)}>
+                                      {!!c.metadata.owner || !canEditCatalog ? t('View') : t('Edit')}
                                     </DropdownItem>
                                     <WithTooltip
                                       showTooltip={!!c.metadata.owner}

@@ -10,7 +10,6 @@ const ACCEPTED_IMAGE_TYPES = {
   'image/svg+xml': ['.svg'],
   'image/png': ['.png'],
   'image/jpeg': ['.jpg', '.jpeg'],
-  'image/gif': ['.gif'],
   'image/webp': ['.webp'],
 };
 
