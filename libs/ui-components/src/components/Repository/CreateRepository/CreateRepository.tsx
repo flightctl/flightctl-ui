@@ -12,8 +12,9 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
+import { useSearchParams } from 'react-router-dom';
 
-import { Repository, ResourceSync, ResourceSyncList } from '@flightctl/types';
+import { Repository, RepoSpecType, ResourceSync, ResourceSyncList, ResourceSyncType } from '@flightctl/types';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
@@ -25,8 +26,7 @@ import { RESOURCE, VERB } from '../../../types/rbac';
 import { getErrorMessage } from '../../../utils/error';
 import { commonQueries } from '../../../utils/query';
 import PageWithPermissions from '../../common/PageWithPermissions';
-
-import CreateRepositoryForm from './CreateRepositoryForm';
+import CreateRepositoryForm, { CreateRepositoryFormProps } from './CreateRepositoryForm';
 
 const CreateRepository = () => {
   const { t } = useTranslation();
@@ -34,6 +34,9 @@ const CreateRepository = () => {
     router: { useParams },
   } = useAppContext();
   const { repositoryId } = useParams<{ repositoryId: string }>();
+
+  const [searchParams] = useSearchParams();
+  const isCatalogSync = !!searchParams.get('isCatalogSync');
 
   const { get } = useFetch();
   const [repoError, setRepoError] = React.useState<string>();
@@ -105,15 +108,24 @@ const CreateRepository = () => {
       </Bullseye>
     );
   } else {
+    const options: CreateRepositoryFormProps['options'] = {
+      isReadOnly: !!rsError,
+    };
+    if (!!isCatalogSync) {
+      options.allowedRepoTypes = [RepoSpecType.RepoSpecTypeGit];
+      options.allowedRSTypes = [ResourceSyncType.ResourceSyncTypeCatalog];
+      options.mustUseResourceSyncs = true;
+    }
+
     content = (
       <CreateRepositoryForm
-        onClose={() => navigate(-1)}
-        onSuccess={(repo) => navigate({ route: ROUTE.REPO_DETAILS, postfix: repo.metadata.name })}
+        onClose={() => (isCatalogSync ? navigate(ROUTE.CATALOG) : navigate(-1))}
+        onSuccess={(repo) =>
+          isCatalogSync ? navigate(ROUTE.CATALOG) : navigate({ route: ROUTE.REPO_DETAILS, postfix: repo.metadata.name })
+        }
         repository={repositoryDetails}
         resourceSyncs={resourceSyncs}
-        options={{
-          isReadOnly: !!rsError,
-        }}
+        options={options}
       />
     );
   }

@@ -8,6 +8,24 @@ import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { CatalogFilter } from './useCatalogFilter';
 import TablePagination from '../Table/TablePagination';
 import { PaginationDetails } from '../../hooks/useTablePagination';
+import { RESOURCE, VERB } from '../../types/rbac';
+import { usePermissionsContext } from '../common/PermissionsContext';
+
+const permissions = [{ kind: RESOURCE.CATALOG_ITEM, verb: VERB.CREATE }];
+
+export const CreateCatalogItemBtn = () => {
+  const { checkPermissions } = usePermissionsContext();
+  const [canCreate] = checkPermissions(permissions);
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  return (
+    !!canCreate && (
+      <Button variant="primary" onClick={() => navigate(ROUTE.CATALOG_ADD_ITEM)}>
+        {t('Create item')}
+      </Button>
+    )
+  );
+};
 
 type CatalogPageToolbarProps = CatalogFilter & {
   pagination: PaginationDetails<CatalogItemList>;
@@ -23,7 +41,6 @@ const CatalogPageToolbar: React.FC<CatalogPageToolbarProps> = ({
   showCatalogMgmt,
 }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   return (
     <Toolbar inset={{ default: 'insetNone' }}>
       <ToolbarContent>
@@ -32,9 +49,7 @@ const CatalogPageToolbar: React.FC<CatalogPageToolbarProps> = ({
         </ToolbarItem>
         {showCatalogMgmt && (
           <ToolbarItem>
-            <Button variant="primary" onClick={() => navigate(ROUTE.CATALOG_ADD_ITEM)}>
-              {t('Create item')}
-            </Button>
+            <CreateCatalogItemBtn />
           </ToolbarItem>
         )}
         <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>

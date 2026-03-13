@@ -36,7 +36,7 @@ import {
   handlePromises,
   repositorySchema,
 } from './utils';
-import { OciRepoSpec, RepoSpecType, Repository, ResourceSync } from '@flightctl/types';
+import { OciRepoSpec, RepoSpecType, Repository, ResourceSync, ResourceSyncType } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import LabelWithHelperText, { FormGroupWithHelperText } from '../../common/WithHelperText';
@@ -431,12 +431,13 @@ const CreateRepositoryFormContent = ({ isEdit, onClose, options, children }: Cre
                   )}
                 />
               }
-              isChecked={values.useResourceSyncs}
+              isChecked={options?.mustUseResourceSyncs ? true : values.useResourceSyncs}
+              isDisabled={!!options?.mustUseResourceSyncs}
               onChange={(_, checked) => {
                 // Trigger validation of the resource syncs items
                 return setFieldValue('useResourceSyncs', checked, true);
               }}
-              body={values.useResourceSyncs && <CreateResourceSyncsForm />}
+              body={values.useResourceSyncs && <CreateResourceSyncsForm allowedRSTypes={options?.allowedRSTypes} />}
             />
           )}
         </Grid>
@@ -462,8 +463,10 @@ export type CreateRepositoryFormProps = {
   options?: {
     isReadOnly?: boolean;
     canUseResourceSyncs?: boolean;
+    mustUseResourceSyncs?: boolean;
     showRepoTypes?: boolean;
     allowedRepoTypes?: RepoSpecType[];
+    allowedRSTypes?: ResourceSyncType[];
     writeAccessOnly?: boolean;
   };
 };
