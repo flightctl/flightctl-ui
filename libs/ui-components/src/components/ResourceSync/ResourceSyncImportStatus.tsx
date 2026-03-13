@@ -44,7 +44,7 @@ const isPending = (rs: ResourceSync) => {
   return rsStatus?.status !== ConditionType.ResourceSyncSynced;
 };
 
-const ResourceSyncInfoAlert = ({ rs }: { rs: ResourceSync }) => {
+const ResourceSyncInfoAlert = ({ rs, type }: { rs: ResourceSync; type: 'fleet' | 'catalog' }) => {
   const { t } = useTranslation();
   const name = rs.metadata.name as string;
 
@@ -52,17 +52,32 @@ const ResourceSyncInfoAlert = ({ rs }: { rs: ResourceSync }) => {
     <Alert
       variant="info"
       title={
-        <Trans t={t}>
-          Importing fleets from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{name}</Link>. This
-          might take a few minutes to complete.
-        </Trans>
+        type === 'fleet' ? (
+          <Trans t={t}>
+            Importing fleets from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{name}</Link>. This
+            might take a few minutes to complete.
+          </Trans>
+        ) : (
+          <Trans t={t}>
+            Importing catalogs from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{name}</Link>. This
+            might take a few minutes to complete.
+          </Trans>
+        )
       }
       isInline
     />
   );
 };
 
-const ResourceSyncErrorAlert = ({ rs, refetch }: { rs: ResourceSync; refetch: VoidFunction }) => {
+const ResourceSyncErrorAlert = ({
+  rs,
+  refetch,
+  type,
+}: {
+  rs: ResourceSync;
+  refetch: VoidFunction;
+  type: 'fleet' | 'catalog';
+}) => {
   const { t } = useTranslation();
   const name = rs.metadata.name as string;
 
@@ -96,14 +111,21 @@ const ResourceSyncErrorAlert = ({ rs, refetch }: { rs: ResourceSync; refetch: Vo
   return (
     <Alert
       variant="danger"
-      title={t('Fleets import failed')}
+      title={type === 'fleet' ? t('Fleets import failed') : t('Catalogs import failed')}
       isInline
       actionClose={<AlertActionCloseButton onClose={dismissAlert} />}
     >
-      <Trans t={t}>
-        Importing fleets from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{name}</Link> failed.
-        Check the resource sync for more details.
-      </Trans>
+      {type === 'fleet' ? (
+        <Trans t={t}>
+          Importing fleets from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{name}</Link> failed.
+          Check the resource sync for more details.
+        </Trans>
+      ) : (
+        <Trans t={t}>
+          Importing catalogs from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{name}</Link> failed.
+          Check the resource sync for more details.
+        </Trans>
+      )}
     </Alert>
   );
 };
@@ -125,9 +147,11 @@ const getVisibleResourceSyncs = (rsList: ResourceSync[]) => {
   return { pendingRs, errorRs };
 };
 
-const FleetResourceSyncs = () => {
+const ResourceSyncImport = ({ type }: { type: 'fleet' | 'catalog' }) => {
+  const params = new URLSearchParams();
+  params.set('fieldSelector', type === 'fleet' ? 'spec.type!=catalog' : 'spec.type==catalog');
   const [rsList, , , rsRefetch] = useFetchPeriodically<ResourceSyncList>({
-    endpoint: 'resourcesyncs',
+    endpoint: `resourcesyncs?${params.toString()}`,
   });
 
   // TODO Remove the client-side filtering once the API filter is available
@@ -142,14 +166,14 @@ const FleetResourceSyncs = () => {
         {pendingRs.map((rs) => {
           return (
             <StackItem key={rs.metadata.name as string}>
-              <ResourceSyncInfoAlert rs={rs} />
+              <ResourceSyncInfoAlert rs={rs} type={type} />
             </StackItem>
           );
         })}
         {errorRs.map((rs) => {
           return (
             <StackItem key={rs.metadata.name as string}>
-              <ResourceSyncErrorAlert rs={rs} refetch={rsRefetch} />
+              <ResourceSyncErrorAlert rs={rs} refetch={rsRefetch} type={type} />
             </StackItem>
           );
         })}
@@ -158,10 +182,10 @@ const FleetResourceSyncs = () => {
   );
 };
 
-const FleetResourceSyncsWithPermissions = () => {
+const ResourceSyncImportStatus = ({ type }: { type: 'fleet' | 'catalog' }) => {
   const { checkPermissions } = usePermissionsContext();
   const [allowed] = checkPermissions([{ kind: RESOURCE.RESOURCE_SYNC, verb: VERB.LIST }]);
-  return allowed && <FleetResourceSyncs />;
+  return allowed && <ResourceSyncImport type={type} />;
 };
 
-export default FleetResourceSyncsWithPermissions;
+export default ResourceSyncImportStatus;
