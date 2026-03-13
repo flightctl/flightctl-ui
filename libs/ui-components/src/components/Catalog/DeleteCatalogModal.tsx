@@ -52,6 +52,7 @@ const DeleteCatalogModal = ({ catalogId, catalogDisplayName, onClose, onDeleteSu
       setError(t('{{count}} catalog item could not be deleted. Try deleting it manually.', { count: nonDeletedItems }));
       return false;
     }
+    setCatalogItemIds([]);
     await remove(`catalogs/${catalogId}`);
     return true;
   };

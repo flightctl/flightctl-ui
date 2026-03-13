@@ -62,7 +62,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
       setResourceSyncIds(resourceSyncs.items.map((rs) => rs.metadata.name || ''));
       setRsError(undefined);
     } catch (e) {
-      setRsError(e);
+      setRsError(getErrorMessage(e));
       setResourceSyncIds([]);
     }
   }, [get, repositoryId]);
@@ -109,7 +109,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
             <Alert isInline variant="warning" title={t('Cannot delete repository')}>
               {t(
                 `The repository cannot be safely deleted at this moment, as we couldn't determine if the repository contains resource syncs. Detail: {{detail}}`,
-                { detail: getErrorMessage(rsError) },
+                { detail: rsError },
               )}
             </Alert>
           ) : (

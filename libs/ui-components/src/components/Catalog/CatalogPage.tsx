@@ -272,7 +272,7 @@ export const CatalogPageContent = ({
                                 >
                                   <DropdownList>
                                     <DropdownItem
-                                      isAriaDisabled={!c.metadata.owner && !canEditCatalog}
+                                      isAriaDisabled={!c.metadata.owner || !canEditCatalog}
                                       onClick={() => setCatalogToEdit(c)}
                                     >
                                       {c.metadata.owner ? t('View') : t('Edit')}

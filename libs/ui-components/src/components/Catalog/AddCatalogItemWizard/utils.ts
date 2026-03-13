@@ -7,6 +7,7 @@ import { TFunction } from 'i18next';
 import isEqual from 'lodash/isEqual';
 import {
   ApiVersion,
+  Catalog,
   CatalogItem,
   CatalogItemArtifact,
   CatalogItemArtifactType,
@@ -17,7 +18,13 @@ import {
 } from '@flightctl/types/alpha';
 import { PatchRequest } from '@flightctl/types';
 
-import { AddCatalogItemFormValues, ArtifactFormValue, VersionFormValues, configurableAppTypes } from './types';
+import {
+  AddCatalogItemFormValues,
+  ArtifactFormValue,
+  CreateCatalogFormValues,
+  VersionFormValues,
+  configurableAppTypes,
+} from './types';
 import { appTypeIds } from '../useCatalogs';
 import { validKubernetesDnsSubdomain, validURLSchema } from '../../form/validations';
 import { appendJSONPatch } from '../../../utils/patch';
@@ -580,3 +587,52 @@ export const getInitialValuesFromItem = (item: CatalogItem): AddCatalogItemFormV
     deprecationReplacement: item.spec.deprecation?.replacement || '',
   };
 };
+
+export const getCatalogPatches = (catalog: Catalog, values: CreateCatalogFormValues) => {
+  const patches: PatchRequest = [];
+
+  appendJSONPatch({
+    patches,
+    path: '/spec/displayName',
+    newValue: values.displayName,
+    originalValue: catalog.spec.displayName,
+  });
+  appendJSONPatch({
+    patches,
+    path: '/spec/shortDescription',
+    newValue: values.shortDescription,
+    originalValue: catalog.spec.shortDescription,
+  });
+  appendJSONPatch({
+    patches,
+    path: '/spec/icon',
+    newValue: values.icon,
+    originalValue: catalog.spec.icon,
+  });
+  appendJSONPatch({
+    patches,
+    path: '/spec/provider',
+    newValue: values.provider,
+    originalValue: catalog.spec.provider,
+  });
+  appendJSONPatch({
+    patches,
+    path: '/spec/support',
+    newValue: values.support,
+    originalValue: catalog.spec.support,
+  });
+  return patches;
+};
+
+export const getCatalogResource = (values: CreateCatalogFormValues): Catalog => ({
+  apiVersion: ApiVersion.V1ALPHA1,
+  kind: 'Catalog',
+  metadata: { name: values.name },
+  spec: {
+    displayName: values.displayName || undefined,
+    shortDescription: values.shortDescription || undefined,
+    icon: values.icon || undefined,
+    provider: values.provider || undefined,
+    support: values.support || undefined,
+  },
+});

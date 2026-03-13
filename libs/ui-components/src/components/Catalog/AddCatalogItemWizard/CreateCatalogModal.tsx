@@ -14,8 +14,7 @@ import {
 } from '@patternfly/react-core';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { ApiVersion, Catalog } from '@flightctl/types/alpha';
-import { PatchRequest } from '@flightctl/types';
+import { Catalog } from '@flightctl/types/alpha';
 
 import { useFetch } from '../../../hooks/useFetch';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -23,19 +22,11 @@ import { getDnsSubdomainValidations, validKubernetesDnsSubdomain, validURLSchema
 import FlightCtlForm from '../../form/FlightCtlForm';
 import NameField from '../../form/NameField';
 import TextField from '../../form/TextField';
+import IconUploadField from '../../form/IconUploadField';
 import { getErrorMessage } from '../../../utils/error';
-import { FormGroupWithHelperText } from '../../common/WithHelperText';
 import TextAreaField from '../../form/TextAreaField';
-import { appendJSONPatch } from '../../../utils/patch';
-
-type CreateCatalogFormValues = {
-  name: string;
-  displayName: string;
-  shortDescription: string;
-  icon: string;
-  provider: string;
-  support: string;
-};
+import { CreateCatalogFormValues } from './types';
+import { getCatalogPatches, getCatalogResource } from './utils';
 
 type CreateCatalogModalProps = {
   onClose: VoidFunction;
@@ -99,56 +90,13 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
           setError(undefined);
           try {
             if (isEdit) {
-              const patches: PatchRequest = [];
-
-              appendJSONPatch({
-                patches,
-                path: '/spec/displayName',
-                newValue: values.displayName,
-                originalValue: catalog.spec.displayName,
-              });
-              appendJSONPatch({
-                patches,
-                path: '/spec/shortDescription',
-                newValue: values.shortDescription,
-                originalValue: catalog.spec.shortDescription,
-              });
-              appendJSONPatch({
-                patches,
-                path: '/spec/icon',
-                newValue: values.icon,
-                originalValue: catalog.spec.icon,
-              });
-              appendJSONPatch({
-                patches,
-                path: '/spec/provider',
-                newValue: values.provider,
-                originalValue: catalog.spec.provider,
-              });
-              appendJSONPatch({
-                patches,
-                path: '/spec/support',
-                newValue: values.support,
-                originalValue: catalog.spec.support,
-              });
-
+              const patches = getCatalogPatches(catalog, values);
               if (patches.length) {
                 const result = await patch<Catalog>(`catalogs/${catalog.metadata.name}`, patches);
                 onSuccess(result);
               }
             } else {
-              const result = await post<Catalog>('catalogs', {
-                apiVersion: ApiVersion.V1ALPHA1,
-                kind: 'Catalog',
-                metadata: { name: values.name },
-                spec: {
-                  displayName: values.displayName || undefined,
-                  shortDescription: values.shortDescription || undefined,
-                  icon: values.icon || undefined,
-                  provider: values.provider || undefined,
-                  support: values.support || undefined,
-                },
-              });
+              const result = await post<Catalog>('catalogs', getCatalogResource(values));
               onSuccess(result);
             }
           } catch (e) {
@@ -175,14 +123,9 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
                 <FormGroup label={t('Short description')}>
                   <TextAreaField name="shortDescription" aria-label={t('Short description')} isDisabled={isReadOnly} />
                 </FormGroup>
-                <FormGroupWithHelperText label={t('Icon')} content={t('URL or data URI of the catalog item icon.')}>
-                  <TextField
-                    name="icon"
-                    aria-label={t('Icon')}
-                    placeholder="https://example.com/icon.svg"
-                    isDisabled={isReadOnly}
-                  />
-                </FormGroupWithHelperText>
+                <FormGroup label={t('Icon')}>
+                  <IconUploadField name="icon" isDisabled={isReadOnly} />
+                </FormGroup>
                 <FormGroup label={t('Provider')}>
                   <TextField name="provider" aria-label={t('Provider')} isDisabled={isReadOnly} />
                 </FormGroup>
