@@ -7,6 +7,7 @@ import { TFunction } from 'i18next';
 import isEqual from 'lodash/isEqual';
 import {
   ApiVersion,
+  Catalog,
   CatalogItem,
   CatalogItemArtifact,
   CatalogItemArtifactType,
@@ -17,7 +18,13 @@ import {
 } from '@flightctl/types/alpha';
 import { PatchRequest } from '@flightctl/types';
 
-import { AddCatalogItemFormValues, ArtifactFormValue, VersionFormValues, configurableAppTypes } from './types';
+import {
+  AddCatalogItemFormValues,
+  ArtifactFormValue,
+  CreateCatalogFormValues,
+  VersionFormValues,
+  configurableAppTypes,
+} from './types';
 import { appTypeIds } from '../useCatalogs';
 import { validKubernetesDnsSubdomain, validURLSchema } from '../../form/validations';
 import { appendJSONPatch } from '../../../utils/patch';
@@ -383,7 +390,7 @@ const yamlFieldSchema = (t: TFunction) =>
     }
   });
 
-const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: boolean) =>
+const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: boolean, isApp: boolean) =>
   Yup.object().shape({
     version: Yup.string()
       .required(t('Version is required'))
@@ -401,12 +408,17 @@ const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: bool
       }),
     references: Yup.object().test(
       'at-least-one-reference',
-      t('At least one artifact reference is required'),
+      isApp ? t('Container reference is required') : t('At least one artifact reference is required'),
       (value) => {
         if (!value || typeof value !== 'object') {
           return false;
         }
-        return Object.values(value as Record<string, string>).some((v) => typeof v === 'string' && v.trim() !== '');
+        const refs = value as Record<string, string>;
+        if (isApp) {
+          const containerRef = refs[CatalogItemArtifactType.CatalogItemArtifactTypeContainer];
+          return typeof containerRef === 'string' && containerRef.trim() !== '';
+        }
+        return Object.values(refs).some((v) => typeof v === 'string' && v.trim() !== '');
       },
     ),
     channels: Yup.array().of(Yup.string().required()).min(1, t('At least one channel is required')),
@@ -423,13 +435,13 @@ const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: bool
     }),
   });
 
-const versionsSchema = (t: TFunction, configurable: boolean) =>
+const versionsSchema = (t: TFunction, configurable: boolean, isApp: boolean) =>
   Yup.lazy((versions: VersionFormValues[]) => {
     const versionNames = (versions || []).map((v) => v.version);
     const duplicates = new Set(versionNames.filter((name, i) => name && versionNames.indexOf(name) !== i));
 
     return Yup.array()
-      .of(versionSchema(t, duplicates, configurable))
+      .of(versionSchema(t, duplicates, configurable, isApp))
       .min(1, t('At least one version is required'));
   });
 
@@ -503,10 +515,11 @@ export const getValidationSchema = (t: TFunction) =>
     homepage: validURLSchema(t),
     supportUrl: validURLSchema(t),
     documentationUrl: validURLSchema(t),
-    versions: Yup.mixed().when('type', {
-      is: (type: string) => configurableAppTypes.includes(type as CatalogItemType),
-      then: () => versionsSchema(t, true),
-      otherwise: () => versionsSchema(t, false),
+    versions: Yup.mixed().when('type', ([type]: string[]) => {
+      const itemType = type as CatalogItemType;
+      const configurable = configurableAppTypes.includes(itemType);
+      const isApp = appTypeIds.includes(itemType);
+      return versionsSchema(t, configurable, isApp);
     }) as unknown as Yup.ArraySchema<VersionFormValues[], Yup.AnyObject>,
     defaultConfig: Yup.string().when('type', {
       is: (type: string) => configurableAppTypes.includes(type as CatalogItemType),
@@ -574,3 +587,52 @@ export const getInitialValuesFromItem = (item: CatalogItem): AddCatalogItemFormV
     deprecationReplacement: item.spec.deprecation?.replacement || '',
   };
 };
+
+export const getCatalogPatches = (catalog: Catalog, values: CreateCatalogFormValues) => {
+  const patches: PatchRequest = [];
+
+  appendJSONPatch({
+    patches,
+    path: '/spec/displayName',
+    newValue: values.displayName,
+    originalValue: catalog.spec.displayName,
+  });
+  appendJSONPatch({
+    patches,
+    path: '/spec/shortDescription',
+    newValue: values.shortDescription,
+    originalValue: catalog.spec.shortDescription,
+  });
+  appendJSONPatch({
+    patches,
+    path: '/spec/icon',
+    newValue: values.icon,
+    originalValue: catalog.spec.icon,
+  });
+  appendJSONPatch({
+    patches,
+    path: '/spec/provider',
+    newValue: values.provider,
+    originalValue: catalog.spec.provider,
+  });
+  appendJSONPatch({
+    patches,
+    path: '/spec/support',
+    newValue: values.support,
+    originalValue: catalog.spec.support,
+  });
+  return patches;
+};
+
+export const getCatalogResource = (values: CreateCatalogFormValues): Catalog => ({
+  apiVersion: ApiVersion.V1ALPHA1,
+  kind: 'Catalog',
+  metadata: { name: values.name },
+  spec: {
+    displayName: values.displayName || undefined,
+    shortDescription: values.shortDescription || undefined,
+    icon: values.icon || undefined,
+    provider: values.provider || undefined,
+    support: values.support || undefined,
+  },
+});
