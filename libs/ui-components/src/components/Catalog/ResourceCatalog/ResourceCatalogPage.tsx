@@ -1,10 +1,10 @@
 import { DeviceSpec, PatchRequest } from '@flightctl/types';
 import * as React from 'react';
 import { Stack, StackItem } from '@patternfly/react-core';
-
 import { CatalogItem } from '@flightctl/types/alpha';
+
 import { getRemoveAppPatches, getRemoveOsPatches } from '../../Catalog/utils';
-import { CatalogPageContent } from '../../Catalog/CatalogPage';
+import { CatalogPageWithInit } from '../../Catalog/CatalogPage';
 import InstalledSoftware from '../../Catalog/InstalledSoftware';
 
 import './ResourceCatalogPage.css';
@@ -59,7 +59,7 @@ const ResourceCatalogPage = ({
           />
         </StackItem>
         <StackItem className="fctl-resource-catalog-page">
-          <CatalogPageContent canInstall={canEdit} targetHasOwner={hasOwner} onInstall={onInstall} targetSet />
+          <CatalogPageWithInit canInstall={canEdit} targetHasOwner={hasOwner} onInstall={onInstall} targetSet />
         </StackItem>
       </Stack>
     </>

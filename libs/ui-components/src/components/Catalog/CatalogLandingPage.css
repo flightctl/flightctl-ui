@@ -1,0 +1,12 @@
+.fctl-catalog-landing__header {
+  cursor: pointer;
+}
+
+.fctl-catalog-landing__header:hover,
+.fctl-catalog-landing__header:focus {
+  background-color: var(--pf-t--global--background--color--secondary--default);
+}
+
+.fctl-catalog-landing__card-body {
+  margin-top: var(--pf-t--global--spacer--md);
+}

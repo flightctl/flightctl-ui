@@ -1,7 +1,6 @@
 import {
-  Button,
-  Content,
-  ContentVariants,
+  Alert,
+  Bullseye,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -16,6 +15,7 @@ import {
   Gallery,
   MenuToggle,
   PageSection,
+  Spinner,
   Split,
   SplitItem,
   Stack,
@@ -30,7 +30,7 @@ import { Catalog, CatalogItem, CatalogItemCategory, CatalogItemType, CatalogList
 
 import { useTranslation } from '../../hooks/useTranslation';
 import CatalogItemCard from './CatalogItemCard';
-import CatalogPageToolbar from './CatalogPageToolbar';
+import CatalogPageToolbar, { CreateCatalogItemBtn } from './CatalogPageToolbar';
 import { CatalogFilter, useCatalogFilter } from './useCatalogFilter';
 import CatalogItemDetails from './CatalogItemDetails';
 import { appTypeIds, useCatalogItems } from './useCatalogs';
@@ -45,6 +45,8 @@ import DeleteCatalogModal from './DeleteCatalogModal';
 import CreateCatalogModal from './AddCatalogItemWizard/CreateCatalogModal';
 import WithTooltip from '../common/WithTooltip';
 import ResourceSyncImportStatus from '../ResourceSync/ResourceSyncImportStatus';
+import { getErrorMessage } from '../../utils/error';
+import CatalogLandingPage from './CatalogLandingPage';
 
 import './CatalogPage.css';
 
@@ -56,24 +58,26 @@ type CatalogPageContentProps = {
   canEditCatalog?: boolean;
   canDeleteCatalog?: boolean;
   targetSet?: boolean;
+  catalogs: Catalog[];
+  refetchCatalogs: VoidFunction;
 };
 
 type CatalogEmptyStateProps = {
   hasFilters: boolean;
   showCatalogMgmt: boolean;
+  isUpdating: boolean;
 };
 
-const CatalogEmptyState = ({ hasFilters, showCatalogMgmt }: CatalogEmptyStateProps) => {
+const CatalogEmptyState = ({ hasFilters, showCatalogMgmt, isUpdating }: CatalogEmptyStateProps) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+
+  const noResults = hasFilters || isUpdating;
+
   return (
-    <ResourceListEmptyState
-      icon={SearchIcon}
-      titleText={hasFilters ? t('No results found') : t('No catalog items yet')}
-    >
+    <ResourceListEmptyState icon={SearchIcon} titleText={noResults ? t('No results found') : t('No catalog items yet')}>
       <EmptyStateBody>
         <Stack>
-          {hasFilters ? (
+          {noResults ? (
             <StackItem>
               {t('No catalog items match the selected filters or search. Try adjusting the category or search.')}
             </StackItem>
@@ -86,12 +90,10 @@ const CatalogEmptyState = ({ hasFilters, showCatalogMgmt }: CatalogEmptyStatePro
           )}
         </Stack>
       </EmptyStateBody>
-      {!hasFilters && showCatalogMgmt && (
+      {!noResults && !isUpdating && showCatalogMgmt && (
         <EmptyStateFooter>
           <EmptyStateActions>
-            <Button variant="primary" onClick={() => navigate(ROUTE.CATALOG_ADD_ITEM)}>
-              {t('Create catalog item')}
-            </Button>
+            <CreateCatalogItemBtn />
           </EmptyStateActions>
         </EmptyStateFooter>
       )}
@@ -185,7 +187,36 @@ const CatalogPageFilter = ({ catalogFilter }: { catalogFilter: CatalogFilter }) 
   return <TreeView hasAnimations data={filterData} onCheck={handleCheck} hasCheckboxes />;
 };
 
-export const CatalogPageContent = ({
+export const CatalogPageWithInit = (props: Omit<CatalogPageContentProps, 'catalogs' | 'refetchCatalogs'>) => {
+  const [catalogList, loading, error, refetch] = useFetchPeriodically<CatalogList>({
+    endpoint: 'catalogs',
+  });
+
+  const { t } = useTranslation();
+  if (error) {
+    return (
+      <Alert variant="danger" title={t('An error occurred')} isInline>
+        {getErrorMessage(error)}
+      </Alert>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Bullseye>
+        <Spinner />
+      </Bullseye>
+    );
+  }
+
+  if (!catalogList?.items.length) {
+    return <CatalogLandingPage />;
+  }
+
+  return <CatalogPageContent {...props} catalogs={catalogList.items} refetchCatalogs={refetch} />;
+};
+
+const CatalogPageContent = ({
   canInstall,
   targetHasOwner,
   onInstall,
@@ -193,6 +224,8 @@ export const CatalogPageContent = ({
   canEditCatalog,
   canDeleteCatalog,
   targetSet,
+  catalogs,
+  refetchCatalogs,
 }: CatalogPageContentProps) => {
   const [catalogMenuOpen, setCatalogMenuOpen] = React.useState<string>();
   const [selectedItem, setSelectedItem] = React.useState<{ itemName: string; catalog: string }>();
@@ -200,10 +233,6 @@ export const CatalogPageContent = ({
   const [catalogToDelete, setCatalogToDelete] = React.useState<Catalog>();
   const { t } = useTranslation();
   const catalogFilter = useCatalogFilter();
-
-  const [catalogList, catalogsLoading, catalogsErr, refetchCatalogs] = useFetchPeriodically<CatalogList>({
-    endpoint: 'catalogs',
-  });
 
   const [catalogItems, isLoading, error, pagination, isUpdating, refetch] = useCatalogItems(catalogFilter);
 
@@ -217,7 +246,7 @@ export const CatalogPageContent = ({
 
   return (
     <>
-      <ListPageBody error={error || catalogsErr} loading={isLoading || catalogsLoading}>
+      <ListPageBody error={error} loading={isLoading}>
         <div>
           <CatalogPageToolbar
             {...catalogFilter}
@@ -232,71 +261,67 @@ export const CatalogPageContent = ({
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t('Catalog')}</DescriptionListTerm>
                     <DescriptionListDescription>
-                      {!!catalogList?.items.length ? (
-                        <TreeView
-                          hasAnimations
-                          onCheck={(_, item) => {
-                            catalogFilter.catalogs.includes(item.id || '')
-                              ? catalogFilter.setCatalogs((catalogs) => catalogs.filter((c) => c !== item.id || ''))
-                              : catalogFilter.setCatalogs((catalogs) => [...catalogs, item.id || '']);
-                          }}
-                          hasCheckboxes
-                          data={catalogList.items.map((c) => {
-                            const canDelete = !c.metadata.owner && canDeleteCatalog;
-                            return {
-                              name: c.spec.displayName || c.metadata.name || '',
-                              id: c.metadata.name || '',
-                              checkProps: {
-                                checked: !!c.metadata.name && catalogFilter.catalogs.includes(c.metadata.name),
-                              },
-                              action: showCatalogMgmt ? (
-                                <Dropdown
-                                  isOpen={catalogMenuOpen === c.metadata.name}
-                                  onOpenChange={(isOpen) => {
-                                    if (isOpen) {
-                                      setCatalogMenuOpen(c.metadata.name);
-                                    } else if (catalogMenuOpen === c.metadata.name) {
-                                      setCatalogMenuOpen(undefined);
-                                    }
-                                  }}
-                                  onSelect={() => setCatalogMenuOpen(undefined)}
-                                  toggle={(toggleRef) => (
-                                    <MenuToggle
-                                      ref={toggleRef}
-                                      isExpanded={catalogMenuOpen === c.metadata.name}
-                                      onClick={() => setCatalogMenuOpen(c.metadata.name)}
-                                      variant="plain"
-                                      icon={<EllipsisVIcon />}
-                                      aria-label={t('Actions dropdown')}
-                                    />
-                                  )}
-                                >
-                                  <DropdownList>
-                                    <DropdownItem onClick={() => setCatalogToEdit(c)}>
-                                      {!!c.metadata.owner || !canEditCatalog ? t('View') : t('Edit')}
-                                    </DropdownItem>
-                                    <WithTooltip
-                                      showTooltip={!!c.metadata.owner}
-                                      content={t(
-                                        'This catalog is managed by a resource sync and cannot be directly removed. Either remove the catalog definition from the resource sync configuration, or delete the resource sync first.',
-                                      )}
+                      <TreeView
+                        hasAnimations
+                        onCheck={(_, item) => {
+                          catalogFilter.catalogs.includes(item.id || '')
+                            ? catalogFilter.setCatalogs((catalogs) => catalogs.filter((c) => c !== item.id || ''))
+                            : catalogFilter.setCatalogs((catalogs) => [...catalogs, item.id || '']);
+                        }}
+                        hasCheckboxes
+                        data={catalogs.map((c) => {
+                          const canDelete = !c.metadata.owner && canDeleteCatalog;
+                          return {
+                            name: c.spec.displayName || c.metadata.name || '',
+                            id: c.metadata.name || '',
+                            checkProps: {
+                              checked: !!c.metadata.name && catalogFilter.catalogs.includes(c.metadata.name),
+                            },
+                            action: showCatalogMgmt ? (
+                              <Dropdown
+                                isOpen={catalogMenuOpen === c.metadata.name}
+                                onOpenChange={(isOpen) => {
+                                  if (isOpen) {
+                                    setCatalogMenuOpen(c.metadata.name);
+                                  } else if (catalogMenuOpen === c.metadata.name) {
+                                    setCatalogMenuOpen(undefined);
+                                  }
+                                }}
+                                onSelect={() => setCatalogMenuOpen(undefined)}
+                                toggle={(toggleRef) => (
+                                  <MenuToggle
+                                    ref={toggleRef}
+                                    isExpanded={catalogMenuOpen === c.metadata.name}
+                                    onClick={() => setCatalogMenuOpen(c.metadata.name)}
+                                    variant="plain"
+                                    icon={<EllipsisVIcon />}
+                                    aria-label={t('Actions dropdown')}
+                                  />
+                                )}
+                              >
+                                <DropdownList>
+                                  <DropdownItem onClick={() => setCatalogToEdit(c)}>
+                                    {!!c.metadata.owner || !canEditCatalog ? t('View') : t('Edit')}
+                                  </DropdownItem>
+                                  <WithTooltip
+                                    showTooltip={!!c.metadata.owner}
+                                    content={t(
+                                      'This catalog is managed by a resource sync and cannot be directly removed. Either remove the catalog definition from the resource sync configuration, or delete the resource sync first.',
+                                    )}
+                                  >
+                                    <DropdownItem
+                                      isAriaDisabled={!canDelete}
+                                      onClick={canDelete ? () => setCatalogToDelete(c) : undefined}
                                     >
-                                      <DropdownItem
-                                        isAriaDisabled={!canDelete}
-                                        onClick={canDelete ? () => setCatalogToDelete(c) : undefined}
-                                      >
-                                        {t('Remove')}
-                                      </DropdownItem>
-                                    </WithTooltip>
-                                  </DropdownList>
-                                </Dropdown>
-                              ) : undefined,
-                            };
-                          })}
-                        />
-                      ) : (
-                        <Content component={ContentVariants.small}>{t('No catalogs')}</Content>
-                      )}
+                                      {t('Remove')}
+                                    </DropdownItem>
+                                  </WithTooltip>
+                                </DropdownList>
+                              </Dropdown>
+                            ) : undefined,
+                          };
+                        })}
+                      />
                     </DescriptionListDescription>
                   </DescriptionListGroup>
                   <DescriptionListGroup>
@@ -317,6 +342,7 @@ export const CatalogPageContent = ({
                   <CatalogEmptyState
                     hasFilters={!filterIsEmpty || !!catalogFilter.nameFilter}
                     showCatalogMgmt={!!showCatalogMgmt}
+                    isUpdating={isUpdating}
                   />
                 ) : (
                   <Gallery hasGutter>
@@ -400,7 +426,7 @@ const CatalogPage = () => {
     <>
       <ResourceSyncImportStatus type="catalog" />
       <ListPage title={t('Software Catalog')}>
-        <CatalogPageContent
+        <CatalogPageWithInit
           canInstall={canEditFleet || canEditDevice}
           canEditCatalog={canEditCatalog}
           canDeleteCatalog={canDeleteCatalog}

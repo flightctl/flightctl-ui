@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FieldArray, useFormikContext } from 'formik';
+import { FieldArray, useField, useFormikContext } from 'formik';
 import { Button, FormGroup, FormSection, Split, SplitItem } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
@@ -13,8 +13,24 @@ import { getDnsSubdomainValidations } from '../../form/validations';
 import RadioField from '../../form/RadioField';
 import { ResourceSyncType } from '@flightctl/types';
 
-export const CreateResourceSyncForm = ({ rs, index }: { rs: ResourceSyncFormValue; index: number }) => {
+export const CreateResourceSyncForm = ({
+  rs,
+  index,
+  allowedRSTypes,
+}: {
+  rs: ResourceSyncFormValue;
+  index: number;
+  allowedRSTypes?: ResourceSyncType[];
+}) => {
   const { t } = useTranslation();
+  const [{ value }, , { setValue }] = useField<ResourceSyncType>(`resourceSyncs[${index}].type`);
+
+  React.useEffect(() => {
+    if (allowedRSTypes?.length && !allowedRSTypes.includes(value)) {
+      setValue(allowedRSTypes[0]);
+    }
+  }, [allowedRSTypes, value, setValue]);
+
   return (
     <FormSection key={index}>
       <NameField
@@ -34,6 +50,7 @@ export const CreateResourceSyncForm = ({ rs, index }: { rs: ResourceSyncFormValu
               name={`resourceSyncs[${index}].type`}
               label={t('Fleet')}
               checkedValue={ResourceSyncType.ResourceSyncTypeFleet}
+              isDisabled={allowedRSTypes && !allowedRSTypes.includes(ResourceSyncType.ResourceSyncTypeFleet)}
             />
           </SplitItem>
           <SplitItem>
@@ -42,6 +59,7 @@ export const CreateResourceSyncForm = ({ rs, index }: { rs: ResourceSyncFormValu
               name={`resourceSyncs[${index}].type`}
               label={t('Catalog')}
               checkedValue={ResourceSyncType.ResourceSyncTypeCatalog}
+              isDisabled={allowedRSTypes && !allowedRSTypes.includes(ResourceSyncType.ResourceSyncTypeCatalog)}
             />
           </SplitItem>
         </Split>
@@ -74,7 +92,7 @@ export const CreateResourceSyncForm = ({ rs, index }: { rs: ResourceSyncFormValu
   );
 };
 
-const CreateResourceSyncsForm = () => {
+const CreateResourceSyncsForm = ({ allowedRSTypes }: { allowedRSTypes?: ResourceSyncType[] }) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<RepositoryFormValues>();
 
@@ -84,7 +102,7 @@ const CreateResourceSyncsForm = () => {
         <>
           {values.resourceSyncs.map((resourceSync, index) => (
             <React.Fragment key={index}>
-              <CreateResourceSyncForm rs={resourceSync} index={index} />
+              <CreateResourceSyncForm rs={resourceSync} index={index} allowedRSTypes={allowedRSTypes} />
               {values.resourceSyncs.length > 1 && (
                 <FormGroup isInline>
                   <Button
