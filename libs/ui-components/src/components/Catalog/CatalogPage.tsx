@@ -1,7 +1,4 @@
 import {
-  Button,
-  Content,
-  ContentVariants,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -30,7 +27,7 @@ import { Catalog, CatalogItem, CatalogItemCategory, CatalogItemType, CatalogList
 
 import { useTranslation } from '../../hooks/useTranslation';
 import CatalogItemCard from './CatalogItemCard';
-import CatalogPageToolbar from './CatalogPageToolbar';
+import CatalogPageToolbar, { CreateCatalogItemBtn, ImportCatalogBtn } from './CatalogPageToolbar';
 import { CatalogFilter, useCatalogFilter } from './useCatalogFilter';
 import CatalogItemDetails from './CatalogItemDetails';
 import { appTypeIds, useCatalogItems } from './useCatalogs';
@@ -45,6 +42,7 @@ import DeleteCatalogModal from './DeleteCatalogModal';
 import CreateCatalogModal from './AddCatalogItemWizard/CreateCatalogModal';
 import WithTooltip from '../common/WithTooltip';
 import ResourceSyncImportStatus from '../ResourceSync/ResourceSyncImportStatus';
+import CatalogLandingPage from './CatalogLandingPage';
 
 import './CatalogPage.css';
 
@@ -61,19 +59,19 @@ type CatalogPageContentProps = {
 type CatalogEmptyStateProps = {
   hasFilters: boolean;
   showCatalogMgmt: boolean;
+  isUpdating: boolean;
 };
 
-const CatalogEmptyState = ({ hasFilters, showCatalogMgmt }: CatalogEmptyStateProps) => {
+const CatalogEmptyState = ({ hasFilters, showCatalogMgmt, isUpdating }: CatalogEmptyStateProps) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+
+  const noResults = hasFilters || isUpdating;
+
   return (
-    <ResourceListEmptyState
-      icon={SearchIcon}
-      titleText={hasFilters ? t('No results found') : t('No catalog items yet')}
-    >
+    <ResourceListEmptyState icon={SearchIcon} titleText={noResults ? t('No results found') : t('No catalog items yet')}>
       <EmptyStateBody>
         <Stack>
-          {hasFilters ? (
+          {noResults ? (
             <StackItem>
               {t('No catalog items match the selected filters or search. Try adjusting the category or search.')}
             </StackItem>
@@ -86,12 +84,11 @@ const CatalogEmptyState = ({ hasFilters, showCatalogMgmt }: CatalogEmptyStatePro
           )}
         </Stack>
       </EmptyStateBody>
-      {!hasFilters && showCatalogMgmt && (
+      {!noResults && !isUpdating && showCatalogMgmt && (
         <EmptyStateFooter>
           <EmptyStateActions>
-            <Button variant="primary" onClick={() => navigate(ROUTE.CATALOG_ADD_ITEM)}>
-              {t('Create catalog item')}
-            </Button>
+            <CreateCatalogItemBtn />
+            <ImportCatalogBtn />
           </EmptyStateActions>
         </EmptyStateFooter>
       )}
@@ -194,16 +191,15 @@ export const CatalogPageContent = ({
   canDeleteCatalog,
   targetSet,
 }: CatalogPageContentProps) => {
+  const [catalogList, catalogLoading, catalogErr, refetchCatalogs] = useFetchPeriodically<CatalogList>({
+    endpoint: 'catalogs',
+  });
   const [catalogMenuOpen, setCatalogMenuOpen] = React.useState<string>();
   const [selectedItem, setSelectedItem] = React.useState<{ itemName: string; catalog: string }>();
   const [catalogToEdit, setCatalogToEdit] = React.useState<Catalog>();
   const [catalogToDelete, setCatalogToDelete] = React.useState<Catalog>();
   const { t } = useTranslation();
   const catalogFilter = useCatalogFilter();
-
-  const [catalogList, catalogsLoading, catalogsErr, refetchCatalogs] = useFetchPeriodically<CatalogList>({
-    endpoint: 'catalogs',
-  });
 
   const [catalogItems, isLoading, error, pagination, isUpdating, refetch] = useCatalogItems(catalogFilter);
 
@@ -217,7 +213,7 @@ export const CatalogPageContent = ({
 
   return (
     <>
-      <ListPageBody error={error || catalogsErr} loading={isLoading || catalogsLoading}>
+      <ListPageBody error={error || catalogErr} loading={isLoading || catalogLoading}>
         <div>
           <CatalogPageToolbar
             {...catalogFilter}
@@ -225,14 +221,20 @@ export const CatalogPageContent = ({
             isUpdating={isUpdating}
             showCatalogMgmt={!!showCatalogMgmt}
           />
-          <PageSection hasBodyWrapper={false} type="wizard">
-            <Split hasGutter>
-              <SplitItem className="fctl-catalog-page fctl-catalog-page__filters">
-                <DescriptionList>
-                  <DescriptionListGroup>
-                    <DescriptionListTerm>{t('Catalog')}</DescriptionListTerm>
-                    <DescriptionListDescription>
-                      {!!catalogList?.items.length ? (
+          {!catalogList?.items.length ? (
+            <PageSection hasBodyWrapper={false} type="wizard">
+              <div className="fctl-catalog-page">
+                <CatalogLandingPage />
+              </div>
+            </PageSection>
+          ) : (
+            <PageSection hasBodyWrapper={false} type="wizard">
+              <Split hasGutter>
+                <SplitItem className="fctl-catalog-page fctl-catalog-page__filters">
+                  <DescriptionList>
+                    <DescriptionListGroup>
+                      <DescriptionListTerm>{t('Catalog')}</DescriptionListTerm>
+                      <DescriptionListDescription>
                         <TreeView
                           hasAnimations
                           onCheck={(_, item) => {
@@ -294,55 +296,54 @@ export const CatalogPageContent = ({
                             };
                           })}
                         />
-                      ) : (
-                        <Content component={ContentVariants.small}>{t('No catalogs')}</Content>
-                      )}
-                    </DescriptionListDescription>
-                  </DescriptionListGroup>
-                  <DescriptionListGroup>
-                    <DescriptionListTerm>{t('Category')}</DescriptionListTerm>
-                    <DescriptionListDescription>
-                      <CatalogPageFilter catalogFilter={catalogFilter} />
-                    </DescriptionListDescription>
-                  </DescriptionListGroup>
-                </DescriptionList>
-              </SplitItem>
-              <Divider
-                orientation={{
-                  default: 'vertical',
-                }}
-              />
-              <SplitItem isFilled className="fctl-catalog-page">
-                {!isLoading && catalogItems.length === 0 ? (
-                  <CatalogEmptyState
-                    hasFilters={!filterIsEmpty || !!catalogFilter.nameFilter}
-                    showCatalogMgmt={!!showCatalogMgmt}
-                  />
-                ) : (
-                  <Gallery hasGutter>
-                    {catalogItems.map((ci) => (
-                      <CatalogItemCard
-                        catalogItem={ci}
-                        key={`${ci.metadata.catalog}/${ci.metadata.name}`}
-                        onSelect={() =>
-                          setSelectedItem((val) => {
-                            if (!val || val.itemName !== ci.metadata.name || val.catalog !== ci.metadata.catalog) {
-                              return {
-                                itemName: ci.metadata.name || '',
-                                catalog: ci.metadata.catalog,
-                              };
-                            } else {
-                              return undefined;
-                            }
-                          })
-                        }
-                      />
-                    ))}
-                  </Gallery>
-                )}
-              </SplitItem>
-            </Split>
-          </PageSection>
+                      </DescriptionListDescription>
+                    </DescriptionListGroup>
+                    <DescriptionListGroup>
+                      <DescriptionListTerm>{t('Category')}</DescriptionListTerm>
+                      <DescriptionListDescription>
+                        <CatalogPageFilter catalogFilter={catalogFilter} />
+                      </DescriptionListDescription>
+                    </DescriptionListGroup>
+                  </DescriptionList>
+                </SplitItem>
+                <Divider
+                  orientation={{
+                    default: 'vertical',
+                  }}
+                />
+                <SplitItem isFilled className="fctl-catalog-page">
+                  {!isLoading && catalogItems.length === 0 ? (
+                    <CatalogEmptyState
+                      hasFilters={!filterIsEmpty || !!catalogFilter.nameFilter}
+                      showCatalogMgmt={!!showCatalogMgmt}
+                      isUpdating={isUpdating}
+                    />
+                  ) : (
+                    <Gallery hasGutter>
+                      {catalogItems.map((ci) => (
+                        <CatalogItemCard
+                          catalogItem={ci}
+                          key={`${ci.metadata.catalog}/${ci.metadata.name}`}
+                          onSelect={() =>
+                            setSelectedItem((val) => {
+                              if (!val || val.itemName !== ci.metadata.name || val.catalog !== ci.metadata.catalog) {
+                                return {
+                                  itemName: ci.metadata.name || '',
+                                  catalog: ci.metadata.catalog,
+                                };
+                              } else {
+                                return undefined;
+                              }
+                            })
+                          }
+                        />
+                      ))}
+                    </Gallery>
+                  )}
+                </SplitItem>
+              </Split>
+            </PageSection>
+          )}
         </div>
       </ListPageBody>
       {!!item && (

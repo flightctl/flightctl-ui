@@ -164,6 +164,14 @@
   {
     "type": "console.page/route",
     "properties": {
+      "exact": true,
+      "path": ["/edge/catalog/import"],
+      "component": { "$codeRef": "ImportCatalogWizard" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
       "exact": false,
       "path": ["/edge/catalog/install/:catalogId/:itemId"],
       "component": { "$codeRef": "CatalogInstallWizard" }

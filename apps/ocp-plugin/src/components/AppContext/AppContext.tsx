@@ -67,6 +67,7 @@ const appRoutes = {
   [ROUTE.CATALOG]: '/edge/catalog',
   [ROUTE.CATALOG_ADD_ITEM]: '/edge/catalog/create',
   [ROUTE.CATALOG_EDIT_ITEM]: '/edge/catalog/edit',
+  [ROUTE.CATALOG_IMPORT]: '/edge/catalog/import',
   [ROUTE.CATALOG_INSTALL]: '/edge/catalog/install',
   [ROUTE.CATALOG_FLEET_EDIT]: '/edge/fleets/catalog',
   [ROUTE.CATALOG_DEVICE_EDIT]: '/edge/devices/catalog',

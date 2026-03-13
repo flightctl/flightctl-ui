@@ -33,7 +33,8 @@
       "AddCatalogItemWizard": "./src/components/Catalog/AddCatalogItemWizard.tsx",
       "CatalogInstallWizard": "./src/components/Catalog/CatalogInstallWizard.tsx",
       "CatalogEditDeviceWizard": "./src/components/Catalog/CatalogEditDeviceWizard.tsx",
-      "CatalogEditFleetWizard": "./src/components/Catalog/CatalogEditFleetWizard.tsx"
+      "CatalogEditFleetWizard": "./src/components/Catalog/CatalogEditFleetWizard.tsx",
+      "ImportCatalogWizard": "./src/components/Catalog/ImportCatalogWizard.tsx"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
