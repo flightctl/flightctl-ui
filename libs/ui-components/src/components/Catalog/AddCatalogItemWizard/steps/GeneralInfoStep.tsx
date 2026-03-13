@@ -9,10 +9,10 @@ import NameField from '../../../form/NameField';
 import { getDnsSubdomainValidations } from '../../../form/validations';
 import TextField from '../../../form/TextField';
 import TextAreaField from '../../../form/TextAreaField';
+import IconUploadField from '../../../form/IconUploadField';
 import CheckboxField from '../../../form/CheckboxField';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import FormSelect, { SelectItem } from '../../../form/FormSelect';
-import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import CreateCatalogModal from '../CreateCatalogModal';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';
@@ -99,14 +99,9 @@ const GeneralInfoStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?
       <FormGroup label={t('Display name')}>
         <TextField name="displayName" aria-label={t('Display name')} isDisabled={isReadOnly} />
       </FormGroup>
-      <FormGroupWithHelperText label={t('Icon')} content={t('URL or data URI of the catalog item icon.')}>
-        <TextField
-          name="icon"
-          aria-label={t('Icon')}
-          placeholder="https://example.com/icon.svg"
-          isDisabled={isReadOnly}
-        />
-      </FormGroupWithHelperText>
+      <FormGroup label={t('Icon')}>
+        <IconUploadField name="icon" isDisabled={isReadOnly} />
+      </FormGroup>
       <FormGroup label={t('Short description')}>
         <TextAreaField name="shortDescription" aria-label={t('Short description')} isDisabled={isReadOnly} />
       </FormGroup>

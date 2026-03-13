@@ -1,5 +1,14 @@
 import { CatalogItemArtifactType, CatalogItemType } from '@flightctl/types/alpha';
 
+export type CreateCatalogFormValues = {
+  name: string;
+  displayName: string;
+  shortDescription: string;
+  icon: string;
+  provider: string;
+  support: string;
+};
+
 export type VersionFormValues = {
   version: string;
   references: Record<string, string>;
