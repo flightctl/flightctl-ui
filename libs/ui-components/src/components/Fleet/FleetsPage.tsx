@@ -30,12 +30,12 @@ import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import DeleteFleetModal from './DeleteFleetModal/DeleteFleetModal';
-import FleetResourceSyncs from './FleetResourceSyncs';
 import { useFleetBackendFilters, useFleets } from './useFleets';
 import { usePermissionsContext } from '../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../types/rbac';
 import PageWithPermissions from '../common/PageWithPermissions';
 import { GlobalSystemRestoreBanners } from '../SystemRestore/SystemRestoreBanners';
+import ResourceSyncImportStatus from '../ResourceSync/ResourceSyncImportStatus';
 
 const fleetPageActionsPermissions = [
   { kind: RESOURCE.FLEET, verb: VERB.CREATE },
@@ -210,7 +210,7 @@ const FleetsPage = () => {
 
   return (
     <>
-      <FleetResourceSyncs />
+      <ResourceSyncImportStatus type="fleet" />
 
       <ListPage title={t('Fleets')}>
         <FleetTable />
