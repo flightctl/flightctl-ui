@@ -150,7 +150,7 @@ const EditAppWizard: React.FC<EditAppWizardProps> = ({
   const { onSubmit, error, schemaErrors, setError } = useSubmitCatalogForm<AppUpdateFormik>(async (values) => {
     const catalogItemVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
     if (!catalogItemVersion) {
-      throw t('Version {{version}} not found', { version: values.version });
+      throw new Error(t('Version {{version}} not found', { version: values.version }));
     }
     await onUpdate(catalogItemVersion, values);
   });

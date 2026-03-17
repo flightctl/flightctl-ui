@@ -98,7 +98,9 @@ const RichValidationTextField = React.forwardRef(
               isRequired={isRequired}
               aria-describedby={`${fieldId}-helper`}
               onChange={async (event, val) => {
-                !popoverOpen && setPopoverOpen(true);
+                if (!popoverOpen) {
+                  setPopoverOpen(true);
+                }
                 field.onChange(event);
                 // TODO does not work well for the first character
                 if (!meta.touched && val?.length) {

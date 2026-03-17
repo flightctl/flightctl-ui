@@ -90,11 +90,6 @@ module.exports = defineConfig([
             },
             {
               name: '@patternfly/react-core',
-              importNames: ['DescriptionList'],
-              message: 'Use FlightCtlDescriptionList wrapper',
-            },
-            {
-              name: '@patternfly/react-core',
               importNames: ['Form'],
               message: 'Use FlightCtlForm wrapper',
             },

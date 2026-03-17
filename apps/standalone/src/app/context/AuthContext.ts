@@ -71,7 +71,7 @@ export const useAuthContext = () => {
                   errorMessage = text;
                 }
               }
-            } catch (parseErr) {
+            } catch {
               // If parsing fails, use default error message
               errorMessage = 'Authentication failed';
             }
@@ -119,7 +119,7 @@ export const useAuthContext = () => {
                   errorMessage = text;
                 }
               }
-            } catch (parseErr) {
+            } catch {
               // If parsing fails, use default error message
             }
             setError(errorMessage);
@@ -140,7 +140,7 @@ export const useAuthContext = () => {
                   errorMessage = text;
                 }
               }
-            } catch (parseErr) {
+            } catch {
               // If parsing fails, use default error message
             }
             setError(errorMessage);
@@ -206,7 +206,7 @@ export const useAuthContext = () => {
           } else {
             localStorage.removeItem(EXPIRATION);
           }
-        } catch (err) {
+        } catch {
           // By deleting the expiration, the next API request will get 401 and redirect to login
           localStorage.removeItem(EXPIRATION);
         }

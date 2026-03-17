@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
   Alert,
+  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -12,7 +13,6 @@ import { useFormikContext } from 'formik';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { FleetFormValues } from '../../../../types/deviceSpec';
 import LabelsView from '../../../common/LabelsView';
-import FlightControlDescriptionList from '../../../common/FlightCtlDescriptionList';
 import { toAPILabel } from '../../../../utils/labels';
 import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
 import { getErrorMessage } from '../../../../utils/error';
@@ -33,7 +33,7 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
   return (
     <Stack hasGutter>
       <StackItem isFilled>
-        <FlightControlDescriptionList
+        <DescriptionList
           isHorizontal
           horizontalTermWidthModifier={{
             default: '25ch',
@@ -112,7 +112,7 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
               )}
             </>
           )}
-        </FlightControlDescriptionList>
+        </DescriptionList>
       </StackItem>
       {!!error && (
         <StackItem>

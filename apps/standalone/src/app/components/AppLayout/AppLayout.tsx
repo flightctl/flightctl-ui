@@ -89,7 +89,9 @@ const AppLayoutContent = () => {
       onClick={(event) => {
         event.preventDefault();
         const primaryContentContainer = document.getElementById(pageId);
-        primaryContentContainer && primaryContentContainer.focus();
+        if (primaryContentContainer) {
+          primaryContentContainer.focus();
+        }
       }}
       href={`#${pageId}`}
     >

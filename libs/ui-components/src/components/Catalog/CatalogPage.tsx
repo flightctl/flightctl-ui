@@ -238,26 +238,30 @@ export const CatalogPageContent = ({
                         <TreeView
                           hasAnimations
                           onCheck={(_, item) => {
-                            catalogFilter.catalogs.includes(item.id || '')
-                              ? catalogFilter.setCatalogs((catalogs) => catalogs.filter((c) => c !== item.id || ''))
-                              : catalogFilter.setCatalogs((catalogs) => [...catalogs, item.id || '']);
+                            const itemId = item.id as string;
+                            if (catalogFilter.catalogs.includes(itemId)) {
+                              catalogFilter.setCatalogs((catalogs) => catalogs.filter((c) => c !== itemId));
+                            } else {
+                              catalogFilter.setCatalogs((catalogs) => [...catalogs, itemId]);
+                            }
                           }}
                           hasCheckboxes
                           data={catalogList.items.map((c) => {
                             const canDelete = !c.metadata.owner && canDeleteCatalog;
+                            const itemId = c.metadata.name as string;
                             return {
-                              name: c.spec.displayName || c.metadata.name || '',
-                              id: c.metadata.name || '',
+                              name: c.spec.displayName || itemId,
+                              id: itemId,
                               checkProps: {
-                                checked: !!c.metadata.name && catalogFilter.catalogs.includes(c.metadata.name),
+                                checked: !!itemId && catalogFilter.catalogs.includes(itemId),
                               },
                               action: showCatalogMgmt ? (
                                 <Dropdown
-                                  isOpen={catalogMenuOpen === c.metadata.name}
+                                  isOpen={catalogMenuOpen === itemId}
                                   onOpenChange={(isOpen) => {
                                     if (isOpen) {
-                                      setCatalogMenuOpen(c.metadata.name);
-                                    } else if (catalogMenuOpen === c.metadata.name) {
+                                      setCatalogMenuOpen(itemId);
+                                    } else if (catalogMenuOpen === itemId) {
                                       setCatalogMenuOpen(undefined);
                                     }
                                   }}
@@ -265,8 +269,8 @@ export const CatalogPageContent = ({
                                   toggle={(toggleRef) => (
                                     <MenuToggle
                                       ref={toggleRef}
-                                      isExpanded={catalogMenuOpen === c.metadata.name}
-                                      onClick={() => setCatalogMenuOpen(c.metadata.name)}
+                                      isExpanded={catalogMenuOpen === itemId}
+                                      onClick={() => setCatalogMenuOpen(itemId)}
                                       variant="plain"
                                       icon={<EllipsisVIcon />}
                                       aria-label={t('Actions dropdown')}

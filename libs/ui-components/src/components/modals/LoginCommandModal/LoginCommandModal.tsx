@@ -55,7 +55,7 @@ const LoginCommandModal = ({ onClose }: LoginCommandModalProps) => {
                 errorMessage = text;
               }
             }
-          } catch (parseErr) {
+          } catch {
             // If parsing fails, use default error message
           }
           setError(errorMessage);
