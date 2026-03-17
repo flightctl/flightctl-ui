@@ -199,7 +199,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
           isSingleContainerApp={isContainer}
         />
         <FieldArray name={`${appFieldName}.variables`}>
-          {({ push, remove }) => (
+          {(arrayHelpers) => (
             <>
               {app.variables.map((variable, varIndex) => (
                 <Split hasGutter key={varIndex}>
@@ -233,7 +233,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
                         variant="link"
                         icon={<MinusCircleIcon />}
                         iconPosition="end"
-                        onClick={() => remove(varIndex)}
+                        onClick={() => arrayHelpers.remove(varIndex)}
                       />
                     </SplitItem>
                   )}
@@ -248,7 +248,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
                     icon={<PlusCircleIcon />}
                     iconPosition="start"
                     onClick={() => {
-                      push({ name: '', value: '' });
+                      arrayHelpers.push({ name: '', value: '' });
                     }}
                   >
                     {t('Add an application variable')}
@@ -282,7 +282,7 @@ const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
           )}
         </small>
         <FieldArray name="applications">
-          {({ push, remove }) => (
+          {(arrayHelpers) => (
             <>
               {values.applications.map((_app, index) => (
                 <FormSection key={index}>
@@ -297,7 +297,7 @@ const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
                           variant="link"
                           icon={<MinusCircleIcon />}
                           iconPosition="start"
-                          onClick={() => remove(index)}
+                          onClick={() => arrayHelpers.remove(index)}
                         />
                       </SplitItem>
                     )}
@@ -313,7 +313,7 @@ const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
                       icon={<PlusCircleIcon />}
                       iconPosition="start"
                       onClick={() => {
-                        push({
+                        arrayHelpers.push({
                           appType: AppType.AppTypeContainer,
                           specType: AppSpecType.OCI_IMAGE,
                           name: '',

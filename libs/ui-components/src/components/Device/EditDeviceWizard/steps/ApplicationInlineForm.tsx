@@ -68,7 +68,7 @@ const ApplicationInlineForm = ({
 
   return (
     <FieldArray name={`applications.${index}.files`}>
-      {({ push, remove }) => (
+      {(arrayHelpers) => (
         <>
           {app.files?.map((file, fileIndex) => {
             const fieldName = `applications[${index}].files[${fileIndex}]`;
@@ -89,7 +89,7 @@ const ApplicationInlineForm = ({
                       variant="link"
                       icon={<MinusCircleIcon />}
                       iconPosition="start"
-                      onClick={() => remove(fileIndex)}
+                      onClick={() => arrayHelpers.remove(fileIndex)}
                     />
                   </SplitItem>
                 )}
@@ -104,7 +104,7 @@ const ApplicationInlineForm = ({
                 icon={<PlusCircleIcon />}
                 iconPosition="start"
                 onClick={() => {
-                  push({
+                  arrayHelpers.push({
                     path: '',
                     content: '',
                     base64: false,
