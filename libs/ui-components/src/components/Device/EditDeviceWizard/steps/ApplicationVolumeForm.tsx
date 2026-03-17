@@ -42,7 +42,7 @@ const ApplicationVolumeForm = ({
   return (
     <FormGroup label={t('Volumes')}>
       <FieldArray name={`${appFieldName}.volumes`}>
-        {({ push, remove }) => (
+        {(arrayHelpers) => (
           <>
             {volumes.map((volume, volumeIndex) => {
               const volumeFieldName = `${appFieldName}.volumes[${volumeIndex}]`;
@@ -108,7 +108,7 @@ const ApplicationVolumeForm = ({
                           variant="link"
                           icon={<MinusCircleIcon />}
                           iconPosition="start"
-                          onClick={() => remove(volumeIndex)}
+                          onClick={() => arrayHelpers.remove(volumeIndex)}
                         />
                       </SplitItem>
                     )}
@@ -132,7 +132,7 @@ const ApplicationVolumeForm = ({
                     if (isSingleContainerApp) {
                       emptyVolume.mountPath = '';
                     }
-                    push(emptyVolume);
+                    arrayHelpers.push(emptyVolume);
                   }}
                 >
                   {t('Add volume')}
