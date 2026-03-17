@@ -47,11 +47,13 @@ const InstallOsWizardContent = ({
 }: InstallOsWizardContentProps) => {
   const { t } = useTranslation();
   const { values, errors } = useFormikContext<InstallOsFormik>();
+  const showLeaveConfirmation = !(values.target === 'new-device' && currentStep?.id === selectTargetStepId);
+
   return isSuccessful ? (
     <UpdateSuccessPage />
   ) : (
     <>
-      <LeaveFormConfirmation />
+      {showLeaveConfirmation && <LeaveFormConfirmation />}
       <Wizard
         footer={
           <FlightCtlWizardFooter<InstallOsFormik>

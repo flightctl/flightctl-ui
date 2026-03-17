@@ -217,25 +217,23 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
   const { values, setFieldValue } = useFormikContext<InstallOsFormik>();
 
   const artifacts = React.useMemo(() => {
-    return catalogItem.spec.artifacts?.sort((a, b) =>
-      getArtifactLabel(t, a.type, a.name).localeCompare(getArtifactLabel(t, b.type, b.name)),
-    );
-  }, [catalogItem, t]);
+    const versionRefs = catalogItem.spec.versions.find((v) => v.version === values.version)?.references || {};
+    return catalogItem.spec.artifacts
+      ?.sort((a, b) => getArtifactLabel(t, a.type, a.name).localeCompare(getArtifactLabel(t, b.type, b.name)))
+      .filter((a) => Object.keys(versionRefs).includes(a.type));
+  }, [catalogItem, values.version, t]);
 
   React.useEffect(() => {
-    if (!values.deploymentTarget && artifacts?.length) {
+    if (!values.deploymentTarget && artifacts.length) {
       setFieldValue('deploymentTarget', artifacts[0].type);
     }
-  }, [values, artifacts, setFieldValue]);
+  }, [artifacts, values.deploymentTarget, setFieldValue]);
 
   const currentVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
 
-  const artifact = catalogItem.spec.artifacts.find((a) => a.type === values.deploymentTarget);
+  const artifact = artifacts.find((a) => a.type === values.deploymentTarget);
 
-  const artifactUrl =
-    values.deploymentTarget && currentVersion && artifact ? getFullArtifactURI(artifact, currentVersion) : undefined;
-
-  const versionRefs = catalogItem.spec.versions.find((v) => v.version === values.version)?.references || {};
+  const artifactUrl = currentVersion && artifact ? getFullArtifactURI(artifact, currentVersion) : undefined;
 
   return (
     <FlightCtlForm>
@@ -248,15 +246,13 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
             <FormSelect
               name="deploymentTarget"
               items={
-                artifacts
-                  ? artifacts
-                      .filter((a) => Object.keys(versionRefs).includes(a.type))
-                      .reduce((acc, curr) => {
-                        acc[curr.type] = {
-                          label: getArtifactLabel(t, curr.type, curr.name),
-                        };
-                        return acc;
-                      }, {})
+                artifacts.length
+                  ? artifacts.reduce((acc, curr) => {
+                      acc[curr.type] = {
+                        label: getArtifactLabel(t, curr.type, curr.name),
+                      };
+                      return acc;
+                    }, {})
                   : {
                       'no-items': {
                         label: t('No items'),
