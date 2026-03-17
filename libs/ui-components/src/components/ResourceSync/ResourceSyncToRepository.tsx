@@ -30,7 +30,7 @@ const ResourceSyncToRepository = () => {
         } else {
           setError(t('Resource sync {{rsId}} is not linked to a repository', { rsId }));
         }
-      } catch (e) {
+      } catch {
         setError(t('Resource sync {{rsId}} could not be found', { rsId }));
       }
     };

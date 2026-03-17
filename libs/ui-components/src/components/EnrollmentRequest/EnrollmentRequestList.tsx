@@ -143,7 +143,9 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
             enrollmentRequest={currentEnrollmentRequest}
             onClose={(updateList) => {
               setApprovingErId(undefined);
-              updateList && refetchWithDevices();
+              if (updateList) {
+                refetchWithDevices();
+              }
             }}
           />
         )}

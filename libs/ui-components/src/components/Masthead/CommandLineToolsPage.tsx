@@ -121,7 +121,7 @@ const CommandLineToolsPage = () => {
         }
         const apiResponse = (await response.json()) as CliArtifactsResponse;
         setCliArtifactsResponse(apiResponse);
-      } catch (e) {
+      } catch {
         setArtifactsEnabled(false);
       } finally {
         setLoading(false);

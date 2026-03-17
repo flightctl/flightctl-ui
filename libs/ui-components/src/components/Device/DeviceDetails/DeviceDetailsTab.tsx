@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   CardBody,
   CardTitle,
+  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -20,7 +21,6 @@ import { useDeviceSpecSystemInfo } from '../../../hooks/useDeviceSpecSystemInfo'
 import EditLabelsForm, { ViewLabels } from '../../modals/EditLabelsModal/EditLabelsForm';
 import ResourceLink from '../../common/ResourceLink';
 import LabelWithHelperText from '../../common/WithHelperText';
-import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
 import DeviceLifecycleStatus from '../../Status/DeviceLifecycleStatus';
@@ -139,7 +139,7 @@ const EnrolledDeviceDetails = ({
         <DetailsPageCard>
           <CardTitle>{t('Configurations')}</CardTitle>
           <CardBody>
-            <FlightControlDescriptionList columnModifier={{ default: '2Col' }}>
+            <DescriptionList columnModifier={{ default: '2Col' }}>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('System image (running)')}</DescriptionListTerm>
                 <DescriptionListDescription>
@@ -154,7 +154,7 @@ const EnrolledDeviceDetails = ({
                   <RepositorySourceList configs={device.spec.config || []} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
-            </FlightControlDescriptionList>
+            </DescriptionList>
           </CardBody>
         </DetailsPageCard>
       </GridItem>
@@ -176,7 +176,7 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
       <GridItem md={12}>
         <DetailsPageCard>
           <CardBody>
-            <FlightControlDescriptionList columnModifier={{ default: '3Col' }}>
+            <DescriptionList columnModifier={{ default: '3Col' }}>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
                 <DescriptionListDescription>
@@ -197,7 +197,7 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
                 </DescriptionListDescription>
               </DescriptionListGroup>
               {children}
-            </FlightControlDescriptionList>
+            </DescriptionList>
           </CardBody>
         </DetailsPageCard>
       </GridItem>
@@ -206,7 +206,7 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
         <DetailsPageCard>
           <CardTitle>{t('Configurations')}</CardTitle>
           <CardBody>
-            <FlightControlDescriptionList columnModifier={{ default: '2Col' }}>
+            <DescriptionList columnModifier={{ default: '2Col' }}>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('System image (running)')}</DescriptionListTerm>
                 <DescriptionListDescription>
@@ -221,7 +221,7 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
                   <RepositorySourceList configs={device.spec.config || []} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
-            </FlightControlDescriptionList>
+            </DescriptionList>
           </CardBody>
         </DetailsPageCard>
       </GridItem>

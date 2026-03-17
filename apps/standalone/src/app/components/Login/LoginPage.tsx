@@ -53,7 +53,7 @@ const LoginPage = () => {
       setIsRedirecting(true);
       try {
         await redirectToProviderLogin(provider);
-      } catch (err) {
+      } catch {
         setIsRedirecting(false);
         setUserSelectedProvider(null);
         setError(
@@ -87,7 +87,7 @@ const LoginPage = () => {
             setIsRedirecting(true);
             try {
               await redirectToProviderLogin(providers[0]);
-            } catch (err) {
+            } catch {
               setIsRedirecting(false);
               setError(t('Failed to initiate login'));
             }
@@ -95,7 +95,7 @@ const LoginPage = () => {
         } else {
           setError(t('No authentication providers found. Please contact your administrator.'));
         }
-      } catch (err) {
+      } catch {
         setError(t('Failed to load the authentication providers'));
       } finally {
         setLoading(false);

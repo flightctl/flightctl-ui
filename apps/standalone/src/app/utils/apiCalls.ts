@@ -68,7 +68,11 @@ export const logout = async () => {
     credentials: 'include',
   });
   const { url } = (await response.json()) as { url: string };
-  url ? (window.location.href = url) : window.location.reload();
+  if (url) {
+    window.location.href = url;
+  } else {
+    window.location.reload();
+  }
 };
 
 export const redirectToLogin = () => {

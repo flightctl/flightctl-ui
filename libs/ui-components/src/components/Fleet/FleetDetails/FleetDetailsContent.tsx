@@ -4,6 +4,7 @@ import {
   Card,
   CardBody,
   CardTitle,
+  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -12,7 +13,6 @@ import {
 } from '@patternfly/react-core';
 
 import { Fleet, ResourceKind } from '@flightctl/types';
-import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import LabelsView from '../../common/LabelsView';
 import { getDateDisplay } from '../../../utils/dates';
 import { getFleetRolloutStatusWarning } from '../../../utils/status/fleet';
@@ -36,7 +36,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
         <Card>
           <CardTitle>{t('Details')}</CardTitle>
           <CardBody>
-            <FlightControlDescriptionList columnModifier={{ lg: '3Col' }}>
+            <DescriptionList columnModifier={{ lg: '3Col' }}>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
                 <DescriptionListDescription>
@@ -79,7 +79,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
                   <RepositorySourceList configs={fleet.spec.template.spec.config || []} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
-            </FlightControlDescriptionList>
+            </DescriptionList>
           </CardBody>
         </Card>
         {devicesSummary && (

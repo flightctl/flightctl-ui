@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   CardBody,
   CardTitle,
+  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -11,7 +12,6 @@ import { Device, DeviceLastSeen } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import DetailsPageCard from '../../../DetailsPage/DetailsPageCard';
-import FlightControlDescriptionList from '../../../common/FlightCtlDescriptionList';
 import LabelWithHelperText from '../../../common/WithHelperText';
 import ApplicationSummaryStatus from '../../../Status/ApplicationSummaryStatus';
 import DeviceStatus from '../../../Status/DeviceStatus';
@@ -33,7 +33,7 @@ const StatusContent = ({ device }: { device: Required<Device> }) => {
     <DetailsPageCard>
       <CardTitle>{t('System status')}</CardTitle>
       <CardBody>
-        <FlightControlDescriptionList columnModifier={{ default: '3Col' }}>
+        <DescriptionList columnModifier={{ default: '3Col' }}>
           <DescriptionListGroup>
             <DescriptionListTerm>
               <LabelWithHelperText
@@ -84,7 +84,7 @@ const StatusContent = ({ device }: { device: Required<Device> }) => {
             <DescriptionListTerm>{t('Last seen')}</DescriptionListTerm>
             <DescriptionListDescription>{timeSinceText(t, lastSeenResponse?.lastSeen)}</DescriptionListDescription>
           </DescriptionListGroup>
-        </FlightControlDescriptionList>
+        </DescriptionList>
       </CardBody>
     </DetailsPageCard>
   );
