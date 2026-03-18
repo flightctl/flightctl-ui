@@ -1525,6 +1525,7 @@
   "Expand row": "Expand row",
   "{page} of <2>{totalPages}</2>": "{page} of <2>{totalPages}</2>",
   "{{ numberOfItems }} items": "{{ numberOfItems }} items",
+  "Search value cannot contain spaces": "Search value cannot contain spaces",
   "Waiting for terminal session to open...": "Waiting for terminal session to open...",
   "Architecture": "Architecture",
   "Agent version": "Agent version",
