@@ -47,9 +47,6 @@ const getColumns = (t: TFunction): ApiSortTableColumn[] => [
     name: t('Status'),
   },
   {
-    name: t('Export images'),
-  },
-  {
     name: t('Date'),
   },
 ];
