@@ -15,7 +15,7 @@ export const getApiVersion = (api: 'flightctl' | 'imagebuilder' | 'alerts' | 'ca
     case 'imagebuilder':
       return ImageBuilderApiVersion.ApiVersionV1alpha1;
     case 'catalog':
-      return AlphaVersion.V1ALPHA1;
+      return AlphaVersion.ApiVersionV1alpha1;
     case 'alerts':
     default:
       return undefined;
