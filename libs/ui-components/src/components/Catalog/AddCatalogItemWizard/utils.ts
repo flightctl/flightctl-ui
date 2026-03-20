@@ -111,7 +111,7 @@ const formVersionsToApi = (values: AddCatalogItemFormValues) => {
       channels: v.channels,
       replaces: v.replaces || undefined,
       skips: skips.length ? skips : undefined,
-      skipRange: v.skipRange || undefined,
+      skipRange: toApiCatalogSkipRange(v.skipRange || ''),
       readme: v.readme || undefined,
       config: configurable ? parseYamlField(v.config) : undefined,
       configSchema: configurable ? parseSchemaField(v.configSchema) : undefined,
@@ -175,7 +175,7 @@ export const getCatalogItemResource = (values: AddCatalogItemFormValues, catalog
   const type = values.type as CatalogItemType;
 
   return {
-    apiVersion: ApiVersion.V1ALPHA1,
+    apiVersion: ApiVersion.ApiVersionV1alpha1,
     kind: 'CatalogItem',
     metadata: {
       name: values.name,
@@ -345,18 +345,61 @@ const jsonSchemaFieldSchema = (t: TFunction) =>
     }
   });
 
-const optionalSemver = (t: TFunction) =>
-  Yup.string().test('valid-semver', t('Must be a valid semantic version (e.g. 1.0.0, v2.1.0-rc1)'), (value) => {
-    if (!value) {
-      return true;
+const hasForbiddenLeadingVPrefix = (s: string): boolean => s.trimStart().startsWith('v');
+
+const isValidCatalogSingleSemver = (value: string): boolean =>
+  !hasForbiddenLeadingVPrefix(value) && semver.valid(value) !== null;
+
+const RANGE_OPERATOR_TRIM = /^[=<>~^]+/;
+
+// Ensure that no leading "v" are present.
+// Allow the user to type extra spaces after operators; they will be removed when the range is saved.
+// Valid examples: ">= 1.0.0 < 2.0.0", ">=1.0.0 <2.0.0"
+const isValidCatalogSemverRange = (value: string): boolean => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return false;
+  }
+  const normalizedRange = semver.validRange(trimmed);
+  if (normalizedRange === null) {
+    return false;
+  }
+  const versionParts = normalizedRange.split(/\s+/);
+  for (const part of versionParts) {
+    const version = part.replace(RANGE_OPERATOR_TRIM, '');
+    if (!version || hasForbiddenLeadingVPrefix(version)) {
+      return false;
     }
-    return semver.valid(value) !== null;
-  });
+  }
+  return true;
+};
+
+// Normalize the skip range for the API. Spaces after operators must be removed.
+const toApiCatalogSkipRange = (value: string): string | undefined => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  const normalized = semver.validRange(trimmed);
+  return normalized ?? undefined;
+};
+
+const optionalSemver = (t: TFunction) =>
+  Yup.string().test(
+    'valid-semver',
+    t('Must be a valid semantic version (e.g. 1.0.0, 2.1.0-rc1). Leading "v" is not allowed.'),
+    (value) => {
+      if (!value) {
+        return true;
+      }
+      return isValidCatalogSingleSemver(value);
+    },
+  );
 
 const optionalSemverList = (t: TFunction) =>
   Yup.string().test(
     'valid-semver-list',
-    t('Each entry must be a valid semantic version (e.g. 1.0.0, v2.1.0-rc1)'),
+    t('Each entry must be a valid semantic version (e.g. 1.0.0, 2.1.0-rc1). Leading "v" is not allowed.'),
     (value) => {
       if (!value?.trim()) {
         return true;
@@ -365,17 +408,21 @@ const optionalSemverList = (t: TFunction) =>
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean)
-        .every((v) => semver.valid(v) !== null);
+        .every(isValidCatalogSingleSemver);
     },
   );
 
 const optionalSemverRange = (t: TFunction) =>
-  Yup.string().test('valid-semver-range', t('Must be a valid semver range (e.g. >=1.0.0 <2.0.0)'), (value) => {
-    if (!value?.trim()) {
-      return true;
-    }
-    return semver.validRange(value) !== null;
-  });
+  Yup.string().test(
+    'valid-semver-range',
+    t('Must be a valid semver range (e.g. >=1.0.0 <2.0.0). Leading "v" is not allowed.'),
+    (value) => {
+      if (!value?.trim()) {
+        return true;
+      }
+      return isValidCatalogSemverRange(value);
+    },
+  );
 
 const yamlFieldSchema = (t: TFunction) =>
   Yup.string().test('valid-yaml-json', t('Must be a valid YAML or JSON object'), (value) => {
@@ -394,12 +441,16 @@ const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: bool
   Yup.object().shape({
     version: Yup.string()
       .required(t('Version is required'))
-      .test('valid-semver', t('Must be a valid semantic version (e.g. 1.0.0, v2.1.0-rc1)'), (value) => {
-        if (!value) {
-          return true;
-        }
-        return semver.valid(value) !== null;
-      })
+      .test(
+        'valid-semver',
+        t('Must be a valid semantic version (e.g. 1.0.0, 2.1.0-rc1). Leading "v" is not allowed.'),
+        (value) => {
+          if (!value) {
+            return true;
+          }
+          return isValidCatalogSingleSemver(value);
+        },
+      )
       .test('unique-version', t('Version must be unique'), (value) => {
         if (!value) {
           return true;
@@ -642,7 +693,7 @@ export const getCatalogPatches = (catalog: Catalog, values: CreateCatalogFormVal
 };
 
 export const getCatalogResource = (values: CreateCatalogFormValues): Catalog => ({
-  apiVersion: ApiVersion.V1ALPHA1,
+  apiVersion: ApiVersion.ApiVersionV1alpha1,
   kind: 'Catalog',
   metadata: { name: values.name },
   spec: {
