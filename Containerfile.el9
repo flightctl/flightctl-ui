@@ -1,6 +1,3 @@
-# Default Containerfile for backward compatibility (EL9)
-# For EDM-3308 parallel EL9/EL10 support, use Containerfile.el9 or Containerfile.el10
-
 FROM registry.access.redhat.com/ubi9/nodejs-22-minimal:latest as ui-build
 USER root
 RUN microdnf install -y rsync
