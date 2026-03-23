@@ -85,6 +85,9 @@ const CreateImageBuildWizard = React.lazy(
 );
 
 const CatalogPage = React.lazy(() => import('@flightctl/ui-components/src/components/Catalog/CatalogPage'));
+const ImportCatalogWizard = React.lazy(
+  () => import('@flightctl/ui-components/src/components/Catalog/ImportCatalogWizard/ImportCatalogWizard'),
+);
 const AddCatalogItemWizard = React.lazy(
   () => import('@flightctl/ui-components/src/components/Catalog/AddCatalogItemWizard/AddCatalogItemWizard'),
 );
@@ -332,6 +335,15 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         element: (
           <TitledRoute title={t('Edit catalog item')}>
             <AddCatalogItemWizard />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'import',
+        title: t('Import catalogs'),
+        element: (
+          <TitledRoute title={t('Import catalogs')}>
+            <ImportCatalogWizard />
           </TitledRoute>
         ),
       },

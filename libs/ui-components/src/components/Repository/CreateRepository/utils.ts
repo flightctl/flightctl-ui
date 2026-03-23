@@ -27,7 +27,7 @@ const gitRepoUrlRegex = new RegExp(
   /^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/,
 );
 const httpRepoUrlRegex = /^(http|https)/;
-const pathRegex = /\/.+/;
+const pathRegex = /\/.*?/;
 const jwtTokenRegexp = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
 
 export const isHttpRepoSpec = (repoSpec: RepositorySpec): repoSpec is HttpRepoSpec =>
@@ -470,6 +470,7 @@ export const getInitValues = ({
     allowedRepoTypes?: RepoSpecType[];
     showRepoTypes?: boolean;
     writeAccessOnly?: boolean;
+    defaultRSType?: ResourceSyncType;
   };
 }): RepositoryFormValues => {
   const configAllowsResourceSyncs = options?.canUseResourceSyncs ?? true;
@@ -495,7 +496,7 @@ export const getInitValues = ({
           name: '',
           path: '',
           targetRevision: '',
-          type: ResourceSyncType.ResourceSyncTypeFleet,
+          type: options?.defaultRSType ?? ResourceSyncType.ResourceSyncTypeFleet,
         },
       ],
     };

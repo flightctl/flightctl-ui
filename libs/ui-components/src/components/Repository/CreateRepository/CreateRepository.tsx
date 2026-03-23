@@ -25,8 +25,7 @@ import { RESOURCE, VERB } from '../../../types/rbac';
 import { getErrorMessage } from '../../../utils/error';
 import { commonQueries } from '../../../utils/query';
 import PageWithPermissions from '../../common/PageWithPermissions';
-
-import CreateRepositoryForm from './CreateRepositoryForm';
+import CreateRepositoryForm, { CreateRepositoryFormProps } from './CreateRepositoryForm';
 
 const CreateRepository = () => {
   const { t } = useTranslation();
@@ -105,15 +104,17 @@ const CreateRepository = () => {
       </Bullseye>
     );
   } else {
+    const options: CreateRepositoryFormProps['options'] = {
+      isReadOnly: !!rsError,
+    };
+
     content = (
       <CreateRepositoryForm
         onClose={() => navigate(-1)}
         onSuccess={(repo) => navigate({ route: ROUTE.REPO_DETAILS, postfix: repo.metadata.name })}
         repository={repositoryDetails}
         resourceSyncs={resourceSyncs}
-        options={{
-          isReadOnly: !!rsError,
-        }}
+        options={options}
       />
     );
   }

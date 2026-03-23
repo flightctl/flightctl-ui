@@ -17,6 +17,7 @@ const links: Record<'fc' | 'acm' | 'aap', Record<AppLink, string>> = {
     addNewDevice: `${upstreamDocsBase}/user/building/building-images.md#choosing-an-enrollment-method`,
     createAcmRepo: `${upstreamDocsBase}/user/using/registering-microshift-devices-acm.md#auto-registering-devices-with-microshift-into-acm`,
     provisionDevice: `${upstreamDocsBase}/user/using/provisioning-devices.md#provisioning-physical-devices`,
+    catalog: `${upstreamDocsBase}/user/using/managing-catalogs.md`,
   },
   acm: {
     createApp: `${acmDownstreamDocsBase}#build-app-packages`,
@@ -24,6 +25,7 @@ const links: Record<'fc' | 'acm' | 'aap', Record<AppLink, string>> = {
     addNewDevice: `${acmDownstreamDocsBase}#edge-mgr-build`,
     createAcmRepo: `${acmDownstreamDocsBase}#device-config-git-cli`,
     provisionDevice: `${acmDownstreamDocsBase}#provision-devices-intro`,
+    catalog: '',
   },
   aap: {
     createApp: `${aapDownstreamDocsBase}/edge-manager-manage-apps#edge-manager-build-app-packages`,
@@ -31,10 +33,11 @@ const links: Record<'fc' | 'acm' | 'aap', Record<AppLink, string>> = {
     addNewDevice: `${aapDownstreamDocsBase}/assembly-edge-manager-images#edge-manager-build-bootc`,
     createAcmRepo: '',
     provisionDevice: `${aapDownstreamDocsBase}/edge-manager-provisioning-devices`,
+    catalog: '',
   },
 };
 
-type AppLink = 'createApp' | 'useTemplateVars' | 'addNewDevice' | 'createAcmRepo' | 'provisionDevice';
+type AppLink = 'createApp' | 'useTemplateVars' | 'addNewDevice' | 'createAcmRepo' | 'provisionDevice' | 'catalog';
 
 const getLinkSource = (appType: FlightCtlApp, isRHEM?: boolean) => {
   // Default doc links are AAP's and apply when using RHEM branding

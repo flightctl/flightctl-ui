@@ -3,6 +3,7 @@ import {
   CatalogItem,
   CatalogItemArtifact,
   CatalogItemArtifactType,
+  CatalogItemCategory,
   CatalogItemType,
   CatalogItemVersion,
 } from '@flightctl/types/alpha';
@@ -25,7 +26,8 @@ import {
 import { fromAPILabel } from '../../utils/labels';
 import { AssetSelection } from '../DynamicForm/DynamicForm';
 
-import defaultIcon from '../../../assets/flight-control-logo.png';
+import appIcon from '../../../assets/application.svg';
+import osIcon from '../../../assets/os.svg';
 
 const tagRegex = /^[\w][\w.-]{0,127}$/;
 
@@ -356,7 +358,8 @@ export const getUpdates = (catalogItem: CatalogItem, currentChannel: string, cur
 };
 
 export const getCatalogItemIcon = (catalogItem: CatalogItem): string =>
-  catalogItem.spec.icon || (defaultIcon as string);
+  catalogItem.spec.icon ||
+  ((catalogItem.spec.category === CatalogItemCategory.CatalogItemCategorySystem ? osIcon : appIcon) as string);
 
 export const getArtifactLabel = (t: TFunction, type: CatalogItemArtifactType, name?: string) => {
   let artifactType: CatalogItemArtifactType;

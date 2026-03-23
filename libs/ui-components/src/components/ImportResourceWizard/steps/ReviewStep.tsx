@@ -3,16 +3,15 @@ import { Alert, FormGroup, Stack, StackItem, TextInput } from '@patternfly/react
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { useFormikContext } from 'formik';
 
-import { ImportFleetFormValues } from '../types';
-import FlightCtlForm from '../../../form/FlightCtlForm';
-
-import { useTranslation } from '../../../../hooks/useTranslation';
+import { ImportResourceFormValues } from '../types';
+import FlightCtlForm from '../../form/FlightCtlForm';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 export const reviewStepId = 'review';
 
-const ReviewStep = ({ errors }: { errors?: string[] }) => {
+const ReviewStep = ({ errors, infoText }: { errors?: string[]; infoText?: string }) => {
   const { t } = useTranslation();
-  const { values } = useFormikContext<ImportFleetFormValues>();
+  const { values } = useFormikContext<ImportResourceFormValues>();
   return (
     <Stack hasGutter>
       <StackItem isFilled>
@@ -47,15 +46,11 @@ const ReviewStep = ({ errors }: { errors?: string[] }) => {
           </FormGroup>
         </FlightCtlForm>
       </StackItem>
-      <StackItem>
-        <Alert
-          isInline
-          variant="info"
-          title={t(
-            'Fleets will appear in the fleets table list and their status will be reflecting the resource sync process status. After a few minutes, they should be synced and enabled.',
-          )}
-        />
-      </StackItem>
+      {infoText && (
+        <StackItem>
+          <Alert isInline variant="info" title={infoText} />
+        </StackItem>
+      )}
       {errors?.length && (
         <StackItem>
           <Alert isInline variant="danger" title={t('An error occurred')}>

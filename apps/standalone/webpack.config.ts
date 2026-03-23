@@ -14,8 +14,7 @@ dotenv.config();
 const BG_IMAGES_DIRNAME = 'bgimages';
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 
-const NODE_ENV: Configuration['mode'] =
-  process.env.NODE_ENV === 'production' ? 'production' : 'development';
+const NODE_ENV: Configuration['mode'] = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 
 const config: Configuration & {
   devServer?: WebpackDevServerConfiguration;
@@ -98,14 +97,15 @@ const config: Configuration & {
           input.indexOf(BG_IMAGES_DIRNAME) === -1 &&
           input.indexOf('fonts') === -1 &&
           input.indexOf('background-filter') === -1 &&
-          input.indexOf('pficon') === -1,
+          input.indexOf('pficon') === -1 &&
+          input.indexOf('libs/ui-components/assets') === -1,
         use: {
           loader: 'raw-loader',
           options: {},
         },
       },
       {
-        test: /\.(jpg|jpeg|png|gif)$/i,
+        test: /\.(jpg|jpeg|png|svg|gif)$/i,
         include: [
           path.resolve(__dirname, 'src'),
           path.resolve(__dirname, 'src/assets/images'),
