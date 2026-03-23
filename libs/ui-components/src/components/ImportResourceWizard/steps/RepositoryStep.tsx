@@ -2,23 +2,22 @@ import * as React from 'react';
 import { FormGroup, FormSection, Grid, Radio } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-
 import { GitRepoSpec, Repository } from '@flightctl/types';
-import { ImportFleetFormValues } from '../types';
 
-import { RepositoryForm } from '../../../Repository/CreateRepository/CreateRepositoryForm';
-import RepositoryStatus from '../../../Status/RepositoryStatus';
-import { getLastTransitionTimeText } from '../../../../utils/status/repository';
-import { useTranslation } from '../../../../hooks/useTranslation';
-import FormSelect from '../../../form/FormSelect';
-import FlightCtlForm from '../../../form/FlightCtlForm';
-import { usePermissionsContext } from '../../../common/PermissionsContext';
-import { RESOURCE, VERB } from '../../../../types/rbac';
-import WithTooltip from '../../../common/WithTooltip';
+import { ImportResourceFormValues } from '../types';
+import { RepositoryForm } from '../../Repository/CreateRepository/CreateRepositoryForm';
+import RepositoryStatus from '../../Status/RepositoryStatus';
+import { getLastTransitionTimeText } from '../../../utils/status/repository';
+import { useTranslation } from '../../../hooks/useTranslation';
+import FormSelect from '../../form/FormSelect';
+import FlightCtlForm from '../../form/FlightCtlForm';
+import { usePermissionsContext } from '../../common/PermissionsContext';
+import { RESOURCE, VERB } from '../../../types/rbac';
+import WithTooltip from '../../common/WithTooltip';
 
 export const repositoryStepId = 'repository';
 
-export const isRepoStepValid = (values: ImportFleetFormValues, errors: FormikErrors<ImportFleetFormValues>) => {
+export const isRepoStepValid = (values: ImportResourceFormValues, errors: FormikErrors<ImportResourceFormValues>) => {
   if (values.useExistingRepo) {
     return !errors.existingRepo;
   }
@@ -34,19 +33,22 @@ export const isRepoStepValid = (values: ImportFleetFormValues, errors: FormikErr
 
 const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
   const { t } = useTranslation();
-  const { values } = useFormikContext<ImportFleetFormValues>();
+  const { values } = useFormikContext<ImportResourceFormValues>();
 
   const currentRepo = repositories.find((r) => r.metadata.name === values.existingRepo);
-  const repoSpec = currentRepo?.spec as GitRepoSpec | undefined; // Only git repositories can be used for importing fleets;
+  const repoSpec = currentRepo?.spec as GitRepoSpec | undefined;
   return (
     <>
       <FormGroup label={t('Repository')} fieldId="repository">
         <FormSelect
           name="existingRepo"
-          items={repositories.reduce((acc, curr) => {
-            acc[curr.metadata.name || ''] = curr.metadata.name || '';
-            return acc;
-          }, {})}
+          items={repositories.reduce(
+            (acc, curr) => {
+              acc[curr.metadata.name || ''] = curr.metadata.name || '';
+              return acc;
+            },
+            {} as Record<string, string>,
+          )}
           placeholderText={t('Select a repository')}
         />
       </FormGroup>
@@ -76,7 +78,7 @@ const ExistingRepoForm = ({ repositories }: { repositories: Repository[] }) => {
 
 const RepositoryStep = ({ repositories, hasLoaded }: { repositories: Repository[]; hasLoaded: boolean }) => {
   const { t } = useTranslation();
-  const { values, setFieldValue } = useFormikContext<ImportFleetFormValues>();
+  const { values, setFieldValue } = useFormikContext<ImportResourceFormValues>();
 
   const { checkPermissions } = usePermissionsContext();
   const [canCreateRepo] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.CREATE }]);

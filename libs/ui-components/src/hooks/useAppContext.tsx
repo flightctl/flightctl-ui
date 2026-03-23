@@ -44,6 +44,7 @@ export const appRoutes = {
   [ROUTE.CATALOG]: '/catalog',
   [ROUTE.CATALOG_ADD_ITEM]: '/catalog/create',
   [ROUTE.CATALOG_EDIT_ITEM]: '/catalog/edit',
+  [ROUTE.CATALOG_IMPORT]: '/catalog/import',
   [ROUTE.CATALOG_INSTALL]: '/catalog/install',
   [ROUTE.CATALOG_FLEET_EDIT]: '/devicemanagement/fleets/catalog',
   [ROUTE.CATALOG_DEVICE_EDIT]: '/devicemanagement/devices/catalog',

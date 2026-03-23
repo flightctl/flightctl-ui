@@ -10,6 +10,7 @@ export enum VERB {
 
 export enum RESOURCE {
   CATALOG = 'catalogs',
+  CATALOG_ITEM = 'catalogitems',
   FLEET = 'fleets',
   DEVICE = 'devices',
   DEVICE_CONSOLE = 'devices/console',
