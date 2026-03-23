@@ -272,6 +272,7 @@
   "Container reference is required": "Container reference is required",
   "At least one artifact reference is required": "At least one artifact reference is required",
   "At least one channel is required": "At least one channel is required",
+  "Channel names must be valid DNS subdomain names (lowercase alphanumeric, dashes, dots). Invalid: {{ channels }}": "Channel names must be valid DNS subdomain names (lowercase alphanumeric, dashes, dots). Invalid: {{ channels }}",
   "Deprecation message is required": "Deprecation message is required",
   "At least one version is required": "At least one version is required",
   "Container image URI is required": "Container image URI is required",

@@ -1,6 +1,8 @@
 import * as React from 'react';
 import {
   Button,
+  HelperText,
+  HelperTextItem,
   Label,
   LabelGroup,
   MenuToggle,
@@ -12,10 +14,12 @@ import {
   TextInputGroupUtilities,
 } from '@patternfly/react-core';
 import { TimesIcon } from '@patternfly/react-icons/dist/js/icons/times-icon';
+import { CheckIcon } from '@patternfly/react-icons/dist/js/icons/check-icon';
 import { useField } from 'formik';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import ErrorHelperText from '../../form/FieldHelperText';
+import { getDnsSubdomainValidations, getKubernetesDnsSubdomainErrors } from '../../form/validations';
 
 type ChannelsSelectProps = {
   name: string;
@@ -36,12 +40,14 @@ const ChannelsSelect = ({ name, availableChannels, isDisabled }: ChannelsSelectP
     return Array.from(merged).sort();
   }, [availableChannels, selected]);
 
+  const trimmedInput = inputValue.trim();
   const filteredOptions = allOptions.filter(
-    (option) => !inputValue || option.toLowerCase().includes(inputValue.toLowerCase()),
+    (option) => !trimmedInput || option.toLowerCase().includes(trimmedInput.toLowerCase()),
   );
-
-  const showCreateOption =
-    inputValue.trim() && !allOptions.some((opt) => opt.toLowerCase() === inputValue.trim().toLowerCase());
+  const isNewChannel = trimmedInput && !allOptions.some((opt) => opt.toLowerCase() === trimmedInput.toLowerCase());
+  const dnsErrors = trimmedInput ? getKubernetesDnsSubdomainErrors(trimmedInput) : {};
+  const isValidDnsSubdomain = trimmedInput ? Object.keys(dnsErrors).length === 0 : true;
+  const showCreateOption = isNewChannel && isValidDnsSubdomain;
 
   const toggleSelection = (channel: string) => {
     const newSelected = selected.includes(channel) ? selected.filter((s) => s !== channel) : [...selected, channel];
@@ -83,8 +89,11 @@ const ChannelsSelect = ({ name, availableChannels, isDisabled }: ChannelsSelectP
   };
 
   const onInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter' && showCreateOption) {
-      event.preventDefault();
+    if (event.key !== 'Enter' || !isNewChannel) {
+      return;
+    }
+    event.preventDefault();
+    if (isValidDnsSubdomain) {
       handleCreateOption();
     }
   };
@@ -100,6 +109,7 @@ const ChannelsSelect = ({ name, availableChannels, isDisabled }: ChannelsSelectP
             setTouched(true);
           }
           setIsOpen(open);
+          setInputValue('');
         }}
         toggle={(toggleRef) => (
           <MenuToggle
@@ -168,11 +178,30 @@ const ChannelsSelect = ({ name, availableChannels, isDisabled }: ChannelsSelectP
             </SelectOption>
           ))}
           {showCreateOption && (
-            <SelectOption value={inputValue.trim()} onClick={handleCreateOption}>
-              {t('Create "{{channel}}" channel', { channel: inputValue.trim() })}
+            <SelectOption value={trimmedInput} onClick={handleCreateOption}>
+              {t('Create "{{channel}}" channel', { channel: trimmedInput })}
             </SelectOption>
           )}
-          {!filteredOptions.length && !showCreateOption && (
+          {isNewChannel && !isValidDnsSubdomain && (
+            <SelectOption isDisabled>
+              <HelperText component="ul">
+                {getDnsSubdomainValidations(t).map((validation) => {
+                  const hasError = dnsErrors[validation.key] === 'failed';
+                  return (
+                    <HelperTextItem
+                      key={validation.key}
+                      component="li"
+                      variant={hasError ? 'error' : 'success'}
+                      icon={hasError ? <TimesIcon /> : <CheckIcon />}
+                    >
+                      {validation.message}
+                    </HelperTextItem>
+                  );
+                })}
+              </HelperText>
+            </SelectOption>
+          )}
+          {!filteredOptions.length && !isNewChannel && (
             <SelectOption isDisabled>{t('Type to create new channel')}</SelectOption>
           )}
         </SelectList>
