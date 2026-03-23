@@ -19,6 +19,9 @@ const compat = new FlatCompat({
 
 module.exports = defineConfig([
   {
+    files: ['**/*.ts', '**/*.tsx'],
+  },
+  {
     languageOptions: {
       parser: tsParser,
       ecmaVersion: 'latest',
