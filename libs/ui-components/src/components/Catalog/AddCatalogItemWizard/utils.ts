@@ -26,7 +26,7 @@ import {
   configurableAppTypes,
 } from './types';
 import { appTypeIds } from '../useCatalogs';
-import { validKubernetesDnsSubdomain, validURLSchema } from '../../form/validations';
+import { getKubernetesDnsSubdomainErrors, validKubernetesDnsSubdomain, validURLSchema } from '../../form/validations';
 import { appendJSONPatch } from '../../../utils/patch';
 
 const parseYamlField = (value: string): Record<string, unknown> | undefined => {
@@ -421,7 +421,24 @@ const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: bool
         return Object.values(refs).some((v) => typeof v === 'string' && v.trim() !== '');
       },
     ),
-    channels: Yup.array().of(Yup.string().required()).min(1, t('At least one channel is required')),
+    channels: Yup.array()
+      .of(Yup.string().required())
+      .min(1, t('At least one channel is required'))
+      .test('valid-dns-subdomain-channels', (channels: string[] | undefined, testContext) => {
+        if (!channels) {
+          return true;
+        }
+        const invalidChannels = channels.filter((ch) => Object.keys(getKubernetesDnsSubdomainErrors(ch)).length > 0);
+        if (invalidChannels.length > 0) {
+          return testContext.createError({
+            message: t(
+              'Channel names must be valid DNS subdomain names (lowercase alphanumeric, dashes, dots). Invalid: {{ channels }}',
+              { channels: invalidChannels.join(', ') },
+            ),
+          });
+        }
+        return true;
+      }),
     replaces: optionalSemver(t),
     skips: optionalSemverList(t),
     skipRange: optionalSemverRange(t),
