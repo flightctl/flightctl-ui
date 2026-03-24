@@ -37,8 +37,8 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
   const { ociRegistries } = useOciRegistriesContext();
   const isEarlyBinding = imageBuild.spec.binding.type === BindingType.BindingTypeEarly;
 
-  const hasExports = imageBuild.exportsCount > 0;
   const existingImageExports = imageBuild.imageExports.filter((imageExport) => imageExport !== undefined);
+  const hasExports = existingImageExports.length > 0;
 
   const srcImageReference = React.useMemo(() => {
     return getImageReference(ociRegistries, imageBuild.spec.source) || '';

@@ -175,9 +175,7 @@ export const getValidationSchema = (t: TFunction) => {
 
 // Returns an array with one item per format (VMDK, QCOW2, ISO), where each item is either
 // undefined or the latest ImageExport for that format.
-const getImageExportsByFormat = (
-  imageExports?: ImageExport[],
-): { imageExports: (ImageExport | undefined)[]; exportsCount: number } => {
+const getImageExportsByFormat = (imageExports?: ImageExport[]): { imageExports: (ImageExport | undefined)[] } => {
   const formatMap: Partial<Record<ExportFormatType, ImageExport>> = {};
 
   imageExports?.forEach((ie) => {
@@ -208,7 +206,6 @@ const getImageExportsByFormat = (
       formatMap[ExportFormatType.ExportFormatTypeQCOW2],
       formatMap[ExportFormatType.ExportFormatTypeVMDK],
     ],
-    exportsCount: imageExports?.length || 0,
   };
 };
 
@@ -223,7 +220,6 @@ export const toImageBuildWithExports = (imageBuild: ImageBuild): ImageBuildWithE
   return {
     ...imageBuildWithoutExports,
     imageExports: latestExports,
-    exportsCount: allExports.length,
   };
 };
 
