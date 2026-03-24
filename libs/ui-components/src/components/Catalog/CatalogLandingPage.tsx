@@ -6,6 +6,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  EmptyStateActions,
+  EmptyStateBody,
+  EmptyStateFooter,
   Gallery,
   Icon,
   List,
@@ -13,11 +16,13 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
+import { Trans } from 'react-i18next';
 import BuilderImageIcon from '@patternfly/react-icons/dist/js/icons/builder-image-icon';
 import PlusCircleIcon from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import ImportIcon from '@patternfly/react-icons/dist/js/icons/import-icon';
 import BookOpenIcon from '@patternfly/react-icons/dist/js/icons/book-open-icon';
 import ArrowRightIcon from '@patternfly/react-icons/dist/js/icons/arrow-right-icon';
+import activeColor from '@patternfly/react-tokens/dist/js/t_color_blue_50';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
@@ -26,6 +31,7 @@ import { usePermissionsContext } from '../common/PermissionsContext';
 import WithTooltip from '../common/WithTooltip';
 import LearnMoreLink from '../common/LearnMoreLink';
 import { useAppLinks } from '../../hooks/useAppLinks';
+import ResourceListEmptyState from '../common/ResourceListEmptyState';
 
 const GettingStartedCard = ({
   children,
@@ -42,7 +48,9 @@ const GettingStartedCard = ({
       <CardHeader>
         <Stack hasGutter>
           <StackItem>
-            <Icon size="xl">{icon}</Icon>
+            <Icon size="2xl" style={{ '--pf-v6-c-icon__content--Color': activeColor.value } as React.CSSProperties}>
+              {icon}
+            </Icon>
           </StackItem>
           <StackItem>
             <CardTitle>{title}</CardTitle>
@@ -63,11 +71,54 @@ const catalogPermissions = [
   { kind: RESOURCE.CATALOG_ITEM, verb: VERB.CREATE },
 ];
 
-const CatalogLandingPage = () => {
-  const catalogDocsLink = useAppLinks('catalog');
+type LandingPagePermissions = {
+  shouldShowCards: boolean;
+  permissions: [boolean, boolean, boolean, boolean, boolean];
+};
+
+export const useLandingPagePermissions = (): LandingPagePermissions => {
   const { checkPermissions } = usePermissionsContext();
   const [canCreateImageBuild, canListRepo, canCreateRS, canCreateCatalog, canCreateCatalogItem] =
     checkPermissions(catalogPermissions);
+
+  return {
+    shouldShowCards: canCreateImageBuild || (canListRepo && canCreateRS) || (canCreateCatalog && canCreateCatalogItem),
+    permissions: [canCreateImageBuild, canListRepo, canCreateRS, canCreateCatalog, canCreateCatalogItem],
+  };
+};
+
+const CatalogLandingPage = () => {
+  const catalogDocsLink = useAppLinks('catalog');
+  const { t } = useTranslation();
+  const { shouldShowCards, permissions } = useLandingPagePermissions();
+
+  return shouldShowCards ? (
+    <CatalogLandingPageContent permissions={permissions} />
+  ) : (
+    <ResourceListEmptyState icon={BookOpenIcon} titleText={t('The Software Catalog is currently empty')}>
+      <EmptyStateBody>
+        <Trans t={t}>
+          There are no items available to view. You have <b>view-only permissions</b> and cannot add or manage items.
+          Please contact your internal administrator for access or catalog details.
+        </Trans>
+      </EmptyStateBody>
+      {catalogDocsLink && (
+        <EmptyStateFooter>
+          <EmptyStateActions>
+            <LearnMoreLink
+              link={catalogDocsLink}
+              text={t('Learn more about the Software Catalog in our documentation')}
+            />
+          </EmptyStateActions>
+        </EmptyStateFooter>
+      )}
+    </ResourceListEmptyState>
+  );
+};
+
+export const CatalogLandingPageContent = ({ permissions }: Pick<LandingPagePermissions, 'permissions'>) => {
+  const catalogDocsLink = useAppLinks('catalog');
+  const [canCreateImageBuild, canListRepo, canCreateRS, canCreateCatalog, canCreateCatalogItem] = permissions;
 
   const { t } = useTranslation();
   const navigate = useNavigate();
