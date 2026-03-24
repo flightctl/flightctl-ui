@@ -13,6 +13,7 @@ import {
   Repository,
   RepositorySpec,
   ResourceSync,
+  ResourceSyncType,
   SshConfig,
 } from '@flightctl/types';
 
@@ -26,7 +27,7 @@ const gitRepoUrlRegex = new RegExp(
   /^((http|git|ssh|http(s)|file|\/?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)?(\/)?$/,
 );
 const httpRepoUrlRegex = /^(http|https)/;
-const pathRegex = /\/.+/;
+const pathRegex = /\/.*?/;
 const jwtTokenRegexp = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
 
 export const isHttpRepoSpec = (repoSpec: RepositorySpec): repoSpec is HttpRepoSpec =>
@@ -469,6 +470,7 @@ export const getInitValues = ({
     allowedRepoTypes?: RepoSpecType[];
     showRepoTypes?: boolean;
     writeAccessOnly?: boolean;
+    defaultRSType?: ResourceSyncType;
   };
 }): RepositoryFormValues => {
   const configAllowsResourceSyncs = options?.canUseResourceSyncs ?? true;
@@ -494,6 +496,7 @@ export const getInitValues = ({
           name: '',
           path: '',
           targetRevision: '',
+          type: options?.defaultRSType ?? ResourceSyncType.ResourceSyncTypeFleet,
         },
       ],
     };
@@ -531,8 +534,9 @@ export const getInitValues = ({
             path: rs.spec.path || '',
             targetRevision: rs.spec.targetRevision || '',
             exists: true,
+            type: rs.spec.type || ResourceSyncType.ResourceSyncTypeFleet,
           }))
-      : [{ name: '', path: '', targetRevision: '' }],
+      : [{ name: '', path: '', targetRevision: '', type: ResourceSyncType.ResourceSyncTypeFleet }],
   };
 
   if (repository.spec.type === RepoSpecType.RepoSpecTypeOci) {
@@ -898,6 +902,7 @@ export const getResourceSync = (repositoryId: string, values: ResourceSyncFormVa
       repository: repositoryId,
       targetRevision: values.targetRevision,
       path: values.path,
+      type: values.type,
     },
   };
 };

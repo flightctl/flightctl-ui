@@ -87,7 +87,6 @@ export type AlertManagerAlert = {
 // ImageBuild with the latest exports for each format
 export type ImageBuildWithExports = Omit<ImageBuild, 'imageexports'> & {
   imageExports: (ImageExport | undefined)[];
-  exportsCount: number;
 };
 
 // AuthProviders that can be added dynamically to the system can only be OAuth2 or OIDC.

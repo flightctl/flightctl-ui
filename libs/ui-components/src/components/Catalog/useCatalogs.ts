@@ -29,6 +29,7 @@ const systemTypeIds = [CatalogItemType.CatalogItemTypeOS];
 
 const buildCatalogItemsFieldSelector = (
   itemType: CatalogItemType[] | undefined,
+  catalogs: string[],
   nameFilter?: string,
 ): string | undefined => {
   const parts: string[] = [];
@@ -42,20 +43,19 @@ const buildCatalogItemsFieldSelector = (
       types = types.filter((t) => !appTypeIds.includes(t));
     }
 
-    if (categories.length === 1) {
-      parts.push(`spec.category==${categories[0]}`);
-    } else if (categories.length > 1) {
+    if (categories.length) {
       parts.push(`spec.category in (${categories.join(',')})`);
     }
-    if (types.length === 1) {
-      parts.push(`spec.type==${types[0]}`);
-    } else if (types.length > 1) {
-      parts.push(`spec.type in (${types?.join(',')})`);
+    if (types.length) {
+      parts.push(`spec.type in (${types.join(',')})`);
     }
   }
 
   if (nameFilter?.trim()) {
     parts.push(`metadata.name contains ${nameFilter.trim()}`);
+  }
+  if (catalogs.length) {
+    parts.push(`metadata.catalog in (${catalogs.join(',')})`);
   }
   return parts.length > 0 ? parts.join(',') : undefined;
 };
@@ -63,16 +63,28 @@ const buildCatalogItemsFieldSelector = (
 export type UseAllCatalogItemsFilter = {
   itemType?: CatalogItemType[];
   nameFilter?: string | undefined;
+  catalogs?: string[];
 };
 
 export const useCatalogItems = ({
   itemType,
   nameFilter,
-}: UseAllCatalogItemsFilter): [CatalogItem[], boolean, unknown, PaginationDetails<CatalogItemList>, boolean] => {
+  catalogs,
+}: UseAllCatalogItemsFilter): [
+  CatalogItem[],
+  boolean,
+  unknown,
+  PaginationDetails<CatalogItemList>,
+  boolean,
+  VoidFunction,
+] => {
   const pagination = useTablePagination<CatalogItemList>();
   const fieldSelector = React.useMemo(
-    () => (itemType || nameFilter ? buildCatalogItemsFieldSelector(itemType, nameFilter) : undefined),
-    [itemType, nameFilter],
+    () =>
+      itemType || nameFilter || catalogs
+        ? buildCatalogItemsFieldSelector(itemType, catalogs || [], nameFilter)
+        : undefined,
+    [itemType, nameFilter, catalogs],
   );
   const endpoint = React.useMemo(() => {
     const params = new URLSearchParams();
@@ -95,12 +107,12 @@ export const useCatalogItems = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nameFilter, itemType]);
 
-  const [catalogItemsList, loading, error] = useFetchPeriodically<CatalogItemList>(
+  const [catalogItemsList, loading, error, refetch] = useFetchPeriodically<CatalogItemList>(
     { endpoint: endpointDebounced },
     pagination.onPageFetched,
   );
 
   const isUpdating = loading || isDebouncing;
 
-  return [catalogItemsList?.items || [], loading, error, pagination, isUpdating];
+  return [catalogItemsList?.items || [], loading, error, pagination, isUpdating, refetch];
 };

@@ -11,14 +11,16 @@ const ExpandableFormSection = ({
   title,
   description,
   children,
+  defaultExpanded = true,
 }: {
   fieldName: string;
   title: string;
   description?: string;
   children: ExpandableSectionProps['children'];
+  defaultExpanded?: boolean;
 }) => {
   const { t } = useTranslation();
-  const [isExpanded, setIsExpanded] = React.useState(true);
+  const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
   const { setFieldTouched } = useFormikContext();
   const [, { error }, { setTouched }] = useField(fieldName);
 

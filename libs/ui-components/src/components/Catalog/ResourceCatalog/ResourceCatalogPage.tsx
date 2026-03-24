@@ -12,6 +12,7 @@ import './ResourceCatalogPage.css';
 type ResourceCatalogPageProps = {
   specPath: string;
   canEdit: boolean;
+  hasOwner?: boolean;
   spec: DeviceSpec | undefined;
   currentLabels: Record<string, string> | undefined;
   onPatch: (allPatches: PatchRequest) => Promise<void>;
@@ -25,6 +26,7 @@ const ResourceCatalogPage = ({
   onPatch,
   specPath,
   canEdit,
+  hasOwner,
   onEdit,
   onInstall,
 }: ResourceCatalogPageProps) => {
@@ -57,7 +59,7 @@ const ResourceCatalogPage = ({
           />
         </StackItem>
         <StackItem className="fctl-resource-catalog-page">
-          <CatalogPageContent canInstall={canEdit} onInstall={onInstall} />
+          <CatalogPageContent canInstall={canEdit} targetHasOwner={hasOwner} onInstall={onInstall} targetSet />
         </StackItem>
       </Stack>
     </>

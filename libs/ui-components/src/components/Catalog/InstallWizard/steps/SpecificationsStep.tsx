@@ -1,4 +1,4 @@
-import { CatalogItem } from '@flightctl/types/alpha';
+import { CatalogItem, CatalogItemArtifactType, CatalogItemVersion } from '@flightctl/types/alpha';
 import {
   Alert,
   Button,
@@ -10,6 +10,7 @@ import {
   Label,
   Modal,
   ModalBody,
+  ModalHeader,
   Spinner,
   Split,
   SplitItem,
@@ -32,24 +33,61 @@ import { RESOURCE, VERB } from '../../../../types/rbac';
 import { useFleets } from '../../../Fleet/useFleets';
 import { useDevicesPaginated } from '../../../Device/DevicesPage/useDevices';
 import { applyInitialConfig, getInitialAppConfig } from '../utils';
-import { InstallAppFormik } from '../types';
+import { InstallAppFormik, InstallSpecFormik, TargetPickerFormik } from '../types';
 import WithTooltip from '../../../common/WithTooltip';
+import { getFullContainerURI } from '../../utils';
+
+type VersionDropdownProps = {
+  catalogItem: CatalogItem;
+  versions: CatalogItemVersion[];
+};
+
+export const VersionDropdown = ({ catalogItem, versions }: VersionDropdownProps) => {
+  const { setFieldValue } = useFormikContext<InstallSpecFormik>();
+  const { t } = useTranslation();
+  return (
+    <FormSelect
+      name="version"
+      onChange={(val) => {
+        const appConfig = getInitialAppConfig(catalogItem, val);
+        applyInitialConfig(setFieldValue, appConfig);
+      }}
+      items={versions.reduce((acc, v) => {
+        return {
+          ...acc,
+          [v.version]: {
+            label: (
+              <Split hasGutter>
+                <SplitItem>{v.version}</SplitItem>
+                {v.deprecation && (
+                  <SplitItem>
+                    <Label variant="outline" color="orange">
+                      {t('Deprecated')}
+                    </Label>
+                  </SplitItem>
+                )}
+              </Split>
+            ),
+            selectedLabel: v.version,
+          },
+        };
+      }, {})}
+    />
+  );
+};
 
 export const isSpecsStepValid = (errors: FormikErrors<InstallAppFormik>) => {
   return !errors.target && !errors.version && !errors.channel;
 };
 
-export type InstallSpecFormik = {
-  version: string;
-  channel: string;
-};
-
 export const InstallSpec = ({
   catalogItem,
   hideReadmeLink,
+  targetSet,
 }: {
   catalogItem: CatalogItem;
   hideReadmeLink?: boolean;
+  targetSet?: boolean;
 }) => {
   const { t } = useTranslation();
   const [showReadme, setShowReadme] = React.useState(false);
@@ -62,7 +100,10 @@ export const InstallSpec = ({
 
   const versions = catalogItem.spec.versions.sort((v1, v2) => semver.compare(v2.version, v1.version));
 
-  const channelVersions = versions.filter((v) => v.channels.includes(values.channel));
+  const channelVersions = versions.filter(
+    (v) =>
+      v.channels.includes(values.channel) && (targetSet ? !!getFullContainerURI(catalogItem.spec.artifacts, v) : true),
+  );
 
   const currentVersion = versions.find((v) => v.version === values.version);
 
@@ -95,33 +136,7 @@ export const InstallSpec = ({
         </GridItem>
         <GridItem span={4}>
           <FormGroup label={t('Version')}>
-            <FormSelect
-              name="version"
-              onChange={(val) => {
-                const appConfig = getInitialAppConfig(catalogItem, val);
-                applyInitialConfig(setFieldValue, appConfig);
-              }}
-              items={channelVersions.reduce((acc, v) => {
-                return {
-                  ...acc,
-                  [v.version]: {
-                    label: (
-                      <Split hasGutter>
-                        <SplitItem>{v.version}</SplitItem>
-                        {v.deprecation && (
-                          <SplitItem>
-                            <Label variant="outline" color="orange">
-                              {t('Deprecated')}
-                            </Label>
-                          </SplitItem>
-                        )}
-                      </Split>
-                    ),
-                    selectedLabel: v.version,
-                  },
-                };
-              }, {})}
-            />
+            <VersionDropdown catalogItem={catalogItem} versions={channelVersions} />
           </FormGroup>
         </GridItem>
         {!hideReadmeLink && !!currentVersion?.readme && (
@@ -141,6 +156,7 @@ export const InstallSpec = ({
       </Grid>
       {showReadme && currentVersion?.readme && (
         <Modal isOpen onClose={() => setShowReadme(false)} variant="medium">
+          <ModalHeader title={t('Readme')} />
           <ModalBody>
             <Content>
               <ReactMarkdown>{currentVersion.readme}</ReactMarkdown>
@@ -178,7 +194,7 @@ const targetPermissions: PermissionCheck[] = [
 
 const getFleetDisabledReason = (
   t: TFunction,
-  { canEdit, canList, size }: { canEdit: boolean; canList: boolean; size: number },
+  { canEdit, canList, size, hasContainer }: { canEdit: boolean; canList: boolean; size: number; hasContainer: boolean },
 ) => {
   if (!canList) {
     return t('You do not have permissions to list fleets');
@@ -189,12 +205,15 @@ const getFleetDisabledReason = (
   if (size === 0) {
     return t('No fleet is available');
   }
+  if (!hasContainer) {
+    return t('Container artifact not available');
+  }
   return undefined;
 };
 
 const getDeviceDisabledReason = (
   t: TFunction,
-  { canEdit, canList, size }: { canEdit: boolean; canList: boolean; size: number },
+  { canEdit, canList, size, hasContainer }: { canEdit: boolean; canList: boolean; size: number; hasContainer: boolean },
 ) => {
   if (!canList) {
     return t('You do not have permissions to list devices');
@@ -205,15 +224,20 @@ const getDeviceDisabledReason = (
   if (size === 0) {
     return t('No device is available');
   }
+  if (!hasContainer) {
+    return t('Container artifact not available');
+  }
   return undefined;
 };
 
 const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepProps) => {
   const { t } = useTranslation();
-  const { checkPermissions } = usePermissionsContext();
+  const { values, setFieldValue } = useFormikContext<InstallSpecFormik & TargetPickerFormik>();
+  const { loading, checkPermissions } = usePermissionsContext();
   const [canEditFleet, canListFleet, canEditDevice, canListDevice] = checkPermissions(targetPermissions);
   const fleetRadioRef = React.useRef<HTMLSpanElement>(null);
   const deviceRadioRef = React.useRef<HTMLSpanElement>(null);
+  const newDeviceRadioRef = React.useRef<HTMLSpanElement>(null);
 
   const { fleets, isLoading: fleetsLoading } = useFleets({});
   const { devices, isLoading: devicesLoading } = useDevicesPaginated({
@@ -221,17 +245,37 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
     onlyFleetless: true,
   });
 
+  const unmanagedFleetsCount = fleets.filter((f) => !f.metadata?.owner).length;
+
+  const hasContainer = catalogItem.spec.versions.some(
+    (v) => v.version === values.version && v.references[CatalogItemArtifactType.CatalogItemArtifactTypeContainer],
+  );
+
   const fleetDisabledReason = getFleetDisabledReason(t, {
     canEdit: canEditFleet,
     canList: canListFleet,
-    size: fleets.length,
+    size: unmanagedFleetsCount,
+    hasContainer,
   });
+
+  React.useEffect(() => {
+    if (!loading && !fleetsLoading && fleetDisabledReason && values.target === 'fleet') {
+      setFieldValue('target', undefined);
+    }
+  }, [fleetDisabledReason, setFieldValue, loading, fleetsLoading, values.target]);
 
   const deviceDisabledReason = getDeviceDisabledReason(t, {
     canEdit: canEditDevice,
     canList: canListDevice,
     size: devices.length,
+    hasContainer,
   });
+
+  React.useEffect(() => {
+    if (!loading && !devicesLoading && deviceDisabledReason && values.target === 'device') {
+      setFieldValue('device', undefined);
+    }
+  }, [deviceDisabledReason, setFieldValue, loading, devicesLoading, values.target]);
 
   return (
     <FlightCtlForm>
@@ -241,7 +285,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
         </StackItem>
         <StackItem>
           <Grid>
-            <GridItem span={6}>
+            <GridItem lg={6} md={8} sm={12}>
               <InstallSpec catalogItem={catalogItem} />
             </GridItem>
           </Grid>
@@ -264,7 +308,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                         name="target"
                         checkedValue="fleet"
                         label={<span ref={fleetRadioRef}>{t('Existing Fleet')}</span>}
-                        description={t('Install to all devices in a fleet')}
+                        description={t('Deploy to all devices in a fleet')}
                         isDisabled={!!fleetDisabledReason}
                       />
                     </WithTooltip>
@@ -280,7 +324,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                         name="target"
                         checkedValue="device"
                         label={<span ref={deviceRadioRef}>{t('Existing Device')}</span>}
-                        description={t('Install to a single fleetless device')}
+                        description={t('Deploy to a single fleetless device')}
                         isDisabled={!!deviceDisabledReason}
                       />
                     </WithTooltip>
@@ -291,7 +335,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                         id="new-device-radio"
                         name="target"
                         checkedValue="new-device"
-                        label={t('New Device')}
+                        label={<span ref={newDeviceRadioRef}>{t('New Device')}</span>}
                         description={t('Provision a brand new, unenrolled device')}
                       />
                     </StackItem>

@@ -3,7 +3,7 @@ import { LinkProps as RouterLinkProps } from 'react-router-dom';
 import { useAppContext } from './useAppContext';
 
 export interface NavigateFunction {
-  (to: Route | ToObj): void;
+  (to: Route | ToObj, urlParams?: Record<string, string>): void;
   (delta: number): void;
 }
 
@@ -34,6 +34,9 @@ export enum ROUTE {
   IMAGE_BUILD_DETAILS = 'IMAGE_BUILD_DETAILS',
   IMAGE_BUILD_EDIT = 'IMAGE_BUILD_EDIT',
   CATALOG = 'CATALOG',
+  CATALOG_ADD_ITEM = 'CATALOG_ADD_ITEM',
+  CATALOG_EDIT_ITEM = 'CATALOG_EDIT_ITEM',
+  CATALOG_IMPORT = 'CATALOG_IMPORT',
   CATALOG_INSTALL = 'CATALOG_INSTALL',
   CATALOG_FLEET_EDIT = 'CATALOG_FLEET_EDIT',
   CATALOG_DEVICE_EDIT = 'CATALOG_DEVICE_EDIT',
@@ -52,6 +55,7 @@ export type RouteWithPostfix =
   | ROUTE.AUTH_PROVIDER_DETAILS
   | ROUTE.IMAGE_BUILD_DETAILS
   | ROUTE.IMAGE_BUILD_EDIT
+  | ROUTE.CATALOG_EDIT_ITEM
   | ROUTE.CATALOG_INSTALL
   | ROUTE.CATALOG_FLEET_EDIT
   | ROUTE.CATALOG_DEVICE_EDIT;
@@ -67,16 +71,18 @@ export const useNavigate = () => {
   const navigate = useRouterNavigate();
 
   return React.useCallback<NavigateFunction>(
-    (to: Route | number | ToObj) => {
+    (to: Route | number | ToObj, urlParams?: Record<string, string>) => {
       if (typeof to === 'number') {
         navigate(to);
       } else {
+        const urlParamsStr = urlParams ? `?${new URLSearchParams(urlParams).toString()}` : '';
+
         if (toParamIsToObj(to)) {
           const route = appRoutes[to.route];
-          navigate(`${route}/${to.postfix}`);
+          navigate(`${route}/${to.postfix}${urlParamsStr}`);
         } else {
           const route = appRoutes[to];
-          navigate(route);
+          navigate(`${route}${urlParamsStr}`);
         }
       }
     },

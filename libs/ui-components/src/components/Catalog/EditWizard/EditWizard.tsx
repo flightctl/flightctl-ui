@@ -15,10 +15,11 @@ import {
 } from '@patternfly/react-core';
 import { CatalogItemCategory } from '@flightctl/types/alpha';
 import { ApplicationProviderSpec, ContainerApplication, Device, Fleet } from '@flightctl/types';
+import { load } from 'js-yaml';
 
 import ErrorBoundary from '../../common/ErrorBoundary';
 import { getErrorMessage } from '../../../utils/error';
-import { getAppPatches, getFullReferenceURI, getOsPatches } from '../utils';
+import { getAppPatches, getFullContainerURI, getOsPatches } from '../utils';
 import EditOsWizard from './EditOsWizard';
 import { APP_CHANNEL_LABEL_KEY, OS_CHANNEL_LABEL_KEY } from '../const';
 import EditAppWizard from './EditAppWizard';
@@ -39,6 +40,7 @@ type EditWizardProps = {
   error: unknown;
   resourceId: string;
   isDevice: boolean;
+  resourceName?: string;
 };
 
 const EditWizard = ({
@@ -50,6 +52,7 @@ const EditWizard = ({
   loading,
   resourceId,
   isDevice,
+  resourceName,
 }: EditWizardProps) => {
   const [isSuccess, setIsSuccess] = React.useState(false);
   const { t } = useTranslation();
@@ -88,9 +91,10 @@ const EditWizard = ({
   } else if (catalogItem?.spec.category === CatalogItemCategory.CatalogItemCategorySystem) {
     const currentVersion = version
       ? catalogItem.spec.versions.find((v) => v.version === version)
-      : catalogItem.spec.versions.find(
-          (v) => getFullReferenceURI(catalogItem.spec.reference.uri, v) === currentOsImage,
-        );
+      : catalogItem.spec.versions.find((v) => {
+          const imgUri = getFullContainerURI(catalogItem.spec.artifacts, v);
+          return !!currentOsImage && !!imgUri && imgUri === currentOsImage;
+        });
     const currentChannel = channel || currentLabels?.[OS_CHANNEL_LABEL_KEY];
     if (!currentVersion || !currentChannel) {
       content = <Alert isInline variant="danger" title={t('Failed to find operating system')} />;
@@ -126,9 +130,10 @@ const EditWizard = ({
       content = <Alert isInline variant="danger" title={t('Failed to find application')} />;
     } else {
       const currentVersion = appSpec
-        ? catalogItem.spec.versions.find(
-            (v) => getFullReferenceURI(catalogItem.spec.reference.uri, v) === (appSpec as ContainerApplication).image,
-          )
+        ? catalogItem.spec.versions.find((v) => {
+            const imgUri = getFullContainerURI(catalogItem.spec.artifacts, v);
+            return !!imgUri && imgUri === (appSpec as ContainerApplication).image;
+          })
         : catalogItem.spec.versions.find((v) => v.version === version);
       const currentChannel = appSpec ? currentLabels?.[`${appName}.${APP_CHANNEL_LABEL_KEY}`] : channel;
 
@@ -153,7 +158,10 @@ const EditWizard = ({
                 channel: values.channel,
                 currentApps,
                 currentLabels,
-                formValues: values.formValues,
+                formValues:
+                  values.configureVia === 'editor'
+                    ? (load(values.editorContent) as Record<string, unknown>)
+                    : values.formValues,
                 selectedAssets: values.selectedAssets,
                 specPath,
               });
@@ -175,7 +183,7 @@ const EditWizard = ({
           </BreadcrumbItem>
           <BreadcrumbItem>
             <Link to={{ route: isDevice ? ROUTE.DEVICE_DETAILS : ROUTE.FLEET_DETAILS, postfix: resourceId }}>
-              {resourceId}
+              {resourceName || resourceId}
             </Link>
           </BreadcrumbItem>
           <BreadcrumbItem>
@@ -249,6 +257,7 @@ export const EditDeviceWizard = () => {
       loading={loading}
       specPath="/"
       resourceId={deviceId}
+      resourceName={device?.metadata.labels?.alias}
       isDevice
     />
   );

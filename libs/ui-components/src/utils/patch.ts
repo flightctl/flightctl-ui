@@ -7,6 +7,7 @@ import {
   UpdateSchedule,
 } from '@flightctl/types';
 import isNil from 'lodash/isNil';
+import isEqual from 'lodash/isEqual';
 
 import { FlightCtlLabel } from '../types/extraTypes';
 import { toAPILabel } from './labels';
@@ -33,7 +34,7 @@ export const appendJSONPatch = <V = unknown>({
   path: string;
   encodeB64?: boolean;
 }) => {
-  if (newValue === originalValue) {
+  if (isEqual(newValue, originalValue)) {
     return;
   }
   // For boolean values, we should never remove them, only set them to true or false

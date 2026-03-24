@@ -9,7 +9,7 @@ import { ImageBuildWithExports } from '../../../types/extraTypes';
 // For that reason, we must remove the fields we add to "ImageBuildWithExports"
 const ImageBuildYaml = ({ imageBuild, refetch }: { imageBuild: ImageBuildWithExports; refetch: VoidFunction }) => {
   const { t } = useTranslation();
-  const rawImageBuild = { ...imageBuild, imageExports: undefined, exportsCount: undefined } as ImageBuild;
+  const rawImageBuild = { ...imageBuild, imageExports: undefined } as ImageBuild;
   return (
     <YamlEditor
       apiObj={rawImageBuild}

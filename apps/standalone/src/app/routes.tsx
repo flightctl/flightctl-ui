@@ -85,6 +85,12 @@ const CreateImageBuildWizard = React.lazy(
 );
 
 const CatalogPage = React.lazy(() => import('@flightctl/ui-components/src/components/Catalog/CatalogPage'));
+const ImportCatalogWizard = React.lazy(
+  () => import('@flightctl/ui-components/src/components/Catalog/ImportCatalogWizard/ImportCatalogWizard'),
+);
+const AddCatalogItemWizard = React.lazy(
+  () => import('@flightctl/ui-components/src/components/Catalog/AddCatalogItemWizard/AddCatalogItemWizard'),
+);
 const CatalogInstallWizard = React.lazy(
   () => import('@flightctl/ui-components/src/components/Catalog/InstallWizard/InstallWizard'),
 );
@@ -311,6 +317,33 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         element: (
           <TitledRoute title={t('Catalog')}>
             <CatalogPage />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'create',
+        title: t('Create catalog item'),
+        element: (
+          <TitledRoute title={t('Create catalog item')}>
+            <AddCatalogItemWizard />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'edit/:catalogId/:itemId',
+        title: t('Edit catalog item'),
+        element: (
+          <TitledRoute title={t('Edit catalog item')}>
+            <AddCatalogItemWizard />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'import',
+        title: t('Import catalogs'),
+        element: (
+          <TitledRoute title={t('Import catalogs')}>
+            <ImportCatalogWizard />
           </TitledRoute>
         ),
       },
