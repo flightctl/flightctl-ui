@@ -103,7 +103,6 @@ const ImageBuildRow = ({
         <Td dataLabel={t('Status')}>
           <ImageBuildStatusDisplay buildStatus={imageBuild.status} />
         </Td>
-        <Td dataLabel={t('Export images')}>{`${imageBuild.exportsCount || 0}`}</Td>
         <Td dataLabel={t('Date')}>{getDateDisplay(imageBuild.metadata.creationTimestamp)}</Td>
         <Td isActionCell>
           <ActionsColumn items={actions} />
