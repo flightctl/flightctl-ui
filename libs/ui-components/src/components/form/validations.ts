@@ -59,7 +59,7 @@ const GENERIC_NAME_REGEXP = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
 const APPLICATION_VAR_NAME_REGEXP = /^[a-zA-Z_]+[a-zA-Z0-9_]*$/;
 
 const TEMPLATE_VARIABLES_REGEXP = /{{.+?}}/g;
-// Special characters allowed: "dot", "pipe", "spaces" "quote", "backward slash", "underscore", "forward slash", "dash"
+// Special characters allowed: "dot", "pipe", "spaces" "quote", "backward slash", "underscore", "forward slash", "hyphen"
 const TEMPLATE_VARIABLES_CONTENT_REGEXP = /^([.a-zA-Z0-9|\s"\\_\/-])+$/;
 const TIME_VALUE_REGEXP = /^([01][0-9]|2[0-3]):([0-5][0-9])$/;
 // Go duration format: positive number followed by unit (s, m, or h). Examples: "30m", "1h", "45m", "30s"
@@ -96,7 +96,7 @@ export const getLabelValueValidations = (t: TFunction) => [
   { key: 'labelValueStartAndEnd', message: t('Starts and ends with a letter or a number.') },
   {
     key: 'labelValueAllowedChars',
-    message: t('Contains only letters, numbers, dashes (-), dots (.), and underscores (_).'),
+    message: t('Contains only letters, numbers, hyphens (-), dots (.), and underscores (_).'),
   },
   {
     key: 'labelValueMaxLength',
@@ -108,7 +108,7 @@ export const getDnsSubdomainValidations = (t: TFunction) => [
   { key: 'dnsSubdomainStartAndEnd', message: t('Starts and ends with a lowercase letter or a number.') },
   {
     key: 'dnsSubdomainAllowedChars',
-    message: t('Contains only lowercase letters, numbers, dashes (-), and dots (.).'),
+    message: t('Contains only lowercase letters, numbers, hyphens (-), and dots (.).'),
   },
   {
     key: 'dnsSubdomainMaxLength',
@@ -228,7 +228,7 @@ export const validKubernetesLabelValue = (
 const genericNameSchema = (t: TFunction) =>
   Yup.string().matches(
     GENERIC_NAME_REGEXP,
-    t('Use lowercase alphanumeric characters, or dash (-). Must start and end with an alphanumeric character.'),
+    t('Use lowercase alphanumeric characters, or hyphens (-). Must start and end with an alphanumeric character.'),
   );
 
 export const validApplicationAndVolumeName = (t: TFunction) =>
@@ -251,7 +251,7 @@ export const getBuildNameValidations = (t: TFunction) => [
   {
     key: 'imageBuildName',
     message: t(
-      'Use lowercase alphanumeric characters, or dash (-). Must start and end with an alphanumeric character.',
+      'Use lowercase alphanumeric characters, or hyphens (-). Must start and end with an alphanumeric character.',
     ),
   },
 ];
@@ -297,20 +297,12 @@ export const validOsImage = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
   );
 
 export const validHelmNamespace = (t: TFunction) =>
-  Yup.string()
-    .max(
-      GENERIC_NAME_MAX_LENGTH,
-      t('Namespace must not exceed {{ max }} characters.', { max: GENERIC_NAME_MAX_LENGTH }),
-    )
-    .test(
-      'helm-namespace-format',
-      t(
-        'Namespace must only include lowercase letters, numbers, and hyphens. It must start and end with a letter or number.',
-      ),
-      (value) => {
-        return !value || GENERIC_NAME_REGEXP.test(value);
-      },
-    );
+  genericNameSchema(t).max(
+    GENERIC_NAME_MAX_LENGTH,
+    t('Namespace must not exceed {{ maxLength }} characters', {
+      maxLength: GENERIC_NAME_MAX_LENGTH,
+    }),
+  );
 
 export const validHelmValuesFile = (t: TFunction) =>
   Yup.string().test('helm-values-file', function (filename) {
@@ -1061,7 +1053,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         if (isGitConfigTemplate(value)) {
           return Yup.object<GitConfigTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
-            name: validKubernetesDnsSubdomain(t, { isRequired: true }),
+            name: validGenericName(t).required(t('Name is required.')),
             path: Yup.string().required(t('Path is required.')).matches(absolutePathRegex, t('Path must be absolute.')),
             repository: Yup.string().required(t('Repository is required.')),
             targetRevision: maxLengthString(t, {
@@ -1073,7 +1065,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
           return Yup.object<HttpConfigTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
             repository: Yup.string().required(t('Repository is required.')),
-            name: validKubernetesDnsSubdomain(t, { isRequired: true }),
+            name: validGenericName(t).required(t('Name is required.')),
             filePath: Yup.string()
               .required(t('File path is required.'))
               .matches(absolutePathRegex, t('Path must be absolute.')),
@@ -1082,7 +1074,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         } else if (isKubeSecretTemplate(value)) {
           return Yup.object<KubeSecretTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
-            name: validKubernetesDnsSubdomain(t, { isRequired: true }),
+            name: validGenericName(t).required(t('Name is required.')),
             secretName: Yup.string().required(t('Secret name is required.')),
             secretNs: Yup.string().required(t('Secret namespace is required.')),
             mountPath: Yup.string()
@@ -1092,7 +1084,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         } else if (isInlineConfigTemplate(value)) {
           return Yup.object<InlineConfigTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
-            name: validKubernetesDnsSubdomain(t, { isRequired: true }),
+            name: validGenericName(t).required(t('Name is required.')),
             files: Yup.array().of(
               Yup.object<InlineConfigTemplate['files'][0]>().shape({
                 path: Yup.string()
@@ -1121,7 +1113,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         }
 
         return Yup.object<InlineConfigTemplate>().shape({
-          name: validKubernetesDnsSubdomain(t, { isRequired: true }),
+          name: validGenericName(t).required(t('Name is required.')),
           type: Yup.string().required(t('Source type is required.')),
         });
       }),
