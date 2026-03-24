@@ -42,6 +42,10 @@ const K8S_LABEL_VALUE_START_END = /^[a-z0-9A-Z](.*[a-z0-9A-Z])?$/;
 const K8S_LABEL_VALUE_ALLOWED_CHARACTERS = /^[a-z0-9A-Z._-]*$/;
 const K8S_LABEL_VALUE_MAX_LENGTH = 63;
 
+const GENERIC_NAME_MAX_LENGTH = 63;
+const EXTENDED_MAX_LENGTH = 253;
+export const MAX_TARGET_REVISION_LENGTH = 244;
+
 // Does not accept uppercase characters, nor "underscore" symbols
 const K8S_DNS_SUBDOMAIN_START_END = /^[a-z0-9](.*[a-z0-9])?$/;
 const K8S_DNS_SUBDOMAIN_ALLOWED_CHARACTERS = /^[a-z0-9.-]*$/;
@@ -50,7 +54,8 @@ const K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH = 253;
 const OCI_IMAGE_FULL_REGEXP = /^(?![./_])[a-zA-Z0-9.\-\/:@_+]*$/;
 // Accepts all characters from the above regex, but it rejects leading dot, slash, or underscore
 const OCI_IMAGE_ALLOWED_CHARS_REGEXP = /^[a-zA-Z0-9.\-\/:@_+]*$/;
-const APPLICATION_NAME_REGEXP = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
+const GENERIC_NAME_REGEXP = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
+
 const APPLICATION_VAR_NAME_REGEXP = /^[a-zA-Z_]+[a-zA-Z0-9_]*$/;
 
 const TEMPLATE_VARIABLES_REGEXP = /{{.+?}}/g;
@@ -65,10 +70,6 @@ const absolutePathRegex = /^\/.*$/;
 // Accepts only relative paths. Rejects paths that start with "/", have multiple "/", or use dots (./file, ../parent/file), etc
 const relativePathRegex = /^(?!\.\.\/|\.\.\$|\.\/)(\.\/)*[\w.-]+(?:\/[\w.-]+)*\/?$/;
 
-export const MAX_TARGET_REVISION_LENGTH = 244;
-const MAX_FILE_PATH_LENGTH = 253;
-
-const HELM_NAMESPACE_MAX_LENGTH = 63;
 const HELM_VALUES_FILE_EXT_REGEXP = /\.(yaml|yml)$/i;
 
 const isInteger = (val: number | undefined) => val === undefined || Number.isInteger(val);
@@ -224,10 +225,26 @@ export const validKubernetesLabelValue = (
         .test('k8sLabelValueFormat', labelValueValidations)
     : Yup.string().test('k8sLabelValueFormat', labelValueValidations);
 
-export const validApplicationAndVolumeName = (t: TFunction) =>
+const genericNameSchema = (t: TFunction) =>
   Yup.string().matches(
-    APPLICATION_NAME_REGEXP,
+    GENERIC_NAME_REGEXP,
     t('Use lowercase alphanumeric characters, or dash (-). Must start and end with an alphanumeric character.'),
+  );
+
+export const validApplicationAndVolumeName = (t: TFunction) =>
+  genericNameSchema(t).max(
+    EXTENDED_MAX_LENGTH,
+    t('Name must not exceed {{ maxLength }} characters', {
+      maxLength: EXTENDED_MAX_LENGTH,
+    }),
+  );
+
+export const validGenericName = (t: TFunction) =>
+  genericNameSchema(t).max(
+    GENERIC_NAME_MAX_LENGTH,
+    t('Name must not exceed {{ maxLength }} characters', {
+      maxLength: GENERIC_NAME_MAX_LENGTH,
+    }),
   );
 
 export const getBuildNameValidations = (t: TFunction) => [
@@ -244,7 +261,7 @@ export const validImageBuildName = (t: TFunction) =>
     .required(t('Build name is required'))
     .test('imageBuildName', function (value: string | undefined) {
       if (!value) return true;
-      return APPLICATION_NAME_REGEXP.test(value) || this.createError({ message: { imageBuildName: 'failed' } });
+      return GENERIC_NAME_REGEXP.test(value) || this.createError({ message: { imageBuildName: 'failed' } });
     });
 
 export const maxLengthString = (t: TFunction, props: { maxLength: number; fieldName: string }) =>
@@ -282,8 +299,8 @@ export const validOsImage = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
 export const validHelmNamespace = (t: TFunction) =>
   Yup.string()
     .max(
-      HELM_NAMESPACE_MAX_LENGTH,
-      t('Namespace must not exceed {{ max }} characters.', { max: HELM_NAMESPACE_MAX_LENGTH }),
+      GENERIC_NAME_MAX_LENGTH,
+      t('Namespace must not exceed {{ max }} characters.', { max: GENERIC_NAME_MAX_LENGTH }),
     )
     .test(
       'helm-namespace-format',
@@ -291,7 +308,7 @@ export const validHelmNamespace = (t: TFunction) =>
         'Namespace must only include lowercase letters, numbers, and hyphens. It must start and end with a letter or number.',
       ),
       (value) => {
-        return !value || APPLICATION_NAME_REGEXP.test(value);
+        return !value || GENERIC_NAME_REGEXP.test(value);
       },
     );
 
@@ -300,10 +317,10 @@ export const validHelmValuesFile = (t: TFunction) =>
     if (!filename) {
       return true;
     }
-    if (filename.length > MAX_FILE_PATH_LENGTH) {
+    if (filename.length > EXTENDED_MAX_LENGTH) {
       return this.createError({
         message: t('Values file path must not exceed {{ max }} characters.', {
-          max: MAX_FILE_PATH_LENGTH,
+          max: EXTENDED_MAX_LENGTH,
         }),
       });
     }
@@ -402,9 +419,9 @@ const inlineAppFilePathSchema = (t: TFunction) =>
   Yup.string()
     .required(t('File path is required'))
     .max(
-      MAX_FILE_PATH_LENGTH,
+      EXTENDED_MAX_LENGTH,
       t('File path length cannot exceed {{ maxCharacters }} characters.', {
-        maxCharacters: MAX_FILE_PATH_LENGTH,
+        maxCharacters: EXTENDED_MAX_LENGTH,
       }),
     )
     .matches(
