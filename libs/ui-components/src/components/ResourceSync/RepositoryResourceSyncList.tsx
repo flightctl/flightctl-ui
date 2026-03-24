@@ -87,7 +87,7 @@ const ResourceSyncEmptyState = ({ addResourceSync }: { addResourceSync?: VoidFun
     <ResourceListEmptyState icon={CodeBranchIcon} titleText={t('No resource syncs here!')}>
       <EmptyStateBody>
         {t(
-          'A resource sync is an automated Gitops method that helps manage your imported fleets by monitoring source repository changes and updating your fleet configuration accordingly.',
+          "A resource sync is an automated Gitops method that helps manage your imported fleets or catalogs by monitoring source repository changes and updating resource's configuration accordingly.",
         )}
       </EmptyStateBody>
       {addResourceSync && (
