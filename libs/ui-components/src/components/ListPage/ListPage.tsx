@@ -13,7 +13,7 @@ const ListPage: React.FC<ListPageProps> = ({ title, headingLevel = 'h1', childre
     <PageSection hasBodyWrapper={false}>
       <Flex gap={{ default: 'gapMd' }} alignItems={{ default: 'alignItemsCenter' }}>
         <FlexItem>
-          <Title headingLevel={headingLevel} size="3xl">
+          <Title headingLevel={headingLevel} size="3xl" data-testid="list-page-title">
             {title}
           </Title>
         </FlexItem>
