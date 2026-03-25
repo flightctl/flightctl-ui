@@ -153,6 +153,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
             resources={pendingEnrollments.filter(isRowSelected)}
             onDeleteSuccess={() => {
               setIsMassDeleteModalOpen(false);
+              setAllSelected(false);
               refetch();
             }}
           />
