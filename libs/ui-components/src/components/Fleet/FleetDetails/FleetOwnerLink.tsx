@@ -1,12 +1,11 @@
 import * as React from 'react';
 import { CodeBranchIcon } from '@patternfly/react-icons/dist/js/icons/code-branch-icon';
+
+import { ResourceKind } from '@flightctl/types';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
-import WithTooltip from '../../common/WithTooltip';
 import { useTranslation } from '../../../hooks/useTranslation';
-
-const rsOwnerRegex = /^ResourceSync\/(?<rsName>.*)$/;
-
-export const getOwnerName = (owner: string | undefined) => rsOwnerRegex.exec(owner || '')?.groups?.rsName;
+import WithTooltip from '../../common/WithTooltip';
+import { getOwnerName } from '../../../utils/resource';
 
 export const RSLink = ({ rsName }: { rsName: string }) => (
   <div>
@@ -15,7 +14,7 @@ export const RSLink = ({ rsName }: { rsName: string }) => (
 );
 
 const FleetOwnerLink = ({ owner }: { owner: string | undefined }) => {
-  const ownerRsName = getOwnerName(owner);
+  const ownerRsName = getOwnerName(ResourceKind.RESOURCE_SYNC, owner);
   if (!ownerRsName) {
     return '-';
   }

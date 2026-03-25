@@ -1,15 +1,16 @@
 import * as React from 'react';
 import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
 
-import { Fleet } from '@flightctl/types';
+import { Fleet, ResourceKind } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { getFleetRolloutStatusWarning } from '../../utils/status/fleet';
+import { getOwnerName } from '../../utils/resource';
 
-import { FleetOwnerLinkIcon, getOwnerName } from './FleetDetails/FleetOwnerLink';
-import FleetStatus from './FleetStatus';
 import ResourceLink from '../common/ResourceLink';
 import FleetDevicesCount from './FleetDetails/FleetDevicesCount';
+import { FleetOwnerLinkIcon } from './FleetDetails/FleetOwnerLink';
+import FleetStatus from './FleetStatus';
 
 type FleetRowProps = {
   fleet: Fleet;
@@ -88,7 +89,7 @@ const FleetRow: React.FC<FleetRowProps> = ({
         }}
       />
       <Td dataLabel={t('Name')}>
-        <FleetOwnerLinkIcon ownerName={getOwnerName(fleet.metadata.owner)}>
+        <FleetOwnerLinkIcon ownerName={getOwnerName(ResourceKind.RESOURCE_SYNC, fleet.metadata.owner)}>
           <ResourceLink id={fleetName} routeLink={ROUTE.FLEET_DETAILS} />
         </FleetOwnerLinkIcon>
       </Td>

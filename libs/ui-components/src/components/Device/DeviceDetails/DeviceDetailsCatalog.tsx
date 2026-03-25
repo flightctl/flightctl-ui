@@ -1,5 +1,5 @@
-import { Device, Fleet, PatchRequest } from '@flightctl/types';
 import * as React from 'react';
+import { Device, Fleet, PatchRequest, ResourceKind } from '@flightctl/types';
 import { Alert, Spinner } from '@patternfly/react-core';
 
 import { useFetch } from '../../../hooks/useFetch';
@@ -8,7 +8,7 @@ import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../..//utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { getOwnerName } from '../../Fleet/FleetDetails/FleetOwnerLink';
+import { getOwnerName } from '../../../utils/resource';
 
 type DeviceDetailsCatalogProps = {
   device: Device;
@@ -28,8 +28,9 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
     [refetch, patch, device.metadata.name],
   );
 
+  const fleetOwnerName = getOwnerName(ResourceKind.FLEET, device.metadata.owner);
   const [ownerFleet, loading, error] = useFetchPeriodically<Fleet>({
-    endpoint: device.metadata.owner ? `fleets/${getOwnerName(device.metadata.owner)}` : '',
+    endpoint: fleetOwnerName ? `fleets/${fleetOwnerName}` : '',
   });
 
   if (loading) {
@@ -43,7 +44,7 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
     );
   }
 
-  return device.metadata.owner ? (
+  return fleetOwnerName ? (
     <ResourceCatalogPage
       canEdit={false}
       hasOwner
