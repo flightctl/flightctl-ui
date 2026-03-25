@@ -48,9 +48,9 @@
   {
     "type": "console.navigation/href",
     "properties": {
-      "id": "fctl-repositories",
-      "name": "%plugin__flightctl-plugin~Repositories%",
-      "href": "/edge/repositories",
+      "id": "fctl-imagebuilds",
+      "name": "%plugin__flightctl-plugin~Image builds%",
+      "href": "/edge/imagebuilds",
       "perspective": "acm",
       "section": "fctl"
     }
@@ -58,9 +58,9 @@
   {
     "type": "console.navigation/href",
     "properties": {
-      "id": "fctl-imagebuilds",
-      "name": "%plugin__flightctl-plugin~Image builds%",
-      "href": "/edge/imagebuilds",
+      "id": "fctl-repositories",
+      "name": "%plugin__flightctl-plugin~Repositories%",
+      "href": "/edge/repositories",
       "perspective": "acm",
       "section": "fctl"
     }
