@@ -50,20 +50,32 @@ const FlightCtlWizardFooter = <T extends Record<string, unknown>>({
   let primaryBtn: React.ReactNode;
   if (isSubmitStep && !isReadOnly) {
     primaryBtn = (
-      <Button variant="primary" onClick={submitForm} isDisabled={isSubmitting} isLoading={isSubmitting}>
+      <Button
+        variant="primary"
+        onClick={submitForm}
+        isDisabled={isSubmitting}
+        isLoading={isSubmitting}
+        data-testid="wizard-save-button"
+      >
         {saveButtonText || t('Save')}
       </Button>
     );
   } else if (isSubmitStep) {
     // Read-only "Review" step
     primaryBtn = (
-      <Button variant="primary" onClick={() => navigate(-1)}>
+      <Button variant="primary" onClick={() => navigate(-1)} data-testid="wizard-close-button">
         {t('Close')}
       </Button>
     );
   } else {
     primaryBtn = (
-      <Button variant="primary" onClick={onMoveNext} isDisabled={!isReadOnly && !stepValid} ref={buttonRef}>
+      <Button
+        variant="primary"
+        onClick={onMoveNext}
+        isDisabled={!isReadOnly && !stepValid}
+        ref={buttonRef}
+        data-testid="wizard-next-button"
+      >
         {t('Next')}
       </Button>
     );
@@ -77,6 +89,7 @@ const FlightCtlWizardFooter = <T extends Record<string, unknown>>({
               variant="secondary"
               onClick={goToPrevStep}
               isDisabled={String(activeStep.id) === firstStepId || isSubmitting}
+              data-testid="wizard-back-button"
             >
               {t('Back')}
             </Button>
@@ -85,7 +98,12 @@ const FlightCtlWizardFooter = <T extends Record<string, unknown>>({
         </ActionListGroup>
         <ActionListGroup>
           <ActionListItem>
-            <Button variant="link" onClick={onCancel ?? (() => navigate(-1))} isDisabled={isSubmitting}>
+            <Button
+              variant="link"
+              onClick={onCancel ?? (() => navigate(-1))}
+              isDisabled={isSubmitting}
+              data-testid="wizard-cancel-button"
+            >
               {t('Cancel')}
             </Button>
           </ActionListItem>

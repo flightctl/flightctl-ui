@@ -54,7 +54,7 @@ const EnrolledDeviceTableRow = ({
   const columnIds = React.useMemo(() => deviceColumns.map(({ id }) => id), [deviceColumns]);
 
   return (
-    <Tr>
+    <Tr data-testid={`enrolled-device-row-${rowIndex}`}>
       <Td
         select={{
           rowIndex,
@@ -65,12 +65,17 @@ const EnrolledDeviceTableRow = ({
       />
       {columnIds.includes('alias') && (
         <Td dataLabel={t('Alias')}>
-          <ResourceLink id={deviceName} name={deviceAlias || t('Untitled')} routeLink={ROUTE.DEVICE_DETAILS} />
+          <ResourceLink
+            id={deviceName}
+            name={deviceAlias || t('Untitled')}
+            routeLink={ROUTE.DEVICE_DETAILS}
+            data-testid={`device-name-link-${rowIndex}`}
+          />
         </Td>
       )}
       {columnIds.includes('name') && (
         <Td dataLabel={t('Name')}>
-          <ResourceLink id={deviceName} />
+          <ResourceLink id={deviceName} data-testid={`device-internal-name-link-${rowIndex}`} />
         </Td>
       )}
       {columnIds.includes('fleet') && (
@@ -94,7 +99,7 @@ const EnrolledDeviceTableRow = ({
         </Td>
       )}
       {!hideActions && (
-        <Td isActionCell>
+        <Td isActionCell data-testid={`device-row-actions-${rowIndex}`}>
           <ActionsColumn
             items={[
               ...(canEdit

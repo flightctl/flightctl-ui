@@ -50,6 +50,7 @@ const AppLayoutContent = () => {
             isSidebarOpen={isSidebarOpen}
             onSidebarToggle={onSidebarToggle}
             id="page-toggle-button"
+            data-testid="nav-toggle"
           />
         </MastheadToggle>
         <MastheadBrand>

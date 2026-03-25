@@ -34,7 +34,7 @@ const DecommissionedDeviceTableRow = ({
   const deviceAlias = device.metadata.labels?.alias;
 
   return (
-    <Tr>
+    <Tr data-testid={`decommissioned-device-row-${rowIndex}`}>
       <Td
         select={{
           rowIndex,
@@ -43,13 +43,17 @@ const DecommissionedDeviceTableRow = ({
         }}
       />
       <Td dataLabel={t('Name')}>
-        <ResourceLink id={deviceName} routeLink={ROUTE.DEVICE_DETAILS} />
+        <ResourceLink
+          id={deviceName}
+          routeLink={ROUTE.DEVICE_DETAILS}
+          data-testid={`decommissioned-device-name-link-${rowIndex}`}
+        />
       </Td>
       <Td dataLabel={t('Device status')}>
         <DeviceLifecycleStatus device={device} />
       </Td>
       {canDelete && (
-        <Td isActionCell>
+        <Td isActionCell data-testid={`decommissioned-device-row-actions-${rowIndex}`}>
           <ActionsColumn
             items={[
               ...(canEdit

@@ -124,6 +124,7 @@ const MassDecommissionDeviceModal = ({ onClose, devices, onSuccess }: MassDecomm
           onClick={decommissionDevices}
           isLoading={isSubmitting}
           isDisabled={isSubmitting}
+          data-testid="modal-decommission-confirm"
         >
           {t('Decommission')}
         </Button>

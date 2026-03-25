@@ -94,6 +94,7 @@ const DecommissionedDevicesTable = ({
                   isDisabled={!hasSelectedRows}
                   onClick={() => setIsMassDeleteModalOpen(true)}
                   variant="secondary"
+                  data-testid="toolbar-delete-forever"
                 >
                   {t('Delete forever')}
                 </Button>
@@ -108,6 +109,7 @@ const DecommissionedDevicesTable = ({
                   setOnlyDecommissioned(false);
                 }}
                 ouiaId={t('Show decommissioned devices')}
+                data-testid="show-decommissioned-devices-switch"
               />
             </ToolbarItem>
           </ToolbarGroup>
