@@ -67,13 +67,17 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
       <Td dataLabel={t('Created')}>{timeSinceText(t, er.metadata.creationTimestamp)}</Td>
       {canApprove && (
         <Td dataLabel={t('Approve')}>
-          <Button variant="link" onClick={approveEnrollment}>
+          <Button
+            variant="link"
+            onClick={approveEnrollment}
+            data-testid={`enrollment-request-approve-button-${rowIndex}`}
+          >
             {t('Approve')}
           </Button>
         </Td>
       )}
       {!!actionItems.length && (
-        <Td isActionCell>
+        <Td isActionCell data-testid={`enrollment-request-row-actions-${rowIndex}`}>
           <ActionsColumn items={actionItems} />
         </Td>
       )}
