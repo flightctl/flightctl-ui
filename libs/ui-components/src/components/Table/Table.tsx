@@ -1,9 +1,11 @@
 import * as React from 'react';
 import { Button, EmptyState, EmptyStateActions, EmptyStateBody, Spinner } from '@patternfly/react-core';
 import { Table as PFTable, TableProps as PFTableProps, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
+import { SearchIcon } from '@patternfly/react-icons/dist/js/icons';
+
 import { useTranslation } from '../../hooks/useTranslation';
 import LabelWithHelperText from '../common/WithHelperText';
-import { SearchIcon } from '@patternfly/react-icons/dist/js/icons';
+import './Table.css';
 
 export type ApiSortTableColumn = {
   id?: string;
@@ -91,7 +93,7 @@ const Table: TableFC = ({
           {!emptyData && singleSelect && <Th screenReaderText={t('Row select')} />}
           {isExpandable && !emptyData && <Th screenReaderText={t('Expand row')} />}
           {columns.map((c) => (
-            <Th key={c.name} {...c.thProps} aria-label={c.name}>
+            <Th key={c.name} {...c.thProps} aria-label={c.name} className="fctl-tableth__helper-text">
               {c.helperText ? (
                 <LabelWithHelperText label={c.name} content={c.helperText} triggerAction="hover" />
               ) : (
