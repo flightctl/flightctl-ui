@@ -8,13 +8,46 @@ Monorepo containing UIs for [Flight Control](https://github.com/flightctl/flight
 
 ## Building
 
-### Checkout the repository and run
+### JavaScript/TypeScript Applications
+
+Checkout the repository and run:
 
 ```shell
 cd flightctl-ui
 npm ci
 npm run build
 ```
+
+### Container Images (EDM-3308: EL9/EL10 Support)
+
+The UI supports building containers for both Enterprise Linux 9 and 10. Containerfiles are organized by OS in a directory structure similar to the main FlightCtl repository:
+
+```
+packaging/images/el9/Containerfile       # EL9 standalone UI
+packaging/images/el9/Containerfile.ocp   # EL9 OCP plugin UI
+packaging/images/el10/Containerfile      # EL10 standalone UI
+packaging/images/el10/Containerfile.ocp  # EL10 OCP plugin UI
+```
+
+Use the provided Makefile:
+
+```shell
+# Build for specific OS (default: el9)
+make build-ui OS=el9        # Standalone UI for EL9
+make build-ui OS=el10       # Standalone UI for EL10
+make build-ocp-ui OS=el9    # OCP Plugin UI for EL9
+make build-ocp-ui OS=el10   # OCP Plugin UI for EL10
+
+# Build all variants
+make build-all
+
+# Show available targets
+make help
+```
+
+Built images will be tagged with both generic and OS-specific names:
+- `localhost/flightctl-ui:latest` and `localhost/flightctl-ui-rhel9:latest`
+- `localhost/flightctl-ocp-ui:latest` and `localhost/flightctl-ocp-ui-rhel9:latest`
 
 ### Running Standalone UI with backend running in Kind
 
