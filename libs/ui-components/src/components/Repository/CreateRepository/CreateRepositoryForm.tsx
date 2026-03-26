@@ -10,12 +10,15 @@ import {
   FormGroup,
   FormSection,
   Grid,
+  GridItem,
   Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
   Split,
   SplitItem,
+  Stack,
+  StackItem,
 } from '@patternfly/react-core';
 
 import { Formik, useFormikContext } from 'formik';
@@ -312,34 +315,39 @@ export const RepositoryForm = ({
   const isAccessModeDisabled = Boolean(accessModeDisabledReason);
 
   return (
-    <>
-      <NameField
-        name="name"
-        aria-label={t('Repository name')}
-        isRequired
-        isDisabled={isEdit}
-        resourceType="repositories"
-        validations={getDnsSubdomainValidations(t)}
-      />
-      {isOciRepo ? (
-        <FormGroup label={t('Registry hostname')} isRequired>
-          <TextField
-            name="ociConfig.registry"
-            aria-label={t('Registry hostname')}
-            helperText={t('For example: quay.io, registry.redhat.io, myregistry.com:5000')}
-          />
-        </FormGroup>
-      ) : (
-        <FormGroup label={t('Repository URL')} isRequired>
-          <TextField
-            name="url"
-            aria-label={t('Repository URL')}
-            helperText={t('For example: {{ demoRepositoryUrl }}', { demoRepositoryUrl: DEMO_REPOSITORY_URL })}
-          />
-        </FormGroup>
-      )}
-
-      <RepositoryType isEdit={isEdit} />
+    <Stack hasGutter>
+      <StackItem>
+        <NameField
+          name="name"
+          aria-label={t('Repository name')}
+          isRequired
+          isDisabled={isEdit}
+          resourceType="repositories"
+          validations={getDnsSubdomainValidations(t)}
+        />
+      </StackItem>
+      <StackItem>
+        {isOciRepo ? (
+          <FormGroup label={t('Registry hostname')} isRequired>
+            <TextField
+              name="ociConfig.registry"
+              aria-label={t('Registry hostname')}
+              helperText={t('For example: quay.io, registry.redhat.io, myregistry.com:5000')}
+            />
+          </FormGroup>
+        ) : (
+          <FormGroup label={t('Repository URL')} isRequired>
+            <TextField
+              name="url"
+              aria-label={t('Repository URL')}
+              helperText={t('For example: {{ demoRepositoryUrl }}', { demoRepositoryUrl: DEMO_REPOSITORY_URL })}
+            />
+          </FormGroup>
+        )}
+      </StackItem>
+      <StackItem>
+        <RepositoryType isEdit={isEdit} />
+      </StackItem>
       {isOciRepo && (
         <FormSection>
           <FormGroup label={t('Scheme')}>
@@ -389,7 +397,7 @@ export const RepositoryForm = ({
         </FormSection>
       )}
       <CheckboxField name="useAdvancedConfig" label={t('Use advanced configurations')} body={<AdvancedSection />} />
-    </>
+    </Stack>
   );
 };
 
@@ -411,14 +419,16 @@ const CreateRepositoryFormContent = ({ isEdit, onClose, options, children }: Cre
     <FlightCtlForm className="fctl-create-repo">
       <fieldset disabled={options?.isReadOnly ?? false}>
         <Grid hasGutter span={8}>
-          <RepositoryForm
-            isEdit={isEdit}
-            accessModeDisabledReason={
-              options?.writeAccessOnly
-                ? t('Access mode must be set to read and write for this repository type')
-                : undefined
-            }
-          />
+          <GridItem>
+            <RepositoryForm
+              isEdit={isEdit}
+              accessModeDisabledReason={
+                options?.writeAccessOnly
+                  ? t('Access mode must be set to read and write for this repository type')
+                  : undefined
+              }
+            />
+          </GridItem>
           {showResourceSyncs && canCreateRS && (
             <Checkbox
               id="use-resource-syncs"
