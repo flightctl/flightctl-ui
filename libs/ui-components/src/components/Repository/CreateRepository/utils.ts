@@ -30,6 +30,9 @@ const httpRepoUrlRegex = /^(http|https)/;
 const pathRegex = /\/.*?/;
 const jwtTokenRegexp = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
 
+const MAX_REPO_ENCODED_CERT_LENGTH = 20 * 1024 * 1024; // 20 MiB as per the backend
+const MAX_REPO_ORIGINAL_CERT_LENGTH = Math.floor((MAX_REPO_ENCODED_CERT_LENGTH / 4) * 3); // 15 MiB
+
 export const isHttpRepoSpec = (repoSpec: RepositorySpec): repoSpec is HttpRepoSpec =>
   repoSpec.type === RepoSpecType.RepoSpecTypeHttp;
 export const isGitRepoSpec = (repoSpec: RepositorySpec): repoSpec is GitRepoSpec =>
@@ -684,38 +687,36 @@ export const singleResourceSyncSchema = (t: TFunction, existingRSs: ResourceSync
   });
 };
 
+const validRepositoryCertificate = (t: TFunction) => (value: string | undefined, testContext: Yup.TestContext) => {
+  if (!value || value.trim() === '') {
+    return true;
+  }
+  if (value.length > MAX_REPO_ORIGINAL_CERT_LENGTH) {
+    return testContext.createError({
+      message: t('Value must not exceed {{ maxSize }} MiB when encoded.', {
+        maxSize: MAX_REPO_ENCODED_CERT_LENGTH / 1024 / 1024,
+      }),
+    });
+  }
+  try {
+    btoa(value);
+    return true;
+  } catch {
+    return testContext.createError({
+      message: t('Invalid format. Only ASCII characters are allowed.'),
+    });
+  }
+};
+
 // Regex for registry hostname: FQDN, IP address (IPv4 or IPv6), with optional port, matching as much as possible of the backend pattern
 const registryHostnameRegex =
   /^(([a-z0-9]([-a-z0-9]*[a-z0-9])?\.)*[a-z]([-a-z0-9]*[a-z0-9])?|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|\[[a-fA-F0-9:]+\])(:[0-9]{1,5})?$/;
 
 export const repositorySchema =
   (t: TFunction, repository: Repository | undefined) => (values: RepositoryFormValues) => {
-    const baseSchema = {
-      name: validKubernetesDnsSubdomain(t, { isRequired: !repository }),
-      configType: values.useAdvancedConfig ? Yup.string().required(t('Repository type is required')) : Yup.string(),
-      httpConfig: Yup.object({
-        basicAuth: Yup.object({
-          username: values.httpConfig?.basicAuth?.use ? Yup.string().required(t('Username is required')) : Yup.string(),
-          password: values.httpConfig?.basicAuth?.use ? Yup.string().required(t('Password is required')) : Yup.string(),
-        }),
-        mTlsAuth: Yup.object({
-          tlsCrt: values.httpConfig?.mTlsAuth?.use
-            ? Yup.string().required(t('Client TLS certificate is required'))
-            : Yup.string(),
-          tlsKey: values.httpConfig?.mTlsAuth?.use
-            ? Yup.string().required(t('Client TLS key is required'))
-            : Yup.string(),
-        }),
-        token: Yup.string().matches(jwtTokenRegexp, t('Must be a valid JWT token')),
-      }),
-      useResourceSyncs: Yup.boolean(),
-      resourceSyncs: values.useResourceSyncs ? repoSyncSchema(t, values.resourceSyncs) : Yup.array(),
-    };
-
     if (values.repoType === RepoSpecType.RepoSpecTypeOci) {
       return Yup.object({
-        ...baseSchema,
-        url: Yup.string(),
+        name: validKubernetesDnsSubdomain(t, { isRequired: !repository }),
         ociConfig: Yup.object({
           registry: Yup.string()
             .matches(
@@ -730,14 +731,43 @@ export const repositorySchema =
             username: values.ociConfig?.ociAuth?.use ? Yup.string().required(t('Username is required')) : Yup.string(),
             password: values.ociConfig?.ociAuth?.use ? Yup.string().required(t('Password is required')) : Yup.string(),
           }),
-          caCrt: Yup.string(),
+          caCrt: Yup.string().test('valid-certificate', validRepositoryCertificate(t)),
           skipServerVerification: Yup.boolean(),
         }),
       });
     }
 
+    // Git or Http repositories
     return Yup.object({
-      ...baseSchema,
+      name: validKubernetesDnsSubdomain(t, { isRequired: !repository }),
+      configType: values.useAdvancedConfig ? Yup.string().required(t('Repository type is required')) : Yup.string(),
+      httpConfig: Yup.object({
+        basicAuth: Yup.object({
+          username: values.httpConfig?.basicAuth?.use ? Yup.string().required(t('Username is required')) : Yup.string(),
+          password: values.httpConfig?.basicAuth?.use ? Yup.string().required(t('Password is required')) : Yup.string(),
+        }),
+        caCrt: Yup.string().test('valid-certificate', validRepositoryCertificate(t)),
+        mTlsAuth: Yup.object({
+          tlsCrt: values.httpConfig?.mTlsAuth?.use
+            ? Yup.string()
+                .required(t('Client TLS certificate is required'))
+                .test('valid-certificate', validRepositoryCertificate(t))
+            : Yup.string(),
+          tlsKey: values.httpConfig?.mTlsAuth?.use
+            ? Yup.string()
+                .required(t('Client TLS key is required'))
+                .test('valid-certificate', validRepositoryCertificate(t))
+            : Yup.string(),
+        }),
+        token: Yup.string().matches(jwtTokenRegexp, t('Must be a valid JWT token')),
+      }),
+      sshConfig: Yup.object({
+        sshPrivateKey: Yup.string().test('valid-certificate', validRepositoryCertificate(t)),
+        privateKeyPassphrase: Yup.string(),
+        skipServerVerification: Yup.boolean(),
+      }),
+      useResourceSyncs: Yup.boolean(),
+      resourceSyncs: values.useResourceSyncs ? repoSyncSchema(t, values.resourceSyncs) : Yup.array(),
       url: Yup.string().when('repoType', {
         is: (repoType: RepoSpecType) => repoType === RepoSpecType.RepoSpecTypeGit,
         then: () =>
@@ -754,7 +784,6 @@ export const repositorySchema =
             .matches(httpRepoUrlRegex, t('Enter a valid HTTP service URL. Example: https://my-service-url'))
             .defined(t('HTTP service URL is required')),
       }),
-      ociConfig: Yup.object(),
     });
   };
 
