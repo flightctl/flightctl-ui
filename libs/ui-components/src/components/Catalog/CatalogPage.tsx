@@ -42,7 +42,7 @@ import DeleteCatalogModal from './DeleteCatalogModal';
 import CreateCatalogModal from './AddCatalogItemWizard/CreateCatalogModal';
 import WithTooltip from '../common/WithTooltip';
 import ResourceSyncImportStatus from '../ResourceSync/ResourceSyncImportStatus';
-import CatalogLandingPage from './CatalogLandingPage';
+import CatalogLandingPage, { CatalogLandingPageContent, useLandingPagePermissions } from './CatalogLandingPage';
 
 import './CatalogPage.css';
 
@@ -191,6 +191,8 @@ export const CatalogPageContent = ({
   canDeleteCatalog,
   targetSet,
 }: CatalogPageContentProps) => {
+  const { shouldShowCards, permissions: catalogPermissions } = useLandingPagePermissions();
+  const [showGettingStarted, setShowGettingStarted] = React.useState(false);
   const [catalogList, catalogLoading, catalogErr, refetchCatalogs] = useFetchPeriodically<CatalogList>({
     endpoint: 'catalogs',
   });
@@ -304,6 +306,26 @@ export const CatalogPageContent = ({
                         <CatalogPageFilter catalogFilter={catalogFilter} />
                       </DescriptionListDescription>
                     </DescriptionListGroup>
+                    {shouldShowCards && showCatalogMgmt && (
+                      <DescriptionListGroup>
+                        <DescriptionListTerm>{t('Get started')}</DescriptionListTerm>
+                        <DescriptionListDescription>
+                          <TreeView
+                            data={[
+                              {
+                                name: t('Help cards'),
+                                id: 'help-cards',
+                                checkProps: {
+                                  checked: showGettingStarted,
+                                },
+                              },
+                            ]}
+                            onCheck={() => setShowGettingStarted((prev) => !prev)}
+                            hasCheckboxes
+                          />
+                        </DescriptionListDescription>
+                      </DescriptionListGroup>
+                    )}
                   </DescriptionList>
                 </SplitItem>
                 <Divider
@@ -319,26 +341,39 @@ export const CatalogPageContent = ({
                       isUpdating={isUpdating}
                     />
                   ) : (
-                    <Gallery hasGutter>
-                      {catalogItems.map((ci) => (
-                        <CatalogItemCard
-                          catalogItem={ci}
-                          key={`${ci.metadata.catalog}/${ci.metadata.name}`}
-                          onSelect={() =>
-                            setSelectedItem((val) => {
-                              if (!val || val.itemName !== ci.metadata.name || val.catalog !== ci.metadata.catalog) {
-                                return {
-                                  itemName: ci.metadata.name || '',
-                                  catalog: ci.metadata.catalog,
-                                };
-                              } else {
-                                return undefined;
+                    <Stack hasGutter>
+                      {showGettingStarted && (
+                        <StackItem>
+                          <CatalogLandingPageContent permissions={catalogPermissions} />
+                        </StackItem>
+                      )}
+                      <StackItem>
+                        <Gallery hasGutter>
+                          {catalogItems.map((ci) => (
+                            <CatalogItemCard
+                              catalogItem={ci}
+                              key={`${ci.metadata.catalog}/${ci.metadata.name}`}
+                              onSelect={() =>
+                                setSelectedItem((val) => {
+                                  if (
+                                    !val ||
+                                    val.itemName !== ci.metadata.name ||
+                                    val.catalog !== ci.metadata.catalog
+                                  ) {
+                                    return {
+                                      itemName: ci.metadata.name || '',
+                                      catalog: ci.metadata.catalog,
+                                    };
+                                  } else {
+                                    return undefined;
+                                  }
+                                })
                               }
-                            })
-                          }
-                        />
-                      ))}
-                    </Gallery>
+                            />
+                          ))}
+                        </Gallery>
+                      </StackItem>
+                    </Stack>
                   )}
                 </SplitItem>
               </Split>
