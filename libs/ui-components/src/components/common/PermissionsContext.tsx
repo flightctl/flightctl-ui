@@ -43,7 +43,7 @@ export const PermissionsContextProvider = ({ children }: React.PropsWithChildren
   const [error, setError] = React.useState<string | undefined>();
   const { currentOrganization } = useOrganizationGuardContext();
 
-  const orgId = currentOrganization?.metadata?.name;
+  const orgId = currentOrganization?.id;
 
   const { get } = useFetch();
 
