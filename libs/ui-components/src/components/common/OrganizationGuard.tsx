@@ -5,11 +5,46 @@ import { getErrorMessage } from '../../utils/error';
 import { getCurrentOrganizationId, storeCurrentOrganizationId } from '../../utils/organizationStorage';
 import { showSpinnerBriefly } from '../../utils/time';
 
+export type OrganizationItem = {
+  id: string;
+  label?: string;
+  description?: string;
+};
+
+// Returns the list of UserOrganizations ready to be displayed.
+// Whenever two organizations have the same displayName, the description is set to the id.
+const toOrganizationItems = (apiOrgs: Organization[]): OrganizationItem[] => {
+  const displayNameCounts = new Map<string, number>();
+  for (const org of apiOrgs) {
+    const displayName = org.spec?.displayName;
+    if (displayName) {
+      const prevCount = displayNameCounts.get(displayName) ?? 0;
+      displayNameCounts.set(displayName, prevCount + 1);
+    }
+  }
+  return apiOrgs.map((org) => {
+    const id = org.metadata?.name as string;
+    const displayName = org.spec?.displayName;
+    const sameNameCount = displayNameCounts.get(displayName || '') ?? 0;
+    if (sameNameCount > 1) {
+      return {
+        id,
+        label: displayName,
+        description: id,
+      };
+    }
+    return {
+      id,
+      label: displayName,
+    };
+  });
+};
+
 interface OrganizationContextType {
-  currentOrganization?: Organization;
-  availableOrganizations: Organization[];
+  currentOrganization?: OrganizationItem;
+  availableOrganizations: OrganizationItem[];
   mustShowOrganizationSelector: boolean;
-  selectOrganization: (org: Organization) => void;
+  selectOrganization: (org: OrganizationItem) => void;
   selectionError?: string;
   isReloading: boolean;
   isEmptyOrganizations: boolean;
@@ -29,20 +64,17 @@ export const useOrganizationGuardContext = (): OrganizationContextType => {
 const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
   const { fetch } = useAppContext();
 
-  const [currentOrganization, setCurrentOrganization] = React.useState<Organization | undefined>();
-  const [availableOrganizations, setAvailableOrganizations] = React.useState<Organization[]>([]);
+  const [currentOrganization, setCurrentOrganization] = React.useState<OrganizationItem | undefined>();
+  const [availableOrganizations, setAvailableOrganizations] = React.useState<OrganizationItem[]>([]);
   const [organizationsLoaded, setOrganizationsLoaded] = React.useState(false);
   const [selectionError, setSelectionError] = React.useState<string | undefined>();
   const [isEmptyOrganizations, setIsEmptyOrganizations] = React.useState(false);
   const [isReloading, setIsReloading] = React.useState(false);
   const initializationStartedRef = React.useRef(false);
 
-  const selectOrganization = React.useCallback((org: Organization) => {
-    const organizationId = org.metadata?.name || '';
-
+  const selectOrganization = React.useCallback((org: OrganizationItem) => {
     try {
-      // Store organization in localStorage - headers will handle the rest
-      storeCurrentOrganizationId(organizationId);
+      storeCurrentOrganizationId(org.id);
       setCurrentOrganization(org);
     } catch (error) {
       setSelectionError(getErrorMessage(error));
@@ -52,10 +84,11 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
   const fetchOrganizations = React.useCallback(async () => {
     try {
       const organizations = await fetch.get<OrganizationList>('organizations');
-      setAvailableOrganizations(organizations.items);
+      const orgItems = toOrganizationItems(organizations.items ?? []);
+      setAvailableOrganizations(orgItems);
 
       // Treat empty organizations list as an error
-      if (!organizations.items || organizations.items.length === 0) {
+      if (!orgItems.length) {
         setSelectionError('No organizations available');
         setIsEmptyOrganizations(true);
         setOrganizationsLoaded(true);
@@ -65,17 +98,15 @@ const OrganizationGuard = ({ children }: React.PropsWithChildren) => {
       const currentOrgId = getCurrentOrganizationId();
 
       // Validate current organization against available organizations
-      const currentOrg = currentOrgId
-        ? organizations.items.find((org) => org.metadata?.name === currentOrgId)
-        : undefined;
+      const currentOrg = currentOrgId ? orgItems.find((org) => org.id === currentOrgId) : undefined;
 
       if (currentOrg) {
         // The previously selected organization exists - use it
         selectOrganization(currentOrg);
       } else {
-        if (organizations.items?.length === 1) {
+        if (orgItems.length === 1) {
           // Only one organization available - select it automatically
-          selectOrganization(organizations.items[0]);
+          selectOrganization(orgItems[0]);
         } else if (currentOrgId) {
           // Previously set organization does not exist anymore - remove it from localStorage so the user can select a new organization
           setCurrentOrganization(undefined);

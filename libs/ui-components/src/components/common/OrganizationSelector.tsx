@@ -25,14 +25,13 @@ import {
   Title,
 } from '@patternfly/react-core';
 
-import { Organization } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
-import { useOrganizationGuardContext } from './OrganizationGuard';
+import { type OrganizationItem, useOrganizationGuardContext } from './OrganizationGuard';
 import { ORGANIZATION_STORAGE_KEY } from '../../utils/organizationStorage';
 
 interface OrganizationSelectorContentProps {
   defaultOrganizationId?: string;
-  organizations: Organization[];
+  organizations: OrganizationItem[];
   onSelect: (orgId: string) => void;
   onCancel?: () => void;
   allowCancel?: boolean;
@@ -73,14 +72,11 @@ const OrganizationSelectorContent = ({
           >
             <MenuContent menuHeight={needsScroll ? '230px' : 'auto'}>
               <MenuList>
-                {organizations.map((org) => {
-                  const orgId = org.metadata?.name as string;
-                  return (
-                    <MenuItem itemId={orgId} key={orgId}>
-                      {org.spec?.displayName || orgId}
-                    </MenuItem>
-                  );
-                })}
+                {organizations.map((org) => (
+                  <MenuItem key={org.id} itemId={org.id} description={org.description}>
+                    {org.label || org.id}
+                  </MenuItem>
+                ))}
               </MenuList>
             </MenuContent>
           </Menu>
@@ -155,7 +151,7 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
   const getLastSelectedOrganization = React.useCallback(() => {
     try {
       const savedOrgId = localStorage.getItem(ORGANIZATION_STORAGE_KEY);
-      if (savedOrgId && availableOrganizations.some((org) => org.metadata?.name === savedOrgId)) {
+      if (savedOrgId && availableOrganizations.some((org) => org.id === savedOrgId)) {
         return savedOrgId;
       }
     } catch (error) {
@@ -166,7 +162,7 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
 
   const handleSelect = React.useCallback(
     (orgId: string) => {
-      const org = availableOrganizations.find((org) => org.metadata?.name === orgId);
+      const org = availableOrganizations.find((o) => o.id === orgId);
       if (org) {
         try {
           selectOrganization(org);
