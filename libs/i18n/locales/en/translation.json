@@ -969,7 +969,7 @@
   "Use different update schedules for downloading and installing updates": "Use different update schedules for downloading and installing updates",
   "Deletion of fleet {{fleetId}} failed.": "Deletion of fleet {{fleetId}} failed.",
   "Delete fleet?": "Delete fleet?",
-  "<0>{fleetId}</0> will be deleted permanently. If the device selector of a remaining fleet matches a device in <2>{fleetId}</2>, the device will be moved to the new fleet. If there&apos;s no matching fleet for a device, it will be unlinked from any fleet.": "<0>{fleetId}</0> will be deleted permanently. If the device selector of a remaining fleet matches a device in <2>{fleetId}</2>, the device will be moved to the new fleet. If there&apos;s no matching fleet for a device, it will be unlinked from any fleet.",
+  "<0>{fleetId}</0> will be deleted permanently. If the device selector of a remaining fleet matches a device currently linked to this fleet, the device will be moved to the new fleet. If there&apos;s no matching fleet for a device, it will be unlinked from any fleet.": "<0>{fleetId}</0> will be deleted permanently. If the device selector of a remaining fleet matches a device currently linked to this fleet, the device will be moved to the new fleet. If there&apos;s no matching fleet for a device, it will be unlinked from any fleet.",
   "Are you sure you want to delete?": "Are you sure you want to delete?",
   "Details: {{errorDetails}}": "Details: {{errorDetails}}",
   "Delete fleet": "Delete fleet",

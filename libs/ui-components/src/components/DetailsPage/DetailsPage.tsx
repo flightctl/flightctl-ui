@@ -16,6 +16,7 @@ import DetailsNotFound from './DetailsNotFound';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Link, Route } from '../../hooks/useNavigate';
 import ErrorBoundary from '../common/ErrorBoundary';
+import ResourceLink from '../common/ResourceLink';
 
 import './DetailsPage.css';
 
@@ -84,7 +85,9 @@ const DetailsPage = ({
           <BreadcrumbItem>
             <Link to={resourceLink}>{resourceTypeLabel}</Link>
           </BreadcrumbItem>
-          <BreadcrumbItem isActive>{breadcrumbTitle || id}</BreadcrumbItem>
+          <BreadcrumbItem isActive>
+            <ResourceLink id={breadcrumbTitle || id} />
+          </BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
       <PageSection hasBodyWrapper={false}>
@@ -96,7 +99,7 @@ const DetailsPage = ({
               role="heading"
               {...(titleDataTestId && { 'data-testid': titleDataTestId })}
             >
-              {title || id}
+              {title || <ResourceLink id={id} />}
             </Title>
           </SplitItem>
           <SplitItem>{actions}</SplitItem>

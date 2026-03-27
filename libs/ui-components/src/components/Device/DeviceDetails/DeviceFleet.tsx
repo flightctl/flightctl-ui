@@ -9,6 +9,7 @@ import { getDeviceFleet } from '../../../utils/devices';
 import { getCondition } from '../../../utils/api';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE } from '../../../hooks/useNavigate';
+import ResourceLink from '../../common/ResourceLink';
 
 import './DeviceFleet.css';
 
@@ -82,7 +83,7 @@ const DeviceFleet = ({ device }: { device?: Device }) => {
   let fleetNameEl: React.ReactNode = null;
   const fleetName = getDeviceFleet(device.metadata);
   if (fleetName) {
-    fleetNameEl = <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: fleetName }}>{fleetName}</Link>;
+    fleetNameEl = <ResourceLink id={fleetName} routeLink={ROUTE.FLEET_DETAILS} />;
   } else if (multipleOwnersCondition) {
     // Device has no owner set, but with the multiple owners condition. The warning icon should be displayed
     fleetNameEl = t('None');
