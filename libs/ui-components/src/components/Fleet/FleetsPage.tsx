@@ -197,6 +197,7 @@ const FleetTable = () => {
           fleets={fleets.filter(isRowSelected)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
+            setAllSelected(false);
             refetch();
           }}
         />

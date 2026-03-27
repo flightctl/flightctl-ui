@@ -185,6 +185,7 @@ const ImageBuildTable = () => {
           imageBuilds={imageBuilds.filter(isRowSelected)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
+            setAllSelected(false);
             refetch();
           }}
         />

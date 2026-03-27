@@ -150,6 +150,7 @@ const DecommissionedDevicesTable = ({
           resources={devices.filter(isRowSelected)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
+            setAllSelected(false);
             refetch();
           }}
         />
