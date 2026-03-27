@@ -644,6 +644,7 @@
   "Device is non-editable": "Device is non-editable",
   "Device template": "Device template",
   "The device will be bound to a fleet. As a result, its configurations cannot be edited directly.": "The device will be bound to a fleet. As a result, its configurations cannot be edited directly.",
+  "Why this step is disabled": "Why this step is disabled",
   "This port mapping already exists": "This port mapping already exists",
   "Port mapping must be in format \"hostPort:containerPort\"": "Port mapping must be in format \"hostPort:containerPort\"",
   "Invalid port values": "Invalid port values",
