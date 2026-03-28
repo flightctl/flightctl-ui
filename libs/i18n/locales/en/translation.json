@@ -620,6 +620,7 @@
   "System image mismatch": "System image mismatch",
   "Desired system image: {{ desiredOsImage }}": "Desired system image: {{ desiredOsImage }}",
   "System services": "System services",
+  "Refreshing device": "Refreshing device",
   "Connection was closed": "Connection was closed",
   "Reconnect": "Reconnect",
   "Show decommissioned devices": "Show decommissioned devices",
