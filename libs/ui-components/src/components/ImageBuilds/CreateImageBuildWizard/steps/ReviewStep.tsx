@@ -6,6 +6,7 @@ import {
   CardBody,
   CardTitle,
   Content,
+  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -24,7 +25,6 @@ import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circl
 import { BindingType } from '@flightctl/types/imagebuilder';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getErrorMessage } from '../../../../utils/error';
-import FlightCtlDescriptionList from '../../../common/FlightCtlDescriptionList';
 import { ImageBuildFormValues, ImageBuildWizardError } from '../types';
 import { getImageReference } from '../../../../utils/imageBuilds';
 import { getExportFormatLabel } from '../../../../utils/imageBuilds';
@@ -62,7 +62,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
         <Card>
           <CardTitle>{t('Base image')}</CardTitle>
           <CardBody>
-            <FlightCtlDescriptionList isHorizontal isCompact>
+            <DescriptionList isHorizontal isCompact>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Build name')}</DescriptionListTerm>
                 <DescriptionListDescription>{values.buildName}</DescriptionListDescription>
@@ -87,7 +87,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               )}
-            </FlightCtlDescriptionList>
+            </DescriptionList>
           </CardBody>
         </Card>
       </StackItem>
@@ -95,7 +95,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
         <Card>
           <CardTitle>{t('Image output')}</CardTitle>
           <CardBody>
-            <FlightCtlDescriptionList isHorizontal isCompact>
+            <DescriptionList isHorizontal isCompact>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Target repository')}</DescriptionListTerm>
                 <DescriptionListDescription>{values.destination.repository}</DescriptionListDescription>
@@ -132,7 +132,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
                   )}
                 </DescriptionListDescription>
               </DescriptionListGroup>
-            </FlightCtlDescriptionList>
+            </DescriptionList>
           </CardBody>
         </Card>
       </StackItem>
@@ -140,7 +140,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
         <Card>
           <CardTitle>{t('Registration')}</CardTitle>
           <CardBody>
-            <FlightCtlDescriptionList isHorizontal isCompact>
+            <DescriptionList isHorizontal isCompact>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Binding type')}</DescriptionListTerm>
                 <DescriptionListDescription>
@@ -188,7 +188,7 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               )}
-            </FlightCtlDescriptionList>
+            </DescriptionList>
           </CardBody>
         </Card>
       </StackItem>

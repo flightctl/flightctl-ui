@@ -3,6 +3,7 @@ import {
   Card,
   CardBody,
   CardTitle,
+  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -15,7 +16,6 @@ import { Repository } from '@flightctl/types';
 
 import { getLastTransitionTimeText } from '../../../utils/status/repository';
 import { useTranslation } from '../../../hooks/useTranslation';
-import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import RepositoryStatus from '../../Status/RepositoryStatus';
 import {
   getRepoTypeLabel,
@@ -68,7 +68,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
     <Card>
       <CardTitle>{t('Details')}</CardTitle>
       <CardBody>
-        <FlightControlDescriptionList columnModifier={{ lg: '3Col' }}>
+        <DescriptionList columnModifier={{ lg: '3Col' }}>
           <DescriptionListGroup>
             <DescriptionListTerm>{isOciRepoSpec(repoDetails.spec) ? t('Registry') : t('URL')}</DescriptionListTerm>
             <DescriptionListDescription>
@@ -99,7 +99,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
               {repoDetails ? getLastTransitionTimeText(repoDetails, t).text : '-'}
             </DescriptionListDescription>
           </DescriptionListGroup>
-        </FlightControlDescriptionList>
+        </DescriptionList>
       </CardBody>
     </Card>
   );

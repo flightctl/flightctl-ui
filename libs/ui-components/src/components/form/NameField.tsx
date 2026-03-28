@@ -41,7 +41,7 @@ const NameField = ({ name, validations, resourceType, ...rest }: NameFieldProps)
       await get(`${resourceType}/${value}`, abortControllerRef.current.signal);
       currentErrorRef.current = true;
       setValidationError();
-    } catch (e) {
+    } catch {
       currentErrorRef.current = false;
     }
   };

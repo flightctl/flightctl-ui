@@ -36,7 +36,9 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
   React.useEffect(() => {
     const term: XTerminal = new XTerminal(terminalOptions);
     const fitAddon = new FitAddon();
-    terminalRef.current && term.open(terminalRef.current);
+    if (terminalRef.current) {
+      term.open(terminalRef.current);
+    }
     term.loadAddon(fitAddon);
     term.focus();
 
@@ -50,7 +52,9 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
       });
     });
 
-    terminalRef.current && resizeObserver.observe(terminalRef.current);
+    if (terminalRef.current) {
+      resizeObserver.observe(terminalRef.current);
+    }
 
     if (terminal.current !== term) {
       terminal.current?.dispose();

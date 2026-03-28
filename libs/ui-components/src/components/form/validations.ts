@@ -781,7 +781,7 @@ export const validApplicationsSchema = (t: TFunction) => {
               }
               try {
                 yaml.load(value);
-              } catch (error) {
+              } catch {
                 return false;
               }
               return true;

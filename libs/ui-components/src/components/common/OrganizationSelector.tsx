@@ -158,7 +158,7 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
       if (savedOrgId && availableOrganizations.some((org) => org.metadata?.name === savedOrgId)) {
         return savedOrgId;
       }
-    } catch (error) {
+    } catch {
       // Ignore - we won't preselect the previously selected organization
     }
     return undefined;
@@ -171,7 +171,7 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
         try {
           selectOrganization(org);
           onClose?.(true);
-        } catch (error) {
+        } catch {
           onClose?.(false);
         }
       }

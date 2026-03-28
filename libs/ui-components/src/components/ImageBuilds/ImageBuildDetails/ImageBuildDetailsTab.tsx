@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   CardBody,
   CardTitle,
+  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -21,7 +22,6 @@ import { BindingType } from '@flightctl/types/imagebuilder';
 import { getDateDisplay } from '../../../utils/dates';
 import { getExportFormatLabel, getImageReference } from '../../../utils/imageBuilds';
 import { useTranslation } from '../../../hooks/useTranslation';
-import FlightCtlDescriptionList from '../../common/FlightCtlDescriptionList';
 import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 import { CERTIFICATE_VALIDITY_IN_YEARS } from '../../../constants';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
@@ -58,7 +58,7 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
             <DetailsPageCard>
               <CardTitle>{t('Build information')}</CardTitle>
               <CardBody>
-                <FlightCtlDescriptionList isCompact isHorizontal>
+                <DescriptionList isCompact isHorizontal>
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t('Build status')}</DescriptionListTerm>
                     <DescriptionListDescription>
@@ -71,7 +71,7 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
                       {getDateDisplay(imageBuild.metadata.creationTimestamp)}
                     </DescriptionListDescription>
                   </DescriptionListGroup>
-                </FlightCtlDescriptionList>
+                </DescriptionList>
               </CardBody>
             </DetailsPageCard>
           </GridItem>
@@ -79,7 +79,7 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
             <DetailsPageCard>
               <CardTitle>{t('Registration')}</CardTitle>
               <CardBody>
-                <FlightCtlDescriptionList isHorizontal isCompact>
+                <DescriptionList isHorizontal isCompact>
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t('Binding type')}</DescriptionListTerm>
                     <DescriptionListDescription>
@@ -129,7 +129,7 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
                       </DescriptionListDescription>
                     </DescriptionListGroup>
                   )}
-                </FlightCtlDescriptionList>
+                </DescriptionList>
               </CardBody>
             </DetailsPageCard>
           </GridItem>
@@ -137,7 +137,7 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
             <DetailsPageCard>
               <CardTitle>{t('Source image')}</CardTitle>
               <CardBody>
-                <FlightCtlDescriptionList isCompact isHorizontal>
+                <DescriptionList isCompact isHorizontal>
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t('Source repository')}</DescriptionListTerm>
                     <DescriptionListDescription>{srcRepositoryName}</DescriptionListDescription>
@@ -156,7 +156,7 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
                       <ImageUrl imageReference={srcImageReference} />
                     </DescriptionListDescription>
                   </DescriptionListGroup>
-                </FlightCtlDescriptionList>
+                </DescriptionList>
               </CardBody>
             </DetailsPageCard>
           </GridItem>
@@ -164,7 +164,7 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
             <DetailsPageCard>
               <CardTitle>{t('Image output')}</CardTitle>
               <CardBody>
-                <FlightCtlDescriptionList isCompact isHorizontal>
+                <DescriptionList isCompact isHorizontal>
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t('Target repository')}</DescriptionListTerm>
                     <DescriptionListDescription>{dstRepositoryName}</DescriptionListDescription>
@@ -195,7 +195,7 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
                         : t('None')}
                     </DescriptionListDescription>
                   </DescriptionListGroup>
-                </FlightCtlDescriptionList>
+                </DescriptionList>
               </CardBody>
             </DetailsPageCard>
           </GridItem>

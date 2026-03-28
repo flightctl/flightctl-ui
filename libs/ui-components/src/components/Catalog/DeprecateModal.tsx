@@ -2,7 +2,6 @@ import * as React from 'react';
 import {
   Alert,
   Button,
-  Form,
   FormGroup,
   Modal,
   ModalBody,
@@ -16,6 +15,7 @@ import { Trans } from 'react-i18next';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { getErrorMessage } from '../../utils/error';
+import FlightCtlForm from '../form/FlightCtlForm';
 
 type DeprecateModalProps = {
   onDeprecate: (message: string) => Promise<void>;
@@ -42,7 +42,7 @@ export const DeprecateModal = ({ onDeprecate, onClose, itemName }: DeprecateModa
             </Trans>
           </StackItem>
           <StackItem>
-            <Form>
+            <FlightCtlForm>
               <FormGroup label={t('Reason')} isRequired fieldId="deprecation-reason">
                 <TextArea
                   id="deprecation-reason"
@@ -53,7 +53,7 @@ export const DeprecateModal = ({ onDeprecate, onClose, itemName }: DeprecateModa
                   autoFocus
                 />
               </FormGroup>
-            </Form>
+            </FlightCtlForm>
           </StackItem>
           {error && (
             <StackItem>
