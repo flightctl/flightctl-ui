@@ -104,6 +104,7 @@ const DecommissionedDevicesTable = ({
               <Switch
                 id="decommissioned-devices-switch"
                 label={<span className="fctl-switch__label">{t('Show decommissioned devices')}</span>}
+                aria-checked
                 isChecked
                 onChange={() => {
                   setOnlyDecommissioned(false);
