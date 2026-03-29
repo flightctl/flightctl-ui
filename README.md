@@ -22,7 +22,7 @@ npm run build
 
 The UI supports building containers for both Enterprise Linux 9 and 10. Containerfiles are organized by OS in a directory structure similar to the main FlightCtl repository:
 
-```
+```text
 packaging/images/el9/Containerfile       # EL9 standalone UI
 packaging/images/el9/Containerfile.ocp   # EL9 OCP plugin UI
 packaging/images/el10/Containerfile      # EL10 standalone UI
