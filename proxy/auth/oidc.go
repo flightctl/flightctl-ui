@@ -9,21 +9,20 @@ import (
 	"net/url"
 
 	"github.com/flightctl/flightctl-ui/bridge"
-	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
 
 type OIDCAuthHandler struct {
-	tlsConfig          *tls.Config
-	client             *osincli.Client
-	internalClient     *osincli.Client
-	endSessionEndpoint string
-	userInfoEndpoint   string
-	authURL            string
-	tokenEndpoint      string
-	clientId           string
-	providerName       string
+	tlsConfig              *tls.Config
+	oidcDiscoveryForClient oidcServerResponse
+	scopes                 *[]string
+	endSessionEndpoint     string
+	userInfoEndpoint       string
+	authURL                string
+	tokenEndpoint          string
+	clientId               string
+	providerName           string
 }
 
 type oidcServerResponse struct {
@@ -86,21 +85,17 @@ func getOIDCAuthHandler(provider *v1beta1.AuthProvider, oidcSpec *v1beta1.OIDCPr
 		return nil, fmt.Errorf("failed to parse oidc config: %w", err)
 	}
 
-	internalClient, err := getOIDCClient(oidcResponse, tlsConfig, clientId, oidcSpec.Scopes)
-	if err != nil {
-		return nil, err
-	}
-
+	oidcForClient := oidcResponse
 	handler := &OIDCAuthHandler{
-		tlsConfig:          tlsConfig,
-		internalClient:     internalClient,
-		client:             internalClient,
-		endSessionEndpoint: oidcResponse.EndSessionEndpoint,
-		userInfoEndpoint:   oidcResponse.UserInfoEndpoint,
-		authURL:            authURL,
-		tokenEndpoint:      oidcResponse.TokenEndpoint,
-		clientId:           clientId,
-		providerName:       providerName,
+		tlsConfig:              tlsConfig,
+		oidcDiscoveryForClient: oidcForClient,
+		scopes:                 oidcSpec.Scopes,
+		endSessionEndpoint:     oidcResponse.EndSessionEndpoint,
+		userInfoEndpoint:       oidcResponse.UserInfoEndpoint,
+		authURL:                authURL,
+		tokenEndpoint:          oidcResponse.TokenEndpoint,
+		clientId:               clientId,
+		providerName:           providerName,
 	}
 
 	if internalAuthURL != nil {
@@ -110,11 +105,7 @@ func getOIDCAuthHandler(provider *v1beta1.AuthProvider, oidcSpec *v1beta1.OIDCPr
 			UserInfoEndpoint:   replaceBaseURL(oidcResponse.UserInfoEndpoint, *internalAuthURL, authURL),
 			EndSessionEndpoint: replaceBaseURL(oidcResponse.EndSessionEndpoint, *internalAuthURL, authURL),
 		}
-		client, err := getOIDCClient(extConfig, tlsConfig, clientId, oidcSpec.Scopes)
-		if err != nil {
-			return nil, err
-		}
-		handler.client = client
+		handler.oidcDiscoveryForClient = extConfig
 		handler.endSessionEndpoint = extConfig.EndSessionEndpoint
 		handler.tokenEndpoint = extConfig.TokenEndpoint
 	}
@@ -142,7 +133,7 @@ func replaceBaseURL(endpoint, oldBase, newBase string) string {
 	return endpointURL.String()
 }
 
-func getOIDCClient(oidcConfig oidcServerResponse, tlsConfig *tls.Config, clientId string, providerScopes *[]string) (*osincli.Client, error) {
+func getOIDCClient(oidcConfig oidcServerResponse, tlsConfig *tls.Config, clientId string, providerScopes *[]string, redirectURL string) (*osincli.Client, error) {
 	defaultScopes := "openid profile email organization:*"
 	scope := buildScopeParam(providerScopes, defaultScopes)
 
@@ -150,7 +141,7 @@ func getOIDCClient(oidcConfig oidcServerResponse, tlsConfig *tls.Config, clientI
 		ClientId:                 clientId,
 		AuthorizeUrl:             oidcConfig.AuthEndpoint,
 		TokenUrl:                 oidcConfig.TokenEndpoint,
-		RedirectUrl:              config.BaseUiUrl + "/callback",
+		RedirectUrl:              redirectURL,
 		ErrorsInStatusCode:       true,
 		SendClientSecretInParams: false,
 		Scope:                    scope,
@@ -168,19 +159,28 @@ func getOIDCClient(oidcConfig oidcServerResponse, tlsConfig *tls.Config, clientI
 	return client, nil
 }
 
-func (o *OIDCAuthHandler) Logout(token string) (string, error) {
+func (o *OIDCAuthHandler) Logout(token string, postLogoutRedirectBase string) (string, error) {
+	if o.endSessionEndpoint == "" {
+		// Provider does not advertise RP-initiated logout; fall back to UI-only logout.
+		return "", nil
+	}
+
 	u, err := url.Parse(o.endSessionEndpoint)
 	if err != nil {
 		return "", err
 	}
 
 	uq := u.Query()
-	uq.Add("post_logout_redirect_uri", config.BaseUiUrl)
+	uq.Add("post_logout_redirect_uri", postLogoutRedirectBase)
 	uq.Add("client_id", o.clientId)
 	u.RawQuery = uq.Encode()
 	return u.String(), nil
 }
 
-func (a *OIDCAuthHandler) GetLoginRedirectURL(state string, codeChallenge string) string {
-	return loginRedirect(a.client, state, codeChallenge)
+func (a *OIDCAuthHandler) GetLoginRedirectURL(state string, codeChallenge string, redirectURI string) (string, error) {
+	client, err := getOIDCClient(a.oidcDiscoveryForClient, a.tlsConfig, a.clientId, a.scopes, redirectURI)
+	if err != nil {
+		return "", fmt.Errorf("failed to create OIDC client: %w", err)
+	}
+	return loginRedirect(client, state, codeChallenge), nil
 }
