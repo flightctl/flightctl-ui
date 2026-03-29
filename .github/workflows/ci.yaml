@@ -108,13 +108,28 @@ jobs:
           podman build -f ${{ steps.containerfile.outputs.file }} -t test-ui:${{ matrix.os }}-${{ matrix.variant }} .
           echo "✓ Successfully built ${{ matrix.os }} ${{ matrix.variant }} container"
 
-      - name: Verify container
+      - name: Verify container - help command
+        id: verify-help
         run: |
-          echo "Verifying container can start..."
-          # Test that the container can at least start (don't run indefinitely)
-          timeout 30s podman run --rm test-ui:${{ matrix.os }}-${{ matrix.variant }} ./flightctl-ui --help || \
-          timeout 30s podman run --rm test-ui:${{ matrix.os }}-${{ matrix.variant }} ls -la /app/proxy/flightctl-ui || \
-          echo "Container verification completed (expected timeout/exit)"
+          echo "Testing help command..."
+          if timeout 30s podman run --rm test-ui:${{ matrix.os }}-${{ matrix.variant }} ./flightctl-ui --help; then
+            echo "Help command successful"
+            echo "passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "Help command failed"
+            echo "passed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify container - binary exists
+        if: steps.verify-help.outputs.passed != 'true'
+        run: |
+          echo "Help command failed, checking if binary exists..."
+          if timeout 30s podman run --rm test-ui:${{ matrix.os }}-${{ matrix.variant }} ls -la /app/proxy/flightctl-ui; then
+            echo "Binary exists but help command failed"
+          else
+            echo "Binary missing"
+            exit 1
+          fi
 
   integration-tests:
     needs: preflight-check

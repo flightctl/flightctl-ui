@@ -45,9 +45,9 @@ make build-all
 make help
 ```
 
-Built images will be tagged with both generic and OS-specific names:
-- `localhost/flightctl-ui:latest` and `localhost/flightctl-ui-rhel9:latest`
-- `localhost/flightctl-ocp-ui:latest` and `localhost/flightctl-ocp-ui-rhel9:latest`
+Built images will use OS-qualified names:
+- `localhost/flightctl-ui-el9:latest` and `localhost/flightctl-ocp-ui-el9:latest`
+- `localhost/flightctl-ui-el10:latest` and `localhost/flightctl-ocp-ui-el10:latest`
 
 ### Running Standalone UI with backend running in Kind
 
