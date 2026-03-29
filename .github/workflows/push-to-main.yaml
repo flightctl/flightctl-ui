@@ -52,31 +52,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate OS-specific tags
-        id: os-tags
+      - name: Generate OS-specific image name
+        id: os-image
         run: |
-          RHEL_OS=$(echo "${{ matrix.os }}" | sed 's/el/rhel/')
-          BASE_TAGS="${{ needs.generate-tags.outputs.image_tags }}"
-
-          # Create OS-suffixed tags
-          OS_TAGS=""
-          for tag in $BASE_TAGS; do
-            if [ -n "$OS_TAGS" ]; then
-              OS_TAGS="$OS_TAGS "
-            fi
-            OS_TAGS="$OS_TAGS$tag-${RHEL_OS}"
-          done
-
-          echo "os_tags=${OS_TAGS}" >> $GITHUB_OUTPUT
-          echo "rhel_os=${RHEL_OS}" >> $GITHUB_OUTPUT
-          echo "Generated OS tags: ${OS_TAGS}"
+          echo "image_name=${{ env.QUAY_STANDALONE_REPO }}-${{ matrix.os }}" >> $GITHUB_OUTPUT
+          echo "Generated image name: ${{ env.QUAY_STANDALONE_REPO }}-${{ matrix.os }}"
 
       - name: Build
         id: build
         uses: redhat-actions/buildah-build@v2
         with:
-          image: ${{ env.QUAY_STANDALONE_REPO }}
-          tags: ${{ steps.os-tags.outputs.os_tags }}
+          image: ${{ steps.os-image.outputs.image_name }}
+          tags: ${{ needs.generate-tags.outputs.image_tags }}
           labels: |
             org.flightctl.flightctl-ui.github.repository=${{ github.repository }}
             org.flightctl.flightctl-ui.github.actor=${{ github.actor }}
@@ -92,7 +79,7 @@ jobs:
         id: fips
         run: |
           go install github.com/flightctl/fips-validator@latest
-          TAGS=(${{ steps.os-tags.outputs.os_tags }})
+          TAGS=(${{ needs.generate-tags.outputs.image_tags }})
           podman unshare -- $HOME/go/bin/fips-validator image ${{ steps.build.outputs.image }}:${TAGS[0]}
 
       - name: Push to Quay.io
@@ -100,7 +87,7 @@ jobs:
         uses: redhat-actions/push-to-registry@v2.7
         with:
           image: ${{ steps.build.outputs.image }}
-          tags: ${{ steps.os-tags.outputs.os_tags }}
+          tags: ${{ needs.generate-tags.outputs.image_tags }}
           registry: ${{ env.QUAY_ORG }}
           username: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_USERNAME }}
           password: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_PASSWORD }}
@@ -114,31 +101,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate OS-specific tags
-        id: os-tags
+      - name: Generate OS-specific image name
+        id: os-image
         run: |
-          RHEL_OS=$(echo "${{ matrix.os }}" | sed 's/el/rhel/')
-          BASE_TAGS="${{ needs.generate-tags.outputs.image_tags }}"
-
-          # Create OS-suffixed tags
-          OS_TAGS=""
-          for tag in $BASE_TAGS; do
-            if [ -n "$OS_TAGS" ]; then
-              OS_TAGS="$OS_TAGS "
-            fi
-            OS_TAGS="$OS_TAGS$tag-${RHEL_OS}"
-          done
-
-          echo "os_tags=${OS_TAGS}" >> $GITHUB_OUTPUT
-          echo "rhel_os=${RHEL_OS}" >> $GITHUB_OUTPUT
-          echo "Generated OS tags: ${OS_TAGS}"
+          echo "image_name=${{ env.QUAY_OCP_REPO }}-${{ matrix.os }}" >> $GITHUB_OUTPUT
+          echo "Generated image name: ${{ env.QUAY_OCP_REPO }}-${{ matrix.os }}"
 
       - name: Build
         id: build
         uses: redhat-actions/buildah-build@v2
         with:
-          image: ${{ env.QUAY_OCP_REPO }}
-          tags: ${{ steps.os-tags.outputs.os_tags }}
+          image: ${{ steps.os-image.outputs.image_name }}
+          tags: ${{ needs.generate-tags.outputs.image_tags }}
           labels: |
             org.flightctl.flightctl-ui.github.repository=${{ github.repository }}
             org.flightctl.flightctl-ui.github.actor=${{ github.actor }}
@@ -154,7 +128,7 @@ jobs:
         id: fips
         run: |
           go install github.com/flightctl/fips-validator@latest
-          TAGS=(${{ steps.os-tags.outputs.os_tags }})
+          TAGS=(${{ needs.generate-tags.outputs.image_tags }})
           podman unshare -- $HOME/go/bin/fips-validator image ${{ steps.build.outputs.image }}:${TAGS[0]}
 
       - name: Push to Quay.io
@@ -162,7 +136,7 @@ jobs:
         uses: redhat-actions/push-to-registry@v2.7
         with:
           image: ${{ steps.build.outputs.image }}
-          tags: ${{ steps.os-tags.outputs.os_tags }}
+          tags: ${{ needs.generate-tags.outputs.image_tags }}
           registry: ${{ env.QUAY_ORG }}
           username: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_USERNAME }}
           password: ${{ secrets.QUAY_FLIGHTCTL_INFRA_ROBOT_PASSWORD }}
