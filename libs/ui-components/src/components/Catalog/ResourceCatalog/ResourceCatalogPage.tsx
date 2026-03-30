@@ -6,6 +6,9 @@ import { CatalogItem } from '@flightctl/types/alpha';
 import { getRemoveAppPatches, getRemoveOsPatches } from '../../Catalog/utils';
 import { CatalogPageContent } from '../../Catalog/CatalogPage';
 import InstalledSoftware from '../../Catalog/InstalledSoftware';
+import { usePermissionsContext } from '../../common/PermissionsContext';
+import { RESOURCE, VERB } from '../../../types/rbac';
+import PageWithPermissions from '../../common/PageWithPermissions';
 
 import './ResourceCatalogPage.css';
 
@@ -20,6 +23,11 @@ type ResourceCatalogPageProps = {
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
 };
 
+const catalogPagePermissions = [
+  { kind: RESOURCE.CATALOG_ITEM, verb: VERB.LIST },
+  { kind: RESOURCE.CATALOG, verb: VERB.LIST },
+];
+
 const ResourceCatalogPage = ({
   currentLabels,
   spec,
@@ -30,6 +38,8 @@ const ResourceCatalogPage = ({
   onEdit,
   onInstall,
 }: ResourceCatalogPageProps) => {
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [canListItems, canListCatalogs] = checkPermissions(catalogPagePermissions);
   const onDeleteOs = async () => {
     const allPatches = getRemoveOsPatches({ currentLabels, specPath });
     await onPatch(allPatches);
@@ -46,7 +56,7 @@ const ResourceCatalogPage = ({
   };
 
   return (
-    <>
+    <PageWithPermissions allowed={canListItems && canListCatalogs} loading={loading}>
       <Stack>
         <StackItem>
           <InstalledSoftware
@@ -62,7 +72,7 @@ const ResourceCatalogPage = ({
           <CatalogPageContent canInstall={canEdit} targetHasOwner={hasOwner} onInstall={onInstall} targetSet />
         </StackItem>
       </Stack>
-    </>
+    </PageWithPermissions>
   );
 };
 

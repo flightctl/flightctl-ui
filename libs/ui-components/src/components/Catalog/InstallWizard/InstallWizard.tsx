@@ -22,6 +22,9 @@ import InstallAppWizard from './InstallAppWizard';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useCatalogItem } from '../useCatalogs';
 import { getErrorMessage } from '../../../utils/error';
+import { usePermissionsContext } from '../../common/PermissionsContext';
+import PageWithPermissions from '../../common/PageWithPermissions';
+import { RESOURCE, VERB } from '../../../types/rbac';
 
 const InstallWizard = () => {
   const { t } = useTranslation();
@@ -77,4 +80,16 @@ const InstallWizard = () => {
   );
 };
 
-export default InstallWizard;
+const installWizardPermissions = [{ kind: RESOURCE.CATALOG_ITEM, verb: VERB.GET }];
+
+const InstallWizardWithPermissions = () => {
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [canGetItem] = checkPermissions(installWizardPermissions);
+  return (
+    <PageWithPermissions allowed={canGetItem} loading={loading}>
+      <InstallWizard />
+    </PageWithPermissions>
+  );
+};
+
+export default InstallWizardWithPermissions;
