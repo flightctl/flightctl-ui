@@ -30,6 +30,9 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { useCatalogItem } from '../useCatalogs';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { UpdateSuccessPageContent } from '../InstallWizard/UpdateSuccessPage';
+import { usePermissionsContext } from '../../common/PermissionsContext';
+import PageWithPermissions from '../../common/PageWithPermissions';
+import { RESOURCE, VERB } from '../../../types/rbac';
 
 type EditWizardProps = {
   specPath: string;
@@ -239,27 +242,33 @@ const EditWizard = ({
   );
 };
 
+const editWizardPermissions = [{ kind: RESOURCE.CATALOG_ITEM, verb: VERB.GET }];
+
 export const EditDeviceWizard = () => {
   const {
     router: { useParams },
   } = useAppContext();
   const { deviceId } = useParams() as { deviceId: string };
+  const { checkPermissions, loading: permissionsLoading } = usePermissionsContext();
+  const [canGetItem] = checkPermissions(editWizardPermissions);
 
   const [device, loading, error] = useFetchPeriodically<Required<Device>>({
     endpoint: `devices/${deviceId}`,
   });
   return (
-    <EditWizard
-      currentApps={device?.spec.applications}
-      currentLabels={device?.metadata.labels}
-      currentOsImage={device?.spec.os?.image}
-      error={error}
-      loading={loading}
-      specPath="/"
-      resourceId={deviceId}
-      resourceName={device?.metadata.labels?.alias}
-      isDevice
-    />
+    <PageWithPermissions allowed={canGetItem} loading={permissionsLoading}>
+      <EditWizard
+        currentApps={device?.spec.applications}
+        currentLabels={device?.metadata.labels}
+        currentOsImage={device?.spec.os?.image}
+        error={error}
+        loading={loading}
+        specPath="/"
+        resourceId={deviceId}
+        resourceName={device?.metadata.labels?.alias}
+        isDevice
+      />
+    </PageWithPermissions>
   );
 };
 
@@ -268,20 +277,24 @@ export const EditFleetWizard = () => {
     router: { useParams },
   } = useAppContext();
   const params = useParams() as { fleetId: string };
+  const { checkPermissions, loading: permissionsLoading } = usePermissionsContext();
+  const [canGetItem] = checkPermissions(editWizardPermissions);
 
   const [fleet, loading, error] = useFetchPeriodically<Required<Fleet>>({
     endpoint: `fleets/${params.fleetId}`,
   });
   return (
-    <EditWizard
-      currentApps={fleet?.spec.template.spec.applications}
-      currentLabels={fleet?.metadata.labels}
-      currentOsImage={fleet?.spec.template.spec.os?.image}
-      error={error}
-      loading={loading}
-      specPath="/spec/template/"
-      resourceId={params.fleetId}
-      isDevice={false}
-    />
+    <PageWithPermissions allowed={canGetItem} loading={permissionsLoading}>
+      <EditWizard
+        currentApps={fleet?.spec.template.spec.applications}
+        currentLabels={fleet?.metadata.labels}
+        currentOsImage={fleet?.spec.template.spec.os?.image}
+        error={error}
+        loading={loading}
+        specPath="/spec/template/"
+        resourceId={params.fleetId}
+        isDevice={false}
+      />
+    </PageWithPermissions>
   );
 };

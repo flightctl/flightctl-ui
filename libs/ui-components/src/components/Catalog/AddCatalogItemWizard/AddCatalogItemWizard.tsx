@@ -34,6 +34,9 @@ import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
 import { getErrorMessage } from '../../../utils/error';
+import { usePermissionsContext } from '../../common/PermissionsContext';
+import PageWithPermissions from '../../common/PageWithPermissions';
+import { RESOURCE, VERB } from '../../../types/rbac';
 
 const orderedIds = [generalInfoStepId, typeConfigStepId, versionStepId, reviewStepId];
 
@@ -250,4 +253,26 @@ const AddCatalogItemWizard = () => {
   );
 };
 
-export default AddCatalogItemWizard;
+const addCatalogItemWizardPermissions = [
+  { kind: RESOURCE.CATALOG, verb: VERB.LIST },
+  { kind: RESOURCE.CATALOG_ITEM, verb: VERB.GET },
+  { kind: RESOURCE.CATALOG_ITEM, verb: VERB.CREATE },
+  { kind: RESOURCE.CATALOG_ITEM, verb: VERB.PATCH },
+];
+
+const AddCatalogItemWizardWithPermissions = () => {
+  const {
+    router: { useParams },
+  } = useAppContext();
+  const { catalogId, itemId } = useParams<{ catalogId: string; itemId: string }>();
+  const isEdit = !!catalogId && !!itemId;
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [canListCatalogs, canGet, canCreate, canPatch] = checkPermissions(addCatalogItemWizardPermissions);
+  return (
+    <PageWithPermissions allowed={canListCatalogs && (isEdit ? canPatch && canGet : canCreate)} loading={loading}>
+      <AddCatalogItemWizard />
+    </PageWithPermissions>
+  );
+};
+
+export default AddCatalogItemWizardWithPermissions;

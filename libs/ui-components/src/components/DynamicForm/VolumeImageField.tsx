@@ -35,6 +35,8 @@ import CatalogItemCard from '../Catalog/CatalogItemCard';
 import { getFullContainerURI } from '../Catalog/utils';
 import { DynamicFormContext } from './DynamicForm';
 import { useTranslation } from '../../hooks/useTranslation';
+import { usePermissionsContext } from '../common/PermissionsContext';
+import { RESOURCE, VERB } from '../../types/rbac';
 import TableTextSearch from '../Table/TableTextSearch';
 import TablePagination from '../Table/TablePagination';
 import {
@@ -262,6 +264,8 @@ const CatalogItemDetails = ({
   );
 };
 
+const catalogItemListPermission = [{ kind: RESOURCE.CATALOG_ITEM, verb: VERB.LIST }];
+
 /**
  * Custom field for the volume image "reference" property.
  * Renders a text input plus "Choose from catalog" for Asset selection.
@@ -278,6 +282,8 @@ const VolumeImageField: React.FC<FieldProps> = ({
   readonly,
 }) => {
   const { t } = useTranslation();
+  const { checkPermissions } = usePermissionsContext();
+  const [canListCatalogItems] = checkPermissions(catalogItemListPermission);
   const { onAssetSelected, selectedAssets, onAssetCleared } = formContext as DynamicFormContext;
   const referenceValue = typeof formData === 'string' ? formData : '';
   const volumeIndex = getVolumeIndexFromId(idSchema.$id);
@@ -343,11 +349,13 @@ const VolumeImageField: React.FC<FieldProps> = ({
               placeholder={t('Enter image reference or choose from catalog')}
             />
           </SplitItem>
-          <SplitItem>
-            <Button variant="secondary" onClick={() => setIsModalOpen(true)} isDisabled={disabled || readonly}>
-              {t('Choose from catalog')}
-            </Button>
-          </SplitItem>
+          {canListCatalogItems && (
+            <SplitItem>
+              <Button variant="secondary" onClick={() => setIsModalOpen(true)} isDisabled={disabled || readonly}>
+                {t('Choose from catalog')}
+              </Button>
+            </SplitItem>
+          )}
         </Split>
       )}
       {schema.description && (
