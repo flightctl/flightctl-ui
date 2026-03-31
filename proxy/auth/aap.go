@@ -8,15 +8,12 @@ import (
 	"net/url"
 
 	"github.com/flightctl/flightctl-ui/bridge"
-	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl-ui/log"
 	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
 
 type AAPAuthHandler struct {
-	client          *osincli.Client
-	internalClient  *osincli.Client
 	tlsConfig       *tls.Config
 	authURL         string
 	tokenURL        string
@@ -72,15 +69,7 @@ func getAAPAuthHandler(provider *v1beta1.AuthProvider, aapSpec *v1beta1.AapProvi
 		return nil, err
 	}
 
-	// Use the authorization and token URLs directly from the spec
-	client, err := getClient(aapSpec.AuthorizationUrl, aapSpec.TokenUrl, tlsConfig, aapSpec.ClientId)
-	if err != nil {
-		return nil, err
-	}
-
 	handler := &AAPAuthHandler{
-		client:          client,
-		internalClient:  client,
 		tlsConfig:       tlsConfig,
 		authURL:         aapSpec.AuthorizationUrl,
 		tokenURL:        aapSpec.TokenUrl,
@@ -92,7 +81,7 @@ func getAAPAuthHandler(provider *v1beta1.AuthProvider, aapSpec *v1beta1.AapProvi
 	return handler, nil
 }
 
-func getClient(authorizationUrl, tokenUrl string, tlsConfig *tls.Config, clientId string) (*osincli.Client, error) {
+func getAAPClient(authorizationUrl, tokenUrl string, tlsConfig *tls.Config, clientId string, redirectURI string) (*osincli.Client, error) {
 	// Use provided clientId, require it to be non-empty
 	if clientId == "" {
 		return nil, fmt.Errorf("clientId is required for AAP provider")
@@ -102,7 +91,7 @@ func getClient(authorizationUrl, tokenUrl string, tlsConfig *tls.Config, clientI
 		ClientId:                 clientId,
 		AuthorizeUrl:             authorizationUrl,
 		TokenUrl:                 tokenUrl,
-		RedirectUrl:              config.BaseUiUrl + "/callback",
+		RedirectUrl:              redirectURI,
 		ErrorsInStatusCode:       true,
 		SendClientSecretInParams: true,
 		Scope:                    "read",
@@ -122,7 +111,7 @@ func getClient(authorizationUrl, tokenUrl string, tlsConfig *tls.Config, clientI
 	return client, nil
 }
 
-func (a *AAPAuthHandler) Logout(token string) (string, error) {
+func (a *AAPAuthHandler) Logout(token string, _ string) (string, error) {
 	data := url.Values{}
 	data.Set("client_id", a.clientId)
 	data.Set("token", token)
@@ -148,6 +137,10 @@ func (a *AAPAuthHandler) Logout(token string) (string, error) {
 	return "", nil
 }
 
-func (a *AAPAuthHandler) GetLoginRedirectURL(state string, codeChallenge string) string {
-	return loginRedirect(a.client, state, codeChallenge)
+func (a *AAPAuthHandler) GetLoginRedirectURL(state string, codeChallenge string, redirectURI string) (string, error) {
+	client, err := getAAPClient(a.authURL, a.tokenURL, a.tlsConfig, a.clientId, redirectURI)
+	if err != nil {
+		return "", fmt.Errorf("failed to create AAP OAuth client: %w", err)
+	}
+	return loginRedirect(client, state, codeChallenge), nil
 }

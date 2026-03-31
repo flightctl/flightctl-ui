@@ -13,7 +13,8 @@ import LoginPageLayout from './LoginPageLayout';
 import { loginAPI } from '../../utils/apiCalls';
 
 const redirectToProviderLogin = async (provider: AuthProvider) => {
-  const response = await fetch(`${loginAPI}?provider=${provider.metadata.name}`, {
+  const redirectBase = encodeURIComponent(window.location.origin);
+  const response = await fetch(`${loginAPI}?provider=${provider.metadata.name}&redirect_base=${redirectBase}`, {
     credentials: 'include',
   });
 
