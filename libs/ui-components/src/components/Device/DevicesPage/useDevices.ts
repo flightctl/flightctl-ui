@@ -66,7 +66,7 @@ const getDevicesEndpoint = ({
 
   if (onlyDecommissioned) {
     queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', decommissionedStatuses);
-  } else if (summaryOnly) {
+  } else {
     queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', enrolledStatuses);
   }
 
