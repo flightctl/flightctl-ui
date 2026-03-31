@@ -6,19 +6,17 @@ import (
 	"net/http"
 
 	"github.com/flightctl/flightctl-ui/bridge"
-	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
 
 type OAuth2AuthHandler struct {
 	tlsConfig        *tls.Config
-	client           *osincli.Client
-	internalClient   *osincli.Client
 	userInfoEndpoint string
 	authURL          string
 	tokenURL         string
 	clientId         string
+	scope            string
 	providerName     string
 }
 
@@ -43,16 +41,29 @@ func getOAuth2AuthHandler(provider *v1beta1.AuthProvider, oauth2Spec *v1beta1.OA
 	// Build scope string (no default scopes for OAuth2 - scopes are mandatory)
 	scope := buildScopeParam(oauth2Spec.Scopes, "")
 
-	// Create OAuth2 client config
+	handler := &OAuth2AuthHandler{
+		tlsConfig:        tlsConfig,
+		userInfoEndpoint: userinfoURL,
+		authURL:          authURL,
+		tokenURL:         tokenURL,
+		clientId:         clientId,
+		scope:            scope,
+		providerName:     providerName,
+	}
+
+	return handler, nil
+}
+
+func (o *OAuth2AuthHandler) oauth2ClientForRedirect(redirectURI string) (*osincli.Client, error) {
 	oauth2ClientConfig := &osincli.ClientConfig{
-		ClientId:                 clientId,
+		ClientId:                 o.clientId,
 		ClientSecret:             "", // Not needed with PKCE for public clients
-		AuthorizeUrl:             authURL,
-		TokenUrl:                 tokenURL,
-		RedirectUrl:              config.BaseUiUrl + "/callback",
+		AuthorizeUrl:             o.authURL,
+		TokenUrl:                 o.tokenURL,
+		RedirectUrl:              redirectURI,
 		ErrorsInStatusCode:       true,
 		SendClientSecretInParams: false, // PKCE is used instead of client secret
-		Scope:                    scope,
+		Scope:                    o.scope,
 	}
 
 	client, err := osincli.NewClient(oauth2ClientConfig)
@@ -61,29 +72,21 @@ func getOAuth2AuthHandler(provider *v1beta1.AuthProvider, oauth2Spec *v1beta1.OA
 	}
 
 	client.Transport = &http.Transport{
-		TLSClientConfig: tlsConfig,
+		TLSClientConfig: o.tlsConfig,
 	}
-
-	handler := &OAuth2AuthHandler{
-		tlsConfig:        tlsConfig,
-		internalClient:   client,
-		client:           client,
-		userInfoEndpoint: userinfoURL,
-		authURL:          authURL,
-		tokenURL:         tokenURL,
-		clientId:         clientId,
-		providerName:     providerName,
-	}
-
-	return handler, nil
+	return client, nil
 }
 
-func (o *OAuth2AuthHandler) Logout(token string) (string, error) {
+func (o *OAuth2AuthHandler) Logout(token string, _ string) (string, error) {
 	// OAuth2 providers typically don't have a standardized logout endpoint
 	// Return empty string to indicate no logout URL
 	return "", nil
 }
 
-func (o *OAuth2AuthHandler) GetLoginRedirectURL(state string, codeChallenge string) string {
-	return loginRedirect(o.client, state, codeChallenge)
+func (o *OAuth2AuthHandler) GetLoginRedirectURL(state string, codeChallenge string, redirectURI string) (string, error) {
+	client, err := o.oauth2ClientForRedirect(redirectURI)
+	if err != nil {
+		return "", err
+	}
+	return loginRedirect(client, state, codeChallenge), nil
 }

@@ -63,7 +63,10 @@ const getFullApiUrl = (path: string): { api: 'flightctl' | 'imagebuilder' | 'ale
 };
 
 export const logout = async () => {
-  const response = await fetch(`${uiProxyAPI}/logout`, { credentials: 'include' });
+  const redirectBase = encodeURIComponent(window.location.origin);
+  const response = await fetch(`${uiProxyAPI}/logout?redirect_base=${redirectBase}`, {
+    credentials: 'include',
+  });
   const { url } = (await response.json()) as { url: string };
   url ? (window.location.href = url) : window.location.reload();
 };

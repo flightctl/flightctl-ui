@@ -116,14 +116,14 @@ func extractTokenExpiration(token string) *int64 {
 }
 
 // Logout for token auth just clears the session
-func (t *TokenAuthProvider) Logout(token string) (string, error) {
+func (t *TokenAuthProvider) Logout(token string, _ string) (string, error) {
 	// No special logout URL for token auth
 	return "", nil
 }
 
 // GetLoginRedirectURL is not applicable for token auth
-func (t *TokenAuthProvider) GetLoginRedirectURL(state string, codeChallenge string) string {
-	return ""
+func (t *TokenAuthProvider) GetLoginRedirectURL(state string, codeChallenge string, redirectURI string) (string, error) {
+	return "", nil
 }
 
 // getK8sAuthHandler creates a new K8s token authentication handler

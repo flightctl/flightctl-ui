@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/flightctl/flightctl-ui/common"
-	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
@@ -41,16 +40,18 @@ type LoginParameters struct {
 }
 
 type AuthProvider interface {
-	Logout(token string) (string, error)
-	GetLoginRedirectURL(state string, codeChallenge string) string
+	// postLogoutRedirectBase is the UI base URL (scheme + host + optional path prefix from BASE_UI_URL) for OIDC end-session post_logout_redirect_uri; use ResolveLogoutRedirectBase.
+	Logout(token string, postLogoutRedirectBase string) (string, error)
+	// redirectURI is the full OAuth redirect_uri (e.g. https://host/callback). Empty means use BASE_UI_URL (legacy); callers should resolve via ResolveOAuthRedirectURI first.
+	GetLoginRedirectURL(state string, codeChallenge string, redirectURI string) (string, error)
 }
 
-func setCookie(w http.ResponseWriter, value TokenData) error {
+func setCookie(w http.ResponseWriter, r *http.Request, value TokenData) error {
 	cookieVal, err := json.Marshal(value)
 	if err != nil {
 		return err
 	}
-	secure := config.TlsCertPath != ""
+	secure := cookieSecureForRequest(r)
 	encodedValue := b64.StdEncoding.EncodeToString(cookieVal)
 
 	// Check cookie value size to ensure it doesn't exceed the maximum
@@ -191,12 +192,12 @@ func generateCodeChallenge(codeVerifier string) string {
 }
 
 // setPKCEVerifierCookie stores the code verifier in a cookie
-func setPKCEVerifierCookie(w http.ResponseWriter, providerName string, codeVerifier string) {
+func setPKCEVerifierCookie(w http.ResponseWriter, r *http.Request, providerName string, codeVerifier string) {
 	cookieName := pkceCookiePrefix + providerName
 	cookie := http.Cookie{
 		Name:     cookieName,
 		Value:    codeVerifier,
-		Secure:   config.TlsCertPath != "",
+		Secure:   cookieSecureForRequest(r),
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode, // Use Lax instead of Strict to allow cookie on redirect from OAuth provider
 		Path:     "/",
@@ -224,14 +225,14 @@ func getPKCEVerifierCookie(r *http.Request, providerName string) (string, error)
 }
 
 // clearPKCEVerifierCookie removes the PKCE verifier cookie
-func clearPKCEVerifierCookie(w http.ResponseWriter, providerName string) {
+func clearPKCEVerifierCookie(w http.ResponseWriter, r *http.Request, providerName string) {
 	cookieName := pkceCookiePrefix + providerName
 	cookie := http.Cookie{
 		Name:     cookieName,
 		Value:    "",
 		MaxAge:   -1,
 		Path:     "/",
-		Secure:   config.TlsCertPath != "",
+		Secure:   cookieSecureForRequest(r),
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
@@ -258,12 +259,12 @@ func generateState() (string, error) {
 
 // setStateCookie stores the state → providerName mapping in a secure cookie
 // This allows us to validate the state on callback and extract the provider name
-func setStateCookie(w http.ResponseWriter, state string, providerName string) {
+func setStateCookie(w http.ResponseWriter, r *http.Request, state string, providerName string) {
 	cookieName := stateCookiePrefix + state
 	cookie := http.Cookie{
 		Name:     cookieName,
 		Value:    providerName,
-		Secure:   config.TlsCertPath != "",
+		Secure:   cookieSecureForRequest(r),
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode, // Use Lax to allow cookie on redirect from OAuth provider
 		Path:     "/",
@@ -292,14 +293,14 @@ func getStateCookie(r *http.Request, state string) (string, error) {
 }
 
 // clearStateCookie removes the state cookie
-func clearStateCookie(w http.ResponseWriter, state string) {
+func clearStateCookie(w http.ResponseWriter, r *http.Request, state string) {
 	cookieName := stateCookiePrefix + state
 	cookie := http.Cookie{
 		Name:     cookieName,
 		Value:    "",
 		MaxAge:   -1,
 		Path:     "/",
-		Secure:   config.TlsCertPath != "",
+		Secure:   cookieSecureForRequest(r),
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
@@ -313,7 +314,7 @@ func clearSessionCookie(w http.ResponseWriter, r *http.Request) {
 		Value:    "",
 		MaxAge:   -1,
 		Path:     "/",
-		Secure:   config.TlsCertPath != "",
+		Secure:   cookieSecureForRequest(r),
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}

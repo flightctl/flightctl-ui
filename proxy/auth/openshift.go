@@ -8,20 +8,18 @@ import (
 	"strings"
 
 	"github.com/flightctl/flightctl-ui/bridge"
-	"github.com/flightctl/flightctl-ui/config"
 	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
 
 type OpenShiftAuthHandler struct {
-	tlsConfig      *tls.Config
-	client         *osincli.Client
-	internalClient *osincli.Client
-	authURL        string
-	tokenURL       string
-	apiServerURL   string
-	clientId       string
-	providerName   string
+	tlsConfig    *tls.Config
+	authURL      string
+	tokenURL     string
+	apiServerURL string
+	clientId     string
+	scope        string
+	providerName string
 }
 
 type openshiftOAuthDiscovery struct {
@@ -90,15 +88,28 @@ func getOpenShiftAuthHandlerFromSpec(provider *v1beta1.AuthProvider, openshiftSp
 		scope = buildScopeParam(openshiftSpec.Scopes, scope)
 	}
 
-	// Create OAuth2 client config for OpenShift
+	handler := &OpenShiftAuthHandler{
+		tlsConfig:    tlsConfig,
+		authURL:      authURL,
+		tokenURL:     tokenURL,
+		apiServerURL: apiServerURL,
+		clientId:     clientId,
+		scope:        scope,
+		providerName: providerName,
+	}
+
+	return handler, nil
+}
+
+func (o *OpenShiftAuthHandler) openshiftClientForRedirect(redirectURI string) (*osincli.Client, error) {
 	oauthClientConfig := &osincli.ClientConfig{
-		ClientId:                 clientId,
-		AuthorizeUrl:             authURL,
-		TokenUrl:                 tokenURL,
-		RedirectUrl:              config.BaseUiUrl + "/callback",
+		ClientId:                 o.clientId,
+		AuthorizeUrl:             o.authURL,
+		TokenUrl:                 o.tokenURL,
+		RedirectUrl:              redirectURI,
 		ErrorsInStatusCode:       true,
 		SendClientSecretInParams: false,
-		Scope:                    scope,
+		Scope:                    o.scope,
 	}
 
 	client, err := osincli.NewClient(oauthClientConfig)
@@ -107,28 +118,20 @@ func getOpenShiftAuthHandlerFromSpec(provider *v1beta1.AuthProvider, openshiftSp
 	}
 
 	client.Transport = &http.Transport{
-		TLSClientConfig: tlsConfig,
+		TLSClientConfig: o.tlsConfig,
 	}
-
-	handler := &OpenShiftAuthHandler{
-		tlsConfig:      tlsConfig,
-		internalClient: client,
-		client:         client,
-		authURL:        authURL,
-		tokenURL:       tokenURL,
-		apiServerURL:   apiServerURL,
-		clientId:       clientId,
-		providerName:   providerName,
-	}
-
-	return handler, nil
+	return client, nil
 }
 
-func (o *OpenShiftAuthHandler) Logout(token string) (string, error) {
+func (o *OpenShiftAuthHandler) Logout(token string, _ string) (string, error) {
 	// The cookie will be cleared by the proxy
 	return "", nil
 }
 
-func (o *OpenShiftAuthHandler) GetLoginRedirectURL(state string, codeChallenge string) string {
-	return loginRedirect(o.client, state, codeChallenge)
+func (o *OpenShiftAuthHandler) GetLoginRedirectURL(state string, codeChallenge string, redirectURI string) (string, error) {
+	client, err := o.openshiftClientForRedirect(redirectURI)
+	if err != nil {
+		return "", err
+	}
+	return loginRedirect(client, state, codeChallenge), nil
 }
