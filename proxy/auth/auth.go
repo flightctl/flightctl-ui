@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"sort"
+	"strings"
 
 	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
@@ -258,7 +259,7 @@ func handleTokenProviderLogin(w http.ResponseWriter, r *http.Request, tokenProvi
 	}
 
 	tokenData.Provider = providerName
-	respondWithToken(w, tokenData, expires)
+	respondWithToken(w, r, tokenData, expires)
 	return true
 }
 
@@ -282,7 +283,12 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		// Check if this is a token-based auth provider (k8s) - token providers don't use PKCE flow
 		if _, ok := provider.(*TokenAuthProvider); ok {
 			// Token providers don't need a redirect URL - they handle login via POST with token
-			loginUrl := provider.GetLoginRedirectURL("", "")
+			loginUrl, err := provider.GetLoginRedirectURL("", "", "")
+			if err != nil {
+				log.GetLogger().WithError(err).Warnf("Failed to initialize authentication provider %s login flow", providerName)
+				respondWithError(w, http.StatusInternalServerError, "Failed to initialize authentication flow")
+				return
+			}
 			response, err := json.Marshal(RedirectResponse{Url: loginUrl})
 			if err != nil {
 				log.GetLogger().WithError(err).Warn("Failed to marshal response")
@@ -311,13 +317,30 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Store code verifier in cookie for later use during token exchange
-		setPKCEVerifierCookie(w, providerName, codeVerifier)
+		setPKCEVerifierCookie(w, r, providerName, codeVerifier)
 
 		// Store state → providerName mapping in secure cookie for validation on callback
-		setStateCookie(w, state, providerName)
+		setStateCookie(w, r, state, providerName)
+
+		redirectBase := r.URL.Query().Get("redirect_base")
+		redirectURI, err := ResolveOAuthRedirectURI(r, redirectBase)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		setOAuthRedirectURICookie(w, r, state, redirectURI)
 
 		// Generate login URL with random state and PKCE challenge
-		loginUrl := provider.GetLoginRedirectURL(state, codeChallenge)
+		loginUrl, err := provider.GetLoginRedirectURL(state, codeChallenge, redirectURI)
+		if err != nil {
+			log.GetLogger().WithError(err).Warnf("Failed to initialize authentication provider %s login flow", providerName)
+			respondWithError(w, http.StatusInternalServerError, "Failed to initialize authentication flow")
+			return
+		}
+		if loginUrl == "" {
+			respondWithError(w, http.StatusInternalServerError, "Failed to build login URL")
+			return
+		}
 		response, err := json.Marshal(RedirectResponse{Url: loginUrl})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -374,7 +397,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Clear state cookie after validation (success or failure)
-		clearStateCookie(w, state)
+		clearStateCookie(w, r, state)
 
 		// PKCE is required - retrieve code_verifier from cookie
 		if loginParams.CodeVerifier == "" {
@@ -394,7 +417,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 		// Clear PKCE verifier cookie after use (success or failure)
 		// Note: state cookie was already cleared above after validation
-		clearPKCEVerifierCookie(w, providerName)
+		clearPKCEVerifierCookie(w, r, providerName)
 
 		clientId, err := getClientIdFromProviderConfig(providerConfig)
 		if err != nil {
@@ -402,7 +425,20 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		redirectURI := config.BaseUiUrl + "/callback"
+		redirectURI, err := getOAuthRedirectURICookie(r, state)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "Invalid OAuth session")
+			return
+		}
+		if redirectURI == "" {
+			redirectURI, err = ResolveOAuthRedirectURI(r, "")
+			if err != nil {
+				respondWithError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		clearOAuthRedirectURICookie(w, r, state)
+
 		tokenReq := &v1beta1.TokenRequest{
 			GrantType:    v1beta1.AuthorizationCode,
 			ClientId:     clientId,
@@ -418,7 +454,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		tokenData, expiresIn := convertTokenResponseToTokenData(tokenResp, providerConfig)
-		respondWithToken(w, tokenData, expiresIn)
+		respondWithToken(w, r, tokenData, expiresIn)
 	} else {
 		respondWithError(w, http.StatusMethodNotAllowed, "Method not allowed")
 	}
@@ -475,7 +511,7 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	// Convert backend response to TokenData
 	newTokenData, expiresIn := convertTokenResponseToTokenData(tokenResp, providerConfig)
-	respondWithToken(w, newTokenData, expiresIn)
+	respondWithToken(w, r, newTokenData, expiresIn)
 }
 
 // handleOAuthErrorResponse handles OAuth2 error responses from token exchange/refresh
@@ -491,8 +527,8 @@ func handleOAuthErrorResponse(w http.ResponseWriter, tokenResp *v1beta1.TokenRes
 	}
 }
 
-func respondWithToken(w http.ResponseWriter, tokenData TokenData, expires *int64) {
-	err := setCookie(w, tokenData)
+func respondWithToken(w http.ResponseWriter, r *http.Request, tokenData TokenData, expires *int64) {
+	err := setCookie(w, r, tokenData)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -570,6 +606,13 @@ func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	var redirectUrl string
 
+	redirectBase := r.URL.Query().Get("redirect_base")
+	postLogoutBase, resolveErr := ResolveLogoutRedirectBase(r, redirectBase)
+	if resolveErr != nil {
+		log.GetLogger().WithError(resolveErr).Warn("Invalid redirect_base for logout, using BASE_UI_URL")
+		postLogoutBase = strings.TrimSuffix(config.BaseUiUrl, "/")
+	}
+
 	// If we have a provider, call its Logout method
 	if tokenData.Provider != "" {
 		authToken := tokenData.Token
@@ -583,7 +626,7 @@ func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 		provider, _, err := a.getProviderInstance(tokenData.Provider)
 		if err == nil {
-			redirectUrl, err = provider.Logout(authToken)
+			redirectUrl, err = provider.Logout(authToken, postLogoutBase)
 			if err != nil {
 				log.GetLogger().WithError(err).Warn("Failed to logout from provider")
 			}
