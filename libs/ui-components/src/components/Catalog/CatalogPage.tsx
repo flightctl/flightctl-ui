@@ -43,6 +43,7 @@ import CreateCatalogModal from './AddCatalogItemWizard/CreateCatalogModal';
 import WithTooltip from '../common/WithTooltip';
 import ResourceSyncImportStatus from '../ResourceSync/ResourceSyncImportStatus';
 import CatalogLandingPage, { CatalogLandingPageContent, useLandingPagePermissions } from './CatalogLandingPage';
+import PageWithPermissions from '../common/PageWithPermissions';
 
 import './CatalogPage.css';
 
@@ -424,16 +425,19 @@ const catalogPagePermissions = [
   { kind: RESOURCE.DEVICE, verb: VERB.PATCH },
   { kind: RESOURCE.CATALOG, verb: VERB.PATCH },
   { kind: RESOURCE.CATALOG, verb: VERB.DELETE },
+  { kind: RESOURCE.CATALOG_ITEM, verb: VERB.LIST },
+  { kind: RESOURCE.CATALOG, verb: VERB.LIST },
 ];
 
 const CatalogPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { checkPermissions } = usePermissionsContext();
-  const [canEditFleet, canEditDevice, canEditCatalog, canDeleteCatalog] = checkPermissions(catalogPagePermissions);
+  const { checkPermissions, loading } = usePermissionsContext();
+  const [canEditFleet, canEditDevice, canEditCatalog, canDeleteCatalog, canListItems, canListCatalogs] =
+    checkPermissions(catalogPagePermissions);
 
   return (
-    <>
+    <PageWithPermissions allowed={canListItems && canListCatalogs} loading={loading}>
       <ResourceSyncImportStatus type="catalog" />
       <ListPage title={t('Software Catalog')}>
         <CatalogPageContent
@@ -453,7 +457,7 @@ const CatalogPage = () => {
           showCatalogMgmt
         />
       </ListPage>
-    </>
+    </PageWithPermissions>
   );
 };
 
