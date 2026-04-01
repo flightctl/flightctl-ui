@@ -20,16 +20,7 @@ npm run build
 
 ### Container Images (EDM-3308: EL9/EL10 Support)
 
-The UI supports building containers for both Enterprise Linux 9 and 10. Containerfiles are organized by OS in a directory structure similar to the main FlightCtl repository:
-
-```
-packaging/images/el9/Containerfile       # EL9 standalone UI
-packaging/images/el9/Containerfile.ocp   # EL9 OCP plugin UI
-packaging/images/el10/Containerfile      # EL10 standalone UI
-packaging/images/el10/Containerfile.ocp  # EL10 OCP plugin UI
-```
-
-Use the provided Makefile:
+The UI supports building containers for both Enterprise Linux 9 and 10. Use the provided Makefile:
 
 ```shell
 # Build for specific OS (default: el9)

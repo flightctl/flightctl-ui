@@ -22,20 +22,20 @@ OCP_IMAGE_NAME = flightctl-ocp-ui
 help:	## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-build-ui: packaging/images/$(OS)/Containerfile ## Build standalone UI container for current OS (default: el9)
+build-ui: ## Build standalone UI container for current OS (default: el9)
 	@echo "Building standalone UI container for $(OS)/$(RHEL_OS)..."
 	podman build \
-		-f packaging/images/$(OS)/Containerfile \
+		-f Containerfile.$(OS) \
 		-t localhost/$(STANDALONE_IMAGE_NAME):latest \
 		-t localhost/$(STANDALONE_IMAGE_NAME)-$(RHEL_OS):latest \
 		-t $(REGISTRY)/$(REGISTRY_OWNER)/$(STANDALONE_IMAGE_NAME):$(VERSION) \
 		-t $(REGISTRY)/$(REGISTRY_OWNER)/$(STANDALONE_IMAGE_NAME)-$(RHEL_OS):$(VERSION) \
 		.
 
-build-ocp-ui: packaging/images/$(OS)/Containerfile.ocp ## Build OCP UI container for current OS (default: el9)
+build-ocp-ui: ## Build OCP UI container for current OS (default: el9)
 	@echo "Building OCP UI container for $(OS)/$(RHEL_OS)..."
 	podman build \
-		-f packaging/images/$(OS)/Containerfile.ocp \
+		-f Containerfile.ocp.$(OS) \
 		-t localhost/$(OCP_IMAGE_NAME):latest \
 		-t localhost/$(OCP_IMAGE_NAME)-$(RHEL_OS):latest \
 		-t $(REGISTRY)/$(REGISTRY_OWNER)/$(OCP_IMAGE_NAME):$(VERSION) \
