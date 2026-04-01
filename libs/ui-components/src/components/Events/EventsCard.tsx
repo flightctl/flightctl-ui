@@ -130,6 +130,7 @@ const EventsCard = ({ kind, objId, type = Event.type.WARNING }: EventListProps) 
             <MenuToggle
               ref={toggleRef}
               isExpanded
+              data-testid="events-type-filter-toggle"
               onClick={() => {
                 setIsTypeOpen((open) => !open);
               }}
@@ -139,14 +140,20 @@ const EventsCard = ({ kind, objId, type = Event.type.WARNING }: EventListProps) 
           )}
         >
           <SelectList>
-            <SelectOption value="all">{t('All types')}</SelectOption>
-            <SelectOption value={Event.type.NORMAL}>{t('Normal')}</SelectOption>
-            <SelectOption value={Event.type.WARNING}>{t('Warning')}</SelectOption>
+            <SelectOption value="all" data-testid="events-filter-option-all-types">
+              {t('All types')}
+            </SelectOption>
+            <SelectOption value={Event.type.NORMAL} data-testid="events-filter-option-normal">
+              {t('Normal')}
+            </SelectOption>
+            <SelectOption value={Event.type.WARNING} data-testid="events-filter-option-warning">
+              {t('Warning')}
+            </SelectOption>
           </SelectList>
         </Select>
       </CardBody>
       <Divider />
-      <CardBody isFilled className="fctl-events-container">
+      <CardBody isFilled className="fctl-events-container" data-testid="device-events-list">
         {content}
       </CardBody>
     </Card>

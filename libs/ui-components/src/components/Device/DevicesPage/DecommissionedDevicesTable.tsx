@@ -124,6 +124,7 @@ const DecommissionedDevicesTable = ({
         emptyData={devices.length === 0}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
+        data-testid="decommissioned-devices-table"
       >
         <Tbody>
           {devices.map((device, index) => (

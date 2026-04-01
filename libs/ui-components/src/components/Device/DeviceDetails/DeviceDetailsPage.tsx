@@ -152,11 +152,13 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
       resourceTypeLabel={t('Devices')}
       nav={
         <TabsNav aria-label="Device details tabs" tabKeys={['details', 'catalog', 'yaml', 'terminal', 'events']}>
-          <Tab eventKey="details" title={t('Details')} />
-          {isEnrolled && <Tab eventKey="catalog" title={t('Catalog')} />}
-          <Tab eventKey="yaml" title={t('YAML')} />
-          {!hideTerminal && canOpenTerminal && <Tab eventKey="terminal" title={t('Terminal')} />}
-          <Tab eventKey="events" title={t('Events')} />
+          <Tab eventKey="details" title={t('Details')} data-testid="device-details-tab-details" />
+          {isEnrolled && <Tab eventKey="catalog" title={t('Catalog')} data-testid="device-details-tab-catalog" />}
+          <Tab eventKey="yaml" title={t('YAML')} data-testid="device-details-tab-yaml" />
+          {!hideTerminal && canOpenTerminal && (
+            <Tab eventKey="terminal" title={t('Terminal')} data-testid="device-details-tab-terminal" />
+          )}
+          <Tab eventKey="events" title={t('Events')} data-testid="device-details-tab-events" />
         </TabsNav>
       }
       actions={

@@ -15,6 +15,7 @@ type StatusLabelProps = {
   level: StatusLevel;
   customIcon?: React.ComponentClass<SVGIconProps>;
   customColor?: string;
+  'data-testid'?: string;
 };
 
 export const StatusDisplayContent = ({
@@ -24,6 +25,7 @@ export const StatusDisplayContent = ({
   level,
   customIcon,
   customColor,
+  'data-testid': dataTestId,
 }: StatusLabelProps) => {
   const overrideStatus = level === 'unknown' || (level === 'custom' && customColor);
   const IconComponent = customIcon || getDefaultStatusIcon(level);
@@ -47,7 +49,7 @@ export const StatusDisplayContent = ({
         className="fctl-status-display-content__popover"
         hasAutoWidth={false}
       >
-        <Button variant="link" isInline icon={icon}>
+        <Button variant="link" isInline icon={icon} data-testid={dataTestId}>
           {label}
         </Button>
       </Popover>
@@ -55,7 +57,7 @@ export const StatusDisplayContent = ({
   }
 
   return (
-    <Flex className="ftcl_status-label">
+    <Flex className="ftcl_status-label" data-testid={dataTestId}>
       <FlexItem>{icon}</FlexItem>
       <FlexItem>{label}</FlexItem>
     </Flex>

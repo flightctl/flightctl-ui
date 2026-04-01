@@ -96,6 +96,7 @@ const RichValidationTextField = React.forwardRef(
               id={fieldId}
               ref={ref}
               isRequired={isRequired}
+              data-testid={fieldId}
               aria-describedby={`${fieldId}-helper`}
               onChange={async (event, val) => {
                 !popoverOpen && setPopoverOpen(true);
@@ -143,6 +144,7 @@ const RichValidationTextField = React.forwardRef(
                 }
                 variant="control"
                 aria-label="Validation"
+                data-testid={`${fieldId}-validation-button`}
               />
             </Popover>
           </InputGroupItem>
@@ -162,7 +164,7 @@ const RichValidationTextFieldWrapper = React.forwardRef(
     if (isDisabled) {
       return (
         <FormGroup label={rest?.['aria-label']} isRequired={rest.isRequired}>
-          <TextInput value={field.value} {...rest} isDisabled />
+          <TextInput value={field.value} {...rest} isDisabled data-testid={`rich-validation-field-${fieldName}`} />
         </FormGroup>
       );
     }
