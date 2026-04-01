@@ -85,7 +85,7 @@ jobs:
             org.flightctl.flightctl-ui.github.ref_name=${{ github.ref_name }}
           extra-args: |
             --ulimit nofile=10000:10000
-          containerfiles: packaging/images/${{ matrix.os }}/Containerfile
+          containerfiles: Containerfile.${{ matrix.os }}
           context: .
 
       - name: Validate FIPS
@@ -147,7 +147,7 @@ jobs:
             org.flightctl.flightctl-ui.github.ref_name=${{ github.ref_name }}
           extra-args: |
             --ulimit nofile=10000:10000
-          containerfiles: packaging/images/${{ matrix.os }}/Containerfile.ocp
+          containerfiles: Containerfile.ocp.${{ matrix.os }}
           context: .
 
       - name: Validate FIPS
