@@ -6,7 +6,6 @@ import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useTablePagination } from '../../../hooks/useTablePagination';
-import { isDeviceEnrolled } from '../../../utils/devices';
 import { useDevices } from './useDevices';
 import { useDeviceBackendFilters } from './useDeviceBackendFilters';
 
@@ -16,10 +15,6 @@ import { RESOURCE, VERB } from '../../../types/rbac';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import EnrolledDevicesTable from './EnrolledDevicesTable';
 import DecommissionedDevicesTable from './DecommissionedDevicesTable';
-
-const removeDecommissionedDevices = (data: DeviceList) => {
-  data.items = data.items.filter(isDeviceEnrolled);
-};
 
 const DevicesPage = ({ canListER }: { canListER: boolean }) => {
   const { t } = useTranslation();
@@ -37,9 +32,7 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
   } = useDeviceBackendFilters();
   const [onlyDecommissioned, setOnlyDecommissioned] = React.useState<boolean>(false);
 
-  const { currentPage, setCurrentPage, onPageFetched, nextContinue, itemCount } = useTablePagination<DeviceList>(
-    onlyDecommissioned ? undefined : removeDecommissionedDevices,
-  );
+  const { currentPage, setCurrentPage, onPageFetched, nextContinue, itemCount } = useTablePagination<DeviceList>();
 
   const {
     devices: data,
