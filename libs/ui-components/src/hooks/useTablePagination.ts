@@ -11,9 +11,7 @@ export type PaginationDetails<T extends ApiList> = {
   itemCount: number;
 };
 
-type ProcessData<T> = (data: T) => void;
-
-export const useTablePagination = <T extends ApiList>(processor?: ProcessData<T>): PaginationDetails<T> => {
+export const useTablePagination = <T extends ApiList>(): PaginationDetails<T> => {
   const [currentPage, setCurrentPage] = React.useState<number>(1);
   const [continueTokens, setContinueTokens] = React.useState<string[]>([]);
   const [itemCount, setItemCount] = React.useState<number>(0);
@@ -22,10 +20,6 @@ export const useTablePagination = <T extends ApiList>(processor?: ProcessData<T>
 
   const onPageFetched = React.useCallback(
     (data: T) => {
-      if (processor) {
-        // Can mutate the data
-        processor(data);
-      }
       const prevItems = (currentPage - 1) * PAGE_SIZE;
       setItemCount(prevItems + (data?.items.length || 0) + (data.metadata.remainingItemCount || 0));
 
@@ -43,7 +37,7 @@ export const useTablePagination = <T extends ApiList>(processor?: ProcessData<T>
         );
       }
     },
-    [setContinueTokens, continueTokens, setItemCount, currentPage, processor],
+    [setContinueTokens, continueTokens, setItemCount, currentPage],
   );
 
   return { onPageFetched, currentPage, setCurrentPage, nextContinue, itemCount };
