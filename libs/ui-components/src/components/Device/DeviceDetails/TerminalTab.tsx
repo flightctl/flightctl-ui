@@ -90,7 +90,7 @@ const TerminalTab = ({ device }: TerminalTabProps) => {
 
   if (isConnecting) {
     return (
-      <Bullseye>
+      <Bullseye data-testid="device-terminal-loading">
         <Spinner />
       </Bullseye>
     );
@@ -109,7 +109,11 @@ const TerminalTab = ({ device }: TerminalTabProps) => {
   }
 
   return (
-    <div ref={containerRef} style={{ height: containerHeight, display: 'flex', flexDirection: 'column' }}>
+    <div
+      ref={containerRef}
+      data-testid="device-terminal-panel"
+      style={{ height: containerHeight, display: 'flex', flexDirection: 'column' }}
+    >
       <Stack hasGutter style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         {isClosed && (
           <Alert

@@ -120,6 +120,7 @@ const CreateResourceSyncsForm = ({
             variant="link"
             icon={<PlusCircleIcon />}
             iconPosition="left"
+            data-testid="repository-add-resource-sync-button"
             onClick={() =>
               arrayHelpers.push({
                 name: '',

@@ -8,7 +8,13 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { StatusDisplayContent } from './StatusDisplay';
 import { SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
 
-const RepositoryStatus = ({ repository }: { repository: Repository }) => {
+const RepositoryStatus = ({
+  repository,
+  'data-testid': dataTestId,
+}: {
+  repository: Repository;
+  'data-testid'?: string;
+}) => {
   const statusInfo = getRepositorySyncStatus(repository);
   const statusType = statusInfo.status;
   const { t } = useTranslation();
@@ -44,6 +50,7 @@ const RepositoryStatus = ({ repository }: { repository: Repository }) => {
       level={status}
       customIcon={customIcon}
       message={statusInfo.message}
+      data-testid={dataTestId}
     />
   );
 };

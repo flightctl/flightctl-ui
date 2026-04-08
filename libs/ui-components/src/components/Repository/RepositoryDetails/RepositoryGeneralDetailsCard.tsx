@@ -84,7 +84,11 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
             <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
             <DescriptionListDescription>
               {' '}
-              {repoDetails ? <RepositoryStatus repository={repoDetails} /> : '-'}
+              {repoDetails ? (
+                <RepositoryStatus repository={repoDetails} data-testid="repository-details-sync-status" />
+              ) : (
+                '-'
+              )}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
