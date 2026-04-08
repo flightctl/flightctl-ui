@@ -504,6 +504,7 @@
   "The current YAML is invalid. Fix the errors, or click ʼReloadʼ to discard your changes.": "The current YAML is invalid. Fix the errors, or click ʼReloadʼ to discard your changes.",
   "This object has been updated.": "This object has been updated.",
   "Click reload to see the new version.": "Click reload to see the new version.",
+  "Refreshing details": "Refreshing details",
   "Copy to clipboard": "Copy to clipboard",
   "Content copied to clipboard": "Content copied to clipboard",
   "Download yaml": "Download yaml",

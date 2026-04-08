@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, AlertActionCloseButton, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, AlertActionCloseButton, Bullseye, Spinner, Stack, StackItem } from '@patternfly/react-core';
 import { CodeEditorProps as PfCodeEditorProps } from '@patternfly/react-code-editor';
 import { dump, load } from 'js-yaml';
 import { compare } from 'fast-json-patch';
@@ -7,6 +7,7 @@ import type * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { AuthProvider, Device, Fleet, PatchRequest, Repository, ResourceKind } from '@flightctl/types';
 import { ImageBuild } from '@flightctl/types/imagebuilder';
+import { showSpinnerBriefly } from '../../../utils/time';
 import { fromAPILabel } from '../../../utils/labels';
 import { getLabelPatches } from '../../../utils/patch';
 import { getErrorMessage, isResourceVersionTestFailure } from '../../../utils/error';
@@ -107,6 +108,8 @@ const createPatchList = (original: FlightCtlYamlResource, updated: FlightCtlYaml
   // To prevent that, we'll use a fallback that patches the top-level mutable fields that were modified.
   return getFallbackPatches(original, updated);
 };
+
+const YAML_TAB_REFETCH_DELAY_MS = 500;
 
 const YamlEditor = <R extends FlightCtlYamlResource>({
   apiObj,
@@ -257,6 +260,39 @@ const YamlEditor = <R extends FlightCtlYamlResource>({
       )}
     </div>
   );
+};
+
+/**
+ * Use YamlEditorLoader instead of the default YamlEditor component to trigger a refetch of the resource before rendering the editor.
+ *
+ * @param props - YamlEditor component props.
+ * @returns A spinner while the resource is being refetched, then the YamlEditor component.
+ */
+export const YamlEditorLoader = <R extends FlightCtlYamlResource>(props: YamlEditorProps<R>) => {
+  const { t } = useTranslation();
+  const [initialLoad, setInitialLoad] = React.useState(false);
+  const { refetch } = props;
+
+  React.useEffect(() => {
+    const forceRefresh = async () => {
+      setInitialLoad(false);
+      // Wait before triggering the refetch to give time for the resource to be updated.
+      await showSpinnerBriefly(YAML_TAB_REFETCH_DELAY_MS);
+      refetch();
+      setInitialLoad(true);
+    };
+    void forceRefresh();
+  }, [refetch]);
+
+  if (!initialLoad) {
+    return (
+      <Bullseye>
+        <Spinner size="lg" aria-label={t('Refreshing details')} />
+      </Bullseye>
+    );
+  }
+
+  return <YamlEditor {...props} />;
 };
 
 export default YamlEditor;
