@@ -276,6 +276,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 		provider, _, err = a.getProviderInstance(providerName)
 		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to set up authentication provider")
 			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid authentication provider: %s", providerName))
 			return
 		}
@@ -303,6 +304,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		// PKCE is required - fail if generation fails
 		codeVerifier, err := generateCodeVerifier()
 		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to generate code verifier")
 			respondWithError(w, http.StatusInternalServerError, "Failed to initialize authentication flow")
 			return
 		}
@@ -312,6 +314,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		// Generate random state for CSRF protection
 		state, err := generateState()
 		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to generate state")
 			respondWithError(w, http.StatusInternalServerError, "Failed to initialize authentication flow")
 			return
 		}
@@ -325,6 +328,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		redirectBase := r.URL.Query().Get("redirect_base")
 		redirectURI, err := ResolveOAuthRedirectURI(r, redirectBase)
 		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to resolve OAuth redirect URI")
 			respondWithError(w, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -343,6 +347,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		response, err := json.Marshal(RedirectResponse{Url: loginUrl})
 		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to marshal response")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -378,6 +383,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		var providerConfig *v1beta1.AuthProvider
 		provider, providerConfig, err = a.getProviderInstance(providerName)
 		if err != nil {
+			log.GetLogger().WithError(err).Warnf("Failed to set up authentication provider %s", providerName)
 			respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid authentication provider: %s", providerName))
 			return
 		}
@@ -392,6 +398,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		loginParams := LoginParameters{}
 		err = json.Unmarshal(body, &loginParams)
 		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to unmarshal login parameters from JSON")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -421,18 +428,21 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 		clientId, err := getClientIdFromProviderConfig(providerConfig)
 		if err != nil {
+			log.GetLogger().WithError(err).Warnf("Failed to get configuration details from provider config for provider %s", providerName)
 			respondWithError(w, http.StatusInternalServerError, "Failed to obtain the configuration details for provider")
 			return
 		}
 
 		redirectURI, err := getOAuthRedirectURICookie(r, state)
 		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to get OAuth redirect URI from cookie")
 			respondWithError(w, http.StatusBadRequest, "Invalid OAuth session")
 			return
 		}
 		if redirectURI == "" {
 			redirectURI, err = ResolveOAuthRedirectURI(r, "")
 			if err != nil {
+				log.GetLogger().WithError(err).Warn("Failed to resolve OAuth redirect URI")
 				respondWithError(w, http.StatusBadRequest, err.Error())
 				return
 			}
@@ -449,6 +459,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 		tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, providerConfig, tokenReq)
 		if err != nil {
+			log.GetLogger().WithError(err).Warn("Failed to exchange token with API server")
 			handleOAuthErrorResponse(w, tokenResp, "Failed to obtain login authorization code")
 			return
 		}
@@ -463,6 +474,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	tokenData, err := ParseSessionCookie(r)
 	if err != nil {
+		log.GetLogger().WithError(err).Warn("Failed to parse session cookie from request")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -477,6 +489,7 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var providerConfig *v1beta1.AuthProvider
 	provider, providerConfig, err := a.getProviderInstance(tokenData.Provider)
 	if err != nil {
+		log.GetLogger().WithError(err).Warnf("Failed to set up authentication for provider %s", tokenData.Provider)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -493,6 +506,7 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	clientId, err := getClientIdFromProviderConfig(providerConfig)
 	if err != nil {
+		log.GetLogger().WithError(err).Warnf("Failed to get configuration details from provider config for provider %s", tokenData.Provider)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -505,6 +519,7 @@ func (a AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	tokenResp, err := exchangeTokenWithApiServer(a.apiTlsConfig, providerConfig, tokenReq)
 	if err != nil {
+		log.GetLogger().WithError(err).Warn("Failed to exchange token with API server")
 		handleOAuthErrorResponse(w, tokenResp, "Failed to obtain new access token")
 		return
 	}
@@ -566,6 +581,8 @@ func (a AuthHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	// Route ALL providers to API server userinfo endpoint
 	username, err := getUserInfoFromApiServer(a.apiTlsConfig, token)
 	if err != nil {
+		log.GetLogger().WithError(err).Warn("Failed to get user info from API server")
+
 		// If user info retrieval fails (including timeouts), treat as authentication failure
 		clearSessionCookie(w, r)
 
