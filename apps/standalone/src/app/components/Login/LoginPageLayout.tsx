@@ -1,24 +1,20 @@
 import * as React from 'react';
 import { Bullseye, Card, CardBody, CardTitle, Stack, StackItem, Title } from '@patternfly/react-core';
 
-import fcLogo from '@fctl-assets/bgimages/flight-control-logo.svg';
-import rhemLogo from '@fctl-assets/bgimages/RHEM-logo.svg';
+import { useBrandLogo } from '../../hooks/useBrandLogo';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
-import { useAppContext } from '@flightctl/ui-components/src/hooks/useAppContext';
 
 const LoginPageLayout = ({ children }: React.PropsWithChildren) => {
   const { t } = useTranslation();
-  const { settings } = useAppContext();
+  const { logo, altText } = useBrandLogo();
+
   return (
     <Bullseye>
       <Card isLarge style={{ width: '400px', maxWidth: '90vw' }}>
         <CardBody>
           <Stack hasGutter>
             <StackItem>
-              <img
-                src={settings.isRHEM ? rhemLogo : fcLogo}
-                alt={settings.isRHEM ? 'Red Hat Edge Manager' : 'Flight Control'}
-              />
+              <img src={logo} alt={altText} />
             </StackItem>
 
             <StackItem>
