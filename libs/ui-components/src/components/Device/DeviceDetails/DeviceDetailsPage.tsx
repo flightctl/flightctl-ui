@@ -23,7 +23,12 @@ import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import DeviceDetailsTab from './DeviceDetailsTab';
 import TerminalTab from './TerminalTab';
-import { getEditDisabledReason, getResumeDisabledReason, isDeviceEnrolled } from '../../../utils/devices';
+import {
+  getEditDisabledReason,
+  getResumeDisabledReason,
+  hasActiveConsoleSessions,
+  isDeviceEnrolled,
+} from '../../../utils/devices';
 import TabsNav from '../../TabsNav/TabsNav';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { usePermissionsContext } from '../../common/PermissionsContext';
@@ -211,6 +216,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
                 refetch={refetch}
                 disabledEditReason={editDisabledReason}
                 canEdit={hasEditPermissions}
+                shouldFetchInitially={hasActiveConsoleSessions(device)}
               />
             }
           />
