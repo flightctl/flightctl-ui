@@ -173,6 +173,7 @@ const EnrolledDevicesTable = ({
             id="enrolled-devices-switch"
             label={<span className="fctl-switch__label">{t('Show decommissioned devices')}</span>}
             isChecked={false}
+            aria-checked={false}
             onChange={() => {
               clearAllFilters();
               setOnlyDecommissioned(true);
