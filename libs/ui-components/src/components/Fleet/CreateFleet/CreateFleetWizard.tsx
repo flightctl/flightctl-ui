@@ -35,6 +35,7 @@ import ErrorBoundary from '../../common/ErrorBoundary';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { useAppContext } from '../../../hooks/useAppContext';
+import ResourceLink from '../../common/ResourceLink';
 
 const orderedIds = [generalInfoStepId, deviceTemplateStepId, updatePolicyStepId, reviewStepId];
 
@@ -190,7 +191,7 @@ const CreateFleetWizard = () => {
           </BreadcrumbItem>
           {fleetId && (
             <BreadcrumbItem>
-              <Link to={{ route: ROUTE.FLEET_DETAILS, postfix: fleetId }}>{fleetId}</Link>
+              <ResourceLink id={fleetId} routeLink={ROUTE.FLEET_DETAILS} />
             </BreadcrumbItem>
           )}
           <BreadcrumbItem isActive>{title}</BreadcrumbItem>
