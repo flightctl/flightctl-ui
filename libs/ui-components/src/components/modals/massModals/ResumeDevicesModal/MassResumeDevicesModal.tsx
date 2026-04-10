@@ -119,7 +119,7 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
         const deviceResult = await get<DeviceList>(queryEndpoint);
         await showSpinnerBriefly(REFRESH_COUNT_DELAY);
         setDeviceCountNum(getApiListCount(deviceResult) || 0);
-      } catch (error) {
+      } catch {
         await showSpinnerBriefly(REFRESH_COUNT_DELAY);
         setCountError(t('Failed to obtain the number of matching devices'));
       } finally {

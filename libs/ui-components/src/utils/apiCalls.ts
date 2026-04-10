@@ -5,10 +5,10 @@ export const getErrorMsgFromApiResponse = async (response: Response): Promise<st
     try {
       const json = JSON.parse(msg) as { message: string };
       errorText = json.message;
-    } catch (e) {
+    } catch {
       errorText = msg;
     }
-  } catch (e) {
+  } catch {
     //ignore
   }
   return `Error ${response.status}: ${response.statusText}${errorText ? `: ${errorText}` : ''}`;
@@ -20,10 +20,10 @@ export const getErrorMsgFromAlertsApiResponse = async (response: Response): Prom
     const msg = await response.text();
     try {
       errorText = JSON.parse(msg) as string;
-    } catch (e) {
+    } catch {
       errorText = msg;
     }
-  } catch (e) {
+  } catch {
     //ignore
   }
   return `Error ${response.status}: ${response.statusText}${errorText ? `: ${errorText}` : ''}`;

@@ -111,7 +111,7 @@ export const useDeviceSpecSystemInfo = (
         });
       }
     });
-  } catch (e) {
+  } catch {
     // eslint-disable-next-line no-console
     console.warn('customInfo is not an object:', systemInfo.customInfo);
   }
