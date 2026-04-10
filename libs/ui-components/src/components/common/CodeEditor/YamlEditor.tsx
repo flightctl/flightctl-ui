@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, AlertActionCloseButton, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, AlertActionCloseButton, Bullseye, Spinner, Stack, StackItem } from '@patternfly/react-core';
 import { CodeEditorProps as PfCodeEditorProps } from '@patternfly/react-code-editor';
 import { dump, load } from 'js-yaml';
 import { compare } from 'fast-json-patch';
@@ -7,6 +7,7 @@ import type * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { AuthProvider, Device, Fleet, PatchRequest, Repository, ResourceKind } from '@flightctl/types';
 import { ImageBuild } from '@flightctl/types/imagebuilder';
+import { showSpinnerBriefly } from '../../../utils/time';
 import { fromAPILabel } from '../../../utils/labels';
 import { getLabelPatches } from '../../../utils/patch';
 import { getErrorMessage, isResourceVersionTestFailure } from '../../../utils/error';
@@ -107,6 +108,9 @@ const createPatchList = (original: FlightCtlYamlResource, updated: FlightCtlYaml
   // To prevent that, we'll use a fallback that patches the top-level mutable fields that were modified.
   return getFallbackPatches(original, updated);
 };
+
+const YAML_TAB_REFETCH_DELAY_BEFORE_MS = 400;
+const YAML_TAB_REFETCH_DELAY_AFTER_MS = 150;
 
 const YamlEditor = <R extends FlightCtlYamlResource>({
   apiObj,
@@ -257,6 +261,63 @@ const YamlEditor = <R extends FlightCtlYamlResource>({
       )}
     </div>
   );
+};
+
+/**
+ * Use YamlEditorLoader instead of the default YamlEditor component to trigger a conditional fetch of the resource before rendering the editor.
+ * The refetch is performed only if `shouldFetchInitially` returns true.
+ *
+ * @param props - YamlEditor component props plus `shouldFetchInitially`.
+ * @returns A spinner while the resource is being refetched, then the YamlEditor component.
+ */
+export const YamlEditorLoader = <R extends FlightCtlYamlResource>(
+  props: YamlEditorProps<R> & {
+    shouldFetchInitially: boolean;
+  },
+) => {
+  const { t } = useTranslation();
+  const { refetch, shouldFetchInitially, ...yamlEditorProps } = props;
+
+  const shouldFetchInitiallyRef = React.useRef(shouldFetchInitially);
+  shouldFetchInitiallyRef.current = shouldFetchInitially;
+
+  const [isLoaded, setIsLoaded] = React.useState(() => !props.shouldFetchInitially);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const shouldFetch = shouldFetchInitiallyRef.current;
+    if (shouldFetch) {
+      const doRefetch = async () => {
+        setIsLoaded(false);
+        await showSpinnerBriefly(YAML_TAB_REFETCH_DELAY_BEFORE_MS);
+        if (cancelled) {
+          return;
+        }
+        refetch();
+        // Give some time for refetch to complete before marking the editor as loaded
+        await showSpinnerBriefly(YAML_TAB_REFETCH_DELAY_AFTER_MS);
+        setIsLoaded(true);
+      };
+      void doRefetch();
+    } else {
+      setIsLoaded(true);
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [refetch]);
+
+  if (!isLoaded) {
+    return (
+      <Bullseye>
+        <Spinner size="lg" aria-label={t('Refreshing details')} />
+      </Bullseye>
+    );
+  }
+
+  return <YamlEditor {...yamlEditorProps} refetch={refetch} />;
 };
 
 export default YamlEditor;
