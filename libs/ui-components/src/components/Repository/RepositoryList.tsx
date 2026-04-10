@@ -244,6 +244,7 @@ const RepositoryTable = () => {
           onClose={() => setIsMassDeleteModalOpen(false)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
+            setAllSelected(false);
             refetch();
           }}
           repositories={filteredData.filter(isRowSelected)}

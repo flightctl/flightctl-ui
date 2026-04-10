@@ -295,6 +295,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
           resources={filteredData.filter(isRowSelected)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
+            setAllSelected(false);
             refetch();
           }}
         />
