@@ -432,7 +432,7 @@ const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: bool
         if (invalidChannels.length > 0) {
           return testContext.createError({
             message: t(
-              'Channel names must be valid DNS subdomain names (lowercase alphanumeric, dashes, dots). Invalid: {{ channels }}',
+              'Channel names must be valid DNS subdomain names (lowercase alphanumeric, hyphens, dots). Invalid: {{ channels }}',
               { channels: invalidChannels.join(', ') },
             ),
           });
