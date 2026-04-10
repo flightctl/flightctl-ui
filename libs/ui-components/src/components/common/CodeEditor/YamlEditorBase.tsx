@@ -108,6 +108,7 @@ const YamlEditorBase = ({
           emptyStateTitle={t('Start editing')}
           language={Language.yaml}
           code={code}
+          height="60vh"
           onEditorDidMount={(editor: monacoEditor.editor.IStandaloneCodeEditor, instance: Monaco) => {
             setEditorMounted(true);
             defineConsoleThemes(instance);
