@@ -29,7 +29,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
         labels: fromAPILabel(labels, { isDefault: true }).filter((label) => label.key !== 'alias'),
         deviceAlias: labels.alias || '',
       }}
-      validationSchema={deviceApprovalValidationSchema(t, { isSingleDevice: true })}
+      validationSchema={deviceApprovalValidationSchema(t, { massDeviceCount: 0 })}
       onSubmit={async ({ labels, deviceAlias }) => {
         setError(undefined);
         const deviceLabels: EnrollmentRequestApproval['labels'] = toAPILabel(labels);

@@ -1162,15 +1162,43 @@ export const deviceSystemdUnitsValidationSchema = (t: TFunction) =>
     systemdUnits: systemdUnitListValidationSchema(t),
   });
 
+const getExpandedAlias = (alias: string | undefined, massDeviceCount: number) => {
+  if (!alias) {
+    return '';
+  }
+  return alias.replace(/{{n+}}/g, `${massDeviceCount}`);
+};
+
 const forbiddenDeviceLabels = ['alias'];
-export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDevice: boolean }) =>
+export const deviceApprovalValidationSchema = (t: TFunction, { massDeviceCount }: { massDeviceCount: number }) =>
   Yup.object({
-    deviceAlias: conf.isSingleDevice
-      ? validKubernetesLabelValue(t, { isRequired: false, fieldName: t('Alias') })
-      : Yup.string().matches(
-          /{{n}}/,
-          t('Device aliases must be unique. Add a number to the template to generate unique aliases.'),
-        ),
+    deviceAlias:
+      massDeviceCount === 0
+        ? validKubernetesLabelValue(t, { isRequired: false, fieldName: t('Alias') })
+        : Yup.string()
+            .test(
+              'massApprovalAliasLength',
+              t('Device aliases must be at most {{maxCharacters}} characters long.', {
+                maxCharacters: K8S_LABEL_VALUE_MAX_LENGTH,
+              }),
+              (value: string | undefined) => {
+                // When a number template is present, we want to check the length of the longest alias in the series.
+                const maxLengthAlias = getExpandedAlias(value, massDeviceCount);
+                return maxLengthAlias.length <= K8S_LABEL_VALUE_MAX_LENGTH;
+              },
+            )
+            .test(
+              'massApprovalAliasFormat',
+              t(
+                'Device aliases must start and end with a letter or number, contain only letters, numbers, dashes (-), dots (.), and underscores (_).',
+              ),
+              (value: string | undefined) => {
+                // Validate format regardless of alias length, since length checks are done in the previous test.
+                const maxLengthAlias = getExpandedAlias(value, 1);
+                const invalidLabel = getInvalidKubernetesLabels([{ key: 'alias', value: maxLengthAlias }]);
+                return invalidLabel.length === 0;
+              },
+            ),
     labels: validLabelsSchema(t, forbiddenDeviceLabels),
   });
 
