@@ -1443,6 +1443,7 @@
   "HTTP service": "HTTP service",
   "OCI registry": "OCI registry",
   "Git repository": "Git repository",
+  "Target revision must start with a letter or number and may only contain letters, numbers, dots (.), hyphens (-), underscores (_), and forward slashes (/).": "Target revision must start with a letter or number and may only contain letters, numbers, dots (.), hyphens (-), underscores (_), and forward slashes (/).",
   "Target revision is required.": "Target revision is required.",
   "Must be an absolute path.": "Must be an absolute path.",
   "Value must not exceed {{ maxSize }} MiB when encoded.": "Value must not exceed {{ maxSize }} MiB when encoded.",

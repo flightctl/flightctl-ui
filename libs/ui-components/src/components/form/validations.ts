@@ -55,8 +55,9 @@ const OCI_IMAGE_FULL_REGEXP = /^(?![./_])[a-zA-Z0-9.\-\/:@_+]*$/;
 // Accepts all characters from the above regex, but it rejects leading dot, slash, or underscore
 const OCI_IMAGE_ALLOWED_CHARS_REGEXP = /^[a-zA-Z0-9.\-\/:@_+]*$/;
 const GENERIC_NAME_REGEXP = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
-
 const APPLICATION_VAR_NAME_REGEXP = /^[a-zA-Z_]+[a-zA-Z0-9_]*$/;
+
+export const GIT_TARGET_REVISION_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9.\/_-])*$/;
 
 const TEMPLATE_VARIABLES_REGEXP = /{{.+?}}/g;
 // Special characters allowed: "dot", "pipe", "spaces" "quote", "backward slash", "underscore", "forward slash", "hyphen"

@@ -20,7 +20,12 @@ import {
 import { RepositoryFormValues, ResourceSyncFormValue } from './types';
 import { getErrorMessage } from '../../../utils/error';
 import { appendJSONPatch } from '../../../utils/patch';
-import { MAX_TARGET_REVISION_LENGTH, maxLengthString, validKubernetesDnsSubdomain } from '../../form/validations';
+import {
+  GIT_TARGET_REVISION_REGEX,
+  MAX_TARGET_REVISION_LENGTH,
+  maxLengthString,
+  validKubernetesDnsSubdomain,
+} from '../../form/validations';
 
 const MAX_PATH_LENGTH = 2048;
 const gitRepoUrlRegex = new RegExp(
@@ -656,7 +661,14 @@ export const repoSyncSchema = (t: TFunction, values: ResourceSyncFormValue[]) =>
         targetRevision: maxLengthString(t, {
           maxLength: MAX_TARGET_REVISION_LENGTH,
           fieldName: t('Target revision'),
-        }).defined(t('Target revision is required.')),
+        })
+          .matches(
+            GIT_TARGET_REVISION_REGEX,
+            t(
+              'Target revision must start with a letter or number and may only contain letters, numbers, dots (.), hyphens (-), underscores (_), and forward slashes (/).',
+            ),
+          )
+          .defined(t('Target revision is required.')),
         path: maxLengthString(t, { maxLength: MAX_PATH_LENGTH, fieldName: t('Path') })
           .matches(pathRegex, t('Must be an absolute path.'))
           .defined(t('Path is required.')),
