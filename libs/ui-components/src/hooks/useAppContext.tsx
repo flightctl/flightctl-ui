@@ -55,7 +55,6 @@ export type PromptFC = React.FC<{ message: string }>;
 export enum FlightCtlApp {
   STANDALONE = 'standalone',
   OCP = 'ocp',
-  AAP = 'aap',
 }
 
 export type AppContextProps = {
