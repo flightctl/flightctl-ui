@@ -109,7 +109,7 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
   const [showOrganizationModal, setShowOrganizationModal] = React.useState(false);
   const [showLoginCommandModal, setShowLoginCommandModal] = React.useState(false);
   const showOrganizationSelection = availableOrganizations.length > 1;
-  const currentOrgDisplayName = currentOrganization?.spec?.displayName || currentOrganization?.metadata?.name || '';
+  const currentOrgDisplayName = currentOrganization?.label || currentOrganization?.id;
 
   return (
     <>
