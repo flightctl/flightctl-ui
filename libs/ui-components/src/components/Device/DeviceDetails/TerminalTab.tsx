@@ -83,7 +83,7 @@ const TerminalTab = ({ device }: TerminalTabProps) => {
 
   const { sendMessage, isClosed, error, reconnect, isConnecting } = useWebSocket(
     device.metadata.name || '',
-    currentOrganization?.metadata?.name || undefined,
+    currentOrganization?.id || undefined,
     onMsgReceived,
     wsMeta,
   );
