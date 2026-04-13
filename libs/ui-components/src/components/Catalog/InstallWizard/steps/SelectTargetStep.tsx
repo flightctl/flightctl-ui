@@ -73,54 +73,52 @@ const DeviceTarget = () => {
   );
 
   return (
-    <FlightCtlForm>
-      <Stack hasGutter>
-        <StackItem>
-          <Title headingLevel="h3">{t('Select device')}</Title>
-        </StackItem>
-        <StackItem>
-          <Toolbar inset={{ default: 'insetNone' }}>
-            <ToolbarContent>
-              <ToolbarItem>
-                <TableTextSearch
-                  value={deviceNameFilter}
-                  setValue={setDeviceNameFilter}
-                  placeholder={t('Search by name or alias')}
-                />
-              </ToolbarItem>
-              <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
-                <TablePagination pagination={devicePagination} isUpdating={devicesUpdating} />
-              </ToolbarItem>
-            </ToolbarContent>
-          </Toolbar>
-          <Table
-            aria-label={t('Enrolled devices table')}
-            loading={devicesLoading || devicesUpdating}
-            columns={deviceColumns}
-            hasFilters={!!deviceNameFilter}
-            emptyData={devices.length === 0}
-            clearFilters={() => setDeviceNameFilter('')}
-            variant="compact"
-            singleSelect
-          >
-            <Tbody>
-              {devices.map((device, index) => (
-                <EnrolledDeviceTableRow
-                  key={device.metadata.name || ''}
-                  device={device}
-                  onRowSelect={(device) => () => handleDeviceSelect(device)}
-                  isRowSelected={isDeviceSelected}
-                  rowIndex={index}
-                  singleSelect
-                  hideActions
-                  deviceColumns={deviceColumns}
-                />
-              ))}
-            </Tbody>
-          </Table>
-        </StackItem>
-      </Stack>
-    </FlightCtlForm>
+    <Stack hasGutter>
+      <StackItem>
+        <Title headingLevel="h3">{t('Select device')}</Title>
+      </StackItem>
+      <StackItem>
+        <Toolbar inset={{ default: 'insetNone' }}>
+          <ToolbarContent>
+            <ToolbarItem>
+              <TableTextSearch
+                value={deviceNameFilter}
+                setValue={setDeviceNameFilter}
+                placeholder={t('Search by name or alias')}
+              />
+            </ToolbarItem>
+            <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
+              <TablePagination pagination={devicePagination} isUpdating={devicesUpdating} />
+            </ToolbarItem>
+          </ToolbarContent>
+        </Toolbar>
+        <Table
+          aria-label={t('Enrolled devices table')}
+          loading={devicesLoading || devicesUpdating}
+          columns={deviceColumns}
+          hasFilters={!!deviceNameFilter}
+          emptyData={devices.length === 0}
+          clearFilters={() => setDeviceNameFilter('')}
+          variant="compact"
+          singleSelect
+        >
+          <Tbody>
+            {devices.map((device, index) => (
+              <EnrolledDeviceTableRow
+                key={device.metadata.name || ''}
+                device={device}
+                onRowSelect={(device) => () => handleDeviceSelect(device)}
+                isRowSelected={isDeviceSelected}
+                rowIndex={index}
+                singleSelect
+                hideActions
+                deviceColumns={deviceColumns}
+              />
+            ))}
+          </Tbody>
+        </Table>
+      </StackItem>
+    </Stack>
   );
 };
 
@@ -156,54 +154,52 @@ const FleetTarget = () => {
   );
 
   return (
-    <FlightCtlForm>
-      <Stack hasGutter>
-        <StackItem>
-          <Title headingLevel="h3">{t('Select fleet')}</Title>
-        </StackItem>
-        <StackItem>
-          <Toolbar inset={{ default: 'insetNone' }}>
-            <ToolbarContent>
-              <ToolbarItem>
-                <TableTextSearch
-                  value={fleetNameFilter}
-                  setValue={setFleetNameFilter}
-                  placeholder={t('Search by name')}
-                />
-              </ToolbarItem>
-              <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
-                <TablePagination pagination={fleetPagination} isUpdating={fleetsUpdating} />
-              </ToolbarItem>
-            </ToolbarContent>
-          </Toolbar>
-          <Table
-            aria-label={t('Fleets table')}
-            loading={fleetsLoading || fleetsUpdating}
-            columns={fleetColumns}
-            hasFilters={!!fleetNameFilter}
-            emptyData={fleets.length === 0}
-            clearFilters={() => setFleetNameFilter('')}
-            variant="compact"
-            singleSelect
-          >
-            <Tbody>
-              {fleets.map((fleet, rowIndex) => (
-                <FleetRow
-                  key={getResourceId(fleet)}
-                  fleet={fleet}
-                  rowIndex={rowIndex}
-                  isRowSelected={isFleetSelected}
-                  onRowSelect={(fleet) => () => handleFleetSelect(fleet)}
-                  singleSelect
-                  hideActions
-                  isSelectDisabled={!!fleet.metadata?.owner}
-                />
-              ))}
-            </Tbody>
-          </Table>
-        </StackItem>
-      </Stack>
-    </FlightCtlForm>
+    <Stack hasGutter>
+      <StackItem>
+        <Title headingLevel="h3">{t('Select fleet')}</Title>
+      </StackItem>
+      <StackItem>
+        <Toolbar inset={{ default: 'insetNone' }}>
+          <ToolbarContent>
+            <ToolbarItem>
+              <TableTextSearch
+                value={fleetNameFilter}
+                setValue={setFleetNameFilter}
+                placeholder={t('Search by name')}
+              />
+            </ToolbarItem>
+            <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
+              <TablePagination pagination={fleetPagination} isUpdating={fleetsUpdating} />
+            </ToolbarItem>
+          </ToolbarContent>
+        </Toolbar>
+        <Table
+          aria-label={t('Fleets table')}
+          loading={fleetsLoading || fleetsUpdating}
+          columns={fleetColumns}
+          hasFilters={!!fleetNameFilter}
+          emptyData={fleets.length === 0}
+          clearFilters={() => setFleetNameFilter('')}
+          variant="compact"
+          singleSelect
+        >
+          <Tbody>
+            {fleets.map((fleet, rowIndex) => (
+              <FleetRow
+                key={getResourceId(fleet)}
+                fleet={fleet}
+                rowIndex={rowIndex}
+                isRowSelected={isFleetSelected}
+                onRowSelect={(fleet) => () => handleFleetSelect(fleet)}
+                singleSelect
+                hideActions
+                isSelectDisabled={!!fleet.metadata?.owner}
+              />
+            ))}
+          </Tbody>
+        </Table>
+      </StackItem>
+    </Stack>
   );
 };
 
@@ -241,7 +237,7 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
         <GridItem>
           <Title headingLevel="h3">{t('Deployment specifications')}</Title>
         </GridItem>
-        <GridItem lg={6} md={8} sm={12}>
+        <GridItem>
           <FormGroup label={t('Deployment target')} isRequired>
             <FormSelect
               name="deploymentTarget"

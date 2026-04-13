@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Content, Grid, Stack, StackItem } from '@patternfly/react-core';
+import { Content, Stack, StackItem } from '@patternfly/react-core';
 import { FormikErrors } from 'formik';
 import { ResourceSyncType } from '@flightctl/types';
 
@@ -29,9 +29,7 @@ const ResourceSyncStep = ({
       </StackItem>
       <StackItem>
         <FlightControlForm>
-          <Grid span={8}>
-            <CreateResourceSyncsForm showSyncType={false} defaultSyncType={defaultSyncType} />
-          </Grid>
+          <CreateResourceSyncsForm showSyncType={false} defaultSyncType={defaultSyncType} />
         </FlightControlForm>
       </StackItem>
     </Stack>

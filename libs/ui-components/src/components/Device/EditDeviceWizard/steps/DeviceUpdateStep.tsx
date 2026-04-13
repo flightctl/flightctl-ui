@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Grid, Title } from '@patternfly/react-core';
+import { Alert, Title } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -22,26 +22,24 @@ const UpdatePolicyStep = ({ isReadOnly }: { isReadOnly?: boolean }) => {
   } = useFormikContext<DeviceSpecConfigFormValues>();
 
   return (
-    <Grid lg={8}>
-      <FlightCtlForm>
-        <CheckboxField name="useBasicUpdateConfig" label={t('Use basic configurations')} isDisabled={isReadOnly} />
-        {!useBasicUpdateConfig ? (
-          <>
-            <Title headingLevel="h3">{t('Advanced configurations')}</Title>
-            <FormGroupWithHelperText
-              label={t('Update policies')}
-              content={t('Update policies allow you to control when updates should be downloaded and applied.')}
-            >
-              <UpdateStepUpdatePolicy isReadOnly={isReadOnly} />
-            </FormGroupWithHelperText>
-          </>
-        ) : (
-          <Alert isInline variant="info" title={t('Default update policy')}>
-            {t('The device will download and apply updates as soon as they are available.')}
-          </Alert>
-        )}
-      </FlightCtlForm>
-    </Grid>
+    <FlightCtlForm>
+      <CheckboxField name="useBasicUpdateConfig" label={t('Use basic configurations')} isDisabled={isReadOnly} />
+      {!useBasicUpdateConfig ? (
+        <>
+          <Title headingLevel="h3">{t('Advanced configurations')}</Title>
+          <FormGroupWithHelperText
+            label={t('Update policies')}
+            content={t('Update policies allow you to control when updates should be downloaded and applied.')}
+          >
+            <UpdateStepUpdatePolicy isReadOnly={isReadOnly} />
+          </FormGroupWithHelperText>
+        </>
+      ) : (
+        <Alert isInline variant="info" title={t('Default update policy')}>
+          {t('The device will download and apply updates as soon as they are available.')}
+        </Alert>
+      )}
+    </FlightCtlForm>
   );
 };
 

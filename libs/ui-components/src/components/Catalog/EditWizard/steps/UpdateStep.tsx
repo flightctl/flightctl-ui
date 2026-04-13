@@ -55,7 +55,7 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit }: UpdateStepProps) =>
           <GridItem>
             <Title headingLevel="h3">{t('Version update')}</Title>
           </GridItem>
-          <GridItem lg={7} md={10} sm={12}>
+          <GridItem>
             <Grid hasGutter>
               <GridItem>
                 <Grid style={{ alignItems: 'center' }}>
@@ -131,7 +131,7 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit }: UpdateStepProps) =>
               </GridItem>
             </Grid>
           </GridItem>
-          <GridItem lg={6} md={9} sm={11}>
+          <GridItem>
             <Grid hasGutter>
               {!!updates.length && (
                 <>
@@ -168,16 +168,16 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit }: UpdateStepProps) =>
       )}
     </>
   ) : (
-    <FlightCtlForm>
-      <Grid hasGutter>
-        <GridItem>
-          <Title headingLevel="h3">{t('Deployment specifications')}</Title>
-        </GridItem>
-        <GridItem lg={6} md={8} sm={12}>
+    <Grid hasGutter>
+      <GridItem>
+        <Title headingLevel="h3">{t('Deployment specifications')}</Title>
+      </GridItem>
+      <GridItem>
+        <FlightCtlForm>
           <InstallSpec catalogItem={catalogItem} targetSet />
-        </GridItem>
-      </Grid>
-    </FlightCtlForm>
+        </FlightCtlForm>
+      </GridItem>
+    </Grid>
   );
 };
 

@@ -175,9 +175,7 @@ const GeneralInfoStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?
             {t('General info')}
           </Title>
         </GridItem>
-        <GridItem lg={6} md={8} sm={12}>
-          {content}
-        </GridItem>
+        <GridItem>{content}</GridItem>
       </Grid>
       {createModalOpen && (
         <CreateCatalogModal

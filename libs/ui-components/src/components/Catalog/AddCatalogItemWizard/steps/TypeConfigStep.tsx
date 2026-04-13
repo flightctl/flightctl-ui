@@ -92,7 +92,7 @@ const TypeConfigStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?:
           {t('Type and configuration')}
         </Title>
       </GridItem>
-      <GridItem lg={6} md={8} sm={12}>
+      <GridItem>
         <FlightCtlForm>
           <FormGroup label={t('Type')} isRequired>
             <FormSelect

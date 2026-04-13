@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FormGroup, FormSection, Grid } from '@patternfly/react-core';
+import { FormGroup, FormSection } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 
 import { RepoSpecType } from '@flightctl/types';
@@ -42,43 +42,41 @@ const SourceImageStep = () => {
 
   return (
     <FlightCtlForm>
-      <Grid lg={5} span={8}>
+      <FormSection>
+        <NameField
+          name="buildName"
+          aria-label={t('Build name')}
+          isRequired
+          resourceType="imagebuilds"
+          validations={getBuildNameValidations(t)}
+        />
+        <RepositorySelect
+          name="source.repository"
+          label={t('Source repository')}
+          repositories={ociRegistries}
+          repoType={RepoSpecType.RepoSpecTypeOci}
+          canCreateRepo={canCreateRepo}
+          repoRefetch={refetch}
+          isRequired
+        />
+        <FormGroup label={t('Image name')} fieldId="image-name" isRequired>
+          <TextField
+            name="source.imageName"
+            aria-label={t('Image name')}
+            helperText={t('The image name from the registry. For example: rhel9/rhel-bootc')}
+          />
+        </FormGroup>
+        <FormGroup label={t('Image tag')} fieldId="image-tag" isRequired>
+          <TextField
+            name="source.imageTag"
+            aria-label={t('Image tag')}
+            helperText={t('Specify the version (e.g., latest or 9.6)')}
+          />
+        </FormGroup>
         <FormSection>
-          <NameField
-            name="buildName"
-            aria-label={t('Build name')}
-            isRequired
-            resourceType="imagebuilds"
-            validations={getBuildNameValidations(t)}
-          />
-          <RepositorySelect
-            name="source.repository"
-            label={t('Source repository')}
-            repositories={ociRegistries}
-            repoType={RepoSpecType.RepoSpecTypeOci}
-            canCreateRepo={canCreateRepo}
-            repoRefetch={refetch}
-            isRequired
-          />
-          <FormGroup label={t('Image name')} fieldId="image-name" isRequired>
-            <TextField
-              name="source.imageName"
-              aria-label={t('Image name')}
-              helperText={t('The image name from the registry. For example: rhel9/rhel-bootc')}
-            />
-          </FormGroup>
-          <FormGroup label={t('Image tag')} fieldId="image-tag" isRequired>
-            <TextField
-              name="source.imageTag"
-              aria-label={t('Image tag')}
-              helperText={t('Specify the version (e.g., latest or 9.6)')}
-            />
-          </FormGroup>
-          <FormSection>
-            <ImageUrlCard imageReference={imageReference} />
-          </FormSection>
+          <ImageUrlCard imageReference={imageReference} />
         </FormSection>
-      </Grid>
+      </FormSection>
     </FlightCtlForm>
   );
 };

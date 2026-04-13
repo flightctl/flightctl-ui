@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Content, FormGroup, FormSection, Gallery, Grid } from '@patternfly/react-core';
+import { Alert, Content, FormGroup, FormSection, Gallery } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 
 import { OciRepoSpec, RepoSpecType, Repository } from '@flightctl/types';
@@ -62,66 +62,64 @@ const OutputImageStep = () => {
 
   return (
     <FlightCtlForm>
-      <Grid lg={6} span={8}>
-        <FormSection>
-          <Alert isInline variant="info" title={t('Management-ready by default')}>
-            {t(
-              'The agent is automatically included in this image. This ensures your devices are ready to be managed immediately after they are deployed.',
-            )}
-          </Alert>
-          <RepositorySelect
-            name="destination.repository"
-            repositories={ociRegistries}
-            repoType={RepoSpecType.RepoSpecTypeOci}
-            canCreateRepo={canCreateRepo}
-            repoRefetch={refetch}
-            label={t('Target repository')}
-            isRequired
-            options={{
-              writeAccessOnly: true,
-            }}
-            validateRepoSelection={writableRepoValidation}
-            helperText={t('Storage repository for your completed image.')}
-          />
-          <FormGroup label={t('Image name')} fieldId="image-name" isRequired>
-            <TextField
-              name="destination.imageName"
-              aria-label={t('Image name')}
-              helperText={t('The image name that will be pushed to the repository. For example: flightctl/rhel-bootc')}
-            />
-          </FormGroup>
-          <FormGroup label={t('Image tag')} fieldId="image-tag" isRequired>
-            <TextField
-              name="destination.imageTag"
-              aria-label={t('Image tag')}
-              helperText={t('Specify the version (e.g., latest or 9.6)')}
-            />
-          </FormGroup>
-          <ImageUrlCard imageReference={imageReference} />
-          <FormGroup label={t('Export formats')} fieldId="export-formats">
-            <Content component="p">
-              {t(
-                'Choose formats you need for this image. Each selection will generate a separate, ready-to-use image file.',
-              )}
-            </Content>
-            <Gallery hasGutter minWidths={{ default: '320px' }}>
-              {getAllExportFormats().map((format) => (
-                <SelectImageBuildExportCard
-                  key={format}
-                  format={format}
-                  isChecked={values.exportFormats.includes(format)}
-                  onToggle={handleFormatToggle}
-                />
-              ))}
-            </Gallery>
-          </FormGroup>
-          {values.exportFormats.length > 0 && (
-            <Content>
-              {t('{{count}} image export tasks will be created.', { count: values.exportFormats.length })}
-            </Content>
+      <FormSection>
+        <Alert isInline variant="info" title={t('Management-ready by default')}>
+          {t(
+            'The agent is automatically included in this image. This ensures your devices are ready to be managed immediately after they are deployed.',
           )}
-        </FormSection>
-      </Grid>
+        </Alert>
+        <RepositorySelect
+          name="destination.repository"
+          repositories={ociRegistries}
+          repoType={RepoSpecType.RepoSpecTypeOci}
+          canCreateRepo={canCreateRepo}
+          repoRefetch={refetch}
+          label={t('Target repository')}
+          isRequired
+          options={{
+            writeAccessOnly: true,
+          }}
+          validateRepoSelection={writableRepoValidation}
+          helperText={t('Storage repository for your completed image.')}
+        />
+        <FormGroup label={t('Image name')} fieldId="image-name" isRequired>
+          <TextField
+            name="destination.imageName"
+            aria-label={t('Image name')}
+            helperText={t('The image name that will be pushed to the repository. For example: flightctl/rhel-bootc')}
+          />
+        </FormGroup>
+        <FormGroup label={t('Image tag')} fieldId="image-tag" isRequired>
+          <TextField
+            name="destination.imageTag"
+            aria-label={t('Image tag')}
+            helperText={t('Specify the version (e.g., latest or 9.6)')}
+          />
+        </FormGroup>
+        <ImageUrlCard imageReference={imageReference} />
+        <FormGroup label={t('Export formats')} fieldId="export-formats">
+          <Content component="p">
+            {t(
+              'Choose formats you need for this image. Each selection will generate a separate, ready-to-use image file.',
+            )}
+          </Content>
+          <Gallery hasGutter minWidths={{ default: '320px' }}>
+            {getAllExportFormats().map((format) => (
+              <SelectImageBuildExportCard
+                key={format}
+                format={format}
+                isChecked={values.exportFormats.includes(format)}
+                onToggle={handleFormatToggle}
+              />
+            ))}
+          </Gallery>
+        </FormGroup>
+        {values.exportFormats.length > 0 && (
+          <Content>
+            {t('{{count}} image export tasks will be created.', { count: values.exportFormats.length })}
+          </Content>
+        )}
+      </FormSection>
     </FlightCtlForm>
   );
 };

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FormGroup, Grid } from '@patternfly/react-core';
+import { FormGroup } from '@patternfly/react-core';
 import { FormikErrors } from 'formik';
 
 import { FleetFormValues } from '../../../../types/deviceSpec';
@@ -25,24 +25,22 @@ const GeneralInfoStep = ({ isEdit, isReadOnly }: GeneralInfoStepProps) => {
   const { t } = useTranslation();
 
   return (
-    <Grid lg={5} span={8}>
-      <FlightCtlForm>
-        <NameField
-          name="name"
-          aria-label={t('Fleet name')}
-          isRequired
-          isDisabled={isEdit || isReadOnly}
-          resourceType="fleets"
-          validations={getDnsSubdomainValidations(t)}
-        />
-        <FormGroup label={t('Fleet labels')}>
-          <LabelsField name="fleetLabels" isDisabled={isReadOnly} />
-        </FormGroup>
-        <FormGroup label={t('Device selector')}>
-          <DeviceLabelSelector isReadOnly={isReadOnly} />
-        </FormGroup>
-      </FlightCtlForm>
-    </Grid>
+    <FlightCtlForm>
+      <NameField
+        name="name"
+        aria-label={t('Fleet name')}
+        isRequired
+        isDisabled={isEdit || isReadOnly}
+        resourceType="fleets"
+        validations={getDnsSubdomainValidations(t)}
+      />
+      <FormGroup label={t('Fleet labels')}>
+        <LabelsField name="fleetLabels" isDisabled={isReadOnly} />
+      </FormGroup>
+      <FormGroup label={t('Device selector')}>
+        <DeviceLabelSelector isReadOnly={isReadOnly} />
+      </FormGroup>
+    </FlightCtlForm>
   );
 };
 
