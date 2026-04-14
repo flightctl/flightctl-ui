@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, CodeBlock, CodeBlockCode, FormGroup, Grid, Spinner, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, CodeBlock, CodeBlockCode, FormGroup, Spinner, Stack, StackItem } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 import { Trans } from 'react-i18next';
 import { Repository } from '@flightctl/types';
@@ -121,54 +121,52 @@ const DeviceTemplateStep = ({
   const catalogOs = !!labels?.[OS_CATALOG_LABEL_KEY];
 
   return (
-    <Grid span={8}>
-      <FlightCtlForm>
-        {isFleet && !isReadOnly && (
-          <Alert isInline variant="info" title={t('Using template variables')} isExpandable>
-            <Trans t={t}>
-              Add a variable by using <strong>{templateOption1}</strong> or <strong>{templateOption2}</strong> and it
-              will be applied based on each device&rsquo;s details. For example, you could set the following value to
-              apply different files in a Git configuration:
-            </Trans>
-            <CodeBlock className="pf-v6-u-my-md">
-              <CodeBlockCode>{exampleCode}</CodeBlockCode>
-            </CodeBlock>
-            <LearnMoreLink link={useTemplateVarsLink} />
-          </Alert>
-        )}
-        <FormGroupWithHelperText
-          label={t('System image')}
-          content={
-            isFleet
-              ? t("The target system image for this fleet's devices.")
-              : t('The target system image for this device.')
-          }
-        >
-          <Stack hasGutter>
-            {catalogOs && (
-              <StackItem>
-                <Alert isInline variant="info" title={t('System image is managed by Software Catalog')} />
-              </StackItem>
-            )}
+    <FlightCtlForm>
+      {isFleet && !isReadOnly && (
+        <Alert isInline variant="info" title={t('Using template variables')} isExpandable>
+          <Trans t={t}>
+            Add a variable by using <strong>{templateOption1}</strong> or <strong>{templateOption2}</strong> and it will
+            be applied based on each device&rsquo;s details. For example, you could set the following value to apply
+            different files in a Git configuration:
+          </Trans>
+          <CodeBlock className="pf-v6-u-my-md">
+            <CodeBlockCode>{exampleCode}</CodeBlockCode>
+          </CodeBlock>
+          <LearnMoreLink link={useTemplateVarsLink} />
+        </Alert>
+      )}
+      <FormGroupWithHelperText
+        label={t('System image')}
+        content={
+          isFleet
+            ? t("The target system image for this fleet's devices.")
+            : t('The target system image for this device.')
+        }
+      >
+        <Stack hasGutter>
+          {catalogOs && (
             <StackItem>
-              <TextField
-                name="osImage"
-                aria-label={t('System image')}
-                value={values.osImage}
-                isDisabled={isReadOnly || catalogOs}
-                helperText={t(
-                  'Must be a reference to a bootable container image (such as "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). If you do not want to manage your OS from Edge management, leave this field empty.',
-                )}
-              />
+              <Alert isInline variant="info" title={t('System image is managed by Software Catalog')} />
             </StackItem>
-          </Stack>
-        </FormGroupWithHelperText>
-        <ConfigurationTemplates isReadOnly={isReadOnly} />
-        <ApplicationsForm isReadOnly={isReadOnly} labels={labels} />
-        <SystemdUnitsForm isReadOnly={isReadOnly} />
-        {appType === FlightCtlApp.OCP && <MicroShiftCheckbox isFleet={isFleet} isReadOnly={isReadOnly} />}
-      </FlightCtlForm>
-    </Grid>
+          )}
+          <StackItem>
+            <TextField
+              name="osImage"
+              aria-label={t('System image')}
+              value={values.osImage}
+              isDisabled={isReadOnly || catalogOs}
+              helperText={t(
+                'Must be a reference to a bootable container image (such as "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). If you do not want to manage your OS from Edge management, leave this field empty.',
+              )}
+            />
+          </StackItem>
+        </Stack>
+      </FormGroupWithHelperText>
+      <ConfigurationTemplates isReadOnly={isReadOnly} />
+      <ApplicationsForm isReadOnly={isReadOnly} labels={labels} />
+      <SystemdUnitsForm isReadOnly={isReadOnly} />
+      {appType === FlightCtlApp.OCP && <MicroShiftCheckbox isFleet={isFleet} isReadOnly={isReadOnly} />}
+    </FlightCtlForm>
   );
 };
 

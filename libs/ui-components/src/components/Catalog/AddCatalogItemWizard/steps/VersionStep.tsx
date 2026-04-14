@@ -188,7 +188,7 @@ const VersionStep = ({ isReadOnly, isEdit }: { isReadOnly?: boolean; isEdit: boo
           {t('Versions')}
         </Title>
       </GridItem>
-      <GridItem lg={6} md={8} sm={12}>
+      <GridItem>
         <FlightCtlForm>
           <FieldArray name="versions">
             {(arrayHelpers) => (

@@ -128,7 +128,7 @@ const TokenLoginForm = ({ provider, onBack }: TokenLoginFormProps) => {
               </Content>
             </StackItem>
             <StackItem>
-              <FlightCtlForm>
+              <FlightCtlForm isResponsive={false}>
                 <FormGroup label={t('Service account token')} isRequired>
                   <TextArea
                     id="accessToken"

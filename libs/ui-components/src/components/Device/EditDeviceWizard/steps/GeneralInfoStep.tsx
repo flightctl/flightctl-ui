@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FormGroup, Grid } from '@patternfly/react-core';
+import { FormGroup } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -40,21 +40,19 @@ const GeneralInfoStep = () => {
   }, [matchLabelsOnChange]);
 
   return (
-    <Grid lg={5} span={8}>
-      <FlightCtlForm>
-        <RichValidationTextField
-          fieldName="deviceAlias"
-          aria-label={t('Device alias')}
-          validations={getLabelValueValidations(t)}
-        />
-        <FormGroup label={t('Device labels')}>
-          <LabelsField name="labels" onChangeCallback={matchLabelsOnChange} />
-        </FormGroup>
-        <FormGroup label={t('Fleet name')}>
-          <DeviceLabelMatch matchStatus={matchStatus} />
-        </FormGroup>
-      </FlightCtlForm>
-    </Grid>
+    <FlightCtlForm>
+      <RichValidationTextField
+        fieldName="deviceAlias"
+        aria-label={t('Device alias')}
+        validations={getLabelValueValidations(t)}
+      />
+      <FormGroup label={t('Device labels')}>
+        <LabelsField name="labels" onChangeCallback={matchLabelsOnChange} />
+      </FormGroup>
+      <FormGroup label={t('Fleet name')}>
+        <DeviceLabelMatch matchStatus={matchStatus} />
+      </FormGroup>
+    </FlightCtlForm>
   );
 };
 

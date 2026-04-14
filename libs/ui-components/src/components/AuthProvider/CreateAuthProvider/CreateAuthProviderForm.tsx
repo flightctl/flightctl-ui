@@ -187,7 +187,7 @@ const CreateAuthProviderFormContent = ({
 
   return (
     <FlightCtlForm>
-      <Grid hasGutter span={8}>
+      <Grid hasGutter>
         <AuthProviderForm isEdit={isEdit} />
       </Grid>
       {children}

@@ -12,7 +12,6 @@ import {
   FlexItem,
   FormGroup,
   FormSection,
-  Grid,
   Radio,
   Stack,
   StackItem,
@@ -158,34 +157,31 @@ const RegistrationStep = () => {
           </CardBody>
         </Card>
       </FormSection>
-
-      <Grid lg={5} span={8}>
-        <FormSection title={t('Remote access')}>
-          <CheckboxField
-            name="remoteAccessEnabled"
-            label={t('Provide an SSH public key to enable passwordless login once your image is deployed.')}
-            onChangeCustom={handleRemoteAccessToggle}
-          >
-            <FormGroup label={t('Username')} fieldId="user-config-username" isRequired>
-              <TextField
-                name="userConfiguration.username"
-                aria-label={t('Username')}
-                helperText={t('The username for the user account')}
-              />
-            </FormGroup>
-            <FormGroup label={t('SSH public key')} fieldId="user-config-publickey" isRequired>
-              <UploadField
-                name="userConfiguration.publickey"
-                ariaLabel={t('SSH public key')}
-                maxFileBytes={PUBLIC_KEY_MAX_LENGTH}
-              />
-            </FormGroup>
-          </CheckboxField>
-          <Content component="small">
-            {t('Paste the content of an SSH public key you want to use to connect to the device.')}
-          </Content>
-        </FormSection>
-      </Grid>
+      <FormSection title={t('Remote access')}>
+        <CheckboxField
+          name="remoteAccessEnabled"
+          label={t('Provide an SSH public key to enable passwordless login once your image is deployed.')}
+          onChangeCustom={handleRemoteAccessToggle}
+        >
+          <FormGroup label={t('Username')} fieldId="user-config-username" isRequired>
+            <TextField
+              name="userConfiguration.username"
+              aria-label={t('Username')}
+              helperText={t('The username for the user account')}
+            />
+          </FormGroup>
+          <FormGroup label={t('SSH public key')} fieldId="user-config-publickey" isRequired>
+            <UploadField
+              name="userConfiguration.publickey"
+              ariaLabel={t('SSH public key')}
+              maxFileBytes={PUBLIC_KEY_MAX_LENGTH}
+            />
+          </FormGroup>
+        </CheckboxField>
+        <Content component="small">
+          {t('Paste the content of an SSH public key you want to use to connect to the device.')}
+        </Content>
+      </FormSection>
     </FlightCtlForm>
   );
 };

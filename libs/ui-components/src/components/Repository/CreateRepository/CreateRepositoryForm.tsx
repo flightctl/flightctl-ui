@@ -410,7 +410,7 @@ const CreateRepositoryFormContent = ({ isEdit, onClose, options, children }: Cre
   return (
     <FlightCtlForm className="fctl-create-repo">
       <fieldset disabled={options?.isReadOnly ?? false}>
-        <Grid hasGutter span={8}>
+        <Grid hasGutter>
           <RepositoryForm
             isEdit={isEdit}
             accessModeDisabledReason={

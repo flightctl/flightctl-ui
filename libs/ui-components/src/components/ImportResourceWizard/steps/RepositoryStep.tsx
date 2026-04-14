@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FormGroup, FormSection, Grid, Radio } from '@patternfly/react-core';
+import { FormGroup, FormSection, Radio } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { GitRepoSpec, Repository } from '@flightctl/types';
@@ -92,34 +92,32 @@ const RepositoryStep = ({ repositories, hasLoaded }: { repositories: Repository[
 
   return (
     <FlightCtlForm>
-      <Grid span={8}>
-        {canCreateRepo && (
-          <FormSection>
-            <FormGroup isInline>
-              <WithTooltip showTooltip={noRepositoriesExist} content={t('No Git repositories found')}>
-                <Radio
-                  isChecked={values.useExistingRepo}
-                  onChange={() => setFieldValue('useExistingRepo', true, true)}
-                  id="existing-repo"
-                  name="repo"
-                  label={t('Use an existing Git repository')}
-                  isDisabled={noRepositoriesExist}
-                />
-              </WithTooltip>
-              <Radio
-                isChecked={!values.useExistingRepo}
-                onChange={() => setFieldValue('useExistingRepo', false, true)}
-                id="new-repo"
-                name="repo"
-                label={t('Use a new Git repository')}
-              />
-            </FormGroup>
-          </FormSection>
-        )}
+      {canCreateRepo && (
         <FormSection>
-          {values.useExistingRepo ? <ExistingRepoForm repositories={repositories} /> : <RepositoryForm />}
+          <FormGroup isInline>
+            <WithTooltip showTooltip={noRepositoriesExist} content={t('No Git repositories found')}>
+              <Radio
+                isChecked={values.useExistingRepo}
+                onChange={() => setFieldValue('useExistingRepo', true, true)}
+                id="existing-repo"
+                name="repo"
+                label={t('Use an existing Git repository')}
+                isDisabled={noRepositoriesExist}
+              />
+            </WithTooltip>
+            <Radio
+              isChecked={!values.useExistingRepo}
+              onChange={() => setFieldValue('useExistingRepo', false, true)}
+              id="new-repo"
+              name="repo"
+              label={t('Use a new Git repository')}
+            />
+          </FormGroup>
         </FormSection>
-      </Grid>
+      )}
+      <FormSection>
+        {values.useExistingRepo ? <ExistingRepoForm repositories={repositories} /> : <RepositoryForm />}
+      </FormSection>
     </FlightCtlForm>
   );
 };
