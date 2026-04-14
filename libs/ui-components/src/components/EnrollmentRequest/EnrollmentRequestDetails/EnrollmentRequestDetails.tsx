@@ -4,6 +4,7 @@ import {
   Card,
   CardBody,
   CardTitle,
+  DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
@@ -30,7 +31,6 @@ import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import EnrollmentRequestStatus from '../../Status/EnrollmentRequestStatus';
 import LabelWithHelperText from '../../common/WithHelperText';
-import FlightControlDescriptionList from '../../common/FlightCtlDescriptionList';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useDeviceSpecSystemInfo } from '../../../hooks/useDeviceSpecSystemInfo';
@@ -104,7 +104,7 @@ const EnrollmentRequestDetails = () => {
           <Card>
             <CardTitle>{t('Details')}</CardTitle>
             <CardBody>
-              <FlightControlDescriptionList columnModifier={{ lg: '3Col' }}>
+              <DescriptionList columnModifier={{ lg: '3Col' }}>
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Name')}</DescriptionListTerm>
                   <DescriptionListDescription>{deviceId}</DescriptionListDescription>
@@ -135,7 +135,7 @@ const EnrollmentRequestDetails = () => {
                     <DescriptionListDescription>{systemInfo.value}</DescriptionListDescription>
                   </DescriptionListGroup>
                 ))}
-              </FlightControlDescriptionList>
+              </DescriptionList>
             </CardBody>
           </Card>
         </GridItem>
@@ -144,14 +144,14 @@ const EnrollmentRequestDetails = () => {
             <DetailsPageCard>
               <CardTitle>{t('Custom data')}</CardTitle>
               <CardBody>
-                <FlightControlDescriptionList columnModifier={{ lg: '3Col' }}>
+                <DescriptionList columnModifier={{ lg: '3Col' }}>
                   {erSystemInfo.customInfo.map((systemInfo) => (
                     <DescriptionListGroup key={systemInfo.title}>
                       <DescriptionListTerm>{systemInfo.title}</DescriptionListTerm>
                       <DescriptionListDescription>{systemInfo.value}</DescriptionListDescription>
                     </DescriptionListGroup>
                   ))}
-                </FlightControlDescriptionList>
+                </DescriptionList>
               </CardBody>
             </DetailsPageCard>
           </GridItem>
@@ -217,7 +217,9 @@ const EnrollmentRequestDetails = () => {
           enrollmentRequest={er}
           onClose={(isApproved) => {
             setIsApprovalModalOpen(false);
-            isApproved && navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceId });
+            if (isApproved) {
+              navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceId });
+            }
           }}
         />
       )}

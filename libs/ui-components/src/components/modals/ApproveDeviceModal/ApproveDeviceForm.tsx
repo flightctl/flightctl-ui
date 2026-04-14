@@ -63,7 +63,13 @@ const ApproveDeviceForm: React.FC<ApproveDeviceFormProps> = ({ enrollmentRequest
         >
           {t('Approve')}
         </Button>
-        <Button key="cancel" variant="link" onClick={() => onClose()} isDisabled={isSubmitting}>
+        <Button
+          key="cancel"
+          variant="link"
+          onClick={() => onClose()}
+          isDisabled={isSubmitting}
+          data-testid="approve-device-form-cancel"
+        >
           {t('Cancel')}
         </Button>
       </ActionGroup>

@@ -42,6 +42,10 @@ const K8S_LABEL_VALUE_START_END = /^[a-z0-9A-Z](.*[a-z0-9A-Z])?$/;
 const K8S_LABEL_VALUE_ALLOWED_CHARACTERS = /^[a-z0-9A-Z._-]*$/;
 const K8S_LABEL_VALUE_MAX_LENGTH = 63;
 
+const GENERIC_NAME_MAX_LENGTH = 63;
+const EXTENDED_MAX_LENGTH = 253;
+export const MAX_TARGET_REVISION_LENGTH = 244;
+
 // Does not accept uppercase characters, nor "underscore" symbols
 const K8S_DNS_SUBDOMAIN_START_END = /^[a-z0-9](.*[a-z0-9])?$/;
 const K8S_DNS_SUBDOMAIN_ALLOWED_CHARACTERS = /^[a-z0-9.-]*$/;
@@ -50,11 +54,13 @@ const K8S_DNS_SUBDOMAIN_VALUE_MAX_LENGTH = 253;
 const OCI_IMAGE_FULL_REGEXP = /^(?![./_])[a-zA-Z0-9.\-\/:@_+]*$/;
 // Accepts all characters from the above regex, but it rejects leading dot, slash, or underscore
 const OCI_IMAGE_ALLOWED_CHARS_REGEXP = /^[a-zA-Z0-9.\-\/:@_+]*$/;
-const APPLICATION_NAME_REGEXP = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
+const GENERIC_NAME_REGEXP = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
 const APPLICATION_VAR_NAME_REGEXP = /^[a-zA-Z_]+[a-zA-Z0-9_]*$/;
 
+export const GIT_TARGET_REVISION_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9.\/_-])*$/;
+
 const TEMPLATE_VARIABLES_REGEXP = /{{.+?}}/g;
-// Special characters allowed: "dot", "pipe", "spaces" "quote", "backward slash", "underscore", "forward slash", "dash"
+// Special characters allowed: "dot", "pipe", "spaces" "quote", "backward slash", "underscore", "forward slash", "hyphen"
 const TEMPLATE_VARIABLES_CONTENT_REGEXP = /^([.a-zA-Z0-9|\s"\\_\/-])+$/;
 const TIME_VALUE_REGEXP = /^([01][0-9]|2[0-3]):([0-5][0-9])$/;
 // Go duration format: positive number followed by unit (s, m, or h). Examples: "30m", "1h", "45m", "30s"
@@ -65,10 +71,6 @@ const absolutePathRegex = /^\/.*$/;
 // Accepts only relative paths. Rejects paths that start with "/", have multiple "/", or use dots (./file, ../parent/file), etc
 const relativePathRegex = /^(?!\.\.\/|\.\.\$|\.\/)(\.\/)*[\w.-]+(?:\/[\w.-]+)*\/?$/;
 
-export const MAX_TARGET_REVISION_LENGTH = 244;
-const MAX_FILE_PATH_LENGTH = 253;
-
-const HELM_NAMESPACE_MAX_LENGTH = 63;
 const HELM_VALUES_FILE_EXT_REGEXP = /\.(yaml|yml)$/i;
 
 const isInteger = (val: number | undefined) => val === undefined || Number.isInteger(val);
@@ -95,7 +97,7 @@ export const getLabelValueValidations = (t: TFunction) => [
   { key: 'labelValueStartAndEnd', message: t('Starts and ends with a letter or a number.') },
   {
     key: 'labelValueAllowedChars',
-    message: t('Contains only letters, numbers, dashes (-), dots (.), and underscores (_).'),
+    message: t('Contains only letters, numbers, hyphens (-), dots (.), and underscores (_).'),
   },
   {
     key: 'labelValueMaxLength',
@@ -107,7 +109,7 @@ export const getDnsSubdomainValidations = (t: TFunction) => [
   { key: 'dnsSubdomainStartAndEnd', message: t('Starts and ends with a lowercase letter or a number.') },
   {
     key: 'dnsSubdomainAllowedChars',
-    message: t('Contains only lowercase letters, numbers, dashes (-), and dots (.).'),
+    message: t('Contains only lowercase letters, numbers, hyphens (-), and dots (.).'),
   },
   {
     key: 'dnsSubdomainMaxLength',
@@ -224,17 +226,33 @@ export const validKubernetesLabelValue = (
         .test('k8sLabelValueFormat', labelValueValidations)
     : Yup.string().test('k8sLabelValueFormat', labelValueValidations);
 
-export const validApplicationAndVolumeName = (t: TFunction) =>
+const genericNameSchema = (t: TFunction) =>
   Yup.string().matches(
-    APPLICATION_NAME_REGEXP,
-    t('Use lowercase alphanumeric characters, or dash (-). Must start and end with an alphanumeric character.'),
+    GENERIC_NAME_REGEXP,
+    t('Use lowercase alphanumeric characters, or hyphens (-). Must start and end with an alphanumeric character.'),
+  );
+
+export const validApplicationAndVolumeName = (t: TFunction) =>
+  genericNameSchema(t).max(
+    EXTENDED_MAX_LENGTH,
+    t('Name must not exceed {{ maxLength }} characters', {
+      maxLength: EXTENDED_MAX_LENGTH,
+    }),
+  );
+
+export const validGenericName = (t: TFunction) =>
+  genericNameSchema(t).max(
+    GENERIC_NAME_MAX_LENGTH,
+    t('Name must not exceed {{ maxLength }} characters', {
+      maxLength: GENERIC_NAME_MAX_LENGTH,
+    }),
   );
 
 export const getBuildNameValidations = (t: TFunction) => [
   {
     key: 'imageBuildName',
     message: t(
-      'Use lowercase alphanumeric characters, or dash (-). Must start and end with an alphanumeric character.',
+      'Use lowercase alphanumeric characters, or hyphens (-). Must start and end with an alphanumeric character.',
     ),
   },
 ];
@@ -244,7 +262,7 @@ export const validImageBuildName = (t: TFunction) =>
     .required(t('Build name is required'))
     .test('imageBuildName', function (value: string | undefined) {
       if (!value) return true;
-      return APPLICATION_NAME_REGEXP.test(value) || this.createError({ message: { imageBuildName: 'failed' } });
+      return GENERIC_NAME_REGEXP.test(value) || this.createError({ message: { imageBuildName: 'failed' } });
     });
 
 export const maxLengthString = (t: TFunction, props: { maxLength: number; fieldName: string }) =>
@@ -280,30 +298,22 @@ export const validOsImage = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
   );
 
 export const validHelmNamespace = (t: TFunction) =>
-  Yup.string()
-    .max(
-      HELM_NAMESPACE_MAX_LENGTH,
-      t('Namespace must not exceed {{ max }} characters.', { max: HELM_NAMESPACE_MAX_LENGTH }),
-    )
-    .test(
-      'helm-namespace-format',
-      t(
-        'Namespace must only include lowercase letters, numbers, and hyphens. It must start and end with a letter or number.',
-      ),
-      (value) => {
-        return !value || APPLICATION_NAME_REGEXP.test(value);
-      },
-    );
+  genericNameSchema(t).max(
+    GENERIC_NAME_MAX_LENGTH,
+    t('Namespace must not exceed {{ maxLength }} characters', {
+      maxLength: GENERIC_NAME_MAX_LENGTH,
+    }),
+  );
 
 export const validHelmValuesFile = (t: TFunction) =>
   Yup.string().test('helm-values-file', function (filename) {
     if (!filename) {
       return true;
     }
-    if (filename.length > MAX_FILE_PATH_LENGTH) {
+    if (filename.length > EXTENDED_MAX_LENGTH) {
       return this.createError({
         message: t('Values file path must not exceed {{ max }} characters.', {
-          max: MAX_FILE_PATH_LENGTH,
+          max: EXTENDED_MAX_LENGTH,
         }),
       });
     }
@@ -402,9 +412,9 @@ const inlineAppFilePathSchema = (t: TFunction) =>
   Yup.string()
     .required(t('File path is required'))
     .max(
-      MAX_FILE_PATH_LENGTH,
+      EXTENDED_MAX_LENGTH,
       t('File path length cannot exceed {{ maxCharacters }} characters.', {
-        maxCharacters: MAX_FILE_PATH_LENGTH,
+        maxCharacters: EXTENDED_MAX_LENGTH,
       }),
     )
     .matches(
@@ -781,7 +791,7 @@ export const validApplicationsSchema = (t: TFunction) => {
               }
               try {
                 yaml.load(value);
-              } catch (error) {
+              } catch {
                 return false;
               }
               return true;
@@ -1044,7 +1054,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         if (isGitConfigTemplate(value)) {
           return Yup.object<GitConfigTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
-            name: validKubernetesDnsSubdomain(t, { isRequired: true }),
+            name: validGenericName(t).required(t('Name is required.')),
             path: Yup.string().required(t('Path is required.')).matches(absolutePathRegex, t('Path must be absolute.')),
             repository: Yup.string().required(t('Repository is required.')),
             targetRevision: maxLengthString(t, {
@@ -1056,7 +1066,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
           return Yup.object<HttpConfigTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
             repository: Yup.string().required(t('Repository is required.')),
-            name: validKubernetesDnsSubdomain(t, { isRequired: true }),
+            name: validGenericName(t).required(t('Name is required.')),
             filePath: Yup.string()
               .required(t('File path is required.'))
               .matches(absolutePathRegex, t('Path must be absolute.')),
@@ -1065,7 +1075,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         } else if (isKubeSecretTemplate(value)) {
           return Yup.object<KubeSecretTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
-            name: validKubernetesDnsSubdomain(t, { isRequired: true }),
+            name: validGenericName(t).required(t('Name is required.')),
             secretName: Yup.string().required(t('Secret name is required.')),
             secretNs: Yup.string().required(t('Secret namespace is required.')),
             mountPath: Yup.string()
@@ -1075,7 +1085,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         } else if (isInlineConfigTemplate(value)) {
           return Yup.object<InlineConfigTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
-            name: validKubernetesDnsSubdomain(t, { isRequired: true }),
+            name: validGenericName(t).required(t('Name is required.')),
             files: Yup.array().of(
               Yup.object<InlineConfigTemplate['files'][0]>().shape({
                 path: Yup.string()
@@ -1104,7 +1114,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         }
 
         return Yup.object<InlineConfigTemplate>().shape({
-          name: validKubernetesDnsSubdomain(t, { isRequired: true }),
+          name: validGenericName(t).required(t('Name is required.')),
           type: Yup.string().required(t('Source type is required.')),
         });
       }),
@@ -1153,15 +1163,43 @@ export const deviceSystemdUnitsValidationSchema = (t: TFunction) =>
     systemdUnits: systemdUnitListValidationSchema(t),
   });
 
+const getExpandedAlias = (alias: string | undefined, massDeviceCount: number) => {
+  if (!alias) {
+    return '';
+  }
+  return alias.replace(/{{n+}}/g, `${massDeviceCount}`);
+};
+
 const forbiddenDeviceLabels = ['alias'];
-export const deviceApprovalValidationSchema = (t: TFunction, conf: { isSingleDevice: boolean }) =>
+export const deviceApprovalValidationSchema = (t: TFunction, { massDeviceCount }: { massDeviceCount: number }) =>
   Yup.object({
-    deviceAlias: conf.isSingleDevice
-      ? validKubernetesLabelValue(t, { isRequired: false, fieldName: t('Alias') })
-      : Yup.string().matches(
-          /{{n}}/,
-          t('Device aliases must be unique. Add a number to the template to generate unique aliases.'),
-        ),
+    deviceAlias:
+      massDeviceCount === 0
+        ? validKubernetesLabelValue(t, { isRequired: false, fieldName: t('Alias') })
+        : Yup.string()
+            .test(
+              'massApprovalAliasLength',
+              t('Device aliases must be at most {{maxCharacters}} characters long.', {
+                maxCharacters: K8S_LABEL_VALUE_MAX_LENGTH,
+              }),
+              (value: string | undefined) => {
+                // When a number template is present, we want to check the length of the longest alias in the series.
+                const maxLengthAlias = getExpandedAlias(value, massDeviceCount);
+                return maxLengthAlias.length <= K8S_LABEL_VALUE_MAX_LENGTH;
+              },
+            )
+            .test(
+              'massApprovalAliasFormat',
+              t(
+                'Device aliases must start and end with a letter or number, contain only letters, numbers, dashes (-), dots (.), and underscores (_).',
+              ),
+              (value: string | undefined) => {
+                // Validate format regardless of alias length, since length checks are done in the previous test.
+                const maxLengthAlias = getExpandedAlias(value, 1);
+                const invalidLabel = getInvalidKubernetesLabels([{ key: 'alias', value: maxLengthAlias }]);
+                return invalidLabel.length === 0;
+              },
+            ),
     labels: validLabelsSchema(t, forbiddenDeviceLabels),
   });
 

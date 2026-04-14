@@ -23,17 +23,16 @@ import PageNavigation from '@flightctl/ui-components/src/components/common/PageN
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import { SystemRestoreProvider } from '@flightctl/ui-components/src/hooks/useSystemRestoreContext';
 import { PermissionsContextProvider } from '@flightctl/ui-components/src/components/common/PermissionsContext';
+import { useBrandLogo } from '../../hooks/useBrandLogo';
 
-import logo from '@fctl-assets/bgimages/flight-control-logo.svg';
-import rhemLogo from '@fctl-assets/bgimages/RHEM-logo.svg';
 import AppNavigation from './AppNavigation';
 import AppToolbar from './AppToolbar';
 
 const AppLayoutContent = () => {
   const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
-
   const { mustShowOrganizationSelector } = useOrganizationGuardContext();
+  const { logo, altText } = useBrandLogo();
 
   const onSidebarToggle = () => {
     setIsSidebarOpen((prevIsOpen) => !prevIsOpen);
@@ -55,11 +54,7 @@ const AppLayoutContent = () => {
         </MastheadToggle>
         <MastheadBrand>
           <MastheadLogo>
-            {window.isRHEM ? (
-              <Brand src={rhemLogo} alt="Red Hat Edge Manager logo" heights={{ default: '50px' }} />
-            ) : (
-              <Brand src={logo} alt="Flight Control Logo" heights={{ default: '30px' }} />
-            )}
+            <Brand src={logo} alt={altText} heights={{ default: '50px' }} />
           </MastheadLogo>
         </MastheadBrand>
       </MastheadMain>
@@ -90,7 +85,9 @@ const AppLayoutContent = () => {
       onClick={(event) => {
         event.preventDefault();
         const primaryContentContainer = document.getElementById(pageId);
-        primaryContentContainer && primaryContentContainer.focus();
+        if (primaryContentContainer) {
+          primaryContentContainer.focus();
+        }
       }}
       href={`#${pageId}`}
     >

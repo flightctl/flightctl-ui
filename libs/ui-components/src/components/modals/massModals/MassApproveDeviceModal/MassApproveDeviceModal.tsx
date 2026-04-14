@@ -89,7 +89,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({
         labels: [],
         deviceAlias: '',
       }}
-      validationSchema={deviceApprovalValidationSchema(t, { isSingleDevice: false })}
+      validationSchema={deviceApprovalValidationSchema(t, { massDeviceCount: pendingEnrollments.length })}
       onSubmit={approveEnrollments}
     >
       {({ isSubmitting, values, submitForm, isValid }) => (

@@ -94,7 +94,7 @@ const EnrolledDeviceTableRow = ({
         </Td>
       )}
       {columnIds.includes('updateStatus') && (
-        <Td dataLabel={t('Update status')}>
+        <Td dataLabel={t('Update status')} data-testid={`device-update-status-${rowIndex}`}>
           <SystemUpdateStatus deviceStatus={device.status} />
         </Td>
       )}

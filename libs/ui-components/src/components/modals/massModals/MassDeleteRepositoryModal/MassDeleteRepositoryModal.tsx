@@ -171,6 +171,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
           onClick={deleteRepositories}
           isLoading={isLoading || isDeleting}
           isDisabled={isLoading || isDeleting}
+          data-testid="modal-delete-repositories-confirm"
         >
           {t('Delete repositories')}
         </Button>

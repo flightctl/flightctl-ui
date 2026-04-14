@@ -33,6 +33,7 @@ const TextField = React.forwardRef(
           {...props}
           ref={ref}
           id={fieldId}
+          data-testid={fieldId}
           onChange={onChange}
           validated={hasError ? 'error' : 'default'}
         />

@@ -96,9 +96,12 @@ const RichValidationTextField = React.forwardRef(
               id={fieldId}
               ref={ref}
               isRequired={isRequired}
+              data-testid={fieldId}
               aria-describedby={`${fieldId}-helper`}
               onChange={async (event, val) => {
-                !popoverOpen && setPopoverOpen(true);
+                if (!popoverOpen) {
+                  setPopoverOpen(true);
+                }
                 field.onChange(event);
                 // TODO does not work well for the first character
                 if (!meta.touched && val?.length) {
@@ -141,8 +144,9 @@ const RichValidationTextField = React.forwardRef(
                     <CheckCircleIcon color={successColor.value} />
                   )
                 }
-                variant="plain"
+                variant="control"
                 aria-label="Validation"
+                data-testid={`${fieldId}-validation-button`}
               />
             </Popover>
           </InputGroupItem>
@@ -162,7 +166,7 @@ const RichValidationTextFieldWrapper = React.forwardRef(
     if (isDisabled) {
       return (
         <FormGroup label={rest?.['aria-label']} isRequired={rest.isRequired}>
-          <TextInput value={field.value} {...rest} isDisabled />
+          <TextInput value={field.value} {...rest} isDisabled data-testid={`rich-validation-field-${fieldName}`} />
         </FormGroup>
       );
     }

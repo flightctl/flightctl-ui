@@ -104,6 +104,7 @@ const DecommissionedDevicesTable = ({
               <Switch
                 id="decommissioned-devices-switch"
                 label={<span className="fctl-switch__label">{t('Show decommissioned devices')}</span>}
+                aria-checked
                 isChecked
                 onChange={() => {
                   setOnlyDecommissioned(false);
@@ -124,6 +125,7 @@ const DecommissionedDevicesTable = ({
         emptyData={devices.length === 0}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
+        data-testid="decommissioned-devices-table"
       >
         <Tbody>
           {devices.map((device, index) => (
@@ -150,6 +152,7 @@ const DecommissionedDevicesTable = ({
           resources={devices.filter(isRowSelected)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
+            setAllSelected(false);
             refetch();
           }}
         />

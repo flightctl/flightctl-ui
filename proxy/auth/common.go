@@ -319,8 +319,6 @@ func clearSessionCookie(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, &cookie)
-
-	w.Header().Set("Clear-Site-Data", `"cookies"`)
 }
 
 // validateAndExtractProviderFromState validates the state parameter and extracts the provider name

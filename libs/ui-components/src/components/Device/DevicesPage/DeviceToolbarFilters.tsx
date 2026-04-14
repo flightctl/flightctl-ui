@@ -276,7 +276,9 @@ const LabelFleetSelector = ({ selectedFleetNames, selectedLabels, onSelect, plac
         }
       }}
       onOpenChange={(isOpen) => {
-        !isOpen && closeMenu();
+        if (!isOpen) {
+          closeMenu();
+        }
       }}
       toggle={toggle}
     >

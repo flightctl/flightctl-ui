@@ -143,7 +143,9 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
             enrollmentRequest={currentEnrollmentRequest}
             onClose={(updateList) => {
               setApprovingErId(undefined);
-              updateList && refetchWithDevices();
+              if (updateList) {
+                refetchWithDevices();
+              }
             }}
           />
         )}
@@ -153,6 +155,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
             resources={pendingEnrollments.filter(isRowSelected)}
             onDeleteSuccess={() => {
               setIsMassDeleteModalOpen(false);
+              setAllSelected(false);
               refetch();
             }}
           />

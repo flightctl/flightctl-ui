@@ -43,7 +43,7 @@ const CreateRepositoryButton = ({ buttonText }: { buttonText?: string }) => {
 
   return (
     canCreate && (
-      <Button variant="primary" onClick={() => navigate(ROUTE.REPO_CREATE)}>
+      <Button variant="primary" data-testid="toolbar-create-repository" onClick={() => navigate(ROUTE.REPO_CREATE)}>
         {buttonText || t('Create a repository')}
       </Button>
     )
@@ -113,16 +113,18 @@ const RepositoryTableRow = ({
     actions.push({
       title: t('Edit repository'),
       onClick: () => navigate({ route: ROUTE.REPO_EDIT, postfix: repository.metadata.name }),
-    });
+      'data-testid': `repository-dropdown-edit-${rowIndex}`,
+    } as IAction);
   }
   if (canDelete) {
     actions.push({
       title: t('Delete repository'),
       onClick: () => setDeleteModalRepoId(repository.metadata.name),
-    });
+      'data-testid': `repository-dropdown-delete-${rowIndex}`,
+    } as IAction);
   }
   return (
-    <Tr>
+    <Tr data-testid={`repository-row-${rowIndex}`}>
       <Td
         select={{
           rowIndex,
@@ -131,7 +133,11 @@ const RepositoryTableRow = ({
         }}
       />
       <Td dataLabel={t('Name')}>
-        <ResourceLink id={repository.metadata.name as string} routeLink={ROUTE.REPO_DETAILS} />
+        <ResourceLink
+          id={repository.metadata.name as string}
+          routeLink={ROUTE.REPO_DETAILS}
+          data-testid={`repository-name-link-${rowIndex}`}
+        />
       </Td>
       <Td dataLabel={t('Type')}>{getRepoTypeLabel(t, repository.spec.type)}</Td>
       <Td dataLabel={t('URL')}>{getRepoUrlOrRegistry(repository.spec) || '-'}</Td>
@@ -140,7 +146,7 @@ const RepositoryTableRow = ({
       </Td>
       <Td dataLabel={t('Last transition')}>{getLastTransitionTimeText(repository, t).text}</Td>
       {!!actions.length && (
-        <Td isActionCell>
+        <Td isActionCell data-testid={`repository-row-actions-${rowIndex}`}>
           <ActionsColumn items={actions} />
         </Td>
       )}
@@ -185,7 +191,12 @@ const RepositoryTable = () => {
           </ToolbarItem>
           {canDelete && (
             <ToolbarItem>
-              <Button isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)} variant="secondary">
+              <Button
+                isDisabled={!hasSelectedRows}
+                onClick={() => setIsMassDeleteModalOpen(true)}
+                variant="secondary"
+                data-testid="toolbar-delete-repositories"
+              >
                 {t('Delete repositories')}
               </Button>
             </ToolbarItem>
@@ -193,6 +204,7 @@ const RepositoryTable = () => {
         </ToolbarContent>
       </Toolbar>
       <Table
+        data-testid="repositories-table"
         aria-label={t('Repositories table')}
         loading={isUpdating}
         hasFilters={!!search}
@@ -232,6 +244,7 @@ const RepositoryTable = () => {
           onClose={() => setIsMassDeleteModalOpen(false)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
+            setAllSelected(false);
             refetch();
           }}
           repositories={filteredData.filter(isRowSelected)}

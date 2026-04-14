@@ -443,10 +443,16 @@ const CreateRepositoryFormContent = ({ isEdit, onClose, options, children }: Cre
       </fieldset>
       {children}
       <ActionGroup>
-        <Button variant="primary" onClick={submitForm} isLoading={isSubmitting} isDisabled={isSubmitDisabled}>
+        <Button
+          variant="primary"
+          onClick={submitForm}
+          isLoading={isSubmitting}
+          isDisabled={isSubmitDisabled}
+          data-testid="repository-form-submit"
+        >
           {isEdit ? t('Save') : t('Create repository')}
         </Button>
-        <Button variant="link" isDisabled={isSubmitting} onClick={onClose}>
+        <Button variant="link" isDisabled={isSubmitting} onClick={onClose} data-testid="repository-form-cancel">
           {t('Cancel')}
         </Button>
       </ActionGroup>

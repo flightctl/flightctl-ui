@@ -22,10 +22,9 @@ import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import { usePermissionsContext } from '../../../common/PermissionsContext';
-import { getDnsSubdomainValidations } from '../../../form/validations';
 import ErrorHelperText from '../../../form/FieldHelperText';
 import FormSelect from '../../../form/FormSelect';
-import RichValidationTextField from '../../../form/RichValidationTextField';
+import TextField from '../../../form/TextField';
 import ConfigWithRepositoryTemplateForm from './ConfigWithRepositoryTemplateForm';
 import ConfigK8sSecretTemplateForm from './ConfigK8sSecretTemplateForm';
 import ConfigInlineTemplateForm from './ConfigInlineTemplateForm';
@@ -103,13 +102,7 @@ const ConfigSection = ({
       fieldName={fieldName}
     >
       <Grid hasGutter>
-        <RichValidationTextField
-          isDisabled={isReadOnly}
-          fieldName={`${fieldName}.name`}
-          aria-label={t('Source name')}
-          validations={getDnsSubdomainValidations(t)}
-          isRequired
-        />
+        <TextField isDisabled={isReadOnly} name={`${fieldName}.name`} aria-label={t('Source name')} isRequired />
 
         <FormGroup label={t('Source type')} isRequired>
           <FormSelect

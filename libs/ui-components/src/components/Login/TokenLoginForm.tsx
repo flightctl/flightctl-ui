@@ -77,7 +77,7 @@ const TokenLoginForm = ({ provider, onBack }: TokenLoginFormProps) => {
               errorMessage = text;
             }
           }
-        } catch (parseErr) {
+        } catch {
           // If parsing fails, use default error message
           errorMessage = t('Authentication failed');
         }
