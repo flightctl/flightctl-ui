@@ -1,7 +1,17 @@
 import * as React from 'react';
 import * as monaco from 'monaco-editor';
 import { loader } from '@monaco-editor/react';
-import { ActionGroup, Button, Stack, StackItem, Tooltip } from '@patternfly/react-core';
+import {
+  ActionList,
+  ActionListGroup,
+  ActionListItem,
+  Button,
+  Split,
+  SplitItem,
+  Stack,
+  StackItem,
+  Tooltip,
+} from '@patternfly/react-core';
 import { CodeEditor, Language } from '@patternfly/react-code-editor';
 import { DownloadIcon } from '@patternfly/react-icons/dist/js/icons/download-icon';
 import { saveAs } from 'file-saver';
@@ -12,8 +22,6 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { useThemePreferences } from '../../../hooks/useThemePreferences';
 // TODO add useShortcutPopover when adding saving capabilities to the YAML editor
 import { defineConsoleThemes } from './CodeEditorTheme';
-
-import './YamlEditorBase.css';
 
 // Avoid using monaco from CDN
 loader.config({ monaco });
@@ -95,7 +103,6 @@ const YamlEditorBase = ({
       <Stack hasGutter>
         <StackItem>
           <CodeEditor
-            className="fctl-yaml-editor-base"
             copyButtonAriaLabel={t('Copy to clipboard')}
             copyButtonSuccessTooltipText={t('Content copied to clipboard')}
             copyButtonToolTipText={t('Copy to clipboard')}
@@ -125,45 +132,56 @@ const YamlEditorBase = ({
         </StackItem>
         {showActions && (
           <StackItem>
-            <ActionGroup className="fctl-yaml-editor-base__action-group">
-              {onSave && (
-                <>
-                  {disabledEditReason && <Tooltip content={disabledEditReason} triggerRef={saveButtonRef} />}
+            <Split hasGutter>
+              <SplitItem isFilled>
+                <ActionList>
+                  <ActionListGroup>
+                    {onSave && (
+                      <ActionListItem>
+                        {disabledEditReason && <Tooltip content={disabledEditReason} triggerRef={saveButtonRef} />}
+                        <Button
+                          ref={saveButtonRef}
+                          variant="primary"
+                          aria-label={t('Save')}
+                          onClick={handleSave}
+                          isLoading={isSaving}
+                          isAriaDisabled={isSaving || !!disabledEditReason}
+                        >
+                          {t('Save')}
+                        </Button>
+                      </ActionListItem>
+                    )}
+                    {onReload && (
+                      <ActionListItem>
+                        <Button variant="secondary" aria-label={t('Reload')} onClick={onReload}>
+                          {t('Reload')}
+                        </Button>
+                      </ActionListItem>
+                    )}
+                    {onCancel && (
+                      <ActionListItem>
+                        <Button variant="secondary" aria-label={t('Cancel')} onClick={onCancel}>
+                          {t('Cancel')}
+                        </Button>
+                      </ActionListItem>
+                    )}
+                  </ActionListGroup>
+                </ActionList>
+              </SplitItem>
+              <SplitItem>
+                {filename && (
                   <Button
-                    ref={saveButtonRef}
-                    variant="primary"
-                    aria-label={t('Save')}
-                    onClick={handleSave}
-                    isLoading={isSaving}
-                    isAriaDisabled={isSaving || !!disabledEditReason}
+                    icon={<DownloadIcon />}
+                    type="submit"
+                    variant="secondary"
+                    aria-label={t('Download')}
+                    onClick={downloadYaml}
                   >
-                    {t('Save')}
+                    {t('Download')}
                   </Button>
-                </>
-              )}
-              {onReload && (
-                <Button variant="secondary" aria-label={t('Reload')} onClick={onReload}>
-                  {t('Reload')}
-                </Button>
-              )}
-              {onCancel && (
-                <Button variant="secondary" aria-label={t('Cancel')} onClick={onCancel}>
-                  {t('Cancel')}
-                </Button>
-              )}
-              {filename && (
-                <Button
-                  icon={<DownloadIcon />}
-                  type="submit"
-                  variant="secondary"
-                  className="pf-v6-u-ml-auto"
-                  aria-label={t('Download')}
-                  onClick={downloadYaml}
-                >
-                  {t('Download')}
-                </Button>
-              )}
-            </ActionGroup>
+                )}
+              </SplitItem>
+            </Split>
           </StackItem>
         )}
       </Stack>
