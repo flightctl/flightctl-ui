@@ -127,6 +127,7 @@ const YamlEditorBase = ({
               theme: `console-${resolvedTheme}`,
               readOnly: readOnly || !!disabledEditReason,
             }}
+            height="60vh"
             onChange={(val) => onChange?.(val)}
           />
         </StackItem>

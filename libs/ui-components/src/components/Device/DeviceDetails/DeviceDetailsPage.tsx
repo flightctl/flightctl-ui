@@ -23,13 +23,18 @@ import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import DeviceDetailsTab from './DeviceDetailsTab';
 import TerminalTab from './TerminalTab';
-import { getEditDisabledReason, getResumeDisabledReason, isDeviceEnrolled } from '../../../utils/devices';
+import {
+  getEditDisabledReason,
+  getResumeDisabledReason,
+  hasActiveConsoleSessions,
+  isDeviceEnrolled,
+} from '../../../utils/devices';
 import TabsNav from '../../TabsNav/TabsNav';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import EventsCard from '../../Events/EventsCard';
 import PageWithPermissions from '../../common/PageWithPermissions';
-import YamlEditor from '../../common/CodeEditor/YamlEditor';
+import { YamlEditorLoader } from '../../common/CodeEditor/YamlEditor';
 import DeviceAliasEdit from './DeviceAliasEdit';
 import { SystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 import DeviceDetailsCatalog from './DeviceDetailsCatalog';
@@ -206,11 +211,12 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
           <Route
             path="yaml"
             element={
-              <YamlEditor
+              <YamlEditorLoader
                 apiObj={device}
                 refetch={refetch}
                 disabledEditReason={editDisabledReason}
                 canEdit={hasEditPermissions}
+                shouldFetchInitially={hasActiveConsoleSessions(device)}
               />
             }
           />

@@ -1,6 +1,8 @@
 import { Device, DeviceSummaryStatusType, ObjectMeta } from '@flightctl/types';
 import { TFunction } from 'react-i18next';
 
+const DEVICE_CONSOLE_ANNOTATION = 'device-controller/console';
+
 const deviceFleetRegExp = /^Fleet\/(?<fleetName>.*)$/;
 
 export const getDeviceFleet = (metadata: ObjectMeta) => {
@@ -35,4 +37,13 @@ export const getResumeDisabledReason = (device: Device, t: TFunction) => {
     return t('Device is not suspended.');
   }
   return undefined;
+};
+
+export const hasActiveConsoleSessions = (device: Device): boolean => {
+  const consoleAnnotation = device.metadata?.annotations?.[DEVICE_CONSOLE_ANNOTATION]?.trim();
+  if (!consoleAnnotation || consoleAnnotation === '[]') {
+    return false;
+  }
+  // Content is a JSON array including the sessionID and sessionMetadata
+  return true;
 };
