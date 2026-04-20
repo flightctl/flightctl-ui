@@ -58,6 +58,21 @@ describe('Create fleet form', () => {
     fleetDetailsPage.title.should('have.text', 'sample-fleet');
   });
 
+  it('allows navigating between previous and current step when there are validation errors', () => {
+    fleetsPage.openCreateFleetFormButton.click();
+    createFleetWizardPage = new CreateFleetWizardPage();
+
+    createFleetWizardPage.newFleetNameField.type('another-fleet');
+    createFleetWizardPage.nextFleetWizardButton.should('be.enabled').click();
+
+    createFleetWizardPage.newFleetSystemImageField.type('invalid!oci').blur();
+    createFleetWizardPage.nextFleetWizardButton.should('be.disabled');
+    createFleetWizardPage.backFleetWizardButton.click();
+    createFleetWizardPage.nextFleetWizardButton.should('be.enabled').click();
+
+    createFleetWizardPage.newFleetSystemImageField.should('be.visible').should('have.value', 'invalid!oci');
+  });
+
   it('disables the create fleet button if a fleet with the same name exists', () => {
     const existingFleetName = 'eu-west-prod-001';
     fleetsPage.fleetRow(existingFleetName).should('exist');
