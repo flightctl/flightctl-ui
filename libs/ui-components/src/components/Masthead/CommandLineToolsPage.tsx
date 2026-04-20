@@ -16,7 +16,7 @@ import ExternalLinkAltIcon from '@patternfly/react-icons/dist/js/icons/external-
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
 import { getErrorMessage } from '../../utils/error';
-import { CliArtifactsResponse } from '../../types/extraTypes';
+import { CliArtifactTool, CliArtifactsResponse } from '../../types/extraTypes';
 
 type CommandLineToolsContentProps = {
   productName: string;
@@ -30,6 +30,47 @@ type CommandLineArtifact = CliArtifactsResponse['artifacts'][0];
 const getArtifactUrl = (baseUrl: string, artifact: CommandLineArtifact) => {
   const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
   return `${normalizedBaseUrl}/${artifact.arch}/${artifact.os}/${artifact.filename}`;
+};
+
+const ArtifactDownloadList = ({ baseUrl, items }: { baseUrl: string; items: CommandLineArtifact[] }) => {
+  const { t } = useTranslation();
+  return (
+    <List>
+      {items.map((cliArtifact) => {
+        const linkText = t('Download for {{ os }} for {{ arch }}', {
+          os: cliArtifact.os,
+          arch: cliArtifact.arch,
+        });
+        return (
+          <ListItem key={cliArtifact.filename}>
+            <Button
+              component="a"
+              variant="link"
+              isInline
+              href={getArtifactUrl(baseUrl, cliArtifact)}
+              target="_blank"
+              rel="noopener noreferrer"
+              icon={<ExternalLinkAltIcon />}
+              iconPosition="end"
+              aria-label={linkText}
+            >
+              {linkText}
+            </Button>
+          </ListItem>
+        );
+      })}
+    </List>
+  );
+};
+
+const getArtifactTool = (artifact: CommandLineArtifact) => {
+  if (!artifact.tool) {
+    // Handle backward compatibility with older artifacts before "tool" was added
+    return artifact.filename.includes('flightctl-restore')
+      ? CliArtifactTool.FlightctlRestore
+      : CliArtifactTool.Flightctl;
+  }
+  return artifact.tool;
 };
 
 const CommandLineToolsContent = ({
@@ -65,32 +106,39 @@ const CommandLineToolsContent = ({
     );
   }
 
+  const baseUrl = artifactsResponse?.baseUrl || '';
+  const mainCliArtifacts = cliArtifacts.filter((a) => getArtifactTool(a) === CliArtifactTool.Flightctl);
+  const restoreCliArtifacts = cliArtifacts.filter((a) => getArtifactTool(a) === CliArtifactTool.FlightctlRestore);
+
   return (
-    <List>
-      {cliArtifacts.map((cliArtifact) => {
-        const linkText = t('Download flightctl CLI for {{ os }} for {{ arch }}', {
-          os: cliArtifact.os,
-          arch: cliArtifact.arch,
-        });
-        return (
-          <ListItem key={cliArtifact.filename}>
-            <Button
-              component="a"
-              variant="link"
-              isInline
-              href={getArtifactUrl(artifactsResponse?.baseUrl || '', cliArtifact)}
-              target="_blank"
-              rel="noopener noreferrer"
-              icon={<ExternalLinkAltIcon />}
-              iconPosition="end"
-              aria-label={linkText}
-            >
-              {linkText}
-            </Button>
-          </ListItem>
-        );
-      })}
-    </List>
+    <Stack hasGutter>
+      {mainCliArtifacts.length > 0 ? (
+        <>
+          <StackItem>
+            <Title headingLevel="h2">{t('flightctl Command Line Interface (CLI)')}</Title>
+          </StackItem>
+          <StackItem>
+            {t('Use the flightctl CLI to manage your edge resources, such as devices and fleets, from a terminal.')}
+          </StackItem>
+          <StackItem>
+            <ArtifactDownloadList baseUrl={baseUrl} items={mainCliArtifacts} />
+          </StackItem>
+        </>
+      ) : null}
+      {restoreCliArtifacts.length > 0 ? (
+        <>
+          <StackItem>
+            <Title headingLevel="h2">{t('flightctl-restore Command Line Interface (CLI)')}</Title>
+          </StackItem>
+          <StackItem>
+            {t('Use the flightctl-restore CLI to prepare devices after restoring the system from a backup.')}
+          </StackItem>
+          <StackItem>
+            <ArtifactDownloadList baseUrl={baseUrl} items={restoreCliArtifacts} />
+          </StackItem>
+        </>
+      ) : null}
+    </Stack>
   );
 };
 
@@ -141,7 +189,7 @@ const CommandLineToolsPage = () => {
         <Divider />
         <StackItem>
           {t(
-            'With the {{ productName }} command line interface, you can manage your fleets, devices and repositories from a terminal.',
+            'With the {{ productName }} command line interface tools, you can manage your fleets, devices and repositories from a terminal.',
             {
               productName,
             },
