@@ -55,11 +55,17 @@ export const isFleet = (resource: ResourceSync | Fleet): resource is Fleet => re
 // We use the fixed type to get proper Typescript checks for the field
 export type InlineApplicationFileFixed = FileContent & RelativePath;
 
+export enum CliArtifactTool {
+  Flightctl = 'flightctl',
+  FlightctlRestore = 'flightctl-restore',
+}
+
 type CliArtifact = {
   os: string;
   arch: string;
   filename: string;
   sha256: string;
+  tool?: CliArtifactTool;
 };
 
 export type CliArtifactsResponse = {
