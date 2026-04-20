@@ -1023,6 +1023,7 @@
   "{{ fieldName }} is required": "{{ fieldName }} is required",
   "Use lowercase alphanumeric characters, or hyphens (-). Must start and end with an alphanumeric character.": "Use lowercase alphanumeric characters, or hyphens (-). Must start and end with an alphanumeric character.",
   "Name must not exceed {{ maxLength }} characters": "Name must not exceed {{ maxLength }} characters",
+  "Use lowercase alphanumeric characters, hyphens (-), or dots (.). Must start and end with an alphanumeric character.": "Use lowercase alphanumeric characters, hyphens (-), or dots (.). Must start and end with an alphanumeric character.",
   "Build name is required": "Build name is required",
   "{{ fieldName }} must not exceed {{ maxLength }} characters": "{{ fieldName }} must not exceed {{ maxLength }} characters",
   "System image is invalid": "System image is invalid",

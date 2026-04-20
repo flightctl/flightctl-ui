@@ -55,6 +55,7 @@ const OCI_IMAGE_FULL_REGEXP = /^(?![./_])[a-zA-Z0-9.\-\/:@_+]*$/;
 // Accepts all characters from the above regex, but it rejects leading dot, slash, or underscore
 const OCI_IMAGE_ALLOWED_CHARS_REGEXP = /^[a-zA-Z0-9.\-\/:@_+]*$/;
 const GENERIC_NAME_REGEXP = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
+const CONFIG_NAME_REGEXP = /^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$/; // same as generic name plus "dots"
 const APPLICATION_VAR_NAME_REGEXP = /^[a-zA-Z_]+[a-zA-Z0-9_]*$/;
 
 export const GIT_TARGET_REVISION_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9.\/_-])*$/;
@@ -240,13 +241,20 @@ export const validApplicationAndVolumeName = (t: TFunction) =>
     }),
   );
 
-export const validGenericName = (t: TFunction) =>
-  genericNameSchema(t).max(
-    GENERIC_NAME_MAX_LENGTH,
-    t('Name must not exceed {{ maxLength }} characters', {
-      maxLength: GENERIC_NAME_MAX_LENGTH,
-    }),
-  );
+export const validConfigName = (t: TFunction) =>
+  Yup.string()
+    .matches(
+      CONFIG_NAME_REGEXP,
+      t(
+        'Use lowercase alphanumeric characters, hyphens (-), or dots (.). Must start and end with an alphanumeric character.',
+      ),
+    )
+    .max(
+      EXTENDED_MAX_LENGTH,
+      t('Name must not exceed {{ maxLength }} characters', {
+        maxLength: EXTENDED_MAX_LENGTH,
+      }),
+    );
 
 export const getBuildNameValidations = (t: TFunction) => [
   {
@@ -1054,7 +1062,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         if (isGitConfigTemplate(value)) {
           return Yup.object<GitConfigTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
-            name: validGenericName(t).required(t('Name is required.')),
+            name: validConfigName(t).required(t('Name is required.')),
             path: Yup.string().required(t('Path is required.')).matches(absolutePathRegex, t('Path must be absolute.')),
             repository: Yup.string().required(t('Repository is required.')),
             targetRevision: maxLengthString(t, {
@@ -1066,7 +1074,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
           return Yup.object<HttpConfigTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
             repository: Yup.string().required(t('Repository is required.')),
-            name: validGenericName(t).required(t('Name is required.')),
+            name: validConfigName(t).required(t('Name is required.')),
             filePath: Yup.string()
               .required(t('File path is required.'))
               .matches(absolutePathRegex, t('Path must be absolute.')),
@@ -1075,7 +1083,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         } else if (isKubeSecretTemplate(value)) {
           return Yup.object<KubeSecretTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
-            name: validGenericName(t).required(t('Name is required.')),
+            name: validConfigName(t).required(t('Name is required.')),
             secretName: Yup.string().required(t('Secret name is required.')),
             secretNs: Yup.string().required(t('Secret namespace is required.')),
             mountPath: Yup.string()
@@ -1085,7 +1093,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         } else if (isInlineConfigTemplate(value)) {
           return Yup.object<InlineConfigTemplate>().shape({
             type: Yup.string().required(t('Source type is required.')),
-            name: validGenericName(t).required(t('Name is required.')),
+            name: validConfigName(t).required(t('Name is required.')),
             files: Yup.array().of(
               Yup.object<InlineConfigTemplate['files'][0]>().shape({
                 path: Yup.string()
@@ -1114,7 +1122,7 @@ export const validConfigTemplatesSchema = (t: TFunction) =>
         }
 
         return Yup.object<InlineConfigTemplate>().shape({
-          name: validGenericName(t).required(t('Name is required.')),
+          name: validConfigName(t).required(t('Name is required.')),
           type: Yup.string().required(t('Source type is required.')),
         });
       }),
