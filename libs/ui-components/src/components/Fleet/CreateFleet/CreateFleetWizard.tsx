@@ -57,9 +57,12 @@ const getValidStepIds = (formikErrors: FormikErrors<FleetFormValues>): string[] 
   return validStepIds;
 };
 
+// Do not disable the current step where there could be validation errors
 const isDisabledStep = (stepId: string, validStepIds: string[]) => {
-  const validIndex = validStepIds.indexOf(stepId);
-  return validIndex === -1 || validIndex !== orderedIds.indexOf(stepId);
+  const stepIdx = orderedIds.findIndex((orderedStepId) => orderedStepId === stepId);
+  return orderedIds.some((orderedId, orderedStepIdx) => {
+    return orderedStepIdx < stepIdx && !validStepIds.includes(orderedId);
+  });
 };
 
 const CreateFleetWizard = () => {

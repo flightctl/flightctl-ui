@@ -59,6 +59,10 @@ export class CreateFleetWizardPage {
     return cy.contains('button', 'Next');
   }
 
+  get backFleetWizardButton() {
+    return cy.contains('button', 'Back');
+  }
+
   get addConfigurationButton() {
     return cy.contains('button', 'Add configuration');
   }
