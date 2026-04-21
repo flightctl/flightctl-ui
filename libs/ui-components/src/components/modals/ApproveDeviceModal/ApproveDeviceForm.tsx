@@ -47,9 +47,7 @@ const ApproveDeviceForm: React.FC<ApproveDeviceFormProps> = ({ enrollmentRequest
       <FormGroup label={t('Labels')}>
         <LabelsField name="labels" onChangeCallback={matchLabelsOnChange} />
       </FormGroup>
-      <FormGroup label={t('Fleet name')}>
-        <DeviceLabelMatch matchStatus={matchStatus} />
-      </FormGroup>
+      <DeviceLabelMatch isApproval matchStatus={matchStatus} />
       {children}
       {error && <Alert isInline title={error} variant="danger" />}
       <ActionGroup>
