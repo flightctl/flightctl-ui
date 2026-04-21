@@ -49,9 +49,7 @@ const GeneralInfoStep = () => {
       <FormGroup label={t('Device labels')}>
         <LabelsField name="labels" onChangeCallback={matchLabelsOnChange} />
       </FormGroup>
-      <FormGroup label={t('Fleet name')}>
-        <DeviceLabelMatch matchStatus={matchStatus} />
-      </FormGroup>
+      <DeviceLabelMatch isApproval={false} matchStatus={matchStatus} />
     </FlightCtlForm>
   );
 };

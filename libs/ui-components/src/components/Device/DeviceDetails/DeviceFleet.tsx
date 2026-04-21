@@ -44,7 +44,7 @@ const MultipleDeviceOwners = ({ multipleOwnersCondition }: { multipleOwnersCondi
     <Popover
       bodyContent={
         <span>
-          {t('Device is owned by more than one fleet:')}
+          {t('Device labels match multiple fleets:')}
           <span>
             <List>
               {owners.map((ownerFleet) => {
