@@ -69,6 +69,7 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
         <Td dataLabel={t('Approve')}>
           <Button
             variant="link"
+            isInline
             onClick={approveEnrollment}
             data-testid={`enrollment-request-approve-button-${rowIndex}`}
           >
