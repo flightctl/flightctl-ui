@@ -1,16 +1,15 @@
 import * as React from 'react';
+import { Button, Icon, Tooltip } from '@patternfly/react-core';
 import { CopyIcon } from '@patternfly/react-icons/dist/js/icons/copy-icon';
-import { Button, ButtonProps, Icon, Tooltip } from '@patternfly/react-core';
 
 import { useTranslation } from '../../hooks/useTranslation';
 
 interface CopyButtonProps {
   text: string;
-  variant?: ButtonProps['variant'];
   ariaLabel?: string;
 }
 
-const CopyButton = ({ ariaLabel, text, variant }: CopyButtonProps) => {
+const CopyButton = ({ ariaLabel, text }: CopyButtonProps) => {
   const { t } = useTranslation();
 
   const [copied, setCopied] = React.useState(false);
@@ -37,8 +36,9 @@ const CopyButton = ({ ariaLabel, text, variant }: CopyButtonProps) => {
   return (
     <Tooltip content={copied ? t('Copied!') : ariaLabel || t('Copy text')}>
       <Button
-        variant={variant || 'plain'}
-        isInline={variant === 'link'}
+        variant="plain"
+        isInline
+        style={{ paddingBlock: 0 }}
         onClick={onCopy}
         icon={
           <Icon size="sm">
