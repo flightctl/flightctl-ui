@@ -10,7 +10,6 @@ import FlightCtlForm from '../../form/FlightCtlForm';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
 import useDeviceLabelMatch from '../../../hooks/useDeviceLabelMatch';
-import ResourceLink from '../../common/ResourceLink';
 import DeviceLabelMatch from './DeviceLabelMatch';
 
 export type ApproveDeviceFormValues = {
@@ -42,7 +41,7 @@ const ApproveDeviceForm: React.FC<ApproveDeviceFormProps> = ({ enrollmentRequest
         isDisabled={!!defaultAlias}
       />
       <FormGroup label={t('Name')} aria-label={t('Name')}>
-        <ResourceLink id={enrollmentRequest.metadata.name as string} variant="full" />
+        {enrollmentRequest.metadata.name}
       </FormGroup>
       <FormGroup label={t('Labels')}>
         <LabelsField name="labels" onChangeCallback={matchLabelsOnChange} />

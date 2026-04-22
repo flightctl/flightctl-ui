@@ -22,6 +22,7 @@ const FleetLessDevice = () => {
         <Button
           isInline
           variant="plain"
+          style={{ paddingBlock: 0 }}
           icon={<OutlinedQuestionCircleIcon />}
           aria-label={t('Ownership information')}
         />
