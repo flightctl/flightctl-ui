@@ -65,10 +65,22 @@ export const commonQueries = {
     }
     return `fleets?${searchParams.toString()}`;
   },
-  getResourceSyncsByRepo: (repositoryId: string, options?: CommonQueryOptions) => {
-    const searchParams = new URLSearchParams();
-    searchParams.set('fieldSelector', `spec.repository=${repositoryId}`);
+  getResourceSyncsByRepo: ({
+    repositoryId,
+    rsName,
+    options,
+  }: {
+    repositoryId: string;
+    rsName?: string;
+    options?: CommonQueryOptions;
+  }) => {
+    const selectors: string[] = [`spec.repository=${repositoryId}`];
+    if (rsName) {
+      selectors.push(`metadata.name contains ${rsName}`);
+    }
 
+    const searchParams = new URLSearchParams();
+    searchParams.set('fieldSelector', selectors.join(','));
     if (options?.limit) {
       searchParams.set('limit', `${options.limit}`);
     }

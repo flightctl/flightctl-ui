@@ -27,7 +27,6 @@ import { ResourceSync, ResourceSyncList, ResourceSyncType } from '@flightctl/typ
 import { getObservedHash } from '../../utils/status/repository';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import Table, { TableColumn } from '../Table/Table';
-import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import TableTextSearch from '../Table/TableTextSearch';
 import { useTableSelect } from '../../hooks/useTableSelect';
 
@@ -78,8 +77,6 @@ const getColumns = (t: TFunction): TableColumn<ResourceSync>[] => [
     name: t('Observed hash'),
   },
 ];
-
-const getSearchText = (resourceSync: ResourceSync) => [resourceSync.metadata.name];
 
 const ResourceSyncEmptyState = ({ addResourceSync }: { addResourceSync?: VoidFunction }) => {
   const { t } = useTranslation();
@@ -177,16 +174,15 @@ const repositoryResourceSyncListPermissions = [
 ];
 
 const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) => {
+  const [nameSearch, setNameSearch] = React.useState('');
   const [rsList, isLoading, error, refetch] = useFetchPeriodically<ResourceSyncList>({
-    endpoint: commonQueries.getResourceSyncsByRepo(repositoryId),
+    endpoint: commonQueries.getResourceSyncsByRepo({ repositoryId, rsName: nameSearch }),
   });
 
   const resourceSyncs = rsList?.items || [];
 
   const { t } = useTranslation();
   const { remove } = useFetch();
-  const { filteredData, search, setSearch } = useTableTextSearch(resourceSyncs, getSearchText);
-
   const columns = React.useMemo(() => getColumns(t), [t]);
 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
@@ -210,7 +206,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
         <ToolbarContent>
           <ToolbarGroup>
             <ToolbarItem>
-              <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name')} />
+              <TableTextSearch value={nameSearch} setValue={setNameSearch} placeholder={t('Search by name')} />
             </ToolbarItem>
           </ToolbarGroup>
           {canDelete && (
@@ -242,12 +238,12 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
         columns={columns}
-        hasFilters={!!search}
-        emptyData={filteredData.length === 0}
-        clearFilters={() => setSearch('')}
+        hasFilters={!!nameSearch}
+        emptyData={resourceSyncs.length === 0}
+        clearFilters={() => setNameSearch('')}
       >
         <Tbody>
-          {filteredData.map((resourceSync, rowIndex) => {
+          {resourceSyncs.map((resourceSync, rowIndex) => {
             const rsName = resourceSync.metadata.name as string;
             const isSelected = isRowSelected(resourceSync);
             return (
@@ -277,7 +273,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
           })}
         </Tbody>
       </Table>
-      {resourceSyncs.length === 0 && (
+      {!isLoading && resourceSyncs.length === 0 && !nameSearch && (
         <ResourceSyncEmptyState
           addResourceSync={
             canCreate
@@ -292,7 +288,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
       {isMassDeleteModalOpen && (
         <MassDeleteResourceSyncModal
           onClose={() => setIsMassDeleteModalOpen(false)}
-          resources={filteredData.filter(isRowSelected)}
+          resources={resourceSyncs.filter(isRowSelected)}
           onDeleteSuccess={() => {
             setIsMassDeleteModalOpen(false);
             setAllSelected(false);
