@@ -1,16 +1,7 @@
-import fuzzy from 'fuzzysearch';
 import { ApiVersion } from '@flightctl/types';
 
 // Must be an even number for "getSearchResultsCount" to work
 export const MAX_TOTAL_SEARCH_RESULTS = 10;
-
-export const fuzzySeach = (filter: string | undefined, value?: string): boolean => {
-  if (!filter) {
-    return true;
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  return fuzzy(filter.toLowerCase(), value ? value.toLowerCase() : value) as boolean;
-};
 
 export const getSearchResultsCount = (labelCount: number, fleetCount: number) => {
   if (labelCount + fleetCount <= MAX_TOTAL_SEARCH_RESULTS) {

@@ -48,7 +48,6 @@
     "@patternfly/react-styles": "^6.4.0",
     "@patternfly/react-table": "^6.4.0",
     "formik": "^2.4.5",
-    "fuzzysearch": "^1.0.3",
     "i18next": "^21.8.14",
     "i18next-browser-languagedetector": "^7.2.1",
     "i18next-http-backend": "^2.5.0",
