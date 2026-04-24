@@ -40,7 +40,6 @@
     "@xterm/xterm": "^5.5.0",
     "file-saver": "^2.0.2",
     "formik": "^2.4.5",
-    "fuzzysearch": "^1.0.3",
     "js-yaml": "^4.1.1",
     "percent-round": "^2.3.1",
     "react-markdown": "^8.0.7",
