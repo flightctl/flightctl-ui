@@ -17,15 +17,19 @@ import LabelsView from '../../common/LabelsView';
 import { getDateDisplay } from '../../../utils/dates';
 import { getFleetRolloutStatusWarning } from '../../../utils/status/fleet';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { useVulnerabilitiesEnabled } from '../../../hooks/useServicesEnabled';
 import RepositorySourceList from '../../Repository/RepositoryDetails/RepositorySourceList';
 import FleetOwnerLink from './FleetOwnerLink';
 import FleetDevicesCharts from './FleetDevicesCharts';
 import FleetStatus from '../FleetStatus';
 import FleetDevicesCount from './FleetDevicesCount';
 import EventsCard from '../../Events/EventsCard';
+import FleetVulnerabilities from './FleetVulnerabilities';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
+  const [vulnerabilitiesEnabled, canListVulnerabilities] = useVulnerabilitiesEnabled();
+  const showVulnerabilities = vulnerabilitiesEnabled && canListVulnerabilities;
   const fleetId = fleet.metadata.name as string;
   const devicesSummary = fleet.status?.devicesSummary;
   const rolloutError = getFleetRolloutStatusWarning(fleet, t);
@@ -82,6 +86,16 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
             </DescriptionList>
           </CardBody>
         </Card>
+
+        {showVulnerabilities && (
+          <Card className="pf-v6-u-mt-md">
+            <CardTitle>{t('Security overview')}</CardTitle>
+            <CardBody>
+              <FleetVulnerabilities fleetId={fleetId} />
+            </CardBody>
+          </Card>
+        )}
+
         {devicesSummary && (
           <Card className="pf-v6-u-mt-md">
             <CardTitle>{t('Fleet devices')}</CardTitle>

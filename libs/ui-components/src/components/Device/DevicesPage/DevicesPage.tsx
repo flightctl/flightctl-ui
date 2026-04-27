@@ -20,12 +20,15 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
   const { t } = useTranslation();
 
   const {
-    nameOrAlias,
-    setNameOrAlias,
+    textFilters,
+    clearTextFilters,
+    setTextFilter,
     ownerFleets,
+    onlyFleetless,
     activeStatuses,
     hasFiltersEnabled,
     setOwnerFleets,
+    setOnlyFleetless,
     setActiveStatuses,
     selectedLabels,
     setSelectedLabels,
@@ -41,8 +44,9 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
     isUpdating: updating,
     refetch,
   } = useDevices({
-    nameOrAlias,
+    textFilters,
     ownerFleets,
+    onlyFleetless,
     onlyDecommissioned,
     activeStatuses,
     labels: selectedLabels,
@@ -70,8 +74,7 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
             <DecommissionedDevicesTable
               devices={data}
               refetch={refetch}
-              nameOrAlias={nameOrAlias}
-              setNameOrAlias={setNameOrAlias}
+              setTextFilter={setTextFilter}
               hasFiltersEnabled={hasFiltersEnabled || updating}
               setOnlyDecommissioned={setOnlyDecommissioned}
               isFilterUpdating={updating}
@@ -80,13 +83,16 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
           ) : (
             <EnrolledDevicesTable
               devices={data}
-              nameOrAlias={nameOrAlias}
-              setNameOrAlias={setNameOrAlias}
+              textFilters={textFilters}
+              setTextFilter={setTextFilter}
+              clearTextFilters={clearTextFilters}
               hasFiltersEnabled={hasFiltersEnabled || updating}
               ownerFleets={ownerFleets}
+              onlyFleetless={onlyFleetless}
               setOnlyDecommissioned={setOnlyDecommissioned}
               activeStatuses={activeStatuses}
               setOwnerFleets={setOwnerFleets}
+              setOnlyFleetless={setOnlyFleetless}
               setActiveStatuses={setActiveStatuses}
               selectedLabels={selectedLabels}
               setSelectedLabels={setSelectedLabels}

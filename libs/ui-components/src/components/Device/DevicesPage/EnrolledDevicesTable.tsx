@@ -19,7 +19,7 @@ import {
   getUpdateStatusHelperText,
 } from '../../Status/utils';
 
-import Table, { ApiSortTableColumn } from '../../Table/Table';
+import Table from '../../Table/Table';
 import { useDecommissionListAction, useResumeListAction } from '../../ListPage/ListPageActions';
 import TablePagination from '../../Table/TablePagination';
 import MassDecommissionDeviceModal from '../../modals/massModals/MassDecommissionDeviceModal/MassDecommissionDeviceModal';
@@ -27,18 +27,21 @@ import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
 import { EnrolledDevicesEmptyState } from './DevicesEmptyStates';
 import DeviceTableToolbar from './DeviceTableToolbar';
 import EnrolledDeviceTableRow from './EnrolledDeviceTableRow';
-import { FilterSearchParams } from '../../../utils/status/devices';
+import { DeviceTextFilterKey, FilterSearchParams } from '../../../utils/status/devices';
 import { GlobalSystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 
 interface EnrolledDeviceTableProps {
   devices: Array<Device>;
   ownerFleets: string[];
+  onlyFleetless: boolean;
   activeStatuses: FilterStatusMap;
   hasFiltersEnabled: boolean;
-  nameOrAlias: string | undefined;
+  textFilters: Partial<Record<DeviceTextFilterKey, string>>;
+  setTextFilter: (key: DeviceTextFilterKey, value: string) => void;
+  clearTextFilters: VoidFunction;
   setOnlyDecommissioned: (check: boolean) => void;
-  setNameOrAlias: (text: string) => void;
   setOwnerFleets: (ownerFleets: string[]) => void;
+  setOnlyFleetless: (enabled: boolean) => void;
   setActiveStatuses: (activeStatuses: FilterStatusMap) => void;
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
@@ -48,7 +51,7 @@ interface EnrolledDeviceTableProps {
   // getSortParams: (columnIndex: number) => ThProps['sort'];
 }
 
-export const getDeviceTableColumns = (t: TFunction): ApiSortTableColumn[] => [
+export const getDeviceTableColumns = (t: TFunction) => [
   {
     id: 'alias',
     name: t('Alias'),
@@ -86,10 +89,13 @@ const enrolledDevicesPermissions = [
 
 const EnrolledDevicesTable = ({
   devices,
-  nameOrAlias,
-  setNameOrAlias,
+  textFilters,
+  setTextFilter,
+  clearTextFilters,
   ownerFleets,
   setOwnerFleets,
+  onlyFleetless,
+  setOnlyFleetless,
   activeStatuses,
   setActiveStatuses,
   setOnlyDecommissioned,
@@ -131,7 +137,8 @@ const EnrolledDevicesTable = ({
         [FilterSearchParams.UpdatedStatus]: [],
       });
       setOwnerFleets([]);
-      setNameOrAlias('');
+      setOnlyFleetless(false);
+      clearTextFilters();
       setSelectedLabels([]);
     }
   };
@@ -141,10 +148,13 @@ const EnrolledDevicesTable = ({
       <GlobalSystemRestoreBanners onResumeComplete={refetchDevices} />
 
       <DeviceTableToolbar
-        nameOrAlias={nameOrAlias}
-        setNameOrAlias={setNameOrAlias}
+        textFilters={textFilters}
+        setTextFilter={setTextFilter}
+        clearTextFilters={clearTextFilters}
         ownerFleets={ownerFleets}
         setOwnerFleets={setOwnerFleets}
+        onlyFleetless={onlyFleetless}
+        setOnlyFleetless={setOnlyFleetless}
         activeStatuses={activeStatuses}
         setActiveStatuses={setActiveStatuses}
         selectedLabels={selectedLabels}

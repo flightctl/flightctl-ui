@@ -2,6 +2,10 @@ import * as React from 'react';
 import debounce from 'lodash/debounce';
 import {
   Button,
+  Flex,
+  FlexItem,
+  HelperText,
+  HelperTextItem,
   Icon,
   MenuToggle,
   MenuToggleElement,
@@ -10,6 +14,8 @@ import {
   SelectList,
   SelectOption,
   Spinner,
+  Stack,
+  StackItem,
   TextInputGroup,
   TextInputGroupMain,
   TextInputGroupUtilities,
@@ -21,17 +27,22 @@ import { Fleet, FleetList, LabelList } from '@flightctl/types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
 import { isPromiseFulfilled } from '../../../types/typeUtils';
 
-import TableTextSearch, { TableTextSearchProps } from '../../Table/TableTextSearch';
+import TableTextSearch from '../../Table/TableTextSearch';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import { commonQueries as queries } from '../../../utils/query';
 import { MAX_TOTAL_SEARCH_RESULTS, getEmptyFleetSearch, getSearchResultsCount } from '../../../utils/search';
 import { labelToString, stringToLabel } from '../../../utils/labels';
+import {
+  DEVICE_TEXT_FILTER_KEYS,
+  DeviceFilterTypes,
+  DeviceTextFilterKey,
+  FilterSearchParams,
+  getDeviceFilterLabel,
+  isValidCveIdFilterValue,
+} from '../../../utils/status/devices';
 
 import './DeviceToolbarFilters.css';
-
-const NAME_SEARCH = 'NameAndAlias';
-const LABEL_SEARCH = 'LabelsAndFleets';
 
 type LabelFleetSelectorProps = {
   selectedFleetNames: string[];
@@ -301,8 +312,8 @@ type DeviceToolbarFilterProps = {
   setSelectedFleets: (ownerFleets: string[]) => void;
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
-  nameOrAlias?: TableTextSearchProps['value'];
-  setNameOrAlias?: TableTextSearchProps['setValue'];
+  textFilters?: Partial<Record<DeviceTextFilterKey, string>>;
+  setTextFilter?: (key: DeviceTextFilterKey, value: string) => void;
 };
 
 const DeviceToolbarFilter = ({
@@ -310,35 +321,59 @@ const DeviceToolbarFilter = ({
   setSelectedFleets,
   selectedLabels,
   setSelectedLabels,
-  nameOrAlias,
-  setNameOrAlias,
+  textFilters = {},
+  setTextFilter,
 }: DeviceToolbarFilterProps) => {
   const { t } = useTranslation();
   const [isSearchTypeExpanded, setIsSearchTypeExpanded] = React.useState(false);
-  const [selectedSearchType, setSelectedSearchType] = React.useState(LABEL_SEARCH);
+  const [selectedSearchType, setSelectedSearchType] = React.useState<DeviceFilterTypes>(FilterSearchParams.Label);
+  const [freeTextFilterError, setFreeTextFilterError] = React.useState<string | undefined>(undefined);
 
   const [typingText, setTypingText] = React.useState<string>('');
-  const debouncedSetParam = React.useMemo(
+  const debouncedSetTextFilter = React.useMemo(
     () =>
-      debounce((setValue: TableTextSearchProps['setValue'], value: string) => {
-        setValue(value || '');
+      debounce((key: DeviceTextFilterKey, value: string) => {
+        if (key === FilterSearchParams.CveId) {
+          const isValid = isValidCveIdFilterValue(value);
+          setFreeTextFilterError(
+            isValid
+              ? undefined
+              : t(
+                  'Enter a valid CVE ID in the form CVE-YYYY-sequence, with sequence containing at least 4 digits (for example, CVE-2024-12345).',
+                ),
+          );
+          if (!isValid) {
+            return;
+          }
+        }
+        setTextFilter?.(key, value || '');
       }, 500),
-    [],
+    [setTextFilter, t],
   );
 
-  React.useEffect(() => {
-    if (setNameOrAlias) {
-      debouncedSetParam(setNameOrAlias, typingText);
-    }
-  }, [typingText, setNameOrAlias, debouncedSetParam]);
+  const urlValueForTextMode =
+    selectedSearchType !== FilterSearchParams.Label ? textFilters[selectedSearchType] : undefined;
 
   React.useEffect(() => {
-    if (!nameOrAlias && typingText) {
+    if (!setTextFilter || selectedSearchType === FilterSearchParams.Label) {
+      return undefined;
+    }
+    debouncedSetTextFilter(selectedSearchType, typingText);
+    return () => {
+      debouncedSetTextFilter.cancel();
+    };
+  }, [typingText, selectedSearchType, setTextFilter, debouncedSetTextFilter]);
+
+  React.useEffect(() => {
+    if (selectedSearchType === FilterSearchParams.Label) {
+      return;
+    }
+    if (!urlValueForTextMode && typingText) {
       setTypingText('');
     }
     // When the filter is cleared from the chips, clear the "typingText" too
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nameOrAlias, setTypingText]);
+  }, [selectedSearchType, urlValueForTextMode, setTypingText]);
 
   const onToggle = () => {
     setIsSearchTypeExpanded(!isSearchTypeExpanded);
@@ -348,10 +383,13 @@ const DeviceToolbarFilter = ({
     _event: React.MouseEvent<Element, MouseEvent> | undefined,
     selection: string | number | undefined,
   ) => {
-    setSelectedSearchType(selection as string);
+    const sel = selection as DeviceFilterTypes;
+    setSelectedSearchType(sel);
     setIsSearchTypeExpanded(false);
-    if (selection === LABEL_SEARCH) {
+    if (sel === FilterSearchParams.Label) {
       setTypingText('');
+    } else {
+      setTypingText(textFilters[sel] ?? '');
     }
   };
 
@@ -377,49 +415,66 @@ const DeviceToolbarFilter = ({
   };
 
   return (
-    <>
-      {setNameOrAlias && (
-        <Select
-          toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-            <MenuToggle
-              ref={toggleRef}
-              onClick={onToggle}
-              isExpanded={isSearchTypeExpanded}
-              style={
-                {
-                  width: '250px',
-                } as React.CSSProperties
-              }
-            >
-              {selectedSearchType === NAME_SEARCH ? t('Name and alias') : t('Labels and fleets')}
-            </MenuToggle>
-          )}
-          onSelect={onSearchTypeSelect}
-          onOpenChange={(isOpen) => setIsSearchTypeExpanded(isOpen)}
-          selected={selectedSearchType}
-          isOpen={isSearchTypeExpanded}
-        >
-          <SelectList>
-            <SelectOption id={NAME_SEARCH} value={NAME_SEARCH}>
-              {t('Name and alias')}
-            </SelectOption>
-          </SelectList>
-          <SelectOption id={LABEL_SEARCH} value={LABEL_SEARCH}>
-            {t('Labels and fleets')}
-          </SelectOption>
-        </Select>
-      )}
-      {setNameOrAlias && selectedSearchType === NAME_SEARCH ? (
-        <TableTextSearch value={typingText} setValue={setTypingText} />
-      ) : (
-        <LabelFleetSelector
-          placeholder={setNameOrAlias ? undefined : t('Filter by labels and fleets')}
-          selectedFleetNames={selectedFleetNames}
-          selectedLabels={selectedLabels}
-          onSelect={onSelectFleetOrLabel}
-        />
-      )}
-    </>
+    <Stack hasGutter>
+      <StackItem>
+        <Flex>
+          <FlexItem>
+            {setTextFilter && (
+              <Select
+                toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                  <MenuToggle
+                    ref={toggleRef}
+                    onClick={onToggle}
+                    isExpanded={isSearchTypeExpanded}
+                    style={
+                      {
+                        width: '250px',
+                      } as React.CSSProperties
+                    }
+                  >
+                    {getDeviceFilterLabel(t, selectedSearchType)}
+                  </MenuToggle>
+                )}
+                onSelect={onSearchTypeSelect}
+                onOpenChange={(isOpen) => setIsSearchTypeExpanded(isOpen)}
+                selected={selectedSearchType}
+                isOpen={isSearchTypeExpanded}
+              >
+                <SelectList>
+                  <SelectOption id={FilterSearchParams.Label} value={FilterSearchParams.Label}>
+                    {t('Labels and fleets')}
+                  </SelectOption>
+                  {DEVICE_TEXT_FILTER_KEYS.map((key) => (
+                    <SelectOption key={key} id={key} value={key}>
+                      {getDeviceFilterLabel(t, key)}
+                    </SelectOption>
+                  ))}
+                </SelectList>
+              </Select>
+            )}
+          </FlexItem>
+          <FlexItem>
+            {setTextFilter && selectedSearchType !== FilterSearchParams.Label ? (
+              <TableTextSearch value={typingText} setValue={setTypingText} />
+            ) : (
+              <LabelFleetSelector
+                placeholder={setTextFilter ? undefined : t('Filter by labels and fleets')}
+                selectedFleetNames={selectedFleetNames}
+                selectedLabels={selectedLabels}
+                onSelect={onSelectFleetOrLabel}
+              />
+            )}
+          </FlexItem>
+        </Flex>
+        {freeTextFilterError && (
+          <StackItem className="pf-v6-u-mt-sm">
+            <HelperText>
+              <HelperTextItem variant="error">{freeTextFilterError}</HelperTextItem>
+            </HelperText>
+          </StackItem>
+        )}
+      </StackItem>
+    </Stack>
   );
 };
 

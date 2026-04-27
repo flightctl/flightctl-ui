@@ -61,6 +61,9 @@ const FleetDetails = React.lazy(
 );
 
 const OverviewPage = React.lazy(() => import('@flightctl/ui-components/src/components/OverviewPage/OverviewPage'));
+const SecurityOverviewPage = React.lazy(
+  () => import('@flightctl/ui-components/src/components/SecurityOverview/SecurityOverviewPage'),
+);
 const PendingEnrollmentRequestsBadge = React.lazy(
   () => import('@flightctl/ui-components/src/components/EnrollmentRequest/PendingEnrollmentRequestsBadge'),
 );
@@ -169,6 +172,15 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
     element: (
       <TitledRoute title={t('Overview')}>
         <OverviewPage />
+      </TitledRoute>
+    ),
+  },
+  {
+    path: '/security-overview',
+    title: t('Security overview'),
+    element: (
+      <TitledRoute title={t('Security overview')}>
+        <SecurityOverviewPage />
       </TitledRoute>
     ),
   },

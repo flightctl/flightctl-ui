@@ -1,28 +1,28 @@
 import * as React from 'react';
 import debounce from 'lodash/debounce';
 
-import TableTextSearch, { TableTextSearchProps } from '../../Table/TableTextSearch';
+import { DeviceTextFilterKey, FilterSearchParams } from '../../../utils/status/devices';
+import TableTextSearch from '../../Table/TableTextSearch';
 
 import './DeviceToolbarFilters.css';
 
 type DeviceNameOnlyToolbarFilterProps = {
-  nameOrAlias?: TableTextSearchProps['value'];
-  setNameOrAlias: TableTextSearchProps['setValue'];
+  setTextFilter: (key: DeviceTextFilterKey, value: string) => void;
 };
 
-const DeviceNameOnlyToolbarFilter = ({ setNameOrAlias }: DeviceNameOnlyToolbarFilterProps) => {
+const DeviceNameOnlyToolbarFilter = ({ setTextFilter }: DeviceNameOnlyToolbarFilterProps) => {
   const [typingText, setTypingText] = React.useState<string>('');
-  const debouncedSetParam = React.useMemo(
+  const debouncedSetNameOrAlias = React.useMemo(
     () =>
-      debounce((setValue: TableTextSearchProps['setValue'], value: string) => {
-        setValue(value || '');
+      debounce((value: string) => {
+        setTextFilter?.(FilterSearchParams.NameOrAlias, value || '');
       }, 500),
-    [],
+    [setTextFilter],
   );
 
   React.useEffect(() => {
-    debouncedSetParam(setNameOrAlias, typingText);
-  }, [typingText, setNameOrAlias, debouncedSetParam]);
+    debouncedSetNameOrAlias(typingText);
+  }, [typingText, setTextFilter, debouncedSetNameOrAlias]);
 
   return <TableTextSearch value={typingText} setValue={setTypingText} />;
 };

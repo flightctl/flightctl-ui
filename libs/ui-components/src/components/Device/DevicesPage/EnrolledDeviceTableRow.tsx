@@ -12,7 +12,7 @@ import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import ResourceLink from '../../common/ResourceLink';
-import { ApiSortTableColumn } from '../../Table/Table';
+import { ApiTableColumn } from '../../Table/Table';
 
 type EnrolledDeviceTableRowProps = {
   device: Device;
@@ -26,7 +26,7 @@ type EnrolledDeviceTableRowProps = {
   resumeAction?: ListAction;
   singleSelect?: boolean;
   hideActions?: boolean;
-  deviceColumns: ApiSortTableColumn[];
+  deviceColumns: ApiTableColumn[];
 };
 
 const EnrolledDeviceTableRow = ({

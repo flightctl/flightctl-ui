@@ -9,6 +9,7 @@ export enum ImageBuildConditionReason {
   ImageBuildConditionReasonPending = 'Pending',
   ImageBuildConditionReasonBuilding = 'Building',
   ImageBuildConditionReasonPushing = 'Pushing',
+  ImageBuildConditionReasonGeneratingSBOM = 'GeneratingSBOM',
   ImageBuildConditionReasonCompleted = 'Completed',
   ImageBuildConditionReasonFailed = 'Failed',
   ImageBuildConditionReasonCanceling = 'Canceling',

@@ -95,6 +95,7 @@ export const isImageBuildActiveReason = (reason: ImageBuildConditionReason): boo
     reason === ImageBuildConditionReason.ImageBuildConditionReasonPending ||
     reason === ImageBuildConditionReason.ImageBuildConditionReasonBuilding ||
     reason === ImageBuildConditionReason.ImageBuildConditionReasonPushing ||
+    reason === ImageBuildConditionReason.ImageBuildConditionReasonGeneratingSBOM ||
     reason === ImageBuildConditionReason.ImageBuildConditionReasonCanceling
   );
 };
@@ -103,6 +104,7 @@ export const isImageBuildCancelable = (reason: ImageBuildConditionReason): boole
   return (
     reason === ImageBuildConditionReason.ImageBuildConditionReasonPending ||
     reason === ImageBuildConditionReason.ImageBuildConditionReasonBuilding ||
+    reason === ImageBuildConditionReason.ImageBuildConditionReasonGeneratingSBOM ||
     reason === ImageBuildConditionReason.ImageBuildConditionReasonPushing
   );
 };

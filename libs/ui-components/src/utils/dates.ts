@@ -12,12 +12,27 @@ const dateTimeFormatter = () =>
     year: 'numeric',
   });
 
+const dateFormatter = () =>
+  new Intl.DateTimeFormat(defaultLang, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
 const getDateDisplay = (timestamp?: string) => {
   if (!timestamp) {
     return 'N/A';
   }
 
   return dateTimeFormatter().format(new Date(timestamp));
+};
+
+const getDateNoTimeDisplay = (timestamp?: string) => {
+  if (!timestamp) {
+    return 'N/A';
+  }
+
+  return dateFormatter().format(new Date(timestamp));
 };
 
 // https://stackoverflow.com/questions/3177836/how-to-format-time-since-xxx-e-g-4-minutes-ago-similar-to-stack-exchange-site
@@ -56,4 +71,4 @@ const timeSinceText = (t: TFunction, timestampStr?: string) => {
   return timeSinceEpochText(t, new Date(timestampStr).getTime());
 };
 
-export { getDateDisplay, timeSinceText };
+export { getDateDisplay, getDateNoTimeDisplay, timeSinceText };

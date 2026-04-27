@@ -1,7 +1,12 @@
 import * as React from 'react';
 import { ApplicationsSummaryStatusType, DeviceSummaryStatusType, DeviceUpdatedStatusType } from '@flightctl/types';
 
-import { FilterSearchParams } from '../../../utils/status/devices';
+import {
+  DEVICE_TEXT_FILTER_KEYS,
+  DeviceTextFilterKey,
+  FilterSearchParams,
+  isValidCveIdFilterValue,
+} from '../../../utils/status/devices';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { FilterStatusMap } from './types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
@@ -21,6 +26,15 @@ const getNewParams = (currentParams: URLSearchParams, newValues: { [key: string]
   return newParams;
 };
 
+const buildTextFilterRemoval = (): Record<string, string[]> =>
+  DEVICE_TEXT_FILTER_KEYS.reduce(
+    (acc, key) => {
+      acc[key] = [''];
+      return acc;
+    },
+    {} as Record<string, string[]>,
+  );
+
 export const useDeviceBackendFilters = () => {
   const {
     router: { useSearchParams },
@@ -28,7 +42,19 @@ export const useDeviceBackendFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const paramsRef = React.useRef(searchParams);
   const ownerFleets = searchParams.getAll(FilterSearchParams.Fleet) || undefined;
-  const nameOrAlias = searchParams.get(FilterSearchParams.NameOrAlias) || undefined;
+  const onlyFleetless = searchParams.get(FilterSearchParams.OnlyFleetless) === 'true';
+
+  const textFilters = React.useMemo((): Partial<Record<DeviceTextFilterKey, string>> => {
+    const out: Partial<Record<DeviceTextFilterKey, string>> = {};
+    for (const key of DEVICE_TEXT_FILTER_KEYS) {
+      const v = searchParams.get(key) || '';
+      const isValid = key === FilterSearchParams.CveId ? isValidCveIdFilterValue(v) : Boolean(v);
+      if (isValid) {
+        out[key] = v;
+      }
+    }
+    return out;
+  }, [searchParams]);
 
   const updateSearchParams = React.useCallback(
     (params: [string, string][]) => {
@@ -89,6 +115,15 @@ export const useDeviceBackendFilters = () => {
     [updateSearchParams],
   );
 
+  const setOnlyFleetless = React.useCallback(
+    (enabled: boolean) => {
+      updateSearchParams(
+        getNewParams(paramsRef.current, { [FilterSearchParams.OnlyFleetless]: [enabled ? 'true' : ''] }),
+      );
+    },
+    [updateSearchParams],
+  );
+
   const setActiveStatuses = React.useCallback(
     (activeStatuses: FilterStatusMap) => {
       updateSearchParams(getNewParams(paramsRef.current, activeStatuses));
@@ -103,26 +138,34 @@ export const useDeviceBackendFilters = () => {
     [updateSearchParams],
   );
 
-  const setNameOrAlias = React.useCallback(
-    (nameOrAlias: string) => {
-      updateSearchParams(getNewParams(paramsRef.current, { [FilterSearchParams.NameOrAlias]: [nameOrAlias] }));
+  const setTextFilter = React.useCallback(
+    (key: DeviceTextFilterKey, value: string) => {
+      updateSearchParams(getNewParams(paramsRef.current, { [key]: [value] }));
     },
     [updateSearchParams],
   );
 
+  const clearTextFilters = React.useCallback(() => {
+    updateSearchParams(getNewParams(paramsRef.current, buildTextFilterRemoval()));
+  }, [updateSearchParams]);
+
   const hasFiltersEnabled =
-    !!nameOrAlias ||
     !!selectedLabels.length ||
     !!ownerFleets.length ||
-    Object.values(activeStatuses).some((s) => !!s.length);
+    onlyFleetless ||
+    Object.values(activeStatuses).some((s) => !!s.length) ||
+    DEVICE_TEXT_FILTER_KEYS.some((key) => !!textFilters[key]);
 
   return {
-    nameOrAlias,
-    setNameOrAlias,
+    textFilters,
+    setTextFilter,
+    clearTextFilters,
     activeStatuses,
     setActiveStatuses,
     ownerFleets,
     setOwnerFleets,
+    onlyFleetless,
+    setOnlyFleetless,
     selectedLabels,
     setSelectedLabels,
     hasFiltersEnabled,

@@ -55,7 +55,7 @@ const TasksCard = () => {
   }
 
   return (
-    <Card>
+    <Card isFullHeight>
       <CardTitle>{t('Tasks')}</CardTitle>
       <CardBody>{content}</CardBody>
     </Card>

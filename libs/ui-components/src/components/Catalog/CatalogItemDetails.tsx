@@ -9,14 +9,10 @@ import {
   DescriptionListGroup,
   DescriptionListTerm,
   Divider,
-  Drawer,
   DrawerActions,
   DrawerCloseButton,
-  DrawerContent,
-  DrawerContentBody,
   DrawerHead,
   DrawerPanelBody,
-  DrawerPanelContent,
   Grid,
   GridItem,
   Spinner,
@@ -27,7 +23,6 @@ import {
   Title,
 } from '@patternfly/react-core';
 import * as React from 'react';
-import { createPortal } from 'react-dom';
 import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 import { Formik, useFormikContext } from 'formik';
@@ -43,6 +38,7 @@ import { getCatalogItemIcon, getFullContainerURI } from './utils';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import WithTooltip from '../common/WithTooltip';
+import FlightCtlPageDrawer from '../common/FlightCtlPageDrawer';
 import { InstallSpecFormik } from './InstallWizard/types';
 
 import './CatalogItemDetails.css';
@@ -59,42 +55,6 @@ type CatalogItemDetailsPanelProps = {
 
 type CatalogItemDetailsProps = CatalogItemDetailsPanelProps & {
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
-};
-
-const getPageContentTop = () => {
-  // Try multiple selectors to find the masthead
-  const masthead =
-    document.getElementById('stack-inline-masthead') || // Standalone masthead
-    document.getElementById('page-main-header'); // OCP Console masthead
-
-  const pageTop = document.getElementById('fctl-cmd-panel');
-
-  return masthead?.getBoundingClientRect()?.bottom || pageTop?.getBoundingClientRect()?.top || 60;
-};
-
-const usePageContentTop = () => {
-  const [topOffset, setTopOffset] = React.useState(() => getPageContentTop());
-
-  React.useEffect(() => {
-    const measureTop = () => {
-      setTopOffset(getPageContentTop());
-    };
-
-    // Measure immediately
-    measureTop();
-
-    // Also measure after a short delay in case layout isn't complete
-    const timeoutId = setTimeout(measureTop, 50);
-
-    window.addEventListener('resize', measureTop);
-
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('resize', measureTop);
-    };
-  }, []);
-
-  return topOffset;
 };
 
 type CatalogItemDetailsHeaderProps = {
@@ -130,7 +90,6 @@ const CatalogItemDetailsPanel = ({
   targetSet,
 }: CatalogItemDetailsPanelProps) => {
   const { t } = useTranslation();
-  const topOffset = usePageContentTop();
   const navigate = useNavigate();
   const { patch, remove } = useFetch();
   const [isDeprecateModalOpen, setIsDeprecateModalOpen] = React.useState(false);
@@ -171,14 +130,7 @@ const CatalogItemDetailsPanel = ({
   const isManaged = !!item.metadata.owner;
 
   const panelContent = (
-    <DrawerPanelContent
-      defaultSize="500px"
-      minSize="400px"
-      maxSize="1200px"
-      isResizable
-      resizeAriaLabel={t('Resize panel')}
-      style={{ pointerEvents: 'auto', boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.15)' }}
-    >
+    <>
       <DrawerHead>
         <CatalogItemDetailsHeader item={item} />
         <DrawerActions>
@@ -272,37 +224,12 @@ const CatalogItemDetailsPanel = ({
           </StackItem>
         </Stack>
       </DrawerPanelBody>
-    </DrawerPanelContent>
-  );
-
-  const drawerWrapper = (
-    <div
-      style={{
-        position: 'fixed',
-        top: `${topOffset}px`,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 400,
-        pointerEvents: 'none',
-      }}
-    >
-      <Drawer isExpanded isInline position="end" style={{ height: '100%', width: '100%', pointerEvents: 'none' }}>
-        <DrawerContent panelContent={panelContent}>
-          <DrawerContentBody
-            style={{
-              background: 'transparent',
-              pointerEvents: 'none',
-            }}
-          />
-        </DrawerContent>
-      </Drawer>
-    </div>
+    </>
   );
 
   return (
     <>
-      {createPortal(drawerWrapper, document.body)}
+      <FlightCtlPageDrawer isExpanded panelContent={panelContent} />
       {isDeprecateModalOpen && (
         <DeprecateModal
           itemName={item.spec.displayName || item.metadata.name || ''}

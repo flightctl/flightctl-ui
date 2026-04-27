@@ -9,7 +9,7 @@ const OverviewPage = () => {
   return (
     <>
       <PageSection hasBodyWrapper={false}>
-        <Title headingLevel="h1" size="3xl" role="heading">
+        <Title headingLevel="h1" size="3xl" role="heading" aria-level={1}>
           {t('Overview')}
         </Title>
       </PageSection>

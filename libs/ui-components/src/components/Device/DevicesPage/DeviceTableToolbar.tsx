@@ -11,19 +11,22 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 
-import { TableTextSearchProps } from '../../Table/TableTextSearch';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { DEVICE_TEXT_FILTER_KEYS, DeviceTextFilterKey, getDeviceFilterLabel } from '../../../utils/status/devices';
+import { labelToString } from '../../../utils/labels';
 import DeviceStatusFilter, { getStatusItem } from './DeviceFilterSelect';
 import { FilterStatusMap, UpdateStatus } from './types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
-import { labelToString } from '../../../utils/labels';
 import DeviceTableToolbarFilters from './DeviceToolbarFilters';
 
 type DeviceTableToolbarProps = {
-  nameOrAlias: TableTextSearchProps['value'];
-  setNameOrAlias: TableTextSearchProps['setValue'];
+  textFilters: Partial<Record<DeviceTextFilterKey, string>>;
+  setTextFilter: (key: DeviceTextFilterKey, value: string) => void;
+  clearTextFilters: VoidFunction;
   ownerFleets: string[];
   setOwnerFleets: (ownerFleets: string[]) => void;
+  onlyFleetless: boolean;
+  setOnlyFleetless: (enabled: boolean) => void;
   activeStatuses: FilterStatusMap;
   setActiveStatuses: (statuses: FilterStatusMap) => void;
   selectedLabels: FlightCtlLabel[];
@@ -35,8 +38,8 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
   const {
     ownerFleets,
     setOwnerFleets,
-    nameOrAlias,
-    setNameOrAlias,
+    textFilters,
+    setTextFilter,
     activeStatuses,
     setActiveStatuses,
     selectedLabels,
@@ -85,8 +88,8 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
                 selectedFleetNames={ownerFleets}
                 setSelectedLabels={setSelectedLabels}
                 setSelectedFleets={setOwnerFleets}
-                nameOrAlias={nameOrAlias}
-                setNameOrAlias={setNameOrAlias}
+                textFilters={textFilters}
+                setTextFilter={setTextFilter}
               />
             </ToolbarItem>
           </ToolbarGroup>
@@ -105,15 +108,27 @@ type DeviceToolbarChipsProps = Omit<DeviceTableToolbarProps, 'setActiveStatuses'
 const DeviceToolbarChips = ({
   activeStatuses,
   updateStatus,
-  nameOrAlias,
-  setNameOrAlias,
+  textFilters,
+  setTextFilter,
+  clearTextFilters,
   ownerFleets,
   setOwnerFleets,
+  onlyFleetless,
+  setOnlyFleetless,
   selectedLabels,
   setSelectedLabels,
 }: DeviceToolbarChipsProps) => {
   const { t } = useTranslation();
   const statusKeys = Object.keys(activeStatuses).filter((k) => !!activeStatuses[k as keyof FilterStatusMap].length);
+  const activeTextFilterKeys = DEVICE_TEXT_FILTER_KEYS.filter((key) => !!textFilters[key]);
+
+  const hasAnyFilter =
+    !!statusKeys.length ||
+    !!ownerFleets.length ||
+    onlyFleetless ||
+    !!activeTextFilterKeys.length ||
+    !!selectedLabels.length;
+
   return (
     <Split hasGutter>
       {statusKeys.map((k) => {
@@ -146,15 +161,31 @@ const DeviceToolbarChips = ({
           </LabelGroup>
         </SplitItem>
       )}
-      {nameOrAlias && (
+      {onlyFleetless && (
         <SplitItem>
-          <LabelGroup categoryName={t('Name / Alias')} isClosable onClick={() => setNameOrAlias('')}>
-            <Label variant="outline" onClose={() => setNameOrAlias('')}>
-              {nameOrAlias}
+          <LabelGroup categoryName={t('Fleet')} isClosable onClick={() => setOnlyFleetless(false)}>
+            <Label variant="outline" onClose={() => setOnlyFleetless(false)}>
+              {t('N/A')}
             </Label>
           </LabelGroup>
         </SplitItem>
       )}
+      {activeTextFilterKeys.map((filterKey) => {
+        const value = textFilters[filterKey];
+        return (
+          <SplitItem key={filterKey}>
+            <LabelGroup
+              categoryName={getDeviceFilterLabel(t, filterKey)}
+              isClosable
+              onClick={() => setTextFilter(filterKey, '')}
+            >
+              <Label variant="outline" onClose={() => setTextFilter(filterKey, '')}>
+                {value}
+              </Label>
+            </LabelGroup>
+          </SplitItem>
+        );
+      })}
       {!!selectedLabels.length && (
         <SplitItem>
           <LabelGroup categoryName={t('Labels')} isClosable onClick={() => setSelectedLabels([])}>
@@ -173,14 +204,15 @@ const DeviceToolbarChips = ({
           </LabelGroup>
         </SplitItem>
       )}
-      {(!!statusKeys.length || !!ownerFleets.length || !!nameOrAlias || !!selectedLabels.length) && (
+      {hasAnyFilter && (
         <SplitItem>
           <Button
             variant="link"
             onClick={() => {
               updateStatus();
               setOwnerFleets([]);
-              setNameOrAlias('');
+              setOnlyFleetless(false);
+              clearTextFilters();
               setSelectedLabels([]);
             }}
           >

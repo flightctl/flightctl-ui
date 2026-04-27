@@ -4,6 +4,8 @@
 /* eslint-disable */
 import type { CatalogItemConfigurable } from './CatalogItemConfigurable';
 import type { CatalogItemDeprecation } from './CatalogItemDeprecation';
+import type { SemVer } from './SemVer';
+import type { SemVerRange } from './SemVerRange';
 /**
  * A version of a catalog item following the Cincinnati model where versions
  * are nodes in an upgrade graph and channels are labels on those nodes.
@@ -16,7 +18,7 @@ export type CatalogItemVersion = (CatalogItemConfigurable & {
   /**
    * Semantic version identifier (e.g., 1.2.3, 2.0.0-rc1). Required for version ordering and upgrade graph.
    */
-  version: string;
+  version: SemVer;
   /**
    * Map of artifact type to image tag or digest. Keys must match a type in spec.artifacts. Only keyed artifacts are available for this version.
    */
@@ -28,15 +30,15 @@ export type CatalogItemVersion = (CatalogItemConfigurable & {
   /**
    * The single version this one replaces, defining the primary upgrade edge.
    */
-  replaces?: string;
+  replaces?: SemVer;
   /**
    * Additional versions that can upgrade directly to this one. Use when stable channel skips intermediate fast-only versions.
    */
-  skips?: Array<string>;
+  skips?: Array<SemVer>;
   /**
    * Semver range of versions that can upgrade directly to this one. Use for z-stream updates or hotfixes.
    */
-  skipRange?: string;
+  skipRange?: SemVerRange;
   deprecation?: CatalogItemDeprecation;
 });
 

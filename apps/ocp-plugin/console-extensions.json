@@ -109,6 +109,14 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
+      "path": ["/edge/security-overview"],
+      "component": { "$codeRef": "SecurityOverviewPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
       "path": ["/edge/devices"],
       "component": { "$codeRef": "DevicesPage" }
     }

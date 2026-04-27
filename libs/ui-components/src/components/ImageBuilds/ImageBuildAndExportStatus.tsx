@@ -52,6 +52,8 @@ const getImageBuildStatusInfo = (condition: ImageBuildCondition | undefined, t: 
       return { level: 'warning', label: t('Canceling') };
     case ImageBuildConditionReason.ImageBuildConditionReasonCanceled:
       return { level: 'warning', label: t('Canceled') };
+    case ImageBuildConditionReason.ImageBuildConditionReasonGeneratingSBOM:
+      return { level: 'info', label: t('Scanning for vulnerabilities') };
     default:
       return { level: 'unknown', label: t('Unknown') };
   }

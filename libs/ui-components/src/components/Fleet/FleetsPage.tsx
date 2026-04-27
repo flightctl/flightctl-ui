@@ -21,7 +21,7 @@ import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import TablePagination from '../Table/TablePagination';
 import TableTextSearch from '../Table/TableTextSearch';
-import Table, { ApiSortTableColumn } from '../Table/Table';
+import Table from '../Table/Table';
 import { useTableSelect } from '../../hooks/useTableSelect';
 import { getResourceId } from '../../utils/resource';
 import MassDeleteFleetModal from '../modals/massModals/MassDeleteFleetModal/MassDeleteFleetModal';
@@ -90,7 +90,7 @@ const FleetEmptyState = () => {
   );
 };
 
-export const getFleetTableColumns = (t: TFunction): ApiSortTableColumn[] => [
+export const getFleetTableColumns = (t: TFunction) => [
   {
     name: t('Name'),
   },

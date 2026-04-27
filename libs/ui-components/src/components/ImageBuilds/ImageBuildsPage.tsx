@@ -24,7 +24,7 @@ import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 import TablePagination from '../Table/TablePagination';
 import TableTextSearch from '../Table/TableTextSearch';
-import Table, { ApiSortTableColumn } from '../Table/Table';
+import Table from '../Table/Table';
 
 import MassDeleteImageBuildModal from '../modals/massModals/MassDeleteImageBuildModal/MassDeleteImageBuildModal';
 import CancelImageBuildModal from './CancelImageBuildModal/CancelImageBuildModal';
@@ -33,7 +33,7 @@ import { useImageBuilds, useImageBuildsBackendFilters } from './useImageBuilds';
 import ImageBuildRow from './ImageBuildRow';
 import { OciRegistriesContextProvider } from './OciRegistriesContext';
 
-const getColumns = (t: TFunction): ApiSortTableColumn[] => [
+const getColumns = (t: TFunction) => [
   {
     name: t('Name'),
   },

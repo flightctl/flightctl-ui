@@ -19,7 +19,7 @@ import { TFunction } from 'i18next';
 import { CubesIcon } from '@patternfly/react-icons/dist/js/icons/cubes-icon';
 
 import ListPageBody from '../ListPage/ListPageBody';
-import Table, { ApiSortTableColumn } from '../Table/Table';
+import Table from '../Table/Table';
 import { useTranslation } from '../../hooks/useTranslation';
 import AuthProviderRow from './AuthProviderRow';
 import { useAuthProviders } from './useAuthProviders';
@@ -30,7 +30,7 @@ import { RESOURCE, VERB } from '../../types/rbac';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import DeleteAuthProviderModal from './AuthProviderDetails/DeleteAuthProviderModal';
 
-const getColumns = (t: TFunction): ApiSortTableColumn[] => [
+const getColumns = (t: TFunction) => [
   {
     name: t('Name'),
   },

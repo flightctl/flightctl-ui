@@ -71,6 +71,7 @@ const appRoutes = {
   [ROUTE.CATALOG_INSTALL]: '/edge/catalog/install',
   [ROUTE.CATALOG_FLEET_EDIT]: '/edge/fleets/catalog',
   [ROUTE.CATALOG_DEVICE_EDIT]: '/edge/devices/catalog',
+  [ROUTE.SECURITY_OVERVIEW]: '/edge/security-overview',
 };
 
 export const useValuesAppContext = (): AppContextProps => {

@@ -11,8 +11,9 @@ import { useTableSelect } from '../../../hooks/useTableSelect';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { useFetch } from '../../../hooks/useFetch';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import { DeviceTextFilterKey, FilterSearchParams } from '../../../utils/status/devices';
 
-import Table, { ApiSortTableColumn } from '../../Table/Table';
+import Table from '../../Table/Table';
 import { useDeleteListAction } from '../../ListPage/ListPageActions';
 import TablePagination from '../../Table/TablePagination';
 import MassDeleteDeviceModal from '../../modals/massModals/MassDeleteDeviceModal/MassDeleteDeviceModal';
@@ -24,15 +25,14 @@ import DeviceNameOnlyToolbarFilter from './DeviceNameOnlyToolbarFilter';
 interface DecommissionedDevicesTableProps {
   devices: Array<Device>;
   refetch: VoidFunction;
-  nameOrAlias: string | undefined;
+  setTextFilter: (key: DeviceTextFilterKey, value: string) => void;
   setOnlyDecommissioned: (check: boolean) => void;
-  setNameOrAlias: (text: string) => void;
   hasFiltersEnabled: boolean;
   isFilterUpdating: boolean;
   pagination: Pick<PaginationDetails<DeviceList>, 'currentPage' | 'setCurrentPage' | 'itemCount'>;
 }
 
-const getDeviceColumns = (t: TFunction): ApiSortTableColumn[] => [
+const getDeviceColumns = (t: TFunction) => [
   {
     name: t('Name'),
   },
@@ -49,8 +49,7 @@ const decommissionedDevicesPermissions = [
 const DecommissionedDevicesTable = ({
   devices,
   refetch,
-  nameOrAlias,
-  setNameOrAlias,
+  setTextFilter,
   hasFiltersEnabled,
   setOnlyDecommissioned,
   isFilterUpdating,
@@ -81,7 +80,7 @@ const DecommissionedDevicesTable = ({
         <ToolbarContent>
           <ToolbarGroup>
             <ToolbarItem>
-              <DeviceNameOnlyToolbarFilter nameOrAlias={nameOrAlias} setNameOrAlias={setNameOrAlias} />
+              <DeviceNameOnlyToolbarFilter setTextFilter={setTextFilter} />
             </ToolbarItem>
             <ToolbarItem>
               <Button aria-label={t('Add devices')} onClick={() => setAddDeviceModal(true)}>
@@ -121,7 +120,7 @@ const DecommissionedDevicesTable = ({
         loading={isFilterUpdating}
         columns={deviceColumns}
         hasFilters={hasFiltersEnabled}
-        clearFilters={() => setNameOrAlias('')}
+        clearFilters={() => setTextFilter(FilterSearchParams.NameOrAlias, '')}
         emptyData={devices.length === 0}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
