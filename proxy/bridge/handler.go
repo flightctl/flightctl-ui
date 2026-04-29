@@ -166,6 +166,9 @@ func NewImageBuilderHandler(tlsConfig *tls.Config) handler {
 		TLSClientConfig: tlsConfig,
 	}
 	proxy.Transport = &imagebuilderDownloadRewriteTransport{base: baseTransport}
+	// Enable streaming for large file downloads (e.g., image exports)
+	// FlushInterval < 0 means flush immediately after each write
+	proxy.FlushInterval = -1
 
 	return handler{target: target, proxy: proxy}
 }

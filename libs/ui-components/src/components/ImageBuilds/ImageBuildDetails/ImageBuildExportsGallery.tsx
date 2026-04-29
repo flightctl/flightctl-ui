@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Gallery } from '@patternfly/react-core';
-import { saveAs } from 'file-saver';
 
 import { ExportFormatType, ImageBuildConditionReason, ImageExport } from '@flightctl/types/imagebuilder';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
@@ -8,12 +7,13 @@ import { getImageBuildStatusReason } from '../../../utils/imageBuilds';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useFetch } from '../../../hooks/useFetch';
 import { usePermissionsContext } from '../../common/PermissionsContext';
+import { useOrganizationGuardContext } from '../../common/OrganizationGuard';
 import { getErrorMessage } from '../../../utils/error';
 import { getImageExportResource } from '../CreateImageBuildWizard/utils';
 import { ImageExportAction, ViewImageBuildExportCard } from '../ImageExportCards';
 import { useOciRegistriesContext } from '../OciRegistriesContext';
 import { showSpinnerBriefly } from '../../../utils/time';
-import { getAllExportFormats, getExportDownloadResult, getImageReference } from '../../../utils/imageBuilds';
+import { getAllExportFormats, getImageReference } from '../../../utils/imageBuilds';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { IMAGE_EXPORT_ID_PARAM } from './ImageBuildLogsTab';
 
@@ -46,8 +46,10 @@ const imageBuildExportsPermissions = [
 ];
 
 const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGalleryProps) => {
-  const { post, proxyFetch, remove } = useFetch();
+  const { post, remove } = useFetch();
   const { checkPermissions } = usePermissionsContext();
+  const { currentOrganization } = useOrganizationGuardContext();
+  const orgId = currentOrganization?.metadata?.name;
   const [canCreateExport, canDelete, canViewLogs, canDownload, canCancel] =
     checkPermissions(imageBuildExportsPermissions);
 
@@ -112,23 +114,13 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
       throw error;
     }
   };
-  const handleDownload = async (ieName: string, format: ExportFormatType) => {
-    const response = await proxyFetch(`imagebuilder/api/v1/imageexports/${ieName}/download`, {
-      method: 'GET',
-      credentials: 'include',
-    });
-    const downloadResult = await getExportDownloadResult(response);
-    if (downloadResult === null) {
-      await showSpinnerBriefly(DOWNLOAD_REDIRECT_DELAY);
-      throw new Error(`Download failed: ${response.status} ${response.statusText}`);
-    }
-    if (downloadResult.type === 'redirect') {
-      createDownloadLink(downloadResult.url);
-      await showSpinnerBriefly(DOWNLOAD_REDIRECT_DELAY);
-    } else {
-      const defaultFilename = `image-export-${ieName}.${format}`;
-      saveAs(downloadResult.blob, downloadResult.filename || defaultFilename);
-    }
+  const handleDownload = async (ieName: string) => {
+    // Use direct link to API endpoint - browser will download with Content-Disposition filename
+    // The API server streams the blob with proper headers, and the browser handles the download
+    // Path must include /api prefix to match proxy routes in app.go
+    // org_id query param is required since direct links can't send the X-FlightCtl-Organization-ID header
+    createDownloadLink(`/api/imagebuilder/api/v1/imageexports/${ieName}/download?org_id=${orgId}`);
+    await showSpinnerBriefly(DOWNLOAD_REDIRECT_DELAY);
   };
 
   const handleCancel = async (ieName: string) => {
@@ -161,7 +153,7 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
           await handleCreateNewExport(format);
           break;
         case 'download':
-          await handleDownload(ieName, format);
+          await handleDownload(ieName);
           break;
         case 'cancel':
           await handleCancel(ieName);
