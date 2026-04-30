@@ -9,12 +9,12 @@ import { useFetch } from '@flightctl/ui-components/src/hooks/useFetch';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import { getProviderDisplayName } from '@flightctl/ui-components/src/utils/authProvider';
 
+import { apiProxy } from '../../utils/apiCalls';
 import LoginPageLayout from './LoginPageLayout';
-import { loginAPI } from '../../utils/apiCalls';
 
 const redirectToProviderLogin = async (provider: AuthProvider) => {
   const redirectBase = encodeURIComponent(window.location.origin);
-  const response = await fetch(`${loginAPI}?provider=${provider.metadata.name}&redirect_base=${redirectBase}`, {
+  const response = await fetch(`${apiProxy}/login?provider=${provider.metadata.name}&redirect_base=${redirectBase}`, {
     credentials: 'include',
   });
 

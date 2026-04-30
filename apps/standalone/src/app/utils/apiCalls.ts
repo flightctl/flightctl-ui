@@ -12,13 +12,12 @@ import { lastRefresh } from '../context/AuthContext';
 const apiPort = window.API_PORT || window.location.port;
 const apiServer = `${window.location.hostname}${apiPort ? `:${apiPort}` : ''}`;
 
-const flightCtlAPI = `${window.location.protocol}//${apiServer}/api/flightctl`;
-const uiProxyAPI = `${window.location.protocol}//${apiServer}/api`;
+const uiProxy = `${window.location.protocol}//${apiServer}`;
+export const apiProxy = `${uiProxy}/api`;
 
 const imageBuilderPathRegex = /^image(builds|exports)/;
 const catalogPathRegex = /^(catalogs|catalogitems)/;
 
-export const loginAPI = `${window.location.protocol}//${apiServer}/api/login`;
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
 // Helper function to add organization header to request options
@@ -43,28 +42,28 @@ export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): 
 
   const options = addOrganizationHeader(baseOptions);
 
-  return await fetch(`${uiProxyAPI}/${endpoint}`, options);
+  return await fetch(`${apiProxy}/${endpoint}`, options);
 };
 
 const getFullApiUrl = (path: string): { api: 'flightctl' | 'imagebuilder' | 'alerts' | 'catalog'; url: string } => {
   if (path.startsWith('alerts')) {
-    return { api: 'alerts', url: `${uiProxyAPI}/alerts/api/v2/${path}` };
+    return { api: 'alerts', url: `${apiProxy}/alerts/api/v2/${path}` };
   }
   if (imageBuilderPathRegex.test(path)) {
-    return { api: 'imagebuilder', url: `${uiProxyAPI}/imagebuilder/api/v1/${path}` };
+    return { api: 'imagebuilder', url: `${apiProxy}/imagebuilder/api/v1/${path}` };
   }
   if (catalogPathRegex.test(path)) {
     return {
       api: 'catalog',
-      url: `${flightCtlAPI}/api/v1/${path}`,
+      url: `${apiProxy}/flightctl/api/v1/${path}`,
     };
   }
-  return { api: 'flightctl', url: `${flightCtlAPI}/api/v1/${path}` };
+  return { api: 'flightctl', url: `${apiProxy}/flightctl/api/v1/${path}` };
 };
 
 export const logout = async () => {
   const redirectBase = encodeURIComponent(window.location.origin);
-  const response = await fetch(`${uiProxyAPI}/logout?redirect_base=${redirectBase}`, {
+  const response = await fetch(`${apiProxy}/logout?redirect_base=${redirectBase}`, {
     credentials: 'include',
   });
   const { url } = (await response.json()) as { url: string };
