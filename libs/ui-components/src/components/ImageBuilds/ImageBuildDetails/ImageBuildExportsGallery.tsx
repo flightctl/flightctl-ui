@@ -46,7 +46,7 @@ const imageBuildExportsPermissions = [
 ];
 
 const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGalleryProps) => {
-  const { post, remove } = useFetch();
+  const { post, remove, apiProxy } = useFetch();
   const { checkPermissions } = usePermissionsContext();
   const { currentOrganization } = useOrganizationGuardContext();
   const orgId = currentOrganization?.metadata?.name;
@@ -117,9 +117,9 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
   const handleDownload = async (ieName: string) => {
     // Use direct link to API endpoint - browser will download with Content-Disposition filename
     // The API server streams the blob with proper headers, and the browser handles the download
-    // Path must include /api prefix to match proxy routes in app.go
+    // Path goes through the UI proxy.
     // org_id query param is required since direct links can't send the X-FlightCtl-Organization-ID header
-    createDownloadLink(`/api/imagebuilder/api/v1/imageexports/${ieName}/download?org_id=${orgId}`);
+    createDownloadLink(`${apiProxy}/imagebuilder/api/v1/imageexports/${ieName}/download?org_id=${orgId}`);
     await showSpinnerBriefly(DOWNLOAD_REDIRECT_DELAY);
   };
 
