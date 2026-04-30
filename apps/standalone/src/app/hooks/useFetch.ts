@@ -1,5 +1,14 @@
 import * as React from 'react';
-import { deleteData, fetchData, fetchUiProxy, patchData, postData, putData, wsEndpoint } from '../utils/apiCalls';
+import {
+  apiProxy,
+  deleteData,
+  fetchData,
+  fetchUiProxy,
+  patchData,
+  postData,
+  putData,
+  wsEndpoint,
+} from '../utils/apiCalls';
 import { PatchRequest } from '@flightctl/types';
 
 export const useFetch = () => {
@@ -37,6 +46,7 @@ export const useFetch = () => {
   }, []);
 
   return {
+    apiProxy,
     getWsEndpoint,
     get,
     post,
