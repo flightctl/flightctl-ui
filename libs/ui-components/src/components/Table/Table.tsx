@@ -69,6 +69,7 @@ export const Table = ({
           {!emptyData && onSelectAll && (
             <Th
               aria-label={t('Select all rows')}
+              data-testid="table-select-all-rows"
               select={{
                 onSelect: (_event, isSelecting) => onSelectAll(isSelecting),
                 isSelected: !!isAllSelected,

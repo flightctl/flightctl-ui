@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@flightctl/types';
 import DeviceFleet from '../DeviceDetails/DeviceFleet';
@@ -53,6 +53,42 @@ const EnrolledDeviceTableRow = ({
 
   const columnIds = React.useMemo(() => deviceColumns.map(({ id }) => id), [deviceColumns]);
 
+  const actionItems: IAction[] = [
+    ...(canEdit
+      ? [
+          {
+            title: t('Edit device configurations'),
+            'data-testid': 'device-row-menu-edit-configurations',
+            onClick: () => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceName }),
+            ...editActionProps,
+          } as IAction,
+        ]
+      : []),
+    {
+      title: t('View device details'),
+      'data-testid': 'device-row-menu-view-details',
+      onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
+    } as IAction,
+    ...(canResume && resumeAction
+      ? [
+          resumeAction({
+            resourceId: deviceName,
+            resourceName: deviceAlias,
+            disabledReason: resumeDisabledReason,
+          }),
+        ]
+      : []),
+    ...(canDecommission && decommissionAction
+      ? [
+          decommissionAction({
+            resourceId: deviceName,
+            resourceName: deviceAlias,
+            disabledReason: decommissionDisabledReason,
+          }),
+        ]
+      : []),
+  ];
+
   return (
     <Tr data-testid={`enrolled-device-row-${rowIndex}`}>
       <Td
@@ -69,7 +105,7 @@ const EnrolledDeviceTableRow = ({
             id={deviceName}
             name={deviceAlias || t('Untitled')}
             routeLink={ROUTE.DEVICE_DETAILS}
-            data-testid={`device-name-link-${rowIndex}`}
+            data-testid={`device-name-link-${deviceName}`}
           />
         </Td>
       )}
@@ -99,42 +135,8 @@ const EnrolledDeviceTableRow = ({
         </Td>
       )}
       {!hideActions && (
-        <Td isActionCell data-testid={`device-row-actions-${rowIndex}`}>
-          <ActionsColumn
-            items={[
-              ...(canEdit
-                ? [
-                    {
-                      title: t('Edit device configurations'),
-                      onClick: () => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceName }),
-                      ...editActionProps,
-                    },
-                  ]
-                : []),
-              {
-                title: t('View device details'),
-                onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
-              },
-              ...(canResume && resumeAction
-                ? [
-                    resumeAction({
-                      resourceId: deviceName,
-                      resourceName: deviceAlias,
-                      disabledReason: resumeDisabledReason,
-                    }),
-                  ]
-                : []),
-              ...(canDecommission && decommissionAction
-                ? [
-                    decommissionAction({
-                      resourceId: deviceName,
-                      resourceName: deviceAlias,
-                      disabledReason: decommissionDisabledReason,
-                    }),
-                  ]
-                : []),
-            ]}
-          />
+        <Td isActionCell data-testid={`device-row-actions-${deviceName}`}>
+          <ActionsColumn items={actionItems} />
         </Td>
       )}
     </Tr>

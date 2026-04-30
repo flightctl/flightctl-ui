@@ -15,12 +15,21 @@ type LabelsFieldProps = {
   addButtonText?: string;
   helperText?: React.ReactNode;
   onChangeCallback?: (newLabels: FlightCtlLabel[], hasErrors: boolean) => void;
+  /** Applied to the PatternFly `LabelGroup` root for E2E selectors (e.g. fleet wizard fleet labels). */
+  labelGroupTestId?: string;
 };
 
 const maxWidthDefaultLabel = '18ch'; // Can fit more chars as it doesn't have a "Close" button
 const maxWidthNonDefaultLabel = '16ch'; // Can fit less chars due to the "Close" button
 
-const LabelsField = ({ name, onChangeCallback, addButtonText, helperText, isLoading }: LabelsFieldProps) => {
+const LabelsField = ({
+  name,
+  onChangeCallback,
+  addButtonText,
+  helperText,
+  isLoading,
+  labelGroupTestId,
+}: LabelsFieldProps) => {
   const [{ value: labels }, meta, { setValue: setLabels }] = useField<FlightCtlLabel[]>(name);
   const updateLabels = async (newLabels: FlightCtlLabel[]) => {
     const errors = await setLabels(newLabels, true);
@@ -68,6 +77,7 @@ const LabelsField = ({ name, onChangeCallback, addButtonText, helperText, isLoad
       <LabelGroup
         numLabels={5}
         isEditable={!isLoading}
+        data-testid={labelGroupTestId}
         addLabelControl={
           <EditableLabelControl
             defaultLabel="key=value"

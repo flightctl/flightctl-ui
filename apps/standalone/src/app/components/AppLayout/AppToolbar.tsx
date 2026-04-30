@@ -112,6 +112,7 @@ const AppToolbar = () => {
             toggle={(toggleRef) => (
               <MenuToggle
                 aria-label={t('Help menu')}
+                data-testid="masthead-help-menu"
                 ref={toggleRef}
                 variant="plain"
                 onClick={() => setHelpDropdownOpen(!helpDropdownOpen)}
@@ -122,6 +123,7 @@ const AppToolbar = () => {
             popperProps={{ position: 'right' }}
           >
             <DropdownItem
+              data-testid="masthead-command-line-tools"
               onClick={() => {
                 navigate(ROUTE.COMMAND_LINE_TOOLS);
               }}

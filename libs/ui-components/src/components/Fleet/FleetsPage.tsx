@@ -54,14 +54,14 @@ const FleetPageActions = ({ createText }: { createText?: string }) => {
     <Split hasGutter>
       {canCreateFleet && (
         <SplitItem>
-          <Button variant="primary" onClick={() => navigate(ROUTE.FLEET_CREATE)}>
+          <Button variant="primary" onClick={() => navigate(ROUTE.FLEET_CREATE)} data-testid="toolbar-create-fleet">
             {createText || t('Create a fleet')}
           </Button>
         </SplitItem>
       )}
       {canImportFleet && (
         <SplitItem>
-          <Button variant="secondary" onClick={() => navigate(ROUTE.FLEET_IMPORT)}>
+          <Button variant="secondary" onClick={() => navigate(ROUTE.FLEET_IMPORT)} data-testid="toolbar-import-fleets">
             {t('Import fleets')}
           </Button>
         </SplitItem>
@@ -144,7 +144,12 @@ const FleetTable = () => {
           )}
           {canDelete && (
             <ToolbarItem>
-              <Button isDisabled={!hasSelectedRows} onClick={() => setIsMassDeleteModalOpen(true)} variant="secondary">
+              <Button
+                isDisabled={!hasSelectedRows}
+                onClick={() => setIsMassDeleteModalOpen(true)}
+                variant="secondary"
+                data-testid="toolbar-delete-fleets"
+              >
                 {t('Delete fleets')}
               </Button>
             </ToolbarItem>
