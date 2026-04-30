@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { loginAPI, redirectToLogin } from '../utils/apiCalls';
+import { apiProxy, redirectToLogin } from '../utils/apiCalls';
 import { ORGANIZATION_STORAGE_KEY } from '@flightctl/ui-components/src/utils/organizationStorage';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 
@@ -10,6 +10,7 @@ export let lastRefresh = 0;
 const maxTimeout = 2 ** 31 - 1;
 
 const nowInSeconds = () => Math.round(Date.now() / 1000);
+const loginApi = `${apiProxy}/login`;
 
 type AuthContextProps = {
   username: string;
@@ -47,7 +48,7 @@ export const useAuthContext = () => {
         const state = searchParams.get('state');
         callbackErr = searchParams.get('error');
         if (code && state) {
-          const resp = await fetch(`${loginAPI}?state=${encodeURIComponent(state)}`, {
+          const resp = await fetch(`${loginApi}?state=${encodeURIComponent(state)}`, {
             headers: {
               'Content-Type': 'application/json',
             },
@@ -94,7 +95,7 @@ export const useAuthContext = () => {
       }
       if (!callbackErr) {
         try {
-          const resp = await fetch(`${loginAPI}/info`, {
+          const resp = await fetch(`${loginApi}/info`, {
             credentials: 'include',
           });
 
@@ -185,7 +186,7 @@ export const useAuthContext = () => {
 
       const refreshToken = async () => {
         try {
-          const resp = await fetch(`${loginAPI}/refresh`, {
+          const resp = await fetch(`${loginApi}/refresh`, {
             credentials: 'include',
             method: 'GET',
           });

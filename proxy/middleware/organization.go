@@ -22,6 +22,12 @@ func OrganizationMiddleware(next http.Handler) http.Handler {
 
 		orgID := r.Header.Get(headerOrganizationID)
 
+		// For direct browser requests (e.g., download links), also check query parameter
+		// since <a href> links can't send custom headers
+		if orgID == "" {
+			orgID = r.URL.Query().Get(queryOrganizationID)
+		}
+
 		if orgID == "" {
 			// No organization selected - block this API call with 428 Precondition required
 			w.Header().Set("Content-Type", "application/json")
