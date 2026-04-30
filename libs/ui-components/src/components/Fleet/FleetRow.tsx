@@ -93,11 +93,7 @@ const FleetRow: React.FC<FleetRowProps> = ({
       />
       <Td dataLabel={t('Name')}>
         <FleetOwnerLinkIcon ownerName={getOwnerName(ResourceKind.RESOURCE_SYNC, fleet.metadata.owner)}>
-          <ResourceLink
-            id={fleetName}
-            routeLink={ROUTE.FLEET_DETAILS}
-            data-testid={`fleet-name-link-${fleetName}`}
-          />
+          <ResourceLink id={fleetName} routeLink={ROUTE.FLEET_DETAILS} data-testid={`fleet-name-link-${fleetName}`} />
         </FleetOwnerLinkIcon>
       </Td>
       <Td dataLabel={t('System image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>
