@@ -59,9 +59,9 @@ export enum CliArtifactTool {
   FlightctlRestore = 'flightctl-restore',
 }
 
-type CliArtifact = {
-  os: string;
-  arch: string;
+export type CliArtifact = {
+  os: 'linux' | 'mac' | 'windows';
+  arch: 'amd64' | 'arm64';
   filename: string;
   sha256: string;
   tool?: CliArtifactTool;

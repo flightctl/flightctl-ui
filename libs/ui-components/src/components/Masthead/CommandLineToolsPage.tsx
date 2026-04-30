@@ -15,32 +15,23 @@ import ExternalLinkAltIcon from '@patternfly/react-icons/dist/js/icons/external-
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
-import { getErrorMessage } from '../../utils/error';
-import { CliArtifactTool, CliArtifactsResponse } from '../../types/extraTypes';
+import { CliArtifactsDisplayResponse, useCliArtifacts } from '../../hooks/useCliArtifacts';
+import { CliArtifact } from '../../types/extraTypes';
+import { getArtifactDownloadLabel, getArtifactUrl } from '../../utils/cliArtifacts';
 
 type CommandLineToolsContentProps = {
   productName: string;
   loading: boolean;
   loadError?: string;
-  artifactsResponse?: CliArtifactsResponse;
+  artifactsResponse?: CliArtifactsDisplayResponse;
 };
 
-type CommandLineArtifact = CliArtifactsResponse['artifacts'][0];
-
-const getArtifactUrl = (baseUrl: string, artifact: CommandLineArtifact) => {
-  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-  return `${normalizedBaseUrl}/${artifact.arch}/${artifact.os}/${artifact.filename}`;
-};
-
-const ArtifactDownloadList = ({ baseUrl, items }: { baseUrl: string; items: CommandLineArtifact[] }) => {
+const ArtifactDownloadList = ({ baseUrl, items }: { baseUrl: string; items: CliArtifact[] }) => {
   const { t } = useTranslation();
   return (
     <List>
       {items.map((cliArtifact) => {
-        const linkText = t('Download for {{ os }} for {{ arch }}', {
-          os: cliArtifact.os,
-          arch: cliArtifact.arch,
-        });
+        const linkText = getArtifactDownloadLabel(cliArtifact, t);
         return (
           <ListItem key={cliArtifact.filename}>
             <Button
@@ -63,16 +54,6 @@ const ArtifactDownloadList = ({ baseUrl, items }: { baseUrl: string; items: Comm
   );
 };
 
-const getArtifactTool = (artifact: CommandLineArtifact) => {
-  if (!artifact.tool) {
-    // Handle backward compatibility with older artifacts before "tool" was added
-    return artifact.filename.includes('flightctl-restore')
-      ? CliArtifactTool.FlightctlRestore
-      : CliArtifactTool.Flightctl;
-  }
-  return artifact.tool;
-};
-
 const CommandLineToolsContent = ({
   productName,
   loading,
@@ -81,14 +62,13 @@ const CommandLineToolsContent = ({
 }: CommandLineToolsContentProps) => {
   const { t } = useTranslation();
 
-  if (loading) {
+  if (loading || !artifactsResponse) {
     return <Spinner size="sm" />;
   }
 
   let errorMessage = loadError;
 
-  const cliArtifacts = artifactsResponse?.artifacts || [];
-  if (cliArtifacts.length === 0) {
+  if (artifactsResponse.totalCount === 0) {
     errorMessage = t('No {{ productName }} command line tools were found for this deployment at this time.', {
       productName,
     });
@@ -106,35 +86,39 @@ const CommandLineToolsContent = ({
     );
   }
 
-  const baseUrl = artifactsResponse?.baseUrl || '';
-  const mainCliArtifacts = cliArtifacts.filter((a) => getArtifactTool(a) === CliArtifactTool.Flightctl);
-  const restoreCliArtifacts = cliArtifacts.filter((a) => getArtifactTool(a) === CliArtifactTool.FlightctlRestore);
+  const { baseUrl, flightctlArtifacts, restoreArtifacts } = artifactsResponse;
 
   return (
     <Stack hasGutter>
-      {mainCliArtifacts.length > 0 ? (
+      {flightctlArtifacts.length > 0 ? (
         <>
           <StackItem>
             <Title headingLevel="h2">{t('flightctl Command Line Interface (CLI)')}</Title>
           </StackItem>
           <StackItem>
-            {t('Use the flightctl CLI to manage your edge resources, such as devices and fleets, from a terminal.')}
+            {t(
+              'flightctl is the command-line interface for managing {{ productName }} fleets, devices, and workloads.',
+              { productName },
+            )}
           </StackItem>
           <StackItem>
-            <ArtifactDownloadList baseUrl={baseUrl} items={mainCliArtifacts} />
+            <ArtifactDownloadList baseUrl={baseUrl} items={flightctlArtifacts} />
           </StackItem>
         </>
       ) : null}
-      {restoreCliArtifacts.length > 0 ? (
+      {restoreArtifacts.length > 0 ? (
         <>
           <StackItem>
             <Title headingLevel="h2">{t('flightctl-restore Command Line Interface (CLI)')}</Title>
           </StackItem>
           <StackItem>
-            {t('Use the flightctl-restore CLI to prepare devices after restoring the system from a backup.')}
+            {t(
+              'flightctl-restore prepares devices after database restoration. Use when restoring {{ productName }} from backup.',
+              { productName },
+            )}
           </StackItem>
           <StackItem>
-            <ArtifactDownloadList baseUrl={baseUrl} items={restoreCliArtifacts} />
+            <ArtifactDownloadList baseUrl={baseUrl} items={restoreArtifacts} />
           </StackItem>
         </>
       ) : null}
@@ -144,39 +128,8 @@ const CommandLineToolsContent = ({
 
 const CommandLineToolsPage = () => {
   const { t } = useTranslation();
-  const { fetch, settings } = useAppContext();
-  const proxyFetch = fetch.proxyFetch;
-
-  const [loading, setLoading] = React.useState<boolean>(true);
-  const [loadError, setLoadError] = React.useState<string>();
-  const [artifactsResponse, setCliArtifactsResponse] = React.useState<CliArtifactsResponse>();
-  const [hasArtifactsEnabled, setArtifactsEnabled] = React.useState<boolean>(true);
-
-  React.useEffect(() => {
-    const getLinks = async () => {
-      try {
-        const response = await proxyFetch('cli-artifacts', {
-          method: 'GET',
-        });
-        if (!response.ok) {
-          if (response.status === 501) {
-            // Response that indicatest that the feature is disabled
-            setArtifactsEnabled(false);
-          } else {
-            setLoadError(getErrorMessage(response.statusText));
-          }
-          return;
-        }
-        const apiResponse = (await response.json()) as CliArtifactsResponse;
-        setCliArtifactsResponse(apiResponse);
-      } catch {
-        setArtifactsEnabled(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-    void getLinks();
-  }, [proxyFetch]);
+  const { settings } = useAppContext();
+  const { loading, loadError, hasArtifactsEnabled, artifactsResponse } = useCliArtifacts();
 
   const productName = settings.isRHEM ? t('Red Hat Edge Manager') : t('Flight Control');
 
@@ -187,14 +140,6 @@ const CommandLineToolsPage = () => {
           <Title headingLevel="h1">{t('Command Line Tools')}</Title>
         </StackItem>
         <Divider />
-        <StackItem>
-          {t(
-            'With the {{ productName }} command line interface tools, you can manage your fleets, devices and repositories from a terminal.',
-            {
-              productName,
-            },
-          )}
-        </StackItem>
         {hasArtifactsEnabled ? (
           <StackItem>
             <CommandLineToolsContent
