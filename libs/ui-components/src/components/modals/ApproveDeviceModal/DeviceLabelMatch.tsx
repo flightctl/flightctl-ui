@@ -1,68 +1,80 @@
 import * as React from 'react';
-import { Spinner, TextInput } from '@patternfly/react-core';
+import { Trans } from 'react-i18next';
+import { Flex, Spinner } from '@patternfly/react-core';
+import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
+import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
+import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { DeviceMatchStatus } from '../../../hooks/useDeviceLabelMatch';
+import { StatusDisplayContent } from '../../Status/StatusDisplay';
 
-import './DeviceLabelMatch.css';
-
-export const DeviceLabelMatch = ({ matchStatus }: { matchStatus: DeviceMatchStatus }) => {
+export const DeviceLabelMatch = ({
+  isApproval,
+  matchStatus,
+}: {
+  isApproval: boolean;
+  matchStatus: DeviceMatchStatus;
+}) => {
   const { t } = useTranslation();
+
+  if (matchStatus.status === 'checking') {
+    return (
+      <Flex gap={{ default: 'gapSm' }} role="status" aria-live="polite">
+        <Spinner size="sm" aria-label={t('Checking for matching fleets')} />
+        {t('Checking for matching fleets')}
+      </Flex>
+    );
+  }
 
   switch (matchStatus.status) {
     case 'unchecked':
       return (
-        <TextInput
-          value=""
-          aria-label={t('Add labels to select a fleet.')}
-          placeholder={t('Add labels to select a fleet.')}
-          readOnlyVariant="default"
+        <StatusDisplayContent
+          level="info"
+          label={t('Add labels to view matching fleet(s).')}
+          customIcon={InfoCircleIcon}
         />
       );
     case 'unchecked--invalid':
       return (
-        <TextInput
-          value={t('Fleet label match cannot cannot be evaluated when there are invalid labels.')}
-          type="text"
-          validated="warning"
-          readOnlyVariant="default"
+        <StatusDisplayContent
+          level="warning"
+          label={t('Fix invalid labels to view matching fleet(s).')}
+          customIcon={ExclamationTriangleIcon}
         />
       );
-    case 'checking':
-      return <TextInput value="" customIcon={<Spinner size="sm" />} readOnlyVariant="default" />;
-    case 'checked--unique':
+    case 'checked--unique': {
+      const fleetName = matchStatus.detail || '';
       return (
-        <TextInput
-          className="fctl-device-label-match"
-          type="text"
-          readOnlyVariant="default"
-          value={matchStatus.detail || ''}
-          validated="success"
+        <StatusDisplayContent
+          level="success"
+          label={
+            <Trans t={t} values={{ fleetName }}>
+              Device matches fleet <strong>{fleetName}</strong>.
+            </Trans>
+          }
+          customIcon={CheckCircleIcon}
         />
       );
+    }
     case 'checked--empty':
-      return (
-        <TextInput
-          value={t('No fleet is matching the selected labels.')}
-          validated="warning"
-          readOnlyVariant="default"
-        />
-      );
+      return <StatusDisplayContent level="warning" label={t('No fleets currently match the selected labels.')} />;
     case 'checked--multiple':
+      const msg = isApproval
+        ? t('Device labels match multiple fleets, therefore the device will not be bound to any fleet.')
+        : t('Device labels match multiple fleets, therefore the device ownership will remain unchanged.');
+      return <StatusDisplayContent level="danger" label={msg} customIcon={ExclamationTriangleIcon} />;
+    case 'checked--error': {
       return (
-        <TextInput
-          readOnlyVariant="default"
-          value={t(
-            "More than one fleet is matching the selected labels. The device will ignore the fleets' configurations.",
-          )}
-          validated="error"
+        <StatusDisplayContent
+          level="danger"
+          label={t('Check for matching fleet(s) failed. {{errorMessage}}', {
+            errorMessage: matchStatus.detail || t('Unknown error'),
+          })}
+          customIcon={ExclamationTriangleIcon}
         />
       );
-    case 'checked--error': {
-      const text = t('Check for matching fleet(s) failed. {{errorMessage}}', {
-        errorMessage: matchStatus.detail || t('Unknown error'),
-      });
-      return <TextInput value={text} validated="error" readOnlyVariant="default" />;
     }
   }
 };
