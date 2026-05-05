@@ -14,7 +14,7 @@ import type { CatalogItemDeprecation } from './CatalogItemDeprecation';
  */
 export type CatalogItemVersion = (CatalogItemConfigurable & {
   /**
-   * Semantic version identifier (e.g., 1.2.3, v2.0.0-rc1). Required for version ordering and upgrade graph.
+   * Semantic version identifier (e.g., 1.2.3, 2.0.0-rc1). Required for version ordering and upgrade graph.
    */
   version: string;
   /**
