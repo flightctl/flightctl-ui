@@ -125,7 +125,6 @@ export type DevicesResult = {
 
 export const useDevices = (args: {
   textFilters?: Partial<Record<DeviceTextFilterKey, string>>;
-  nameOrAlias?: string;
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];

@@ -1,7 +1,12 @@
 import * as React from 'react';
 import { SelectList, SelectOption, Toolbar, ToolbarContent, ToolbarGroup, ToolbarItem } from '@patternfly/react-core';
 import type { OnSort } from '@patternfly/react-table';
-import { Vulnerability, VulnerabilityGroup, VulnerabilityGroupList, VulnerabilityList } from '@flightctl/types/alpha';
+import type {
+  Vulnerability,
+  VulnerabilityGroup,
+  VulnerabilityGroupList,
+  VulnerabilityList,
+} from '@flightctl/types/alpha';
 
 import { PaginationDetails } from '../../hooks/useTablePagination';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -18,7 +23,7 @@ import StatusDisplay from '../Status/StatusDisplay';
 import { VulnerabilitiesTableCompactRow, VulnerabilitiesTableFullRow } from './VulnerabilitiesTableRow';
 import VulnerabilityDetailsDrawer from './VulnerabilityDetailsDrawer';
 
-type VulnerabilitySeverity = Vulnerability.severity;
+type VulnerabilitySeverity = Vulnerability['severity'];
 
 type VulnerabilitiesTableCommonProps = {
   isUpdating?: boolean;

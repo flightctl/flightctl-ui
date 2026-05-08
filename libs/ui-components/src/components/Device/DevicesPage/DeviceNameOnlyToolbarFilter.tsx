@@ -22,7 +22,7 @@ const DeviceNameOnlyToolbarFilter = ({ setTextFilter }: DeviceNameOnlyToolbarFil
 
   React.useEffect(() => {
     debouncedSetNameOrAlias(typingText);
-  }, [typingText, setTextFilter, debouncedSetNameOrAlias]);
+  }, [typingText, debouncedSetNameOrAlias]);
 
   return <TableTextSearch value={typingText} setValue={setTypingText} />;
 };
