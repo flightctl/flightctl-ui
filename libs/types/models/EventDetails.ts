@@ -5,6 +5,7 @@
 import type { DeviceMultipleOwnersDetectedDetails } from './DeviceMultipleOwnersDetectedDetails';
 import type { DeviceMultipleOwnersResolvedDetails } from './DeviceMultipleOwnersResolvedDetails';
 import type { DeviceOwnershipChangedDetails } from './DeviceOwnershipChangedDetails';
+import type { DeviceVulnerabilityCveDetails } from './DeviceVulnerabilityCveDetails';
 import type { FleetRolloutBatchCompletedDetails } from './FleetRolloutBatchCompletedDetails';
 import type { FleetRolloutBatchDispatchedDetails } from './FleetRolloutBatchDispatchedDetails';
 import type { FleetRolloutCompletedDetails } from './FleetRolloutCompletedDetails';
