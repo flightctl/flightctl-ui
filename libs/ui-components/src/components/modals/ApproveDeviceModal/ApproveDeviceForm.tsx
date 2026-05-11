@@ -30,7 +30,6 @@ const ApproveDeviceForm: React.FC<ApproveDeviceFormProps> = ({ enrollmentRequest
 
   const disableSubmit = Object.keys(formErrors).length > 0;
   const [matchLabelsOnChange, matchStatus] = useDeviceLabelMatch();
-  const defaultAlias = enrollmentRequest.spec.labels?.alias;
 
   return (
     <FlightCtlForm>
@@ -38,7 +37,6 @@ const ApproveDeviceForm: React.FC<ApproveDeviceFormProps> = ({ enrollmentRequest
         fieldName="deviceAlias"
         aria-label={t('Alias')}
         validations={getLabelValueValidations(t)}
-        isDisabled={!!defaultAlias}
       />
       <FormGroup label={t('Name')} aria-label={t('Name')}>
         {enrollmentRequest.metadata.name}
