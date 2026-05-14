@@ -11,9 +11,14 @@
  * isWizardStepDisabled('B', ['A','B','C'], ['A']);      // false — User can access step B since A is valid.
  * isWizardStepDisabled('C', ['A','B','C'], ['A']);      // true  — User is blocked from accessing step C since B is invalid.
  */
+
 export const isWizardStepDisabled = (stepId: string, orderedStepIds: string[], validStepIds: string[]) => {
-  const stepIdx = orderedStepIds.findIndex((orderedStepId) => orderedStepId === stepId);
-  return orderedStepIds.some((orderedId, orderedStepIdx) => {
-    return orderedStepIdx < stepIdx && !validStepIds.includes(orderedId);
-  });
+  const stepIndex = orderedStepIds.indexOf(stepId);
+  if (stepIndex <= 0) {
+    return false;
+  }
+
+  // If there are any invalid steps before the current one, the current step should be disabled.
+  const previousStepIds = orderedStepIds.slice(0, stepIndex);
+  return previousStepIds.some((id) => !validStepIds.includes(id));
 };
