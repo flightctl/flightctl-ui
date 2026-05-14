@@ -27,3 +27,27 @@
 .fctl-security-overview-summary-box.unknown {
   background-color: color-mix(in srgb, var(--pf-t--global--icon--color--severity--minor--default) 14%, white);
 }
+
+.pf-v6-theme-dark .fctl-security-overview-summary-box.critical {
+  background-color: var(--pf-t--global--dark--color--severity--critical--100);
+}
+
+.pf-v6-theme-dark .fctl-security-overview-summary-box.high {
+  background-color: var(--pf-t--global--dark--color--severity--important--100);
+}
+
+.pf-v6-theme-dark .fctl-security-overview-summary-box.medium {
+  background-color: var(--pf-t--global--dark--color--severity--moderate--100);
+}
+
+.pf-v6-theme-dark .fctl-security-overview-summary-box.low {
+  background-color: var(--pf-t--global--dark--color--severity--minor--100);
+}
+
+.pf-v6-theme-dark .fctl-security-overview-summary-box.none {
+  background-color: var(--pf-t--global--dark--color--severity--none--100);
+}
+
+.pf-v6-theme-dark .fctl-security-overview-summary-box.unknown {
+  background-color: var(--pf-t--global--dark--color--severity--minor--100);
+}
