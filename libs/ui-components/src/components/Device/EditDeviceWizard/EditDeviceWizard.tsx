@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Formik } from 'formik';
+import { Formik, FormikErrors } from 'formik';
 import {
   Alert,
   Breadcrumb,
@@ -40,6 +40,26 @@ import EditDeviceWizardFooter from './EditDeviceWizardFooter';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import { isWizardStepDisabled } from '../../../utils/wizards';
+
+const orderedIds = [generalInfoStepId, deviceTemplateStepId, deviceUpdatePolicyStepId, reviewDeviceStepId];
+
+const getValidStepIds = (formikErrors: FormikErrors<EditDeviceFormValues>): string[] => {
+  const validStepIds: string[] = [];
+  if (isGeneralInfoStepValid(formikErrors)) {
+    validStepIds.push(generalInfoStepId);
+  }
+  if (isDeviceTemplateStepValid(formikErrors)) {
+    validStepIds.push(deviceTemplateStepId);
+  }
+  if (isUpdatePolicyStepValid(formikErrors)) {
+    validStepIds.push(deviceUpdatePolicyStepId);
+  }
+  if (validStepIds.length === orderedIds.length - 1) {
+    validStepIds.push(reviewDeviceStepId);
+  }
+  return validStepIds;
+};
 
 const EditDeviceWizard = () => {
   const { t } = useTranslation();
@@ -109,13 +129,9 @@ const EditDeviceWizard = () => {
         }}
       >
         {({ values, errors: formikErrors }) => {
-          const generalStepValid = isGeneralInfoStepValid(formikErrors);
-          const templateStepValid = isDeviceTemplateStepValid(formikErrors);
-          const updateStepValid = isUpdatePolicyStepValid(formikErrors);
+          const validStepIds = getValidStepIds(formikErrors);
 
           const isFleetless = !values.fleetMatch;
-          const isTemplateStepDisabled = !(generalStepValid && isFleetless);
-          const isUpdateStepDisabled = !(generalStepValid && templateStepValid && isFleetless);
 
           return (
             <>
@@ -132,13 +148,25 @@ const EditDeviceWizard = () => {
                 <WizardStep name={t('General info')} id={generalInfoStepId}>
                   <GeneralInfoStep />
                 </WizardStep>
-                <WizardStep name={t('Device template')} id={deviceTemplateStepId} isDisabled={isTemplateStepDisabled}>
+                <WizardStep
+                  name={t('Device template')}
+                  id={deviceTemplateStepId}
+                  isDisabled={isWizardStepDisabled(deviceTemplateStepId, orderedIds, validStepIds) || !isFleetless}
+                >
                   <DeviceTemplateStep isFleet={false} labels={device.metadata.labels} />
                 </WizardStep>
-                <WizardStep name={t('Updates')} id={deviceUpdatePolicyStepId} isDisabled={isUpdateStepDisabled}>
+                <WizardStep
+                  name={t('Updates')}
+                  id={deviceUpdatePolicyStepId}
+                  isDisabled={isWizardStepDisabled(deviceUpdatePolicyStepId, orderedIds, validStepIds) || !isFleetless}
+                >
                   <DeviceUpdateStep />
                 </WizardStep>
-                <WizardStep name={t('Review and save')} id={reviewDeviceStepId} isDisabled={!updateStepValid}>
+                <WizardStep
+                  name={t('Review and save')}
+                  id={reviewDeviceStepId}
+                  isDisabled={isWizardStepDisabled(reviewDeviceStepId, orderedIds, validStepIds)}
+                >
                   <ReviewDeviceStep error={submitError} />
                 </WizardStep>
               </Wizard>

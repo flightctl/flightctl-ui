@@ -35,6 +35,7 @@ import { useFetch } from '../../../hooks/useFetch';
 import { useEditImageBuild } from './useEditImageBuild';
 import { OciRegistriesContextProvider, useOciRegistriesContext } from '../OciRegistriesContext';
 import { getImageBuildStatusReason } from '../../../utils/imageBuilds';
+import { isWizardStepDisabled } from '../../../utils/wizards';
 
 const orderedIds = [sourceImageStepId, outputImageStepId, registrationStepId, reviewStepId];
 
@@ -54,13 +55,6 @@ const getValidStepIds = (formikErrors: FormikErrors<ImageBuildFormValues>): stri
     validStepIds.push(reviewStepId);
   }
   return validStepIds;
-};
-
-const isDisabledStep = (stepId: string, validStepIds: string[]) => {
-  const stepIdx = orderedIds.findIndex((stepOrderId) => stepOrderId === stepId);
-  return orderedIds.some((orderedId, orderedStepIdx) => {
-    return orderedStepIdx < stepIdx && !validStepIds.includes(orderedId);
-  });
 };
 
 const CreateImageBuildWizard = () => {
@@ -195,21 +189,21 @@ const CreateImageBuildWizard = () => {
                       <WizardStep
                         name={t('Image output')}
                         id={outputImageStepId}
-                        isDisabled={isDisabledStep(outputImageStepId, validStepIds)}
+                        isDisabled={isWizardStepDisabled(outputImageStepId, orderedIds, validStepIds)}
                       >
                         {currentStep?.id === outputImageStepId && <OutputImageStep />}
                       </WizardStep>
                       <WizardStep
                         name={t('Registration')}
                         id={registrationStepId}
-                        isDisabled={isDisabledStep(registrationStepId, validStepIds)}
+                        isDisabled={isWizardStepDisabled(registrationStepId, orderedIds, validStepIds)}
                       >
                         {currentStep?.id === registrationStepId && <RegistrationStep />}
                       </WizardStep>
                       <WizardStep
                         name={t('Review')}
                         id={reviewStepId}
-                        isDisabled={isDisabledStep(reviewStepId, validStepIds)}
+                        isDisabled={isWizardStepDisabled(reviewStepId, orderedIds, validStepIds)}
                       >
                         {currentStep?.id === reviewStepId && <ReviewStep error={error} />}
                       </WizardStep>
