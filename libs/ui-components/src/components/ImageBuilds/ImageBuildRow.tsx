@@ -23,6 +23,8 @@ type ImageBuildRowProps = {
   canDelete: boolean;
   onCancelClick: VoidFunction;
   canCancel: boolean;
+  onNewVersionClick: VoidFunction;
+  canNewVersion: boolean;
   refetch: VoidFunction;
 };
 
@@ -36,6 +38,8 @@ const ImageBuildRow = ({
   canDelete,
   onCancelClick,
   canCancel,
+  onNewVersionClick,
+  canNewVersion,
   refetch,
 }: ImageBuildRowProps) => {
   const { t } = useTranslation();
@@ -60,6 +64,13 @@ const ImageBuildRow = ({
       onClick: () => {
         navigate({ route: ROUTE.IMAGE_BUILD_EDIT, postfix: imageBuildName });
       },
+    });
+  }
+
+  if (canNewVersion) {
+    actions.push({
+      title: t('Build new version'),
+      onClick: onNewVersionClick,
     });
   }
 
