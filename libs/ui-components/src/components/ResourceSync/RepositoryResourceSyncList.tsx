@@ -26,7 +26,7 @@ import { useFetch } from '../../hooks/useFetch';
 import { ResourceSync, ResourceSyncList, ResourceSyncType } from '@flightctl/types';
 import { getObservedHash } from '../../utils/status/repository';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
-import Table, { TableColumn } from '../Table/Table';
+import Table from '../Table/Table';
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import TableTextSearch from '../Table/TableTextSearch';
 import { useTableSelect } from '../../hooks/useTableSelect';
@@ -58,7 +58,7 @@ const getResourceSyncType = (t: TFunction, type?: ResourceSyncType) => {
   return t('Fleet');
 };
 
-const getColumns = (t: TFunction): TableColumn<ResourceSync>[] => [
+const getColumns = (t: TFunction) => [
   {
     name: t('Name'),
   },

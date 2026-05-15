@@ -7,36 +7,23 @@ import { useTranslation } from '../../hooks/useTranslation';
 import LabelWithHelperText from '../common/WithHelperText';
 import './Table.css';
 
-export type ApiSortTableColumn = {
+export type ApiTableColumn = {
   id?: string;
   name: string;
-  sortableField?: string;
-  defaultSort?: boolean;
   helperText?: string;
-  thProps?: Omit<ThProps, 'sort'> & {
+  thProps?: ThProps & {
     ref?: React.Ref<HTMLTableCellElement> | undefined;
   };
 };
 
-export type TableColumn<D> = {
-  name: string;
-  onSort?: (data: D[]) => D[];
-  defaultSort?: boolean;
-  helperText?: string;
-  thProps?: Omit<ThProps, 'sort'> & {
-    ref?: React.Ref<HTMLTableCellElement> | undefined;
-  };
-};
-
-type TableProps<D> = Pick<PFTableProps, 'variant'> & {
-  columns: TableColumn<D>[];
+type TableProps = Pick<PFTableProps, 'variant'> & {
+  columns: ApiTableColumn[];
   children: React.ReactNode;
   loading: boolean;
   hasFilters?: boolean;
   emptyData?: boolean;
   clearFilters?: VoidFunction;
   'aria-label': string;
-  // getSortParams: (columnIndex: number) => ThProps['sort'];
   onSelectAll?: (isSelected: boolean) => void;
   isAllSelected?: boolean;
   isExpandable?: boolean;
@@ -44,9 +31,7 @@ type TableProps<D> = Pick<PFTableProps, 'variant'> & {
   singleSelect?: boolean;
 };
 
-type TableFC = <D>(props: TableProps<D>) => JSX.Element;
-
-const Table: TableFC = ({
+export const Table = ({
   columns,
   children,
   loading,
@@ -58,7 +43,7 @@ const Table: TableFC = ({
   isExpandable,
   singleSelect,
   ...rest
-}) => {
+}: TableProps) => {
   const { t } = useTranslation();
   if (emptyData && hasFilters) {
     return loading ? (

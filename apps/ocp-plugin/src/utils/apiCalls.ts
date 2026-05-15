@@ -16,7 +16,7 @@ declare global {
   }
 }
 
-type Api = 'flightctl' | 'imagebuilder' | 'alerts' | 'catalog';
+type Api = 'flightctl' | 'imagebuilder' | 'alerts' | 'catalog' | 'vulnerability';
 
 const addRequiredHeaders = (options: RequestInit, api?: Api): RequestInit => {
   const token = getCSRFToken();
@@ -49,6 +49,7 @@ export const apiProxy = `${uiProxy}/api`;
 const alertsAPI = `${apiProxy}/alerts`;
 const imageBuilderPathRegex = /^image(builds|exports)/;
 const catalogPathRegex = /^(catalogs|catalogitems)/;
+const vulnerabilityPathRegex = /^vulnerabilities/;
 
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
@@ -65,13 +66,14 @@ const getFullApiUrl = (path: string): { api: Api; url: string } => {
   if (imageBuilderPathRegex.test(path)) {
     return { api: 'imagebuilder', url: `${apiProxy}/imagebuilder/api/v1/${path}` };
   }
+
+  let apiName: Api = 'flightctl';
   if (catalogPathRegex.test(path)) {
-    return {
-      api: 'catalog',
-      url: `${apiProxy}/flightctl/api/v1/${path}`,
-    };
+    apiName = 'catalog';
+  } else if (vulnerabilityPathRegex.test(path)) {
+    apiName = 'vulnerability';
   }
-  return { api: 'flightctl', url: `${apiProxy}/flightctl/api/v1/${path}` };
+  return { api: apiName, url: `${apiProxy}/flightctl/api/v1/${path}` };
 };
 
 const handleAlertsJSONResponse = async <R>(response: Response): Promise<R> => {
@@ -94,7 +96,28 @@ const handleAlertsJSONResponse = async <R>(response: Response): Promise<R> => {
   throw new Error(await getErrorMsgFromAlertsApiResponse(response));
 };
 
-export const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
+const handleVulnerabilityJSONResponse = async <R>(response: Response): Promise<R> => {
+  if (response.ok) {
+    const data = (await response.json()) as R;
+    return data;
+  }
+
+  if (response.status === 404) {
+    throw new Error(`Error ${response.status}: ${response.statusText}`);
+  }
+
+  // API returns 501 for disabled vulnerabilities API.
+  if (response.status === 501) {
+    throw new Error(`${response.status}`);
+  }
+
+  throw new Error(await getErrorMsgFromApiResponse(response));
+};
+
+export const handleApiJSONResponse = async <R>(api: Api, response: Response): Promise<R> => {
+  if (api === 'vulnerability') {
+    return handleVulnerabilityJSONResponse(response);
+  }
   if (response.ok) {
     const data = (await response.json()) as R;
     return data;
@@ -125,7 +148,7 @@ const putOrPostData = async <TRequest, TResponse = TRequest>(
   const options = addRequiredHeaders(baseOptions, api);
   try {
     const response = await fetch(url, options);
-    return handleApiJSONResponse(response);
+    return handleApiJSONResponse(api, response);
   } catch (error) {
     console.error(`Error making ${method} request for ${kind}:`, error);
     throw error;
@@ -148,7 +171,7 @@ export const deleteData = async <R>(kind: string, abortSignal?: AbortSignal): Pr
   const options = addRequiredHeaders(baseOptions, api);
   try {
     const response = await fetch(url, options);
-    return handleApiJSONResponse(response);
+    return handleApiJSONResponse(api, response);
   } catch (error) {
     console.error('Error making DELETE request:', error);
     throw error;
@@ -169,7 +192,7 @@ export const patchData = async <R>(kind: string, data: PatchRequest, abortSignal
   const options = addRequiredHeaders(baseOptions, api);
   try {
     const response = await fetch(url, options);
-    return handleApiJSONResponse(response);
+    return handleApiJSONResponse(api, response);
   } catch (error) {
     console.error('Error making PATCH request:', error);
     throw error;
@@ -190,7 +213,7 @@ export const fetchData = async <R>(path: string, abortSignal?: AbortSignal): Pro
     if (api === 'alerts') {
       return handleAlertsJSONResponse(response);
     }
-    return handleApiJSONResponse(response);
+    return handleApiJSONResponse(api, response);
   } catch (error) {
     console.error('Error making GET request:', error);
     throw error;

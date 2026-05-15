@@ -17,6 +17,7 @@ export const apiProxy = `${uiProxy}/api`;
 
 const imageBuilderPathRegex = /^image(builds|exports)/;
 const catalogPathRegex = /^(catalogs|catalogitems)/;
+const vulnerabilityPathRegex = /^vulnerabilities/;
 
 export const wsEndpoint = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${apiServer}`;
 
@@ -45,20 +46,23 @@ export const fetchUiProxy = async (endpoint: string, requestInit: RequestInit): 
   return await fetch(`${apiProxy}/${endpoint}`, options);
 };
 
-const getFullApiUrl = (path: string): { api: 'flightctl' | 'imagebuilder' | 'alerts' | 'catalog'; url: string } => {
+type Api = 'flightctl' | 'imagebuilder' | 'alerts' | 'catalog' | 'vulnerability';
+
+const getFullApiUrl = (path: string): { api: Api; url: string } => {
   if (path.startsWith('alerts')) {
     return { api: 'alerts', url: `${apiProxy}/alerts/api/v2/${path}` };
   }
   if (imageBuilderPathRegex.test(path)) {
     return { api: 'imagebuilder', url: `${apiProxy}/imagebuilder/api/v1/${path}` };
   }
+
+  let apiName: Api = 'flightctl';
   if (catalogPathRegex.test(path)) {
-    return {
-      api: 'catalog',
-      url: `${apiProxy}/flightctl/api/v1/${path}`,
-    };
+    apiName = 'catalog';
+  } else if (vulnerabilityPathRegex.test(path)) {
+    apiName = 'vulnerability';
   }
-  return { api: 'flightctl', url: `${apiProxy}/flightctl/api/v1/${path}` };
+  return { api: apiName, url: `${apiProxy}/flightctl/api/v1/${path}` };
 };
 
 export const logout = async () => {
@@ -78,7 +82,10 @@ export const redirectToLogin = () => {
   window.location.href = '/login';
 };
 
-const handleApiJSONResponse = async <R>(response: Response): Promise<R> => {
+const handleApiJSONResponse = async <R>(api: Api, response: Response): Promise<R> => {
+  if (api === 'vulnerability') {
+    return handleVulnerabilityJSONResponse(response);
+  }
   if (response.ok) {
     const data = (await response.json()) as R;
     return data;
@@ -116,6 +123,24 @@ const handleAlertsJSONResponse = async <R>(response: Response): Promise<R> => {
   throw new Error(await getErrorMsgFromAlertsApiResponse(response));
 };
 
+const handleVulnerabilityJSONResponse = async <R>(response: Response): Promise<R> => {
+  if (response.ok) {
+    const data = (await response.json()) as R;
+    return data;
+  }
+
+  if (response.status === 404) {
+    throw new Error(`Error ${response.status}: ${response.statusText}`);
+  }
+
+  // API returns 501 for disabled vulnerabilities API.
+  if (response.status === 501) {
+    throw new Error(`${response.status}`);
+  }
+
+  throw new Error(await getErrorMsgFromApiResponse(response));
+};
+
 const fetchWithRetry = async <R>(path: string, init?: RequestInit): Promise<R> => {
   const { api, url } = getFullApiUrl(path);
 
@@ -136,7 +161,7 @@ const fetchWithRetry = async <R>(path: string, init?: RequestInit): Promise<R> =
   if (api === 'alerts') {
     return handleAlertsJSONResponse(response);
   }
-  return handleApiJSONResponse(response);
+  return handleApiJSONResponse(api, response);
 };
 
 const putOrPostData = async <TRequest, TResponse = TRequest>(

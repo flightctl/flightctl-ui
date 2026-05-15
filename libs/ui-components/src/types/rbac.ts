@@ -13,6 +13,7 @@ export enum RESOURCE {
   CATALOG_ITEM = 'catalogitems',
   FLEET = 'fleets',
   DEVICE = 'devices',
+  VULNERABILITY = 'vulnerabilities',
   DEVICE_CONSOLE = 'devices/console',
   DEVICE_DECOMMISSION = 'devices/decommission',
   DEVICE_RESUME = 'devices/resume',

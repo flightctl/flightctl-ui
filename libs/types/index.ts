@@ -49,6 +49,7 @@ export type { ContainerApplicationProperties } from './models/ContainerApplicati
 export type { CpuResourceMonitorSpec } from './models/CpuResourceMonitorSpec';
 export type { CronExpression } from './models/CronExpression';
 export type { CustomDeviceInfo } from './models/CustomDeviceInfo';
+export type { DependenciesSync } from './models/DependenciesSync';
 export type { Device } from './models/Device';
 export type { DeviceApplicationsSummaryStatus } from './models/DeviceApplicationsSummaryStatus';
 export type { DeviceApplicationStatus } from './models/DeviceApplicationStatus';
@@ -83,6 +84,7 @@ export type { DeviceSystemInfo } from './models/DeviceSystemInfo';
 export type { DeviceUpdatedStatus } from './models/DeviceUpdatedStatus';
 export { DeviceUpdatedStatusType } from './models/DeviceUpdatedStatusType';
 export type { DeviceUpdatePolicySpec } from './models/DeviceUpdatePolicySpec';
+export type { DeviceVulnerabilityCveDetails } from './models/DeviceVulnerabilityCveDetails';
 export type { DiskResourceMonitorSpec } from './models/DiskResourceMonitorSpec';
 export type { DisruptionBudget } from './models/DisruptionBudget';
 export type { DockerAuth } from './models/DockerAuth';

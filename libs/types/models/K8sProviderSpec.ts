@@ -28,14 +28,8 @@ export type K8sProviderSpec = {
    * Whether this K8s provider is enabled.
    */
   enabled?: boolean;
-  /**
-   * How users from this auth provider are assigned to organizations.
-   */
-  organizationAssignment: AuthOrganizationAssignment | null;
-  /**
-   * How users from this auth provider are assigned roles.
-   */
-  roleAssignment: AuthRoleAssignment | null;
+  organizationAssignment?: AuthOrganizationAssignment;
+  roleAssignment?: AuthRoleAssignment;
   /**
    * Optional suffix to strip from ClusterRole names when normalizing role names. Used for multi-release deployments where ClusterRoles have namespace-specific names (e.g., flightctl-admin-<namespace>).
    */

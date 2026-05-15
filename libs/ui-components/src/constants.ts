@@ -8,14 +8,17 @@ export const EVENT_PAGE_SIZE = 200; // It's 500 in OCP console
 
 export const CERTIFICATE_VALIDITY_IN_YEARS = 1;
 
-export const getApiVersion = (api: 'flightctl' | 'imagebuilder' | 'alerts' | 'catalog'): string | undefined => {
+export const getApiVersion = (
+  api: 'flightctl' | 'imagebuilder' | 'alerts' | 'catalog' | 'vulnerability',
+): string | undefined => {
   switch (api) {
     case 'flightctl':
       return ApiVersion.ApiVersionV1beta1;
+    case 'catalog':
+    case 'vulnerability':
+      return AlphaVersion.ApiVersionV1alpha1;
     case 'imagebuilder':
       return ImageBuilderApiVersion.ApiVersionV1alpha1;
-    case 'catalog':
-      return AlphaVersion.ApiVersionV1alpha1;
     case 'alerts':
     default:
       return undefined;

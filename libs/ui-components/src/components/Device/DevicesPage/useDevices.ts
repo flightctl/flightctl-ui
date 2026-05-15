@@ -1,7 +1,7 @@
 import { useDebounce } from 'use-debounce';
 
 import { Device, DeviceLifecycleStatusType, DeviceList, DevicesSummary } from '@flightctl/types';
-import { FilterSearchParams } from '../../../utils/status/devices';
+import { DeviceTextFilterKey, FilterSearchParams, isValidCveIdFilterValue } from '../../../utils/status/devices';
 import * as queryUtils from '../../../utils/query';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { FlightCtlLabel } from '../../../types/extraTypes';
@@ -10,7 +10,8 @@ import { PAGE_SIZE } from '../../../constants';
 import { PaginationDetails, useTablePagination } from '../../../hooks/useTablePagination';
 
 type DevicesEndpointArgs = {
-  nameOrAlias?: string;
+  /** Free-text filters synced with URL (name/alias, CVE ID, …). */
+  textFilters?: Partial<Record<DeviceTextFilterKey, string>>;
   ownerFleets?: string[];
   onlyFleetless?: boolean;
   activeStatuses?: FilterStatusMap;
@@ -31,15 +32,18 @@ const decommissionedStatuses = [
 ];
 
 const getDevicesEndpoint = ({
-  nameOrAlias,
+  textFilters,
   ownerFleets,
   activeStatuses,
   labels,
   onlyDecommissioned,
+  onlyFleetless,
   nextContinue,
   summaryOnly,
-  onlyFleetless,
 }: DevicesEndpointArgs) => {
+  const nameOrAlias = textFilters?.[FilterSearchParams.NameOrAlias];
+  const cveId = textFilters?.[FilterSearchParams.CveId];
+
   const filterByAppStatus = activeStatuses?.[FilterSearchParams.AppStatus];
   const filterByDevStatus = activeStatuses?.[FilterSearchParams.DeviceStatus];
   const filterByUpdateStatus = activeStatuses?.[FilterSearchParams.UpdatedStatus];
@@ -52,16 +56,15 @@ const getDevicesEndpoint = ({
   if (nameOrAlias) {
     queryUtils.addTextContainsCondition(fieldSelectors, 'metadata.nameOrAlias', nameOrAlias);
   }
-  if (ownerFleets?.length) {
+
+  if (onlyFleetless) {
+    fieldSelectors.push('!metadata.owner');
+  } else if (ownerFleets?.length) {
     queryUtils.addQueryConditions(
       fieldSelectors,
       'metadata.owner',
       ownerFleets.map((fleet) => `Fleet/${fleet}`),
     );
-  }
-
-  if (onlyFleetless) {
-    fieldSelectors.push('!metadata.owner');
   }
 
   if (onlyDecommissioned) {
@@ -73,6 +76,9 @@ const getDevicesEndpoint = ({
   const params = new URLSearchParams();
   if (fieldSelectors.length > 0) {
     params.set('fieldSelector', fieldSelectors.join(','));
+  }
+  if (cveId && isValidCveIdFilterValue(cveId)) {
+    params.set('cveId', cveId);
   }
   queryUtils.setLabelParams(params, labels);
   if (summaryOnly) {
@@ -105,7 +111,6 @@ export const useDevicesSummary = ({
   const [deviceList, listLoading] = useFetchPeriodically<DeviceList>({
     endpoint: devicesEndpoint,
   });
-
   return [deviceList?.summary, listLoading];
 };
 
@@ -119,7 +124,7 @@ export type DevicesResult = {
 };
 
 export const useDevices = (args: {
-  nameOrAlias?: string;
+  textFilters?: Partial<Record<DeviceTextFilterKey, string>>;
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
   labels?: FlightCtlLabel[];
@@ -136,7 +141,6 @@ export const useDevices = (args: {
     },
     args.onPageFetched,
   );
-
   const hasMore = !!devicesList?.metadata?.continue || (devicesList?.metadata?.remainingItemCount ?? 0) > 0;
 
   return {
@@ -163,7 +167,7 @@ export type DevicesPaginatedResult = {
  * Use this for paginated tables/modals.
  */
 export const useDevicesPaginated = (args: {
-  nameOrAlias?: string;
+  textFilters?: Partial<Record<DeviceTextFilterKey, string>>;
   ownerFleets?: string[];
   onlyDecommissioned: boolean;
   onlyFleetless?: boolean;

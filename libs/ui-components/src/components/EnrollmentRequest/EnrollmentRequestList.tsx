@@ -4,7 +4,7 @@ import { Tbody } from '@patternfly/react-table';
 import { SelectList, SelectOption, ToolbarItem } from '@patternfly/react-core';
 import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons';
 
-import Table, { ApiSortTableColumn } from '../Table/Table';
+import Table from '../Table/Table';
 import TableActions from '../Table/TableActions';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
@@ -28,7 +28,7 @@ const EnrollmentRequestEmptyState = () => {
   return <ResourceListEmptyState icon={MicrochipIcon} titleText={t('No enrollment requests here!')} />;
 };
 
-const getEnrollmentColumns = (t: TFunction): ApiSortTableColumn[] => [
+const getEnrollmentColumns = (t: TFunction) => [
   {
     name: t('Alias'),
   },

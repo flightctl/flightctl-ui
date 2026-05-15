@@ -35,6 +35,7 @@ import FormSelect from '../../../form/FormSelect';
 import { getArtifactLabel, getFullArtifactURI } from '../../utils';
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import { useAppLinks } from '../../../../hooks/useAppLinks';
+import { FilterSearchParams } from '../../../../utils/status/devices';
 
 export const isSelectTargetStepValid = (errors: FormikErrors<InstallAppFormik>) => {
   return !errors.device && !errors.fleet;
@@ -51,7 +52,9 @@ const DeviceTarget = () => {
     isUpdating: devicesUpdating,
     pagination: devicePagination,
   } = useDevicesPaginated({
-    nameOrAlias: deviceNameFilter || undefined,
+    textFilters: {
+      [FilterSearchParams.NameOrAlias]: deviceNameFilter,
+    },
     onlyDecommissioned: false,
     onlyFleetless: true,
   });

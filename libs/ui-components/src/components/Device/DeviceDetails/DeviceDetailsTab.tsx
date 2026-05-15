@@ -18,6 +18,7 @@ import { isDeviceEnrolled } from '../../../utils/devices';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useDeviceSpecSystemInfo } from '../../../hooks/useDeviceSpecSystemInfo';
+import { useVulnerabilitiesEnabled } from '../../../hooks/useServicesEnabled';
 import EditLabelsForm, { ViewLabels } from '../../modals/EditLabelsModal/EditLabelsForm';
 import ResourceLink from '../../common/ResourceLink';
 import LabelWithHelperText from '../../common/WithHelperText';
@@ -28,6 +29,7 @@ import DeviceFleet from './DeviceFleet';
 import DeviceOs from './DeviceOs';
 import DeviceApplications from './DeviceApplications';
 import DeviceSystemdUnits from './DeviceSystemdUnits';
+import DeviceVulnerabilities from './DeviceVulnerabilities';
 import StatusContent from './DeviceDetailsTabContent/StatusContent';
 import SystemResourcesContent from './DeviceDetailsTabContent/SystemResourcesContent';
 
@@ -42,13 +44,15 @@ type DeviceDetailsTabProps = {
 const EnrolledDeviceDetails = ({
   device,
   refetch,
-  children,
   canEdit,
+  children,
 }: React.PropsWithChildren<DeviceDetailsTabProps>) => {
   const { t } = useTranslation();
   const devSystemInfo = useDeviceSpecSystemInfo(device.status.systemInfo, t);
-  const hasExtraColumn = !!children;
+  const [vulnerabilitiesEnabled, canListVulnerabilities] = useVulnerabilitiesEnabled();
+  const showVulnerabilities = vulnerabilitiesEnabled && canListVulnerabilities;
 
+  const hasExtraColumn = !!children;
   return (
     <Grid hasGutter>
       <GridItem md={12}>
@@ -158,6 +162,11 @@ const EnrolledDeviceDetails = ({
           </CardBody>
         </DetailsPageCard>
       </GridItem>
+      {showVulnerabilities && (
+        <GridItem md={12}>
+          <DeviceVulnerabilities deviceId={device.metadata.name as string} />
+        </GridItem>
+      )}
       <GridItem md={12} lg={6}>
         <DeviceApplications device={device} />
       </GridItem>

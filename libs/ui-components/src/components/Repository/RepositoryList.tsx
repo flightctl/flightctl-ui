@@ -20,7 +20,7 @@ import { getLastTransitionTimeText } from '../../utils/status/repository';
 import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import DeleteRepositoryModal from './RepositoryDetails/DeleteRepositoryModal';
 import TableTextSearch from '../Table/TableTextSearch';
-import Table, { TableColumn } from '../Table/Table';
+import Table from '../Table/Table';
 import { useTableSelect } from '../../hooks/useTableSelect';
 import MassDeleteRepositoryModal from '../modals/massModals/MassDeleteRepositoryModal/MassDeleteRepositoryModal';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
@@ -68,7 +68,7 @@ const RepositoryEmptyState = () => {
   );
 };
 
-const getColumns = (t: TFunction): TableColumn<Repository>[] => [
+const getColumns = (t: TFunction) => [
   {
     name: t('Name'),
   },
