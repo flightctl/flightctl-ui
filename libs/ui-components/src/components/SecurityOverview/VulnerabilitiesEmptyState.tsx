@@ -18,7 +18,7 @@ const VulnerabilitiesEmptyState = ({ hasDevices }: { hasDevices: boolean }) => {
   }
 
   return (
-    <Alert variant="info" title={t('No vulnerability data to display.')}>
+    <Alert variant="info" title={t('No vulnerability data to display')}>
       {t('There are currently no deployed devices. Scan results will be available once devices have been added.')}
     </Alert>
   );

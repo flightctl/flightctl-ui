@@ -16,7 +16,8 @@
   background-color: color-mix(in srgb, var(--pf-t--global--icon--color--severity--moderate--default) 14%, white);
 }
 
-.fctl-security-overview-summary-box.low {
+.fctl-security-overview-summary-box.low,
+.fctl-security-overview-summary-box.unknown {
   background-color: color-mix(in srgb, var(--pf-t--global--icon--color--severity--minor--default) 14%, white);
 }
 
@@ -24,8 +25,9 @@
   background-color: color-mix(in srgb, var(--pf-t--global--icon--color--severity--none--default) 14%, white);
 }
 
-.fctl-security-overview-summary-box.unknown {
-  background-color: color-mix(in srgb, var(--pf-t--global--icon--color--severity--minor--default) 14%, white);
+/* Dark theme variations. */
+.pf-v6-theme-dark .fctl-security-overview-summary-box {
+  color: var(--pf-t--global--icon--color--100);
 }
 
 .pf-v6-theme-dark .fctl-security-overview-summary-box.critical {
@@ -40,14 +42,11 @@
   background-color: var(--pf-t--global--dark--color--severity--moderate--100);
 }
 
-.pf-v6-theme-dark .fctl-security-overview-summary-box.low {
+.pf-v6-theme-dark .fctl-security-overview-summary-box.low,
+.pf-v6-theme-dark .fctl-security-overview-summary-box.unknown {
   background-color: var(--pf-t--global--dark--color--severity--minor--100);
 }
 
 .pf-v6-theme-dark .fctl-security-overview-summary-box.none {
   background-color: var(--pf-t--global--dark--color--severity--none--100);
-}
-
-.pf-v6-theme-dark .fctl-security-overview-summary-box.unknown {
-  background-color: var(--pf-t--global--dark--color--severity--minor--100);
 }

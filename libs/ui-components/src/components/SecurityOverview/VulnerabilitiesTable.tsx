@@ -105,7 +105,7 @@ const VulnerabilitiesTable = ({
     setSelectedSeverities([]);
   }, [setSearch, setSelectedSeverities]);
 
-  const [selectedRow, setSelectedRow] = React.useState<Vulnerability | VulnerabilityGroup | undefined>(undefined);
+  const [selectedRow, setSelectedRow] = React.useState<Vulnerability | VulnerabilityGroup>();
 
   const toggleSeverityFilter = React.useCallback(
     (severity: VulnerabilitySeverity) => {

@@ -39,7 +39,7 @@ const Overview = () => {
                 <StatusCard />
               </GridItem>
             )}
-            {vulnerabilitiesEnabled && (
+            {vulnerabilitiesEnabled && canListVulnerabilities && (
               <GridItem lg={vulnColumns}>
                 <SecurityOverviewCard />
               </GridItem>
