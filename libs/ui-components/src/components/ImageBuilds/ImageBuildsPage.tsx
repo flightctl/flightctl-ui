@@ -29,9 +29,11 @@ import Table from '../Table/Table';
 import MassDeleteImageBuildModal from '../modals/massModals/MassDeleteImageBuildModal/MassDeleteImageBuildModal';
 import CancelImageBuildModal from './CancelImageBuildModal/CancelImageBuildModal';
 import DeleteImageBuildModal from './DeleteImageBuildModal/DeleteImageBuildModal';
+import NewVersionImageBuildModal from './NewVersionImageBuildModal/NewVersionImageBuildModal';
 import { useImageBuilds, useImageBuildsBackendFilters } from './useImageBuilds';
 import ImageBuildRow from './ImageBuildRow';
 import { OciRegistriesContextProvider } from './OciRegistriesContext';
+import { ImageBuild } from '@flightctl/types/imagebuilder';
 
 const getColumns = (t: TFunction) => [
   {
@@ -55,6 +57,7 @@ const imageBuildTablePermissions = [
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.CREATE },
   { kind: RESOURCE.IMAGE_BUILD_CANCEL, verb: VERB.CREATE },
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.DELETE },
+  { kind: RESOURCE.IMAGE_BUILD_NEW_VERSION, verb: VERB.CREATE },
 ];
 
 const ImageBuildsEmptyState = ({ onCreateClick }: { onCreateClick?: VoidFunction }) => {
@@ -85,10 +88,11 @@ const ImageBuildTable = () => {
   const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
 
   const { checkPermissions } = usePermissionsContext();
-  const [canCreate, canCancel, canDelete] = checkPermissions(imageBuildTablePermissions);
+  const [canCreate, canCancel, canDelete, canNewVersion] = checkPermissions(imageBuildTablePermissions);
 
   const [imageBuildToDeleteId, setImageBuildToDeleteId] = React.useState<string>();
   const [imageBuildToCancelId, setImageBuildToCancelId] = React.useState<string>();
+  const [imageBuildForNewVersion, setImageBuildForNewVersion] = React.useState<ImageBuild>();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
 
   const handleCreateClick = React.useCallback(() => {
@@ -141,10 +145,12 @@ const ImageBuildTable = () => {
               canCreate={canCreate}
               canDelete={canDelete}
               canCancel={canCancel}
+              canNewVersion={canNewVersion}
               onDeleteClick={() => {
                 setImageBuildToDeleteId(name);
               }}
               onCancelClick={() => setImageBuildToCancelId(name)}
+              onNewVersionClick={() => setImageBuildForNewVersion(imageBuild)}
               isRowSelected={() => isRowSelected(imageBuild)}
               onRowSelect={() => onRowSelect(imageBuild)}
               refetch={refetch}
@@ -163,6 +169,17 @@ const ImageBuildTable = () => {
           onClose={(confirmed) => {
             setImageBuildToCancelId(undefined);
             if (confirmed) {
+              refetch();
+            }
+          }}
+        />
+      )}
+      {imageBuildForNewVersion && (
+        <NewVersionImageBuildModal
+          imageBuild={imageBuildForNewVersion}
+          onClose={(created) => {
+            setImageBuildForNewVersion(undefined);
+            if (created) {
               refetch();
             }
           }}

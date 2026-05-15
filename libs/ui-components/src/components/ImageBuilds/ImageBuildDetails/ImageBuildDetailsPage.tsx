@@ -20,6 +20,7 @@ import ImageBuildDetailsTab from './ImageBuildDetailsTab';
 import ImageBuildExportsGallery from './ImageBuildExportsGallery';
 import ImageBuildLogsTab from './ImageBuildLogsTab';
 import CancelImageBuildModal from '../CancelImageBuildModal/CancelImageBuildModal';
+import NewVersionImageBuildModal from '../NewVersionImageBuildModal/NewVersionImageBuildModal';
 
 const imageBuildDetailsPermissions = [
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.CREATE },
@@ -27,6 +28,7 @@ const imageBuildDetailsPermissions = [
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.DELETE },
   // Users that can view logs for imagebuilds also can view logs for imageexports
   { kind: RESOURCE.IMAGE_BUILD_LOG, verb: VERB.GET },
+  { kind: RESOURCE.IMAGE_BUILD_NEW_VERSION, verb: VERB.CREATE },
 ];
 
 const ImageBuildDetailsPageContent = () => {
@@ -40,7 +42,8 @@ const ImageBuildDetailsPageContent = () => {
   const [imageBuild, isLoading, error, refetch] = useImageBuild(imageBuildId);
   const { checkPermissions } = usePermissionsContext();
   const buildReason = imageBuild ? getImageBuildStatusReason(imageBuild) : undefined;
-  const [canCreate, hasCancelPermission, canDelete, canViewLogs] = checkPermissions(imageBuildDetailsPermissions);
+  const [canCreate, hasCancelPermission, canDelete, canViewLogs, canNewVersion] =
+    checkPermissions(imageBuildDetailsPermissions);
   const canCancel = hasCancelPermission && buildReason && isImageBuildCancelable(buildReason);
 
   const tabKeys = React.useMemo(
@@ -49,6 +52,7 @@ const ImageBuildDetailsPageContent = () => {
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>();
   const [isCancelModalOpen, setIsCancelModalOpen] = React.useState<boolean>();
+  const [isNewVersionModalOpen, setIsNewVersionModalOpen] = React.useState<boolean>();
 
   return (
     <DetailsPage
@@ -67,7 +71,7 @@ const ImageBuildDetailsPageContent = () => {
         </TabsNav>
       }
       actions={
-        (canCreate || canDelete) && (
+        (canCreate || canDelete || canNewVersion || canCancel) && (
           <DetailsPageActions>
             <DropdownList>
               {canCreate && (
@@ -76,6 +80,9 @@ const ImageBuildDetailsPageContent = () => {
                     ? t('Retry')
                     : t('Duplicate')}
                 </DropdownItem>
+              )}
+              {canNewVersion && (
+                <DropdownItem onClick={() => setIsNewVersionModalOpen(true)}>{t('Build new version')}</DropdownItem>
               )}
               {canCancel && (
                 <DropdownItem onClick={() => setIsCancelModalOpen(true)}>{t('Cancel image build')}</DropdownItem>
@@ -97,6 +104,17 @@ const ImageBuildDetailsPageContent = () => {
             <Route path="yaml" element={<ImageBuildYaml imageBuild={imageBuild} refetch={refetch} />} />
             {canViewLogs && <Route path="logs" element={<ImageBuildLogsTab imageBuild={imageBuild} />} />}
           </Routes>
+          {isNewVersionModalOpen && (
+            <NewVersionImageBuildModal
+              imageBuild={imageBuild}
+              onClose={(newBuildName) => {
+                setIsNewVersionModalOpen(false);
+                if (newBuildName) {
+                  navigate({ route: ROUTE.IMAGE_BUILD_DETAILS, postfix: newBuildName });
+                }
+              }}
+            />
+          )}
           {isDeleteModalOpen && (
             <DeleteImageBuildModal
               imageBuildId={imageBuildId}

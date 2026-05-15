@@ -26,6 +26,7 @@ export enum RESOURCE {
   IMAGE_BUILD = 'imagebuilds',
   IMAGE_BUILD_LOG = 'imagebuilds/log',
   IMAGE_BUILD_CANCEL = 'imagebuilds/cancel',
+  IMAGE_BUILD_NEW_VERSION = 'imagebuilds/newversion',
   IMAGE_EXPORT = 'imageexports',
   IMAGE_EXPORT_LOG = 'imageexports/log',
   IMAGE_EXPORT_CANCEL = 'imageexports/cancel',

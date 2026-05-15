@@ -57,7 +57,7 @@ const getImageNameValidationError = (value: string, t: TFunction): string | unde
   return undefined;
 };
 
-const getImageTagValidationError = (value: string, t: TFunction): string | undefined => {
+export const getImageTagValidationError = (value: string, t: TFunction): string | undefined => {
   if (!value) return undefined;
   if (value.length > OCI_IMAGE_TAG_MAX_LENGTH) {
     return t('Image tag must not exceed {{max}} characters.', { max: OCI_IMAGE_TAG_MAX_LENGTH });
