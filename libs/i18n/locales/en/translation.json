@@ -1513,7 +1513,7 @@
   "Vulnerability counts by severity": "Vulnerability counts by severity",
   "No CVEs detected": "No CVEs detected",
   "All managed devices have been scanned. No CVEs were found affecting images currently deployed across your fleets and devices.": "All managed devices have been scanned. No CVEs were found affecting images currently deployed across your fleets and devices.",
-  "No vulnerability data to display.": "No vulnerability data to display.",
+  "No vulnerability data to display": "No vulnerability data to display",
   "There are currently no deployed devices. Scan results will be available once devices have been added.": "There are currently no deployed devices. Scan results will be available once devices have been added.",
   "Severity": "Severity",
   "Affected devices": "Affected devices",

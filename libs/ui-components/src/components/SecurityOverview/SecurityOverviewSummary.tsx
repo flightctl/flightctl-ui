@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Divider, Flex, FlexItem, Icon, Stack, StackItem } from '@patternfly/react-core';
+import { Divider, Flex, FlexItem, Grid, GridItem, Icon, Stack, StackItem } from '@patternfly/react-core';
 import { Vulnerability } from '@flightctl/types/alpha';
 import SeverityUndefinedIcon from '@patternfly/react-icons/dist/js/icons/severity-undefined-icon';
 
@@ -65,6 +65,7 @@ const SecurityOverviewSummary = () => {
 
   const statusItems = getVulnerabilitySeverityStatusItems(t);
   const severityThresholdIndex = VULNERABILITY_SEVERITY_ORDER.indexOf(Vulnerability.severity.LOW);
+  const severityColumnSpan = hasAllSeverities ? 4 : 3;
 
   return (
     <Stack hasGutter>
@@ -83,15 +84,7 @@ const SecurityOverviewSummary = () => {
         <Divider className="pf-v6-u-my-md" />
       </StackItem>
       <StackItem>
-        <div
-          role="group"
-          aria-label={t('Vulnerability counts by severity')}
-          style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${hasAllSeverities ? 3 : 4}, minmax(0, 1fr))`,
-            gap: 'var(--pf-t--global--spacer--md)',
-          }}
-        >
+        <Grid hasGutter role="group" aria-label={t('Vulnerability counts by severity')}>
           {VULNERABILITY_SEVERITY_ORDER.map((severity, index) => {
             // If none/unknown severities are present, we show all severities.
             // Otherwise, we only show severities of the main categories (Critical to Low)
@@ -101,15 +94,12 @@ const SecurityOverviewSummary = () => {
 
             const item = statusItems.find((item) => item.id === severity) || defaultVulnerabilitySeverityStatusItem(t);
             return (
-              <SeverityStat
-                key={severity}
-                count={getSeverityCountValue(severity, counts)}
-                severity={severity}
-                item={item}
-              />
+              <GridItem key={severity} xl={severityColumnSpan} span={6}>
+                <SeverityStat severity={severity} item={item} count={getSeverityCountValue(severity, counts)} />
+              </GridItem>
             );
           })}
-        </div>
+        </Grid>
       </StackItem>
     </Stack>
   );
