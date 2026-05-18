@@ -19,8 +19,7 @@ type LabelsFieldProps = {
   labelGroupTestId?: string;
 };
 
-const maxWidthDefaultLabel = '18ch'; // Can fit more chars as it doesn't have a "Close" button
-const maxWidthNonDefaultLabel = '16ch'; // Can fit less chars due to the "Close" button
+const maxLabelWidth = '16ch';
 
 const LabelsField = ({
   name,
@@ -90,23 +89,16 @@ const LabelsField = ({
         {labels
           .map((label, originalIndex) => ({ ...label, originalIndex }))
           .filter((l) => !l.key.includes(CATALOG_LABEL))
-          .map(({ key, value, isDefault, originalIndex }) => {
+          .map(({ key, value, originalIndex }) => {
             const text = value ? `${key}=${value}` : key;
             const elKey = `${key}__${originalIndex}`;
-            if (isDefault) {
-              return (
-                <Label key={elKey} textMaxWidth={maxWidthDefaultLabel}>
-                  {text}
-                </Label>
-              );
-            }
 
             const closeButtonProps = isLoading && { isDisabled: true };
-            const isLabelEditable = !isLoading && !isDefault;
+            const isLabelEditable = !isLoading;
             return (
               <Label
                 key={elKey}
-                textMaxWidth={maxWidthNonDefaultLabel}
+                textMaxWidth={maxLabelWidth}
                 closeBtnProps={closeButtonProps}
                 onClose={(e) => onDelete(e, originalIndex)}
                 onEditCancel={(_, prevText) => onEdit(originalIndex, prevText)}

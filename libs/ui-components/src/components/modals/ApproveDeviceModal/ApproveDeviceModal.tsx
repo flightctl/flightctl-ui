@@ -26,7 +26,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
   return (
     <Formik<ApproveDeviceFormValues>
       initialValues={{
-        labels: fromAPILabel(labels, { isDefault: true }).filter((label) => label.key !== 'alias'),
+        labels: fromAPILabel(labels).filter((label) => label.key !== 'alias'),
         deviceAlias: labels.alias || '',
       }}
       validationSchema={deviceApprovalValidationSchema(t, { massDeviceCount: 0 })}
@@ -41,6 +41,8 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
           await put<EnrollmentRequestApproval>(`enrollmentrequests/${enrollmentRequest.metadata.name}/approval`, {
             approved: true,
             labels: deviceLabels,
+            // "replaceLabels=true" indicates that the labels we're sending are the complete final set
+            replaceLabels: true,
           });
           onClose(true);
         } catch (e) {
