@@ -18,11 +18,10 @@ import {
   formatDeviceLogsForExport as getExportableLogContent,
   openTextInNewTab,
 } from '../../../utils/deviceLogDownload';
-import { useOrganizationGuardContext } from '../../common/OrganizationGuard';
 import { UserPreferencesContext } from '../../Masthead/UserPreferencesProvider';
+import { DeviceLogsDisconnectedBanner, DeviceLogsEmptyState, DeviceLogsRetrievalError } from './DeviceLogsEmptyState';
 import DeviceLogsSearchToolbar from './DeviceLogsSearchToolbar';
 import DeviceLogsInnerToolbar from './DeviceLogsInnerToolbar';
-import { DeviceLogsDisconnectedBanner, DeviceLogsEmptyState, DeviceLogsRetrievalError } from './DeviceLogsEmptyState';
 
 type DeviceLogsTabProps = {
   deviceId: string;
@@ -30,7 +29,6 @@ type DeviceLogsTabProps = {
 
 const DeviceLogsTab = ({ deviceId }: DeviceLogsTabProps) => {
   const { t } = useTranslation();
-  const { currentOrganization } = useOrganizationGuardContext();
   const { settings } = useAppContext();
   const { resolvedTheme } = React.useContext(UserPreferencesContext);
   const [lastSearchParams, setLastSearchParams] = React.useState<DeviceLogSearchParams>();
@@ -39,7 +37,6 @@ const DeviceLogsTab = ({ deviceId }: DeviceLogsTabProps) => {
   const { logs, isConnecting, isFetching, isStreaming, errorTypeOrMsg, search, closeSession, retrySearch } =
     useDeviceLogs({
       deviceId,
-      organizationId: currentOrganization?.id || undefined,
     });
   const lineCount = React.useMemo(() => logs.length, [logs]);
 

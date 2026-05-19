@@ -19,19 +19,12 @@ import { useFormikContext } from 'formik';
 import { useTranslation } from '../../../hooks/useTranslation';
 import {
   DeviceLogCategory,
-  DeviceLogLevel,
   DeviceLogSearchParams,
   getActiveTimeFilterLabel,
   getDeviceLogLevelLabel,
 } from '../../../utils/deviceLogs';
 
 import './DeviceLogsInnerToolbar.css';
-
-type ActiveFilter = {
-  key: string;
-  label: string;
-  onRemove: VoidFunction;
-};
 
 export type DeviceLogsInnerToolbarProps = {
   lastSearchParams: DeviceLogSearchParams;
@@ -87,20 +80,19 @@ const DeviceLogsInnerToolbar = ({
     [onSearchUpdate, lastSearchParams, setValues],
   );
 
-  const activeFilters = React.useMemo((): ActiveFilter[] => {
-    const params = lastSearchParams;
-    const filters: ActiveFilter[] = [];
+  const activeFilters = React.useMemo(() => {
+    const { category, level, systemdUnit, logFilePath } = lastSearchParams;
 
-    const unit = params.systemdUnit;
-    if (params.category === DeviceLogCategory.SYSTEM && unit) {
+    const filters: { key: string; label: string; onRemove?: VoidFunction }[] = [];
+    if (category === DeviceLogCategory.SYSTEM && systemdUnit) {
       filters.push({
         key: 'unit',
-        label: t('Unit: {{unit}}', { unit }),
+        label: t('Unit: {{unit}}', { unit: systemdUnit }),
         onRemove: onRemoveFilter('systemdUnit', ''),
       });
     }
 
-    const timeText = getActiveTimeFilterLabel(t, params);
+    const timeText = getActiveTimeFilterLabel(t, lastSearchParams);
     if (timeText) {
       filters.push({
         key: 'time',
@@ -109,19 +101,19 @@ const DeviceLogsInnerToolbar = ({
       });
     }
 
-    if (params.category !== DeviceLogCategory.FILE && params.level !== DeviceLogLevel.ALL) {
+    if (category !== DeviceLogCategory.FILE && level !== 'all') {
       filters.push({
         key: 'level',
-        label: t('Level: {{level}}', { level: getDeviceLogLevelLabel(t, params.level) }),
-        onRemove: onRemoveFilter('level', DeviceLogLevel.ALL),
+        label: t('Level: {{level}}', { level: getDeviceLogLevelLabel(t, level) }),
+        onRemove: onRemoveFilter('level', 'all'),
       });
     }
 
-    if (params.category === DeviceLogCategory.FILE && params.logFilePath) {
+    if (category === DeviceLogCategory.FILE && logFilePath) {
+      // File path filter is not removable, as the search would become invalid
       filters.push({
         key: 'file-path',
-        label: t('File path: {{logFilePath}}', { logFilePath: params.logFilePath }),
-        onRemove: onRemoveFilter('logFilePath', ''),
+        label: t('File path: {{logFilePath}}', { logFilePath }),
       });
     }
 
@@ -136,16 +128,20 @@ const DeviceLogsInnerToolbar = ({
             <ToolbarGroup rowWrap={{ default: 'nowrap' }}>
               <ToolbarItem>
                 <LabelGroup categoryName={t('Active filters')}>
-                  {activeFilters.map((c) => (
+                  {activeFilters.map((filter) => (
                     <Label
-                      key={c.key}
+                      key={filter.key}
                       variant="outline"
-                      onClose={(e) => {
-                        e.preventDefault();
-                        c.onRemove();
-                      }}
+                      onClose={
+                        filter.onRemove
+                          ? (e) => {
+                              e.preventDefault();
+                              filter.onRemove?.();
+                            }
+                          : undefined
+                      }
                     >
-                      {c.label}
+                      {filter.label}
                     </Label>
                   ))}
                 </LabelGroup>

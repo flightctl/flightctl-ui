@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { useTranslation } from './useTranslation';
 import { useAppContext } from './useAppContext';
-import { DeviceLogCategory, DeviceLogErrorType, type DeviceLogSearchParams, MAX_LOG_LINES } from '../utils/deviceLogs';
+import { useOrganizationGuardContext } from '../components/common/OrganizationGuard';
+import { DeviceLogCategory, DeviceLogErrorType, type DeviceLogSearchParams } from '../utils/deviceLogs';
 import {
   DeviceLogFileProbeError,
   parseCompletedDeviceLogStreamBuffer,
@@ -26,9 +27,6 @@ const K8S_CHANNEL_STATUS = 3;
 
 const isErrorCloseEvent = (evt: CloseEvent) => evt.code !== 1000 && evt.code !== 1001;
 
-const trimLogLines = (lines: string[]): string[] =>
-  lines.length <= MAX_LOG_LINES ? lines : lines.slice(lines.length - MAX_LOG_LINES);
-
 const encodeStdinPayload = (text: string): Uint8Array => {
   const encoder = new TextEncoder();
   const encoded = encoder.encode(text);
@@ -40,7 +38,7 @@ const encodeStdinPayload = (text: string): Uint8Array => {
 
 enum DeviceLogCompletionKind {
   FILE_PROBE = 'fileProbe',
-  LOGS = 'logs',
+  LOGS = 'logContent',
   LIVE_STREAM = 'liveStream',
 }
 
@@ -48,43 +46,44 @@ type ActiveSearch = {
   searchId: number;
   buffer: string;
   timeoutId?: ReturnType<typeof setTimeout>;
-  resolve: () => void;
+  resolve: VoidFunction;
   reject: (err: Error) => void;
   completionKind: DeviceLogCompletionKind;
 };
 
 export type UseDeviceLogsArgs = {
   deviceId: string;
-  organizationId?: string;
 };
 
-// For files, we only perform the probe when there's a new logFilePath.
-// When a modified search is requested for the same file, the probe is not needed again.
+// For files, we perform a file probe to ensure the path points to a valid file (file exists, it's a text file, etc).
+// The probe is therefore only needed once per logFilePath.
 const needsFileProbe = (params: DeviceLogSearchParams, prevLogFilePath?: string): boolean =>
   params.category === DeviceLogCategory.FILE && (!prevLogFilePath || prevLogFilePath !== params.logFilePath);
 
-export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
+export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
   const { t } = useTranslation();
+  const { currentOrganization } = useOrganizationGuardContext();
   const {
     fetch: { getWsEndpoint },
   } = useAppContext();
 
+  const organizationId = currentOrganization?.id as string;
   const wsRef = React.useRef<WebSocket>();
   const connectPromiseRef = React.useRef<Promise<void>>();
-  const activeSearchRef = React.useRef<ActiveSearch | null>(null);
+  const activeSearchRef = React.useRef<ActiveSearch>();
   const logSearchSeqRef = React.useRef(0);
   const isMountedRef = React.useRef(true);
   const intentionalCloseRef = React.useRef(false);
   const isStreamingRef = React.useRef(false);
   const partialLineRef = React.useRef('');
-  const lastSuccessfulSearchParamsRef = React.useRef<DeviceLogSearchParams | null>(null);
+  const lastSuccessfulSearchParamsRef = React.useRef<DeviceLogSearchParams>();
 
   const [logs, setLogs] = React.useState<string[]>([]);
   const [isConnecting, setIsConnecting] = React.useState(false);
   const [isFetching, setIsFetching] = React.useState(false);
   const [isStreaming, setIsStreaming] = React.useState(false);
   // Despite its typing, "errorTypeOrMsg" can be a DeviceLogErrorType or a generic error message
-  // The former is for controlled errors, and the generic error message is for uncontrolled errors.
+  // The untyped error message is only used in the case of uncontrolled errors.
   const [errorTypeOrMsg, setErrorTypeOrMsg] = React.useState<DeviceLogErrorType | undefined>();
 
   React.useEffect(() => {
@@ -108,7 +107,7 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
       if (s.timeoutId) {
         clearTimeout(s.timeoutId);
       }
-      activeSearchRef.current = null;
+      activeSearchRef.current = undefined;
     }
   }, []);
 
@@ -131,7 +130,7 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
   }, [clearActiveSearch, clearStreamingState]);
 
   const closeSession = React.useCallback(() => {
-    lastSuccessfulSearchParamsRef.current = null;
+    lastSuccessfulSearchParamsRef.current = undefined;
     setLogs([]);
     setErrorTypeOrMsg(undefined);
     closeWebSocket();
@@ -145,7 +144,7 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
     if (lines.length === 0 || !isMountedRef.current) {
       return;
     }
-    setLogs((prev) => trimLogLines([...prev, ...lines]));
+    setLogs((prev) => [...prev, ...lines]);
   }, []);
 
   const handleConsoleFrame = React.useCallback(
@@ -171,7 +170,7 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
               if (active.timeoutId) {
                 clearTimeout(active.timeoutId);
               }
-              activeSearchRef.current = null;
+              activeSearchRef.current = undefined;
               if (active.completionKind !== DeviceLogCompletionKind.LIVE_STREAM) {
                 active.reject(new Error(t('Log retrieval failed with exit code {{code}}', { code: parsed.code })));
               }
@@ -213,13 +212,14 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
           if (pending.timeoutId) {
             clearTimeout(pending.timeoutId);
           }
-          activeSearchRef.current = null;
+          activeSearchRef.current = undefined;
           if (probeParsed.status === 'script_failed') {
             pending.reject(
               new Error(t('Log retrieval failed with exit code {{code}}', { code: probeParsed.exitCode })),
             );
             return;
           }
+          // We send the error type based on the probe result to be able to display different error messages in the UI.
           const probe = probeParsed.probe;
           if (!probe.exists) {
             pending.reject(new DeviceLogFileProbeError('FILE_NOT_FOUND'));
@@ -243,7 +243,7 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
         if (pending.timeoutId) {
           clearTimeout(pending.timeoutId);
         }
-        activeSearchRef.current = null;
+        activeSearchRef.current = undefined;
         pending.resolve();
 
         if (isMountedRef.current) {
@@ -254,7 +254,6 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
               detail.length > 0
                 ? detail
                 : t('Log retrieval failed with exit code {{code}}', { code: completed.exitCode });
-            // We make an exception to store the error detail instead of having just a generic error type.
             setErrorTypeOrMsg(errorMsg as DeviceLogErrorType);
             setLogs([]);
           } else {
@@ -319,9 +318,9 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
             if (pendingSearch.timeoutId) {
               clearTimeout(pendingSearch.timeoutId);
             }
-            activeSearchRef.current = null;
+            activeSearchRef.current = undefined;
             if (pendingSearch.completionKind !== DeviceLogCompletionKind.LIVE_STREAM) {
-              pendingSearch.reject(new Error('Connection to device closed unexpectedly'));
+              pendingSearch.reject(new Error('CONNECTION_CLOSED'));
             }
           }
           clearStreamingState();
@@ -353,7 +352,7 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
 
   const search = React.useCallback(
     async (params: DeviceLogSearchParams): Promise<boolean> => {
-      // Turning live off: stop follow and keep the current log buffer (UX 1A).
+      // When the live stream is turned off, the stream stops and the current log buffer is kept.
       if (!params.showLiveLogs && isStreamingRef.current) {
         closeWebSocket();
         lastSuccessfulSearchParamsRef.current = params;
@@ -384,8 +383,8 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
             const timeoutId = setTimeout(() => {
               const cur = activeSearchRef.current;
               if (cur?.searchId === searchId) {
-                activeSearchRef.current = null;
-                cur.reject(new Error('timeout'));
+                activeSearchRef.current = undefined;
+                cur.reject(new Error('TIMEOUT'));
               }
             }, SEARCH_TIMEOUT_MS);
 
@@ -441,10 +440,8 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
         }
         const err = e instanceof Error ? e : new Error(String(e));
         if (isMountedRef.current) {
-          if (err.message === 'timeout') {
-            setErrorTypeOrMsg('TIMEOUT');
-          } else if (err.message === 'Connection to device closed unexpectedly') {
-            setErrorTypeOrMsg('CONNECTION_CLOSED');
+          if (err.message === 'TIMEOUT' || err.message === 'CONNECTION_ERROR') {
+            setErrorTypeOrMsg(err.message as DeviceLogErrorType);
           } else {
             setErrorTypeOrMsg(getErrorMessage(e) as DeviceLogErrorType);
           }
@@ -458,7 +455,7 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
 
   React.useEffect(() => {
     return () => {
-      lastSuccessfulSearchParamsRef.current = null;
+      lastSuccessfulSearchParamsRef.current = undefined;
       closeWebSocket();
     };
   }, [closeWebSocket]);
@@ -482,4 +479,4 @@ export function useDeviceLogs({ deviceId, organizationId }: UseDeviceLogsArgs) {
     closeSession,
     retrySearch,
   };
-}
+};

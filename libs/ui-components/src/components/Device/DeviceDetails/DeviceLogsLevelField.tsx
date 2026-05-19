@@ -10,30 +10,25 @@ import {
   SelectList,
   SelectOption,
 } from '@patternfly/react-core';
-import { useFormikContext } from 'formik';
+import { useField } from 'formik';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { DeviceLogLevel, DeviceLogSearchParams, getDeviceLogLevelLabel } from '../../../utils/deviceLogs';
+import { DeviceLogLevel, DeviceLogLevelValue, getDeviceLogLevelLabel } from '../../../utils/deviceLogs';
 
 const fieldIdToggle = 'device-logs-level-toggle';
 
 const DeviceLogsLevelField = () => {
   const { t } = useTranslation();
-  const {
-    values: { level },
-    setFieldValue,
-    setFieldTouched,
-  } = useFormikContext<DeviceLogSearchParams>();
-  const [isOpen, setIsOpen] = React.useState(false);
 
-  const toggleText = getDeviceLogLevelLabel(t, level);
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [{ value: level }, , { setValue, setTouched }] = useField<DeviceLogLevelValue>({ name: 'level' });
 
   const onLevelSelected = React.useCallback(
     (_event: React.MouseEvent | undefined, value: string | number | undefined) => {
-      void setFieldValue('level', value as DeviceLogLevel);
-      void setFieldTouched('level', true);
+      void setValue(value as DeviceLogLevelValue);
+      void setTouched(true);
       setIsOpen(false);
     },
-    [setFieldTouched, setFieldValue],
+    [setValue, setTouched],
   );
 
   return (
@@ -54,7 +49,7 @@ const DeviceLogsLevelField = () => {
             style={{ width: '12rem' }}
             onOpenChange={(open) => {
               if (!open) {
-                void setFieldTouched('level', true);
+                void setTouched(true);
               }
               setIsOpen(open);
             }}
@@ -68,30 +63,28 @@ const DeviceLogsLevelField = () => {
                 aria-label={t('Level')}
                 style={{ minWidth: '12rem' }}
               >
-                {toggleText}
+                {level === 'all' ? t('All levels') : getDeviceLogLevelLabel(t, level)}
               </MenuToggle>
             )}
           >
             <SelectGroup>
               <SelectList>
-                {Object.values(DeviceLogLevel)
-                  .filter((p) => p !== DeviceLogLevel.ALL)
-                  .map((p) => (
-                    <SelectOption key={p} value={p} isSelected={level === p}>
-                      {getDeviceLogLevelLabel(t, p)}
-                    </SelectOption>
-                  ))}
+                {Object.values(DeviceLogLevel).map((lvl) => (
+                  <SelectOption key={lvl} value={lvl} isSelected={level === lvl}>
+                    {getDeviceLogLevelLabel(t, lvl)}
+                  </SelectOption>
+                ))}
               </SelectList>
             </SelectGroup>
             <Divider />
             <SelectGroup>
               <SelectList>
                 <SelectOption
-                  value={DeviceLogLevel.ALL}
-                  isSelected={level === DeviceLogLevel.ALL}
+                  value="all"
+                  isSelected={level === 'all'}
                   description={t('Returns all log entries including those without a priority set.')}
                 >
-                  {t('All logs')}
+                  {t('All levels')}
                 </SelectOption>
               </SelectList>
             </SelectGroup>

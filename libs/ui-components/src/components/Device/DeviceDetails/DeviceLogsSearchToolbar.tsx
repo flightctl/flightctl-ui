@@ -9,18 +9,18 @@ import {
   InputGroupText,
   Stack,
   StackItem,
-  TextInput,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { useField, useFormikContext } from 'formik';
+import { useFormikContext } from 'formik';
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { DEVICE_LOG_BASE_PATH, DeviceLogCategory, DeviceLogSearchParams } from '../../../utils/deviceLogs';
 import FormSelect from '../../form/FormSelect';
+import TextField from '../../form/TextField';
 import DeviceLogsPriorityField from './DeviceLogsLevelField';
 import DeviceLogsTimeRangeField from './DeviceLogsTimeRangeField';
 
@@ -36,16 +36,15 @@ export type DeviceLogsToolbarProps = {
 
 const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
   const { t } = useTranslation();
-  const { submitForm, isSubmitting, values, errors } = useFormikContext<DeviceLogSearchParams>();
-  const [logFilePathField, logFilePathMeta, { setValue: setLogFilePathValue, setTouched: setLogFilePathTouched }] =
-    useField({ name: 'logFilePath' });
-  const [systemdUnitField, systemdUnitMeta, { setValue: setSystemdUnitValue }] = useField({ name: 'systemdUnit' });
-
-  const hasSystemdUnitError = Boolean(systemdUnitMeta.error);
-  const hasLogFilePathError = Boolean(logFilePathMeta.error);
-  const isSubmitDisabled = isSubmitting || Object.keys(errors).length > 0;
-
   const categoryItems = React.useMemo(() => getCategoryItems(t), [t]);
+
+  const { submitForm, isSubmitting, values, errors } = useFormikContext<DeviceLogSearchParams>();
+  const validationError = React.useMemo(() => {
+    const allErrors = Object.values(errors).filter(Boolean);
+    return allErrors.join(', ');
+  }, [errors]);
+
+  const isSubmitDisabled = isSubmitting || Boolean(validationError);
 
   return (
     <Stack>
@@ -65,33 +64,16 @@ const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
                   flexWrap={{ default: 'nowrap' }}
                 >
                   <FlexItem>
-                    <FormSelect
-                      name="category"
-                      items={categoryItems}
-                      onChange={(newCategory) => {
-                        if (newCategory === values.category) {
-                          return;
-                        }
-                        if (newCategory === DeviceLogCategory.FILE) {
-                          void setLogFilePathValue('');
-                          void setLogFilePathTouched(false);
-                        }
-                        onLogTypeChange();
-                      }}
-                    />
+                    <FormSelect name="category" items={categoryItems} onChange={onLogTypeChange} />
                   </FlexItem>
                   {values.category === DeviceLogCategory.SYSTEM && (
                     <FlexItem style={{ minWidth: '12rem' }}>
                       <FormGroup id="form-control__systemdUnit" fieldId="systemdUnit">
-                        <TextInput
-                          {...systemdUnitField}
-                          id="systemdUnit"
+                        <TextField
+                          name="systemdUnit"
                           aria-label={t('Systemd unit')}
                           placeholder={t('e.g. sshd.service')}
-                          onChange={async (_, value) => {
-                            await setSystemdUnitValue(value);
-                          }}
-                          validated={hasSystemdUnitError ? 'error' : 'default'}
+                          showErrorMsg={false}
                         />
                       </FormGroup>
                     </FlexItem>
@@ -114,17 +96,11 @@ const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
                       </FlexItem>
                       <FlexItem>
                         <FormGroup id="form-control__logFilePath" fieldId="textfield-logFilePath">
-                          <TextInput
-                            {...logFilePathField}
-                            id="textfield-logFilePath"
-                            type="text"
+                          <TextField
+                            name="logFilePath"
                             aria-label={t('Log file path')}
                             placeholder={t('Relative file path')}
-                            validated={hasLogFilePathError && logFilePathMeta.touched ? 'error' : 'default'}
-                            onChange={async (_, value) => {
-                              await setLogFilePathValue(value);
-                              await setLogFilePathTouched(true);
-                            }}
+                            showErrorMsg={false}
                           />
                         </FormGroup>
                       </FlexItem>
@@ -149,12 +125,12 @@ const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
         </Toolbar>
       </StackItem>
       <StackItem>
-        {(hasLogFilePathError || hasSystemdUnitError) && (
+        {validationError && (
           <>
             <Icon status="danger">
               <ExclamationCircleIcon />
             </Icon>{' '}
-            <span className="pf-v6-u-font-weight-bold">{logFilePathMeta.error || systemdUnitMeta.error || ''}</span>
+            <span className="pf-v6-u-font-weight-bold">{validationError}</span>
           </>
         )}
       </StackItem>

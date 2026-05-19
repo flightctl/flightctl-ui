@@ -3,6 +3,7 @@ import {
   DEVICE_LOG_BASE_PATH,
   DeviceLogCategory,
   DeviceLogLevel,
+  DeviceLogLevelValue,
   type DeviceLogSearchParams,
   DeviceLogTimeRange,
   MAX_LOG_LINES,
@@ -13,7 +14,7 @@ const FLIGHTCTL_AGENT_UNIT = 'flightctl-agent.service';
 
 export const DEVICE_LOGS_STREAM_FOOTER_PREFIX = '__FLIGHTCTL_DEVICE_LOGS_EOF__';
 
-const LEVEL_TO_JOURNAL_PRIORITY: Record<Exclude<DeviceLogLevel, DeviceLogLevel.ALL>, string> = {
+const LEVEL_TO_JOURNAL_PRIORITY: Record<DeviceLogLevel, string> = {
   [DeviceLogLevel.EMERGENCY]: 'emerg',
   [DeviceLogLevel.ALERT]: 'alert',
   [DeviceLogLevel.CRITICAL]: 'crit',
@@ -24,8 +25,8 @@ const LEVEL_TO_JOURNAL_PRIORITY: Record<Exclude<DeviceLogLevel, DeviceLogLevel.A
   [DeviceLogLevel.DEBUG]: 'debug',
 };
 
-const getPriorityOption = (level: DeviceLogLevel): string[] =>
-  level === DeviceLogLevel.ALL ? [] : ['-p', LEVEL_TO_JOURNAL_PRIORITY[level]];
+const getPriorityOption = (level: DeviceLogLevelValue): string[] =>
+  level === 'all' ? [] : ['-p', LEVEL_TO_JOURNAL_PRIORITY[level]];
 
 const quoteShellArg = (a: string) => `'${a.replace(/'/g, `'\\''`)}'`;
 
@@ -150,10 +151,9 @@ const wrapLiveDeviceLogsShellCommand = (innerCommand: string): string =>
 
 /**
  * Runs a bash script that prints `exists`, `regular`, `stat` size, and `file` MIME for a path under DEVICE_LOG_BASE_PATH.
+ *
  * If the stat/file tools are missing, the script will print empty `size` and `mime` values.
  * We'll only consider the probe failed when we obtain all the information we requested.
- *
- * Assertions run in TypeScript via {@link evaluateDeviceLogFileProbe}; empty `size`/`mime` is allowed when tools are missing.
  */
 const getDeviceLogFileProbeInnerCommand = (params: DeviceLogSearchParams): string => {
   if (!params.logFilePath) {

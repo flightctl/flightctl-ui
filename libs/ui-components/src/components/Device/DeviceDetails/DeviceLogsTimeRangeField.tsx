@@ -126,20 +126,17 @@ const DeviceLogsCustomTimeRangePanel = ({
   onClear,
 }: DeviceLogsCustomTimeRangePanelProps) => {
   const { t } = useTranslation();
-  const [dateOption, setDateOption] = React.useState<DateOption | null>(null);
-
-  const activeValue = dateOption === 'from' ? draftFrom : dateOption === 'to' ? draftTo : draftFrom;
+  const [dateOption, setDateOption] = React.useState<DateOption>();
+  const activeValue = dateOption === 'to' ? draftTo : draftFrom;
   const calendarDate = parseCalendarDate(activeValue);
   const parsedFrom = parseCalendarDate(draftFrom);
 
   const onCalendarChange = (_event: React.MouseEvent<HTMLButtonElement>, date: Date) => {
-    const formatted = formatCalendarDate(date);
+    const dateStr = formatCalendarDate(date);
     if (dateOption === 'from') {
-      onDraftFromChange(formatted);
-      return;
-    }
-    if (dateOption === 'to') {
-      onDraftToChange(formatted);
+      onDraftFromChange(dateStr);
+    } else if (dateOption === 'to') {
+      onDraftToChange(dateStr);
     }
   };
 
@@ -184,7 +181,7 @@ const DeviceLogsCustomTimeRangePanel = ({
             </FlexItem>
           </Flex>
         </StackItem>
-        {dateOption !== null && (
+        {dateOption && (
           <>
             <StackItem style={{ textAlign: 'center' }}>
               <CalendarMonth
