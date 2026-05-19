@@ -411,6 +411,7 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
             completionKind: DeviceLogCompletionKind.LIVE_STREAM,
           };
           if (isMountedRef.current) {
+            setLogs([]);
             setIsStreaming(true);
             setIsFetching(false);
           }
