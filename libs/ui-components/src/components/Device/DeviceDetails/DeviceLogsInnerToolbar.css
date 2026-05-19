@@ -1,0 +1,8 @@
+/*
+   LogViewer sets "flex-wrap: nowrap" for the toolbar content section.
+   When a few filters are applied, the elements can't all fit in one line.
+   We control when the Toolbar wraps using the "rowWrap" prop on the toolbar elements.
+  */
+#device-logs-log-viewer-toolbar .pf-v6-c-toolbar__content-section {
+  flex-wrap: wrap;
+}

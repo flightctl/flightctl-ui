@@ -1,0 +1,199 @@
+import * as React from 'react';
+import {
+  Button,
+  Label,
+  LabelGroup,
+  Stack,
+  StackItem,
+  Switch,
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
+} from '@patternfly/react-core';
+import { LogViewerSearch } from '@patternfly/react-log-viewer';
+import { DownloadIcon } from '@patternfly/react-icons/dist/js/icons/download-icon';
+import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
+import { useFormikContext } from 'formik';
+
+import { useTranslation } from '../../../hooks/useTranslation';
+import {
+  DeviceLogCategory,
+  DeviceLogLevel,
+  DeviceLogSearchParams,
+  getActiveTimeFilterLabel,
+  getDeviceLogLevelLabel,
+} from '../../../utils/deviceLogs';
+
+import './DeviceLogsInnerToolbar.css';
+
+type ActiveFilter = {
+  key: string;
+  label: string;
+  onRemove: VoidFunction;
+};
+
+export type DeviceLogsInnerToolbarProps = {
+  lastSearchParams: DeviceLogSearchParams;
+  onSearchUpdate: (params: DeviceLogSearchParams) => Promise<boolean>;
+  onResetForm: VoidFunction;
+  onDownload: VoidFunction;
+  onOpenRaw: VoidFunction;
+};
+
+const DeviceLogsInnerToolbar = ({
+  lastSearchParams,
+  onSearchUpdate,
+  onResetForm,
+  onDownload,
+  onOpenRaw,
+  children,
+}: React.PropsWithChildren<DeviceLogsInnerToolbarProps>) => {
+  const { t } = useTranslation();
+  const { setValues, values } = useFormikContext<DeviceLogSearchParams>();
+  const hasChildren = Boolean(children);
+
+  const updateLiveLogs = React.useCallback(
+    (checked: boolean) => {
+      const newParams = { ...lastSearchParams, showLiveLogs: checked };
+      void setValues(newParams);
+      return newParams;
+    },
+    [lastSearchParams, setValues],
+  );
+
+  // The "show live logs" switch can only be applied after the logs have been retrieved and it triggers a new search.
+  const onShowLiveLogsChange = React.useCallback(
+    (_event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
+      const newParams = updateLiveLogs(checked);
+      void onSearchUpdate(newParams);
+    },
+    [updateLiveLogs, onSearchUpdate],
+  );
+
+  const doResetForm = React.useCallback(() => {
+    updateLiveLogs(false);
+    onResetForm();
+  }, [onResetForm, updateLiveLogs]);
+
+  const onRemoveFilter = React.useCallback(
+    (filterKey: keyof DeviceLogSearchParams, defaultValue: string | undefined) => () => {
+      // We sync the form values with the search params with the current filter removed.
+      // That syncs the form controls to the updated search (including reverting non-persisted form changes)
+      const newParams = { ...lastSearchParams, [filterKey]: defaultValue };
+      void setValues(newParams);
+      void onSearchUpdate(newParams);
+    },
+    [onSearchUpdate, lastSearchParams, setValues],
+  );
+
+  const activeFilters = React.useMemo((): ActiveFilter[] => {
+    const params = lastSearchParams;
+    const filters: ActiveFilter[] = [];
+
+    const unit = params.systemdUnit;
+    if (params.category === DeviceLogCategory.SYSTEM && unit) {
+      filters.push({
+        key: 'unit',
+        label: t('Unit: {{unit}}', { unit }),
+        onRemove: onRemoveFilter('systemdUnit', ''),
+      });
+    }
+
+    const timeText = getActiveTimeFilterLabel(t, params);
+    if (timeText) {
+      filters.push({
+        key: 'time',
+        label: t('Time: {{timeText}}', { timeText }),
+        onRemove: onRemoveFilter('timeRange', undefined),
+      });
+    }
+
+    if (params.category !== DeviceLogCategory.FILE && params.level !== DeviceLogLevel.ALL) {
+      filters.push({
+        key: 'level',
+        label: t('Level: {{level}}', { level: getDeviceLogLevelLabel(t, params.level) }),
+        onRemove: onRemoveFilter('level', DeviceLogLevel.ALL),
+      });
+    }
+
+    if (params.category === DeviceLogCategory.FILE && params.logFilePath) {
+      filters.push({
+        key: 'file-path',
+        label: t('File path: {{logFilePath}}', { logFilePath: params.logFilePath }),
+        onRemove: onRemoveFilter('logFilePath', ''),
+      });
+    }
+
+    return filters;
+  }, [onRemoveFilter, lastSearchParams, t]);
+
+  return (
+    <Stack hasGutter={hasChildren}>
+      <StackItem>
+        <Toolbar id="device-logs-log-viewer-toolbar" inset={{ default: 'insetNone' }} isStatic>
+          <ToolbarContent alignItems="start" rowWrap={{ default: 'wrap', ['2xl']: 'nowrap' }}>
+            <ToolbarGroup rowWrap={{ default: 'nowrap' }}>
+              <ToolbarItem>
+                <LabelGroup categoryName={t('Active filters')}>
+                  {activeFilters.map((c) => (
+                    <Label
+                      key={c.key}
+                      variant="outline"
+                      onClose={(e) => {
+                        e.preventDefault();
+                        c.onRemove();
+                      }}
+                    >
+                      {c.label}
+                    </Label>
+                  ))}
+                </LabelGroup>
+              </ToolbarItem>
+              <ToolbarItem>
+                <Button variant="link" isInline onClick={doResetForm}>
+                  {t('Clear search')}
+                </Button>
+              </ToolbarItem>
+            </ToolbarGroup>
+            <ToolbarGroup variant="action-group" align={{ default: 'alignStart', ['2xl']: 'alignEnd' }}>
+              <ToolbarItem alignSelf="center">
+                <Switch
+                  id="device-logs-show-live-logs"
+                  label={t('Show live logs')}
+                  isChecked={values.showLiveLogs}
+                  onChange={onShowLiveLogsChange}
+                />
+              </ToolbarItem>
+              <ToolbarItem>
+                <LogViewerSearch placeholder={t('Search logs')} minSearchChars={2} aria-label={t('Search logs')} />
+              </ToolbarItem>
+              <ToolbarItem>
+                <Button
+                  variant="plain"
+                  type="button"
+                  icon={<ExternalLinkAltIcon />}
+                  aria-label={t('View raw logs')}
+                  onClick={onOpenRaw}
+                />
+              </ToolbarItem>
+              <ToolbarItem>
+                <Button
+                  variant="plain"
+                  type="button"
+                  icon={<DownloadIcon />}
+                  aria-label={t('Download logs')}
+                  onClick={onDownload}
+                />
+              </ToolbarItem>
+            </ToolbarGroup>
+          </ToolbarContent>
+        </Toolbar>
+      </StackItem>
+
+      {hasChildren && <StackItem>{children}</StackItem>}
+    </Stack>
+  );
+};
+
+export default DeviceLogsInnerToolbar;

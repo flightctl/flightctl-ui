@@ -23,6 +23,7 @@ import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useAppContext } from '../../../hooks/useAppContext';
 import DeviceDetailsTab from './DeviceDetailsTab';
 import TerminalTab from './TerminalTab';
+import DeviceLogsTab from './DeviceLogsTab';
 import {
   getEditDisabledReason,
   getResumeDisabledReason,
@@ -70,6 +71,15 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
 
   const canEdit = hasEditPermissions && isEnrolled;
   const canOpenTerminal = hasTerminalAccess && isEnrolled;
+  const showTerminalAndLogs = !hideTerminal && canOpenTerminal;
+
+  const tabKeys = [
+    'details',
+    ...(isEnrolled ? ['catalog'] : []),
+    'yaml',
+    ...(showTerminalAndLogs ? ['logs', 'terminal'] : []),
+    'events',
+  ];
 
   const { deleteAction, deleteModal } = useDeleteAction({
     onDelete: async () => {
@@ -156,13 +166,14 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
       resourceType="Devices"
       resourceTypeLabel={t('Devices')}
       nav={
-        <TabsNav aria-label="Device details tabs" tabKeys={['details', 'catalog', 'yaml', 'terminal', 'events']}>
+        <TabsNav aria-label="Device details tabs" tabKeys={tabKeys}>
           <Tab eventKey="details" title={t('Details')} data-testid="device-details-tab-details" />
           {isEnrolled && <Tab eventKey="catalog" title={t('Catalog')} data-testid="device-details-tab-catalog" />}
           <Tab eventKey="yaml" title={t('YAML')} data-testid="device-details-tab-yaml" />
-          {!hideTerminal && canOpenTerminal && (
+          {showTerminalAndLogs && (
             <Tab eventKey="terminal" title={t('Terminal')} data-testid="device-details-tab-terminal" />
           )}
+          {showTerminalAndLogs && <Tab eventKey="logs" title={t('Logs')} data-testid="device-details-tab-logs" />}
           <Tab eventKey="events" title={t('Events')} data-testid="device-details-tab-events" />
         </TabsNav>
       }
@@ -221,7 +232,8 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
               />
             }
           />
-          {!hideTerminal && canOpenTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
+          {showTerminalAndLogs && <Route path="logs" element={<DeviceLogsTab deviceId={deviceId} />} />}
+          {showTerminalAndLogs && <Route path="terminal" element={<TerminalTab device={device} />} />}
           <Route path="events" element={<EventsCard kind={ResourceKind.DEVICE} objId={deviceId} />} />
         </Routes>
       )}
