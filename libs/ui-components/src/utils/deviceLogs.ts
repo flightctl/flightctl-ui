@@ -60,7 +60,7 @@ export type DeviceLogSearchParams = {
   dateTo: string;
   // For System logs, optional unit name (eg. sshd.service)
   systemdUnit: string;
-  // For File logs, relative path under DEVICE_LOG_BASE_PATH (/var/log/)
+  // For File logs, relative path under DEVICE_LOG_BASE_PATH (/var/log)
   logFilePath: string;
   /** When true, logs are streamed in follow mode instead of a one-shot snapshot. */
   showLiveLogs: boolean;

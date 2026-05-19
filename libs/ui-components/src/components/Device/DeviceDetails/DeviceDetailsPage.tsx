@@ -77,7 +77,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
     'details',
     ...(isEnrolled ? ['catalog'] : []),
     'yaml',
-    ...(showTerminalAndLogs ? ['logs', 'terminal'] : []),
+    ...(showTerminalAndLogs ? ['terminal', 'logs'] : []),
     'events',
   ];
 

@@ -634,7 +634,7 @@
   "Unable to retrieve logs": "Unable to retrieve logs",
   "Log retrieval failed. Review the error details below and adjust your search criteria.": "Log retrieval failed. Review the error details below and adjust your search criteria.",
   "No logs loaded": "No logs loaded",
-  "Select a log category specify which log to retrieve, then click Retrieve logs. You can optionall filter by time range, level or search term.": "Select a log category specify which log to retrieve, then click Retrieve logs. You can optionall filter by time range, level or search term.",
+  "Select a log category to specify which log to retrieve, then click Retrieve logs. You can optionally filter by time range, level or search term.": "Select a log category to specify which log to retrieve, then click Retrieve logs. You can optionally filter by time range, level or search term.",
   "Offline/ device lost connection": "Offline/ device lost connection",
   "Retry": "Retry",
   "Error details:": "Error details:",

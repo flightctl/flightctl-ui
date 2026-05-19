@@ -92,7 +92,7 @@ const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
                   {values.category === DeviceLogCategory.FILE && (
                     <>
                       <FlexItem alignSelf={{ default: 'alignSelfCenter' }}>
-                        <InputGroupText>{DEVICE_LOG_BASE_PATH}</InputGroupText>
+                        <InputGroupText>{DEVICE_LOG_BASE_PATH}/</InputGroupText>
                       </FlexItem>
                       <FlexItem>
                         <FormGroup id="form-control__logFilePath" fieldId="textfield-logFilePath">

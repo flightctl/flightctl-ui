@@ -80,7 +80,7 @@ export const DeviceLogsEmptyState = () => {
     <EmptyState headingLevel="h2" icon={CubesIcon} titleText={t('No logs loaded')} variant={EmptyStateVariant.lg}>
       <EmptyStateBody>
         {t(
-          'Select a log category specify which log to retrieve, then click Retrieve logs. You can optionall filter by time range, level or search term.',
+          'Select a log category to specify which log to retrieve, then click Retrieve logs. You can optionally filter by time range, level or search term.',
         )}
       </EmptyStateBody>
     </EmptyState>
