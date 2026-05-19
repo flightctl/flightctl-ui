@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DependenciesSync } from './DependenciesSync';
 import type { DeviceSpec } from './DeviceSpec';
 import type { LabelSelector } from './LabelSelector';
 import type { ObjectMeta } from './ObjectMeta';
@@ -13,7 +12,6 @@ import type { RolloutPolicy } from './RolloutPolicy';
 export type FleetSpec = {
   selector?: LabelSelector;
   rolloutPolicy?: RolloutPolicy;
-  dependenciesSync?: DependenciesSync;
   /**
    * The template for the devices in the fleet.
    */

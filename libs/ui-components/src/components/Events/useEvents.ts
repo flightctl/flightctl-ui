@@ -79,6 +79,11 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.DEVICE_SPEC_INVALID]: t('Device specification is invalid'),
     [Event.reason.DEVICE_CONFLICT_PAUSED]: t('Device is paused after database restore'),
     [Event.reason.DEVICE_CONFLICT_RESOLVED]: t('Device conflict has been resolved'),
+    [Event.reason.DEVICE_OSIMAGE_CHANGED]: t('Device OS image has changed'),
+    // Device vulnerability events
+    [Event.reason.DEVICE_VULNERABILITY_CVECRITICAL]: t('Critical vulnerability detected'),
+    [Event.reason.DEVICE_VULNERABILITY_CVEWARNING]: t('Moderate vulnerability detected'),
+    [Event.reason.DEVICE_VULNERABILITY_CVERESOLVED]: t('Vulnerability resolved'),
     // Enrollment request events
     [Event.reason.ENROLLMENT_REQUEST_APPROVED]: t('Enrollment request was approved'),
     [Event.reason.ENROLLMENT_REQUEST_APPROVAL_FAILED]: t('Enrollment request approval failed'),
@@ -100,13 +105,16 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.FLEET_ROLLOUT_DEVICE_SELECTED]: t('Fleet rollout device selected'),
     [Event.reason.FLEET_ROLLOUT_BATCH_COMPLETED]: t('Fleet rollout batch completed'),
     // Resource sync events
-    [Event.reason.RESOURCE_SYNC_SYNCED]: t('Resourcesync synchronization completed', params),
-    [Event.reason.RESOURCE_SYNC_SYNC_FAILED]: t('Resourcesync synchronization failed', params),
-    [Event.reason.RESOURCE_SYNC_PARSED]: t('Resourcesync parsed successfully', params),
-    [Event.reason.RESOURCE_SYNC_PARSING_FAILED]: t('Resourcesync parsing failed', params),
-    [Event.reason.RESOURCE_SYNC_ACCESSIBLE]: t('Resourcesync is accessible', params),
-    [Event.reason.RESOURCE_SYNC_INACCESSIBLE]: t('Resourcesync is not accessible', params),
-    [Event.reason.RESOURCE_SYNC_COMMIT_DETECTED]: t('Resourcesync new commit detected', params),
+    [Event.reason.RESOURCE_SYNC_SYNCED]: t('Resourcesync synchronization completed'),
+    [Event.reason.RESOURCE_SYNC_SYNC_FAILED]: t('Resourcesync synchronization failed'),
+    [Event.reason.RESOURCE_SYNC_PARSED]: t('Resourcesync parsed successfully'),
+    [Event.reason.RESOURCE_SYNC_PARSING_FAILED]: t('Resourcesync parsing failed'),
+    [Event.reason.RESOURCE_SYNC_ACCESSIBLE]: t('Resourcesync is accessible'),
+    [Event.reason.RESOURCE_SYNC_INACCESSIBLE]: t('Resourcesync is not accessible'),
+    [Event.reason.RESOURCE_SYNC_COMMIT_DETECTED]: t('Resourcesync new commit detected'),
+    // Dependency sync events
+    [Event.reason.DEPENDENCY_SYNC_PROBE_FAILED]: t('Dependency sync probe failed'),
+    [Event.reason.DEPENDENCY_CHANGE_DETECTED]: t('Dependency change detected'),
   };
 };
 

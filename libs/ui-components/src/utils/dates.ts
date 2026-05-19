@@ -60,7 +60,7 @@ export const timeSinceEpochText = (t: TFunction, epochOffset: number) => {
   if (interval > 1) {
     return t('{{count}} minutes ago', { count: Math.floor(interval) });
   }
-  return t('< 1 minute ago');
+  return t('just now');
 };
 
 const timeSinceText = (t: TFunction, timestampStr?: string) => {
