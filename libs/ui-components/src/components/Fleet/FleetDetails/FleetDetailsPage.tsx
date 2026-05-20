@@ -48,6 +48,7 @@ const FleetDetailPage = () => {
       loading={isLoading}
       error={error}
       id={fleetId}
+      titleDataTestId="fleet-details-title"
       resourceLink={ROUTE.FLEETS}
       resourceType="Fleets"
       resourceTypeLabel={t('Fleets')}
@@ -64,12 +65,18 @@ const FleetDetailPage = () => {
           <DetailsPageActions>
             <DropdownList>
               {isManaged && (
-                <DropdownItem onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}>
+                <DropdownItem
+                  data-testid="fleet-details-menu-view-configurations"
+                  onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}
+                >
                   {t('View fleet configurations')}
                 </DropdownItem>
               )}
               {canEdit && !isManaged && (
-                <DropdownItem onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}>
+                <DropdownItem
+                  data-testid="fleet-details-menu-edit-configurations"
+                  onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}
+                >
                   {t('Edit fleet configurations')}
                 </DropdownItem>
               )}

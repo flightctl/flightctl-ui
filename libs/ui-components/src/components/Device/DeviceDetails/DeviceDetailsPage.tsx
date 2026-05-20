@@ -172,6 +172,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
             <DropdownList>
               {hasEditPermissions && (
                 <DropdownItem
+                  data-testid="device-details-menu-edit-configurations"
                   onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}
                   {...editActionProps}
                 >

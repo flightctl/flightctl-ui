@@ -32,14 +32,16 @@ const useFleetActions = (fleetName: string, isManaged: boolean, canEdit: boolean
 
   actions.push({
     title: t('View fleet details'),
+    'data-testid': 'fleet-row-menu-view-details',
     onClick: () => navigate({ route: ROUTE.FLEET_DETAILS, postfix: fleetName }),
-  });
+  } as IAction);
 
   // If users can't edit, the wizard will be in read-only mode
   actions.push({
     title: isManaged || !canEdit ? t('View fleet configurations') : t('Edit fleet configurations'),
+    'data-testid': isManaged || !canEdit ? 'fleet-row-menu-view-configurations' : 'fleet-row-menu-edit-configurations',
     onClick: () => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetName }),
-  });
+  } as IAction);
   return actions;
 };
 
@@ -65,6 +67,7 @@ const FleetRow: React.FC<FleetRowProps> = ({
   if (canDelete) {
     actions.push({
       title: t('Delete fleet'),
+      'data-testid': 'fleet-row-menu-delete-fleet',
       onClick: onDeleteClick,
       tooltipProps: isManaged
         ? {
@@ -74,7 +77,7 @@ const FleetRow: React.FC<FleetRowProps> = ({
           }
         : undefined,
       isAriaDisabled: isManaged,
-    });
+    } as IAction);
   }
 
   return (
@@ -90,7 +93,7 @@ const FleetRow: React.FC<FleetRowProps> = ({
       />
       <Td dataLabel={t('Name')}>
         <FleetOwnerLinkIcon ownerName={getOwnerName(ResourceKind.RESOURCE_SYNC, fleet.metadata.owner)}>
-          <ResourceLink id={fleetName} routeLink={ROUTE.FLEET_DETAILS} />
+          <ResourceLink id={fleetName} routeLink={ROUTE.FLEET_DETAILS} data-testid={`fleet-name-link-${fleetName}`} />
         </FleetOwnerLinkIcon>
       </Td>
       <Td dataLabel={t('System image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>
@@ -101,11 +104,11 @@ const FleetRow: React.FC<FleetRowProps> = ({
           error={fleetRolloutError}
         />
       </Td>
-      <Td dataLabel={t('Status')}>
+      <Td dataLabel={t('Status')} data-testid={`fleet-row-status-${fleetName}`}>
         <FleetStatus fleet={fleet} />
       </Td>
       {!hideActions && (
-        <Td isActionCell>
+        <Td isActionCell data-testid={`fleet-row-actions-${fleetName}`}>
           <ActionsColumn items={actions} />
         </Td>
       )}

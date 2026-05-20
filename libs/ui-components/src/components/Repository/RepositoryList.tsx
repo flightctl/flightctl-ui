@@ -109,18 +109,19 @@ const RepositoryTableRow = ({
   const navigate = useNavigate();
 
   const actions: IAction[] = [];
+  const repoName = repository.metadata.name as string;
   if (canEdit) {
     actions.push({
       title: t('Edit repository'),
       onClick: () => navigate({ route: ROUTE.REPO_EDIT, postfix: repository.metadata.name }),
-      'data-testid': `repository-dropdown-edit-${rowIndex}`,
+      'data-testid': 'repository-row-menu-edit-repository',
     } as IAction);
   }
   if (canDelete) {
     actions.push({
       title: t('Delete repository'),
       onClick: () => setDeleteModalRepoId(repository.metadata.name),
-      'data-testid': `repository-dropdown-delete-${rowIndex}`,
+      'data-testid': 'repository-row-menu-delete-repository',
     } as IAction);
   }
   return (
@@ -133,11 +134,7 @@ const RepositoryTableRow = ({
         }}
       />
       <Td dataLabel={t('Name')}>
-        <ResourceLink
-          id={repository.metadata.name as string}
-          routeLink={ROUTE.REPO_DETAILS}
-          data-testid={`repository-name-link-${rowIndex}`}
-        />
+        <ResourceLink id={repoName} routeLink={ROUTE.REPO_DETAILS} data-testid={`repository-name-link-${repoName}`} />
       </Td>
       <Td dataLabel={t('Type')}>{getRepoTypeLabel(t, repository.spec.type)}</Td>
       <Td dataLabel={t('URL')}>{getRepoUrlOrRegistry(repository.spec) || '-'}</Td>
@@ -146,7 +143,7 @@ const RepositoryTableRow = ({
       </Td>
       <Td dataLabel={t('Last transition')}>{getLastTransitionTimeText(repository, t).text}</Td>
       {!!actions.length && (
-        <Td isActionCell data-testid={`repository-row-actions-${rowIndex}`}>
+        <Td isActionCell data-testid={`repository-row-actions-${repoName}`}>
           <ActionsColumn items={actions} />
         </Td>
       )}

@@ -35,7 +35,7 @@ const GeneralInfoStep = ({ isEdit, isReadOnly }: GeneralInfoStepProps) => {
         validations={getDnsSubdomainValidations(t)}
       />
       <FormGroup label={t('Fleet labels')}>
-        <LabelsField name="fleetLabels" isDisabled={isReadOnly} />
+        <LabelsField name="fleetLabels" isDisabled={isReadOnly} labelGroupTestId="fleet-create-wizard-fleet-labels" />
       </FormGroup>
       <FormGroup label={t('Device selector')}>
         <DeviceLabelSelector isReadOnly={isReadOnly} />

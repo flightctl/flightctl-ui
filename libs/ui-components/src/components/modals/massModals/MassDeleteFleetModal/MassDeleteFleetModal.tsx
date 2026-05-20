@@ -176,7 +176,14 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, fl
         </Stack>
       </ModalBody>
       <ModalFooter>
-        <Button key="delete" variant="danger" onClick={deleteFleets} isLoading={isDeleting} isDisabled={isDeleting}>
+        <Button
+          key="delete"
+          variant="danger"
+          onClick={deleteFleets}
+          isLoading={isDeleting}
+          isDisabled={isDeleting}
+          data-testid="modal-delete-fleets-confirm"
+        >
           {t('Delete fleets')}
         </Button>
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
