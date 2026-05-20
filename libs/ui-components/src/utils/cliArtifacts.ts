@@ -35,6 +35,7 @@ export const getArtifactUrl = (baseUrl: string, artifact: CliArtifact) => {
 export const getArtifactTool = (artifact: CliArtifact) => {
   if (!artifact.tool) {
     // Handle backward compatibility with older artifacts before "tool" was added
+    // Only flightctl and flightctl-restore existed back then.
     return artifact.filename.includes('flightctl-restore')
       ? CliArtifactTool.FlightctlRestore
       : CliArtifactTool.Flightctl;
@@ -55,13 +56,13 @@ export const getArchLabel = (arch: string): string => {
 
 export const getArtifactDownloadLabel = (artifact: CliArtifact, t: TFunction): string => {
   const archLabel = getArchLabel(artifact.arch);
-
+  const toolLabel = getArtifactTool(artifact);
   switch (artifact.os) {
     case 'mac':
-      return t('Download flightctl for Mac ({{ arch }})', { arch: archLabel });
+      return t('Download {{ tool }} for Mac ({{ arch }})', { tool: toolLabel, arch: archLabel });
     case 'linux':
-      return t('Download flightctl for Linux ({{ arch }})', { arch: archLabel });
+      return t('Download {{ tool }} for Linux ({{ arch }})', { tool: toolLabel, arch: archLabel });
     case 'windows':
-      return t('Download flightctl for Windows ({{ arch }})', { arch: archLabel });
+      return t('Download {{ tool }} for Windows ({{ arch }})', { tool: toolLabel, arch: archLabel });
   }
 };

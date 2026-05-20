@@ -8,8 +8,7 @@ import { CliArtifact, CliArtifactTool, CliArtifactsResponse } from '../types/ext
 export type CliArtifactsDisplayResponse = {
   baseUrl: string;
   totalCount: number;
-  flightctlArtifacts: CliArtifact[];
-  restoreArtifacts: CliArtifact[];
+  artifactsByTool: Record<CliArtifactTool, CliArtifact[]>;
 };
 
 export const useCliArtifacts = (): {
@@ -41,14 +40,24 @@ export const useCliArtifacts = (): {
           return;
         }
         const apiResponse = (await response.json()) as CliArtifactsResponse;
-        const artifacts = sortCliArtifacts(apiResponse.artifacts);
-        const mainCliArtifacts = artifacts.filter((a) => getArtifactTool(a) === CliArtifactTool.Flightctl);
-        const restoreCliArtifacts = artifacts.filter((a) => getArtifactTool(a) === CliArtifactTool.FlightctlRestore);
+        const artifactsByTool = sortCliArtifacts(apiResponse.artifacts).reduce(
+          (acc, artifact) => {
+            const tool = getArtifactTool(artifact);
+            let list = acc[tool];
+            if (!list) {
+              list = [];
+              acc[tool] = list;
+            }
+            list.push(artifact);
+            return acc;
+          },
+          {} as Record<CliArtifactTool, CliArtifact[]>,
+        );
+
         setArtifactsResponse({
           baseUrl: apiResponse.baseUrl,
-          totalCount: artifacts.length,
-          flightctlArtifacts: mainCliArtifacts,
-          restoreArtifacts: restoreCliArtifacts,
+          totalCount: apiResponse.artifacts.length,
+          artifactsByTool,
         });
       } catch {
         setArtifactsEnabled(false);

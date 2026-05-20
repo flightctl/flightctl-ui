@@ -57,6 +57,7 @@ export type InlineApplicationFileFixed = FileContent & RelativePath;
 export enum CliArtifactTool {
   Flightctl = 'flightctl',
   FlightctlRestore = 'flightctl-restore',
+  FlightctlBackup = 'flightctl-backup',
 }
 
 export type CliArtifact = {
