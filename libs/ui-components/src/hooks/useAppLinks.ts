@@ -6,7 +6,7 @@ export const DEMO_REPOSITORY_URL = 'https://github.com/flightctl/flightctl-demos
 export const RHEM_VERSION = '1.1';
 
 const baseUpstreamDocs = 'https://github.com/flightctl/flightctl/blob/main/docs';
-const baseDownstreamDocs = 'https://docs.redhat.com/en/documentation/red_hat_edge_manager/${RHEM_VERSION}/html';
+const baseDownstreamDocs = `https://docs.redhat.com/en/documentation/red_hat_edge_manager/${RHEM_VERSION}/html`;
 
 const upstreamLinks = {
   createApp: `${baseUpstreamDocs}/user/using/managing-devices.md#creating-applications`,
@@ -23,7 +23,7 @@ const downstreamLinks = {
   addNewDevice: `${baseDownstreamDocs}/operating_system_images_for_the_red_hat_edge_manager/edge-mgr-images#build-images-consider`,
   createAcmRepo: `${baseDownstreamDocs}/managing_devices/manage-devices-intro#manage-git-repository`,
   provisionDevice: `${baseDownstreamDocs}/provisioning_devices/provision-devices-intro`,
-  catalog: '',
+  catalog: `${baseDownstreamDocs}/managing_devices/manage-devices-intro#software-catalog`,
 };
 
 type AppLink = 'createApp' | 'useTemplateVars' | 'addNewDevice' | 'createAcmRepo' | 'provisionDevice' | 'catalog';
