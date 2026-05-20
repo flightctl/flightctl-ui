@@ -25,6 +25,7 @@
       "ImageBuildsPage": "./src/components/ImageBuilds/ImageBuildsPage.tsx",
       "ImageBuildDetailsPage": "./src/components/ImageBuilds/ImageBuildDetailsPage.tsx",
       "CreateImageBuildWizardPage": "./src/components/ImageBuilds/CreateImageBuildWizardPage.tsx",
+      "NewVersionImageBuildWizardPage": "./src/components/ImageBuilds/NewVersionImageBuildWizardPage.tsx",
       "ResourceSyncToRepositoryPage": "./src/components/ResourceSyncs/ResourceSyncToRepositoryPage.tsx",
       "EnrollmentRequestDetailsPage": "./src/components/EnrollmentRequests/EnrollmentRequestDetailsPage.tsx",
       "appContext": "./src/components/AppContext/AppContext.tsx",

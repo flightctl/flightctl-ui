@@ -8,6 +8,7 @@ import { reviewStepId } from './steps/ReviewStep';
 import { isSourceImageStepValid, sourceImageStepId } from './steps/SourceImageStep';
 import { isOutputImageStepValid, outputImageStepId } from './steps/OutputImageStep';
 import { isRegistrationStepValid, registrationStepId } from './steps/RegistrationStep';
+import { catalogStepId, isCatalogStepValid } from './steps/CatalogStep';
 
 const validateStep = (activeStepId: string, errors: FormikErrors<ImageBuildFormValues>): boolean => {
   if (activeStepId === sourceImageStepId) {
@@ -18,6 +19,9 @@ const validateStep = (activeStepId: string, errors: FormikErrors<ImageBuildFormV
   }
   if (activeStepId === registrationStepId) {
     return isRegistrationStepValid(errors);
+  }
+  if (activeStepId === catalogStepId) {
+    return isCatalogStepValid(errors);
   }
   return true;
 };

@@ -3,7 +3,8 @@ import { Button, Content, Flex, FlexItem, Icon, Stack, StackItem, Title } from '
 import { ActionsColumn, ExpandableRowContent, IAction, OnSelect, Tbody, Td, Tr } from '@patternfly/react-table';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
-import { ImageBuild, ImageBuildConditionReason } from '@flightctl/types/imagebuilder';
+import { ImageBuild, ImageBuildConditionReason, ImagePromotion } from '@flightctl/types/imagebuilder';
+import ImagePromotionStatus from '../ImagePromotion/ImagePromotionStatus';
 import { ImageBuildWithExports } from '../../types/extraTypes';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
@@ -18,14 +19,16 @@ type ImageBuildRowProps = {
   rowIndex: number;
   onRowSelect: (imageBuild: ImageBuild) => OnSelect;
   isRowSelected: (imageBuild: ImageBuild) => boolean;
-  canCreate: boolean;
   onDeleteClick: VoidFunction;
   canDelete: boolean;
   onCancelClick: VoidFunction;
   canCancel: boolean;
   onNewVersionClick: VoidFunction;
   canNewVersion: boolean;
+  onAddToCatalog: VoidFunction;
+  canAddToCatalog: boolean;
   refetch: VoidFunction;
+  latestPromotion?: ImagePromotion;
 };
 
 const ImageBuildRow = ({
@@ -34,13 +37,15 @@ const ImageBuildRow = ({
   onRowSelect,
   isRowSelected,
   onDeleteClick,
-  canCreate,
   canDelete,
   onCancelClick,
   canCancel,
   onNewVersionClick,
   canNewVersion,
   refetch,
+  onAddToCatalog,
+  canAddToCatalog,
+  latestPromotion,
 }: ImageBuildRowProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -58,19 +63,17 @@ const ImageBuildRow = ({
     },
   ];
 
-  if (canCreate) {
+  if (canNewVersion) {
     actions.push({
-      title: buildReason === ImageBuildConditionReason.ImageBuildConditionReasonFailed ? t('Retry') : t('Duplicate'),
-      onClick: () => {
-        navigate({ route: ROUTE.IMAGE_BUILD_EDIT, postfix: imageBuildName });
-      },
+      title: t('Rebuild'),
+      onClick: onNewVersionClick,
     });
   }
 
-  if (canNewVersion) {
+  if (canAddToCatalog) {
     actions.push({
-      title: t('Build new version'),
-      onClick: onNewVersionClick,
+      title: t('Add to catalog'),
+      onClick: onAddToCatalog,
     });
   }
 
@@ -111,8 +114,11 @@ const ImageBuildRow = ({
         </Td>
         <Td dataLabel={t('Base image')}>{sourceImage}</Td>
         <Td dataLabel={t('Image output')}>{destinationImage}</Td>
-        <Td dataLabel={t('Status')}>
+        <Td dataLabel={t('Build status')}>
           <ImageBuildStatusDisplay buildStatus={imageBuild.status} />
+        </Td>
+        <Td dataLabel={t('Promotion status')}>
+          {latestPromotion ? <ImagePromotionStatus promotion={latestPromotion} /> : '-'}
         </Td>
         <Td dataLabel={t('Date')}>{getDateDisplay(imageBuild.metadata.creationTimestamp)}</Td>
         <Td isActionCell>
@@ -137,17 +143,19 @@ const ImageBuildRow = ({
                           <ExclamationCircleIcon />
                         </Icon>
                       </FlexItem>
-                      {canCreate ? (
+                      {canNewVersion ? (
                         <>
                           <FlexItem>
-                            <Content>{t('Build failed. Please retry.')}</Content>
+                            <Content>{t('Build failed. Please rebuild.')}</Content>
                           </FlexItem>
                           <FlexItem>
                             <Button
                               variant="link"
-                              onClick={() => navigate({ route: ROUTE.IMAGE_BUILD_EDIT, postfix: imageBuildName })}
+                              onClick={() =>
+                                navigate({ route: ROUTE.IMAGE_BUILD_NEW_VERSION, postfix: imageBuildName })
+                              }
                             >
-                              {t('Retry')}
+                              {t('Rebuild')}
                             </Button>
                           </FlexItem>
                         </>

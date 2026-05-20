@@ -49,6 +49,11 @@ export type RepositoryFormValues = {
       password?: string;
     };
     skipServerVerification?: boolean;
+    baseImages?: {
+      displayName?: string;
+      imageName: string;
+      tags: string[];
+    }[];
   };
   canUseResourceSyncs: boolean;
   useResourceSyncs: boolean;

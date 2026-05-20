@@ -86,6 +86,10 @@ const ImageBuildDetails = React.lazy(
 const CreateImageBuildWizard = React.lazy(
   () => import('@flightctl/ui-components/src/components/ImageBuilds/CreateImageBuildWizard/CreateImageBuildWizard'),
 );
+const NewVersionImageBuildWizard = React.lazy(
+  () =>
+    import('@flightctl/ui-components/src/components/ImageBuilds/NewVersionImageBuildWizard/NewVersionImageBuildWizard'),
+);
 
 const CatalogPage = React.lazy(() => import('@flightctl/ui-components/src/components/Catalog/CatalogPage'));
 const ImportCatalogWizard = React.lazy(
@@ -399,6 +403,15 @@ const getAppRoutes = (t: TFunction): ExtendedRouteObject[] => [
         element: (
           <TitledRoute title={t('Duplicate image build')}>
             <CreateImageBuildWizard />
+          </TitledRoute>
+        ),
+      },
+      {
+        path: 'newversion/:imageBuildId',
+        title: t('Rebuild'),
+        element: (
+          <TitledRoute title={t('Rebuild')}>
+            <NewVersionImageBuildWizard />
           </TitledRoute>
         ),
       },

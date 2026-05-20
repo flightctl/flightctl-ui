@@ -7,7 +7,7 @@ import {
   RepositoryList,
   ResourceSyncList,
 } from '@flightctl/types';
-import { ImageBuildList } from '@flightctl/types/imagebuilder';
+import { ImageBuildList, ImagePromotionList } from '@flightctl/types/imagebuilder';
 import { CatalogItemList, VulnerabilityGroupList, VulnerabilityList } from '@flightctl/types/alpha';
 
 import { AnnotationType, GenericCondition, GenericConditionType } from '../types/extraTypes';
@@ -21,7 +21,8 @@ export type ApiList =
   | ImageBuildList
   | CatalogItemList
   | VulnerabilityGroupList
-  | VulnerabilityList;
+  | VulnerabilityList
+  | ImagePromotionList;
 
 const getApiListCount = (listResponse: ApiList | undefined): number | undefined => {
   if (listResponse === undefined) {

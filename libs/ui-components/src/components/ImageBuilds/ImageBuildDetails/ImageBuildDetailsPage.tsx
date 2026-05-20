@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
 
-import { ImageBuildConditionReason } from '@flightctl/types/imagebuilder';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -20,13 +19,16 @@ import ImageBuildDetailsTab from './ImageBuildDetailsTab';
 import ImageBuildExportsGallery from './ImageBuildExportsGallery';
 import ImageBuildLogsTab from './ImageBuildLogsTab';
 import CancelImageBuildModal from '../CancelImageBuildModal/CancelImageBuildModal';
+import ImagePromotionModal from '../../ImagePromotion/ImagePromotionModal';
+import { ImagePromotionsContextProvider, useImagePromotionsContext } from '../ImagePromotionsContext';
 
 const imageBuildDetailsPermissions = [
-  { kind: RESOURCE.IMAGE_BUILD, verb: VERB.CREATE },
   { kind: RESOURCE.IMAGE_BUILD_CANCEL, verb: VERB.CREATE },
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.DELETE },
+  { kind: RESOURCE.IMAGE_BUILD_NEW_VERSION, verb: VERB.CREATE },
   // Users that can view logs for imagebuilds also can view logs for imageexports
   { kind: RESOURCE.IMAGE_BUILD_LOG, verb: VERB.GET },
+  { kind: RESOURCE.IMAGE_PROMOTION, verb: VERB.CREATE },
 ];
 
 const ImageBuildDetailsPageContent = () => {
@@ -35,12 +37,14 @@ const ImageBuildDetailsPageContent = () => {
   const {
     router: { useParams, Routes, Route, Navigate },
   } = useAppContext();
+  const { refetchPromotions } = useImagePromotionsContext();
 
   const { imageBuildId } = useParams() as { imageBuildId: string };
   const [imageBuild, isLoading, error, refetch] = useImageBuild(imageBuildId);
   const { checkPermissions } = usePermissionsContext();
   const buildReason = imageBuild ? getImageBuildStatusReason(imageBuild) : undefined;
-  const [canCreate, hasCancelPermission, canDelete, canViewLogs] = checkPermissions(imageBuildDetailsPermissions);
+  const [hasCancelPermission, canDelete, canNewVersion, canViewLogs, canPromote] =
+    checkPermissions(imageBuildDetailsPermissions);
   const canCancel = hasCancelPermission && buildReason && isImageBuildCancelable(buildReason);
 
   const tabKeys = React.useMemo(
@@ -49,6 +53,7 @@ const ImageBuildDetailsPageContent = () => {
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState<boolean>();
   const [isCancelModalOpen, setIsCancelModalOpen] = React.useState<boolean>();
+  const [isImagePromotionOpen, setIsImagePromotionOpen] = React.useState<boolean>();
 
   return (
     <DetailsPage
@@ -67,15 +72,16 @@ const ImageBuildDetailsPageContent = () => {
         </TabsNav>
       }
       actions={
-        (canCreate || canDelete) && (
+        (canPromote || canNewVersion || canDelete || canCancel) && (
           <DetailsPageActions>
             <DropdownList>
-              {canCreate && (
-                <DropdownItem onClick={() => navigate({ route: ROUTE.IMAGE_BUILD_EDIT, postfix: imageBuildId })}>
-                  {buildReason === ImageBuildConditionReason.ImageBuildConditionReasonFailed
-                    ? t('Retry')
-                    : t('Duplicate')}
+              {canNewVersion && (
+                <DropdownItem onClick={() => navigate({ route: ROUTE.IMAGE_BUILD_NEW_VERSION, postfix: imageBuildId })}>
+                  {t('Rebuild')}
                 </DropdownItem>
+              )}
+              {canPromote && (
+                <DropdownItem onClick={() => setIsImagePromotionOpen(true)}>{t('Add to catalog')}</DropdownItem>
               )}
               {canCancel && (
                 <DropdownItem onClick={() => setIsCancelModalOpen(true)}>{t('Cancel image build')}</DropdownItem>
@@ -119,6 +125,17 @@ const ImageBuildDetailsPageContent = () => {
               }}
             />
           )}
+          {isImagePromotionOpen && (
+            <ImagePromotionModal
+              onClose={(updated) => {
+                setIsImagePromotionOpen(false);
+                if (updated) {
+                  refetchPromotions();
+                }
+              }}
+              imageBuild={imageBuild}
+            />
+          )}
         </>
       )}
     </DetailsPage>
@@ -131,7 +148,9 @@ const ImageBuildDetailsWithPermissions = () => {
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
       <OciRegistriesContextProvider>
-        <ImageBuildDetailsPageContent />
+        <ImagePromotionsContextProvider>
+          <ImageBuildDetailsPageContent />
+        </ImagePromotionsContextProvider>
       </OciRegistriesContextProvider>
     </PageWithPermissions>
   );

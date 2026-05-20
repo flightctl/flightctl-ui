@@ -221,8 +221,16 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
-      "path": ["/edge/imagebuilds/create", "/edge/imagebuilds/edit/:imageBuildId"],
+      "path": ["/edge/imagebuilds/create"],
       "component": { "$codeRef": "CreateImageBuildWizardPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/edge/imagebuilds/newversion/:imageBuildId"],
+      "component": { "$codeRef": "NewVersionImageBuildWizardPage" }
     }
   },
   {

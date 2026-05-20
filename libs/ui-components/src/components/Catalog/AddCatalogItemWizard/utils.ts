@@ -347,7 +347,7 @@ const jsonSchemaFieldSchema = (t: TFunction) =>
 
 const hasForbiddenLeadingVPrefix = (s: string): boolean => s.trimStart().startsWith('v');
 
-const isValidCatalogSingleSemver = (value: string): boolean =>
+export const isValidCatalogSingleSemver = (value: string): boolean =>
   !hasForbiddenLeadingVPrefix(value) && semver.valid(value) !== null;
 
 const RANGE_OPERATOR_TRIM = /^[=<>~^]+/;
@@ -384,7 +384,7 @@ const toApiCatalogSkipRange = (value: string): string | undefined => {
   return normalized ?? undefined;
 };
 
-const optionalSemver = (t: TFunction) =>
+export const optionalSemver = (t: TFunction) =>
   Yup.string().test(
     'valid-semver',
     t('Must be a valid semantic version (e.g. 1.0.0, 2.1.0-rc1). Leading "v" is not allowed.'),
@@ -396,7 +396,7 @@ const optionalSemver = (t: TFunction) =>
     },
   );
 
-const optionalSemverList = (t: TFunction) =>
+export const optionalSemverList = (t: TFunction) =>
   Yup.string().test(
     'valid-semver-list',
     t('Each entry must be a valid semantic version (e.g. 1.0.0, 2.1.0-rc1). Leading "v" is not allowed.'),
@@ -412,7 +412,7 @@ const optionalSemverList = (t: TFunction) =>
     },
   );
 
-const optionalSemverRange = (t: TFunction) =>
+export const optionalSemverRange = (t: TFunction) =>
   Yup.string().test(
     'valid-semver-range',
     t('Must be a valid semver range (e.g. >=1.0.0 <2.0.0). Leading "v" is not allowed.'),

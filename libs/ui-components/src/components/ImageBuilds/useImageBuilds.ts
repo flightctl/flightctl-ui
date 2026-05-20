@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useDebounce } from 'use-debounce';
 
-import { ImageBuild, ImageBuildList } from '@flightctl/types/imagebuilder';
+import { ImageBuild, ImageBuildList, ImagePromotion, ImagePromotionList } from '@flightctl/types/imagebuilder';
 import { ImageBuildWithExports } from '../../types/extraTypes';
 import { useAppContext } from '../../hooks/useAppContext';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
@@ -103,6 +103,43 @@ export const useImageBuilds = (args: ImageBuildsEndpointArgs): ImageBuildsLoad =
     refetch,
     pagination,
   };
+};
+
+const getImageBuildPromotionsEndpoint = (buildNames: string[]): string => {
+  if (buildNames.length === 0) {
+    return '';
+  }
+  const fieldSelector =
+    buildNames.length === 1
+      ? `spec.source.imageBuildRef=${buildNames[0]}`
+      : `spec.source.imageBuildRef in (${buildNames.join(',')})`;
+  const params = new URLSearchParams({ fieldSelector });
+  return `imagepromotions?${params.toString()}`;
+};
+
+const getLatestPromotion = (a: ImagePromotion, b: ImagePromotion): ImagePromotion => {
+  const tA = a.metadata.creationTimestamp ?? '';
+  const tB = b.metadata.creationTimestamp ?? '';
+  return tA >= tB ? a : b;
+};
+
+export const useImageBuildLatestPromotions = (buildNames: string[]): [Record<string, ImagePromotion>, VoidFunction] => {
+  const endpoint = getImageBuildPromotionsEndpoint(buildNames);
+  const [promotionsList, , , refetch] = useFetchPeriodically<ImagePromotionList>({ endpoint });
+
+  return React.useMemo(() => {
+    if (!promotionsList?.items.length) {
+      return [{}, refetch];
+    }
+    return [
+      promotionsList.items.reduce<Record<string, ImagePromotion>>((acc, promotion) => {
+        const buildRef = promotion.spec.source.imageBuildRef;
+        acc[buildRef] = acc[buildRef] ? getLatestPromotion(acc[buildRef], promotion) : promotion;
+        return acc;
+      }, {}),
+      refetch,
+    ];
+  }, [promotionsList, refetch]);
 };
 
 export const useImageBuild = (

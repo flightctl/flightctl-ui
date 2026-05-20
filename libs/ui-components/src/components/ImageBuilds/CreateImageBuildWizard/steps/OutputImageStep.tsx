@@ -12,7 +12,7 @@ import RepositorySelect from '../../../form/RepositorySelect';
 import { usePermissionsContext } from '../../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../../types/rbac';
 import { SelectImageBuildExportCard } from '../../ImageExportCards';
-import { getAllExportFormats, getImageReference } from '../../../../utils/imageBuilds';
+import { getAllExportFormats } from '../../../../utils/imageBuilds';
 import { isOciRepoSpec } from '../../../Repository/CreateRepository/utils';
 import { useOciRegistriesContext } from '../../OciRegistriesContext';
 import ImageUrlCard from '../../ImageUrlCard';
@@ -56,10 +56,6 @@ const OutputImageStep = () => {
     }
   };
 
-  const imageReference = React.useMemo(() => {
-    return getImageReference(ociRegistries, values.destination);
-  }, [ociRegistries, values.destination]);
-
   return (
     <FlightCtlForm>
       <FormSection>
@@ -96,7 +92,7 @@ const OutputImageStep = () => {
             helperText={t('Specify the version (e.g., latest or 9.6)')}
           />
         </FormGroup>
-        <ImageUrlCard imageReference={imageReference} />
+        <ImageUrlCard {...values.destination} />
         <FormGroup label={t('Export formats')} fieldId="export-formats">
           <Content component="p">
             {t(
