@@ -18,7 +18,7 @@ const upstreamLinks = {
 };
 
 const downstreamLinks = {
-  createApp: `${baseDownstreamDocs}/managing_applications_on_an_edge_device/rhem-manage-apps#build-app-packages`,
+  createApp: `${baseDownstreamDocs}/managing_applications_on_an_edge_device/build-app-packages`,
   useTemplateVars: `${baseDownstreamDocs}/managing_device_fleets/device-fleets#device-templates`,
   addNewDevice: `${baseDownstreamDocs}/operating_system_images_for_the_red_hat_edge_manager/edge-mgr-images#build-images-consider`,
   createAcmRepo: `${baseDownstreamDocs}/managing_devices/manage-devices-intro#manage-git-repository`,
