@@ -14,6 +14,7 @@ export const MAX_DEVICE_LOG_FILE_BYTES = MAX_LOG_LINES * AVERAGE_LOG_LINE_BYTES;
 
 const MAX_SYSTEMD_UNIT_LENGTH = 256;
 const MAX_LOG_FILE_PATH_LENGTH = 4096;
+const FILTER_ALL_VALUE = 'all';
 
 const SYSTEMD_UNIT_INPUT_PATTERN = /^[a-zA-Z0-9:@._-]+$/;
 
@@ -48,14 +49,14 @@ export enum DeviceLogLevel {
   DEBUG = 'debug',
 }
 
-export type DeviceLogLevelValue = DeviceLogLevel | 'all';
+export type DeviceLogLevelValue = DeviceLogLevel | typeof FILTER_ALL_VALUE;
 
 export type DeviceLogSearchParams = {
   category: DeviceLogCategory;
-  level: DeviceLogLevel | 'all';
+  level: DeviceLogLevel | typeof FILTER_ALL_VALUE;
 
   // For "Custom" time range: optional journal bounds as `YYYY-MM-DD` (date input); at least one must be set.
-  timeRange?: DeviceLogTimeRange;
+  timeRange: DeviceLogTimeRange | typeof FILTER_ALL_VALUE;
   dateFrom: string;
   dateTo: string;
   // For System logs, optional unit name (eg. sshd.service)
@@ -68,8 +69,8 @@ export type DeviceLogSearchParams = {
 
 export const DEVICE_LOGS_FORM_INITIAL_VALUES: DeviceLogSearchParams = {
   category: DeviceLogCategory.AGENT,
-  timeRange: undefined,
-  level: 'all',
+  timeRange: FILTER_ALL_VALUE,
+  level: FILTER_ALL_VALUE,
   dateFrom: '',
   dateTo: '',
   systemdUnit: '',
@@ -119,16 +120,17 @@ export const formatDeviceLogCustomTimeRangeText = (t: TFunction, dateFrom: strin
 };
 
 export const getActiveTimeFilterLabel = (t: TFunction, params: DeviceLogSearchParams): string | null => {
+  if (params.timeRange === FILTER_ALL_VALUE) {
+    return null;
+  }
   if (params.timeRange === DeviceLogTimeRange.CUSTOM_TIME_RANGE) {
     if (!params.dateFrom && !params.dateTo) {
       return null;
     }
     return formatDeviceLogCustomTimeRangeText(t, params.dateFrom, params.dateTo);
   }
-  if (params.timeRange) {
-    return getDeviceLogTimeRangeLabel(t, params.timeRange);
-  }
-  return null;
+
+  return getDeviceLogTimeRangeLabel(t, params.timeRange);
 };
 
 export const getDeviceLogLevelLabel = (t: TFunction, level: DeviceLogLevel): string => {
@@ -155,11 +157,11 @@ export const getDeviceLogLevelLabel = (t: TFunction, level: DeviceLogLevel): str
 export const getDeviceLogSearchSchema = (t: TFunction) => {
   return Yup.object({
     category: Yup.string().oneOf(Object.values(DeviceLogCategory)).required(),
-    timeRange: Yup.string().oneOf(Object.values(DeviceLogTimeRange)),
+    timeRange: Yup.string().oneOf([...Object.values(DeviceLogTimeRange), FILTER_ALL_VALUE]),
     // "dateFrom" and "dateTo" don't need additional validations (DeviceLogsTimeRangeField allows only valid selections).
     dateFrom: Yup.string(),
     dateTo: Yup.string(),
-    level: Yup.string().oneOf([...Object.values(DeviceLogLevel), 'all']),
+    level: Yup.string().oneOf([...Object.values(DeviceLogLevel), FILTER_ALL_VALUE]),
     systemdUnit: Yup.string()
       .max(MAX_SYSTEMD_UNIT_LENGTH, t('Must be at most {{max}} characters.', { max: MAX_SYSTEMD_UNIT_LENGTH }))
       .when('category', {

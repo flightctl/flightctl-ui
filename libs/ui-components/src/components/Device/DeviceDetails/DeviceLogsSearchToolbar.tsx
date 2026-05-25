@@ -72,7 +72,7 @@ const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
                         <TextField
                           name="systemdUnit"
                           aria-label={t('Systemd unit')}
-                          placeholder={t('e.g. sshd.service')}
+                          placeholder={t('Unit')}
                           showErrorMsg={false}
                         />
                       </FormGroup>

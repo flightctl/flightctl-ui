@@ -113,7 +113,7 @@ const DeviceLogsTab = ({ deviceId }: DeviceLogsTabProps) => {
               <StackItem>
                 <LogViewer
                   data={logs}
-                  height={650}
+                  height={700}
                   hasLineNumbers
                   theme={resolvedTheme}
                   isTextWrapped

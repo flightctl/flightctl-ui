@@ -92,12 +92,12 @@ const DeviceLogsInnerToolbar = ({
       });
     }
 
-    const timeText = getActiveTimeFilterLabel(t, lastSearchParams);
-    if (timeText) {
+    const activeTimeFilter = getActiveTimeFilterLabel(t, lastSearchParams);
+    if (activeTimeFilter) {
       filters.push({
         key: 'time',
-        label: t('Time: {{timeText}}', { timeText }),
-        onRemove: onRemoveFilter('timeRange', undefined),
+        label: t('Time: {{timeText}}', { timeText: activeTimeFilter }),
+        onRemove: onRemoveFilter('timeRange', 'all'),
       });
     }
 

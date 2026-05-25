@@ -44,7 +44,7 @@ const formatCalendarDate = (date: Date): string =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
 const isIncompleteCustomRange = (
-  timeRange: DeviceLogTimeRange | undefined,
+  timeRange: DeviceLogTimeRange | 'all' | undefined,
   dateFrom: string,
   dateTo: string,
 ): boolean => timeRange === DeviceLogTimeRange.CUSTOM_TIME_RANGE && dateFrom === '' && dateTo === '';
@@ -228,7 +228,7 @@ const DeviceLogsTimeRangeField = () => {
   const [draftFrom, setDraftFrom] = React.useState('');
   const [draftTo, setDraftTo] = React.useState('');
 
-  const toggleText = timeRange ? getDeviceLogTimeRangeLabel(t, timeRange) : t('Time');
+  const toggleText = timeRange === 'all' ? t('All time') : getDeviceLogTimeRangeLabel(t, timeRange);
 
   const clearIncompleteCustomRange = React.useCallback(() => {
     if (!isIncompleteCustomRange(timeRange, dateFrom, dateTo)) {
@@ -337,6 +337,12 @@ const DeviceLogsTimeRangeField = () => {
       >
         {menuView === TimeRangeMenuView.PRESETS ? (
           <>
+            <SelectList>
+              <SelectOption value="all" isSelected={timeRange === 'all'}>
+                {t('All time')}
+              </SelectOption>
+            </SelectList>
+            <Divider />
             <SelectGroup label={t('Presets')}>
               <SelectList>
                 <SelectOption
@@ -359,6 +365,7 @@ const DeviceLogsTimeRangeField = () => {
                 </SelectOption>
               </SelectList>
             </SelectGroup>
+            <Divider />
             <SelectGroup label={t('Boot')}>
               <SelectList>
                 <SelectOption
@@ -375,6 +382,7 @@ const DeviceLogsTimeRangeField = () => {
                 </SelectOption>
               </SelectList>
             </SelectGroup>
+            <Divider />
             <SelectGroup label={t('Custom')}>
               <SelectList>
                 <SelectOption
