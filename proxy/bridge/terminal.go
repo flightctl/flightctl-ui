@@ -14,6 +14,7 @@ import (
 
 	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
+	clientorigin "github.com/flightctl/flightctl-ui/origin"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
@@ -103,13 +104,17 @@ func buildDeviceConsoleURL(r *http.Request) (string, error) {
 
 // checkOrigin validates the Origin header against allowed origins.
 // It allows:
+//   - Requests without an Origin header (same-origin from browsers)
 //   - Requests from the configured BaseUiUrl origin
 //   - Same-origin requests (Origin matches request Host)
-//   - Requests without an Origin header (same-origin from browsers)
+//   - When trusted X-Forwarded-Host is set (OpenShift console plugin proxy), the
+//     effective client-facing origin matches BASE_UI_URL even if Origin is wrong (e.g. http://localhost)
 //
 // Host comparisons are case-insensitive per RFC 3986.
 func checkOrigin(r *http.Request) bool {
 	origin := r.Header.Get("Origin")
+	xfh := r.Header.Get("X-Forwarded-Host")
+	effectiveOrigin := clientorigin.EffectiveRequestOrigin(r)
 
 	// If no Origin header is present, allow the request (same-origin from browsers).
 	if origin == "" {
@@ -118,26 +123,47 @@ func checkOrigin(r *http.Request) bool {
 
 	originURL, err := url.Parse(origin)
 	if err != nil {
-		// Log rejected origin safely using %q to escape user-controlled input and prevent log injection
-		log.Warnf("Rejected WebSocket connection - invalid Origin header: %q", origin)
+		log.Warnf(
+			"Rejected WebSocket connection - invalid Origin header: %q",
+			origin,
+		)
 		return false
 	}
 
 	baseURL, err := url.Parse(config.BaseUiUrl)
 	if err != nil {
 		log.WithError(err).Warnf("Failed to parse BaseUiUrl for origin check")
-	} else if originURL.Scheme == baseURL.Scheme && strings.EqualFold(originURL.Host, baseURL.Host) {
+	} else if originMatchesConfiguredBaseUI(originURL, baseURL) {
 		return true
 	}
 
-	// Allow same-origin requests
+	// Allow same-origin requests (direct access to the proxy, not via console plugin).
 	if strings.EqualFold(originURL.Host, r.Host) {
 		return true
 	}
 
-	// Log rejected origin safely using %q to escape user-controlled input and prevent log injection
-	log.Warnf("Rejected WebSocket connection - unauthorized Origin header: %q", origin)
+	// OpenShift console plugin proxy often forwards a placeholder Origin (e.g. http://localhost)
+	// while setting X-Forwarded-Host/Proto to the real console URL.
+	if config.ShouldTrustForwardedHeaders(r) && strings.TrimSpace(xfh) != "" {
+		if baseURL != nil && clientorigin.FromURL(baseURL) == effectiveOrigin {
+			return true
+		}
+		log.Warnf(
+			"Rejected WebSocket connection - forwarded origin mismatch effectiveOrigin=%q baseUiOrigin=%q",
+			effectiveOrigin, clientorigin.FromURL(baseURL),
+		)
+	} else {
+		log.Warnf(
+			"Rejected WebSocket connection - unauthorized Origin header: %q (request Host=%q, BASE_UI_URL=%q, effectiveOrigin=%q)",
+			origin, r.Host, config.BaseUiUrl, effectiveOrigin,
+		)
+	}
+
 	return false
+}
+
+func originMatchesConfiguredBaseUI(originURL, baseURL *url.URL) bool {
+	return originURL.Scheme == baseURL.Scheme && strings.EqualFold(originURL.Host, baseURL.Host)
 }
 
 func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
