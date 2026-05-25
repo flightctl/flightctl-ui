@@ -107,8 +107,9 @@ func buildDeviceConsoleURL(r *http.Request) (string, error) {
 //   - Requests without an Origin header (same-origin from browsers)
 //   - Requests from the configured BaseUiUrl origin
 //   - Same-origin requests (Origin matches request Host)
-//   - When trusted X-Forwarded-Host is set (OpenShift console plugin proxy), the
-//     effective client-facing origin matches BASE_UI_URL even if Origin is wrong (e.g. http://localhost)
+//   - OpenShift console plugin proxy only: Origin is the console's documented placeholder
+//     (http://localhost) and X-Forwarded-Host/Proto match BASE_UI_URL — not a blanket bypass
+//     for arbitrary Origin values when forwarded headers match the destination host
 //
 // Host comparisons are case-insensitive per RFC 3986.
 func checkOrigin(r *http.Request) bool {
@@ -123,47 +124,59 @@ func checkOrigin(r *http.Request) bool {
 
 	originURL, err := url.Parse(origin)
 	if err != nil {
-		log.Warnf(
-			"Rejected WebSocket connection - invalid Origin header: %q",
-			origin,
-		)
+		log.Warnf("Rejected WebSocket connection - invalid Origin header: %q", origin)
 		return false
 	}
 
 	baseURL, err := url.Parse(config.BaseUiUrl)
 	if err != nil {
-		log.WithError(err).Warnf("Failed to parse BaseUiUrl for origin check")
+		log.WithError(err).Debugf("WebSocket origin check: failed to parse BaseUiUrl")
 	} else if originMatchesConfiguredBaseUI(originURL, baseURL) {
 		return true
 	}
 
 	// Allow same-origin requests (direct access to the proxy, not via console plugin).
-	if strings.EqualFold(originURL.Host, r.Host) {
+	if clientorigin.FromURL(originURL) == clientorigin.DirectRequestOrigin(r) {
 		return true
 	}
 
-	// OpenShift console plugin proxy often forwards a placeholder Origin (e.g. http://localhost)
-	// while setting X-Forwarded-Host/Proto to the real console URL.
-	if config.ShouldTrustForwardedHeaders(r) && strings.TrimSpace(xfh) != "" {
-		if baseURL != nil && clientorigin.FromURL(baseURL) == effectiveOrigin {
-			return true
-		}
-		log.Warnf(
-			"Rejected WebSocket connection - forwarded origin mismatch effectiveOrigin=%q baseUiOrigin=%q",
-			effectiveOrigin, clientorigin.FromURL(baseURL),
-		)
-	} else {
-		log.Warnf(
-			"Rejected WebSocket connection - unauthorized Origin header: %q (request Host=%q, BASE_UI_URL=%q, effectiveOrigin=%q)",
-			origin, r.Host, config.BaseUiUrl, effectiveOrigin,
-		)
+	if isOpenShiftConsolePluginProxyOriginAllowed(r, origin, baseURL, xfh, effectiveOrigin) {
+		return true
 	}
 
+	log.Debugf(
+		"Rejected WebSocket connection - Origin=%q requestHost=%q BASE_UI_URL=%q effectiveOrigin=%q xForwardedHost=%q",
+		origin, r.Host, config.BaseUiUrl, effectiveOrigin, xfh,
+	)
 	return false
 }
 
 func originMatchesConfiguredBaseUI(originURL, baseURL *url.URL) bool {
-	return originURL.Scheme == baseURL.Scheme && strings.EqualFold(originURL.Host, baseURL.Host)
+	return clientorigin.FromURL(originURL) == clientorigin.FromURL(baseURL)
+}
+
+// isOpenShiftConsolePluginProxyOriginAllowed permits the console WebSocket backend hop only when
+// Origin is openshift/console's fixed placeholder (http://localhost), not when an attacker
+// supplies another Origin but forges X-Forwarded-Host to match BASE_UI_URL.
+func isOpenShiftConsolePluginProxyOriginAllowed(
+	r *http.Request,
+	origin string,
+	baseURL *url.URL,
+	xfh, effectiveOrigin string,
+) bool {
+	if config.OcpPlugin != "true" {
+		return false
+	}
+	if !config.ShouldTrustForwardedHeaders(r) || strings.TrimSpace(xfh) == "" {
+		return false
+	}
+	if baseURL == nil {
+		return false
+	}
+	if !clientorigin.IsOpenShiftConsoleProxyWebSocketOrigin(origin) {
+		return false
+	}
+	return clientorigin.FromURL(baseURL) == effectiveOrigin
 }
 
 func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {

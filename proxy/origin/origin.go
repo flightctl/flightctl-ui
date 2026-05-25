@@ -9,6 +9,20 @@ import (
 	"github.com/flightctl/flightctl-ui/config"
 )
 
+// openshiftConsoleProxyWebSocketOrigin is the Origin openshift/console sets on outbound
+// WebSocket dials to plugin backends (see openshift/console pkg/proxy/proxy.go).
+const openshiftConsoleProxyWebSocketOrigin = "http://localhost"
+
+// IsOpenShiftConsoleProxyWebSocketOrigin reports whether origin is the console proxy's
+// documented placeholder, not an arbitrary cross-site Origin.
+func IsOpenShiftConsoleProxyWebSocketOrigin(origin string) bool {
+	u, err := url.Parse(origin)
+	if err != nil {
+		return false
+	}
+	return Normalize(u.Scheme, u.Host) == openshiftConsoleProxyWebSocketOrigin
+}
+
 // EffectiveRequest returns the client-facing scheme and host for the request.
 // When trusted X-Forwarded-* headers are present, they define the origin; otherwise r.Host is used.
 func EffectiveRequest(r *http.Request) (scheme, host string) {
@@ -41,6 +55,16 @@ func FromURL(u *url.URL) string {
 		return ""
 	}
 	return Normalize(u.Scheme, u.Host)
+}
+
+// DirectRequestOrigin returns the normalized origin for the direct connection (r.Host),
+// without using X-Forwarded-* headers.
+func DirectRequestOrigin(r *http.Request) string {
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
+	return Normalize(scheme, r.Host)
 }
 
 // Normalize returns a canonical origin string for scheme and host (default ports omitted).
