@@ -17,7 +17,7 @@ const FINGERPRINT_MAX_CHARS_SHA256 = FINGERPRINT_MAX_CHARS + 'sha256:'.length;
 const getFingerprintTruncation = (fingerprint: string): Partial<TruncateProps> => {
   return {
     position: 'end',
-    maxCharsDisplayed: fingerprint.includes('sha256:') ? FINGERPRINT_MAX_CHARS_SHA256 : FINGERPRINT_MAX_CHARS,
+    maxCharsDisplayed: fingerprint.startsWith('sha256:') ? FINGERPRINT_MAX_CHARS_SHA256 : FINGERPRINT_MAX_CHARS,
     // We hide the tooltip that displays the full fingerprint.
     // Users can always copy the fingerprint to the clipboard, and there already are 2 more tooltips in this small component.
     tooltipProps: { trigger: 'manual', isVisible: false },
