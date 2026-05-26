@@ -29,6 +29,7 @@ import {
   getInitialValuesFromItem,
   getValidationSchema,
 } from './utils';
+import { isWizardStepDisabled } from '../../../utils/wizards';
 import { AddCatalogItemFormValues } from './types';
 import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
@@ -55,11 +56,6 @@ const getValidStepIds = (formikErrors: FormikErrors<AddCatalogItemFormValues>): 
     validStepIds.push(reviewStepId);
   }
   return validStepIds;
-};
-
-const isDisabledStep = (stepId: string, validStepIds: string[]) => {
-  const validIndex = validStepIds.indexOf(stepId);
-  return validIndex === -1 || validIndex !== orderedIds.indexOf(stepId);
 };
 
 const validateStep = (activeStepId: string, errors: FormikErrors<AddCatalogItemFormValues>) => {
@@ -178,27 +174,21 @@ const AddCatalogItemWizard = () => {
                   <WizardStep
                     name={t('Type and configuration')}
                     id={typeConfigStepId}
-                    isDisabled={isDisabledStep(generalInfoStepId, validStepIds)}
+                    isDisabled={isWizardStepDisabled(typeConfigStepId, orderedIds, validStepIds)}
                   >
                     {currentStep?.id === typeConfigStepId && <TypeConfigStep isEdit={isEdit} isReadOnly={isReadOnly} />}
                   </WizardStep>
                   <WizardStep
                     name={t('Versions')}
                     id={versionStepId}
-                    isDisabled={
-                      isDisabledStep(typeConfigStepId, validStepIds) || isDisabledStep(generalInfoStepId, validStepIds)
-                    }
+                    isDisabled={isWizardStepDisabled(versionStepId, orderedIds, validStepIds)}
                   >
                     {currentStep?.id === versionStepId && <VersionStep isReadOnly={isReadOnly} isEdit={isEdit} />}
                   </WizardStep>
                   <WizardStep
                     name={isReadOnly ? t('Review') : isEdit ? t('Review and save') : t('Review and create')}
                     id={reviewStepId}
-                    isDisabled={
-                      isDisabledStep(versionStepId, validStepIds) ||
-                      isDisabledStep(typeConfigStepId, validStepIds) ||
-                      isDisabledStep(generalInfoStepId, validStepIds)
-                    }
+                    isDisabled={isWizardStepDisabled(reviewStepId, orderedIds, validStepIds)}
                   >
                     {currentStep?.id === reviewStepId && (
                       <ReviewStep error={error} isEdit={isEdit} isReadOnly={isReadOnly} />

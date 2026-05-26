@@ -39,6 +39,26 @@ import PageWithPermissions from '../common/PageWithPermissions';
 import { usePermissionsContext } from '../common/PermissionsContext';
 import FlightCtlWizardFooter from '../common/FlightCtlWizardFooter';
 import { RESOURCE, VERB } from '../../types/rbac';
+import { isWizardStepDisabled } from '../../utils/wizards';
+
+const orderedIds = [repositoryStepId, resourceSyncStepId, reviewStepId];
+
+const getValidStepIds = (
+  values: ImportResourceFormValues,
+  formikErrors: FormikErrors<ImportResourceFormValues>,
+): string[] => {
+  const validStepIds: string[] = [];
+  if (isRepoStepValid(values, formikErrors)) {
+    validStepIds.push(repositoryStepId);
+  }
+  if (isResourceSyncStepValid(formikErrors)) {
+    validStepIds.push(resourceSyncStepId);
+  }
+  if (validStepIds.length === orderedIds.length - 1) {
+    validStepIds.push(reviewStepId);
+  }
+  return validStepIds;
+};
 
 const validationSchema = (t: TFunction) =>
   Yup.lazy((values: ImportResourceFormValues) =>
@@ -137,46 +157,47 @@ const ImportResourceWizardContent = ({
         navigate(successRoute);
       }}
     >
-      {({ values, errors: formikErrors }) => (
-        <>
-          <LeaveFormConfirmation />
-          <Wizard
-            footer={
-              <FlightCtlWizardFooter<ImportResourceFormValues>
-                firstStepId={repositoryStepId}
-                submitStepId={reviewStepId}
-                validateStep={validateFooterStep}
-                saveButtonText={t('Import')}
-              />
-            }
-            onStepChange={(_, step) => setCurrentStep(step)}
-          >
-            <WizardStep name={t('Select or create repository')} id={repositoryStepId}>
-              {(!currentStep || currentStep?.id === repositoryStepId) && (
-                <RepositoryStep repositories={gitRepositories} hasLoaded={!!repoList} />
-              )}
-            </WizardStep>
-            <WizardStep
-              name={t('Add resource sync')}
-              id={resourceSyncStepId}
-              isDisabled={
-                (!currentStep || currentStep?.id === repositoryStepId) && !isRepoStepValid(values, formikErrors)
+      {({ values, errors: formikErrors }) => {
+        const validStepIds = getValidStepIds(values, formikErrors);
+        return (
+          <>
+            <LeaveFormConfirmation />
+            <Wizard
+              footer={
+                <FlightCtlWizardFooter<ImportResourceFormValues>
+                  firstStepId={repositoryStepId}
+                  submitStepId={reviewStepId}
+                  validateStep={validateFooterStep}
+                  saveButtonText={t('Import')}
+                />
               }
+              onStepChange={(_, step) => setCurrentStep(step)}
             >
-              {currentStep?.id === resourceSyncStepId && (
-                <ResourceSyncStep description={resourceSyncDescription} defaultSyncType={resourceSyncType} />
-              )}
-            </WizardStep>
-            <WizardStep
-              name={t('Review')}
-              id={reviewStepId}
-              isDisabled={!isRepoStepValid(values, formikErrors) || !isResourceSyncStepValid(formikErrors)}
-            >
-              {currentStep?.id === reviewStepId && <ReviewStep errors={errors} infoText={reviewInfoText} />}
-            </WizardStep>
-          </Wizard>
-        </>
-      )}
+              <WizardStep name={t('Select or create repository')} id={repositoryStepId}>
+                {(!currentStep || currentStep?.id === repositoryStepId) && (
+                  <RepositoryStep repositories={gitRepositories} hasLoaded={!!repoList} />
+                )}
+              </WizardStep>
+              <WizardStep
+                name={t('Add resource sync')}
+                id={resourceSyncStepId}
+                isDisabled={isWizardStepDisabled(resourceSyncStepId, orderedIds, validStepIds)}
+              >
+                {currentStep?.id === resourceSyncStepId && (
+                  <ResourceSyncStep description={resourceSyncDescription} defaultSyncType={resourceSyncType} />
+                )}
+              </WizardStep>
+              <WizardStep
+                name={t('Review')}
+                id={reviewStepId}
+                isDisabled={isWizardStepDisabled(reviewStepId, orderedIds, validStepIds)}
+              >
+                {currentStep?.id === reviewStepId && <ReviewStep errors={errors} infoText={reviewInfoText} />}
+              </WizardStep>
+            </Wizard>
+          </>
+        );
+      }}
     </Formik>
   );
 };

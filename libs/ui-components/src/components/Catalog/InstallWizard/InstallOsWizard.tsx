@@ -1,6 +1,6 @@
 import { CatalogItem } from '@flightctl/types/alpha';
 import { Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
-import { Formik, useFormikContext } from 'formik';
+import { Formik, FormikErrors, useFormikContext } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
 import { Device, Fleet } from '@flightctl/types';
@@ -18,6 +18,26 @@ import UpdateSuccessPage from './UpdateSuccessPage';
 import FlightCtlWizardFooter, { FlightCtlWizardFooterProps } from '../../common/FlightCtlWizardFooter';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { isWizardStepDisabled } from '../../../utils/wizards';
+
+const getOrderedStepIds = (target: InstallOsFormik['target']) =>
+  target === 'new-device'
+    ? [specificationsStepId, selectTargetStepId]
+    : [specificationsStepId, selectTargetStepId, reviewStepId];
+
+const getValidStepIds = (errors: FormikErrors<InstallOsFormik>, orderedStepIds: string[]): string[] => {
+  const validStepIds: string[] = [];
+  if (isSpecsStepValid(errors)) {
+    validStepIds.push(specificationsStepId);
+  }
+  if (isSelectTargetStepValid(errors)) {
+    validStepIds.push(selectTargetStepId);
+  }
+  if (orderedStepIds.includes(reviewStepId) && validStepIds.length === orderedStepIds.length - 1) {
+    validStepIds.push(reviewStepId);
+  }
+  return validStepIds;
+};
 
 export const validateOsWizardStep: FlightCtlWizardFooterProps<InstallOsFormik>['validateStep'] = (
   activeStepId,
@@ -47,6 +67,8 @@ const InstallOsWizardContent = ({
 }: InstallOsWizardContentProps) => {
   const { t } = useTranslation();
   const { values, errors } = useFormikContext<InstallOsFormik>();
+  const orderedStepIds = getOrderedStepIds(values.target);
+  const validStepIds = getValidStepIds(errors, orderedStepIds);
   const showLeaveConfirmation = !(values.target === 'new-device' && currentStep?.id === selectTargetStepId);
 
   return isSuccessful ? (
@@ -75,14 +97,18 @@ const InstallOsWizardContent = ({
             <SpecificationsStep catalogItem={catalogItem} showNewDevice />
           )}
         </WizardStep>
-        <WizardStep name={t('Select target')} id={selectTargetStepId} isDisabled={!isSpecsStepValid(errors)}>
+        <WizardStep
+          name={t('Select target')}
+          id={selectTargetStepId}
+          isDisabled={isWizardStepDisabled(selectTargetStepId, orderedStepIds, validStepIds)}
+        >
           {currentStep?.id === selectTargetStepId && <SelectTargetStep catalogItem={catalogItem} />}
         </WizardStep>
         {values.target !== 'new-device' && (
           <WizardStep
             name={t('Review and deploy')}
             id={reviewStepId}
-            isDisabled={!isSpecsStepValid(errors) || !isSelectTargetStepValid(errors)}
+            isDisabled={isWizardStepDisabled(reviewStepId, orderedStepIds, validStepIds)}
           >
             {currentStep?.id === reviewStepId && <ReviewStep error={error} catalogItem={catalogItem} />}
           </WizardStep>
