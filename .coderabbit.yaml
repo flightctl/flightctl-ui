@@ -51,7 +51,6 @@ reviews:
     drafts: false
     base_branches:
       - "main"
-      - "release.*"
     ignore_title_keywords:
       - "[skip-review]"
       - "WIP"
@@ -114,10 +113,6 @@ reviews:
       instructions: |
         React & PatternFly design review:
         - Prefer PatternFly components over custom HTML; follow PF6 patterns
-        - Use project wrapper components where required by ESLint rules:
-          FlightCtlForm (not PF Form), FlightCtlWizardFooter,
-          FlightCtlPageDrawer
-        - Import PF icons via full path (@patternfly/react-icons/dist/js/icons/...)
         - Components should have a single responsibility; split large
           components into focused sub-components
         - Avoid prop drilling more than 2 levels deep; use context or
@@ -163,8 +158,6 @@ reviews:
       instructions: |
         i18n review:
         - All user-visible strings must use the t() translation function
-        - Import useTranslation from @flightctl/ui-components/hooks/useTranslation,
-          NOT from react-i18next directly (enforced by ESLint)
         - Translation keys must be hardcoded string literals so the
           i18next-parser can extract them — never use variables as keys:
           GOOD: t('Device enrolled')  BAD: t(statusMessage)
@@ -191,9 +184,9 @@ reviews:
       instructions: |
         TypeScript review:
         - No use of 'any' type — prefer 'unknown' and narrow with type guards
-        - Avoid non-null assertions (!) except for resource.metadata.name
-          where the field is known defined for API-returned resources
-          (documented convention in AGENTS.md)
+        - For resource.metadata.name (known defined for API-returned
+          resources), use `metadata.name as string` or `metadata.name || ''`
+          rather than non-null assertions (!)
         - Prefer discriminated unions over type assertions for state variants
         - Generic types should have meaningful constraints, not just <T>
         - Exported functions and hooks should have explicit return types
@@ -210,7 +203,6 @@ reviews:
         - No !important unless overriding a PF default that cannot be
           configured otherwise
         - Support dark mode: use PF color tokens, not fixed hex values
-        - Responsive: verify layouts work at standard breakpoints
 
     # ── Monorepo boundary enforcement ────────────────────────────
     - path: "libs/ui-components/src/**/*.{ts,tsx}"
@@ -222,7 +214,6 @@ reviews:
           not direct imports of platform code
         - Shared types belong in libs/types; do not duplicate API types
         - Do not import lodash as a full module; use lodash/<function>
-          (enforced by ESLint)
 
     # ── Cypress E2E tests ────────────────────────────────────────
     - path: "libs/cypress/**/*.{ts,tsx}"
@@ -488,7 +479,8 @@ reviews:
       - name: "ai-attribution"
         instructions: |
           If AI tools were used (mentioned in PR or commits), verify
-          Red Hat attribution: Assisted-by or Generated-by trailers.
+          attribution trailers: Assisted-by, Generated-by, or
+          Made-with (e.g., Made-with: Cursor) are acceptable.
           Flag use of Co-Authored-By for AI tools.
         mode: "warning"
 
