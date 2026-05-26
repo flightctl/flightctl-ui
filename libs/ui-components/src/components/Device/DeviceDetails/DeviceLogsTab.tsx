@@ -38,7 +38,7 @@ const DeviceLogsTab = ({ deviceId }: DeviceLogsTabProps) => {
     useDeviceLogs({
       deviceId,
     });
-  const lineCount = React.useMemo(() => logs.length, [logs]);
+  const lineCount = logs.length;
 
   const onLogSearch = React.useCallback(
     async (params: DeviceLogSearchParams) => {

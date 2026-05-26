@@ -5,7 +5,6 @@ import {
   Flex,
   FlexItem,
   FormGroup,
-  Icon,
   InputGroupText,
   Stack,
   StackItem,
@@ -15,7 +14,6 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
-import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { DEVICE_LOG_BASE_PATH, DeviceLogCategory, DeviceLogSearchParams } from '../../../utils/deviceLogs';
@@ -23,6 +21,7 @@ import FormSelect from '../../form/FormSelect';
 import TextField from '../../form/TextField';
 import DeviceLogsPriorityField from './DeviceLogsLevelField';
 import DeviceLogsTimeRangeField from './DeviceLogsTimeRangeField';
+import StatusDisplay from '../../Status/StatusDisplay';
 
 const getCategoryItems = (t: TFunction) => ({
   [DeviceLogCategory.AGENT]: t('Agent'),
@@ -79,16 +78,15 @@ const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
                     </FlexItem>
                   )}
                   {values.category !== DeviceLogCategory.FILE && (
-                    <FlexItem>
-                      <DeviceLogsTimeRangeField />
-                    </FlexItem>
+                    <>
+                      <FlexItem>
+                        <DeviceLogsTimeRangeField />
+                      </FlexItem>
+                      <FlexItem>
+                        <DeviceLogsPriorityField />
+                      </FlexItem>
+                    </>
                   )}
-                  {values.category !== DeviceLogCategory.FILE && (
-                    <FlexItem>
-                      <DeviceLogsPriorityField />
-                    </FlexItem>
-                  )}
-
                   {values.category === DeviceLogCategory.FILE && (
                     <>
                       <FlexItem alignSelf={{ default: 'alignSelfCenter' }}>
@@ -124,16 +122,11 @@ const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
           </ToolbarContent>
         </Toolbar>
       </StackItem>
-      <StackItem>
-        {validationError && (
-          <>
-            <Icon status="danger">
-              <ExclamationCircleIcon />
-            </Icon>{' '}
-            <span className="pf-v6-u-font-weight-bold">{validationError}</span>
-          </>
-        )}
-      </StackItem>
+      {validationError && (
+        <StackItem>
+          <StatusDisplay item={{ label: validationError, level: 'danger' }} />
+        </StackItem>
+      )}
     </Stack>
   );
 };

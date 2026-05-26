@@ -1679,12 +1679,7 @@
   "{{count}} hours ago_other": "{{count}} hours ago",
   "{{count}} minutes ago_one": "{{count}} minute ago",
   "{{count}} minutes ago_other": "{{count}} minutes ago",
-<<<<<<< HEAD
   "just now": "just now",
-||||||| parent of 431e43d1 (EDM-3694: New tab for viewing device logs)
-  "< 1 minute ago": "< 1 minute ago",
-=======
-  "< 1 minute ago": "< 1 minute ago",
   "{{dateFrom}} to {{dateTo}}": "{{dateFrom}} to {{dateTo}}",
   "Since {{dateFrom}}": "Since {{dateFrom}}",
   "Until {{dateTo}}": "Until {{dateTo}}",
@@ -1701,7 +1696,6 @@
   "Log file path is required.": "Log file path is required.",
   "Log file path must be relative to {{basePath}}. It cannot be absolute or point outside the log directory.": "Log file path must be relative to {{basePath}}. It cannot be absolute or point outside the log directory.",
   "Log file path must not end with \"/\". Enter a file path, not a directory.": "Log file path must not end with \"/\". Enter a file path, not a directory.",
->>>>>>> 431e43d1 (EDM-3694: New tab for viewing device logs)
   "Device is bound to a fleet and its configurations cannot be edited.": "Device is bound to a fleet and its configurations cannot be edited.",
   "Device decommissioning already started.": "Device decommissioning already started.",
   "Device is not suspended.": "Device is not suspended.",
