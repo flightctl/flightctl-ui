@@ -14,10 +14,8 @@ tone_instructions: >
   explain the user-facing or maintainability consequence.
 
 reviews:
-  approve:
-    enabled: false
   profile: "assertive"
-  request_changes_workflow: true
+  request_changes_workflow: false
   high_level_summary: true
   high_level_summary_instructions: >-
     Summarize changes in terms of which areas are affected (libs/ui-components/,
