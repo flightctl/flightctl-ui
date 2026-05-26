@@ -49,7 +49,6 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
   const { post, remove, apiProxy } = useFetch();
   const { checkPermissions } = usePermissionsContext();
   const { currentOrganization } = useOrganizationGuardContext();
-  const orgId = currentOrganization?.metadata?.name;
   const [canCreateExport, canDelete, canViewLogs, canDownload, canCancel] =
     checkPermissions(imageBuildExportsPermissions);
 
@@ -119,7 +118,9 @@ const ImageBuildExportsGallery = ({ imageBuild, refetch }: ImageBuildExportsGall
     // The API server streams the blob with proper headers, and the browser handles the download
     // Path goes through the UI proxy.
     // org_id query param is required since direct links can't send the X-FlightCtl-Organization-ID header
-    createDownloadLink(`${apiProxy}/imagebuilder/api/v1/imageexports/${ieName}/download?org_id=${orgId}`);
+    createDownloadLink(
+      `${apiProxy}/imagebuilder/api/v1/imageexports/${ieName}/download?org_id=${currentOrganization?.id || ''}`,
+    );
     await showSpinnerBriefly(DOWNLOAD_REDIRECT_DELAY);
   };
 
