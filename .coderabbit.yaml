@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 # CodeRabbit configuration for flightctl-ui
 # Tuned for this monorepo: React/TypeScript frontend + Go auth proxy.
 # Covers security, design, accessibility, performance, and i18n.
@@ -40,7 +41,6 @@ reviews:
     - "!libs/i18n/locales/en/translation.json"
     # Binary / media assets — no useful review signal
     - "!**/*.png"
-    - "!**/*.svg"
     - "!**/*.jpg"
     - "!**/*.jpeg"
     # package-lock.json is kept so the supply-chain block fires on it.
