@@ -71,6 +71,10 @@ export namespace Event {
     DEVICE_CONTENT_OUT_OF_DATE = 'DeviceContentOutOfDate',
     DEVICE_CONTENT_UPDATING = 'DeviceContentUpdating',
     DEVICE_UPDATE_FAILED = 'DeviceUpdateFailed',
+    DEVICE_VULNERABILITY_CVECRITICAL = 'DeviceVulnerabilityCVECritical',
+    DEVICE_VULNERABILITY_CVERESOLVED = 'DeviceVulnerabilityCVEResolved',
+    DEVICE_VULNERABILITY_CVEWARNING = 'DeviceVulnerabilityCVEWarning',
+    DEVICE_OSIMAGE_CHANGED = 'DeviceOSImageChanged',
     ENROLLMENT_REQUEST_APPROVED = 'EnrollmentRequestApproved',
     ENROLLMENT_REQUEST_APPROVAL_FAILED = 'EnrollmentRequestApprovalFailed',
     DEVICE_MULTIPLE_OWNERS_DETECTED = 'DeviceMultipleOwnersDetected',
@@ -98,6 +102,8 @@ export namespace Event {
     RESOURCE_SYNC_PARSING_FAILED = 'ResourceSyncParsingFailed',
     RESOURCE_SYNC_SYNCED = 'ResourceSyncSynced',
     RESOURCE_SYNC_SYNC_FAILED = 'ResourceSyncSyncFailed',
+    DEPENDENCY_CHANGE_DETECTED = 'DependencyChangeDetected',
+    DEPENDENCY_SYNC_PROBE_FAILED = 'DependencySyncProbeFailed',
     SYSTEM_RESTORED = 'SystemRestored',
   }
   /**

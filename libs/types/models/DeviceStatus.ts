@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Condition } from './Condition';
+import type { DependencySyncStatus } from './DependencySyncStatus';
 import type { DeviceApplicationsSummaryStatus } from './DeviceApplicationsSummaryStatus';
 import type { DeviceApplicationStatus } from './DeviceApplicationStatus';
 import type { DeviceConfigStatus } from './DeviceConfigStatus';
@@ -43,5 +44,6 @@ export type DeviceStatus = {
    */
   lastSeen?: string;
   lifecycle: DeviceLifecycleStatus;
+  dependencySync?: DependencySyncStatus;
 };
 

@@ -2,6 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { DependencyChangeDetectedDetails } from './DependencyChangeDetectedDetails';
+import type { DependencySyncProbeFailedDetails } from './DependencySyncProbeFailedDetails';
 import type { DeviceMultipleOwnersDetectedDetails } from './DeviceMultipleOwnersDetectedDetails';
 import type { DeviceMultipleOwnersResolvedDetails } from './DeviceMultipleOwnersResolvedDetails';
 import type { DeviceOwnershipChangedDetails } from './DeviceOwnershipChangedDetails';
@@ -20,5 +22,5 @@ import type { ResourceUpdatedDetails } from './ResourceUpdatedDetails';
 /**
  * Event-specific details, structured based on event type.
  */
-export type EventDetails = (ResourceUpdatedDetails | DeviceOwnershipChangedDetails | DeviceMultipleOwnersDetectedDetails | DeviceMultipleOwnersResolvedDetails | InternalTaskFailedDetails | InternalTaskPermanentlyFailedDetails | ResourceSyncCompletedDetails | ReferencedRepositoryUpdatedDetails | FleetRolloutStartedDetails | FleetRolloutFailedDetails | FleetRolloutCompletedDetails | FleetRolloutBatchDispatchedDetails | FleetRolloutBatchCompletedDetails | FleetRolloutDeviceSelectedDetails);
+export type EventDetails = (ResourceUpdatedDetails | DeviceOwnershipChangedDetails | DeviceMultipleOwnersDetectedDetails | DeviceMultipleOwnersResolvedDetails | InternalTaskFailedDetails | InternalTaskPermanentlyFailedDetails | ResourceSyncCompletedDetails | ReferencedRepositoryUpdatedDetails | FleetRolloutStartedDetails | FleetRolloutFailedDetails | FleetRolloutCompletedDetails | FleetRolloutBatchDispatchedDetails | FleetRolloutBatchCompletedDetails | FleetRolloutDeviceSelectedDetails | DeviceVulnerabilityCveDetails | DependencyChangeDetectedDetails | DependencySyncProbeFailedDetails);
 

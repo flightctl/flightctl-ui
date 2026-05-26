@@ -49,7 +49,10 @@ export type { ContainerApplicationProperties } from './models/ContainerApplicati
 export type { CpuResourceMonitorSpec } from './models/CpuResourceMonitorSpec';
 export type { CronExpression } from './models/CronExpression';
 export type { CustomDeviceInfo } from './models/CustomDeviceInfo';
-export type { DependenciesSync } from './models/DependenciesSync';
+export type { DependencyChangeDetectedDetails } from './models/DependencyChangeDetectedDetails';
+export type { DependencySyncConfigRefStatus } from './models/DependencySyncConfigRefStatus';
+export type { DependencySyncProbeFailedDetails } from './models/DependencySyncProbeFailedDetails';
+export type { DependencySyncStatus } from './models/DependencySyncStatus';
 export type { Device } from './models/Device';
 export type { DeviceApplicationsSummaryStatus } from './models/DeviceApplicationsSummaryStatus';
 export type { DeviceApplicationStatus } from './models/DeviceApplicationStatus';
