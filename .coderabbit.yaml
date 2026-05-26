@@ -14,6 +14,8 @@ tone_instructions: >
   explain the user-facing or maintainability consequence.
 
 reviews:
+  approve:
+    enabled: false
   profile: "assertive"
   request_changes_workflow: true
   high_level_summary: true
