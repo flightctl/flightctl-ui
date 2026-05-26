@@ -4,49 +4,100 @@
   font-weight: var(--pf-t--global--font--weight--body--bold);
 }
 
-.fctl-security-overview-summary-box.critical {
+/* 
+The colors of the font and icon of these cards are very different between dark and light themes.
+Due to this, we set the colors via CSS rather than using the --pf-v6-c-icon__content--Color variable on the <Icon> component.
+
+Desired result:
+- Light theme:
+  - Cards with vuln = 0: Font: dark. Icon: the PF severity color. Background: none.
+  - Cards with vuln > 0: Font: dark. Icon: the PF severity color. Background: lighter variation of the PF severity token.
+- Dark theme:
+  - Cards with vuln = 0: Font: white. Icon: the PF severity color. Background: none.
+  - Cards with vuln > 0: Font: dark. Icon: dark. Background: the severity-specific PF token.
+*/
+
+/* Light theme - icon colors */
+.fctl-security-overview-summary-box.critical .pf-v6-c-icon__content {
+  --pf-v6-c-icon__content--Color: var(--pf-t--global--icon--color--severity--critical--default);
+}
+
+.fctl-security-overview-summary-box.medium .pf-v6-c-icon__content {
+  --pf-v6-c-icon__content--Color: var(--pf-t--global--icon--color--severity--moderate--default);
+}
+
+.fctl-security-overview-summary-box.high .pf-v6-c-icon__content {
+  --pf-v6-c-icon__content--Color: var(--pf-t--global--icon--color--severity--important--default);
+}
+
+.fctl-security-overview-summary-box.low .pf-v6-c-icon__content,
+.fctl-security-overview-summary-box.unknown .pf-v6-c-icon__content {
+  --pf-v6-c-icon__content--Color: var(--pf-t--global--icon--color--severity--minor--default);
+}
+
+.fctl-security-overview-summary-box.none .pf-v6-c-icon__content {
+  --pf-v6-c-icon__content--Color: var(--pf-t--global--icon--color--severity--none--default);
+}
+
+/* Light theme - background colors */
+.fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled.critical {
   background-color: color-mix(in srgb, var(--pf-t--global--icon--color--severity--critical--default) 14%, white);
 }
 
-.fctl-security-overview-summary-box.high {
+.fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled.high {
   background-color: color-mix(in srgb, var(--pf-t--global--icon--color--severity--important--default) 14%, white);
 }
 
-.fctl-security-overview-summary-box.medium {
+.fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled.medium {
   background-color: color-mix(in srgb, var(--pf-t--global--icon--color--severity--moderate--default) 14%, white);
 }
 
-.fctl-security-overview-summary-box.low,
-.fctl-security-overview-summary-box.unknown {
+.fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled.low {
   background-color: color-mix(in srgb, var(--pf-t--global--icon--color--severity--minor--default) 14%, white);
 }
 
-.fctl-security-overview-summary-box.none {
+.fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled.unknown {
+  /* This is the color used in the design. There is no PF token for unknown severity. */
+  background-color: color-mix(in srgb, var(--pf-t--global--color--disabled--200) 14%, white);
+}
+
+.fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled.none {
   background-color: color-mix(in srgb, var(--pf-t--global--icon--color--severity--none--default) 14%, white);
 }
 
-/* Dark theme variations. */
-.pf-v6-theme-dark .fctl-security-overview-summary-box {
+/* Dark theme - font color */
+.pf-v6-theme-dark .fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled {
   color: var(--pf-t--global--icon--color--100);
 }
 
-.pf-v6-theme-dark .fctl-security-overview-summary-box.critical {
+/* Dark theme - icon color */
+.pf-v6-theme-dark
+  .fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled
+  .pf-v6-c-icon__content {
+  --pf-v6-c-icon__content--Color: var(--pf-t--global--icon--color--100) !important;
+}
+
+/* Dark theme - background colors */
+.pf-v6-theme-dark .fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled.critical {
   background-color: var(--pf-t--global--dark--color--severity--critical--100);
 }
 
-.pf-v6-theme-dark .fctl-security-overview-summary-box.high {
+.pf-v6-theme-dark .fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled.high {
   background-color: var(--pf-t--global--dark--color--severity--important--100);
 }
 
-.pf-v6-theme-dark .fctl-security-overview-summary-box.medium {
+.pf-v6-theme-dark .fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled.medium {
   background-color: var(--pf-t--global--dark--color--severity--moderate--100);
 }
 
-.pf-v6-theme-dark .fctl-security-overview-summary-box.low,
-.pf-v6-theme-dark .fctl-security-overview-summary-box.unknown {
+.pf-v6-theme-dark .fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled.low {
   background-color: var(--pf-t--global--dark--color--severity--minor--100);
 }
 
-.pf-v6-theme-dark .fctl-security-overview-summary-box.none {
+.pf-v6-theme-dark .fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled.unknown {
+  background-color: var(--pf-t--global--color--disabled--200);
+}
+
+.pf-v6-theme-dark .fctl-security-overview-summary-box.fctl-security-overview-summary-box__filled.none {
   background-color: var(--pf-t--global--dark--color--severity--none--100);
 }
