@@ -17,7 +17,6 @@ import { Repository } from '@flightctl/types';
 import ListPageBody from '../ListPage/ListPageBody';
 import ListPage from '../ListPage/ListPage';
 import { getLastTransitionTimeText } from '../../utils/status/repository';
-import { useTableTextSearch } from '../../hooks/useTableTextSearch';
 import DeleteRepositoryModal from './RepositoryDetails/DeleteRepositoryModal';
 import TableTextSearch from '../Table/TableTextSearch';
 import Table from '../Table/Table';
@@ -85,8 +84,6 @@ const getColumns = (t: TFunction) => [
     name: t('Last transition'),
   },
 ];
-
-const getSearchText = (repo: Repository) => [repo.metadata.name];
 
 const RepositoryTableRow = ({
   repository,
@@ -157,7 +154,8 @@ const repositoryTablePermissions = [
 ];
 const RepositoryTable = () => {
   const { t } = useTranslation();
-  const [repositories, loading, error, isUpdating, refetch, pagination] = useRepositories();
+  const [nameSearch, setNameSearch] = React.useState('');
+  const [repositories, loading, error, isUpdating, refetch, pagination] = useRepositories(nameSearch);
   const [deleteModalRepoId, setDeleteModalRepoId] = React.useState<string>();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
 
@@ -166,7 +164,6 @@ const RepositoryTable = () => {
     refetch();
   };
 
-  const { search, setSearch, filteredData } = useTableTextSearch(repositories, getSearchText);
   const columns = React.useMemo(() => getColumns(t), [t]);
 
   const { hasSelectedRows, isAllSelected, isRowSelected, setAllSelected, onRowSelect } = useTableSelect<Repository>();
@@ -180,7 +177,7 @@ const RepositoryTable = () => {
         <ToolbarContent>
           <ToolbarGroup>
             <ToolbarItem>
-              <TableTextSearch value={search} setValue={setSearch} />
+              <TableTextSearch value={nameSearch} setValue={setNameSearch} placeholder={t('Search by name')} />
             </ToolbarItem>
           </ToolbarGroup>
           <ToolbarItem>
@@ -204,15 +201,15 @@ const RepositoryTable = () => {
         data-testid="repositories-table"
         aria-label={t('Repositories table')}
         loading={isUpdating}
-        hasFilters={!!search}
-        emptyData={filteredData.length === 0}
-        clearFilters={() => setSearch('')}
+        hasFilters={!!nameSearch}
+        emptyData={repositories.length === 0}
+        clearFilters={() => setNameSearch('')}
         isAllSelected={isAllSelected}
         onSelectAll={setAllSelected}
         columns={columns}
       >
         <Tbody>
-          {filteredData.map((repository, rowIndex) => (
+          {repositories.map((repository, rowIndex) => (
             <RepositoryTableRow
               key={repository.metadata.name}
               repository={repository}
@@ -228,7 +225,7 @@ const RepositoryTable = () => {
       </Table>
       <TablePagination isUpdating={isUpdating} pagination={pagination} />
 
-      {repositories.length === 0 && <RepositoryEmptyState />}
+      {!isUpdating && repositories.length === 0 && !nameSearch && <RepositoryEmptyState />}
       {!!deleteModalRepoId && (
         <DeleteRepositoryModal
           onClose={() => setDeleteModalRepoId(undefined)}
@@ -244,7 +241,7 @@ const RepositoryTable = () => {
             setAllSelected(false);
             refetch();
           }}
-          repositories={filteredData.filter(isRowSelected)}
+          repositories={repositories.filter(isRowSelected)}
         />
       )}
     </ListPageBody>

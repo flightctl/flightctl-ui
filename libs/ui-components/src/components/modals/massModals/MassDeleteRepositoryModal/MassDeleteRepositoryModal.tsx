@@ -53,7 +53,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
     const promises = repositories.map(async (r) => {
       const repositoryId = r.metadata.name || '';
       const resourceSyncs = await get<ResourceSyncList>(
-        commonQueries.getResourceSyncsByRepo(repositoryId, { limit: 1 }),
+        commonQueries.getResourceSyncsByRepo({ repositoryId, options: { limit: 1 } }),
       );
       rsCount[repositoryId] = getApiListCount(resourceSyncs);
     });
@@ -68,7 +68,7 @@ const MassDeleteRepositoryModal: React.FC<MassDeleteRepositoryModalProps> = ({
     setProgress(0);
     const promises = repositories.map(async (r) => {
       const repositoryId = r.metadata.name || '';
-      const resourceSyncs = await get<ResourceSyncList>(commonQueries.getResourceSyncsByRepo(repositoryId));
+      const resourceSyncs = await get<ResourceSyncList>(commonQueries.getResourceSyncsByRepo({ repositoryId }));
       const rsyncPromises = resourceSyncs.items.map((rsync) => remove(`resourcesyncs/${rsync.metadata.name}`));
       const rsyncResults = await Promise.allSettled(rsyncPromises);
       const rejectedResults = rsyncResults.filter(isPromiseRejected);
