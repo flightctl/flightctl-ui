@@ -1,9 +1,8 @@
 import { DeviceLogCategory, DeviceLogSearchParams } from './deviceLogs';
 
-// Maximum length for the final download filename (including extension). Typical per-name filesystem limits are 255.
+// Maximum length for the final download filename. Typical per-name filesystem limits are 255.
 const MAX_DOWNLOAD_FILENAME_LENGTH = 255;
 const INVALID_FILENAME_CHARS = /[<>:"/\\|?*\u0000-\u001F]/g;
-const LOG_EXTENSION = '.log';
 
 const sanitizeFilename = (value: string) =>
   value
@@ -14,7 +13,7 @@ const sanitizeFilename = (value: string) =>
     .replace(/^-+|-+$/g, '')
     .trim();
 
-const fileNameFits = (filename: string) => filename.length <= MAX_DOWNLOAD_FILENAME_LENGTH - LOG_EXTENSION.length;
+const fileNameFits = (filename: string) => filename.length <= MAX_DOWNLOAD_FILENAME_LENGTH;
 
 export const buildDownloadFilename = (prefix: string, params: DeviceLogSearchParams): string => {
   const commonParts: string[] = [prefix, params.category];
@@ -28,15 +27,16 @@ export const buildDownloadFilename = (prefix: string, params: DeviceLogSearchPar
   }
   allParts.push(sanitizeFilename(variablePart));
 
-  // Return the filename staying within the desired character limit (including the extension)
+  // Return the filename staying within the desired character limit
   const baseFilename = allParts.join('-');
   const withTimestamp = `${baseFilename}-${Date.now()}`;
   if (fileNameFits(withTimestamp)) {
-    return `${withTimestamp}${LOG_EXTENSION}`;
-  } else if (fileNameFits(baseFilename)) {
-    return `${baseFilename}${LOG_EXTENSION}`;
+    return withTimestamp;
   }
-  return `${commonParts.join('-')}${LOG_EXTENSION}`;
+  if (fileNameFits(baseFilename)) {
+    return baseFilename;
+  }
+  return commonParts.join('-');
 };
 
 export const formatDeviceLogsForExport = (logs: string[]): string => (logs.length > 0 ? `${logs.join('\n')}\n` : '');
