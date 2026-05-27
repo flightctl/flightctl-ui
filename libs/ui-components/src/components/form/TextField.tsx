@@ -7,10 +7,11 @@ export interface TextFieldProps extends Omit<TextInputProps, 'onChange'> {
   name: string;
   helperText?: React.ReactNode;
   onChangeCustom?: (value: string) => void;
+  showErrorMsg?: boolean;
 }
 
 const TextField = React.forwardRef(
-  ({ helperText, onChangeCustom, ...props }: TextFieldProps, ref: React.Ref<HTMLInputElement>) => {
+  ({ helperText, onChangeCustom, showErrorMsg = true, ...props }: TextFieldProps, ref: React.Ref<HTMLInputElement>) => {
     const [field, meta, { setValue, setTouched }] = useField({
       name: props.name,
     });
@@ -39,7 +40,7 @@ const TextField = React.forwardRef(
         />
 
         <DefaultHelperText helperText={helperText} />
-        <ErrorHelperText meta={meta} />
+        {showErrorMsg && <ErrorHelperText meta={meta} />}
       </FormGroup>
     );
   },

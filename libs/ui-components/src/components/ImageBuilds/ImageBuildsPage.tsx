@@ -29,9 +29,11 @@ import Table from '../Table/Table';
 import MassDeleteImageBuildModal from '../modals/massModals/MassDeleteImageBuildModal/MassDeleteImageBuildModal';
 import CancelImageBuildModal from './CancelImageBuildModal/CancelImageBuildModal';
 import DeleteImageBuildModal from './DeleteImageBuildModal/DeleteImageBuildModal';
-import { useImageBuilds, useImageBuildsBackendFilters } from './useImageBuilds';
+import { useImageBuildLatestPromotions, useImageBuilds, useImageBuildsBackendFilters } from './useImageBuilds';
 import ImageBuildRow from './ImageBuildRow';
 import { OciRegistriesContextProvider } from './OciRegistriesContext';
+import ImagePromotionModal from '../ImagePromotion/ImagePromotionModal';
+import { ImageBuildWithExports } from '../../types/extraTypes';
 
 const getColumns = (t: TFunction) => [
   {
@@ -44,7 +46,10 @@ const getColumns = (t: TFunction) => [
     name: t('Image output'),
   },
   {
-    name: t('Status'),
+    name: t('Build status'),
+  },
+  {
+    name: t('Promotion status'),
   },
   {
     name: t('Date'),
@@ -55,6 +60,9 @@ const imageBuildTablePermissions = [
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.CREATE },
   { kind: RESOURCE.IMAGE_BUILD_CANCEL, verb: VERB.CREATE },
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.DELETE },
+  { kind: RESOURCE.IMAGE_BUILD_NEW_VERSION, verb: VERB.CREATE },
+  { kind: RESOURCE.IMAGE_PROMOTION, verb: VERB.CREATE },
+  { kind: RESOURCE.IMAGE_PROMOTION, verb: VERB.LIST },
 ];
 
 const ImageBuildsEmptyState = ({ onCreateClick }: { onCreateClick?: VoidFunction }) => {
@@ -85,10 +93,18 @@ const ImageBuildTable = () => {
   const { onRowSelect, isAllSelected, hasSelectedRows, isRowSelected, setAllSelected } = useTableSelect();
 
   const { checkPermissions } = usePermissionsContext();
-  const [canCreate, canCancel, canDelete] = checkPermissions(imageBuildTablePermissions);
+  const [canCreate, canCancel, canDelete, canNewVersion, canPromote, canListPromotions] =
+    checkPermissions(imageBuildTablePermissions);
+
+  const buildNames = React.useMemo(
+    () => (canListPromotions ? imageBuilds.map((b) => b.metadata.name || '').filter(Boolean) : []),
+    [canListPromotions, imageBuilds],
+  );
+  const [latestPromotionsByBuild, refetchPromotions] = useImageBuildLatestPromotions(buildNames);
 
   const [imageBuildToDeleteId, setImageBuildToDeleteId] = React.useState<string>();
   const [imageBuildToCancelId, setImageBuildToCancelId] = React.useState<string>();
+  const [imageBuildtoCatalog, setImageBuildToCatalog] = React.useState<ImageBuildWithExports>();
   const [isMassDeleteModalOpen, setIsMassDeleteModalOpen] = React.useState(false);
 
   const handleCreateClick = React.useCallback(() => {
@@ -138,16 +154,20 @@ const ImageBuildTable = () => {
               key={name}
               imageBuild={imageBuild}
               rowIndex={rowIndex}
-              canCreate={canCreate}
               canDelete={canDelete}
               canCancel={canCancel}
+              canNewVersion={canNewVersion}
               onDeleteClick={() => {
                 setImageBuildToDeleteId(name);
               }}
               onCancelClick={() => setImageBuildToCancelId(name)}
+              onNewVersionClick={() => navigate({ route: ROUTE.IMAGE_BUILD_NEW_VERSION, postfix: name })}
               isRowSelected={() => isRowSelected(imageBuild)}
               onRowSelect={() => onRowSelect(imageBuild)}
+              onAddToCatalog={() => setImageBuildToCatalog(imageBuild)}
+              canAddToCatalog={canPromote}
               refetch={refetch}
+              latestPromotion={latestPromotionsByBuild[name]}
             />
           );
         })}
@@ -166,6 +186,17 @@ const ImageBuildTable = () => {
               refetch();
             }
           }}
+        />
+      )}
+      {imageBuildtoCatalog && (
+        <ImagePromotionModal
+          onClose={(updated) => {
+            setImageBuildToCatalog(undefined);
+            if (updated) {
+              refetchPromotions();
+            }
+          }}
+          imageBuild={imageBuildtoCatalog}
         />
       )}
       {imageBuildToDeleteId && (

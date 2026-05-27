@@ -356,7 +356,7 @@ export const getArtifactLabel = (t: TFunction, type: CatalogItemArtifactType, na
   let artifactType: CatalogItemArtifactType;
   switch (type) {
     case CatalogItemArtifactType.CatalogItemArtifactTypeQcow2:
-      artifactType = t('OpenShift Virtualization');
+      artifactType = t('QCOW2');
       break;
     case CatalogItemArtifactType.CatalogItemArtifactTypeIso:
       artifactType = t('Bare Metal');
@@ -382,6 +382,8 @@ export const getArtifactLabel = (t: TFunction, type: CatalogItemArtifactType, na
     case CatalogItemArtifactType.CatalogItemArtifactTypeContainer:
       artifactType = t('Cloud native');
       break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeQcow2DiskContainer:
+      artifactType = t('OpenShift Virtualization');
   }
 
   if (name) {

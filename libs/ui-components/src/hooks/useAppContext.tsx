@@ -40,7 +40,7 @@ export const appRoutes = {
   [ROUTE.IMAGE_BUILDS]: '/devicemanagement/imagebuilds',
   [ROUTE.IMAGE_BUILD_CREATE]: '/devicemanagement/imagebuilds/create',
   [ROUTE.IMAGE_BUILD_DETAILS]: '/devicemanagement/imagebuilds',
-  [ROUTE.IMAGE_BUILD_EDIT]: '/devicemanagement/imagebuilds/edit',
+  [ROUTE.IMAGE_BUILD_NEW_VERSION]: '/devicemanagement/imagebuilds/newversion',
   [ROUTE.CATALOG]: '/catalog',
   [ROUTE.CATALOG_ADD_ITEM]: '/catalog/create',
   [ROUTE.CATALOG_EDIT_ITEM]: '/catalog/edit',

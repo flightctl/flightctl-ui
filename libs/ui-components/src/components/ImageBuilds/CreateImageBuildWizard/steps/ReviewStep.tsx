@@ -1,11 +1,9 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
 import {
-  Alert,
   Card,
   CardBody,
   CardTitle,
-  Content,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -14,8 +12,6 @@ import {
   FlexItem,
   Icon,
   Label,
-  List,
-  ListItem,
   Stack,
   StackItem,
 } from '@patternfly/react-core';
@@ -24,13 +20,15 @@ import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circl
 
 import { BindingType } from '@flightctl/types/imagebuilder';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { getErrorMessage } from '../../../../utils/error';
 import { ImageBuildFormValues, ImageBuildWizardError } from '../types';
 import { getImageReference } from '../../../../utils/imageBuilds';
 import { getExportFormatLabel } from '../../../../utils/imageBuilds';
 import { CERTIFICATE_VALIDITY_IN_YEARS } from '../../../../constants';
 import { useOciRegistriesContext } from '../../OciRegistriesContext';
 import ImageUrl from '../../ImageUrl';
+import { ErrorAlert, SoftwareCatalogReviewCard } from '../../ReviewCommon';
+
+export { ErrorAlert };
 
 export const reviewStepId = 'review';
 
@@ -192,32 +190,10 @@ const ReviewStep = ({ error }: ReviewStepProps) => {
           </CardBody>
         </Card>
       </StackItem>
+      <SoftwareCatalogReviewCard />
       {!!error && (
         <StackItem>
-          {error.type === 'build' ? (
-            <Alert isInline variant="danger" title={t('Failed to create image build')}>
-              {getErrorMessage(error.error)}
-            </Alert>
-          ) : (
-            <Alert isInline variant="warning" title={t('Image build created, but some exports failed')}>
-              <Content>
-                {t(
-                  'The image build "{{buildName}}" was created successfully, however the following export(s) failed:',
-                  {
-                    buildName: error.buildName,
-                  },
-                )}
-              </Content>
-
-              <List isPlain>
-                {error.errors.map(({ format, error: exportError }, index) => (
-                  <ListItem key={index}>
-                    <strong>{getExportFormatLabel(t, format)}:</strong> {getErrorMessage(exportError)}
-                  </ListItem>
-                ))}
-              </List>
-            </Alert>
-          )}
+          <ErrorAlert error={error} />
         </StackItem>
       )}
     </Stack>

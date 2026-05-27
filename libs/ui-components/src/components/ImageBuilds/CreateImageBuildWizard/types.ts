@@ -5,8 +5,9 @@ import {
   ImageBuildUserConfiguration,
 } from '@flightctl/types/imagebuilder';
 import { ExportFormatType } from '@flightctl/types/imagebuilder';
+import { CatalogStepValues } from './steps/CatalogStep';
 
-export type ImageBuildFormValues = {
+export type ImageBuildFormValues = CatalogStepValues & {
   buildName: string;
   source: ImageBuildSource;
   destination: ImageBuildDestination;
@@ -25,4 +26,8 @@ export type ImageBuildWizardError =
       type: 'export';
       buildName: string;
       errors: Array<{ format: ExportFormatType; error: unknown }>;
+    }
+  | {
+      type: 'promotion';
+      error: unknown;
     };

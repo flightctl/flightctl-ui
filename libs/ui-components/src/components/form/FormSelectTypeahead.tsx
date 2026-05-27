@@ -14,7 +14,7 @@ import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 import './FormSelect.css';
 
-type SelectItem = { label: string; description?: string };
+export type SelectItem = { label: string; description?: string };
 
 type FormSelectProps = {
   name: string;

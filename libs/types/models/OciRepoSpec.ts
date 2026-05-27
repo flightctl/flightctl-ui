@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { BaseImageEntry } from './BaseImageEntry';
 import type { OciAuth } from './OciAuth';
 /**
  * OCI container registry specification.
@@ -32,6 +33,10 @@ export type OciRepoSpec = {
    * Skip remote server verification.
    */
   skipServerVerification?: boolean;
+  /**
+   * Curated list of trusted base images available in this registry. When present, the Image Builder source picker surfaces these entries as selectable options.
+   */
+  baseImages?: Array<BaseImageEntry>;
 };
 export namespace OciRepoSpec {
   /**

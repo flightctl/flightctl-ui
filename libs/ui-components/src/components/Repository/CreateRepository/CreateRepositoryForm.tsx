@@ -10,6 +10,8 @@ import {
   FormGroup,
   FormSection,
   Grid,
+  Label,
+  LabelGroup,
   Modal,
   ModalBody,
   ModalFooter,
@@ -18,9 +20,10 @@ import {
   SplitItem,
 } from '@patternfly/react-core';
 
-import { Formik, useFormikContext } from 'formik';
+import { FieldArray, Formik, useField, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import { Trans } from 'react-i18next';
+import { MinusCircleIcon, PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
@@ -51,6 +54,9 @@ import { DEMO_REPOSITORY_URL } from '../../../hooks/useAppLinks';
 import WithTooltip from '../../common/WithTooltip';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import ExpandableFormSection from '../../form/ExpandableFormSection';
+import EditableLabelControl from '../../common/EditableLabelControl';
+import ErrorHelperText from '../../form/FieldHelperText';
 
 import './CreateRepositoryForm.css';
 
@@ -299,6 +305,45 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
   );
 };
 
+const TagsField = ({
+  index,
+  onAdd,
+  onRemove,
+  onEdit,
+}: {
+  index: number;
+  onAdd: (tag: string) => void;
+  onRemove: (idx: number) => void;
+  onEdit: (idx: number, tag: string) => void;
+}) => {
+  const { t } = useTranslation();
+  const [{ value }, meta] = useField<string[] | undefined>(`ociConfig.baseImages.${index}.tags`);
+  return (
+    <>
+      <LabelGroup
+        numLabels={5}
+        isEditable
+        addLabelControl={<EditableLabelControl defaultLabel="tag" addButtonText={t('Add tag')} onAddLabel={onAdd} />}
+      >
+        {value?.map((tag, idx) => (
+          <Label
+            key={idx}
+            title={tag}
+            isEditable
+            onClose={() => onRemove(idx)}
+            onEditComplete={(_, newText) => {
+              onEdit(idx, newText);
+            }}
+          >
+            {tag}
+          </Label>
+        ))}
+      </LabelGroup>
+      <ErrorHelperText meta={meta} touchRequired={false} />
+    </>
+  );
+};
+
 export const RepositoryForm = ({
   isEdit,
   accessModeDisabledReason,
@@ -386,6 +431,81 @@ export const RepositoryForm = ({
               </Flex>
             </WithTooltip>
           </FormGroup>
+          <FieldArray name="ociConfig.baseImages">
+            {(arrayHelpers) => (
+              <>
+                <FormGroup label={t('Base images')}>
+                  {values.ociConfig?.baseImages?.map((baseImage, index) => (
+                    <Split hasGutter key={index}>
+                      <SplitItem isFilled>
+                        <ExpandableFormSection
+                          title={
+                            baseImage.displayName ||
+                            baseImage.imageName ||
+                            t('Base image {{ idx }}', { idx: index + 1 })
+                          }
+                          fieldName={`ociConfig.baseImages.${index}`}
+                        >
+                          <Grid hasGutter>
+                            <FormGroup label={t('Display name')}>
+                              <TextField
+                                name={`ociConfig.baseImages.${index}.displayName`}
+                                aria-label={t('Display name')}
+                              />
+                            </FormGroup>
+                            <FormGroup label={t('Image name')} isRequired>
+                              <TextField
+                                name={`ociConfig.baseImages.${index}.imageName`}
+                                aria-label={t('Artifact URI')}
+                                isRequired
+                              />
+                            </FormGroup>
+                            <FormGroup label={t('Tags')} isRequired>
+                              <FieldArray name={`ociConfig.baseImages.${index}.tags`}>
+                                {(arrayHelpers) => (
+                                  <TagsField
+                                    index={index}
+                                    onAdd={(tag) => arrayHelpers.push(tag)}
+                                    onEdit={(idx, tag) => arrayHelpers.replace(idx, tag)}
+                                    onRemove={(idx) => arrayHelpers.remove(idx)}
+                                  />
+                                )}
+                              </FieldArray>
+                            </FormGroup>
+                          </Grid>
+                        </ExpandableFormSection>
+                      </SplitItem>
+                      <SplitItem>
+                        <Button
+                          aria-label={t('Remove base image')}
+                          variant="link"
+                          icon={<MinusCircleIcon />}
+                          iconPosition="start"
+                          onClick={() => arrayHelpers.remove(index)}
+                        />
+                      </SplitItem>
+                    </Split>
+                  ))}
+                </FormGroup>
+                <FormGroup>
+                  <Button
+                    variant="link"
+                    icon={<PlusCircleIcon />}
+                    iconPosition="start"
+                    onClick={() =>
+                      arrayHelpers.push({
+                        displayName: '',
+                        imageName: '',
+                        tags: [],
+                      })
+                    }
+                  >
+                    {t('Add base image')}
+                  </Button>
+                </FormGroup>
+              </>
+            )}
+          </FieldArray>
         </FormSection>
       )}
       <CheckboxField name="useAdvancedConfig" label={t('Use advanced configurations')} body={<AdvancedSection />} />

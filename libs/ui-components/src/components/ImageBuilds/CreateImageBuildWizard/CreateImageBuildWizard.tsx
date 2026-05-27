@@ -13,7 +13,7 @@ import {
 } from '@patternfly/react-core';
 import { Formik, FormikErrors } from 'formik';
 
-import { ExportFormatType, ImageBuild, ImageBuildConditionReason } from '@flightctl/types/imagebuilder';
+import { ExportFormatType, ImageBuild } from '@flightctl/types/imagebuilder';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
@@ -32,12 +32,12 @@ import OutputImageStep, { isOutputImageStepValid, outputImageStepId } from './st
 import RegistrationStep, { isRegistrationStepValid, registrationStepId } from './steps/RegistrationStep';
 import CreateImageBuildWizardFooter from './CreateImageBuildWizardFooter';
 import { useFetch } from '../../../hooks/useFetch';
-import { useEditImageBuild } from './useEditImageBuild';
 import { OciRegistriesContextProvider, useOciRegistriesContext } from '../OciRegistriesContext';
-import { getImageBuildStatusReason } from '../../../utils/imageBuilds';
 import { isWizardStepDisabled } from '../../../utils/wizards';
+import CatalogStep, { catalogStepId, isCatalogStepValid } from './steps/CatalogStep';
+import { getImagePromotion } from '../NewVersionImageBuildWizard/utils';
 
-const orderedIds = [sourceImageStepId, outputImageStepId, registrationStepId, reviewStepId];
+const orderedIds = [sourceImageStepId, outputImageStepId, registrationStepId, catalogStepId, reviewStepId];
 
 const getValidStepIds = (formikErrors: FormikErrors<ImageBuildFormValues>): string[] => {
   const validStepIds: string[] = [];
@@ -50,6 +50,9 @@ const getValidStepIds = (formikErrors: FormikErrors<ImageBuildFormValues>): stri
   if (isRegistrationStepValid(formikErrors)) {
     validStepIds.push(registrationStepId);
   }
+  if (isCatalogStepValid(formikErrors)) {
+    validStepIds.push(catalogStepId);
+  }
   // Review step is always valid. We disable it if some of the previous steps are invalid
   if (validStepIds.length === orderedIds.length - 1) {
     validStepIds.push(reviewStepId);
@@ -57,32 +60,17 @@ const getValidStepIds = (formikErrors: FormikErrors<ImageBuildFormValues>): stri
   return validStepIds;
 };
 
+const promotionPermissions = [{ kind: RESOURCE.IMAGE_PROMOTION, verb: VERB.CREATE }];
+
 const CreateImageBuildWizard = () => {
   const { t } = useTranslation();
   const { post } = useFetch();
   const navigate = useNavigate();
   const [error, setError] = React.useState<ImageBuildWizardError>();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
-  const [imageBuildId, imageBuild, imageBuildLoading, editError] = useEditImageBuild();
-  const { ociRegistries, isLoading: registriesLoading, error: registriesError } = useOciRegistriesContext();
-
-  const isEdit = !!imageBuildId;
-  const buildReason = imageBuild ? getImageBuildStatusReason(imageBuild) : undefined;
-
-  const availableRepositoryIds = React.useMemo(
-    () => new Set(ociRegistries.map((r) => r.metadata?.name as string)),
-    [ociRegistries],
-  );
-
-  let title: string;
-  if (isEdit) {
-    title =
-      buildReason === ImageBuildConditionReason.ImageBuildConditionReasonFailed
-        ? t('Retry image build')
-        : t('Duplicate image build');
-  } else {
-    title = t('Build new image');
-  }
+  const { isLoading: registriesLoading, error: registriesError } = useOciRegistriesContext();
+  const { checkPermissions, loading: permissionsLoading } = usePermissionsContext();
+  const [canPromote] = checkPermissions(promotionPermissions);
 
   return (
     <>
@@ -91,32 +79,27 @@ const CreateImageBuildWizard = () => {
           <BreadcrumbItem>
             <Link to={ROUTE.IMAGE_BUILDS}>{t('Image builds')}</Link>
           </BreadcrumbItem>
-          {imageBuildId && (
-            <BreadcrumbItem>
-              <Link to={{ route: ROUTE.IMAGE_BUILD_DETAILS, postfix: imageBuildId }}>{imageBuildId}</Link>
-            </BreadcrumbItem>
-          )}
-          <BreadcrumbItem isActive>{title}</BreadcrumbItem>
+          <BreadcrumbItem isActive>{t('Build new image')}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
       <PageSection hasBodyWrapper={false}>
         <Title headingLevel="h1" size="3xl">
-          {title}
+          {t('Build new image')}
         </Title>
       </PageSection>
       <PageSection hasBodyWrapper={false} type="wizard">
         <ErrorBoundary>
-          {registriesLoading || imageBuildLoading ? (
+          {registriesLoading || permissionsLoading ? (
             <Bullseye>
               <Spinner />
             </Bullseye>
-          ) : registriesError || editError ? (
+          ) : registriesError ? (
             <Alert isInline variant="danger" title={t('An error occurred')}>
-              {getErrorMessage(registriesError || editError)}
+              {getErrorMessage(registriesError)}
             </Alert>
           ) : (
             <Formik<ImageBuildFormValues>
-              initialValues={getInitialValues(imageBuild, availableRepositoryIds)}
+              initialValues={{ ...getInitialValues(), promoteToCatalog: canPromote }}
               validationSchema={getValidationSchema(t)}
               validateOnMount
               onSubmit={async (values) => {
@@ -165,6 +148,17 @@ const CreateImageBuildWizard = () => {
                   }
                 }
 
+                if (values.promoteToCatalog) {
+                  const imagePromotion = getImagePromotion(values, buildName);
+
+                  try {
+                    await post('imagepromotions', imagePromotion);
+                  } catch (err) {
+                    setError({ type: 'promotion', error: err });
+                    return;
+                  }
+                }
+
                 navigate(ROUTE.IMAGE_BUILDS);
               }}
             >
@@ -199,6 +193,13 @@ const CreateImageBuildWizard = () => {
                         isDisabled={isWizardStepDisabled(registrationStepId, orderedIds, validStepIds)}
                       >
                         {currentStep?.id === registrationStepId && <RegistrationStep />}
+                      </WizardStep>
+                      <WizardStep
+                        name={t('Software Catalog')}
+                        id={catalogStepId}
+                        isDisabled={isWizardStepDisabled(catalogStepId, orderedIds, validStepIds)}
+                      >
+                        {currentStep?.id === catalogStepId && <CatalogStep canPromote={canPromote} />}
                       </WizardStep>
                       <WizardStep
                         name={t('Review')}

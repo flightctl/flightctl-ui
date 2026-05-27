@@ -9,7 +9,8 @@ import {
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  Gallery,
+  Grid,
+  GridItem,
   Icon,
   List,
   ListItem,
@@ -44,7 +45,7 @@ const GettingStartedCard = ({
   footer: React.ReactNode;
 }>) => {
   return (
-    <Card>
+    <Card isFullHeight>
       <CardHeader>
         <Stack hasGutter>
           <StackItem>
@@ -124,134 +125,142 @@ export const CatalogLandingPageContent = ({ permissions }: Pick<LandingPagePermi
   const navigate = useNavigate();
 
   return (
-    <Gallery hasGutter>
-      <GettingStartedCard
-        title={t('Build custom images')}
-        icon={<BuilderImageIcon />}
-        footer={
-          <WithTooltip
-            showTooltip={!canCreateImageBuild}
-            content={t("You don't have permissions to create image builds")}
-          >
-            <Button
-              variant="secondary"
-              icon={<ArrowRightIcon />}
-              iconPosition="end"
-              onClick={() => navigate(ROUTE.IMAGE_BUILD_CREATE)}
-              isAriaDisabled={!canCreateImageBuild}
-            >
-              {t('Start a build')}
-            </Button>
-          </WithTooltip>
-        }
-      >
-        <Stack hasGutter>
-          <StackItem>
-            {t('Build a deployment-ready image tailored to your needs, then test and share it with your team.')}
-          </StackItem>
-          <StackItem>
-            <List>
-              <ListItem>{t('Click "Start a build" and walk through the steps to build your own image.')}</ListItem>
-              <ListItem>{t('Review everything and kick off the build to generate your custom image.')}</ListItem>
-              <ListItem>
-                {t(
-                  "Once it's ready, test the image and promote it to the Software Catalog so everyone on your team can use it.",
-                )}
-              </ListItem>
-            </List>
-          </StackItem>
-        </Stack>
-      </GettingStartedCard>
-      <GettingStartedCard
-        title={t('Create a new catalog item')}
-        icon={<PlusCircleIcon />}
-        footer={
-          <WithTooltip
-            showTooltip={!canCreateCatalog || !canCreateCatalogItem}
-            content={t("You don't have permissions to create catalogs")}
-          >
-            <Button
-              variant="secondary"
-              icon={<ArrowRightIcon />}
-              iconPosition="end"
-              onClick={() => navigate(ROUTE.CATALOG_ADD_ITEM)}
-              isAriaDisabled={!canCreateCatalog || !canCreateCatalogItem}
-            >
-              {t('Create item')}
-            </Button>
-          </WithTooltip>
-        }
-      >
-        <Stack hasGutter>
-          <StackItem>
-            {t('Start from scratch and define a brand-new catalog item with the details and settings you need.')}
-          </StackItem>
-          <StackItem>
-            <List>
-              <ListItem>{t('Click "Create item" below to get started.')}</ListItem>
-              <ListItem>{t('Enter a name, description, version, and any other details for your item.')}</ListItem>
-              <ListItem>
-                {t('Choose your source and deployment settings, then publish it so your team can use it.')}
-              </ListItem>
-            </List>
-          </StackItem>
-        </Stack>
-      </GettingStartedCard>
-      <GettingStartedCard
-        title={t('Import catalog')}
-        icon={<ImportIcon />}
-        footer={
-          <WithTooltip
-            showTooltip={!canListRepo || !canCreateRS}
-            content={t("You don't have permissions to import catalogs")}
-          >
-            <Button
-              variant="secondary"
-              icon={<ArrowRightIcon />}
-              iconPosition="end"
-              onClick={() => navigate(ROUTE.CATALOG_IMPORT)}
-              isAriaDisabled={!canListRepo || !canCreateRS}
-            >
-              {t('Import')}
-            </Button>
-          </WithTooltip>
-        }
-      >
-        <Stack hasGutter>
-          <StackItem>
-            {t(
-              'Already have a catalog defined in an external repository? Sync it directly into your Software Catalog in just a few steps.',
-            )}
-          </StackItem>
-          <StackItem>
-            <List>
-              <ListItem>{t('Head over to Repositories and create a new repository.')}</ListItem>
-              <ListItem>{t('Point repository to where your catalog definition lives.')}</ListItem>
-              <ListItem>{t('Give it a few minutes — your catalog items will show up automatically.')}</ListItem>
-            </List>
-          </StackItem>
-        </Stack>
-      </GettingStartedCard>
-      {catalogDocsLink && (
+    <Grid hasGutter span={catalogDocsLink ? 3 : 4}>
+      <GridItem>
         <GettingStartedCard
-          title={t('Learn more')}
-          icon={<BookOpenIcon />}
-          footer={<LearnMoreLink link={catalogDocsLink} text={t('View documentation')} />}
+          title={t('Build custom images')}
+          icon={<BuilderImageIcon />}
+          footer={
+            <WithTooltip
+              showTooltip={!canCreateImageBuild}
+              content={t("You don't have permissions to create image builds")}
+            >
+              <Button
+                variant="secondary"
+                icon={<ArrowRightIcon />}
+                iconPosition="end"
+                onClick={() => navigate(ROUTE.IMAGE_BUILD_CREATE)}
+                isAriaDisabled={!canCreateImageBuild}
+              >
+                {t('Start a build')}
+              </Button>
+            </WithTooltip>
+          }
         >
           <Stack hasGutter>
             <StackItem>
-              {t('Explore documentation and resources to get the most out of the Software Catalog.')}
+              {t('Build a deployment-ready image tailored to your needs, then test and share it with your team.')}
             </StackItem>
             <StackItem>
               <List>
-                <ListItem>{t('Learn how to create and manage catalog items.')}</ListItem>
-                <ListItem>{t('Understand channels, versions, and deployment workflows.')}</ListItem>
+                <ListItem>{t('Click "Start a build" and walk through the steps to build your own image.')}</ListItem>
+                <ListItem>{t('Review everything and kick off the build to generate your custom image.')}</ListItem>
+                <ListItem>
+                  {t(
+                    "Once it's ready, test the image and promote it to the Software Catalog so everyone on your team can use it.",
+                  )}
+                </ListItem>
               </List>
             </StackItem>
           </Stack>
         </GettingStartedCard>
+      </GridItem>
+      <GridItem>
+        <GettingStartedCard
+          title={t('Create a new catalog item')}
+          icon={<PlusCircleIcon />}
+          footer={
+            <WithTooltip
+              showTooltip={!canCreateCatalog || !canCreateCatalogItem}
+              content={t("You don't have permissions to create catalogs")}
+            >
+              <Button
+                variant="secondary"
+                icon={<ArrowRightIcon />}
+                iconPosition="end"
+                onClick={() => navigate(ROUTE.CATALOG_ADD_ITEM)}
+                isAriaDisabled={!canCreateCatalog || !canCreateCatalogItem}
+              >
+                {t('Create item')}
+              </Button>
+            </WithTooltip>
+          }
+        >
+          <Stack hasGutter>
+            <StackItem>
+              {t('Start from scratch and define a brand-new catalog item with the details and settings you need.')}
+            </StackItem>
+            <StackItem>
+              <List>
+                <ListItem>{t('Click "Create item" below to get started.')}</ListItem>
+                <ListItem>{t('Enter a name, description, version, and any other details for your item.')}</ListItem>
+                <ListItem>
+                  {t('Choose your source and deployment settings, then publish it so your team can use it.')}
+                </ListItem>
+              </List>
+            </StackItem>
+          </Stack>
+        </GettingStartedCard>
+      </GridItem>
+      <GridItem>
+        <GettingStartedCard
+          title={t('Import catalog')}
+          icon={<ImportIcon />}
+          footer={
+            <WithTooltip
+              showTooltip={!canListRepo || !canCreateRS}
+              content={t("You don't have permissions to import catalogs")}
+            >
+              <Button
+                variant="secondary"
+                icon={<ArrowRightIcon />}
+                iconPosition="end"
+                onClick={() => navigate(ROUTE.CATALOG_IMPORT)}
+                isAriaDisabled={!canListRepo || !canCreateRS}
+              >
+                {t('Import')}
+              </Button>
+            </WithTooltip>
+          }
+        >
+          <Stack hasGutter>
+            <StackItem>
+              {t(
+                'Already have a catalog defined in an external repository? Sync it directly into your Software Catalog in just a few steps.',
+              )}
+            </StackItem>
+            <StackItem>
+              <List>
+                <ListItem>{t('Head over to Repositories and create a new repository.')}</ListItem>
+                <ListItem>{t('Point repository to where your catalog definition lives.')}</ListItem>
+                <ListItem>{t('Give it a few minutes — your catalog items will show up automatically.')}</ListItem>
+              </List>
+            </StackItem>
+          </Stack>
+        </GettingStartedCard>
+      </GridItem>
+      {catalogDocsLink && (
+        <GridItem>
+          <GettingStartedCard
+            title={t('Learn more')}
+            icon={<BookOpenIcon />}
+            footer={<LearnMoreLink link={catalogDocsLink} text={t('View documentation')} />}
+          >
+            <Stack hasGutter>
+              <StackItem>
+                {t('Explore documentation and resources to get the most out of the Software Catalog.')}
+              </StackItem>
+              <StackItem>
+                <List>
+                  <ListItem>{t('Learn how to create and manage catalog items.')}</ListItem>
+                  <ListItem>{t('Understand channels, versions, and deployment workflows.')}</ListItem>
+                </List>
+              </StackItem>
+            </Stack>
+          </GettingStartedCard>
+        </GridItem>
       )}
-    </Gallery>
+    </Grid>
   );
 };
 

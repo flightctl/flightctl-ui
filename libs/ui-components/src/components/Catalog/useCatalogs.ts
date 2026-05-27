@@ -107,12 +107,12 @@ export const useCatalogItems = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nameFilter, itemType]);
 
-  const [catalogItemsList, loading, error, refetch] = useFetchPeriodically<CatalogItemList>(
+  const [catalogItemsList, loading, error, refetch, isFetchUpdating] = useFetchPeriodically<CatalogItemList>(
     { endpoint: endpointDebounced },
     pagination.onPageFetched,
   );
 
-  const isUpdating = loading || isDebouncing;
+  const isUpdating = loading || isDebouncing || isFetchUpdating;
 
   return [catalogItemsList?.items || [], loading, error, pagination, isUpdating, refetch];
 };
