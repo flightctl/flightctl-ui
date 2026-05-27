@@ -37,19 +37,10 @@ export const getFullArtifactURI = (artifact: CatalogItemArtifact, version: Catal
     return undefined;
   }
 
-  try {
-    const url = new URL(versionRef);
-    if (url.host !== '') {
-      return versionRef;
-    }
-  } catch {}
-
-  try {
-    const url = new URL(artifact.uri);
-    if (url.host !== '' && url.protocol !== 'oci:') {
-      return `${artifact.uri}/${versionRef}`;
-    }
-  } catch {}
+  // tag, nor digest can contain '/'
+  if (versionRef.includes('/')) {
+    return versionRef;
+  }
 
   if (tagRegex.test(versionRef)) {
     return `${artifact.uri}:${versionRef}`;
