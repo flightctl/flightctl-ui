@@ -1572,6 +1572,7 @@
   "Enter a valid registry hostname (e.g., quay.io, registry.redhat.io, myregistry.com:5000)": "Enter a valid registry hostname (e.g., quay.io, registry.redhat.io, myregistry.com:5000)",
   "Registry hostname is required": "Registry hostname is required",
   "Password is required": "Password is required",
+  "Image name must be unique": "Image name must be unique",
   "At least one tag is required": "At least one tag is required",
   "Tags must be unique": "Tags must be unique",
   "Tag is required": "Tag is required",

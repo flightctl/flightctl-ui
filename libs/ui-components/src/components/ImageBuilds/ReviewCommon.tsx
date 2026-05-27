@@ -80,27 +80,27 @@ export const SoftwareCatalogReviewCard = () => {
                 <>
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t('Catalog item')}</DescriptionListTerm>
-                    <DescriptionListDescription>{values.new.name}</DescriptionListDescription>
+                    <DescriptionListDescription>{values.newItem.name}</DescriptionListDescription>
                   </DescriptionListGroup>
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t('Version')}</DescriptionListTerm>
-                    <DescriptionListDescription>{values.new.version}</DescriptionListDescription>
+                    <DescriptionListDescription>{values.newItem.version}</DescriptionListDescription>
                   </DescriptionListGroup>
                 </>
               ) : (
                 <>
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t('Catalog item')}</DescriptionListTerm>
-                    <DescriptionListDescription>{values.existing.name}</DescriptionListDescription>
+                    <DescriptionListDescription>{values.existingItem.name}</DescriptionListDescription>
                   </DescriptionListGroup>
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t('Version')}</DescriptionListTerm>
-                    <DescriptionListDescription>{values.existing.version}</DescriptionListDescription>
+                    <DescriptionListDescription>{values.existingItem.version}</DescriptionListDescription>
                   </DescriptionListGroup>
-                  {values.existing.replaces && (
+                  {values.existingItem.replaces && (
                     <DescriptionListGroup>
                       <DescriptionListTerm>{t('Replaces')}</DescriptionListTerm>
-                      <DescriptionListDescription>{values.existing.replaces}</DescriptionListDescription>
+                      <DescriptionListDescription>{values.existingItem.replaces}</DescriptionListDescription>
                     </DescriptionListGroup>
                   )}
                 </>

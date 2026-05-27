@@ -17,7 +17,7 @@ import {
   SshConfig,
 } from '@flightctl/types';
 
-import { RepositoryFormValues, ResourceSyncFormValue } from './types';
+import { BaseImage, RepositoryFormValues, ResourceSyncFormValue } from './types';
 import { getErrorMessage } from '../../../utils/error';
 import { appendJSONPatch } from '../../../utils/patch';
 import {
@@ -784,47 +784,53 @@ export const repositorySchema =
           }),
           caCrt: Yup.string().test('valid-certificate', validRepositoryCertificate(t)),
           skipServerVerification: Yup.boolean(),
-          baseImages: Yup.array().of(
-            Yup.object({
-              displayName: Yup.string(),
-              imageName: Yup.string()
-                .required(t('Image name is required'))
-                .test('oci-image-name', function (value) {
-                  if (!value) return true;
-                  const error = getImageNameValidationError(value, t);
-                  return error ? this.createError({ message: error }) : true;
-                }),
-              tags: Yup.array()
-                .min(1, t('At least one tag is required'))
-                .test('unique tags', t('Tags must be unique'), (tags) => {
-                  const uniqueTags = new Set(tags);
-                  return uniqueTags.size === tags?.length;
-                })
-                .test('invalid-tags', (tags: string[] | undefined, testContext) => {
-                  const tagsValidation = (tags || []).reduce(
-                    (acc, tag) => {
-                      if (!tag.trim()) {
-                        acc[tag] = t('Tag is required');
+          baseImages: Yup.lazy((baseImages: BaseImage[]) =>
+            Yup.array().of(
+              Yup.object({
+                displayName: Yup.string(),
+                imageName: Yup.string()
+                  .required(t('Image name is required'))
+                  .test('image-name-unique', function (value) {
+                    const hasDuplicate = baseImages.filter(({ imageName }) => imageName === value).length > 1;
+                    return hasDuplicate ? this.createError({ message: t('Image name must be unique') }) : true;
+                  })
+                  .test('oci-image-name', function (value) {
+                    if (!value) return true;
+                    const error = getImageNameValidationError(value, t);
+                    return error ? this.createError({ message: error }) : true;
+                  }),
+                tags: Yup.array()
+                  .min(1, t('At least one tag is required'))
+                  .test('unique tags', t('Tags must be unique'), (tags) => {
+                    const uniqueTags = new Set(tags);
+                    return uniqueTags.size === tags?.length;
+                  })
+                  .test('invalid-tags', (tags: string[] | undefined, testContext) => {
+                    const tagsValidation = (tags || []).reduce(
+                      (acc, tag) => {
+                        if (!tag.trim()) {
+                          acc[tag] = t('Tag is required');
+                          return acc;
+                        }
+                        const error = getImageTagValidationError(tag, t);
+                        if (error) {
+                          acc[tag] = error;
+                        }
                         return acc;
-                      }
-                      const error = getImageTagValidationError(tag, t);
-                      if (error) {
-                        acc[tag] = error;
-                      }
-                      return acc;
-                    },
-                    {} as Record<string, string>,
-                  );
+                      },
+                      {} as Record<string, string>,
+                    );
 
-                  return Object.keys(tagsValidation).length > 0
-                    ? testContext.createError({
-                        message: t('The following tags are not valid: {{invalidTags}}', {
-                          invalidTags: `${Object.keys(tagsValidation).join(', ')}`,
-                        }),
-                      })
-                    : true;
-                }),
-            }),
+                    return Object.keys(tagsValidation).length > 0
+                      ? testContext.createError({
+                          message: t('The following tags are not valid: {{invalidTags}}', {
+                            invalidTags: `${Object.keys(tagsValidation).join(', ')}`,
+                          }),
+                        })
+                      : true;
+                  }),
+              }),
+            ),
           ),
         }),
       });

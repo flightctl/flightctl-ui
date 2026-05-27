@@ -15,7 +15,7 @@ export type CatalogStepValues = ImagePromotionFormValues & {
 export const catalogStepId = 'catalog';
 
 export const isCatalogStepValid = (errors: FormikErrors<CatalogStepValues>) => {
-  return !errors.name && !errors.catalog && !errors.new && !errors.existing;
+  return !errors.name && !errors.catalog && !errors.newItem && !errors.existingItem;
 };
 const CatalogStep = ({ canPromote }: { canPromote: boolean }) => {
   const { t } = useTranslation();

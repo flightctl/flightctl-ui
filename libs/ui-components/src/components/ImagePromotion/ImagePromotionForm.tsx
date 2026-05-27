@@ -24,7 +24,7 @@ const NewItemForm = ({ isDisabled }: { isDisabled?: boolean }) => {
   return (
     <>
       <NameField
-        name="new.name"
+        name="newItem.name"
         aria-label={t('Catalog item name')}
         isRequired
         isDisabled={isDisabled}
@@ -32,14 +32,14 @@ const NewItemForm = ({ isDisabled }: { isDisabled?: boolean }) => {
         validations={getDnsSubdomainValidations(t)}
       />
       <FormGroup label={t('Display name')}>
-        <TextField name="new.displayName" isDisabled={isDisabled} />
+        <TextField name="newItem.displayName" isDisabled={isDisabled} />
       </FormGroup>
       <FormGroup label={t('Version')} isRequired>
-        <TextField name="new.version" isDisabled={isDisabled} />
+        <TextField name="newItem.version" isDisabled={isDisabled} />
       </FormGroup>
       <FormGroup label={t('Readme')}>
         <TextAreaField
-          name="new.readme"
+          name="newItem.readme"
           isDisabled={isDisabled}
           helperText={t('Markdown documentation for this catalog item')}
         />
@@ -66,15 +66,15 @@ const ExistingItemForm = ({ catalogItems, isDisabled }: { catalogItems: CatalogI
   return (
     <>
       <FormGroup label={t('Catalog item')} isRequired>
-        <FormSelect name="existing.name" items={selectCatalogItems} isDisabled={isDisabled} />
+        <FormSelect name="existingItem.name" items={selectCatalogItems} isDisabled={isDisabled} />
       </FormGroup>
       <FormGroup label={t('Version')} isRequired>
-        <TextField name="existing.version" isDisabled={isDisabled} />
+        <TextField name="existingItem.version" isDisabled={isDisabled} />
       </FormGroup>
       <FormSection title={t('Updates')}>
         <FormGroup label={t('Replaces')}>
           <TextField
-            name="existing.replaces"
+            name="existingItem.replaces"
             isDisabled={isDisabled}
             placeholder="1.0.0"
             helperText={t('Single version this one replaces, defining the primary upgrade edge')}
@@ -82,7 +82,7 @@ const ExistingItemForm = ({ catalogItems, isDisabled }: { catalogItems: CatalogI
         </FormGroup>
         <FormGroup label={t('Skips')}>
           <TextField
-            name="existing.skips"
+            name="existingItem.skips"
             isDisabled={isDisabled}
             placeholder="1.0.1, 1.0.2"
             helperText={t('Comma-separated versions that can upgrade directly to this one')}
@@ -90,7 +90,7 @@ const ExistingItemForm = ({ catalogItems, isDisabled }: { catalogItems: CatalogI
         </FormGroup>
         <FormGroup label={t('Skip range')}>
           <TextField
-            name="existing.skipRange"
+            name="existingItem.skipRange"
             isDisabled={isDisabled}
             placeholder=">=1.0.0 <1.5.0"
             helperText={t('Semver range of versions that can upgrade directly to this one')}
@@ -99,7 +99,7 @@ const ExistingItemForm = ({ catalogItems, isDisabled }: { catalogItems: CatalogI
       </FormSection>
       <FormGroup label={t('Readme')}>
         <TextAreaField
-          name="existing.readme"
+          name="existingItem.readme"
           isDisabled={isDisabled}
           helperText={t('Markdown documentation for this version')}
         />
