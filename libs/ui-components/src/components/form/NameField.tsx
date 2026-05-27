@@ -28,7 +28,7 @@ const NameField = ({ name, validations, resourceType, ...rest }: NameFieldProps)
     });
   };
 
-  const validateExistingName = async (value: string) => {
+  const validateExistingName = async (resourceType: string, value: string) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -51,8 +51,8 @@ const NameField = ({ name, validations, resourceType, ...rest }: NameFieldProps)
 
   React.useEffect(() => {
     currentErrorRef.current = undefined;
-    validate(value);
-  }, [value, validate]);
+    validate(resourceType, value);
+  }, [value, validate, resourceType]);
 
   React.useEffect(() => {
     if (!error && currentErrorRef.current) {
