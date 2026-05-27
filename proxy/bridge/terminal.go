@@ -131,7 +131,7 @@ func checkOrigin(r *http.Request) bool {
 	baseURL, err := url.Parse(config.BaseUiUrl)
 	if err != nil {
 		log.WithError(err).Debugf("WebSocket origin check: failed to parse BaseUiUrl")
-	} else if originMatchesConfiguredBaseUI(originURL, baseURL) {
+	} else if clientorigin.FromURL(originURL) == clientorigin.FromURL(baseURL) {
 		return true
 	}
 
@@ -149,10 +149,6 @@ func checkOrigin(r *http.Request) bool {
 		origin, r.Host, config.BaseUiUrl, effectiveOrigin, xfh,
 	)
 	return false
-}
-
-func originMatchesConfiguredBaseUI(originURL, baseURL *url.URL) bool {
-	return clientorigin.FromURL(originURL) == clientorigin.FromURL(baseURL)
 }
 
 // isOpenShiftConsolePluginProxyOriginAllowed permits the console WebSocket backend hop only when
