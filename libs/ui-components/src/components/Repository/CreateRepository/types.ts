@@ -8,6 +8,12 @@ export type ResourceSyncFormValue = {
   exists?: boolean;
 };
 
+export type BaseImage = {
+  displayName?: string;
+  imageName: string;
+  tags: string[];
+};
+
 export type RepositoryFormValues = {
   exists: boolean;
   name: string;
@@ -49,11 +55,7 @@ export type RepositoryFormValues = {
       password?: string;
     };
     skipServerVerification?: boolean;
-    baseImages?: {
-      displayName?: string;
-      imageName: string;
-      tags: string[];
-    }[];
+    baseImages?: BaseImage[];
   };
   canUseResourceSyncs: boolean;
   useResourceSyncs: boolean;

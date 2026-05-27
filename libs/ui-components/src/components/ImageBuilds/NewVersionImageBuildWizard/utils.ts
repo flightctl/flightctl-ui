@@ -30,23 +30,23 @@ export const getImagePromotion = (values: ImagePromotionFormValues, buildName: s
   let promotionTarget: NewCatalogItemTarget | ExistingCatalogItemTarget;
   if (values.type === 'new') {
     promotionTarget = {
-      catalogItemName: values.new.name,
+      catalogItemName: values.newItem.name,
       catalogName: values.catalog,
       type: NewCatalogItemTarget.type.NEW_CATALOG_ITEM,
-      version: values.new.version,
-      readme: values.new.readme,
+      version: values.newItem.version,
+      readme: values.newItem.readme,
     } as NewCatalogItemTarget;
   } else {
     promotionTarget = {
       type: ExistingCatalogItemTarget.type.EXISTING_CATALOG_ITEM,
-      catalogItemName: values.existing.name,
+      catalogItemName: values.existingItem.name,
       catalogName: values.catalog,
-      version: values.existing.version,
-      readme: values.existing.readme,
-      replaces: values.existing.replaces?.trim() || undefined,
-      skipRange: values.existing.skipRange?.trim() || undefined,
-      skips: values.existing.skips
-        ? values.existing.skips
+      version: values.existingItem.version,
+      readme: values.existingItem.readme,
+      replaces: values.existingItem.replaces?.trim() || undefined,
+      skipRange: values.existingItem.skipRange?.trim() || undefined,
+      skips: values.existingItem.skips
+        ? values.existingItem.skips
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean)
@@ -99,14 +99,14 @@ const getLatestTestingVersion = (catalogItem: CatalogItem): string | undefined =
   return testingVersions.sort((a, b) => semver.rcompare(a.version, b.version))[0].version;
 };
 
-export const getCatalogInitialValues = (catalogItem: CatalogItem | undefined) => {
+export const getCatalogInitialValues = (catalogItem: CatalogItem | undefined): ImagePromotionFormValues => {
   if (catalogItem) {
     const latestTestingVersion = getLatestTestingVersion(catalogItem);
     return {
       ...defaultInitialValues,
       catalog: catalogItem.metadata.catalog,
       type: 'existing' as const,
-      existing: {
+      existingItem: {
         name: catalogItem.metadata.name || '',
         version: latestTestingVersion ? bumpPatchVersion(latestTestingVersion) : '',
         replaces: latestTestingVersion || '',
@@ -168,7 +168,7 @@ export const getValidationSchema = (t: TFunction) =>
       then: () => Yup.string().required(t('Catalog is required')),
       otherwise: () => Yup.string(),
     }),
-    new: Yup.object().when(['promoteToCatalog', 'type'], ([promoteToCatalog, type]) => {
+    newItem: Yup.object().when(['promoteToCatalog', 'type'], ([promoteToCatalog, type]) => {
       if (promoteToCatalog && type === 'new') {
         return Yup.object().shape({
           name: validItemName(t),
@@ -179,7 +179,7 @@ export const getValidationSchema = (t: TFunction) =>
       }
       return Yup.object();
     }),
-    existing: Yup.object().when(['promoteToCatalog', 'type'], ([promoteToCatalog, type]) => {
+    existingItem: Yup.object().when(['promoteToCatalog', 'type'], ([promoteToCatalog, type]) => {
       if (promoteToCatalog && type === 'existing') {
         return Yup.object().shape({
           name: Yup.string().required(t('Catalog item is required')),
