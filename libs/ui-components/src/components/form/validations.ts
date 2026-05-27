@@ -70,7 +70,7 @@ const DURATION_REGEXP = /^\d+[smh]$/;
 const absolutePathRegex = /^\/.*$/;
 
 // Accepts only relative paths. Rejects paths that start with "/", have multiple "/", or use dots (./file, ../parent/file), etc
-const relativePathRegex = /^(?!\.\.\/|\.\.\$|\.\/)(\.\/)*[\w.-]+(?:\/[\w.-]+)*\/?$/;
+export const relativePathRegex = /^(?!\.\.\/|\.\.\$|\.\/)(\.\/)*[\w.-]+(?:\/[\w.-]+)*\/?$/;
 
 const HELM_VALUES_FILE_EXT_REGEXP = /\.(yaml|yml)$/i;
 
