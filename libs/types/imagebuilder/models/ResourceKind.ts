@@ -8,4 +8,5 @@
 export enum ResourceKind {
   IMAGE_BUILD = 'ImageBuild',
   IMAGE_EXPORT = 'ImageExport',
+  IMAGE_PROMOTION = 'ImagePromotion',
 }

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { FormGroup, FormSection } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 
-import { RepoSpecType } from '@flightctl/types';
+import { OciRepoSpec, RepoSpecType } from '@flightctl/types';
 import { ImageBuildFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
@@ -11,10 +11,10 @@ import TextField from '../../../form/TextField';
 import RepositorySelect from '../../../form/RepositorySelect';
 import { usePermissionsContext } from '../../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../../types/rbac';
-import { getImageReference } from '../../../../utils/imageBuilds';
 import ImageUrlCard from '../../ImageUrlCard';
 import { useOciRegistriesContext } from '../../OciRegistriesContext';
 import { getBuildNameValidations } from '../../../form/validations';
+import FormSelectTypeahead, { SelectItem } from '../../../form/FormSelectTypeahead';
 
 export const sourceImageStepId = 'source-image';
 
@@ -36,10 +36,10 @@ const SourceImageStep = () => {
   const [canCreateRepo] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.CREATE }]);
   const { ociRegistries, refetch } = useOciRegistriesContext();
 
-  const imageReference = React.useMemo(() => {
-    return getImageReference(ociRegistries, values.source);
-  }, [ociRegistries, values.source]);
+  const ociRepoSpec = ociRegistries.find((reg) => reg.metadata.name === values.source.repository)?.spec as OciRepoSpec;
 
+  const baseImages = ociRepoSpec?.baseImages || [];
+  const imageTags = baseImages.find((i) => i.imageName === values.source.imageName)?.tags || [];
   return (
     <FlightCtlForm>
       <FormSection>
@@ -60,21 +60,51 @@ const SourceImageStep = () => {
           isRequired
         />
         <FormGroup label={t('Image name')} fieldId="image-name" isRequired>
-          <TextField
-            name="source.imageName"
-            aria-label={t('Image name')}
-            helperText={t('The image name from the registry. For example: rhel9/rhel-bootc')}
-          />
+          {baseImages.length ? (
+            <FormSelectTypeahead
+              name="source.imageName"
+              items={baseImages.reduce(
+                (acc, curr) => {
+                  acc[curr.imageName] = {
+                    label: curr.displayName || curr.imageName,
+                    description: curr.displayName ? curr.imageName : undefined,
+                  };
+                  return acc;
+                },
+                {} as Record<string, SelectItem>,
+              )}
+              helperText={t('The image name from the registry. For example: rhel9/rhel-bootc')}
+              isValidTypedItem={() => true}
+            />
+          ) : (
+            <TextField
+              name="source.imageName"
+              aria-label={t('Image name')}
+              helperText={t('The image name from the registry. For example: rhel9/rhel-bootc')}
+            />
+          )}
         </FormGroup>
         <FormGroup label={t('Image tag')} fieldId="image-tag" isRequired>
-          <TextField
-            name="source.imageTag"
-            aria-label={t('Image tag')}
-            helperText={t('Specify the version (e.g., latest or 9.6)')}
-          />
+          {imageTags.length ? (
+            <FormSelectTypeahead
+              name="source.imageTag"
+              items={imageTags.reduce((acc, curr) => {
+                acc[curr] = curr;
+                return acc;
+              }, {})}
+              isValidTypedItem={() => true}
+              helperText={t('Specify the version (e.g., latest or 9.6)')}
+            />
+          ) : (
+            <TextField
+              name="source.imageTag"
+              aria-label={t('Image tag')}
+              helperText={t('Specify the version (e.g., latest or 9.6)')}
+            />
+          )}
         </FormGroup>
         <FormSection>
-          <ImageUrlCard imageReference={imageReference} />
+          <ImageUrlCard {...values.source} validateAccessibility />
         </FormSection>
       </FormSection>
     </FlightCtlForm>

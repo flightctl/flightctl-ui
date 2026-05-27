@@ -66,26 +66,24 @@ type CatalogEmptyStateProps = {
 const CatalogEmptyState = ({ hasFilters, showCatalogMgmt, isUpdating }: CatalogEmptyStateProps) => {
   const { t } = useTranslation();
 
-  const noResults = hasFilters || isUpdating;
+  if (isUpdating) {
+    return <ResourceListEmptyState icon={SearchIcon} titleText={t('Loading catalog items')} />;
+  } else if (hasFilters) {
+    return (
+      <ResourceListEmptyState icon={SearchIcon} titleText={t('No results found')}>
+        <EmptyStateBody>
+          {t('No catalog items match the selected filters or search. Try adjusting the category or search.')}
+        </EmptyStateBody>
+      </ResourceListEmptyState>
+    );
+  }
 
   return (
-    <ResourceListEmptyState icon={SearchIcon} titleText={noResults ? t('No results found') : t('No catalog items yet')}>
+    <ResourceListEmptyState icon={SearchIcon} titleText={t('No catalog items yet')}>
       <EmptyStateBody>
-        <Stack>
-          {noResults ? (
-            <StackItem>
-              {t('No catalog items match the selected filters or search. Try adjusting the category or search.')}
-            </StackItem>
-          ) : (
-            <>
-              <StackItem>
-                {t('Catalog items are applications and system images you can deploy to your devices.')}
-              </StackItem>
-            </>
-          )}
-        </Stack>
+        {t('Catalog items are applications and system images you can deploy to your devices.')}
       </EmptyStateBody>
-      {!noResults && !isUpdating && showCatalogMgmt && (
+      {showCatalogMgmt && (
         <EmptyStateFooter>
           <EmptyStateActions>
             <CreateCatalogItemBtn />
@@ -212,7 +210,7 @@ export const CatalogPageContent = ({
       )
     : undefined;
 
-  const filterIsEmpty = catalogFilter.itemType.length === 0;
+  const filterIsEmpty = catalogFilter.itemType.length === 0 && !catalogFilter.nameFilter.trim();
 
   return (
     <>
@@ -224,7 +222,12 @@ export const CatalogPageContent = ({
             isUpdating={isUpdating}
             showCatalogMgmt={!!showCatalogMgmt}
           />
-          {!catalogList?.items.length ? (
+          {!catalogList?.items.length ||
+          (catalogList.items.length === 1 &&
+            catalogList.items[0].metadata.name === 'default' &&
+            !catalogItems.length &&
+            filterIsEmpty &&
+            !isUpdating) ? (
             <PageSection hasBodyWrapper={false} type="wizard">
               <div className="fctl-catalog-page">
                 <CatalogLandingPage />
@@ -341,7 +344,7 @@ export const CatalogPageContent = ({
                 <SplitItem isFilled className="fctl-catalog-page">
                   {!isLoading && catalogItems.length === 0 ? (
                     <CatalogEmptyState
-                      hasFilters={!filterIsEmpty || !!catalogFilter.nameFilter}
+                      hasFilters={!filterIsEmpty}
                       showCatalogMgmt={!!showCatalogMgmt}
                       isUpdating={isUpdating}
                     />
