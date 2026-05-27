@@ -131,7 +131,7 @@ const ImagePromotionsCard = ({
   const { error, isLoading, isUpdating, pagination, imagePromotions, refetchPromotions } = useImagePromotionsContext();
 
   const [promotionToDeleteId, setPromotionToDeleteId] = React.useState<string>();
-  const [promotionToEdit, setPromotionToEdit] = React.useState<ImagePromotion>();
+  const [promotionToEditId, setPromotionToEditId] = React.useState<string>();
 
   let content: React.ReactNode;
   if (error) {
@@ -153,8 +153,8 @@ const ImagePromotionsCard = ({
               <ImagePromotionRow
                 key={getResourceId(promotion)}
                 imagePromotion={promotion}
-                onEditClick={() => setPromotionToEdit(promotion)}
-                onDeleteClick={() => setPromotionToDeleteId(promotion.metadata.name || '')}
+                onEditClick={() => setPromotionToEditId(promotion.metadata.name)}
+                onDeleteClick={() => setPromotionToDeleteId(promotion.metadata.name)}
                 canEditPromotions={canEditPromotions}
                 canDeletePromotions={canDeletePromotions}
               />
@@ -166,13 +166,16 @@ const ImagePromotionsCard = ({
     );
   }
 
+  const promotionToDelete = imagePromotions.find((p) => p.metadata.name === promotionToDeleteId);
+  const promotionToEdit = imagePromotions.find((p) => p.metadata.name === promotionToEditId);
+
   return (
     <DetailsPageCard>
       <CardTitle>{t('Image promotions')}</CardTitle>
       <CardBody>{content}</CardBody>
-      {promotionToDeleteId && (
+      {promotionToDelete && (
         <DeleteImagePromotionModal
-          promotionId={promotionToDeleteId}
+          promotion={promotionToDelete}
           onClose={(hasDeleted?: boolean) => {
             if (hasDeleted) {
               refetchPromotions();
@@ -186,7 +189,7 @@ const ImagePromotionsCard = ({
           imageBuild={imageBuild}
           imagePromotion={promotionToEdit}
           onClose={(updated) => {
-            setPromotionToEdit(undefined);
+            setPromotionToEditId(undefined);
             if (updated) {
               refetchPromotions();
             }

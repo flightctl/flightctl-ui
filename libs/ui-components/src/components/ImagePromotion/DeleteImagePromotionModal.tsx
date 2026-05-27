@@ -5,12 +5,13 @@ import { Alert, Button, Modal, ModalBody, ModalFooter, ModalHeader, Stack, Stack
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
 import { getErrorMessage } from '../../utils/error';
+import { ImagePromotion } from '@flightctl/types/imagebuilder';
 
 const DeleteImagePromotionModal = ({
-  promotionId,
+  promotion,
   onClose,
 }: {
-  promotionId: string;
+  promotion: ImagePromotion;
   onClose: (hasDeleted?: boolean) => void;
 }) => {
   const { t } = useTranslation();
@@ -26,9 +27,10 @@ const DeleteImagePromotionModal = ({
         <Stack hasGutter>
           <StackItem>
             <Trans t={t}>
-              <strong>{promotionId}</strong> will be deleted permanently.
+              <strong>{promotion.metadata.name}</strong> will be deleted permanently.
             </Trans>
           </StackItem>
+          {promotion.status?.publishedAt && <StackItem>{t('The existing catalog item will be unaffected.')}</StackItem>}
           <StackItem>{t('Are you sure you want to delete?')}</StackItem>
           {!!error && (
             <StackItem>
@@ -49,7 +51,7 @@ const DeleteImagePromotionModal = ({
             setError(undefined);
             setIsDeleting(true);
             try {
-              await remove(`imagepromotions/${promotionId}`);
+              await remove(`imagepromotions/${promotion.metadata.name}`);
               onClose(true);
             } catch (err) {
               setError(err);
