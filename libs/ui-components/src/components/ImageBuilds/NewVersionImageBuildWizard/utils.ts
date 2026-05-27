@@ -1,5 +1,10 @@
 import { ApiVersion, CatalogItem } from '@flightctl/types/alpha';
-import { ExistingCatalogItemTarget, ImagePromotion, NewCatalogItemTarget } from '@flightctl/types/imagebuilder';
+import {
+  ExistingCatalogItemTarget,
+  ImagePromotion,
+  NewCatalogItemTarget,
+  ResourceKind,
+} from '@flightctl/types/imagebuilder';
 import semver from 'semver';
 import { TFunction } from 'i18next';
 import * as Yup from 'yup';
@@ -51,7 +56,7 @@ export const getImagePromotion = (values: ImagePromotionFormValues, buildName: s
 
   const newImagePromotion: ImagePromotion = {
     apiVersion: ApiVersion.ApiVersionV1alpha1,
-    kind: 'ImagePromotion',
+    kind: ResourceKind.IMAGE_PROMOTION,
     metadata: {
       name: values.name,
     },
@@ -148,7 +153,7 @@ export const getValidationSchema = (t: TFunction) =>
       const error = getImageTagValidationError(value, t);
       return error ? this.createError({ message: error }) : true;
     }),
-    destinationImageTag: Yup.string().test('oci-image-tag', function (value) {
+    destinationImageTag: Yup.string().test('oci-dst-image-tag', function (value) {
       if (!value) return true;
       const error = getImageTagValidationError(value, t);
       return error ? this.createError({ message: error }) : true;

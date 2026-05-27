@@ -20,12 +20,13 @@ const ImageUrlCard = ({
   const { t } = useTranslation();
   const { ociRegistries } = useOciRegistriesContext();
 
-  const imageReference =
-    repository && imageName && imageTag
-      ? getImageReference(ociRegistries, { repository, imageName, imageTag })
-      : undefined;
+  const hasRefFields = repository && imageName && imageTag;
 
-  if (imageReference && repository && imageName && imageTag) {
+  const imageReference = hasRefFields
+    ? getImageReference(ociRegistries, { repository, imageName, imageTag })
+    : undefined;
+
+  if (imageReference && hasRefFields) {
     return (
       <Stack hasGutter>
         <StackItem>

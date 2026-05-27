@@ -51,6 +51,7 @@ import { useImageBuild } from '../useImageBuilds';
 import { getImageExportResources } from '../CreateImageBuildWizard/utils';
 import { isPromiseRejected } from '../../../types/typeUtils';
 import { ImageBuildWizardError } from '../CreateImageBuildWizard/types';
+import { isWizardStepDisabled } from '../../../utils/wizards';
 
 const orderedIds = [newVersionStepId, catalogStepId, reviewStepId];
 
@@ -66,13 +67,6 @@ const getValidStepIds = (formikErrors: FormikErrors<NewVersionWizardFormValues>)
     validStepIds.push(reviewStepId);
   }
   return validStepIds;
-};
-
-const isDisabledStep = (stepId: string, validStepIds: string[]) => {
-  const stepIdx = orderedIds.findIndex((stepOrderId) => stepOrderId === stepId);
-  return orderedIds.some((orderedId, orderedStepIdx) => {
-    return orderedStepIdx < stepIdx && !validStepIds.includes(orderedId);
-  });
 };
 
 type NewVersionImageBuildWizardInnerProps = {
@@ -198,11 +192,15 @@ const NewVersionImageBuildWizardInner = ({
               <WizardStep
                 name={t('Software Catalog')}
                 id={catalogStepId}
-                isDisabled={isDisabledStep(catalogStepId, validStepIds)}
+                isDisabled={isWizardStepDisabled(catalogStepId, orderedIds, validStepIds)}
               >
                 {currentStep?.id === catalogStepId && <CatalogStep canPromote={canPromote} />}
               </WizardStep>
-              <WizardStep name={t('Review')} id={reviewStepId} isDisabled={isDisabledStep(reviewStepId, validStepIds)}>
+              <WizardStep
+                name={t('Review')}
+                id={reviewStepId}
+                isDisabled={isWizardStepDisabled(reviewStepId, orderedIds, validStepIds)}
+              >
                 {currentStep?.id === reviewStepId && <ReviewStep imageBuild={imageBuild} error={error} />}
               </WizardStep>
             </Wizard>

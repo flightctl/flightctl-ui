@@ -8,6 +8,7 @@ import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
 import { PAGE_SIZE } from '../../constants';
 import { toImageBuildWithExports } from './CreateImageBuildWizard/utils';
+import { getLatestPromotion } from './NewVersionImageBuildWizard/utils';
 
 export enum ImageBuildsSearchParams {
   Name = 'name',
@@ -117,12 +118,6 @@ const getImageBuildPromotionsEndpoint = (buildNames: string[]): string => {
   return `imagepromotions?${params.toString()}`;
 };
 
-const getLatestPromotion = (a: ImagePromotion, b: ImagePromotion): ImagePromotion => {
-  const tA = a.metadata.creationTimestamp ?? '';
-  const tB = b.metadata.creationTimestamp ?? '';
-  return tA >= tB ? a : b;
-};
-
 export const useImageBuildLatestPromotions = (buildNames: string[]): [Record<string, ImagePromotion>, VoidFunction] => {
   const endpoint = getImageBuildPromotionsEndpoint(buildNames);
   const [promotionsList, , , refetch] = useFetchPeriodically<ImagePromotionList>({ endpoint });
@@ -134,7 +129,7 @@ export const useImageBuildLatestPromotions = (buildNames: string[]): [Record<str
     return [
       promotionsList.items.reduce<Record<string, ImagePromotion>>((acc, promotion) => {
         const buildRef = promotion.spec.source.imageBuildRef;
-        acc[buildRef] = acc[buildRef] ? getLatestPromotion(acc[buildRef], promotion) : promotion;
+        acc[buildRef] = acc[buildRef] ? (getLatestPromotion([acc[buildRef], promotion]) as ImagePromotion) : promotion;
         return acc;
       }, {}),
       refetch,
