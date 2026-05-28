@@ -37,6 +37,13 @@ const FILTER_DEBOUNCE_MS = 1000;
 
 const severitySelectionKey = (severities: Vulnerability.severity[]): string => [...severities].sort().join('\0');
 
+// The cveId must not contain spaces or other special characters, otherwise API fails with error 400.
+// Additionally, we make the search case-insensitive, as cveIds are always in the form "CVE-<YEAR>-<NUMBER>".
+const toApiSearchCveId = (search: string): string => {
+  const normalized = search.replace(/%/g, '').replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
+  return normalized.length ? normalized.toUpperCase() : '';
+};
+
 type VulnerabilitiesListEndpointArgs = {
   endpoint: string;
   nextContinue: string;
@@ -49,11 +56,11 @@ type VulnerabilitiesListEndpointArgs = {
 const getVulnerabilityListFieldSelector = (search: string, severities: Vulnerability.severity[]) => {
   const selectors: string[] = [];
 
-  // CVE ID is stripped of special characters that would make the query invalid.
-  const cveIdSearch = search.trim().replace(/%/g, '').replace(/,/g, ' ').replace(/\s+/g, ' ');
-  if (cveIdSearch.length > 0) {
+  const cveIdSearch = toApiSearchCveId(search);
+  if (cveIdSearch) {
     selectors.push(`cveId contains ${cveIdSearch}`);
   }
+
   if (severities.length === 1) {
     selectors.push(`severity=${severities[0]}`);
   } else if (severities.length > 1) {
