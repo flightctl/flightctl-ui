@@ -76,9 +76,15 @@ func buildDeviceConsoleURL(r *http.Request) (string, error) {
 		return "", fmt.Errorf("invalid base API URL: %w", err)
 	}
 
+	// Websocket scheme must match backend API transport
+	wsScheme := "wss"
+	if strings.EqualFold(baseURL.Scheme, "http") {
+		wsScheme = "ws"
+	}
+
 	// Construct the websocket URL safely using url.URL to prevent SSRF
 	consoleURL := &url.URL{
-		Scheme: "wss",
+		Scheme: wsScheme,
 		Host:   baseURL.Host,
 		Path:   path.Join("/ws/v1/devices", deviceId, "console"),
 	}
