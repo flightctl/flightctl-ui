@@ -52,9 +52,9 @@ const DeviceLogsTab = ({ deviceId }: DeviceLogsTabProps) => {
   );
 
   const onResetForm = React.useCallback(() => {
-    setLastSearchParams(undefined);
+    setLastSearchParams(DEVICE_LOGS_FORM_INITIAL_VALUES);
     closeSession();
-  }, [closeSession]);
+  }, [closeSession, setLastSearchParams]);
 
   const onDownload = React.useCallback(() => {
     if (!lastSearchParams) {

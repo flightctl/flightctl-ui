@@ -16,7 +16,12 @@ import {
 import { useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import { DEVICE_LOG_BASE_PATH, DeviceLogCategory, DeviceLogSearchParams } from '../../../utils/deviceLogs';
+import {
+  DEVICE_LOGS_FORM_INITIAL_VALUES,
+  DEVICE_LOG_BASE_PATH,
+  DeviceLogCategory,
+  DeviceLogSearchParams,
+} from '../../../utils/deviceLogs';
 import FormSelect from '../../form/FormSelect';
 import TextField from '../../form/TextField';
 import DeviceLogsPriorityField from './DeviceLogsLevelField';
@@ -37,11 +42,19 @@ const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
   const { t } = useTranslation();
   const categoryItems = React.useMemo(() => getCategoryItems(t), [t]);
 
-  const { submitForm, isSubmitting, values, errors } = useFormikContext<DeviceLogSearchParams>();
+  const { submitForm, isSubmitting, values, setValues, errors } = useFormikContext<DeviceLogSearchParams>();
   const validationError = React.useMemo(() => {
     const allErrors = Object.values(errors).filter(Boolean);
     return allErrors.join(', ');
   }, [errors]);
+
+  const doChangeLogType = React.useCallback(
+    (value: string) => {
+      setValues({ ...DEVICE_LOGS_FORM_INITIAL_VALUES, category: value as DeviceLogCategory });
+      onLogTypeChange();
+    },
+    [setValues, onLogTypeChange],
+  );
 
   const isSubmitDisabled = isSubmitting || Boolean(validationError);
 
@@ -63,7 +76,7 @@ const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
                   flexWrap={{ default: 'nowrap' }}
                 >
                   <FlexItem>
-                    <FormSelect name="category" items={categoryItems} onChange={onLogTypeChange} />
+                    <FormSelect name="category" items={categoryItems} onChange={doChangeLogType} />
                   </FlexItem>
                   {values.category === DeviceLogCategory.SYSTEM && (
                     <FlexItem style={{ minWidth: '12rem' }}>
