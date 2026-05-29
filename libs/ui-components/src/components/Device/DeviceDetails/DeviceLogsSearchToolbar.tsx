@@ -17,10 +17,10 @@ import { useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import {
-  DEVICE_LOGS_FORM_INITIAL_VALUES,
   DEVICE_LOG_BASE_PATH,
   DeviceLogCategory,
   DeviceLogSearchParams,
+  getDeviceLogsFormResetValues,
 } from '../../../utils/deviceLogs';
 import FormSelect from '../../form/FormSelect';
 import TextField from '../../form/TextField';
@@ -46,10 +46,13 @@ const DeviceLogsToolbar = ({ onLogTypeChange, isSubmitting, onCancelSearch }: De
 
   const { submitForm, setValues, values, errors } = useFormikContext<DeviceLogSearchParams>();
 
-  const onCategoryChange = React.useCallback(() => {
-    void setValues(DEVICE_LOGS_FORM_INITIAL_VALUES);
-    onLogTypeChange();
-  }, [onLogTypeChange, setValues]);
+  const onCategoryChange = React.useCallback(
+    (value: string) => {
+      void setValues(getDeviceLogsFormResetValues(value as DeviceLogCategory));
+      onLogTypeChange();
+    },
+    [onLogTypeChange, setValues],
+  );
 
   const validationError = React.useMemo(() => {
     const allErrors = Object.values(errors).filter(Boolean);
