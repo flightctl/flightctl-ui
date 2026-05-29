@@ -43,12 +43,6 @@ const parseCalendarDate = (value: string) => new Date(`${value}T00:00:00`);
 const formatCalendarDate = (date: Date): string =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-const isIncompleteCustomRange = (
-  timeRange: DeviceLogTimeRange | 'all' | undefined,
-  dateFrom: string,
-  dateTo: string,
-): boolean => timeRange === DeviceLogTimeRange.CUSTOM_TIME_RANGE && dateFrom === '' && dateTo === '';
-
 const isApplyDisabled = (dateFrom: string, dateTo: string): boolean => {
   if (!dateFrom && !dateTo) {
     return true;
@@ -115,7 +109,8 @@ type DeviceLogsCustomTimeRangePanelProps = {
   onClear: VoidFunction;
 };
 
-const dateValidators = [(date: Date) => date.getTime() <= Date.now()];
+const dateNotInFuture = (date: Date) => date.getTime() <= Date.now();
+const dateToNotBeforeFrom = (dateFrom: Date) => (dateTo: Date) => dateTo.getTime() >= dateFrom.getTime();
 
 const DeviceLogsCustomTimeRangePanel = ({
   draftFrom,
@@ -134,11 +129,20 @@ const DeviceLogsCustomTimeRangePanel = ({
   const onCalendarChange = (_event: React.MouseEvent<HTMLButtonElement>, date: Date) => {
     const dateStr = formatCalendarDate(date);
     if (dateOption === 'from') {
+      // If range is complete and dateFrom changes to after dateTo, "Apply" will become disabled and changes won't be persisted
       onDraftFromChange(dateStr);
     } else if (dateOption === 'to') {
       onDraftToChange(dateStr);
     }
   };
+
+  const dateValidators = React.useMemo(() => {
+    const validators = [dateNotInFuture];
+    if (dateOption === 'to') {
+      validators.push(dateToNotBeforeFrom(parsedFrom));
+    }
+    return validators;
+  }, [parsedFrom, dateOption]);
 
   return (
     <div
@@ -195,13 +199,25 @@ const DeviceLogsCustomTimeRangePanel = ({
               <ActionList>
                 <ActionListGroup>
                   <ActionListItem>
-                    <Button variant="primary" isDisabled={isApplyDisabled(draftFrom, draftTo)} onClick={onApply}>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      isDisabled={isApplyDisabled(draftFrom, draftTo)}
+                      onClick={onApply}
+                    >
                       {t('Apply')}
                     </Button>
                   </ActionListItem>
 
                   <ActionListItem>
-                    <Button variant="link" onClick={onClear}>
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={() => {
+                        setDateOption(undefined);
+                        onClear();
+                      }}
+                    >
                       {t('Clear')}
                     </Button>
                   </ActionListItem>
@@ -229,32 +245,43 @@ const DeviceLogsTimeRangeField = () => {
   const [draftTo, setDraftTo] = React.useState('');
 
   const toggleText = timeRange === 'all' ? t('All time') : getDeviceLogTimeRangeLabel(t, timeRange);
+  const isCompleteRange = timeRange === DeviceLogTimeRange.CUSTOM_TIME_RANGE && (dateFrom !== '' || dateTo !== '');
+
+  const setDateValues = React.useCallback(
+    (dateFrom: string, dateTo: string) => {
+      void setFieldValue('dateFrom', dateFrom);
+      void setFieldValue('dateTo', dateTo);
+      void setFieldTouched('dateFrom', Boolean(dateFrom));
+      void setFieldTouched('dateTo', Boolean(dateTo));
+      void validateForm();
+    },
+    [setFieldTouched, setFieldValue, validateForm],
+  );
 
   const clearIncompleteCustomRange = React.useCallback(() => {
-    if (!isIncompleteCustomRange(timeRange, dateFrom, dateTo)) {
+    if (isCompleteRange) {
       return;
     }
     void setFieldValue('timeRange', undefined);
-    void setFieldValue('dateFrom', '');
-    void setFieldValue('dateTo', '');
     void setFieldTouched('timeRange', false);
-    void setFieldTouched('dateFrom', false);
-    void setFieldTouched('dateTo', false);
-    void validateForm();
-  }, [setFieldTouched, setFieldValue, validateForm, timeRange, dateFrom, dateTo]);
+    void setDateValues('', '');
+  }, [setDateValues, setFieldTouched, setFieldValue, isCompleteRange]);
 
-  const openCustomRangeView = React.useCallback(() => {
-    setDraftFrom(dateFrom);
-    setDraftTo(dateTo);
-    setMenuView(TimeRangeMenuView.CUSTOM);
-  }, [dateFrom, dateTo]);
+  const discardDrafts = React.useCallback(
+    (menuView: TimeRangeMenuView) => {
+      setDraftFrom(dateFrom);
+      setDraftTo(dateTo);
+      setMenuView(menuView);
+    },
+    [dateFrom, dateTo],
+  );
 
   const onTimeRangeSelected = React.useCallback(
     (event: React.MouseEvent | undefined, value: string | number | undefined) => {
       if (value === BACK_OPTION_VALUE) {
         event?.preventDefault();
+        discardDrafts(TimeRangeMenuView.PRESETS);
         clearIncompleteCustomRange();
-        setMenuView(TimeRangeMenuView.PRESETS);
         return;
       }
       const selection = value as DeviceLogTimeRange;
@@ -267,7 +294,7 @@ const DeviceLogsTimeRangeField = () => {
             void setFieldTouched('dateTo', false);
           }
           void setFieldTouched('timeRange', true);
-          openCustomRangeView();
+          discardDrafts(TimeRangeMenuView.CUSTOM);
         }, 0);
         return;
       } else if (selection === timeRange) {
@@ -275,31 +302,28 @@ const DeviceLogsTimeRangeField = () => {
         return;
       }
       void setFieldValue('timeRange', selection);
-      void setFieldValue('dateFrom', '');
-      void setFieldValue('dateTo', '');
       void setFieldTouched('timeRange', true);
-      void setFieldTouched('dateFrom', false);
-      void setFieldTouched('dateTo', false);
+      void setDateValues('', '');
       setMenuView(TimeRangeMenuView.PRESETS);
       setIsOpen(false);
     },
-    [clearIncompleteCustomRange, openCustomRangeView, setFieldTouched, setFieldValue, timeRange],
+    [clearIncompleteCustomRange, discardDrafts, setFieldTouched, setFieldValue, setDateValues, timeRange],
   );
 
   const onCustomRangeApply = React.useCallback(() => {
-    void setFieldValue('dateFrom', draftFrom);
-    void setFieldValue('dateTo', draftTo);
-    void setFieldTouched('dateFrom', true);
-    void setFieldTouched('dateTo', true);
+    if (isApplyDisabled(draftFrom, draftTo)) {
+      return;
+    }
     void setFieldTouched('timeRange', true);
-    void validateForm();
+    void setDateValues(draftFrom, draftTo);
     setIsOpen(false);
-  }, [draftFrom, draftTo, setFieldTouched, setFieldValue, validateForm]);
+  }, [setDateValues, setFieldTouched, draftFrom, draftTo]);
 
   const onCustomRangeClear = React.useCallback(() => {
     setDraftFrom('');
     setDraftTo('');
-  }, []);
+    void setDateValues('', '');
+  }, [setDateValues]);
 
   return (
     <FormGroup id="form-control__device-logs-time-range" fieldId={fieldIdToggle}>
@@ -313,11 +337,13 @@ const DeviceLogsTimeRangeField = () => {
         onOpenChange={(open) => {
           if (open) {
             setMenuView(TimeRangeMenuView.PRESETS);
-          } else if (isIncompleteCustomRange(timeRange, dateFrom, dateTo)) {
-            clearIncompleteCustomRange();
-            setMenuView(TimeRangeMenuView.PRESETS);
           } else {
-            void setFieldTouched('timeRange', true);
+            discardDrafts(TimeRangeMenuView.PRESETS);
+            if (isCompleteRange) {
+              void setFieldTouched('timeRange', true);
+            } else {
+              clearIncompleteCustomRange();
+            }
           }
           setIsOpen(open);
         }}
