@@ -21,6 +21,8 @@ const LOGS_WS_METADATA = {
 
 const STDIN_STREAM_BYTE = 0x00;
 const SEARCH_TIMEOUT_MS = 50_000;
+const SEARCH_CANCELLED_MESSAGE = 'CANCELLED';
+const SEARCH_SUPERSEDED_MESSAGE = 'SUPERSEDED';
 const K8S_CHANNEL_STDOUT = 1;
 const K8S_CHANNEL_STDERR = 2;
 const K8S_CHANNEL_STATUS = 3;
@@ -70,6 +72,7 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
   const organizationId = currentOrganization?.id as string;
   const wsRef = React.useRef<WebSocket>();
   const connectPromiseRef = React.useRef<Promise<void>>();
+  const connectRejectRef = React.useRef<(reason?: Error) => void>();
   const activeSearchRef = React.useRef<ActiveSearch>();
   const logSearchSeqRef = React.useRef(0);
   const isMountedRef = React.useRef(true);
@@ -77,6 +80,9 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
   const isStreamingRef = React.useRef(false);
   const partialLineRef = React.useRef('');
   const lastSuccessfulSearchParamsRef = React.useRef<DeviceLogSearchParams>();
+  const requestGenerationRef = React.useRef(0);
+
+  const isActiveSearch = React.useCallback((pending: ActiveSearch) => activeSearchRef.current === pending, []);
 
   const [logs, setLogs] = React.useState<string[]>([]);
   const [isConnecting, setIsConnecting] = React.useState(false);
@@ -117,31 +123,110 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
     connectPromiseRef.current = undefined;
     const ws = wsRef.current;
     if (ws) {
-      intentionalCloseRef.current = true;
+      // Handlers are cleared so this socket's onclose/onerror will not run; do not leave
+      // intentionalCloseRef set — that would make the next connection's disconnect look intentional.
       ws.onopen = null;
       ws.onclose = null;
       ws.onerror = null;
       ws.onmessage = null;
       ws.close();
       wsRef.current = undefined;
-    } else {
-      intentionalCloseRef.current = false;
     }
+    intentionalCloseRef.current = false;
   }, [clearActiveSearch, clearStreamingState]);
 
-  const closeSession = React.useCallback(() => {
-    lastSuccessfulSearchParamsRef.current = undefined;
-    setLogs([]);
-    setErrorTypeOrMsg(undefined);
+  const shouldCloseWebSocket = React.useCallback((): boolean => {
+    if (isStreamingRef.current) {
+      return true;
+    }
+    const ws = wsRef.current;
+    return !ws || ws.readyState !== WebSocket.OPEN;
+  }, []);
+
+  const resetSession = React.useCallback(
+    (options: { forceClose?: boolean; abortMessage?: string }) => {
+      requestGenerationRef.current += 1;
+
+      const pending = activeSearchRef.current;
+      if (pending) {
+        if (pending.timeoutId) {
+          clearTimeout(pending.timeoutId);
+        }
+        activeSearchRef.current = undefined;
+        if (pending.completionKind !== DeviceLogCompletionKind.LIVE_STREAM && options.abortMessage) {
+          pending.reject(new Error(options.abortMessage));
+        }
+      }
+
+      const closeConnection = options.forceClose === true || shouldCloseWebSocket();
+
+      if (closeConnection) {
+        const abortError = options.abortMessage ?? SEARCH_CANCELLED_MESSAGE;
+        connectRejectRef.current?.(new Error(abortError));
+        connectRejectRef.current = undefined;
+        connectPromiseRef.current = undefined;
+        intentionalCloseRef.current = true;
+        closeWebSocket();
+      } else {
+        clearActiveSearch();
+        clearStreamingState();
+      }
+
+      lastSuccessfulSearchParamsRef.current = undefined;
+      if (isMountedRef.current) {
+        setLogs([]);
+        setErrorTypeOrMsg(undefined);
+        setIsConnecting(false);
+        setIsFetching(false);
+      }
+    },
+    [clearActiveSearch, clearStreamingState, closeWebSocket, shouldCloseWebSocket],
+  );
+
+  const clearSession = React.useCallback(
+    () => resetSession({ abortMessage: SEARCH_CANCELLED_MESSAGE }),
+    [resetSession],
+  );
+
+  const closeSession = React.useCallback(() => resetSession({ forceClose: true }), [resetSession]);
+
+  const stopLiveStream = React.useCallback(() => {
+    if (!isStreamingRef.current) {
+      return;
+    }
+    requestGenerationRef.current += 1;
+    intentionalCloseRef.current = true;
     closeWebSocket();
+    if (lastSuccessfulSearchParamsRef.current) {
+      lastSuccessfulSearchParamsRef.current = {
+        ...lastSuccessfulSearchParamsRef.current,
+        showLiveLogs: false,
+      };
+    }
     if (isMountedRef.current) {
-      setIsConnecting(false);
       setIsFetching(false);
+      setErrorTypeOrMsg(undefined);
     }
   }, [closeWebSocket]);
 
+  const abortInFlightSearch = React.useCallback(() => {
+    const pending = activeSearchRef.current;
+    if (!pending) {
+      return;
+    }
+    if (pending.timeoutId) {
+      clearTimeout(pending.timeoutId);
+    }
+    activeSearchRef.current = undefined;
+    if (pending.completionKind !== DeviceLogCompletionKind.LIVE_STREAM) {
+      pending.reject(new Error(SEARCH_SUPERSEDED_MESSAGE));
+    }
+  }, []);
+
+  const cancelSearch = clearSession;
+
   const appendLiveLogLines = React.useCallback((lines: string[]) => {
-    if (lines.length === 0 || !isMountedRef.current) {
+    if (lines.length === 0 || !isMountedRef.current || !isStreamingRef.current) {
       return;
     }
     setLogs((prev) => [...prev, ...lines]);
@@ -149,9 +234,13 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
 
   const handleConsoleFrame = React.useCallback(
     async (message: Blob) => {
-      const bytes = new Uint8Array(await message.arrayBuffer());
       const pending = activeSearchRef.current;
       if (!pending) {
+        return;
+      }
+
+      const bytes = new Uint8Array(await message.arrayBuffer());
+      if (!isActiveSearch(pending)) {
         return;
       }
 
@@ -166,7 +255,7 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
             const active = activeSearchRef.current;
             const buffer = active?.buffer.trim();
             const isLive = active?.completionKind === DeviceLogCompletionKind.LIVE_STREAM;
-            if (active) {
+            if (active && isActiveSearch(active)) {
               if (active.timeoutId) {
                 clearTimeout(active.timeoutId);
               }
@@ -174,16 +263,18 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
               if (active.completionKind !== DeviceLogCompletionKind.LIVE_STREAM) {
                 active.reject(new Error(t('Log retrieval failed with exit code {{code}}', { code: parsed.code })));
               }
-            }
-            clearStreamingState();
-            if (isMountedRef.current) {
-              if (!isLive) {
-                setLogs([]);
+              clearStreamingState();
+              if (isMountedRef.current) {
+                if (!isLive) {
+                  setLogs([]);
+                }
+                setErrorTypeOrMsg(
+                  buffer
+                    ? t('Log retrieval failed with exit code {{code}}', { code: parsed.code })
+                    : 'CONNECTION_CLOSED',
+                );
+                setIsFetching(false);
               }
-              setErrorTypeOrMsg(
-                buffer ? t('Log retrieval failed with exit code {{code}}', { code: parsed.code }) : 'CONNECTION_CLOSED',
-              );
-              setIsFetching(false);
             }
             return;
           }
@@ -195,6 +286,10 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
       }
 
       if (msgType === K8S_CHANNEL_STDOUT || msgType === K8S_CHANNEL_STDERR) {
+        if (!isActiveSearch(pending)) {
+          return;
+        }
+
         if (pending.completionKind === DeviceLogCompletionKind.LIVE_STREAM) {
           const { lines, partialLine } = parseIncrementalDeviceLogStreamChunk(str, partialLineRef.current);
           partialLineRef.current = partialLine;
@@ -207,6 +302,9 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
         if (pending.completionKind === DeviceLogCompletionKind.FILE_PROBE) {
           const probeParsed = parseDeviceLogFileProbeBuffer(pending.buffer);
           if (probeParsed.status === 'incomplete') {
+            return;
+          }
+          if (!isActiveSearch(pending)) {
             return;
           }
           if (pending.timeoutId) {
@@ -240,6 +338,10 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
           return;
         }
 
+        if (!isActiveSearch(pending)) {
+          return;
+        }
+
         if (pending.timeoutId) {
           clearTimeout(pending.timeoutId);
         }
@@ -263,7 +365,7 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
         }
       }
     },
-    [t, appendLiveLogLines, clearStreamingState],
+    [t, appendLiveLogLines, clearStreamingState, isActiveSearch],
   );
 
   const ensureWebSocket = React.useCallback((): Promise<void> => {
@@ -278,6 +380,7 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
     setIsConnecting(true);
 
     connectPromiseRef.current = new Promise<void>((resolve, reject) => {
+      connectRejectRef.current = reject;
       try {
         const wsEndpoint = getWsEndpoint(deviceId);
         const wsMeta = JSON.stringify(LOGS_WS_METADATA);
@@ -293,6 +396,8 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
         };
 
         ws.onopen = () => {
+          intentionalCloseRef.current = false;
+          connectRejectRef.current = undefined;
           connectPromiseRef.current = undefined;
           if (isMountedRef.current) {
             setIsConnecting(false);
@@ -301,18 +406,27 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
         };
 
         ws.onerror = () => {
+          connectRejectRef.current = undefined;
           connectPromiseRef.current = undefined;
+          if (intentionalCloseRef.current) {
+            intentionalCloseRef.current = false;
+            reject(new Error(SEARCH_CANCELLED_MESSAGE));
+            return;
+          }
+          const wasStreaming = isStreamingRef.current;
           if (isMountedRef.current) {
             setIsConnecting(false);
-            setErrorTypeOrMsg('CONNECTION_ERROR');
+            setErrorTypeOrMsg(wasStreaming ? 'CONNECTION_CLOSED' : 'CONNECTION_ERROR');
           }
           reject(new Error('Failed to connect to device'));
           ws.close();
         };
 
         ws.onclose = (evt: CloseEvent) => {
+          connectRejectRef.current = undefined;
           connectPromiseRef.current = undefined;
           wsRef.current = undefined;
+          const wasStreaming = isStreamingRef.current;
           const pendingSearch = activeSearchRef.current;
           if (pendingSearch) {
             if (pendingSearch.timeoutId) {
@@ -329,14 +443,13 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
             setIsFetching(false);
             if (intentionalCloseRef.current) {
               intentionalCloseRef.current = false;
-            } else {
-              if (isErrorCloseEvent(evt)) {
-                setErrorTypeOrMsg('CONNECTION_CLOSED');
-              }
+            } else if (isErrorCloseEvent(evt) || wasStreaming) {
+              setErrorTypeOrMsg('CONNECTION_CLOSED');
             }
           }
         };
       } catch (err) {
+        connectRejectRef.current = undefined;
         connectPromiseRef.current = undefined;
         const msg = getErrorMessage(err);
         if (isMountedRef.current) {
@@ -350,25 +463,27 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
     return connectPromiseRef.current;
   }, [deviceId, organizationId, getWsEndpoint, handleConsoleFrame, clearStreamingState]);
 
-  const search = React.useCallback(
-    async (params: DeviceLogSearchParams): Promise<boolean> => {
-      // When the live stream is turned off, the stream stops and the current log buffer is kept.
-      if (!params.showLiveLogs && isStreamingRef.current) {
-        closeWebSocket();
-        lastSuccessfulSearchParamsRef.current = params;
-        if (isMountedRef.current) {
-          setIsFetching(false);
-          setErrorTypeOrMsg(undefined);
-        }
-        return true;
-      }
+  const executeLogRequest = React.useCallback(
+    async (params: DeviceLogSearchParams, mode: 'snapshot' | 'live'): Promise<boolean> => {
+      const generation = ++requestGenerationRef.current;
+      const isCurrentRequest = () => generation === requestGenerationRef.current;
 
       setErrorTypeOrMsg(undefined);
+      if (isMountedRef.current) {
+        setLogs([]);
+      }
       setIsFetching(true);
 
+      const commandParams: DeviceLogSearchParams =
+        mode === 'live' ? { ...params, showLiveLogs: true } : { ...params, showLiveLogs: false };
+
       try {
-        if (params.showLiveLogs) {
+        // Reuse the console WebSocket for consecutive snapshot searches. Close only when entering/leaving
+        // live follow mode (or when the tab resets the session / cancels / unmounts).
+        if (mode === 'live' || isStreamingRef.current) {
           closeWebSocket();
+        } else {
+          abortInFlightSearch();
         }
 
         await ensureWebSocket();
@@ -400,7 +515,7 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
             ws.send(encodeStdinPayload(command));
           });
 
-        const startLiveStream = (command: string) => {
+        if (mode === 'live') {
           partialLineRef.current = '';
           isStreamingRef.current = true;
           activeSearchRef.current = {
@@ -411,25 +526,28 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
             completionKind: DeviceLogCompletionKind.LIVE_STREAM,
           };
           if (isMountedRef.current) {
-            setLogs([]);
             setIsStreaming(true);
             setIsFetching(false);
           }
-          ws.send(encodeStdinPayload(command));
-        };
-
-        // Send the commands to perform the desired search.
-        if (params.showLiveLogs) {
-          startLiveStream(getRetrieveLogContentCommand(params));
+          ws.send(encodeStdinPayload(getRetrieveLogContentCommand(commandParams)));
         } else {
-          if (needsFileProbe(params, lastSuccessfulSearchParamsRef.current?.logFilePath)) {
-            await runLogRequest(getFileProbeCommand(params), DeviceLogCompletionKind.FILE_PROBE);
+          if (needsFileProbe(commandParams, lastSuccessfulSearchParamsRef.current?.logFilePath)) {
+            await runLogRequest(getFileProbeCommand(commandParams), DeviceLogCompletionKind.FILE_PROBE);
           }
-          await runLogRequest(getRetrieveLogContentCommand(params), DeviceLogCompletionKind.LOGS);
+          await runLogRequest(getRetrieveLogContentCommand(commandParams), DeviceLogCompletionKind.LOGS);
         }
-        lastSuccessfulSearchParamsRef.current = params;
+
+        if (!isCurrentRequest()) {
+          return false;
+        }
+
+        lastSuccessfulSearchParamsRef.current = commandParams;
         return true;
       } catch (e) {
+        if (!isCurrentRequest()) {
+          return false;
+        }
+
         clearStreamingState();
         if (e instanceof DeviceLogFileProbeError) {
           if (isMountedRef.current) {
@@ -440,6 +558,15 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
           return false;
         }
         const err = e instanceof Error ? e : new Error(String(e));
+        if (err.message === SEARCH_CANCELLED_MESSAGE || err.message === SEARCH_SUPERSEDED_MESSAGE) {
+          if (isMountedRef.current) {
+            setLogs([]);
+            setErrorTypeOrMsg(undefined);
+            setIsFetching(false);
+            setIsConnecting(false);
+          }
+          return false;
+        }
         if (isMountedRef.current) {
           if (err.message === 'TIMEOUT' || err.message === 'CONNECTION_ERROR') {
             setErrorTypeOrMsg(err.message as DeviceLogErrorType);
@@ -451,7 +578,17 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
         return false;
       }
     },
-    [ensureWebSocket, closeWebSocket, clearStreamingState],
+    [ensureWebSocket, closeWebSocket, clearStreamingState, abortInFlightSearch],
+  );
+
+  const fetchSnapshot = React.useCallback(
+    (params: DeviceLogSearchParams) => executeLogRequest(params, 'snapshot'),
+    [executeLogRequest],
+  );
+
+  const startLiveStream = React.useCallback(
+    (params: DeviceLogSearchParams) => executeLogRequest(params, 'live'),
+    [executeLogRequest],
   );
 
   React.useEffect(() => {
@@ -461,14 +598,25 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
     };
   }, [closeWebSocket]);
 
+  const clearLiveLogsPreference = React.useCallback(() => {
+    if (lastSuccessfulSearchParamsRef.current) {
+      lastSuccessfulSearchParamsRef.current = {
+        ...lastSuccessfulSearchParamsRef.current,
+        showLiveLogs: false,
+      };
+    }
+  }, []);
+
   const retrySearch = React.useCallback(async () => {
     const lastParams = lastSuccessfulSearchParamsRef.current;
     if (!lastParams) {
-      return;
+      return false;
     }
-    closeWebSocket();
-    await search(lastParams);
-  }, [closeWebSocket, search]);
+    if (lastParams.showLiveLogs) {
+      return startLiveStream(lastParams);
+    }
+    return fetchSnapshot(lastParams);
+  }, [fetchSnapshot, startLiveStream]);
 
   return {
     logs,
@@ -476,8 +624,13 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
     isFetching,
     isStreaming,
     errorTypeOrMsg,
-    search,
+    fetchSnapshot,
+    startLiveStream,
+    cancelSearch,
+    clearSession,
+    stopLiveStream,
     closeSession,
+    clearLiveLogsPreference,
     retrySearch,
   };
 };
