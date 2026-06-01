@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Alert, AlertActionCloseButton, PageSection, Stack, StackItem } from '@patternfly/react-core';
 import { Trans } from 'react-i18next';
 
-import { ConditionType, ResourceSync, ResourceSyncList } from '@flightctl/types';
+import { ConditionType, RepositoryList, ResourceSync, ResourceSyncList } from '@flightctl/types';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
@@ -147,6 +147,9 @@ const getVisibleResourceSyncs = (rsList: ResourceSync[]) => {
   return { pendingRs, errorRs };
 };
 
+const removeRsWithMissingRepositories = (rsList: ResourceSync[], repoList: RepositoryList) =>
+  rsList.filter((rs) => repoList.items.some((repo) => repo.metadata.name === rs.spec.repository));
+
 const ResourceSyncImport = ({ type }: { type: 'fleet' | 'catalog' }) => {
   const params = new URLSearchParams();
   params.set('fieldSelector', type === 'fleet' ? 'spec.type!=catalog' : 'spec.type==catalog');
@@ -155,7 +158,26 @@ const ResourceSyncImport = ({ type }: { type: 'fleet' | 'catalog' }) => {
   });
 
   // TODO Remove the client-side filtering once the API filter is available
-  const { pendingRs, errorRs } = React.useMemo(() => getVisibleResourceSyncs(rsList?.items || []), [rsList]);
+  const { pendingRs: allPendingRs, errorRs: allErrorRs } = React.useMemo(
+    () => getVisibleResourceSyncs(rsList?.items || []),
+    [rsList],
+  );
+
+  const shouldFetchRepositories = allPendingRs.length > 0 || allErrorRs.length > 0;
+  const [repoList, isLoadingRepos] = useFetchPeriodically<RepositoryList>({
+    endpoint: shouldFetchRepositories ? 'repositories' : '',
+  });
+
+  const { pendingRs, errorRs } = React.useMemo(() => {
+    if (isLoadingRepos || !repoList) {
+      return { pendingRs: [], errorRs: [] };
+    }
+    // If the repository no longer exists, the RS will eventually error, but it's not useful to show it to the user
+    return {
+      pendingRs: removeRsWithMissingRepositories(allPendingRs, repoList),
+      errorRs: removeRsWithMissingRepositories(allErrorRs, repoList),
+    };
+  }, [allPendingRs, allErrorRs, isLoadingRepos, repoList]);
 
   if (pendingRs.length === 0 && errorRs.length === 0) {
     return null;
