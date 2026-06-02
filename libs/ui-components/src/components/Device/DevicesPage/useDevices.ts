@@ -18,7 +18,11 @@ import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { type FlightCtlLabel } from '../../../types/extraTypes';
 import { type FilterStatusMap } from './types';
 import { PAGE_SIZE } from '../../../constants';
-import { type PaginationDetails, useTablePagination } from '../../../hooks/useTablePagination';
+import {
+  type PaginationDetails,
+  useResetPaginationOnFilterChange,
+  useTablePagination,
+} from '../../../hooks/useTablePagination';
 
 type DevicesEndpointArgs = {
   /** Free-text filters synced with URL (name/alias, CVE ID, …). */
@@ -186,19 +190,34 @@ export type DevicesPaginatedResult = {
 
 /**
  * Hook for fetching devices with built-in pagination support.
- * Use this for paginated tables/modals.
+
+* Use this for paginated tables/modals of enrolled, fleetless devices.
  */
-export const useDevicesPaginated = (args: {
-  textFilters?: Partial<Record<DeviceTextFilterKey, string>>;
-  ownerFleets?: string[];
-  onlyDecommissioned: boolean;
-  onlyFleetless?: boolean;
-  selectedOsModes?: DeviceOsModeFilterValue[];
+export const useDevicesPaginated = ({
+  deviceNameFilter,
+  excludePackageMode,
+}: {
+  deviceNameFilter?: string;
   excludePackageMode?: boolean;
-}): DevicesPaginatedResult => {
+} = {}): DevicesPaginatedResult => {
   const pagination = useTablePagination<DeviceList>();
+
+  useResetPaginationOnFilterChange(
+    `${deviceNameFilter || ''}|${excludePackageMode ?? false}`,
+    pagination.setCurrentPage,
+  );
+
+  const textFilters = deviceNameFilter
+    ? {
+        [FilterSearchParams.NameOrAlias]: deviceNameFilter,
+      }
+    : undefined;
+
   const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint({
-    ...args,
+    textFilters,
+    onlyDecommissioned: false,
+    onlyFleetless: true,
+    excludePackageMode,
     nextContinue: pagination.nextContinue,
   });
 

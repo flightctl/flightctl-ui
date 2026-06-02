@@ -249,8 +249,6 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
 
   const { isLoading: fleetsLoading, pagination: fleetPagination } = useFleets({ onlyUnmanaged: true });
   const { devices, isLoading: devicesLoading } = useDevicesPaginated({
-    onlyDecommissioned: false,
-    onlyFleetless: true,
     excludePackageMode: catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS,
   });
 

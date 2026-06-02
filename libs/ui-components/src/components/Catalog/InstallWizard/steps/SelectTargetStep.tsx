@@ -36,7 +36,6 @@ import FormSelect from '../../../form/FormSelect';
 import { getArtifactLabel, getFullArtifactURI } from '../../../../utils/catalog';
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import { useAppLinks } from '../../../../hooks/useAppLinks';
-import { FilterSearchParams } from '../../../../utils/status/devices';
 import { isSameCatalogRef } from '../utils';
 
 export const isSelectTargetStepValid = (errors: FormikErrors<InstallAppFormik>) => {
@@ -59,14 +58,7 @@ const DeviceTarget = ({
     isLoading: devicesLoading,
     isUpdating: devicesUpdating,
     pagination: devicePagination,
-  } = useDevicesPaginated({
-    textFilters: {
-      [FilterSearchParams.NameOrAlias]: deviceNameFilter,
-    },
-    onlyDecommissioned: false,
-    onlyFleetless: true,
-    excludePackageMode: isOsItem,
-  });
+  } = useDevicesPaginated({ deviceNameFilter, excludePackageMode: isOsItem });
 
   const handleDeviceSelect = React.useCallback(
     async (device: Device) => {
