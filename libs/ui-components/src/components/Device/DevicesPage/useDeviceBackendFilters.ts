@@ -19,7 +19,7 @@ const validDeviceStatuses = Object.values(DeviceSummaryStatusType) as string[];
 const getSearchParamsQueryKey = (searchParams: URLSearchParams): string => {
   return (
     [...searchParams.entries()]
-      .map(([key, value]) => `${key}=${value}`)
+      .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
       .sort()
       .join('&') || ''
   );
