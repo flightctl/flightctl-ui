@@ -17,7 +17,7 @@ const PaginationTemplate = ({
   isUpdating: boolean;
 }) => {
   const { t } = useTranslation();
-  const pagesCount = Math.ceil((itemCount || 0) / PAGE_SIZE);
+  const pagesCount = Math.ceil(itemCount / PAGE_SIZE);
 
   const page = String(currentPage <= pagesCount ? currentPage : 0);
   const totalPages = String(pagesCount);
@@ -54,6 +54,10 @@ function TablePagination<T extends ApiList>({
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
     setCurrentPage(newPage);
   };
+
+  if (itemCount === 0) {
+    return null;
+  }
 
   return (
     <Pagination
