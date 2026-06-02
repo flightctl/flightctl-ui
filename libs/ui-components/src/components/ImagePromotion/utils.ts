@@ -5,7 +5,7 @@ import { CatalogItem } from '@flightctl/types/alpha';
 import semver from 'semver';
 
 import { ImagePromotionFormValues } from './types';
-import { getKubernetesDnsSubdomainErrors, validKubernetesDnsSubdomain } from '../form/validations';
+import { validKubernetesDnsSubdomain } from '../form/validations';
 import {
   isValidCatalogSingleSemver,
   optionalSemver,
@@ -83,20 +83,6 @@ export const defaultInitialValues: ImagePromotionFormValues = {
   existingItem: { name: '', version: '', replaces: '', skips: '', skipRange: '', readme: '' },
 };
 
-const validItemName = (t: TFunction) =>
-  Yup.string()
-    .required(t('Item name is required'))
-    .test(
-      'k8sDnsSubdomain',
-      t(
-        'Must start and end with a lowercase letter or number, and contain only lowercase letters, numbers, hyphens (-), or dots (.).',
-      ),
-      (value) => {
-        if (!value) return true;
-        return Object.keys(getKubernetesDnsSubdomainErrors(value)).length === 0;
-      },
-    );
-
 const requiredSemver = (t: TFunction) =>
   Yup.string()
     .required(t('Version is required'))
@@ -117,7 +103,7 @@ export const getImagePromotionValidationSchema = (t: TFunction) =>
       is: 'new',
       then: () =>
         Yup.object().shape({
-          name: validItemName(t),
+          name: validKubernetesDnsSubdomain(t, { isRequired: true }),
           displayName: Yup.string(),
           version: requiredSemver(t),
           readme: Yup.string(),
