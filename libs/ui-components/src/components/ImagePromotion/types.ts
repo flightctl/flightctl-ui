@@ -6,13 +6,13 @@ export type ImagePromotionFormValues = {
   type: 'new' | 'existing';
   exportFormats: ExportFormatType[];
   additionalExportFormats?: ExportFormatType[];
-  new: {
+  newItem: {
     name: string;
     displayName: string;
     version: string;
     readme: string;
   };
-  existing: {
+  existingItem: {
     name: string;
     version: string;
     replaces: string;

@@ -24,7 +24,7 @@ export const getEditInitialValues = (imagePromotion: ImagePromotion): ImagePromo
     catalog: (isExisting ? existingTarget.catalogName : newTarget.catalogName) || '',
     type: isExisting ? 'existing' : 'new',
     exportFormats: imagePromotion.spec.source.exportFormats || [],
-    existing: {
+    existingItem: {
       name: existingTarget.catalogItemName || '',
       version: existingTarget.version || '',
       replaces: existingTarget.replaces || '',
@@ -32,7 +32,7 @@ export const getEditInitialValues = (imagePromotion: ImagePromotion): ImagePromo
       skipRange: existingTarget.skipRange || '',
       readme: existingTarget.readme || '',
     },
-    new: {
+    newItem: {
       name: newTarget.catalogItemName || '',
       displayName: '',
       version: newTarget.version || '',
@@ -60,7 +60,7 @@ export const getInitialValues = (catalogItem: CatalogItem | undefined): ImagePro
       ...defaultInitialValues,
       catalog: catalogItem.metadata.catalog,
       type: 'existing',
-      existing: {
+      existingItem: {
         name: catalogItem.metadata.name || '',
         version: latestTestingVersion ? bumpPatchVersion(latestTestingVersion) : '',
         replaces: latestTestingVersion || '',
@@ -79,8 +79,8 @@ export const defaultInitialValues: ImagePromotionFormValues = {
   catalog: '',
   type: 'new',
   exportFormats: [],
-  new: { name: '', displayName: '', version: '', readme: '' },
-  existing: { name: '', version: '', replaces: '', skips: '', skipRange: '', readme: '' },
+  newItem: { name: '', displayName: '', version: '', readme: '' },
+  existingItem: { name: '', version: '', replaces: '', skips: '', skipRange: '', readme: '' },
 };
 
 const validItemName = (t: TFunction) =>
@@ -113,7 +113,7 @@ export const getImagePromotionValidationSchema = (t: TFunction) =>
   Yup.object().shape({
     name: validKubernetesDnsSubdomain(t, { isRequired: true }),
     catalog: Yup.string().required(t('Catalog is required')),
-    new: Yup.object().when('type', {
+    newItem: Yup.object().when('type', {
       is: 'new',
       then: () =>
         Yup.object().shape({
@@ -124,7 +124,7 @@ export const getImagePromotionValidationSchema = (t: TFunction) =>
         }),
       otherwise: () => Yup.object(),
     }),
-    existing: Yup.object().when('type', {
+    existingItem: Yup.object().when('type', {
       is: 'existing',
       then: () =>
         Yup.object().shape({

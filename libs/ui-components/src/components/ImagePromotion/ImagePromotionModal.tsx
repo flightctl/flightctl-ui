@@ -9,21 +9,14 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { useCatalogItem } from '../Catalog/useCatalogs';
-import {
-  ApiVersion,
-  ExistingCatalogItemTarget,
-  ExportFormatType,
-  ImageExport,
-  ImagePromotion,
-  ImagePromotionList,
-  NewCatalogItemTarget,
-} from '@flightctl/types/imagebuilder';
+import { ExportFormatType, ImageExport, ImagePromotion, ImagePromotionList } from '@flightctl/types/imagebuilder';
 import { PatchRequest } from '@flightctl/types';
 import { getErrorMessage } from '../../utils/error';
 import { getImagePromotionValidationSchema } from './utils';
 import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from '../common/PermissionsContext';
 import { ImageBuildWithExports } from '../../types/extraTypes';
+import { getImagePromotion } from '../ImageBuilds/NewVersionImageBuildWizard/utils';
 
 const NEW_VERSION_FROM_ANNOTATION = 'flightctl.io/new-version-from';
 
@@ -116,49 +109,9 @@ const ImagePromotionFormContainer = ({
             setError(e);
           }
         } else {
-          let promotionTarget: NewCatalogItemTarget | ExistingCatalogItemTarget;
-          if (values.type === 'new') {
-            promotionTarget = {
-              catalogItemName: values.new.name,
-              catalogName: values.catalog,
-              type: NewCatalogItemTarget.type.NEW_CATALOG_ITEM,
-              version: values.new.version,
-              readme: values.new.readme,
-            } as NewCatalogItemTarget;
-          } else {
-            promotionTarget = {
-              type: ExistingCatalogItemTarget.type.EXISTING_CATALOG_ITEM,
-              catalogItemName: values.existing.name,
-              catalogName: values.catalog,
-              version: values.existing.version,
-              readme: values.existing.readme,
-              replaces: values.existing.replaces,
-              skipRange: values.existing.skipRange,
-              skips: values.existing.skips
-                ? values.existing.skips
-                    .split(',')
-                    .map((s) => s.trim())
-                    .filter(Boolean)
-                : [],
-            } as ExistingCatalogItemTarget;
-          }
-
-          const newImagePromotion: ImagePromotion = {
-            apiVersion: ApiVersion.ApiVersionV1alpha1,
-            kind: 'ImagePromotion',
-            metadata: {
-              name: values.name,
-            },
-            spec: {
-              source: {
-                imageBuildRef: imageBuild.metadata.name || '',
-                exportFormats: values.exportFormats.length > 0 ? values.exportFormats : undefined,
-              },
-              target: promotionTarget,
-            },
-          };
+          const imagePromotion = getImagePromotion(values, imageBuild.metadata.name || '');
           try {
-            await post('imagepromotions', newImagePromotion);
+            await post('imagepromotions', imagePromotion);
             onClose(true);
           } catch (e) {
             setError(e);
