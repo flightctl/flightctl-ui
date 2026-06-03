@@ -92,7 +92,8 @@ export const parseDeviceLogFileProbeBuffer = (buffer: string): DeviceLogFileProb
 
 const parseLastDeviceLogStreamFooter = (buffer: string): { contentBeforeFooter: string; exitCode: number } | null => {
   const escapedPrefix = DEVICE_LOGS_STREAM_FOOTER_PREFIX.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const re = new RegExp(`^${escapedPrefix}\\s+(\\d+)\\s*\\r?\\n?$`, 'gm');
+  // Match footer markers even when the transport does not preserve a strict line boundary.
+  const re = new RegExp(`${escapedPrefix}\\s+(\\d+)\\s*\\r?\\n?`, 'g');
   re.lastIndex = 0;
   let last: RegExpExecArray | undefined;
   let m: RegExpExecArray | null;
