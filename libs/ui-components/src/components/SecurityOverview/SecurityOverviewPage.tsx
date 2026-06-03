@@ -10,7 +10,7 @@ import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
 
 import VulnerabilitiesTable from './VulnerabilitiesTable';
-import SecurityOverviewEmptyState from './VulnerabilitiesEmptyState';
+import { VulnerabilitiesOverviewEmptyState } from './VulnerabilitiesEmptyState';
 
 const SecurityOverviewPageContent = () => {
   const { t } = useTranslation();
@@ -36,7 +36,7 @@ const SecurityOverviewPageContent = () => {
   if (itemCount === 0 && !hasFiltersEnabled && !isLoading && !isUpdating) {
     // The link to this page is only shown when some vulnerabilities are present.
     // If the user navigates to it directly, we show the empty state assuming there are some devices
-    return <SecurityOverviewEmptyState hasDevices />;
+    return <VulnerabilitiesOverviewEmptyState hasDevices={true} />;
   }
 
   return (

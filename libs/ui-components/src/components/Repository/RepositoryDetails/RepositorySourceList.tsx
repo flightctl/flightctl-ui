@@ -78,7 +78,11 @@ const RepositorySourceList = ({ configs, dependencyStatus }: RepositorySourceLis
     return <Spinner size="sm" />;
   }
 
-  return configs.length > 0 ? (
+  if (configs.length === 0) {
+    return null;
+  }
+
+  return (
     <List isPlain>
       {configs.map((config, index) => {
         const addDivider = index !== configs.length - 1;
@@ -113,8 +117,6 @@ const RepositorySourceList = ({ configs, dependencyStatus }: RepositorySourceLis
         );
       })}
     </List>
-  ) : (
-    '-'
   );
 };
 

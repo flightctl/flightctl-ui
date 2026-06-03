@@ -9,20 +9,11 @@ import semver from 'semver';
 import { TFunction } from 'i18next';
 import * as Yup from 'yup';
 
-import {
-  getKubernetesDnsSubdomainErrors,
-  validImageBuildName,
-  validKubernetesDnsSubdomain,
-} from '../../form/validations';
+import { validImageBuildName } from '../../form/validations';
 import { getImageTagValidationError } from '../CreateImageBuildWizard/utils';
-import {
-  isValidCatalogSingleSemver,
-  optionalSemver,
-  optionalSemverList,
-  optionalSemverRange,
-} from '../../Catalog/AddCatalogItemWizard/utils';
-import { defaultInitialValues } from '../../ImagePromotion/utils';
+import { defaultInitialValues, getImagePromotionValidationSchema } from '../../ImagePromotion/utils';
 import { ImagePromotionFormValues } from '../../ImagePromotion/types';
+import { NewVersionWizardFormValues } from './types';
 
 const TESTING_CHANNEL = 'testing';
 
@@ -119,77 +110,25 @@ export const getCatalogInitialValues = (catalogItem: CatalogItem | undefined): I
   return defaultInitialValues;
 };
 
-const requiredSemver = (t: TFunction) =>
-  Yup.string()
-    .required(t('Version is required'))
-    .test(
-      'valid-semver',
-      t('Must be a valid semantic version (e.g. 1.0.0, 2.1.0-rc1). Leading "v" is not allowed.'),
-      (value) => {
-        if (!value) return true;
-        return isValidCatalogSingleSemver(value);
-      },
-    );
-
-const validItemName = (t: TFunction) =>
-  Yup.string()
-    .required(t('Item name is required'))
-    .test(
-      'k8sDnsSubdomain',
-      t(
-        'Must start and end with a lowercase letter or number, and contain only lowercase letters, numbers, hyphens (-), or dots (.).',
-      ),
-      (value) => {
-        if (!value) return true;
-        return Object.keys(getKubernetesDnsSubdomainErrors(value)).length === 0;
-      },
-    );
-
 export const getValidationSchema = (t: TFunction) =>
-  Yup.object({
-    buildName: validImageBuildName(t),
-    sourceImageTag: Yup.string().test('oci-image-tag', function (value) {
-      if (!value) return true;
-      const error = getImageTagValidationError(value, t);
-      return error ? this.createError({ message: error }) : true;
-    }),
-    destinationImageTag: Yup.string().test('oci-dst-image-tag', function (value) {
-      if (!value) return true;
-      const error = getImageTagValidationError(value, t);
-      return error ? this.createError({ message: error }) : true;
-    }),
-    name: Yup.string().when('promoteToCatalog', {
-      is: true,
-      then: () => validKubernetesDnsSubdomain(t, { isRequired: true }),
-      otherwise: () => Yup.string(),
-    }),
-    catalog: Yup.string().when('promoteToCatalog', {
-      is: true,
-      then: () => Yup.string().required(t('Catalog is required')),
-      otherwise: () => Yup.string(),
-    }),
-    newItem: Yup.object().when(['promoteToCatalog', 'type'], ([promoteToCatalog, type]) => {
-      if (promoteToCatalog && type === 'new') {
-        return Yup.object().shape({
-          name: validItemName(t),
-          displayName: Yup.string(),
-          version: requiredSemver(t),
-          readme: Yup.string(),
-        });
-      }
-      return Yup.object();
-    }),
-    existingItem: Yup.object().when(['promoteToCatalog', 'type'], ([promoteToCatalog, type]) => {
-      if (promoteToCatalog && type === 'existing') {
-        return Yup.object().shape({
-          name: Yup.string().required(t('Catalog item is required')),
-          version: requiredSemver(t),
-          replaces: optionalSemver(t),
-          skips: optionalSemverList(t),
-          skipRange: optionalSemverRange(t),
-          readme: Yup.string(),
-        });
-      }
-      return Yup.object();
-    }),
+  Yup.lazy((values: NewVersionWizardFormValues) => {
+    const imageBuildSchema = Yup.object({
+      buildName: validImageBuildName(t),
+      sourceImageTag: Yup.string().test('oci-image-tag', function (value) {
+        if (!value) return true;
+        const error = getImageTagValidationError(value, t);
+        return error ? this.createError({ message: error }) : true;
+      }),
+      destinationImageTag: Yup.string().test('oci-dst-image-tag', function (value) {
+        if (!value) return true;
+        const error = getImageTagValidationError(value, t);
+        return error ? this.createError({ message: error }) : true;
+      }),
+    });
+
+    if (values.promoteToCatalog) {
+      return imageBuildSchema.concat(getImagePromotionValidationSchema(t));
+    }
+
+    return imageBuildSchema;
   });
