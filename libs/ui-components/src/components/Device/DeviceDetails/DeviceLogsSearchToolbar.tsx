@@ -16,7 +16,12 @@ import {
 import { useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import { DEVICE_LOG_BASE_PATH, DeviceLogCategory, DeviceLogSearchParams } from '../../../utils/deviceLogs';
+import {
+  DEVICE_LOG_BASE_PATH,
+  DeviceLogCategory,
+  DeviceLogSearchParams,
+  getDeviceLogsFormResetValues,
+} from '../../../utils/deviceLogs';
 import FormSelect from '../../form/FormSelect';
 import TextField from '../../form/TextField';
 import DeviceLogsPriorityField from './DeviceLogsLevelField';
@@ -31,13 +36,24 @@ const getCategoryItems = (t: TFunction) => ({
 
 export type DeviceLogsToolbarProps = {
   onLogTypeChange: VoidFunction;
+  onCancelSearch: VoidFunction;
+  isSubmitting: boolean;
 };
 
-const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
+const DeviceLogsToolbar = ({ onLogTypeChange, isSubmitting, onCancelSearch }: DeviceLogsToolbarProps) => {
   const { t } = useTranslation();
   const categoryItems = React.useMemo(() => getCategoryItems(t), [t]);
 
-  const { submitForm, isSubmitting, values, errors } = useFormikContext<DeviceLogSearchParams>();
+  const { submitForm, setValues, values, errors } = useFormikContext<DeviceLogSearchParams>();
+
+  const onCategoryChange = React.useCallback(
+    (value: string) => {
+      void setValues(getDeviceLogsFormResetValues(value as DeviceLogCategory));
+      onLogTypeChange();
+    },
+    [onLogTypeChange, setValues],
+  );
+
   const validationError = React.useMemo(() => {
     const allErrors = Object.values(errors).filter(Boolean);
     return allErrors.join(', ');
@@ -63,7 +79,7 @@ const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
                   flexWrap={{ default: 'nowrap' }}
                 >
                   <FlexItem>
-                    <FormSelect name="category" items={categoryItems} onChange={onLogTypeChange} />
+                    <FormSelect name="category" items={categoryItems} onChange={onCategoryChange} />
                   </FlexItem>
                   {values.category === DeviceLogCategory.SYSTEM && (
                     <FlexItem style={{ minWidth: '12rem' }}>
@@ -108,6 +124,13 @@ const DeviceLogsToolbar = ({ onLogTypeChange }: DeviceLogsToolbarProps) => {
               </ToolbarItem>
             </ToolbarGroup>
             <ToolbarGroup variant="action-group" align={{ default: 'alignEnd' }}>
+              {isSubmitting && (
+                <ToolbarItem>
+                  <Button variant="link" onClick={onCancelSearch}>
+                    {t('Cancel')}
+                  </Button>
+                </ToolbarItem>
+              )}
               <ToolbarItem>
                 <Button
                   variant="primary"

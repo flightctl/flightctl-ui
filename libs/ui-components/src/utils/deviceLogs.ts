@@ -78,6 +78,12 @@ export const DEVICE_LOGS_FORM_INITIAL_VALUES: DeviceLogSearchParams = {
   showLiveLogs: false,
 };
 
+/** Resets log search fields to defaults while keeping the selected log category. */
+export const getDeviceLogsFormResetValues = (category: DeviceLogCategory): DeviceLogSearchParams => ({
+  ...DEVICE_LOGS_FORM_INITIAL_VALUES,
+  category,
+});
+
 export const getDeviceLogCategoryLabel = (t: TFunction, category: DeviceLogCategory): string => {
   switch (category) {
     case DeviceLogCategory.AGENT:
