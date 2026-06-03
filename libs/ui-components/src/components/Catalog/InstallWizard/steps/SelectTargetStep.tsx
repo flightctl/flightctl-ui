@@ -206,6 +206,8 @@ const FleetTarget = () => {
   );
 };
 
+const PROTOCOL_REGEX = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//;
+
 type NewDeviceTargetProps = {
   catalogItem: CatalogItem;
 };
@@ -233,6 +235,8 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
   const artifact = artifacts.find((a) => a.type === values.deploymentTarget);
 
   const artifactUrl = currentVersion && artifact ? getFullArtifactURI(artifact, currentVersion) : undefined;
+
+  const hasProtocol = PROTOCOL_REGEX.test(artifactUrl || '');
 
   return (
     <FlightCtlForm>
@@ -274,7 +278,7 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
                 icon={<ExternalLinkAltIcon />}
                 target="_blank"
                 rel="noopener noreferrer"
-                href={artifactUrl}
+                href={hasProtocol ? artifactUrl : `docker://${artifactUrl}`}
               >
                 {artifactUrl}
               </Button>
