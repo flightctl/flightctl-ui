@@ -76,9 +76,10 @@ const getCategoryOption = (params: DeviceLogSearchParams): string[] => {
   switch (params.category) {
     case DeviceLogCategory.AGENT:
       return ['-u', FLIGHTCTL_AGENT_UNIT];
-    case DeviceLogCategory.SYSTEM:
+    case DeviceLogCategory.SYSTEM: {
       const unit = params.systemdUnit;
       return unit ? ['-u', unit] : [];
+    }
     default:
       return [];
   }

@@ -22,7 +22,7 @@ const SecurityOverviewCard = () => {
   const navigate = useNavigate();
 
   const { counts, isLoading } = useVulnerabilitySummary();
-  const isEmpty = counts.total === 0;
+  const isEmpty = !isLoading && counts.total === 0;
 
   return (
     <Card>
@@ -43,7 +43,7 @@ const SecurityOverviewCard = () => {
             </CardTitle>
           </FlexItem>
           <FlexItem>
-            {!isLoading && !isEmpty && (
+            {!isEmpty && (
               <Button
                 variant="link"
                 isInline

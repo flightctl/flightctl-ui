@@ -12,7 +12,7 @@ import {
   defaultVulnerabilitySeverityStatusItem,
   getVulnerabilitySeverityStatusItems,
 } from '../../utils/status/vulnerabilities';
-import VulnerabilitiesEmptyState from './VulnerabilitiesEmptyState';
+import { VulnerabilitiesOverviewEmptyState } from './VulnerabilitiesEmptyState';
 
 import './SecurityOverviewSummary.css';
 
@@ -74,7 +74,7 @@ const SecurityOverviewSummary = () => {
           {hasVulnerabilities ? (
             <StackItem>{t('CVEs affecting images deployed across your managed fleet and devices.')}</StackItem>
           ) : (
-            <VulnerabilitiesEmptyState hasDevices={hasDevices} />
+            <VulnerabilitiesOverviewEmptyState hasDevices={hasDevices} />
           )}
         </Stack>
       </StackItem>

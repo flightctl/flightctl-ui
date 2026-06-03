@@ -27,31 +27,116 @@ type DeviceLogsTabProps = {
   deviceId: string;
 };
 
+// Adds an extra delay to "Retrieve logs", to ensure the Cancel button and the new action results can be observed clearly.
+const MIN_RETRIEVE_SPINNER_MS = 400;
+
+const toSnapshotParams = (params: DeviceLogSearchParams): DeviceLogSearchParams => ({
+  ...params,
+  showLiveLogs: false,
+});
+
 const DeviceLogsTab = ({ deviceId }: DeviceLogsTabProps) => {
   const { t } = useTranslation();
   const { settings } = useAppContext();
   const { resolvedTheme } = React.useContext(UserPreferencesContext);
   const [lastSearchParams, setLastSearchParams] = React.useState<DeviceLogSearchParams>();
+  const [isRetrievePending, setIsRetrievePending] = React.useState(false);
+  const retrievePendingStartedAtRef = React.useRef(0);
   const logPrefix = settings.isRHEM ? `rhem-${deviceId}` : `flightctl-${deviceId}`;
 
-  const { logs, isConnecting, isFetching, isStreaming, errorTypeOrMsg, search, closeSession, retrySearch } =
-    useDeviceLogs({
-      deviceId,
-    });
-  const lineCount = logs.length;
+  const {
+    logs,
+    isConnecting,
+    isFetching,
+    isStreaming,
+    errorTypeOrMsg,
+    fetchSnapshot,
+    startLiveStream,
+    clearSession,
+    stopLiveStream,
+    closeSession,
+    clearLiveLogsPreference,
+    retrySearch,
+  } = useDeviceLogs({
+    deviceId,
+  });
 
-  const onLogSearch = React.useCallback(
+  const finishRetrievePending = React.useCallback(async () => {
+    if (retrievePendingStartedAtRef.current === 0) {
+      return;
+    }
+    const remaining = MIN_RETRIEVE_SPINNER_MS - (Date.now() - retrievePendingStartedAtRef.current);
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, remaining);
+    });
+    retrievePendingStartedAtRef.current = 0;
+    setIsRetrievePending(false);
+  }, []);
+
+  const runSnapshotSearch = React.useCallback(
     async (params: DeviceLogSearchParams) => {
-      const ok = await search(params);
-      if (ok) {
-        setLastSearchParams(params);
+      const snapshotParams = toSnapshotParams(params);
+      setLastSearchParams(undefined);
+      retrievePendingStartedAtRef.current = Date.now();
+      setIsRetrievePending(true);
+      try {
+        const ok = await fetchSnapshot(snapshotParams);
+        if (ok) {
+          setLastSearchParams(snapshotParams);
+        }
+        return ok;
+      } finally {
+        await finishRetrievePending();
       }
-      return ok;
     },
-    [search],
+    [fetchSnapshot, finishRetrievePending],
   );
 
-  const onResetForm = React.useCallback(() => {
+  const handleStartLiveStream = React.useCallback(async () => {
+    if (!lastSearchParams) {
+      return false;
+    }
+    const ok = await startLiveStream(lastSearchParams);
+    if (ok) {
+      setLastSearchParams({ ...lastSearchParams, showLiveLogs: true });
+    }
+    return ok;
+  }, [lastSearchParams, startLiveStream]);
+
+  const handleStopLiveStream = React.useCallback(() => {
+    stopLiveStream();
+    setLastSearchParams((prev) => (prev ? { ...prev, showLiveLogs: false } : prev));
+  }, [stopLiveStream]);
+
+  const handleClearLiveLogsPreference = React.useCallback(() => {
+    clearLiveLogsPreference();
+    setLastSearchParams((prev) => (prev ? { ...prev, showLiveLogs: false } : prev));
+  }, [clearLiveLogsPreference]);
+
+  const runSearchWithParams = React.useCallback(
+    async (params: DeviceLogSearchParams) => {
+      if (params.showLiveLogs) {
+        const ok = await startLiveStream(params);
+        if (ok) {
+          setLastSearchParams({ ...params, showLiveLogs: true });
+        }
+        return ok;
+      }
+      return runSnapshotSearch(params);
+    },
+    [runSnapshotSearch, startLiveStream],
+  );
+
+  const onClearSession = React.useCallback(() => {
+    retrievePendingStartedAtRef.current = 0;
+    setIsRetrievePending(false);
+    setLastSearchParams(undefined);
+    clearSession();
+  }, [clearSession]);
+
+  const onCloseSession = React.useCallback(() => {
+    retrievePendingStartedAtRef.current = 0;
+    setIsRetrievePending(false);
     setLastSearchParams(undefined);
     closeSession();
   }, [closeSession]);
@@ -72,30 +157,34 @@ const DeviceLogsTab = ({ deviceId }: DeviceLogsTabProps) => {
     const content = getExportableLogContent(logs);
     const isOpen = openTextInNewTab(content);
     if (!isOpen) {
-      // Fallback to download if the tab to show the file could not be opened
       const filename = buildDownloadFilename(logPrefix, lastSearchParams);
       downloadTextAsFile(content, filename);
     }
   }, [logPrefix, logs, lastSearchParams]);
 
+  const lineCount = logs.length;
+  const isSearching = isConnecting || isFetching || isRetrievePending;
   const hasDisplayedLogs = Boolean(lastSearchParams && lineCount > 0);
-  const isInitialLoading = (isConnecting || isFetching) && !hasDisplayedLogs && !isStreaming;
-  const showLogViewer = Boolean(lastSearchParams && (hasDisplayedLogs || isStreaming)) && !isInitialLoading;
-  const showEmptyState = !isInitialLoading && !showLogViewer && !errorTypeOrMsg;
-  const showRetrievalError = !isInitialLoading && !showLogViewer && Boolean(errorTypeOrMsg);
+  const showLogViewer = Boolean(lastSearchParams && (hasDisplayedLogs || isStreaming)) && !isSearching;
+  const showEmptyState = !isSearching && !showLogViewer && !errorTypeOrMsg;
+  const showRetrievalError = !isSearching && !showLogViewer && Boolean(errorTypeOrMsg);
 
   return (
     <Formik<DeviceLogSearchParams>
       initialValues={DEVICE_LOGS_FORM_INITIAL_VALUES}
       validationSchema={getDeviceLogSearchSchema(t)}
-      onSubmit={onLogSearch}
+      onSubmit={runSnapshotSearch}
     >
       <Stack hasGutter>
         <StackItem>
-          <DeviceLogsSearchToolbar onLogTypeChange={onResetForm} />
+          <DeviceLogsSearchToolbar
+            onLogTypeChange={onCloseSession}
+            isSubmitting={isSearching}
+            onCancelSearch={onClearSession}
+          />
         </StackItem>
 
-        {isInitialLoading && (
+        {isSearching && (
           <Bullseye>
             <Stack hasGutter>
               <StackItem>
@@ -121,13 +210,19 @@ const DeviceLogsTab = ({ deviceId }: DeviceLogsTabProps) => {
                   toolbar={
                     <DeviceLogsInnerToolbar
                       lastSearchParams={lastSearchParams}
-                      onSearchUpdate={onLogSearch}
-                      onResetForm={onResetForm}
+                      isStreaming={isStreaming}
+                      onApplySearchParams={runSearchWithParams}
+                      onStartLiveStream={handleStartLiveStream}
+                      onStopLiveStream={handleStopLiveStream}
+                      onClearLiveLogsPreference={handleClearLiveLogsPreference}
+                      onClearSession={onClearSession}
                       onDownload={onDownload}
                       onOpenRaw={onOpenRaw}
                     >
                       {/* If we receive a disconection error after we had retrieved some logs, the logs stay visible. Users can download them and retry if needed. */}
-                      {errorTypeOrMsg === 'CONNECTION_CLOSED' && <DeviceLogsDisconnectedBanner onRetry={retrySearch} />}
+                      {errorTypeOrMsg === 'CONNECTION_CLOSED' && (
+                        <DeviceLogsDisconnectedBanner onRetry={() => void retrySearch()} />
+                      )}
                     </DeviceLogsInnerToolbar>
                   }
                 />

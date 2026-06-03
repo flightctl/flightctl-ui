@@ -16,7 +16,12 @@ const MAX_SYSTEMD_UNIT_LENGTH = 256;
 const MAX_LOG_FILE_PATH_LENGTH = 4096;
 const FILTER_ALL_VALUE = 'all';
 
-const SYSTEMD_UNIT_INPUT_PATTERN = /^[a-zA-Z0-9:@._-]+$/;
+/**
+ * Allows glob metacharacters systemd uses with list-units/journalctl patterns.
+ * Examples: sshd.service, flightctl-*.service, flightctl-agent@.service, flightctl-agent@*.service
+ */
+const DEVICE_LOG_SYSTEMD_UNIT_PATTERN = /^[0-9a-zA-Z:@._\-\\[\]!*?]+$/;
+const DOT_ONLY_STRING_PATTERN = /^\.+$/;
 
 export type DeviceLogFileErrorType = 'FILE_NOT_FOUND' | 'FILE_IS_DIRECTORY' | 'NOT_A_TEXT_FILE' | 'FILE_TOO_LARGE';
 export type DeviceLogTransportErrorType = 'TIMEOUT' | 'CONNECTION_CLOSED' | 'CONNECTION_ERROR';
@@ -77,6 +82,12 @@ export const DEVICE_LOGS_FORM_INITIAL_VALUES: DeviceLogSearchParams = {
   logFilePath: '',
   showLiveLogs: false,
 };
+
+/** Resets log search fields to defaults while keeping the selected log category. */
+export const getDeviceLogsFormResetValues = (category: DeviceLogCategory): DeviceLogSearchParams => ({
+  ...DEVICE_LOGS_FORM_INITIAL_VALUES,
+  category,
+});
 
 export const getDeviceLogCategoryLabel = (t: TFunction, category: DeviceLogCategory): string => {
   switch (category) {
@@ -167,18 +178,18 @@ export const getDeviceLogSearchSchema = (t: TFunction) => {
       .when('category', {
         is: DeviceLogCategory.SYSTEM,
         then: (schema) =>
-          schema.test(
-            'systemd-unit-token',
-            t(
-              'Enter a single unit name using alphanumeric characters, colons (:), at signs (@), dots (.), underscores (_), and hyphens (-).',
+          schema
+            .test(
+              'systemd-unit-not-dot-only',
+              t('Unit name must not consist of only dots.'),
+              (value) => !value || !DOT_ONLY_STRING_PATTERN.test(value),
+            )
+            .matches(
+              DEVICE_LOG_SYSTEMD_UNIT_PATTERN,
+              t(
+                'Enter a unit name or pattern. Use alphanumeric characters, dots (.), underscores (_), hyphens (-), at signs (@) and colons (:). Glob characters are allowed: (*, ?, [...]).',
+              ),
             ),
-            (value) => {
-              if (!value) {
-                return true;
-              }
-              return SYSTEMD_UNIT_INPUT_PATTERN.test(value);
-            },
-          ),
         otherwise: (schema) => schema,
       }),
     showLiveLogs: Yup.boolean(),
