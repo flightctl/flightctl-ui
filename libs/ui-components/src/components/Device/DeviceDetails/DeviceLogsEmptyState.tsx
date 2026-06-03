@@ -18,6 +18,12 @@ import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exc
 import { DEVICE_LOG_BASE_PATH, DeviceLogErrorType } from '../../../utils/deviceLogs';
 import { useTranslation } from '../../../hooks/useTranslation';
 
+// Fixes the color of the text in the "red" banner button.
+const redBannerButtonFixStyle = {
+  '--pf-v6-c-button--m-link--Color': 'var(--pf-t--global--text--color--nonstatus--on-red--default)',
+  '--pf-v6-c-button--m-link--hover--Color': 'var(--pf-t--global--text--color--nonstatus--on-red--default)',
+} as React.CSSProperties;
+
 // Note: Despite the function signature, errorType can actually be a plain string.
 // This happens when we receive an uncontrolled error, and instead of the errorType we store the actual error message.
 const getErrorDetails = (t: TFunction, errorType: DeviceLogErrorType) => {
@@ -94,7 +100,7 @@ export const DeviceLogsDisconnectedBanner = ({ onRetry }: { onRetry: VoidFunctio
       <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
         <FlexItem>{t('Offline/ device lost connection')}</FlexItem>
         <FlexItem>
-          <Button variant="link" onClick={onRetry}>
+          <Button variant="link" onClick={onRetry} style={redBannerButtonFixStyle}>
             {t('Retry')}
           </Button>
         </FlexItem>

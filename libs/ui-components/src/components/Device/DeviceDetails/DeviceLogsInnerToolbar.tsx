@@ -22,22 +22,31 @@ import {
   DeviceLogSearchParams,
   getActiveTimeFilterLabel,
   getDeviceLogLevelLabel,
+  getDeviceLogsFormResetValues,
 } from '../../../utils/deviceLogs';
 
 import './DeviceLogsInnerToolbar.css';
 
 export type DeviceLogsInnerToolbarProps = {
   lastSearchParams: DeviceLogSearchParams;
-  onSearchUpdate: (params: DeviceLogSearchParams) => Promise<boolean>;
-  onResetForm: VoidFunction;
+  isStreaming: boolean;
+  onApplySearchParams: (params: DeviceLogSearchParams) => Promise<boolean>;
+  onStartLiveStream: () => Promise<boolean>;
+  onStopLiveStream: VoidFunction;
+  onClearLiveLogsPreference: VoidFunction;
+  onClearSession: VoidFunction;
   onDownload: VoidFunction;
   onOpenRaw: VoidFunction;
 };
 
 const DeviceLogsInnerToolbar = ({
   lastSearchParams,
-  onSearchUpdate,
-  onResetForm,
+  isStreaming,
+  onApplySearchParams,
+  onStartLiveStream,
+  onStopLiveStream,
+  onClearLiveLogsPreference,
+  onClearSession,
   onDownload,
   onOpenRaw,
   children,
@@ -46,38 +55,31 @@ const DeviceLogsInnerToolbar = ({
   const { setValues, values } = useFormikContext<DeviceLogSearchParams>();
   const hasChildren = Boolean(children);
 
-  const updateLiveLogs = React.useCallback(
-    (checked: boolean) => {
-      const newParams = { ...lastSearchParams, showLiveLogs: checked };
-      void setValues(newParams);
-      return newParams;
-    },
-    [lastSearchParams, setValues],
-  );
+  const onClearSearch = React.useCallback(() => {
+    void setValues(getDeviceLogsFormResetValues(values.category));
+    onClearSession();
+  }, [onClearSession, setValues, values.category]);
 
-  // The "show live logs" switch can only be applied after the logs have been retrieved and it triggers a new search.
   const onShowLiveLogsChange = React.useCallback(
     (_event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
-      const newParams = updateLiveLogs(checked);
-      void onSearchUpdate(newParams);
+      if (checked) {
+        void onStartLiveStream();
+      } else if (isStreaming) {
+        onStopLiveStream();
+      } else if (lastSearchParams.showLiveLogs) {
+        onClearLiveLogsPreference();
+      }
     },
-    [updateLiveLogs, onSearchUpdate],
+    [isStreaming, lastSearchParams.showLiveLogs, onClearLiveLogsPreference, onStartLiveStream, onStopLiveStream],
   );
-
-  const doResetForm = React.useCallback(() => {
-    updateLiveLogs(false);
-    onResetForm();
-  }, [onResetForm, updateLiveLogs]);
 
   const onRemoveFilter = React.useCallback(
     (filterKey: keyof DeviceLogSearchParams, defaultValue: string | undefined) => () => {
-      // We sync the form values with the search params with the current filter removed.
-      // That syncs the form controls to the updated search (including reverting non-persisted form changes)
       const newParams = { ...lastSearchParams, [filterKey]: defaultValue };
       void setValues(newParams);
-      void onSearchUpdate(newParams);
+      void onApplySearchParams(newParams);
     },
-    [onSearchUpdate, lastSearchParams, setValues],
+    [onApplySearchParams, lastSearchParams, setValues],
   );
 
   const activeFilters = React.useMemo(() => {
@@ -147,7 +149,7 @@ const DeviceLogsInnerToolbar = ({
                 </LabelGroup>
               </ToolbarItem>
               <ToolbarItem>
-                <Button variant="link" isInline onClick={doResetForm}>
+                <Button variant="link" isInline onClick={onClearSearch}>
                   {t('Clear search')}
                 </Button>
               </ToolbarItem>
@@ -157,7 +159,7 @@ const DeviceLogsInnerToolbar = ({
                 <Switch
                   id="device-logs-show-live-logs"
                   label={t('Show live logs')}
-                  isChecked={values.showLiveLogs}
+                  isChecked={isStreaming || lastSearchParams.showLiveLogs}
                   onChange={onShowLiveLogsChange}
                 />
               </ToolbarItem>
