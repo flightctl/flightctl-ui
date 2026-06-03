@@ -1,0 +1,19 @@
+.fctl-device-logs-viewer {
+  position: relative;
+}
+
+.fctl-device-logs-viewer .fctl-device-logs-viewer__waiting-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  /* Prevent the overlay from blocking the inner toolbar controls */
+  pointer-events: none;
+}
+
+.fctl-device-logs-viewer .fctl-device-logs-viewer__waiting-overlay-text {
+  font-weight: var(--pf-t--global--font--weight--body--bold);
+  font-size: var(--pf-t--global--font--size--lg);
+}

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Bullseye, Spinner, Stack, StackItem } from '@patternfly/react-core';
+import { Bullseye, Flex, FlexItem, Spinner, Stack, StackItem } from '@patternfly/react-core';
 import { LogViewer } from '@patternfly/react-log-viewer';
 import { Formik } from 'formik';
 
@@ -22,6 +22,10 @@ import { UserPreferencesContext } from '../../Masthead/UserPreferencesProvider';
 import { DeviceLogsDisconnectedBanner, DeviceLogsEmptyState, DeviceLogsRetrievalError } from './DeviceLogsEmptyState';
 import DeviceLogsSearchToolbar from './DeviceLogsSearchToolbar';
 import DeviceLogsInnerToolbar from './DeviceLogsInnerToolbar';
+
+import './DeviceLogsTab.css';
+
+const LOG_VIEWER_HEIGHT = 700;
 
 type DeviceLogsTabProps = {
   deviceId: string;
@@ -165,9 +169,10 @@ const DeviceLogsTab = ({ deviceId }: DeviceLogsTabProps) => {
   const lineCount = logs.length;
   const isSearching = isConnecting || isFetching || isRetrievePending;
   const hasDisplayedLogs = Boolean(lastSearchParams && lineCount > 0);
-  const showLogViewer = Boolean(lastSearchParams && (hasDisplayedLogs || isStreaming)) && !isSearching;
+  const showLogViewer = Boolean(lastSearchParams) && (hasDisplayedLogs || isStreaming) && !isSearching;
   const showEmptyState = !isSearching && !showLogViewer && !errorTypeOrMsg;
   const showRetrievalError = !isSearching && !showLogViewer && Boolean(errorTypeOrMsg);
+  const isEmptyLiveSearch = isStreaming && lineCount === 0;
 
   return (
     <Formik<DeviceLogSearchParams>
@@ -196,38 +201,55 @@ const DeviceLogsTab = ({ deviceId }: DeviceLogsTabProps) => {
         )}
         {showEmptyState && <DeviceLogsEmptyState />}
         {showRetrievalError && <DeviceLogsRetrievalError errorTypeOrMsg={errorTypeOrMsg as DeviceLogErrorType} />}
-        {showLogViewer && lastSearchParams && (
-          <StackItem>
-            <Stack hasGutter>
-              <StackItem>
-                <LogViewer
-                  data={logs}
-                  height={700}
-                  hasLineNumbers
-                  theme={resolvedTheme}
-                  isTextWrapped
-                  scrollToRow={isStreaming && lineCount > 0 ? lineCount : undefined}
-                  toolbar={
-                    <DeviceLogsInnerToolbar
-                      lastSearchParams={lastSearchParams}
-                      isStreaming={isStreaming}
-                      onApplySearchParams={runSearchWithParams}
-                      onStartLiveStream={handleStartLiveStream}
-                      onStopLiveStream={handleStopLiveStream}
-                      onClearLiveLogsPreference={handleClearLiveLogsPreference}
-                      onClearSession={onClearSession}
-                      onDownload={onDownload}
-                      onOpenRaw={onOpenRaw}
-                    >
-                      {/* If we receive a disconection error after we had retrieved some logs, the logs stay visible. Users can download them and retry if needed. */}
-                      {errorTypeOrMsg === 'CONNECTION_CLOSED' && (
-                        <DeviceLogsDisconnectedBanner onRetry={() => void retrySearch()} />
+        {showLogViewer && (
+          <StackItem className="fctl-device-logs-viewer">
+            <LogViewer
+              data={logs}
+              height={LOG_VIEWER_HEIGHT}
+              hasLineNumbers
+              theme={resolvedTheme}
+              isTextWrapped
+              scrollToRow={isEmptyLiveSearch ? undefined : lineCount}
+              toolbar={
+                <DeviceLogsInnerToolbar
+                  lastSearchParams={lastSearchParams as DeviceLogSearchParams}
+                  isStreaming={isStreaming}
+                  hasLogs={lineCount > 0}
+                  onApplySearchParams={runSearchWithParams}
+                  onStartLiveStream={handleStartLiveStream}
+                  onStopLiveStream={handleStopLiveStream}
+                  onClearLiveLogsPreference={handleClearLiveLogsPreference}
+                  onClearSession={onClearSession}
+                  onDownload={onDownload}
+                  onOpenRaw={onOpenRaw}
+                >
+                  {/* If we receive a disconection error after we had retrieved some logs, the logs stay visible. Users can download them and retry if needed. */}
+                  {errorTypeOrMsg === 'CONNECTION_CLOSED' && (
+                    <DeviceLogsDisconnectedBanner onRetry={() => void retrySearch()} />
+                  )}
+                </DeviceLogsInnerToolbar>
+              }
+            />
+            {isEmptyLiveSearch && (
+              <Bullseye
+                className="fctl-device-logs-viewer__waiting-overlay"
+                aria-live="polite"
+                style={{ height: LOG_VIEWER_HEIGHT }}
+              >
+                <Flex direction={{ default: 'column' }} alignItems={{ default: 'alignItemsCenter' }}>
+                  <FlexItem>
+                    <Spinner size="xl" />
+                  </FlexItem>
+                  <FlexItem>
+                    <StackItem className="fctl-device-logs-viewer__waiting-overlay-text">
+                      {t(
+                        'No matching log entries yet. Log entries that match your filter will appear here in real time.',
                       )}
-                    </DeviceLogsInnerToolbar>
-                  }
-                />
-              </StackItem>
-            </Stack>
+                    </StackItem>
+                  </FlexItem>
+                </Flex>
+              </Bullseye>
+            )}
           </StackItem>
         )}
       </Stack>
