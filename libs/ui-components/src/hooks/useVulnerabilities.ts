@@ -40,7 +40,7 @@ const severitySelectionKey = (severities: Vulnerability.severity[]): string => [
 // The cveId must not contain spaces or other special characters, otherwise API fails with error 400.
 // Additionally, we make the search case-insensitive, as cveIds are always in the form "CVE-<YEAR>-<NUMBER>".
 const toApiSearchCveId = (search: string): string => {
-  const normalized = search.replace(/%/g, '').replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
+  const normalized = search.replace(/%/g, '').replace(/,/g, '').replace(/\s/g, '');
   return normalized.length ? normalized.toUpperCase() : '';
 };
 
