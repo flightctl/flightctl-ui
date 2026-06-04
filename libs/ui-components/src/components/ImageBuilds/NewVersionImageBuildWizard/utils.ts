@@ -26,6 +26,7 @@ export const getImagePromotion = (values: ImagePromotionFormValues, buildName: s
       type: NewCatalogItemTarget.type.NEW_CATALOG_ITEM,
       version: values.newItem.version,
       readme: values.newItem.readme,
+      displayName: values.newItem.displayName || undefined,
     } as NewCatalogItemTarget;
   } else {
     promotionTarget = {

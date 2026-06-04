@@ -7,9 +7,11 @@
  */
 export enum ConditionType {
   EnrollmentRequestApproved = 'Approved',
+  EnrollmentRequestTPMVerified = 'TPMVerified',
   CertificateSigningRequestApproved = 'Approved',
   CertificateSigningRequestDenied = 'Denied',
   CertificateSigningRequestFailed = 'Failed',
+  CertificateSigningRequestTPMVerified = 'TPMVerified',
   RepositoryAccessible = 'Accessible',
   ResourceSyncAccessible = 'Accessible',
   ResourceSyncResourceParsed = 'ResourceParsed',
