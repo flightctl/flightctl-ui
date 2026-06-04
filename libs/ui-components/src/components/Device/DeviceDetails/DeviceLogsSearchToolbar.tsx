@@ -96,7 +96,8 @@ const DeviceLogsToolbar = ({ onLogTypeChange, isSubmitting, onCancelSearch }: De
                   {values.category !== DeviceLogCategory.FILE && (
                     <>
                       <FlexItem>
-                        <DeviceLogsTimeRangeField />
+                        {/* Key is used to discard selected time range state selected for the previous category */}
+                        <DeviceLogsTimeRangeField key={values.category} />
                       </FlexItem>
                       <FlexItem>
                         <DeviceLogsPriorityField />
