@@ -240,12 +240,10 @@ const DeviceLogsTab = ({ deviceId }: DeviceLogsTabProps) => {
                   <FlexItem>
                     <Spinner size="xl" />
                   </FlexItem>
-                  <FlexItem>
-                    <StackItem className="fctl-device-logs-viewer__waiting-overlay-text">
-                      {t(
-                        'No matching log entries yet. Log entries that match your filter will appear here in real time.',
-                      )}
-                    </StackItem>
+                  <FlexItem className="fctl-device-logs-viewer__waiting-overlay-text">
+                    {t(
+                      'No matching log entries yet. Log entries that match your filter will appear here in real time.',
+                    )}
                   </FlexItem>
                 </Flex>
               </Bullseye>
