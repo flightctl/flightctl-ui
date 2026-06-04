@@ -1,11 +1,14 @@
 import { TFunction } from 'react-i18next';
-import { CveCountsBySeverity, Vulnerability, VulnerabilityGroup } from '@flightctl/types/alpha';
+import { CveCountsBySeverity, Vulnerability, VulnerabilityGroup, VulnerabilityGroupItem } from '@flightctl/types/alpha';
 
 const SeverityColorCritical = 'var(--pf-t--global--icon--color--severity--critical--default)';
 const SeverityColorImportant = 'var(--pf-t--global--icon--color--severity--important--default)';
 const SeverityColorModerate = 'var(--pf-t--global--icon--color--severity--moderate--default)';
 const SeverityColorMinor = 'var(--pf-t--global--icon--color--severity--minor--default)';
 const SeverityColorNone = 'var(--pf-t--global--icon--color--severity--none--default)';
+
+// Accepts different variations for "Red Hat" issuer detection
+const RED_HAT_ISSUER_PATTERN = /red\s*hat/i;
 
 type Severity = Vulnerability.severity;
 
@@ -32,6 +35,15 @@ export const VULNERABILITY_FILTER_QUERY_PARAM = 'cveId';
 export const isVulnerabilityGroup = (
   vulnerability: Vulnerability | VulnerabilityGroup,
 ): vulnerability is VulnerabilityGroup => 'findings' in vulnerability;
+
+export const isRedHatIssuer = (issuer?: string): boolean => !!issuer && RED_HAT_ISSUER_PATTERN.test(issuer);
+
+// Prefer a Red Hat advisory finding when present; otherwise use the first finding.
+export const getPrimaryVulnerabilityGroupFinding = (
+  findings: VulnerabilityGroupItem[],
+): VulnerabilityGroupItem | undefined => {
+  return findings.find((finding) => isRedHatIssuer(finding.issuer)) ?? findings[0];
+};
 
 export const getSeverityCountValue = (severity: Severity, counts: CveCountsBySeverity) => {
   switch (severity) {

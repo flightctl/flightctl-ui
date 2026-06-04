@@ -7,7 +7,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { Link, ROUTE } from '../../hooks/useNavigate';
 import { getDateNoTimeDisplay } from '../../utils/dates';
 import { isVulnerabilityGroup } from '../../utils/vulnerabilities';
-import VulnerabilitySeverityStatus from '../Status/VulnerabilitySeverityStatus';
+import { VulnerabilitySeverityBadge } from '../Status/VulnerabilitySeverityStatus';
 import VulnerabilityAffectedImages, { getAffectedImages } from './VulnerabilityAffectedImages';
 
 type VulnerabilitiesTableCompactRowProps = {
@@ -40,7 +40,7 @@ const VulnerabilitiesBaseTr = ({
         </Button>
       </Td>
       <Td dataLabel={t('Severity')}>
-        <VulnerabilitySeverityStatus severity={vulnerability.severity} />
+        <VulnerabilitySeverityBadge severity={vulnerability.severity} />
       </Td>
       {children}
       <Td dataLabel={t('Published')}>

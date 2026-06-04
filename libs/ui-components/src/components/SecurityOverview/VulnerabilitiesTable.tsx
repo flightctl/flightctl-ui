@@ -31,7 +31,6 @@ import StatusDisplay from '../Status/StatusDisplay';
 import { VulnerabilitiesTableCompactRow, VulnerabilitiesTableFullRow } from './VulnerabilitiesTableRow';
 import VulnerabilityDetailsDrawer from './VulnerabilityDetailsDrawer';
 import { VulnerabilitiesSingleEntityEmptyState } from './VulnerabilitiesEmptyState';
-
 type VulnerabilitySeverity = Vulnerability['severity'];
 
 type VulnerabilitiesTableCommonProps = {
