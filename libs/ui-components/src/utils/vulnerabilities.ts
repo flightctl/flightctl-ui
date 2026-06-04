@@ -42,7 +42,8 @@ export const isRedHatIssuer = (issuer?: string): boolean => !!issuer && RED_HAT_
 export const getPrimaryVulnerabilityGroupFinding = (
   findings: VulnerabilityGroupItem[],
 ): VulnerabilityGroupItem | undefined => {
-  return findings.find((finding) => isRedHatIssuer(finding.issuer)) ?? findings[0];
+  const findingsWithLink = findings.filter((finding) => finding.link);
+  return findingsWithLink.find((finding) => isRedHatIssuer(finding.issuer)) || findingsWithLink[0] || findings[0];
 };
 
 export const getSeverityCountValue = (severity: Severity, counts: CveCountsBySeverity) => {
