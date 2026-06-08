@@ -663,6 +663,7 @@
   "Relative file path": "Relative file path",
   "Retrieve logs": "Retrieve logs",
   "Retrieving logs": "Retrieving logs",
+  "No matching log entries yet. Log entries that match your filter will appear here in real time.": "No matching log entries yet. Log entries that match your filter will appear here in real time.",
   "YYYY-MM-DD": "YYYY-MM-DD",
   "Toggle calendar for start date": "Toggle calendar for start date",
   "Toggle calendar for end date": "Toggle calendar for end date",
