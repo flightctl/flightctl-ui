@@ -34,7 +34,7 @@ export const getEditInitialValues = (imagePromotion: ImagePromotion): ImagePromo
     },
     newItem: {
       name: newTarget.catalogItemName || '',
-      displayName: '',
+      displayName: newTarget.displayName || '',
       version: newTarget.version || '',
       readme: newTarget.readme || '',
     },

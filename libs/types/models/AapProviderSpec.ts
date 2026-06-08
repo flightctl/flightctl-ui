@@ -42,5 +42,9 @@ export type AapProviderSpec = {
    * List of OAuth2 scopes to request.
    */
   scopes: Array<string>;
+  /**
+   * Optional prefix for AAP organization names. Incoming names are exposed as prefix + name.
+   */
+  organizationNamePrefix?: string;
 };
 
