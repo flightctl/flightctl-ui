@@ -22,8 +22,10 @@ import {
 import { TFunction, Trans } from 'react-i18next';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
-import { BindingType, ImagePromotion } from '@flightctl/types/imagebuilder';
+import { BindingType, ImageExport, ImagePromotion } from '@flightctl/types/imagebuilder';
 import ImagePromotionModal from '../../ImagePromotion/ImagePromotionModal';
+import { getPromotionEditDisabledReason } from '../../ImagePromotion/utils';
+import { getDisabledTooltipProps } from '../../../utils/tooltip';
 import ImagePromotionStatus from '../../ImagePromotion/ImagePromotionStatus';
 import { getDateDisplay } from '../../../utils/dates';
 import { getExportFormatLabel, getImageReference } from '../../../utils/imageBuilds';
@@ -50,39 +52,44 @@ const detailsPermissions = [
   { kind: RESOURCE.IMAGE_PROMOTION, verb: VERB.DELETE },
 ];
 
+type PromotionAction = 'view' | 'edit' | 'delete';
+
+type PromotionActionState = {
+  id: string;
+  action: PromotionAction;
+};
+
 const ImagePromotionRow = ({
   imagePromotion,
-  onDeleteClick,
-  onEditClick,
-  canEditPromotions,
+  editDisabledReason,
+  onActionClick,
   canDeletePromotions,
 }: {
   imagePromotion: ImagePromotion;
-  onDeleteClick: VoidFunction;
-  onEditClick: VoidFunction;
-  canEditPromotions: boolean;
+  editDisabledReason?: string;
+  onActionClick: (action: PromotionAction) => void;
   canDeletePromotions: boolean;
 }) => {
   const { t } = useTranslation();
 
   const actions: IAction[] = [
-    ...(canEditPromotions
-      ? [
-          {
-            title: t('Edit image promotion'),
-            onClick: onEditClick,
-          },
-        ]
-      : []),
-    ...(canDeletePromotions
-      ? [
-          {
-            title: t('Delete image promotion'),
-            onClick: onDeleteClick,
-          },
-        ]
-      : []),
+    {
+      title: t('View image promotion'),
+      onClick: () => onActionClick('view'),
+    },
+    {
+      title: t('Edit image promotion'),
+      onClick: () => onActionClick('edit'),
+      ...getDisabledTooltipProps(editDisabledReason),
+    },
   ];
+
+  if (canDeletePromotions) {
+    actions.push({
+      title: t('Delete image promotion'),
+      onClick: () => onActionClick('delete'),
+    });
+  }
 
   return (
     <Tr>
@@ -93,11 +100,9 @@ const ImagePromotionRow = ({
       <Td dataLabel={t('Status')}>
         <ImagePromotionStatus promotion={imagePromotion} />
       </Td>
-      {!!actions.length && (
-        <Td isActionCell>
-          <ActionsColumn items={actions} />
-        </Td>
-      )}
+      <Td isActionCell>
+        <ActionsColumn items={actions} />
+      </Td>
     </Tr>
   );
 };
@@ -130,8 +135,9 @@ const ImagePromotionsCard = ({
 
   const { error, isLoading, isUpdating, pagination, imagePromotions, refetchPromotions } = useImagePromotionsContext();
 
-  const [promotionToDeleteId, setPromotionToDeleteId] = React.useState<string>();
-  const [promotionToEditId, setPromotionToEditId] = React.useState<string>();
+  const [promotionAction, setPromotionAction] = React.useState<PromotionActionState>();
+
+  const availableFormats = imageBuild.imageExports.filter(Boolean).map((e) => (e as ImageExport).spec.format);
 
   let content: React.ReactNode;
   if (error) {
@@ -153,9 +159,8 @@ const ImagePromotionsCard = ({
               <ImagePromotionRow
                 key={getResourceId(promotion)}
                 imagePromotion={promotion}
-                onEditClick={() => setPromotionToEditId(promotion.metadata.name)}
-                onDeleteClick={() => setPromotionToDeleteId(promotion.metadata.name)}
-                canEditPromotions={canEditPromotions}
+                editDisabledReason={getPromotionEditDisabledReason(promotion, availableFormats, canEditPromotions, t)}
+                onActionClick={(action) => setPromotionAction({ id: promotion.metadata.name as string, action })}
                 canDeletePromotions={canDeletePromotions}
               />
             ))}
@@ -166,30 +171,41 @@ const ImagePromotionsCard = ({
     );
   }
 
-  const promotionToDelete = imagePromotions.find((p) => p.metadata.name === promotionToDeleteId);
-  const promotionToEdit = imagePromotions.find((p) => p.metadata.name === promotionToEditId);
+  const activePromotion = promotionAction
+    ? imagePromotions.find((p) => p.metadata.name === promotionAction.id)
+    : undefined;
+
+  const closePromotionAction = () => setPromotionAction(undefined);
 
   return (
     <DetailsPageCard>
       <CardTitle>{t('Image promotions')}</CardTitle>
       <CardBody>{content}</CardBody>
-      {promotionToDelete && (
+      {activePromotion && promotionAction?.action === 'delete' && (
         <DeleteImagePromotionModal
-          promotion={promotionToDelete}
+          promotion={activePromotion}
           onClose={(hasDeleted?: boolean) => {
             if (hasDeleted) {
               refetchPromotions();
             }
-            setPromotionToDeleteId(undefined);
+            closePromotionAction();
           }}
         />
       )}
-      {promotionToEdit && (
+      {activePromotion && promotionAction?.action === 'view' && (
+        <ImagePromotionModal
+          readOnly
+          imageBuild={imageBuild}
+          imagePromotion={activePromotion}
+          onClose={closePromotionAction}
+        />
+      )}
+      {activePromotion && promotionAction?.action === 'edit' && (
         <ImagePromotionModal
           imageBuild={imageBuild}
-          imagePromotion={promotionToEdit}
+          imagePromotion={activePromotion}
           onClose={(updated) => {
-            setPromotionToEditId(undefined);
+            closePromotionAction();
             if (updated) {
               refetchPromotions();
             }
