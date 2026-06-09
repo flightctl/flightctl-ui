@@ -4,7 +4,6 @@ export type CreateCatalogFormValues = {
   name: string;
   displayName: string;
   shortDescription: string;
-  icon: string;
   provider: string;
   support: string;
 };

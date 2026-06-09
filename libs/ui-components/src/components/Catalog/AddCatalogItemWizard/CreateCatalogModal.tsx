@@ -22,7 +22,6 @@ import { getDnsSubdomainValidations, validKubernetesDnsSubdomain, validURLSchema
 import FlightCtlForm from '../../form/FlightCtlForm';
 import NameField from '../../form/NameField';
 import TextField from '../../form/TextField';
-import IconUploadField from '../../form/IconUploadField';
 import { getErrorMessage } from '../../../utils/error';
 import TextAreaField from '../../form/TextAreaField';
 import { CreateCatalogFormValues } from './types';
@@ -48,11 +47,6 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
         name: validKubernetesDnsSubdomain(t, { isRequired: true }),
         displayName: Yup.string(),
         shortDescription: Yup.string(),
-        icon: Yup.string().test(
-          'url-or-data-uri',
-          t('Must be a valid URL or data URI'),
-          (value) => !value || /^(https?:\/\/|data:)/.test(value),
-        ),
         provider: Yup.string(),
         support: validURLSchema(t),
       }),
@@ -63,7 +57,6 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
     name: catalog?.metadata.name || '',
     displayName: catalog?.spec.displayName || '',
     shortDescription: catalog?.spec.shortDescription || '',
-    icon: catalog?.spec.icon || '',
     provider: catalog?.spec.provider || '',
     support: catalog?.spec.support || '',
   };
@@ -122,9 +115,6 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
                 </FormGroup>
                 <FormGroup label={t('Short description')}>
                   <TextAreaField name="shortDescription" aria-label={t('Short description')} isDisabled={isReadOnly} />
-                </FormGroup>
-                <FormGroup label={t('Icon')}>
-                  <IconUploadField name="icon" isDisabled={isReadOnly} />
                 </FormGroup>
                 <FormGroup label={t('Provider')}>
                   <TextField name="provider" aria-label={t('Provider')} isDisabled={isReadOnly} />
