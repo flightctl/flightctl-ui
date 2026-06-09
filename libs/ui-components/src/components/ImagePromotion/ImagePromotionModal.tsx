@@ -3,25 +3,26 @@ import FlightCtlModal from '@flightctl/ui-components/src/components/common/Fligh
 import { Formik } from 'formik';
 import * as React from 'react';
 
-import ImagePromotionForm from './ImagePromotionForm';
+import ImagePromotionForm, { ImagePromotionFormContent } from './ImagePromotionForm';
 import { type ImagePromotionFormValues } from './types';
-import { defaultInitialValues, getEditInitialValues, getInitialValues } from './utils';
+import {
+  canPromotionBeEdited,
+  defaultInitialValues,
+  getAvailableExportFormats,
+  getEditInitialValues,
+  getImagePromotionValidationSchema,
+  getInitialValues,
+} from './utils';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { useCatalogItemsLookup } from '../Catalog/useCatalogItemsLookup';
-import {
-  type ExportFormatType,
-  type ImageExport,
-  type ImagePromotion,
-  type ImagePromotionList,
-} from '@flightctl/types/imagebuilder';
+import { type ImagePromotion, type ImagePromotionList } from '@flightctl/types/imagebuilder';
 import { type PatchRequest } from '@flightctl/types';
+import { type ImageBuildWithExports } from '../../types/extraTypes';
 import { getErrorMessage } from '../../utils/error';
-import { getImagePromotionValidationSchema } from './utils';
 import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from '../common/PermissionsContext';
-import { type ImageBuildWithExports } from '../../types/extraTypes';
 import { getImagePromotion } from '../ImageBuilds/NewVersionImageBuildWizard/utils';
 
 const NEW_VERSION_FROM_ANNOTATION = 'flightctl.io/new-version-from';
@@ -47,11 +48,44 @@ const LoadingModal = ({ onClose }: { onClose: VoidFunction }) => {
   );
 };
 
+const ImagePromotionViewModal = ({
+  promotion,
+  onClose,
+}: {
+  promotion: ImagePromotion;
+  onClose: (updated?: boolean) => void;
+}) => {
+  const { t } = useTranslation();
+  const formats = promotion.spec.source.exportFormats || [];
+  return (
+    <FlightCtlModal isOpen onClose={() => onClose()} variant="small">
+      <ModalHeader title={t('View image promotion')} />
+      <ModalBody>
+        <Formik<ImagePromotionFormValues> initialValues={getEditInitialValues(promotion)} onSubmit={() => {}}>
+          <ImagePromotionFormContent
+            isEdit
+            catalogs={{}}
+            catalogItems={[]}
+            canAmendExportFormats={false}
+            availableFormats={formats}
+          />
+        </Formik>
+      </ModalBody>
+      <ModalFooter>
+        <Button key="close" variant="link" onClick={() => onClose()}>
+          {t('Close')}
+        </Button>
+      </ModalFooter>
+    </FlightCtlModal>
+  );
+};
+
 type ImagePromotionFormContainerProps = {
   onClose: (updated?: boolean) => void;
   imageBuild: ImageBuildWithExports;
   parentPromotion: ImagePromotion | undefined;
   imagePromotion?: ImagePromotion;
+  canBeEdited: boolean;
 };
 
 const ImagePromotionFormContainer = ({
@@ -59,12 +93,14 @@ const ImagePromotionFormContainer = ({
   imageBuild,
   parentPromotion,
   imagePromotion,
+  canBeEdited,
 }: ImagePromotionFormContainerProps) => {
   const { t } = useTranslation();
   const { post, patch } = useFetch();
   const [error, setError] = React.useState<unknown>();
 
   const isEdit = !!imagePromotion;
+  const availableFormats = getAvailableExportFormats(imageBuild);
 
   const target = parentPromotion?.spec.target;
   const hasCatalogParams = target?.catalogName && target?.catalogItemName;
@@ -83,12 +119,12 @@ const ImagePromotionFormContainer = ({
     const catalogItem = hasCatalogParams ? getItem(target.catalogName, target.catalogItemName) : undefined;
     initialValues = {
       ...getInitialValues(catalogItem),
-      exportFormats: imageBuild.imageExports.filter(Boolean).map((ie) => (ie as ImageExport).spec.format),
+      exportFormats: getAvailableExportFormats(imageBuild),
     };
   } else {
     initialValues = {
       ...defaultInitialValues,
-      exportFormats: imageBuild.imageExports.filter(Boolean).map((ie) => (ie as ImageExport).spec.format),
+      exportFormats: getAvailableExportFormats(imageBuild),
     };
   }
 
@@ -131,11 +167,16 @@ const ImagePromotionFormContainer = ({
     >
       {({ isValid, isSubmitting, dirty, submitForm }) => (
         <FlightCtlModal isOpen onClose={isSubmitting ? undefined : () => onClose()} variant="small">
-          <ModalHeader title={isEdit ? t('Edit image promotion') : t('Add build to catalog')} />
+          <ModalHeader
+            title={
+              isEdit ? (canBeEdited ? t('Edit image promotion') : t('View image promotion')) : t('Add build to catalog')
+            }
+          />
           <ModalBody>
             <ImagePromotionForm
               isEdit={isEdit}
-              availableFormats={imageBuild.imageExports.filter(Boolean).map((e) => e?.spec.format as ExportFormatType)}
+              canAmendExportFormats={!isEdit || canBeEdited}
+              availableFormats={availableFormats}
             />
             {!!error && (
               <Alert
@@ -148,17 +189,19 @@ const ImagePromotionFormContainer = ({
             )}
           </ModalBody>
           <ModalFooter>
-            <Button
-              key="confirm"
-              variant="primary"
-              isDisabled={isSubmitting || !isValid || !dirty}
-              isLoading={isSubmitting}
-              onClick={submitForm}
-            >
-              {isEdit ? t('Save') : t('Add to catalog')}
-            </Button>
+            {(!isEdit || canBeEdited) && (
+              <Button
+                key="confirm"
+                variant="primary"
+                isDisabled={isSubmitting || !isValid || !dirty}
+                isLoading={isSubmitting}
+                onClick={submitForm}
+              >
+                {isEdit ? t('Save') : t('Add to catalog')}
+              </Button>
+            )}
             <Button key="cancel" variant="link" onClick={() => onClose()} isDisabled={isSubmitting}>
-              {t('Cancel')}
+              {!isEdit || canBeEdited ? t('Cancel') : t('Close')}
             </Button>
           </ModalFooter>
         </FlightCtlModal>
@@ -169,7 +212,7 @@ const ImagePromotionFormContainer = ({
 
 const promotionPermissions = [{ kind: RESOURCE.IMAGE_PROMOTION, verb: VERB.LIST }];
 
-const ImagePromotionModal = ({
+const ImagePromotionEditorModal = ({
   onClose,
   imageBuild,
   imagePromotion,
@@ -209,15 +252,41 @@ const ImagePromotionModal = ({
   }
 
   const parentPromotion = !isEdit ? getLatestPromotion(promotionList?.items || []) : undefined;
-
   return (
     <ImagePromotionFormContainer
       onClose={onClose}
       imageBuild={imageBuild}
       parentPromotion={parentPromotion}
       imagePromotion={imagePromotion}
+      canBeEdited
     />
   );
+};
+
+const ImagePromotionModal = ({
+  onClose,
+  imageBuild,
+  imagePromotion,
+  readOnly,
+}: {
+  onClose: (updated?: boolean) => void;
+  imageBuild: ImageBuildWithExports;
+  imagePromotion?: ImagePromotion;
+  readOnly?: boolean;
+}) => {
+  // Do not change modes once the modal opens, otherwise the user could lose unsaved changes
+  const [isViewOnly] = React.useState(() => {
+    if (!imagePromotion) {
+      return false;
+    }
+    return !!readOnly || !canPromotionBeEdited(imagePromotion, getAvailableExportFormats(imageBuild));
+  });
+
+  if (imagePromotion && isViewOnly) {
+    return <ImagePromotionViewModal promotion={imagePromotion} onClose={onClose} />;
+  }
+
+  return <ImagePromotionEditorModal onClose={onClose} imageBuild={imageBuild} imagePromotion={imagePromotion} />;
 };
 
 export default ImagePromotionModal;
