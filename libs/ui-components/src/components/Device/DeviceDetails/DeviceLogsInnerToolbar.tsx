@@ -136,6 +136,7 @@ const DeviceLogsInnerToolbar = ({
                     <Label
                       key={filter.key}
                       variant="outline"
+                      textMaxWidth="25ch"
                       onClose={
                         filter.onRemove
                           ? (e) => {
