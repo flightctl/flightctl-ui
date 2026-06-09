@@ -12,7 +12,7 @@ import {
   defaultVulnerabilitySeverityStatusItem,
   getVulnerabilitySeverityStatusItems,
 } from '../../utils/status/vulnerabilities';
-import VulnerabilitiesEmptyState from './VulnerabilitiesEmptyState';
+import { VulnerabilitiesOverviewEmptyState } from './VulnerabilitiesEmptyState';
 
 import './SecurityOverviewSummary.css';
 
@@ -26,13 +26,10 @@ const SeverityStat = ({ count, severity, item }: SeverityStatProps) => {
   const { t } = useTranslation();
 
   const SeverityIcon = item.customIcon || SeverityUndefinedIcon;
-  const iconColor = item.customColor;
 
-  // Background color is only set for severities with count > 0
-  const statusClass = count === 0 ? '' : severity.toLowerCase();
   return (
     <Flex
-      className={`fctl-security-overview-summary-box ${statusClass}`}
+      className={`fctl-security-overview-summary-box ${count > 0 ? 'fctl-security-overview-summary-box__filled' : ''} ${severity.toLowerCase()} `}
       direction={{ default: 'column' }}
       justifyContent={{ default: 'justifyContentSpaceBetween' }}
       alignItems={{ default: 'alignItemsCenter' }}
@@ -40,7 +37,8 @@ const SeverityStat = ({ count, severity, item }: SeverityStatProps) => {
       <FlexItem>
         <Flex justifyContent={{ default: 'justifyContentCenter' }}>
           <FlexItem>
-            <Icon style={{ '--pf-v6-c-icon__content--Color': iconColor } as React.CSSProperties}>
+            {/* Icon only provides the class to target the element from the CSS file*/}
+            <Icon>
               <SeverityIcon />
             </Icon>
           </FlexItem>
@@ -76,7 +74,7 @@ const SecurityOverviewSummary = () => {
           {hasVulnerabilities ? (
             <StackItem>{t('CVEs affecting images deployed across your managed fleet and devices.')}</StackItem>
           ) : (
-            <VulnerabilitiesEmptyState hasDevices={hasDevices} />
+            <VulnerabilitiesOverviewEmptyState hasDevices={hasDevices} />
           )}
         </Stack>
       </StackItem>

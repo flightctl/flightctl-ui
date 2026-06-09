@@ -13,9 +13,23 @@ import UpdateStep, { isUpdateStepValid } from './steps/UpdateStep';
 import { getErrorMessage } from '../../../utils/error';
 import ReviewStep from './steps/ReviewStep';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
+import { isWizardStepDisabled } from '../../../utils/wizards';
 
 const versionStepId = 'version-step';
 const reviewStepId = 'review-step';
+
+const orderedIds = [versionStepId, reviewStepId];
+
+const getValidStepIds = (errors: FormikErrors<InstallSpecFormik>): string[] => {
+  const validStepIds: string[] = [];
+  if (isUpdateStepValid(errors)) {
+    validStepIds.push(versionStepId);
+  }
+  if (validStepIds.length === orderedIds.length - 1) {
+    validStepIds.push(reviewStepId);
+  }
+  return validStepIds;
+};
 
 const validateUpdateWizardStep = (activeStepId: string, errors: FormikErrors<InstallSpecFormik>) => {
   if (activeStepId === versionStepId) return isUpdateStepValid(errors);
@@ -34,9 +48,9 @@ const WizardContent: React.FC<WizardContentProps> = ({ currentVersion, catalogIt
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
 
-  const { values } = useFormikContext<InstallSpecFormik>();
+  const { errors } = useFormikContext<InstallSpecFormik>();
 
-  const isVersionStepValid = !!values.version;
+  const validStepIds = getValidStepIds(errors);
 
   return (
     <>
@@ -62,7 +76,11 @@ const WizardContent: React.FC<WizardContentProps> = ({ currentVersion, catalogIt
             <UpdateStep catalogItem={catalogItem} currentVersion={currentVersion} isEdit={isEdit} />
           )}
         </WizardStep>
-        <WizardStep name={t('Review and deploy')} id={reviewStepId} isDisabled={!isVersionStepValid}>
+        <WizardStep
+          name={t('Review and deploy')}
+          id={reviewStepId}
+          isDisabled={isWizardStepDisabled(reviewStepId, orderedIds, validStepIds)}
+        >
           {currentStep?.id === reviewStepId && <ReviewStep error={error} isEdit={isEdit} />}
         </WizardStep>
       </Wizard>

@@ -36,6 +36,7 @@ import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { useAppContext } from '../../../hooks/useAppContext';
 import ResourceLink from '../../common/ResourceLink';
+import { isWizardStepDisabled } from '../../../utils/wizards';
 
 const orderedIds = [generalInfoStepId, deviceTemplateStepId, updatePolicyStepId, reviewStepId];
 
@@ -55,11 +56,6 @@ const getValidStepIds = (formikErrors: FormikErrors<FleetFormValues>): string[] 
     validStepIds.push(reviewStepId);
   }
   return validStepIds;
-};
-
-const isDisabledStep = (stepId: string, validStepIds: string[]) => {
-  const validIndex = validStepIds.indexOf(stepId);
-  return validIndex === -1 || validIndex !== orderedIds.indexOf(stepId);
 };
 
 const CreateFleetWizard = () => {
@@ -145,7 +141,7 @@ const CreateFleetWizard = () => {
                 <WizardStep
                   name={t('Device template')}
                   id={deviceTemplateStepId}
-                  isDisabled={isDisabledStep(deviceTemplateStepId, validStepIds)}
+                  isDisabled={isWizardStepDisabled(deviceTemplateStepId, orderedIds, validStepIds)}
                 >
                   {currentStep?.id === deviceTemplateStepId && (
                     <DeviceTemplateStep isFleet isReadOnly={isReadOnly} labels={fleet?.metadata.labels} />
@@ -154,14 +150,14 @@ const CreateFleetWizard = () => {
                 <WizardStep
                   name={t('Updates')}
                   id={updatePolicyStepId}
-                  isDisabled={isDisabledStep(updatePolicyStepId, validStepIds)}
+                  isDisabled={isWizardStepDisabled(updatePolicyStepId, orderedIds, validStepIds)}
                 >
                   {currentStep?.id === updatePolicyStepId && <UpdatePolicyStep isReadOnly={isReadOnly} />}
                 </WizardStep>
                 <WizardStep
                   name={reviewStepLabel}
                   id={reviewStepId}
-                  isDisabled={isDisabledStep(reviewStepId, validStepIds)}
+                  isDisabled={isWizardStepDisabled(reviewStepId, orderedIds, validStepIds)}
                 >
                   {currentStep?.id === reviewStepId && <ReviewStep error={error} />}
                 </WizardStep>

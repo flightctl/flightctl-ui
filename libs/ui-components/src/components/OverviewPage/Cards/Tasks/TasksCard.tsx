@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   Bullseye,
-  Card,
   CardBody,
   CardTitle,
   Content,
@@ -16,6 +15,7 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import { usePendingEnrollmentRequestsCount } from '../../../../hooks/usePendingEnrollmentRequestsCount';
 import { Link, ROUTE } from '../../../../hooks/useNavigate';
 import ErrorAlert from '../../../ErrorAlert/ErrorAlert';
+import DetailsPageCard from '../../../DetailsPage/DetailsPageCard';
 
 const TasksCard = () => {
   const { t } = useTranslation();
@@ -55,10 +55,10 @@ const TasksCard = () => {
   }
 
   return (
-    <Card isFullHeight>
+    <DetailsPageCard>
       <CardTitle>{t('Tasks')}</CardTitle>
       <CardBody>{content}</CardBody>
-    </Card>
+    </DetailsPageCard>
   );
 };
 

@@ -15,4 +15,5 @@ export enum CatalogItemArtifactType {
   CatalogItemArtifactTypeVhd = 'vhd',
   CatalogItemArtifactTypeRaw = 'raw',
   CatalogItemArtifactTypeGce = 'gce',
+  CatalogItemArtifactTypeQcow2DiskContainer = 'qcow2-disk-container',
 }

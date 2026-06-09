@@ -15,7 +15,7 @@ const apiServer = `${window.location.hostname}${apiPort ? `:${apiPort}` : ''}`;
 const uiProxy = `${window.location.protocol}//${apiServer}`;
 export const apiProxy = `${uiProxy}/api`;
 
-const imageBuilderPathRegex = /^image(builds|exports)/;
+const imageBuilderPathRegex = /^image(builds|exports|promotions)/;
 const catalogPathRegex = /^(catalogs|catalogitems)/;
 const vulnerabilityPathRegex = /^vulnerabilities/;
 

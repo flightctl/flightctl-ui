@@ -9,13 +9,17 @@ import { PaginationDetails, useTablePagination } from '../../hooks/useTablePagin
 import { PAGE_SIZE } from '../../constants';
 
 type RepositoriesEndpointArgs = {
+  name?: string;
   nextContinue?: string;
 };
 
-const getRepositoriesEndpoint = ({ nextContinue }: RepositoriesEndpointArgs) => {
+const getRepositoriesEndpoint = ({ name, nextContinue }: RepositoriesEndpointArgs) => {
   const params = new URLSearchParams();
   if (nextContinue !== undefined) {
     params.set('limit', `${PAGE_SIZE}`);
+  }
+  if (name) {
+    params.set('fieldSelector', `metadata.name contains ${name}`);
   }
   if (nextContinue) {
     params.set('continue', nextContinue);
@@ -29,7 +33,9 @@ export const useRepositoriesEndpoint = (args: RepositoriesEndpointArgs): [string
   return [repositoriesEndpointDebounced, endpoint !== repositoriesEndpointDebounced];
 };
 
-export const useRepositories = (): [
+export const useRepositories = (
+  name: string | undefined,
+): [
   Repository[],
   boolean,
   unknown,
@@ -38,7 +44,16 @@ export const useRepositories = (): [
   Pick<PaginationDetails<RepositoryList>, 'currentPage' | 'setCurrentPage' | 'itemCount'>,
 ] => {
   const { currentPage, setCurrentPage, itemCount, nextContinue, onPageFetched } = useTablePagination<RepositoryList>();
-  const [repoEndpoint, isDebouncing] = useRepositoriesEndpoint({ nextContinue });
+
+  const prevNameRef = React.useRef(name);
+  React.useEffect(() => {
+    if (prevNameRef.current !== name) {
+      prevNameRef.current = name;
+      setCurrentPage(1);
+    }
+  }, [name, setCurrentPage]);
+
+  const [repoEndpoint, isDebouncing] = useRepositoriesEndpoint({ name, nextContinue });
 
   const [repoList, isLoading, error, refetch] = useFetchPeriodically<RepositoryList>(
     {

@@ -15,6 +15,8 @@ import {
 import { validImageBuildName } from '../../form/validations';
 import { ImageBuildFormValues } from './types';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
+import { defaultInitialValues } from '../../ImagePromotion/utils';
+import { getImagePromotionValidationSchema } from '../../ImagePromotion/utils';
 
 export const PUBLIC_KEY_MAX_LENGTH = 8 * 1024; // (8 KB)
 
@@ -43,7 +45,7 @@ const USERNAME_MAX_LENGTH = 256;
 const USERNAME_REGEX = /^[A-Za-z0-9_.][A-Za-z0-9_.-]*\$?$/;
 
 /** Returns an error message for image name: invalid chars, or invalid format. */
-const getImageNameValidationError = (value: string, t: TFunction): string | undefined => {
+export const getImageNameValidationError = (value: string, t: TFunction): string | undefined => {
   if (!value) return undefined;
   if (value.length > OCI_IMAGE_NAME_MAX_LENGTH) {
     return t('Image name must not exceed {{max}} characters.', { max: OCI_IMAGE_NAME_MAX_LENGTH });
@@ -57,7 +59,7 @@ const getImageNameValidationError = (value: string, t: TFunction): string | unde
   return undefined;
 };
 
-const getImageTagValidationError = (value: string, t: TFunction): string | undefined => {
+export const getImageTagValidationError = (value: string, t: TFunction): string | undefined => {
   if (!value) return undefined;
   if (value.length > OCI_IMAGE_TAG_MAX_LENGTH) {
     return t('Image tag must not exceed {{max}} characters.', { max: OCI_IMAGE_TAG_MAX_LENGTH });
@@ -141,8 +143,8 @@ const validImageBuildImageFields = (t: TFunction) =>
   });
 
 export const getValidationSchema = (t: TFunction) => {
-  return Yup.lazy((values: ImageBuildFormValues) =>
-    Yup.object<ImageBuildFormValues>({
+  return Yup.lazy((values: ImageBuildFormValues) => {
+    const imageBuildSchema = Yup.object<ImageBuildFormValues>({
       buildName: validImageBuildName(t),
       source: validImageBuildImageFields(t).required(t('Source image is required')),
       destination: validImageBuildImageFields(t).required(t('Target image is required')),
@@ -169,8 +171,14 @@ export const getValidationSchema = (t: TFunction) => {
               })
           : Yup.string(),
       }),
-    }),
-  );
+    });
+
+    if (values.promoteToCatalog) {
+      return imageBuildSchema.concat(getImagePromotionValidationSchema(t));
+    }
+
+    return imageBuildSchema;
+  });
 };
 
 // Returns an array with one item per format (VMDK, QCOW2, ISO), where each item is either
@@ -223,39 +231,10 @@ export const toImageBuildWithExports = (imageBuild: ImageBuild): ImageBuildWithE
   };
 };
 
-const getExistingImageData = (image: ImageBuildSource | ImageBuildDestination, repoIds: Set<string>) => {
-  if (repoIds.has(image.repository)) {
-    return image;
-  }
-  // When copying the image build, drop the reference to the repository if it doesn't exist anymore
+export const getInitialValues = (): ImageBuildFormValues => {
   return {
-    ...image,
-    repository: '',
-  };
-};
-
-export const getInitialValues = (
-  imageBuild: ImageBuildWithExports | undefined,
-  repoIds: Set<string>,
-): ImageBuildFormValues => {
-  if (imageBuild) {
-    const exportFormats = imageBuild.imageExports
-      .filter((ie) => ie !== undefined)
-      .map((imageExport) => imageExport.spec.format);
-    const userConfig = imageBuild.spec.userConfiguration;
-    return {
-      // Since we're always creating new imageBuilds, we don't copy the current name
-      buildName: '',
-      source: getExistingImageData(imageBuild.spec.source, repoIds),
-      destination: getExistingImageData(imageBuild.spec.destination, repoIds),
-      bindingType: imageBuild.spec.binding.type as BindingType,
-      exportFormats: exportFormats || [],
-      remoteAccessEnabled: !!(userConfig?.username || userConfig?.publickey),
-      userConfiguration: userConfig || { username: '', publickey: '' },
-    };
-  }
-
-  return {
+    ...defaultInitialValues,
+    promoteToCatalog: true,
     buildName: '',
     source: {
       repository: '',
@@ -337,7 +316,10 @@ export const getImageExportResource = (imageBuildName: string, format: ExportFor
   };
 };
 
-export const getImageExportResources = (values: ImageBuildFormValues, imageBuildName: string): ImageExport[] => {
+export const getImageExportResources = (
+  values: Pick<ImageBuildFormValues, 'exportFormats'>,
+  imageBuildName: string,
+): ImageExport[] => {
   if (!values.exportFormats || values.exportFormats.length === 0) {
     return [];
   }

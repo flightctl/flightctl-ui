@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   Bullseye,
-  Card,
   CardBody,
   CardTitle,
   DescriptionList,
@@ -101,7 +100,7 @@ const EnrollmentRequestDetails = () => {
     >
       <Grid hasGutter>
         <GridItem md={12}>
-          <Card>
+          <DetailsPageCard>
             <CardTitle>{t('Details')}</CardTitle>
             <CardBody>
               <DescriptionList columnModifier={{ lg: '3Col' }}>
@@ -137,7 +136,7 @@ const EnrollmentRequestDetails = () => {
                 ))}
               </DescriptionList>
             </CardBody>
-          </Card>
+          </DetailsPageCard>
         </GridItem>
         {erSystemInfo.customInfo.length > 0 && (
           <GridItem md={6}>

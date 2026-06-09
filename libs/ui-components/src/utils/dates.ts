@@ -60,7 +60,7 @@ export const timeSinceEpochText = (t: TFunction, epochOffset: number) => {
   if (interval > 1) {
     return t('{{count}} minutes ago', { count: Math.floor(interval) });
   }
-  return t('< 1 minute ago');
+  return t('just now');
 };
 
 const timeSinceText = (t: TFunction, timestampStr?: string) => {
@@ -71,4 +71,13 @@ const timeSinceText = (t: TFunction, timestampStr?: string) => {
   return timeSinceEpochText(t, new Date(timestampStr).getTime());
 };
 
-export { getDateDisplay, getDateNoTimeDisplay, timeSinceText };
+const getNextCalendarDay = (isoDate: string): string => {
+  const y = Number(isoDate.slice(0, 4));
+  const mo = Number(isoDate.slice(5, 7)) - 1;
+  const d = Number(isoDate.slice(8, 10));
+  const next = new Date(Date.UTC(y, mo, d) + 86400000);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${next.getUTCFullYear()}-${pad(next.getUTCMonth() + 1)}-${pad(next.getUTCDate())}`;
+};
+
+export { getNextCalendarDay, getDateDisplay, getDateNoTimeDisplay, timeSinceText };

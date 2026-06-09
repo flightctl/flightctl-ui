@@ -5,7 +5,7 @@ import { Blocker, BlockerFunction } from 'react-router-dom';
 import { useFormikContext } from 'formik';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { FlightCtlApp, useAppContext } from '../../hooks/useAppContext';
+import { useAppContext } from '../../hooks/useAppContext';
 
 const ConfirmNavigationDialog = ({ blocker }: { blocker: Blocker }) => {
   const { t } = useTranslation();
@@ -74,15 +74,10 @@ const BrowserBlocker = ({ lock }: { lock: boolean }) => {
 const LeaveFormConfirmation = () => {
   const { dirty, isSubmitting } = useFormikContext();
   const {
-    appType,
     router: { useBlocker },
   } = useAppContext();
 
   const lock = !isSubmitting && dirty;
-
-  if (appType === FlightCtlApp.AAP) {
-    return null;
-  }
 
   // workaround for OCP plugin where useBlocker is not yet available due to older react-router-dom version
   return useBlocker ? <RouterBlocker lock={lock} /> : <BrowserBlocker lock={lock} />;

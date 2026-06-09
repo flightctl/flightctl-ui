@@ -9,24 +9,31 @@ export type PermissionCheck = {
   verb: VERB;
 };
 
+const isVerbAllowed = (operations: string[], verb: string): boolean =>
+  operations.includes('*') || operations.includes(verb);
+
 /**
  * Helper function to check if a permission (resource + verb) is allowed
+ *
  * Handles wildcards: "*" in resource means all resources, "*" in operations means all operations
+ * Handles exceptions to the wildcard rules, e.g. "operations":[],"resource":"devices/console" prevents the user from accessing the device console.
  */
 const isPermissionAllowed = (userPermissions: Permission[], permissionCheck: PermissionCheck): boolean => {
-  for (const permission of userPermissions) {
-    // Check if resource matches (exact match or wildcard)
-    const resourceMatches = permission.resource === '*' || permission.resource === permissionCheck.kind;
-    if (resourceMatches) {
-      // Check if operation/verb matches (exact match or wildcard)
-      const verbMatches = permission.operations.includes('*') || permission.operations.includes(permissionCheck.verb);
-      if (verbMatches) {
-        return true;
-      }
-    }
+  const kindPermissions = userPermissions.filter((permission) => permission.resource === permissionCheck.kind);
+
+  // Check for explicit permission denial for this resource (kind)
+  if (kindPermissions.some((permission) => permission.operations.length === 0)) {
+    return false;
   }
 
-  return false;
+  // Check for explicit permission grant for this resource (kind) and verb
+  if (kindPermissions.some((permission) => isVerbAllowed(permission.operations, permissionCheck.verb))) {
+    return true;
+  }
+
+  // If there are no exceptions for this resource/verb, check for wildcard permissions
+  const wildcardPermissions = userPermissions.filter((permission) => permission.resource === '*');
+  return wildcardPermissions.some((p) => isVerbAllowed(p.operations, permissionCheck.verb));
 };
 
 export type PermissionsContextType = {
@@ -43,7 +50,7 @@ export const PermissionsContextProvider = ({ children }: React.PropsWithChildren
   const [error, setError] = React.useState<string | undefined>();
   const { currentOrganization } = useOrganizationGuardContext();
 
-  const orgId = currentOrganization?.metadata?.name;
+  const orgId = currentOrganization?.id;
 
   const { get } = useFetch();
 

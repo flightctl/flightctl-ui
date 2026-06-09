@@ -37,19 +37,10 @@ export const getFullArtifactURI = (artifact: CatalogItemArtifact, version: Catal
     return undefined;
   }
 
-  try {
-    const url = new URL(versionRef);
-    if (url.host !== '') {
-      return versionRef;
-    }
-  } catch {}
-
-  try {
-    const url = new URL(artifact.uri);
-    if (url.host !== '' && url.protocol !== 'oci:') {
-      return `${artifact.uri}/${versionRef}`;
-    }
-  } catch {}
+  // tag, nor digest can contain '/'
+  if (versionRef.includes('/')) {
+    return versionRef;
+  }
 
   if (tagRegex.test(versionRef)) {
     return `${artifact.uri}:${versionRef}`;
@@ -365,7 +356,7 @@ export const getArtifactLabel = (t: TFunction, type: CatalogItemArtifactType, na
   let artifactType: CatalogItemArtifactType;
   switch (type) {
     case CatalogItemArtifactType.CatalogItemArtifactTypeQcow2:
-      artifactType = t('OpenShift Virtualization');
+      artifactType = t('QCOW2');
       break;
     case CatalogItemArtifactType.CatalogItemArtifactTypeIso:
       artifactType = t('Bare Metal');
@@ -391,6 +382,8 @@ export const getArtifactLabel = (t: TFunction, type: CatalogItemArtifactType, na
     case CatalogItemArtifactType.CatalogItemArtifactTypeContainer:
       artifactType = t('Cloud native');
       break;
+    case CatalogItemArtifactType.CatalogItemArtifactTypeQcow2DiskContainer:
+      artifactType = t('OpenShift Virtualization');
   }
 
   if (name) {

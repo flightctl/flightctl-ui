@@ -1,6 +1,6 @@
 import { CatalogItem } from '@flightctl/types/alpha';
 import { Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
-import { Formik, useFormikContext } from 'formik';
+import { Formik, FormikErrors, useFormikContext } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
 import { load } from 'js-yaml';
@@ -22,6 +22,26 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { getInitialAppConfig } from './utils';
 import { useSubmitCatalogForm } from '../useSubmitCatalogForm';
 import { validApplicationAndVolumeName } from '../../form/validations';
+import { isWizardStepDisabled } from '../../../utils/wizards';
+
+const orderedIds = [specificationsStepId, selectTargetStepId, appConfigStepId, reviewStepId];
+
+const getValidStepIds = (errors: FormikErrors<InstallAppFormik>, values: InstallAppFormik): string[] => {
+  const validStepIds: string[] = [];
+  if (isSpecsStepValid(errors)) {
+    validStepIds.push(specificationsStepId);
+  }
+  if (isSelectTargetStepValid(errors)) {
+    validStepIds.push(selectTargetStepId);
+  }
+  if (isAppConfigStepValid(values, errors)) {
+    validStepIds.push(appConfigStepId);
+  }
+  if (validStepIds.length === orderedIds.length - 1) {
+    validStepIds.push(reviewStepId);
+  }
+  return validStepIds;
+};
 
 export const validateAppWizardStep: FlightCtlWizardFooterProps<InstallAppFormik>['validateStep'] = (
   activeStepId,
@@ -55,6 +75,7 @@ const InstallAppWizardContent = ({
 }: InstallAppWizardContentProps) => {
   const { t } = useTranslation();
   const { values, errors } = useFormikContext<InstallAppFormik>();
+  const validStepIds = getValidStepIds(errors, values);
   return isSuccessful ? (
     <UpdateSuccessPage />
   ) : (
@@ -81,22 +102,24 @@ const InstallAppWizardContent = ({
             <SpecificationsStep catalogItem={catalogItem} />
           )}
         </WizardStep>
-        <WizardStep name={t('Select target')} id={selectTargetStepId} isDisabled={!isSpecsStepValid(errors)}>
+        <WizardStep
+          name={t('Select target')}
+          id={selectTargetStepId}
+          isDisabled={isWizardStepDisabled(selectTargetStepId, orderedIds, validStepIds)}
+        >
           {currentStep?.id === selectTargetStepId && <SelectTargetStep catalogItem={catalogItem} />}
         </WizardStep>
         <WizardStep
           name={t('Application configuration')}
           id={appConfigStepId}
-          isDisabled={!isSelectTargetStepValid(errors) || !isSpecsStepValid(errors)}
+          isDisabled={isWizardStepDisabled(appConfigStepId, orderedIds, validStepIds)}
         >
           {currentStep?.id === appConfigStepId && <AppConfigStep schemaErrors={schemaErrors} />}
         </WizardStep>
         <WizardStep
           name={t('Review and deploy')}
           id={reviewStepId}
-          isDisabled={
-            !isAppConfigStepValid(values, errors) || !isSpecsStepValid(errors) || !isSelectTargetStepValid(errors)
-          }
+          isDisabled={isWizardStepDisabled(reviewStepId, orderedIds, validStepIds)}
         >
           {currentStep?.id === reviewStepId && <ReviewStep error={error} catalogItem={catalogItem} />}
         </WizardStep>

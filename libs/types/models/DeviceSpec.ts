@@ -4,7 +4,6 @@
 /* eslint-disable */
 import type { ApplicationProviderSpec } from './ApplicationProviderSpec';
 import type { ConfigProviderSpec } from './ConfigProviderSpec';
-import type { DependenciesSync } from './DependenciesSync';
 import type { DeviceConsole } from './DeviceConsole';
 import type { DeviceDecommission } from './DeviceDecommission';
 import type { DeviceOsSpec } from './DeviceOsSpec';
@@ -14,7 +13,6 @@ import type { ResourceMonitor } from './ResourceMonitor';
  * DeviceSpec describes a device.
  */
 export type DeviceSpec = {
-  dependenciesSync?: DependenciesSync;
   updatePolicy?: DeviceUpdatePolicySpec;
   os?: DeviceOsSpec;
   /**

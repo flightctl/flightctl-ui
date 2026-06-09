@@ -14,6 +14,7 @@ import (
 
 	"github.com/flightctl/flightctl-ui/common"
 	"github.com/flightctl/flightctl-ui/config"
+	clientorigin "github.com/flightctl/flightctl-ui/origin"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
@@ -76,9 +77,15 @@ func buildDeviceConsoleURL(r *http.Request) (string, error) {
 		return "", fmt.Errorf("invalid base API URL: %w", err)
 	}
 
+	// Websocket scheme must match backend API transport
+	wsScheme := "wss"
+	if strings.EqualFold(baseURL.Scheme, "http") {
+		wsScheme = "ws"
+	}
+
 	// Construct the websocket URL safely using url.URL to prevent SSRF
 	consoleURL := &url.URL{
-		Scheme: "wss",
+		Scheme: wsScheme,
 		Host:   baseURL.Host,
 		Path:   path.Join("/ws/v1/devices", deviceId, "console"),
 	}
@@ -97,13 +104,18 @@ func buildDeviceConsoleURL(r *http.Request) (string, error) {
 
 // checkOrigin validates the Origin header against allowed origins.
 // It allows:
+//   - Requests without an Origin header (same-origin from browsers)
 //   - Requests from the configured BaseUiUrl origin
 //   - Same-origin requests (Origin matches request Host)
-//   - Requests without an Origin header (same-origin from browsers)
+//   - OpenShift console plugin proxy only: Origin is the console's documented placeholder
+//     (http://localhost) and X-Forwarded-Host/Proto match BASE_UI_URL — not a blanket bypass
+//     for arbitrary Origin values when forwarded headers match the destination host
 //
 // Host comparisons are case-insensitive per RFC 3986.
 func checkOrigin(r *http.Request) bool {
 	origin := r.Header.Get("Origin")
+	xfh := r.Header.Get("X-Forwarded-Host")
+	effectiveOrigin := clientorigin.EffectiveRequestOrigin(r)
 
 	// If no Origin header is present, allow the request (same-origin from browsers).
 	if origin == "" {
@@ -112,26 +124,55 @@ func checkOrigin(r *http.Request) bool {
 
 	originURL, err := url.Parse(origin)
 	if err != nil {
-		// Log rejected origin safely using %q to escape user-controlled input and prevent log injection
 		log.Warnf("Rejected WebSocket connection - invalid Origin header: %q", origin)
 		return false
 	}
 
 	baseURL, err := url.Parse(config.BaseUiUrl)
 	if err != nil {
-		log.WithError(err).Warnf("Failed to parse BaseUiUrl for origin check")
-	} else if originURL.Scheme == baseURL.Scheme && strings.EqualFold(originURL.Host, baseURL.Host) {
+		log.WithError(err).Debugf("WebSocket origin check: failed to parse BaseUiUrl")
+	} else if clientorigin.FromURL(originURL) == clientorigin.FromURL(baseURL) {
 		return true
 	}
 
-	// Allow same-origin requests
-	if strings.EqualFold(originURL.Host, r.Host) {
+	// Allow same-origin requests (direct access to the proxy, not via console plugin).
+	if clientorigin.FromURL(originURL) == clientorigin.DirectRequestOrigin(r) {
 		return true
 	}
 
-	// Log rejected origin safely using %q to escape user-controlled input and prevent log injection
-	log.Warnf("Rejected WebSocket connection - unauthorized Origin header: %q", origin)
+	if isOpenShiftConsolePluginProxyOriginAllowed(r, origin, baseURL, xfh, effectiveOrigin) {
+		return true
+	}
+
+	log.Debugf(
+		"Rejected WebSocket connection - Origin=%q requestHost=%q BASE_UI_URL=%q effectiveOrigin=%q xForwardedHost=%q",
+		origin, r.Host, config.BaseUiUrl, effectiveOrigin, xfh,
+	)
 	return false
+}
+
+// isOpenShiftConsolePluginProxyOriginAllowed permits the console WebSocket backend hop only when
+// Origin is openshift/console's fixed placeholder (http://localhost), not when an attacker
+// supplies another Origin but forges X-Forwarded-Host to match BASE_UI_URL.
+func isOpenShiftConsolePluginProxyOriginAllowed(
+	r *http.Request,
+	origin string,
+	baseURL *url.URL,
+	xfh, effectiveOrigin string,
+) bool {
+	if config.OcpPlugin != "true" {
+		return false
+	}
+	if !config.ShouldTrustForwardedHeaders(r) || strings.TrimSpace(xfh) == "" {
+		return false
+	}
+	if baseURL == nil {
+		return false
+	}
+	if !clientorigin.IsOpenShiftConsoleProxyWebSocketOrigin(origin) {
+		return false
+	}
+	return clientorigin.FromURL(baseURL) == effectiveOrigin
 }
 
 func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {

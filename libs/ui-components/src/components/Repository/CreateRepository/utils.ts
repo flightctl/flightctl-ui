@@ -17,7 +17,7 @@ import {
   SshConfig,
 } from '@flightctl/types';
 
-import { RepositoryFormValues, ResourceSyncFormValue } from './types';
+import { BaseImage, RepositoryFormValues, ResourceSyncFormValue } from './types';
 import { getErrorMessage } from '../../../utils/error';
 import { appendJSONPatch } from '../../../utils/patch';
 import {
@@ -26,6 +26,10 @@ import {
   maxLengthString,
   validKubernetesDnsSubdomain,
 } from '../../form/validations';
+import {
+  getImageNameValidationError,
+  getImageTagValidationError,
+} from '../../ImageBuilds/CreateImageBuildWizard/utils';
 
 const MAX_PATH_LENGTH = 2048;
 const gitRepoUrlRegex = new RegExp(
@@ -233,6 +237,13 @@ const getHttpRepositoryPatches = (values: RepositoryFormValues, repoSpec: HttpRe
   return patches;
 };
 
+const hasSameTags = (tagsA: string[], tagsB: string[]) => {
+  if (tagsA.length !== tagsB.length) {
+    return false;
+  }
+  return tagsA.every((tag) => tagsB.includes(tag));
+};
+
 const getOciRepositoryPatches = (values: RepositoryFormValues, repoSpec: OciRepoSpec): PatchRequest => {
   const formOciConfig = values.ociConfig;
   if (!formOciConfig) {
@@ -259,6 +270,31 @@ const getOciRepositoryPatches = (values: RepositoryFormValues, repoSpec: OciRepo
     originalValue: repoSpec.accessMode,
     path: '/spec/accessMode',
   });
+
+  if (!formOciConfig.baseImages?.length) {
+    if (repoSpec.baseImages?.length) {
+      patches.push({ op: 'remove', path: '/spec/baseImages' });
+    }
+  } else if (!repoSpec.baseImages?.length) {
+    patches.push({ op: 'add', path: '/spec/baseImages', value: formOciConfig.baseImages });
+  } else {
+    if (repoSpec.baseImages.length !== formOciConfig.baseImages.length) {
+      patches.push({ op: 'replace', path: '/spec/baseImages', value: formOciConfig.baseImages });
+    } else {
+      if (
+        !formOciConfig.baseImages.every((baseImg) =>
+          repoSpec.baseImages?.find(
+            (img) =>
+              img.displayName === baseImg.displayName &&
+              img.imageName === baseImg.imageName &&
+              hasSameTags(baseImg.tags, img.tags),
+          ),
+        )
+      ) {
+        patches.push({ op: 'replace', path: '/spec/baseImages', value: formOciConfig.baseImages });
+      }
+    }
+  }
 
   if (!values.useAdvancedConfig) {
     if (repoSpec.ociAuth) {
@@ -327,6 +363,7 @@ const getOciRepositoryPatches = (values: RepositoryFormValues, repoSpec: OciRepo
   } else if (repoSpec.ociAuth) {
     patches.push({ op: 'remove', path: '/spec/ociAuth' });
   }
+
   return patches;
 };
 
@@ -514,6 +551,7 @@ export const getInitValues = ({
         registry: '',
         scheme: OciRepoSpec.scheme.HTTPS,
         accessMode: options?.writeAccessOnly ? OciRepoSpec.accessMode.READ_WRITE : OciRepoSpec.accessMode.READ,
+        baseImages: [],
       };
     }
 
@@ -566,6 +604,7 @@ export const getInitValues = ({
         : undefined,
       caCrt: repository.spec['ca.crt'] ? atob(repository.spec['ca.crt']) : undefined,
       skipServerVerification: repository.spec.skipServerVerification,
+      baseImages: repository.spec.baseImages,
     };
   } else if (repository.spec.type === RepoSpecType.RepoSpecTypeHttp) {
     formValues.configType = 'http';
@@ -745,6 +784,54 @@ export const repositorySchema =
           }),
           caCrt: Yup.string().test('valid-certificate', validRepositoryCertificate(t)),
           skipServerVerification: Yup.boolean(),
+          baseImages: Yup.lazy((baseImages: BaseImage[]) =>
+            Yup.array().of(
+              Yup.object({
+                displayName: Yup.string(),
+                imageName: Yup.string()
+                  .required(t('Image name is required'))
+                  .test('image-name-unique', function (value) {
+                    const hasDuplicate = baseImages.filter(({ imageName }) => imageName === value).length > 1;
+                    return hasDuplicate ? this.createError({ message: t('Image name must be unique') }) : true;
+                  })
+                  .test('oci-image-name', function (value) {
+                    if (!value) return true;
+                    const error = getImageNameValidationError(value, t);
+                    return error ? this.createError({ message: error }) : true;
+                  }),
+                tags: Yup.array()
+                  .min(1, t('At least one tag is required'))
+                  .test('unique tags', t('Tags must be unique'), (tags) => {
+                    const uniqueTags = new Set(tags);
+                    return uniqueTags.size === tags?.length;
+                  })
+                  .test('invalid-tags', (tags: string[] | undefined, testContext) => {
+                    const tagsValidation = (tags || []).reduce(
+                      (acc, tag) => {
+                        if (!tag.trim()) {
+                          acc[tag] = t('Tag is required');
+                          return acc;
+                        }
+                        const error = getImageTagValidationError(tag, t);
+                        if (error) {
+                          acc[tag] = error;
+                        }
+                        return acc;
+                      },
+                      {} as Record<string, string>,
+                    );
+
+                    return Object.keys(tagsValidation).length > 0
+                      ? testContext.createError({
+                          message: t('The following tags are not valid: {{invalidTags}}', {
+                            invalidTags: `${Object.keys(tagsValidation).join(', ')}`,
+                          }),
+                        })
+                      : true;
+                  }),
+              }),
+            ),
+          ),
         }),
       });
     }
@@ -807,6 +894,10 @@ export const getRepository = (values: Omit<RepositoryFormValues, 'useResourceSyn
       scheme: values.ociConfig.scheme || OciRepoSpec.scheme.HTTPS,
       accessMode: values.ociConfig.accessMode || OciRepoSpec.accessMode.READ,
     };
+
+    if (values.ociConfig.baseImages?.length) {
+      ociRepoSpec.baseImages = values.ociConfig.baseImages;
+    }
 
     if (values.ociConfig.skipServerVerification) {
       ociRepoSpec.skipServerVerification = true;

@@ -201,65 +201,73 @@ const YamlEditor = <R extends FlightCtlYamlResource>({
   };
 
   return (
-    <div className="fctl-yaml-editor">
-      <YamlEditorBase
-        filename={resourceName}
-        code={yaml}
-        onCancel={() => {
-          navigate('../.');
-        }}
-        onReload={() => {
-          refetch();
-          setIsSavedSuccessfully(false);
-          setSaveError(undefined);
-          setDoUpdate(true);
-        }}
-        onSave={canEdit ? handleSave : undefined}
-        isSaving={isSaving}
-        disabledEditReason={canEdit ? disabledEditReason : undefined}
-        editorRef={editorRef}
-      />
+    <Stack hasGutter className="fctl-yaml-editor">
+      <StackItem>
+        <YamlEditorBase
+          filename={resourceName}
+          code={yaml}
+          onCancel={() => {
+            navigate('../.');
+          }}
+          onReload={() => {
+            refetch();
+            setIsSavedSuccessfully(false);
+            setSaveError(undefined);
+            setDoUpdate(true);
+          }}
+          onSave={canEdit ? handleSave : undefined}
+          isSaving={isSaving}
+          disabledEditReason={canEdit ? disabledEditReason : undefined}
+          editorRef={editorRef}
+        />
+      </StackItem>
 
       {isSavedSuccessfully && (
-        <Alert
-          isInline
-          variant="success"
-          title={t('{{ resourceName }} has been updated to version {{ version }}', {
-            resourceName,
-            version: yamlResourceVersion,
-          })}
-          actionClose={<AlertActionCloseButton onClose={() => setIsSavedSuccessfully(false)} />}
-        />
+        <StackItem>
+          <Alert
+            isInline
+            variant="success"
+            title={t('{{ resourceName }} has been updated to version {{ version }}', {
+              resourceName,
+              version: yamlResourceVersion,
+            })}
+            actionClose={<AlertActionCloseButton onClose={() => setIsSavedSuccessfully(false)} />}
+          />
+        </StackItem>
       )}
 
       {saveError && (
-        <Alert isInline variant="danger" title={t('Yaml could not be saved')}>
-          {saveError.hasConflict ? (
-            <Stack>
-              <StackItem>{t('A newer version of the resource has been detected.')}</StackItem>
-              <StackItem>
-                {t(
-                  'First, copy your changes to a safe location, then click ʼReloadʼ to get the latest version, and reapply your changes.',
-                )}
-              </StackItem>
-            </Stack>
-          ) : (
-            <Stack hasGutter>
-              <StackItem>
-                {t('The current YAML is invalid. Fix the errors, or click ʼReloadʼ to discard your changes.')}
-              </StackItem>
-              <StackItem>{saveError.message}</StackItem>
-            </Stack>
-          )}
-        </Alert>
+        <StackItem>
+          <Alert isInline variant="danger" title={t('Yaml could not be saved')}>
+            {saveError.hasConflict ? (
+              <Stack>
+                <StackItem>{t('A newer version of the resource has been detected.')}</StackItem>
+                <StackItem>
+                  {t(
+                    'First, copy your changes to a safe location, then click ʼReloadʼ to get the latest version, and reapply your changes.',
+                  )}
+                </StackItem>
+              </Stack>
+            ) : (
+              <Stack hasGutter>
+                <StackItem>
+                  {t('The current YAML is invalid. Fix the errors, or click ʼReloadʼ to discard your changes.')}
+                </StackItem>
+                <StackItem>{saveError.message}</StackItem>
+              </Stack>
+            )}
+          </Alert>
+        </StackItem>
       )}
 
       {needsReload && (
-        <Alert isInline variant="info" title={t('This object has been updated.')}>
-          {t('Click reload to see the new version.')}
-        </Alert>
+        <StackItem>
+          <Alert isInline variant="info" title={t('This object has been updated.')}>
+            {t('Click reload to see the new version.')}
+          </Alert>
+        </StackItem>
       )}
-    </div>
+    </Stack>
   );
 };
 

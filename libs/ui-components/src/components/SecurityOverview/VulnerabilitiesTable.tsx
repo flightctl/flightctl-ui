@@ -1,6 +1,14 @@
 import * as React from 'react';
-import { SelectList, SelectOption, Toolbar, ToolbarContent, ToolbarGroup, ToolbarItem } from '@patternfly/react-core';
-import type { OnSort } from '@patternfly/react-table';
+import {
+  Bullseye,
+  SelectList,
+  SelectOption,
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
+} from '@patternfly/react-core';
+import { type OnSort, Tbody, Td, Tr } from '@patternfly/react-table';
 import type {
   Vulnerability,
   VulnerabilityGroup,
@@ -22,7 +30,7 @@ import FlightCtlPageDrawer from '../common/FlightCtlPageDrawer';
 import StatusDisplay from '../Status/StatusDisplay';
 import { VulnerabilitiesTableCompactRow, VulnerabilitiesTableFullRow } from './VulnerabilitiesTableRow';
 import VulnerabilityDetailsDrawer from './VulnerabilityDetailsDrawer';
-
+import { VulnerabilitiesSingleEntityEmptyState } from './VulnerabilitiesEmptyState';
 type VulnerabilitySeverity = Vulnerability['severity'];
 
 type VulnerabilitiesTableCommonProps = {
@@ -173,6 +181,27 @@ const VulnerabilitiesTable = ({
 
   const severityItems = getVulnerabilitySeverityStatusItems(t);
 
+  let tableContent: React.ReactNode;
+  if (emptyData) {
+    tableContent = (
+      <Tbody>
+        <Tr>
+          <Td colSpan={5}>
+            <Bullseye>
+              <VulnerabilitiesSingleEntityEmptyState entityType={isSingleDevice ? 'device' : 'fleet'} />
+            </Bullseye>
+          </Td>
+        </Tr>
+      </Tbody>
+    );
+  } else if (isSingleDevice) {
+    tableContent = (
+      <VulnerabilitiesTableCompactRows vulnerabilities={vulnerabilities} setSelectedRow={setSelectedRow} />
+    );
+  } else {
+    tableContent = <VulnerabilitiesTableFullRows vulnerabilities={vulnerabilities} setSelectedRow={setSelectedRow} />;
+  }
+
   return (
     <>
       {selectedRow && (
@@ -232,11 +261,7 @@ const VulnerabilitiesTable = ({
         emptyData={emptyData}
         clearFilters={clearAllFilters}
       >
-        {isSingleDevice ? (
-          <VulnerabilitiesTableCompactRows vulnerabilities={vulnerabilities} setSelectedRow={setSelectedRow} />
-        ) : (
-          <VulnerabilitiesTableFullRows vulnerabilities={vulnerabilities} setSelectedRow={setSelectedRow} />
-        )}
+        {tableContent}
       </Table>
       <TablePagination isUpdating={isUpdating} pagination={pagination} />
     </>

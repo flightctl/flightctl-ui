@@ -18,10 +18,27 @@ import UpdateStep, { isUpdateStepValid } from './steps/UpdateStep';
 import ReviewStep from './steps/ReviewStep';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import { validApplicationAndVolumeName } from '../../form/validations';
+import { isWizardStepDisabled } from '../../../utils/wizards';
 
 const versionStepId = 'version-step';
 const configStepId = 'config-step';
 const reviewStepId = 'review-step';
+
+const orderedIds = [versionStepId, configStepId, reviewStepId];
+
+const getValidStepIds = (errors: FormikErrors<AppUpdateFormik>, values: AppUpdateFormik): string[] => {
+  const validStepIds: string[] = [];
+  if (isUpdateStepValid(errors)) {
+    validStepIds.push(versionStepId);
+  }
+  if (isAppConfigStepValid(values, errors)) {
+    validStepIds.push(configStepId);
+  }
+  if (validStepIds.length === orderedIds.length - 1) {
+    validStepIds.push(reviewStepId);
+  }
+  return validStepIds;
+};
 
 const validateUpdateWizardStep = (
   activeStepId: string,
@@ -55,8 +72,7 @@ const WizardContent: React.FC<WizardContentProps> = ({
 
   const { values, errors } = useFormikContext<AppUpdateFormik>();
 
-  const isVersionStepValid = !!values.version;
-  const isConfigStepValid = isAppConfigStepValid(values, errors);
+  const validStepIds = getValidStepIds(errors, values);
 
   return (
     <>
@@ -82,13 +98,17 @@ const WizardContent: React.FC<WizardContentProps> = ({
             <UpdateStep catalogItem={catalogItem} currentVersion={currentVersion} isEdit={!!appSpec} />
           )}
         </WizardStep>
-        <WizardStep name={t('Configuration')} id={configStepId} isDisabled={!isVersionStepValid}>
+        <WizardStep
+          name={t('Configuration')}
+          id={configStepId}
+          isDisabled={isWizardStepDisabled(configStepId, orderedIds, validStepIds)}
+        >
           {currentStep?.id === configStepId && <AppConfigStep isEdit={!!appSpec} />}
         </WizardStep>
         <WizardStep
           name={t('Review and deploy')}
           id={reviewStepId}
-          isDisabled={!isVersionStepValid || !isConfigStepValid}
+          isDisabled={isWizardStepDisabled(reviewStepId, orderedIds, validStepIds)}
         >
           {currentStep?.id === reviewStepId && (
             <ReviewStep error={error} schemaErrors={schemaErrors} isEdit={!!appSpec} />

@@ -1,11 +1,12 @@
 import React from 'react';
-import { List, ListItem, Spinner } from '@patternfly/react-core';
+import { Divider, List, ListItem, Spinner, Stack, StackItem } from '@patternfly/react-core';
 
-import { Repository } from '@flightctl/types';
+import { DependencySyncConfigRefStatus, DependencySyncStatus, Repository } from '@flightctl/types';
 import { useFetch } from '../../../hooks/useFetch';
 import { ConfigSourceProvider, getRepoName, isRepoConfig } from '../../../types/deviceSpec';
 import { isPromiseRejected } from '../../../types/typeUtils';
 import { getErrorMessage } from '../../../utils/error';
+import ConfigSourceSyncDetails from './ConfigSourceSyncDetails';
 import { getConfigDetails } from './RepositorySource';
 import { getRepoUrlOrRegistry } from '../CreateRepository/utils';
 
@@ -19,9 +20,25 @@ const useArrayEq = (array: string[]) => {
   return prevArrayRef.current;
 };
 
+const getSyncRef = (
+  configProviderName: string,
+  dependencyStatus?: DependencySyncStatus,
+): DependencySyncConfigRefStatus | null => {
+  const syncRef = dependencyStatus?.configRefs?.find((ref) => ref.configProviderName === configProviderName);
+  if (syncRef && (syncRef.fingerprint || syncRef.lastUpdatedAt)) {
+    return syncRef;
+  }
+  return null;
+};
+
 type RepoLoadDetails = { url?: string; errorMsg?: string };
 
-const RepositorySourceList = ({ configs }: { configs: Array<ConfigSourceProvider> }) => {
+type RepositorySourceListProps = {
+  configs: Array<ConfigSourceProvider>;
+  dependencyStatus?: DependencySyncStatus;
+};
+
+const RepositorySourceList = ({ configs, dependencyStatus }: RepositorySourceListProps) => {
   const { get } = useFetch();
   const repoConfigs = configs.filter(isRepoConfig);
 
@@ -61,19 +78,45 @@ const RepositorySourceList = ({ configs }: { configs: Array<ConfigSourceProvider
     return <Spinner size="sm" />;
   }
 
-  return configs.length > 0 ? (
-    <List>
-      {configs.map((config) => {
+  if (configs.length === 0) {
+    return null;
+  }
+
+  return (
+    <List isPlain>
+      {configs.map((config, index) => {
+        const addDivider = index !== configs.length - 1;
+
         let extraArgs = {};
         if (isRepoConfig(config)) {
           const repoName = getRepoName(config);
           extraArgs = repoDetailsMap[repoName] || {};
         }
-        return <ListItem key={config.name}>{getConfigDetails(config, extraArgs)}</ListItem>;
+
+        const syncRef = getSyncRef(config.name, dependencyStatus);
+        return (
+          <ListItem key={config.name}>
+            <Stack>
+              <StackItem>{getConfigDetails(config, extraArgs)}</StackItem>
+              {syncRef && (
+                <StackItem>
+                  <ConfigSourceSyncDetails syncRef={syncRef} />
+                </StackItem>
+              )}
+              {addDivider && (
+                <StackItem className="pf-v6-u-my-sm">
+                  <Divider
+                    style={
+                      { '--pf-v6-c-divider--Color': 'var(--pf-t--global--border--color--50)' } as React.CSSProperties
+                    }
+                  />
+                </StackItem>
+              )}
+            </Stack>
+          </ListItem>
+        );
       })}
     </List>
-  ) : (
-    '-'
   );
 };
 
