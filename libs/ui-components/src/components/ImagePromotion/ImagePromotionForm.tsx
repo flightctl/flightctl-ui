@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Button, FormGroup, FormSection, Spinner, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, FormGroup, FormSection, Spinner } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
 import { CatalogItem, CatalogList } from '@flightctl/types/alpha';
@@ -15,8 +15,8 @@ import NameField from '../form/NameField';
 import { getDnsSubdomainValidations } from '../form/validations';
 import { useCatalogItems } from '../Catalog/useCatalogs';
 import { getErrorMessage } from '../../utils/error';
-import { getExportFormatLabel } from '../../utils/imageBuilds';
 import { ImagePromotionFormValues } from './types';
+import ImagePromotionFormatsField from './ImagePromotionFormatsField';
 
 const NewItemForm = ({ isDisabled }: { isDisabled?: boolean }) => {
   const { t } = useTranslation();
@@ -116,14 +116,16 @@ const ExistingItemForm = ({ catalogItems, isDisabled }: { catalogItems: CatalogI
 
 const ImagePromotionForm = ({
   isEdit,
+  canAmendExportFormats = true,
   availableFormats,
 }: {
   isEdit?: boolean;
+  canAmendExportFormats?: boolean;
   availableFormats?: ExportFormatType[];
 }) => {
   const { t } = useTranslation();
 
-  const { values, setFieldValue } = useFormikContext<ImagePromotionFormValues>();
+  const { values } = useFormikContext<ImagePromotionFormValues>();
 
   const [catalogList, catalogsLoading, catalogsErr] = useFetchPeriodically<CatalogList>({
     endpoint: 'catalogs',
@@ -173,10 +175,6 @@ const ImagePromotionForm = ({
     );
   }
 
-  const hasExports = availableFormats?.length || values.exportFormats.length;
-
-  const extraFormats = availableFormats?.filter((f) => !values.exportFormats.includes(f));
-
   return (
     <FlightCtlForm>
       <NameField
@@ -187,37 +185,11 @@ const ImagePromotionForm = ({
         isDisabled={isEdit}
         validations={getDnsSubdomainValidations(t)}
       />
-      <FormGroup label={t('Formats')}>
-        {hasExports ? (
-          <Stack>
-            <StackItem>{values.exportFormats.map((format) => getExportFormatLabel(t, format)).join(', ')}</StackItem>
-            {extraFormats?.map((f) => {
-              const isIncluded = values.additionalExportFormats?.includes(f);
-              const exportLabel = getExportFormatLabel(t, f);
-              return (
-                <StackItem key={f}>
-                  <Button
-                    isInline
-                    variant="link"
-                    onClick={() => {
-                      const newFormats = isIncluded
-                        ? values.additionalExportFormats?.filter((format) => format !== f)
-                        : [...(values.additionalExportFormats || []), f];
-                      setFieldValue('additionalExportFormats', newFormats);
-                    }}
-                  >
-                    {isIncluded
-                      ? t('Remove {{ exportLabel }}', { exportLabel })
-                      : t('Add {{ exportLabel }}', { exportLabel })}
-                  </Button>
-                </StackItem>
-              );
-            })}
-          </Stack>
-        ) : (
-          t('No additional formats')
-        )}
-      </FormGroup>
+      <ImagePromotionFormatsField
+        isEdit={isEdit}
+        canAmendExportFormats={canAmendExportFormats}
+        availableFormats={availableFormats}
+      />
       <FormGroup label={t('Catalog')} isRequired>
         <FormSelect name="catalog" items={catalogs} isDisabled={isEdit} />
       </FormGroup>
