@@ -1,0 +1,517 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit configuration for flightctl-ui
+# Tuned for this monorepo: React/TypeScript frontend + Go auth proxy.
+# Covers security, design, accessibility, performance, and i18n.
+#
+# Schema: https://coderabbit.ai/integrations/schema.v2.json
+# Validate: comment "@coderabbitai configuration" on any PR
+#
+language: "en-US"
+early_access: true
+tone_instructions: >
+  Thorough and direct. Cover security, design, and correctness equally.
+  State severity and impact for security findings. For design findings,
+  explain the user-facing or maintainability consequence.
+
+reviews:
+  profile: "assertive"
+  request_changes_workflow: false
+  high_level_summary: true
+  high_level_summary_instructions: >-
+    Summarize changes in terms of which areas are affected (libs/ui-components/,
+    libs/types/, libs/i18n/, libs/cypress/, apps/standalone/, apps/ocp-plugin/,
+    proxy/, packaging/, .github/workflows/), whether the change affects shared
+    UI components, platform-specific app code, the Go auth proxy, container
+    builds, E2E tests, or CI configuration, and flag any cross-cutting
+    implications (e.g., shared component changes that affect both standalone
+    and OCP plugin).
+  collapse_walkthrough: false
+  sequence_diagrams: true
+
+  path_filters:
+    - "!node_modules/**"
+    - "!dist/**"
+    - "!*.min.js"
+    # Generated API types — changes are driven from the OpenAPI spec, not
+    # manual edits. Reviewing diffs here is noise.
+    - "!libs/types/models/**"
+    - "!libs/types/alpha/models/**"
+    - "!libs/types/imagebuilder/models/**"
+    # Generated translation file — produced by `npm run i18n`, not hand-edited.
+    - "!libs/i18n/locales/en/translation.json"
+    # Binary / media assets — no useful review signal
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.jpeg"
+    # package-lock.json is kept so the supply-chain block fires on it.
+
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    drafts: false
+    base_branches:
+      - "main"
+    ignore_title_keywords:
+      - "[skip-review]"
+      - "WIP"
+
+  labeling_instructions:
+    - label: "ui-components"
+      instructions: >-
+        Apply when the PR modifies files in libs/ui-components/. Changes here
+        affect shared components used by both standalone and OCP plugin apps.
+
+    - label: "ocp-plugin"
+      instructions: >-
+        Apply when the PR modifies files in apps/ocp-plugin/. Changes here
+        affect the OpenShift Console plugin integration.
+
+    - label: "standalone"
+      instructions: >-
+        Apply when the PR modifies files in apps/standalone/. Changes here
+        affect the standalone web application.
+
+    - label: "proxy"
+      instructions: >-
+        Apply when the PR modifies files in proxy/. Changes here affect the
+        Go auth proxy (authentication, middleware, server, WebSocket bridge).
+
+    - label: "api-types"
+      instructions: >-
+        Apply when the PR modifies files in libs/types/. Changes here affect
+        generated API types and client code.
+
+    - label: "e2e-tests"
+      instructions: >-
+        Apply when the PR modifies files in libs/cypress/. Changes here
+        affect Cypress E2E test suites, fixtures, or page objects.
+
+    - label: "ci"
+      instructions: >-
+        Apply when the PR modifies files in .github/workflows/ or build
+        configuration (webpack, tsconfig, eslint.config). Changes here
+        affect CI pipelines or build behavior.
+
+    - label: "packaging"
+      instructions: >-
+        Apply when the PR modifies files in packaging/. Changes here affect
+        container image builds (Containerfiles for el9/el10, standalone/OCP).
+
+    - label: "i18n"
+      instructions: >-
+        Apply when the PR modifies files in libs/i18n/ or adds/changes
+        translation keys in source code.
+
+  path_instructions:
+
+    # ═══════════════════════════════════════════════════════════════
+    #  DESIGN & ARCHITECTURE
+    # ═══════════════════════════════════════════════════════════════
+
+    # ── React component design & PatternFly conventions ──────────
+    - path: "**/*.tsx"
+      instructions: |
+        React & PatternFly design review:
+        - Prefer PatternFly components over custom HTML; follow PF6 patterns
+        - Components should have a single responsibility; split large
+          components into focused sub-components
+        - Avoid prop drilling more than 2 levels deep; use context or
+          composition instead
+        - Memoize expensive renders: React.memo, useMemo, useCallback
+          where appropriate — but don't over-memoize simple values
+        - Event handlers: name with "on" prefix (onSubmit, onClick);
+          avoid anonymous functions in JSX where they cause re-renders
+        - Keep presentation and data-fetching concerns separated
+          (container/hook pattern used in this codebase)
+
+    # ── Custom hooks quality ─────────────────────────────────────
+    - path: "libs/ui-components/src/hooks/**/*.{ts,tsx}"
+      instructions: |
+        Custom hooks review:
+        - Must start with "use" prefix
+        - Respect Rules of Hooks: no conditional calls, no calls in loops
+        - useEffect cleanup: always clean up subscriptions, timers, and
+          abort controllers
+        - useEffect dependency arrays: include all referenced values;
+          this project enforces exhaustive-deps as an error
+        - Avoid returning unstable references that trigger downstream
+          re-renders; wrap return objects in useMemo when appropriate
+        - Data-fetching hooks (useFetch, useFetchPeriodically): handle
+          loading, error, and empty states
+
+    # ── Form design (Formik + Yup) ───────────────────────────────
+    - path: "**/*.tsx"
+      instructions: |
+        Form review (if this file contains Formik usage):
+        - Use Yup schemas for validation; keep schemas co-located
+          with the form or in a shared validation file
+        - Show validation errors inline next to the field, not just
+          at the top of the form
+        - Disable submit while isSubmitting to prevent double-submit
+        - Handle API errors gracefully: display server-side errors
+          without losing form state
+        - Unsaved changes: this project tracks dirty state for
+          navigation guards — verify forms integrate properly
+
+    # ── Internationalization (i18n) ──────────────────────────────
+    - path: "{libs,apps}/*/src/**/*.{ts,tsx}"
+      instructions: |
+        i18n review:
+        - All user-visible strings must use the t() translation function
+        - Translation keys must be hardcoded string literals so the
+          i18next-parser can extract them — never use variables as keys:
+          GOOD: t('Device enrolled')  BAD: t(statusMessage)
+        - Interpolation variables are fine: t('Found {{count}} devices', { count })
+        - Do not hand-edit libs/i18n/locales/en/translation.json
+
+    # ── Accessibility (a11y) ─────────────────────────────────────
+    - path: "**/*.tsx"
+      instructions: |
+        Accessibility review:
+        - Interactive elements must be keyboard-accessible (no click
+          handlers on <div> or <span> without role and keyboard events)
+        - Images and icons need alt text or aria-label; decorative icons
+          should have aria-hidden="true"
+        - Form fields need associated labels (PF FormGroup handles this;
+          verify it is used)
+        - Status changes and alerts should use aria-live regions or
+          PatternFly Alert components
+        - Color alone must not convey meaning; pair with icons or text
+        - Modals and drawers must trap focus and return it on close
+
+    # ── TypeScript type safety ───────────────────────────────────
+    - path: "**/*.{ts,tsx}"
+      instructions: |
+        TypeScript review:
+        - No use of 'any' type — prefer 'unknown' and narrow with type guards
+        - For resource.metadata.name (known defined for API-returned
+          resources), use `metadata.name as string` or `metadata.name || ''`
+          rather than non-null assertions (!)
+        - Prefer discriminated unions over type assertions for state variants
+        - Generic types should have meaningful constraints, not just <T>
+        - Exported functions and hooks should have explicit return types
+          when the inferred type is complex
+        - Import types with 'import type' when only used for type checking
+
+    # ── CSS & styling ────────────────────────────────────────────
+    - path: "**/*.css"
+      instructions: |
+        CSS review:
+        - Use PatternFly CSS variables (--pf-*) for colors, spacing,
+          and typography — avoid hardcoded values
+        - Scope styles to the component; avoid global selectors
+        - No !important unless overriding a PF default that cannot be
+          configured otherwise
+        - Support dark mode: use PF color tokens, not fixed hex values
+
+    # ── Monorepo boundary enforcement ────────────────────────────
+    - path: "libs/ui-components/src/**/*.{ts,tsx}"
+      instructions: |
+        Monorepo boundary review:
+        - libs/ui-components must NOT import from apps/standalone or
+          apps/ocp-plugin — dependencies flow downward only
+        - Use the AppContext hook pattern for platform-specific behavior,
+          not direct imports of platform code
+        - Shared types belong in libs/types; do not duplicate API types
+        - Do not import lodash as a full module; use lodash/<function>
+
+    # ── Cypress E2E tests ────────────────────────────────────────
+    - path: "libs/cypress/**/*.{ts,tsx}"
+      instructions: |
+        E2E test review:
+        - Use page objects from libs/cypress/pages/ to encapsulate selectors
+        - Prefer data-testid attributes over CSS selectors for resilience
+        - Tests should be independent: no ordering dependencies between
+          spec files
+        - Use fixtures from libs/cypress/fixtures/ for mock data
+        - Assert meaningful outcomes, not implementation details
+        - Avoid cy.wait(number); use cy.intercept() with aliases instead
+
+    # ── Webpack & build configuration ────────────────────────────
+    - path: "**/{webpack.config,tsconfig,eslint.config}*"
+      instructions: |
+        Build config review:
+        - Verify bundle splitting is maintained; avoid importing entire
+          libraries where tree-shaking is possible
+        - TypeScript strict mode settings should not be relaxed
+        - ESLint rule changes need justification in the PR description
+        - webpack-dev-server proxy config must not expose internal URLs
+
+    # ═══════════════════════════════════════════════════════════════
+    #  SECURITY
+    # ═══════════════════════════════════════════════════════════════
+
+    # ── Injection & input validation (TS + Go) ───────────────────
+    - path: "**/*.{ts,tsx,go}"
+      instructions: |
+        Injection prevention (prodsec-skills):
+        - Command: no exec/spawn with user input without validation
+        - Path traversal: canonicalize paths, reject ../
+        - Deserialization: no eval on untrusted data; use JSON.parse
+          with schema validation
+        - Prototype pollution: no recursive merge of untrusted objects
+        - Validate at trust boundaries with allow-lists, not deny-lists
+        - Anchor regexes (^$); watch for ReDoS
+
+    # ── Web & frontend security ──────────────────────────────────
+    - path: "**/*.{tsx,html}"
+      instructions: |
+        Web security (prodsec-skills):
+        - No dangerouslySetInnerHTML with user data
+        - CSP: no unsafe-inline, no unsafe-eval
+        - CSRF tokens on state-changing requests
+        - Cookies: Secure, HttpOnly, SameSite=Strict
+        - No document.write, eval, new Function with user input
+        - File uploads: validate by content type, cap size
+
+    # ── Cryptography ─────────────────────────────────────────────
+    - path: "**/*{crypt,cipher,sign,hash,tls,ssl,cert,key,token}*"
+      instructions: |
+        Cryptographic security (prodsec-skills):
+        - Banned: MD5, SHA1, DES, RC4, 3DES, Blowfish, ECB mode
+        - Symmetric: AES-256-GCM or ChaCha20-Poly1305
+        - Signing: Ed25519 or ECDSA P-256+
+        - Constant-time comparison for all secret/token data
+        - No custom crypto; use vetted libraries only
+        - Go: use stdlib crypto/* and golang.org/x/crypto
+
+    # ── Container & image hardening ──────────────────────────────
+    - path: "packaging/images/**/{Containerfile,Dockerfile}*"
+      instructions: |
+        Container security (prodsec-skills):
+        - Base image: UBI or trusted images from registry.access.redhat.com
+        - Red Hat images: use floating tags (Red Hat manages updates);
+          non-RH images: pin by digest
+        - Multi-stage builds; no build tools in final image
+        - USER non-root; minimize root usage in build stages
+        - COPY specific files, not entire context
+        - No secrets in ENV, ARG, or COPY
+        - No package manager cache in final layer
+
+    # ── OpenShift manifests ──────────────────────────────────────
+    - path: "apps/ocp-plugin/*.yaml"
+      instructions: |
+        OpenShift manifest review:
+        - securityContext: runAsNonRoot, readOnlyRootFilesystem,
+          allowPrivilegeEscalation: false
+        - Drop ALL capabilities, add only what is required
+        - RBAC: least privilege; no cluster-admin for workloads
+        - No secrets in manifests; use Secret references
+
+    # ── Supply chain & dependencies ──────────────────────────────
+    - path: "**/{package.json,package-lock.json,go.mod,go.sum}"
+      instructions: |
+        Supply chain security (prodsec-skills):
+        - New deps: justify need, check license compatibility
+        - Pin versions appropriately; verify integrity where supported
+        - Flag known CVEs (cross-ref osv.dev)
+        - No pre-release or yanked versions in production
+        - Prefer well-maintained packages with active security response
+
+    # ── CI/CD & GitHub Actions ───────────────────────────────────
+    - path: ".github/workflows/**/*"
+      instructions: |
+        CI/CD security (prodsec-skills):
+        - Pin actions by full SHA, not tag
+        - No secrets in logs; mask sensitive outputs
+        - Least privilege: minimize GITHUB_TOKEN permissions
+        - No pull_request_target with checkout of PR head
+        - Validate untrusted input (PR title/body) before interpolation
+
+    # ── Authentication & proxy security ──────────────────────────
+    - path: "proxy/auth/**/*.go"
+      instructions: |
+        Authentication review (prodsec-skills):
+        - OAuth/OIDC: PKCE required; no implicit grant
+        - JWT: verify signature, issuer, audience, expiry, nbf
+        - Sessions: secure cookie flags, regenerate ID on login
+        - Token storage: no tokens in logs, URLs, or error messages
+        - Redirect validation: allow-list of redirect URIs; reject
+          open redirects
+
+    # ── Go proxy ─────────────────────────────────────────────────
+    - path: "proxy/**/*.go"
+      instructions: |
+        Go review (security + design):
+
+        **Design & correctness:**
+        - Every error return must be checked; wrap errors with
+          fmt.Errorf("context: %w", err) for debuggability
+        - Resources (files, HTTP bodies, connections) must be closed
+          via defer immediately after acquisition
+        - Goroutines must have a clear shutdown path; no fire-and-forget
+          goroutines without context cancellation or channel signaling
+        - context.Context must be threaded through call chains; never
+          use context.Background() deep in handler code
+        - Avoid package-level mutable state; prefer dependency injection
+        - Exported functions and types need godoc comments
+        - strings.Builder or fmt.Sprintf over repeated string concatenation
+        - Flag unbounded slices, maps, or channels fed by external input
+
+        **Security:**
+        - Use stdlib crypto/* and golang.org/x/crypto
+        - Validate and sanitize all request parameters
+        - Middleware: verify auth runs before any business logic
+        - HTTP headers: set security headers (X-Content-Type-Options,
+          X-Frame-Options, Strict-Transport-Security)
+        - WebSocket (terminal): validate origin, enforce auth,
+          limit message size
+
+    # ── Go tests ─────────────────────────────────────────────────
+    - path: "proxy/**/*_test.go"
+      instructions: |
+        Go test quality:
+        - Prefer table-driven tests for functions with multiple
+          input/output combinations
+        - Test names should describe the scenario and expected outcome
+        - Use t.Helper() in test helper functions
+        - Use t.TempDir() for file-based tests, not manual os.MkdirTemp
+        - Test the contract (inputs → outputs), not the implementation
+        - Mock external dependencies via interfaces, not internal logic
+        - Flag tests that sleep for fixed durations; prefer channels,
+          sync.WaitGroup, or polling with deadline
+        - Flag tests with no assertions
+        - Race-detector safe: no shared mutable state across parallel
+          subtests without synchronization
+
+    # ── Shell scripts ────────────────────────────────────────────
+    - path: "**/*.sh"
+      instructions: |
+        Shell script review:
+        - Use set -euo pipefail
+        - Quote all variable expansions ("$var", not $var)
+        - No eval with user-controlled input
+        - Validate inputs before use
+        - No embedded secrets or credentials
+
+    # ═══════════════════════════════════════════════════════════════
+    #  PERFORMANCE
+    # ═══════════════════════════════════════════════════════════════
+
+    # ── Frontend performance ─────────────────────────────────────
+    - path: "{libs,apps}/*/src/**/*.{ts,tsx}"
+      instructions: |
+        Performance review:
+        - Avoid re-renders: check that objects/arrays are not
+          re-created on every render (move to useMemo or module scope)
+        - Large lists: use virtualization or pagination (this project
+          uses useTablePagination)
+        - API calls: use useFetchPeriodically for polling data;
+          cancel in-flight requests on unmount
+        - Lazy load routes and heavy components where possible
+        - Avoid importing entire libraries when only one function
+          is needed (lodash/<fn>, not lodash)
+
+  # ── Scanners ────────────────────────────────────────────────
+  tools:
+    gitleaks:
+      enabled: true
+    semgrep:
+      enabled: true
+    hadolint:
+      enabled: true
+    trivy:
+      enabled: true
+    osvScanner:
+      enabled: true
+    actionlint:
+      enabled: true
+    ast-grep:
+      essential_rules: true
+
+  # ── Pre-merge checks (hard gates) ───────────────────────────
+  pre_merge_checks:
+    description:
+      mode: "warning"
+    custom_checks:
+      - name: "no-hardcoded-secrets"
+        instructions: |
+          Flag hardcoded secrets: API keys, tokens, passwords, private
+          keys, credentials. Also flag base64 strings >32 chars in config,
+          URLs with embedded credentials, variables named api_key/secret/
+          token/password assigned string literals.
+        mode: "error"
+
+      - name: "no-weak-crypto"
+        instructions: |
+          Flag MD5, SHA1, DES, RC4, 3DES, Blowfish, ECB mode usage.
+          Flag custom crypto implementations. Flag non-constant-time
+          comparison of secrets or tokens.
+        mode: "error"
+
+      - name: "no-injection-vectors"
+        instructions: |
+          Flag eval/exec on untrusted data, dangerouslySetInnerHTML
+          with user data, os.system or exec.Command with unsanitized
+          variables, yaml.load without SafeLoader.
+        mode: "error"
+
+      - name: "container-privileges"
+        instructions: |
+          Flag privileged: true, hostPID, hostNetwork, hostIPC,
+          SYS_ADMIN capability, running as root without justification,
+          allowPrivilegeEscalation: true in container/K8s manifests.
+        mode: "error"
+
+      - name: "no-sensitive-data-in-logs"
+        instructions: |
+          Flag logging that may expose passwords, tokens, API keys,
+          PII (email, SSN, credit card), session IDs, internal
+          hostnames, or customer data.
+        mode: "error"
+
+      - name: "resource-leaks"
+        instructions: |
+          In Go files (proxy/): flag opened files, HTTP response bodies,
+          or network connections that are not closed via defer. Flag
+          goroutines launched without a shutdown mechanism (context
+          cancellation, done channel, or WaitGroup).
+        mode: "warning"
+
+      - name: "unchecked-errors"
+        instructions: |
+          In Go files (proxy/): flag error returns assigned to _
+          (blank identifier) without a comment justifying why the
+          error is safe to ignore. Flag error returns that are silently
+          swallowed (checked but not returned, logged, or handled).
+        mode: "warning"
+
+      - name: "ai-attribution"
+        instructions: |
+          If AI tools were used (mentioned in PR or commits), verify
+          attribution trailers: Assisted-by, Generated-by, or
+          Made-with (e.g., Made-with: Cursor) are acceptable.
+          Flag use of Co-Authored-By for AI tools.
+        mode: "warning"
+
+      - name: "generated-files-not-hand-edited"
+        instructions: |
+          Flag direct edits to generated files:
+          - libs/types/models/**, libs/types/alpha/models/**,
+            libs/types/imagebuilder/models/** (generated from OpenAPI)
+          - libs/i18n/locales/en/translation.json (generated by i18next-parser)
+          These should be regenerated via npm run gen-types or npm run i18n.
+        mode: "warning"
+
+      - name: "i18n-compliance"
+        instructions: |
+          Flag user-visible strings in .tsx files that are not wrapped
+          in the t() translation function. Flag t() calls that use
+          variables as keys instead of hardcoded string literals.
+        mode: "warning"
+
+# ── Knowledge base ───────────────────────────────────────────
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "**/AGENTS.md"
+      - "**/CLAUDE.md"
+      - "**/CONTRIBUTING.md"
+
+  issues:
+    scope: "auto"
+  pull_requests:
+    scope: "auto"
+  learnings:
+    scope: "auto"
