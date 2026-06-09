@@ -89,21 +89,26 @@ const getCategoryOption = (params: DeviceLogSearchParams): string[] => {
 Builds the command to retrieve the logs from the journal.
 We always include a max number of lines to retrieve, to prevent the command from timing out.
 
-- Command: journalctl <unitOption> <timeOption> <priorityOption> --no-pager <followOption> -n <maxLines>
+- Snapshot: journalctl <filters> --no-pager | tail -n <maxLines>
+ "-n <maxLines>" cannot be used here because the lines are fetched before the filters are applied.
+
+- Live: journalctl <filters> --no-pager -f -n <maxLines>
+ "tail -n <maxLines>" cannot be used here because it doesn't support the follow mode.
 */
 const buildJournalCommand = (params: DeviceLogSearchParams): string => {
   const unitArgs = getCategoryOption(params);
   const timeArgs = getTimeOption(params);
   const priorityArgs = getPriorityOption(params.level);
 
-  const options = [...unitArgs, ...timeArgs, ...priorityArgs, '--no-pager'];
+  const journalArgs = [...unitArgs, ...timeArgs, ...priorityArgs, '--no-pager'];
+  const journalCmd = `journalctl ${journalArgs.map(quoteShellArg).join(' ')}`;
+
   if (params.showLiveLogs) {
-    options.push('-f');
-    options.push('-n', String(MAX_LOG_LINES_WHEN_STREAMING));
-  } else {
-    options.push('-n', String(MAX_LOG_LINES));
+    return `${journalCmd} -f -n ${MAX_LOG_LINES_WHEN_STREAMING}`;
   }
-  return `journalctl ${options.map(quoteShellArg).join(' ')}`;
+
+  // Run the command under "bash -c" so journalctl and tail are executed together.
+  return `bash -c ${quoteShellArg(`${journalCmd} 2>&1 | tail -n ${MAX_LOG_LINES}`)}`;
 };
 
 /*
@@ -161,8 +166,7 @@ const getDeviceLogFileProbeInnerCommand = (params: DeviceLogSearchParams): strin
     throw new Error('A log file path is required.');
   }
 
-  const path = `${DEVICE_LOG_BASE_PATH}/${params.logFilePath.trim()}`;
-  const quotedPath = quoteShellArg(path);
+  const path = quoteShellArg(`${DEVICE_LOG_BASE_PATH}/${params.logFilePath.trim()}`);
 
   const bashScript = [
     'path=$1',
@@ -172,7 +176,7 @@ const getDeviceLogFileProbeInnerCommand = (params: DeviceLogSearchParams): strin
     'echo "mime=$(file -b --mime-type -- "$path" 2>/dev/null)"',
   ].join('\n');
 
-  return `bash -c ${quoteShellArg(bashScript)} bash ${quotedPath}`;
+  return `bash -c ${quoteShellArg(bashScript)} bash ${path}`;
 };
 
 export const getFileProbeCommand = (params: DeviceLogSearchParams): string =>
