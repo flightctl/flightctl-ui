@@ -87,28 +87,37 @@ const getCategoryOption = (params: DeviceLogSearchParams): string[] => {
 
 /*
 Builds the command to retrieve the logs from the journal.
-We always include a max number of lines to retrieve, to prevent the command from timing out.
+
+We limit the number of lines to retrieve to prevent the command from timing out.
+"tail" is used to perform the cap because `journalctl -n` retrieves the desired number of lines, then it applies the filters.
 
 - Snapshot: journalctl <filters> --no-pager | tail -n <maxLines>
- "-n <maxLines>" cannot be used here because the lines are fetched before the filters are applied.
-
-- Live: journalctl <filters> --no-pager -f -n <maxLines>
- "tail -n <maxLines>" cannot be used here because it doesn't support the follow mode.
+- Live backlog: Same pipeline as snapshot (to retrieve the older lines), then piped to journalctl <filters> --since now --no-pager -f
 */
+const buildJournalSnapshotCommand = (journalCmd: string, maxLines: number): string =>
+  `set -o pipefail; ${journalCmd} 2>&1 | tail -n ${maxLines}`;
+
 const buildJournalCommand = (params: DeviceLogSearchParams): string => {
   const unitArgs = getCategoryOption(params);
   const timeArgs = getTimeOption(params);
   const priorityArgs = getPriorityOption(params.level);
 
   const journalArgs = [...unitArgs, ...timeArgs, ...priorityArgs, '--no-pager'];
-  const journalCmd = `journalctl ${journalArgs.map(quoteShellArg).join(' ')}`;
+  const snapshotCmd = buildJournalSnapshotCommand(
+    `journalctl ${journalArgs.map(quoteShellArg).join(' ')}`,
+    params.showLiveLogs ? MAX_LOG_LINES_WHEN_STREAMING : MAX_LOG_LINES,
+  );
 
+  let innerCommand = snapshotCmd;
   if (params.showLiveLogs) {
-    return `${journalCmd} -f -n ${MAX_LOG_LINES_WHEN_STREAMING}`;
+    // Adds follow mode on top of the snapshot command (adding only new entries to prevent duplicating content).
+    const followArgs = [...unitArgs, ...priorityArgs, '--since', 'now', '--no-pager'];
+    const followJournalCmd = `journalctl ${followArgs.map(quoteShellArg).join(' ')} -f`;
+    innerCommand = `${snapshotCmd} && ${followJournalCmd}`;
   }
 
-  // Run under bash -c with pipefail so the footer exit code reflects journalctl, not tail.
-  return `bash -c ${quoteShellArg(`set -o pipefail; ${journalCmd} 2>&1 | tail -n ${MAX_LOG_LINES}`)}`;
+  // Quote the full script once: snapshotCmd must stay unquoted until follow is appended for live mode.
+  return `bash -c ${quoteShellArg(innerCommand)}`;
 };
 
 /*
