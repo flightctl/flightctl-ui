@@ -107,8 +107,8 @@ const buildJournalCommand = (params: DeviceLogSearchParams): string => {
     return `${journalCmd} -f -n ${MAX_LOG_LINES_WHEN_STREAMING}`;
   }
 
-  // Run the command under "bash -c" so journalctl and tail are executed together.
-  return `bash -c ${quoteShellArg(`${journalCmd} 2>&1 | tail -n ${MAX_LOG_LINES}`)}`;
+  // Run under bash -c with pipefail so the footer exit code reflects journalctl, not tail.
+  return `bash -c ${quoteShellArg(`set -o pipefail; ${journalCmd} 2>&1 | tail -n ${MAX_LOG_LINES}`)}`;
 };
 
 /*
