@@ -126,10 +126,10 @@ const TypeConfigStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?:
                                 isDisabled={isReadOnly}
                               />
                             </FormGroup>
-                            <FormGroup label={t('URI')} isRequired>
+                            <FormGroup label={t('OCI reference')} isRequired>
                               <TextField
                                 name={`artifacts.${index}.uri`}
-                                aria-label={t('Artifact URI')}
+                                aria-label={t('OCI reference')}
                                 isRequired
                                 isDisabled={isReadOnly}
                                 placeholder={t('e.g. https://example.com/image.qcow2', { nsSeparator: '|' })}

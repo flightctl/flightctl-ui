@@ -513,20 +513,22 @@ const versionsSchema = (t: TFunction, configurable: boolean, isApp: boolean) =>
       .min(1, t('At least one version is required'));
   });
 
-const artifactURISchema = (t: TFunction) =>
+const uriHasNoTagOrDigest = (value: string | undefined) => {
+  if (!value) {
+    return true;
+  }
+  const path = value.replace(/^[a-z]+:\/\//, '');
+  const imageName = path.includes('/') ? path.substring(path.lastIndexOf('/') + 1) : path;
+  return !imageName.includes(':') && !imageName.includes('@');
+};
+
+const imageReferenceWithoutVersionSchema = (t: TFunction, requiredMessage: string) =>
   Yup.string()
-    .required(t('Container image URI is required'))
+    .required(requiredMessage)
     .test(
       'no-tag-or-digest',
-      t('URI must not include a tag (":") or digest ("@"). Specify those in the version fields.'),
-      (value) => {
-        if (!value) {
-          return true;
-        }
-        const path = value.replace(/^[a-z]+:\/\//, '');
-        const imageName = path.includes('/') ? path.substring(path.lastIndexOf('/') + 1) : path;
-        return !imageName.includes(':') && !imageName.includes('@');
-      },
+      t('Must not include a tag (":") or digest ("@"). Specify those in the version fields.'),
+      uriHasNoTagOrDigest,
     );
 
 export const getValidationSchema = (t: TFunction) =>
@@ -543,7 +545,7 @@ export const getValidationSchema = (t: TFunction) =>
     type: Yup.string().oneOf(Object.values(CatalogItemType)).required(t('Type is required')),
     containerUri: Yup.string().when('type', {
       is: (type: string) => appTypeIds.includes(type as CatalogItemType),
-      then: () => artifactURISchema(t),
+      then: () => imageReferenceWithoutVersionSchema(t, t('Container image reference is required')),
       otherwise: () => Yup.string(),
     }),
     artifacts: Yup.mixed().when('type', {
@@ -572,7 +574,7 @@ export const getValidationSchema = (t: TFunction) =>
                     return !duplicateTypes.has(value);
                   }),
                 name: Yup.string(),
-                uri: artifactURISchema(t),
+                uri: imageReferenceWithoutVersionSchema(t, t('OCI reference is required')),
               }),
             )
             .min(1, t('At least one artifact is required'));
