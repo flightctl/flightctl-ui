@@ -34,5 +34,9 @@ export type K8sProviderSpec = {
    * Optional suffix to strip from ClusterRole names when normalizing role names. Used for multi-release deployments where ClusterRoles have namespace-specific names (e.g., flightctl-admin-<namespace>).
    */
   roleSuffix?: string;
+  /**
+   * Optional prefix for the organization name. The default org name is exposed as prefix + 'default' when set.
+   */
+  organizationNamePrefix?: string;
 };
 

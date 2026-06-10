@@ -27,6 +27,10 @@ export type NewCatalogItemTarget = (ImagePromotionTargetBase & {
    * Optional item-level readme for the new CatalogItem. Markdown is supported.
    */
   readme?: string;
+  /**
+   * Optional human-readable display name for the new CatalogItem.
+   */
+  displayName?: string;
 });
 export namespace NewCatalogItemTarget {
   /**

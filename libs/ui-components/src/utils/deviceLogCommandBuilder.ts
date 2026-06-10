@@ -87,23 +87,37 @@ const getCategoryOption = (params: DeviceLogSearchParams): string[] => {
 
 /*
 Builds the command to retrieve the logs from the journal.
-We always include a max number of lines to retrieve, to prevent the command from timing out.
 
-- Command: journalctl <unitOption> <timeOption> <priorityOption> --no-pager <followOption> -n <maxLines>
+We limit the number of lines to retrieve to prevent the command from timing out.
+"tail" is used to perform the cap because `journalctl -n` retrieves the desired number of lines, then it applies the filters.
+
+- Snapshot: journalctl <filters> --no-pager | tail -n <maxLines>
+- Live backlog: Same pipeline as snapshot (to retrieve the older lines), then piped to journalctl <filters> --since now --no-pager -f
 */
+const buildJournalSnapshotCommand = (journalCmd: string, maxLines: number): string =>
+  `set -o pipefail; ${journalCmd} 2>&1 | tail -n ${maxLines}`;
+
 const buildJournalCommand = (params: DeviceLogSearchParams): string => {
   const unitArgs = getCategoryOption(params);
   const timeArgs = getTimeOption(params);
   const priorityArgs = getPriorityOption(params.level);
 
-  const options = [...unitArgs, ...timeArgs, ...priorityArgs, '--no-pager'];
+  const journalArgs = [...unitArgs, ...timeArgs, ...priorityArgs, '--no-pager'];
+  const snapshotCmd = buildJournalSnapshotCommand(
+    `journalctl ${journalArgs.map(quoteShellArg).join(' ')}`,
+    params.showLiveLogs ? MAX_LOG_LINES_WHEN_STREAMING : MAX_LOG_LINES,
+  );
+
+  let innerCommand = snapshotCmd;
   if (params.showLiveLogs) {
-    options.push('-f');
-    options.push('-n', String(MAX_LOG_LINES_WHEN_STREAMING));
-  } else {
-    options.push('-n', String(MAX_LOG_LINES));
+    // Adds follow mode on top of the snapshot command (adding only new entries to prevent duplicating content).
+    const followArgs = [...unitArgs, ...priorityArgs, '--since', 'now', '--no-pager'];
+    const followJournalCmd = `journalctl ${followArgs.map(quoteShellArg).join(' ')} -f`;
+    innerCommand = `${snapshotCmd} && ${followJournalCmd}`;
   }
-  return `journalctl ${options.map(quoteShellArg).join(' ')}`;
+
+  // Quote the full script once: snapshotCmd must stay unquoted until follow is appended for live mode.
+  return `bash -c ${quoteShellArg(innerCommand)}`;
 };
 
 /*
@@ -161,8 +175,7 @@ const getDeviceLogFileProbeInnerCommand = (params: DeviceLogSearchParams): strin
     throw new Error('A log file path is required.');
   }
 
-  const path = `${DEVICE_LOG_BASE_PATH}/${params.logFilePath.trim()}`;
-  const quotedPath = quoteShellArg(path);
+  const path = quoteShellArg(`${DEVICE_LOG_BASE_PATH}/${params.logFilePath.trim()}`);
 
   const bashScript = [
     'path=$1',
@@ -172,7 +185,7 @@ const getDeviceLogFileProbeInnerCommand = (params: DeviceLogSearchParams): strin
     'echo "mime=$(file -b --mime-type -- "$path" 2>/dev/null)"',
   ].join('\n');
 
-  return `bash -c ${quoteShellArg(bashScript)} bash ${quotedPath}`;
+  return `bash -c ${quoteShellArg(bashScript)} bash ${path}`;
 };
 
 export const getFileProbeCommand = (params: DeviceLogSearchParams): string =>

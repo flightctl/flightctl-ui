@@ -30,6 +30,7 @@ import './DeviceLogsInnerToolbar.css';
 export type DeviceLogsInnerToolbarProps = {
   lastSearchParams: DeviceLogSearchParams;
   isStreaming: boolean;
+  hasLogs: boolean;
   onApplySearchParams: (params: DeviceLogSearchParams) => Promise<boolean>;
   onStartLiveStream: () => Promise<boolean>;
   onStopLiveStream: VoidFunction;
@@ -42,6 +43,7 @@ export type DeviceLogsInnerToolbarProps = {
 const DeviceLogsInnerToolbar = ({
   lastSearchParams,
   isStreaming,
+  hasLogs,
   onApplySearchParams,
   onStartLiveStream,
   onStopLiveStream,
@@ -134,6 +136,7 @@ const DeviceLogsInnerToolbar = ({
                     <Label
                       key={filter.key}
                       variant="outline"
+                      textMaxWidth="25ch"
                       onClose={
                         filter.onRemove
                           ? (e) => {
@@ -172,6 +175,7 @@ const DeviceLogsInnerToolbar = ({
                   type="button"
                   icon={<ExternalLinkAltIcon />}
                   aria-label={t('View raw logs')}
+                  isDisabled={!hasLogs}
                   onClick={onOpenRaw}
                 />
               </ToolbarItem>
@@ -181,6 +185,7 @@ const DeviceLogsInnerToolbar = ({
                   type="button"
                   icon={<DownloadIcon />}
                   aria-label={t('Download logs')}
+                  isDisabled={!hasLogs}
                   onClick={onDownload}
                 />
               </ToolbarItem>

@@ -54,5 +54,9 @@ export type OpenShiftProviderSpec = {
    * Optional suffix to strip from ClusterRole names when normalizing role names. Used for multi-release deployments where ClusterRoles have namespace-specific names (e.g., flightctl-admin-<namespace>).
    */
   roleSuffix?: string;
+  /**
+   * Optional prefix for organization (project) names. Incoming names are exposed as prefix + name (e.g. 'ocp-' + project).
+   */
+  organizationNamePrefix?: string;
 };
 
