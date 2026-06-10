@@ -14,7 +14,7 @@ type NameFieldProps = TextFieldProps & {
   validations: RichValidationTextFieldProps['validations'];
 };
 
-const NameField = ({ name, validations, resourceType, ...rest }: NameFieldProps) => {
+const NameField = ({ name, validations, resourceType, helperText, ...rest }: NameFieldProps) => {
   const { t } = useTranslation();
   const { get } = useFetch();
   const [{ value }, { error }, { setError }] = useField<string>(name);
@@ -69,21 +69,30 @@ const NameField = ({ name, validations, resourceType, ...rest }: NameFieldProps)
     ...validations,
   ];
 
-  return <RichValidationTextField fieldName={name} validations={allValidations} {...rest} />;
+  return <RichValidationTextField fieldName={name} validations={allValidations} helperText={helperText} {...rest} />;
 };
 
-const NameFieldWrapper = ({ name, isDisabled, validations, resourceType, helperText, ...rest }: NameFieldProps) => {
+const NameFieldWrapper = ({ name, isDisabled, validations, resourceType, ...rest }: NameFieldProps) => {
+  const { t } = useTranslation();
   const [{ value }] = useField<string>(name);
 
   if (isDisabled) {
     return (
       <FormGroup label={rest?.['aria-label']} isRequired={rest.isRequired}>
         <TextInput value={value} {...rest} isDisabled />
-        {helperText && <DefaultHelperText helperText={helperText} />}
+        <DefaultHelperText helperText={t('A unique system identifier. Cannot be changed after creation.')} />
       </FormGroup>
     );
   }
-  return <NameField name={name} validations={validations} resourceType={resourceType} {...rest} />;
+  return (
+    <NameField
+      name={name}
+      validations={validations}
+      resourceType={resourceType}
+      helperText={t('A unique system identifier. Cannot be changed after creation.')}
+      {...rest}
+    />
+  );
 };
 
 export default NameFieldWrapper;

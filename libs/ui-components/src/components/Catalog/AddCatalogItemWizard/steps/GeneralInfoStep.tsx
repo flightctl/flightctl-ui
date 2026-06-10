@@ -97,7 +97,12 @@ const GeneralInfoStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?
         validations={getDnsSubdomainValidations(t)}
       />
       <FormGroup label={t('Display name')}>
-        <TextField name="displayName" aria-label={t('Display name')} isDisabled={isReadOnly} />
+        <TextField
+          name="displayName"
+          aria-label={t('Display name')}
+          helperText={t('The name shown to users in the catalog.')}
+          isDisabled={isReadOnly}
+        />
       </FormGroup>
       <FormGroup label={t('Icon')}>
         <IconUploadField name="icon" isDisabled={isReadOnly} />
