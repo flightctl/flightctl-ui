@@ -1,0 +1,26 @@
+.fctl-getting-started-cards {
+  width: 100%;
+  container-type: inline-size;
+  container-name: getting-started-cards;
+}
+
+/* Card size is approximately 350px */
+.fctl-getting-started-cards__item {
+  flex: 1 1 22rem;
+  min-width: min(100%, 22rem);
+  max-width: 100%;
+}
+
+/* Container fits two cards */
+@container getting-started-cards (min-width: 45rem) {
+  .fctl-getting-started-cards__item {
+    max-width: calc((100% - var(--pf-v6-l-flex--ColumnGap, var(--pf-t--global--spacer--md))) / 2);
+  }
+}
+
+/* Container fits three cards */
+@container getting-started-cards (min-width: 68rem) {
+  .fctl-getting-started-cards__item {
+    max-width: calc((100% - 2 * var(--pf-v6-l-flex--ColumnGap, var(--pf-t--global--spacer--md))) / 3);
+  }
+}
