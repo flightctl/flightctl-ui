@@ -26,7 +26,7 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import TextField from '../../../form/TextField';
 import UploadField from '../../../form/UploadField';
-import CheckboxField from '../../../form/CheckboxField';
+import SwitchField from '../../../form/SwitchField';
 import { CERTIFICATE_VALIDITY_IN_YEARS } from '../../../../constants';
 
 export const registrationStepId = 'registration';
@@ -158,7 +158,7 @@ const RegistrationStep = () => {
         </Card>
       </FormSection>
       <FormSection title={t('Remote access')}>
-        <CheckboxField
+        <SwitchField
           name="remoteAccessEnabled"
           label={t('Provide an SSH public key to enable passwordless login once your image is deployed.')}
           onChangeCustom={handleRemoteAccessToggle}
@@ -177,7 +177,7 @@ const RegistrationStep = () => {
               maxFileBytes={PUBLIC_KEY_MAX_LENGTH}
             />
           </FormGroup>
-        </CheckboxField>
+        </SwitchField>
         <Content component="small">
           {t('Paste the content of an SSH public key you want to use to connect to the device.')}
         </Content>
