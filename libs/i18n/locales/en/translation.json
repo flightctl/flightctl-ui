@@ -1214,7 +1214,6 @@
   "Build image": "Build image",
   "You do not have permissions to promote builds to the catalog": "You do not have permissions to promote builds to the catalog",
   "Add to the software catalog testing channel upon successful build": "Add to the software catalog testing channel upon successful build",
-  "Repositories used for output images must be writable.": "Repositories used for output images must be writable.",
   "Management-ready by default": "Management-ready by default",
   "The agent is automatically included in this image. This ensures your devices are ready to be managed immediately after they are deployed.": "The agent is automatically included in this image. This ensures your devices are ready to be managed immediately after they are deployed.",
   "Target repository": "Target repository",

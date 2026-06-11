@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Alert, Content, FormGroup, FormSection, Gallery } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 
-import { OciRepoSpec, RepoSpecType, Repository } from '@flightctl/types';
+import { RepoSpecType } from '@flightctl/types';
 import { ExportFormatType } from '@flightctl/types/imagebuilder';
 import { ImageBuildFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -13,7 +13,6 @@ import { usePermissionsContext } from '../../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../../types/rbac';
 import { SelectImageBuildExportCard } from '../../ImageExportCards';
 import { getAllExportFormats } from '../../../../utils/imageBuilds';
-import { isOciRepoSpec } from '../../../Repository/CreateRepository/utils';
 import { useOciRegistriesContext } from '../../OciRegistriesContext';
 import ImageUrlCard from '../../ImageUrlCard';
 
@@ -33,16 +32,6 @@ const OutputImageStep = () => {
   const { checkPermissions } = usePermissionsContext();
   const { ociRegistries, refetch } = useOciRegistriesContext();
   const [canCreateRepo] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.CREATE }]);
-
-  const writableRepoValidation = React.useCallback(
-    (repo: Repository) => {
-      if (isOciRepoSpec(repo.spec) && repo.spec.accessMode === OciRepoSpec.accessMode.READ) {
-        return t('Repositories used for output images must be writable.');
-      }
-      return undefined;
-    },
-    [t],
-  );
 
   const handleFormatToggle = (format: ExportFormatType, isChecked: boolean) => {
     const currentFormats = values.exportFormats;
@@ -75,7 +64,6 @@ const OutputImageStep = () => {
           options={{
             writeAccessOnly: true,
           }}
-          validateRepoSelection={writableRepoValidation}
           helperText={t(
             'Only OCI-compliant registries are shown. Other repository types, such as Git or HTTP, are not supported for image builds.',
           )}
