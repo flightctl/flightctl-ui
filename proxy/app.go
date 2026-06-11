@@ -80,6 +80,8 @@ func main() {
 		apiRouter.HandleFunc("/logout", authHandler.Logout)
 	}
 
+	router.HandleFunc("/ui-settings.json", server.UISettingsHandler).Methods(http.MethodGet)
+
 	spa := server.SpaHandler{}
 	router.PathPrefix("/").Handler(server.GzipHandler(spa))
 

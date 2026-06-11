@@ -23,9 +23,33 @@ import { Prompt } from 'react-router-dom';
 import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/reducers';
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
+import { uiProxy } from '../../utils/apiCalls';
 
 import '@flightctl/ui-components/src/styles/global.css';
 import './AppContext.css';
+
+const useUiSettings = (): { isRHEM: boolean } => {
+  const [settings, setSettings] = React.useState({ isRHEM: window.isRHEM ?? false });
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+
+    fetch(`${uiProxy}/ui-settings.json`, { signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error('Failed to load UI settings'))))
+      .then((data: { isRHEM?: boolean }) => {
+        const isRHEM = !!data.isRHEM;
+        window.isRHEM = isRHEM;
+        setSettings({ isRHEM });
+      })
+      .catch(() => {
+        // Keep defaults when settings cannot be loaded.
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  return settings;
+};
 
 /**
  * OCP Plugin App Context Provider
@@ -78,10 +102,11 @@ const appRoutes = {
 export const useValuesAppContext = (): AppContextProps => {
   const fetch = useFetch();
   const userInfo = useSelector(getUser);
+  const settings = useUiSettings();
 
   return {
     appType: FlightCtlApp.OCP,
-    settings: {},
+    settings,
     user: userInfo?.username || '',
     router: {
       Link,

@@ -22,6 +22,13 @@ var (
 	AuthInsecure           = getEnvVar("AUTH_INSECURE_SKIP_VERIFY", "")
 	OcpPlugin              = getEnvVar("IS_OCP_PLUGIN", "false")
 	IsRHEM                 = getEnvVar("IS_RHEM", "")
+)
+
+func IsRHEMEnabled() bool {
+	return getEnvVar("IS_RHEM", "") == "true"
+}
+
+var (
 	// TrustXForwardedHeaders enables use of X-Forwarded-Proto and X-Forwarded-Host for request
 	// origin (e.g. TLS termination at an ingress). When false, only r.TLS and r.Host are used.
 	// Set to true when a trusted reverse proxy sets these headers; see also TrustedProxyNets.
