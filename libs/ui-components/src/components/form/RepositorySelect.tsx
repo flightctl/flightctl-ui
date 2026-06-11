@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useField, useFormikContext } from 'formik';
 import {
   Button,
+  Divider,
   Flex,
   FlexItem,
   FormGroup,
@@ -195,19 +196,22 @@ const RepositorySelect = ({
           <ReadOnlyRepositoryListItem invalidRepoItems={invalidRepoItems} />
 
           {canCreateRepo && (
-            <MenuFooter>
-              <Button
-                variant="link"
-                isInline
-                icon={<PlusCircleIcon />}
-                onClick={() => {
-                  setCreateRepoModalOpen(true);
-                }}
-                isDisabled={isReadOnly}
-              >
-                {t('Create repository')}
-              </Button>
-            </MenuFooter>
+            <>
+              <Divider />
+              <MenuFooter>
+                <Button
+                  variant="link"
+                  isInline
+                  icon={<PlusCircleIcon />}
+                  onClick={() => {
+                    setCreateRepoModalOpen(true);
+                  }}
+                  isDisabled={isReadOnly}
+                >
+                  {t('Create repository')}
+                </Button>
+              </MenuFooter>
+            </>
           )}
         </FormSelect>
 
