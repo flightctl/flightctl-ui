@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { Alert, Title } from '@patternfly/react-core';
+import { Title } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import UpdateStepUpdatePolicy from '../../../Fleet/CreateFleet/steps/UpdateStepUpdatePolicy';
 
-import FlightCtlForm from '../../../form/FlightCtlForm';
+import FlightCtlForm, { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import { DeviceSpecConfigFormValues } from '../../../../types/deviceSpec';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import CheckboxField from '../../../form/CheckboxField';
@@ -35,9 +35,9 @@ const UpdatePolicyStep = ({ isReadOnly }: { isReadOnly?: boolean }) => {
           </FormGroupWithHelperText>
         </>
       ) : (
-        <Alert isInline variant="info" title={t('Default update policy')}>
+        <FlightCtlFormAlert variant="info" title={t('Default update policy')}>
           {t('The device will download and apply updates as soon as they are available.')}
-        </Alert>
+        </FlightCtlFormAlert>
       )}
     </FlightCtlForm>
   );

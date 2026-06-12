@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { Alert, FormSection } from '@patternfly/react-core';
+import { FormSection } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import LabelWithHelperText from '../../../common/WithHelperText';
 import { FleetFormValues } from '../../../../types/deviceSpec';
 
-import FlightCtlForm from '../../../form/FlightCtlForm';
+import FlightCtlForm, { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import UpdateStepRolloutPolicy from './UpdateStepRolloutPolicy';
 import UpdateStepDisruptionBudget from './UpdateStepDisruptionBudget';
 import UpdateStepUpdatePolicy from './UpdateStepUpdatePolicy';
@@ -73,9 +73,9 @@ const UpdatePolicyStep = ({ isReadOnly }: { isReadOnly: boolean }) => {
           />
         </FormSection>
       ) : (
-        <Alert isInline variant="info" title={t('Default update policy')}>
+        <FlightCtlFormAlert variant="info" title={t('Default update policy')}>
           {t('All the devices that are part of this fleet will receive updates as soon as they are available.')}
-        </Alert>
+        </FlightCtlFormAlert>
       )}
     </FlightCtlForm>
   );

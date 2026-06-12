@@ -1,16 +1,6 @@
 import * as React from 'react';
 
-import {
-  Alert,
-  Bullseye,
-  Button,
-  FormGroup,
-  FormSection,
-  Grid,
-  Spinner,
-  Split,
-  SplitItem,
-} from '@patternfly/react-core';
+import { Bullseye, Button, FormGroup, FormSection, Grid, Spinner, Split, SplitItem } from '@patternfly/react-core';
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
@@ -29,6 +19,7 @@ import ConfigWithRepositoryTemplateForm from './ConfigWithRepositoryTemplateForm
 import ConfigK8sSecretTemplateForm from './ConfigK8sSecretTemplateForm';
 import ConfigInlineTemplateForm from './ConfigInlineTemplateForm';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
+import { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import { RESOURCE, VERB } from '../../../../types/rbac';
 
 const useValidateOnMount = () => {
@@ -222,9 +213,9 @@ const ConfigurationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
 
   if (error) {
     return (
-      <Alert isInline variant="danger" title={t('Failed to load repositories')}>
+      <FlightCtlFormAlert variant="danger" title={t('Failed to load repositories')}>
         {getErrorMessage(error)}
-      </Alert>
+      </FlightCtlFormAlert>
     );
   } else if (isLoading) {
     return (

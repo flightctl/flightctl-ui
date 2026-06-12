@@ -1,5 +1,5 @@
+import * as React from 'react';
 import {
-  Alert,
   FormGroup,
   Grid,
   GridItem,
@@ -14,7 +14,6 @@ import {
 import { RJSFValidationError } from '@rjsf/utils';
 import { FormikErrors, useFormikContext } from 'formik';
 import type * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
-import * as React from 'react';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import DynamicForm, { AssetSelection } from '../../../DynamicForm/DynamicForm';
@@ -22,7 +21,7 @@ import YamlEditorBase from '../../../common/CodeEditor/YamlEditorBase';
 import TextField from '../../../form/TextField';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import RadioField from '../../../form/RadioField';
-import FlightCtlForm from '../../../form/FlightCtlForm';
+import FlightCtlForm, { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import { DynamicFormConfigFormik, InstallAppFormik } from '../types';
 
 import './AppConfigStep.css';
@@ -99,9 +98,8 @@ export const DynamicAppForm = ({ schemaErrors, isEdit }: DynamicAppFormProps) =>
       </StackItem>
       {!values.configSchema && (
         <StackItem>
-          <Alert
+          <FlightCtlFormAlert
             variant="info"
-            isInline
             title={t('Form view is disabled for this application because the schema is not available')}
           />
         </StackItem>
@@ -110,9 +108,8 @@ export const DynamicAppForm = ({ schemaErrors, isEdit }: DynamicAppFormProps) =>
         {values.configSchema && values.configureVia === 'form' ? (
           <Stack hasGutter>
             <StackItem>
-              <Alert
+              <FlightCtlFormAlert
                 variant="info"
-                isInline
                 title={t(
                   'Note: Some fields may not be represented in this form view. Please select "YAML view" for full control.',
                 )}
@@ -159,7 +156,7 @@ export const DynamicAppForm = ({ schemaErrors, isEdit }: DynamicAppFormProps) =>
       </StackItem>
       {schemaErrors?.length ? (
         <StackItem>
-          <Alert variant="danger" title={t('Configuration is not valid')} isInline>
+          <FlightCtlFormAlert variant="danger" title={t('Configuration is not valid')}>
             <List>
               {schemaErrors.map((e, index) => (
                 <ListItem key={index}>
@@ -167,7 +164,7 @@ export const DynamicAppForm = ({ schemaErrors, isEdit }: DynamicAppFormProps) =>
                 </ListItem>
               ))}
             </List>
-          </Alert>
+          </FlightCtlFormAlert>
         </StackItem>
       ) : null}
     </Stack>

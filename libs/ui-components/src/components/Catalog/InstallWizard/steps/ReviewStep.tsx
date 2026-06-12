@@ -1,5 +1,4 @@
 import {
-  Alert,
   Card,
   CardBody,
   CardTitle,
@@ -16,7 +15,7 @@ import * as React from 'react';
 import { CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import FlightCtlForm from '../../../form/FlightCtlForm';
+import FlightCtlForm, { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import { InstallAppFormik, InstallOsFormik } from '../types';
 import { OS_ITEM_LABEL_KEY } from '../../const';
 import { getFullContainerURI } from '../../utils';
@@ -56,66 +55,66 @@ const UpdateAlerts = ({ catalogItem }: UpdateAlertsProps) => {
     const numOfDevices = `${values.fleet?.status?.devicesSummary?.total || 0}`;
     if (!values.fleet?.spec.template.spec.os?.image) {
       return (
-        <Alert isInline variant="warning" title={t('Fleet update')}>
+        <FlightCtlFormAlert variant="warning" title={t('Fleet update')}>
           <Trans t={t}>
             This will deploy the OS <strong>{osImageName}</strong> for all <strong>({numOfDevices})</strong> devices in
             the <strong>{values.fleet?.metadata.name}</strong> fleet. Devices will download and apply the update
             according to the configured update policies.
           </Trans>
-        </Alert>
+        </FlightCtlFormAlert>
       );
     } else {
       if (isOsUpdate(catalogItem, values.version, values.fleet?.metadata.labels, values.fleet?.spec.template.spec)) {
         return (
-          <Alert isInline variant="info" title={t('Version update')}>
+          <FlightCtlFormAlert variant="info" title={t('Version update')}>
             <Trans t={t}>
               You are about to update OS <strong>{osImageName}</strong>. This will update the OS image for all{' '}
               <strong>({numOfDevices})</strong> devices in the <strong>{values.fleet?.metadata.name}</strong> fleet.
               Devices will download and apply the update according to the configured update policies.
             </Trans>
-          </Alert>
+          </FlightCtlFormAlert>
         );
       }
 
       return (
-        <Alert isInline variant="warning" title={t('Existing OS image detected')}>
+        <FlightCtlFormAlert variant="warning" title={t('Existing OS image detected')}>
           <Trans t={t}>
             You are about to replace OS with <strong>{osImageName}</strong>. This will update the OS image for all{' '}
             <strong>({numOfDevices})</strong> devices in the <strong>{values.fleet?.metadata.name}</strong> fleet.
             Devices will download and apply the update according to the configured update policies.
           </Trans>
-        </Alert>
+        </FlightCtlFormAlert>
       );
     }
   } else if (values.target === 'device') {
     if (!values.device?.spec?.os?.image) {
       return (
-        <Alert isInline variant="warning" title={t('Device update')}>
+        <FlightCtlFormAlert variant="warning" title={t('Device update')}>
           <Trans t={t}>
             This will deploy the OS <strong>{osImageName}</strong>. Device will download and apply the update according
             to the configured update policies.
           </Trans>
-        </Alert>
+        </FlightCtlFormAlert>
       );
     } else {
       if (isOsUpdate(catalogItem, values.version, values.device?.metadata.labels, values.device?.spec)) {
         return (
-          <Alert isInline variant="info" title={t('Version update')}>
+          <FlightCtlFormAlert variant="info" title={t('Version update')}>
             <Trans t={t}>
               You are about to update OS with <strong>{osImageName}</strong>. Device will download and apply the update
               according to the configured update policies.
             </Trans>
-          </Alert>
+          </FlightCtlFormAlert>
         );
       }
 
       return (
-        <Alert isInline variant="warning" title={t('Existing OS image detected')}>
+        <FlightCtlFormAlert variant="warning" title={t('Existing OS image detected')}>
           <Trans t={t}>
             You are about to replace OS with <strong>{osImageName}</strong>. Device will download and apply the update
             according to the configured update policies.
           </Trans>
-        </Alert>
+        </FlightCtlFormAlert>
       );
     }
   }
@@ -180,9 +179,9 @@ const ReviewStep = ({ error, catalogItem }: ReviewStepProps) => {
         </StackItem>
         {error && (
           <StackItem>
-            <Alert variant="danger" title={t('Failed to deploy')} isInline>
+            <FlightCtlFormAlert variant="danger" title={t('Failed to deploy')}>
               {error}
-            </Alert>
+            </FlightCtlFormAlert>
           </StackItem>
         )}
       </Stack>

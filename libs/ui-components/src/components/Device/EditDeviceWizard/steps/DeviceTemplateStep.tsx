@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, CodeBlock, CodeBlockCode, FormGroup, Spinner, Stack, StackItem } from '@patternfly/react-core';
+import { CodeBlock, CodeBlockCode, FormGroup, Spinner, Stack, StackItem } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 import { Trans } from 'react-i18next';
 import { Repository } from '@flightctl/types';
@@ -8,7 +8,7 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import LabelWithHelperText, { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import TextField from '../../../form/TextField';
-import FlightCtlForm from '../../../form/FlightCtlForm';
+import FlightCtlForm, { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import { DeviceSpecConfigFormValues } from '../../../../types/deviceSpec';
 import ConfigurationTemplates from './ConfigurationTemplates';
 import ApplicationsForm from './ApplicationTemplates';
@@ -91,13 +91,13 @@ const MicroShiftCheckbox = ({ isFleet, isReadOnly }: { isFleet: boolean; isReadO
       </FormGroup>
       {isDisabled && (
         <FormGroup>
-          <Alert variant="warning" title={t('Cannot register MicroShift devices')} isInline>
+          <FlightCtlFormAlert variant="warning" title={t('Cannot register MicroShift devices')}>
             {t(`{{ repository }} repository is missing. To re-create the repository`, {
               repository: `'${ACM_REPO_NAME}'`,
             })}
             {', '}
             <LearnMoreLink link={createAcmRepoLink} text={t('view documentation')} />
-          </Alert>
+          </FlightCtlFormAlert>
         </FormGroup>
       )}
     </>
@@ -123,7 +123,7 @@ const DeviceTemplateStep = ({
   return (
     <FlightCtlForm>
       {isFleet && !isReadOnly && (
-        <Alert isInline variant="info" title={t('Using template variables')} isExpandable>
+        <FlightCtlFormAlert variant="info" title={t('Using template variables')} isExpandable>
           <Trans t={t}>
             Add a variable by using <strong>{templateOption1}</strong> or <strong>{templateOption2}</strong> and it will
             be applied based on each device&rsquo;s details. For example, you could set the following value to apply
@@ -133,7 +133,7 @@ const DeviceTemplateStep = ({
             <CodeBlockCode>{exampleCode}</CodeBlockCode>
           </CodeBlock>
           <LearnMoreLink link={useTemplateVarsLink} />
-        </Alert>
+        </FlightCtlFormAlert>
       )}
       <FormGroupWithHelperText
         label={t('System image')}
@@ -146,7 +146,7 @@ const DeviceTemplateStep = ({
         <Stack hasGutter>
           {catalogOs && (
             <StackItem>
-              <Alert isInline variant="info" title={t('System image is managed by Software Catalog')} />
+              <FlightCtlFormAlert variant="info" title={t('System image is managed by Software Catalog')} />
             </StackItem>
           )}
           <StackItem>

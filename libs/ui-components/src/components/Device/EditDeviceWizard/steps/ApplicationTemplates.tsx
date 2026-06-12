@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  Alert,
   Button,
   Content,
   FormGroup,
@@ -25,6 +24,7 @@ import TextField from '../../../form/TextField';
 import FormSelect from '../../../form/FormSelect';
 import RadioField from '../../../form/RadioField';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
+import { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import { appTypeOptions } from '../../../../utils/apps';
 import ApplicationImageForm from './ApplicationImageForm';
@@ -82,7 +82,7 @@ const ApplicationSection = ({
       <Grid hasGutter>
         {managedByCatalog && (
           <GridItem>
-            <Alert isInline variant="info" title={t('Application is managed by Software Catalog')} />
+            <FlightCtlFormAlert variant="info" title={t('Application is managed by Software Catalog')} />
           </GridItem>
         )}
         <FormGroup label={t('Application type')} isRequired>

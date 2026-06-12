@@ -1,6 +1,5 @@
 import { Device, Fleet } from '@flightctl/types';
 import {
-  Alert,
   Button,
   FormGroup,
   Grid,
@@ -29,7 +28,7 @@ import FleetRow from '../../../Fleet/FleetRow';
 import { useDevicesPaginated } from '../../../Device/DevicesPage/useDevices';
 import { getDeviceTableColumns } from '../../../Device/DevicesPage/EnrolledDevicesTable';
 import EnrolledDeviceTableRow from '../../../Device/DevicesPage/EnrolledDeviceTableRow';
-import FlightCtlForm from '../../../form/FlightCtlForm';
+import FlightCtlForm, { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import { InstallAppFormik, InstallOsFormik } from '../types';
 import FormSelect from '../../../form/FormSelect';
 import { getArtifactLabel, getFullArtifactURI } from '../../utils';
@@ -284,9 +283,9 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
               </Button>
             </GridItem>
             <GridItem>
-              <Alert isInline variant="info" title={t('Learn more about provisioning devices')}>
+              <FlightCtlFormAlert variant="info" title={t('Learn more about provisioning devices')}>
                 <LearnMoreLink link={provisionDeviceLink} />
-              </Alert>
+              </FlightCtlFormAlert>
             </GridItem>
           </>
         )}
