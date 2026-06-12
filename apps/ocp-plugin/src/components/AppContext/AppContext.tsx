@@ -23,7 +23,7 @@ import { Prompt } from 'react-router-dom';
 import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/reducers';
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
-import { uiProxy } from '../../utils/apiCalls';
+import { apiProxy } from '../../utils/apiCalls';
 
 import '@flightctl/ui-components/src/styles/global.css';
 import './AppContext.css';
@@ -34,7 +34,7 @@ const useUiSettings = (): { isRHEM: boolean } => {
   React.useEffect(() => {
     const controller = new AbortController();
 
-    fetch(`${uiProxy}/ui-settings.json`, { signal: controller.signal })
+    fetch(`${apiProxy}/ui-settings`, { signal: controller.signal })
       .then((response) => (response.ok ? response.json() : Promise.reject(new Error('Failed to load UI settings'))))
       .then((data: { isRHEM?: boolean }) => {
         const isRHEM = !!data.isRHEM;

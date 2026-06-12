@@ -72,15 +72,15 @@ func main() {
 	// Viewing the login command is always available
 	apiRouter.HandleFunc("/login-command", authHandler.GetLoginCommand)
 
-	// Login/logout actions are only available in the standalone UI
-	if config.OcpPlugin != "true" {
+	if config.OcpPlugin == "true" {
+		apiRouter.HandleFunc("/ui-settings", server.UISettingsHandler).Methods(http.MethodGet)
+	} else {
+		// Login/logout actions are only available in the standalone UI
 		apiRouter.HandleFunc("/login", authHandler.Login)
 		apiRouter.HandleFunc("/login/info", authHandler.GetUserInfo)
 		apiRouter.HandleFunc("/login/refresh", authHandler.Refresh)
 		apiRouter.HandleFunc("/logout", authHandler.Logout)
 	}
-
-	router.HandleFunc("/ui-settings.json", server.UISettingsHandler).Methods(http.MethodGet)
 
 	spa := server.SpaHandler{}
 	router.PathPrefix("/").Handler(server.GzipHandler(spa))

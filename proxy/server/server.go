@@ -16,7 +16,7 @@ type SpaHandler struct{}
 
 func serveIndexPage(w http.ResponseWriter, r *http.Request) {
 	indexName := "index"
-	if config.IsRHEM == "true" {
+	if config.IsRHEM {
 		indexName = "index-rhem"
 	}
 	content, err := os.ReadFile(fmt.Sprintf("./dist/%s.html", indexName))
