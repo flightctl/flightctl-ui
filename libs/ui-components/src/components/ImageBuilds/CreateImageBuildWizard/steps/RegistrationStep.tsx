@@ -58,10 +58,6 @@ const RegistrationStep = () => {
     }
   };
 
-  const handleRemoteAccessToggle = (enabled: boolean) => {
-    setFieldValue('remoteAccessEnabled', enabled);
-  };
-
   return (
     <FlightCtlForm>
       <FormSection>
@@ -161,26 +157,29 @@ const RegistrationStep = () => {
         <SwitchField
           name="remoteAccessEnabled"
           label={t('Provide an SSH public key to enable passwordless login once your image is deployed.')}
-          onChangeCustom={handleRemoteAccessToggle}
-        >
-          <FormGroup label={t('Username')} fieldId="user-config-username" isRequired>
-            <TextField
-              name="userConfiguration.username"
-              aria-label={t('Username')}
-              helperText={t('The username for the user account')}
-            />
-          </FormGroup>
-          <FormGroup label={t('SSH public key')} fieldId="user-config-publickey" isRequired>
-            <UploadField
-              name="userConfiguration.publickey"
-              ariaLabel={t('SSH public key')}
-              maxFileBytes={PUBLIC_KEY_MAX_LENGTH}
-            />
-          </FormGroup>
-        </SwitchField>
-        <Content component="small">
-          {t('Paste the content of an SSH public key you want to use to connect to the device.')}
-        </Content>
+          aria-label={t('SSH public key for remote access')}
+        />
+        {values.remoteAccessEnabled && (
+          <>
+            <FormGroup label={t('Username')} fieldId="user-config-username" isRequired>
+              <TextField
+                name="userConfiguration.username"
+                aria-label={t('Username')}
+                helperText={t('The username for the user account')}
+              />
+            </FormGroup>
+            <FormGroup label={t('SSH public key')} fieldId="user-config-publickey" isRequired>
+              <UploadField
+                name="userConfiguration.publickey"
+                ariaLabel={t('SSH public key')}
+                maxFileBytes={PUBLIC_KEY_MAX_LENGTH}
+              />
+            </FormGroup>
+            <Content component="small">
+              {t('Paste the content of an SSH public key you want to use to connect to the device.')}
+            </Content>
+          </>
+        )}
       </FormSection>
     </FlightCtlForm>
   );
