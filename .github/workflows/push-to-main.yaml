@@ -60,7 +60,7 @@ jobs:
 
       - name: Build
         id: build
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
         with:
           image: ${{ steps.os-image.outputs.image_name }}
           tags: ${{ needs.generate-tags.outputs.image_tags }}
@@ -84,7 +84,7 @@ jobs:
 
       - name: Push to Quay.io
         id: push
-        uses: redhat-actions/push-to-registry@v2.7
+        uses: redhat-actions/push-to-registry@9986a6552bc4571882a4a67e016b17361412b4df # v2.7
         with:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ needs.generate-tags.outputs.image_tags }}
@@ -109,7 +109,7 @@ jobs:
 
       - name: Build
         id: build
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
         with:
           image: ${{ steps.os-image.outputs.image_name }}
           tags: ${{ needs.generate-tags.outputs.image_tags }}
@@ -133,7 +133,7 @@ jobs:
 
       - name: Push to Quay.io
         id: push
-        uses: redhat-actions/push-to-registry@v2.7
+        uses: redhat-actions/push-to-registry@9986a6552bc4571882a4a67e016b17361412b4df # v2.7
         with:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ needs.generate-tags.outputs.image_tags }}
