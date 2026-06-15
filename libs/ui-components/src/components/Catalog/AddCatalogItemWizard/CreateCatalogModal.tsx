@@ -2,6 +2,9 @@ import * as React from 'react';
 import {
   Alert,
   Button,
+  EmptyState,
+  EmptyStateBody,
+  EmptyStateStatus,
   FormGroup,
   ModalBody,
   ModalFooter,
@@ -37,6 +40,7 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
   const { t } = useTranslation();
   const { post, patch } = useFetch();
   const [error, setError] = React.useState<unknown>();
+  const [createdCatalog, setCreatedCatalog] = React.useState<Catalog>();
 
   const isEdit = !!catalog;
   const isReadOnly = !!catalog?.metadata?.owner;
@@ -90,7 +94,7 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
               }
             } else {
               const result = await post<Catalog>('catalogs', getCatalogResource(values));
-              onSuccess(result);
+              setCreatedCatalog(result);
             }
           } catch (e) {
             setError(e);
@@ -99,70 +103,89 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
       >
         {({ isSubmitting, isValid, submitForm, dirty }) => (
           <>
-            <ModalHeader title={title} />
+            <ModalHeader title={createdCatalog ? t('Catalog created') : title} />
             <ModalBody>
-              <FlightCtlForm>
-                <NameField
-                  name="name"
-                  aria-label={t('Name')}
-                  isRequired
-                  isDisabled={isEdit}
-                  resourceType="catalogs"
-                  validations={getDnsSubdomainValidations(t)}
-                />
-                <FormGroup label={t('Display name')}>
-                  <TextField
-                    name="displayName"
-                    aria-label={t('Display name')}
-                    helperText={t('The name shown to users in the catalog.')}
-                    isDisabled={isReadOnly}
+              {createdCatalog ? (
+                <EmptyState status={EmptyStateStatus.success} titleText={t('Catalog created successfully')}>
+                  <EmptyStateBody>
+                    {t(
+                      '"{{catalogName}}" has been created and is ready to use. You can select it from the list of available catalogs.',
+                      {
+                        catalogName: createdCatalog.spec.displayName || createdCatalog.metadata.name,
+                      },
+                    )}
+                  </EmptyStateBody>
+                </EmptyState>
+              ) : (
+                <FlightCtlForm>
+                  <NameField
+                    name="name"
+                    aria-label={t('Name')}
+                    isRequired
+                    isDisabled={isEdit}
+                    resourceType="catalogs"
+                    validations={getDnsSubdomainValidations(t)}
                   />
-                </FormGroup>
-                <FormGroup label={t('Short description')}>
-                  <TextAreaField name="shortDescription" aria-label={t('Short description')} isDisabled={isReadOnly} />
-                </FormGroup>
-                <FormGroup label={t('Provider')}>
-                  <TextField name="provider" aria-label={t('Provider')} isDisabled={isReadOnly} />
-                </FormGroup>
-                <FormGroup label={t('Support')}>
-                  <TextField
-                    name="support"
-                    aria-label={t('Support')}
-                    placeholder={t('e.g. https://example.com/support', { nsSeparator: '|' })}
-                    isDisabled={isReadOnly}
-                  />
-                </FormGroup>
-              </FlightCtlForm>
+                  <FormGroup label={t('Display name')}>
+                    <TextField
+                      name="displayName"
+                      aria-label={t('Display name')}
+                      helperText={t('The name shown to users in the catalog.')}
+                      isDisabled={isReadOnly}
+                    />
+                  </FormGroup>
+                  <FormGroup label={t('Short description')}>
+                    <TextAreaField name="shortDescription" aria-label={t('Short description')} isDisabled={isReadOnly} />
+                  </FormGroup>
+                  <FormGroup label={t('Provider')}>
+                    <TextField name="provider" aria-label={t('Provider')} isDisabled={isReadOnly} />
+                  </FormGroup>
+                  <FormGroup label={t('Support')}>
+                    <TextField
+                      name="support"
+                      aria-label={t('Support')}
+                      placeholder={t('e.g. https://example.com/support', { nsSeparator: '|' })}
+                      isDisabled={isReadOnly}
+                    />
+                  </FormGroup>
+                </FlightCtlForm>
+              )}
             </ModalBody>
             <ModalFooter>
-              <Stack hasGutter>
-                {!!error && (
+              {createdCatalog ? (
+                <Button variant="primary" onClick={() => onSuccess(createdCatalog)}>
+                  {t('Close')}
+                </Button>
+              ) : (
+                <Stack hasGutter>
+                  {!!error && (
+                    <StackItem>
+                      <Alert variant="danger" isInline title={getErrorMessage(error)} />
+                    </StackItem>
+                  )}
                   <StackItem>
-                    <Alert variant="danger" isInline title={getErrorMessage(error)} />
-                  </StackItem>
-                )}
-                <StackItem>
-                  <Split hasGutter>
-                    {!isReadOnly && (
+                    <Split hasGutter>
+                      {!isReadOnly && (
+                        <SplitItem>
+                          <Button
+                            variant="primary"
+                            onClick={submitForm}
+                            isDisabled={!isValid || isSubmitting || !dirty}
+                            isLoading={isSubmitting}
+                          >
+                            {isEdit ? t('Save') : t('Create')}
+                          </Button>
+                        </SplitItem>
+                      )}
                       <SplitItem>
-                        <Button
-                          variant="primary"
-                          onClick={submitForm}
-                          isDisabled={!isValid || isSubmitting || !dirty}
-                          isLoading={isSubmitting}
-                        >
-                          {isEdit ? t('Save') : t('Create')}
+                        <Button variant="link" onClick={onClose} isDisabled={isSubmitting}>
+                          {isReadOnly ? t('Close') : t('Cancel')}
                         </Button>
                       </SplitItem>
-                    )}
-                    <SplitItem>
-                      <Button variant="link" onClick={onClose} isDisabled={isSubmitting}>
-                        {isReadOnly ? t('Close') : t('Cancel')}
-                      </Button>
-                    </SplitItem>
-                  </Split>
-                </StackItem>
-              </Stack>
+                    </Split>
+                  </StackItem>
+                </Stack>
+              )}
             </ModalFooter>
           </>
         )}
