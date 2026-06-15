@@ -152,6 +152,12 @@ const ConfigWithRepositoryTemplateForm = ({
         repoRefetch={repoRefetch}
         helperText={getRepositoryHelperText(t, repoType)}
         isRequired
+        options={{
+          enforcedRepoTypeMessage:
+            repoType === RepoSpecType.RepoSpecTypeGit
+              ? t('Only Git repositories can be used for Git configurations.')
+              : t('Only HTTP repositories can be used for HTTP configurations.'),
+        }}
       />
       {repoType === RepoSpecType.RepoSpecTypeGit && (
         <GitConfigForm template={ct as GitConfigTemplate} index={index} isReadOnly={isReadOnly} />

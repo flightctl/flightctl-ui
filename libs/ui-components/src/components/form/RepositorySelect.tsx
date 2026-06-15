@@ -1,21 +1,17 @@
 import * as React from 'react';
 import { useField, useFormikContext } from 'formik';
 import {
-  Button,
   Content,
   ContentVariants,
-  Divider,
   FormGroup,
   Grid,
   GridItem,
   Icon,
-  MenuFooter,
   SelectList,
   SelectOption,
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { TFunction } from 'react-i18next';
 
@@ -112,6 +108,7 @@ type RepositorySelectProps = {
   repoRefetch?: VoidFunction;
   options?: {
     writeAccessOnly?: boolean;
+    enforcedRepoTypeMessage?: string;
   };
   isRequired?: boolean;
 };
@@ -165,6 +162,10 @@ const RepositorySelect = ({
     void setFieldValue(name, repo.metadata.name, true);
   };
 
+  const addAction = canCreateRepo
+    ? { label: t('Create repository'), onAdd: () => setCreateRepoModalOpen(true) }
+    : undefined;
+
   return (
     <>
       <FormGroup label={label || t('Repository')} isRequired={isRequired}>
@@ -174,27 +175,9 @@ const RepositorySelect = ({
           withStatusIcon
           placeholderText={t('Select a repository')}
           isDisabled={isReadOnly}
+          addAction={addAction}
         >
           <ReadOnlyRepositoryListItem invalidRepoItems={invalidRepoItems} />
-
-          {canCreateRepo && (
-            <>
-              <Divider />
-              <MenuFooter>
-                <Button
-                  variant="link"
-                  isInline
-                  icon={<PlusCircleIcon />}
-                  onClick={() => {
-                    setCreateRepoModalOpen(true);
-                  }}
-                  isDisabled={isReadOnly}
-                >
-                  {t('Create repository')}
-                </Button>
-              </MenuFooter>
-            </>
-          )}
         </FormSelect>
 
         {helperText && <DefaultHelperText helperText={helperText} />}
