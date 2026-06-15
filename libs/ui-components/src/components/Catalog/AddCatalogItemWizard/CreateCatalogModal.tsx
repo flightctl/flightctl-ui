@@ -3,9 +3,7 @@ import {
   Alert,
   Button,
   EmptyState,
-  EmptyStateActions,
   EmptyStateBody,
-  EmptyStateFooter,
   EmptyStateStatus,
   FormGroup,
   Modal,
@@ -23,7 +21,6 @@ import { Catalog } from '@flightctl/types/alpha';
 
 import { useFetch } from '../../../hooks/useFetch';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { getDnsSubdomainValidations, validKubernetesDnsSubdomain, validURLSchema } from '../../form/validations';
 import FlightCtlForm from '../../form/FlightCtlForm';
 import NameField from '../../form/NameField';
@@ -43,7 +40,6 @@ type CreateCatalogModalProps = {
 const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalProps) => {
   const { t } = useTranslation();
   const { post, patch } = useFetch();
-  const navigate = useNavigate();
   const [error, setError] = React.useState<unknown>();
   const [createdCatalog, setCreatedCatalog] = React.useState<Catalog>();
 
@@ -120,30 +116,12 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
                 <EmptyState status={EmptyStateStatus.success} titleText={t('Catalog created successfully')}>
                   <EmptyStateBody>
                     {t(
-                      '"{{catalogName}}" has been created. You can now create a catalog item or return to the catalog.',
+                      '"{{catalogName}}" has been created and is ready to use. You can select it from the list of available catalogs.',
                       {
                         catalogName: createdCatalog.spec.displayName || createdCatalog.metadata.name,
                       },
                     )}
                   </EmptyStateBody>
-                  <EmptyStateFooter>
-                    <EmptyStateActions>
-                      <Button variant="primary" onClick={() => onSuccess(createdCatalog)}>
-                        {t('Create catalog item')}
-                      </Button>
-                    </EmptyStateActions>
-                    <EmptyStateActions>
-                      <Button
-                        variant="link"
-                        onClick={() => {
-                          onClose();
-                          navigate(ROUTE.CATALOG);
-                        }}
-                      >
-                        {t('Return to catalog')}
-                      </Button>
-                    </EmptyStateActions>
-                  </EmptyStateFooter>
                 </EmptyState>
               ) : (
                 <FlightCtlForm>
@@ -182,8 +160,12 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
                 </FlightCtlForm>
               )}
             </ModalBody>
-            {!createdCatalog && (
-              <ModalFooter>
+            <ModalFooter>
+              {createdCatalog ? (
+                <Button variant="primary" onClick={() => onSuccess(createdCatalog)}>
+                  {t('Close')}
+                </Button>
+              ) : (
                 <Stack hasGutter>
                   {!!error && (
                     <StackItem>
@@ -212,8 +194,8 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
                     </Split>
                   </StackItem>
                 </Stack>
-              </ModalFooter>
-            )}
+              )}
+            </ModalFooter>
           </>
         )}
       </Formik>
