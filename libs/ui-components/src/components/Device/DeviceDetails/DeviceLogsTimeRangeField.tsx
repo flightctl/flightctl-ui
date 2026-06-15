@@ -262,7 +262,7 @@ const DeviceLogsTimeRangeField = () => {
     if (isCompleteRange) {
       return;
     }
-    void setFieldValue('timeRange', undefined);
+    void setFieldValue('timeRange', 'all');
     void setFieldTouched('timeRange', false);
     void setDateValues('', '');
   }, [setDateValues, setFieldTouched, setFieldValue, isCompleteRange]);
