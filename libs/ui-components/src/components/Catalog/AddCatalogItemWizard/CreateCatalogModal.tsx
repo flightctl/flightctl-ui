@@ -135,7 +135,11 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
                     />
                   </FormGroup>
                   <FormGroup label={t('Short description')}>
-                    <TextAreaField name="shortDescription" aria-label={t('Short description')} isDisabled={isReadOnly} />
+                    <TextAreaField
+                      name="shortDescription"
+                      aria-label={t('Short description')}
+                      isDisabled={isReadOnly}
+                    />
                   </FormGroup>
                   <FormGroup label={t('Provider')}>
                     <TextField name="provider" aria-label={t('Provider')} isDisabled={isReadOnly} />
