@@ -15,6 +15,7 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
+  Popover,
   Split,
   SplitItem,
 } from '@patternfly/react-core';
@@ -23,7 +24,7 @@ import FlightCtlModal from '@flightctl/ui-components/src/components/common/Fligh
 import { FieldArray, Formik, useField, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import { Trans } from 'react-i18next';
-import { MinusCircleIcon, PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons';
+import { MinusCircleIcon, OutlinedQuestionCircleIcon, PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
@@ -32,6 +33,7 @@ import CreateResourceSyncsForm from './CreateResourceSyncsForm';
 
 import {
   getInitValues,
+  getRepoTypeLabel,
   getRepository,
   getRepositoryPatches,
   getResourceSync,
@@ -185,7 +187,13 @@ const AdvancedSection = () => {
   );
 };
 
-const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
+const RepositoryType = ({
+  isEdit,
+  enforcedRepoTypeMessage,
+}: {
+  isEdit?: boolean;
+  enforcedRepoTypeMessage?: string;
+}) => {
   const { t } = useTranslation();
   const { values, setFieldValue, validateForm } = useFormikContext<RepositoryFormValues>();
   const [showConfirmChangeType, setShowConfirmChangeType] = React.useState<RepoSpecType | undefined>();
@@ -194,7 +202,26 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
     return null;
   }
 
-  const isRepoTypeChangeDisabled = values.allowedRepoTypes?.length === 1;
+  // When we don't want to hide the repository type, but a single repoType can be chosen, we show a clarifying message.
+  const enforcedRepoType = values.allowedRepoTypes?.length === 1 ? values.allowedRepoTypes[0] : undefined;
+  if (enforcedRepoType) {
+    const repoTypeLabel = getRepoTypeLabel(t, enforcedRepoType);
+    return (
+      <FormGroup label={t('Repository type')}>
+        {repoTypeLabel}
+        {enforcedRepoTypeMessage && (
+          <Popover bodyContent={enforcedRepoTypeMessage}>
+            <Button
+              variant="plain"
+              isInline
+              icon={<OutlinedQuestionCircleIcon />}
+              aria-label={t('Why is this repository type enforced?')}
+            />
+          </Popover>
+        )}
+      </FormGroup>
+    );
+  }
 
   const doChangeRepoType = (toType: RepoSpecType) => {
     if (toType === RepoSpecType.RepoSpecTypeGit) {
@@ -245,7 +272,6 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
             checkedValue={RepoSpecType.RepoSpecTypeGit}
             onChangeCustom={onRepoTypeChange}
             noDefaultOnChange
-            isDisabled={isRepoTypeChangeDisabled}
           />
         </SplitItem>
         <SplitItem>
@@ -256,7 +282,6 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
             checkedValue={RepoSpecType.RepoSpecTypeHttp}
             onChangeCustom={onRepoTypeChange}
             noDefaultOnChange
-            isDisabled={isRepoTypeChangeDisabled}
           />
         </SplitItem>
         <SplitItem>
@@ -267,7 +292,6 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
             checkedValue={RepoSpecType.RepoSpecTypeOci}
             onChangeCustom={onRepoTypeChange}
             noDefaultOnChange
-            isDisabled={isRepoTypeChangeDisabled}
           />
         </SplitItem>
       </Split>
@@ -347,9 +371,11 @@ const TagsField = ({
 export const RepositoryForm = ({
   isEdit,
   accessModeDisabledReason,
+  enforcedRepoTypeMessage,
 }: {
   isEdit?: boolean;
   accessModeDisabledReason?: string;
+  enforcedRepoTypeMessage?: string;
 }) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<RepositoryFormValues>();
@@ -384,7 +410,7 @@ export const RepositoryForm = ({
         </FormGroup>
       )}
 
-      <RepositoryType isEdit={isEdit} />
+      <RepositoryType isEdit={isEdit} enforcedRepoTypeMessage={enforcedRepoTypeMessage} />
       {isOciRepo && (
         <FormSection>
           <FormGroup label={t('Scheme')}>
@@ -533,6 +559,7 @@ const CreateRepositoryFormContent = ({ isEdit, onClose, options, children }: Cre
         <Grid hasGutter>
           <RepositoryForm
             isEdit={isEdit}
+            enforcedRepoTypeMessage={options?.enforcedRepoTypeMessage}
             accessModeDisabledReason={
               options?.writeAccessOnly
                 ? t('Access mode must be set to read and write for this repository type')
@@ -591,6 +618,8 @@ export type CreateRepositoryFormProps = {
     canUseResourceSyncs?: boolean;
     showRepoTypes?: boolean;
     allowedRepoTypes?: RepoSpecType[];
+    // Message to display when a single repository type is enforced
+    enforcedRepoTypeMessage?: string;
     writeAccessOnly?: boolean;
   };
 };

@@ -61,6 +61,9 @@ const SourceImageStep = () => {
           canCreateRepo={canCreateRepo}
           repoRefetch={refetch}
           isRequired
+          options={{
+            enforcedRepoTypeMessage: t('Only OCI registries can be used for image builds.'),
+          }}
         />
         <FormGroup label={t('Image name')} fieldId="image-name" isRequired>
           {baseImages.length ? (
