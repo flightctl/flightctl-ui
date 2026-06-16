@@ -3,9 +3,12 @@ import {
   Alert,
   Avatar,
   Button,
+  Content,
   Dropdown,
   DropdownItem,
   DropdownList,
+  Flex,
+  FlexItem,
   MenuToggle,
   MenuToggleElement,
   Modal,
@@ -23,6 +26,7 @@ import UserPreferencesModal from '@flightctl/ui-components/src/components/Masthe
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import { ROUTE, useNavigate } from '@flightctl/ui-components/src/hooks/useNavigate';
 
+import { useOrganizationGuardContext } from '@flightctl/ui-components/src/components/common/OrganizationGuard';
 import { getErrorMessage } from '@flightctl/ui-components/src/utils/error';
 import { AuthContext } from '../../context/AuthContext';
 import { logout } from '../../utils/apiCalls';
@@ -30,12 +34,17 @@ import { logout } from '../../utils/apiCalls';
 import './AppToolbar.css';
 
 type UserDropdownProps = {
-  children?: React.ReactNode;
   username?: string;
+  organizationLabel?: string;
   onUserPreferences: VoidFunction;
 };
 
-const UserDropdown: React.FC<UserDropdownProps> = ({ children, username = 'User', onUserPreferences }) => {
+const UserDropdown = ({
+  children,
+  username = 'User',
+  organizationLabel,
+  onUserPreferences,
+}: React.PropsWithChildren<UserDropdownProps>) => {
   const { t } = useTranslation();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const onDropdownToggle = () => {
@@ -49,14 +58,21 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ children, username = 'User'
       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
         <MenuToggle
           ref={toggleRef}
+          className="fctl-app_toolbar-menu__toggle"
           icon={<Avatar src="images/avatarimg.svg" alt="avatar" size="md" />}
           onClick={onDropdownToggle}
           id="userMenu"
-          isFullHeight
           isExpanded={isDropdownOpen}
           variant="plainText"
         >
-          {username}
+          <Flex direction={{ default: 'column' }} alignItems={{ default: 'alignItemsFlexStart' }}>
+            <FlexItem data-testid="masthead-username">{username}</FlexItem>
+            {organizationLabel && (
+              <FlexItem data-testid="masthead-organization">
+                <Content component="small">{organizationLabel}</Content>
+              </FlexItem>
+            )}
+          </Flex>
         </MenuToggle>
       )}
     >
@@ -74,6 +90,8 @@ const AppToolbar = () => {
   const [helpDropdownOpen, setHelpDropdownOpen] = React.useState<boolean>(false);
 
   const { username } = React.useContext(AuthContext);
+  const { currentOrganization } = useOrganizationGuardContext();
+  const organizationLabel = currentOrganization?.label || currentOrganization?.id;
   const [logoutLoading, setLogoutLoading] = React.useState(false);
   const [logoutErr, setLogoutErr] = React.useState<string>();
   const onUserPreferences = () => setPreferencesModalOpen(true);
@@ -82,7 +100,7 @@ const AppToolbar = () => {
   let userDropdown = <UserDropdown onUserPreferences={onUserPreferences} />;
   if (username) {
     userDropdown = (
-      <UserDropdown username={username} onUserPreferences={onUserPreferences}>
+      <UserDropdown username={username} onUserPreferences={onUserPreferences} organizationLabel={organizationLabel}>
         <DropdownItem
           onClick={async () => {
             try {

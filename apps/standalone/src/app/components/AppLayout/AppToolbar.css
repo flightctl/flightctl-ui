@@ -1,3 +1,8 @@
 .fctl-app_toolbar {
   justify-content: flex-end;
 }
+
+/* Put the dropdown icon at the top - it looks better with the content (username + organization label in two lines) */
+.fctl-app_toolbar-menu__toggle {
+  align-items: flex-start;
+}
