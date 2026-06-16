@@ -1,5 +1,4 @@
 import {
-  Alert,
   Button,
   Content,
   FormGroup,
@@ -18,7 +17,7 @@ import { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
 import semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 
-import FlightCtlForm from '../../../form/FlightCtlForm';
+import FlightCtlForm, { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelect from '../../../form/FormSelect';
 import { InstallSpecFormik } from '../../InstallWizard/types';
@@ -137,7 +136,7 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit }: UpdateStepProps) =>
                 <>
                   {values.version === currentVersion.version && (
                     <GridItem>
-                      <Alert isInline variant="info" title={t('No version update will be performed')} />
+                      <FlightCtlFormAlert variant="info" title={t('No version update will be performed')} />
                     </GridItem>
                   )}
                   <GridItem>
@@ -147,9 +146,9 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit }: UpdateStepProps) =>
               )}
               {updateVersion?.deprecation && (
                 <GridItem>
-                  <Alert isInline variant="warning" title={t('This version is deprecated')}>
+                  <FlightCtlFormAlert variant="warning" title={t('This version is deprecated')}>
                     {updateVersion.deprecation.message}
-                  </Alert>
+                  </FlightCtlFormAlert>
                 </GridItem>
               )}
             </Grid>

@@ -1,0 +1,7 @@
+/* FlightCtlFormAlerts are displayed as full width, without expanding the form's layout. */
+.fctl-form-alert {
+  width: calc(100% * 12 / var(--fctl-form-span, 12) - var(--pf-t--global--spacer--lg));
+  margin-inline-end: calc(
+    100% * (var(--fctl-form-span, 12) - 12) / var(--fctl-form-span, 12) + var(--pf-t--global--spacer--lg)
+  );
+}

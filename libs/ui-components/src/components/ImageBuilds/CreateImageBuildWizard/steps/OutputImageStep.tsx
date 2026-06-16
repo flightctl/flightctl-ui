@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { Alert, Content, FormGroup, FormSection, Gallery } from '@patternfly/react-core';
+import { Content, FormGroup, FormSection, Gallery } from '@patternfly/react-core';
 import { FormikErrors, useFormikContext } from 'formik';
 
 import { OciRepoSpec, RepoSpecType, Repository } from '@flightctl/types';
 import { ExportFormatType } from '@flightctl/types/imagebuilder';
 import { ImageBuildFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import FlightCtlForm from '../../../form/FlightCtlForm';
+import FlightCtlForm, { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import TextField from '../../../form/TextField';
 import RepositorySelect from '../../../form/RepositorySelect';
 import { usePermissionsContext } from '../../../common/PermissionsContext';
@@ -59,11 +59,11 @@ const OutputImageStep = () => {
   return (
     <FlightCtlForm>
       <FormSection>
-        <Alert isInline variant="info" title={t('Management-ready by default')}>
+        <FlightCtlFormAlert variant="info" title={t('Management-ready by default')}>
           {t(
             'The agent is automatically included in this image. This ensures your devices are ready to be managed immediately after they are deployed.',
           )}
-        </Alert>
+        </FlightCtlFormAlert>
         <RepositorySelect
           name="destination.repository"
           repositories={ociRegistries}

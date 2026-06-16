@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  Alert,
   Button,
   Flex,
   FlexItem,
@@ -12,6 +11,7 @@ import {
   SplitItem,
 } from '@patternfly/react-core';
 import { FieldArray, useField, useFormikContext } from 'formik';
+import { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import { MinusCircleIcon, PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons';
 
 import { BatchForm, BatchLimitType, FleetFormValues } from '../../../../types/deviceSpec';
@@ -120,11 +120,11 @@ const UpdateStepRolloutPolicy = ({ isReadOnly }: { isReadOnly: boolean }) => {
 
   return (
     <>
-      <Alert isInline variant="info" title={t('Batch sequencing')} className="pf-v6-u-mb-md">
+      <FlightCtlFormAlert variant="info" title={t('Batch sequencing')} className="pf-v6-u-mb-md">
         {t('Batches will be applied from first to last.')}
         <br />
         {t('Devices that are not part of any batch will be updated last.')}
-      </Alert>
+      </FlightCtlFormAlert>
       <FormGroupWithHelperText
         label={t('Update timeout')}
         content={t(

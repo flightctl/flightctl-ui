@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { Alert, Button, Spinner, Stack, StackItem } from '@patternfly/react-core';
+import { Button, Spinner, Stack, StackItem } from '@patternfly/react-core';
 import { RedoIcon } from '@patternfly/react-icons/dist/js/icons/redo-icon';
 import debounce from 'lodash/debounce';
 
 import { DeviceList } from '@flightctl/types';
 import LabelsField from '../../../form/LabelsField';
+import { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import { getInvalidKubernetesLabels, hasUniqueLabelKeys } from '../../../form/validations';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetch } from '../../../../hooks/useFetch';
@@ -74,7 +75,7 @@ const DeviceLabelSelector = () => {
   } else if (deviceCountError) {
     showHelperText = false;
     message = (
-      <Alert isInline variant="danger" title={t('Failed to determine the number of selected devices')}>
+      <FlightCtlFormAlert variant="danger" title={t('Failed to determine the number of selected devices')}>
         {deviceCountError}
         <Button
           variant="link"
@@ -85,13 +86,12 @@ const DeviceLabelSelector = () => {
         >
           {t('Try again')}
         </Button>
-      </Alert>
+      </FlightCtlFormAlert>
     );
   } else if (labels.length > 0) {
     showHelperText = false;
     message = (
-      <Alert
-        isInline
+      <FlightCtlFormAlert
         variant={deviceCount === 0 ? 'warning' : 'info'}
         title={t('{{ count }} devices matching the labels were selected.', { count: deviceCount })}
       />

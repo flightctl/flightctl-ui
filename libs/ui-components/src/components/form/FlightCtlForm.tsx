@@ -1,6 +1,16 @@
 import * as React from 'react';
-// eslint-disable-next-line no-restricted-imports
-import { Form, Grid, GridItem, globalWidthBreakpoints, gridItemSpanValueShape } from '@patternfly/react-core';
+import {
+  Alert,
+  AlertProps,
+  // eslint-disable-next-line no-restricted-imports
+  Form,
+  Grid,
+  GridItem,
+  globalWidthBreakpoints,
+  gridItemSpanValueShape,
+} from '@patternfly/react-core';
+
+import './FlightCtlForm.css';
 
 const widthToSpan = (width: number = 0): gridItemSpanValueShape => {
   if (width < globalWidthBreakpoints.sm) {
@@ -39,16 +49,22 @@ const useContainerWidth = () => {
   return [ref, width] as const;
 };
 
+// FlightCtlFormAlerts are displayed as inline by default, and are full width (via CSS styling)
+export const FlightCtlFormAlert = ({ className, isInline, ...props }: AlertProps) => (
+  <Alert isInline={isInline ?? true} className={`fctl-form-alert ${className || ''}`} {...props} />
+);
+
 const FlightCtlForm = ({
   className,
   children,
   isResponsive = true,
 }: React.PropsWithChildren<{ className?: string; isResponsive?: boolean }>) => {
   const [ref, width] = useContainerWidth();
+  const formSpan = isResponsive ? widthToSpan(width) : 12;
 
   return (
-    <div ref={ref}>
-      <Grid span={isResponsive ? widthToSpan(width) : 12}>
+    <div ref={ref} className="fctl-form" style={{ '--fctl-form-span': formSpan } as React.CSSProperties}>
+      <Grid span={formSpan}>
         <GridItem>
           <Form
             className={className}

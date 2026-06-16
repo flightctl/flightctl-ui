@@ -1,6 +1,5 @@
 import { CatalogItem, CatalogItemArtifactType, CatalogItemVersion } from '@flightctl/types/alpha';
 import {
-  Alert,
   Button,
   Content,
   EmptyState,
@@ -25,7 +24,7 @@ import ReactMarkdown from 'react-markdown';
 import { TFunction } from 'react-i18next';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import FlightCtlForm from '../../../form/FlightCtlForm';
+import FlightCtlForm, { FlightCtlFormAlert } from '../../../form/FlightCtlForm';
 import RadioField from '../../../form/RadioField';
 import FormSelect from '../../../form/FormSelect';
 import { PermissionCheck, usePermissionsContext } from '../../../common/PermissionsContext';
@@ -112,9 +111,9 @@ export const InstallSpec = ({
       <Grid hasGutter style={{ alignItems: 'flex-end' }}>
         {catalogItem.spec.deprecation && (
           <GridItem>
-            <Alert isInline variant="warning" title={t('Deprecated')}>
+            <FlightCtlFormAlert variant="warning" title={t('Deprecated')}>
               {catalogItem.spec.deprecation.message}
-            </Alert>
+            </FlightCtlFormAlert>
           </GridItem>
         )}
         <GridItem span={4}>
@@ -148,9 +147,9 @@ export const InstallSpec = ({
         )}
         {currentVersion?.deprecation && (
           <GridItem>
-            <Alert isInline variant="warning" title={t('This version is deprecated')}>
+            <FlightCtlFormAlert variant="warning" title={t('This version is deprecated')}>
               {currentVersion.deprecation.message}
-            </Alert>
+            </FlightCtlFormAlert>
           </GridItem>
         )}
       </Grid>
