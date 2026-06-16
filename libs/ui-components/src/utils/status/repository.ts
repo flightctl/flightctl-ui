@@ -18,8 +18,8 @@ const repositoryStatusLabels = (t: TFunction) => ({
   'Not synced': t('Not synced'),
   [ConditionType.ResourceSyncResourceParsed]: t('Parsed'),
   'Not parsed': t('Not parsed'),
-  [ConditionType.RepositoryAccessible]: t('Accessible'),
-  'Not accessible': t('Not accessible'),
+  [ConditionType.RepositoryAccessible]: t('Available'),
+  'Not accessible': t('Not available'),
   'Sync pending': t('Sync pending'),
 });
 

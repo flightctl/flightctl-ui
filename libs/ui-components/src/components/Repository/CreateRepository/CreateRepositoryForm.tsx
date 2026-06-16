@@ -117,7 +117,7 @@ const AdvancedSection = () => {
             <FormSection>
               <FormGroupWithHelperText
                 label={t('Validation suffix')}
-                content={t("Suffix to the repository's base URL used to validate if the HTTP service is accessible.")}
+                content={t("Suffix to the repository's base URL used to validate if the HTTP service is available.")}
               >
                 <TextField
                   aria-label={t('Validation suffix')}
