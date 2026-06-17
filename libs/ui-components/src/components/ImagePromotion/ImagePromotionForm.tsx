@@ -76,7 +76,7 @@ const ExistingItemForm = ({ catalogItems, isDisabled }: { catalogItems: CatalogI
           <TextField
             name="existingItem.replaces"
             isDisabled={isDisabled}
-            placeholder="1.0.0"
+            placeholder={t('e.g. 1.0.0')}
             helperText={t('Single version this one replaces, defining the primary upgrade edge')}
           />
         </FormGroup>
@@ -84,7 +84,7 @@ const ExistingItemForm = ({ catalogItems, isDisabled }: { catalogItems: CatalogI
           <TextField
             name="existingItem.skips"
             isDisabled={isDisabled}
-            placeholder="1.0.1, 1.0.2"
+            placeholder={t('e.g. 1.0.1, 1.0.2')}
             helperText={t('Comma-separated versions that can upgrade directly to this one')}
           />
         </FormGroup>
@@ -92,7 +92,7 @@ const ExistingItemForm = ({ catalogItems, isDisabled }: { catalogItems: CatalogI
           <TextField
             name="existingItem.skipRange"
             isDisabled={isDisabled}
-            placeholder=">=1.0.0 <1.5.0"
+            placeholder={t('e.g. >=1.0.0 <1.5.0')}
             helperText={t('Semver range of versions that can upgrade directly to this one')}
           />
         </FormGroup>

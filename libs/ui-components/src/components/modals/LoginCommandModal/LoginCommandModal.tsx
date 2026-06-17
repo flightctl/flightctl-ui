@@ -4,7 +4,6 @@ import {
   Button,
   ClipboardCopy,
   Content,
-  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -12,6 +11,7 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
@@ -86,7 +86,7 @@ const LoginCommandModal = ({ onClose }: LoginCommandModalProps) => {
       : t('Use the following command to log in to the Flight Control CLI:');
 
   return (
-    <Modal isOpen onClose={onClose} variant="medium">
+    <FlightCtlModal isOpen onClose={onClose} variant="medium">
       <ModalHeader title={t('Copy Login Command')} />
       <ModalBody>
         <Stack hasGutter>
@@ -138,7 +138,7 @@ const LoginCommandModal = ({ onClose }: LoginCommandModalProps) => {
           {t('Close')}
         </Button>
       </ModalFooter>
-    </Modal>
+    </FlightCtlModal>
   );
 };
 

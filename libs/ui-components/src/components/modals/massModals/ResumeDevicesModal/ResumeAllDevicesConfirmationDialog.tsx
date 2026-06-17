@@ -1,16 +1,7 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import {
-  Alert,
-  Button,
-  Content,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  Stack,
-  StackItem,
-} from '@patternfly/react-core';
+import { Alert, Button, Content, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { DeviceResumeRequest, DeviceResumeResponse } from '@flightctl/types';
 
@@ -87,7 +78,7 @@ const ResumeAllDevicesConfirmationModal = ({ devicesToResume, onClose }: ResumeA
     : t('Resume devices result');
 
   return (
-    <Modal isOpen onClose={() => onClose(undefined)} variant="small">
+    <FlightCtlModal isOpen onClose={() => onClose(undefined)} variant="small">
       <ModalHeader title={title} />
       <ModalBody>
         {isBeforeResume ? (
@@ -138,7 +129,7 @@ const ResumeAllDevicesConfirmationModal = ({ devicesToResume, onClose }: ResumeA
           </Button>
         )}
       </ModalFooter>
-    </Modal>
+    </FlightCtlModal>
   );
 };
 

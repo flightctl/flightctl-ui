@@ -12,13 +12,13 @@ import {
   Grid,
   Label,
   LabelGroup,
-  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
   Split,
   SplitItem,
 } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { FieldArray, Formik, useField, useFormikContext } from 'formik';
 import * as Yup from 'yup';
@@ -272,7 +272,7 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
         </SplitItem>
       </Split>
       {showConfirmChangeType && (
-        <Modal variant="small" isOpen>
+        <FlightCtlModal variant="small" isOpen>
           <ModalHeader title={'Change repository type?'} titleIconVariant="warning" />
           <ModalBody>
             {t('Switching the repository type will cause some data to be lost.')}{' '}
@@ -299,7 +299,7 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
               {t('Cancel')}
             </Button>
           </ModalFooter>
-        </Modal>
+        </FlightCtlModal>
       )}
     </>
   );

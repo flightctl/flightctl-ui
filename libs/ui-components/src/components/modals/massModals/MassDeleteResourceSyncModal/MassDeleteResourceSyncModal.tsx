@@ -2,7 +2,6 @@ import * as React from 'react';
 import {
   Alert,
   Button,
-  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -11,6 +10,7 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
@@ -58,7 +58,7 @@ const MassDeleteResourceSyncModal: React.FC<MassDeleteResourceSyncModalProps> = 
     }
   };
   return (
-    <Modal isOpen onClose={isDeleting ? undefined : onClose} variant="medium">
+    <FlightCtlModal isOpen onClose={isDeleting ? undefined : onClose} variant="medium">
       <ModalHeader title={t('Delete resource syncs')} />
       <ModalBody>
         <Stack hasGutter>
@@ -119,7 +119,7 @@ const MassDeleteResourceSyncModal: React.FC<MassDeleteResourceSyncModalProps> = 
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </Modal>
+    </FlightCtlModal>
   );
 };
 

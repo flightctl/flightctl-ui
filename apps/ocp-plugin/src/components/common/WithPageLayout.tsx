@@ -6,6 +6,7 @@ import OrganizationSelector from '@flightctl/ui-components/src/components/common
 import PageNavigation from '@flightctl/ui-components/src/components/common/PageNavigation';
 import { SystemRestoreProvider } from '@flightctl/ui-components/src/hooks/useSystemRestoreContext';
 import { PermissionsContextProvider } from '@flightctl/ui-components/src/components/common/PermissionsContext';
+import { FLIGHTCTL_APP_CLASS } from '@flightctl/ui-components/src/constants';
 
 const WithPageLayoutContent = ({ children }: React.PropsWithChildren) => {
   const { mustShowOrganizationSelector } = useOrganizationGuardContext();
@@ -27,7 +28,9 @@ const WithPageLayout = ({ children }: React.PropsWithChildren) => {
     <OrganizationGuard>
       <PermissionsContextProvider>
         <SystemRestoreProvider>
-          <WithPageLayoutContent>{children}</WithPageLayoutContent>
+          <div className={FLIGHTCTL_APP_CLASS}>
+            <WithPageLayoutContent>{children}</WithPageLayoutContent>
+          </div>
         </SystemRestoreProvider>
       </PermissionsContextProvider>
     </OrganizationGuard>

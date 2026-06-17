@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import { Alert, Button, Modal, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, Button, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
@@ -21,7 +22,7 @@ const DeleteImagePromotionModal = ({
   const [isDeleting, setIsDeleting] = React.useState<boolean>();
 
   return (
-    <Modal isOpen onClose={() => onClose()} variant="small">
+    <FlightCtlModal isOpen onClose={() => onClose()} variant="small">
       <ModalHeader title={t('Delete image promotion?')} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
@@ -66,7 +67,7 @@ const DeleteImagePromotionModal = ({
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </Modal>
+    </FlightCtlModal>
   );
 };
 

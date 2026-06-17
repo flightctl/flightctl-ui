@@ -52,7 +52,7 @@ const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?
           name={`${appFieldName}.namespace`}
           value={app.namespace || ''}
           isDisabled={isReadOnly}
-          placeholder={t('Type namespace here')}
+          placeholder={t('Enter namespace')}
         />
         <Alert
           isInline
@@ -81,7 +81,7 @@ const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?
                       value={file}
                       isDisabled={isReadOnly}
                       helperText={t('Enter a file path relative to the Helm chart root. For example, values.yaml')}
-                      placeholder={t('Type values file name here')}
+                      placeholder={t('Enter values file name')}
                     />
                   </SplitItem>
                   {!isReadOnly && (

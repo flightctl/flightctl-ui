@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { EnrollmentRequestApproval } from '@flightctl/types';
-import { Alert, Modal, ModalBody, ModalHeader } from '@patternfly/react-core';
+import { Alert, ModalBody, ModalHeader } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { Formik } from 'formik';
 
@@ -51,7 +52,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
       }}
     >
       {({ isSubmitting }) => (
-        <Modal isOpen onClose={() => !isSubmitting && onClose()} variant="small">
+        <FlightCtlModal isOpen onClose={() => !isSubmitting && onClose()} variant="small">
           <ModalHeader title={t('Approve pending device')} />
           <ModalBody>
             {getApprovalStatus(enrollmentRequest) !== EnrollmentRequestStatusType.Approved ? (
@@ -60,7 +61,7 @@ const DeviceEnrollmentModal: React.FC<DeviceEnrollmentModalProps> = ({ enrollmen
               <Alert isInline variant="info" title={t('Enrollment request is already approved.')} />
             )}
           </ModalBody>
-        </Modal>
+        </FlightCtlModal>
       )}
     </Formik>
   );

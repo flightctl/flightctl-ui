@@ -11,7 +11,6 @@ import {
   Gallery,
   HelperText,
   HelperTextItem,
-  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -25,6 +24,7 @@ import {
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
 import { CubeIcon } from '@patternfly/react-icons/dist/js/icons/cube-icon';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
@@ -85,7 +85,7 @@ const SelectAssetModal = ({ onClose, onSelect }: SelectAssetModalProps) => {
   });
 
   return (
-    <Modal isOpen onClose={onClose} variant="large" aria-label={t('Choose asset from catalog')}>
+    <FlightCtlModal isOpen onClose={onClose} variant="large" aria-label={t('Choose asset from catalog')}>
       {selectedAsset ? (
         <CatalogItemDetails
           item={selectedAsset}
@@ -109,7 +109,7 @@ const SelectAssetModal = ({ onClose, onSelect }: SelectAssetModalProps) => {
           setNameFilter={setNameFilter}
         />
       )}
-    </Modal>
+    </FlightCtlModal>
   );
 };
 

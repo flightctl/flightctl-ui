@@ -24,6 +24,7 @@ import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/redu
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
 
+import '@flightctl/ui-components/src/styles/global.css';
 import './AppContext.css';
 
 /**

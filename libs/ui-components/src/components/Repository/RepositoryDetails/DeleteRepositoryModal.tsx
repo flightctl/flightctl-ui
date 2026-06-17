@@ -4,7 +4,6 @@ import {
   Alert,
   Button,
   Content,
-  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -12,6 +11,7 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { ResourceSyncList } from '@flightctl/types';
 
@@ -87,7 +87,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
   };
 
   return (
-    <Modal isOpen onClose={onClose} variant={hasResourceSyncs ? 'medium' : 'small'}>
+    <FlightCtlModal isOpen onClose={onClose} variant={hasResourceSyncs ? 'medium' : 'small'}>
       <ModalHeader title={t('Delete repository ?')} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
@@ -155,7 +155,7 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </Modal>
+    </FlightCtlModal>
   );
 };
 
