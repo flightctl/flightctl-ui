@@ -273,7 +273,7 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
       </Split>
       {showConfirmChangeType && (
         <FlightCtlModal variant="small" isOpen>
-          <ModalHeader title={'Change repository type?'} titleIconVariant="warning" />
+          <ModalHeader title={t('Change repository type?')} titleIconVariant="warning" />
           <ModalBody>
             {t('Switching the repository type will cause some data to be lost.')}{' '}
             {t('Are you sure you want to change the repository type?')}

@@ -1552,6 +1552,7 @@
   "Use Git repository": "Use Git repository",
   "Use HTTP service": "Use HTTP service",
   "Use OCI registry": "Use OCI registry",
+  "Change repository type?": "Change repository type?",
   "Switching the repository type will cause some data to be lost.": "Switching the repository type will cause some data to be lost.",
   "Are you sure you want to change the repository type?": "Are you sure you want to change the repository type?",
   "Change": "Change",
