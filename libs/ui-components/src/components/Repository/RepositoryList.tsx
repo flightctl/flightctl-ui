@@ -26,6 +26,7 @@ import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import ResourceLink from '../common/ResourceLink';
+import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import RepositoryStatus from '../Status/RepositoryStatus';
 import PageWithPermissions from '../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../types/rbac';
@@ -105,25 +106,25 @@ const RepositoryTableRow = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const actions: IAction[] = [];
+  const regularActions: IAction[] = [];
   const repoName = repository.metadata.name as string;
   if (canEdit) {
-    actions.push({
+    regularActions.push({
       title: t('Edit repository'),
       onClick: () => navigate({ route: ROUTE.REPO_EDIT, postfix: repository.metadata.name }),
       'data-testid': 'repository-row-menu-edit-repository',
     } as IAction);
   }
-  if (canDelete) {
-    if (actions.length > 0) {
-      actions.push({ isSeparator: true } as IAction);
-    }
-    actions.push({
-      title: t('Delete repository'),
-      onClick: () => setDeleteModalRepoId(repository.metadata.name),
-      'data-testid': 'repository-row-menu-delete-repository',
-    } as IAction);
-  }
+  const dangerActions: IAction[] = canDelete
+    ? [
+        {
+          title: t('Delete repository'),
+          onClick: () => setDeleteModalRepoId(repository.metadata.name),
+          'data-testid': 'repository-row-menu-delete-repository',
+        } as IAction,
+      ]
+    : [];
+  const actions = buildAllDropdownActions(regularActions, dangerActions);
   return (
     <Tr data-testid={`repository-row-${rowIndex}`}>
       <Td

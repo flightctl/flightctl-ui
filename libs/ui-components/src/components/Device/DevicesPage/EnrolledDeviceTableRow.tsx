@@ -12,6 +12,7 @@ import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import ResourceLink from '../../common/ResourceLink';
+import { buildAllDropdownActions } from '../../common/ActionsDropdownList';
 import { ApiTableColumn } from '../../Table/Table';
 
 type EnrolledDeviceTableRowProps = {
@@ -53,7 +54,7 @@ const EnrolledDeviceTableRow = ({
 
   const columnIds = React.useMemo(() => deviceColumns.map(({ id }) => id), [deviceColumns]);
 
-  const actionItems: IAction[] = [
+  const regularActions: IAction[] = [
     ...(canEdit
       ? [
           {
@@ -78,17 +79,18 @@ const EnrolledDeviceTableRow = ({
           }),
         ]
       : []),
-    ...(canDecommission && decommissionAction
+  ];
+  const dangerActions: IAction[] =
+    canDecommission && decommissionAction
       ? [
-          { isSeparator: true } as IAction,
           decommissionAction({
             resourceId: deviceName,
             resourceName: deviceAlias,
             disabledReason: decommissionDisabledReason,
           }),
         ]
-      : []),
-  ];
+      : [];
+  const actionItems = buildAllDropdownActions(regularActions, dangerActions);
 
   return (
     <Tr data-testid={`enrolled-device-row-${rowIndex}`}>

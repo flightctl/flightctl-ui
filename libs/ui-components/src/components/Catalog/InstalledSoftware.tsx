@@ -28,6 +28,7 @@ import { getCatalogItemIcon, getFullContainerURI, getUpdates } from './utils';
 import { useFetch } from '../../hooks/useFetch';
 import { useTranslation } from '../../hooks/useTranslation';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
+import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import {
   APP_CATALOG_LABEL_KEY,
   APP_CHANNEL_LABEL_KEY,
@@ -196,6 +197,23 @@ const InstalledSoftware = ({ labels, spec, onDeleteOs, onDeleteApp, onEdit, canE
   const hasApps = !!(appItems && appItems.length > 0);
   const isEmpty = !hasOs && !hasApps;
 
+  const osActions = osItem
+    ? buildAllDropdownActions(
+        [
+          {
+            title: t('Edit'),
+            onClick: () => onEdit(osItem.metadata.catalog, osItem.metadata.name || ''),
+          },
+        ],
+        [
+          {
+            title: t('Delete'),
+            onClick: () => setDeleteOs(true),
+          },
+        ],
+      )
+    : [];
+
   return (
     <>
       <Card>
@@ -237,18 +255,7 @@ const InstalledSoftware = ({ labels, spec, onDeleteOs, onDeleteApp, onEdit, canE
                     )}
                     {canEdit && (
                       <FlexItem>
-                        <ActionsColumn
-                          items={[
-                            {
-                              title: t('Edit'),
-                              onClick: () => onEdit(osItem.metadata.catalog, osItem.metadata.name || ''),
-                            },
-                            {
-                              title: t('Delete'),
-                              onClick: () => setDeleteOs(true),
-                            },
-                          ]}
-                        />
+                        <ActionsColumn items={osActions} />
                       </FlexItem>
                     )}
                   </Flex>
@@ -264,20 +271,21 @@ const InstalledSoftware = ({ labels, spec, onDeleteOs, onDeleteApp, onEdit, canE
                     const imageMatches = refUri === (appSpec as ContainerApplication).image;
                     return imageMatches && v.channels.includes(appChannel);
                   });
-                const actions: IAction[] = [
-                  ...(itemVersion
-                    ? [
-                        {
-                          title: t('Edit'),
-                          onClick: () => onEdit(app.item.metadata.catalog, app.item.metadata.name || '', app.name),
-                        },
-                      ]
-                    : []),
+                const regularActions: IAction[] = itemVersion
+                  ? [
+                      {
+                        title: t('Edit'),
+                        onClick: () => onEdit(app.item.metadata.catalog, app.item.metadata.name || '', app.name),
+                      },
+                    ]
+                  : [];
+                const dangerActions: IAction[] = [
                   {
                     title: t('Delete'),
                     onClick: () => setAppToDelete(app.name),
                   },
                 ];
+                const actions = buildAllDropdownActions(regularActions, dangerActions);
 
                 return (
                   <React.Fragment key={app.name}>

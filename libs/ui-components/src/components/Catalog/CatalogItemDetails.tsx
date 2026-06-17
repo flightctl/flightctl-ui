@@ -26,7 +26,7 @@ import * as React from 'react';
 import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 import { Formik, useFormikContext } from 'formik';
-import { ActionsColumn } from '@patternfly/react-table';
+import { ActionsColumn, IAction } from '@patternfly/react-table';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
@@ -38,6 +38,7 @@ import { getCatalogItemIcon, getFullContainerURI } from './utils';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import WithTooltip from '../common/WithTooltip';
+import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import FlightCtlPageDrawer from '../common/FlightCtlPageDrawer';
 import { InstallSpecFormik } from './InstallWizard/types';
 
@@ -129,63 +130,64 @@ const CatalogItemDetailsPanel = ({
 
   const isManaged = !!item.metadata.owner;
 
+  const regularActions: IAction[] = [
+    {
+      title: isManaged ? t('View') : t('Edit'),
+      onClick: () => {
+        navigate({
+          route: ROUTE.CATALOG_EDIT_ITEM,
+          postfix: `${item.metadata.catalog}/${item.metadata.name}`,
+        });
+      },
+    },
+    isDeprecated
+      ? {
+          title: t('Restore'),
+          onClick: () => setIsRestoreModalOpen(true),
+          tooltipProps: isManaged
+            ? {
+                content: t(
+                  "This catalog item is managed by a resource sync and cannot be directly restored. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
+                ),
+              }
+            : undefined,
+          isAriaDisabled: isManaged,
+        }
+      : {
+          title: t('Deprecate'),
+          onClick: () => setIsDeprecateModalOpen(true),
+          tooltipProps: isManaged
+            ? {
+                content: t(
+                  "This catalog item is managed by a resource sync and cannot be directly deprecated. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
+                ),
+              }
+            : undefined,
+          isAriaDisabled: isManaged,
+        },
+  ];
+  const dangerActions: IAction[] = [
+    {
+      title: t('Delete'),
+      onClick: () => setIsDeleteModalOpen(true),
+      tooltipProps: isManaged
+        ? {
+            content: t(
+              "This catalog item is managed by a resource sync and cannot be directly deleted. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
+            ),
+          }
+        : undefined,
+      isAriaDisabled: isManaged,
+    },
+  ];
+  const catalogItemActions = buildAllDropdownActions(regularActions, dangerActions);
+
   const panelContent = (
     <>
       <DrawerHead>
         <CatalogItemDetailsHeader item={item} />
         <DrawerActions>
-          {showCatalogMgmt && (
-            <ActionsColumn
-              items={[
-                {
-                  title: isManaged ? t('View') : t('Edit'),
-                  onClick: () => {
-                    navigate({
-                      route: ROUTE.CATALOG_EDIT_ITEM,
-                      postfix: `${item.metadata.catalog}/${item.metadata.name}`,
-                    });
-                  },
-                },
-                isDeprecated
-                  ? {
-                      title: t('Restore'),
-                      onClick: () => setIsRestoreModalOpen(true),
-                      tooltipProps: isManaged
-                        ? {
-                            content: t(
-                              "This catalog item is managed by a resource sync and cannot be directly restored. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
-                            ),
-                          }
-                        : undefined,
-                      isAriaDisabled: isManaged,
-                    }
-                  : {
-                      title: t('Deprecate'),
-                      onClick: () => setIsDeprecateModalOpen(true),
-                      tooltipProps: isManaged
-                        ? {
-                            content: t(
-                              "This catalog item is managed by a resource sync and cannot be directly deprecated. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
-                            ),
-                          }
-                        : undefined,
-                      isAriaDisabled: isManaged,
-                    },
-                {
-                  title: t('Delete'),
-                  onClick: () => setIsDeleteModalOpen(true),
-                  tooltipProps: isManaged
-                    ? {
-                        content: t(
-                          "This catalog item is managed by a resource sync and cannot be directly deleted. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
-                        ),
-                      }
-                    : undefined,
-                  isAriaDisabled: isManaged,
-                },
-              ]}
-            />
-          )}
+          {showCatalogMgmt && <ActionsColumn items={catalogItemActions} />}
           <DrawerCloseButton onClose={onClose} />
         </DrawerActions>
       </DrawerHead>

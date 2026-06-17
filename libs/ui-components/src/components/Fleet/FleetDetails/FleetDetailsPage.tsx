@@ -1,5 +1,5 @@
 import React from 'react';
-import { Divider, DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
+import { DropdownItem, Tab } from '@patternfly/react-core';
 import { Fleet } from '@flightctl/types';
 
 import { RESOURCE, VERB } from '../../../types/rbac';
@@ -17,6 +17,7 @@ import FleetRestoreBanner from './FleetRestoreBanner';
 import FleetYaml from './FleetYaml';
 import TabsNav from '../../TabsNav/TabsNav';
 import FleetDetailsCatalog from './FleetDetailsCatalog';
+import ActionsDropdownList from '../../common/ActionsDropdownList';
 
 const fleetDetailsPermissions = [
   { kind: RESOURCE.FLEET, verb: VERB.DELETE },
@@ -63,46 +64,50 @@ const FleetDetailPage = () => {
       actions={
         hasActions && (
           <DetailsPageActions>
-            <DropdownList>
+            <ActionsDropdownList>
               {isManaged && (
-                <DropdownItem
-                  data-testid="fleet-details-menu-view-configurations"
-                  onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}
-                >
-                  {t('View fleet configurations')}
-                </DropdownItem>
+                <ActionsDropdownList.Item>
+                  <DropdownItem
+                    data-testid="fleet-details-menu-view-configurations"
+                    onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}
+                  >
+                    {t('View fleet configurations')}
+                  </DropdownItem>
+                </ActionsDropdownList.Item>
               )}
               {canEdit && !isManaged && (
-                <DropdownItem
-                  data-testid="fleet-details-menu-edit-configurations"
-                  onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}
-                >
-                  {t('Edit fleet configurations')}
-                </DropdownItem>
+                <ActionsDropdownList.Item>
+                  <DropdownItem
+                    data-testid="fleet-details-menu-edit-configurations"
+                    onClick={() => navigate({ route: ROUTE.FLEET_EDIT, postfix: fleetId })}
+                  >
+                    {t('Edit fleet configurations')}
+                  </DropdownItem>
+                </ActionsDropdownList.Item>
               )}
-
-              {canDelete && (isManaged || canEdit) && <Divider component="li" />}
               {canDelete && (
-                <DropdownItem
-                  title={t('Delete fleet')}
-                  onClick={() => {
-                    setIsDeleteModalOpen(true);
-                  }}
-                  isAriaDisabled={isManaged}
-                  tooltipProps={
-                    isManaged
-                      ? {
-                          content: t(
-                            "This fleet is managed by a resource sync and cannot be directly deleted. Either remove this fleet's definition from the resource sync configuration, or delete the resource sync first.",
-                          ),
-                        }
-                      : undefined
-                  }
-                >
-                  {t('Delete fleet')}
-                </DropdownItem>
+                <ActionsDropdownList.Item isDanger>
+                  <DropdownItem
+                    title={t('Delete fleet')}
+                    onClick={() => {
+                      setIsDeleteModalOpen(true);
+                    }}
+                    isAriaDisabled={isManaged}
+                    tooltipProps={
+                      isManaged
+                        ? {
+                            content: t(
+                              "This fleet is managed by a resource sync and cannot be directly deleted. Either remove this fleet's definition from the resource sync configuration, or delete the resource sync first.",
+                            ),
+                          }
+                        : undefined
+                    }
+                  >
+                    {t('Delete fleet')}
+                  </DropdownItem>
+                </ActionsDropdownList.Item>
               )}
-            </DropdownList>
+            </ActionsDropdownList>
           </DetailsPageActions>
         )
       }
