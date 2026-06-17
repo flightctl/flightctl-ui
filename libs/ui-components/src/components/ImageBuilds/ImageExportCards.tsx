@@ -13,7 +13,6 @@ import {
   ContentVariants,
   Dropdown,
   DropdownItem,
-  DropdownList,
   Flex,
   FlexItem,
   Icon,
@@ -33,6 +32,7 @@ import { getExportFormatDescription, getExportFormatLabel, getImageExportStatusR
 import { getDateDisplay } from '../../utils/dates';
 import { useTranslation } from '../../hooks/useTranslation';
 import WithTooltip from '../common/WithTooltip';
+import ActionsDropdownList from '../common/ActionsDropdownList';
 import ConfirmImageExportActionModal, {
   ConfirmImageExportAction,
 } from './ConfirmImageExportModal/ConfirmImageExportModal';
@@ -60,7 +60,7 @@ const getActionsForStatus = (
       if (format !== ExportFormatType.ExportFormatTypeQCOW2DiskContainer) {
         actions.push('download');
       }
-      actions.push('viewLogs', 'delete', 'rebuild');
+      actions.push('viewLogs', 'rebuild', 'delete');
       break;
     case ImageExportConditionReason.ImageExportConditionReasonFailed:
     case ImageExportConditionReason.ImageExportConditionReasonCanceled:
@@ -228,17 +228,18 @@ export const ViewImageBuildExportCard = ({
     const isLoading = exportAction === activeAction;
 
     return (
-      <DropdownItem
-        key={exportAction}
-        onClick={() => {
-          setActionsDropdownOpen(false);
-          handleCardAction(exportAction);
-        }}
-        isDisabled={isDisabled}
-        isLoading={isLoading}
-      >
-        {getActionTitle(t, exportAction, false)}
-      </DropdownItem>
+      <ActionsDropdownList.Item key={exportAction} isDanger={exportAction === 'delete'}>
+        <DropdownItem
+          onClick={() => {
+            setActionsDropdownOpen(false);
+            handleCardAction(exportAction);
+          }}
+          isDisabled={isDisabled}
+          isLoading={isLoading}
+        >
+          {getActionTitle(t, exportAction, false)}
+        </DropdownItem>
+      </ActionsDropdownList.Item>
     );
   };
 
@@ -310,7 +311,7 @@ export const ViewImageBuildExportCard = ({
                         </MenuToggle>
                       )}
                     >
-                      <DropdownList>{remainingActions.map((actionKey) => renderDropdownItem(actionKey))}</DropdownList>
+                      <ActionsDropdownList>{remainingActions.map(renderDropdownItem)}</ActionsDropdownList>
                     </Dropdown>
                   </FlexItem>
                 )}
