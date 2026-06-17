@@ -67,7 +67,12 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
     <>
       {canListER && <EnrollmentRequestList refetchDevices={refetch} />}
 
-      <ListPage title={t('Devices')}>
+      <ListPage
+        title={t('Devices')}
+        description={t(
+          'View and manage your enrolled edge devices. Monitor device status, configurations, and fleet assignments.',
+        )}
+      >
         {/* When searching for decommissioned devices we want to avoid showing the enrolled devices */}
         <ListPageBody error={error} loading={loading || (onlyDecommissioned && updating && !hasFiltersEnabled)}>
           {onlyDecommissioned ? (

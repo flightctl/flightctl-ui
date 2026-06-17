@@ -89,7 +89,11 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const currentEnrollmentRequest = pendingEnrollments.find((er) => er.metadata.name === approvingErId);
 
   return (
-    <ListPage title={t('Devices pending approval')} headingLevel="h2">
+    <ListPage
+      title={t('Devices pending approval')}
+      headingLevel="h2"
+      description={t('Review and approve pending requests from devices seeking to join your organization.')}
+    >
       <ListPageBody error={error} loading={false}>
         <EnrollmentRequestTableToolbar search={search} setSearch={setSearch} enrollments={pendingEnrollments}>
           {(canApprove || canDelete) && (
