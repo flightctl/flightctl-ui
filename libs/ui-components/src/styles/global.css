@@ -1,4 +1,11 @@
 /*
+ * Do not affect the page layout by making the app root display contents.
+ */
+.fctl-app {
+  display: contents;
+}
+
+/*
  * Reduce opacity of all placeholders so they are clearly distinguishable from entered values.
  */
 .fctl-app .pf-v6-c-form-control ::placeholder,
