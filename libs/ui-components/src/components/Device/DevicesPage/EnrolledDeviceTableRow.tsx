@@ -80,6 +80,7 @@ const EnrolledDeviceTableRow = ({
       : []),
     ...(canDecommission && decommissionAction
       ? [
+          { isSeparator: true } as IAction,
           decommissionAction({
             resourceId: deviceName,
             resourceName: deviceAlias,

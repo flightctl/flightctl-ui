@@ -78,11 +78,13 @@ const ImageBuildRow = ({
   }
 
   if (canCancel && isImageBuildCancelable(buildReason)) {
+    actions.push({ isSeparator: true } as IAction);
     actions.push({
       title: t('Cancel image build'),
       onClick: onCancelClick,
     });
   } else if (canDelete) {
+    actions.push({ isSeparator: true } as IAction);
     actions.push({
       title: t('Delete image build'),
       onClick: onDeleteClick,

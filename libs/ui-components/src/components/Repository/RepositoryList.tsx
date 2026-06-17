@@ -115,6 +115,9 @@ const RepositoryTableRow = ({
     } as IAction);
   }
   if (canDelete) {
+    if (actions.length > 0) {
+      actions.push({ isSeparator: true } as IAction);
+    }
     actions.push({
       title: t('Delete repository'),
       onClick: () => setDeleteModalRepoId(repository.metadata.name),

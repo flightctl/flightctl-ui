@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
+import { Divider, DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
 
 import { AuthProvider } from '@flightctl/types';
 
@@ -70,6 +70,7 @@ const AuthProviderDetails = () => {
                   {t('Edit authentication provider')}
                 </DropdownItem>
               )}
+              {canDelete && canEdit && <Divider component="li" />}
               {canDelete && (
                 <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>
                   {t('Delete authentication provider')}

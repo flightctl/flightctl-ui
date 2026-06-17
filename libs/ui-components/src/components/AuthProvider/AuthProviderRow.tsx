@@ -48,6 +48,7 @@ const AuthProviderRow = ({ provider, onDeleteClick }: { provider: AuthProvider; 
   }
 
   if (canDelete) {
+    actions.push({ isSeparator: true } as IAction);
     actions.push({
       title: t('Delete'),
       onClick: onDeleteClick,

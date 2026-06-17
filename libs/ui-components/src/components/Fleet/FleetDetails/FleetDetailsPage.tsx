@@ -1,5 +1,5 @@
 import React from 'react';
-import { DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
+import { Divider, DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
 import { Fleet } from '@flightctl/types';
 
 import { RESOURCE, VERB } from '../../../types/rbac';
@@ -81,6 +81,7 @@ const FleetDetailPage = () => {
                 </DropdownItem>
               )}
 
+              {canDelete && (isManaged || canEdit) && <Divider component="li" />}
               {canDelete && (
                 <DropdownItem
                   title={t('Delete fleet')}

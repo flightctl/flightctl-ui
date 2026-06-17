@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import { Button, DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
+import { Button, Divider, DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
 
 import {
   Device,
@@ -191,6 +191,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
                 </DropdownItem>
               )}
               {canResume && resumeAction}
+              {canDecommission && (hasEditPermissions || canResume) && <Divider component="li" />}
               {canDecommission && decommissionAction}
             </DropdownList>
           </DetailsPageActions>

@@ -287,6 +287,7 @@ export const CatalogPageContent = ({
                                     <DropdownItem onClick={() => setCatalogToEdit(c)}>
                                       {!!c.metadata.owner || !canEditCatalog ? t('View') : t('Edit')}
                                     </DropdownItem>
+                                    <Divider component="li" />
                                     <WithTooltip
                                       showTooltip={!!c.metadata.owner}
                                       content={t(

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@flightctl/types';
 import { ListAction } from '../../ListPage/types';
@@ -74,6 +74,7 @@ const DecommissionedDeviceTableRow = ({
               },
               ...(canDelete
                 ? [
+                    { isSeparator: true } as IAction,
                     deleteAction({
                       resourceId: deviceName,
                       resourceName: deviceAlias,

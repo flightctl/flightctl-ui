@@ -46,6 +46,9 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
     });
   }
   if (canDelete) {
+    if (actionItems.length > 0) {
+      actionItems.push({ isSeparator: true } as IAction);
+    }
     actionItems.push(deleteAction({ resourceId: erName }));
   }
 

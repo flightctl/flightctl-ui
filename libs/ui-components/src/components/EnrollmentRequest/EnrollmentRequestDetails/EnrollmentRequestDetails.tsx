@@ -7,6 +7,7 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
+  Divider,
   DropdownItem,
   DropdownList,
   Grid,
@@ -92,6 +93,7 @@ const EnrollmentRequestDetails = () => {
                   {t('Approve')}
                 </DropdownItem>
               )}
+              {canDelete && canApprove && <Divider component="li" />}
               {canDelete && deleteAction}
             </DropdownList>
           </DetailsPageActions>

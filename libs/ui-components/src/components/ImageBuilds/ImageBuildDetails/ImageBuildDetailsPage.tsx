@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
+import { Divider, DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
 
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
@@ -83,6 +83,7 @@ const ImageBuildDetailsPageContent = () => {
               {canPromote && (
                 <DropdownItem onClick={() => setIsImagePromotionOpen(true)}>{t('Add to catalog')}</DropdownItem>
               )}
+              {(canCancel || (canDelete && !canCancel)) && (canNewVersion || canPromote) && <Divider component="li" />}
               {canCancel && (
                 <DropdownItem onClick={() => setIsCancelModalOpen(true)}>{t('Cancel image build')}</DropdownItem>
               )}

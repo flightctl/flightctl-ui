@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DropdownItem, DropdownList, Grid, GridItem, Tab } from '@patternfly/react-core';
+import { Divider, DropdownItem, DropdownList, Grid, GridItem, Tab } from '@patternfly/react-core';
 
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { RepoSpecType, Repository, ResourceKind } from '@flightctl/types';
@@ -62,6 +62,7 @@ const RepositoryDetails = () => {
                   {t('Edit repository')}
                 </DropdownItem>
               )}
+              {canDelete && canEdit && <Divider component="li" />}
               {canDelete && (
                 <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete repository')}</DropdownItem>
               )}

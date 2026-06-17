@@ -65,6 +65,7 @@ const FleetRow: React.FC<FleetRowProps> = ({
   const fleetRolloutError = getFleetRolloutStatusWarning(fleet, t);
 
   if (canDelete) {
+    actions.push({ isSeparator: true } as IAction);
     actions.push({
       title: t('Delete fleet'),
       'data-testid': 'fleet-row-menu-delete-fleet',
