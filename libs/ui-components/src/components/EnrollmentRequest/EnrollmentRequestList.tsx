@@ -92,7 +92,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
     <ListPage
       title={t('Devices pending approval')}
       headingLevel="h2"
-      description={t('Review and approve pending requests from devices seeking to join your organization.')}
+      description={t('Review and approve devices requesting to join your environment.')}
     >
       <ListPageBody error={error} loading={false}>
         <EnrollmentRequestTableToolbar search={search} setSearch={setSearch} enrollments={pendingEnrollments}>
