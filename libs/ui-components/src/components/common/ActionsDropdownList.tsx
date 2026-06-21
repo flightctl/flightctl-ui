@@ -6,11 +6,22 @@ type ActionsDropdownListItemProps = {
   isDanger?: boolean;
 };
 
+/**
+ * Transparent wrapper whose only purpose is to carry the `isDanger` prop.
+ * The prop is never consumed here — `ActionsDropdownList` reads it via
+ * `child.props.isDanger` to classify children into regular vs. danger groups.
+ */
 const ActionsDropdownListItem = ({ children }: React.PropsWithChildren<ActionsDropdownListItemProps>) => (
   <>{children}</>
 );
 ActionsDropdownListItem.displayName = 'ActionsDropdownListItem';
 
+/**
+ * Dropdown list that automatically inserts a divider between regular and danger actions.
+ *
+ * Children are classified by reference-equality check (`child.type === ActionsDropdownListItem`).
+ * Wrap each action in `<ActionsDropdownList.Item>` and set `isDanger` on destructive ones.
+ */
 const ActionsDropdownList = ({ children }: React.PropsWithChildren) => {
   const actions: React.ReactNode[] = [];
   const dangerActions: React.ReactNode[] = [];
