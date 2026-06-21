@@ -78,11 +78,7 @@ export const AuthProviderForm = ({ isEdit }: { isEdit?: boolean }) => {
 
   return (
     <>
-      <SwitchField
-        name="enabled"
-        label={<EnableProviderSwitchLabel />}
-        aria-label={t('Enabled provider')}
-      />
+      <SwitchField name="enabled" label={<EnableProviderSwitchLabel />} aria-label={t('Enabled provider')} />
 
       <NameField
         name="name"
