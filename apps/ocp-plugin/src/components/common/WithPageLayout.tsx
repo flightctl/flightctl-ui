@@ -7,6 +7,17 @@ import PageNavigation from '@flightctl/ui-components/src/components/common/PageN
 import { SystemRestoreProvider } from '@flightctl/ui-components/src/hooks/useSystemRestoreContext';
 import { PermissionsContextProvider } from '@flightctl/ui-components/src/components/common/PermissionsContext';
 
+// The OCP console uses "calc" to calculate padding values for page containers and breadcrumbs.
+// But some CSS variables it uses are undefined, so the "calc" values are invalid.
+const ocpPageRootStyles: React.CSSProperties = {
+  // Ensure page containers have inline padding
+  ['--pf-v6-c-page__main-container--BorderInlineEndWidth' as string]: '0px',
+  ['--pf-v6-c-page__main-container--BorderInlineStartWidth' as string]: '0px',
+  // Ensure page breadcrumbs have inline padding
+  ['--pf-v6-c-page__main-breadcrumb--PaddingInlineStart' as string]: '1rem',
+  ['--pf-v6-c-page__main-breadcrumb--PaddingInlineEnd' as string]: '1rem',
+};
+
 const WithPageLayoutContent = ({ children }: React.PropsWithChildren) => {
   const { mustShowOrganizationSelector } = useOrganizationGuardContext();
 
@@ -15,10 +26,10 @@ const WithPageLayoutContent = ({ children }: React.PropsWithChildren) => {
   }
 
   return (
-    <>
+    <div style={ocpPageRootStyles}>
       <PageNavigation showSettings={false} />
       {children}
-    </>
+    </div>
   );
 };
 
