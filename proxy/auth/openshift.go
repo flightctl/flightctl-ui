@@ -47,6 +47,9 @@ func getOpenShiftAuthHandlerFromSpec(provider *v1beta1.AuthProvider, openshiftSp
 			}
 			apiServerURL = parsedURL.String()
 		} else {
+			// url.Parse should not fail on a URL already validated by the API
+			// server; fall back to the raw string to preserve backward
+			// compatibility rather than failing provider initialization.
 			apiServerURL = authURL
 		}
 	} else {
@@ -101,6 +104,8 @@ func getOpenShiftAuthHandlerFromSpec(provider *v1beta1.AuthProvider, openshiftSp
 	return handler, nil
 }
 
+// openshiftClientForRedirect creates an osincli OAuth2 client configured for
+// the given redirect URI using the handler's stored credentials and TLS config.
 func (o *OpenShiftAuthHandler) openshiftClientForRedirect(redirectURI string) (*osincli.Client, error) {
 	oauthClientConfig := &osincli.ClientConfig{
 		ClientId:                 o.clientId,
@@ -123,28 +128,32 @@ func (o *OpenShiftAuthHandler) openshiftClientForRedirect(redirectURI string) (*
 	return client, nil
 }
 
+// Logout derives the OpenShift OAuth server logout URL from the authorization
+// URL (scheme + host only, path replaced with /logout). This terminates the
+// user's OpenShift OAuth browser session so the login page's auto-redirect
+// cannot silently re-authenticate them.
+//
+// Using authURL avoids a discovery HTTP round-trip and is robust: authURL
+// always points to the OAuth server regardless of whether apiServerURL is
+// the K8s API server or the OAuth server. The prior approach that called
+// {apiServerURL}/.well-known/oauth-authorization-server was removed in
+// EDM-2612 because it produced a K8s API server URL as the logout target
+// (e.g. https://api.cluster:6443/logout) which is not a valid endpoint.
+//
+// Returns ("", nil) when authURL is empty, unparseable, or missing scheme/host.
 func (o *OpenShiftAuthHandler) Logout(_ string, _ string) (string, error) {
-	// Derive the OpenShift OAuth server logout URL directly from the authorization
-	// URL (scheme + host only, path replaced with /logout). This terminates the
-	// user's OpenShift OAuth browser session so the login page's auto-redirect
-	// cannot silently re-authenticate them.
-	//
-	// Using authURL avoids a discovery HTTP round-trip and is robust: authURL
-	// always points to the OAuth server regardless of whether apiServerURL is
-	// the K8s API server or the OAuth server. The prior approach that called
-	// {apiServerURL}/.well-known/oauth-authorization-server was removed in
-	// EDM-2612 because it produced a K8s API server URL as the logout target
-	// (e.g. https://api.cluster:6443/logout) which is not a valid endpoint.
 	if o.authURL == "" {
 		return "", nil
 	}
 	parsed, err := url.Parse(o.authURL)
-	if err != nil || parsed.Host == "" {
+	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
 		return "", nil
 	}
-	return parsed.Scheme + "://" + parsed.Host + "/logout", nil
+	return (&url.URL{Scheme: parsed.Scheme, Host: parsed.Host, Path: "/logout"}).String(), nil
 }
 
+// GetLoginRedirectURL returns the OAuth2 authorization URL the browser should
+// be redirected to in order to initiate the OpenShift login flow.
 func (o *OpenShiftAuthHandler) GetLoginRedirectURL(state string, codeChallenge string, redirectURI string) (string, error) {
 	client, err := o.openshiftClientForRedirect(redirectURI)
 	if err != nil {
