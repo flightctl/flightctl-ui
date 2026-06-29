@@ -89,8 +89,8 @@ const NameFieldWrapper = ({ name, isDisabled, validations, resourceType, ...rest
       name={name}
       validations={validations}
       resourceType={resourceType}
-      helperText={t('A unique system identifier. Cannot be changed after creation.')}
       {...rest}
+      helperText={t('A unique system identifier. Cannot be changed after creation.')}
     />
   );
 };
