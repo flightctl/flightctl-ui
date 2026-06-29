@@ -9,7 +9,7 @@ import { useFetch } from '@flightctl/ui-components/src/hooks/useFetch';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import { getProviderDisplayName } from '@flightctl/ui-components/src/utils/authProvider';
 
-import { apiProxy, JUST_LOGGED_OUT_KEY } from '../../utils/apiCalls';
+import { JUST_LOGGED_OUT_KEY, apiProxy } from '../../utils/apiCalls';
 import LoginPageLayout from './LoginPageLayout';
 
 const redirectToProviderLogin = async (provider: AuthProvider) => {
