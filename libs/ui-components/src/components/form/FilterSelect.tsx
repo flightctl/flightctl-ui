@@ -44,7 +44,6 @@ const FilterSelect = ({ placeholder, selectedFilters, isFilterUpdating, children
       aria-label={placeholder}
       role="menu"
       shouldFocusToggleOnSelect
-      shouldFocusFirstItemOnOpen
       toggle={(toggleRef) => (
         <MenuToggle
           ref={toggleRef}
