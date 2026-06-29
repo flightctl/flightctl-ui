@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import {
   Button,
+  Divider,
   FormGroup,
   MenuFooter,
   MenuToggle,
@@ -143,19 +144,22 @@ const FormSelect = ({
         )}
         {children}
         {addAction && (
-          <MenuFooter>
-            <Button
-              variant="link"
-              isInline
-              icon={<PlusCircleIcon />}
-              onClick={() => {
-                setIsOpen(false);
-                addAction.onAdd();
-              }}
-            >
-              {addAction.label}
-            </Button>
-          </MenuFooter>
+          <>
+            <Divider />
+            <MenuFooter>
+              <Button
+                variant="link"
+                isInline
+                icon={<PlusCircleIcon />}
+                onClick={() => {
+                  setIsOpen(false);
+                  addAction.onAdd();
+                }}
+              >
+                {addAction.label}
+              </Button>
+            </MenuFooter>
+          </>
         )}
       </Select>
 
