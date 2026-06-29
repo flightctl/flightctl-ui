@@ -23,6 +23,8 @@ import dangerColor from '@patternfly/react-tokens/dist/js/t_global_icon_color_st
 import successColor from '@patternfly/react-tokens/dist/js/t_global_icon_color_status_success_default';
 import infoColor from '@patternfly/react-tokens/dist/js/t_global_color_nonstatus_blue_300';
 
+import { DefaultHelperText } from './FieldHelperText';
+
 interface RichValidationStatusProps {
   validations: RichValidationTextFieldProps['validations'];
   metaError?: string | Record<string, string>;
@@ -66,6 +68,7 @@ const RichValidationStatus = ({ isRequired, hasValue, validations, metaError }: 
 export interface RichValidationTextFieldProps extends TextInputProps {
   fieldName: string;
   isRequired?: boolean;
+  helperText?: React.ReactNode;
   validations: {
     key: string;
     message: string;
@@ -74,7 +77,7 @@ export interface RichValidationTextFieldProps extends TextInputProps {
 
 const RichValidationTextField = React.forwardRef(
   (
-    { fieldName, validations, isRequired, onBlur, ...rest }: RichValidationTextFieldProps,
+    { fieldName, validations, isRequired, helperText, onBlur, ...rest }: RichValidationTextFieldProps,
     ref: React.Ref<HTMLInputElement>,
   ) => {
     const [popoverOpen, setPopoverOpen] = React.useState(false);
@@ -151,6 +154,7 @@ const RichValidationTextField = React.forwardRef(
             </Popover>
           </InputGroupItem>
         </InputGroup>
+        <DefaultHelperText helperText={helperText} />
       </FormGroup>
     );
   },

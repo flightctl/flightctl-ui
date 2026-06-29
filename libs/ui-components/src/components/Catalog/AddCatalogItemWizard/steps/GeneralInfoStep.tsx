@@ -97,7 +97,12 @@ const GeneralInfoStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?
         validations={getDnsSubdomainValidations(t)}
       />
       <FormGroup label={t('Display name')}>
-        <TextField name="displayName" aria-label={t('Display name')} isDisabled={isReadOnly} />
+        <TextField
+          name="displayName"
+          aria-label={t('Display name')}
+          helperText={t('The name shown to users in the catalog.')}
+          isDisabled={isReadOnly}
+        />
       </FormGroup>
       <FormGroup label={t('Icon')}>
         <IconUploadField name="icon" isDisabled={isReadOnly} />
@@ -112,7 +117,7 @@ const GeneralInfoStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?
         <TextField
           name="homepage"
           aria-label={t('Homepage')}
-          placeholder="https://example.com"
+          placeholder={t('e.g. https://example.com', { nsSeparator: '|' })}
           isDisabled={isReadOnly}
         />
       </FormGroup>
@@ -120,7 +125,7 @@ const GeneralInfoStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?
         <TextField
           name="supportUrl"
           aria-label={t('Support URL')}
-          placeholder="https://example.com/support"
+          placeholder={t('e.g. https://example.com/support', { nsSeparator: '|' })}
           isDisabled={isReadOnly}
         />
       </FormGroup>
@@ -128,7 +133,7 @@ const GeneralInfoStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?
         <TextField
           name="documentationUrl"
           aria-label={t('Documentation URL')}
-          placeholder="https://example.com/docs"
+          placeholder={t('e.g. https://example.com/docs', { nsSeparator: '|' })}
           isDisabled={isReadOnly}
         />
       </FormGroup>

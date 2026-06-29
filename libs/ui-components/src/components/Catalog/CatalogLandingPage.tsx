@@ -9,8 +9,8 @@ import {
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  Grid,
-  GridItem,
+  Flex,
+  FlexItem,
   Icon,
   List,
   ListItem,
@@ -34,6 +34,8 @@ import LearnMoreLink from '../common/LearnMoreLink';
 import { useAppLinks } from '../../hooks/useAppLinks';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 
+import './CatalogLandingPage.css';
+
 const GettingStartedCard = ({
   children,
   title,
@@ -49,7 +51,7 @@ const GettingStartedCard = ({
       <CardHeader>
         <Stack hasGutter>
           <StackItem>
-            <Icon size="2xl" style={{ '--pf-v6-c-icon__content--Color': activeColor.value } as React.CSSProperties}>
+            <Icon size="xl" style={{ '--pf-v6-c-icon__content--Color': activeColor.value } as React.CSSProperties}>
               {icon}
             </Icon>
           </StackItem>
@@ -63,6 +65,10 @@ const GettingStartedCard = ({
     </Card>
   );
 };
+
+const GettingStartedCardItem = ({ children }: React.PropsWithChildren) => (
+  <FlexItem className="fctl-getting-started-cards__item">{children}</FlexItem>
+);
 
 const catalogPermissions = [
   { kind: RESOURCE.IMAGE_BUILD, verb: VERB.CREATE },
@@ -125,8 +131,13 @@ export const CatalogLandingPageContent = ({ permissions }: Pick<LandingPagePermi
   const navigate = useNavigate();
 
   return (
-    <Grid hasGutter span={catalogDocsLink ? 3 : 4}>
-      <GridItem>
+    <Flex
+      className="fctl-getting-started-cards"
+      flexWrap={{ default: 'wrap' }}
+      alignItems={{ default: 'alignItemsStretch' }}
+      gap={{ default: 'gapMd' }}
+    >
+      <GettingStartedCardItem>
         <GettingStartedCard
           title={t('Build custom images')}
           icon={<BuilderImageIcon />}
@@ -164,8 +175,8 @@ export const CatalogLandingPageContent = ({ permissions }: Pick<LandingPagePermi
             </StackItem>
           </Stack>
         </GettingStartedCard>
-      </GridItem>
-      <GridItem>
+      </GettingStartedCardItem>
+      <GettingStartedCardItem>
         <GettingStartedCard
           title={t('Create a new catalog item')}
           icon={<PlusCircleIcon />}
@@ -176,8 +187,6 @@ export const CatalogLandingPageContent = ({ permissions }: Pick<LandingPagePermi
             >
               <Button
                 variant="secondary"
-                icon={<ArrowRightIcon />}
-                iconPosition="end"
                 onClick={() => navigate(ROUTE.CATALOG_ADD_ITEM)}
                 isAriaDisabled={!canCreateCatalog || !canCreateCatalogItem}
               >
@@ -201,8 +210,8 @@ export const CatalogLandingPageContent = ({ permissions }: Pick<LandingPagePermi
             </StackItem>
           </Stack>
         </GettingStartedCard>
-      </GridItem>
-      <GridItem>
+      </GettingStartedCardItem>
+      <GettingStartedCardItem>
         <GettingStartedCard
           title={t('Import catalog')}
           icon={<ImportIcon />}
@@ -238,9 +247,9 @@ export const CatalogLandingPageContent = ({ permissions }: Pick<LandingPagePermi
             </StackItem>
           </Stack>
         </GettingStartedCard>
-      </GridItem>
+      </GettingStartedCardItem>
       {catalogDocsLink && (
-        <GridItem>
+        <GettingStartedCardItem>
           <GettingStartedCard
             title={t('Learn more')}
             icon={<BookOpenIcon />}
@@ -258,9 +267,9 @@ export const CatalogLandingPageContent = ({ permissions }: Pick<LandingPagePermi
               </StackItem>
             </Stack>
           </GettingStartedCard>
-        </GridItem>
+        </GettingStartedCardItem>
       )}
-    </Grid>
+    </Flex>
   );
 };
 

@@ -121,7 +121,7 @@ const ScheduleBlock = ({
             <FlexItem>
               <FormSelectTypeahead
                 name={`updatePolicy.${blockType}StartsAt`}
-                placeholderText={t('hh:mm', { nsSeparator: '|' })}
+                placeholderText={t('Enter time (hh:mm)', { nsSeparator: '|' })}
                 defaultId={timeUtils.defaultStartTime}
                 items={selectableTimes}
                 isValidTypedItem={isValidTypedItem}
@@ -132,7 +132,7 @@ const ScheduleBlock = ({
             <FlexItem>
               <FormSelectTypeahead
                 name={`updatePolicy.${blockType}EndsAt`}
-                placeholderText={t('hh:mm', { nsSeparator: '|' })}
+                placeholderText={t('Enter time (hh:mm)', { nsSeparator: '|' })}
                 defaultId={timeUtils.defaultEndTime}
                 items={selectableTimes}
                 isValidTypedItem={isValidTypedItem}
@@ -234,7 +234,7 @@ const ScheduleBlock = ({
             helperText={t('Devices can start the update within this time window after the scheduled trigger.')}
             isRequired
             isDisabled={isReadOnly}
-            placeholder="30m"
+            placeholder={t('e.g. 30m')}
           />
         </FormGroup>
       </StackItem>

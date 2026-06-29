@@ -1,16 +1,16 @@
 import * as React from 'react';
 import { Alert, Button, FormGroup, FormSection, Spinner, Stack, StackItem } from '@patternfly/react-core';
+import { useFormikContext } from 'formik';
 
+import { CatalogItem, CatalogList } from '@flightctl/types/alpha';
+import { ExportFormatType } from '@flightctl/types/imagebuilder';
 import FlightCtlForm from '../form/FlightCtlForm';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { CatalogItem, CatalogList } from '@flightctl/types/alpha';
-import { ExportFormatType } from '@flightctl/types/imagebuilder';
 import FormSelect, { SelectItem } from '../form/FormSelect';
 import RadioField from '../form/RadioField';
 import TextField from '../form/TextField';
 import TextAreaField from '../form/TextAreaField';
-import { useFormikContext } from 'formik';
 import NameField from '../form/NameField';
 import { getDnsSubdomainValidations } from '../form/validations';
 import { useCatalogItems } from '../Catalog/useCatalogs';
@@ -32,14 +32,20 @@ const NewItemForm = ({ isDisabled }: { isDisabled?: boolean }) => {
         validations={getDnsSubdomainValidations(t)}
       />
       <FormGroup label={t('Display name')}>
-        <TextField name="newItem.displayName" isDisabled={isDisabled} />
+        <TextField
+          name="newItem.displayName"
+          aria-label={t('Catalog item display name')}
+          helperText={t('The name shown to users in the catalog.')}
+          isDisabled={isDisabled}
+        />
       </FormGroup>
       <FormGroup label={t('Version')} isRequired>
-        <TextField name="newItem.version" isDisabled={isDisabled} />
+        <TextField name="newItem.version" aria-label={t('Catalog item version')} isDisabled={isDisabled} />
       </FormGroup>
       <FormGroup label={t('Readme')}>
         <TextAreaField
           name="newItem.readme"
+          aria-label={t('Catalog item readme')}
           isDisabled={isDisabled}
           helperText={t('Markdown documentation for this catalog item')}
         />
@@ -76,7 +82,7 @@ const ExistingItemForm = ({ catalogItems, isDisabled }: { catalogItems: CatalogI
           <TextField
             name="existingItem.replaces"
             isDisabled={isDisabled}
-            placeholder="1.0.0"
+            placeholder={t('e.g. 1.0.0')}
             helperText={t('Single version this one replaces, defining the primary upgrade edge')}
           />
         </FormGroup>
@@ -84,7 +90,7 @@ const ExistingItemForm = ({ catalogItems, isDisabled }: { catalogItems: CatalogI
           <TextField
             name="existingItem.skips"
             isDisabled={isDisabled}
-            placeholder="1.0.1, 1.0.2"
+            placeholder={t('e.g. 1.0.1, 1.0.2')}
             helperText={t('Comma-separated versions that can upgrade directly to this one')}
           />
         </FormGroup>
@@ -92,7 +98,7 @@ const ExistingItemForm = ({ catalogItems, isDisabled }: { catalogItems: CatalogI
           <TextField
             name="existingItem.skipRange"
             isDisabled={isDisabled}
-            placeholder=">=1.0.0 <1.5.0"
+            placeholder={t('e.g. >=1.0.0 <1.5.0')}
             helperText={t('Semver range of versions that can upgrade directly to this one')}
           />
         </FormGroup>

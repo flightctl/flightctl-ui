@@ -446,7 +446,10 @@ const CatalogPage = () => {
   return (
     <PageWithPermissions allowed={canListItems && canListCatalogs} loading={loading}>
       <ResourceSyncImportStatus type="catalog" />
-      <ListPage title={t('Software Catalog')}>
+      <ListPage
+        title={t('Software Catalog')}
+        description={t('Browse and manage catalog items available for deployment to your fleets and devices.')}
+      >
         <CatalogPageContent
           canInstall={canEditFleet || canEditDevice}
           canEditCatalog={canEditCatalog}

@@ -3,7 +3,6 @@ import {
   Alert,
   Button,
   ExpandableSection,
-  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -12,6 +11,7 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { Fleet } from '@flightctl/types';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
@@ -89,7 +89,7 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, fl
 
   if (fleetsToDelete.length === 0) {
     return (
-      <Modal isOpen onClose={onClose} variant="medium">
+      <FlightCtlModal isOpen onClose={onClose} variant="medium">
         <ModalHeader title={t('Delete fleets')} />
         <ModalBody>
           <Stack hasGutter>
@@ -112,12 +112,12 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, fl
             {t('Close')}
           </Button>
         </ModalFooter>
-      </Modal>
+      </FlightCtlModal>
     );
   }
 
   return (
-    <Modal isOpen onClose={isDeleting ? undefined : onClose} variant="medium">
+    <FlightCtlModal isOpen onClose={isDeleting ? undefined : onClose} variant="medium">
       <ModalHeader title={t('Delete fleets ?')} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
@@ -190,7 +190,7 @@ const MassDeleteFleetModal: React.FC<MassDeleteFleetModalProps> = ({ onClose, fl
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </Modal>
+    </FlightCtlModal>
   );
 };
 

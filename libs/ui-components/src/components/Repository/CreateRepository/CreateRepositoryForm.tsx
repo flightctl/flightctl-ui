@@ -12,13 +12,13 @@ import {
   Grid,
   Label,
   LabelGroup,
-  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
   Split,
   SplitItem,
 } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { FieldArray, Formik, useField, useFormikContext } from 'formik';
 import * as Yup from 'yup';
@@ -117,7 +117,7 @@ const AdvancedSection = () => {
             <FormSection>
               <FormGroupWithHelperText
                 label={t('Validation suffix')}
-                content={t("Suffix to the repository's base URL used to validate if the HTTP service is accessible.")}
+                content={t("Suffix to the repository's base URL used to validate if the HTTP service is available.")}
               >
                 <TextField
                   aria-label={t('Validation suffix')}
@@ -272,8 +272,8 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
         </SplitItem>
       </Split>
       {showConfirmChangeType && (
-        <Modal variant="small" isOpen>
-          <ModalHeader title={'Change repository type?'} titleIconVariant="warning" />
+        <FlightCtlModal variant="small" isOpen>
+          <ModalHeader title={t('Change repository type?')} titleIconVariant="warning" />
           <ModalBody>
             {t('Switching the repository type will cause some data to be lost.')}{' '}
             {t('Are you sure you want to change the repository type?')}
@@ -299,7 +299,7 @@ const RepositoryType = ({ isEdit }: { isEdit?: boolean }) => {
               {t('Cancel')}
             </Button>
           </ModalFooter>
-        </Modal>
+        </FlightCtlModal>
       )}
     </>
   );

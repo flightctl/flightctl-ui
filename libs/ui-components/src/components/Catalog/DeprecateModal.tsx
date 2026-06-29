@@ -3,7 +3,6 @@ import {
   Alert,
   Button,
   FormGroup,
-  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -11,6 +10,7 @@ import {
   StackItem,
   TextArea,
 } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import { Trans } from 'react-i18next';
 
 import { useTranslation } from '../../hooks/useTranslation';
@@ -32,7 +32,7 @@ export const DeprecateModal = ({ onDeprecate, onClose, itemName }: DeprecateModa
   const isValid = reason.trim().length > 0;
 
   return (
-    <Modal isOpen onClose={onClose} variant="small">
+    <FlightCtlModal isOpen onClose={onClose} variant="small">
       <ModalHeader title={t('Deprecate catalog item')} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
@@ -87,7 +87,7 @@ export const DeprecateModal = ({ onDeprecate, onClose, itemName }: DeprecateModa
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </Modal>
+    </FlightCtlModal>
   );
 };
 
@@ -103,7 +103,7 @@ export const RestoreModal = ({ onRestore, onClose, itemName }: RestoreModalProps
   const [error, setError] = React.useState<string>();
 
   return (
-    <Modal isOpen onClose={onClose} variant="small">
+    <FlightCtlModal isOpen onClose={onClose} variant="small">
       <ModalHeader title={t('Restore catalog item')} />
       <ModalBody>
         <Stack hasGutter>
@@ -144,6 +144,6 @@ export const RestoreModal = ({ onRestore, onClose, itemName }: RestoreModalProps
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </Modal>
+    </FlightCtlModal>
   );
 };

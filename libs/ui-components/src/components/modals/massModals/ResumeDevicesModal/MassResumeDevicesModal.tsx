@@ -6,7 +6,6 @@ import {
   FormGroup,
   MenuToggle,
   MenuToggleElement,
-  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -18,6 +17,7 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { Trans } from 'react-i18next';
 import { Formik, useFormikContext } from 'formik';
@@ -214,7 +214,7 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
   };
 
   return (
-    <Modal isOpen onClose={() => onClose(hasResumedAtLeastOne)} variant="medium">
+    <FlightCtlModal isOpen onClose={() => onClose(hasResumedAtLeastOne)} variant="medium">
       <ModalHeader title={t('Resume devices')} />
       <ModalBody>
         <Stack hasGutter>
@@ -432,7 +432,7 @@ const MassResumeDevicesModalContent = ({ onClose }: MassResumeDevicesModalProps)
           {hasResumedAtLeastOne ? t('Close') : t('Cancel')}
         </Button>
       </ModalFooter>
-    </Modal>
+    </FlightCtlModal>
   );
 };
 

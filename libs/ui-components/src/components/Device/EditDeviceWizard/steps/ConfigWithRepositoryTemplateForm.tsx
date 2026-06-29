@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useFormikContext } from 'formik';
 import { FormGroup } from '@patternfly/react-core';
-import { Trans } from 'react-i18next';
+import { TFunction, Trans } from 'react-i18next';
 
 import { GitRepoSpec, HttpRepoSpec, RepoSpecType, Repository } from '@flightctl/types';
 import { DeviceSpecConfigFormValues, GitConfigTemplate, HttpConfigTemplate } from '../../../../types/deviceSpec';
@@ -49,7 +49,7 @@ const GitConfigForm = ({
           aria-label={t('Path')}
           name={`configTemplates[${index}].path`}
           value={template.path}
-          placeholder={t('/absolute/path')}
+          placeholder={t('Enter an absolute path')}
           isDisabled={isReadOnly}
         />
       </FormGroupWithHelperText>
@@ -107,12 +107,23 @@ const HttpConfigForm = ({
           aria-label={t('File path')}
           name={`configTemplates[${index}].filePath`}
           value={template.filePath || ''}
-          placeholder={t('/absolute/path')}
+          placeholder={t('Enter an absolute path')}
           isDisabled={isReadOnly}
         />
       </FormGroupWithHelperText>
     </>
   );
+};
+
+const getRepositoryHelperText = (t: TFunction, repoType: RepoSpecType) => {
+  switch (repoType) {
+    case RepoSpecType.RepoSpecTypeGit:
+      return t('Only Git repositories are shown. Other repository types are not compatible with Git configurations.');
+    case RepoSpecType.RepoSpecTypeHttp:
+      return t('Only HTTP repositories are shown. Other repository types are not compatible with HTTP configurations.');
+    default:
+      return '';
+  }
 };
 
 const ConfigWithRepositoryTemplateForm = ({
@@ -123,6 +134,7 @@ const ConfigWithRepositoryTemplateForm = ({
   isReadOnly,
   canCreateRepo,
 }: ConfigWithRepositoryTemplateFormProps) => {
+  const { t } = useTranslation();
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
 
   const ct = values.configTemplates[index] as HttpConfigTemplate | GitConfigTemplate;
@@ -138,6 +150,7 @@ const ConfigWithRepositoryTemplateForm = ({
         canCreateRepo={canCreateRepo}
         isReadOnly={isReadOnly}
         repoRefetch={repoRefetch}
+        helperText={getRepositoryHelperText(t, repoType)}
         isRequired
       />
       {repoType === RepoSpecType.RepoSpecTypeGit && (

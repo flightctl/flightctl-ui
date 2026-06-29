@@ -91,8 +91,8 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.INTERNAL_TASK_FAILED]: t('Internal task failed'),
     [Event.reason.INTERNAL_TASK_PERMANENTLY_FAILED]: t('Internal task permanently failed'),
     // Repository events
-    [Event.reason.REPOSITORY_ACCESSIBLE]: t('Repository is accessible'),
-    [Event.reason.REPOSITORY_INACCESSIBLE]: t('Repository is inaccessible'),
+    [Event.reason.REPOSITORY_ACCESSIBLE]: t('Repository is available'),
+    [Event.reason.REPOSITORY_INACCESSIBLE]: t('Repository is not available'),
     [Event.reason.REFERENCED_REPOSITORY_UPDATED]: t('Referenced repository was updated'),
     // Fleet events
     [Event.reason.FLEET_VALID]: t('Fleet specification is valid'),
@@ -109,8 +109,8 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.RESOURCE_SYNC_SYNC_FAILED]: t('Resourcesync synchronization failed'),
     [Event.reason.RESOURCE_SYNC_PARSED]: t('Resourcesync parsed successfully'),
     [Event.reason.RESOURCE_SYNC_PARSING_FAILED]: t('Resourcesync parsing failed'),
-    [Event.reason.RESOURCE_SYNC_ACCESSIBLE]: t('Resourcesync is accessible'),
-    [Event.reason.RESOURCE_SYNC_INACCESSIBLE]: t('Resourcesync is not accessible'),
+    [Event.reason.RESOURCE_SYNC_ACCESSIBLE]: t('Resourcesync is available'),
+    [Event.reason.RESOURCE_SYNC_INACCESSIBLE]: t('Resourcesync is not available'),
     [Event.reason.RESOURCE_SYNC_COMMIT_DETECTED]: t('Resourcesync new commit detected'),
     // Dependency sync events
     [Event.reason.DEPENDENCY_SYNC_PROBE_FAILED]: t('Dependency sync probe failed'),

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useField, useFormikContext } from 'formik';
 import {
   Button,
+  Divider,
   Flex,
   FlexItem,
   FormGroup,
@@ -63,10 +64,10 @@ export const getRepositoryItems = (
         let accessText = t('Unknown');
         let level: StatusLevel = 'unknown';
         if (isAccessible) {
-          accessText = t('Accessible');
+          accessText = t('Available');
           level = 'success';
         } else if (isInaccessible) {
-          accessText = t('Not accessible');
+          accessText = t('Not available');
           level = 'danger';
         }
 
@@ -195,19 +196,22 @@ const RepositorySelect = ({
           <ReadOnlyRepositoryListItem invalidRepoItems={invalidRepoItems} />
 
           {canCreateRepo && (
-            <MenuFooter>
-              <Button
-                variant="link"
-                isInline
-                icon={<PlusCircleIcon />}
-                onClick={() => {
-                  setCreateRepoModalOpen(true);
-                }}
-                isDisabled={isReadOnly}
-              >
-                {t('Create repository')}
-              </Button>
-            </MenuFooter>
+            <>
+              <Divider />
+              <MenuFooter>
+                <Button
+                  variant="link"
+                  isInline
+                  icon={<PlusCircleIcon />}
+                  onClick={() => {
+                    setCreateRepoModalOpen(true);
+                  }}
+                  isDisabled={isReadOnly}
+                >
+                  {t('Create repository')}
+                </Button>
+              </MenuFooter>
+            </>
           )}
         </FormSelect>
 

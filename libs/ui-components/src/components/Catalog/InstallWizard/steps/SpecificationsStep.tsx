@@ -8,7 +8,6 @@ import {
   Grid,
   GridItem,
   Label,
-  Modal,
   ModalBody,
   ModalHeader,
   Spinner,
@@ -18,6 +17,7 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import * as React from 'react';
 import { FormikErrors, useFormikContext } from 'formik';
 import * as semver from 'semver';
@@ -155,14 +155,14 @@ export const InstallSpec = ({
         )}
       </Grid>
       {showReadme && currentVersion?.readme && (
-        <Modal isOpen onClose={() => setShowReadme(false)} variant="medium">
+        <FlightCtlModal isOpen onClose={() => setShowReadme(false)} variant="medium">
           <ModalHeader title={t('Readme')} />
           <ModalBody>
             <Content>
               <ReactMarkdown>{currentVersion.readme}</ReactMarkdown>
             </Content>
           </ModalBody>
-        </Modal>
+        </FlightCtlModal>
       )}
     </>
   );

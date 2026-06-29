@@ -76,7 +76,9 @@ const OutputImageStep = () => {
             writeAccessOnly: true,
           }}
           validateRepoSelection={writableRepoValidation}
-          helperText={t('Storage repository for your completed image.')}
+          helperText={t(
+            'Only OCI-compliant registries are shown. Other repository types, such as Git or HTTP, are not supported for image builds.',
+          )}
         />
         <FormGroup label={t('Image name')} fieldId="image-name" isRequired>
           <TextField
