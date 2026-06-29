@@ -111,7 +111,12 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
                   validations={getDnsSubdomainValidations(t)}
                 />
                 <FormGroup label={t('Display name')}>
-                  <TextField name="displayName" aria-label={t('Display name')} isDisabled={isReadOnly} />
+                  <TextField
+                    name="displayName"
+                    aria-label={t('Display name')}
+                    helperText={t('The name shown to users in the catalog.')}
+                    isDisabled={isReadOnly}
+                  />
                 </FormGroup>
                 <FormGroup label={t('Short description')}>
                   <TextAreaField name="shortDescription" aria-label={t('Short description')} isDisabled={isReadOnly} />

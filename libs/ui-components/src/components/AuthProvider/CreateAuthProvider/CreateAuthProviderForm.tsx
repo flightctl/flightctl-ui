@@ -87,7 +87,6 @@ export const AuthProviderForm = ({ isEdit }: { isEdit?: boolean }) => {
         isDisabled={isEdit}
         resourceType="authproviders"
         validations={getDnsSubdomainValidations(t)}
-        helperText={t("You can't change the provider name after it's created")}
       />
 
       <FormGroup label={t('Display name')}>

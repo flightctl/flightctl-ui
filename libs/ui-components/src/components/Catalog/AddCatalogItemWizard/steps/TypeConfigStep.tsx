@@ -135,11 +135,10 @@ const TypeConfigStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?:
                                 placeholder={t('e.g. https://example.com/image.qcow2', { nsSeparator: '|' })}
                               />
                             </FormGroup>
-                            <FormGroup label={t('Name')}>
+                            <FormGroup label={t('Display name')}>
                               <TextField
                                 name={`artifacts.${index}.name`}
-                                aria-label={t('Artifact name')}
-                                helperText={t('Optional display name')}
+                                aria-label={t('Display name')}
                                 isDisabled={isReadOnly}
                               />
                             </FormGroup>
