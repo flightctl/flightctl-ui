@@ -131,7 +131,8 @@ const LoginPage = () => {
     );
   }
 
-  const selectedProvider = userSelectedProvider || (suppressAutoSelect ? null : providers.length === 1 ? providers[0] : null);
+  const selectedProvider =
+    userSelectedProvider || (suppressAutoSelect ? null : providers.length === 1 ? providers[0] : null);
   if (selectedProvider?.spec.providerType === ProviderType.K8s) {
     return (
       <TokenLoginForm
