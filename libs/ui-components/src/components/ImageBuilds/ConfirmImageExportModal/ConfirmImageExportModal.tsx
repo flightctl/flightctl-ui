@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core';
+import { Button, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 
@@ -43,7 +44,7 @@ const ConfirmImageExportActionModal = ({
   }
 
   return (
-    <Modal variant="small" isOpen onClose={() => onClose(false)}>
+    <FlightCtlModal variant="small" isOpen onClose={() => onClose(false)}>
       <ModalHeader title={title} />
       <ModalBody>{message}</ModalBody>
       <ModalFooter>
@@ -54,7 +55,7 @@ const ConfirmImageExportActionModal = ({
           {action === 'cancel' ? t('Close') : t('Cancel')}
         </Button>
       </ModalFooter>
-    </Modal>
+    </FlightCtlModal>
   );
 };
 

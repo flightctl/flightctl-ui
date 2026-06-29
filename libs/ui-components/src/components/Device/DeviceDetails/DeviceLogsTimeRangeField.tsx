@@ -81,7 +81,7 @@ const DeviceLogsCustomDateInput = ({
           id={inputId}
           data-testid={inputId}
           aria-label={ariaLabel}
-          placeholder={t('YYYY-MM-DD')}
+          placeholder={t('Select a date')}
           value={value}
           onChange={(_event, nextValue) => onChange(nextValue)}
         />

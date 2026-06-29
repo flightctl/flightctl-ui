@@ -49,7 +49,7 @@ const GitConfigForm = ({
           aria-label={t('Path')}
           name={`configTemplates[${index}].path`}
           value={template.path}
-          placeholder={t('/absolute/path')}
+          placeholder={t('Enter an absolute path')}
           isDisabled={isReadOnly}
         />
       </FormGroupWithHelperText>
@@ -107,7 +107,7 @@ const HttpConfigForm = ({
           aria-label={t('File path')}
           name={`configTemplates[${index}].filePath`}
           value={template.filePath || ''}
-          placeholder={t('/absolute/path')}
+          placeholder={t('Enter an absolute path')}
           isDisabled={isReadOnly}
         />
       </FormGroupWithHelperText>

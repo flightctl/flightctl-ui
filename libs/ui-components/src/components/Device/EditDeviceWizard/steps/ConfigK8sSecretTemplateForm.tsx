@@ -38,7 +38,7 @@ const ConfigK8sSecretTemplateForm = ({ index }: ConfigK8sSecretTemplateFormProps
           aria-label={t('Mount path')}
           name={`configTemplates.${index}.mountPath`}
           value={template.mountPath}
-          placeholder={t('/absolute/path')}
+          placeholder={t('Enter an absolute path')}
           isDisabled
         />
       </FormGroup>

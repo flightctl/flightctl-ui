@@ -11,3 +11,7 @@
   top: 0;
   right: 2.5rem;
 }
+
+.fctl-filter-select__placeholder {
+  opacity: 0.6;
+}

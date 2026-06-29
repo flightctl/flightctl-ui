@@ -87,7 +87,7 @@ const DeviceLogsToolbar = ({ onLogTypeChange, isSubmitting, onCancelSearch }: De
                         <TextField
                           name="systemdUnit"
                           aria-label={t('Systemd unit')}
-                          placeholder={t('Unit')}
+                          placeholder={t('Enter unit name')}
                           showErrorMsg={false}
                         />
                       </FormGroup>
@@ -114,7 +114,7 @@ const DeviceLogsToolbar = ({ onLogTypeChange, isSubmitting, onCancelSearch }: De
                           <TextField
                             name="logFilePath"
                             aria-label={t('Log file path')}
-                            placeholder={t('Relative file path')}
+                            placeholder={t('Enter a relative file path')}
                             showErrorMsg={false}
                           />
                         </FormGroup>

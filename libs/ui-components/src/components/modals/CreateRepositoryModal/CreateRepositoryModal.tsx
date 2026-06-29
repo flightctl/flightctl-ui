@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Modal, ModalBody, ModalHeader } from '@patternfly/react-core';
+import { ModalBody, ModalHeader } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { RepoSpecType, Repository } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -17,7 +18,7 @@ type CreateRepositoryModalProps = {
 const CreateRepositoryModal = ({ type, onClose, onSuccess, options }: CreateRepositoryModalProps) => {
   const { t } = useTranslation();
   return (
-    <Modal variant="medium" isOpen>
+    <FlightCtlModal variant="medium" isOpen>
       <ModalHeader title={t('Create repository')} />
       <ModalBody>
         <CreateRepositoryForm
@@ -30,7 +31,7 @@ const CreateRepositoryModal = ({ type, onClose, onSuccess, options }: CreateRepo
           }}
         />
       </ModalBody>
-    </Modal>
+    </FlightCtlModal>
   );
 };
 

@@ -153,7 +153,12 @@ const RoleAssignmentSection = () => {
           </FormGroupWithHelperText>
 
           <FormGroupWithHelperText label={t('Separator')} content={<RoleSeparatorHelperText />}>
-            <TextField name="roleSeparator" id="roleSeparator" aria-label={t('Separator')} placeholder=":" />
+            <TextField
+              name="roleSeparator"
+              id="roleSeparator"
+              aria-label={t('Separator')}
+              placeholder={t('e.g. colon (:)', { nsSeparator: '|' })}
+            />
           </FormGroupWithHelperText>
         </>
       )}

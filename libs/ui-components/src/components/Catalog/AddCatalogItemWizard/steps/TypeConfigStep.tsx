@@ -132,7 +132,7 @@ const TypeConfigStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?:
                                 aria-label={t('Artifact URI')}
                                 isRequired
                                 isDisabled={isReadOnly}
-                                placeholder="https://example.com/image.qcow2"
+                                placeholder={t('e.g. https://example.com/image.qcow2', { nsSeparator: '|' })}
                               />
                             </FormGroup>
                             <FormGroup label={t('Name')}>

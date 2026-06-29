@@ -3,7 +3,6 @@ import {
   Alert,
   Button,
   FormGroup,
-  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -12,6 +11,7 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { Catalog } from '@flightctl/types/alpha';
@@ -71,7 +71,7 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
   }
 
   return (
-    <Modal variant="medium" isOpen onClose={onClose}>
+    <FlightCtlModal variant="medium" isOpen onClose={onClose}>
       <Formik<CreateCatalogFormValues>
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -123,7 +123,7 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
                   <TextField
                     name="support"
                     aria-label={t('Support')}
-                    placeholder="https://example.com/support"
+                    placeholder={t('e.g. https://example.com/support', { nsSeparator: '|' })}
                     isDisabled={isReadOnly}
                   />
                 </FormGroup>
@@ -162,7 +162,7 @@ const CreateCatalogModal = ({ onClose, onSuccess, catalog }: CreateCatalogModalP
           </>
         )}
       </Formik>
-    </Modal>
+    </FlightCtlModal>
   );
 };
 

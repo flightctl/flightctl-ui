@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import { Alert, Button, Modal, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
+import { Alert, Button, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
+import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
@@ -22,7 +23,7 @@ const DeleteFleetModal = ({ fleetId, onClose }: { fleetId: string; onClose: (has
   };
 
   return (
-    <Modal
+    <FlightCtlModal
       isOpen
       onClose={() => {
         onClose();
@@ -81,7 +82,7 @@ const DeleteFleetModal = ({ fleetId, onClose }: { fleetId: string; onClose: (has
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </Modal>
+    </FlightCtlModal>
   );
 };
 
