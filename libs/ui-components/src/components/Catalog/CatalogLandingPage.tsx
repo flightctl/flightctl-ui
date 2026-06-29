@@ -49,7 +49,7 @@ const GettingStartedCard = ({
       <CardHeader>
         <Stack hasGutter>
           <StackItem>
-            <Icon size="2xl" style={{ '--pf-v6-c-icon__content--Color': activeColor.value } as React.CSSProperties}>
+            <Icon size="xl" style={{ '--pf-v6-c-icon__content--Color': activeColor.value } as React.CSSProperties}>
               {icon}
             </Icon>
           </StackItem>
