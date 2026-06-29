@@ -254,7 +254,12 @@ const RepositoryList = () => {
   const [allowed] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.LIST }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
-      <ListPage title={t('Repositories')}>
+      <ListPage
+        title={t('Repositories')}
+        description={t(
+          'Manage the source and target repositories used across your image builds and device configurations.',
+        )}
+      >
         <RepositoryTable />
       </ListPage>
     </PageWithPermissions>
