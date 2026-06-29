@@ -673,12 +673,6 @@ export const getCatalogPatches = (catalog: Catalog, values: CreateCatalogFormVal
   });
   appendJSONPatch({
     patches,
-    path: '/spec/icon',
-    newValue: values.icon,
-    originalValue: catalog.spec.icon,
-  });
-  appendJSONPatch({
-    patches,
     path: '/spec/provider',
     newValue: values.provider,
     originalValue: catalog.spec.provider,
@@ -699,7 +693,6 @@ export const getCatalogResource = (values: CreateCatalogFormValues): Catalog => 
   spec: {
     displayName: values.displayName || undefined,
     shortDescription: values.shortDescription || undefined,
-    icon: values.icon || undefined,
     provider: values.provider || undefined,
     support: values.support || undefined,
   },
