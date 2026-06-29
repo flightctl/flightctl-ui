@@ -63,10 +63,10 @@ export const getRepositoryItems = (
         let accessText = t('Unknown');
         let level: StatusLevel = 'unknown';
         if (isAccessible) {
-          accessText = t('Accessible');
+          accessText = t('Available');
           level = 'success';
         } else if (isInaccessible) {
-          accessText = t('Not accessible');
+          accessText = t('Not available');
           level = 'danger';
         }
 
