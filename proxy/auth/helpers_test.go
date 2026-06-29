@@ -4,8 +4,16 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"testing"
+
+	"github.com/flightctl/flightctl-ui/log"
 )
+
+func TestMain(m *testing.M) {
+	log.InitLogs()
+	os.Exit(m.Run())
+}
 
 // redirectBaseMatchesRequest is a test helper that checks whether url u's origin
 // matches the effective request origin. Returns nil when they match, error otherwise.

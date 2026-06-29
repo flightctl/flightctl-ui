@@ -9,7 +9,7 @@ import { useFetch } from '@flightctl/ui-components/src/hooks/useFetch';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import { getProviderDisplayName } from '@flightctl/ui-components/src/utils/authProvider';
 
-import { apiProxy } from '../../utils/apiCalls';
+import { apiProxy, JUST_LOGGED_OUT_KEY } from '../../utils/apiCalls';
 import LoginPageLayout from './LoginPageLayout';
 
 const redirectToProviderLogin = async (provider: AuthProvider) => {
@@ -38,6 +38,7 @@ const LoginPage = () => {
   const [userSelectedProvider, setUserSelectedProvider] = React.useState<AuthProvider | null>(null);
   const [defaultProviderName, setDefaultProviderName] = React.useState<string>('');
   const [isRedirecting, setIsRedirecting] = React.useState(false);
+  const [suppressAutoSelect, setSuppressAutoSelect] = React.useState(false);
 
   const handleProviderSelect = async (provider: AuthProvider) => {
     // Prevent multiple clicks while redirect is in progress
@@ -83,7 +84,12 @@ const LoginPage = () => {
         if (providers.length > 0) {
           setProviders(providers);
           setDefaultProviderName(config.defaultProvider || '');
-          if (providers.length === 1 && providers[0].spec.providerType !== ProviderType.K8s) {
+          const justLoggedOut = sessionStorage.getItem(JUST_LOGGED_OUT_KEY) === 'true';
+          if (justLoggedOut) {
+            sessionStorage.removeItem(JUST_LOGGED_OUT_KEY);
+            setSuppressAutoSelect(true);
+          }
+          if (!justLoggedOut && providers.length === 1 && providers[0].spec.providerType !== ProviderType.K8s) {
             setIsRedirecting(true);
             try {
               await redirectToProviderLogin(providers[0]);
@@ -125,7 +131,7 @@ const LoginPage = () => {
     );
   }
 
-  const selectedProvider = userSelectedProvider || (providers.length === 1 ? providers[0] : null);
+  const selectedProvider = userSelectedProvider || (suppressAutoSelect ? null : providers.length === 1 ? providers[0] : null);
   if (selectedProvider?.spec.providerType === ProviderType.K8s) {
     return (
       <TokenLoginForm

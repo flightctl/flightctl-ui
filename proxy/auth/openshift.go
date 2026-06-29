@@ -1,13 +1,16 @@
 package auth
 
 import (
+	"crypto/sha256"
 	"crypto/tls"
+	b64 "encoding/base64"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/flightctl/flightctl-ui/bridge"
+	"github.com/flightctl/flightctl-ui/log"
 	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
 )
@@ -128,28 +131,59 @@ func (o *OpenShiftAuthHandler) openshiftClientForRedirect(redirectURI string) (*
 	return client, nil
 }
 
-// Logout derives the OpenShift OAuth server logout URL from the authorization
-// URL (scheme + host only, path replaced with /logout). This terminates the
-// user's OpenShift OAuth browser session so the login page's auto-redirect
-// cannot silently re-authenticate them.
+// openShiftTokenName derives the OAuthAccessToken Kubernetes resource name from
+// an access token value. Tokens prefixed with "sha256~" are named by hashing
+// the full token string with SHA-256 and base64url-encoding the result (no
+// padding). Legacy tokens (no prefix) are used as-is — the token value IS the
+// resource name in that case.
+func openShiftTokenName(token string) string {
+	if strings.HasPrefix(token, "sha256~") {
+		hash := sha256.Sum256([]byte(token))
+		return "sha256~" + b64.RawURLEncoding.EncodeToString(hash[:])
+	}
+	return token
+}
+
+// Logout revokes the OpenShift OAuth access token server-side by issuing a
+// DELETE to /apis/oauth.openshift.io/v1/oauthaccesstokens/{name}, authenticated
+// with the token itself as the Bearer credential. Revocation invalidates the
+// OpenShift session without requiring a browser redirect, avoiding the 405 that
+// the OAuth server's /logout endpoint returns for unauthenticated GET requests.
 //
-// Using authURL avoids a discovery HTTP round-trip and is robust: authURL
-// always points to the OAuth server regardless of whether apiServerURL is
-// the K8s API server or the OAuth server. The prior approach that called
-// {apiServerURL}/.well-known/oauth-authorization-server was removed in
-// EDM-2612 because it produced a K8s API server URL as the logout target
-// (e.g. https://api.cluster:6443/logout) which is not a valid endpoint.
-//
-// Returns ("", nil) when authURL is empty, unparseable, or missing scheme/host.
-func (o *OpenShiftAuthHandler) Logout(_ string, _ string) (string, error) {
-	if o.authURL == "" {
+// Always returns ("", nil) — the caller falls back to a local page reload which
+// lands the user on the login page with no valid session.
+func (o *OpenShiftAuthHandler) Logout(token string, _ string) (string, error) {
+	if token == "" || o.apiServerURL == "" {
 		return "", nil
 	}
-	parsed, err := url.Parse(o.authURL)
-	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
+
+	tokenName := openShiftTokenName(token)
+	revokeURL := fmt.Sprintf("%s/apis/oauth.openshift.io/v1/oauthaccesstokens/%s",
+		strings.TrimSuffix(o.apiServerURL, "/"), tokenName)
+
+	client := &http.Client{
+		Transport: &http.Transport{TLSClientConfig: o.tlsConfig},
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, revokeURL, nil)
+	if err != nil {
+		log.GetLogger().WithError(err).Warn("Failed to build OpenShift token revocation request")
 		return "", nil
 	}
-	return (&url.URL{Scheme: parsed.Scheme, Host: parsed.Host, Path: "/logout"}).String(), nil
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.GetLogger().WithError(err).Warn("Failed to revoke OpenShift OAuth token")
+		return "", nil
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+		log.GetLogger().Warnf("OpenShift token revocation returned unexpected status %d", resp.StatusCode)
+	}
+
+	return "", nil
 }
 
 // GetLoginRedirectURL returns the OAuth2 authorization URL the browser should
