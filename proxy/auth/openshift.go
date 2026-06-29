@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/log"
@@ -144,6 +145,18 @@ func openShiftTokenName(token string) string {
 	return token
 }
 
+// openShiftAPIServerBase normalises apiServerURL to a plain scheme+host (no
+// path, query, or fragment) so the revocation URL is always well-formed even
+// when apiServerURL was derived from an AuthorizationUrl that carries extra
+// components.
+func openShiftAPIServerBase(rawURL string) string {
+	parsed, err := url.Parse(rawURL)
+	if err != nil || parsed.Host == "" {
+		return strings.TrimSuffix(rawURL, "/")
+	}
+	return parsed.Scheme + "://" + parsed.Host
+}
+
 // Logout revokes the OpenShift OAuth access token server-side by issuing a
 // DELETE to /apis/oauth.openshift.io/v1/oauthaccesstokens/{name}, authenticated
 // with the token itself as the Bearer credential. Revocation invalidates the
@@ -158,11 +171,12 @@ func (o *OpenShiftAuthHandler) Logout(token string, _ string) (string, error) {
 	}
 
 	tokenName := openShiftTokenName(token)
-	revokeURL := fmt.Sprintf("%s/apis/oauth.openshift.io/v1/oauthaccesstokens/%s",
-		strings.TrimSuffix(o.apiServerURL, "/"), tokenName)
+	base := openShiftAPIServerBase(o.apiServerURL)
+	revokeURL := fmt.Sprintf("%s/apis/oauth.openshift.io/v1/oauthaccesstokens/%s", base, tokenName)
 
 	client := &http.Client{
 		Transport: &http.Transport{TLSClientConfig: o.tlsConfig},
+		Timeout:   10 * time.Second,
 	}
 
 	req, err := http.NewRequest(http.MethodDelete, revokeURL, nil)

@@ -51,6 +51,59 @@ func TestOpenShiftTokenName(t *testing.T) {
 	}
 }
 
+// TestOpenShiftAPIServerBase verifies that openShiftAPIServerBase normalises
+// the base URL by stripping any path, query, and fragment components.
+func TestOpenShiftAPIServerBase(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		rawURL  string
+		wantURL string
+	}{
+		{
+			name:    "plain base URL is unchanged",
+			rawURL:  "https://api.cluster.example.com",
+			wantURL: "https://api.cluster.example.com",
+		},
+		{
+			name:    "trailing slash is removed",
+			rawURL:  "https://api.cluster.example.com/",
+			wantURL: "https://api.cluster.example.com",
+		},
+		{
+			name:    "path is stripped",
+			rawURL:  "https://api.cluster.example.com/oauth/authorize",
+			wantURL: "https://api.cluster.example.com",
+		},
+		{
+			name:    "query string is stripped",
+			rawURL:  "https://api.cluster.example.com?foo=bar",
+			wantURL: "https://api.cluster.example.com",
+		},
+		{
+			name:    "fragment is stripped",
+			rawURL:  "https://api.cluster.example.com#frag",
+			wantURL: "https://api.cluster.example.com",
+		},
+		{
+			name:    "path and query are both stripped",
+			rawURL:  "https://oauth.example.com/oauth/authorize?response_type=code",
+			wantURL: "https://oauth.example.com",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := openShiftAPIServerBase(tt.rawURL)
+			if got != tt.wantURL {
+				t.Fatalf("expected %q, got %q", tt.wantURL, got)
+			}
+		})
+	}
+}
+
 // TestOpenShiftLogout verifies that Logout revokes the token server-side via the
 // Kubernetes OAuthAccessToken API and always returns ("", nil) — never a redirect URL.
 func TestOpenShiftLogout(t *testing.T) {
@@ -101,6 +154,14 @@ func TestOpenShiftLogout(t *testing.T) {
 			apiServerURL: "", // override: do not use server
 			serverStatus: http.StatusOK,
 		},
+		{
+			name:           "apiServerURL with path and query is normalised",
+			token:          "legacy-token",
+			serverStatus:   http.StatusOK,
+			wantDeletePath: "/apis/oauth.openshift.io/v1/oauthaccesstokens/legacy-token",
+			wantAuthHeader: "Bearer legacy-token",
+			// apiServerURL is set by the test loop to server.URL + "/oauth/authorize?foo=bar"
+		},
 	}
 
 	for _, tt := range tests {
@@ -118,8 +179,11 @@ func TestOpenShiftLogout(t *testing.T) {
 
 			// Determine which apiServerURL to use
 			apiServerURL := server.URL
-			if tt.name == "empty apiServerURL skips revocation" {
+			switch tt.name {
+			case "empty apiServerURL skips revocation":
 				apiServerURL = ""
+			case "apiServerURL with path and query is normalised":
+				apiServerURL = server.URL + "/oauth/authorize?foo=bar"
 			}
 
 			handler := &OpenShiftAuthHandler{apiServerURL: apiServerURL}
