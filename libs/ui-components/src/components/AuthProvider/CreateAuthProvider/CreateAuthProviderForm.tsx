@@ -1,5 +1,16 @@
 import * as React from 'react';
-import { ActionGroup, Alert, Button, Divider, FormGroup, FormSection, Grid, Popover } from '@patternfly/react-core';
+import {
+  ActionGroup,
+  Alert,
+  Button,
+  Divider,
+  Flex,
+  FlexItem,
+  FormGroup,
+  FormSection,
+  Grid,
+  Popover,
+} from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
@@ -27,7 +38,7 @@ import RoleAssignmentSection from './RoleAssignmentSection';
 import TestConnectionModal from '../TestConnectionModal/TestConnectionModal';
 import { ScopesHelperText, UsernameClaimHelperText } from './AuthProviderHelperText';
 
-const EnabledHelpText = () => {
+const EnableProviderSwitchLabel = () => {
   const { t } = useTranslation();
   return (
     <Popover
@@ -40,17 +51,21 @@ const EnabledHelpText = () => {
       withFocusTrap
       triggerAction="click"
     >
-      <Button
-        icon={<OutlinedQuestionCircleIcon />}
-        component="a"
-        isInline
-        variant="plain"
-        onClick={(ev) => {
-          ev.preventDefault();
-          ev.stopPropagation();
-        }}
-        aria-label="Enabled help text"
-      />
+      <Flex>
+        <FlexItem>{t('Enabled')}</FlexItem>
+        <FlexItem>
+          <Button
+            icon={<OutlinedQuestionCircleIcon />}
+            hasNoPadding
+            variant="plain"
+            onClick={(ev) => {
+              ev.preventDefault();
+              ev.stopPropagation();
+            }}
+            aria-label="Enabled help text"
+          />
+        </FlexItem>
+      </Flex>
     </Popover>
   );
 };
@@ -63,12 +78,7 @@ export const AuthProviderForm = ({ isEdit }: { isEdit?: boolean }) => {
 
   return (
     <>
-      <SwitchField
-        name="enabled"
-        label={t('Enabled')}
-        aria-label={t('Enabled provider')}
-        labelIcon={<EnabledHelpText />}
-      />
+      <SwitchField name="enabled" label={<EnableProviderSwitchLabel />} aria-label={t('Enabled provider')} />
 
       <NameField
         name="name"

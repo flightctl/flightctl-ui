@@ -1240,6 +1240,7 @@
   "No additional user input required (cloud-init and ignition are enabled automatically)": "No additional user input required (cloud-init and ignition are enabled automatically)",
   "Remote access": "Remote access",
   "Provide an SSH public key to enable passwordless login once your image is deployed.": "Provide an SSH public key to enable passwordless login once your image is deployed.",
+  "SSH public key for remote access": "SSH public key for remote access",
   "Username": "Username",
   "The username for the user account": "The username for the user account",
   "SSH public key": "SSH public key",
