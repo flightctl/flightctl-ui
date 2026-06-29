@@ -176,8 +176,6 @@ export const CatalogLandingPageContent = ({ permissions }: Pick<LandingPagePermi
             >
               <Button
                 variant="secondary"
-                icon={<ArrowRightIcon />}
-                iconPosition="end"
                 onClick={() => navigate(ROUTE.CATALOG_ADD_ITEM)}
                 isAriaDisabled={!canCreateCatalog || !canCreateCatalogItem}
               >
