@@ -55,6 +55,9 @@ const SourceImageStep = () => {
           label={t('Source repository')}
           repositories={ociRegistries}
           repoType={RepoSpecType.RepoSpecTypeOci}
+          helperText={t(
+            'Only OCI-compliant registries are shown. Other repository types, such as Git or HTTP, are not supported for image builds.',
+          )}
           canCreateRepo={canCreateRepo}
           repoRefetch={refetch}
           isRequired
