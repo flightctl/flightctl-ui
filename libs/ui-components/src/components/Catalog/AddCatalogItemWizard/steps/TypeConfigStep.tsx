@@ -132,7 +132,7 @@ const TypeConfigStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?:
                                 aria-label={t('OCI reference')}
                                 isRequired
                                 isDisabled={isReadOnly}
-                                placeholder={t('e.g. https://example.com/image.qcow2', { nsSeparator: '|' })}
+                                placeholder={t('e.g. quay.io/org/image', { nsSeparator: '|' })}
                               />
                             </FormGroup>
                             <FormGroup label={t('Display name')}>
