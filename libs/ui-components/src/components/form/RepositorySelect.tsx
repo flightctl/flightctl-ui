@@ -1,17 +1,6 @@
 import * as React from 'react';
 import { useField, useFormikContext } from 'formik';
-import {
-  Content,
-  ContentVariants,
-  FormGroup,
-  Grid,
-  GridItem,
-  Icon,
-  SelectList,
-  SelectOption,
-  Stack,
-  StackItem,
-} from '@patternfly/react-core';
+import { Content, ContentVariants, FormGroup, Grid, GridItem, Icon, Stack, StackItem } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { TFunction } from 'react-i18next';
 
@@ -30,8 +19,7 @@ export const getRepositoryItems = (
   repoType: RepoSpecType,
   selectedRepoName?: string,
 ) => {
-  const invalidRepoItems: Record<string, SelectItem> = {};
-  const validRepoItems: Record<string, SelectItem> = {};
+  const repoItems: Record<string, SelectItem> = {};
 
   repositories
     .filter((repo) => {
@@ -54,7 +42,7 @@ export const getRepositoryItems = (
         level = 'danger';
       }
 
-      validRepoItems[repoName] = {
+      repoItems[repoName] = {
         label: (
           <Grid hasGutter style={{ alignItems: 'center' }}>
             <GridItem span={8}>
@@ -77,8 +65,8 @@ export const getRepositoryItems = (
   // If the selected repository has been removed, we still consider it "valid" since it needs to be selected initially
   const isSelectedRepoMissing =
     selectedRepoName && !repositories.some((repo) => repo.metadata.name === selectedRepoName);
-  if (isSelectedRepoMissing && !validRepoItems[selectedRepoName]) {
-    validRepoItems[selectedRepoName] = {
+  if (isSelectedRepoMissing && !repoItems[selectedRepoName]) {
+    repoItems[selectedRepoName] = {
       label: (
         <Stack>
           <StackItem>{selectedRepoName}</StackItem>
@@ -94,7 +82,7 @@ export const getRepositoryItems = (
     };
   }
 
-  return { validRepoItems, invalidRepoItems };
+  return repoItems;
 };
 
 type RepositorySelectProps = {
@@ -111,25 +99,6 @@ type RepositorySelectProps = {
     enforcedRepoTypeMessage?: string;
   };
   isRequired?: boolean;
-};
-
-const ReadOnlyRepositoryListItem = ({ invalidRepoItems }: { invalidRepoItems: Record<string, SelectItem> }) => {
-  const itemKeys = Object.keys(invalidRepoItems);
-  if (itemKeys.length === 0) {
-    return null;
-  }
-  return (
-    <SelectList className="fctl-form-select__menu">
-      {itemKeys.map((key) => {
-        const item = invalidRepoItems[key];
-        return (
-          <SelectOption key={key} value={key} isDisabled>
-            {item.label}
-          </SelectOption>
-        );
-      })}
-    </SelectList>
-  );
 };
 
 const RepositorySelect = ({
@@ -149,7 +118,7 @@ const RepositorySelect = ({
   const [field] = useField<string>(name);
   const [createRepoModalOpen, setCreateRepoModalOpen] = React.useState(false);
 
-  const { validRepoItems, invalidRepoItems } = React.useMemo(() => {
+  const repoItems = React.useMemo(() => {
     return getRepositoryItems(t, repositories, repoType, field.value);
   }, [t, repositories, repoType, field.value]);
 
@@ -171,14 +140,12 @@ const RepositorySelect = ({
       <FormGroup label={label || t('Repository')} isRequired={isRequired}>
         <FormSelect
           name={name}
-          items={validRepoItems}
+          items={repoItems}
           withStatusIcon
           placeholderText={t('Select a repository')}
           isDisabled={isReadOnly}
           addAction={addAction}
-        >
-          <ReadOnlyRepositoryListItem invalidRepoItems={invalidRepoItems} />
-        </FormSelect>
+        />
 
         {helperText && <DefaultHelperText helperText={helperText} />}
       </FormGroup>
