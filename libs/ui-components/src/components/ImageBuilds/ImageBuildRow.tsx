@@ -11,6 +11,7 @@ import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { getImageBuildImage, getImageBuildStatusReason, isImageBuildCancelable } from '../../utils/imageBuilds';
 import { getDateDisplay } from '../../utils/dates';
 import ResourceLink from '../common/ResourceLink';
+import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import ImageBuildExportsGallery from './ImageBuildDetails/ImageBuildExportsGallery';
 import { ImageBuildStatusDisplay } from './ImageBuildAndExportStatus';
 
@@ -54,7 +55,7 @@ const ImageBuildRow = ({
   const imageBuildName = imageBuild.metadata.name || '';
   const buildReason = getImageBuildStatusReason(imageBuild);
 
-  const actions: IAction[] = [
+  const regularActions: IAction[] = [
     {
       title: t('View details'),
       onClick: () => {
@@ -64,30 +65,32 @@ const ImageBuildRow = ({
   ];
 
   if (canNewVersion) {
-    actions.push({
+    regularActions.push({
       title: t('Rebuild'),
       onClick: onNewVersionClick,
     });
   }
 
   if (canAddToCatalog) {
-    actions.push({
+    regularActions.push({
       title: t('Add to catalog'),
       onClick: onAddToCatalog,
     });
   }
 
+  const dangerActions: IAction[] = [];
   if (canCancel && isImageBuildCancelable(buildReason)) {
-    actions.push({
+    dangerActions.push({
       title: t('Cancel image build'),
       onClick: onCancelClick,
     });
   } else if (canDelete) {
-    actions.push({
+    dangerActions.push({
       title: t('Delete image build'),
       onClick: onDeleteClick,
     });
   }
+  const actions = buildAllDropdownActions(regularActions, dangerActions);
 
   const sourceImage = getImageBuildImage(imageBuild.spec.source);
   const destinationImage = getImageBuildImage(imageBuild.spec.destination);

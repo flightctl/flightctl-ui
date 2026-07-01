@@ -8,6 +8,7 @@ import { ListAction } from '../ListPage/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE } from '../../hooks/useNavigate';
 import ResourceLink from '../common/ResourceLink';
+import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 
 type EnrollmentRequestTableRow = {
   rowIndex: number;
@@ -38,16 +39,15 @@ const EnrollmentRequestTableRow: React.FC<EnrollmentRequestTableRow> = ({
     onApprove(erName);
   };
 
-  const actionItems: IAction[] = [];
+  const regularActions: IAction[] = [];
   if (canApprove) {
-    actionItems.push({
+    regularActions.push({
       title: t('Approve'),
       onClick: approveEnrollment,
     });
   }
-  if (canDelete) {
-    actionItems.push(deleteAction({ resourceId: erName }));
-  }
+  const dangerActions: IAction[] = canDelete ? [deleteAction({ resourceId: erName })] : [];
+  const actionItems = buildAllDropdownActions(regularActions, dangerActions);
 
   return (
     <Tr data-testid={`enrollment-request-${rowIndex}`}>

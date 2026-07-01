@@ -8,6 +8,7 @@ import { getFleetRolloutStatusWarning } from '../../utils/status/fleet';
 import { getOwnerName } from '../../utils/resource';
 
 import ResourceLink from '../common/ResourceLink';
+import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import FleetDevicesCount from './FleetDetails/FleetDevicesCount';
 import { FleetOwnerLinkIcon } from './FleetDetails/FleetOwnerLink';
 import FleetStatus from './FleetStatus';
@@ -61,24 +62,26 @@ const FleetRow: React.FC<FleetRowProps> = ({
   const fleetName = fleet.metadata.name || '';
 
   const isManaged = !!fleet.metadata?.owner;
-  const actions = useFleetActions(fleetName, isManaged, canEdit);
+  const regularActions = useFleetActions(fleetName, isManaged, canEdit);
+  const dangerActions: IAction[] = canDelete
+    ? [
+        {
+          title: t('Delete fleet'),
+          'data-testid': 'fleet-row-menu-delete-fleet',
+          onClick: onDeleteClick,
+          tooltipProps: isManaged
+            ? {
+                content: t(
+                  "This fleet is managed by a resource sync and cannot be directly deleted. Either remove this fleet's definition from the resource sync configuration, or delete the resource sync first.",
+                ),
+              }
+            : undefined,
+          isAriaDisabled: isManaged,
+        } as IAction,
+      ]
+    : [];
+  const actions = buildAllDropdownActions(regularActions, dangerActions);
   const fleetRolloutError = getFleetRolloutStatusWarning(fleet, t);
-
-  if (canDelete) {
-    actions.push({
-      title: t('Delete fleet'),
-      'data-testid': 'fleet-row-menu-delete-fleet',
-      onClick: onDeleteClick,
-      tooltipProps: isManaged
-        ? {
-            content: t(
-              "This fleet is managed by a resource sync and cannot be directly deleted. Either remove this fleet's definition from the resource sync configuration, or delete the resource sync first.",
-            ),
-          }
-        : undefined,
-      isAriaDisabled: isManaged,
-    } as IAction);
-  }
 
   return (
     <Tr>

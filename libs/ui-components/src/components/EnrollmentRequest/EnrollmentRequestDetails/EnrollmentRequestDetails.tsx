@@ -8,7 +8,6 @@ import {
   DescriptionListGroup,
   DescriptionListTerm,
   DropdownItem,
-  DropdownList,
   Grid,
   GridItem,
   TextArea,
@@ -37,6 +36,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
+import ActionsDropdownList from '../../common/ActionsDropdownList';
 
 import './EnrollmentRequestDetails.css';
 
@@ -86,14 +86,16 @@ const EnrollmentRequestDetails = () => {
       actions={
         (canApprove || canDelete) && (
           <DetailsPageActions>
-            <DropdownList>
+            <ActionsDropdownList>
               {canApprove && (
-                <DropdownItem onClick={() => setIsApprovalModalOpen(true)} isDisabled={!isPendingApproval}>
-                  {t('Approve')}
-                </DropdownItem>
+                <ActionsDropdownList.Item>
+                  <DropdownItem onClick={() => setIsApprovalModalOpen(true)} isDisabled={!isPendingApproval}>
+                    {t('Approve')}
+                  </DropdownItem>
+                </ActionsDropdownList.Item>
               )}
-              {canDelete && deleteAction}
-            </DropdownList>
+              {canDelete && <ActionsDropdownList.Item isDanger>{deleteAction}</ActionsDropdownList.Item>}
+            </ActionsDropdownList>
           </DetailsPageActions>
         )
       }

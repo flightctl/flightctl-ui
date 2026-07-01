@@ -6,7 +6,6 @@ import {
   Divider,
   Dropdown,
   DropdownItem,
-  DropdownList,
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
@@ -41,6 +40,7 @@ import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import DeleteCatalogModal from './DeleteCatalogModal';
 import CreateCatalogModal from './AddCatalogItemWizard/CreateCatalogModal';
 import WithTooltip from '../common/WithTooltip';
+import ActionsDropdownList from '../common/ActionsDropdownList';
 import ResourceSyncImportStatus from '../ResourceSync/ResourceSyncImportStatus';
 import CatalogLandingPage, { CatalogLandingPageContent, useLandingPagePermissions } from './CatalogLandingPage';
 import PageWithPermissions from '../common/PageWithPermissions';
@@ -283,24 +283,28 @@ export const CatalogPageContent = ({
                                     />
                                   )}
                                 >
-                                  <DropdownList>
-                                    <DropdownItem onClick={() => setCatalogToEdit(c)}>
-                                      {!!c.metadata.owner || !canEditCatalog ? t('View') : t('Edit')}
-                                    </DropdownItem>
-                                    <WithTooltip
-                                      showTooltip={!!c.metadata.owner}
-                                      content={t(
-                                        'This catalog is managed by a resource sync and cannot be directly removed. Either remove the catalog definition from the resource sync configuration, or delete the resource sync first.',
-                                      )}
-                                    >
-                                      <DropdownItem
-                                        isAriaDisabled={!canDelete}
-                                        onClick={canDelete ? () => setCatalogToDelete(c) : undefined}
-                                      >
-                                        {t('Remove')}
+                                  <ActionsDropdownList>
+                                    <ActionsDropdownList.Item>
+                                      <DropdownItem onClick={() => setCatalogToEdit(c)}>
+                                        {!!c.metadata.owner || !canEditCatalog ? t('View catalog') : t('Edit catalog')}
                                       </DropdownItem>
-                                    </WithTooltip>
-                                  </DropdownList>
+                                    </ActionsDropdownList.Item>
+                                    <ActionsDropdownList.Item isDanger>
+                                      <WithTooltip
+                                        showTooltip={!!c.metadata.owner}
+                                        content={t(
+                                          'This catalog is managed by a resource sync and cannot be directly removed. Either remove the catalog definition from the resource sync configuration, or delete the resource sync first.',
+                                        )}
+                                      >
+                                        <DropdownItem
+                                          isAriaDisabled={!canDelete}
+                                          onClick={canDelete ? () => setCatalogToDelete(c) : undefined}
+                                        >
+                                          {t('Delete catalog')}
+                                        </DropdownItem>
+                                      </WithTooltip>
+                                    </ActionsDropdownList.Item>
+                                  </ActionsDropdownList>
                                 </Dropdown>
                               ) : undefined,
                             };
