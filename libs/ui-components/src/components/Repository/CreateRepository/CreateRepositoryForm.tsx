@@ -456,7 +456,7 @@ export const RepositoryForm = ({
                             <FormGroup label={t('Image name')} isRequired>
                               <TextField
                                 name={`ociConfig.baseImages.${index}.imageName`}
-                                aria-label={t('Artifact URI')}
+                                aria-label={t('Image name')}
                                 isRequired
                               />
                             </FormGroup>
