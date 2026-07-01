@@ -12,6 +12,7 @@ This file orients AI tools to the flightctl-ui repo layout and conventions. The 
 | **libs/ui-components** | Shared UI components.                                                  |
 | **libs/i18n**          | Internationalization; contains generated translation file.             |
 | **libs/cypress**       | E2E tests.                                                             |
+| **proxy/**             | Go backend proxy (auth, CORS, API bridging) between the UI and the Flight Control API. |
 
 ## Generated files – do not edit by hand
 
@@ -33,5 +34,7 @@ testing conventions, see [UI-ARCHITECTURE.md](UI-ARCHITECTURE.md).
 - **Develop (standalone):** `npm run dev` (or `npm run dev:kind` for kind backend)
 - **Build:** `npm run build`
 - **Lint:** `npm run lint` (includes ESLint, Prettier, and i18n check)
+- **Format:** `npm run format` (auto-fix Prettier violations)
+- **Proxy (Go):** `cd proxy && go build ./...` to build; `cd proxy && go test ./...` to test
 
 Before committing, run `npm run lint`. After API or copy changes, run `npm run gen-types` or `npm run i18n` as needed and commit the generated updates.

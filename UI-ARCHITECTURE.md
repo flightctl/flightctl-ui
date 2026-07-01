@@ -14,11 +14,15 @@ first. Avoid the round-trip.
 | `Form` from `@patternfly/react-core`                        | `FlightCtlForm` from `components/form/FlightCtlForm`             |
 | `WizardFooterWrapper` / `WizardFooter` from `@patternfly/…` | `FlightCtlWizardFooter` from `components/common/…`               |
 | `Drawer` / `DrawerPanelContent` from `@patternfly/…`        | `FlightCtlPageDrawer` from `components/common/…`                 |
+| `Modal` from `@patternfly/react-core`                       | `FlightCtlModal` from `components/common/FlightCtlModal`         |
 | `useTranslation` from `react-i18next`                       | `useTranslation` from `@flightctl/ui-components/hooks/…`         |
 | `@patternfly/react-icons` (barrel import)                   | `@patternfly/react-icons/dist/js/icons/<icon-name>`              |
 | `@patternfly/react-tokens` (barrel import)                  | `@patternfly/react-tokens/dist/js/<token-name>`                  |
 | `lodash` (barrel import)                                    | `lodash/<function>` (e.g. `lodash/debounce`)                     |
-| `useNavigate` / `Link` from `react-router-dom`              | `useNavigate` / `Link` from `@flightctl/ui-components/hooks/…`   |
+
+Additionally, always use `useNavigate` and `Link` from
+`@flightctl/ui-components/hooks/useNavigate` — never from `react-router-dom`
+directly. This is a project convention (not ESLint-enforced).
 
 ## Component Architecture
 
