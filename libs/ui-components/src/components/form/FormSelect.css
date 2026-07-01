@@ -7,6 +7,19 @@
   overflow: auto;
 }
 
+.fctl-form-select__menu .pf-v6-c-menu__item-main {
+  position: relative;
+  padding-inline-end: calc(var(--pf-t--global--icon--size--md) + var(--pf-v6-c-menu__item-main--ColumnGap));
+}
+
+/* Render the select checkmark with absolute position so it doesn't affect the alignment of the content */
+.fctl-form-select__menu .pf-v6-c-menu__item-select-icon {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .fctl-form-select {
   max-width: 30rem;
 }
