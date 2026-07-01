@@ -12,6 +12,7 @@ type CreateRepositoryModalProps = {
   onSuccess: (repository: Repository) => void;
   options?: {
     writeAccessOnly?: boolean;
+    enforcedRepoTypeMessage?: string;
   };
 };
 
@@ -27,6 +28,7 @@ const CreateRepositoryModal = ({ type, onClose, onSuccess, options }: CreateRepo
           options={{
             canUseResourceSyncs: false,
             allowedRepoTypes: [type],
+            enforcedRepoTypeMessage: options?.enforcedRepoTypeMessage,
             writeAccessOnly: options?.writeAccessOnly,
           }}
         />

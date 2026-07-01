@@ -74,6 +74,7 @@ const OutputImageStep = () => {
           isRequired
           options={{
             writeAccessOnly: true,
+            enforcedRepoTypeMessage: t('Only OCI registries can be used for image builds.'),
           }}
           validateRepoSelection={writableRepoValidation}
           helperText={t(
