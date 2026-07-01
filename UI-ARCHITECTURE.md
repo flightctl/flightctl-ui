@@ -47,6 +47,7 @@ Two page layouts exist. Always use these — never compose raw PatternFly
   </ListPageBody>
 </ListPage>
 ```
+
 Reference: `components/Fleet/FleetsPage.tsx`
 
 **Details page** — `DetailsPage` with `TabsNav` + nested `Routes`:
@@ -69,6 +70,7 @@ Reference: `components/Fleet/FleetsPage.tsx`
   </Routes>
 </DetailsPage>
 ```
+
 Reference: `components/Fleet/FleetDetails/FleetDetailsPage.tsx`
 
 ### Form Fields
@@ -159,6 +161,7 @@ export const useFleets = (args: FleetsEndpointArgs): FleetLoad => {
 // Component consumes the domain hook
 const { fleets, isLoading, error, pagination } = useFleets({ addDevicesSummary: true });
 ```
+
 Reference: `components/Fleet/useFleets.ts`, `components/Device/DevicesPage/useDevices.ts`
 
 ### Mutations
@@ -187,6 +190,7 @@ const name = searchParams.get('name') || undefined;
 // Updating params triggers endpoint rebuild and automatic refetch
 setSearchParams(new URLSearchParams({ name: newValue }));
 ```
+
 Reference: `components/Fleet/useFleets.ts` (`useFleetBackendFilters`)
 
 ### Pagination
@@ -249,6 +253,7 @@ Wizards compose three layers: **Formik** (form state + validation),
   }}
 </Formik>
 ```
+
 Reference: `components/Fleet/CreateFleet/CreateFleetWizard.tsx`
 
 ### Step Validation Contract
