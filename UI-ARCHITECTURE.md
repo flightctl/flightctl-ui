@@ -4,6 +4,9 @@ Architectural patterns and constraints that AI agents cannot reliably infer
 from reading the source code. Supplements AGENTS.md. When uncertain about a
 pattern, imitate the reference implementation cited — not this prose.
 
+All `components/` paths in this document are relative to
+`libs/ui-components/src/` unless stated otherwise.
+
 ## Restricted Patterns (Enforced by ESLint)
 
 These are caught by `no-restricted-imports` but agents write the wrong code
@@ -148,7 +151,7 @@ export const useFleets = (args: FleetsEndpointArgs): FleetLoad => {
     ...args,
     nextContinue: pagination.nextContinue,
   });
-  const [data, isLoading, error, refetch, updating] = useFetchPeriodically<FleetList>(
+  const [data, isLoading, error, refetch, isUpdating] = useFetchPeriodically<FleetList>(
     { endpoint },
     pagination.onPageFetched,
   );
@@ -156,7 +159,7 @@ export const useFleets = (args: FleetsEndpointArgs): FleetLoad => {
     fleets: data?.items || [],
     isLoading,
     error,
-    isUpdating: updating || debouncing,
+    isUpdating: isUpdating || debouncing,
     refetch,
     pagination,
   };
@@ -208,7 +211,7 @@ const pagination = useTablePagination<FleetList>();
 // Render: <TablePagination pagination={pagination} />
 ```
 
-Page size: `PAGE_SIZE` (50) from `constants.ts`.
+Page size: `PAGE_SIZE` (15) from `constants.ts`.
 
 ### Navigation
 
@@ -298,6 +301,9 @@ constraints:
   `t()` and passes the result: `<ListPage title={t('Fleets')}>`.
 - **Keys are flat** — `keySeparator: false` in the parser config. No dot
   notation nesting.
+- **Colons in translation text** require `nsSeparator` override — i18next
+  treats `:` as a namespace separator by default:
+  `t('e.g. https://example.com', { nsSeparator: '|' })`.
 - **`npm run i18n` is part of `npm run lint`** — if you add or change a
   translation key in source, lint will fail until you run `npm run i18n` and
   commit the updated `translation.json`.
@@ -318,6 +324,18 @@ const [canList, canCreate] = checkPermissions([
 ```
 
 `checkPermissions` takes an array and returns a parallel boolean array.
+
+### Permission Conventions
+
+- **No raw 403s** — users should never see an action they lack permission
+  for. Use `checkPermissions` to hide or disable the action before it can
+  be triggered.
+- **Disabled, not hidden, with tooltip** — when a user has permission but
+  the action is disabled for another reason, show the button as disabled
+  with a tooltip explaining why.
+- **New APIs need new constants** — when adding API endpoints, add the
+  corresponding entries to the `RESOURCE` and `VERB` enums in
+  `types/rbac.ts`.
 
 ### Page-Level Protection
 
