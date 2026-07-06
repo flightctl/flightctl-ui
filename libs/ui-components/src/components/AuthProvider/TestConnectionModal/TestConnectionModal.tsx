@@ -7,13 +7,13 @@ import {
   Icon,
   List,
   ListItem,
+  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
@@ -73,7 +73,7 @@ const TestConnectionModal = ({ onClose, results }: TestConnectionModalProps) => 
   const hasValid = results.some((validation) => validation.valid);
 
   return (
-    <FlightCtlModal isOpen onClose={onClose} variant="medium">
+    <Modal isOpen onClose={onClose} variant="medium">
       <ModalHeader title={t('Test connection results')} />
       <ModalBody>
         <Stack hasGutter>
@@ -130,7 +130,7 @@ const TestConnectionModal = ({ onClose, results }: TestConnectionModalProps) => 
           {t('Close')}
         </Button>
       </ModalFooter>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

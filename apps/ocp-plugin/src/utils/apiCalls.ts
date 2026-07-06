@@ -43,7 +43,7 @@ const apiServer = `${window.location.hostname}${
   window.FCTL_API_PORT ? `:${window.FCTL_API_PORT}` : ''
 }/api/proxy/plugin/flightctl-plugin/api-proxy`;
 
-export const uiProxy = `${window.location.protocol}//${apiServer}`;
+const uiProxy = `${window.location.protocol}//${apiServer}`;
 export const apiProxy = `${uiProxy}/api`;
 
 const alertsAPI = `${apiProxy}/alerts`;

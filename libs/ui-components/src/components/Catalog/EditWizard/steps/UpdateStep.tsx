@@ -6,11 +6,11 @@ import {
   Grid,
   GridItem,
   Icon,
+  Modal,
   ModalBody,
   ModalHeader,
   Title,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import ArrowRightIcon from '@patternfly/react-icons/dist/js/icons/arrow-right-icon';
 import * as React from 'react';
 import { FormikErrors, useFormikContext } from 'formik';
@@ -157,14 +157,14 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit }: UpdateStepProps) =>
         </Grid>
       </FlightCtlForm>
       {showReadme && updateVersion?.readme && (
-        <FlightCtlModal isOpen onClose={() => setShowReadme(false)} variant="medium">
+        <Modal isOpen onClose={() => setShowReadme(false)} variant="medium">
           <ModalHeader title={t('Readme')} />
           <ModalBody>
             <Content>
               <ReactMarkdown>{updateVersion.readme}</ReactMarkdown>
             </Content>
           </ModalBody>
-        </FlightCtlModal>
+        </Modal>
       )}
     </>
   ) : (

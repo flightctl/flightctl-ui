@@ -81,7 +81,7 @@ const DeviceLogsCustomDateInput = ({
           id={inputId}
           data-testid={inputId}
           aria-label={ariaLabel}
-          placeholder={t('Select a date')}
+          placeholder={t('YYYY-MM-DD')}
           value={value}
           onChange={(_event, nextValue) => onChange(nextValue)}
         />
@@ -331,6 +331,8 @@ const DeviceLogsTimeRangeField = () => {
         id="device-logs-time-range"
         selected={timeRange}
         onSelect={onTimeRangeSelected}
+        shouldFocusToggleOnSelect={false}
+        shouldFocusFirstItemOnOpen={false}
         isOpen={isOpen}
         onOpenChange={(open) => {
           if (open) {

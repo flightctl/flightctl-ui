@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { Stack, StackItem } from '@patternfly/react-core';
 import { TFunction } from 'react-i18next';
-import { SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
-import { PendingIcon } from '@patternfly/react-icons/dist/js/icons/pending-icon';
 
 import {
   ImageBuildCondition,
@@ -31,14 +29,7 @@ type ImageExportStatusProps = {
 type LevelAndLabel = {
   level: StatusLevel;
   label: string;
-  customIcon?: React.ComponentClass<SVGIconProps>;
 };
-
-const getQueuedStatusInfo = (t: TFunction): LevelAndLabel => ({
-  level: 'unknown',
-  label: t('Queued'),
-  customIcon: PendingIcon,
-});
 
 const getImageBuildStatusInfo = (condition: ImageBuildCondition | undefined, t: TFunction): LevelAndLabel => {
   // Without the Ready condition, the build wouldn't be even queued for processing.
@@ -48,7 +39,7 @@ const getImageBuildStatusInfo = (condition: ImageBuildCondition | undefined, t: 
 
   switch (condition.reason) {
     case ImageBuildConditionReason.ImageBuildConditionReasonPending:
-      return getQueuedStatusInfo(t);
+      return { level: 'unknown', label: t('Queued') };
     case ImageBuildConditionReason.ImageBuildConditionReasonBuilding:
       return { level: 'info', label: t('Building') };
     case ImageBuildConditionReason.ImageBuildConditionReasonPushing:
@@ -73,7 +64,7 @@ const getImageExportStatusInfo = (condition: ImageExportCondition | undefined, t
   switch (reason) {
     case ImageExportConditionReason.ImageExportConditionReasonPending:
       // ImageExports will have a "pending" state while their associated imageBuild is incomplete.
-      return getQueuedStatusInfo(t);
+      return { level: 'unknown', label: t('Queued') };
     case ImageExportConditionReason.ImageExportConditionReasonConverting:
       // Main status while the export image is being generated
       return { level: 'info', label: t('Converting') };
@@ -97,13 +88,11 @@ const ImageBuildAndExportStatus = ({
   label,
   message,
   imageReference,
-  customIcon,
 }: {
   level: StatusLevel;
   label: string;
   message: React.ReactNode | undefined;
   imageReference: string | undefined;
-  customIcon?: React.ComponentClass<SVGIconProps>;
 }) => {
   const { t } = useTranslation();
   if (imageReference) {
@@ -117,7 +106,7 @@ const ImageBuildAndExportStatus = ({
     );
   }
 
-  return <StatusDisplayContent label={label} level={level} message={message} customIcon={customIcon} />;
+  return <StatusDisplayContent label={label} level={level} message={message} />;
 };
 
 export const ImageBuildStatusDisplay = ({ buildStatus }: ImageBuildStatusProps) => {
@@ -125,7 +114,7 @@ export const ImageBuildStatusDisplay = ({ buildStatus }: ImageBuildStatusProps) 
 
   const conditions = buildStatus?.conditions || [];
   const readyCondition = conditions.find((c) => c.type === ImageBuildConditionType.ImageBuildConditionTypeReady);
-  const { level, label, customIcon } = getImageBuildStatusInfo(readyCondition, t);
+  const { level, label } = getImageBuildStatusInfo(readyCondition, t);
 
   return (
     <ImageBuildAndExportStatus
@@ -133,7 +122,6 @@ export const ImageBuildStatusDisplay = ({ buildStatus }: ImageBuildStatusProps) 
       label={label}
       message={readyCondition?.message}
       imageReference={buildStatus?.imageReference}
-      customIcon={customIcon}
     />
   );
 };
@@ -143,7 +131,7 @@ export const ImageExportStatusDisplay = ({ imageStatus, imageReference }: ImageE
 
   const conditions = imageStatus?.conditions || [];
   const readyCondition = conditions.find((c) => c.type === ImageExportConditionType.ImageExportConditionTypeReady);
-  const { level, label, customIcon } = getImageExportStatusInfo(readyCondition, t);
+  const { level, label } = getImageExportStatusInfo(readyCondition, t);
 
   return (
     <ImageBuildAndExportStatus
@@ -151,7 +139,6 @@ export const ImageExportStatusDisplay = ({ imageStatus, imageReference }: ImageE
       label={label}
       message={readyCondition?.message}
       imageReference={imageReference}
-      customIcon={customIcon}
     />
   );
 };

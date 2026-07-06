@@ -21,15 +21,11 @@ var (
 	BaseUiUrl              = getEnvUrlVar("BASE_UI_URL", "http://localhost:9000")
 	AuthInsecure           = getEnvVar("AUTH_INSECURE_SKIP_VERIFY", "")
 	OcpPlugin              = getEnvVar("IS_OCP_PLUGIN", "false")
-)
-
-var (
+	IsRHEM                 = getEnvVar("IS_RHEM", "")
 	// TrustXForwardedHeaders enables use of X-Forwarded-Proto and X-Forwarded-Host for request
 	// origin (e.g. TLS termination at an ingress). When false, only r.TLS and r.Host are used.
 	// Set to true when a trusted reverse proxy sets these headers; see also TrustedProxyNets.
 	TrustXForwardedHeaders = parseBoolEnv("TRUST_X_FORWARDED_HEADERS", false)
-	// IsRHEM enables the RHEM mode for the UI.
-	IsRHEM = parseBoolEnv("IS_RHEM", false)
 )
 
 // trustedProxyNets is parsed from TRUSTED_PROXY_CIDRS (comma-separated). When non-empty and

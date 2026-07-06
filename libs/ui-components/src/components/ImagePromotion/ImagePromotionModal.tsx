@@ -1,5 +1,4 @@
-import { Alert, Button, ModalBody, ModalFooter, ModalHeader, Spinner } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
+import { Alert, Button, Modal, ModalBody, ModalFooter, ModalHeader, Spinner } from '@patternfly/react-core';
 import { Formik } from 'formik';
 import * as React from 'react';
 
@@ -33,12 +32,12 @@ const getLatestPromotion = (promotions: ImagePromotion[]): ImagePromotion | unde
 const LoadingModal = ({ onClose }: { onClose: VoidFunction }) => {
   const { t } = useTranslation();
   return (
-    <FlightCtlModal isOpen onClose={onClose} variant="small">
+    <Modal isOpen onClose={onClose} variant="small">
       <ModalHeader title={t('Add build to catalog')} />
       <ModalBody>
         <Spinner />
       </ModalBody>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 
@@ -121,7 +120,7 @@ const ImagePromotionFormContainer = ({
       }}
     >
       {({ isValid, isSubmitting, dirty, submitForm }) => (
-        <FlightCtlModal isOpen onClose={isSubmitting ? undefined : () => onClose()} variant="small">
+        <Modal isOpen onClose={isSubmitting ? undefined : () => onClose()} variant="small">
           <ModalHeader title={isEdit ? t('Edit image promotion') : t('Add build to catalog')} />
           <ModalBody>
             <ImagePromotionForm
@@ -152,7 +151,7 @@ const ImagePromotionFormContainer = ({
               {t('Cancel')}
             </Button>
           </ModalFooter>
-        </FlightCtlModal>
+        </Modal>
       )}
     </Formik>
   );
@@ -188,14 +187,14 @@ const ImagePromotionModal = ({
 
   if (promotionsError) {
     return (
-      <FlightCtlModal isOpen onClose={() => onClose(false)} variant="small">
+      <Modal isOpen onClose={() => onClose(false)} variant="small">
         <ModalHeader title={isEdit ? t('Edit image promotion') : t('Add build to catalog')} />
         <ModalBody>
           <Alert isInline variant="danger" title={t('Failed to load Image promotions')}>
             {getErrorMessage(promotionsError)}
           </Alert>
         </ModalBody>
-      </FlightCtlModal>
+      </Modal>
     );
   }
 

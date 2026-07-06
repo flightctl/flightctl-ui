@@ -82,10 +82,10 @@ const FileForm = ({ fieldName, index, isReadOnly }: { fieldName: string; index: 
           />
         </FormGroup>
         <FormGroup label={t('User')}>
-          <TextField name={`${fieldName}.user`} placeholder={t('e.g. root')} isDisabled={isReadOnly} />
+          <TextField name={`${fieldName}.user`} placeholder="root" isDisabled={isReadOnly} />
         </FormGroup>
         <FormGroup label={t('Group')}>
-          <TextField name={`${fieldName}.group`} placeholder={t('e.g. root')} isDisabled={isReadOnly} />
+          <TextField name={`${fieldName}.group`} placeholder="root" isDisabled={isReadOnly} />
         </FormGroup>
       </Grid>
     </ExpandableFormSection>

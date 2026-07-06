@@ -126,19 +126,20 @@ const TypeConfigStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?:
                                 isDisabled={isReadOnly}
                               />
                             </FormGroup>
-                            <FormGroup label={t('OCI reference')} isRequired>
+                            <FormGroup label={t('URI')} isRequired>
                               <TextField
                                 name={`artifacts.${index}.uri`}
-                                aria-label={t('OCI reference')}
+                                aria-label={t('Artifact URI')}
                                 isRequired
                                 isDisabled={isReadOnly}
-                                placeholder={t('e.g. quay.io/org/image', { nsSeparator: '|' })}
+                                placeholder="https://example.com/image.qcow2"
                               />
                             </FormGroup>
-                            <FormGroup label={t('Display name')}>
+                            <FormGroup label={t('Name')}>
                               <TextField
                                 name={`artifacts.${index}.name`}
-                                aria-label={t('Display name')}
+                                aria-label={t('Artifact name')}
+                                helperText={t('Optional display name')}
                                 isDisabled={isReadOnly}
                               />
                             </FormGroup>

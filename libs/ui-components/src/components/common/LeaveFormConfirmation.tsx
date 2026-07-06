@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { Button, Content, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
+import { Button, Content, Modal, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core';
 
 import { Blocker, BlockerFunction } from 'react-router-dom';
 import { useFormikContext } from 'formik';
@@ -16,7 +15,7 @@ const ConfirmNavigationDialog = ({ blocker }: { blocker: Blocker }) => {
   }
 
   return (
-    <FlightCtlModal isOpen variant="small">
+    <Modal isOpen variant="small">
       <ModalHeader title={t('There are unsaved changes')} titleIconVariant="warning" />
       <ModalBody>
         <Content component="p">
@@ -43,7 +42,7 @@ const ConfirmNavigationDialog = ({ blocker }: { blocker: Blocker }) => {
           {t('Stay here')}
         </Button>
       </ModalFooter>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

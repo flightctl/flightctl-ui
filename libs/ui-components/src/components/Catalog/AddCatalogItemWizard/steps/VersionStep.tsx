@@ -62,7 +62,7 @@ const VersionEntry = ({
           <TextField
             name={`${prefix}.replaces`}
             aria-label={t('Replaces')}
-            placeholder={t('e.g. 1.0.0')}
+            placeholder="1.0.0"
             isDisabled={isReadOnly}
             helperText={t('Single version this one replaces, defining the primary upgrade edge')}
           />
@@ -71,7 +71,7 @@ const VersionEntry = ({
           <TextField
             name={`${prefix}.skips`}
             aria-label={t('Skips')}
-            placeholder={t('e.g. 1.0.1, 1.0.2')}
+            placeholder="1.0.1, 1.0.2"
             isDisabled={isReadOnly}
             helperText={t('Comma-separated versions that can upgrade directly to this one')}
           />
@@ -80,7 +80,7 @@ const VersionEntry = ({
           <TextField
             name={`${prefix}.skipRange`}
             aria-label={t('Skip range')}
-            placeholder={t('e.g. >=1.0.0 <1.5.0')}
+            placeholder=">=1.0.0 <1.5.0"
             isDisabled={isReadOnly}
             helperText={t('Semver range of versions that can upgrade directly to this one')}
           />

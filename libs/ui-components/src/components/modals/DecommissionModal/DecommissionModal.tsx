@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Formik } from 'formik';
-import { Alert, Button, ModalBody, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
+import { Alert, Button, Modal, ModalBody, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
 
 import { DeviceDecommissionTargetType } from '@flightctl/types';
 
@@ -31,7 +30,7 @@ const DecommissionModal = ({ onDecommission, onClose }: DecommissionModalProps) 
   }, []);
 
   return (
-    <FlightCtlModal isOpen onClose={onClose} variant="small">
+    <Modal isOpen onClose={onClose} variant="small">
       <ModalHeader title={t('Decommission device?')} titleIconVariant="warning" />
       <ModalBody>
         <Formik<DecommissionFormValues>
@@ -92,7 +91,7 @@ const DecommissionModal = ({ onDecommission, onClose }: DecommissionModalProps) 
           }}
         </Formik>
       </ModalBody>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

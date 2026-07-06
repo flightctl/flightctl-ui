@@ -2,12 +2,9 @@ import * as React from 'react';
 import { useField, useFormikContext } from 'formik';
 import {
   Button,
-  Content,
-  ContentVariants,
-  Divider,
+  Flex,
+  FlexItem,
   FormGroup,
-  Grid,
-  GridItem,
   Icon,
   MenuFooter,
   SelectList,
@@ -33,6 +30,8 @@ export const getRepositoryItems = (
   repositories: Repository[],
   repoType: RepoSpecType,
   selectedRepoName?: string,
+  // Returns an error message if the repository cannot be selected
+  validateRepoSelection?: (repo: Repository) => string | undefined,
 ) => {
   const invalidRepoItems: Record<string, SelectItem> = {};
   const validRepoItems: Record<string, SelectItem> = {};
@@ -42,40 +41,50 @@ export const getRepositoryItems = (
       return repo.spec.type === repoType;
     })
     .forEach((repo) => {
+      const selectionError = validateRepoSelection ? validateRepoSelection(repo) : undefined;
       const repoName = repo.metadata.name as string;
-      const accessibleCondition = repo.status?.conditions?.find((c) => c.type === ConditionType.RepositoryAccessible);
-      const isAccessible = accessibleCondition && accessibleCondition.status === ConditionStatus.ConditionStatusTrue;
-      const isInaccessible = accessibleCondition && accessibleCondition.status === ConditionStatus.ConditionStatusFalse;
-      const urlOrRegistry = getRepoUrlOrRegistry(repo.spec);
+      if (selectionError) {
+        invalidRepoItems[repoName] = {
+          label: repoName,
+          description: (
+            <Stack>
+              <StackItem>{getRepoUrlOrRegistry(repo.spec)}</StackItem>
+              <StackItem>{selectionError}</StackItem>
+            </Stack>
+          ),
+        };
+      } else {
+        const accessibleCondition = repo.status?.conditions?.find((c) => c.type === ConditionType.RepositoryAccessible);
+        const isAccessible = accessibleCondition && accessibleCondition.status === ConditionStatus.ConditionStatusTrue;
+        const isInaccessible =
+          accessibleCondition && accessibleCondition.status === ConditionStatus.ConditionStatusFalse;
+        const urlOrRegistry = getRepoUrlOrRegistry(repo.spec);
 
-      let accessText = t('Unknown');
-      let level: StatusLevel = 'unknown';
-      if (isAccessible) {
-        accessText = t('Available');
-        level = 'success';
-      } else if (isInaccessible) {
-        accessText = t('Not available');
-        level = 'danger';
+        let accessText = t('Unknown');
+        let level: StatusLevel = 'unknown';
+        if (isAccessible) {
+          accessText = t('Accessible');
+          level = 'success';
+        } else if (isInaccessible) {
+          accessText = t('Not accessible');
+          level = 'danger';
+        }
+
+        validRepoItems[repoName] = {
+          label: repoName,
+          description: (
+            <Flex
+              justifyContent={{ default: 'justifyContentSpaceBetween' }}
+              alignItems={{ default: 'alignItemsCenter' }}
+            >
+              <FlexItem>{urlOrRegistry}</FlexItem>
+              <FlexItem>
+                <StatusDisplayContent label={accessText} level={level} />
+              </FlexItem>
+            </Flex>
+          ),
+        };
       }
-
-      validRepoItems[repoName] = {
-        label: (
-          <Grid hasGutter style={{ alignItems: 'center' }}>
-            <GridItem span={8}>
-              <Stack>
-                <StackItem>{repoName}</StackItem>
-                <StackItem>
-                  <Content component={ContentVariants.small}>{urlOrRegistry}</Content>
-                </StackItem>
-              </Stack>
-            </GridItem>
-            <GridItem span={4}>
-              <StatusDisplayContent label={accessText} level={level} />
-            </GridItem>
-          </Grid>
-        ),
-        selectedLabel: repoName,
-      };
     });
 
   // If the selected repository has been removed, we still consider it "valid" since it needs to be selected initially
@@ -83,18 +92,15 @@ export const getRepositoryItems = (
     selectedRepoName && !repositories.some((repo) => repo.metadata.name === selectedRepoName);
   if (isSelectedRepoMissing && !validRepoItems[selectedRepoName]) {
     validRepoItems[selectedRepoName] = {
-      label: (
-        <Stack>
-          <StackItem>{selectedRepoName}</StackItem>
-          <StackItem>
-            <Icon size="sm" status="danger">
-              <ExclamationCircleIcon />
-            </Icon>{' '}
-            {t('Missing repository')}
-          </StackItem>
-        </Stack>
+      label: selectedRepoName,
+      description: (
+        <>
+          <Icon size="sm" status="danger">
+            <ExclamationCircleIcon />
+          </Icon>{' '}
+          {t('Missing repository')}
+        </>
       ),
-      selectedLabel: selectedRepoName,
     };
   }
 
@@ -114,6 +120,7 @@ type RepositorySelectProps = {
     writeAccessOnly?: boolean;
   };
   isRequired?: boolean;
+  validateRepoSelection?: (repo: Repository) => string | undefined;
 };
 
 const ReadOnlyRepositoryListItem = ({ invalidRepoItems }: { invalidRepoItems: Record<string, SelectItem> }) => {
@@ -126,7 +133,7 @@ const ReadOnlyRepositoryListItem = ({ invalidRepoItems }: { invalidRepoItems: Re
       {itemKeys.map((key) => {
         const item = invalidRepoItems[key];
         return (
-          <SelectOption key={key} value={key} isDisabled>
+          <SelectOption key={key} value={key} description={item.description} isDisabled>
             {item.label}
           </SelectOption>
         );
@@ -146,20 +153,30 @@ const RepositorySelect = ({
   helperText,
   options,
   isRequired,
+  validateRepoSelection,
 }: RepositorySelectProps) => {
   const { t } = useTranslation();
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, setFieldError } = useFormikContext();
   const [field] = useField<string>(name);
   const [createRepoModalOpen, setCreateRepoModalOpen] = React.useState(false);
 
   const { validRepoItems, invalidRepoItems } = React.useMemo(() => {
-    return getRepositoryItems(t, repositories, repoType, field.value);
-  }, [t, repositories, repoType, field.value]);
+    return getRepositoryItems(t, repositories, repoType, field.value, validateRepoSelection);
+  }, [t, repositories, repoType, field.value, validateRepoSelection]);
 
   const handleCreateRepository = (repo: Repository) => {
     setCreateRepoModalOpen(false);
     if (repoRefetch) {
       repoRefetch();
+    }
+
+    // If the created repository cannot be selected, we set the error and skip marking the repository as selected
+    if (validateRepoSelection) {
+      const selectionError = validateRepoSelection(repo);
+      if (selectionError) {
+        setFieldError(name, selectionError);
+        return;
+      }
     }
 
     void setFieldValue(name, repo.metadata.name, true);
@@ -178,22 +195,19 @@ const RepositorySelect = ({
           <ReadOnlyRepositoryListItem invalidRepoItems={invalidRepoItems} />
 
           {canCreateRepo && (
-            <>
-              <Divider />
-              <MenuFooter>
-                <Button
-                  variant="link"
-                  isInline
-                  icon={<PlusCircleIcon />}
-                  onClick={() => {
-                    setCreateRepoModalOpen(true);
-                  }}
-                  isDisabled={isReadOnly}
-                >
-                  {t('Create repository')}
-                </Button>
-              </MenuFooter>
-            </>
+            <MenuFooter>
+              <Button
+                variant="link"
+                isInline
+                icon={<PlusCircleIcon />}
+                onClick={() => {
+                  setCreateRepoModalOpen(true);
+                }}
+                isDisabled={isReadOnly}
+              >
+                {t('Create repository')}
+              </Button>
+            </MenuFooter>
           )}
         </FormSelect>
 

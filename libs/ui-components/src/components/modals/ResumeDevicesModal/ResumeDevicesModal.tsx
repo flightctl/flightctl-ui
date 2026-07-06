@@ -1,6 +1,15 @@
 import * as React from 'react';
-import { Alert, Button, Content, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
+import {
+  Alert,
+  Button,
+  Content,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Stack,
+  StackItem,
+} from '@patternfly/react-core';
 
 import { DeviceResumeRequest, DeviceResumeResponse } from '@flightctl/types';
 
@@ -44,7 +53,7 @@ const ResumeDevicesModal = ({ mode, title, selector, expectedCount, onClose }: R
   };
 
   return (
-    <FlightCtlModal isOpen onClose={() => onClose(hasResumed)} variant="small">
+    <Modal isOpen onClose={() => onClose(hasResumed)} variant="small">
       <ModalHeader title={t('Resume devices?', { count: pluralCount })} />
       <ModalBody>
         <Stack hasGutter>
@@ -103,7 +112,7 @@ const ResumeDevicesModal = ({ mode, title, selector, expectedCount, onClose }: R
           {hasResumed ? t('Close') : t('Cancel')}
         </Button>
       </ModalFooter>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

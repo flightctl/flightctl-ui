@@ -5,13 +5,13 @@ import {
   FormGroup,
   MenuToggle,
   MenuToggleElement,
+  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
   Select,
   SelectOption,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { Theme } from '../../hooks/useThemePreferences';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -36,7 +36,7 @@ const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) 
 
   const [themeExpanded, setThemeExpanded] = React.useState(false);
   return (
-    <FlightCtlModal isOpen variant="small" onClose={onClose}>
+    <Modal isOpen variant="small" onClose={onClose}>
       <ModalHeader title={t('User preferences')} />
       <ModalBody>
         <FlightCtlForm>
@@ -75,7 +75,7 @@ const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({ onClose }) 
           {t('Close')}
         </Button>
       </ModalFooter>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

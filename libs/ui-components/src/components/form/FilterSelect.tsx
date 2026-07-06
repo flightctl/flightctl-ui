@@ -44,6 +44,7 @@ const FilterSelect = ({ placeholder, selectedFilters, isFilterUpdating, children
       aria-label={placeholder}
       role="menu"
       shouldFocusToggleOnSelect
+      shouldFocusFirstItemOnOpen
       toggle={(toggleRef) => (
         <MenuToggle
           ref={toggleRef}
@@ -58,7 +59,9 @@ const FilterSelect = ({ placeholder, selectedFilters, isFilterUpdating, children
           }
         >
           <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-            <FlexItem className="fctl-filter-select__placeholder">{placeholder}</FlexItem>
+            <FlexItem>
+              <span>{placeholder}</span>
+            </FlexItem>
             <FlexItem className="fctl-toggle-content">
               {!!selectedFilters && (
                 <TextInputGroupUtilities onClick={toggleExpand}>

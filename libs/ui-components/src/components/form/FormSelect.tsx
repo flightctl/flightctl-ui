@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import {
   Button,
-  Divider,
   FormGroup,
   MenuFooter,
   MenuToggle,
@@ -99,6 +98,7 @@ const FormSelect = ({
           setIsOpen(false);
         }}
         shouldFocusToggleOnSelect
+        shouldFocusFirstItemOnOpen
         toggle={(toggleRef) => (
           <MenuToggle
             status={statusToggle}
@@ -144,22 +144,19 @@ const FormSelect = ({
         )}
         {children}
         {addAction && (
-          <>
-            <Divider />
-            <MenuFooter>
-              <Button
-                variant="link"
-                isInline
-                icon={<PlusCircleIcon />}
-                onClick={() => {
-                  setIsOpen(false);
-                  addAction.onAdd();
-                }}
-              >
-                {addAction.label}
-              </Button>
-            </MenuFooter>
-          </>
+          <MenuFooter>
+            <Button
+              variant="link"
+              isInline
+              icon={<PlusCircleIcon />}
+              onClick={() => {
+                setIsOpen(false);
+                addAction.onAdd();
+              }}
+            >
+              {addAction.label}
+            </Button>
+          </MenuFooter>
         )}
       </Select>
 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DropdownItem, Tab } from '@patternfly/react-core';
+import { DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
 
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';
@@ -21,7 +21,6 @@ import ImageBuildLogsTab from './ImageBuildLogsTab';
 import CancelImageBuildModal from '../CancelImageBuildModal/CancelImageBuildModal';
 import ImagePromotionModal from '../../ImagePromotion/ImagePromotionModal';
 import { ImagePromotionsContextProvider, useImagePromotionsContext } from '../ImagePromotionsContext';
-import ActionsDropdownList from '../../common/ActionsDropdownList';
 
 const imageBuildDetailsPermissions = [
   { kind: RESOURCE.IMAGE_BUILD_CANCEL, verb: VERB.CREATE },
@@ -75,32 +74,22 @@ const ImageBuildDetailsPageContent = () => {
       actions={
         (canPromote || canNewVersion || canDelete || canCancel) && (
           <DetailsPageActions>
-            <ActionsDropdownList>
+            <DropdownList>
               {canNewVersion && (
-                <ActionsDropdownList.Item>
-                  <DropdownItem
-                    onClick={() => navigate({ route: ROUTE.IMAGE_BUILD_NEW_VERSION, postfix: imageBuildId })}
-                  >
-                    {t('Rebuild')}
-                  </DropdownItem>
-                </ActionsDropdownList.Item>
+                <DropdownItem onClick={() => navigate({ route: ROUTE.IMAGE_BUILD_NEW_VERSION, postfix: imageBuildId })}>
+                  {t('Rebuild')}
+                </DropdownItem>
               )}
               {canPromote && (
-                <ActionsDropdownList.Item>
-                  <DropdownItem onClick={() => setIsImagePromotionOpen(true)}>{t('Add to catalog')}</DropdownItem>
-                </ActionsDropdownList.Item>
+                <DropdownItem onClick={() => setIsImagePromotionOpen(true)}>{t('Add to catalog')}</DropdownItem>
               )}
               {canCancel && (
-                <ActionsDropdownList.Item isDanger>
-                  <DropdownItem onClick={() => setIsCancelModalOpen(true)}>{t('Cancel image build')}</DropdownItem>
-                </ActionsDropdownList.Item>
+                <DropdownItem onClick={() => setIsCancelModalOpen(true)}>{t('Cancel image build')}</DropdownItem>
               )}
               {canDelete && !canCancel && (
-                <ActionsDropdownList.Item isDanger>
-                  <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete image build')}</DropdownItem>
-                </ActionsDropdownList.Item>
+                <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete image build')}</DropdownItem>
               )}
-            </ActionsDropdownList>
+            </DropdownList>
           </DetailsPageActions>
         )
       }

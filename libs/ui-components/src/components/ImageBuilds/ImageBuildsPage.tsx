@@ -229,12 +229,7 @@ const ImageBuildsPage = () => {
   const { t } = useTranslation();
 
   return (
-    <ListPage
-      title={t('Image builds')}
-      description={t(
-        'Build and manage OS images for your edge devices. Track build status, export formats, and version history.',
-      )}
-    >
+    <ListPage title={t('Image builds')}>
       <ImageBuildTable />
     </ListPage>
   );

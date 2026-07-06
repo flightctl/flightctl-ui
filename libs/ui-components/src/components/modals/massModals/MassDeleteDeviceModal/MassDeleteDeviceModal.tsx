@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Alert,
   Button,
+  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -10,7 +11,6 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
@@ -58,7 +58,7 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
   };
 
   return (
-    <FlightCtlModal isOpen onClose={isDeleting ? undefined : onClose} variant="medium">
+    <Modal isOpen onClose={isDeleting ? undefined : onClose} variant="medium">
       <ModalHeader title={t('Delete devices ?')} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
@@ -126,7 +126,7 @@ const MassDeleteDeviceModal: React.FC<MassDeleteDeviceModalProps> = ({ onClose, 
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

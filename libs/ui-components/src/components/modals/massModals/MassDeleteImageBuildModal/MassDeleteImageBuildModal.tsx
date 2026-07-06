@@ -3,6 +3,7 @@ import {
   Alert,
   Button,
   Content,
+  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -11,7 +12,6 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
@@ -91,7 +91,7 @@ const MassDeleteImageBuildModal = ({ onClose, imageBuilds, onDeleteSuccess }: Ma
   };
 
   return (
-    <FlightCtlModal isOpen onClose={isDeleting ? undefined : onClose} variant="medium">
+    <Modal isOpen onClose={isDeleting ? undefined : onClose} variant="medium">
       <ModalHeader title={t('Delete image builds?')} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
@@ -149,7 +149,7 @@ const MassDeleteImageBuildModal = ({ onClose, imageBuilds, onDeleteSuccess }: Ma
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

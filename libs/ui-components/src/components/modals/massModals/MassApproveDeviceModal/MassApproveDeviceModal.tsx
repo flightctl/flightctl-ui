@@ -4,6 +4,7 @@ import {
   Alert,
   Button,
   FormGroup,
+  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -12,7 +13,6 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { Formik } from 'formik';
@@ -93,7 +93,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({
       onSubmit={approveEnrollments}
     >
       {({ isSubmitting, values, submitForm, isValid }) => (
-        <FlightCtlModal isOpen onClose={isSubmitting ? undefined : onClose} variant="medium">
+        <Modal isOpen onClose={isSubmitting ? undefined : onClose} variant="medium">
           <ModalHeader title={t('Approve pending devices')} />
           <ModalBody>
             <Stack hasGutter>
@@ -131,7 +131,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({
                     <TextField
                       name="deviceAlias"
                       aria-label={t('Alias')}
-                      placeholder={t('e.g. device-{{n}}')}
+                      placeholder="device-{{n}}"
                       helperText={
                         <>
                           {t('Alias devices using a custom template. Add a number using')}
@@ -182,7 +182,7 @@ const MassApproveDeviceModal: React.FC<MassApproveDeviceModalProps> = ({
               {t('Cancel')}
             </Button>
           </ModalFooter>
-        </FlightCtlModal>
+        </Modal>
       )}
     </Formik>
   );

@@ -177,7 +177,7 @@ const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isRead
               <TextInput
                 aria-label={t('Host port')}
                 value={hostPort}
-                placeholder={t('Enter host port')}
+                placeholder={t('Host port')}
                 onChange={(_, value) => {
                   setHostPort(value);
                   setHostPortTouched(true);
@@ -193,7 +193,7 @@ const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isRead
               <TextInput
                 aria-label={t('Container port')}
                 value={containerPort}
-                placeholder={t('Enter container port')}
+                placeholder={t('Container port')}
                 onChange={(_, value) => {
                   setContainerPort(value);
                   setContainerPortTouched(true);

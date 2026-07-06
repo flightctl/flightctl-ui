@@ -1,6 +1,15 @@
 import * as React from 'react';
-import { Alert, Button, Content, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
+import {
+  Alert,
+  Button,
+  Content,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Stack,
+  StackItem,
+} from '@patternfly/react-core';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
@@ -20,7 +29,7 @@ const DeleteImageBuildModal = ({
   const [isDeleting, setIsDeleting] = React.useState<boolean>();
 
   return (
-    <FlightCtlModal
+    <Modal
       isOpen
       onClose={() => {
         onClose();
@@ -79,7 +88,7 @@ const DeleteImageBuildModal = ({
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

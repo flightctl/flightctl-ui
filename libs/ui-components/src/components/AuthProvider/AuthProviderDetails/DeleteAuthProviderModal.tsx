@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Alert,
   Button,
+  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -10,7 +11,6 @@ import {
   StackItem,
   TextInput,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import { Trans } from 'react-i18next';
 
 import { useFetch } from '../../../hooks/useFetch';
@@ -44,7 +44,7 @@ const DeleteAuthProviderModal = ({ authProviderId, onClose, onDeleteSuccess }: D
   };
 
   return (
-    <FlightCtlModal variant={ModalVariant.medium} isOpen onClose={onClose}>
+    <Modal variant={ModalVariant.medium} isOpen onClose={onClose}>
       <ModalHeader title={t('Delete authentication provider?')} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
@@ -79,7 +79,7 @@ const DeleteAuthProviderModal = ({ authProviderId, onClose, onDeleteSuccess }: D
           <TextInput
             value={confirmationText}
             onChange={(_event, value) => setConfirmationText(value)}
-            placeholder={t('Type "{{ authProviderId }}" to confirm', { authProviderId })}
+            placeholder={`Type "${authProviderId}" to confirm`}
             aria-label={t('Confirmation text')}
           />
         </Stack>
@@ -98,7 +98,7 @@ const DeleteAuthProviderModal = ({ authProviderId, onClose, onDeleteSuccess }: D
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

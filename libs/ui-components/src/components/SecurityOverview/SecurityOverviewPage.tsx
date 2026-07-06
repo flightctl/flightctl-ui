@@ -40,12 +40,7 @@ const SecurityOverviewPageContent = () => {
   }
 
   return (
-    <ListPage
-      title={t('Security overview')}
-      description={t(
-        'Monitor security findings across your edge environment. Review vulnerabilities to identify affected devices and images.',
-      )}
-    >
+    <ListPage title={t('Security overview')}>
       <Breadcrumb>
         <BreadcrumbItem>
           <Link to={ROUTE.ROOT}>{t('Overview')}</Link>

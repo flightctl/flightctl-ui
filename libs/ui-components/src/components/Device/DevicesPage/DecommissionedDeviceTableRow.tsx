@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import { Device } from '@flightctl/types';
 import { ListAction } from '../../ListPage/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import ResourceLink from '../../common/ResourceLink';
-import { buildAllDropdownActions } from '../../common/ActionsDropdownList';
 import DeviceLifecycleStatus from '../../Status/DeviceLifecycleStatus';
 
 type DecommissionedDeviceTableRowProps = {
@@ -34,34 +33,6 @@ const DecommissionedDeviceTableRow = ({
   const deviceName = device.metadata.name as string;
   const deviceAlias = device.metadata.labels?.alias;
 
-  const regularActions: IAction[] = [
-    ...(canEdit
-      ? [
-          {
-            title: t('Edit device configurations'),
-            onClick: () => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceName }),
-            isAriaDisabled: true,
-            tooltipProps: {
-              content: t('Device already started decommissioning and cannot be edited.'),
-            },
-          },
-        ]
-      : []),
-    {
-      title: t('View device details'),
-      onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
-    },
-  ];
-  const dangerActions: IAction[] = canDelete
-    ? [
-        deleteAction({
-          resourceId: deviceName,
-          resourceName: deviceAlias,
-        }),
-      ]
-    : [];
-  const actionItems = buildAllDropdownActions(regularActions, dangerActions);
-
   return (
     <Tr data-testid={`decommissioned-device-row-${rowIndex}`}>
       <Td
@@ -83,7 +54,34 @@ const DecommissionedDeviceTableRow = ({
       </Td>
       {canDelete && (
         <Td isActionCell data-testid={`decommissioned-device-row-actions-${rowIndex}`}>
-          <ActionsColumn items={actionItems} />
+          <ActionsColumn
+            items={[
+              ...(canEdit
+                ? [
+                    {
+                      title: t('Edit device configurations'),
+                      onClick: () => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceName }),
+                      isAriaDisabled: true,
+                      tooltipProps: {
+                        content: t('Device already started decommissioning and cannot be edited.'),
+                      },
+                    },
+                  ]
+                : []),
+              {
+                title: t('View device details'),
+                onClick: () => navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceName }),
+              },
+              ...(canDelete
+                ? [
+                    deleteAction({
+                      resourceId: deviceName,
+                      resourceName: deviceAlias,
+                    }),
+                  ]
+                : []),
+            ]}
+          />
         </Td>
       )}
     </Tr>

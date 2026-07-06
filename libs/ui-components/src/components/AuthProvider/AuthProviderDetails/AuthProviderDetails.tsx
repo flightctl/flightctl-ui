@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DropdownItem, Tab } from '@patternfly/react-core';
+import { DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
 
 import { AuthProvider } from '@flightctl/types';
 
@@ -17,7 +17,6 @@ import { usePermissionsContext } from '../../common/PermissionsContext';
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
 import { ProviderType } from '../../../types/extraTypes';
 import TabsNav from '../../TabsNav/TabsNav';
-import ActionsDropdownList from '../../common/ActionsDropdownList';
 
 const authProviderDetailsPermissions = [
   { kind: RESOURCE.AUTH_PROVIDER, verb: VERB.DELETE },
@@ -57,30 +56,26 @@ const AuthProviderDetails = () => {
       actions={
         (canDelete || canEdit) && (
           <DetailsPageActions>
-            <ActionsDropdownList>
+            <DropdownList>
               {canEdit && (
-                <ActionsDropdownList.Item>
-                  <DropdownItem
-                    onClick={() => navigate({ route: ROUTE.AUTH_PROVIDER_EDIT, postfix: authProviderId })}
-                    isAriaDisabled={isOAuth2}
-                    tooltipProps={
-                      isOAuth2
-                        ? { content: <span>{t('OAuth2 providers can only be edited via the YAML editor')}</span> }
-                        : undefined
-                    }
-                  >
-                    {t('Edit authentication provider')}
-                  </DropdownItem>
-                </ActionsDropdownList.Item>
+                <DropdownItem
+                  onClick={() => navigate({ route: ROUTE.AUTH_PROVIDER_EDIT, postfix: authProviderId })}
+                  isAriaDisabled={isOAuth2}
+                  tooltipProps={
+                    isOAuth2
+                      ? { content: <span>{t('OAuth2 providers can only be edited via the YAML editor')}</span> }
+                      : undefined
+                  }
+                >
+                  {t('Edit authentication provider')}
+                </DropdownItem>
               )}
               {canDelete && (
-                <ActionsDropdownList.Item isDanger>
-                  <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>
-                    {t('Delete authentication provider')}
-                  </DropdownItem>
-                </ActionsDropdownList.Item>
+                <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>
+                  {t('Delete authentication provider')}
+                </DropdownItem>
               )}
-            </ActionsDropdownList>
+            </DropdownList>
           </DetailsPageActions>
         )
       }

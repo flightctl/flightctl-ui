@@ -16,6 +16,7 @@ import {
   MenuContent,
   MenuItem,
   MenuList,
+  Modal,
   ModalBody,
   ModalHeader,
   PageSection,
@@ -23,7 +24,6 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { type OrganizationItem, useOrganizationGuardContext } from './OrganizationGuard';
@@ -243,12 +243,12 @@ const OrganizationSelector = ({ onClose, isFirstLogin = true }: OrganizationSele
   return isFirstLogin ? (
     <OrganizationSelectorCustomModal {...commonProps} />
   ) : (
-    <FlightCtlModal variant="medium" isOpen onClose={() => onClose?.(false)}>
+    <Modal variant="medium" isOpen onClose={() => onClose?.(false)}>
       <ModalHeader title={t('Select Organization')} />
       <ModalBody>
         <OrganizationSelectorContent {...commonProps} isFirstLogin={false} />
       </ModalBody>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

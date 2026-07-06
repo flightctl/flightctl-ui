@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DropdownItem, Grid, GridItem, Tab } from '@patternfly/react-core';
+import { DropdownItem, DropdownList, Grid, GridItem, Tab } from '@patternfly/react-core';
 
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { RepoSpecType, Repository, ResourceKind } from '@flightctl/types';
@@ -18,7 +18,6 @@ import PageWithPermissions from '../../common/PageWithPermissions';
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
 import EventsCard from '../../Events/EventsCard';
 import TabsNav from '../../TabsNav/TabsNav';
-import ActionsDropdownList from '../../common/ActionsDropdownList';
 
 const repositoryDetailsPermissions = [
   { kind: RESOURCE.REPOSITORY, verb: VERB.DELETE },
@@ -57,20 +56,16 @@ const RepositoryDetails = () => {
       actions={
         (canDelete || canEdit) && (
           <DetailsPageActions>
-            <ActionsDropdownList>
+            <DropdownList>
               {canEdit && (
-                <ActionsDropdownList.Item>
-                  <DropdownItem onClick={() => navigate({ route: ROUTE.REPO_EDIT, postfix: repositoryId })}>
-                    {t('Edit repository')}
-                  </DropdownItem>
-                </ActionsDropdownList.Item>
+                <DropdownItem onClick={() => navigate({ route: ROUTE.REPO_EDIT, postfix: repositoryId })}>
+                  {t('Edit repository')}
+                </DropdownItem>
               )}
               {canDelete && (
-                <ActionsDropdownList.Item isDanger>
-                  <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete repository')}</DropdownItem>
-                </ActionsDropdownList.Item>
+                <DropdownItem onClick={() => setIsDeleteModalOpen(true)}>{t('Delete repository')}</DropdownItem>
               )}
-            </ActionsDropdownList>
+            </DropdownList>
           </DetailsPageActions>
         )
       }

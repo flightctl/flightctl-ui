@@ -4,6 +4,7 @@ import {
   List,
   ListComponent,
   ListItem,
+  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -11,7 +12,6 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import LearnMoreLink from '../../common/LearnMoreLink';
@@ -22,7 +22,7 @@ const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
   const addNewDevicesLink = useAppLinks('addNewDevice');
 
   return (
-    <FlightCtlModal variant="small" onClose={onClose} isOpen>
+    <Modal variant="small" onClose={onClose} isOpen>
       <ModalHeader title={t('Add devices')} />
       <ModalBody>
         <Stack hasGutter>
@@ -45,7 +45,7 @@ const AddDeviceModal = ({ onClose }: { onClose: VoidFunction }) => {
           {t('Close')}
         </Button>
       </ModalFooter>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

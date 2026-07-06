@@ -11,7 +11,6 @@ import { DynamicAuthProviderSpec, ProviderType } from '../../types/extraTypes';
 import { isOAuth2Provider } from './CreateAuthProvider/types';
 import { getProviderTypeLabel } from './CreateAuthProvider/utils';
 import { usePermissionsContext } from '../common/PermissionsContext';
-import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 
 const authProviderPermissions = [
   { kind: RESOURCE.AUTH_PROVIDER, verb: VERB.UPDATE },
@@ -27,7 +26,7 @@ const AuthProviderRow = ({ provider, onDeleteClick }: { provider: AuthProvider; 
   const { checkPermissions } = usePermissionsContext();
   const [canEdit, canDelete] = checkPermissions(authProviderPermissions);
 
-  const regularActions: IAction[] = [
+  const actions: IAction[] = [
     {
       title: t('View details'),
       onClick: () => navigate({ route: ROUTE.AUTH_PROVIDER_DETAILS, postfix: providerName }),
@@ -36,7 +35,7 @@ const AuthProviderRow = ({ provider, onDeleteClick }: { provider: AuthProvider; 
 
   if (canEdit) {
     const isDisableEdit = providerSpec.providerType === ProviderType.OAuth2;
-    regularActions.push({
+    actions.push({
       title: t('Edit'),
       isAriaDisabled: isDisableEdit,
       tooltipProps: isDisableEdit
@@ -48,15 +47,12 @@ const AuthProviderRow = ({ provider, onDeleteClick }: { provider: AuthProvider; 
     });
   }
 
-  const dangerActions: IAction[] = canDelete
-    ? [
-        {
-          title: t('Delete'),
-          onClick: onDeleteClick,
-        },
-      ]
-    : [];
-  const actions = buildAllDropdownActions(regularActions, dangerActions);
+  if (canDelete) {
+    actions.push({
+      title: t('Delete'),
+      onClick: onDeleteClick,
+    });
+  }
 
   let url: string = 'N/A';
   let urlTitle: string = '';

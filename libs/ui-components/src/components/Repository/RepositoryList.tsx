@@ -26,7 +26,6 @@ import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import ResourceLink from '../common/ResourceLink';
-import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import RepositoryStatus from '../Status/RepositoryStatus';
 import PageWithPermissions from '../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../types/rbac';
@@ -106,25 +105,22 @@ const RepositoryTableRow = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const regularActions: IAction[] = [];
+  const actions: IAction[] = [];
   const repoName = repository.metadata.name as string;
   if (canEdit) {
-    regularActions.push({
+    actions.push({
       title: t('Edit repository'),
       onClick: () => navigate({ route: ROUTE.REPO_EDIT, postfix: repository.metadata.name }),
       'data-testid': 'repository-row-menu-edit-repository',
     } as IAction);
   }
-  const dangerActions: IAction[] = canDelete
-    ? [
-        {
-          title: t('Delete repository'),
-          onClick: () => setDeleteModalRepoId(repository.metadata.name),
-          'data-testid': 'repository-row-menu-delete-repository',
-        } as IAction,
-      ]
-    : [];
-  const actions = buildAllDropdownActions(regularActions, dangerActions);
+  if (canDelete) {
+    actions.push({
+      title: t('Delete repository'),
+      onClick: () => setDeleteModalRepoId(repository.metadata.name),
+      'data-testid': 'repository-row-menu-delete-repository',
+    } as IAction);
+  }
   return (
     <Tr data-testid={`repository-row-${rowIndex}`}>
       <Td
@@ -258,12 +254,7 @@ const RepositoryList = () => {
   const [allowed] = checkPermissions([{ kind: RESOURCE.REPOSITORY, verb: VERB.LIST }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
-      <ListPage
-        title={t('Repositories')}
-        description={t(
-          'Manage the source and target repositories used across your image builds and device configurations.',
-        )}
-      >
+      <ListPage title={t('Repositories')}>
         <RepositoryTable />
       </ListPage>
     </PageWithPermissions>

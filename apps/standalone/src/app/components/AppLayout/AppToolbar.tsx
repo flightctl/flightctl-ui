@@ -8,6 +8,7 @@ import {
   DropdownList,
   MenuToggle,
   MenuToggleElement,
+  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -15,7 +16,6 @@ import {
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { QuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/question-circle-icon';
 
@@ -137,7 +137,7 @@ const AppToolbar = () => {
       {preferencesModalOpen && <UserPreferencesModal onClose={() => setPreferencesModalOpen(false)} />}
 
       {logoutErr && (
-        <FlightCtlModal isOpen onClose={() => setLogoutErr(undefined)}>
+        <Modal isOpen onClose={() => setLogoutErr(undefined)}>
           <ModalHeader title={t('Failed to logout')} />
           <ModalBody>
             <Alert isInline variant="danger" title={logoutErr} />
@@ -147,7 +147,7 @@ const AppToolbar = () => {
               Close
             </Button>
           </ModalFooter>
-        </FlightCtlModal>
+        </Modal>
       )}
     </Toolbar>
   );

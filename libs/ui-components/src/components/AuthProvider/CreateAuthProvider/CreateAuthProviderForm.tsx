@@ -1,16 +1,5 @@
 import * as React from 'react';
-import {
-  ActionGroup,
-  Alert,
-  Button,
-  Divider,
-  Flex,
-  FlexItem,
-  FormGroup,
-  FormSection,
-  Grid,
-  Popover,
-} from '@patternfly/react-core';
+import { ActionGroup, Alert, Button, Divider, FormGroup, FormSection, Grid, Popover } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
@@ -38,7 +27,7 @@ import RoleAssignmentSection from './RoleAssignmentSection';
 import TestConnectionModal from '../TestConnectionModal/TestConnectionModal';
 import { ScopesHelperText, UsernameClaimHelperText } from './AuthProviderHelperText';
 
-const EnableProviderSwitchLabel = () => {
+const EnabledHelpText = () => {
   const { t } = useTranslation();
   return (
     <Popover
@@ -51,21 +40,17 @@ const EnableProviderSwitchLabel = () => {
       withFocusTrap
       triggerAction="click"
     >
-      <Flex>
-        <FlexItem>{t('Enabled')}</FlexItem>
-        <FlexItem>
-          <Button
-            icon={<OutlinedQuestionCircleIcon />}
-            hasNoPadding
-            variant="plain"
-            onClick={(ev) => {
-              ev.preventDefault();
-              ev.stopPropagation();
-            }}
-            aria-label="Enabled help text"
-          />
-        </FlexItem>
-      </Flex>
+      <Button
+        icon={<OutlinedQuestionCircleIcon />}
+        component="a"
+        isInline
+        variant="plain"
+        onClick={(ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+        }}
+        aria-label="Enabled help text"
+      />
     </Popover>
   );
 };
@@ -78,7 +63,12 @@ export const AuthProviderForm = ({ isEdit }: { isEdit?: boolean }) => {
 
   return (
     <>
-      <SwitchField name="enabled" label={<EnableProviderSwitchLabel />} aria-label={t('Enabled provider')} />
+      <SwitchField
+        name="enabled"
+        label={t('Enabled')}
+        aria-label={t('Enabled provider')}
+        labelIcon={<EnabledHelpText />}
+      />
 
       <NameField
         name="name"
@@ -87,6 +77,7 @@ export const AuthProviderForm = ({ isEdit }: { isEdit?: boolean }) => {
         isDisabled={isEdit}
         resourceType="authproviders"
         validations={getDnsSubdomainValidations(t)}
+        helperText={t("You can't change the provider name after it's created")}
       />
 
       <FormGroup label={t('Display name')}>

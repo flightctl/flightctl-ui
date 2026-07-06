@@ -4,6 +4,7 @@ import {
   Alert,
   Button,
   Content,
+  Modal,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -11,7 +12,6 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { CatalogItemList } from '@flightctl/types/alpha';
 
@@ -90,7 +90,7 @@ const DeleteCatalogModal = ({ catalogId, catalogDisplayName, onClose, onDeleteSu
   };
 
   return (
-    <FlightCtlModal isOpen onClose={onClose} variant={hasCatalogItems ? 'medium' : 'small'}>
+    <Modal isOpen onClose={onClose} variant={hasCatalogItems ? 'medium' : 'small'}>
       <ModalHeader title={t('Delete catalog ?')} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
@@ -156,7 +156,7 @@ const DeleteCatalogModal = ({ catalogId, catalogDisplayName, onClose, onDeleteSu
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

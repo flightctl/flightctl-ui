@@ -107,11 +107,6 @@ module.exports = defineConfig([
               message: 'Use FlightCtlPageDrawer wrapper',
             },
             {
-              name: '@patternfly/react-core',
-              importNames: ['Modal'],
-              message: 'Use FlightCtlModal wrapper',
-            },
-            {
               name: 'react-i18next',
               importNames: ['useTranslation'],
               message: 'Import useTranslation from @flightctl/ui-components/hooks/useTranslation instead',

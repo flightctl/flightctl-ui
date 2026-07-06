@@ -4,7 +4,3 @@ body,
   height: 100%;
 }
 
-/* Let #root's height flow to routed pages */
-#root > .fctl-app {
-  display: contents;
-}

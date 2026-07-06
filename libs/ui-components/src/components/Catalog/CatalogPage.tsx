@@ -6,6 +6,7 @@ import {
   Divider,
   Dropdown,
   DropdownItem,
+  DropdownList,
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
@@ -40,7 +41,6 @@ import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import DeleteCatalogModal from './DeleteCatalogModal';
 import CreateCatalogModal from './AddCatalogItemWizard/CreateCatalogModal';
 import WithTooltip from '../common/WithTooltip';
-import ActionsDropdownList from '../common/ActionsDropdownList';
 import ResourceSyncImportStatus from '../ResourceSync/ResourceSyncImportStatus';
 import CatalogLandingPage, { CatalogLandingPageContent, useLandingPagePermissions } from './CatalogLandingPage';
 import PageWithPermissions from '../common/PageWithPermissions';
@@ -283,28 +283,24 @@ export const CatalogPageContent = ({
                                     />
                                   )}
                                 >
-                                  <ActionsDropdownList>
-                                    <ActionsDropdownList.Item>
-                                      <DropdownItem onClick={() => setCatalogToEdit(c)}>
-                                        {!!c.metadata.owner || !canEditCatalog ? t('View catalog') : t('Edit catalog')}
-                                      </DropdownItem>
-                                    </ActionsDropdownList.Item>
-                                    <ActionsDropdownList.Item isDanger>
-                                      <WithTooltip
-                                        showTooltip={!!c.metadata.owner}
-                                        content={t(
-                                          'This catalog is managed by a resource sync and cannot be directly removed. Either remove the catalog definition from the resource sync configuration, or delete the resource sync first.',
-                                        )}
+                                  <DropdownList>
+                                    <DropdownItem onClick={() => setCatalogToEdit(c)}>
+                                      {!!c.metadata.owner || !canEditCatalog ? t('View') : t('Edit')}
+                                    </DropdownItem>
+                                    <WithTooltip
+                                      showTooltip={!!c.metadata.owner}
+                                      content={t(
+                                        'This catalog is managed by a resource sync and cannot be directly removed. Either remove the catalog definition from the resource sync configuration, or delete the resource sync first.',
+                                      )}
+                                    >
+                                      <DropdownItem
+                                        isAriaDisabled={!canDelete}
+                                        onClick={canDelete ? () => setCatalogToDelete(c) : undefined}
                                       >
-                                        <DropdownItem
-                                          isAriaDisabled={!canDelete}
-                                          onClick={canDelete ? () => setCatalogToDelete(c) : undefined}
-                                        >
-                                          {t('Delete catalog')}
-                                        </DropdownItem>
-                                      </WithTooltip>
-                                    </ActionsDropdownList.Item>
-                                  </ActionsDropdownList>
+                                        {t('Remove')}
+                                      </DropdownItem>
+                                    </WithTooltip>
+                                  </DropdownList>
                                 </Dropdown>
                               ) : undefined,
                             };
@@ -450,10 +446,7 @@ const CatalogPage = () => {
   return (
     <PageWithPermissions allowed={canListItems && canListCatalogs} loading={loading}>
       <ResourceSyncImportStatus type="catalog" />
-      <ListPage
-        title={t('Software Catalog')}
-        description={t('Browse and manage catalog items available for deployment to your fleets and devices.')}
-      >
+      <ListPage title={t('Software Catalog')}>
         <CatalogPageContent
           canInstall={canEditFleet || canEditDevice}
           canEditCatalog={canEditCatalog}

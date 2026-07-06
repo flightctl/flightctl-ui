@@ -44,6 +44,7 @@ const DeviceLogsLevelField = () => {
             selected={level}
             onSelect={onLevelSelected}
             shouldFocusToggleOnSelect
+            shouldFocusFirstItemOnOpen
             isOpen={isOpen}
             style={{ width: '12rem' }}
             onOpenChange={(open) => {

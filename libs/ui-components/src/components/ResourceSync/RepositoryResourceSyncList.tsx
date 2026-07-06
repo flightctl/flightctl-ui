@@ -7,6 +7,7 @@ import {
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
+  Modal,
   ModalBody,
   ModalHeader,
   Toolbar,
@@ -14,7 +15,6 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { TFunction } from 'i18next';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
@@ -135,7 +135,7 @@ const CreateResourceSyncModal = ({
   const [submitError, setSubmitError] = React.useState<string | undefined>();
 
   return (
-    <FlightCtlModal variant="medium" onClose={() => onClose()} isOpen>
+    <Modal variant="medium" onClose={() => onClose()} isOpen>
       <ModalHeader title={t('Add a resource sync')} />
       <ModalBody>
         <Formik<SingleResourceSyncValues>
@@ -164,7 +164,7 @@ const CreateResourceSyncModal = ({
           </>
         </Formik>
       </ModalBody>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

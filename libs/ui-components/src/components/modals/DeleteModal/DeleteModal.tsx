@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import { Alert, Button, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
+import { Alert, Button, Modal, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
 
 import { getErrorMessage } from '../../../utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -18,7 +17,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ onDelete, onClose, resourceTy
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [error, setError] = React.useState<string>();
   return (
-    <FlightCtlModal isOpen onClose={onClose} variant="small">
+    <Modal isOpen onClose={onClose} variant="small">
       <ModalHeader title={t('Delete {{resourceType}} ?', { resourceType })} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
@@ -60,7 +59,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ onDelete, onClose, resourceTy
           {t('Cancel')}
         </Button>
       </ModalFooter>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

@@ -41,7 +41,6 @@ import TablePagination from '../../Table/TablePagination';
 import { getResourceId } from '../../../utils/resource';
 import DeleteImagePromotionModal from '../../ImagePromotion/DeleteImagePromotionModal';
 import { usePermissionsContext } from '../../common/PermissionsContext';
-import { buildAllDropdownActions } from '../../common/ActionsDropdownList';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useImagePromotionsContext } from '../ImagePromotionsContext';
 
@@ -66,23 +65,24 @@ const ImagePromotionRow = ({
 }) => {
   const { t } = useTranslation();
 
-  const regularActions: IAction[] = canEditPromotions
-    ? [
-        {
-          title: t('Edit image promotion'),
-          onClick: onEditClick,
-        },
-      ]
-    : [];
-  const dangerActions: IAction[] = canDeletePromotions
-    ? [
-        {
-          title: t('Delete image promotion'),
-          onClick: onDeleteClick,
-        },
-      ]
-    : [];
-  const actions = buildAllDropdownActions(regularActions, dangerActions);
+  const actions: IAction[] = [
+    ...(canEditPromotions
+      ? [
+          {
+            title: t('Edit image promotion'),
+            onClick: onEditClick,
+          },
+        ]
+      : []),
+    ...(canDeletePromotions
+      ? [
+          {
+            title: t('Delete image promotion'),
+            onClick: onDeleteClick,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <Tr>

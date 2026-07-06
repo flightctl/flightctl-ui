@@ -513,22 +513,20 @@ const versionsSchema = (t: TFunction, configurable: boolean, isApp: boolean) =>
       .min(1, t('At least one version is required'));
   });
 
-const uriHasNoTagOrDigest = (value: string | undefined) => {
-  if (!value) {
-    return true;
-  }
-  const path = value.replace(/^[a-z]+:\/\//, '');
-  const imageName = path.includes('/') ? path.substring(path.lastIndexOf('/') + 1) : path;
-  return !imageName.includes(':') && !imageName.includes('@');
-};
-
-const imageReferenceWithoutVersionSchema = (t: TFunction, requiredMessage: string) =>
+const artifactURISchema = (t: TFunction) =>
   Yup.string()
-    .required(requiredMessage)
+    .required(t('Container image URI is required'))
     .test(
       'no-tag-or-digest',
-      t('Must not include a tag (":") or digest ("@"). Specify those in the version fields.'),
-      uriHasNoTagOrDigest,
+      t('URI must not include a tag (":") or digest ("@"). Specify those in the version fields.'),
+      (value) => {
+        if (!value) {
+          return true;
+        }
+        const path = value.replace(/^[a-z]+:\/\//, '');
+        const imageName = path.includes('/') ? path.substring(path.lastIndexOf('/') + 1) : path;
+        return !imageName.includes(':') && !imageName.includes('@');
+      },
     );
 
 export const getValidationSchema = (t: TFunction) =>
@@ -545,7 +543,7 @@ export const getValidationSchema = (t: TFunction) =>
     type: Yup.string().oneOf(Object.values(CatalogItemType)).required(t('Type is required')),
     containerUri: Yup.string().when('type', {
       is: (type: string) => appTypeIds.includes(type as CatalogItemType),
-      then: () => imageReferenceWithoutVersionSchema(t, t('Container image reference is required')),
+      then: () => artifactURISchema(t),
       otherwise: () => Yup.string(),
     }),
     artifacts: Yup.mixed().when('type', {
@@ -574,7 +572,7 @@ export const getValidationSchema = (t: TFunction) =>
                     return !duplicateTypes.has(value);
                   }),
                 name: Yup.string(),
-                uri: imageReferenceWithoutVersionSchema(t, t('OCI reference is required')),
+                uri: artifactURISchema(t),
               }),
             )
             .min(1, t('At least one artifact is required'));
@@ -675,6 +673,12 @@ export const getCatalogPatches = (catalog: Catalog, values: CreateCatalogFormVal
   });
   appendJSONPatch({
     patches,
+    path: '/spec/icon',
+    newValue: values.icon,
+    originalValue: catalog.spec.icon,
+  });
+  appendJSONPatch({
+    patches,
     path: '/spec/provider',
     newValue: values.provider,
     originalValue: catalog.spec.provider,
@@ -695,6 +699,7 @@ export const getCatalogResource = (values: CreateCatalogFormValues): Catalog => 
   spec: {
     displayName: values.displayName || undefined,
     shortDescription: values.shortDescription || undefined,
+    icon: values.icon || undefined,
     provider: values.provider || undefined,
     support: values.support || undefined,
   },

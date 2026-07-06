@@ -218,10 +218,7 @@ const FleetsPage = () => {
     <>
       <ResourceSyncImportStatus type="fleet" />
 
-      <ListPage
-        title={t('Fleets')}
-        description={t('Organize devices into fleets to manage configurations, updates, and system images at scale.')}
-      >
+      <ListPage title={t('Fleets')}>
         <FleetTable />
       </ListPage>
     </>

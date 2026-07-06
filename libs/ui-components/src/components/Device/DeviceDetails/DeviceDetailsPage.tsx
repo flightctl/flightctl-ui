@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import { Button, DropdownItem, Tab } from '@patternfly/react-core';
+import { Button, DropdownItem, DropdownList, Tab } from '@patternfly/react-core';
 
 import {
   Device,
@@ -39,7 +39,6 @@ import { YamlEditorLoader } from '../../common/CodeEditor/YamlEditor';
 import DeviceAliasEdit from './DeviceAliasEdit';
 import { SystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 import DeviceDetailsCatalog from './DeviceDetailsCatalog';
-import ActionsDropdownList from '../../common/ActionsDropdownList';
 
 type DeviceDetailsPageProps = React.PropsWithChildren<{ hideTerminal?: boolean }>;
 
@@ -181,21 +180,19 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
       actions={
         isEnrolled ? (
           <DetailsPageActions>
-            <ActionsDropdownList>
+            <DropdownList>
               {hasEditPermissions && (
-                <ActionsDropdownList.Item>
-                  <DropdownItem
-                    data-testid="device-details-menu-edit-configurations"
-                    onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}
-                    {...editActionProps}
-                  >
-                    {t('Edit device configurations')}
-                  </DropdownItem>
-                </ActionsDropdownList.Item>
+                <DropdownItem
+                  data-testid="device-details-menu-edit-configurations"
+                  onClick={() => navigate({ route: ROUTE.DEVICE_EDIT, postfix: deviceId })}
+                  {...editActionProps}
+                >
+                  {t('Edit device configurations')}
+                </DropdownItem>
               )}
-              {canResume && <ActionsDropdownList.Item>{resumeAction}</ActionsDropdownList.Item>}
-              {canDecommission && <ActionsDropdownList.Item isDanger>{decommissionAction}</ActionsDropdownList.Item>}
-            </ActionsDropdownList>
+              {canResume && resumeAction}
+              {canDecommission && decommissionAction}
+            </DropdownList>
           </DetailsPageActions>
         ) : (
           canDelete && (

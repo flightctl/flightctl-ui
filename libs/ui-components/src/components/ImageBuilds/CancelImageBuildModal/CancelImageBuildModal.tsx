@@ -1,6 +1,15 @@
 import * as React from 'react';
-import { Alert, Button, Content, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
+import {
+  Alert,
+  Button,
+  Content,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Stack,
+  StackItem,
+} from '@patternfly/react-core';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
@@ -20,7 +29,7 @@ const CancelImageBuildModal = ({
   const [isCancelling, setIsCancelling] = React.useState<boolean>(false);
 
   return (
-    <FlightCtlModal isOpen onClose={() => onClose()} variant="small">
+    <Modal isOpen onClose={() => onClose()} variant="small">
       <ModalHeader title={t('Cancel and discard build?')} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
@@ -65,7 +74,7 @@ const CancelImageBuildModal = ({
           {t('Close')}
         </Button>
       </ModalFooter>
-    </FlightCtlModal>
+    </Modal>
   );
 };
 

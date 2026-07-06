@@ -63,14 +63,14 @@ const SourceImageValidation = ({ repository, imageName, imageTag }: SourceImageV
   }
 
   if (isLoading) {
-    return <StatusDisplay item={{ label: t('Checking image availability'), level: 'info' }} />;
+    return <StatusDisplay item={{ label: t('Checking image accessibility'), level: 'info' }} />;
   }
 
   return response?.accessible ? (
-    <StatusDisplay item={{ label: t('Available'), level: 'success' }} />
+    <StatusDisplay item={{ label: t('Accessible'), level: 'success' }} />
   ) : (
     <StatusDisplay
-      item={{ label: t('Not available'), level: 'warning' }}
+      item={{ label: t('Not accessible'), level: 'warning' }}
       message={
         response?.errorCode || response?.errorMessage ? `${response?.errorCode}: ${response?.errorMessage}` : undefined
       }
