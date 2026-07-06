@@ -1,0 +1,17 @@
+/* Style the table column headers in bold and without borders */
+#fctl-applications-table .fctl-applications-table__column-headers tr > th {
+  font-weight: var(--pf-t--global--font--weight--body--bold);
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+}
+
+/* Style the section header */
+#fctl-applications-table .fctl-applications-table__section-header {
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+}
+
+/* Reduce the gap between description list rows */
+#fctl-applications-table .fctl-applications-table__description-list {
+  --pf-v6-c-description-list--RowGap: var(--pf-t--global--spacer--sm, 0.5rem);
+}

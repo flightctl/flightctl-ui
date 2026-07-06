@@ -13,9 +13,14 @@ const msgToBytes = (msg: string, resize?: boolean) => {
 
 const isErrorCloseEvent = (evt: CloseEvent) => evt.code !== 1000 && evt.code !== 1001;
 
-export type WsMetadata = {
+type WsMetadata = {
   tty: boolean;
   term: string;
+};
+
+export const wsMeta: WsMetadata = {
+  tty: true,
+  term: 'xterm-256color',
 };
 
 export const useWebSocket = <T>(

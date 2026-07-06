@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  Bullseye,
   CardBody,
   CardTitle,
   DescriptionList,
@@ -146,8 +147,8 @@ const EnrolledDeviceDetails = ({
           <DeviceVulnerabilities deviceId={device.metadata.name as string} />
         </GridItem>
       )}
-      <GridItem md={12} lg={6}>
-        <DeviceApplications device={device} />
+      <GridItem md={12}>
+        <DeviceApplications device={device} refetch={refetch} />
       </GridItem>
       <GridItem md={12} lg={6}>
         <DeviceSystemdUnits device={device} />
@@ -194,7 +195,12 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
         <ConfigurationsContent device={device} />
       </GridItem>
       <GridItem md={12} lg={6}>
-        <DeviceApplications device={device} />
+        <DetailsPageCard>
+          <CardTitle>{t('Applications')}</CardTitle>
+          <CardBody>
+            <Bullseye>{t('Application status is not available for decommissioned devices')}</Bullseye>
+          </CardBody>
+        </DetailsPageCard>
       </GridItem>
     </Grid>
   );

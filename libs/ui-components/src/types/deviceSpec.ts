@@ -1,4 +1,5 @@
 import {
+  AppType,
   ApplicationProviderSpec,
   ComposeApplication,
   ConfigProviderSpec,
@@ -13,6 +14,7 @@ import {
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
   QuadletApplication,
+  VmApplication,
 } from '@flightctl/types';
 import { FlightCtlLabel } from './extraTypes';
 import { UpdateScheduleMode } from '../utils/time';
@@ -70,6 +72,20 @@ export const isInlineVariantApp = (
   app: ApplicationProviderSpec,
 ): app is ApplicationProviderSpec & InlineApplicationProviderSpec => 'inline' in app;
 
+export const isVmAppSpec = (app: ApplicationProviderSpec): app is VmApplication => app.appType === AppType.AppTypeVm;
+
+export const isHelmAppSpec = (app: ApplicationProviderSpec): app is HelmApplication =>
+  app.appType === AppType.AppTypeHelm;
+
+export const isQuadletAppSpec = (app: ApplicationProviderSpec): app is QuadletApplication =>
+  app.appType === AppType.AppTypeQuadlet;
+
+export const isComposeAppSpec = (app: ApplicationProviderSpec): app is ComposeApplication =>
+  app.appType === AppType.AppTypeCompose;
+
+export const isContainerAppSpec = (app: ApplicationProviderSpec): app is ContainerApplication =>
+  app.appType === AppType.AppTypeContainer;
+
 export type ApplicationVolumeForm = {
   name: string;
   imageRef: string;
@@ -79,7 +95,8 @@ export type ApplicationVolumeForm = {
 
 export type PortMapping = {
   hostPort: string;
-  containerPort: string;
+  targetPort: string;
+  protocol?: string;
 };
 
 export type VariablesForm = { name: string; value: string }[];
@@ -119,7 +136,31 @@ export type ComposeAppForm = Omit<ComposeApplication, 'envVars' | 'volumes' | 'i
     volumes: ApplicationVolumeForm[];
   };
 
-export type AppForm = SingleContainerAppForm | HelmAppForm | QuadletAppForm | ComposeAppForm;
+export type VmConfigMode = 'form' | 'yaml';
+
+export type VmAppForm = {
+  appType: AppType.AppTypeVm;
+  name: string;
+  specType: AppSpecType.INLINE;
+  configMode: VmConfigMode;
+  // Full vm.yaml file that can be edited in YAML mode; independent from form field
+  vmYaml: string;
+  // Whether vm.yaml has settings which are not supported by the guided form.
+  // Only meaningful for existing applications.
+  hasAdvancedVmSettings: boolean;
+  diskImage: string;
+  cpuCores: number;
+  memory: string;
+  enableSshKey: boolean;
+  sshPublicKey: string;
+  enablePassword: boolean;
+  password: string;
+  cloudInit: string;
+  // Protocol is mandatory for VM publish ports
+  publishPorts: Required<PortMapping>[];
+};
+
+export type AppForm = SingleContainerAppForm | HelmAppForm | QuadletAppForm | ComposeAppForm | VmAppForm;
 
 const hasTemplateVariables = (str: string) => /{{.+?}}/.test(str);
 

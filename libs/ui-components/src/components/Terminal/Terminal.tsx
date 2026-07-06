@@ -7,6 +7,10 @@ import { useTranslation } from '../../hooks/useTranslation';
 
 import './Terminal.css';
 
+// Cap bytes written per animation frame so high-volume output (e.g. VM reboot) cannot
+// block the main thread and freeze the rest of the page.
+const MAX_TERMINAL_WRITE_BYTES_PER_FRAME = 16_384;
+
 const terminalOptions: ITerminalOptions & ITerminalInitOnlyOptions = {
   fontFamily: 'monospace',
   fontSize: 16,
@@ -32,6 +36,50 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
   const [receivedData, setReceivedData] = React.useState(false);
   const terminal = React.useRef<XTerminal>();
   const terminalRef = React.useRef<HTMLDivElement>(null);
+  const writeChunksRef = React.useRef<string[]>([]);
+  const pendingWriteRef = React.useRef('');
+  const flushScheduledRef = React.useRef(false);
+
+  const flushWriteBuffer = React.useCallback(() => {
+    flushScheduledRef.current = false;
+    const term = terminal.current;
+
+    let pending = pendingWriteRef.current;
+    if (writeChunksRef.current.length > 0) {
+      pending += writeChunksRef.current.join('');
+      writeChunksRef.current = [];
+    }
+
+    if (!term || pending.length === 0) {
+      pendingWriteRef.current = '';
+      return;
+    }
+
+    const chunk =
+      pending.length > MAX_TERMINAL_WRITE_BYTES_PER_FRAME
+        ? pending.slice(0, MAX_TERMINAL_WRITE_BYTES_PER_FRAME)
+        : pending;
+    pendingWriteRef.current = pending.length > chunk.length ? pending.slice(chunk.length) : '';
+
+    try {
+      term.write(chunk);
+    } catch {
+      pendingWriteRef.current = '';
+      return;
+    }
+
+    if (pendingWriteRef.current.length > 0 || writeChunksRef.current.length > 0) {
+      flushScheduledRef.current = true;
+      requestAnimationFrame(flushWriteBuffer);
+    }
+  }, []);
+
+  const scheduleWriteFlush = React.useCallback(() => {
+    if (!flushScheduledRef.current) {
+      flushScheduledRef.current = true;
+      requestAnimationFrame(flushWriteBuffer);
+    }
+  }, [flushWriteBuffer]);
 
   React.useEffect(() => {
     const term: XTerminal = new XTerminal(terminalOptions);
@@ -62,6 +110,9 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
     }
 
     return () => {
+      writeChunksRef.current = [];
+      pendingWriteRef.current = '';
+      flushScheduledRef.current = false;
       term.dispose();
       resizeObserver.disconnect();
     };
@@ -80,13 +131,20 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
       terminal.current?.focus();
     },
     onDataReceived: (data) => {
-      setReceivedData(true);
-      terminal.current?.write(data);
+      if (!terminal.current) {
+        return;
+      }
+      setReceivedData((prev) => (prev ? prev : true));
+      writeChunksRef.current.push(data);
+      scheduleWriteFlush();
     },
     loadAttachAddon: (addOn) => {
       terminal.current?.loadAddon(addOn);
     },
     reset: () => {
+      writeChunksRef.current = [];
+      pendingWriteRef.current = '';
+      flushScheduledRef.current = false;
       terminal.current?.reset();
       setReceivedData(false);
     },

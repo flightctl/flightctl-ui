@@ -28,7 +28,7 @@ const TextField = React.forwardRef(
     const hasError = meta.touched && !!meta.error;
 
     return (
-      <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId}>
+      <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId} style={props.style}>
         <TextInput
           {...field}
           {...props}

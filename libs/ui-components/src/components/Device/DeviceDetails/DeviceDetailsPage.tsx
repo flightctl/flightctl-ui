@@ -41,17 +41,16 @@ import { SystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 import DeviceDetailsCatalog from './DeviceDetailsCatalog';
 import ActionsDropdownList from '../../common/ActionsDropdownList';
 
-type DeviceDetailsPageProps = React.PropsWithChildren<{ hideTerminal?: boolean }>;
-
 const deviceDetailsPermissions = [
   { kind: RESOURCE.DEVICE_CONSOLE, verb: VERB.GET },
+  { kind: RESOURCE.DEVICE_APPLICATION_CONSOLE, verb: VERB.GET },
   { kind: RESOURCE.DEVICE, verb: VERB.DELETE },
   { kind: RESOURCE.DEVICE, verb: VERB.PATCH },
   { kind: RESOURCE.DEVICE_DECOMMISSION, verb: VERB.UPDATE },
   { kind: RESOURCE.DEVICE_RESUME, verb: VERB.UPDATE },
 ];
 
-const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) => {
+const DeviceDetailsPage = ({ children }: React.PropsWithChildren) => {
   const { t } = useTranslation();
   const {
     router: { useParams, Routes, Route, Navigate },
@@ -67,18 +66,19 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
   const isEnrolled = !device || isDeviceEnrolled(device);
 
   const { checkPermissions } = usePermissionsContext();
-  const [hasTerminalAccess, canDelete, hasEditPermissions, canDecommission, canResume] =
+  const [hasDeviceConsoleAccess, hasAppConsoleAccess, canDelete, hasEditPermissions, canDecommission, canResume] =
     checkPermissions(deviceDetailsPermissions);
 
   const canEdit = hasEditPermissions && isEnrolled;
-  const canOpenTerminal = hasTerminalAccess && isEnrolled;
-  const showTerminalAndLogs = !hideTerminal && canOpenTerminal;
+  const canViewTerminal = (hasDeviceConsoleAccess || hasAppConsoleAccess) && isEnrolled;
+  const canViewLogs = hasDeviceConsoleAccess && isEnrolled;
 
   const tabKeys = [
     'details',
     ...(isEnrolled ? ['catalog'] : []),
     'yaml',
-    ...(showTerminalAndLogs ? ['terminal', 'logs'] : []),
+    ...(canViewTerminal ? ['terminal'] : []),
+    ...(canViewLogs ? ['logs'] : []),
     'events',
   ];
 
@@ -131,6 +131,8 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
       deviceSummaryStatus === DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect ? 1 : 0,
   };
 
+  const hasEnrolledActions = hasEditPermissions || canResume || canDecommission;
+
   return (
     <DetailsPage
       loading={loading}
@@ -171,15 +173,15 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
           <Tab eventKey="details" title={t('Details')} data-testid="device-details-tab-details" />
           {isEnrolled && <Tab eventKey="catalog" title={t('Catalog')} data-testid="device-details-tab-catalog" />}
           <Tab eventKey="yaml" title={t('YAML')} data-testid="device-details-tab-yaml" />
-          {showTerminalAndLogs && (
+          {canViewTerminal && (
             <Tab eventKey="terminal" title={t('Terminal')} data-testid="device-details-tab-terminal" />
           )}
-          {showTerminalAndLogs && <Tab eventKey="logs" title={t('Logs')} data-testid="device-details-tab-logs" />}
+          {canViewLogs && <Tab eventKey="logs" title={t('Logs')} data-testid="device-details-tab-logs" />}
           <Tab eventKey="events" title={t('Events')} data-testid="device-details-tab-events" />
         </TabsNav>
       }
       actions={
-        isEnrolled ? (
+        isEnrolled && hasEnrolledActions ? (
           <DetailsPageActions>
             <ActionsDropdownList>
               {hasEditPermissions && (
@@ -198,6 +200,7 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
             </ActionsDropdownList>
           </DetailsPageActions>
         ) : (
+          !isEnrolled &&
           canDelete && (
             <Button component="a" aria-label={t('Delete device forever')} variant="danger" tabIndex={0}>
               {deleteAction}
@@ -235,8 +238,8 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
               />
             }
           />
-          {showTerminalAndLogs && <Route path="logs" element={<DeviceLogsTab deviceId={deviceId} />} />}
-          {showTerminalAndLogs && <Route path="terminal" element={<TerminalTab device={device} />} />}
+          {canViewTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
+          {canViewLogs && <Route path="logs" element={<DeviceLogsTab deviceId={deviceId} />} />}
           <Route path="events" element={<EventsCard kind={ResourceKind.DEVICE} objId={deviceId} />} />
         </Routes>
       )}
@@ -246,12 +249,12 @@ const DeviceDetailsPage = ({ children, hideTerminal }: DeviceDetailsPageProps) =
   );
 };
 
-const DeviceDetailsPageWithPermissions = (props: DeviceDetailsPageProps) => {
+const DeviceDetailsPageWithPermissions = ({ children }: React.PropsWithChildren) => {
   const { checkPermissions, loading } = usePermissionsContext();
   const [allowed] = checkPermissions([{ kind: RESOURCE.DEVICE, verb: VERB.GET }]);
   return (
     <PageWithPermissions allowed={allowed} loading={loading}>
-      <DeviceDetailsPage {...props} />
+      <DeviceDetailsPage>{children}</DeviceDetailsPage>
     </PageWithPermissions>
   );
 };

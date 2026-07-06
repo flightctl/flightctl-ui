@@ -115,6 +115,8 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     // Dependency sync events
     [Event.reason.DEPENDENCY_SYNC_PROBE_FAILED]: t('Dependency sync probe failed'),
     [Event.reason.DEPENDENCY_CHANGE_DETECTED]: t('Dependency change detected'),
+    // Application lifecycle events
+    [Event.reason.APPLICATION_LIFECYCLE_CHANGED]: t('Application lifecycle changed'),
   };
 };
 

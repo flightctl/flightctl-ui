@@ -39,6 +39,19 @@ export const getResumeDisabledReason = (device: Device, t: TFunction) => {
   return undefined;
 };
 
+export const getLifecycleDisabledReason = (device: Device, t: TFunction) => {
+  if (!isDeviceEnrolled(device)) {
+    return t('Device is decommissioning and applications cannot be managed.');
+  }
+  if (device.status?.summary.status === DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect) {
+    return t('Device is awaiting reconnect and applications cannot be managed.');
+  }
+  if (device.status?.summary.status === DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused) {
+    return t('Device is paused after a conflict and applications cannot be managed.');
+  }
+  return undefined;
+};
+
 export const hasActiveConsoleSessions = (device: Device): boolean => {
   const consoleAnnotation = device.metadata?.annotations?.[DEVICE_CONSOLE_ANNOTATION]?.trim();
   if (!consoleAnnotation || consoleAnnotation === '[]') {

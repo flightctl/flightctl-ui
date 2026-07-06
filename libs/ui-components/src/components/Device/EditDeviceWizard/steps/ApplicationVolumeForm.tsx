@@ -14,8 +14,6 @@ import ErrorHelperText from '../../../form/FieldHelperText';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 
-import './ApplicationVolumeForm.css';
-
 type ApplicationVolumeFormProps = {
   appFieldName: string;
   isReadOnly?: boolean;
@@ -40,7 +38,7 @@ const ApplicationVolumeForm = ({
   const volumesError = typeof error === 'string' ? error : undefined;
 
   return (
-    <FormGroup label={t('Volumes')} className="fctl-application-volume-form">
+    <FormGroup label={t('Volumes')}>
       <FieldArray name={`${appFieldName}.volumes`}>
         {(arrayHelpers) => (
           <>
