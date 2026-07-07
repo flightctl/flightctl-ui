@@ -80,13 +80,16 @@ describe('Create fleet form', () => {
     createFleetWizardPage = new CreateFleetWizardPage();
 
     createFleetWizardPage.newFleetNameField.type(existingFleetName).blur();
-    createFleetWizardPage.openFleetRichValidationsPopover();
+
+    // Open the validation popover, and close it before continuing the test
+    createFleetWizardPage.toggleFleetRichValidationsPopover();
     createFleetWizardPage.newFleetRichValidationsPopoverError.should('contain.text', 'Name must be unique');
+    createFleetWizardPage.toggleFleetRichValidationsPopover();
+
     createFleetWizardPage.nextFleetWizardButton.should('be.disabled');
 
-    // Fix the duplicate fleet name and check that the form could be submitted
+    // Fix the duplicate fleet name and ensure that the form can now be submitted
     createFleetWizardPage.newFleetNameField.clear().type(`${existingFleetName}-2`);
-    createFleetWizardPage.newFleetRichValidationsPopoverError.should('not.exist');
     createFleetWizardPage.nextFleetWizardButton.should('be.enabled');
   });
 });
