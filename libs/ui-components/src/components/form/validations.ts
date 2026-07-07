@@ -774,10 +774,16 @@ export const validApplicationsSchema = (t: TFunction) => {
                 })
                 .required(),
             ),
-            limits: Yup.object().shape({
-              cpu: Yup.string().test('valid-cpu-format', t('CPU limit is invalid.'), validateCPULimit),
-              memory: Yup.string().test('valid-memory-format', t('Memory limit is invalid.'), validateMemoryLimit),
-            }),
+            cpuLimit: Yup.string().test(
+              'valid-cpu-format',
+              t('CPU limit is invalid. Use a positive number of cores (e.g. 0.5 or 2).'),
+              validateCPULimit,
+            ),
+            memoryLimit: Yup.string().test(
+              'valid-memory-format',
+              t('Memory limit is invalid. Use a number with optional unit b, k, m, or g (e.g. 512m or 2g).'),
+              validateMemoryLimit,
+            ),
             volumes: singleContainerVolumesSchema(t),
             variables: appVariablesSchema(t),
             runAs: Yup.string(),
