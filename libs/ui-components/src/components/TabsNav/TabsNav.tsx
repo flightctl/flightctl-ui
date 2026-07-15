@@ -29,8 +29,14 @@ const TabsNav: React.FC<TabsNavProps> = ({ children, 'aria-label': ariaLabel, ta
   const handleTabSelect = (_event: React.MouseEvent | React.KeyboardEvent | undefined, tabIndex: string | number) => {
     const tabKey = String(tabIndex);
     setActiveTab(tabKey);
-    // Navigate to the relative path
-    navigate(tabKey);
+
+    const isOnTabPath = tabKeys.some((key) => location.pathname.endsWith(`/${key}`));
+    if (isOnTabPath) {
+      // React Router v6/v7 appends bare segments; navigate to sibling tab instead.
+      navigate(`../${tabKey}`, { relative: 'path' });
+    } else {
+      navigate(tabKey);
+    }
   };
 
   return (
