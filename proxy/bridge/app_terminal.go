@@ -99,7 +99,7 @@ func (t TerminalBridge) HandleAppTerminal(w http.ResponseWriter, r *http.Request
 	if !isWebsocketUpgrade(r) {
 		errMsg := "not a websocket connection"
 		log.Warn(errMsg)
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte(errMsg))
 		return
 	}
@@ -125,7 +125,7 @@ func (t TerminalBridge) HandleAppTerminal(w http.ResponseWriter, r *http.Request
 	consoleURL, err := buildAppConsoleURL(basePath, force, orgID)
 	if err != nil {
 		log.Warnf("Failed to build app console URL: %v", err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 

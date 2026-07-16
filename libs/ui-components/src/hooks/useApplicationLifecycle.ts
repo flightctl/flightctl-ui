@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { ApplicationStatusType, Device } from '@flightctl/types';
+import type { ApplicationStatusType, Device } from '@flightctl/types';
 
-import { ApplicationLifecycleAction, shouldClearPendingLifecycleAction } from '../utils/applicationLifecycle';
+import { type ApplicationLifecycleAction, shouldClearPendingLifecycleAction } from '../utils/applicationLifecycle';
 import { getErrorMessage } from '../utils/error';
 import { useFetch } from './useFetch';
 

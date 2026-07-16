@@ -39,13 +39,15 @@ type TerminalBridge struct {
 func writeCloseFrame(writeMutex *sync.Mutex, dest *websocket.Conn, code int, text string) {
 	deadline := time.Now().Add(websocketTimeout)
 	msg := websocket.FormatCloseMessage(code, text)
-	if writeMutex == nil {
-		_ = dest.WriteControl(websocket.CloseMessage, msg, deadline)
-		return
+
+	if writeMutex != nil {
+		writeMutex.Lock()
+		defer writeMutex.Unlock()
 	}
-	writeMutex.Lock()
-	_ = dest.WriteControl(websocket.CloseMessage, msg, deadline)
-	writeMutex.Unlock()
+
+	if err := dest.WriteControl(websocket.CloseMessage, msg, deadline); err != nil {
+		log.Warnf("Failed to write close frame: %v", err)
+	}
 }
 
 func copyMsgs(writeMutex *sync.Mutex, dest, src *websocket.Conn) error {

@@ -7,11 +7,13 @@ import {
   DescriptionListTerm,
 } from '@patternfly/react-core';
 
-import { ApplicationDesiredState, type ApplicationPort } from '@flightctl/types';
+import type { ApplicationDesiredState, ApplicationPort } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { StatusAppWithSpec } from '../../../utils/vmApplications';
+import type { StatusAppWithSpec } from '../../../utils/vmApplications';
 import { RUN_AS_ROOT_USER, isImageVariantApp } from '../../../types/deviceSpec';
-import ApplicationExpandedSections, { ApplicationDetailSection } from '../../Application/ApplicationExpandedSections';
+import ApplicationExpandedSections, {
+  type ApplicationDetailSection,
+} from '../../Application/ApplicationExpandedSections';
 import ApplicationPortsTable from '../../Application/ApplicationPortsTable';
 import DesiredStateLabel from '../../Application/DesiredStateLabel';
 import ApplicationVolumesDescriptionList from '../../Application/ApplicationVolumesDescriptionList';

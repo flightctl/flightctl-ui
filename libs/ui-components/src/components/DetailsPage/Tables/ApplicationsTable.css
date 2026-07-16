@@ -1,14 +1,13 @@
-/* Style the table column headers in bold and without borders */
+/* Make the table column headers in bold */
 #fctl-applications-table .fctl-applications-table__column-headers tr > th {
   font-weight: var(--pf-t--global--font--weight--body--bold);
-  border-top: 1px solid transparent;
-  border-bottom: 1px solid transparent;
 }
 
-/* Style the section header */
+/* Hide the borders of the table column headers and section header */
+#fctl-applications-table .fctl-applications-table__column-headers tr > th,
 #fctl-applications-table .fctl-applications-table__section-header {
-  border-top: 1px solid transparent;
-  border-bottom: 1px solid transparent;
+  border-top: var(--pf-t--global--border--width--regular) solid transparent;
+  border-bottom: var(--pf-t--global--border--width--regular) solid transparent;
 }
 
 /* Reduce the gap between description list rows */

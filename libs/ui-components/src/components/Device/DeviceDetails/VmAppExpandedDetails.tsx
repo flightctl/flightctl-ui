@@ -10,7 +10,9 @@ import {
 import { type ApplicationDesiredState, type VmApplication } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { getVmYamlContent, parseVmYaml } from '../../../utils/vmApplications';
-import ApplicationExpandedSections, { ApplicationDetailSection } from '../../Application/ApplicationExpandedSections';
+import ApplicationExpandedSections, {
+  type ApplicationDetailSection,
+} from '../../Application/ApplicationExpandedSections';
 import DesiredStateLabel from '../../Application/DesiredStateLabel';
 import ApplicationPortsTable from '../../Application/ApplicationPortsTable';
 

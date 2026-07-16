@@ -14,7 +14,7 @@ import {
   InlineConfigProviderSpec,
   KubernetesSecretProviderSpec,
   QuadletApplication,
-  VmApplication,
+  type VmApplication,
 } from '@flightctl/types';
 import { FlightCtlLabel } from './extraTypes';
 import { UpdateScheduleMode } from '../utils/time';
