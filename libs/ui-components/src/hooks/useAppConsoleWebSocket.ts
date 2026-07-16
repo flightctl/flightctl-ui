@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useAppContext } from './useAppContext';
+import { msgToBytes } from './terminalWsUtils';
 
 const APP_CONSOLE_CLOSE_CODE = 1000;
 const APP_CONSOLE_CLOSE_REASON = 'client disconnect';
@@ -99,13 +100,16 @@ export const useAppConsoleWebSocket = (
   const forceConnectRef = React.useRef(false);
 
   const sendMessage = React.useCallback((data: string, resize?: boolean) => {
-    if (resize) {
+    const ws = wsRef.current;
+    if (ws?.readyState !== WebSocket.OPEN) {
       return;
     }
-    const ws = wsRef.current;
-    if (ws?.readyState === WebSocket.OPEN) {
-      ws.send(new TextEncoder().encode(data));
+    // Serial stdin is raw bytes; resize uses device-console channel framing (0x4 + size JSON).
+    if (resize) {
+      ws.send(msgToBytes(data, true));
+      return;
     }
+    ws.send(new TextEncoder().encode(data));
   }, []);
 
   const disconnect = React.useCallback(() => {

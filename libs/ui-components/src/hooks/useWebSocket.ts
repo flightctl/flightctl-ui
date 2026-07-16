@@ -1,15 +1,7 @@
 import * as React from 'react';
 import { useTranslation } from './useTranslation';
 import { useAppContext } from './useAppContext';
-
-const msgToBytes = (msg: string, resize?: boolean) => {
-  const encoder = new TextEncoder();
-  const encodedData = encoder.encode(msg);
-  const result = new Uint8Array(encodedData.length + 1);
-  result[0] = resize ? 0x4 : 0x00;
-  result.set(encodedData, 1);
-  return result;
-};
+import { msgToBytes } from './terminalWsUtils';
 
 const isErrorCloseEvent = (evt: CloseEvent) => evt.code !== 1000 && evt.code !== 1001;
 
