@@ -1,0 +1,32 @@
+.fctl-form {
+  width: 100%;
+  container-type: inline-size;
+  container-name: fctl-form;
+}
+
+.fctl-form__content {
+  width: 100%;
+}
+
+/*
+ * Constrain line length only in genuinely wide form areas (e.g. full-page forms).
+ * Wizard and split-view hosts are often < 75rem even on large monitors, so keep
+ * those at full width. Breakpoints are container-based, not viewport-based.
+ */
+@container fctl-form (min-width: 75rem) {
+  .fctl-form--responsive .fctl-form__content {
+    width: 83.333%;
+  }
+}
+
+@container fctl-form (min-width: 90rem) {
+  .fctl-form--responsive .fctl-form__content {
+    width: 75%;
+  }
+}
+
+@container fctl-form (min-width: 105rem) {
+  .fctl-form--responsive .fctl-form__content {
+    width: 66.666%;
+  }
+}
