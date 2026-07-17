@@ -65,6 +65,8 @@ const getFullApiUrl = (path: string): { api: Api; url: string } => {
   return { api: apiName, url: `${apiProxy}/flightctl/api/v1/${path}` };
 };
 
+export const JUST_LOGGED_OUT_KEY = 'flightctl.justLoggedOut';
+
 export const logout = async () => {
   const redirectBase = encodeURIComponent(window.location.origin);
   const response = await fetch(`${apiProxy}/logout?redirect_base=${redirectBase}`, {
@@ -74,7 +76,8 @@ export const logout = async () => {
   if (url) {
     window.location.href = url;
   } else {
-    window.location.reload();
+    sessionStorage.setItem(JUST_LOGGED_OUT_KEY, 'true');
+    window.location.href = '/login';
   }
 };
 

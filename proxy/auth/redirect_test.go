@@ -15,7 +15,7 @@ func TestRedirectBaseMatchesRequest_NormalizesDefaultHTTPSPort(t *testing.T) {
 	r.Host = "ui.example.com:443"
 
 	u := &url.URL{Scheme: "https", Host: "ui.example.com"}
-	if err := redirectBaseMatchesRequest(r, u); err != nil {
+	if err := redirectBaseMatchesRequest(t, r, u); err != nil {
 		t.Fatalf("expected origins to match after normalization, got error: %v", err)
 	}
 }
@@ -27,7 +27,7 @@ func TestRedirectBaseMatchesRequest_NormalizesDefaultHTTPPort(t *testing.T) {
 	r.Host = "ui.example.com:80"
 
 	u := &url.URL{Scheme: "http", Host: "ui.example.com"}
-	if err := redirectBaseMatchesRequest(r, u); err != nil {
+	if err := redirectBaseMatchesRequest(t, r, u); err != nil {
 		t.Fatalf("expected origins to match after normalization, got error: %v", err)
 	}
 }
@@ -40,7 +40,7 @@ func TestRedirectBaseMatchesRequest_RejectsNonDefaultPortMismatch(t *testing.T) 
 	r.Host = "ui.example.com:8443"
 
 	u := &url.URL{Scheme: "https", Host: "ui.example.com"}
-	if err := redirectBaseMatchesRequest(r, u); err == nil {
+	if err := redirectBaseMatchesRequest(t, r, u); err == nil {
 		t.Fatal("expected non-default port mismatch to be rejected")
 	}
 }
