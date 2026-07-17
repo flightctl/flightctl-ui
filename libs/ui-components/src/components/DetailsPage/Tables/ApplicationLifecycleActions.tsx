@@ -79,7 +79,6 @@ type ApplicationLifecycleActionsProps = {
   desiredState?: ApplicationDesiredState;
   appStatus: DeviceApplicationStatus;
   canManageLifecycle: boolean;
-  canOpenConsole?: boolean;
   onOpenConsole?: (name: string) => void;
 };
 
