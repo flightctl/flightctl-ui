@@ -25,12 +25,16 @@ const TabsNav: React.FC<TabsNavProps> = ({ children, 'aria-label': ariaLabel, ta
     setActiveTab(String(newActiveTab));
   }, [location.pathname, tabKeys]);
 
-  // Handle tab selection and navigate to the corresponding route
+  // Navigate to the selected tab path using absolute path from location.pathname
+  // Relative navigate() resolves differently based on the React Router version.
   const handleTabSelect = (_event: React.MouseEvent | React.KeyboardEvent | undefined, tabIndex: string | number) => {
     const tabKey = String(tabIndex);
     setActiveTab(tabKey);
-    // Navigate to the relative path
-    navigate(tabKey);
+
+    const pathname = location.pathname.replace(/\/$/, '');
+    const isOnTabPath = tabKeys.some((key) => pathname.endsWith(`/${key}`));
+    const nextPath = isOnTabPath ? pathname.replace(/\/[^/]+$/, `/${tabKey}`) : `${pathname}/${tabKey}`;
+    navigate(nextPath);
   };
 
   return (
