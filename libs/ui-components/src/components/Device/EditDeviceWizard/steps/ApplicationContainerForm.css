@@ -1,9 +1,3 @@
-.fctl-containerapp__added-ports {
-  /* In PF5 light mode, the border is almost invisible */
-  border: 1px solid gray !important;
-  margin-top: 1rem;
-}
-
 /*
 The tooltip text has the same color as the background, making the text unreadable in light and dark modes.
  Due to Patternfly targets the tooltip content ([class*='pf-v6-c-content']), just using the CSS variables does not work.

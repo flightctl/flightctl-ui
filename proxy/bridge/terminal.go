@@ -2,6 +2,7 @@ package bridge
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/textproto"
@@ -35,10 +36,28 @@ type TerminalBridge struct {
 	TlsConfig *tls.Config
 }
 
+func writeCloseFrame(writeMutex *sync.Mutex, dest *websocket.Conn, code int, text string) {
+	deadline := time.Now().Add(websocketTimeout)
+	msg := websocket.FormatCloseMessage(code, text)
+
+	if writeMutex != nil {
+		writeMutex.Lock()
+		defer writeMutex.Unlock()
+	}
+
+	if err := dest.WriteControl(websocket.CloseMessage, msg, deadline); err != nil {
+		log.Warnf("Failed to write close frame: %v", err)
+	}
+}
+
 func copyMsgs(writeMutex *sync.Mutex, dest, src *websocket.Conn) error {
 	for {
 		messageType, msg, err := src.ReadMessage()
 		if err != nil {
+			var closeErr *websocket.CloseError
+			if errors.As(err, &closeErr) {
+				writeCloseFrame(writeMutex, dest, closeErr.Code, closeErr.Text)
+			}
 			return err
 		}
 
@@ -176,21 +195,12 @@ func isOpenShiftConsolePluginProxyOriginAllowed(
 }
 
 func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
-	isWebsocket := false
-	upgrades := r.Header["Upgrade"]
-
-	for _, upgrade := range upgrades {
-		if strings.ToLower(upgrade) == "websocket" {
-			isWebsocket = true
-			break
-		}
-	}
-
-	if !isWebsocket {
+	if !isWebsocketUpgrade(r) {
 		errMsg := "not a websocket connection"
 		log.Warn(errMsg)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(errMsg))
+		return
 	}
 
 	consoleURL, err := buildDeviceConsoleURL(r)
@@ -200,10 +210,21 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extract deviceId for logging purposes
 	deviceId, _ := strings.CutPrefix(r.URL.Path, "/api/terminal/")
 	log.Infof("Starting terminal session for device: %s", deviceId)
+	t.bridgeWebSocket(w, r, consoleURL, fmt.Sprintf("device: %s", deviceId))
+}
 
+func isWebsocketUpgrade(r *http.Request) bool {
+	for _, upgrade := range r.Header["Upgrade"] {
+		if strings.EqualFold(upgrade, "websocket") {
+			return true
+		}
+	}
+	return false
+}
+
+func (t TerminalBridge) bridgeWebSocket(w http.ResponseWriter, r *http.Request, consoleURL, sessionLabel string) {
 	dialer := &websocket.Dialer{
 		TLSClientConfig: t.TlsConfig,
 	}
@@ -265,7 +286,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 	var writeMutex sync.Mutex // Needed because ticker & copy are writing to frontend in separate goroutines
 
 	defer func() {
-		log.Infof("Closing terminal session for device: %s", deviceId)
+		log.Infof("Closing terminal session for %s", sessionLabel)
 		ticker.Stop()
 		frontend.Close()
 	}()

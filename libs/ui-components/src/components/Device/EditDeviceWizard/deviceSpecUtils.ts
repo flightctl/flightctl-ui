@@ -23,6 +23,7 @@ import {
   KubernetesSecretProviderSpec,
   PatchRequest,
   QuadletApplication,
+  VmApplication,
 } from '@flightctl/types';
 import {
   AppForm,
@@ -37,12 +38,14 @@ import {
   InlineConfigTemplate,
   InlineFileForm,
   KubeSecretTemplate,
+  PortMapping,
   QuadletAppForm,
   RUN_AS_FLIGHTCTL_USER,
   RUN_AS_ROOT_USER,
   SingleContainerAppForm,
   SpecConfigTemplate,
   SystemdUnitFormValue,
+  VmAppForm,
   isGitConfigTemplate,
   isGitProviderSpec,
   isHttpConfigTemplate,
@@ -53,6 +56,12 @@ import {
   isKubeProviderSpec,
   isKubeSecretTemplate,
 } from '../../../types/deviceSpec';
+import {
+  formatPublishPorts,
+  getVmYamlContent,
+  parseVmYamlForForm,
+  vmYamlHasAdvancedSettings,
+} from '../../../utils/vmApplications';
 
 const DEFAULT_INLINE_FILE_MODE = 420; // In Octal: 0644
 const DEFAULT_INLINE_FILE_USER = 'root';
@@ -359,6 +368,11 @@ const hasQuadletAppChanged = (
   return hasRunAsChanged(current.runAs, updated.runAs);
 };
 
+const hasVmAppChanged = (current: VmApplication, updated: VmApplication): boolean =>
+  hasStringChanged(current.name, updated.name) ||
+  hasStringChanged(getVmYamlContent(current), getVmYamlContent(updated)) ||
+  hasStringChanged(JSON.stringify(current.publishPorts ?? []), JSON.stringify(updated.publishPorts ?? []));
+
 const hasApplicationChanged = (current: ApplicationProviderSpec, updated: ApplicationProviderSpec): boolean => {
   if (current.appType !== updated.appType) {
     return true;
@@ -378,6 +392,8 @@ const hasApplicationChanged = (current: ApplicationProviderSpec, updated: Applic
       return hasQuadletAppChanged(current as QuadletApplication, updated as QuadletApplication, currentSpectType);
     case AppType.AppTypeCompose:
       return hasComposeAppChanged(current as ComposeApplication, updated as ComposeApplication, currentSpectType);
+    case AppType.AppTypeVm:
+      return hasVmAppChanged(current as VmApplication, updated as VmApplication);
   }
 };
 
@@ -471,7 +487,7 @@ const toApiContainerApp = (app: SingleContainerAppForm): ContainerApplication =>
     containerApp.name = app.name;
   }
   if (app.ports.length > 0) {
-    containerApp.ports = app.ports.map((p) => `${p.hostPort}:${p.containerPort}`);
+    containerApp.ports = app.ports.map((p) => `${p.hostPort}:${p.targetPort}`);
   }
 
   const cpu = app.cpuLimit;
@@ -513,6 +529,71 @@ const toApiQuadletApp = (app: QuadletAppForm): QuadletApplication => {
   return { ...baseApp, appType: AppType.AppTypeQuadlet, runAs: app.runAs || RUN_AS_ROOT_USER };
 };
 
+export const generateVmYaml = (app: VmAppForm): string => {
+  const userData = app.cloudInit || '#cloud-config';
+
+  const vm = {
+    apiVersion: 'kubevirt.io/v1',
+    kind: 'VirtualMachine',
+    metadata: {
+      name: app.name,
+    },
+    spec: {
+      template: {
+        spec: {
+          domain: {
+            cpu: {
+              cores: app.cpuCores,
+            },
+            memory: {
+              guest: app.memory,
+            },
+            devices: {
+              disks: [
+                {
+                  name: 'containerdisk',
+                  disk: { bus: 'virtio' },
+                },
+                {
+                  name: 'cloudinitdisk',
+                  disk: { bus: 'virtio' },
+                },
+              ],
+            },
+          },
+          volumes: [
+            {
+              name: 'containerdisk',
+              containerDisk: {
+                image: app.diskImage,
+              },
+            },
+            {
+              name: 'cloudinitdisk',
+              cloudInitNoCloud: {
+                userData,
+              },
+            },
+          ],
+        },
+      },
+    },
+  };
+
+  return yaml.dump(vm, { lineWidth: -1 });
+};
+
+const toApiVmApp = (app: VmAppForm): VmApplication => {
+  const publishPorts = formatPublishPorts(app.publishPorts);
+  const vmYaml = app.configMode === 'yaml' ? app.vmYaml : generateVmYaml(app);
+  return {
+    appType: AppType.AppTypeVm,
+    name: app.name,
+    inline: [{ path: 'vm.yaml', content: vmYaml }],
+    ...(publishPorts.length > 0 ? { publishPorts } : {}),
+  };
+};
+
 export const toApiApplication = (app: AppForm): ApplicationProviderSpec => {
   switch (app.appType) {
     case AppType.AppTypeHelm:
@@ -523,6 +604,8 @@ export const toApiApplication = (app: AppForm): ApplicationProviderSpec => {
       return toApiQuadletApp(app as QuadletAppForm);
     case AppType.AppTypeCompose:
       return toApiComposeApp(app as ComposeAppForm);
+    case AppType.AppTypeVm:
+      return toApiVmApp(app as VmAppForm);
     default:
       throw new Error('Unknown application type');
   }
@@ -544,6 +627,54 @@ const toFormVolumes = (volumes?: ApplicationVolume[]): ApplicationVolumeForm[] =
   });
 };
 
+const createDefaultVmAppForm = (name: string = ''): VmAppForm => ({
+  appType: AppType.AppTypeVm,
+  specType: AppSpecType.INLINE,
+  name,
+  configMode: 'form',
+  hasAdvancedVmSettings: false,
+  vmYaml: '',
+  diskImage: '',
+  cpuCores: 2,
+  memory: '',
+  enableSshKey: false,
+  sshPublicKey: '',
+  enablePassword: false,
+  password: '',
+  cloudInit: '',
+  publishPorts: [],
+});
+
+const toVmAppForm = (vmApp: VmApplication | undefined): VmAppForm => {
+  const defaults = createDefaultVmAppForm(vmApp?.name || '');
+  if (!vmApp) {
+    return defaults;
+  }
+
+  const kubeVirtYaml = getVmYamlContent(vmApp);
+  const hasAdvanced = kubeVirtYaml ? vmYamlHasAdvancedSettings(kubeVirtYaml) : false;
+  const parsed = !hasAdvanced ? parseVmYamlForForm(kubeVirtYaml) : null;
+  const configMode = kubeVirtYaml && (hasAdvanced || !parsed) ? 'yaml' : parsed ? 'form' : defaults.configMode;
+  const vmYaml = configMode === 'yaml' ? kubeVirtYaml || '' : '';
+
+  return {
+    ...defaults,
+    name: vmApp.name || '',
+    configMode,
+    hasAdvancedVmSettings: hasAdvanced,
+    vmYaml,
+    diskImage: parsed?.diskImage || defaults.diskImage,
+    cpuCores: parsed?.cpuCoresNumber || defaults.cpuCores,
+    memory: parsed?.memory || defaults.memory,
+    enableSshKey: parsed?.enableSshKey ?? defaults.enableSshKey,
+    sshPublicKey: parsed?.sshPublicKey || defaults.sshPublicKey,
+    enablePassword: parsed?.enablePassword ?? defaults.enablePassword,
+    password: parsed?.password || defaults.password,
+    cloudInit: parsed?.cloudInit || defaults.cloudInit,
+    publishPorts: vmApp.publishPorts?.map(toFormPortMappingWithProtocol) || [],
+  };
+};
+
 const toFormApps = (app: ApplicationProviderSpec): AppForm => {
   switch (app.appType) {
     case AppType.AppTypeContainer:
@@ -554,6 +685,8 @@ const toFormApps = (app: ApplicationProviderSpec): AppForm => {
       return toQuadletAppForm(app as QuadletApplication);
     case AppType.AppTypeCompose:
       return toComposeAppForm(app as ComposeApplication);
+    case AppType.AppTypeVm:
+      return toVmAppForm(app as VmApplication);
     default:
       throw new Error('Unknown application type');
   }
@@ -651,13 +784,22 @@ const getRunAsUser = (app: ContainerApplication | QuadletApplication | undefined
   return RUN_AS_FLIGHTCTL_USER;
 };
 
-const toContainerAppForm = (containerApp: ContainerApplication | undefined): SingleContainerAppForm => {
-  const ports =
-    containerApp?.ports?.map((portString) => {
-      const [hostPort, containerPort] = portString.split(':');
-      return { hostPort: hostPort || '', containerPort: containerPort || '' };
-    }) || [];
+// Parses ports that have a protocol
+export const toFormPortMappingWithProtocol = (portStr: string): Required<PortMapping> => {
+  const portTokens = portStr.split('/');
+  const [hostPort, targetPort] = portTokens[0].split(':');
+  const protocol = portTokens[1] || 'tcp';
+  return { hostPort: hostPort || '', targetPort: targetPort || '', protocol: protocol || '' };
+};
 
+// Parses ports that don't have a protocol
+export const toFormPortMapping = (portStr: string): PortMapping => {
+  const [hostPort, targetPort] = portStr.split(':');
+  return { hostPort: hostPort || '', targetPort: targetPort || '' };
+};
+
+const toContainerAppForm = (containerApp: ContainerApplication | undefined): SingleContainerAppForm => {
+  const ports = containerApp?.ports?.map(toFormPortMapping) || [];
   const limits = containerApp?.resources?.limits;
 
   return {
@@ -737,6 +879,9 @@ export const createInitialAppForm = (appType: AppType, name: string = ''): AppFo
       break;
     case AppType.AppTypeCompose:
       app = toComposeAppForm(undefined);
+      break;
+    case AppType.AppTypeVm:
+      app = toVmAppForm(undefined);
       break;
     default:
       throw new Error('Unknown application type');

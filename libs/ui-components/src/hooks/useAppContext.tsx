@@ -84,6 +84,7 @@ export type AppContextProps = {
   fetch: {
     apiProxy: string;
     getWsEndpoint: (deviceId: string) => string;
+    getAppConsoleWsEndpoint: (deviceId: string, appName: string) => string;
     get: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
     post: <TRequest, TResponse = TRequest>(
       kind: string,
@@ -123,6 +124,7 @@ export const AppContext = React.createContext<AppContextProps>({
   fetch: {
     apiProxy: '',
     getWsEndpoint: () => '',
+    getAppConsoleWsEndpoint: () => '',
     get: async () => ({}) as any,
     post: async () => ({}) as any,
     put: async () => ({}) as any,

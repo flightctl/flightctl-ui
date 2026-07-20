@@ -31,6 +31,7 @@ import ApplicationImageForm from './ApplicationImageForm';
 import ApplicationInlineForm from './ApplicationInlineForm';
 import ApplicationContainerForm from './ApplicationContainerForm';
 import ApplicationHelmForm from './ApplicationHelmForm';
+import ApplicationVmForm from './ApplicationVmForm';
 import ApplicationVolumeForm from './ApplicationVolumeForm';
 import ApplicationVariablesForm from './ApplicationVariablesForm';
 import ApplicationIntegritySettings from './ApplicationIntegritySettings';
@@ -56,14 +57,16 @@ const ApplicationSection = ({
   const isHelm = app.appType === AppType.AppTypeHelm;
   const isQuadlet = app.appType === AppType.AppTypeQuadlet;
   const isCompose = app.appType === AppType.AppTypeCompose;
+  const isVm = app.appType === AppType.AppTypeVm;
 
   // Each AppForm type has all data structures it needs initialized with safe defaults (eg. empty arrays, etc).
   // However, when the user switches to a type that doesn't have those fields, we must reset the app to define the missing fields.
   const isContainerIncomplete = isContainer && !('ports' in app);
   const isHelmIncomplete = isHelm && !('valuesFiles' in app);
   const isQuadletComposeIncomplete = (isQuadlet || isCompose) && !('volumes' in app);
+  const isVmIncomplete = isVm && !('diskImage' in app);
 
-  const shouldResetApp = isContainerIncomplete || isHelmIncomplete || isQuadletComposeIncomplete;
+  const shouldResetApp = isContainerIncomplete || isHelmIncomplete || isQuadletComposeIncomplete || isVmIncomplete;
 
   const appTypesOptions = appTypeOptions(t);
 
@@ -79,7 +82,7 @@ const ApplicationSection = ({
       title={app.name || t('Application {{ appNum }}', { appNum: index + 1 })}
       fieldName={appFieldName}
     >
-      <Grid hasGutter>
+      <Grid span={12} hasGutter>
         {managedByCatalog && (
           <GridItem>
             <Alert isInline variant="info" title={t('Application is managed by Software Catalog')} />
@@ -94,7 +97,9 @@ const ApplicationSection = ({
           />
         </FormGroup>
 
-        {isContainer ? (
+        {isVm ? (
+          <ApplicationVmForm index={index} isReadOnly={isReadOnly} />
+        ) : isContainer ? (
           <ApplicationContainerForm index={index} isReadOnly={isReadOnly} />
         ) : isHelm ? (
           <ApplicationHelmForm index={index} isReadOnly={isReadOnly} />
@@ -164,9 +169,9 @@ const ApplicationSection = ({
           </>
         )}
 
-        {(isQuadlet || isContainer) && <ApplicationIntegritySettings index={index} isReadOnly={isReadOnly} />}
+        {(isQuadlet || isContainer) && !isVm && <ApplicationIntegritySettings index={index} isReadOnly={isReadOnly} />}
 
-        {!isHelm && (
+        {!isHelm && !isVm && (
           <>
             <ApplicationVolumeForm
               appFieldName={appFieldName}
@@ -200,7 +205,7 @@ const ApplicationTemplates = ({
       content={t('Define the application workloads that shall run on the device.')}
     >
       <>
-        <Content component="p">
+        <Content>
           {t(
             'Configure containerized applications and services that will run on your fleet devices. You can deploy single containers, Quadlet applications for advanced container orchestration or inline applications with custom files.',
           )}

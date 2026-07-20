@@ -12,26 +12,11 @@ import {
   ImageExport,
   ResourceKind,
 } from '@flightctl/types/imagebuilder';
-import { validImageBuildName } from '../../form/validations';
+import { validImageBuildName, validateSshPublicKey } from '../../form/validations';
 import { ImageBuildFormValues } from './types';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
 import { defaultInitialValues } from '../../ImagePromotion/utils';
 import { getImagePromotionValidationSchema } from '../../ImagePromotion/utils';
-
-export const PUBLIC_KEY_MAX_LENGTH = 8 * 1024; // (8 KB)
-
-const VALID_SSH_PUBLIC_KEY_TYPES = [
-  'ssh-rsa',
-  'ssh-ed25519',
-  'ecdsa-sha2-nistp256',
-  'ecdsa-sha2-nistp384',
-  'ecdsa-sha2-nistp521',
-  'ssh-dss',
-];
-
-const SSH_PUBLIC_KEY_BASE64_DATA_REGEX = /^(?=.{50,}$)[A-Za-z0-9+/]+=*$/;
-// Characters that could be used for injection attacks
-const MALICIOUS_PUBLIC_KEY_CHARACTERS = /[;|&`()[\]{}<>"'\\\t$]/;
 
 const OCI_IMAGE_NAME_MAX_LENGTH = 255;
 const OCI_IMAGE_NAME_REGEX = /^[a-z0-9]+(?:[._-]+[a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-]+[a-z0-9]+)*)*$/;
@@ -70,41 +55,6 @@ export const getImageTagValidationError = (value: string, t: TFunction): string 
   if (!OCI_IMAGE_TAG_REGEX.test(value)) {
     return t('Image tag must start with a letter, number, or underscore.');
   }
-  return undefined;
-};
-
-const getPublicKeyValidationError = (publicKey: string, t: TFunction): string | undefined => {
-  if (publicKey.length > PUBLIC_KEY_MAX_LENGTH) {
-    return t('SSH public key is too long');
-  }
-
-  // Allow newlines only at the end
-  const trimmedKey = publicKey.replace(/[\r\n]+$/g, '');
-  if (/[\r\n]/.test(trimmedKey)) {
-    return t('A single public key can be provided only');
-  }
-
-  if (MALICIOUS_PUBLIC_KEY_CHARACTERS.test(trimmedKey)) {
-    return t('Invalid SSH public key');
-  }
-
-  const parts = trimmedKey.trim().split(/\s+/);
-  if (parts.length < 2) {
-    return t('Invalid SSH public key format. Expected: "[TYPE] key [comment]"');
-  }
-
-  const keyType = parts[0];
-  if (!VALID_SSH_PUBLIC_KEY_TYPES.includes(keyType)) {
-    return t('Unsupported SSH public key type. Supported types: {{supportedTypes}}', {
-      supportedTypes: VALID_SSH_PUBLIC_KEY_TYPES.join(', '),
-    });
-  }
-
-  const base64Data = parts[1];
-  if (!SSH_PUBLIC_KEY_BASE64_DATA_REGEX.test(base64Data)) {
-    return t('Invalid SSH public key data');
-  }
-
   return undefined;
 };
 
@@ -166,7 +116,7 @@ export const getValidationSchema = (t: TFunction) => {
                 if (!publicKey) {
                   return true;
                 }
-                const error = getPublicKeyValidationError(publicKey, t);
+                const error = validateSshPublicKey(publicKey, t);
                 return error ? this.createError({ message: error }) : true;
               })
           : Yup.string(),

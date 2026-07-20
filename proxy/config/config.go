@@ -12,6 +12,7 @@ var (
 	BridgePort             = ":" + getEnvVar("API_PORT", "3001")
 	FctlApiUrl             = getEnvUrlVar("FLIGHTCTL_SERVER", "https://localhost:3443")
 	FctlApiExternalUrl     = getEnvUrlVar("FLIGHTCTL_SERVER_EXTERNAL", "https://localhost:3443")
+	FctlRemoteAccessUrl    = getEnvUrlVar("FLIGHTCTL_REMOTE_ACCESS_SERVER", "https://localhost:3444")
 	FctlImageBuilderApiUrl = getEnvUrlVar("FLIGHTCTL_IMAGEBUILDER_SERVER", "https://localhost:8445")
 	FctlApiInsecure        = getEnvVar("FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY", "false")
 	FctlCliArtifactsUrl    = getEnvUrlVar("FLIGHTCTL_CLI_ARTIFACTS_SERVER", "http://localhost:8090")

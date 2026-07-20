@@ -65,6 +65,15 @@ export FLIGHTCTL_SERVER="https://$EXTERNAL_IP:3443"
 export FLIGHTCTL_SERVER_EXTERNAL="https://api.$EXTERNAL_IP.nip.io:3443"
 export FLIGHTCTL_IMAGEBUILDER_SERVER="https://$EXTERNAL_IP:8445"
 
+# Remote access (app console) - required when flightctl-remote-access is deployed
+if kubectl get service flightctl-remote-access -n "$flightctl_namespace" --context kind-kind >/dev/null 2>&1; then
+    export FLIGHTCTL_REMOTE_ACCESS_SERVER="https://$EXTERNAL_IP:3444"
+    echo "Autodetected: remote access (app console) at $FLIGHTCTL_REMOTE_ACCESS_SERVER ✅" >&2
+else
+    unset FLIGHTCTL_REMOTE_ACCESS_SERVER
+    echo "Autodetected: remote access (app console) unavailable ❌" >&2
+fi
+
 # CLI artifacts - get setting from kind cluster, unless it has been configured already
 if [ -z "$ENABLE_CLI_ARTIFACTS" ]; then
     ENABLE_CLI_ARTIFACTS=$(detect_service_setting "CLI artifacts" "flightctl-cli-artifacts")
@@ -92,6 +101,7 @@ echo "🌐 Environment variables set:" >&2
 echo "  FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY=$FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY" >&2
 echo "  FLIGHTCTL_SERVER=$FLIGHTCTL_SERVER" >&2
 echo "  FLIGHTCTL_SERVER_EXTERNAL=$FLIGHTCTL_SERVER_EXTERNAL" >&2
+echo "  FLIGHTCTL_REMOTE_ACCESS_SERVER=${FLIGHTCTL_REMOTE_ACCESS_SERVER:-'(not available)'}" >&2
 echo "  FLIGHTCTL_IMAGEBUILDER_SERVER=$FLIGHTCTL_IMAGEBUILDER_SERVER" >&2
 echo "  FLIGHTCTL_CLI_ARTIFACTS_SERVER=${FLIGHTCTL_CLI_ARTIFACTS_SERVER:-'(disabled)'}" >&2
 echo "  FLIGHTCTL_ALERTMANAGER_PROXY=${FLIGHTCTL_ALERTMANAGER_PROXY:-'(disabled)'}" >&2

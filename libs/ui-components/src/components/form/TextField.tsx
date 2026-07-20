@@ -11,7 +11,10 @@ export interface TextFieldProps extends Omit<TextInputProps, 'onChange'> {
 }
 
 const TextField = React.forwardRef(
-  ({ helperText, onChangeCustom, showErrorMsg = true, ...props }: TextFieldProps, ref: React.Ref<HTMLInputElement>) => {
+  (
+    { helperText, onChangeCustom, showErrorMsg = true, style, ...props }: TextFieldProps,
+    ref: React.Ref<HTMLInputElement>,
+  ) => {
     const [field, meta, { setValue, setTouched }] = useField({
       name: props.name,
     });
@@ -28,7 +31,7 @@ const TextField = React.forwardRef(
     const hasError = meta.touched && !!meta.error;
 
     return (
-      <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId}>
+      <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId} style={style}>
         <TextInput
           {...field}
           {...props}

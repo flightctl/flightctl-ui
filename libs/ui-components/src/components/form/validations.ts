@@ -24,6 +24,7 @@ import {
   SpecConfigTemplate,
   SystemdUnitFormValue,
   UpdatePolicyForm,
+  VmAppForm,
   getAppIdentifier,
   isGitConfigTemplate,
   isHttpConfigTemplate,
@@ -31,7 +32,9 @@ import {
   isKubeSecretTemplate,
 } from '../../types/deviceSpec';
 import { labelToString } from '../../utils/labels';
+import { isValidKubernetesQuantity } from '../../utils/kubernetesQuantity';
 import { UpdateScheduleMode } from '../../utils/time';
+import { VM_PORT_PROTOCOLS, loadYamlDocument, parseVmCloudInitUserData } from '../../utils/vmApplications';
 
 const SYSTEMD_PATTERNS_REGEXP =
   /^[0-9a-zA-Z:\-_.\\\[\]!\-\*\?]+(@[0-9a-zA-Z:\-_.\\\[\]!\-\*\?]+)?(\.[a-zA-Z\[\]!\-\*\?]+)?$/;
@@ -644,24 +647,74 @@ export const isValidPortNumber = (port: string): boolean => {
 
 export const isDuplicatePortMapping = (
   hostPort: string,
-  containerPort: string,
+  targetPort: string,
   existingPorts: PortMapping[] = [],
 ): boolean => {
-  if (!hostPort || !containerPort) {
+  if (!hostPort || !targetPort) {
     return false;
   }
-  return existingPorts.some((port) => port.hostPort === hostPort && port.containerPort === containerPort);
+  return existingPorts.some((port) => port.hostPort === hostPort && port.targetPort === targetPort);
 };
 
 export const isValidPortMapping = (
   hostPort: string,
-  containerPort: string,
+  targetPort: string,
   existingPorts: PortMapping[] = [],
 ): boolean => {
-  if (!isValidPortNumber(hostPort) || !isValidPortNumber(containerPort)) {
+  if (!isValidPortNumber(hostPort) || !isValidPortNumber(targetPort)) {
     return false;
   }
-  return !isDuplicatePortMapping(hostPort, containerPort, existingPorts);
+  return !isDuplicatePortMapping(hostPort, targetPort, existingPorts);
+};
+
+export const PUBLIC_KEY_MAX_LENGTH = 8 * 1024; // (8 KB)
+
+const VALID_SSH_PUBLIC_KEY_TYPES = [
+  'ssh-rsa',
+  'ssh-ed25519',
+  'ecdsa-sha2-nistp256',
+  'ecdsa-sha2-nistp384',
+  'ecdsa-sha2-nistp521',
+  'ssh-dss',
+];
+
+const SSH_PUBLIC_KEY_BASE64_DATA_REGEX = /^(?=.{50,}$)[A-Za-z0-9+/]+=*$/;
+// Characters that could be used for injection attacks
+const MALICIOUS_PUBLIC_KEY_CHARACTERS = /[;|&`()[\]{}<>"'\\\t$]/;
+
+export const validateSshPublicKey = (publicKey: string, t: TFunction): string | undefined => {
+  if (publicKey.length > PUBLIC_KEY_MAX_LENGTH) {
+    return t('SSH public key is too long');
+  }
+
+  // Allow newlines only at the end
+  const trimmedKey = publicKey.replace(/[\r\n]+$/g, '');
+  if (/[\r\n]/.test(trimmedKey)) {
+    return t('A single public key can be provided only');
+  }
+
+  if (MALICIOUS_PUBLIC_KEY_CHARACTERS.test(trimmedKey)) {
+    return t('Invalid SSH public key');
+  }
+
+  const parts = trimmedKey.trim().split(/\s+/);
+  if (parts.length < 2) {
+    return t('Invalid SSH public key format. Expected: "[TYPE] key [comment]"');
+  }
+
+  const keyType = parts[0];
+  if (!VALID_SSH_PUBLIC_KEY_TYPES.includes(keyType)) {
+    return t('Unsupported SSH public key type. Supported types: {{supportedTypes}}', {
+      supportedTypes: VALID_SSH_PUBLIC_KEY_TYPES.join(', '),
+    });
+  }
+
+  const base64Data = parts[1];
+  if (!SSH_PUBLIC_KEY_BASE64_DATA_REGEX.test(base64Data)) {
+    return t('Invalid SSH public key data');
+  }
+
+  return undefined;
 };
 
 export const validateCPULimit = (cpu: string | undefined): boolean => {
@@ -688,6 +741,14 @@ export const validateMemoryLimit = (memory: string | undefined): boolean => {
     return false;
   }
   return true;
+};
+
+export const validateKubevirtMemoryGuest = (memory: string | undefined): boolean => {
+  if (!memory) {
+    return true;
+  }
+
+  return isValidKubernetesQuantity(memory);
 };
 
 const ociImageSchema = (t: TFunction) =>
@@ -743,6 +804,42 @@ export const composeQuadletVolumesSchema = (t: TFunction) =>
     }),
   );
 
+const portNumberField = (t: TFunction, requiredMessage: string, testName: string) =>
+  Yup.string()
+    .required(requiredMessage)
+    .test(testName, (value, testContext) => {
+      const error = validatePortNumber(value || '', t);
+      return error ? testContext.createError({ message: error }) : true;
+    });
+
+const containerAppPortMappingSchema = (t: TFunction) =>
+  Yup.array().of(
+    Yup.object()
+      .shape({
+        hostPort: portNumberField(t, t('Host port is required'), 'valid-host-port'),
+        targetPort: portNumberField(t, t('Container port is required'), 'valid-target-port'),
+      })
+      .required(),
+  );
+
+const vmAppPortMappingSchema = (t: TFunction) =>
+  Yup.array().of(
+    Yup.object()
+      .shape({
+        hostPort: portNumberField(t, t('Host port is required'), 'valid-host-port'),
+        targetPort: portNumberField(t, t('VM port is required'), 'valid-target-port'),
+        protocol: Yup.string()
+          .required(t('Protocol is required'))
+          .test('valid-protocol', (value, testContext) => {
+            const normalizedProtocol = (value || 'tcp').toLowerCase();
+            return VM_PORT_PROTOCOLS.includes(normalizedProtocol as (typeof VM_PORT_PROTOCOLS)[number])
+              ? true
+              : testContext.createError({ message: t('Invalid port values') });
+          }),
+      })
+      .required(),
+  );
+
 export const validApplicationsSchema = (t: TFunction) => {
   return Yup.array()
     .of(
@@ -756,24 +853,7 @@ export const validApplicationsSchema = (t: TFunction) => {
             appType: Yup.string().oneOf([AppType.AppTypeContainer]).required(t('Application type is required')),
             name: validApplicationAndVolumeName(t),
             image: requiredOciImageSchema(t),
-            ports: Yup.array().of(
-              Yup.object()
-                .shape({
-                  hostPort: Yup.string()
-                    .required(t('Host port is required'))
-                    .test('valid-host-port', (value, testContext) => {
-                      const error = validatePortNumber(value || '', t);
-                      return error ? testContext.createError({ message: error }) : true;
-                    }),
-                  containerPort: Yup.string()
-                    .required(t('Container port is required'))
-                    .test('valid-container-port', (value, testContext) => {
-                      const error = validatePortNumber(value || '', t);
-                      return error ? testContext.createError({ message: error }) : true;
-                    }),
-                })
-                .required(),
-            ),
+            ports: containerAppPortMappingSchema(t),
             cpuLimit: Yup.string().test(
               'valid-cpu-format',
               t('CPU limit is invalid. Use a positive number of cores (e.g. 0.5 or 2).'),
@@ -812,6 +892,119 @@ export const validApplicationsSchema = (t: TFunction) => {
               return true;
             }),
             valuesFiles: Yup.array().of(validHelmValuesFile(t)),
+          });
+        }
+
+        // VM applications
+        if (value.appType === AppType.AppTypeVm) {
+          return Yup.object<VmAppForm>().shape({
+            specType: Yup.string()
+              .oneOf([AppSpecType.INLINE])
+              .required(t('Definition source must be inline for this type of applications')),
+            appType: Yup.string().oneOf([AppType.AppTypeVm]).required(t('Application type is required')),
+            name: validApplicationAndVolumeName(t).required(t('Name is required for VM applications.')),
+            configMode: Yup.string().oneOf(['form', 'yaml']).required(),
+            vmYaml: Yup.string().when('configMode', {
+              is: 'yaml',
+              then: (schema) =>
+                schema
+                  .required(t('VM specification is required.'))
+                  .test(
+                    'valid-kubevirt-virtual-machine',
+                    t(
+                      'Provide a valid KubeVirt VirtualMachine manifest with metadata.name matching the application name.',
+                    ),
+                    function validateVmYamlManifest(vmYaml) {
+                      if (!vmYaml) {
+                        return true;
+                      }
+
+                      const doc = loadYamlDocument(vmYaml);
+                      if (!doc) {
+                        return this.createError({ message: t('YAML manifest could not be parsed.') });
+                      }
+                      if (!doc || typeof doc !== 'object') {
+                        return this.createError({ message: t('Invalid KubeVirt VirtualMachine manifest.') });
+                      }
+                      if (doc.apiVersion !== 'kubevirt.io/v1' || doc.kind !== 'VirtualMachine') {
+                        return this.createError({
+                          message: t(
+                            'KubeVirt VirtualMachine manifest must have apiVersion: kubevirt.io/v1 and kind: VirtualMachine.',
+                          ),
+                        });
+                      }
+                      if (!doc.spec || typeof doc.spec !== 'object') {
+                        return this.createError({
+                          message: t('KubeVirt VirtualMachine manifest must have a spec object.'),
+                        });
+                      }
+                      const appName = (this.parent as VmAppForm).name;
+                      if (appName && doc.metadata?.name !== appName) {
+                        return this.createError({
+                          message: t(
+                            'KubeVirt VirtualMachine manifest must have metadata.name matching the application name.',
+                          ),
+                        });
+                      }
+                      return true;
+                    },
+                  ),
+            }),
+            diskImage: Yup.string().when('configMode', {
+              is: 'form',
+              then: () => requiredOciImageSchema(t, t('Disk image is required for VM applications.')),
+            }),
+            cpuCores: Yup.number().when('configMode', {
+              is: 'form',
+              then: (schema) =>
+                schema
+                  .integer(t('CPU cores must be a whole number.'))
+                  .min(1, t('CPU cores must be at least 1.'))
+                  .required(t('CPU cores is required.')),
+            }),
+            memory: Yup.string().when('configMode', {
+              is: 'form',
+              then: (schema) =>
+                schema
+                  .required(t('Memory is required.'))
+                  .test(
+                    'valid-kubevirt-memory-guest',
+                    t('Provide a valid KubeVirt memory value.'),
+                    validateKubevirtMemoryGuest,
+                  ),
+            }),
+            cloudInit: Yup.string().when('configMode', {
+              is: 'form',
+              then: (schema) =>
+                schema.test('valid-cloud-init-ssh-key', function (cloudInitValue) {
+                  const parsed = parseVmCloudInitUserData(cloudInitValue);
+                  if (parsed.enableSshKey && parsed.sshPublicKey) {
+                    const error = validateSshPublicKey(parsed.sshPublicKey, t);
+                    if (error) {
+                      return this.createError({ message: error });
+                    }
+                  }
+                  return true;
+                }),
+            }),
+            sshPublicKey: Yup.string().when(['configMode', 'enableSshKey'], {
+              is: (configMode: string, enableSshKey: boolean) => configMode === 'form' && enableSshKey,
+              then: (schema) =>
+                schema
+                  .required(t('SSH public key is required when SSH is enabled.'))
+                  .test('flightctl-ssh-public-key', function (publicKey) {
+                    if (!publicKey) {
+                      return true;
+                    }
+                    const error = validateSshPublicKey(publicKey, t);
+                    return error ? this.createError({ message: error }) : true;
+                  }),
+            }),
+            password: Yup.string().when(['configMode', 'enablePassword'], {
+              is: (configMode: string, enablePassword: boolean) => configMode === 'form' && enablePassword,
+              then: (schema) => schema.required(t('Password is required when password authentication is enabled.')),
+            }),
+            publishPorts: vmAppPortMappingSchema(t),
           });
         }
 
