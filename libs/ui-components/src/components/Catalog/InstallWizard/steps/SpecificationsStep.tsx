@@ -240,10 +240,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
   const newDeviceRadioRef = React.useRef<HTMLSpanElement>(null);
 
   const { fleets, isLoading: fleetsLoading } = useFleets({});
-  const { devices, isLoading: devicesLoading } = useDevicesPaginated({
-    onlyDecommissioned: false,
-    onlyFleetless: true,
-  });
+  const { devices, isLoading: devicesLoading } = useDevicesPaginated();
 
   const unmanagedFleetsCount = fleets.filter((f) => !f.metadata?.owner).length;
 

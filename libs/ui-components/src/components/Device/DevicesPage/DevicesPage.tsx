@@ -5,7 +5,7 @@ import { DeviceList } from '@flightctl/types';
 import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { useTablePagination } from '../../../hooks/useTablePagination';
+import { useResetPaginationOnFilterChange, useTablePagination } from '../../../hooks/useTablePagination';
 import { useDevices } from './useDevices';
 import { useDeviceBackendFilters } from './useDeviceBackendFilters';
 
@@ -20,6 +20,7 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
   const { t } = useTranslation();
 
   const {
+    filterKey,
     textFilters,
     clearTextFilters,
     setTextFilter,
@@ -36,6 +37,8 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
   const [onlyDecommissioned, setOnlyDecommissioned] = React.useState<boolean>(false);
 
   const { currentPage, setCurrentPage, onPageFetched, nextContinue, itemCount } = useTablePagination<DeviceList>();
+
+  useResetPaginationOnFilterChange(`${filterKey}|${onlyDecommissioned}`, setCurrentPage);
 
   const {
     devices: data,
