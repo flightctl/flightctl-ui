@@ -50,6 +50,7 @@ import './CatalogPage.css';
 type CatalogPageContentProps = {
   canInstall: boolean;
   targetHasOwner?: boolean;
+  targetHasPackageMode?: boolean;
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
   showCatalogMgmt?: boolean;
   canEditCatalog?: boolean;
@@ -95,10 +96,16 @@ const CatalogEmptyState = ({ hasFilters, showCatalogMgmt, isUpdating }: CatalogE
   );
 };
 
-const CatalogPageFilter = ({ catalogFilter }: { catalogFilter: CatalogFilter }) => {
+const CatalogPageFilter = ({
+  catalogFilter,
+  hasPackageMode,
+}: {
+  catalogFilter: CatalogFilter;
+  hasPackageMode?: boolean;
+}) => {
   const { t } = useTranslation();
 
-  const handleCheck = (event: React.ChangeEvent<HTMLInputElement>, item: TreeViewDataItem) => {
+  const handleCheck = (_event: React.ChangeEvent<HTMLInputElement>, item: TreeViewDataItem) => {
     const id = item.id as string;
 
     if (id === CatalogItemCategory.CatalogItemCategoryApplication) {
@@ -120,13 +127,6 @@ const CatalogPageFilter = ({ catalogFilter }: { catalogFilter: CatalogFilter }) 
   const anyAppTypeChecked = appTypeIds.some((t) => catalogFilter.itemType.includes(t));
 
   const filterData: TreeViewDataItem[] = [
-    {
-      name: t('Operating system'),
-      id: CatalogItemType.CatalogItemTypeOS,
-      checkProps: {
-        checked: osTypeChecked,
-      },
-    },
     {
       name: t('Application'),
       id: CatalogItemCategory.CatalogItemCategoryApplication,
@@ -177,6 +177,15 @@ const CatalogPageFilter = ({ catalogFilter }: { catalogFilter: CatalogFilter }) 
       ],
     },
   ];
+  if (!hasPackageMode) {
+    filterData.unshift({
+      name: t('Operating system'),
+      id: CatalogItemType.CatalogItemTypeOS,
+      checkProps: {
+        checked: osTypeChecked,
+      },
+    });
+  }
 
   return <TreeView hasAnimations data={filterData} onCheck={handleCheck} hasCheckboxes />;
 };
@@ -184,12 +193,15 @@ const CatalogPageFilter = ({ catalogFilter }: { catalogFilter: CatalogFilter }) 
 export const CatalogPageContent = ({
   canInstall,
   targetHasOwner,
+  targetHasPackageMode,
   onInstall,
   showCatalogMgmt,
   canEditCatalog,
   canDeleteCatalog,
   targetSet,
 }: CatalogPageContentProps) => {
+  const { t } = useTranslation();
+
   const { shouldShowCards, permissions: catalogPermissions } = useLandingPagePermissions();
   const [showGettingStarted, setShowGettingStarted] = React.useState(false);
   const [catalogList, catalogLoading, catalogErr, refetchCatalogs] = useFetchPeriodically<CatalogList>({
@@ -199,10 +211,13 @@ export const CatalogPageContent = ({
   const [selectedItem, setSelectedItem] = React.useState<{ itemName: string; catalog: string }>();
   const [catalogToEdit, setCatalogToEdit] = React.useState<Catalog>();
   const [catalogToDelete, setCatalogToDelete] = React.useState<Catalog>();
-  const { t } = useTranslation();
   const catalogFilter = useCatalogFilter();
+  const excludeItemType = targetHasPackageMode ? CatalogItemType.CatalogItemTypeOS : undefined;
 
-  const [catalogItems, isLoading, error, pagination, isUpdating, refetch] = useCatalogItems(catalogFilter);
+  const [catalogItems, isLoading, error, pagination, isUpdating, refetch] = useCatalogItems({
+    catalogFilter,
+    excludeItemType,
+  });
 
   const item = selectedItem
     ? catalogItems?.find(
@@ -315,7 +330,7 @@ export const CatalogPageContent = ({
                     <DescriptionListGroup>
                       <DescriptionListTerm>{t('Category')}</DescriptionListTerm>
                       <DescriptionListDescription>
-                        <CatalogPageFilter catalogFilter={catalogFilter} />
+                        <CatalogPageFilter catalogFilter={catalogFilter} hasPackageMode={targetHasPackageMode} />
                       </DescriptionListDescription>
                     </DescriptionListGroup>
                     {shouldShowCards && showCatalogMgmt && (

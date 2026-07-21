@@ -1,6 +1,6 @@
 import { useDebounce } from 'use-debounce';
 
-import { Device, DeviceLifecycleStatusType, DeviceList, DevicesSummary } from '@flightctl/types';
+import { Device, DeviceLifecycleStatusType, DeviceList, DevicesSummary, OsModeType } from '@flightctl/types';
 import { DeviceTextFilterKey, FilterSearchParams, isValidCveIdFilterValue } from '../../../utils/status/devices';
 import * as queryUtils from '../../../utils/query';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
@@ -16,6 +16,7 @@ type DevicesEndpointArgs = {
   onlyFleetless?: boolean;
   activeStatuses?: FilterStatusMap;
   onlyDecommissioned?: boolean;
+  excludePackageMode?: boolean;
   labels?: FlightCtlLabel[];
   summaryOnly?: boolean;
   nextContinue?: string;
@@ -38,6 +39,7 @@ const getDevicesEndpoint = ({
   labels,
   onlyDecommissioned,
   onlyFleetless,
+  excludePackageMode,
   nextContinue,
   summaryOnly,
 }: DevicesEndpointArgs) => {
@@ -71,6 +73,11 @@ const getDevicesEndpoint = ({
     queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', decommissionedStatuses);
   } else {
     queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', enrolledStatuses);
+  }
+
+  if (excludePackageMode) {
+    // Only exclude devices known to be in package mode. Keep devices that did not report package mode yet.
+    fieldSelectors.push(`status.capabilities.osMode != ${OsModeType.OsModePackage}`);
   }
 
   const params = new URLSearchParams();
@@ -171,6 +178,7 @@ export const useDevicesPaginated = (args: {
   ownerFleets?: string[];
   onlyDecommissioned: boolean;
   onlyFleetless?: boolean;
+  excludePackageMode?: boolean;
 }): DevicesPaginatedResult => {
   const pagination = useTablePagination<DeviceList>();
   const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint({

@@ -57,6 +57,7 @@ const DeviceTarget = () => {
     },
     onlyDecommissioned: false,
     onlyFleetless: true,
+    excludePackageMode: true,
   });
 
   const handleDeviceSelect = React.useCallback(

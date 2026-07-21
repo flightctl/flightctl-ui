@@ -108,9 +108,11 @@ const DeviceTemplateStep = ({
   labels,
   isFleet,
   isReadOnly,
+  isOsPackageMode,
 }: {
   isFleet: boolean;
   isReadOnly?: boolean;
+  isOsPackageMode?: boolean;
   labels: Record<string, string> | undefined;
 }) => {
   const { appType } = useAppContext();
@@ -135,33 +137,42 @@ const DeviceTemplateStep = ({
           <LearnMoreLink link={useTemplateVarsLink} />
         </Alert>
       )}
-      <FormGroupWithHelperText
-        label={t('System image')}
-        content={
-          isFleet
-            ? t("The target system image for this fleet's devices.")
-            : t('The target system image for this device.')
-        }
-      >
-        <Stack hasGutter>
-          {catalogOs && (
-            <StackItem>
-              <Alert isInline variant="info" title={t('System image is managed by Software Catalog')} />
-            </StackItem>
+      {isOsPackageMode ? (
+        <Alert isInline variant="info" title={t('System image is managed outside of Edge Manager')}>
+          {t(
+            'This device uses traditional package management (dnf/yum). OS image updates do not apply. Use your existing package management tools to manage OS updates on this device.',
           )}
-          <StackItem>
-            <TextField
-              name="osImage"
-              aria-label={t('System image')}
-              value={values.osImage}
-              isDisabled={isReadOnly || catalogOs}
-              helperText={t(
-                'Must be a reference to a bootable container image (such as "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). If you do not want to manage your OS from Edge management, leave this field empty.',
-              )}
-            />
-          </StackItem>
-        </Stack>
-      </FormGroupWithHelperText>
+        </Alert>
+      ) : (
+        <FormGroupWithHelperText
+          label={t('System image')}
+          content={
+            isFleet
+              ? t("The target system image for this fleet's devices.")
+              : t('The target system image for this device.')
+          }
+        >
+          <Stack hasGutter>
+            {catalogOs && (
+              <StackItem>
+                <Alert isInline variant="info" title={t('The system image is managed by Software Catalog')} />
+              </StackItem>
+            )}
+            <StackItem>
+              <TextField
+                name="osImage"
+                aria-label={t('System image')}
+                value="quay.io/flightctl/flightctl:latest"
+                isDisabled={isReadOnly || catalogOs}
+                helperText={t(
+                  'Must be a reference to a bootable container image (such as "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). If you do not want to manage your OS from Edge management, leave this field empty.',
+                )}
+              />
+            </StackItem>
+          </Stack>
+        </FormGroupWithHelperText>
+      )}
+
       <ConfigurationTemplates isReadOnly={isReadOnly} />
       <ApplicationsForm isReadOnly={isReadOnly} labels={labels} />
       <SystemdUnitsForm isReadOnly={isReadOnly} />

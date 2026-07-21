@@ -31,6 +31,7 @@ const buildCatalogItemsFieldSelector = (
   itemType: CatalogItemType[] | undefined,
   catalogs: string[],
   nameFilter?: string,
+  excludeItemType?: CatalogItemType,
 ): string | undefined => {
   const parts: string[] = [];
 
@@ -45,6 +46,13 @@ const buildCatalogItemsFieldSelector = (
 
     if (categories.length) {
       parts.push(`spec.category in (${categories.join(',')})`);
+    }
+    if (excludeItemType) {
+      if (types.length === 0) {
+        parts.push(`spec.type != ${excludeItemType}`);
+      } else {
+        types = types.filter((t) => t !== excludeItemType);
+      }
     }
     if (types.length) {
       parts.push(`spec.type in (${types.join(',')})`);
@@ -61,15 +69,16 @@ const buildCatalogItemsFieldSelector = (
 };
 
 export type UseAllCatalogItemsFilter = {
-  itemType?: CatalogItemType[];
-  nameFilter?: string | undefined;
-  catalogs?: string[];
-};
+  catalogFilter: {
+    itemType?: CatalogItemType[];
+    nameFilter?: string | undefined;
+    catalogs?: string[];
+  };
+} & { excludeItemType?: CatalogItemType };
 
 export const useCatalogItems = ({
-  itemType,
-  nameFilter,
-  catalogs,
+  catalogFilter,
+  excludeItemType,
 }: UseAllCatalogItemsFilter): [
   CatalogItem[],
   boolean,
@@ -79,13 +88,15 @@ export const useCatalogItems = ({
   VoidFunction,
 ] => {
   const pagination = useTablePagination<CatalogItemList>();
+  const { itemType, nameFilter, catalogs } = catalogFilter;
   const fieldSelector = React.useMemo(
     () =>
       itemType || nameFilter || catalogs
-        ? buildCatalogItemsFieldSelector(itemType, catalogs || [], nameFilter)
+        ? buildCatalogItemsFieldSelector(itemType, catalogs || [], nameFilter, excludeItemType)
         : undefined,
-    [itemType, nameFilter, catalogs],
+    [itemType, nameFilter, catalogs, excludeItemType],
   );
+
   const endpoint = React.useMemo(() => {
     const params = new URLSearchParams();
     params.set('limit', `${PAGE_SIZE}`);

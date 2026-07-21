@@ -80,8 +80,10 @@ const SelectAssetModal = ({ onClose, onSelect }: SelectAssetModalProps) => {
   const [nameFilter, setNameFilter] = React.useState('');
   const { t } = useTranslation();
   const [assetCatalogItems, isLoading, error, pagination, isUpdating] = useCatalogItems({
-    itemType: [CatalogItemType.CatalogItemTypeData],
-    nameFilter: nameFilter || undefined,
+    catalogFilter: {
+      itemType: [CatalogItemType.CatalogItemTypeData],
+      nameFilter,
+    },
   });
 
   return (
