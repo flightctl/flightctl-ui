@@ -22,6 +22,11 @@ const terminalOptions: ITerminalOptions & ITerminalInitOnlyOptions = {
 
 type TerminalProps = {
   onData: (data: string, resize?: boolean) => void;
+  /**
+   * When set, the session is treated as open immediately and this message is written
+   * to the terminal (for example VM serial for Windows, which may never emit guest output).
+   */
+  connectedMessage?: string;
 };
 
 export type ImperativeTerminalType = {
@@ -31,14 +36,26 @@ export type ImperativeTerminalType = {
   reset: VoidFunction;
 };
 
-const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onData }, ref) => {
+const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onData, connectedMessage }, ref) => {
   const { t } = useTranslation();
-  const [receivedData, setReceivedData] = React.useState(false);
+  const [receivedData, setReceivedData] = React.useState(!!connectedMessage);
   const terminal = React.useRef<XTerminal>();
   const terminalRef = React.useRef<HTMLDivElement>(null);
   const writeChunksRef = React.useRef<string[]>([]);
   const pendingWriteRef = React.useRef('');
   const flushScheduledRef = React.useRef(false);
+  const connectedMessageRef = React.useRef(connectedMessage);
+  connectedMessageRef.current = connectedMessage;
+
+  const writeConnectedMessage = React.useCallback((term: XTerminal) => {
+    const message = connectedMessageRef.current;
+    if (!message) {
+      return;
+    }
+    // Show connection message in green; reset so guest output is unaffected.
+    term.write(`\x1b[32m${message}\x1b[0m\r\n\r\n`);
+    setReceivedData(true);
+  }, []);
 
   const flushWriteBuffer = React.useCallback(() => {
     flushScheduledRef.current = false;
@@ -109,6 +126,8 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
       terminal.current = term;
     }
 
+    writeConnectedMessage(term);
+
     return () => {
       writeChunksRef.current = [];
       pendingWriteRef.current = '';
@@ -116,7 +135,7 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
       term.dispose();
       resizeObserver.disconnect();
     };
-  }, [onData]);
+  }, [onData, writeConnectedMessage]);
 
   React.useEffect(() => {
     const term = terminal.current;
@@ -146,13 +165,17 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
       pendingWriteRef.current = '';
       flushScheduledRef.current = false;
       terminal.current?.reset();
-      setReceivedData(false);
+      if (connectedMessageRef.current && terminal.current) {
+        writeConnectedMessage(terminal.current);
+      } else {
+        setReceivedData(false);
+      }
     },
   }));
 
   return (
     <Stack hasGutter className="fctl-terminal-container">
-      {!receivedData && (
+      {!receivedData && !connectedMessage && (
         <StackItem>
           <Spinner size="md" /> {t('Waiting for terminal session to open...')}
         </StackItem>

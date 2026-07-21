@@ -1836,6 +1836,7 @@
   "The virtual machine is not running. Start the VM to access the console.": "The virtual machine is not running. Start the VM to access the console.",
   "Connection was closed": "Connection was closed",
   "Reconnect": "Reconnect",
+  "Connected to serial console: {{ appName }}": "Connected to serial console: {{ appName }}",
   "No virtual machines found. Create a virtual machine to access its serial console.": "No virtual machines found. Create a virtual machine to access its serial console.",
   "Select a virtual machine": "Select a virtual machine",
   "Serial console · {{status}}": "Serial console · {{status}}",

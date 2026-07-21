@@ -96,7 +96,11 @@ const AppTerminalContent = ({
       )}
       <StackItem isFilled>
         <div data-testid="app-console-terminal" style={{ height: '100%' }}>
-          <Terminal onData={sendMessage} ref={terminalRef} />
+          <Terminal
+            onData={sendMessage}
+            ref={terminalRef}
+            connectedMessage={t('Connected to serial console: {{ appName }}', { appName: appStatus.name })}
+          />
         </div>
       </StackItem>
     </Stack>
