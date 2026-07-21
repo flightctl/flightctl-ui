@@ -1,9 +1,17 @@
 import * as React from 'react';
+import { Flex, FlexItem, Icon, Tooltip } from '@patternfly/react-core';
 import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { OsImageIcon } from '@patternfly/react-icons/dist/js/icons/os-image-icon';
+import { ArchiveIcon } from '@patternfly/react-icons/dist/js/icons/archive-icon';
 
-import { Device } from '@flightctl/types';
+import { Device, OsModeType } from '@flightctl/types';
 import DeviceFleet from '../DeviceDetails/DeviceFleet';
-import { getDecommissionDisabledReason, getEditDisabledReason, getResumeDisabledReason } from '../../../utils/devices';
+import {
+  getDecommissionDisabledReason,
+  getDeviceOsMode,
+  getEditDisabledReason,
+  getResumeDisabledReason,
+} from '../../../utils/devices';
 import { getDisabledTooltipProps } from '../../../utils/tooltip';
 import { ListAction } from '../../ListPage/types';
 import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
@@ -48,6 +56,7 @@ const EnrolledDeviceTableRow = ({
   const navigate = useNavigate();
   const deviceName = device.metadata.name as string;
   const deviceAlias = device.metadata.labels?.alias;
+  const osMode = getDeviceOsMode(device);
   const editActionProps = getDisabledTooltipProps(getEditDisabledReason(device, t));
   const decommissionDisabledReason = getDecommissionDisabledReason(device, t);
   const resumeDisabledReason = getResumeDisabledReason(device, t);
@@ -104,12 +113,33 @@ const EnrolledDeviceTableRow = ({
       />
       {columnIds.includes('alias') && (
         <Td dataLabel={t('Alias')}>
-          <ResourceLink
-            id={deviceName}
-            name={deviceAlias || t('Untitled')}
-            routeLink={ROUTE.DEVICE_DETAILS}
-            data-testid={`device-name-link-${deviceName}`}
-          />
+          <Flex
+            alignItems={{ default: 'alignItemsCenter' }}
+            spaceItems={{ default: 'spaceItemsSm' }}
+            flexWrap={{ default: 'nowrap' }}
+          >
+            {osMode && (
+              <FlexItem>
+                <Tooltip
+                  content={
+                    osMode === OsModeType.OsModeImage
+                      ? t('Image mode: OS managed as bootable container images through Edge Manager')
+                      : t('Package mode: OS managed outside of Edge Manager')
+                  }
+                >
+                  <Icon size="sm">{osMode === OsModeType.OsModeImage ? <OsImageIcon /> : <ArchiveIcon />}</Icon>
+                </Tooltip>
+              </FlexItem>
+            )}
+            <FlexItem>
+              <ResourceLink
+                id={deviceName}
+                name={deviceAlias || t('Untitled')}
+                routeLink={ROUTE.DEVICE_DETAILS}
+                data-testid={`device-name-link-${deviceName}`}
+              />
+            </FlexItem>
+          </Flex>
         </Td>
       )}
       {columnIds.includes('name') && (

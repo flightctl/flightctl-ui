@@ -1,4 +1,4 @@
-import { CatalogItem, CatalogItemArtifactType, CatalogItemVersion } from '@flightctl/types/alpha';
+import { CatalogItem, CatalogItemArtifactType, CatalogItemType, CatalogItemVersion } from '@flightctl/types/alpha';
 import {
   Alert,
   Button,
@@ -243,6 +243,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
   const { devices, isLoading: devicesLoading } = useDevicesPaginated({
     onlyDecommissioned: false,
     onlyFleetless: true,
+    excludePackageMode: catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS,
   });
 
   const unmanagedFleetsCount = fleets.filter((f) => !f.metadata?.owner).length;
@@ -324,7 +325,9 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                         name="target"
                         checkedValue="device"
                         label={<span ref={deviceRadioRef}>{t('Existing Device')}</span>}
-                        description={t('Deploy to a single fleetless device')}
+                        description={t(
+                          'Deploy to a single fleetless device. Devices with package mode OS are excluded.',
+                        )}
                         isDisabled={!!deviceDisabledReason}
                       />
                     </WithTooltip>

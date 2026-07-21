@@ -208,7 +208,13 @@ const ApplicationsTable = ({
   );
 
   return (
-    <Table aria-label={t('Applications')} variant="compact" isExpandable id="fctl-applications-table">
+    <Table
+      aria-label={t('Applications')}
+      variant="compact"
+      isExpandable
+      id="fctl-applications-table"
+      className="pf-v6-u-p-0"
+    >
       {workloadApps.length > 0 && renderSection('workload', workloadApps, 0)}
       {vmApps.length > 0 && renderSection('vm', vmApps, workloadApps.length)}
     </Table>

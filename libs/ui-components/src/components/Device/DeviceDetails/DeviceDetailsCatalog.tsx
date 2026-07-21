@@ -9,6 +9,7 @@ import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../..//utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { getOwnerName } from '../../../utils/resource';
+import { isDevicePackageMode } from '../../../utils/devices';
 
 type DeviceDetailsCatalogProps = {
   device: Device;
@@ -44,10 +45,13 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
     );
   }
 
+  const hasPackageMode = isDevicePackageMode(device);
+
   return fleetOwnerName ? (
     <ResourceCatalogPage
       canEdit={false}
       hasOwner
+      hasPackageMode={hasPackageMode}
       currentLabels={ownerFleet?.metadata?.labels}
       onPatch={async () => {}}
       spec={ownerFleet?.spec.template.spec}
@@ -62,6 +66,7 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
       onPatch={onPatch}
       spec={device.spec}
       specPath="/"
+      hasPackageMode={hasPackageMode}
       onEdit={(catalogId, catalogItemId, appName) => {
         let path = `${device.metadata.name}/${catalogId}/${catalogItemId}`;
         if (appName) {

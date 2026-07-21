@@ -1,4 +1,4 @@
-import { Device, DeviceSummaryStatusType, ObjectMeta } from '@flightctl/types';
+import { Device, DeviceSummaryStatusType, ObjectMeta, OsModeType } from '@flightctl/types';
 import { TFunction } from 'react-i18next';
 
 const DEVICE_CONSOLE_ANNOTATION = 'device-controller/console';
@@ -11,6 +11,11 @@ export const getDeviceFleet = (metadata: ObjectMeta) => {
 };
 
 export const isDeviceEnrolled = (dev: Device) => !dev.spec?.decommissioning?.target;
+
+/** Agent-reported OS mode. Absent for legacy agents until the first status with capabilities. */
+export const getDeviceOsMode = (device: Device): OsModeType | undefined => device.status?.capabilities?.osMode;
+
+export const isDevicePackageMode = (device: Device): boolean => getDeviceOsMode(device) === OsModeType.OsModePackage;
 
 export const getEditDisabledReason = (device: Device, t: TFunction) => {
   if (getDeviceFleet(device.metadata)) {

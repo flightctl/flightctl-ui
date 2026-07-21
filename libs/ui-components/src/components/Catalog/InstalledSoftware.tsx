@@ -108,6 +108,7 @@ export const CatalogItemTitle = ({
 
 type InstalledSoftwareProps = {
   labels: Record<string, string> | undefined;
+  hasPackageMode?: boolean;
   spec: DeviceSpec | undefined;
   onDeleteOs: () => Promise<void>;
   onDeleteApp: (appName: string) => Promise<void>;
@@ -117,7 +118,15 @@ type InstalledSoftwareProps = {
 
 type AppItem = { item: CatalogItem; name: string };
 
-const InstalledSoftware = ({ labels, spec, onDeleteOs, onDeleteApp, onEdit, canEdit }: InstalledSoftwareProps) => {
+const InstalledSoftware = ({
+  labels,
+  spec,
+  onDeleteOs,
+  onDeleteApp,
+  onEdit,
+  canEdit,
+  hasPackageMode,
+}: InstalledSoftwareProps) => {
   const { t } = useTranslation();
   const [appItems, setAppItems] = React.useState<AppItem[]>();
   const [appsLoading, setAppsLoading] = React.useState(true);
@@ -221,7 +230,11 @@ const InstalledSoftware = ({ labels, spec, onDeleteOs, onDeleteApp, onEdit, canE
         <CardBody>
           {isEmpty ? (
             <EmptyState headingLevel="h4" icon={CubeIcon} titleText={t('No software deployed')}>
-              <EmptyStateBody>{t('Select an operating system or application from the catalog below.')}</EmptyStateBody>
+              <EmptyStateBody>
+                {hasPackageMode
+                  ? t('Select an application from the catalog below.')
+                  : t('Select an operating system or application from the catalog below.')}
+              </EmptyStateBody>
             </EmptyState>
           ) : (
             <Stack hasGutter>
