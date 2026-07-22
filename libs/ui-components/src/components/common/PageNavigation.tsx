@@ -1,8 +1,6 @@
 import * as React from 'react';
 import {
   Button,
-  ClipboardCopy,
-  Content,
   Dropdown,
   DropdownItem,
   DropdownList,
@@ -11,7 +9,6 @@ import {
   Panel,
   PanelMain,
   PanelMainBody,
-  Popover,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -25,7 +22,7 @@ import LoginCommandModal from '../modals/LoginCommandModal/LoginCommandModal';
 import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from './PermissionsContext';
 import OrganizationSelector from './OrganizationSelector';
-import { OrganizationItem, useOrganizationGuardContext } from './OrganizationGuard';
+import { type OrganizationItem, useOrganizationGuardContext } from './OrganizationGuard';
 
 import './PageNavigation.css';
 
@@ -45,18 +42,21 @@ const OrganizationDisplay = ({ organization, hasSingleOrg, onSwitchOrganization 
 
   if (hasSingleOrg) {
     return (
-      <Content className="fctl-subnav_organization" data-testid="page-navigation-organization">
-        <Popover
-          headerContent={t('Organization ID')}
-          bodyContent={
-            <ClipboardCopy isReadOnly hoverTip={t('Copy')} clickTip={t('Copied')} variant="inline-compact">
-              {organization.id}
-            </ClipboardCopy>
-          }
-        >
-          <Content>{organization.label || t('Default')}</Content>
-        </Popover>
-      </Content>
+      <Tooltip
+        content={
+          <>
+            <div className="pf-v6-u-font-weight-bold">{t('Organization ID')}</div>
+            <div>{organization.id}</div>
+          </>
+        }
+        position="bottom"
+        maxWidth="36ch"
+        isContentLeftAligned
+      >
+        <span tabIndex={0} className="fctl-subnav_organization" data-testid="page-navigation-organization">
+          {organization.label || t('Default')}
+        </span>
+      </Tooltip>
     );
   }
 
@@ -154,15 +154,13 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
                   </ToolbarItem>
                 )}
                 <ToolbarItem>
-                  <Tooltip content={t('Copy login command')}>
-                    <Button
-                      variant="link"
-                      aria-label={t('Copy login command')}
-                      onClick={() => setShowLoginCommandModal(true)}
-                    >
-                      {t('Copy login command')}
-                    </Button>
-                  </Tooltip>
+                  <Button
+                    variant="link"
+                    aria-label={t('Copy login command')}
+                    onClick={() => setShowLoginCommandModal(true)}
+                  >
+                    {t('Copy login command')}
+                  </Button>
                 </ToolbarItem>
                 {isAdmin && showSettings && (
                   <ToolbarItem>
