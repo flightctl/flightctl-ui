@@ -86,7 +86,7 @@
     "@types/react-redux": "^7.1.33",
     "formik": "^2.4.9",
     "i18next": "^21.8.14",
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.3.0",
     "monaco-editor": "^0.51.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",
