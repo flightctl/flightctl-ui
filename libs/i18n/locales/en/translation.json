@@ -854,7 +854,7 @@
   "SSH public key": "SSH public key",
   "Add a public SSH key to enable direct SSH access to the application's VM. Requires publishing the SSH port to the host device.": "Add a public SSH key to enable direct SSH access to the application's VM. Requires publishing the SSH port to the host device.",
   "Password": "Password",
-  "Sets a login password via cloud-init, required for serial console access. If not configured, the default credentials from the OS image apply (if any).": "Sets a login password via cloud-init, required for serial console access. If not configured, the default credentials from the OS image apply (if any).",
+  "Sets a login password via cloud-init, for serial console access. If not configured, the default credentials from the OS image apply (if any).": "Sets a login password via cloud-init, for serial console access. If not configured, the default credentials from the OS image apply (if any).",
   "Enter password": "Enter password",
   "Show password": "Show password",
   "Hide password": "Hide password",

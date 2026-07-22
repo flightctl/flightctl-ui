@@ -307,7 +307,7 @@ const ApplicationVmForm = ({ index, isReadOnly }: { index: number; isReadOnly?: 
                     <span>{t('Password')}</span>
                     <DefaultHelperText
                       helperText={t(
-                        'Sets a login password via cloud-init, required for serial console access. If not configured, the default credentials from the OS image apply (if any).',
+                        'Sets a login password via cloud-init, for serial console access. If not configured, the default credentials from the OS image apply (if any).',
                       )}
                     />
                   </>
