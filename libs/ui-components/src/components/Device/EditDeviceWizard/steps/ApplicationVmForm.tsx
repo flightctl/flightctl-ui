@@ -4,8 +4,6 @@ import {
   Button,
   Content,
   ContentVariants,
-  Flex,
-  FlexItem,
   FormGroup,
   FormHelperText,
   FormSection,
@@ -16,7 +14,6 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
-  Popover,
   ToggleGroup,
   ToggleGroupItem,
 } from '@patternfly/react-core';
@@ -170,37 +167,31 @@ const ApplicationVmForm = ({ index, isReadOnly }: { index: number; isReadOnly?: 
         />
       </FormGroupWithHelperText>
 
-      <Flex>
-        <FlexItem>
-          <ToggleGroup aria-label={t('Configuration mode')}>
-            <ToggleGroupItem
-              text={t('Form')}
-              buttonId={`${appFieldName}-form-mode`}
-              isSelected={app.configMode === 'form'}
-              isDisabled={isReadOnly}
-              onChange={() => handleModeChange('form')}
-            />
-            <ToggleGroupItem
-              text={t('YAML')}
-              buttonId={`${appFieldName}-yaml-mode`}
-              isSelected={app.configMode === 'yaml'}
-              isDisabled={isReadOnly}
-              onChange={() => handleModeChange('yaml')}
-            />
-          </ToggleGroup>
-        </FlexItem>
-        <FlexItem>
-          <Popover
-            bodyContent={t(
-              'Use Form for standard Linux VMs with a container disk image, CPU, memory, and cloud-init. Use YAML for advanced configurations such as Windows VMs, custom networking, or other KubeVirt options not available in the form.',
+      <FormGroup>
+        <ToggleGroup aria-label={t('Configuration mode')}>
+          <ToggleGroupItem
+            text={t('Form')}
+            buttonId={`${appFieldName}-form-mode`}
+            isSelected={app.configMode === 'form'}
+            isDisabled={isReadOnly}
+            onChange={() => handleModeChange('form')}
+          />
+          <ToggleGroupItem
+            text={t('YAML')}
+            buttonId={`${appFieldName}-yaml-mode`}
+            isSelected={app.configMode === 'yaml'}
+            isDisabled={isReadOnly}
+            onChange={() => handleModeChange('yaml')}
+          />
+        </ToggleGroup>
+        <HelperText className="pf-v6-u-mt-sm">
+          <HelperTextItem>
+            {t(
+              'Use Form for standard Linux VMs. Use YAML for advanced configurations such as Windows VMs or custom KubeVirt setups that require additional spec fields.',
             )}
-          >
-            <Button variant="link" isInline>
-              {t('When to choose one or the other?')}
-            </Button>
-          </Popover>
-        </FlexItem>
-      </Flex>
+          </HelperTextItem>
+        </HelperText>
+      </FormGroup>
 
       {app.configMode === 'yaml' && app.hasAdvancedVmSettings && (
         <Alert isInline variant="warning" title={t('Advanced YAML configuration detected')}>
@@ -265,13 +256,17 @@ const ApplicationVmForm = ({ index, isReadOnly }: { index: number; isReadOnly?: 
               resizeOrientation="vertical"
               minHeight="auto"
               isDisabled={isReadOnly}
-              helperText={t('Cloud-init user data in YAML format. Applied on first boot.')}
+              helperText={t(
+                'Cloud-init user data in YAML format. Applied on first boot only. SSH key and password entries in this field are managed by the Credentials section below and may be overwritten when toggling those options.',
+              )}
               onChangeCustom={handleCloudInitCustom}
             />
 
             <FormSection title={t('Credentials')}>
               <Content component={ContentVariants.small}>
-                {t('Credentials are injected via cloud-init. Changes here update the configuration above.')}
+                {t(
+                  'Credentials are applied through cloud-init on first boot only. Changes here will take effect on newly created VMs but will not update VMs already running on existing devices. To update credentials on a running VM, access it directly through the console.',
+                )}
               </Content>
 
               <SwitchField
@@ -312,7 +307,7 @@ const ApplicationVmForm = ({ index, isReadOnly }: { index: number; isReadOnly?: 
                     <span>{t('Password')}</span>
                     <DefaultHelperText
                       helperText={t(
-                        'A password may be needed to log in through the serial console. Without one, console access may not be available.',
+                        'Sets a login password via cloud-init, for serial console access. If not configured, the default credentials from the OS image apply (if any).',
                       )}
                     />
                   </>
