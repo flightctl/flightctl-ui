@@ -165,11 +165,7 @@ const Terminal = React.forwardRef<ImperativeTerminalType, TerminalProps>(({ onDa
       pendingWriteRef.current = '';
       flushScheduledRef.current = false;
       terminal.current?.reset();
-      if (connectedMessageRef.current && terminal.current) {
-        writeConnectedMessage(terminal.current);
-      } else {
-        setReceivedData(false);
-      }
+      setReceivedData(false);
     },
   }));
 
