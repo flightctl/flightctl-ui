@@ -167,7 +167,7 @@ const ApplicationVmForm = ({ index, isReadOnly }: { index: number; isReadOnly?: 
         />
       </FormGroupWithHelperText>
 
-      <FormGroup fieldId={`${appFieldName}-config-mode`}>
+      <FormGroup>
         <ToggleGroup aria-label={t('Configuration mode')}>
           <ToggleGroupItem
             text={t('Form')}
