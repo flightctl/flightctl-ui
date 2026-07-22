@@ -234,7 +234,7 @@ export const CatalogPageContent = ({
               </div>
             </PageSection>
           ) : (
-            <PageSection hasBodyWrapper={false} type="wizard">
+            <PageSection hasBodyWrapper={false}>
               <Split hasGutter>
                 <SplitItem className="fctl-catalog-page fctl-catalog-page__filters">
                   <DescriptionList>
