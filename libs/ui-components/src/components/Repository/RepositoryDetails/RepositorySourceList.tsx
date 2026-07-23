@@ -99,18 +99,22 @@ const RepositorySourceList = ({ configs, dependencyStatus }: RepositorySourceLis
             <Stack>
               <StackItem>{getConfigDetails(config, extraArgs)}</StackItem>
               {syncRef && (
-                <StackItem>
-                  <ConfigSourceSyncDetails syncRef={syncRef} />
-                </StackItem>
-              )}
-              {addDivider && (
-                <StackItem className="pf-v6-u-my-sm">
-                  <Divider
-                    style={
-                      { '--pf-v6-c-divider--Color': 'var(--pf-t--global--border--color--50)' } as React.CSSProperties
-                    }
-                  />
-                </StackItem>
+                <>
+                  <StackItem>
+                    <ConfigSourceSyncDetails syncRef={syncRef} />
+                  </StackItem>
+                  {addDivider && (
+                    <StackItem className="pf-v6-u-my-sm">
+                      <Divider
+                        style={
+                          {
+                            '--pf-v6-c-divider--Color': 'var(--pf-t--global--border--color--50)',
+                          } as React.CSSProperties
+                        }
+                      />
+                    </StackItem>
+                  )}
+                </>
               )}
             </Stack>
           </ListItem>
