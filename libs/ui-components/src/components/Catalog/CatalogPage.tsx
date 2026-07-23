@@ -1,4 +1,5 @@
 import {
+  Content,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
@@ -105,7 +106,7 @@ const CatalogPageFilter = ({
 }) => {
   const { t } = useTranslation();
 
-  const handleCheck = (_event: React.ChangeEvent<HTMLInputElement>, item: TreeViewDataItem) => {
+  const onHandleCheck = (_event: React.ChangeEvent<HTMLInputElement>, item: TreeViewDataItem) => {
     const id = item.id as string;
 
     if (id === CatalogItemCategory.CatalogItemCategoryApplication) {
@@ -127,6 +128,25 @@ const CatalogPageFilter = ({
   const anyAppTypeChecked = appTypeIds.some((t) => catalogFilter.itemType.includes(t));
 
   const filterData: TreeViewDataItem[] = [
+    {
+      name: (
+        <>
+          <Stack>
+            <StackItem>{t('Operating system')}</StackItem>
+            {hasPackageMode && (
+              <StackItem>
+                <Content component="small">{t('Not available for package-based devices')}</Content>
+              </StackItem>
+            )}
+          </Stack>
+        </>
+      ),
+      id: CatalogItemType.CatalogItemTypeOS,
+      checkProps: {
+        checked: osTypeChecked,
+        disabled: hasPackageMode,
+      },
+    },
     {
       name: t('Application'),
       id: CatalogItemCategory.CatalogItemCategoryApplication,
@@ -177,17 +197,8 @@ const CatalogPageFilter = ({
       ],
     },
   ];
-  if (!hasPackageMode) {
-    filterData.unshift({
-      name: t('Operating system'),
-      id: CatalogItemType.CatalogItemTypeOS,
-      checkProps: {
-        checked: osTypeChecked,
-      },
-    });
-  }
 
-  return <TreeView hasAnimations data={filterData} onCheck={handleCheck} hasCheckboxes />;
+  return <TreeView hasAnimations data={filterData} onCheck={onHandleCheck} hasCheckboxes />;
 };
 
 export const CatalogPageContent = ({

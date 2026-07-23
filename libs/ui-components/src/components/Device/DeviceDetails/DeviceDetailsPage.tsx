@@ -58,9 +58,7 @@ const DeviceDetailsPage = ({ children }: React.PropsWithChildren) => {
   const { deviceId } = useParams() as { deviceId: string };
   const navigate = useNavigate();
   const { put, remove } = useFetch();
-  const [device, loading, error, refetch] = useFetchPeriodically<Required<Device>>({
-    endpoint: `devices/${deviceId}`,
-  });
+  const [device, loading, error, refetch] = useFetchPeriodically<Required<Device>>({ endpoint: `devices/${deviceId}` });
 
   const deviceLabels = device?.metadata.labels;
   const deviceAlias = deviceLabels?.alias;

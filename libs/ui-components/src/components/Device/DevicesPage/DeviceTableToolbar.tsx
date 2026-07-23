@@ -3,6 +3,8 @@ import {
   Button,
   Label,
   LabelGroup,
+  SelectList,
+  SelectOption,
   Split,
   SplitItem,
   Toolbar,
@@ -12,12 +14,20 @@ import {
 } from '@patternfly/react-core';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import { DEVICE_TEXT_FILTER_KEYS, DeviceTextFilterKey, getDeviceFilterLabel } from '../../../utils/status/devices';
+import {
+  DEVICE_OS_MODE_FILTER_VALUES,
+  DEVICE_TEXT_FILTER_KEYS,
+  type DeviceOsModeFilterValue,
+  DeviceTextFilterKey,
+  getDeviceFilterLabel,
+  getOsModeFilterLabel,
+} from '../../../utils/status/devices';
 import { labelToString } from '../../../utils/labels';
 import DeviceStatusFilter, { getStatusItem } from './DeviceFilterSelect';
-import { FilterStatusMap, UpdateStatus } from './types';
-import { FlightCtlLabel } from '../../../types/extraTypes';
+import type { FilterStatusMap, UpdateStatus } from './types';
+import type { FlightCtlLabel } from '../../../types/extraTypes';
 import DeviceTableToolbarFilters from './DeviceToolbarFilters';
+import FilterSelect from '../../form/FilterSelect';
 
 type DeviceTableToolbarProps = {
   textFilters: Partial<Record<DeviceTextFilterKey, string>>;
@@ -29,9 +39,53 @@ type DeviceTableToolbarProps = {
   setOnlyFleetless: (enabled: boolean) => void;
   activeStatuses: FilterStatusMap;
   setActiveStatuses: (statuses: FilterStatusMap) => void;
+  selectedOsModes: DeviceOsModeFilterValue[];
+  setSelectedOsModes: (modes: DeviceOsModeFilterValue[]) => void;
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
   isFilterUpdating: boolean;
+};
+
+const OsModeFilter = ({
+  selectedOsModes,
+  setSelectedOsModes,
+  isFilterUpdating,
+}: {
+  selectedOsModes: DeviceOsModeFilterValue[];
+  setSelectedOsModes: (modes: DeviceOsModeFilterValue[]) => void;
+  isFilterUpdating: boolean;
+}) => {
+  const { t } = useTranslation();
+
+  const onToggleOsMode = (mode: DeviceOsModeFilterValue) => {
+    if (selectedOsModes.includes(mode)) {
+      setSelectedOsModes(selectedOsModes.filter((m) => m !== mode));
+    } else {
+      setSelectedOsModes([...selectedOsModes, mode]);
+    }
+  };
+
+  return (
+    <FilterSelect
+      selectedFilters={selectedOsModes.length}
+      placeholder={t('OS mode')}
+      isFilterUpdating={isFilterUpdating}
+    >
+      <SelectList>
+        {DEVICE_OS_MODE_FILTER_VALUES.map((mode) => (
+          <SelectOption
+            key={mode}
+            hasCheckbox
+            value={mode}
+            isSelected={selectedOsModes.includes(mode)}
+            onClick={() => onToggleOsMode(mode)}
+          >
+            {getOsModeFilterLabel(t, mode)}
+          </SelectOption>
+        ))}
+      </SelectList>
+    </FilterSelect>
+  );
 };
 
 const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarProps>> = ({ children, ...rest }) => {
@@ -42,6 +96,8 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
     setTextFilter,
     activeStatuses,
     setActiveStatuses,
+    selectedOsModes,
+    setSelectedOsModes,
     selectedLabels,
     setSelectedLabels,
     isFilterUpdating,
@@ -82,6 +138,13 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
                 isFilterUpdating={isFilterUpdating}
               />
             </ToolbarItem>
+            <ToolbarItem>
+              <OsModeFilter
+                selectedOsModes={selectedOsModes}
+                setSelectedOsModes={setSelectedOsModes}
+                isFilterUpdating={isFilterUpdating}
+              />
+            </ToolbarItem>
             <ToolbarItem style={{ alignItems: 'flex-start' }}>
               <DeviceTableToolbarFilters
                 selectedLabels={selectedLabels}
@@ -115,6 +178,8 @@ const DeviceToolbarChips = ({
   setOwnerFleets,
   onlyFleetless,
   setOnlyFleetless,
+  selectedOsModes,
+  setSelectedOsModes,
   selectedLabels,
   setSelectedLabels,
 }: DeviceToolbarChipsProps) => {
@@ -127,7 +192,8 @@ const DeviceToolbarChips = ({
     !!ownerFleets.length ||
     onlyFleetless ||
     !!activeTextFilterKeys.length ||
-    !!selectedLabels.length;
+    !!selectedLabels.length ||
+    !!selectedOsModes.length;
 
   return (
     <Split hasGutter>
@@ -204,6 +270,21 @@ const DeviceToolbarChips = ({
           </LabelGroup>
         </SplitItem>
       )}
+      {selectedOsModes.length > 0 && (
+        <SplitItem>
+          <LabelGroup categoryName={t('OS mode')} isClosable onClick={() => setSelectedOsModes([])}>
+            {selectedOsModes.map((mode) => (
+              <Label
+                variant="outline"
+                key={mode}
+                onClose={() => setSelectedOsModes(selectedOsModes.filter((m) => m !== mode))}
+              >
+                {getOsModeFilterLabel(t, mode)}
+              </Label>
+            ))}
+          </LabelGroup>
+        </SplitItem>
+      )}
       {hasAnyFilter && (
         <SplitItem>
           <Button
@@ -214,6 +295,7 @@ const DeviceToolbarChips = ({
               setOnlyFleetless(false);
               clearTextFilters();
               setSelectedLabels([]);
+              setSelectedOsModes([]);
             }}
           >
             {t('Clear all filters')}

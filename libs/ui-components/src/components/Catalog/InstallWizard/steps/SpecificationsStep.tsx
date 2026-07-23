@@ -325,9 +325,13 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                         name="target"
                         checkedValue="device"
                         label={<span ref={deviceRadioRef}>{t('Existing Device')}</span>}
-                        description={t(
-                          'Deploy to a single fleetless device. Devices with package mode OS are excluded.',
-                        )}
+                        description={
+                          catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS
+                            ? t(
+                                'Deploy to a single fleetless device. Devices using package-based OS management are excluded.',
+                              )
+                            : t('Deploy to a single fleetless device.')
+                        }
                         isDisabled={!!deviceDisabledReason}
                       />
                     </WithTooltip>

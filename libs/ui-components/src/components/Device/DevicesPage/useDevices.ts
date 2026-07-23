@@ -1,7 +1,18 @@
 import { useDebounce } from 'use-debounce';
 
-import { Device, DeviceLifecycleStatusType, DeviceList, DevicesSummary, OsModeType } from '@flightctl/types';
-import { DeviceTextFilterKey, FilterSearchParams, isValidCveIdFilterValue } from '../../../utils/status/devices';
+import {
+  type Device,
+  DeviceLifecycleStatusType,
+  type DeviceList,
+  type DevicesSummary,
+  OsModeType,
+} from '@flightctl/types';
+import {
+  type DeviceOsModeFilterValue,
+  type DeviceTextFilterKey,
+  FilterSearchParams,
+  isValidCveIdFilterValue,
+} from '../../../utils/status/devices';
 import * as queryUtils from '../../../utils/query';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import { FlightCtlLabel } from '../../../types/extraTypes';
@@ -15,6 +26,7 @@ type DevicesEndpointArgs = {
   ownerFleets?: string[];
   onlyFleetless?: boolean;
   activeStatuses?: FilterStatusMap;
+  selectedOsModes?: DeviceOsModeFilterValue[];
   onlyDecommissioned?: boolean;
   excludePackageMode?: boolean;
   labels?: FlightCtlLabel[];
@@ -36,6 +48,7 @@ const getDevicesEndpoint = ({
   textFilters,
   ownerFleets,
   activeStatuses,
+  selectedOsModes,
   labels,
   onlyDecommissioned,
   onlyFleetless,
@@ -54,6 +67,7 @@ const getDevicesEndpoint = ({
   queryUtils.addQueryConditions(fieldSelectors, 'status.applicationsSummary.status', filterByAppStatus);
   queryUtils.addQueryConditions(fieldSelectors, 'status.summary.status', filterByDevStatus);
   queryUtils.addQueryConditions(fieldSelectors, 'status.updated.status', filterByUpdateStatus);
+  queryUtils.addOsModeQueryConditions(fieldSelectors, selectedOsModes);
 
   if (nameOrAlias) {
     queryUtils.addTextContainsCondition(fieldSelectors, 'metadata.nameOrAlias', nameOrAlias);
@@ -77,7 +91,7 @@ const getDevicesEndpoint = ({
 
   if (excludePackageMode) {
     // Only exclude devices known to be in package mode. Keep devices that did not report package mode yet.
-    fieldSelectors.push(`status.capabilities.osMode != ${OsModeType.OsModePackage}`);
+    fieldSelectors.push(`status.capabilities.osMode!=${OsModeType.OsModePackage}`);
   }
 
   const params = new URLSearchParams();
@@ -134,6 +148,7 @@ export const useDevices = (args: {
   textFilters?: Partial<Record<DeviceTextFilterKey, string>>;
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
+  selectedOsModes?: DeviceOsModeFilterValue[];
   labels?: FlightCtlLabel[];
   onlyDecommissioned: boolean;
   nextContinue?: string;
@@ -178,6 +193,7 @@ export const useDevicesPaginated = (args: {
   ownerFleets?: string[];
   onlyDecommissioned: boolean;
   onlyFleetless?: boolean;
+  selectedOsModes?: DeviceOsModeFilterValue[];
   excludePackageMode?: boolean;
 }): DevicesPaginatedResult => {
   const pagination = useTablePagination<DeviceList>();
