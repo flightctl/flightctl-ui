@@ -121,6 +121,11 @@ const DeviceTemplateStep = ({
   const useTemplateVarsLink = useAppLinks('useTemplateVars');
 
   const catalogOs = !!labels?.[OS_CATALOG_LABEL_KEY];
+  // Os image cannot be edited when:
+  // - The form is read only (viewing configurations for a fleet)
+  // - The OS image is defined via the catalog (for fleets or fleetless devices)
+  // - The OS is in package mode (for fleetless devices only)
+  const isOsEditDisabled = isReadOnly || catalogOs || isOsPackageMode;
 
   return (
     <FlightCtlForm>
@@ -137,41 +142,42 @@ const DeviceTemplateStep = ({
           <LearnMoreLink link={useTemplateVarsLink} />
         </Alert>
       )}
-      {isOsPackageMode ? (
-        <Alert isInline variant="info" title={t('System image is managed outside of Edge Manager')}>
-          {t(
-            'This device uses traditional package management (dnf/yum). OS image updates do not apply. Use your existing package management tools to manage OS updates on this device.',
-          )}
-        </Alert>
-      ) : (
-        <FormGroupWithHelperText
-          label={t('System image')}
-          content={
-            isFleet
-              ? t("The target system image for this fleet's devices.")
-              : t('The target system image for this device.')
-          }
-        >
-          <Stack hasGutter>
-            {catalogOs && (
-              <StackItem>
-                <Alert isInline variant="info" title={t('The system image is managed by Software Catalog')} />
-              </StackItem>
-            )}
+      <FormGroupWithHelperText
+        label={t('System image')}
+        content={
+          isFleet
+            ? t("The target system image for this fleet's devices.")
+            : t('The target system image for this device.')
+        }
+      >
+        <Stack hasGutter>
+          {isOsPackageMode && !isFleet && (
             <StackItem>
-              <TextField
-                name="osImage"
-                aria-label={t('System image')}
-                value="quay.io/flightctl/flightctl:latest"
-                isDisabled={isReadOnly || catalogOs}
-                helperText={t(
-                  'Must be a reference to a bootable container image (such as "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). If you do not want to manage your OS from Edge management, leave this field empty.',
+              <Alert isInline variant="info" title={t('System image is managed outside of Edge Manager')}>
+                {t(
+                  'This device uses package-based OS management. System image configuration is not available for this device.',
                 )}
-              />
+              </Alert>
             </StackItem>
-          </Stack>
-        </FormGroupWithHelperText>
-      )}
+          )}
+          {catalogOs && (
+            <StackItem>
+              <Alert isInline variant="info" title={t('System image is managed by Software Catalog')} />
+            </StackItem>
+          )}
+          <StackItem>
+            <TextField
+              name="osImage"
+              aria-label={t('System image')}
+              value={values.osImage || ''}
+              isDisabled={isOsEditDisabled}
+              helperText={t(
+                'Must be a reference to a bootable container image (such as "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). If you do not want to manage your OS from Edge management, leave this field empty.',
+              )}
+            />
+          </StackItem>
+        </Stack>
+      </FormGroupWithHelperText>
 
       <ConfigurationTemplates isReadOnly={isReadOnly} />
       <ApplicationsForm isReadOnly={isReadOnly} labels={labels} />

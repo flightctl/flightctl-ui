@@ -87,6 +87,7 @@ export type { DeviceResumeRequest } from './models/DeviceResumeRequest';
 export type { DeviceResumeResponse } from './models/DeviceResumeResponse';
 export type { DeviceSpec } from './models/DeviceSpec';
 export type { DevicesSummary } from './models/DevicesSummary';
+export type { DevicesSummaryCapabilities } from './models/DevicesSummaryCapabilities';
 export type { DeviceStatus } from './models/DeviceStatus';
 export type { DeviceSummaryStatus } from './models/DeviceSummaryStatus';
 export { DeviceSummaryStatusType } from './models/DeviceSummaryStatusType';

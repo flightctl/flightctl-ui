@@ -16,7 +16,7 @@ import { Tbody } from '@patternfly/react-table';
 import { FormikErrors, useFormikContext } from 'formik';
 import * as React from 'react';
 import ExternalLinkAltIcon from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
-import { CatalogItem } from '@flightctl/types/alpha';
+import { CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import Table from '../../../Table/Table';
@@ -41,7 +41,7 @@ export const isSelectTargetStepValid = (errors: FormikErrors<InstallAppFormik>) 
   return !errors.device && !errors.fleet;
 };
 
-const DeviceTarget = () => {
+const DeviceTarget = ({ isOsItem }: { isOsItem: boolean }) => {
   const { t } = useTranslation();
   const { values, setFieldValue, setFieldTouched } = useFormikContext<InstallOsFormik>();
   const [deviceNameFilter, setDeviceNameFilter] = React.useState('');
@@ -57,7 +57,7 @@ const DeviceTarget = () => {
     },
     onlyDecommissioned: false,
     onlyFleetless: true,
-    excludePackageMode: true,
+    excludePackageMode: isOsItem,
   });
 
   const handleDeviceSelect = React.useCallback(
@@ -305,7 +305,7 @@ const SelectTargetStep = ({ catalogItem }: SelectTargetStepProps) => {
 
   switch (values.target) {
     case 'device':
-      return <DeviceTarget />;
+      return <DeviceTarget isOsItem={catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS} />;
     case 'fleet':
       return <FleetTarget />;
     default:

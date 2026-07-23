@@ -2,9 +2,9 @@ import React from 'react';
 import { Label } from '@patternfly/react-core';
 import OsImageIcon from '@patternfly/react-icons/dist/js/icons/os-image-icon';
 import ArchiveIcon from '@patternfly/react-icons/dist/js/icons/archive-icon';
-import { TFunction } from 'react-i18next';
+import type { TFunction } from 'react-i18next';
 
-import { CustomDeviceInfo, DeviceStatus, DeviceSystemInfo, OsModeType } from '@flightctl/types';
+import { type CustomDeviceInfo, type DeviceStatus, type DeviceSystemInfo, OsModeType } from '@flightctl/types';
 
 // Used to mark system info properties that we want to always display, regardless of whether they are set
 const UnsetValue = 'unset';
@@ -52,22 +52,23 @@ const getInfoDataKnownKeys = (t: TFunction) => ({
 });
 
 const buildSystemInfoAndCapabilities = (deviceStatus?: DeviceStatus): FixedDeviceSystemInfo => {
-  const fullSystemInfo = deviceStatus?.systemInfo || ({} as DeviceSystemInfo);
-  fullSystemInfo.osMode = deviceStatus?.capabilities?.osMode || UnsetValue;
-  return fullSystemInfo as FixedDeviceSystemInfo;
+  return {
+    ...(deviceStatus?.systemInfo ?? {}),
+    osMode: deviceStatus?.capabilities?.osMode ?? UnsetValue,
+  } as FixedDeviceSystemInfo;
 };
 
 const getSystemInfoValue = (systemInfo: FixedDeviceSystemInfo, infoKey: string, t: TFunction) => {
   switch (infoKey) {
     case 'distroName': {
-      if ('distroVersion' in systemInfo) {
+      if (systemInfo.distroVersion) {
         return `${systemInfo.distroName} ${systemInfo.distroVersion}`;
       }
       return systemInfo.distroName;
     }
     case 'osMode': {
       if (systemInfo.osMode === UnsetValue) {
-        return t('Unknown');
+        return '-';
       }
 
       const isImageMode = systemInfo.osMode === OsModeType.OsModeImage;

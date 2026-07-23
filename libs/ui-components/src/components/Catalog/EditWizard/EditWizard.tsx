@@ -33,7 +33,7 @@ import { UpdateSuccessPageContent } from '../InstallWizard/UpdateSuccessPage';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../../types/rbac';
-import { isDevicePackageMode } from '../../../utils/devices';
+import { hasPackageModeCapability } from '../../../utils/capabilities';
 
 type EditWizardProps = {
   specPath: string;
@@ -267,7 +267,7 @@ export const EditDeviceWizard = () => {
     endpoint: `devices/${deviceId}`,
   });
 
-  const hasPackageMode = device ? isDevicePackageMode(device) : undefined;
+  const hasPackageMode = device ? hasPackageModeCapability(device) : undefined;
   return (
     <PageWithPermissions allowed={canGetItem} loading={permissionsLoading}>
       <EditWizard

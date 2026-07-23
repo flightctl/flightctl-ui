@@ -30,6 +30,8 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
     setOwnerFleets,
     setOnlyFleetless,
     setActiveStatuses,
+    selectedOsModes,
+    setSelectedOsModes,
     selectedLabels,
     setSelectedLabels,
   } = useDeviceBackendFilters();
@@ -49,6 +51,7 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
     onlyFleetless,
     onlyDecommissioned,
     activeStatuses,
+    selectedOsModes,
     labels: selectedLabels,
     nextContinue,
     onPageFetched,
@@ -99,6 +102,8 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
               setOwnerFleets={setOwnerFleets}
               setOnlyFleetless={setOnlyFleetless}
               setActiveStatuses={setActiveStatuses}
+              selectedOsModes={selectedOsModes}
+              setSelectedOsModes={setSelectedOsModes}
               selectedLabels={selectedLabels}
               setSelectedLabels={setSelectedLabels}
               isFilterUpdating={updating}
