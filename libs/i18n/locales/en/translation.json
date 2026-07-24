@@ -722,6 +722,7 @@
   "Current boot": "Current boot",
   "Previous boot": "Previous boot",
   "Custom": "Custom",
+  "Running system image is unknown": "Running system image is unknown",
   "System image mismatch": "System image mismatch",
   "Desired system image: {{ desiredOsImage }}": "Desired system image: {{ desiredOsImage }}",
   "System services": "System services",

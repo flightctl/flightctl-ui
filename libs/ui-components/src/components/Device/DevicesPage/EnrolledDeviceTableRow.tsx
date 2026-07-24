@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Flex, FlexItem } from '@patternfly/react-core';
-import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, type IAction, type OnSelect, Td, Tr } from '@patternfly/react-table';
 
 import type { Device } from '@flightctl/types';
 import DeviceFleet from '../DeviceDetails/DeviceFleet';
