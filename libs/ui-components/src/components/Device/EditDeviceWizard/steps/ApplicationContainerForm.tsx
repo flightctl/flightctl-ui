@@ -4,6 +4,7 @@ import { FormGroup, Grid } from '@patternfly/react-core';
 
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
+import ImageOrCatalogRefField from '../../../form/ImageOrCatalogRefField';
 import ApplicationPortMappingField from '../../../form/ApplicationPortMappingField';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { PortMapping, SingleContainerAppForm } from '../../../../types/deviceSpec';
@@ -30,14 +31,13 @@ const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isRead
       >
         <TextField aria-label={t('Application name')} name={`${appFieldName}.name`} isDisabled={isReadOnly} />
       </FormGroupWithHelperText>
-      <FormGroup label={t('Image')} isRequired>
-        <TextField
-          aria-label={t('Image')}
-          name={`${appFieldName}.image`}
-          isDisabled={isReadOnly}
-          helperText={t('Provide a valid image reference')}
-        />
-      </FormGroup>
+
+      <ImageOrCatalogRefField
+        label={t('Image')}
+        name={`${appFieldName}.imageSpec`}
+        isDisabled={isReadOnly}
+        helperText={t('Provide a valid image reference')}
+      />
 
       <ApplicationPortMappingField
         ports={ports}

@@ -1,8 +1,6 @@
-import { ContainerApplication, DeviceSpec } from '@flightctl/types';
-import { ArrowCircleUpIcon } from '@patternfly/react-icons/dist/js/icons/arrow-circle-up-icon';
-import { ActionsColumn, IAction } from '@patternfly/react-table';
 import * as React from 'react';
-import { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
+import { ArrowCircleUpIcon } from '@patternfly/react-icons/dist/js/icons/arrow-circle-up-icon';
+import { ActionsColumn } from '@patternfly/react-table';
 import {
   Button,
   Card,
@@ -24,32 +22,25 @@ import {
 } from '@patternfly/react-core';
 import { CubeIcon } from '@patternfly/react-icons/dist/js/icons/cube-icon';
 
-import { getCatalogItemIcon, getFullContainerURI, getUpdates } from './utils';
-import { useFetch } from '../../hooks/useFetch';
+import { DeviceSpec } from '@flightctl/types';
+import { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
+import { getCatalogItemIcon, getUpdates } from '../../utils/catalog';
 import { useTranslation } from '../../hooks/useTranslation';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import { buildAllDropdownActions } from '../common/ActionsDropdownList';
-import {
-  APP_CATALOG_LABEL_KEY,
-  APP_CHANNEL_LABEL_KEY,
-  APP_ITEM_LABEL_KEY,
-  OS_CATALOG_LABEL_KEY,
-  OS_CHANNEL_LABEL_KEY,
-  OS_ITEM_LABEL_KEY,
-} from './const';
-import { useCatalogItem } from './useCatalogs';
+import { useSpecCatalogItems } from './useSpecCatalogItems';
 
 type UpdateInfoProps = {
   catalogItem: CatalogItem;
   channel: string;
-  catalogItemVersion: CatalogItemVersion;
+  itemVersion: CatalogItemVersion;
   onClick: VoidFunction;
   canEdit: boolean;
 };
 
-const UpdateInfo = ({ onClick, catalogItem, channel, catalogItemVersion, canEdit }: UpdateInfoProps) => {
+const UpdateInfo = ({ onClick, catalogItem, channel, itemVersion, canEdit }: UpdateInfoProps) => {
   const { t } = useTranslation();
-  const updates = getUpdates(catalogItem, channel, catalogItemVersion.version);
+  const updates = getUpdates(catalogItem, channel, itemVersion.version);
 
   if (!updates.length) {
     return false;
@@ -106,8 +97,67 @@ export const CatalogItemTitle = ({
   );
 };
 
+type InstalledSoftwareItemProps = {
+  item: CatalogItem;
+  version: CatalogItemVersion | undefined;
+  channel: string;
+  onEdit: VoidFunction;
+  onDelete: VoidFunction;
+  canEdit: boolean;
+};
+
+const InstalledSoftwareItem = ({ item, version, channel, onEdit, onDelete, canEdit }: InstalledSoftwareItemProps) => {
+  const { t } = useTranslation();
+  const actions = canEdit
+    ? buildAllDropdownActions(
+      [
+        {
+          title: t('Edit'),
+          onClick: onEdit,
+        },
+      ],
+      [
+        {
+          title: t('Delete'),
+          onClick: onDelete,
+        },
+      ],
+    )
+    : [];
+
+  const deprecationMessage = item.spec.deprecation?.message || version?.deprecation?.message;
+
+  return (
+    <StackItem key={item.metadata.name}>
+      <Flex alignItems={{ default: 'alignItemsCenter' }}>
+        <FlexItem grow={{ default: 'grow' }}>
+          <CatalogItemTitle item={item} channel={channel} version={version?.version} />
+        </FlexItem>
+        {version && (
+          <FlexItem>
+            <UpdateInfo catalogItem={item} itemVersion={version} channel={channel} onClick={onEdit} canEdit={canEdit} />
+          </FlexItem>
+        )}
+        {deprecationMessage && (
+          <FlexItem>
+            <Popover bodyContent={deprecationMessage} withFocusTrap triggerAction="click">
+              <Label variant="outline" color="orange">
+                {t('Deprecated')}
+              </Label>
+            </Popover>
+          </FlexItem>
+        )}
+        {actions.length > 0 && (
+          <FlexItem>
+            <ActionsColumn items={actions} />
+          </FlexItem>
+        )}
+      </Flex>
+    </StackItem>
+  );
+};
+
 type InstalledSoftwareProps = {
-  labels: Record<string, string> | undefined;
   hasPackageMode?: boolean;
   spec: DeviceSpec | undefined;
   onDeleteOs: () => Promise<void>;
@@ -116,10 +166,7 @@ type InstalledSoftwareProps = {
   canEdit: boolean;
 };
 
-type AppItem = { item: CatalogItem; name: string };
-
 const InstalledSoftware = ({
-  labels,
   spec,
   onDeleteOs,
   onDeleteApp,
@@ -128,100 +175,17 @@ const InstalledSoftware = ({
   hasPackageMode,
 }: InstalledSoftwareProps) => {
   const { t } = useTranslation();
-  const [appItems, setAppItems] = React.useState<AppItem[]>();
-  const [appsLoading, setAppsLoading] = React.useState(true);
   const [deleteOs, setDeleteOs] = React.useState(false);
   const [appToDelete, setAppToDelete] = React.useState<string>();
-  const osItemId = labels?.[OS_ITEM_LABEL_KEY];
-  const osChannel = labels?.[OS_CHANNEL_LABEL_KEY];
-  const osCatalog = labels?.[OS_CATALOG_LABEL_KEY];
+  const { os, apps, isLoading } = useSpecCatalogItems(spec);
 
-  const { get } = useFetch();
-
-  const apps = React.useMemo(() => {
-    if (!labels) {
-      return [];
-    }
-    return Object.keys(labels).reduce(
-      (acc, key) => {
-        if (key.endsWith(APP_ITEM_LABEL_KEY)) {
-          const appName = key.slice(0, -(APP_ITEM_LABEL_KEY.length + 1));
-          const item = labels[`${appName}.${APP_ITEM_LABEL_KEY}`];
-          const catalog = labels[`${appName}.${APP_CATALOG_LABEL_KEY}`];
-          const channel = labels[`${appName}.${APP_CHANNEL_LABEL_KEY}`];
-          if (item && catalog && channel && spec?.applications?.find((a) => a.name === appName)) {
-            acc.push({
-              item,
-              catalog,
-              channel,
-              name: appName,
-            });
-          }
-        }
-        return acc;
-      },
-      [] as {
-        item: string;
-        catalog: string;
-        channel: string;
-        name: string;
-      }[],
-    );
-  }, [labels, spec?.applications]);
-
-  React.useEffect(() => {
-    (async () => {
-      const appRequests = apps.map((app) => get<CatalogItem>(`catalogs/${app.catalog}/items/${app.item}`));
-      const results = await Promise.allSettled(appRequests);
-
-      const items: AppItem[] = [];
-      results.forEach((r, idx) => {
-        if (r.status === 'rejected') {
-          // eslint-disable-next-line no-console
-          console.warn(`Failed to fetch catalog item ${apps[idx].catalog}/${apps[idx].item}`);
-        } else {
-          items.push({
-            item: r.value,
-            name: apps[idx].name,
-          });
-        }
-      });
-      setAppItems(items);
-      setAppsLoading(false);
-    })();
-  }, [apps, get]);
-
-  const [osItem, osLoading] = useCatalogItem(osCatalog, osItemId);
-
-  if (osLoading || appsLoading) {
+  if (isLoading) {
     return <EmptyState titleText={t('Loading installed software')} headingLevel="h4" icon={Spinner} />;
   }
 
-  const catalogItemVersion = osItem?.spec.versions.find((v) => {
-    const imageUri = getFullContainerURI(osItem.spec.artifacts, v);
-    return !!imageUri && !!spec?.os?.image && imageUri === spec.os.image && v.channels.includes(osChannel || '');
-  });
-
-  const hasOs = !!(osItem && osCatalog && osChannel && catalogItemVersion && spec);
-  const hasApps = !!(appItems && appItems.length > 0);
+  const hasOs = !!os?.item;
+  const hasApps = apps.length > 0;
   const isEmpty = !hasOs && !hasApps;
-
-  const osActions = osItem
-    ? buildAllDropdownActions(
-        [
-          {
-            title: t('Edit'),
-            onClick: () => onEdit(osItem.metadata.catalog, osItem.metadata.name || ''),
-          },
-        ],
-        [
-          {
-            title: t('Delete'),
-            onClick: () => setDeleteOs(true),
-          },
-        ],
-      )
-    : [];
 
   return (
     <>
@@ -238,127 +202,41 @@ const InstalledSoftware = ({
             </EmptyState>
           ) : (
             <Stack hasGutter>
-              {osItem && osCatalog && osChannel && catalogItemVersion && spec && (
-                <StackItem key={osItem.metadata.name}>
-                  <Flex alignItems={{ default: 'alignItemsCenter' }}>
-                    <FlexItem grow={{ default: 'grow' }}>
-                      <CatalogItemTitle item={osItem} channel={osChannel} version={catalogItemVersion.version} />
-                    </FlexItem>
-                    <FlexItem>
-                      <UpdateInfo
-                        catalogItem={osItem}
-                        catalogItemVersion={catalogItemVersion}
-                        channel={osChannel}
-                        onClick={() => onEdit(osItem.metadata.catalog, osItem.metadata.name || '')}
-                        canEdit={canEdit}
-                      />
-                    </FlexItem>
-                    {(osItem.spec.deprecation || catalogItemVersion.deprecation) && (
-                      <FlexItem>
-                        <Popover
-                          bodyContent={osItem.spec.deprecation?.message || catalogItemVersion.deprecation?.message}
-                          withFocusTrap
-                          triggerAction="click"
-                        >
-                          <Label variant="outline" color="orange">
-                            {t('Deprecated')}
-                          </Label>
-                        </Popover>
-                      </FlexItem>
-                    )}
-                    {canEdit && (
-                      <FlexItem>
-                        <ActionsColumn items={osActions} />
-                      </FlexItem>
-                    )}
-                  </Flex>
-                </StackItem>
+              {hasOs && (
+                <InstalledSoftwareItem
+                  item={os.item}
+                  version={os.version}
+                  channel={os.channel}
+                  onEdit={() => onEdit(os.item.metadata.catalog, os.item.metadata.name || '')}
+                  onDelete={() => setDeleteOs(true)}
+                  canEdit={canEdit}
+                />
               )}
-              {appItems?.map((app, index) => {
-                const appChannel = labels?.[`${app.name}.${APP_CHANNEL_LABEL_KEY}`] || '';
-                const appSpec = spec?.applications?.find((a) => a.name === app.name);
-                const itemVersion =
-                  appSpec &&
-                  app.item.spec.versions.find((v) => {
-                    const refUri = getFullContainerURI(app.item.spec.artifacts, v);
-                    const imageMatches = refUri === (appSpec as ContainerApplication).image;
-                    return imageMatches && v.channels.includes(appChannel);
-                  });
-                const regularActions: IAction[] = itemVersion
-                  ? [
-                      {
-                        title: t('Edit'),
-                        onClick: () => onEdit(app.item.metadata.catalog, app.item.metadata.name || '', app.name),
-                      },
-                    ]
-                  : [];
-                const dangerActions: IAction[] = [
-                  {
-                    title: t('Delete'),
-                    onClick: () => setAppToDelete(app.name),
-                  },
-                ];
-                const actions = buildAllDropdownActions(regularActions, dangerActions);
-
-                return (
-                  <React.Fragment key={app.name}>
-                    {(hasOs || index > 0) && <Divider />}
-                    <StackItem>
-                      <Flex alignItems={{ default: 'alignItemsCenter' }}>
-                        <FlexItem grow={{ default: 'grow' }}>
-                          <CatalogItemTitle
-                            item={app.item}
-                            channel={appChannel}
-                            version={itemVersion?.version}
-                            appName={app.name}
-                          />
-                        </FlexItem>
-                        <FlexItem>
-                          {itemVersion && (
-                            <UpdateInfo
-                              catalogItem={app.item}
-                              catalogItemVersion={itemVersion}
-                              channel={appChannel}
-                              onClick={() => onEdit(app.item.metadata.catalog, app.item.metadata.name || '', app.name)}
-                              canEdit={canEdit}
-                            />
-                          )}
-                        </FlexItem>
-                        {(app.item.spec.deprecation || itemVersion?.deprecation) && (
-                          <FlexItem>
-                            <Popover
-                              bodyContent={app.item.spec.deprecation?.message || itemVersion?.deprecation?.message}
-                              withFocusTrap
-                              triggerAction="click"
-                            >
-                              <Label variant="outline" color="orange">
-                                {t('Deprecated')}
-                              </Label>
-                            </Popover>
-                          </FlexItem>
-                        )}
-                        {canEdit && (
-                          <FlexItem>
-                            <ActionsColumn items={actions} />
-                          </FlexItem>
-                        )}
-                      </Flex>
-                    </StackItem>
-                  </React.Fragment>
-                );
-              })}
+              {apps.map((app, index) => (
+                <React.Fragment key={app.name}>
+                  {(hasOs || index > 0) && <Divider />}
+                  <InstalledSoftwareItem
+                    item={app.item}
+                    version={app.version}
+                    channel={app.channel}
+                    onEdit={() => onEdit(app.item.metadata.catalog, app.item.metadata.name || '', app.name)}
+                    onDelete={() => setAppToDelete(app.name)}
+                    canEdit={canEdit}
+                  />
+                </React.Fragment>
+              ))}
             </Stack>
           )}
         </CardBody>
       </Card>
-      {deleteOs && (
+      {deleteOs && os && (
         <DeleteModal
           onClose={() => setDeleteOs(false)}
           onDelete={async () => {
             await onDeleteOs();
             setDeleteOs(false);
           }}
-          resourceName={osItem?.spec.displayName || osItem?.metadata.name || ''}
+          resourceName={os.item.spec.displayName || os.item.metadata.name || ''}
           resourceType={t('operating system')}
         />
       )}

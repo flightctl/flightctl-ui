@@ -6,17 +6,6 @@ import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
 import { PAGE_SIZE } from '../../constants';
 
-export const useCatalogItem = (
-  catalog: string | undefined,
-  item: string | undefined,
-): [CatalogItem | undefined, boolean, unknown, boolean, VoidFunction] => {
-  const [catalogItem, loading, error, refetch, updating] = useFetchPeriodically<CatalogItem>({
-    endpoint: catalog && item ? `catalogs/${catalog}/items/${item}` : '',
-  });
-
-  return [catalogItem, loading, error, updating, refetch];
-};
-
 export const appTypeIds = [
   CatalogItemType.CatalogItemTypeContainer,
   CatalogItemType.CatalogItemTypeHelm,
@@ -38,6 +27,7 @@ const buildCatalogItemsFieldSelector = (
   let selectedTypes: CatalogItemType[] = [];
 
   const allTypesSelected = [...systemTypeIds, ...appTypeIds].every((id) => itemType?.includes(id));
+
   if (!allTypesSelected) {
     selectedTypes = itemType ? itemType.filter((t) => !excludeItemType || t !== excludeItemType) : [];
 
@@ -58,8 +48,8 @@ const buildCatalogItemsFieldSelector = (
     parts.push(`spec.type != ${excludeItemType}`);
   }
 
-  if (nameFilter?.trim()) {
-    parts.push(`metadata.name contains ${nameFilter.trim()}`);
+  if (nameFilter) {
+    parts.push(`metadata.name contains ${nameFilter}`);
   }
   if (catalogs.length) {
     parts.push(`metadata.catalog in (${catalogs.join(',')})`);
@@ -88,6 +78,7 @@ export const useCatalogItems = ({
 ] => {
   const pagination = useTablePagination<CatalogItemList>();
   const { itemType, nameFilter, catalogs } = catalogFilter;
+
   const fieldSelector = React.useMemo(
     () =>
       itemType || nameFilter || catalogs || excludeItemType
@@ -115,7 +106,7 @@ export const useCatalogItems = ({
   React.useEffect(() => {
     pagination.setCurrentPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nameFilter, itemType, excludeItemType]);
+  }, [nameFilter, itemType, catalogs, excludeItemType]);
 
   const [catalogItemsList, loading, error, refetch, isFetchUpdating] = useFetchPeriodically<CatalogItemList>(
     { endpoint: endpointDebounced },

@@ -6,15 +6,10 @@ import {
   validConfigTemplatesSchema,
   validKubernetesLabelValue,
   validLabelsSchema,
-  validOsImage,
+  validOsFormValue,
   validUpdatePolicySchema,
 } from '../../form/validations';
-import {
-  appendJSONPatch,
-  getDeviceLabelPatches,
-  getStringListPatches,
-  getUpdatePolicyPatches,
-} from '../../../utils/patch';
+import { getDeviceLabelPatches, getStringListPatches, getUpdatePolicyPatches } from '../../../utils/patch';
 import { Device, PatchRequest } from '@flightctl/types';
 import { EditDeviceFormValues, UpdatePolicyForm } from './../../../types/deviceSpec';
 import {
@@ -24,13 +19,14 @@ import {
   getApiConfig,
   getApplicationPatches,
   getDeviceSpecConfigPatches,
+  getFormOsSpecPatches,
 } from './deviceSpecUtils';
 
 export const getValidationSchema = (t: TFunction) =>
   Yup.lazy((values: EditDeviceFormValues) =>
     Yup.object({
       deviceAlias: validKubernetesLabelValue(t, { isRequired: false, fieldName: t('Alias') }),
-      osImage: validOsImage(t, { isFleet: false }),
+      osSpec: validOsFormValue(t, { isFleet: false }),
       labels: validLabelsSchema(t),
       configTemplates: validConfigTemplatesSchema(t),
       applications: validApplicationsSchema(t),
@@ -54,28 +50,8 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
     return allPatches;
   }
 
-  // OS image
-  const currentOsImage = currentDevice.spec?.os?.image;
-  const newOsImage = updatedDevice.osImage;
-  if (!currentOsImage && newOsImage) {
-    allPatches.push({
-      path: '/spec/os',
-      op: 'add',
-      value: { image: newOsImage },
-    });
-  } else if (!newOsImage && currentOsImage) {
-    allPatches.push({
-      path: '/spec/os',
-      op: 'remove',
-    });
-  } else if (newOsImage && currentOsImage !== newOsImage) {
-    appendJSONPatch({
-      path: '/spec/os/image',
-      patches: allPatches,
-      newValue: newOsImage,
-      originalValue: currentOsImage,
-    });
-  }
+  // OS patches. ATM only the image can be modified via the Device form.
+  allPatches = allPatches.concat(getFormOsSpecPatches('/spec/os', currentDevice.spec?.os, updatedDevice.osSpec));
 
   // Configurations
   const currentConfigs = currentDevice.spec?.config || [];

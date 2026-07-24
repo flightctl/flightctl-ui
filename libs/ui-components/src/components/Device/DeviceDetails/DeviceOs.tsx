@@ -2,16 +2,21 @@ import * as React from 'react';
 import { Icon, Popover, PopoverPosition } from '@patternfly/react-core';
 import ExclamationTriangleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 
+import { ImageOrCatalogItemRefSpec } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { useSystemImage } from '../../Catalog/useSystemImage';
 
 const DeviceOs = ({
-  desiredOsImage,
+  osSpec,
   renderedOsImage,
 }: {
-  desiredOsImage: string | undefined;
+  osSpec?: ImageOrCatalogItemRefSpec;
   renderedOsImage: string | undefined;
 }) => {
   const { t } = useTranslation();
+
+  // CELIA-WIP: Restore the functioanlity from the Catalog.
+  const { imageUri: desiredOsImage } = useSystemImage(osSpec);
 
   if (!desiredOsImage && !renderedOsImage) {
     return null;

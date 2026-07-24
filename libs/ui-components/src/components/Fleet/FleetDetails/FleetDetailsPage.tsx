@@ -18,6 +18,8 @@ import FleetYaml from './FleetYaml';
 import TabsNav from '../../TabsNav/TabsNav';
 import FleetDetailsCatalog from './FleetDetailsCatalog';
 import ActionsDropdownList from '../../common/ActionsDropdownList';
+import { CatalogItemsProvider } from '../../Catalog/CatalogItemsContext';
+import { extractCatalogItemIdsFromSpec } from '../../../utils/catalog';
 
 const fleetDetailsPermissions = [
   { kind: RESOURCE.FLEET, verb: VERB.DELETE },
@@ -114,12 +116,14 @@ const FleetDetailPage = () => {
     >
       {fleet && (
         <>
-          <Routes>
-            <Route index element={<Navigate to="details" replace />} />
-            <Route path="details" element={<FleetDetailsContent fleet={fleet} />} />
-            <Route path="catalog" element={<FleetDetailsCatalog fleet={fleet} refetch={refetch} />} />
-            <Route path="yaml" element={<FleetYaml fleet={fleet} refetch={refetch} canEdit={canEdit} />} />
-          </Routes>
+          <CatalogItemsProvider ids={extractCatalogItemIdsFromSpec(fleet.spec.template.spec)}>
+            <Routes>
+              <Route index element={<Navigate to="details" replace />} />
+              <Route path="details" element={<FleetDetailsContent fleet={fleet} />} />
+              <Route path="catalog" element={<FleetDetailsCatalog fleet={fleet} refetch={refetch} />} />
+              <Route path="yaml" element={<FleetYaml fleet={fleet} refetch={refetch} canEdit={canEdit} />} />
+            </Routes>
+          </CatalogItemsProvider>
           {isDeleteModalOpen && (
             <DeleteFleetModal
               fleetId={fleetId}

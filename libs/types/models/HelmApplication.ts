@@ -3,11 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ApplicationProviderBase } from './ApplicationProviderBase';
-export type HelmApplication = (ApplicationProviderBase & {
-  /**
-   * Reference to the chart for this helm application.
-   */
-  image: string;
+import type { CatalogItemRefApplicationProviderSpec } from './CatalogItemRefApplicationProviderSpec';
+import type { ImageApplicationProviderSpec } from './ImageApplicationProviderSpec';
+export type HelmApplication = (ApplicationProviderBase & (ImageApplicationProviderSpec | CatalogItemRefApplicationProviderSpec) & {
   /**
    * The target namespace for the application deployment.
    */

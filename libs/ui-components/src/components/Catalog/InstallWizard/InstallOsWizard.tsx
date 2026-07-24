@@ -3,11 +3,11 @@ import { Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
 import { Formik, FormikErrors, useFormikContext } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { Device, Fleet } from '@flightctl/types';
+import { Device, Fleet, ImageOrCatalogItemRefSpec, PatchRequest } from '@flightctl/types';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
-import { getOsPatches } from '../utils';
+import { buildCatalogItemRef } from '../../../utils/catalog';
 import { getErrorMessage } from '../../../utils/error';
 import { InstallOsFormik, reviewStepId, selectTargetStepId, specificationsStepId } from './types';
 import SpecificationsStep, { isSpecsStepValid } from './steps/SpecificationsStep';
@@ -19,6 +19,7 @@ import FlightCtlWizardFooter, { FlightCtlWizardFooterProps } from '../../common/
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { isWizardStepDisabled } from '../../../utils/wizards';
+import { appendJSONPatch } from '../../../utils/patch';
 
 const getOrderedStepIds = (target: InstallOsFormik['target']) =>
   target === 'new-device'
@@ -166,36 +167,49 @@ const InstallOsWizard = ({ catalogItem }: InstallOsWizardProps) => {
       navigate(-1);
       return;
     }
-    const selectedDevice = values.device;
-    const selectedFleet = values.fleet;
     const installToDevice = values.target === 'device';
-    const resourceId = installToDevice
-      ? `devices/${selectedDevice?.metadata.name}`
-      : `fleets/${selectedFleet?.metadata.name}`;
+    const selectedResource = installToDevice ? (values.device as Device) : (values.fleet as Fleet);
+    if (!selectedResource) {
+      setError(t('Deployment target not found for {{ target }}', { target: values.target }));
+      return;
+    }
+
+    const catalogItemVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
+    if (!catalogItemVersion || !values.channel) {
+      setError(t('Failed to find requested version {{ version }}', { version: values.version }));
+      return;
+    }
+
+    const getResourceOs = async (
+      endpoint: string,
+      isDevice: boolean,
+    ): Promise<ImageOrCatalogItemRefSpec | undefined> => {
+      if (isDevice) {
+        const res = await get<Device>(endpoint);
+        return res?.spec?.os;
+      } else {
+        const res = await get<Fleet>(endpoint);
+        return res?.spec?.template?.spec?.os;
+      }
+    };
 
     try {
-      const res = await get<Device | Fleet>(resourceId);
-      const catalogItemVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
+      const resourceId = selectedResource.metadata.name as string;
+      const endpoint = installToDevice ? `devices/${resourceId}` : `fleets/${resourceId}`;
+      const currentOsSpec = await getResourceOs(endpoint, installToDevice);
 
-      if (!catalogItemVersion || !values.channel) {
-        return;
-      }
-      const currentOsImage = installToDevice
-        ? (res as Device)?.spec?.os?.image
-        : (res as Fleet)?.spec.template.spec.os?.image;
-      const allPatches = getOsPatches({
-        currentOsImage,
-        currentLabels: res?.metadata.labels,
-        catalogItem,
-        catalogItemVersion,
-        channel: values.channel,
-        specPath: installToDevice ? '/' : '/spec/template/',
+      const allPatches: PatchRequest = [];
+      appendJSONPatch({
+        patches: allPatches,
+        path: `${installToDevice ? '/spec/os' : '/spec/template/spec/os'}`,
+        newValue: { catalogItemRef: buildCatalogItemRef({ catalogItem, catalogItemVersion, channel: values.channel }) },
+        originalValue: currentOsSpec,
       });
 
-      if (!allPatches.length) {
+      if (allPatches.length === 0) {
         setIsSuccessful(true);
       } else {
-        await patch(resourceId, allPatches);
+        await patch(endpoint, allPatches);
         setIsSuccessful(true);
       }
     } catch (e) {

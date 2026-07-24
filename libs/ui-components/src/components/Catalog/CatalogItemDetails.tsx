@@ -34,7 +34,7 @@ import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { InstallSpec } from './InstallWizard/steps/SpecificationsStep';
 import FlightCtlForm from '../form/FlightCtlForm';
 import { DeprecateModal, RestoreModal } from './DeprecateModal';
-import { getCatalogItemIcon, getFullContainerURI } from './utils';
+import { getCatalogItemIcon, getFullContainerURI } from '../../utils/catalog';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import WithTooltip from '../common/WithTooltip';

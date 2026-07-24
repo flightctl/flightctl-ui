@@ -9,6 +9,7 @@ import { getOwnerName } from '../../utils/resource';
 
 import ResourceLink from '../common/ResourceLink';
 import { buildAllDropdownActions } from '../common/ActionsDropdownList';
+import { formatCatalogItemRef } from '../../utils/catalog';
 import FleetDevicesCount from './FleetDetails/FleetDevicesCount';
 import { FleetOwnerLinkIcon } from './FleetDetails/FleetOwnerLink';
 import FleetStatus from './FleetStatus';
@@ -81,7 +82,9 @@ const FleetRow: React.FC<FleetRowProps> = ({
       ]
     : [];
   const actions = buildAllDropdownActions(regularActions, dangerActions);
-  const fleetRolloutError = getFleetRolloutStatusWarning(fleet, t);
+
+  const fleetOsSpec = fleet.spec.template.spec.os;
+  const fleetOs = fleetOsSpec?.catalogItemRef ? formatCatalogItemRef(fleetOsSpec.catalogItemRef) : fleetOsSpec?.image;
 
   return (
     <Tr>
@@ -99,12 +102,12 @@ const FleetRow: React.FC<FleetRowProps> = ({
           <ResourceLink id={fleetName} routeLink={ROUTE.FLEET_DETAILS} data-testid={`fleet-name-link-${fleetName}`} />
         </FleetOwnerLinkIcon>
       </Td>
-      <Td dataLabel={t('System image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>
+      <Td dataLabel={t('System image')}>{fleetOs || '-'}</Td>
       <Td dataLabel={t('Up-to-date/devices')}>
         <FleetDevicesCount
           fleetId={fleetName}
           devicesSummary={fleet.status?.devicesSummary}
-          error={fleetRolloutError}
+          error={getFleetRolloutStatusWarning(fleet, t)}
         />
       </Td>
       <Td dataLabel={t('Status')} data-testid={`fleet-row-status-${fleetName}`}>

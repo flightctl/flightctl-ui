@@ -10,10 +10,12 @@ import {
   DescriptionListTerm,
   Grid,
   GridItem,
+  Spinner,
 } from '@patternfly/react-core';
 
 import { Fleet, ResourceKind } from '@flightctl/types';
 import LabelsView from '../../common/LabelsView';
+import { useSystemImage } from '../../Catalog/useSystemImage';
 import { getDateDisplay } from '../../../utils/dates';
 import { getFleetRolloutStatusWarning } from '../../../utils/status/fleet';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -29,13 +31,15 @@ import FleetDetailsOsMode from './FleetDetailsOsMode';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
+
   const [vulnerabilitiesEnabled, canListVulnerabilities] = useVulnerabilitiesEnabled();
   const showVulnerabilities = vulnerabilitiesEnabled && canListVulnerabilities;
 
   const fleetId = fleet.metadata.name as string;
   const devicesSummary = fleet.status?.devicesSummary;
   const osModeCounts = devicesSummary?.capabilities?.osMode;
-  const rolloutError = getFleetRolloutStatusWarning(fleet, t);
+
+  const { isLoading: isLoadingOs, label: osImageLabel } = useSystemImage(fleet.spec.template.spec.os);
 
   return (
     <Grid hasGutter>
@@ -58,7 +62,9 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
-                <DescriptionListDescription>{fleet.spec.template.spec.os?.image || '-'}</DescriptionListDescription>
+                <DescriptionListDescription>
+                  {isLoadingOs ? <Spinner size="sm" /> : osImageLabel || '-'}
+                </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Device selector')}</DescriptionListTerm>
@@ -69,7 +75,11 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Up-to-date/devices')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <FleetDevicesCount fleetId={fleetId} devicesSummary={devicesSummary} error={rolloutError} />
+                  <FleetDevicesCount
+                    fleetId={fleetId}
+                    devicesSummary={devicesSummary}
+                    error={getFleetRolloutStatusWarning(fleet, t)}
+                  />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>

@@ -3,12 +3,12 @@ import * as React from 'react';
 import { Stack, StackItem } from '@patternfly/react-core';
 
 import { CatalogItem } from '@flightctl/types/alpha';
-import { getRemoveAppPatches, getRemoveOsPatches } from '../../Catalog/utils';
+import { getRemoveAppPatches, getRemoveOsPatches } from '../../../utils/catalog';
+import { RESOURCE, VERB } from '../../../types/rbac';
+import { usePermissionsContext } from '../../common/PermissionsContext';
+import PageWithPermissions from '../../common/PageWithPermissions';
 import { CatalogPageContent } from '../../Catalog/CatalogPage';
 import InstalledSoftware from '../../Catalog/InstalledSoftware';
-import { usePermissionsContext } from '../../common/PermissionsContext';
-import { RESOURCE, VERB } from '../../../types/rbac';
-import PageWithPermissions from '../../common/PageWithPermissions';
 
 import './ResourceCatalogPage.css';
 
@@ -18,7 +18,6 @@ type ResourceCatalogPageProps = {
   hasOwner?: boolean;
   hasPackageMode?: boolean;
   spec: DeviceSpec | undefined;
-  currentLabels: Record<string, string> | undefined;
   onPatch: (allPatches: PatchRequest) => Promise<void>;
   onEdit: (catalogId: string, catalogItemId: string, appName?: string) => void;
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
@@ -30,7 +29,6 @@ const catalogPagePermissions = [
 ];
 
 const ResourceCatalogPage = ({
-  currentLabels,
   spec,
   onPatch,
   specPath,
@@ -43,7 +41,7 @@ const ResourceCatalogPage = ({
   const { checkPermissions, loading } = usePermissionsContext();
   const [canListItems, canListCatalogs] = checkPermissions(catalogPagePermissions);
   const onDeleteOs = async () => {
-    const allPatches = getRemoveOsPatches({ currentLabels, specPath });
+    const allPatches = getRemoveOsPatches({ specPath });
     await onPatch(allPatches);
   };
 
@@ -51,7 +49,6 @@ const ResourceCatalogPage = ({
     const allPatches = getRemoveAppPatches({
       appName,
       currentApps: spec?.applications,
-      currentLabels,
       specPath,
     });
     await onPatch(allPatches);
@@ -63,7 +60,6 @@ const ResourceCatalogPage = ({
         <StackItem>
           <InstalledSoftware
             hasPackageMode={hasPackageMode}
-            labels={currentLabels}
             spec={spec}
             onDeleteOs={onDeleteOs}
             onEdit={onEdit}

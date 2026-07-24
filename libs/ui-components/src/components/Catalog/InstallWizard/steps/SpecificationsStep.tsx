@@ -35,7 +35,7 @@ import { useDevicesPaginated } from '../../../Device/DevicesPage/useDevices';
 import { applyInitialConfig, getInitialAppConfig } from '../utils';
 import { InstallAppFormik, InstallSpecFormik, TargetPickerFormik } from '../types';
 import WithTooltip from '../../../common/WithTooltip';
-import { getFullContainerURI } from '../../utils';
+import { getFullContainerURI } from '../../../../utils/catalog';
 
 type VersionDropdownProps = {
   catalogItem: CatalogItem;

@@ -1,6 +1,8 @@
 import * as React from 'react';
 import {
   Button,
+  Content,
+  ContentVariants,
   FormGroup,
   Label,
   LabelGroup,
@@ -10,6 +12,8 @@ import {
   SelectOption,
   Split,
   SplitItem,
+  Stack,
+  StackItem,
   TextInput,
 } from '@patternfly/react-core';
 import { ArrowRightIcon } from '@patternfly/react-icons/dist/js/icons/arrow-right-icon';
@@ -235,125 +239,143 @@ const ApplicationPortMappingField = ({
     }
   };
 
-  const fieldContent = (
-    <>
-      {!isReadOnly && (
-        <Split hasGutter className="pf-v6-u-mt-sm">
-          <SplitItem isFilled>
-            <TextInput
-              aria-label={t('Host port')}
-              value={hostPort}
-              placeholder={t('Enter host port')}
-              onChange={(_, value) => {
-                setHostPort(value);
-                setHostPortTouched(true);
-              }}
-              onBlur={() => setHostPortTouched(true)}
-              onKeyDown={handleKeyDown}
-              isDisabled={isReadOnly}
-              validated={hostPortError ? 'error' : 'default'}
-            />
-            {hostPortError ? <ErrorHelperText error={hostPortError} touchRequired={false} /> : <div>&nbsp;</div>}
-          </SplitItem>
-          <SplitItem isFilled>
-            <TextInput
-              aria-label={targetPortAriaLabel}
-              value={targetPort}
-              placeholder={targetPortPlaceholder ?? t('Enter target port')}
-              onChange={(_, value) => {
-                setTargetPort(value);
-                setTargetPortTouched(true);
-              }}
-              onBlur={() => setTargetPortTouched(true)}
-              onKeyDown={handleKeyDown}
-              isDisabled={isReadOnly}
-              validated={targetPortError ? 'error' : 'default'}
-            />
-            {targetPortError ? <ErrorHelperText error={targetPortError} touchRequired={false} /> : <div>&nbsp;</div>}
-          </SplitItem>
-          {withProtocol && (
-            <SplitItem>
-              <Select
-                isOpen={isProtocolOpen}
-                selected={protocol}
-                onOpenChange={(open) => setIsProtocolOpen(open)}
-                onSelect={(_, value) => {
-                  setProtocol(String(value));
-                  setIsProtocolOpen(false);
-                }}
-                toggle={(toggleRef) => (
-                  <MenuToggle
-                    ref={toggleRef}
-                    aria-label={t('Protocol')}
-                    onClick={() => setIsProtocolOpen(!isProtocolOpen)}
-                    isExpanded={isProtocolOpen}
-                    style={{ minWidth: '5.5rem' }}
-                  >
-                    {protocol.toUpperCase()}
-                  </MenuToggle>
-                )}
-              >
-                <SelectList>
-                  {VM_PORT_PROTOCOLS.map((option) => (
-                    <SelectOption key={option} value={option}>
-                      {option.toUpperCase()}
-                    </SelectOption>
-                  ))}
-                </SelectList>
-              </Select>
-            </SplitItem>
-          )}
-          <SplitItem>
-            <Button
-              aria-label={t('Add port mapping')}
-              variant="control"
-              icon={<ArrowRightIcon />}
-              iconPosition="end"
-              onClick={onAddPort}
-              isDisabled={!canAddPorts}
-            >
-              {t('Add')}
-            </Button>
-          </SplitItem>
-        </Split>
-      )}
-      {ports.length > 0 && (
-        <>
-          <LabelGroup numLabels={5} categoryName={t('Added ports')} isEditable={!isReadOnly} className="pf-v6-u-mt-lg">
-            {ports.map((port, portIndex) => {
-              const portText = formatPortText(port);
-              const isEditing = editingPortIndex === portIndex;
-              const hasError = isEditing && editingPortError;
+  let addedPortsContent: React.ReactNode;
+  if (ports.length > 0) {
+    addedPortsContent = (
+      <>
+        <LabelGroup numLabels={5} categoryName={t('Added ports')} isEditable={!isReadOnly}>
+          {ports.map((port, portIndex) => {
+            const portText = formatPortText(port);
+            const isEditing = editingPortIndex === portIndex;
+            const hasError = isEditing && editingPortError;
+
+            const key = `${port.hostPort}_${port.targetPort}_${port.protocol ?? 'tcp'}_${portIndex}`;
+            if (isReadOnly) {
               return (
-                <Label
-                  key={`${port.hostPort}_${port.targetPort}_${port.protocol ?? 'tcp'}_${portIndex}`}
-                  textMaxWidth="20ch"
-                  onClose={!isReadOnly ? () => onDeletePort(portIndex) : undefined}
-                  onEditComplete={!isReadOnly ? (_, newText) => onEditPort(portIndex, newText) : undefined}
-                  onEditCancel={!isReadOnly ? () => onEditCancel(portIndex) : undefined}
-                  title={portText}
-                  isEditable={!isReadOnly && (!editingPortError || portIndex === editingPortIndex)}
-                  color={hasError ? 'red' : undefined}
-                >
+                <Label key={key} textMaxWidth="20ch">
                   {portText}
                 </Label>
               );
-            })}
-          </LabelGroup>
-          {editingPortError && editingPortIndex !== null && (
-            <ErrorHelperText error={editingPortError} touchRequired={false} />
-          )}
-        </>
+            }
+            return (
+              <Label
+                key={key}
+                textMaxWidth="20ch"
+                onClose={() => onDeletePort(portIndex)}
+                onEditComplete={(_, newText) => onEditPort(portIndex, newText)}
+                onEditCancel={() => onEditCancel(portIndex)}
+                title={portText}
+                isEditable={!editingPortError || portIndex === editingPortIndex}
+                color={hasError ? 'red' : undefined}
+              >
+                {portText}
+              </Label>
+            );
+          })}
+        </LabelGroup>
+        {editingPortError && editingPortIndex !== null && (
+          <ErrorHelperText error={editingPortError} touchRequired={false} />
+        )}
+      </>
+    );
+  } else if (isReadOnly) {
+    addedPortsContent = t('No ports added');
+  }
+
+  const fieldContent = !isReadOnly ? (
+    <Split hasGutter>
+      <SplitItem isFilled>
+        <TextInput
+          aria-label={t('Host port')}
+          value={hostPort}
+          placeholder={t('Enter host port')}
+          onChange={(_, value) => {
+            setHostPort(value);
+            setHostPortTouched(true);
+          }}
+          onBlur={() => setHostPortTouched(true)}
+          onKeyDown={handleKeyDown}
+          isDisabled={isReadOnly}
+          validated={hostPortError ? 'error' : 'default'}
+        />
+        {hostPortError ? <ErrorHelperText error={hostPortError} touchRequired={false} /> : <div>&nbsp;</div>}
+      </SplitItem>
+      <SplitItem isFilled>
+        <TextInput
+          aria-label={targetPortAriaLabel}
+          value={targetPort}
+          placeholder={targetPortPlaceholder ?? t('Enter target port')}
+          onChange={(_, value) => {
+            setTargetPort(value);
+            setTargetPortTouched(true);
+          }}
+          onBlur={() => setTargetPortTouched(true)}
+          onKeyDown={handleKeyDown}
+          isDisabled={isReadOnly}
+          validated={targetPortError ? 'error' : 'default'}
+        />
+        {targetPortError ? <ErrorHelperText error={targetPortError} touchRequired={false} /> : <div>&nbsp;</div>}
+      </SplitItem>
+      {withProtocol && (
+        <SplitItem>
+          <Select
+            isOpen={isProtocolOpen}
+            selected={protocol}
+            onOpenChange={(open) => setIsProtocolOpen(open)}
+            onSelect={(_, value) => {
+              setProtocol(String(value));
+              setIsProtocolOpen(false);
+            }}
+            toggle={(toggleRef) => (
+              <MenuToggle
+                ref={toggleRef}
+                aria-label={t('Protocol')}
+                onClick={() => setIsProtocolOpen(!isProtocolOpen)}
+                isExpanded={isProtocolOpen}
+                style={{ minWidth: '5.5rem' }}
+              >
+                {protocol.toUpperCase()}
+              </MenuToggle>
+            )}
+          >
+            <SelectList>
+              {VM_PORT_PROTOCOLS.map((option) => (
+                <SelectOption key={option} value={option}>
+                  {option.toUpperCase()}
+                </SelectOption>
+              ))}
+            </SelectList>
+          </Select>
+        </SplitItem>
       )}
-    </>
-  );
+      <SplitItem>
+        <Button
+          aria-label={t('Add port mapping')}
+          variant="control"
+          icon={<ArrowRightIcon />}
+          iconPosition="end"
+          onClick={onAddPort}
+          isDisabled={!canAddPorts}
+        >
+          {t('Add')}
+        </Button>
+      </SplitItem>
+    </Split>
+  ) : null;
 
   return (
     <FormGroup label={t('Ports')}>
-      <>
-        <small>{description}</small>
-        {fieldContent}
-      </>
+      <Stack hasGutter>
+        {!isReadOnly && (
+          <>
+            <StackItem>
+              <Content component={ContentVariants.small}>{description}</Content>
+            </StackItem>
+            <StackItem>{fieldContent}</StackItem>
+          </>
+        )}
+        <StackItem>{addedPortsContent}</StackItem>
+      </Stack>
     </FormGroup>
   );
 };

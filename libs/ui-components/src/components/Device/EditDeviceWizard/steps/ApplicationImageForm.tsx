@@ -23,7 +23,7 @@ const ApplicationImageForm = ({ index, isReadOnly }: { index: number; isReadOnly
         }
         isRequired
       >
-        <TextField aria-label={t('Image')} name={`applications.${index}.image`} isDisabled={isReadOnly} />
+        <TextField aria-label={t('Image')} name={`applications.${index}.imageSpec.image`} isDisabled={isReadOnly} />
       </FormGroupWithHelperText>
     </Grid>
   );

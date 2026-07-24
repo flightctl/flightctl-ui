@@ -9,6 +9,7 @@ import TextField from '../../../form/TextField';
 import UploadField from '../../../form/UploadField';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { AppSpecType, HelmAppForm } from '../../../../types/deviceSpec';
+import ImageOrCatalogRefField from '../../../form/ImageOrCatalogRefField';
 
 const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
@@ -38,9 +39,9 @@ const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?
         content={t('Reference to the OCI image or artifact containing the Helm chart.')}
         isRequired
       >
-        <TextField
-          aria-label={t('Image')}
-          name={`${appFieldName}.image`}
+        <ImageOrCatalogRefField
+          label={t('Image')}
+          name={`${appFieldName}.imageSpec`}
           isDisabled={isReadOnly}
           helperText={t('Provide a valid image reference')}
         />

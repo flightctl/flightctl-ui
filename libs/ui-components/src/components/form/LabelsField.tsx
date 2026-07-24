@@ -7,7 +7,6 @@ import EditableLabelControl from '../common/EditableLabelControl';
 import LabelsView from '../common/LabelsView';
 import { toAPILabel } from '../../utils/labels';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
-import { CATALOG_LABEL } from '../Catalog/const';
 
 type LabelsFieldProps = {
   name: string;
@@ -88,7 +87,6 @@ const LabelsField = ({
       >
         {labels
           .map((label, originalIndex) => ({ ...label, originalIndex }))
-          .filter((l) => !l.key.includes(CATALOG_LABEL))
           .map(({ key, value, originalIndex }) => {
             const text = value ? `${key}=${value}` : key;
             const elKey = `${key}__${originalIndex}`;

@@ -1,5 +1,5 @@
 import { Device, Fleet } from '@flightctl/types';
-import { AssetSelection } from '../../DynamicForm/DynamicForm';
+import { CatalogVolumSelection } from '../../DynamicForm/DynamicForm';
 import { CatalogItemArtifactType } from '@flightctl/types/alpha';
 
 export const specificationsStepId = 'specifications';
@@ -27,7 +27,7 @@ export type DynamicFormConfigFormik = {
   appName: string;
   configureVia: 'editor' | 'form';
   editorContent: string;
-  selectedAssets: AssetSelection[];
+  volumeSelection: CatalogVolumSelection[];
   formValues: Record<string, unknown> | undefined;
   configSchema: Record<string, unknown> | undefined;
   /** Set by AppConfigStep when form view is used; used by wizard footer validation */

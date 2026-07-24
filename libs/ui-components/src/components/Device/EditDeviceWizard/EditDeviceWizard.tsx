@@ -102,7 +102,7 @@ const EditDeviceWizard = () => {
       <Formik<EditDeviceFormValues>
         initialValues={{
           deviceAlias,
-          osImage: device.spec?.os?.image || '',
+          osSpec: device.spec?.os,
           labels: fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias'),
           configTemplates: getConfigTemplatesValues(device.spec, registerMicroShift),
           fleetMatch: '', // Initially this is always a fleetless device
@@ -157,7 +157,6 @@ const EditDeviceWizard = () => {
                 >
                   <DeviceTemplateStep
                     isFleet={false}
-                    labels={device.metadata.labels}
                     isOsPackageMode={isOsPackageMode}
                   />
                 </WizardStep>

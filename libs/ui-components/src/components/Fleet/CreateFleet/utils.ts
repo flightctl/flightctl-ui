@@ -10,11 +10,10 @@ import {
   validFleetRolloutPolicySchema,
   validKubernetesDnsSubdomain,
   validLabelsSchema,
-  validOsImage,
+  validOsFormValue,
   validUpdatePolicySchema,
 } from '../../form/validations';
 import {
-  appendJSONPatch,
   getLabelPatches,
   getRolloutPolicyData,
   getRolloutPolicyPatches,
@@ -31,6 +30,7 @@ import {
   getApplicationValues,
   getConfigTemplatesValues,
   getDeviceSpecConfigPatches,
+  getFormOsSpecPatches,
   getSystemdUnitsValues,
   hasMicroshiftRegistrationConfig,
   toApiApplication,
@@ -42,7 +42,7 @@ export const getValidationSchema = (t: TFunction) => {
   return Yup.lazy((values: FleetFormValues) =>
     Yup.object<FleetFormValues>({
       name: validKubernetesDnsSubdomain(t, { isRequired: true }),
-      osImage: validOsImage(t, { isFleet: true }),
+      osSpec: validOsFormValue(t, { isFleet: true }),
       fleetLabels: validLabelsSchema(t),
       labels: validLabelsSchema(t),
       configTemplates: validConfigTemplatesSchema(t),
@@ -101,28 +101,10 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
     });
   }
 
-  // OS image
-  const currentOsImage = currentFleet.spec.template.spec.os?.image;
-  const newOsImage = updatedFleet.osImage;
-  if (!currentOsImage && newOsImage) {
-    allPatches.push({
-      path: '/spec/template/spec/os',
-      op: 'add',
-      value: { image: newOsImage },
-    });
-  } else if (!newOsImage && currentOsImage) {
-    allPatches.push({
-      path: '/spec/template/spec/os',
-      op: 'remove',
-    });
-  } else if (newOsImage && currentOsImage !== newOsImage) {
-    appendJSONPatch({
-      path: '/spec/template/spec/os/image',
-      patches: allPatches,
-      newValue: newOsImage,
-      originalValue: currentOsImage,
-    });
-  }
+  // OS patches. ATM only the image can be modified via the Fleet form.
+  allPatches = allPatches.concat(
+    getFormOsSpecPatches('/spec/template/spec/os', currentFleet.spec.template.spec.os, updatedFleet.osSpec),
+  );
 
   // Configurations
   const currentConfigs = currentFleet.spec.template.spec.config || [];
@@ -176,6 +158,8 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
             matchPatterns: values.systemdUnits.map((unit) => unit.pattern),
           },
         };
+
+  const isOsSet = Boolean(values.osSpec?.image) || Boolean(values.osSpec?.catalogItemRef);
   const fleet: Fleet = {
     apiVersion: ApiVersion.ApiVersionV1beta1,
     kind: 'Fleet',
@@ -194,7 +178,7 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
           },
         },
         spec: {
-          os: values.osImage ? { image: values.osImage || '' } : undefined,
+          os: isOsSet ? values.osSpec : undefined,
           config: values.configTemplates.map(getApiConfig),
           applications: values.applications.map(toApiApplication),
           ...systemdPatterns,
@@ -233,7 +217,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
         key,
         value: fleet.metadata.labels?.[key],
       })),
-      osImage: fleet.spec.template.spec.os?.image || '',
+      osSpec: fleet.spec.template.spec.os,
       configTemplates: getConfigTemplatesValues(fleet.spec.template.spec, registerMicroShift),
       applications: getApplicationValues(fleet.spec.template.spec),
       systemdUnits: getSystemdUnitsValues(fleet.spec.template.spec),
@@ -249,7 +233,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
     name: '',
     labels: [],
     fleetLabels: [],
-    osImage: '',
+    osSpec: { image: '' },
     configTemplates: [],
     applications: [],
     systemdUnits: [],

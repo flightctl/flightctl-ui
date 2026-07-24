@@ -27,7 +27,7 @@ import { InstallSpec, VersionDropdown } from '../../InstallWizard/steps/Specific
 import UpdateGraph from './UpdateGraph';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import { applyInitialConfig, getInitialAppConfig } from '../../InstallWizard/utils';
-import { getUpdates } from '../../utils';
+import { getUpdates } from '../../../../utils/catalog';
 
 export const isUpdateStepValid = (errors: FormikErrors<InstallSpecFormik>) => {
   return !errors.version && !errors.channel;
