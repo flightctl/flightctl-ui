@@ -1,9 +1,11 @@
 import * as React from 'react';
-import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { Flex, FlexItem } from '@patternfly/react-core';
+import { ActionsColumn, type IAction, type OnSelect, Td, Tr } from '@patternfly/react-table';
 
-import { Device } from '@flightctl/types';
+import type { Device } from '@flightctl/types';
 import DeviceFleet from '../DeviceDetails/DeviceFleet';
 import { getDecommissionDisabledReason, getEditDisabledReason, getResumeDisabledReason } from '../../../utils/devices';
+import { getDeviceCapability } from '../../../utils/capabilities';
 import { getDisabledTooltipProps } from '../../../utils/tooltip';
 import { ListAction } from '../../ListPage/types';
 import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
@@ -12,6 +14,7 @@ import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import ResourceLink from '../../common/ResourceLink';
+import OsModeContent from '../../common/OsModeContent';
 import { buildAllDropdownActions } from '../../common/ActionsDropdownList';
 import { ApiTableColumn } from '../../Table/Table';
 
@@ -48,6 +51,7 @@ const EnrolledDeviceTableRow = ({
   const navigate = useNavigate();
   const deviceName = device.metadata.name as string;
   const deviceAlias = device.metadata.labels?.alias;
+  const osMode = getDeviceCapability(device, 'osMode');
   const editActionProps = getDisabledTooltipProps(getEditDisabledReason(device, t));
   const decommissionDisabledReason = getDecommissionDisabledReason(device, t);
   const resumeDisabledReason = getResumeDisabledReason(device, t);
@@ -104,12 +108,23 @@ const EnrolledDeviceTableRow = ({
       />
       {columnIds.includes('alias') && (
         <Td dataLabel={t('Alias')}>
-          <ResourceLink
-            id={deviceName}
-            name={deviceAlias || t('Untitled')}
-            routeLink={ROUTE.DEVICE_DETAILS}
-            data-testid={`device-name-link-${deviceName}`}
-          />
+          <Flex
+            alignItems={{ default: 'alignItemsCenter' }}
+            spaceItems={{ default: 'spaceItemsSm' }}
+            flexWrap={{ default: 'nowrap' }}
+          >
+            <FlexItem>
+              <OsModeContent osMode={osMode} />
+            </FlexItem>
+            <FlexItem>
+              <ResourceLink
+                id={deviceName}
+                name={deviceAlias || t('Untitled')}
+                routeLink={ROUTE.DEVICE_DETAILS}
+                data-testid={`device-name-link-${deviceName}`}
+              />
+            </FlexItem>
+          </Flex>
         </Td>
       )}
       {columnIds.includes('name') && (

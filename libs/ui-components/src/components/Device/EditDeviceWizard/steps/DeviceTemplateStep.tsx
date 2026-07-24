@@ -108,9 +108,11 @@ const DeviceTemplateStep = ({
   labels,
   isFleet,
   isReadOnly,
+  isOsPackageMode,
 }: {
   isFleet: boolean;
   isReadOnly?: boolean;
+  isOsPackageMode?: boolean;
   labels: Record<string, string> | undefined;
 }) => {
   const { appType } = useAppContext();
@@ -119,6 +121,11 @@ const DeviceTemplateStep = ({
   const useTemplateVarsLink = useAppLinks('useTemplateVars');
 
   const catalogOs = !!labels?.[OS_CATALOG_LABEL_KEY];
+  // Os image cannot be edited when:
+  // - The form is read only (viewing configurations for a fleet)
+  // - The OS image is defined via the catalog (for fleets or fleetless devices)
+  // - The OS is in package mode (for fleetless devices only)
+  const isOsEditDisabled = isReadOnly || catalogOs || isOsPackageMode;
 
   return (
     <FlightCtlForm>
@@ -144,6 +151,15 @@ const DeviceTemplateStep = ({
         }
       >
         <Stack hasGutter>
+          {isOsPackageMode && !isFleet && (
+            <StackItem>
+              <Alert isInline variant="info" title={t('System image is managed outside of Edge Manager')}>
+                {t(
+                  'This device uses package-based OS management. System image configuration is not available for this device.',
+                )}
+              </Alert>
+            </StackItem>
+          )}
           {catalogOs && (
             <StackItem>
               <Alert isInline variant="info" title={t('System image is managed by Software Catalog')} />
@@ -153,8 +169,8 @@ const DeviceTemplateStep = ({
             <TextField
               name="osImage"
               aria-label={t('System image')}
-              value={values.osImage}
-              isDisabled={isReadOnly || catalogOs}
+              value={values.osImage || ''}
+              isDisabled={isOsEditDisabled}
               helperText={t(
                 'Must be a reference to a bootable container image (such as "quay.io/<my-org>/my-rhel-with-fc-agent:<version>"). If you do not want to manage your OS from Edge management, leave this field empty.',
               )}
@@ -162,6 +178,7 @@ const DeviceTemplateStep = ({
           </StackItem>
         </Stack>
       </FormGroupWithHelperText>
+
       <ConfigurationTemplates isReadOnly={isReadOnly} />
       <ApplicationsForm isReadOnly={isReadOnly} labels={labels} />
       <SystemdUnitsForm isReadOnly={isReadOnly} />

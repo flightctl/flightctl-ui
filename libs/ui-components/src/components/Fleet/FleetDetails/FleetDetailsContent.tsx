@@ -25,13 +25,16 @@ import FleetStatus from '../FleetStatus';
 import FleetDevicesCount from './FleetDevicesCount';
 import EventsCard from '../../Events/EventsCard';
 import FleetVulnerabilities from './FleetVulnerabilities';
+import FleetDetailsOsMode from './FleetDetailsOsMode';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
   const [vulnerabilitiesEnabled, canListVulnerabilities] = useVulnerabilitiesEnabled();
   const showVulnerabilities = vulnerabilitiesEnabled && canListVulnerabilities;
+
   const fleetId = fleet.metadata.name as string;
   const devicesSummary = fleet.status?.devicesSummary;
+  const osModeCounts = devicesSummary?.capabilities?.osMode;
   const rolloutError = getFleetRolloutStatusWarning(fleet, t);
 
   return (
@@ -75,6 +78,15 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
                   <FleetOwnerLink owner={fleet.metadata.owner} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
+              {osModeCounts && devicesSummary?.total > 0 ? (
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('OS mode')}</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <FleetDetailsOsMode osModeCounts={osModeCounts} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+              ) : null}
+
               <DescriptionListGroup>
                 <DescriptionListTerm>
                   {t('Sources ({{size}})', { size: fleet.spec.template.spec.config?.length || 0 })}

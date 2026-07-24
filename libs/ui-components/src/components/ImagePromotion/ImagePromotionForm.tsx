@@ -130,7 +130,9 @@ const ImagePromotionForm = ({
   });
 
   const [catalogItems, , itemsErr] = useCatalogItems({
-    catalogs: values.catalog ? [values.catalog] : undefined,
+    catalogFilter: {
+      catalogs: values.catalog ? [values.catalog] : undefined,
+    },
   });
 
   const catalogs = (catalogList?.items || [])

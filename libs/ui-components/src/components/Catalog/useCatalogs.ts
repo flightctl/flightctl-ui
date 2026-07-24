@@ -31,24 +31,31 @@ const buildCatalogItemsFieldSelector = (
   itemType: CatalogItemType[] | undefined,
   catalogs: string[],
   nameFilter?: string,
+  excludeItemType?: CatalogItemType,
 ): string | undefined => {
   const parts: string[] = [];
 
-  if (![...systemTypeIds, ...appTypeIds].every((id) => itemType?.includes(id))) {
-    const categories: CatalogItemCategory[] = [];
-    let types = itemType ? [...itemType] : [];
+  let selectedTypes: CatalogItemType[] = [];
 
-    if (appTypeIds.every((id) => types.includes(id))) {
+  const allTypesSelected = [...systemTypeIds, ...appTypeIds].every((id) => itemType?.includes(id));
+  if (!allTypesSelected) {
+    selectedTypes = itemType ? itemType.filter((t) => !excludeItemType || t !== excludeItemType) : [];
+
+    const categories: CatalogItemCategory[] = [];
+    if (appTypeIds.every((id) => selectedTypes.includes(id))) {
       categories.push(CatalogItemCategory.CatalogItemCategoryApplication);
-      types = types.filter((t) => !appTypeIds.includes(t));
+      selectedTypes = selectedTypes.filter((t) => !appTypeIds.includes(t));
     }
 
     if (categories.length) {
       parts.push(`spec.category in (${categories.join(',')})`);
     }
-    if (types.length) {
-      parts.push(`spec.type in (${types.join(',')})`);
-    }
+  }
+
+  if (selectedTypes.length > 0) {
+    parts.push(`spec.type in (${selectedTypes.join(',')})`);
+  } else if (excludeItemType) {
+    parts.push(`spec.type != ${excludeItemType}`);
   }
 
   if (nameFilter?.trim()) {
@@ -61,15 +68,16 @@ const buildCatalogItemsFieldSelector = (
 };
 
 export type UseAllCatalogItemsFilter = {
-  itemType?: CatalogItemType[];
-  nameFilter?: string | undefined;
-  catalogs?: string[];
-};
+  catalogFilter: {
+    itemType?: CatalogItemType[];
+    nameFilter?: string | undefined;
+    catalogs?: string[];
+  };
+} & { excludeItemType?: CatalogItemType };
 
 export const useCatalogItems = ({
-  itemType,
-  nameFilter,
-  catalogs,
+  catalogFilter,
+  excludeItemType,
 }: UseAllCatalogItemsFilter): [
   CatalogItem[],
   boolean,
@@ -79,13 +87,15 @@ export const useCatalogItems = ({
   VoidFunction,
 ] => {
   const pagination = useTablePagination<CatalogItemList>();
+  const { itemType, nameFilter, catalogs } = catalogFilter;
   const fieldSelector = React.useMemo(
     () =>
-      itemType || nameFilter || catalogs
-        ? buildCatalogItemsFieldSelector(itemType, catalogs || [], nameFilter)
+      itemType || nameFilter || catalogs || excludeItemType
+        ? buildCatalogItemsFieldSelector(itemType, catalogs || [], nameFilter, excludeItemType)
         : undefined,
-    [itemType, nameFilter, catalogs],
+    [itemType, nameFilter, catalogs, excludeItemType],
   );
+
   const endpoint = React.useMemo(() => {
     const params = new URLSearchParams();
     params.set('limit', `${PAGE_SIZE}`);
@@ -105,7 +115,7 @@ export const useCatalogItems = ({
   React.useEffect(() => {
     pagination.setCurrentPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nameFilter, itemType]);
+  }, [nameFilter, itemType, excludeItemType]);
 
   const [catalogItemsList, loading, error, refetch, isFetchUpdating] = useFetchPeriodically<CatalogItemList>(
     { endpoint: endpointDebounced },

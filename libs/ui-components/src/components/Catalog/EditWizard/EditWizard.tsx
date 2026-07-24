@@ -33,6 +33,7 @@ import { UpdateSuccessPageContent } from '../InstallWizard/UpdateSuccessPage';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import { hasPackageModeCapability } from '../../../utils/capabilities';
 
 type EditWizardProps = {
   specPath: string;
@@ -43,6 +44,7 @@ type EditWizardProps = {
   error: unknown;
   resourceId: string;
   isDevice: boolean;
+  hasPackageMode?: boolean;
   resourceName?: string;
 };
 
@@ -55,6 +57,7 @@ const EditWizard = ({
   loading,
   resourceId,
   isDevice,
+  hasPackageMode,
   resourceName,
 }: EditWizardProps) => {
   const [isSuccess, setIsSuccess] = React.useState(false);
@@ -91,6 +94,14 @@ const EditWizard = ({
     );
   } else if (catalogItemLoading || loading) {
     content = <EmptyState titleText={t('Loading')} headingLevel="h4" icon={Spinner} />;
+  } else if (catalogItem?.spec.category === CatalogItemCategory.CatalogItemCategorySystem && hasPackageMode) {
+    content = (
+      <Alert
+        isInline
+        variant="danger"
+        title={t('Device is in package mode. The catalog item cannot be deployed to this device.')}
+      />
+    );
   } else if (catalogItem?.spec.category === CatalogItemCategory.CatalogItemCategorySystem) {
     const currentVersion = version
       ? catalogItem.spec.versions.find((v) => v.version === version)
@@ -100,7 +111,7 @@ const EditWizard = ({
         });
     const currentChannel = channel || currentLabels?.[OS_CHANNEL_LABEL_KEY];
     if (!currentVersion || !currentChannel) {
-      content = <Alert isInline variant="danger" title={t('Failed to find operating system')} />;
+      content = <Alert isInline variant="danger" title={t('Failed to load operating system for this catalog item')} />;
     } else {
       content = (
         <EditOsWizard
@@ -255,6 +266,8 @@ export const EditDeviceWizard = () => {
   const [device, loading, error] = useFetchPeriodically<Required<Device>>({
     endpoint: `devices/${deviceId}`,
   });
+
+  const hasPackageMode = device ? hasPackageModeCapability(device) : undefined;
   return (
     <PageWithPermissions allowed={canGetItem} loading={permissionsLoading}>
       <EditWizard
@@ -267,6 +280,7 @@ export const EditDeviceWizard = () => {
         resourceId={deviceId}
         resourceName={device?.metadata.labels?.alias}
         isDevice
+        hasPackageMode={hasPackageMode}
       />
     </PageWithPermissions>
   );

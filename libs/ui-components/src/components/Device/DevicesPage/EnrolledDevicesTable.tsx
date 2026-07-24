@@ -3,7 +3,7 @@ import { Button, Switch, ToolbarItem } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 import { TFunction } from 'react-i18next';
 
-import { Device, DeviceDecommission, DeviceDecommissionTargetType, DeviceList } from '@flightctl/types';
+import { type Device, type DeviceDecommission, DeviceDecommissionTargetType, type DeviceList } from '@flightctl/types';
 
 import { FilterStatusMap } from './types';
 import { FlightCtlLabel } from '../../../types/extraTypes';
@@ -27,7 +27,11 @@ import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
 import { EnrolledDevicesEmptyState } from './DevicesEmptyStates';
 import DeviceTableToolbar from './DeviceTableToolbar';
 import EnrolledDeviceTableRow from './EnrolledDeviceTableRow';
-import { DeviceTextFilterKey, FilterSearchParams } from '../../../utils/status/devices';
+import {
+  type DeviceOsModeFilterValue,
+  type DeviceTextFilterKey,
+  FilterSearchParams,
+} from '../../../utils/status/devices';
 import { GlobalSystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 
 interface EnrolledDeviceTableProps {
@@ -43,6 +47,8 @@ interface EnrolledDeviceTableProps {
   setOwnerFleets: (ownerFleets: string[]) => void;
   setOnlyFleetless: (enabled: boolean) => void;
   setActiveStatuses: (activeStatuses: FilterStatusMap) => void;
+  selectedOsModes: DeviceOsModeFilterValue[];
+  setSelectedOsModes: (modes: DeviceOsModeFilterValue[]) => void;
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
   isFilterUpdating: boolean;
@@ -99,6 +105,8 @@ const EnrolledDevicesTable = ({
   activeStatuses,
   setActiveStatuses,
   setOnlyDecommissioned,
+  selectedOsModes,
+  setSelectedOsModes,
   selectedLabels,
   setSelectedLabels,
   hasFiltersEnabled,
@@ -140,6 +148,7 @@ const EnrolledDevicesTable = ({
       setOnlyFleetless(false);
       clearTextFilters();
       setSelectedLabels([]);
+      setSelectedOsModes([]);
     }
   };
 
@@ -157,6 +166,8 @@ const EnrolledDevicesTable = ({
         setOnlyFleetless={setOnlyFleetless}
         activeStatuses={activeStatuses}
         setActiveStatuses={setActiveStatuses}
+        selectedOsModes={selectedOsModes}
+        setSelectedOsModes={setSelectedOsModes}
         selectedLabels={selectedLabels}
         setSelectedLabels={setSelectedLabels}
         isFilterUpdating={isFilterUpdating}

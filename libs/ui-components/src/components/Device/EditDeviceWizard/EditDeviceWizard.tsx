@@ -18,6 +18,7 @@ import { EditDeviceFormValues } from './../../../types/deviceSpec';
 import { getErrorMessage } from '../../../utils/error';
 import { fromAPILabel } from '../../../utils/labels';
 import { getEditDisabledReason } from '../../../utils/devices';
+import { hasPackageModeCapability } from '../../../utils/capabilities';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
@@ -96,6 +97,7 @@ const EditDeviceWizard = () => {
   } else if (device) {
     const registerMicroShift = hasMicroshiftRegistrationConfig(device.spec);
     const updatePolicyValues = getUpdatePolicyValues(device.spec?.updatePolicy);
+    const isOsPackageMode = hasPackageModeCapability(device);
     body = (
       <Formik<EditDeviceFormValues>
         initialValues={{
@@ -153,7 +155,11 @@ const EditDeviceWizard = () => {
                   id={deviceTemplateStepId}
                   isDisabled={isWizardStepDisabled(deviceTemplateStepId, orderedIds, validStepIds) || !isFleetless}
                 >
-                  <DeviceTemplateStep isFleet={false} labels={device.metadata.labels} />
+                  <DeviceTemplateStep
+                    isFleet={false}
+                    labels={device.metadata.labels}
+                    isOsPackageMode={isOsPackageMode}
+                  />
                 </WizardStep>
                 <WizardStep
                   name={t('Updates')}

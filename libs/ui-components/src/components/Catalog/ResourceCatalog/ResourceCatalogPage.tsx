@@ -16,6 +16,7 @@ type ResourceCatalogPageProps = {
   specPath: string;
   canEdit: boolean;
   hasOwner?: boolean;
+  hasPackageMode?: boolean;
   spec: DeviceSpec | undefined;
   currentLabels: Record<string, string> | undefined;
   onPatch: (allPatches: PatchRequest) => Promise<void>;
@@ -34,6 +35,7 @@ const ResourceCatalogPage = ({
   onPatch,
   specPath,
   canEdit,
+  hasPackageMode,
   hasOwner,
   onEdit,
   onInstall,
@@ -57,9 +59,10 @@ const ResourceCatalogPage = ({
 
   return (
     <PageWithPermissions allowed={canListItems && canListCatalogs} loading={loading}>
-      <Stack>
+      <Stack hasGutter>
         <StackItem>
           <InstalledSoftware
+            hasPackageMode={hasPackageMode}
             labels={currentLabels}
             spec={spec}
             onDeleteOs={onDeleteOs}
@@ -69,7 +72,13 @@ const ResourceCatalogPage = ({
           />
         </StackItem>
         <StackItem className="fctl-resource-catalog-page">
-          <CatalogPageContent canInstall={canEdit} targetHasOwner={hasOwner} onInstall={onInstall} targetSet />
+          <CatalogPageContent
+            canInstall={canEdit}
+            targetHasOwner={hasOwner}
+            targetHasPackageMode={hasPackageMode}
+            onInstall={onInstall}
+            targetSet
+          />
         </StackItem>
       </Stack>
     </PageWithPermissions>

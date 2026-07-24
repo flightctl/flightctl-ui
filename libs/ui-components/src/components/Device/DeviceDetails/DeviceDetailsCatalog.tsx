@@ -1,14 +1,14 @@
 import * as React from 'react';
-import { Device, Fleet, PatchRequest, ResourceKind } from '@flightctl/types';
 import { Alert, Spinner } from '@patternfly/react-core';
 
+import type { Device, PatchRequest } from '@flightctl/types';
 import { useFetch } from '../../../hooks/useFetch';
-import ResourceCatalogPage from '../../Catalog/ResourceCatalog/ResourceCatalogPage';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
-import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { getErrorMessage } from '../../..//utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { getOwnerName } from '../../../utils/resource';
+import { useDeviceOwnerFleet } from '../../../hooks/useDeviceOwnerFleet';
+import { getErrorMessage } from '../../../utils/error';
+import { hasPackageModeCapability } from '../../../utils/capabilities';
+import ResourceCatalogPage from '../../Catalog/ResourceCatalog/ResourceCatalogPage';
 
 type DeviceDetailsCatalogProps = {
   device: Device;
@@ -28,26 +28,26 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
     [refetch, patch, device.metadata.name],
   );
 
-  const fleetOwnerName = getOwnerName(ResourceKind.FLEET, device.metadata.owner);
-  const [ownerFleet, loading, error] = useFetchPeriodically<Fleet>({
-    endpoint: fleetOwnerName ? `fleets/${fleetOwnerName}` : '',
-  });
+  const [hasOwnerFleet, ownerFleet, ownerFleetLoading, ownerFleetError] = useDeviceOwnerFleet(device.metadata.owner);
 
-  if (loading) {
+  if (ownerFleetLoading) {
     return <Spinner />;
   }
-  if (error) {
+  if (ownerFleetError) {
     return (
       <Alert isInline variant="danger" title={t('Failed to fetch owner fleet')}>
-        {getErrorMessage(error)}
+        {getErrorMessage(ownerFleetError)}
       </Alert>
     );
   }
 
-  return fleetOwnerName ? (
+  const hasPackageMode = hasPackageModeCapability(device);
+
+  return hasOwnerFleet ? (
     <ResourceCatalogPage
       canEdit={false}
       hasOwner
+      hasPackageMode={hasPackageMode}
       currentLabels={ownerFleet?.metadata?.labels}
       onPatch={async () => {}}
       spec={ownerFleet?.spec.template.spec}
@@ -62,6 +62,7 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
       onPatch={onPatch}
       spec={device.spec}
       specPath="/"
+      hasPackageMode={hasPackageMode}
       onEdit={(catalogId, catalogItemId, appName) => {
         let path = `${device.metadata.name}/${catalogId}/${catalogItemId}`;
         if (appName) {

@@ -14,6 +14,7 @@ import {
   DeviceLifecycleStatusType,
   DeviceSummaryStatusType,
   DeviceUpdatedStatusType,
+  OsModeType,
 } from '@flightctl/types';
 import { StatusItem } from './common';
 
@@ -23,10 +24,38 @@ export enum FilterSearchParams {
   DeviceStatus = 'devSt',
   AppStatus = 'appSt',
   UpdatedStatus = 'updSt',
+  OsMode = 'osMode',
   Label = 'label',
   NameOrAlias = 'nameOrAlias',
   CveId = 'cveId',
 }
+
+/** Sentinel for devices that have not reported status.capabilities.osMode. */
+export const UNKNOWN_CAPABILITY_VALUE = 'unknown' as const;
+
+export type DeviceOsModeFilterValue = OsModeType | typeof UNKNOWN_CAPABILITY_VALUE;
+
+export const DEVICE_OS_MODE_FILTER_VALUES: DeviceOsModeFilterValue[] = [
+  OsModeType.OsModeImage,
+  OsModeType.OsModePackage,
+  UNKNOWN_CAPABILITY_VALUE,
+];
+
+export const KNOWN_OS_MODE_FILTER_VALUES: OsModeType[] = [OsModeType.OsModeImage, OsModeType.OsModePackage];
+
+export const isDeviceOsModeFilterValue = (value: string): value is DeviceOsModeFilterValue =>
+  (DEVICE_OS_MODE_FILTER_VALUES as string[]).includes(value);
+
+export const getOsModeFilterLabel = (t: TFunction, mode: DeviceOsModeFilterValue) => {
+  switch (mode) {
+    case OsModeType.OsModeImage:
+      return t('Image');
+    case OsModeType.OsModePackage:
+      return t('Package');
+    case UNKNOWN_CAPABILITY_VALUE:
+      return t('Not reported');
+  }
+};
 
 // Filters that require the user to enter some free-text
 export const DEVICE_TEXT_FILTER_KEYS = [FilterSearchParams.NameOrAlias, FilterSearchParams.CveId];

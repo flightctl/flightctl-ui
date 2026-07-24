@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { DeviceStatus } from './DeviceStatus';
+import type { OsModeType } from './OsModeType';
 /**
  * EnrollmentRequestSpec is a description of a EnrollmentRequest's target state.
  */
@@ -20,5 +21,6 @@ export type EnrollmentRequestSpec = {
    * The rendered version of the device from desired.json (optional).
    */
   knownRenderedVersion?: string;
+  osMode?: OsModeType;
 };
 
