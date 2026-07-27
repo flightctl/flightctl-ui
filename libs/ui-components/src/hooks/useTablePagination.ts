@@ -42,3 +42,13 @@ export const useTablePagination = <T extends ApiList>(): PaginationDetails<T> =>
 
   return { onPageFetched, currentPage, setCurrentPage, nextContinue, itemCount };
 };
+
+export const useResetPaginationOnFilterChange = (queryKey: string, setCurrentPage: (page: number) => void) => {
+  const prevQueryKeyRef = React.useRef(queryKey);
+  React.useEffect(() => {
+    if (prevQueryKeyRef.current !== queryKey) {
+      prevQueryKeyRef.current = queryKey;
+      setCurrentPage(1);
+    }
+  }, [queryKey, setCurrentPage]);
+};
