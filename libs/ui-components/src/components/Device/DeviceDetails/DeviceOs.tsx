@@ -11,31 +11,31 @@ const DeviceOs = ({
   desiredOsImage: string | undefined;
   renderedOsImage: string | undefined;
 }) => {
-  const hasDiff = desiredOsImage && desiredOsImage !== renderedOsImage;
   const { t } = useTranslation();
-  let popover: React.ReactNode;
-  if (hasDiff) {
-    popover = (
-      <Popover
-        aria-label={t('System image mismatch')}
-        position={PopoverPosition.top}
-        headerContent={t('System image mismatch')}
-        bodyContent={t('Desired system image: {{ desiredOsImage }}', { desiredOsImage: desiredOsImage })}
-        withFocusTrap={false}
-      >
-        <>
-          {' '}
-          <Icon status="warning">
-            <ExclamationTriangleIcon />
-          </Icon>
-        </>
-      </Popover>
-    );
+
+  if (!desiredOsImage && !renderedOsImage) {
+    return null;
   }
+
   return (
     <div>
-      {renderedOsImage || '-'}
-      {popover}
+      {renderedOsImage || t('Running system image is unknown')}
+      {desiredOsImage && desiredOsImage !== renderedOsImage && (
+        <Popover
+          aria-label={t('System image mismatch')}
+          position={PopoverPosition.top}
+          headerContent={t('System image mismatch')}
+          bodyContent={t('Desired system image: {{ desiredOsImage }}', { desiredOsImage })}
+          withFocusTrap={false}
+        >
+          <>
+            {' '}
+            <Icon status="warning">
+              <ExclamationTriangleIcon />
+            </Icon>
+          </>
+        </Popover>
+      )}
     </div>
   );
 };

@@ -1,16 +1,23 @@
 import React from 'react';
-import { TFunction } from 'react-i18next';
+import { Label } from '@patternfly/react-core';
+import OsImageIcon from '@patternfly/react-icons/dist/js/icons/os-image-icon';
+import ArchiveIcon from '@patternfly/react-icons/dist/js/icons/archive-icon';
+import type { TFunction } from 'react-i18next';
 
-import { CustomDeviceInfo, DeviceSystemInfo } from '@flightctl/types';
+import { type CustomDeviceInfo, type DeviceStatus, type DeviceSystemInfo, OsModeType } from '@flightctl/types';
+
+// Used to mark system info properties that we want to always display, regardless of whether they are set
+const UnsetValue = 'unset';
 
 // The API definition doesn't handle "customInfo" correctly
 export type FixedDeviceSystemInfo = DeviceSystemInfo & {
   customInfo?: CustomDeviceInfo;
+  osMode: OsModeType | typeof UnsetValue;
 };
 
 type SystemInfoEntry = {
   title: string;
-  value: string;
+  value: React.ReactNode;
 };
 
 // Converts a camelCase variable into words. Example: "someInfoData" --> "Some info data"
@@ -20,11 +27,6 @@ const propNameToTitle = (input: string) => {
   return words.charAt(0).toUpperCase() + words.slice(1).toLowerCase();
 };
 
-const emptySystemInfo = {
-  baseInfo: [],
-  customInfo: [],
-};
-
 const excludedKnownProps = [
   'distroVersion', // It's combined with "distroName"
   'customInfo', // Custom properies are evaluated separately from the predefined, known properties
@@ -32,6 +34,7 @@ const excludedKnownProps = [
 ];
 
 const getInfoDataKnownKeys = (t: TFunction) => ({
+  osMode: t('OS mode'),
   architecture: t('Architecture'),
   operatingSystem: t('Operating system'),
   agentVersion: t('Agent version'),
@@ -48,17 +51,47 @@ const getInfoDataKnownKeys = (t: TFunction) => ({
   tpmVendorInfo: t('TPM vendor info'),
 });
 
+const buildSystemInfoAndCapabilities = (deviceStatus?: DeviceStatus): FixedDeviceSystemInfo => {
+  return {
+    ...(deviceStatus?.systemInfo ?? {}),
+    osMode: deviceStatus?.capabilities?.osMode ?? UnsetValue,
+  } as FixedDeviceSystemInfo;
+};
+
+const getSystemInfoValue = (systemInfo: FixedDeviceSystemInfo, infoKey: string, t: TFunction) => {
+  switch (infoKey) {
+    case 'distroName': {
+      if (systemInfo.distroVersion) {
+        return `${systemInfo.distroName} ${systemInfo.distroVersion}`;
+      }
+      return systemInfo.distroName;
+    }
+    case 'osMode': {
+      if (systemInfo.osMode === UnsetValue) {
+        return '-';
+      }
+
+      const isImageMode = systemInfo.osMode === OsModeType.OsModeImage;
+      return (
+        <Label variant="outline" isCompact icon={isImageMode ? <OsImageIcon /> : <ArchiveIcon />}>
+          {isImageMode ? t('Image') : t('Package')}
+        </Label>
+      );
+    }
+    default:
+      return systemInfo[infoKey];
+  }
+};
+
 export const useDeviceSpecSystemInfo = (
-  systemInfo: FixedDeviceSystemInfo | undefined,
+  deviceStatus: DeviceStatus | undefined,
   t: TFunction,
 ): {
   baseInfo: SystemInfoEntry[];
   customInfo: SystemInfoEntry[];
 } => {
   const infoDataKnownKeys = React.useMemo(() => getInfoDataKnownKeys(t), [t]);
-  if (!systemInfo) {
-    return emptySystemInfo;
-  }
+  const systemInfo = buildSystemInfoAndCapabilities(deviceStatus);
 
   // First show the properties known to us, and only those that are set
   const baseInfoList = Object.entries(infoDataKnownKeys)
@@ -66,18 +99,7 @@ export const useDeviceSpecSystemInfo = (
       return !excludedKnownProps.includes(infoKey) && systemInfo[infoKey];
     })
     .map(([infoKey, infoTitle]) => {
-      let infoDataValue: string;
-
-      switch (infoKey) {
-        case 'distroName':
-          infoDataValue =
-            'distroVersion' in systemInfo
-              ? `${systemInfo.distroName} ${systemInfo.distroVersion}`
-              : systemInfo.distroName;
-          break;
-        default:
-          infoDataValue = systemInfo[infoKey];
-      }
+      const infoDataValue = getSystemInfoValue(systemInfo, infoKey, t);
 
       return {
         title: infoTitle,

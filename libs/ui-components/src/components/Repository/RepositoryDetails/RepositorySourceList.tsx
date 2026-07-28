@@ -82,10 +82,13 @@ const RepositorySourceList = ({ configs, dependencyStatus }: RepositorySourceLis
     return null;
   }
 
+  const configSyncs = configs.map((config) => getSyncRef(config.name, dependencyStatus));
+  const hasSyncDetails = configSyncs.some((sync) => sync !== null);
+
   return (
     <List isPlain>
       {configs.map((config, index) => {
-        const addDivider = index !== configs.length - 1;
+        const addDivider = hasSyncDetails && index !== configs.length - 1;
 
         let extraArgs = {};
         if (isRepoConfig(config)) {
@@ -93,7 +96,7 @@ const RepositorySourceList = ({ configs, dependencyStatus }: RepositorySourceLis
           extraArgs = repoDetailsMap[repoName] || {};
         }
 
-        const syncRef = getSyncRef(config.name, dependencyStatus);
+        const syncRef = configSyncs[index];
         return (
           <ListItem key={config.name}>
             <Stack>
@@ -107,7 +110,9 @@ const RepositorySourceList = ({ configs, dependencyStatus }: RepositorySourceLis
                 <StackItem className="pf-v6-u-my-sm">
                   <Divider
                     style={
-                      { '--pf-v6-c-divider--Color': 'var(--pf-t--global--border--color--50)' } as React.CSSProperties
+                      {
+                        '--pf-v6-c-divider--Color': 'var(--pf-t--global--border--color--50)',
+                      } as React.CSSProperties
                     }
                   />
                 </StackItem>

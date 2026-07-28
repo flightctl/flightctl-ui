@@ -34,7 +34,7 @@ const DeviceApplications = ({ device, refetch = () => undefined }: DeviceDetails
   return (
     <DetailsPageCard isCompact>
       <CardTitle>{t('Applications')}</CardTitle>
-      <CardBody className="pf-v6-u-p-0">
+      <CardBody>
         <ApplicationsTable
           deviceName={device.metadata.name as string}
           refetch={refetch}

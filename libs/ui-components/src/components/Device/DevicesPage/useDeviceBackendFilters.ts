@@ -3,8 +3,10 @@ import { ApplicationsSummaryStatusType, DeviceSummaryStatusType, DeviceUpdatedSt
 
 import {
   DEVICE_TEXT_FILTER_KEYS,
+  type DeviceOsModeFilterValue,
   DeviceTextFilterKey,
   FilterSearchParams,
+  isDeviceOsModeFilterValue,
   isValidCveIdFilterValue,
 } from '../../../utils/status/devices';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -94,6 +96,10 @@ export const useDeviceBackendFilters = () => {
     return activeStatuses;
   }, [searchParams]);
 
+  const selectedOsModes = React.useMemo(() => {
+    return (searchParams.getAll(FilterSearchParams.OsMode) || []).filter(isDeviceOsModeFilterValue);
+  }, [searchParams]);
+
   const selectedLabels = (searchParams.getAll(FilterSearchParams.Label) || []).map<FlightCtlLabel>((l) => {
     const labelParts = l.split('=');
     if (labelParts.length === 1) {
@@ -131,6 +137,13 @@ export const useDeviceBackendFilters = () => {
     [updateSearchParams],
   );
 
+  const setSelectedOsModes = React.useCallback(
+    (osModes: DeviceOsModeFilterValue[]) => {
+      updateSearchParams(getNewParams(paramsRef.current, { [FilterSearchParams.OsMode]: osModes }));
+    },
+    [updateSearchParams],
+  );
+
   const setSelectedLabels = React.useCallback(
     (labels: FlightCtlLabel[]) => {
       updateSearchParams(getNewParams(paramsRef.current, { [FilterSearchParams.Label]: labels.map(labelToString) }));
@@ -153,6 +166,7 @@ export const useDeviceBackendFilters = () => {
     !!selectedLabels.length ||
     !!ownerFleets.length ||
     onlyFleetless ||
+    !!selectedOsModes.length ||
     Object.values(activeStatuses).some((s) => !!s.length) ||
     DEVICE_TEXT_FILTER_KEYS.some((key) => !!textFilters[key]);
 
@@ -162,6 +176,8 @@ export const useDeviceBackendFilters = () => {
     clearTextFilters,
     activeStatuses,
     setActiveStatuses,
+    selectedOsModes,
+    setSelectedOsModes,
     ownerFleets,
     setOwnerFleets,
     onlyFleetless,

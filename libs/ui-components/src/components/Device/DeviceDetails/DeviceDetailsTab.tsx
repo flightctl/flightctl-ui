@@ -48,7 +48,7 @@ const EnrolledDeviceDetails = ({
   children,
 }: React.PropsWithChildren<DeviceDetailsTabProps>) => {
   const { t } = useTranslation();
-  const devSystemInfo = useDeviceSpecSystemInfo(device.status.systemInfo, t);
+  const devSystemInfo = useDeviceSpecSystemInfo(device.status, t);
   const [vulnerabilitiesEnabled, canListVulnerabilities] = useVulnerabilitiesEnabled();
   const showVulnerabilities = vulnerabilitiesEnabled && canListVulnerabilities;
 
@@ -94,7 +94,7 @@ const EnrolledDeviceDetails = ({
               </GridItem>
             </Grid>
             {devSystemInfo.baseInfo.length > 0 && (
-              <Grid hasGutter>
+              <Grid hasGutter className="pf-v6-u-pt-md">
                 {devSystemInfo.baseInfo.map((systemInfo, index) => {
                   const sizes: gridSpans[] = hasExtraColumn ? [2, 2, 2, 6] : [3, 3, 6];
                   const colSize = sizes[index % (hasExtraColumn ? 4 : 3)];

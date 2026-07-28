@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { DevicesSummaryCapabilities } from './DevicesSummaryCapabilities';
 /**
  * A summary of the devices in the fleet returned when fetching a single Fleet.
  */
@@ -22,5 +23,6 @@ export type DevicesSummary = {
    * A breakdown of the devices in the fleet by "updated" status.
    */
   updateStatus: Record<string, number>;
+  capabilities?: DevicesSummaryCapabilities;
 };
 
