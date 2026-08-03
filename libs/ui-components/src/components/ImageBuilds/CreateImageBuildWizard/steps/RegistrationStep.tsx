@@ -159,7 +159,10 @@ const RegistrationStep = () => {
       <FormSection title={t('{{ productName }} onboarding', { productName })}>
         <SwitchField
           name="onboarding"
-          label={t('Enable the {{ productName }} onboarding wizard powered by Cockpit. Provides a guided first-boot experience for device configuration. Compatible with both early and late binding.', { productName })}
+          label={t(
+            'Enable the {{ productName }} onboarding wizard powered by Cockpit. Provides a guided first-boot experience for device configuration. Compatible with both early and late binding.',
+            { productName },
+          )}
           aria-label={t('{{ productName }} onboarding', { productName })}
         />
       </FormSection>
