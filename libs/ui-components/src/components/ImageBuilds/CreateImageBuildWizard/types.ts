@@ -13,6 +13,7 @@ export type ImageBuildFormValues = CatalogStepValues & {
   destination: ImageBuildDestination;
   bindingType: BindingType;
   exportFormats: ExportFormatType[];
+  onboarding: boolean;
   remoteAccessEnabled: boolean;
   userConfiguration: ImageBuildUserConfiguration;
 };

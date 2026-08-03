@@ -28,6 +28,7 @@ import ImagePromotionStatus from '../../ImagePromotion/ImagePromotionStatus';
 import { getDateDisplay } from '../../../utils/dates';
 import { getExportFormatLabel, getImageReference } from '../../../utils/imageBuilds';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { useAppContext } from '../../../hooks/useAppContext';
 import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 import { CERTIFICATE_VALIDITY_IN_YEARS } from '../../../constants';
 import { ImageBuildWithExports } from '../../../types/extraTypes';
@@ -202,7 +203,9 @@ const ImagePromotionsCard = ({
 
 const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }) => {
   const { t } = useTranslation();
+  const { settings } = useAppContext();
   const { checkPermissions } = usePermissionsContext();
+  const productName = settings.isRHEM ? t('Red Hat Edge Manager') : t('Flight Control');
   const [canListPromotions, canEditPromotions, canDeletePromotions] = checkPermissions(detailsPermissions);
   const srcRepositoryName = imageBuild.spec.source.repository;
   const dstRepositoryName = imageBuild.spec.destination.repository;
@@ -292,6 +295,12 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
                       </DescriptionListGroup>
                     </>
                   )}
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('{{ productName }} onboarding', { productName })}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      {imageBuild.spec.onboarding ? t('Enabled') : t('Disabled')}
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
                   {remoteAccessUsername && (
                     <DescriptionListGroup>
                       <DescriptionListTerm>{t('Remote access')}</DescriptionListTerm>

@@ -198,6 +198,7 @@ export const getInitialValues = (): ImageBuildFormValues => {
     },
     bindingType: BindingType.BindingTypeEarly,
     exportFormats: [],
+    onboarding: false,
     remoteAccessEnabled: false,
     userConfiguration: {
       username: '',
@@ -226,6 +227,10 @@ export const getImageBuildResource = (values: ImageBuildFormValues): ImageBuild 
       type: values.bindingType,
     },
   };
+
+  if (values.onboarding) {
+    spec.onboarding = true;
+  }
 
   // Allow the user to uncheck the toggle without having cleared the fields
   const username = values.userConfiguration.username || '';
