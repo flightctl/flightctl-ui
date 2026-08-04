@@ -1,23 +1,12 @@
-import {
-  Alert,
-  FormGroup,
-  Grid,
-  GridItem,
-  List,
-  ListItem,
-  Split,
-  SplitItem,
-  Stack,
-  StackItem,
-  Title,
-} from '@patternfly/react-core';
+import * as React from 'react';
+import { Alert, FormGroup, List, ListItem, Split, SplitItem, Stack, StackItem, Title } from '@patternfly/react-core';
 import { RJSFValidationError } from '@rjsf/utils';
 import { FormikErrors, useFormikContext } from 'formik';
 import type * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
-import * as React from 'react';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import DynamicForm, { AssetSelection } from '../../../DynamicForm/DynamicForm';
+import type { VolumeCatalogSelection } from '../../../../utils/catalog';
+import DynamicForm from '../../../DynamicForm/DynamicForm';
 import YamlEditorBase from '../../../common/CodeEditor/YamlEditorBase';
 import TextField from '../../../form/TextField';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
@@ -38,35 +27,40 @@ export const DynamicAppForm = ({ schemaErrors, isEdit }: DynamicAppFormProps) =>
   const { values, setFieldValue, setFieldTouched } = useFormikContext<InstallAppFormik>();
 
   const formContext = React.useMemo(() => {
-    const onAssetSelected = (selection: AssetSelection) => {
-      const existing = values.selectedAssets.findIndex((a) => a.volumeIndex === selection.volumeIndex);
-      let newAssets: AssetSelection[];
+    const onVolumeSelected = (selection: VolumeCatalogSelection) => {
+      const existing = values.volumeSelection.findIndex((a) => a.volumeIndex === selection.volumeIndex);
+      let newVolumeSelection: VolumeCatalogSelection[];
       if (existing >= 0) {
-        const updated = [...values.selectedAssets];
+        const updated = [...values.volumeSelection];
         updated[existing] = selection;
-        newAssets = updated;
+        newVolumeSelection = updated;
       } else {
-        newAssets = [...values.selectedAssets, selection];
+        newVolumeSelection = [...values.volumeSelection, selection];
       }
-      setFieldValue('selectedAssets', newAssets);
+      setFieldValue('volumeSelection', newVolumeSelection);
     };
 
     const onBeforeArrayItemRemoved = (arrayId: string, removedIndex: number) => {
       if (arrayId === 'root_volumes') {
-        const newAssets = values.selectedAssets
+        const newVolumeSelection = values.volumeSelection
           .filter((a) => a.volumeIndex !== removedIndex)
           .map((a) => (a.volumeIndex > removedIndex ? { ...a, volumeIndex: a.volumeIndex - 1 } : a));
-        setFieldValue('selectedAssets', newAssets);
+        setFieldValue('volumeSelection', newVolumeSelection);
       }
     };
 
-    const onAssetCleared = (volumeIndex: number) => {
-      const newAssets = values.selectedAssets.filter((a) => a.volumeIndex !== volumeIndex);
-      setFieldValue('selectedAssets', newAssets);
+    const onVolumeSelectionCleared = (volumeIndex: number) => {
+      const newVolumeSelection = values.volumeSelection.filter((a) => a.volumeIndex !== volumeIndex);
+      setFieldValue('volumeSelection', newVolumeSelection);
     };
 
-    return { onAssetSelected, onBeforeArrayItemRemoved, onAssetCleared, selectedAssets: values.selectedAssets };
-  }, [values.selectedAssets, setFieldValue]);
+    return {
+      onVolumeSelected,
+      onBeforeArrayItemRemoved,
+      onVolumeCleared: onVolumeSelectionCleared,
+      volumeSelection: values.volumeSelection,
+    };
+  }, [values.volumeSelection, setFieldValue]);
 
   return (
     <Stack hasGutter>
@@ -119,22 +113,18 @@ export const DynamicAppForm = ({ schemaErrors, isEdit }: DynamicAppFormProps) =>
               />
             </StackItem>
             <StackItem>
-              <Grid>
-                <GridItem span={6}>
-                  <DynamicForm
-                    valuesSchema={values.configSchema}
-                    formData={values.formValues}
-                    onChange={async (val) => {
-                      await setFieldValue('formValues', val);
-                      await setFieldTouched('formValues', true);
-                    }}
-                    onValidate={(valid) => {
-                      setFieldValue('dynamicFormValid', valid);
-                    }}
-                    formContext={formContext}
-                  />
-                </GridItem>
-              </Grid>
+              <DynamicForm
+                valuesSchema={values.configSchema}
+                formData={values.formValues}
+                onChange={async (val) => {
+                  await setFieldValue('formValues', val);
+                  await setFieldTouched('formValues', true);
+                }}
+                onValidate={(valid) => {
+                  setFieldValue('dynamicFormValid', valid);
+                }}
+                formContext={formContext}
+              />
             </StackItem>
           </Stack>
         ) : (

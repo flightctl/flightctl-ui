@@ -33,7 +33,7 @@ import ErrorBoundary from '../../common/ErrorBoundary';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { OciRegistriesContextProvider, useOciRegistriesContext } from '../OciRegistriesContext';
-import { useCatalogItem } from '../../Catalog/useCatalogs';
+import { useCatalogItemsLookup } from '../../Catalog/useCatalogItemsLookup';
 import NewVersionStep, { isNewVersionStepValid, newVersionStepId } from './steps/NewVersionStep';
 import CatalogStep, { catalogStepId, isCatalogStepValid } from '../CreateImageBuildWizard/steps/CatalogStep';
 import ReviewStep, { reviewStepId } from './steps/ReviewStep';
@@ -237,21 +237,27 @@ const NewVersionImageBuildWizard = () => {
 
   const activePromotion = getLatestPromotion(promotionList?.items || []);
   const promotionTarget = activePromotion?.spec.target;
-
-  const [catalogItem, , catalogItemError] = useCatalogItem(
-    promotionTarget?.catalogName,
-    promotionTarget?.catalogItemName,
+  const hasCatalogParams = promotionTarget && promotionTarget.catalogName && promotionTarget.catalogItemName;
+  const {
+    getItem,
+    isLoading: catalogItemLoading,
+    error: catalogItemError,
+  } = useCatalogItemsLookup(
+    hasCatalogParams ? [{ catalog: promotionTarget.catalogName, item: promotionTarget.catalogItemName }] : [],
   );
+  const catalogItem = hasCatalogParams
+    ? getItem(promotionTarget.catalogName, promotionTarget.catalogItemName)
+    : undefined;
 
-  // useFetchPeriodically never resets isLoading back to true when the endpoint changes,
-  // so we can't rely on the loading flag. Instead, wait until we have the item or an error.
   const isLoading =
     permissionsLoading ||
     imageBuildLoading ||
     registriesLoading ||
     (canListPromotions && promotionsLoading) ||
-    (!!activePromotion && !catalogItem && !catalogItemError);
-  const loadError = imageBuildError || registriesError || promotionsError;
+    (!!activePromotion && hasCatalogParams && catalogItemLoading) ||
+    (!!activePromotion && hasCatalogParams && !catalogItem && !catalogItemError);
+  const loadError =
+    imageBuildError || registriesError || promotionsError || (hasCatalogParams ? catalogItemError : undefined);
 
   return (
     <>

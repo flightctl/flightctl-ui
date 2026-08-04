@@ -2,7 +2,6 @@ import * as React from 'react';
 import Form from '@rjsf/core';
 import { RJSFSchema, RegistryWidgetsType, TemplatesType } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
-import { CatalogItem } from '@flightctl/types/alpha';
 import AJV8Validator from '@rjsf/validator-ajv8/lib/validator';
 
 import {
@@ -22,23 +21,15 @@ import {
   PFObjectFieldTemplate,
   pfFields,
 } from './FieldTemplate';
-
-export type AssetSelection = {
-  volumeIndex: number;
-  assetChannel: string;
-  assetVersion: string;
-  assetItem?: CatalogItem;
-  assetCatalog: string;
-  assetItemName: string;
-};
+import { VolumeCatalogSelection } from '../../utils/catalog';
 
 export type DynamicFormContext = {
-  selectedAssets: AssetSelection[];
-  onAssetSelected: (selection: AssetSelection) => void;
-  /** Called when an array item is removed, before the form state is updated. Use to sync e.g. selectedAssets when the array is "volumes". */
+  volumeSelection: VolumeCatalogSelection[];
+  onVolumeSelected: (selection: VolumeCatalogSelection) => void;
+  /** Called when an array item is removed, before the form state is updated. Use to sync e.g. volumeSelection when the array is "volumes". */
   onBeforeArrayItemRemoved: (arrayId: string, index: number) => void;
-  /** Called when the user clears the selected asset for a volume (e.g. "Delete Item"). Use to remove the entry from selectedAssets. */
-  onAssetCleared: (volumeIndex: number) => void;
+  /** Called when the user clears the catalog item selection for a volume (e.g. "Delete Item"). Use to remove the entry from volumeSelection. */
+  onVolumeCleared: (volumeIndex: number) => void;
 };
 
 // All PatternFly widgets

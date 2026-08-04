@@ -10,8 +10,8 @@ const getAppName = (app: AppForm, t: TFunction): string => {
   if (app.name) {
     return app.name;
   }
-  if ('image' in app && app.image) {
-    return `${t('Unnamed')} (${app.image})`;
+  if ('imageSpec' in app && app.imageSpec?.image) {
+    return `${t('Unnamed')} (${app.imageSpec.image})`;
   }
   return '';
 };

@@ -9,6 +9,7 @@ import TextField from '../../../form/TextField';
 import UploadField from '../../../form/UploadField';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { AppSpecType, HelmAppForm } from '../../../../types/deviceSpec';
+import ApplicationImageForm from './ApplicationImageForm';
 
 const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
@@ -33,18 +34,12 @@ const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?
         isChecked
       />
 
-      <FormGroupWithHelperText
-        label={t('Image')}
-        content={t('Reference to the OCI image or artifact containing the Helm chart.')}
+      <ApplicationImageForm
+        applicationName={appFieldName}
+        isReadOnly={isReadOnly}
+        groupContent={t('Reference to the OCI image or artifact containing the Helm chart.')}
         isRequired
-      >
-        <TextField
-          aria-label={t('Image')}
-          name={`${appFieldName}.image`}
-          isDisabled={isReadOnly}
-          helperText={t('Provide a valid image reference')}
-        />
-      </FormGroupWithHelperText>
+      />
 
       <FormGroupWithHelperText label={t('Namespace')} content={t('The namespace to install the Helm chart into.')}>
         <TextField
@@ -100,10 +95,7 @@ const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?
               {!isReadOnly && (
                 <FormGroup>
                   <Tooltip
-                    className="fctl-application-helm-form__tooltip"
-                    content={
-                      <Content>{t('Fill in the existing values files before you can add more values files.')}</Content>
-                    }
+                    content={<>{t('Fill in the existing values files before you can add more values files.')}</>}
                   >
                     <Button
                       variant="link"

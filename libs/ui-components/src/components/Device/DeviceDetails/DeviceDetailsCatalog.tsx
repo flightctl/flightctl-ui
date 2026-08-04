@@ -48,7 +48,6 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
       canEdit={false}
       hasOwner
       hasPackageMode={hasPackageMode}
-      currentLabels={ownerFleet?.metadata?.labels}
       onPatch={async () => {}}
       spec={ownerFleet?.spec.template.spec}
       specPath="/spec/template"
@@ -58,7 +57,6 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
   ) : (
     <ResourceCatalogPage
       canEdit={canEdit}
-      currentLabels={device.metadata.labels}
       onPatch={onPatch}
       spec={device.spec}
       specPath="/"

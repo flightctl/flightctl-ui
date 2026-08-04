@@ -18,7 +18,7 @@ import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-cir
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
 import { AppType } from '@flightctl/types';
-import { AppForm, AppSpecType, DeviceSpecConfigFormValues } from '../../../../types/deviceSpec';
+import { AppForm, AppSpecType, DeviceSpecConfigFormValues, isCatalogAppForm } from '../../../../types/deviceSpec';
 import { createInitialAppForm } from '../deviceSpecUtils';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
@@ -35,18 +35,17 @@ import ApplicationVmForm from './ApplicationVmForm';
 import ApplicationVolumeForm from './ApplicationVolumeForm';
 import ApplicationVariablesForm from './ApplicationVariablesForm';
 import ApplicationIntegritySettings from './ApplicationIntegritySettings';
-import { APP_CATALOG_LABEL_KEY } from '../../../Catalog/const';
 
 import './ApplicationsForm.css';
 
 const ApplicationSection = ({
   index,
-  isReadOnly,
-  managedByCatalog,
+  isReadOnly: isReadOnlyForm,
+  isCatalogApp,
 }: {
   index: number;
   isReadOnly?: boolean;
-  managedByCatalog: boolean;
+  isCatalogApp: boolean;
 }) => {
   const { t } = useTranslation();
   const appFieldName = `applications[${index}]`;
@@ -58,6 +57,7 @@ const ApplicationSection = ({
   const isQuadlet = app.appType === AppType.AppTypeQuadlet;
   const isCompose = app.appType === AppType.AppTypeCompose;
   const isVm = app.appType === AppType.AppTypeVm;
+  const isReadOnly = isReadOnlyForm || isCatalogApp;
 
   // Each AppForm type has all data structures it needs initialized with safe defaults (eg. empty arrays, etc).
   // However, when the user switches to a type that doesn't have those fields, we must reset the app to define the missing fields.
@@ -83,7 +83,7 @@ const ApplicationSection = ({
       fieldName={appFieldName}
     >
       <Grid span={12} hasGutter>
-        {managedByCatalog && (
+        {isCatalogApp && (
           <GridItem>
             <Alert isInline variant="info" title={t('Application is managed by Software Catalog')} />
           </GridItem>
@@ -114,7 +114,7 @@ const ApplicationSection = ({
                     <strong>{t('Configuration Sources')}:</strong>
                   </StackItem>
                   <StackItem>
-                    <u>
+                    <ul>
                       <li>
                         <strong>{t('OCI reference')}</strong> -{' '}
                         {t('Pull definitions from container registry (reusable, versioned).')}
@@ -123,7 +123,7 @@ const ApplicationSection = ({
                         <strong>{t('Inline')}</strong> -{' '}
                         {t('Define application files directly in this interface (custom, one-off).')}
                       </li>
-                    </u>
+                    </ul>
                   </StackItem>
                 </Stack>
               }
@@ -153,16 +153,18 @@ const ApplicationSection = ({
             <FormGroupWithHelperText
               label={t('Application name')}
               content={
-                specType === AppSpecType.INLINE
+                isCatalogApp || specType === AppSpecType.INLINE
                   ? t('The unique identifier for this application.')
                   : t('If not specified, the image name will be used. Application name must be unique.')
               }
-              isRequired={specType === AppSpecType.INLINE}
+              isRequired={isCatalogApp || specType === AppSpecType.INLINE}
             >
               <TextField aria-label={t('Application name')} name={`${appFieldName}.name`} isDisabled={isReadOnly} />
             </FormGroupWithHelperText>
 
-            {specType === AppSpecType.OCI_IMAGE && <ApplicationImageForm index={index} isReadOnly={isReadOnly} />}
+            {specType === AppSpecType.OCI_IMAGE && (
+              <ApplicationImageForm applicationName={appFieldName} isReadOnly={isReadOnly || isCatalogApp} isRequired />
+            )}
             {specType === AppSpecType.INLINE && (
               <ApplicationInlineForm files={app.files || []} index={index} isReadOnly={isReadOnly} />
             )}
@@ -186,13 +188,7 @@ const ApplicationSection = ({
   );
 };
 
-const ApplicationTemplates = ({
-  isReadOnly,
-  labels,
-}: {
-  isReadOnly?: boolean;
-  labels: Record<string, string> | undefined;
-}) => {
+const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
   if (isReadOnly && values.applications.length === 0) {
@@ -213,19 +209,15 @@ const ApplicationTemplates = ({
         <FieldArray name="applications">
           {(arrayHelpers) => (
             <>
-              {values.applications.map((_app, index) => {
-                const appCatalog = !!_app.name && !!labels?.[`${_app.name}.${APP_CATALOG_LABEL_KEY}`];
+              {values.applications.map((app, index) => {
+                const isCatalogApp = isCatalogAppForm(app);
                 return (
                   <FormSection key={index}>
                     <Split hasGutter>
                       <SplitItem isFilled>
-                        <ApplicationSection
-                          index={index}
-                          isReadOnly={isReadOnly || appCatalog}
-                          managedByCatalog={appCatalog}
-                        />
+                        <ApplicationSection index={index} isReadOnly={isReadOnly} isCatalogApp={isCatalogApp} />
                       </SplitItem>
-                      {!isReadOnly && !appCatalog && (
+                      {!isReadOnly && !isCatalogApp && (
                         <SplitItem>
                           <Button
                             aria-label={t('Delete application')}

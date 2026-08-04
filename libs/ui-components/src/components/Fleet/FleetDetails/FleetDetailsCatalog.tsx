@@ -1,10 +1,11 @@
-import { Fleet, PatchRequest } from '@flightctl/types';
 import * as React from 'react';
+
+import type { Fleet, PatchRequest } from '@flightctl/types';
 import { useFetch } from '../../../hooks/useFetch';
+import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import ResourceCatalogPage from '../../Catalog/ResourceCatalog/ResourceCatalogPage';
-import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 
 type FleetDetailsCatalogProps = {
   fleet: Fleet;
@@ -30,7 +31,6 @@ const FleetDetailsCatalog = ({ fleet, refetch }: FleetDetailsCatalogProps) => {
     <ResourceCatalogPage
       canEdit={canEdit && !fleet.metadata.owner}
       hasOwner={!!fleet.metadata.owner}
-      currentLabels={fleet.metadata.labels}
       onPatch={onPatch}
       spec={fleet.spec.template.spec}
       specPath="/spec/template/"

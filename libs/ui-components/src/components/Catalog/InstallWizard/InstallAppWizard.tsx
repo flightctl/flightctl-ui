@@ -9,7 +9,7 @@ import { Device, Fleet } from '@flightctl/types';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
-import { getAppPatches } from '../utils';
+import { getAppPatches } from '../../../utils/catalog';
 import { InstallAppFormik, appConfigStepId, reviewStepId, selectTargetStepId, specificationsStepId } from './types';
 import SpecificationsStep, { isSpecsStepValid } from './steps/SpecificationsStep';
 import SelectTargetStep, { isSelectTargetStepValid } from './steps/SelectTargetStep';
@@ -77,7 +77,7 @@ const InstallAppWizardContent = ({
   const { values, errors } = useFormikContext<InstallAppFormik>();
   const validStepIds = getValidStepIds(errors, values);
   return isSuccessful ? (
-    <UpdateSuccessPage />
+    <UpdateSuccessPage isSpecUnchanged={false} />
   ) : (
     <>
       <LeaveFormConfirmation />
@@ -195,7 +195,6 @@ const InstallAppWizard = ({ catalogItem }: InstallAppWizardProps) => {
       : `fleets/${selectedFleet?.metadata.name}`;
 
     const res = await get<Device | Fleet>(resourceId);
-    const currentLabels = res?.metadata.labels;
     const specPath = installToDevice ? '/' : '/spec/template/';
     const catalogItemVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
 
@@ -208,14 +207,13 @@ const InstallAppWizard = ({ catalogItem }: InstallAppWizardProps) => {
     const allPatches = getAppPatches({
       appName: values.appName,
       currentApps,
-      currentLabels,
       catalogItem,
       catalogItemVersion,
       channel: values.channel,
       formValues:
         values.configureVia === 'editor' ? (load(values.editorContent) as Record<string, unknown>) : values.formValues,
       specPath,
-      selectedAssets: values.configureVia === 'form' ? values.selectedAssets : [],
+      volumeSelection: values.configureVia === 'form' ? values.volumeSelection : [],
     });
     if (!allPatches.length) {
       return;

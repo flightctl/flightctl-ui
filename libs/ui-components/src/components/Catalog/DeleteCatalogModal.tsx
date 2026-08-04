@@ -11,13 +11,15 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
+import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
-import { CatalogItemList } from '@flightctl/types/alpha';
+import type { CatalogItemDeploymentList, CatalogItemList } from '@flightctl/types/alpha';
 
 import { getErrorMessage } from '../../utils/error';
 import { useFetch } from '../../hooks/useFetch';
 import { useTranslation } from '../../hooks/useTranslation';
+import { isPromiseRejected } from '../../types/typeUtils';
 
 type DeleteCatalogModalProps = {
   onClose: VoidFunction;
@@ -26,35 +28,100 @@ type DeleteCatalogModalProps = {
   catalogDisplayName: string;
 };
 
+type CatalogItemInfo = {
+  id: string;
+  displayName: string;
+  // Populated after attempting to delete a catalog item that's used in at least one deployment
+  isInUse?: boolean;
+};
+
+const FailedItemsTable = ({ items }: { items: CatalogItemInfo[] }) => {
+  const { t } = useTranslation();
+  return (
+    <Table>
+      <Thead>
+        <Tr>
+          <Th modifier="fitContent">{t('Name')}</Th>
+          <Th>{t('Reason')}</Th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {items.map((item) => (
+          <Tr key={item.id}>
+            <Td dataLabel={t('Name')}>{item.displayName}</Td>
+            <Td dataLabel={t('Reason')}>
+              {item.isInUse
+                ? t('Catalog item is used in at least one fleet or device.')
+                : t('Reason is unknown. Retrying deletion may succeed.')}
+            </Td>
+          </Tr>
+        ))}
+      </Tbody>
+    </Table>
+  );
+};
+
 const DeleteCatalogModal = ({ catalogId, catalogDisplayName, onClose, onDeleteSuccess }: DeleteCatalogModalProps) => {
   const { t } = useTranslation();
   const { get, remove } = useFetch();
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [error, setError] = React.useState<string>();
-  const [itemsError, setItemsError] = React.useState<unknown>();
+  const [loadItemsError, setLoadItemsError] = React.useState<unknown>();
   const [message, setMessage] = React.useState<string>();
-  const [catalogItemIds, setCatalogItemIds] = React.useState<string[]>();
-  const isLoadingItems = catalogItemIds === undefined;
-  const hasCatalogItems = !isLoadingItems && catalogItemIds.length > 0;
+  const [catalogItems, setCatalogItems] = React.useState<CatalogItemInfo[]>();
+  const [hasFailedToDeleteItems, setHasFailedToDeleteItems] = React.useState(false);
+  const isLoadingItems = catalogItems === undefined;
+  const hasCatalogItems = !!catalogItems?.length;
 
-  const deleteCatalogAndItems = async () => {
-    const toDeleteItems = catalogItemIds?.length || 0;
-    let deletedCount = 0;
-    if (toDeleteItems > 0) {
-      setMessage(t('Deleting {{count}} catalog item', { count: toDeleteItems }));
-      const promises = (catalogItemIds || []).map((id) => remove(`catalogs/${catalogId}/items/${id}`));
-      const results = await Promise.allSettled(promises);
-      deletedCount = results.filter((result) => result.status === 'fulfilled').length;
+  const updateFailedDeletionStatus = async (failedToDelete: CatalogItemInfo[]) => {
+    const failedItems = await Promise.all(
+      failedToDelete.map(async (item): Promise<CatalogItemInfo> => {
+        try {
+          const deployments = await get<CatalogItemDeploymentList>(
+            `catalogs/${catalogId}/items/${item.id}/deployments?limit=1`,
+          );
+          return { ...item, isInUse: deployments.items.length > 0 };
+        } catch {
+          return { ...item, isInUse: false };
+        }
+      }),
+    );
+
+    setCatalogItems(failedItems);
+  };
+
+  const deleteCatalogItems = async () => {
+    const itemsToDelete = catalogItems || [];
+    if (itemsToDelete.length === 0) {
+      return true;
     }
+    setMessage(t('Deleting {{count}} catalog items', { count: itemsToDelete.length }));
+    const results = await Promise.allSettled(
+      itemsToDelete.map(async (item) => {
+        await remove(`catalogs/${catalogId}/items/${item.id}`);
+        return item;
+      }),
+    );
 
-    const nonDeletedItems = toDeleteItems - deletedCount;
-    if (nonDeletedItems !== 0) {
-      setError(t('{{count}} catalog item could not be deleted. Try deleting it manually.', { count: nonDeletedItems }));
+    const failedToDelete = results.flatMap((result, index) =>
+      isPromiseRejected(result) ? [itemsToDelete[index]] : [],
+    );
+    if (failedToDelete.length > 0) {
+      setHasFailedToDeleteItems(true);
+      await updateFailedDeletionStatus(failedToDelete);
       return false;
     }
-    setCatalogItemIds([]);
-    await remove(`catalogs/${catalogId}`);
     return true;
+  };
+
+  const deleteCatalogAndItems = async () => {
+    const allItemsDeleted = await deleteCatalogItems();
+    if (allItemsDeleted) {
+      setCatalogItems([]);
+      setHasFailedToDeleteItems(false);
+      await remove(`catalogs/${catalogId}`);
+    }
+    return allItemsDeleted;
   };
 
   const loadCatalogItems = React.useCallback(async () => {
@@ -62,11 +129,16 @@ const DeleteCatalogModal = ({ catalogId, catalogDisplayName, onClose, onDeleteSu
       const params = new URLSearchParams();
       params.set('fieldSelector', `metadata.catalog in (${catalogId})`);
       const items = await get<CatalogItemList>(`catalogitems?${params.toString()}`);
-      setCatalogItemIds(items.items.map((item) => item.metadata.name || ''));
-      setItemsError(undefined);
+      setCatalogItems(
+        items.items.map((item) => ({
+          id: item.metadata.name || '',
+          displayName: item.spec.displayName || item.metadata.name || '',
+        })),
+      );
+      setLoadItemsError(undefined);
     } catch (e) {
-      setItemsError(e);
-      setCatalogItemIds([]);
+      setLoadItemsError(e);
+      setCatalogItems([]);
     }
   }, [get, catalogId]);
 
@@ -89,12 +161,33 @@ const DeleteCatalogModal = ({ catalogId, catalogDisplayName, onClose, onDeleteSu
     }
   };
 
+  let content: React.ReactNode = null;
+  if (loadItemsError) {
+    content = (
+      <Alert isInline variant="warning" title={t('Cannot delete catalog')}>
+        {t(
+          `The catalog cannot be safely deleted at this moment, as we couldn't determine if the catalog contains items. Detail: {{detail}}`,
+          { detail: getErrorMessage(loadItemsError) },
+        )}
+      </Alert>
+    );
+  } else if (!hasFailedToDeleteItems) {
+    content = (
+      <Trans t={t}>
+        Are you sure you want to delete the catalog <b>{catalogDisplayName}</b>?
+      </Trans>
+    );
+  }
+
   return (
-    <FlightCtlModal isOpen onClose={onClose} variant={hasCatalogItems ? 'medium' : 'small'}>
-      <ModalHeader title={t('Delete catalog ?')} titleIconVariant="warning" />
+    <FlightCtlModal isOpen onClose={onClose} variant={hasCatalogItems || hasFailedToDeleteItems ? 'medium' : 'small'}>
+      <ModalHeader
+        title={hasFailedToDeleteItems ? t('Catalog deletion failure') : t('Delete catalog ?')}
+        titleIconVariant={hasFailedToDeleteItems ? 'danger' : 'warning'}
+      />
       <ModalBody>
         <Stack hasGutter>
-          {hasCatalogItems && (
+          {hasCatalogItems && !hasFailedToDeleteItems && (
             <StackItem>
               <Content component="p">
                 {t(
@@ -103,20 +196,7 @@ const DeleteCatalogModal = ({ catalogId, catalogDisplayName, onClose, onDeleteSu
               </Content>
             </StackItem>
           )}
-          {itemsError ? (
-            <Alert isInline variant="warning" title={t('Cannot delete catalog')}>
-              {t(
-                `The catalog cannot be safely deleted at this moment, as we couldn't determine if the catalog contains items. Detail: {{detail}}`,
-                { detail: getErrorMessage(itemsError) },
-              )}
-            </Alert>
-          ) : (
-            <StackItem>
-              <Trans t={t}>
-                Are you sure you want to delete the catalog <b>{catalogDisplayName}</b>?
-              </Trans>
-            </StackItem>
-          )}
+          {content && <StackItem>{content}</StackItem>}
           {isDeleting && !!message && (
             <StackItem>
               <Spinner size="sm" /> {message}
@@ -134,10 +214,24 @@ const DeleteCatalogModal = ({ catalogId, catalogDisplayName, onClose, onDeleteSu
               </Alert>
             </StackItem>
           )}
+          {hasFailedToDeleteItems && (
+            <>
+              <StackItem>
+                <Content component="p">
+                  {t(
+                    'The catalog could not be deleted because it contains catalog items that failed to delete. Review the details below and retry the deletion if necessary.',
+                  )}
+                </Content>
+              </StackItem>
+              <StackItem>
+                <FailedItemsTable items={catalogItems || []} />
+              </StackItem>
+            </>
+          )}
         </Stack>
       </ModalBody>
       <ModalFooter>
-        {itemsError ? (
+        {loadItemsError ? (
           <Button variant="primary" onClick={loadCatalogItems}>
             {t('Reload catalog items')}
           </Button>
@@ -149,7 +243,7 @@ const DeleteCatalogModal = ({ catalogId, catalogDisplayName, onClose, onDeleteSu
             isLoading={isLoadingItems || isDeleting}
             onClick={deleteAction}
           >
-            {t('Delete catalog')}
+            {hasFailedToDeleteItems ? t('Retry delete') : t('Delete catalog')}
           </Button>
         )}
         <Button variant="link" onClick={onClose} isDisabled={isDeleting}>

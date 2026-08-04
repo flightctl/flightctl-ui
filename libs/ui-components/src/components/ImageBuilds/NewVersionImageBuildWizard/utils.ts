@@ -17,6 +17,12 @@ import { NewVersionWizardFormValues } from './types';
 
 const TESTING_CHANNEL = 'testing';
 
+// Drop fields with empty string. Otherwise they're later detected as changed when the associated catalog item is updated.
+const optionalTrimmed = (value: string | undefined): string | undefined => {
+  const trimmed = value?.trim();
+  return trimmed || undefined;
+};
+
 export const getImagePromotion = (values: ImagePromotionFormValues, buildName: string): ImagePromotion => {
   let promotionTarget: NewCatalogItemTarget | ExistingCatalogItemTarget;
   if (values.type === 'new') {
@@ -25,24 +31,27 @@ export const getImagePromotion = (values: ImagePromotionFormValues, buildName: s
       catalogName: values.catalog,
       type: NewCatalogItemTarget.type.NEW_CATALOG_ITEM,
       version: values.newItem.version,
-      readme: values.newItem.readme,
-      displayName: values.newItem.displayName || undefined,
+      readme: optionalTrimmed(values.newItem.readme),
+      displayName: optionalTrimmed(values.newItem.displayName),
     } as NewCatalogItemTarget;
   } else {
+    const skips =
+      values.existingItem.skips || []
+        ? values.existingItem.skips
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+
     promotionTarget = {
       type: ExistingCatalogItemTarget.type.EXISTING_CATALOG_ITEM,
       catalogItemName: values.existingItem.name,
       catalogName: values.catalog,
       version: values.existingItem.version,
-      readme: values.existingItem.readme,
-      replaces: values.existingItem.replaces?.trim() || undefined,
-      skipRange: values.existingItem.skipRange?.trim() || undefined,
-      skips: values.existingItem.skips
-        ? values.existingItem.skips
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : undefined,
+      readme: optionalTrimmed(values.existingItem.readme),
+      replaces: optionalTrimmed(values.existingItem.replaces),
+      skipRange: optionalTrimmed(values.existingItem.skipRange),
+      skips: skips.length ? skips : undefined,
     } as ExistingCatalogItemTarget;
   }
 

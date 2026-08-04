@@ -1,3 +1,5 @@
+import * as React from 'react';
+import { Trans } from 'react-i18next';
 import {
   Alert,
   Card,
@@ -12,49 +14,50 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
-import * as React from 'react';
-import { CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
+
+import { type ImageOrCatalogItemRefSpec } from '@flightctl/types';
+import { type CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
+import { InstallAppFormik, InstallOsFormik } from '../types';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
-import { InstallAppFormik, InstallOsFormik } from '../types';
-import { OS_ITEM_LABEL_KEY } from '../../const';
-import { getFullContainerURI } from '../../utils';
-import { DeviceSpec } from '@flightctl/types';
-import { Trans } from 'react-i18next';
 
-const isOsUpdate = (
-  catalogItem: CatalogItem,
-  version: string,
-  labels: Record<string, string> | undefined,
-  spec: DeviceSpec,
-) => {
-  const existingOsItem = labels?.[OS_ITEM_LABEL_KEY];
-  const catalogItemVersion = catalogItem.spec.versions.find((v) => v.version === version);
-  if (existingOsItem === catalogItem.metadata.name && catalogItemVersion) {
-    const imgUri = getFullContainerURI(catalogItem.spec.artifacts, catalogItemVersion);
-    return !!imgUri && !!spec?.os?.image && imgUri !== spec.os.image;
+const isOsUnset = (osSpec: ImageOrCatalogItemRefSpec | undefined) => !(osSpec?.image || osSpec?.catalogItemRef);
+
+const isOsUpdate = (catalogItem: CatalogItem, version: string, osSpec: ImageOrCatalogItemRefSpec | undefined) => {
+  const osRef = osSpec?.catalogItemRef;
+  if (!osRef) {
+    return false;
   }
-  return false;
+  return (
+    osRef.item === catalogItem.metadata.name &&
+    osRef.catalog === catalogItem.metadata.catalog &&
+    osRef.version !== version
+  );
 };
 
-type UpdateAlertsProps = {
-  catalogItem: CatalogItem;
+const isOsUnchanged = (osSpec: ImageOrCatalogItemRefSpec | undefined, catalogItem: CatalogItem, version: string) => {
+  const osRef = osSpec?.catalogItemRef;
+  if (!osRef) {
+    return false;
+  }
+  return (
+    osRef.item === catalogItem.metadata.name &&
+    osRef.catalog === catalogItem.metadata.catalog &&
+    osRef.version === version
+  );
 };
 
-const UpdateAlerts = ({ catalogItem }: UpdateAlertsProps) => {
+const UpdateOsUpdateAlerts = ({ catalogItem }: { catalogItem: CatalogItem }) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<InstallOsFormik>();
 
-  if (catalogItem.spec.type !== CatalogItemType.CatalogItemTypeOS) {
-    return false;
-  }
-
+  const resourceOs = values.target === 'fleet' ? values.fleet?.spec.template.spec?.os : values.device?.spec?.os;
   const osImageName = `${catalogItem.spec.displayName || catalogItem.metadata.name}:${values.version}`;
 
   if (values.target === 'fleet') {
     const numOfDevices = `${values.fleet?.status?.devicesSummary?.total || 0}`;
-    if (!values.fleet?.spec.template.spec.os?.image) {
+    if (isOsUnset(resourceOs)) {
       return (
         <Alert isInline variant="warning" title={t('Fleet update')}>
           <Trans t={t}>
@@ -64,31 +67,43 @@ const UpdateAlerts = ({ catalogItem }: UpdateAlertsProps) => {
           </Trans>
         </Alert>
       );
-    } else {
-      if (isOsUpdate(catalogItem, values.version, values.fleet?.metadata.labels, values.fleet?.spec.template.spec)) {
-        return (
-          <Alert isInline variant="info" title={t('Version update')}>
-            <Trans t={t}>
-              You are about to update OS <strong>{osImageName}</strong>. This will update the OS image for all{' '}
-              <strong>({numOfDevices})</strong> devices in the <strong>{values.fleet?.metadata.name}</strong> fleet.
-              Devices will download and apply the update according to the configured update policies.
-            </Trans>
-          </Alert>
-        );
-      }
+    }
 
+    if (isOsUnchanged(resourceOs, catalogItem, values.version)) {
       return (
-        <Alert isInline variant="warning" title={t('Existing OS image detected')}>
+        <Alert isInline variant="info" title={t('No action required')}>
           <Trans t={t}>
-            You are about to replace OS with <strong>{osImageName}</strong>. This will update the OS image for all{' '}
+            The fleet already defines the selected OS <strong>{osImageName}</strong>. No update will be performed.
+          </Trans>
+        </Alert>
+      );
+    }
+
+    if (isOsUpdate(catalogItem, values.version, resourceOs)) {
+      return (
+        <Alert isInline variant="info" title={t('Version update')}>
+          <Trans t={t}>
+            You are about to update OS <strong>{osImageName}</strong>. This will update the OS image for all{' '}
             <strong>({numOfDevices})</strong> devices in the <strong>{values.fleet?.metadata.name}</strong> fleet.
             Devices will download and apply the update according to the configured update policies.
           </Trans>
         </Alert>
       );
     }
-  } else if (values.target === 'device') {
-    if (!values.device?.spec?.os?.image) {
+
+    return (
+      <Alert isInline variant="warning" title={t('Existing OS image detected')}>
+        <Trans t={t}>
+          You are about to replace OS with <strong>{osImageName}</strong>. This will update the OS image for all{' '}
+          <strong>({numOfDevices})</strong> devices in the <strong>{values.fleet?.metadata.name}</strong> fleet. Devices
+          will download and apply the update according to the configured update policies.
+        </Trans>
+      </Alert>
+    );
+  }
+
+  if (values.target === 'device') {
+    if (isOsUnset(resourceOs)) {
       return (
         <Alert isInline variant="warning" title={t('Device update')}>
           <Trans t={t}>
@@ -97,27 +112,37 @@ const UpdateAlerts = ({ catalogItem }: UpdateAlertsProps) => {
           </Trans>
         </Alert>
       );
-    } else {
-      if (isOsUpdate(catalogItem, values.version, values.device?.metadata.labels, values.device?.spec)) {
-        return (
-          <Alert isInline variant="info" title={t('Version update')}>
-            <Trans t={t}>
-              You are about to update OS with <strong>{osImageName}</strong>. Device will download and apply the update
-              according to the configured update policies.
-            </Trans>
-          </Alert>
-        );
-      }
+    }
 
+    if (isOsUnchanged(resourceOs, catalogItem, values.version)) {
       return (
-        <Alert isInline variant="warning" title={t('Existing OS image detected')}>
+        <Alert isInline variant="info" title={t('No action required')}>
           <Trans t={t}>
-            You are about to replace OS with <strong>{osImageName}</strong>. Device will download and apply the update
+            The device already defines the selected OS <strong>{osImageName}</strong>. No update will be performed.
+          </Trans>
+        </Alert>
+      );
+    }
+
+    if (isOsUpdate(catalogItem, values.version, resourceOs)) {
+      return (
+        <Alert isInline variant="info" title={t('Version update')}>
+          <Trans t={t}>
+            You are about to update OS with <strong>{osImageName}</strong>. Device will download and apply the update
             according to the configured update policies.
           </Trans>
         </Alert>
       );
     }
+
+    return (
+      <Alert isInline variant="warning" title={t('Existing OS image detected')}>
+        <Trans t={t}>
+          You are about to replace OS with <strong>{osImageName}</strong>. Device will download and apply the update
+          according to the configured update policies.
+        </Trans>
+      </Alert>
+    );
   }
   return false;
 };
@@ -131,13 +156,15 @@ const ReviewStep = ({ error, catalogItem }: ReviewStepProps) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<InstallOsFormik | InstallAppFormik>();
 
+  const isOsCatalogItem = catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS;
+
   return (
     <FlightCtlForm>
       <Stack hasGutter>
         <StackItem>
           <Title headingLevel="h3">{t('Review deployment specifications')}</Title>
         </StackItem>
-        <UpdateAlerts catalogItem={catalogItem} />
+        {isOsCatalogItem && <UpdateOsUpdateAlerts catalogItem={catalogItem} />}
         <StackItem>
           <Card>
             <CardTitle>{t('Deployment specifications')}</CardTitle>

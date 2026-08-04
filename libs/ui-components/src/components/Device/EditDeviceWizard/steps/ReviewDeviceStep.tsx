@@ -18,6 +18,7 @@ import { getErrorMessage } from '../../../../utils/error';
 import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
 import { getApiConfig } from '../deviceSpecUtils';
 import ReviewApplications from './ReviewApplications';
+import SystemImage from '../SystemImageDescriptionGroup';
 
 export const reviewDeviceStepId = 'review-device';
 
@@ -53,12 +54,7 @@ const ReviewStep = ({ error }: { error?: string }) => {
               <DescriptionListDescription>{values.fleetMatch}</DescriptionListDescription>
             </DescriptionListGroup>
           )}
-          <DescriptionListGroup>
-            <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
-            <DescriptionListDescription>
-              {values.osImage || t(`Edge Manager will not manage system image`)}
-            </DescriptionListDescription>
-          </DescriptionListGroup>
+          <SystemImage osSpec={values.osSpec} isFleet={false} />
           {values.configTemplates.length > 0 && (
             <DescriptionListGroup>
               <DescriptionListTerm>{t('Configurations')}</DescriptionListTerm>

@@ -1,4 +1,4 @@
-import { Device, Fleet } from '@flightctl/types';
+import { Device, Fleet, ImageOrCatalogItemRefSpec } from '@flightctl/types';
 import {
   Alert,
   Button,
@@ -32,7 +32,7 @@ import EnrolledDeviceTableRow from '../../../Device/DevicesPage/EnrolledDeviceTa
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { InstallAppFormik, InstallOsFormik } from '../types';
 import FormSelect from '../../../form/FormSelect';
-import { getArtifactLabel, getFullArtifactURI } from '../../utils';
+import { getArtifactLabel, getFullArtifactURI } from '../../../../utils/catalog';
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import { useAppLinks } from '../../../../hooks/useAppLinks';
 import { FilterSearchParams } from '../../../../utils/status/devices';
@@ -41,7 +41,31 @@ export const isSelectTargetStepValid = (errors: FormikErrors<InstallAppFormik>) 
   return !errors.device && !errors.fleet;
 };
 
-const DeviceTarget = ({ isOsItem }: { isOsItem: boolean }) => {
+const isSameOsSpec = (
+  osSpec: ImageOrCatalogItemRefSpec | undefined,
+  catalogItem: CatalogItem,
+  version: string,
+  channel: string,
+) => {
+  const osRef = osSpec?.catalogItemRef;
+  if (!osRef) {
+    return false;
+  }
+  return (
+    osRef.item === catalogItem.metadata.name &&
+    osRef.catalog === catalogItem.metadata.catalog &&
+    osRef.version === version &&
+    osRef.channel === channel
+  );
+};
+
+const DeviceTarget = ({
+  isOsItem,
+  onTargetSelected,
+}: {
+  isOsItem: boolean;
+  onTargetSelected: (targetSpec: ImageOrCatalogItemRefSpec | undefined) => void;
+}) => {
   const { t } = useTranslation();
   const { values, setFieldValue, setFieldTouched } = useFormikContext<InstallOsFormik>();
   const [deviceNameFilter, setDeviceNameFilter] = React.useState('');
@@ -111,7 +135,10 @@ const DeviceTarget = ({ isOsItem }: { isOsItem: boolean }) => {
               <EnrolledDeviceTableRow
                 key={device.metadata.name || ''}
                 device={device}
-                onRowSelect={(device) => () => handleDeviceSelect(device)}
+                onRowSelect={(device) => async () => {
+                  await handleDeviceSelect(device);
+                  onTargetSelected(device.spec?.os);
+                }}
                 isRowSelected={isDeviceSelected}
                 rowIndex={index}
                 singleSelect
@@ -126,7 +153,11 @@ const DeviceTarget = ({ isOsItem }: { isOsItem: boolean }) => {
   );
 };
 
-const FleetTarget = () => {
+const FleetTarget = ({
+  onTargetSelected,
+}: {
+  onTargetSelected: (targetSpec: ImageOrCatalogItemRefSpec | undefined) => void;
+}) => {
   const { t } = useTranslation();
   const { values, setFieldValue, setFieldTouched } = useFormikContext<InstallOsFormik>();
   const [fleetNameFilter, setFleetNameFilter] = React.useState('');
@@ -194,7 +225,10 @@ const FleetTarget = () => {
                 fleet={fleet}
                 rowIndex={rowIndex}
                 isRowSelected={isFleetSelected}
-                onRowSelect={(fleet) => () => handleFleetSelect(fleet)}
+                onRowSelect={(fleet) => async () => {
+                  await handleFleetSelect(fleet);
+                  onTargetSelected(fleet.spec.template.spec?.os);
+                }}
                 singleSelect
                 hideActions
                 isSelectDisabled={!!fleet.metadata?.owner}
@@ -220,8 +254,9 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
 
   const artifacts = React.useMemo(() => {
     const versionRefs = catalogItem.spec.versions.find((v) => v.version === values.version)?.references || {};
-    return catalogItem.spec.artifacts
-      ?.sort((a, b) => getArtifactLabel(t, a.type, a.name).localeCompare(getArtifactLabel(t, b.type, b.name)))
+    const specArtifacts = catalogItem.spec.artifacts || [];
+    return [...specArtifacts]
+      .sort((a, b) => getArtifactLabel(t, a).localeCompare(getArtifactLabel(t, b)))
       .filter((a) => Object.keys(versionRefs).includes(a.type));
   }, [catalogItem, values.version, t]);
 
@@ -253,7 +288,7 @@ const NewDeviceTarget = ({ catalogItem }: NewDeviceTargetProps) => {
                 artifacts.length
                   ? artifacts.reduce((acc, curr) => {
                       acc[curr.type] = {
-                        label: getArtifactLabel(t, curr.type, curr.name),
+                        label: getArtifactLabel(t, curr),
                       };
                       return acc;
                     }, {})
@@ -301,13 +336,25 @@ type SelectTargetStepProps = {
 };
 
 const SelectTargetStep = ({ catalogItem }: SelectTargetStepProps) => {
-  const { values } = useFormikContext<InstallOsFormik>();
+  const { values, setFieldValue } = useFormikContext<InstallOsFormik>();
+
+  const onTargetSelected = React.useCallback(
+    (targetSpec: ImageOrCatalogItemRefSpec | undefined) => {
+      setFieldValue('isSpecUnchanged', isSameOsSpec(targetSpec, catalogItem, values.version, values.channel));
+    },
+    [catalogItem, values.version, values.channel, setFieldValue],
+  );
 
   switch (values.target) {
     case 'device':
-      return <DeviceTarget isOsItem={catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS} />;
+      return (
+        <DeviceTarget
+          isOsItem={catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS}
+          onTargetSelected={onTargetSelected}
+        />
+      );
     case 'fleet':
-      return <FleetTarget />;
+      return <FleetTarget onTargetSelected={onTargetSelected} />;
     default:
       return <NewDeviceTarget catalogItem={catalogItem} />;
   }

@@ -25,7 +25,7 @@ import {
   VersionFormValues,
   configurableAppTypes,
 } from './types';
-import { appTypeIds } from '../useCatalogs';
+import { appTypeIds } from '../useCatalogItems';
 import { getKubernetesDnsSubdomainErrors, validKubernetesDnsSubdomain, validURLSchema } from '../../form/validations';
 import { appendJSONPatch } from '../../../utils/patch';
 
