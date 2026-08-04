@@ -161,10 +161,22 @@ const CatalogItemDetailsModal = ({
   return null;
 };
 
+const isSafeHttpUrl = (value: string): boolean => {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 const CatalogItemPanelLink = ({ link }: { link: string | undefined }) => {
   const { t } = useTranslation();
   if (!link) {
     return t('N/A');
+  }
+  if (!isSafeHttpUrl(link)) {
+    return link;
   }
   return (
     <Button component="a" variant="link" href={link} isInline target="_blank" rel="noopener noreferrer">

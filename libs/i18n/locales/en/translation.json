@@ -455,6 +455,7 @@
   "Failed to find requested version {{version}}": "Failed to find requested version {{version}}",
   "Deployment target not found for {{ target }}": "Deployment target not found for {{ target }}",
   "Failed to find requested version {{ version }}": "Failed to find requested version {{ version }}",
+  "Invalid channel {{ channel }} for version {{ version }}": "Invalid channel {{ channel }} for version {{ version }}",
   "Loading catalog item": "Loading catalog item",
   "Deploy {{name}}": "Deploy {{name}}",
   "Application name": "Application name",
