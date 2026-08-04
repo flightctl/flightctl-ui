@@ -13,7 +13,7 @@ import { useCatalogItem } from '../Catalog/useCatalogs';
 import { ExportFormatType, ImageExport, ImagePromotion, ImagePromotionList } from '@flightctl/types/imagebuilder';
 import { PatchRequest } from '@flightctl/types';
 import { getErrorMessage } from '../../utils/error';
-import { getImagePromotionValidationSchema } from './utils';
+import { canPromotionBeEdited, getImagePromotionValidationSchema } from './utils';
 import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from '../common/PermissionsContext';
 import { ImageBuildWithExports } from '../../types/extraTypes';
@@ -47,6 +47,7 @@ type ImagePromotionFormContainerProps = {
   imageBuild: ImageBuildWithExports;
   parentPromotion: ImagePromotion | undefined;
   imagePromotion?: ImagePromotion;
+  canBeEdited: boolean;
 };
 
 const ImagePromotionFormContainer = ({
@@ -54,12 +55,14 @@ const ImagePromotionFormContainer = ({
   imageBuild,
   parentPromotion,
   imagePromotion,
+  canBeEdited,
 }: ImagePromotionFormContainerProps) => {
   const { t } = useTranslation();
   const { post, patch } = useFetch();
   const [error, setError] = React.useState<unknown>();
 
   const isEdit = !!imagePromotion;
+  const availableFormats = imageBuild.imageExports.filter(Boolean).map((e) => e?.spec.format as ExportFormatType);
 
   const target = parentPromotion?.spec.target;
   const [catalogItem, catalogItemLoading] = useCatalogItem(target?.catalogName, target?.catalogItemName);
@@ -122,11 +125,16 @@ const ImagePromotionFormContainer = ({
     >
       {({ isValid, isSubmitting, dirty, submitForm }) => (
         <FlightCtlModal isOpen onClose={isSubmitting ? undefined : () => onClose()} variant="small">
-          <ModalHeader title={isEdit ? t('Edit image promotion') : t('Add build to catalog')} />
+          <ModalHeader
+            title={
+              isEdit ? (canBeEdited ? t('Edit image promotion') : t('View image promotion')) : t('Add build to catalog')
+            }
+          />
           <ModalBody>
             <ImagePromotionForm
               isEdit={isEdit}
-              availableFormats={imageBuild.imageExports.filter(Boolean).map((e) => e?.spec.format as ExportFormatType)}
+              canAmendExportFormats={!isEdit || canBeEdited}
+              availableFormats={availableFormats}
             />
             {!!error && (
               <Alert
@@ -139,17 +147,19 @@ const ImagePromotionFormContainer = ({
             )}
           </ModalBody>
           <ModalFooter>
-            <Button
-              key="confirm"
-              variant="primary"
-              isDisabled={isSubmitting || !isValid || !dirty}
-              isLoading={isSubmitting}
-              onClick={submitForm}
-            >
-              {isEdit ? t('Save') : t('Add to catalog')}
-            </Button>
+            {(!isEdit || canBeEdited) && (
+              <Button
+                key="confirm"
+                variant="primary"
+                isDisabled={isSubmitting || !isValid || !dirty}
+                isLoading={isSubmitting}
+                onClick={submitForm}
+              >
+                {isEdit ? t('Save') : t('Add to catalog')}
+              </Button>
+            )}
             <Button key="cancel" variant="link" onClick={() => onClose()} isDisabled={isSubmitting}>
-              {t('Cancel')}
+              {!isEdit || canBeEdited ? t('Cancel') : t('Close')}
             </Button>
           </ModalFooter>
         </FlightCtlModal>
@@ -164,13 +174,17 @@ const ImagePromotionModal = ({
   onClose,
   imageBuild,
   imagePromotion,
+  readOnly,
 }: {
   onClose: (updated?: boolean) => void;
   imageBuild: ImageBuildWithExports;
   imagePromotion?: ImagePromotion;
+  readOnly?: boolean;
 }) => {
   const { t } = useTranslation();
   const isEdit = !!imagePromotion;
+  const availableFormats = imageBuild.imageExports.filter(Boolean).map((e) => e?.spec.format as ExportFormatType);
+  const canBeEdited = !readOnly && imagePromotion ? canPromotionBeEdited(imagePromotion, availableFormats) : false;
   const parentBuildName = !isEdit ? imageBuild.metadata.annotations?.[NEW_VERSION_FROM_ANNOTATION] : undefined;
   const { checkPermissions } = usePermissionsContext();
   const [canList] = checkPermissions(promotionPermissions);
@@ -190,6 +204,11 @@ const ImagePromotionModal = ({
     return (
       <FlightCtlModal isOpen onClose={() => onClose(false)} variant="small">
         <ModalHeader title={isEdit ? t('Edit image promotion') : t('Add build to catalog')} />
+        <ModalHeader
+          title={
+            isEdit ? (canBeEdited ? t('Edit image promotion') : t('View image promotion')) : t('Add build to catalog')
+          }
+        />
         <ModalBody>
           <Alert isInline variant="danger" title={t('Failed to load Image promotions')}>
             {getErrorMessage(promotionsError)}
@@ -207,6 +226,7 @@ const ImagePromotionModal = ({
       imageBuild={imageBuild}
       parentPromotion={parentPromotion}
       imagePromotion={imagePromotion}
+      canBeEdited={canBeEdited}
     />
   );
 };

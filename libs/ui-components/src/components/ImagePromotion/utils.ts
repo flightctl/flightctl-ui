@@ -1,6 +1,13 @@
 import { TFunction } from 'react-i18next';
 import * as Yup from 'yup';
-import { ExistingCatalogItemTarget, ImagePromotion, NewCatalogItemTarget } from '@flightctl/types/imagebuilder';
+import {
+  ExistingCatalogItemTarget,
+  ExportFormatType,
+  ImagePromotion,
+  ImagePromotionConditionReason,
+  ImagePromotionConditionType,
+  NewCatalogItemTarget,
+} from '@flightctl/types/imagebuilder';
 import { CatalogItem } from '@flightctl/types/alpha';
 import semver from 'semver';
 
@@ -12,6 +19,58 @@ import {
   optionalSemverList,
   optionalSemverRange,
 } from '../Catalog/AddCatalogItemWizard/utils';
+
+const NON_EDITABLE_PROMOTION_REASONS = new Set<ImagePromotionConditionReason>([
+  ImagePromotionConditionReason.ImagePromotionConditionReasonFailed,
+  ImagePromotionConditionReason.ImagePromotionConditionReasonBuildFailed,
+  ImagePromotionConditionReason.ImagePromotionConditionReasonBuildCanceled,
+  ImagePromotionConditionReason.ImagePromotionConditionReasonPublishing,
+]);
+
+const getImagePromotionReadyReason = (promotion: ImagePromotion): ImagePromotionConditionReason | undefined => {
+  const readyCondition = promotion.status?.conditions?.find(
+    (c) => c.type === ImagePromotionConditionType.ImagePromotionConditionTypeReady,
+  );
+  return readyCondition?.reason as ImagePromotionConditionReason | undefined;
+};
+
+// Currently only true if additional export formats can be appended to the promotion.
+export const canPromotionBeEdited = (promotion: ImagePromotion, availableFormats: ExportFormatType[]): boolean => {
+  const reason = getImagePromotionReadyReason(promotion);
+  if (reason && NON_EDITABLE_PROMOTION_REASONS.has(reason)) {
+    return false;
+  }
+  const currentFormats = promotion.spec.source.exportFormats || [];
+  return availableFormats.some((format) => !currentFormats.includes(format));
+};
+
+export const getPromotionEditDisabledReason = (
+  promotion: ImagePromotion,
+  availableFormats: ExportFormatType[],
+  canEdit: boolean,
+  t: TFunction,
+): string | undefined => {
+  if (!canEdit) {
+    return t('You do not have permissions to update image promotions');
+  }
+  if (canPromotionBeEdited(promotion, availableFormats)) {
+    return undefined;
+  }
+
+  const reason = getImagePromotionReadyReason(promotion);
+  switch (reason) {
+    case ImagePromotionConditionReason.ImagePromotionConditionReasonPublishing:
+      return t('Image promotion cannot be edited while publishing is in progress');
+    case ImagePromotionConditionReason.ImagePromotionConditionReasonFailed:
+      return t('Failed image promotions cannot be edited. Create a new image promotion to retry.');
+    case ImagePromotionConditionReason.ImagePromotionConditionReasonBuildFailed:
+      return t('Image promotions for failed image builds cannot be edited. Create a new image promotion to retry.');
+    case ImagePromotionConditionReason.ImagePromotionConditionReasonBuildCanceled:
+      return t('Image promotions for canceled image builds cannot be edited. Create a new image promotion to retry.');
+    default:
+      return t('All export formats from this image build are already included in this promotion');
+  }
+};
 
 export const getEditInitialValues = (imagePromotion: ImagePromotion): ImagePromotionFormValues => {
   const target = imagePromotion.spec.target;
