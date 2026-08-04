@@ -19,7 +19,7 @@ import {
 import { ArrowRightIcon } from '@patternfly/react-icons/dist/js/icons/arrow-right-icon';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { PortMapping } from '../../types/deviceSpec';
+import { type PortMapping } from '../../types/deviceSpec';
 import { VM_PORT_PROTOCOLS } from '../../utils/vmApplications';
 import ErrorHelperText from './FieldHelperText';
 import { toFormPortMappingWithProtocol } from '../Device/EditDeviceWizard/deviceSpecUtils';

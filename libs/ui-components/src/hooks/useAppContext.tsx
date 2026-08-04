@@ -4,7 +4,7 @@ import {
   NavLink,
   Navigate,
   Route,
-  NavigateFunction as RouterNavigateFunction,
+  type NavigateFunction as RouterNavigateFunction,
   Routes,
   useBlocker,
   useLocation,
@@ -12,7 +12,7 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
-import { PatchRequest } from '@flightctl/types';
+import { type PatchRequest } from '@flightctl/types';
 import { ROUTE } from './useNavigate';
 
 export const appRoutes = {

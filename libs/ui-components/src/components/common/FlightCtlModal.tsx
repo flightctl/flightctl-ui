@@ -1,6 +1,6 @@
 import * as React from 'react';
 // eslint-disable-next-line no-restricted-imports
-import { ModalProps, Modal as PFModal } from '@patternfly/react-core';
+import { type ModalProps, Modal as PFModal } from '@patternfly/react-core';
 export type { ModalProps } from '@patternfly/react-core';
 
 import { FLIGHTCTL_APP_CLASS } from '../../constants';

@@ -1,4 +1,4 @@
-import { EnrollmentRequestList } from '@flightctl/types';
+import { type EnrollmentRequestList } from '@flightctl/types';
 
 import { useFetchPeriodically } from './useFetchPeriodically';
 import { getApiListCount } from '../utils/api';

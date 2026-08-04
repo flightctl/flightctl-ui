@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Tabs, TabsProps } from '@patternfly/react-core';
+import { Tabs, type TabsProps } from '@patternfly/react-core';
 import { useAppContext } from '../../hooks/useAppContext';
 
 type TabsNavProps = {

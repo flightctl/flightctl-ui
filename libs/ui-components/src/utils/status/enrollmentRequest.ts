@@ -1,6 +1,6 @@
-import { TFunction } from 'i18next';
-import { ConditionType, EnrollmentRequest } from '@flightctl/types';
-import { StatusItem } from './common';
+import { type TFunction } from 'i18next';
+import { ConditionType, type EnrollmentRequest } from '@flightctl/types';
+import { type StatusItem } from './common';
 import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-circle-icon';
 
 export enum EnrollmentRequestStatus {

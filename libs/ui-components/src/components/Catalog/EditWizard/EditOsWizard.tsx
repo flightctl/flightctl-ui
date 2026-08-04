@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
+import { Wizard, WizardStep, type WizardStepType } from '@patternfly/react-core';
 import { Formik, type FormikErrors, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import semver from 'semver';

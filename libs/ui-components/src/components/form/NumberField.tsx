@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { FormGroup, NumberInput, NumberInputProps as PFNumberInputProps } from '@patternfly/react-core';
+import { FormGroup, NumberInput, type NumberInputProps as PFNumberInputProps } from '@patternfly/react-core';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 export interface NumberFieldProps extends Omit<PFNumberInputProps, 'onChange'> {

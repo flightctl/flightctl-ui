@@ -5,7 +5,7 @@ import {
   DropdownItem,
   DropdownList,
   MenuToggle,
-  MenuToggleElement,
+  type MenuToggleElement,
   Panel,
   PanelMain,
   PanelMainBody,

@@ -17,10 +17,10 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type FormikErrors, useFormikContext } from 'formik';
 
 import { BindingType } from '@flightctl/types/imagebuilder';
-import { ImageBuildFormValues } from '../types';
+import { type ImageBuildFormValues } from '../types';
 import { PUBLIC_KEY_MAX_LENGTH } from '../../../form/validations';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useAppContext } from '../../../../hooks/useAppContext';

@@ -16,9 +16,9 @@ import {
 import * as React from 'react';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { InstallSpecFormik } from '../../InstallWizard/types';
+import { type InstallSpecFormik } from '../../InstallWizard/types';
 import { useFormikContext } from 'formik';
-import { RJSFValidationError } from '@rjsf/utils';
+import { type RJSFValidationError } from '@rjsf/utils';
 
 type ReviewStepProps = {
   error?: string;

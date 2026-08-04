@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Alert, FormGroup, List, ListItem, Split, SplitItem, Stack, StackItem, Title } from '@patternfly/react-core';
-import { RJSFValidationError } from '@rjsf/utils';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type RJSFValidationError } from '@rjsf/utils';
+import { type FormikErrors, useFormikContext } from 'formik';
 import type * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -12,7 +12,7 @@ import TextField from '../../../form/TextField';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import RadioField from '../../../form/RadioField';
 import FlightCtlForm from '../../../form/FlightCtlForm';
-import { DynamicFormConfigFormik, InstallAppFormik } from '../types';
+import { type DynamicFormConfigFormik, type InstallAppFormik } from '../types';
 
 import './AppConfigStep.css';
 

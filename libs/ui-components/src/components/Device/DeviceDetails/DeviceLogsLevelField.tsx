@@ -12,7 +12,7 @@ import {
 } from '@patternfly/react-core';
 import { useField } from 'formik';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { DeviceLogLevel, DeviceLogLevelValue, getDeviceLogLevelLabel } from '../../../utils/deviceLogs';
+import { DeviceLogLevel, type DeviceLogLevelValue, getDeviceLogLevelLabel } from '../../../utils/deviceLogs';
 
 const fieldIdToggle = 'device-logs-level-toggle';
 

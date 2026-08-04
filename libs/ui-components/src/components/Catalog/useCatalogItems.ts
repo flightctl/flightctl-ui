@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useDebounce } from 'use-debounce';
-import { CatalogItem, CatalogItemDeploymentList, CatalogItemList } from '@flightctl/types/alpha';
+import { type CatalogItem, type CatalogItemDeploymentList, type CatalogItemList } from '@flightctl/types/alpha';
 import { CatalogItemCategory, CatalogItemType } from '@flightctl/types/alpha';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
+import { type PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
 import { PAGE_SIZE } from '../../constants';
 
 export const appTypeIds = [

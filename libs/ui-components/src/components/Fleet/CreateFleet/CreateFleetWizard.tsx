@@ -9,12 +9,12 @@ import {
   Title,
   Wizard,
   WizardStep,
-  WizardStepType,
+  type WizardStepType,
 } from '@patternfly/react-core';
-import { Fleet } from '@flightctl/types';
-import { Formik, FormikErrors } from 'formik';
+import { type Fleet } from '@flightctl/types';
+import { Formik, type FormikErrors } from 'formik';
 
-import { FleetFormValues } from './../../../types/deviceSpec';
+import { type FleetFormValues } from './../../../types/deviceSpec';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';

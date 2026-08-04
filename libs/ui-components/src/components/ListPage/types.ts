@@ -1,4 +1,4 @@
-import { IAction } from '@patternfly/react-table';
+import { type IAction } from '@patternfly/react-table';
 
 export type ListAction = (params: { resourceId: string; resourceName?: string; disabledReason?: string }) => IAction;
 

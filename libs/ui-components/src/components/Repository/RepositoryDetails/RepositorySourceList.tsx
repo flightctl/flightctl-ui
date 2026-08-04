@@ -1,9 +1,9 @@
 import React from 'react';
 import { Divider, List, ListItem, Spinner, Stack, StackItem } from '@patternfly/react-core';
 
-import { DependencySyncConfigRefStatus, DependencySyncStatus, Repository } from '@flightctl/types';
+import { type DependencySyncConfigRefStatus, type DependencySyncStatus, type Repository } from '@flightctl/types';
 import { useFetch } from '../../../hooks/useFetch';
-import { ConfigSourceProvider, getRepoName, isRepoConfig } from '../../../types/deviceSpec';
+import { type ConfigSourceProvider, getRepoName, isRepoConfig } from '../../../types/deviceSpec';
 import { isPromiseRejected } from '../../../types/typeUtils';
 import { getErrorMessage } from '../../../utils/error';
 import ConfigSourceSyncDetails from './ConfigSourceSyncDetails';

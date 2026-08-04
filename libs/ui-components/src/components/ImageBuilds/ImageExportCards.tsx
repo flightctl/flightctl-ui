@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 import {
   Alert,
   AlertActionCloseButton,
@@ -17,7 +17,7 @@ import {
   FlexItem,
   Icon,
   MenuToggle,
-  MenuToggleElement,
+  type MenuToggleElement,
   Stack,
   StackItem,
 } from '@patternfly/react-core';
@@ -27,14 +27,14 @@ import { ServerGroupIcon } from '@patternfly/react-icons/dist/js/icons/server-gr
 import { BuilderImageIcon } from '@patternfly/react-icons/dist/js/icons/builder-image-icon';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
-import { ExportFormatType, ImageExport, ImageExportConditionReason } from '@flightctl/types/imagebuilder';
+import { ExportFormatType, type ImageExport, ImageExportConditionReason } from '@flightctl/types/imagebuilder';
 import { getExportFormatDescription, getExportFormatLabel, getImageExportStatusReason } from '../../utils/imageBuilds';
 import { getDateDisplay } from '../../utils/dates';
 import { useTranslation } from '../../hooks/useTranslation';
 import WithTooltip from '../common/WithTooltip';
 import ActionsDropdownList from '../common/ActionsDropdownList';
 import ConfirmImageExportActionModal, {
-  ConfirmImageExportAction,
+  type ConfirmImageExportAction,
 } from './ConfirmImageExportModal/ConfirmImageExportModal';
 import { ImageExportStatusDisplay } from './ImageBuildAndExportStatus';
 

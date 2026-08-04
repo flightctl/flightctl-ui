@@ -17,7 +17,7 @@ import {
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { Catalog } from '@flightctl/types/alpha';
+import { type Catalog } from '@flightctl/types/alpha';
 
 import { useFetch } from '../../../hooks/useFetch';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -27,7 +27,7 @@ import NameField from '../../form/NameField';
 import TextField from '../../form/TextField';
 import { getErrorMessage } from '../../../utils/error';
 import TextAreaField from '../../form/TextAreaField';
-import { CreateCatalogFormValues } from './types';
+import { type CreateCatalogFormValues } from './types';
 import { getCatalogPatches, getCatalogResource } from './utils';
 
 type CreateCatalogModalProps = {

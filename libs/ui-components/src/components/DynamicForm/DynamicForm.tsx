@@ -1,8 +1,8 @@
 import * as React from 'react';
 import Form from '@rjsf/core';
-import { RJSFSchema, RegistryWidgetsType, TemplatesType } from '@rjsf/utils';
+import { type RJSFSchema, type RegistryWidgetsType, type TemplatesType } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
-import AJV8Validator from '@rjsf/validator-ajv8/lib/validator';
+import type AJV8Validator from '@rjsf/validator-ajv8/lib/validator';
 
 import {
   PFCheckboxWidget,

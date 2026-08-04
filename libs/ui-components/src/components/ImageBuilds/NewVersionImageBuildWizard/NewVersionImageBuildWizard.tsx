@@ -9,18 +9,18 @@ import {
   Title,
   Wizard,
   WizardStep,
-  WizardStepType,
+  type WizardStepType,
 } from '@patternfly/react-core';
-import { Formik, FormikErrors } from 'formik';
+import { Formik, type FormikErrors } from 'formik';
 
 import {
-  ExportFormatType,
-  ImageBuild,
-  ImageExport,
-  ImagePromotion,
-  ImagePromotionList,
+  type ExportFormatType,
+  type ImageBuild,
+  type ImageExport,
+  type ImagePromotion,
+  type ImagePromotionList,
 } from '@flightctl/types/imagebuilder';
-import { CatalogItem } from '@flightctl/types/alpha';
+import { type CatalogItem } from '@flightctl/types/alpha';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useFetch } from '../../../hooks/useFetch';
@@ -38,7 +38,7 @@ import NewVersionStep, { isNewVersionStepValid, newVersionStepId } from './steps
 import CatalogStep, { catalogStepId, isCatalogStepValid } from '../CreateImageBuildWizard/steps/CatalogStep';
 import ReviewStep, { reviewStepId } from './steps/ReviewStep';
 import NewVersionImageBuildWizardFooter from './NewVersionImageBuildWizardFooter';
-import { NewVersionWizardFormValues } from './types';
+import { type NewVersionWizardFormValues } from './types';
 import {
   bumpImageTag,
   getCatalogInitialValues,
@@ -46,11 +46,11 @@ import {
   getLatestPromotion,
   getValidationSchema,
 } from './utils';
-import { ImageBuildWithExports } from '../../../types/extraTypes';
+import { type ImageBuildWithExports } from '../../../types/extraTypes';
 import { useImageBuild } from '../useImageBuilds';
 import { getImageExportResources } from '../CreateImageBuildWizard/utils';
 import { isPromiseRejected } from '../../../types/typeUtils';
-import { ImageBuildWizardError } from '../CreateImageBuildWizard/types';
+import { type ImageBuildWizardError } from '../CreateImageBuildWizard/types';
 import { isWizardStepDisabled } from '../../../utils/wizards';
 
 const orderedIds = [newVersionStepId, catalogStepId, reviewStepId];

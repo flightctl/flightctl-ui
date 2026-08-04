@@ -1,6 +1,6 @@
 import React from 'react';
 import { DropdownItem, Tab } from '@patternfly/react-core';
-import { Fleet } from '@flightctl/types';
+import { type Fleet } from '@flightctl/types';
 
 import { RESOURCE, VERB } from '../../../types/rbac';
 import PageWithPermissions from '../../common/PageWithPermissions';

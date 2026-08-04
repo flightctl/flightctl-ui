@@ -1,7 +1,7 @@
 import React from 'react';
 import { Label, LabelGroup } from '@patternfly/react-core';
 
-import { SystemdUnitFormValue } from '../../../../types/deviceSpec';
+import { type SystemdUnitFormValue } from '../../../../types/deviceSpec';
 
 export type SystemdUnitsFormValues = {
   systemdUnits: SystemdUnitFormValue[];

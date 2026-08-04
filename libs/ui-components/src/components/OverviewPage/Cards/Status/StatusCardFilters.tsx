@@ -14,7 +14,7 @@ import {
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { labelToString } from '../../../../utils/labels';
-import { FlightCtlLabel } from '../../../../types/extraTypes';
+import { type FlightCtlLabel } from '../../../../types/extraTypes';
 import DeviceTableToolbarFilters from '../../../Device/DevicesPage/DeviceToolbarFilters';
 
 type StatusCardFiltersProps = {

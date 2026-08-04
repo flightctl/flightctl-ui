@@ -10,7 +10,7 @@ import {
   StackItem,
 } from '@patternfly/react-core';
 
-import { EditDeviceFormValues } from '../../../../types/deviceSpec';
+import { type EditDeviceFormValues } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import LabelsView from '../../../common/LabelsView';
 import { toAPILabel } from '../../../../utils/labels';

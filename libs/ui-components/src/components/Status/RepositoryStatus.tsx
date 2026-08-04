@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progress-icon';
 
-import { ConditionType, Repository } from '@flightctl/types';
+import { ConditionType, type Repository } from '@flightctl/types';
 import { getRepositorySyncStatus, repositoryStatusLabels } from '../../utils/status/repository';
-import { StatusLevel } from '../../utils/status/common';
+import { type StatusLevel } from '../../utils/status/common';
 import { useTranslation } from '../../hooks/useTranslation';
 import { StatusDisplayContent } from './StatusDisplay';
-import { SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
+import { type SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
 
 const RepositoryStatus = ({
   repository,

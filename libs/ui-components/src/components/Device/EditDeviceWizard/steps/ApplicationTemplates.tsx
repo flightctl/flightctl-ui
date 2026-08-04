@@ -18,7 +18,12 @@ import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-cir
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
 import { AppType } from '@flightctl/types';
-import { AppForm, AppSpecType, DeviceSpecConfigFormValues, isCatalogAppForm } from '../../../../types/deviceSpec';
+import {
+  type AppForm,
+  AppSpecType,
+  type DeviceSpecConfigFormValues,
+  isCatalogAppForm,
+} from '../../../../types/deviceSpec';
 import { createInitialAppForm } from '../deviceSpecUtils';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';

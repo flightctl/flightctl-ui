@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { Grid, GridItem, SelectList, SelectOption } from '@patternfly/react-core';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import FilterSelect, { FilterSelectGroup } from '../../form/FilterSelect';
-import { FilterStatusMap, UpdateStatus } from './types';
+import { type FilterStatusMap, type UpdateStatus } from './types';
 import StatusDisplay from '../../Status/StatusDisplay';
-import { DeviceSummaryStatus, FilterSearchParams, getDeviceStatusItems } from '../../../utils/status/devices';
-import { StatusItem } from '../../../utils/status/common';
+import { type DeviceSummaryStatus, FilterSearchParams, getDeviceStatusItems } from '../../../utils/status/devices';
+import { type StatusItem } from '../../../utils/status/common';
 import { getApplicationSummaryStatusItems } from '../../../utils/status/applications';
 import { getSystemUpdateStatusItems } from '../../../utils/status/system';
 

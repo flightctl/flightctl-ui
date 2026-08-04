@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { DeviceList } from '@flightctl/types';
+import { type DeviceList } from '@flightctl/types';
 
 import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';

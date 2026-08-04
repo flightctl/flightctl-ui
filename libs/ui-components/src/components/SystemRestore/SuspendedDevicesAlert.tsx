@@ -5,7 +5,7 @@ import { Alert, AlertActionLink, Stack, StackItem } from '@patternfly/react-core
 import { useTranslation } from '../../hooks/useTranslation';
 import MassResumeDevicesModal from '../modals/massModals/ResumeDevicesModal/MassResumeDevicesModal';
 import ResumeDevicesModal from '../modals/ResumeDevicesModal/ResumeDevicesModal';
-import { DeviceResumeRequest } from '@flightctl/types';
+import { type DeviceResumeRequest } from '@flightctl/types';
 
 export type ResumeMode = 'global' | 'device' | 'fleet';
 

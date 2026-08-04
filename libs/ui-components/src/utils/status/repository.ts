@@ -1,5 +1,5 @@
-import { TFunction } from 'i18next';
-import { Condition, ConditionStatus, ConditionType, Repository, ResourceSync } from '@flightctl/types';
+import { type TFunction } from 'i18next';
+import { type Condition, ConditionStatus, ConditionType, type Repository, type ResourceSync } from '@flightctl/types';
 import { timeSinceText } from '../dates';
 import { getConditionMessage } from '../error';
 import { getCondition } from '../api';

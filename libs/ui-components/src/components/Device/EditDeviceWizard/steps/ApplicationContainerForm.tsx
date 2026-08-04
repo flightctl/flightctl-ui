@@ -6,7 +6,7 @@ import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
 import ApplicationPortMappingField from '../../../form/ApplicationPortMappingField';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { PortMapping, SingleContainerAppForm } from '../../../../types/deviceSpec';
+import { type PortMapping, type SingleContainerAppForm } from '../../../../types/deviceSpec';
 import ApplicationImageForm from './ApplicationImageForm';
 
 const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {

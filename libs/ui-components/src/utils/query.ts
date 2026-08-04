@@ -1,6 +1,6 @@
 import { DeviceSummaryStatusType } from '@flightctl/types';
 
-import { FlightCtlLabel } from '../types/extraTypes';
+import { type FlightCtlLabel } from '../types/extraTypes';
 import { labelToExactApiMatchString, textToPartialApiMatchString } from './labels';
 import {
   DEVICE_OS_MODE_FILTER_VALUES,

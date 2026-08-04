@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type FormikErrors, useFormikContext } from 'formik';
 import {
   ActionList,
   ActionListGroup,

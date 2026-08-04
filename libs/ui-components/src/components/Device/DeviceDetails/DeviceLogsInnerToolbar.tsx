@@ -19,7 +19,7 @@ import { useFormikContext } from 'formik';
 import { useTranslation } from '../../../hooks/useTranslation';
 import {
   DeviceLogCategory,
-  DeviceLogSearchParams,
+  type DeviceLogSearchParams,
   getActiveTimeFilterLabel,
   getDeviceLogLevelLabel,
   getDeviceLogsFormResetValues,

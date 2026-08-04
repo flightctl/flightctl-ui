@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { OnSort, SortByDirection } from '@patternfly/react-table';
+import { type OnSort, SortByDirection } from '@patternfly/react-table';
 import { useDebounce } from 'use-debounce';
 import type { Vulnerability, VulnerabilityGroupList, VulnerabilityList } from '@flightctl/types/alpha';
 

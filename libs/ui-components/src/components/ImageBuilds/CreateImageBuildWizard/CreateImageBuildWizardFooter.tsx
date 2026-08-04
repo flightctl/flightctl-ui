@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { FormikErrors } from 'formik';
+import { type FormikErrors } from 'formik';
 
-import { ImageBuildFormValues } from './types';
+import { type ImageBuildFormValues } from './types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
 import { reviewStepId } from './steps/ReviewStep';

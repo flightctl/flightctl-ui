@@ -11,7 +11,7 @@ import {
 import * as React from 'react';
 import { useFormikContext } from 'formik';
 
-import { TargetPickerFormik } from './types';
+import { type TargetPickerFormik } from './types';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useTranslation } from '../../../hooks/useTranslation';
 

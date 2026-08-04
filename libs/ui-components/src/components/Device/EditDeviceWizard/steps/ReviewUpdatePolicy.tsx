@@ -1,7 +1,7 @@
 import React from 'react';
 import { Stack, StackItem } from '@patternfly/react-core';
 
-import { DisruptionBudgetForm, RolloutPolicyForm } from '../../../../types/deviceSpec';
+import { type DisruptionBudgetForm, type RolloutPolicyForm } from '../../../../types/deviceSpec';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import LabelsView from '../../../common/LabelsView';

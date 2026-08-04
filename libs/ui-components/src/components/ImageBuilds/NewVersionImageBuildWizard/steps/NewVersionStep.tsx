@@ -1,16 +1,16 @@
 import * as React from 'react';
 import { Content, FormGroup, Gallery } from '@patternfly/react-core';
-import { FormikErrors, useFormikContext } from 'formik';
-import { OciRepoSpec } from '@flightctl/types';
+import { type FormikErrors, useFormikContext } from 'formik';
+import { type OciRepoSpec } from '@flightctl/types';
 
-import { ExportFormatType, ImageBuild } from '@flightctl/types/imagebuilder';
+import { type ExportFormatType, type ImageBuild } from '@flightctl/types/imagebuilder';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { getBuildNameValidations } from '../../../form/validations';
 import NameField from '../../../form/NameField';
 import ImageUrlCard from '../../ImageUrlCard';
-import { NewVersionWizardFormValues } from '../types';
+import { type NewVersionWizardFormValues } from '../types';
 import { useOciRegistriesContext } from '../../OciRegistriesContext';
 import FormSelectTypeaheadWrapper from '../../../form/FormSelectTypeahead';
 import { SelectImageBuildExportCard } from '../../ImageExportCards';

@@ -2,15 +2,15 @@ import * as React from 'react';
 import { useField, useFormikContext } from 'formik';
 import { Content, ContentVariants, FormGroup, Grid, GridItem, Icon, Stack, StackItem } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
-import { ConditionStatus, ConditionType, RepoSpecType, Repository } from '@flightctl/types';
+import { ConditionStatus, ConditionType, type RepoSpecType, type Repository } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
-import { StatusLevel } from '../../utils/status/common';
+import { type StatusLevel } from '../../utils/status/common';
 import CreateRepositoryModal from '../modals/CreateRepositoryModal/CreateRepositoryModal';
 import { StatusDisplayContent } from '../Status/StatusDisplay';
 import { getRepoUrlOrRegistry } from '../Repository/CreateRepository/utils';
-import FormSelect, { SelectItem } from './FormSelect';
+import FormSelect, { type SelectItem } from './FormSelect';
 import { DefaultHelperText } from './FieldHelperText';
 
 export const getRepositoryItems = (

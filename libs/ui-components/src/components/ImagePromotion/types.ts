@@ -1,4 +1,4 @@
-import { ExportFormatType } from '@flightctl/types/imagebuilder';
+import { type ExportFormatType } from '@flightctl/types/imagebuilder';
 
 export type ImagePromotionFormValues = {
   name: string;

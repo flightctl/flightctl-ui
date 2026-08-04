@@ -1,5 +1,5 @@
-import { Device, DeviceSummaryStatusType, ObjectMeta } from '@flightctl/types';
-import { TFunction } from 'react-i18next';
+import { type Device, DeviceSummaryStatusType, type ObjectMeta } from '@flightctl/types';
+import { type TFunction } from 'react-i18next';
 
 const DEVICE_CONSOLE_ANNOTATION = 'device-controller/console';
 

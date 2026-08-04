@@ -8,7 +8,7 @@ import {
   type PatchRequest,
 } from '@flightctl/types';
 import {
-  CatalogItem,
+  type CatalogItem,
   type CatalogItemArtifact,
   CatalogItemArtifactType,
   CatalogItemCategory,
@@ -16,7 +16,7 @@ import {
   type CatalogItemVersion,
 } from '@flightctl/types/alpha';
 
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import semver from 'semver';
 
 import { type FullAppVolume, buildApiVolume } from './volumes';

@@ -1,8 +1,8 @@
-import { FlightCtlLabel } from '../../../../types/extraTypes';
+import { type FlightCtlLabel } from '../../../../types/extraTypes';
 import { labelToString } from '../../../../utils/labels';
 import { FilterSearchParams } from '../../../../utils/status/devices';
-import { StatusItem } from '../../../../utils/status/common';
-import { StatusMap, toChartData } from '../../../charts/utils';
+import { type StatusItem } from '../../../../utils/status/common';
+import { type StatusMap, toChartData } from '../../../charts/utils';
 
 export const toOverviewChartData = <T extends string>(
   map: StatusMap,

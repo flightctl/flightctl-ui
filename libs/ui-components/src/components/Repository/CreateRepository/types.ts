@@ -1,4 +1,4 @@
-import { OciRepoSpec, RepoSpecType, ResourceSyncType } from '@flightctl/types';
+import { type OciRepoSpec, type RepoSpecType, type ResourceSyncType } from '@flightctl/types';
 
 export type ResourceSyncFormValue = {
   name: string;

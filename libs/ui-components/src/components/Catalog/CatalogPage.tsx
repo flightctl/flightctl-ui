@@ -18,17 +18,23 @@ import {
   Stack,
   StackItem,
   TreeView,
-  TreeViewDataItem,
+  type TreeViewDataItem,
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
 import { EllipsisVIcon } from '@patternfly/react-icons/dist/js/icons/ellipsis-v-icon';
 import * as React from 'react';
-import { Catalog, CatalogItem, CatalogItemCategory, CatalogItemType, CatalogList } from '@flightctl/types/alpha';
+import {
+  type Catalog,
+  type CatalogItem,
+  CatalogItemCategory,
+  CatalogItemType,
+  type CatalogList,
+} from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import CatalogItemCard from './CatalogItemCard';
 import CatalogPageToolbar, { CreateCatalogItemBtn, ImportCatalogBtn } from './CatalogPageToolbar';
-import { CatalogFilter, useCatalogFilter } from './useCatalogFilter';
+import { type CatalogFilter, useCatalogFilter } from './useCatalogFilter';
 import CatalogItemDetails from './CatalogItemDetails';
 import { appTypeIds, useCatalogItems } from './useCatalogItems';
 import ListPageBody from '../ListPage/ListPageBody';

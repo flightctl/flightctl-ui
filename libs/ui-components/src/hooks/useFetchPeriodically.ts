@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ApiQuery } from '../types/extraTypes';
+import { type ApiQuery } from '../types/extraTypes';
 
 import { useFetch } from './useFetch';
 

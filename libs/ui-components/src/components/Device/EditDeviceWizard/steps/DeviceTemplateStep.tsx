@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { Alert, CodeBlock, CodeBlockCode, FormGroup, Spinner, Stack, StackItem } from '@patternfly/react-core';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type FormikErrors, useFormikContext } from 'formik';
 import { Trans } from 'react-i18next';
-import { Repository } from '@flightctl/types';
+import { type Repository } from '@flightctl/types';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import LabelWithHelperText, { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import ImageOrCatalogRefField from '../../../form/ImageOrCatalogRefField';
-import { DeviceSpecConfigFormValues } from '../../../../types/deviceSpec';
+import { type DeviceSpecConfigFormValues } from '../../../../types/deviceSpec';
 import ConfigurationTemplates from './ConfigurationTemplates';
 import ApplicationsForm from './ApplicationTemplates';
 import SystemdUnitsForm from './SystemdUnitsForm';

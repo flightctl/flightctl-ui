@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, type IAction, type OnSelect, Td, Tr } from '@patternfly/react-table';
 
-import { Fleet, ResourceKind } from '@flightctl/types';
+import { type Fleet, ResourceKind } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { getFleetRolloutStatusWarning } from '../../utils/status/fleet';

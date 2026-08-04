@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { ApiList } from '../utils/api';
+import { type ApiList } from '../utils/api';
 import { PAGE_SIZE } from '../constants';
 
 export type PaginationDetails<T extends ApiList> = {

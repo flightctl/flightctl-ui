@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { FormikErrors } from 'formik';
+import { type FormikErrors } from 'formik';
 
-import { EditDeviceFormValues } from '../../../types/deviceSpec';
+import { type EditDeviceFormValues } from '../../../types/deviceSpec';
 import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
 import { generalInfoStepId, isGeneralInfoStepValid } from './steps/GeneralInfoStep';
 import { deviceTemplateStepId, isDeviceTemplateStepValid } from './steps/DeviceTemplateStep';

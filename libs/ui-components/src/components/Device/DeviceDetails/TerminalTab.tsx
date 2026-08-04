@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Alert, Bullseye, Tab, TabTitleText, Tabs } from '@patternfly/react-core';
-import { Device } from '@flightctl/types';
+import { type Device } from '@flightctl/types';
 
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useTranslation } from '../../../hooks/useTranslation';

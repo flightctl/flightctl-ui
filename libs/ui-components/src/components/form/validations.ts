@@ -1,30 +1,30 @@
 import * as Yup from 'yup';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import countBy from 'lodash/countBy';
 import yaml from 'js-yaml';
 
-import { AppType, ImageOrCatalogItemRefSpec, ImagePullPolicy } from '@flightctl/types';
-import { FlightCtlLabel } from '../../types/extraTypes';
+import { AppType, type ImageOrCatalogItemRefSpec, ImagePullPolicy } from '@flightctl/types';
+import { type FlightCtlLabel } from '../../types/extraTypes';
 import {
-  AppForm,
+  type AppForm,
   AppSpecType,
-  BatchForm,
+  type BatchForm,
   BatchLimitType,
-  ComposeAppForm,
-  DisruptionBudgetForm,
-  GitConfigTemplate,
-  HelmAppForm,
-  HttpConfigTemplate,
-  InlineConfigTemplate,
-  InlineFileForm,
-  KubeSecretTemplate,
-  PortMapping,
-  QuadletAppForm,
-  RolloutPolicyForm,
-  SpecConfigTemplate,
-  SystemdUnitFormValue,
-  UpdatePolicyForm,
-  VmAppForm,
+  type ComposeAppForm,
+  type DisruptionBudgetForm,
+  type GitConfigTemplate,
+  type HelmAppForm,
+  type HttpConfigTemplate,
+  type InlineConfigTemplate,
+  type InlineFileForm,
+  type KubeSecretTemplate,
+  type PortMapping,
+  type QuadletAppForm,
+  type RolloutPolicyForm,
+  type SpecConfigTemplate,
+  type SystemdUnitFormValue,
+  type UpdatePolicyForm,
+  type VmAppForm,
   getAppIdentifier,
   isGitConfigTemplate,
   isHttpConfigTemplate,

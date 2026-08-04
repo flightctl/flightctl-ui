@@ -1,4 +1,4 @@
-import { DeviceLogCategory, DeviceLogSearchParams } from './deviceLogs';
+import { DeviceLogCategory, type DeviceLogSearchParams } from './deviceLogs';
 
 // Maximum length for the final download filename. Typical per-name filesystem limits are 255.
 const MAX_DOWNLOAD_FILENAME_LENGTH = 255;

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FieldArray, useField } from 'formik';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 import { Button, FormGroup, FormSection, Grid, Split, SplitItem } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';

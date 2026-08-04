@@ -3,9 +3,9 @@ import { Trans } from 'react-i18next';
 import { Button, DropdownItem, Tab } from '@patternfly/react-core';
 
 import {
-  Device,
-  DeviceDecommission,
-  DeviceDecommissionTargetType,
+  type Device,
+  type DeviceDecommission,
+  type DeviceDecommissionTargetType,
   DeviceSummaryStatusType,
   ResourceKind,
 } from '@flightctl/types';

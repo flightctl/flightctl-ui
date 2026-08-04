@@ -5,13 +5,13 @@ import {
   FormGroup,
   HelperText,
   HelperTextItem,
-  HelperTextItemProps,
+  type HelperTextItemProps,
   InputGroup,
   InputGroupItem,
   Popover,
   PopoverPosition,
   TextInput,
-  TextInputProps,
+  type TextInputProps,
 } from '@patternfly/react-core';
 import { TimesIcon } from '@patternfly/react-icons/dist/js/icons/times-icon';
 import { CheckIcon } from '@patternfly/react-icons/dist/js/icons/check-icon';

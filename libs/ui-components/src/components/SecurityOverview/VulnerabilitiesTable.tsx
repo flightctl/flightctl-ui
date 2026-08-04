@@ -16,14 +16,14 @@ import type {
   VulnerabilityList,
 } from '@flightctl/types/alpha';
 
-import { PaginationDetails } from '../../hooks/useTablePagination';
+import { type PaginationDetails } from '../../hooks/useTablePagination';
 import { useTranslation } from '../../hooks/useTranslation';
-import { VulnerabilitySortDirection, VulnerabilitySortField } from '../../hooks/useVulnerabilities';
+import { type VulnerabilitySortDirection, type VulnerabilitySortField } from '../../hooks/useVulnerabilities';
 import { useAffectedImagesExpand } from '../../hooks/useAffectedImagesExpand';
 import { VULNERABILITY_SEVERITY_ORDER } from '../../utils/vulnerabilities';
 import { getVulnerabilitySeverityStatusItems } from '../../utils/status/vulnerabilities';
 import FilterSelect from '../form/FilterSelect';
-import Table, { ApiTableColumn } from '../Table/Table';
+import Table, { type ApiTableColumn } from '../Table/Table';
 import TableTextSearch from '../Table/TableTextSearch';
 import TablePagination from '../Table/TablePagination';
 import FlightCtlPageDrawer from '../common/FlightCtlPageDrawer';

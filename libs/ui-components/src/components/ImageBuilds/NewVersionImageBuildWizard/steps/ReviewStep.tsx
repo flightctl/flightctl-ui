@@ -12,13 +12,13 @@ import {
 } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
-import { ImageBuild } from '@flightctl/types/imagebuilder';
+import { type ImageBuild } from '@flightctl/types/imagebuilder';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getImageReference } from '../../../../utils/imageBuilds';
 import { useOciRegistriesContext } from '../../OciRegistriesContext';
 import ImageUrl from '../../ImageUrl';
-import { NewVersionWizardFormValues } from '../types';
-import { ImageBuildWizardError } from '../../CreateImageBuildWizard/types';
+import { type NewVersionWizardFormValues } from '../types';
+import { type ImageBuildWizardError } from '../../CreateImageBuildWizard/types';
 import { ErrorAlert, SoftwareCatalogReviewCard } from '../../ReviewCommon';
 
 export { SoftwareCatalogReviewCard };

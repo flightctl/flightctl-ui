@@ -1,8 +1,16 @@
 import * as React from 'react';
 import { Button } from '@patternfly/react-core';
-import { ActionsColumn, ExpandableRowContent, Tbody, Td, type TdProps, Tr, TrProps } from '@patternfly/react-table';
+import {
+  ActionsColumn,
+  ExpandableRowContent,
+  Tbody,
+  Td,
+  type TdProps,
+  Tr,
+  type TrProps,
+} from '@patternfly/react-table';
 
-import { Vulnerability, VulnerabilityGroup } from '@flightctl/types/alpha';
+import { type Vulnerability, type VulnerabilityGroup } from '@flightctl/types/alpha';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Link, ROUTE } from '../../hooks/useNavigate';
 import { getDateNoTimeDisplay } from '../../utils/dates';

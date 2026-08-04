@@ -1,4 +1,9 @@
-import { CatalogItem, CatalogItemArtifactType, CatalogItemType, CatalogItemVersion } from '@flightctl/types/alpha';
+import {
+  type CatalogItem,
+  CatalogItemArtifactType,
+  CatalogItemType,
+  type CatalogItemVersion,
+} from '@flightctl/types/alpha';
 import {
   Alert,
   Button,
@@ -19,22 +24,22 @@ import {
 } from '@patternfly/react-core';
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import * as React from 'react';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type FormikErrors, useFormikContext } from 'formik';
 import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
 import type { ApplicationProviderSpec } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import RadioField from '../../../form/RadioField';
 import FormSelect from '../../../form/FormSelect';
-import { PermissionCheck, usePermissionsContext } from '../../../common/PermissionsContext';
+import { type PermissionCheck, usePermissionsContext } from '../../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../../types/rbac';
 import { useFleets } from '../../../Fleet/useFleets';
 import { useDevicesPaginated } from '../../../Device/DevicesPage/useDevices';
 import { applyInitialConfig, getInitialAppConfig } from '../utils';
-import { InstallAppFormik, InstallSpecFormik, TargetPickerFormik } from '../types';
+import { type InstallAppFormik, type InstallSpecFormik, type TargetPickerFormik } from '../types';
 import WithTooltip from '../../../common/WithTooltip';
 import { getFullContainerURI } from '../../../../utils/catalog';
 

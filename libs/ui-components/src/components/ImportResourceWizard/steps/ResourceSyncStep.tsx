@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { Content, Stack, StackItem } from '@patternfly/react-core';
-import { FormikErrors } from 'formik';
-import { ResourceSyncType } from '@flightctl/types';
+import { type FormikErrors } from 'formik';
+import { type ResourceSyncType } from '@flightctl/types';
 
 import FlightControlForm from '../../form/FlightCtlForm';
 import CreateResourceSyncsForm from '../../Repository/CreateRepository/CreateResourceSyncsForm';
-import { ImportResourceFormValues } from '../types';
+import { type ImportResourceFormValues } from '../types';
 
 export const resourceSyncStepId = 'resource-sync';
 export const isResourceSyncStepValid = (errors: FormikErrors<ImportResourceFormValues>) => {

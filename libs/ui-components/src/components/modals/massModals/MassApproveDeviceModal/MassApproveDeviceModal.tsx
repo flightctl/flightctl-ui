@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { EnrollmentRequest, EnrollmentRequestApproval } from '@flightctl/types';
+import { type EnrollmentRequest, type EnrollmentRequestApproval } from '@flightctl/types';
 import {
   Alert,
   Button,

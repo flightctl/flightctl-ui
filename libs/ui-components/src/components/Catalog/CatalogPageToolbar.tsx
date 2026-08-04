@@ -1,13 +1,13 @@
 import { Button, Toolbar, ToolbarContent, ToolbarItem } from '@patternfly/react-core';
 import * as React from 'react';
-import { CatalogItemList } from '@flightctl/types/alpha';
+import { type CatalogItemList } from '@flightctl/types/alpha';
 
 import TableTextSearch from '../Table/TableTextSearch';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
-import { CatalogFilter } from './useCatalogFilter';
+import { type CatalogFilter } from './useCatalogFilter';
 import TablePagination from '../Table/TablePagination';
-import { PaginationDetails } from '../../hooks/useTablePagination';
+import { type PaginationDetails } from '../../hooks/useTablePagination';
 import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from '../common/PermissionsContext';
 

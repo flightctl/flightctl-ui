@@ -5,7 +5,7 @@ import {
   Content,
   FormGroup,
   MenuToggle,
-  MenuToggleElement,
+  type MenuToggleElement,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -21,9 +21,9 @@ import FlightCtlModal from '@flightctl/ui-components/src/components/common/Fligh
 
 import { Trans } from 'react-i18next';
 import { Formik, useFormikContext } from 'formik';
-import { DeviceList, DeviceResumeRequest, DeviceResumeResponse, Fleet } from '@flightctl/types';
+import { type DeviceList, type DeviceResumeRequest, type DeviceResumeResponse, type Fleet } from '@flightctl/types';
 
-import { FlightCtlLabel } from '../../../../types/extraTypes';
+import { type FlightCtlLabel } from '../../../../types/extraTypes';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetch } from '../../../../hooks/useFetch';
 import LabelsField from '../../../form/LabelsField';

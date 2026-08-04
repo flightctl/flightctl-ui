@@ -13,8 +13,8 @@ import {
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import ArrowRightIcon from '@patternfly/react-icons/dist/js/icons/arrow-right-icon';
 import * as React from 'react';
-import { FormikErrors, useFormikContext } from 'formik';
-import { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
+import { type FormikErrors, useFormikContext } from 'formik';
+import { type CatalogItem, type CatalogItemVersion } from '@flightctl/types/alpha';
 import semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 
@@ -22,7 +22,7 @@ import type { ApplicationProviderSpec } from '@flightctl/types';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelect from '../../../form/FormSelect';
-import { InstallSpecFormik } from '../../InstallWizard/types';
+import { type InstallSpecFormik } from '../../InstallWizard/types';
 import { StatusDisplayContent } from '../../../Status/StatusDisplay';
 import { InstallSpec, VersionDropdown } from '../../InstallWizard/steps/SpecificationsStep';
 import UpdateGraph from './UpdateGraph';

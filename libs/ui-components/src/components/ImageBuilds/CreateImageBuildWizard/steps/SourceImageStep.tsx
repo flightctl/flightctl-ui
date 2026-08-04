@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { FormGroup, FormSection } from '@patternfly/react-core';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type FormikErrors, useFormikContext } from 'formik';
 
-import { OciRepoSpec, RepoSpecType } from '@flightctl/types';
-import { ImageBuildFormValues } from '../types';
+import { type OciRepoSpec, RepoSpecType } from '@flightctl/types';
+import { type ImageBuildFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import NameField from '../../../form/NameField';
@@ -14,7 +14,7 @@ import { RESOURCE, VERB } from '../../../../types/rbac';
 import ImageUrlCard from '../../ImageUrlCard';
 import { useOciRegistriesContext } from '../../OciRegistriesContext';
 import { getBuildNameValidations } from '../../../form/validations';
-import FormSelectTypeahead, { SelectItem } from '../../../form/FormSelectTypeahead';
+import FormSelectTypeahead, { type SelectItem } from '../../../form/FormSelectTypeahead';
 
 export const sourceImageStepId = 'source-image';
 

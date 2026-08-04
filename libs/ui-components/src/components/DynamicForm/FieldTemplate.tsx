@@ -13,12 +13,12 @@ import {
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import {
-  ArrayFieldTemplateProps,
-  BaseInputTemplateProps,
-  FieldProps,
-  FieldTemplateProps,
-  ObjectFieldTemplateProps,
-  RegistryFieldsType,
+  type ArrayFieldTemplateProps,
+  type BaseInputTemplateProps,
+  type FieldProps,
+  type FieldTemplateProps,
+  type ObjectFieldTemplateProps,
+  type RegistryFieldsType,
 } from '@rjsf/utils';
 import { getDefaultRegistry } from '@rjsf/core';
 
@@ -26,7 +26,7 @@ import VolumeImageField, { ROOT_VOLUMES_IMAGE_REFERENCE_FIELD_REGEX } from './Vo
 import FieldErrors from './FieldErrors';
 import { PFEmailWidget, PFPasswordWidget, PFTextWidget, PFURLWidget } from './FormWidget';
 import { useTranslation } from '../../hooks/useTranslation';
-import { DynamicFormContext } from './DynamicForm';
+import { type DynamicFormContext } from './DynamicForm';
 import { FormGroupWithHelperText } from '../common/WithHelperText';
 import { DefaultHelperText } from '../form/FieldHelperText';
 

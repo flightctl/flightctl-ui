@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
 import { relativePathRegex } from '../components/form/validations';
 

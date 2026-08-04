@@ -11,10 +11,10 @@ import {
   GridItem,
   Stack,
   StackItem,
-  gridSpans,
+  type gridSpans,
 } from '@patternfly/react-core';
 
-import { Device } from '@flightctl/types';
+import { type Device } from '@flightctl/types';
 import { isDeviceEnrolled } from '../../../utils/devices';
 
 import { useTranslation } from '../../../hooks/useTranslation';

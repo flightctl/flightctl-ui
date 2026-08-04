@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
+import type * as React from 'react';
+import { type SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
 import { InProgressIcon } from '@patternfly/react-icons/dist/js/icons/in-progress-icon';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';

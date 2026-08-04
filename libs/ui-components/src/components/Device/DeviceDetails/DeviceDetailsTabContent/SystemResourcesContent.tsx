@@ -8,7 +8,7 @@ import {
   DescriptionListTerm,
 } from '@patternfly/react-core';
 
-import { Device } from '@flightctl/types';
+import { type Device } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import DetailsPageCard from '../../../DetailsPage/DetailsPageCard';
 import DeviceResourceStatus, { MonitorType } from '../../../Status/DeviceResourceStatus';

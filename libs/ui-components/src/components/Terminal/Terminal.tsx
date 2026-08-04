@@ -1,5 +1,10 @@
 import * as React from 'react';
-import { ITerminalAddon, ITerminalInitOnlyOptions, ITerminalOptions, Terminal as XTerminal } from '@xterm/xterm';
+import {
+  type ITerminalAddon,
+  type ITerminalInitOnlyOptions,
+  type ITerminalOptions,
+  Terminal as XTerminal,
+} from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { Spinner, Stack, StackItem } from '@patternfly/react-core';
 

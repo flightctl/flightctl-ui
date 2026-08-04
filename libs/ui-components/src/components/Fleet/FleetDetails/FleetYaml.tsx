@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Fleet } from '@flightctl/types';
+import { type Fleet } from '@flightctl/types';
 
 import YamlEditor from '../../common/CodeEditor/YamlEditor';
 

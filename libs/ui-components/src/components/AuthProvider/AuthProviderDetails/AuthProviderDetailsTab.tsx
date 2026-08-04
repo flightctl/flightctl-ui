@@ -16,13 +16,13 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
-import { AuthProvider } from '@flightctl/types';
+import { type AuthProvider } from '@flightctl/types';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { DEFAULT_USERNAME_CLAIM, OrgAssignmentType, isOAuth2Provider } from '../CreateAuthProvider/types';
 import { getAssignmentTypeLabel, getProviderTypeLabel } from '../CreateAuthProvider/utils';
 import RoleAssigmentDetails from './RoleAssigmentDetails';
-import { DynamicAuthProviderSpec } from '../../../types/extraTypes';
+import { type DynamicAuthProviderSpec } from '../../../types/extraTypes';
 
 const Scopes = ({ scopes }: { scopes: string[] | undefined }) => {
   if (!scopes || scopes.length === 0) {

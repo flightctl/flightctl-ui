@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FieldMetaProps, useField } from 'formik';
+import { type FieldMetaProps, useField } from 'formik';
 import { FileUpload, FormGroup, TextArea } from '@patternfly/react-core';
 import { useTranslation } from '../../hooks/useTranslation';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';

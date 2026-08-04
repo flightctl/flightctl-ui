@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Formik, FormikErrors } from 'formik';
+import { Formik, type FormikErrors } from 'formik';
 import {
   Alert,
   Breadcrumb,
@@ -12,9 +12,9 @@ import {
   WizardStep,
 } from '@patternfly/react-core';
 
-import { Device } from '@flightctl/types';
+import { type Device } from '@flightctl/types';
 import { getUpdatePolicyValues } from '../../Fleet/CreateFleet/fleetSpecUtils';
-import { EditDeviceFormValues } from './../../../types/deviceSpec';
+import { type EditDeviceFormValues } from './../../../types/deviceSpec';
 import { getErrorMessage } from '../../../utils/error';
 import { fromAPILabel } from '../../../utils/labels';
 import { getEditDisabledReason } from '../../../utils/devices';

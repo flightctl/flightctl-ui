@@ -1,16 +1,16 @@
 import * as React from 'react';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
 import { Icon, Stack, StackItem } from '@patternfly/react-core';
 import {
-  DeviceIntegrityCheckStatusType,
-  DeviceIntegrityStatus,
+  type DeviceIntegrityCheckStatusType,
+  type DeviceIntegrityStatus,
   DeviceIntegrityStatusSummaryType,
 } from '@flightctl/types';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { getIntegrityStatusItems, integrityCheckToSummaryType } from '../../utils/status/integrity';
-import { StatusItem, getDefaultStatusColor } from '../../utils/status/common';
+import { type StatusItem, getDefaultStatusColor } from '../../utils/status/common';
 import { getDefaultStatusIcon } from '../../utils/status/common';
 import { getDateDisplay } from '../../utils/dates';
 import StatusDisplay from './StatusDisplay';

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { CardBody, CardTitle, Flex, FlexItem } from '@patternfly/react-core';
 
-import { Device } from '@flightctl/types';
+import { type Device } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import SystemdUnitsTable from '../../DetailsPage/Tables/SystemdUnitsTable';
 import DetailsPageCard from '../../DetailsPage/DetailsPageCard';

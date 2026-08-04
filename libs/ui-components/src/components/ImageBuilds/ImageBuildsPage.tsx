@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import {
   Button,
   EmptyStateActions,
@@ -33,7 +33,7 @@ import { useImageBuildLatestPromotions, useImageBuilds, useImageBuildsBackendFil
 import ImageBuildRow from './ImageBuildRow';
 import { OciRegistriesContextProvider } from './OciRegistriesContext';
 import ImagePromotionModal from '../ImagePromotion/ImagePromotionModal';
-import { ImageBuildWithExports } from '../../types/extraTypes';
+import { type ImageBuildWithExports } from '../../types/extraTypes';
 
 const getColumns = (t: TFunction) => [
   {

@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { Checkbox, Flex, FlexItem, FormGroup, Stack, StackItem, Weekday } from '@patternfly/react-core';
+import { Checkbox, Flex, FlexItem, FormGroup, Stack, StackItem, type Weekday } from '@patternfly/react-core';
 import { FieldArray, useField, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import useTimeZones from '../../../../hooks/useTimeZones';
 import * as timeUtils from '../../../../utils/time';
-import { FleetFormValues, UpdatePolicyForm } from '../../../../types/deviceSpec';
+import { type FleetFormValues, type UpdatePolicyForm } from '../../../../types/deviceSpec';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import CheckboxField, { CheckboxFieldGroupValidation } from '../../../form/CheckboxField';
 import FormSelectTypeahead from '../../../form/FormSelectTypeahead';

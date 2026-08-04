@@ -1,14 +1,14 @@
 import {
-  AuthDynamicOrganizationAssignment,
-  AuthDynamicRoleAssignment,
-  AuthOrganizationAssignment,
-  AuthPerUserOrganizationAssignment,
-  AuthProviderSpec,
-  AuthRoleAssignment,
-  AuthStaticOrganizationAssignment,
-  AuthStaticRoleAssignment,
-  OAuth2ProviderSpec,
-  OIDCProviderSpec,
+  type AuthDynamicOrganizationAssignment,
+  type AuthDynamicRoleAssignment,
+  type AuthOrganizationAssignment,
+  type AuthPerUserOrganizationAssignment,
+  type AuthProviderSpec,
+  type AuthRoleAssignment,
+  type AuthStaticOrganizationAssignment,
+  type AuthStaticRoleAssignment,
+  type OAuth2ProviderSpec,
+  type OIDCProviderSpec,
 } from '@flightctl/types';
 import { ProviderType } from '../../../types/extraTypes';
 

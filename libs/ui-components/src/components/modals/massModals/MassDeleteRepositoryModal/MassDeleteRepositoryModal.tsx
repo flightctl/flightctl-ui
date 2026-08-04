@@ -14,7 +14,7 @@ import FlightCtlModal from '@flightctl/ui-components/src/components/common/Fligh
 
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import { Repository, ResourceSyncList } from '@flightctl/types';
+import { type Repository, type ResourceSyncList } from '@flightctl/types';
 
 import { useFetch } from '../../../../hooks/useFetch';
 import { getErrorMessage } from '../../../../utils/error';

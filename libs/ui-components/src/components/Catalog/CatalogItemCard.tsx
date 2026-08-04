@@ -12,7 +12,7 @@ import {
   Title,
 } from '@patternfly/react-core';
 import * as React from 'react';
-import { CatalogItem, CatalogItemCategory } from '@flightctl/types/alpha';
+import { type CatalogItem, CatalogItemCategory } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { getCatalogItemBadge, getCatalogItemIcon } from '../../utils/catalog';
