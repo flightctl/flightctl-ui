@@ -1,4 +1,4 @@
-import { Device, Fleet, ImageOrCatalogItemRefSpec } from '@flightctl/types';
+import * as React from 'react';
 import {
   Alert,
   Button,
@@ -13,10 +13,11 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
-import { FormikErrors, useFormikContext } from 'formik';
-import * as React from 'react';
+import { type FormikErrors, useFormikContext } from 'formik';
 import ExternalLinkAltIcon from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
-import { CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
+
+import type { Device, Fleet, ImageOrCatalogItemRefSpec } from '@flightctl/types';
+import { type CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import Table from '../../../Table/Table';

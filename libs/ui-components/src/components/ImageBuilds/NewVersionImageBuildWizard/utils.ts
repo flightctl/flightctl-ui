@@ -35,14 +35,10 @@ export const getImagePromotion = (values: ImagePromotionFormValues, buildName: s
       displayName: optionalTrimmed(values.newItem.displayName),
     } as NewCatalogItemTarget;
   } else {
-    const skips =
-      values.existingItem.skips || []
-        ? values.existingItem.skips
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [];
-
+    const skips = (values.existingItem.skips || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
     promotionTarget = {
       type: ExistingCatalogItemTarget.type.EXISTING_CATALOG_ITEM,
       catalogItemName: values.existingItem.name,

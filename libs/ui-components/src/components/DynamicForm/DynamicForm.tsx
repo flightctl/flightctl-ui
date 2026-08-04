@@ -21,7 +21,7 @@ import {
   PFObjectFieldTemplate,
   pfFields,
 } from './FieldTemplate';
-import { VolumeCatalogSelection } from '../../utils/catalog';
+import type { VolumeCatalogSelection } from '../../utils/catalog';
 
 export type DynamicFormContext = {
   volumeSelection: VolumeCatalogSelection[];

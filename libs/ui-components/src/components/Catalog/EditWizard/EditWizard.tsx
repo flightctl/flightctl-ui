@@ -131,7 +131,7 @@ const EditWizard = ({
               await patch(`${isDevice ? 'devices' : 'fleets'}/${resourceId}`, allPatches);
               setIsSpecUnchanged(false);
             } else {
-              setIsSpecUnchanged(false);
+              setIsSpecUnchanged(true);
             }
             setIsSuccess(true);
           }}

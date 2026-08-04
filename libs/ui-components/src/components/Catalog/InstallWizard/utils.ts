@@ -1,12 +1,12 @@
-import { CatalogItem } from '@flightctl/types/alpha';
 import validator from '@rjsf/validator-ajv8';
 import { createSchemaUtils } from '@rjsf/utils';
 import merge from 'lodash/merge';
-import { FormikHelpers } from 'formik';
+import type { FormikHelpers } from 'formik';
 
 import type { ApplicationProviderSpec, ImageMountVolumeProviderSpec } from '@flightctl/types';
+import type { CatalogItem } from '@flightctl/types/alpha';
 import type { VolumeCatalogSelection } from '../../../utils/catalog';
-import { DynamicFormConfigFormik } from './types';
+import type { DynamicFormConfigFormik } from './types';
 import { convertObjToYAMLString } from '../../common/CodeEditor/YamlEditor';
 
 const appSpecFilteredKeys = ['name', 'appType', 'catalogItemRef'];

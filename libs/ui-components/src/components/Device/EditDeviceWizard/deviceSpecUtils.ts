@@ -62,7 +62,7 @@ import {
   parseVmYamlForForm,
   vmYamlHasAdvancedSettings,
 } from '../../../utils/vmApplications';
-import { FullAppVolume, formVolumesToApi, toFormVolumes } from '../../../utils/volumes';
+import { type FullAppVolume, formVolumesToApi, toFormVolumes } from '../../../utils/volumes';
 
 const DEFAULT_INLINE_FILE_MODE = 420; // In Octal: 0644
 const DEFAULT_INLINE_FILE_USER = 'root';

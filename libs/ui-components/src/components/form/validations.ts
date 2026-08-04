@@ -784,7 +784,10 @@ const ociImageSchema = (t: TFunction) =>
 const imageSpecSchema = (t: TFunction, imageRequired: boolean, requiredMessage: string) =>
   Yup.mixed().test('image-or-catalog-ref', function (val) {
     const value = val as ImageOrCatalogItemRefSpec;
-    if ((!value && !imageRequired) || value.catalogItemRef) {
+    if (!value) {
+      return imageRequired ? this.createError({ message: requiredMessage }) : true;
+    }
+    if (value.catalogItemRef) {
       // For now, CatalogItems cannot be edited via the UI, so if they are set they must be valid
       return true;
     }

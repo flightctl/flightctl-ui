@@ -6,7 +6,7 @@ import { Button, Flex, FlexItem, Label, Popover, StackItem } from '@patternfly/r
 import { getUpdates } from '../../utils/catalog';
 import { useTranslation } from '../../hooks/useTranslation';
 import { buildAllDropdownActions } from '../common/ActionsDropdownList';
-import { ResolvedCatalogItemData, type SpecAppCatalogItem, type SpecOsCatalogItem } from './useSpecCatalogItems';
+import type { ResolvedCatalogItemData, SpecAppCatalogItem, SpecOsCatalogItem } from './useSpecCatalogItems';
 import CatalogItemTitle, { BrokenCatalogItemTitle } from './CatalogItemTitle';
 
 const isAppCatalogItem = (entry: SpecOsCatalogItem | SpecAppCatalogItem): entry is SpecAppCatalogItem => {

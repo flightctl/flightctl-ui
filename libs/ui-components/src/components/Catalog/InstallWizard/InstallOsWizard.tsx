@@ -1,10 +1,10 @@
-import { CatalogItem } from '@flightctl/types/alpha';
-import { Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
-import { Formik, FormikErrors, useFormikContext } from 'formik';
 import * as React from 'react';
+import { Wizard, WizardStep, type WizardStepType } from '@patternfly/react-core';
+import { Formik, type FormikErrors, useFormikContext } from 'formik';
 import * as Yup from 'yup';
-import { Device, Fleet, ImageOrCatalogItemRefSpec, PatchRequest } from '@flightctl/types';
 
+import type { Device, Fleet, ImageOrCatalogItemRefSpec, PatchRequest } from '@flightctl/types';
+import type { CatalogItem } from '@flightctl/types/alpha';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import { buildCatalogItemRef } from '../../../utils/catalog';
@@ -178,7 +178,8 @@ const InstallOsWizard = ({ catalogItem }: InstallOsWizardProps) => {
       return;
     }
     const installToDevice = values.target === 'device';
-    const selectedResource = installToDevice ? (values.device as Device) : (values.fleet as Fleet);
+    const selectedResource =
+      values.target === 'device' ? values.device : values.target === 'fleet' ? values.fleet : undefined;
     if (!selectedResource) {
       setError(t('Deployment target not found for {{ target }}', { target: values.target }));
       return;
@@ -187,6 +188,16 @@ const InstallOsWizard = ({ catalogItem }: InstallOsWizardProps) => {
     const catalogItemVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
     if (!catalogItemVersion || !values.channel) {
       setError(t('Failed to find requested version {{ version }}', { version: values.version }));
+      return;
+    }
+    const isValidChannel = catalogItemVersion.channels.some((chan) => chan === values.channel);
+    if (!isValidChannel) {
+      setError(
+        t('Invalid channel {{ channel }} for version {{ version }}', {
+          channel: values.channel,
+          version: values.version,
+        }),
+      );
       return;
     }
 

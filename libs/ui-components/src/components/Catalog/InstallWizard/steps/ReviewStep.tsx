@@ -15,9 +15,9 @@ import {
 } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
-import { type ImageOrCatalogItemRefSpec } from '@flightctl/types';
+import type { ImageOrCatalogItemRefSpec } from '@flightctl/types';
 import { type CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
-import { InstallAppFormik, InstallOsFormik } from '../types';
+import type { InstallAppFormik, InstallOsFormik } from '../types';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
@@ -36,7 +36,12 @@ const isOsUpdate = (catalogItem: CatalogItem, version: string, osSpec: ImageOrCa
   );
 };
 
-const isOsUnchanged = (osSpec: ImageOrCatalogItemRefSpec | undefined, catalogItem: CatalogItem, version: string) => {
+const isOsUnchanged = (
+  osSpec: ImageOrCatalogItemRefSpec | undefined,
+  catalogItem: CatalogItem,
+  version: string,
+  channel: string,
+) => {
   const osRef = osSpec?.catalogItemRef;
   if (!osRef) {
     return false;
@@ -44,7 +49,8 @@ const isOsUnchanged = (osSpec: ImageOrCatalogItemRefSpec | undefined, catalogIte
   return (
     osRef.item === catalogItem.metadata.name &&
     osRef.catalog === catalogItem.metadata.catalog &&
-    osRef.version === version
+    osRef.version === version &&
+    osRef.channel === channel
   );
 };
 
@@ -69,7 +75,7 @@ const UpdateOsUpdateAlerts = ({ catalogItem }: { catalogItem: CatalogItem }) => 
       );
     }
 
-    if (isOsUnchanged(resourceOs, catalogItem, values.version)) {
+    if (isOsUnchanged(resourceOs, catalogItem, values.version, values.channel)) {
       return (
         <Alert isInline variant="info" title={t('No action required')}>
           <Trans t={t}>
@@ -114,7 +120,7 @@ const UpdateOsUpdateAlerts = ({ catalogItem }: { catalogItem: CatalogItem }) => 
       );
     }
 
-    if (isOsUnchanged(resourceOs, catalogItem, values.version)) {
+    if (isOsUnchanged(resourceOs, catalogItem, values.version, values.channel)) {
       return (
         <Alert isInline variant="info" title={t('No action required')}>
           <Trans t={t}>
@@ -157,6 +163,7 @@ const ReviewStep = ({ error, catalogItem }: ReviewStepProps) => {
   const { values } = useFormikContext<InstallOsFormik | InstallAppFormik>();
 
   const isOsCatalogItem = catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS;
+  const resourceMeta = values.target === 'fleet' ? values.fleet?.metadata : values.device?.metadata;
 
   return (
     <FlightCtlForm>
@@ -196,9 +203,7 @@ const ReviewStep = ({ error, catalogItem }: ReviewStepProps) => {
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Target')}</DescriptionListTerm>
                   <DescriptionListDescription>
-                    {values.target === 'fleet'
-                      ? values.fleet?.metadata.name
-                      : values.device?.metadata.labels?.alias || values.device?.metadata.name}
+                    {resourceMeta?.labels?.alias || resourceMeta?.name}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               </DescriptionList>

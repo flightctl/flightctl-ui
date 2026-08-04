@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import {
   Button,
   Content,
@@ -49,7 +49,7 @@ const CatalogTitleLayout = ({ icon, title, description, version, channel }: Cata
           </StackItem>
           {description && (
             <StackItem>
-              <Title headingLevel="h6">{description}</Title>
+              <Content component={ContentVariants.h6}>{description}</Content>
             </StackItem>
           )}
           {versionLine && (

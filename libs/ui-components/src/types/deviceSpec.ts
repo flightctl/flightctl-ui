@@ -20,7 +20,7 @@ import {
 import { FlightCtlLabel } from './extraTypes';
 import { UpdateScheduleMode } from '../utils/time';
 import { formatCatalogItemRef } from '../utils/catalog';
-import { ApplicationVolumeForm } from '../utils/volumes';
+import type { ApplicationVolumeForm } from '../utils/volumes';
 
 // At the moment the "root" user is the default user when no user is specified.
 export const RUN_AS_ROOT_USER = 'root';

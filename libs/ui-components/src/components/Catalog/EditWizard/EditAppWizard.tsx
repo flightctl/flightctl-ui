@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { Formik, FormikErrors, useFormikContext } from 'formik';
-import { Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
+import { Formik, type FormikErrors, useFormikContext } from 'formik';
+import { Wizard, WizardStep, type WizardStepType } from '@patternfly/react-core';
 import * as Yup from 'yup';
-import { RJSFValidationError } from '@rjsf/utils';
+import type { RJSFValidationError } from '@rjsf/utils';
 import semver from 'semver';
 
 import type { ApplicationProviderSpec } from '@flightctl/types';
