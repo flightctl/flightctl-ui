@@ -23,6 +23,7 @@ import { BindingType } from '@flightctl/types/imagebuilder';
 import { ImageBuildFormValues } from '../types';
 import { PUBLIC_KEY_MAX_LENGTH } from '../../../form/validations';
 import { useTranslation } from '../../../../hooks/useTranslation';
+import { useAppContext } from '../../../../hooks/useAppContext';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import TextField from '../../../form/TextField';
 import UploadField from '../../../form/UploadField';
@@ -42,7 +43,9 @@ export const isRegistrationStepValid = (errors: FormikErrors<ImageBuildFormValue
 
 const RegistrationStep = () => {
   const { t } = useTranslation();
+  const { settings } = useAppContext();
   const { values, setFieldValue } = useFormikContext<ImageBuildFormValues>();
+  const productName = settings.isRHEM ? t('Red Hat Edge Manager') : t('Flight Control');
 
   const isEarlyBindingSelected = values.bindingType === BindingType.BindingTypeEarly;
 
@@ -152,6 +155,16 @@ const RegistrationStep = () => {
             </Stack>
           </CardBody>
         </Card>
+      </FormSection>
+      <FormSection title={t('{{ productName }} onboarding', { productName })}>
+        <SwitchField
+          name="onboarding"
+          label={t(
+            'Enable the {{ productName }} onboarding wizard powered by Cockpit. Provides a guided first-boot experience for device configuration. Compatible with both early and late binding.',
+            { productName },
+          )}
+          aria-label={t('{{ productName }} onboarding', { productName })}
+        />
       </FormSection>
       <FormSection title={t('Remote access')}>
         <SwitchField
