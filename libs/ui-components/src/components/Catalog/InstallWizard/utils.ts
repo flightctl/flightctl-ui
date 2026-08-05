@@ -3,13 +3,31 @@ import { createSchemaUtils } from '@rjsf/utils';
 import merge from 'lodash/merge';
 import type { FormikHelpers } from 'formik';
 
-import type { ApplicationProviderSpec, ImageMountVolumeProviderSpec } from '@flightctl/types';
+import type { ApplicationProviderSpec, CatalogItemRefSpec, ImageMountVolumeProviderSpec } from '@flightctl/types';
 import type { CatalogItem } from '@flightctl/types/alpha';
 import type { VolumeCatalogSelection } from '../../../utils/catalog';
 import type { DynamicFormConfigFormik } from './types';
 import { convertObjToYAMLString } from '../../common/CodeEditor/YamlEditor';
 
 const appSpecFilteredKeys = ['name', 'appType', 'catalogItemRef'];
+
+export const isSameCatalogRef = (
+  catalogRef: CatalogItemRefSpec | undefined,
+  catalogItem: CatalogItem,
+  version: string,
+  channel: string,
+) => {
+  if (!catalogRef) {
+    return false;
+  }
+  return (
+    catalogRef.item === catalogItem.metadata.name &&
+    catalogRef.catalog === catalogItem.metadata.catalog &&
+    catalogRef.version === version &&
+    // channel is optional on the API; treat undefined and '' as equivalent
+    (catalogRef.channel || '') === (channel || '')
+  );
+};
 
 export const getInitialAppConfig = (
   catalogItem: CatalogItem,

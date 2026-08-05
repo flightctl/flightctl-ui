@@ -37,27 +37,10 @@ import { getArtifactLabel, getFullArtifactURI } from '../../../../utils/catalog'
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import { useAppLinks } from '../../../../hooks/useAppLinks';
 import { FilterSearchParams } from '../../../../utils/status/devices';
+import { isSameCatalogRef } from '../utils';
 
 export const isSelectTargetStepValid = (errors: FormikErrors<InstallAppFormik>) => {
   return !errors.device && !errors.fleet;
-};
-
-const isSameOsSpec = (
-  osSpec: ImageOrCatalogItemRefSpec | undefined,
-  catalogItem: CatalogItem,
-  version: string,
-  channel: string,
-) => {
-  const osRef = osSpec?.catalogItemRef;
-  if (!osRef) {
-    return false;
-  }
-  return (
-    osRef.item === catalogItem.metadata.name &&
-    osRef.catalog === catalogItem.metadata.catalog &&
-    osRef.version === version &&
-    osRef.channel === channel
-  );
 };
 
 const DeviceTarget = ({
@@ -341,7 +324,10 @@ const SelectTargetStep = ({ catalogItem }: SelectTargetStepProps) => {
 
   const onTargetSelected = React.useCallback(
     (targetSpec: ImageOrCatalogItemRefSpec | undefined) => {
-      setFieldValue('isSpecUnchanged', isSameOsSpec(targetSpec, catalogItem, values.version, values.channel));
+      setFieldValue(
+        'isSpecUnchanged',
+        isSameCatalogRef(targetSpec?.catalogItemRef, catalogItem, values.version, values.channel),
+      );
     },
     [catalogItem, values.version, values.channel, setFieldValue],
   );

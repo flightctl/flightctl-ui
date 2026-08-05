@@ -1,17 +1,6 @@
 import * as React from 'react';
-import {
-  Button,
-  Content,
-  ContentVariants,
-  Flex,
-  FlexItem,
-  Icon,
-  Popover,
-  Stack,
-  StackItem,
-  Title,
-} from '@patternfly/react-core';
-import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { Alert, Content, ContentVariants, Flex, FlexItem, Icon, Stack, StackItem, Title } from '@patternfly/react-core';
+import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 import type { TFunction } from 'i18next';
 
 import type { CatalogItemRefSpec } from '@flightctl/types';
@@ -30,7 +19,7 @@ const formatVersionLine = (t: TFunction, version?: string, channel?: string) => 
 
 type CatalogTitleLayoutProps = {
   icon: React.ReactNode;
-  title: string;
+  title: React.ReactNode;
   description?: string;
   version?: string;
   channel?: string;
@@ -74,29 +63,25 @@ export const BrokenCatalogItemTitle = ({
   return (
     <CatalogTitleLayout
       icon={
-        <Popover
-          aria-label={t('Invalid reference to a catalog item')}
-          alertSeverityVariant="danger"
-          headerContent={t('Invalid reference to a catalog item')}
-          bodyContent={t(
-            'The catalog item referenced by this element could not be found. Review that the details are correct and the catalog item has not been deleted.',
-          )}
-          withFocusTrap
-          triggerAction="click"
-        >
-          <Button
-            variant="plain"
-            isInline
-            aria-label={t('Catalog item not found')}
-            icon={
-              <Icon status="danger">
-                <ExclamationCircleIcon />
-              </Icon>
-            }
-          />
-        </Popover>
+        <Icon size="xl">
+          <OutlinedQuestionCircleIcon />
+        </Icon>
       }
-      title={`${catalogRef.catalog}/${catalogRef.item}`}
+      title={
+        <Stack hasGutter>
+          <StackItem>
+            <Alert
+              isInline
+              isPlain
+              variant="danger"
+              title={t(
+                'The catalog item referenced by this element could not be found. Review that the details are correct and the catalog item has not been deleted.',
+              )}
+            />
+          </StackItem>
+          <StackItem>{`${catalogRef.catalog}/${catalogRef.item}`}</StackItem>
+        </Stack>
+      }
       description={description}
       version={catalogRef.version}
       channel={catalogRef.channel}

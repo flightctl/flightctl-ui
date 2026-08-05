@@ -12,7 +12,7 @@ import {
 } from '@patternfly/react-core';
 import { CubeIcon } from '@patternfly/react-icons/dist/js/icons/cube-icon';
 
-import { formatCatalogItemRef, type SpecCatalogItemId } from '../../utils/catalog';
+import { type SpecCatalogItemId, formatCatalogItemRef } from '../../utils/catalog';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useCatalogItemsContext } from './CatalogItemsContext';
 import { resolveSpecCatalogItem } from './specCatalogItems';

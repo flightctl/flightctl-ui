@@ -22,7 +22,6 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 import { Formik } from 'formik';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
 import { CubeIcon } from '@patternfly/react-icons/dist/js/icons/cube-icon';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
@@ -51,6 +50,7 @@ import { PaginationDetails } from '../../hooks/useTablePagination';
 import { getErrorMessage } from '../../utils/error';
 import { buildCatalogItemRef, formatCatalogItemRef } from '../../utils/catalog';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
+import FlightCtlModal from '../common/FlightCtlModal';
 import { InstallSpec } from '../Catalog/InstallWizard/steps/SpecificationsStep';
 import CatalogItemTitle from '../Catalog/CatalogItemTitle';
 import { InstallSpecFormik } from '../Catalog/InstallWizard/types';

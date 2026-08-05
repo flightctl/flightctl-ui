@@ -21,6 +21,7 @@ import type { InstallAppFormik, InstallOsFormik } from '../types';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
+import { isSameCatalogRef } from '../utils';
 
 const isOsUnset = (osSpec: ImageOrCatalogItemRefSpec | undefined) => !(osSpec?.image || osSpec?.catalogItemRef);
 
@@ -33,24 +34,6 @@ const isOsUpdate = (catalogItem: CatalogItem, version: string, osSpec: ImageOrCa
     osRef.item === catalogItem.metadata.name &&
     osRef.catalog === catalogItem.metadata.catalog &&
     osRef.version !== version
-  );
-};
-
-const isOsUnchanged = (
-  osSpec: ImageOrCatalogItemRefSpec | undefined,
-  catalogItem: CatalogItem,
-  version: string,
-  channel: string,
-) => {
-  const osRef = osSpec?.catalogItemRef;
-  if (!osRef) {
-    return false;
-  }
-  return (
-    osRef.item === catalogItem.metadata.name &&
-    osRef.catalog === catalogItem.metadata.catalog &&
-    osRef.version === version &&
-    osRef.channel === channel
   );
 };
 
@@ -75,7 +58,7 @@ const UpdateOsUpdateAlerts = ({ catalogItem }: { catalogItem: CatalogItem }) => 
       );
     }
 
-    if (isOsUnchanged(resourceOs, catalogItem, values.version, values.channel)) {
+    if (isSameCatalogRef(resourceOs?.catalogItemRef, catalogItem, values.version, values.channel)) {
       return (
         <Alert isInline variant="info" title={t('No action required')}>
           <Trans t={t}>
@@ -120,7 +103,7 @@ const UpdateOsUpdateAlerts = ({ catalogItem }: { catalogItem: CatalogItem }) => 
       );
     }
 
-    if (isOsUnchanged(resourceOs, catalogItem, values.version, values.channel)) {
+    if (isSameCatalogRef(resourceOs?.catalogItemRef, catalogItem, values.version, values.channel)) {
       return (
         <Alert isInline variant="info" title={t('No action required')}>
           <Trans t={t}>

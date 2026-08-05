@@ -48,7 +48,7 @@ const ImageOrCatalogRefField = ({ name, helperText, ...props }: ImageOrCatalogRe
         helperText={
           hasCatalogRef && isReadOnly
             ? t(
-                'This image is defined by the Software Catalog {{ catalogItemRef }} and cannot be edited directly. To change the image, update the catalog item or channel assignment.',
+                'This image is defined by the Software Catalog ({{ catalogItemRef }}) and cannot be edited directly. To change the image, update the catalog item.',
                 {
                   catalogItemRef: formatCatalogItemRef(catalogRef),
                 },

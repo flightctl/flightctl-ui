@@ -12,7 +12,6 @@ import {
   StackItem,
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import type { CatalogItemDeploymentList, CatalogItemList } from '@flightctl/types/alpha';
 
@@ -20,6 +19,7 @@ import { getErrorMessage } from '../../utils/error';
 import { useFetch } from '../../hooks/useFetch';
 import { useTranslation } from '../../hooks/useTranslation';
 import { isPromiseRejected } from '../../types/typeUtils';
+import FlightCtlModal from '../common/FlightCtlModal';
 
 type DeleteCatalogModalProps = {
   onClose: VoidFunction;

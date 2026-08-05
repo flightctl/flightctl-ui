@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Stack, StackItem } from '@patternfly/react-core';
 
 import { CatalogItem } from '@flightctl/types/alpha';
-import { getRemoveAppPatches, getRemoveOsPatches, type SpecCatalogItemId } from '../../../utils/catalog';
+import { type SpecCatalogItemId, getRemoveAppPatches, getRemoveOsPatches } from '../../../utils/catalog';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';

@@ -50,7 +50,7 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
       hasPackageMode={hasPackageMode}
       onPatch={async () => {}}
       spec={ownerFleet?.spec.template.spec}
-      specPath="/spec/template"
+      specPath="/spec/template/"
       onEdit={() => {}}
       onInstall={() => {}}
     />

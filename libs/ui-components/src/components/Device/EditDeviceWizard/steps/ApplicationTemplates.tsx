@@ -163,7 +163,7 @@ const ApplicationSection = ({
             </FormGroupWithHelperText>
 
             {specType === AppSpecType.OCI_IMAGE && (
-              <ApplicationImageForm applicationName={appFieldName} isReadOnly={isReadOnly || isCatalogApp} isRequired />
+              <ApplicationImageForm applicationName={appFieldName} isReadOnly={isReadOnly} isRequired />
             )}
             {specType === AppSpecType.INLINE && (
               <ApplicationInlineForm files={app.files || []} index={index} isReadOnly={isReadOnly} />
