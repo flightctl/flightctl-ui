@@ -28,6 +28,16 @@ import osIcon from '../../assets/os.svg';
 
 export type CatalogItemId = { catalog: string; item: string };
 
+/** Role of a catalog item reference on a Device/Fleet template spec. `data` is volume image refs. */
+export type SpecCatalogItemType = 'os' | 'app' | 'data';
+
+export type SpecCatalogItemId = {
+  type: SpecCatalogItemType;
+  ref: CatalogItemRefSpec;
+  /** Set for application refs and volume (data) refs under an application. */
+  appName?: string;
+};
+
 /** Tracks which volume slots use a catalog Data item. */
 export type VolumeCatalogSelection = {
   volumeIndex: number;
@@ -54,27 +64,50 @@ export const toCatalogItemId = (ref: Pick<CatalogItemRefSpec, 'catalog' | 'item'
   item: ref.item,
 });
 
-export const extractCatalogItemIdsFromSpec = (spec: DeviceSpec | undefined): CatalogItemId[] => {
-  const byKey = new Map<string, CatalogItemId>();
-  const addRef = (ref: CatalogItemRefSpec | undefined) => {
-    if (!ref) {
-      return;
-    }
-    const id = toCatalogItemId(ref);
-    byKey.set(catalogItemCacheKey(id), id);
-  };
+/**
+ * Extracts typed catalog item refs from a Device/Fleet template spec.
+ * `data` entries are volume image catalog refs.
+ */
+export const extractSpecCatalogItemIds = (spec: DeviceSpec | undefined): SpecCatalogItemId[] => {
+  const entries: SpecCatalogItemId[] = [];
 
   if (spec?.os?.catalogItemRef) {
-    addRef(spec.os.catalogItemRef);
+    entries.push({ type: 'os', ref: spec.os.catalogItemRef });
   }
+
   (spec?.applications || []).forEach((app) => {
-    addRef(getAppCatalogItemRef(app));
-    const volumes = 'volumes' in app ? (app.volumes as ImageMountVolumeProviderSpec[]) : undefined;
-    if (volumes) {
-      volumes.forEach((vol) => {
-        addRef(vol.image?.catalogItemRef);
+    const appRef = getAppCatalogItemRef(app);
+    if (appRef && app.name) {
+      entries.push({
+        type: 'app',
+        ref: appRef,
+        appName: app.name,
       });
     }
+
+    const volumes = 'volumes' in app ? (app.volumes as ImageMountVolumeProviderSpec[]) : undefined;
+    volumes?.forEach((vol) => {
+      const volRef = vol.image?.catalogItemRef;
+      if (!volRef) {
+        return;
+      }
+      entries.push({
+        type: 'data',
+        ref: volRef,
+        appName: app.name,
+      });
+    });
+  });
+
+  return entries;
+};
+
+/** Deduped catalog/item ids for fetch (os, apps, and volume data refs). */
+export const extractCatalogItemIdsFromSpec = (spec: DeviceSpec | undefined): CatalogItemId[] => {
+  const byKey = new Map<string, CatalogItemId>();
+  extractSpecCatalogItemIds(spec).forEach((entry) => {
+    const id = toCatalogItemId(entry.ref);
+    byKey.set(catalogItemCacheKey(id), id);
   });
   return [...byKey.values()];
 };

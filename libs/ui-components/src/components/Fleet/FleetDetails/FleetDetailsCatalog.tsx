@@ -34,11 +34,11 @@ const FleetDetailsCatalog = ({ fleet, refetch }: FleetDetailsCatalogProps) => {
       onPatch={onPatch}
       spec={fleet.spec.template.spec}
       specPath="/spec/template/"
-      onEdit={(catalogId, catalogItemId, appName) => {
-        let path = `${fleet.metadata.name}/${catalogId}/${catalogItemId}`;
-        if (appName) {
+      onEdit={(id) => {
+        let path = `${fleet.metadata.name}/${id.ref.catalog}/${id.ref.item}`;
+        if (id.appName) {
           const params = new URLSearchParams({
-            appName,
+            appName: id.appName,
           });
           path = `${path}?${params.toString()}`;
         }

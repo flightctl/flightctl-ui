@@ -19,7 +19,6 @@ import TabsNav from '../../TabsNav/TabsNav';
 import FleetDetailsCatalog from './FleetDetailsCatalog';
 import ActionsDropdownList from '../../common/ActionsDropdownList';
 import { CatalogItemsProvider } from '../../Catalog/CatalogItemsContext';
-import { extractCatalogItemIdsFromSpec } from '../../../utils/catalog';
 
 const fleetDetailsPermissions = [
   { kind: RESOURCE.FLEET, verb: VERB.DELETE },
@@ -116,7 +115,7 @@ const FleetDetailPage = () => {
     >
       {fleet && (
         <>
-          <CatalogItemsProvider ids={extractCatalogItemIdsFromSpec(fleet.spec.template.spec)}>
+          <CatalogItemsProvider spec={fleet.spec.template.spec}>
             <Routes>
               <Route index element={<Navigate to="details" replace />} />
               <Route path="details" element={<FleetDetailsContent fleet={fleet} />} />

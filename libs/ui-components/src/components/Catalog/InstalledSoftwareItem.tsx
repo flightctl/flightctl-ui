@@ -3,22 +3,24 @@ import { ArrowCircleUpIcon } from '@patternfly/react-icons/dist/js/icons/arrow-c
 import { ActionsColumn, IAction } from '@patternfly/react-table';
 import { Button, Flex, FlexItem, Label, Popover, StackItem } from '@patternfly/react-core';
 
+import type { SpecCatalogItemId } from '../../utils/catalog';
 import { getUpdates } from '../../utils/catalog';
 import { useTranslation } from '../../hooks/useTranslation';
 import { buildAllDropdownActions } from '../common/ActionsDropdownList';
-import type { ResolvedCatalogItemData, SpecAppCatalogItem, SpecOsCatalogItem } from './useSpecCatalogItems';
+import type { ResolvedCatalogItemData } from './specCatalogItems';
 import CatalogItemTitle, { BrokenCatalogItemTitle } from './CatalogItemTitle';
 
-const isAppCatalogItem = (entry: SpecOsCatalogItem | SpecAppCatalogItem): entry is SpecAppCatalogItem => {
-  return 'appName' in entry;
-};
-
-const SoftwareItemTitle = ({ entry }: { entry: SpecOsCatalogItem | SpecAppCatalogItem }) => {
-  const { ref: catalogRef, data } = entry;
-  const description = isAppCatalogItem(entry) && entry.appName ? entry.appName : '';
+const SoftwareItemTitle = ({
+  catalogItemId,
+  data,
+}: {
+  catalogItemId: SpecCatalogItemId;
+  data?: ResolvedCatalogItemData;
+}) => {
+  const description = catalogItemId.type === 'app' && catalogItemId.appName ? catalogItemId.appName : '';
 
   if (!data) {
-    return <BrokenCatalogItemTitle catalogRef={catalogRef} description={description} />;
+    return <BrokenCatalogItemTitle catalogRef={catalogItemId.ref} description={description} />;
   }
   return (
     <CatalogItemTitle
@@ -78,16 +80,16 @@ const SoftwareItemDeprecation = ({ data }: { data: ResolvedCatalogItemData }) =>
 };
 
 type InstalledSoftwareItemProps = {
-  entry: SpecOsCatalogItem | SpecAppCatalogItem;
+  catalogItemId: SpecCatalogItemId;
+  data?: ResolvedCatalogItemData;
   onEdit: VoidFunction;
   onDelete: VoidFunction;
   canEdit: boolean;
 };
 
-const InstalledSoftwareItem = ({ entry, onEdit, onDelete, canEdit }: InstalledSoftwareItemProps) => {
+const InstalledSoftwareItem = ({ catalogItemId, data, onEdit, onDelete, canEdit }: InstalledSoftwareItemProps) => {
   const { t } = useTranslation();
 
-  const { data } = entry;
   const isValidCatalogItem = !!data;
 
   const regularActions: IAction[] = [];
@@ -120,7 +122,7 @@ const InstalledSoftwareItem = ({ entry, onEdit, onDelete, canEdit }: InstalledSo
     <StackItem>
       <Flex alignItems={{ default: 'alignItemsCenter' }}>
         <FlexItem grow={{ default: 'grow' }}>
-          <SoftwareItemTitle entry={entry} />
+          <SoftwareItemTitle catalogItemId={catalogItemId} data={data} />
         </FlexItem>
 
         {isValidCatalogItem && (

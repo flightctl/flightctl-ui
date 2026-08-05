@@ -21,7 +21,6 @@ import { getEditDisabledReason } from '../../../utils/devices';
 import { hasPackageModeCapability } from '../../../utils/capabilities';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
-import { extractCatalogItemIdsFromSpec } from '../../../utils/catalog';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
 import { CatalogItemsProvider } from '../../Catalog/CatalogItemsContext';
@@ -101,7 +100,7 @@ const EditDeviceWizard = () => {
     const updatePolicyValues = getUpdatePolicyValues(device.spec?.updatePolicy);
     const isOsPackageMode = hasPackageModeCapability(device);
     body = (
-      <CatalogItemsProvider ids={extractCatalogItemIdsFromSpec(device.spec)}>
+      <CatalogItemsProvider spec={device.spec}>
         <Formik<EditDeviceFormValues>
           initialValues={{
             deviceAlias,

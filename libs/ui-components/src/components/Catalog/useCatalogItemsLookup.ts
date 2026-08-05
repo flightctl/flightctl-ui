@@ -144,5 +144,5 @@ export const useCatalogItemsLookup = (ids: CatalogItemId[]): CatalogItemsLookupR
     [catalogItemsByKey],
   );
 
-  return { getItem, isLoading, error };
+  return React.useMemo(() => ({ getItem, isLoading, error }), [getItem, isLoading, error]);
 };

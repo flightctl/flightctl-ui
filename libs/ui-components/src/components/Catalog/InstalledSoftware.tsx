@@ -12,39 +12,32 @@ import {
 } from '@patternfly/react-core';
 import { CubeIcon } from '@patternfly/react-icons/dist/js/icons/cube-icon';
 
-import { DeviceSpec } from '@flightctl/types';
-import { formatCatalogItemRef } from '../../utils/catalog';
+import { formatCatalogItemRef, type SpecCatalogItemId } from '../../utils/catalog';
 import { useTranslation } from '../../hooks/useTranslation';
-import { SpecOsCatalogItem, useSpecCatalogItems } from './useSpecCatalogItems';
+import { useCatalogItemsContext } from './CatalogItemsContext';
+import { resolveSpecCatalogItem } from './specCatalogItems';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import InstalledSoftwareItem from './InstalledSoftwareItem';
 
-const getOsDisplayName = (os: SpecOsCatalogItem) => {
-  const osItem = os.data?.item;
-  return osItem?.spec.displayName || osItem?.metadata.name || formatCatalogItemRef(os.ref);
-};
-
 type InstalledSoftwareProps = {
   hasPackageMode?: boolean;
-  spec: DeviceSpec | undefined;
-  onDeleteOs: () => Promise<void>;
-  onDeleteApp: (appName: string) => Promise<void>;
-  onEdit: (catalogId: string, catalogItemId: string, appName?: string) => void;
+  onDeleteItem: (id: SpecCatalogItemId) => Promise<void>;
+  onEdit: (id: SpecCatalogItemId) => void;
   canEdit: boolean;
 };
 
-const InstalledSoftware = ({
-  spec,
-  onDeleteOs,
-  onDeleteApp,
-  onEdit,
-  canEdit,
-  hasPackageMode,
-}: InstalledSoftwareProps) => {
+const InstalledSoftware = ({ onDeleteItem, onEdit, canEdit, hasPackageMode }: InstalledSoftwareProps) => {
   const { t } = useTranslation();
-  const [deleteOs, setDeleteOs] = React.useState(false);
-  const [appToDelete, setAppToDelete] = React.useState<string>();
-  const { os, apps, error, isLoading } = useSpecCatalogItems(spec);
+  const [itemToDelete, setItemToDelete] = React.useState<SpecCatalogItemId | undefined>();
+  const { catalogItemIds, getItem, isLoading, error } = useCatalogItemsContext();
+
+  const softwareItems = React.useMemo(
+    () =>
+      catalogItemIds
+        .filter((id) => id.type === 'os' || id.type === 'app')
+        .map((id) => ({ id, data: resolveSpecCatalogItem(id, getItem) })),
+    [catalogItemIds, getItem],
+  );
 
   if (isLoading) {
     return <EmptyState titleText={t('Loading installed software')} headingLevel="h4" icon={Spinner} />;
@@ -53,9 +46,7 @@ const InstalledSoftware = ({
     return <Alert isInline variant="danger" title={t('Failed to load installed software')} />;
   }
 
-  const hasOs = !!os;
-  const hasApps = apps.length > 0;
-  const isEmpty = !hasOs && !hasApps;
+  const isEmpty = softwareItems.length === 0;
 
   return (
     <>
@@ -72,21 +63,16 @@ const InstalledSoftware = ({
             </EmptyState>
           ) : (
             <Stack hasGutter>
-              {hasOs && (
-                <InstalledSoftwareItem
-                  entry={os}
-                  onEdit={() => onEdit(os.ref.catalog, os.ref.item || '')}
-                  onDelete={() => setDeleteOs(true)}
-                  canEdit={canEdit}
-                />
-              )}
-              {apps.map((app, index) => (
-                <React.Fragment key={app.appName}>
-                  {(hasOs || index > 0) && <Divider />}
+              {softwareItems.map(({ id, data }, index) => (
+                <React.Fragment key={id.type === 'app' ? id.appName : 'os'}>
+                  {index > 0 && <Divider />}
                   <InstalledSoftwareItem
-                    entry={app}
-                    onEdit={() => onEdit(app.ref.catalog, app.ref.item || '', app.appName)}
-                    onDelete={() => setAppToDelete(app.appName)}
+                    catalogItemId={id}
+                    data={data}
+                    onEdit={() => onEdit(id)}
+                    onDelete={() => {
+                      setItemToDelete(id);
+                    }}
                     canEdit={canEdit}
                   />
                 </React.Fragment>
@@ -95,26 +81,17 @@ const InstalledSoftware = ({
           )}
         </CardBody>
       </Card>
-      {deleteOs && os && (
+      {itemToDelete && (
         <DeleteModal
-          onClose={() => setDeleteOs(false)}
+          onClose={() => setItemToDelete(undefined)}
           onDelete={async () => {
-            await onDeleteOs();
-            setDeleteOs(false);
+            await onDeleteItem(itemToDelete);
+            setItemToDelete(undefined);
           }}
-          resourceName={getOsDisplayName(os)}
-          resourceType={t('operating system')}
-        />
-      )}
-      {appToDelete && (
-        <DeleteModal
-          onClose={() => setAppToDelete(undefined)}
-          onDelete={async () => {
-            await onDeleteApp(appToDelete);
-            setAppToDelete(undefined);
-          }}
-          resourceName={appToDelete}
-          resourceType={t('application')}
+          resourceName={
+            itemToDelete.type === 'os' ? formatCatalogItemRef(itemToDelete.ref) : (itemToDelete.appName as string)
+          }
+          resourceType={itemToDelete.type === 'os' ? t('operating system') : t('application')}
         />
       )}
     </>

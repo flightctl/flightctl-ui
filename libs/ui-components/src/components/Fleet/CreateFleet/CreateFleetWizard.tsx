@@ -27,7 +27,6 @@ import DeviceTemplateStep, {
 } from '../../Device/EditDeviceWizard/steps/DeviceTemplateStep';
 import ReviewStep, { reviewStepId } from './steps/ReviewStep';
 import UpdatePolicyStep, { isUpdatePolicyStepValid, updatePolicyStepId } from './steps/UpdatePolicyStep';
-import { extractCatalogItemIdsFromSpec } from '../../../utils/catalog';
 import { getFleetPatches, getFleetResource, getInitialValues, getValidationSchema } from './utils';
 import CreateFleetWizardFooter from './CreateFleetWizardFooter';
 import { useEditFleet } from './useEditFleet';
@@ -90,7 +89,7 @@ const CreateFleetWizard = () => {
     );
   } else {
     body = (
-      <CatalogItemsProvider ids={extractCatalogItemIdsFromSpec(fleet?.spec.template.spec)}>
+      <CatalogItemsProvider spec={fleet?.spec.template.spec}>
         <Formik<FleetFormValues>
           initialValues={getInitialValues(fleet)}
           validationSchema={getValidationSchema(t)}

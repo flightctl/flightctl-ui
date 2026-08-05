@@ -41,7 +41,6 @@ import { SystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 import DeviceDetailsCatalog from './DeviceDetailsCatalog';
 import ActionsDropdownList from '../../common/ActionsDropdownList';
 import { CatalogItemsProvider } from '../../Catalog/CatalogItemsContext';
-import { extractCatalogItemIdsFromSpec } from '../../../utils/catalog';
 
 const deviceDetailsPermissions = [
   { kind: RESOURCE.DEVICE_CONSOLE, verb: VERB.GET },
@@ -212,7 +211,7 @@ const DeviceDetailsPage = ({ children }: React.PropsWithChildren) => {
       }
     >
       {device && (
-        <CatalogItemsProvider ids={extractCatalogItemIdsFromSpec(device.spec)}>
+        <CatalogItemsProvider spec={device.spec}>
           <Routes>
             <Route index element={<Navigate to="details" replace />} />
             <Route

@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Stack, StackItem } from '@patternfly/react-core';
 
 import { CatalogItem } from '@flightctl/types/alpha';
-import { getRemoveAppPatches, getRemoveOsPatches } from '../../../utils/catalog';
+import { getRemoveAppPatches, getRemoveOsPatches, type SpecCatalogItemId } from '../../../utils/catalog';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
@@ -19,7 +19,7 @@ type ResourceCatalogPageProps = {
   hasPackageMode?: boolean;
   spec: DeviceSpec | undefined;
   onPatch: (allPatches: PatchRequest) => Promise<void>;
-  onEdit: (catalogId: string, catalogItemId: string, appName?: string) => void;
+  onEdit: (id: SpecCatalogItemId) => void;
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
 };
 
@@ -40,18 +40,21 @@ const ResourceCatalogPage = ({
 }: ResourceCatalogPageProps) => {
   const { checkPermissions, loading } = usePermissionsContext();
   const [canListItems, canListCatalogs] = checkPermissions(catalogPagePermissions);
-  const onDeleteOs = async () => {
-    const allPatches = getRemoveOsPatches({ specPath });
-    await onPatch(allPatches);
-  };
 
-  const onDeleteApp = async (appName: string) => {
-    const allPatches = getRemoveAppPatches({
-      appName,
-      currentApps: spec?.applications,
-      specPath,
-    });
-    await onPatch(allPatches);
+  const onDeleteItem = async (id: SpecCatalogItemId) => {
+    let allPatches: PatchRequest = [];
+    if (id.type === 'os') {
+      allPatches = getRemoveOsPatches({ specPath });
+    } else if (id.type === 'app') {
+      allPatches = getRemoveAppPatches({
+        appName: id.appName as string,
+        currentApps: spec?.applications,
+        specPath,
+      });
+    }
+    if (allPatches.length > 0) {
+      await onPatch(allPatches);
+    }
   };
 
   return (
@@ -60,10 +63,8 @@ const ResourceCatalogPage = ({
         <StackItem>
           <InstalledSoftware
             hasPackageMode={hasPackageMode}
-            spec={spec}
-            onDeleteOs={onDeleteOs}
+            onDeleteItem={onDeleteItem}
             onEdit={onEdit}
-            onDeleteApp={onDeleteApp}
             canEdit={canEdit}
           />
         </StackItem>
