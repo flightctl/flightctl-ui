@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
-import { Event, EventList, ObjectReference, ResourceKind } from '@flightctl/types';
+import { Event, type EventList, type ObjectReference, ResourceKind } from '@flightctl/types';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { EVENT_PAGE_SIZE } from '../../constants';
 import { getDateDisplay } from '../../utils/dates';

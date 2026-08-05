@@ -1,16 +1,16 @@
 import * as React from 'react';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
 import {
-  Device,
+  type Device,
   DeviceResourceStatus,
   DeviceResourceStatusType,
   ResourceAlertSeverityType,
-  ResourceMonitor,
+  type ResourceMonitor,
 } from '@flightctl/types';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { StatusLevel } from '../../utils/status/common';
+import { type StatusLevel } from '../../utils/status/common';
 import { StatusDisplayContent } from './StatusDisplay';
 
 export enum MonitorType {

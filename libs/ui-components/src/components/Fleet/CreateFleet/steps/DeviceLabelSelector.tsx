@@ -4,12 +4,12 @@ import { Alert, Button, Spinner, Stack, StackItem } from '@patternfly/react-core
 import { RedoIcon } from '@patternfly/react-icons/dist/js/icons/redo-icon';
 import debounce from 'lodash/debounce';
 
-import { DeviceList } from '@flightctl/types';
+import { type DeviceList } from '@flightctl/types';
 import LabelsField from '../../../form/LabelsField';
 import { getInvalidKubernetesLabels, hasUniqueLabelKeys } from '../../../form/validations';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetch } from '../../../../hooks/useFetch';
-import { FlightCtlLabel } from '../../../../types/extraTypes';
+import { type FlightCtlLabel } from '../../../../types/extraTypes';
 import { getApiListCount } from '../../../../utils/api';
 import { getErrorMessage } from '../../../../utils/error';
 import { commonQueries } from '../../../../utils/query';

@@ -14,7 +14,7 @@ import AppConfigStep, { isAppConfigStepValid } from '../InstallWizard/steps/AppC
 import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
 import { useSubmitCatalogForm } from '../useSubmitCatalogForm';
 import { getUpdates } from '../../../utils/catalog';
-import { AppUpdateFormik } from './types';
+import { type AppUpdateFormik } from './types';
 import UpdateStep, { isUpdateStepValid } from './steps/UpdateStep';
 import ReviewStep from './steps/ReviewStep';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';

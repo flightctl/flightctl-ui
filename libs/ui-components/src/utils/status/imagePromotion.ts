@@ -1,11 +1,11 @@
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
 import {
-  ImagePromotion,
+  type ImagePromotion,
   ImagePromotionConditionReason,
   ImagePromotionConditionType,
 } from '@flightctl/types/imagebuilder';
-import { StatusLevel } from './common';
+import { type StatusLevel } from './common';
 
 export type ImagePromotionStatusReason = ImagePromotionConditionReason | 'Unknown';
 

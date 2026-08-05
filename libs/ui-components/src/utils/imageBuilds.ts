@@ -1,16 +1,16 @@
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 import {
   ExportFormatType,
-  ImageBuild,
+  type ImageBuild,
   ImageBuildConditionReason,
   ImageBuildConditionType,
-  ImageBuildDestination,
-  ImageBuildSource,
-  ImageExport,
+  type ImageBuildDestination,
+  type ImageBuildSource,
+  type ImageExport,
   ImageExportConditionReason,
   ImageExportConditionType,
 } from '@flightctl/types/imagebuilder';
-import { Repository } from '@flightctl/types';
+import { type Repository } from '@flightctl/types';
 import { isOciRepoSpec } from '../components/Repository/CreateRepository/utils';
 
 export const getAllExportFormats = () => [

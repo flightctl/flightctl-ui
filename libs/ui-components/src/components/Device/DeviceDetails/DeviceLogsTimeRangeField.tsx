@@ -26,7 +26,7 @@ import { OutlinedCalendarAltIcon } from '@patternfly/react-icons/dist/js/icons/o
 import { useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import { DeviceLogSearchParams, DeviceLogTimeRange, getDeviceLogTimeRangeLabel } from '../../../utils/deviceLogs';
+import { type DeviceLogSearchParams, DeviceLogTimeRange, getDeviceLogTimeRangeLabel } from '../../../utils/deviceLogs';
 
 const fieldIdToggle = 'device-logs-time-range-toggle';
 const BACK_OPTION_VALUE = 'back';

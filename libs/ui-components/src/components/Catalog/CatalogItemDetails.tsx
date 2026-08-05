@@ -25,7 +25,7 @@ import {
 import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 import { Formik, useFormikContext } from 'formik';
-import { ActionsColumn, IAction } from '@patternfly/react-table';
+import { ActionsColumn, type IAction } from '@patternfly/react-table';
 
 import { type Catalog, type CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -41,7 +41,7 @@ import WithTooltip from '../common/WithTooltip';
 import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import FlightCtlPageDrawer from '../common/FlightCtlPageDrawer';
 import { InstallSpec } from './InstallWizard/steps/SpecificationsStep';
-import { InstallSpecFormik } from './InstallWizard/types';
+import { type InstallSpecFormik } from './InstallWizard/types';
 
 import './CatalogItemDetails.css';
 

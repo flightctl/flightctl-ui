@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 import {
   Banner,
   Button,
@@ -15,7 +15,7 @@ import {
 import { CubesIcon } from '@patternfly/react-icons/dist/js/icons/cubes-icon';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
-import { DEVICE_LOG_BASE_PATH, DeviceLogErrorType } from '../../../utils/deviceLogs';
+import { DEVICE_LOG_BASE_PATH, type DeviceLogErrorType } from '../../../utils/deviceLogs';
 import { useTranslation } from '../../../hooks/useTranslation';
 
 // Fixes the color of the text in the "red" banner button.

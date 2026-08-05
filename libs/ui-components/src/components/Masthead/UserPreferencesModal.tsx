@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import {
   Button,
   FormGroup,
   MenuToggle,
-  MenuToggleElement,
+  type MenuToggleElement,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -13,7 +13,7 @@ import {
 } from '@patternfly/react-core';
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
-import { Theme } from '../../hooks/useThemePreferences';
+import { type Theme } from '../../hooks/useThemePreferences';
 import { useTranslation } from '../../hooks/useTranslation';
 import { UserPreferencesContext } from './UserPreferencesProvider';
 import FlightCtlForm from '../form/FlightCtlForm';

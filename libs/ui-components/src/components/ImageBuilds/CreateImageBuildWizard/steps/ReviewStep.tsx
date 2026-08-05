@@ -21,7 +21,7 @@ import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circl
 import { BindingType } from '@flightctl/types/imagebuilder';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useAppContext } from '../../../../hooks/useAppContext';
-import { ImageBuildFormValues, ImageBuildWizardError } from '../types';
+import { type ImageBuildFormValues, type ImageBuildWizardError } from '../types';
 import { getImageReference } from '../../../../utils/imageBuilds';
 import { getExportFormatLabel } from '../../../../utils/imageBuilds';
 import { CERTIFICATE_VALIDITY_IN_YEARS } from '../../../../constants';

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { ApplicationsSummaryStatusType } from '@flightctl/types';
-import { FlightCtlLabel } from '../../../../types/extraTypes';
+import { type ApplicationsSummaryStatusType } from '@flightctl/types';
+import { type FlightCtlLabel } from '../../../../types/extraTypes';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getApplicationStatusHelperText } from '../../../Status/utils';

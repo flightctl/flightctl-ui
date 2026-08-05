@@ -4,7 +4,7 @@ import {
   AlertActionLink,
   Bullseye,
   MenuToggle,
-  MenuToggleElement,
+  type MenuToggleElement,
   Select,
   SelectList,
   SelectOption,
@@ -13,13 +13,13 @@ import {
   StackItem,
 } from '@patternfly/react-core';
 
-import { ApplicationStatusType, Device, DeviceApplicationStatus } from '@flightctl/types';
+import { ApplicationStatusType, type Device, type DeviceApplicationStatus } from '@flightctl/types';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { type AppConsoleConnectError, useAppConsoleWebSocket } from '../../hooks/useAppConsoleWebSocket';
 import { useOrganizationGuardContext } from '../common/OrganizationGuard';
 import TerminalConnectError from './TerminalConnectError';
-import Terminal, { ImperativeTerminalType } from './Terminal';
+import Terminal, { type ImperativeTerminalType } from './Terminal';
 
 const AppTerminalContent = ({
   appStatus,

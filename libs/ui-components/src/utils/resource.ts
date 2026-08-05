@@ -1,4 +1,4 @@
-import { ObjectMeta, ResourceKind } from '@flightctl/types';
+import { type ObjectMeta, type ResourceKind } from '@flightctl/types';
 
 export const getOwnerName = (ownerKind: ResourceKind, owner: string | undefined): string | undefined => {
   if (!owner) {

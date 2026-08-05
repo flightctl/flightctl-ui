@@ -1,4 +1,4 @@
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import * as Yup from 'yup';
 
 import {
@@ -10,8 +10,8 @@ import {
   validUpdatePolicySchema,
 } from '../../form/validations';
 import { getDeviceLabelPatches, getStringListPatches, getUpdatePolicyPatches } from '../../../utils/patch';
-import { Device, PatchRequest } from '@flightctl/types';
-import { EditDeviceFormValues, UpdatePolicyForm } from './../../../types/deviceSpec';
+import { type Device, type PatchRequest } from '@flightctl/types';
+import { type EditDeviceFormValues, type UpdatePolicyForm } from './../../../types/deviceSpec';
 import {
   ACMCrdConfig,
   ACMImportConfig,

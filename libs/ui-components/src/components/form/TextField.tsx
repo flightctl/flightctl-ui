@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { FormGroup, TextInput, TextInputProps } from '@patternfly/react-core';
+import { FormGroup, TextInput, type TextInputProps } from '@patternfly/react-core';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 export interface TextFieldProps extends Omit<TextInputProps, 'onChange'> {

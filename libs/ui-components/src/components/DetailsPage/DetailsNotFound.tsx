@@ -12,7 +12,7 @@ import {
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 import { Trans } from 'react-i18next';
 import { useTranslation } from '../../hooks/useTranslation';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 
 interface DetailsNotFoundProps {

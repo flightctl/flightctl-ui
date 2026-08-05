@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { DeviceResumeRequest, DeviceSummaryStatusType, DevicesSummary } from '@flightctl/types';
+import { type DeviceResumeRequest, DeviceSummaryStatusType, type DevicesSummary } from '@flightctl/types';
 import { useSystemRestore } from '../../hooks/useSystemRestoreContext';
-import SuspendedDevicesAlert, { ResumeMode } from './SuspendedDevicesAlert';
+import SuspendedDevicesAlert, { type ResumeMode } from './SuspendedDevicesAlert';
 import { PendingSyncDevicesAlert } from './PendingSyncDevicesAlert';
 
 import './SystemRestoreBanners.css';

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Stack, StackItem } from '@patternfly/react-core';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { AppForm, getAppIdentifier } from '../../../../types/deviceSpec';
+import { type AppForm, getAppIdentifier } from '../../../../types/deviceSpec';
 import { getAppTypeLabel } from '../../../../utils/apps';
 
 const getAppName = (app: AppForm, t: TFunction): string => {

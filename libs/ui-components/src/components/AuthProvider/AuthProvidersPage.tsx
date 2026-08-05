@@ -15,7 +15,7 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import { CubesIcon } from '@patternfly/react-icons/dist/js/icons/cubes-icon';
 
 import ListPageBody from '../ListPage/ListPageBody';

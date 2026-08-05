@@ -1,5 +1,5 @@
 import React from 'react';
-import { PopoverProps } from '@patternfly/react-core';
+import { type PopoverProps } from '@patternfly/react-core';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import Shortcut from './Shortcut';

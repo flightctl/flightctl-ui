@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Gallery } from '@patternfly/react-core';
 
-import { ExportFormatType, ImageBuildConditionReason, ImageExport } from '@flightctl/types/imagebuilder';
-import { ImageBuildWithExports } from '../../../types/extraTypes';
+import { type ExportFormatType, ImageBuildConditionReason, type ImageExport } from '@flightctl/types/imagebuilder';
+import { type ImageBuildWithExports } from '../../../types/extraTypes';
 import { getImageBuildStatusReason } from '../../../utils/imageBuilds';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useFetch } from '../../../hooks/useFetch';
@@ -10,7 +10,7 @@ import { usePermissionsContext } from '../../common/PermissionsContext';
 import { useOrganizationGuardContext } from '../../common/OrganizationGuard';
 import { getErrorMessage } from '../../../utils/error';
 import { getImageExportResource } from '../CreateImageBuildWizard/utils';
-import { ImageExportAction, ViewImageBuildExportCard } from '../ImageExportCards';
+import { type ImageExportAction, ViewImageBuildExportCard } from '../ImageExportCards';
 import { useOciRegistriesContext } from '../OciRegistriesContext';
 import { showSpinnerBriefly } from '../../../utils/time';
 import { getAllExportFormats, getImageReference } from '../../../utils/imageBuilds';

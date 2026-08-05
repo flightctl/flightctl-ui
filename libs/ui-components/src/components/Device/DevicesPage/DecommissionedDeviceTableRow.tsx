@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { ActionsColumn, IAction, OnSelect, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, type IAction, type OnSelect, Td, Tr } from '@patternfly/react-table';
 
-import { Device } from '@flightctl/types';
-import { ListAction } from '../../ListPage/types';
+import { type Device } from '@flightctl/types';
+import { type ListAction } from '../../ListPage/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import ResourceLink from '../../common/ResourceLink';

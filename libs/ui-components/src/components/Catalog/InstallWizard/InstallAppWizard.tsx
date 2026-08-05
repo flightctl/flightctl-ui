@@ -1,23 +1,29 @@
-import { CatalogItem } from '@flightctl/types/alpha';
-import { Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
-import { Formik, FormikErrors, useFormikContext } from 'formik';
+import { type CatalogItem } from '@flightctl/types/alpha';
+import { Wizard, WizardStep, type WizardStepType } from '@patternfly/react-core';
+import { Formik, type FormikErrors, useFormikContext } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
 import { load } from 'js-yaml';
-import { RJSFValidationError } from '@rjsf/utils';
-import { Device, Fleet } from '@flightctl/types';
+import { type RJSFValidationError } from '@rjsf/utils';
+import { type Device, type Fleet } from '@flightctl/types';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import { getAppPatches } from '../../../utils/catalog';
-import { InstallAppFormik, appConfigStepId, reviewStepId, selectTargetStepId, specificationsStepId } from './types';
+import {
+  type InstallAppFormik,
+  appConfigStepId,
+  reviewStepId,
+  selectTargetStepId,
+  specificationsStepId,
+} from './types';
 import SpecificationsStep, { isSpecsStepValid } from './steps/SpecificationsStep';
 import SelectTargetStep, { isSelectTargetStepValid } from './steps/SelectTargetStep';
 import AppConfigStep, { isAppConfigStepValid } from './steps/AppConfigStep';
 import ReviewStep from './steps/ReviewStep';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import UpdateSuccessPage from './UpdateSuccessPage';
-import FlightCtlWizardFooter, { FlightCtlWizardFooterProps } from '../../common/FlightCtlWizardFooter';
+import FlightCtlWizardFooter, { type FlightCtlWizardFooterProps } from '../../common/FlightCtlWizardFooter';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { getInitialAppConfig } from './utils';
 import { useSubmitCatalogForm } from '../useSubmitCatalogForm';

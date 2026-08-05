@@ -1,5 +1,10 @@
 import * as React from 'react';
-import { AppContextProps, FlightCtlApp, NavLinkFC, appRoutes } from '@flightctl/ui-components/src/hooks/useAppContext';
+import {
+  type AppContextProps,
+  FlightCtlApp,
+  type NavLinkFC,
+  appRoutes,
+} from '@flightctl/ui-components/src/hooks/useAppContext';
 import {
   Link,
   NavLink,

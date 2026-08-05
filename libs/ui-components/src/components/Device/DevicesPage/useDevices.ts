@@ -15,10 +15,10 @@ import {
 } from '../../../utils/status/devices';
 import * as queryUtils from '../../../utils/query';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { FlightCtlLabel } from '../../../types/extraTypes';
-import { FilterStatusMap } from './types';
+import { type FlightCtlLabel } from '../../../types/extraTypes';
+import { type FilterStatusMap } from './types';
 import { PAGE_SIZE } from '../../../constants';
-import { PaginationDetails, useTablePagination } from '../../../hooks/useTablePagination';
+import { type PaginationDetails, useTablePagination } from '../../../hooks/useTablePagination';
 
 type DevicesEndpointArgs = {
   /** Free-text filters synced with URL (name/alias, CVE ID, …). */

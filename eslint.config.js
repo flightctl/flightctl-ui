@@ -134,6 +134,13 @@ module.exports = defineConfig([
       '@typescript-eslint/no-floating-promises': 'off',
       '@typescript-eslint/no-unsafe-enum-comparison': 'off',
       '@typescript-eslint/no-unused-vars': 'error',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'inline-type-imports',
+        },
+      ],
     },
   },
   globalIgnores(['**/*.json']),

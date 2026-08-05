@@ -20,7 +20,7 @@ import { CheckCircleIcon } from '@patternfly/react-icons/dist/js/icons/check-cir
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import { FieldValidationResult } from '../CreateAuthProvider/types';
+import { type FieldValidationResult } from '../CreateAuthProvider/types';
 
 type TestConnectionModalProps = {
   onClose: VoidFunction;

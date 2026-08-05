@@ -3,7 +3,7 @@ import {
   DEVICE_LOG_BASE_PATH,
   DeviceLogCategory,
   DeviceLogLevel,
-  DeviceLogLevelValue,
+  type DeviceLogLevelValue,
   type DeviceLogSearchParams,
   DeviceLogTimeRange,
   MAX_LOG_LINES,

@@ -12,7 +12,7 @@ import {
   GridItem,
   TextArea,
 } from '@patternfly/react-core';
-import { EnrollmentRequest } from '@flightctl/types';
+import { type EnrollmentRequest } from '@flightctl/types';
 
 import ConditionsTable from '../../DetailsPage/Tables/ConditionsTable';
 import DetailsPage from '../../DetailsPage/DetailsPage';

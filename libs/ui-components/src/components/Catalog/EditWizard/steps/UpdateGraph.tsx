@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useField, useFormikContext } from 'formik';
-import { CatalogItemVersion } from '@flightctl/types/alpha';
+import { type CatalogItemVersion } from '@flightctl/types/alpha';
 import semver from 'semver';
 import { Button, Popover, Stack } from '@patternfly/react-core';
 import { ArrowCircleUpIcon } from '@patternfly/react-icons/dist/js/icons';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { InstallSpecFormik } from '../../InstallWizard/types';
+import { type InstallSpecFormik } from '../../InstallWizard/types';
 
 import './UpdateGraph.css';
 

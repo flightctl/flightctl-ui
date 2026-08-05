@@ -4,7 +4,7 @@ import { Button, Content, FormGroup, FormSection, Grid, Split, SplitItem } from 
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
-import { VariablesForm } from '../../../../types/deviceSpec';
+import { type VariablesForm } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import ErrorHelperText from '../../../form/FieldHelperText';

@@ -8,8 +8,8 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { useAppContext } from '../../../hooks/useAppContext';
 import {
   DEVICE_LOGS_FORM_INITIAL_VALUES,
-  DeviceLogErrorType,
-  DeviceLogSearchParams,
+  type DeviceLogErrorType,
+  type DeviceLogSearchParams,
   getDeviceLogSearchSchema,
 } from '../../../utils/deviceLogs';
 import {

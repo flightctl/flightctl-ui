@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { FormGroup, Radio, RadioProps } from '@patternfly/react-core';
+import { FormGroup, Radio, type RadioProps } from '@patternfly/react-core';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 export interface RadioFieldProps extends Omit<RadioProps, 'onChange' | 'ref' | 'checked'> {

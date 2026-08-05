@@ -1,6 +1,6 @@
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import * as Yup from 'yup';
-import { ApiVersion, Fleet, PatchRequest } from '@flightctl/types';
+import { ApiVersion, type Fleet, type PatchRequest } from '@flightctl/types';
 import { toAPILabel } from '../../../utils/labels';
 import {
   systemdUnitListValidationSchema,
@@ -36,7 +36,7 @@ import {
   toApiApplication,
 } from '../../Device/EditDeviceWizard/deviceSpecUtils';
 import { getDisruptionBudgetValues, getRolloutPolicyValues, getUpdatePolicyValues } from './fleetSpecUtils';
-import { FleetFormValues, UpdatePolicyForm } from '../../../types/deviceSpec';
+import { type FleetFormValues, type UpdatePolicyForm } from '../../../types/deviceSpec';
 
 export const getValidationSchema = (t: TFunction) => {
   return Yup.lazy((values: FleetFormValues) =>

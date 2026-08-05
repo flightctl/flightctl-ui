@@ -3,7 +3,7 @@ import { Alert, FormGroup, Stack, StackItem, TextInput } from '@patternfly/react
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { useFormikContext } from 'formik';
 
-import { ImportResourceFormValues } from '../types';
+import { type ImportResourceFormValues } from '../types';
 import FlightCtlForm from '../../form/FlightCtlForm';
 import { useTranslation } from '../../../hooks/useTranslation';
 

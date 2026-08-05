@@ -9,7 +9,7 @@ import {
 } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { getAppTypeLabel } from '../../../utils/apps';
-import { DeviceAppLifecycleOverrides } from '../../../utils/applicationLifecycle';
+import { type DeviceAppLifecycleOverrides } from '../../../utils/applicationLifecycle';
 import { type StatusAppWithSpec, getAppsByType } from '../../../utils/vmApplications';
 import { isVmAppSpec } from '../../../types/deviceSpec';
 import { RESOURCE, VERB } from '../../../types/rbac';

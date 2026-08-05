@@ -4,7 +4,7 @@ import { PencilAltIcon } from '@patternfly/react-icons/dist/js/icons/pencil-alt-
 import { Formik, useField } from 'formik';
 import * as Yup from 'yup';
 
-import { Device, PatchRequest } from '@flightctl/types';
+import { type Device, type PatchRequest } from '@flightctl/types';
 import { useFetch } from '../../../hooks/useFetch';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { getErrorMessage } from '../../../utils/error';

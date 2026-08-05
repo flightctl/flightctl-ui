@@ -8,7 +8,7 @@ import {
   DescriptionListTerm,
 } from '@patternfly/react-core';
 
-import { Device, DeviceLastSeen } from '@flightctl/types';
+import { type Device, type DeviceLastSeen } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import DetailsPageCard from '../../../DetailsPage/DetailsPageCard';

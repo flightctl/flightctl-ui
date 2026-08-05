@@ -1,12 +1,19 @@
 import * as React from 'react';
 import { Alert, AlertActionCloseButton, Bullseye, Spinner, Stack, StackItem } from '@patternfly/react-core';
-import { CodeEditorProps as PfCodeEditorProps } from '@patternfly/react-code-editor';
+import { type CodeEditorProps as PfCodeEditorProps } from '@patternfly/react-code-editor';
 import { dump, load } from 'js-yaml';
 import { compare } from 'fast-json-patch';
 import type * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
-import { AuthProvider, Device, Fleet, PatchRequest, Repository, ResourceKind } from '@flightctl/types';
-import { ImageBuild } from '@flightctl/types/imagebuilder';
+import {
+  type AuthProvider,
+  type Device,
+  type Fleet,
+  type PatchRequest,
+  type Repository,
+  ResourceKind,
+} from '@flightctl/types';
+import { type ImageBuild } from '@flightctl/types/imagebuilder';
 import { showSpinnerBriefly } from '../../../utils/time';
 import { fromAPILabel } from '../../../utils/labels';
 import { getLabelPatches } from '../../../utils/patch';

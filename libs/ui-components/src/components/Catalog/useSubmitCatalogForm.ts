@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { load } from 'js-yaml';
-import { RJSFSchema, RJSFValidationError } from '@rjsf/utils';
+import { type RJSFSchema, type RJSFValidationError } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { getErrorMessage } from '../../utils/error';
-import { DynamicFormConfigFormik } from './InstallWizard/types';
+import { type DynamicFormConfigFormik } from './InstallWizard/types';
 
 type useSubmitProps<F> = (values: F) => Promise<void>;
 

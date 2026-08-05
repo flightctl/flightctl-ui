@@ -34,7 +34,7 @@ import {
   type CatalogItemVersion,
 } from '@flightctl/types/alpha';
 
-import { DynamicFormContext } from './DynamicForm';
+import { type DynamicFormContext } from './DynamicForm';
 import { useTranslation } from '../../hooks/useTranslation';
 import { usePermissionsContext } from '../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../types/rbac';
@@ -46,14 +46,14 @@ import {
   getDefaultChannelAndVersion,
 } from '../Catalog/CatalogItemDetails';
 import FlightCtlForm from '../form/FlightCtlForm';
-import { PaginationDetails } from '../../hooks/useTablePagination';
+import { type PaginationDetails } from '../../hooks/useTablePagination';
 import { getErrorMessage } from '../../utils/error';
 import { buildCatalogItemRef, formatCatalogItemRef } from '../../utils/catalog';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import FlightCtlModal from '../common/FlightCtlModal';
 import { InstallSpec } from '../Catalog/InstallWizard/steps/SpecificationsStep';
 import CatalogItemTitle from '../Catalog/CatalogItemTitle';
-import { InstallSpecFormik } from '../Catalog/InstallWizard/types';
+import { type InstallSpecFormik } from '../Catalog/InstallWizard/types';
 import { useCatalogItems } from '../Catalog/useCatalogItems';
 import { useResolvedCatalogRef } from '../Catalog/useResolvedCatalogRef';
 import CatalogItemCard from '../Catalog/CatalogItemCard';

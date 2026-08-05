@@ -7,7 +7,7 @@ import DeviceFleet from '../DeviceDetails/DeviceFleet';
 import { getDecommissionDisabledReason, getEditDisabledReason, getResumeDisabledReason } from '../../../utils/devices';
 import { getDeviceCapability } from '../../../utils/capabilities';
 import { getDisabledTooltipProps } from '../../../utils/tooltip';
-import { ListAction } from '../../ListPage/types';
+import { type ListAction } from '../../ListPage/types';
 import ApplicationSummaryStatus from '../../Status/ApplicationSummaryStatus';
 import DeviceStatus from '../../Status/DeviceStatus';
 import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
@@ -16,7 +16,7 @@ import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import ResourceLink from '../../common/ResourceLink';
 import OsModeContent from '../../common/OsModeContent';
 import { buildAllDropdownActions } from '../../common/ActionsDropdownList';
-import { ApiTableColumn } from '../../Table/Table';
+import { type ApiTableColumn } from '../../Table/Table';
 
 type EnrolledDeviceTableRowProps = {
   device: Device;

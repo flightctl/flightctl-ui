@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DeviceSummaryStatusType, DevicesSummary } from '@flightctl/types';
+import { DeviceSummaryStatusType, type DevicesSummary } from '@flightctl/types';
 import { useDevicesSummary } from '../components/Device/DevicesPage/useDevices';
 import { usePermissionsContext } from '../components/common/PermissionsContext';
 import { RESOURCE, VERB } from '../types/rbac';

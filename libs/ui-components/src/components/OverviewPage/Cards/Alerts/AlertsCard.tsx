@@ -11,11 +11,11 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 import { Event, ResourceKind } from '@flightctl/types';
-import { AlertManagerAlert } from '../../../../types/extraTypes';
+import { type AlertManagerAlert } from '../../../../types/extraTypes';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getDateDisplay } from '../../../../utils/dates';

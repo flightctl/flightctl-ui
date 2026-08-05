@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { EnrollmentRequestApproval } from '@flightctl/types';
+import { type EnrollmentRequestApproval } from '@flightctl/types';
 import { Alert, ModalBody, ModalHeader } from '@patternfly/react-core';
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
@@ -7,7 +7,7 @@ import { Formik } from 'formik';
 
 import { useFetch } from '../../../hooks/useFetch';
 import { getErrorMessage } from '../../../utils/error';
-import ApproveDeviceForm, { ApproveDeviceFormProps, ApproveDeviceFormValues } from './ApproveDeviceForm';
+import ApproveDeviceForm, { type ApproveDeviceFormProps, type ApproveDeviceFormValues } from './ApproveDeviceForm';
 import {
   EnrollmentRequestStatus as EnrollmentRequestStatusType,
   getApprovalStatus,

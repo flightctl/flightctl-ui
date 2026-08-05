@@ -21,7 +21,11 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 
-import { ExportFormatType, ImageBuildConditionReason, ImageExportConditionReason } from '@flightctl/types/imagebuilder';
+import {
+  type ExportFormatType,
+  ImageBuildConditionReason,
+  type ImageExportConditionReason,
+} from '@flightctl/types/imagebuilder';
 import { useTranslation } from '../../../hooks/useTranslation';
 import {
   getExportFormatLabel,
@@ -30,10 +34,10 @@ import {
   isImageBuildActiveReason,
   isImageExportActiveReason,
 } from '../../../utils/imageBuilds';
-import { ImageBuildWithExports } from '../../../types/extraTypes';
+import { type ImageBuildWithExports } from '../../../types/extraTypes';
 import { LogResourceType, useImageBuildLogs } from '../useImageBuildLogs';
 import { StatusDisplayContent } from '../../Status/StatusDisplay';
-import { StatusLevel } from '../../../utils/status/common';
+import { type StatusLevel } from '../../../utils/status/common';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 export const IMAGE_EXPORT_ID_PARAM = 'exportId';

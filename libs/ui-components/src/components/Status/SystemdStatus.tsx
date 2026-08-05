@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { StatusLevel } from '../../utils/status/common';
+import { type StatusLevel } from '../../utils/status/common';
 import { StatusDisplayContent } from './StatusDisplay';
 
 const SystemdStatus = ({ status }: { status: string | undefined }) => {

@@ -11,7 +11,7 @@ import {
 import { useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { FleetFormValues } from '../../../../types/deviceSpec';
+import { type FleetFormValues } from '../../../../types/deviceSpec';
 import LabelsView from '../../../common/LabelsView';
 import { toAPILabel } from '../../../../utils/labels';
 import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';

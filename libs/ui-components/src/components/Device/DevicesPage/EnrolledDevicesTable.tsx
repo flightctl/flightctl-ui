@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { Button, Switch, ToolbarItem } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
 import { type Device, type DeviceDecommission, DeviceDecommissionTargetType, type DeviceList } from '@flightctl/types';
 
-import { FilterStatusMap } from './types';
-import { FlightCtlLabel } from '../../../types/extraTypes';
-import { PaginationDetails } from '../../../hooks/useTablePagination';
+import { type FilterStatusMap } from './types';
+import { type FlightCtlLabel } from '../../../types/extraTypes';
+import { type PaginationDetails } from '../../../hooks/useTablePagination';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useTableSelect } from '../../../hooks/useTableSelect';
 import { usePermissionsContext } from '../../common/PermissionsContext';

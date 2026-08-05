@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Button, FormGroup, FormSection, Grid, GridItem, Split, SplitItem, Title } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import { FieldArray, FormikErrors, useField, useFormikContext } from 'formik';
+import { FieldArray, type FormikErrors, useField, useFormikContext } from 'formik';
 
 import { CatalogItemArtifactType } from '@flightctl/types/alpha';
 

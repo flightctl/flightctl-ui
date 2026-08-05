@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { PatchRequest } from '@flightctl/types';
+import { type PatchRequest } from '@flightctl/types';
 import {
   getErrorMsgFromAlertsApiResponse,
   getErrorMsgFromApiResponse,

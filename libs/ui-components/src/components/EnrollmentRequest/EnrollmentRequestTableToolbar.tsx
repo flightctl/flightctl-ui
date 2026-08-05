@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Toolbar, ToolbarContent, ToolbarGroup, ToolbarItem } from '@patternfly/react-core';
 
-import { EnrollmentRequest } from '@flightctl/types';
+import { type EnrollmentRequest } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 
-import TableTextSearch, { TableTextSearchProps } from '../Table/TableTextSearch';
+import TableTextSearch, { type TableTextSearchProps } from '../Table/TableTextSearch';
 
 type EnrollmentRequestTableToolbarProps = {
   enrollments: EnrollmentRequest[];

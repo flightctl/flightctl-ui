@@ -18,8 +18,8 @@ import { useFormikContext } from 'formik';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getErrorMessage } from '../../utils/error';
 import { getExportFormatLabel } from '../../utils/imageBuilds';
-import { ImageBuildWizardError } from './CreateImageBuildWizard/types';
-import { ImagePromotionFormValues } from '../ImagePromotion/types';
+import { type ImageBuildWizardError } from './CreateImageBuildWizard/types';
+import { type ImagePromotionFormValues } from '../ImagePromotion/types';
 
 export const ErrorAlert = ({ error }: { error: ImageBuildWizardError }) => {
   const { t } = useTranslation();

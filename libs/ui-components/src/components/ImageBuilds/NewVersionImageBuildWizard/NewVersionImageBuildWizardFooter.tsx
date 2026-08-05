@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { FormikErrors } from 'formik';
+import { type FormikErrors } from 'formik';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
 import { isNewVersionStepValid, newVersionStepId } from './steps/NewVersionStep';
 import { catalogStepId, isCatalogStepValid } from '../CreateImageBuildWizard/steps/CatalogStep';
 import { reviewStepId } from './steps/ReviewStep';
-import { NewVersionWizardFormValues } from './types';
+import { type NewVersionWizardFormValues } from './types';
 
 const validateStep = (activeStepId: string, errors: FormikErrors<NewVersionWizardFormValues>): boolean => {
   if (activeStepId === newVersionStepId) {

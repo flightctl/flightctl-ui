@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { CardBody, CardTitle } from '@patternfly/react-core';
-import { VulnerabilityList } from '@flightctl/types/alpha';
+import { type VulnerabilityList } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useVulnerabilities } from '../../../hooks/useVulnerabilities';

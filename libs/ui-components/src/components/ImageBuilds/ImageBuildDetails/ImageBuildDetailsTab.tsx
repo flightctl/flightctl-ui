@@ -19,10 +19,10 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import { TFunction, Trans } from 'react-i18next';
+import { type TFunction, Trans } from 'react-i18next';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
-import { BindingType, ImagePromotion } from '@flightctl/types/imagebuilder';
+import { BindingType, type ImagePromotion } from '@flightctl/types/imagebuilder';
 import ImagePromotionModal from '../../ImagePromotion/ImagePromotionModal';
 import ImagePromotionStatus from '../../ImagePromotion/ImagePromotionStatus';
 import { getDateDisplay } from '../../../utils/dates';
@@ -31,13 +31,13 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { useAppContext } from '../../../hooks/useAppContext';
 import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 import { CERTIFICATE_VALIDITY_IN_YEARS } from '../../../constants';
-import { ImageBuildWithExports } from '../../../types/extraTypes';
+import { type ImageBuildWithExports } from '../../../types/extraTypes';
 import { useOciRegistriesContext } from '../OciRegistriesContext';
 import { ImageBuildStatusDisplay } from '../ImageBuildAndExportStatus';
 import ImageUrl from '../ImageUrl';
 import { getErrorMessage } from '../../../utils/error';
 import Table from '../../Table/Table';
-import { ActionsColumn, IAction, Tbody, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, type IAction, Tbody, Td, Tr } from '@patternfly/react-table';
 import TablePagination from '../../Table/TablePagination';
 import { getResourceId } from '../../../utils/resource';
 import DeleteImagePromotionModal from '../../ImagePromotion/DeleteImagePromotionModal';

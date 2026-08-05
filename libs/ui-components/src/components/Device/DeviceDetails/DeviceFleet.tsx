@@ -3,8 +3,8 @@ import { Button, Icon, List, ListItem, Popover } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 
-import { ConditionType, Device } from '@flightctl/types';
-import { GenericCondition } from '../../../types/extraTypes';
+import { ConditionType, type Device } from '@flightctl/types';
+import { type GenericCondition } from '../../../types/extraTypes';
 import { getDeviceFleet } from '../../../utils/devices';
 import { getCondition } from '../../../utils/api';
 import { useTranslation } from '../../../hooks/useTranslation';

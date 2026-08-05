@@ -1,10 +1,14 @@
 import * as React from 'react';
 import { useFormikContext } from 'formik';
 import { FormGroup } from '@patternfly/react-core';
-import { TFunction, Trans } from 'react-i18next';
+import { type TFunction, Trans } from 'react-i18next';
 
-import { GitRepoSpec, HttpRepoSpec, RepoSpecType, Repository } from '@flightctl/types';
-import { DeviceSpecConfigFormValues, GitConfigTemplate, HttpConfigTemplate } from '../../../../types/deviceSpec';
+import { type GitRepoSpec, type HttpRepoSpec, RepoSpecType, type Repository } from '@flightctl/types';
+import {
+  type DeviceSpecConfigFormValues,
+  type GitConfigTemplate,
+  type HttpConfigTemplate,
+} from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import RepositorySelect from '../../../form/RepositorySelect';

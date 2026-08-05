@@ -1,20 +1,20 @@
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import * as Yup from 'yup';
 
 import {
   ApiVersion,
   BindingType,
   ExportFormatType,
-  ImageBuild,
-  ImageBuildDestination,
-  ImageBuildSource,
-  ImageBuildUserConfiguration,
-  ImageExport,
+  type ImageBuild,
+  type ImageBuildDestination,
+  type ImageBuildSource,
+  type ImageBuildUserConfiguration,
+  type ImageExport,
   ResourceKind,
 } from '@flightctl/types/imagebuilder';
 import { validImageBuildName, validateSshPublicKey } from '../../form/validations';
-import { ImageBuildFormValues } from './types';
-import { ImageBuildWithExports } from '../../../types/extraTypes';
+import { type ImageBuildFormValues } from './types';
+import { type ImageBuildWithExports } from '../../../types/extraTypes';
 import { defaultInitialValues } from '../../ImagePromotion/utils';
 import { getImagePromotionValidationSchema } from '../../ImagePromotion/utils';
 

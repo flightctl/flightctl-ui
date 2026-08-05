@@ -2,12 +2,12 @@ import * as React from 'react';
 import { Button, FormGroup, FormSection, Grid, GridItem, Split, SplitItem, Title } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import { FieldArray, FormikErrors, useFormikContext } from 'formik';
-import { TFunction } from 'i18next';
+import { FieldArray, type FormikErrors, useFormikContext } from 'formik';
+import { type TFunction } from 'i18next';
 import { CatalogItemArtifactType, CatalogItemType } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { AddCatalogItemFormValues, ArtifactFormValue, configurableAppTypes } from '../types';
+import { type AddCatalogItemFormValues, type ArtifactFormValue, configurableAppTypes } from '../types';
 import { getEmptyArtifact } from '../utils';
 import TextField from '../../../form/TextField';
 import FormSelect from '../../../form/FormSelect';

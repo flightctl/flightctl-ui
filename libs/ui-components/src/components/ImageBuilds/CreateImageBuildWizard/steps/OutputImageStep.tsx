@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Alert, Content, FormGroup, FormSection, Gallery } from '@patternfly/react-core';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type FormikErrors, useFormikContext } from 'formik';
 
 import { RepoSpecType } from '@flightctl/types';
-import { ExportFormatType } from '@flightctl/types/imagebuilder';
-import { ImageBuildFormValues } from '../types';
+import { type ExportFormatType } from '@flightctl/types/imagebuilder';
+import { type ImageBuildFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import TextField from '../../../form/TextField';

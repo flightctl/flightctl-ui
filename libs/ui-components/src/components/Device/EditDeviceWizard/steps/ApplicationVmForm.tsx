@@ -17,7 +17,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@patternfly/react-core';
-import { FormikErrors, useField, useFormikContext } from 'formik';
+import { type FormikErrors, useField, useFormikContext } from 'formik';
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { EyeIcon } from '@patternfly/react-icons/dist/js/icons/eye-icon';
 import EyeSlashIcon from '@patternfly/react-icons/dist/js/icons/eye-slash-icon';
@@ -25,7 +25,7 @@ import type * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { PUBLIC_KEY_MAX_LENGTH, validateSshPublicKey } from '../../../form/validations';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { DeviceSpecConfigFormValues, PortMapping, VmAppForm } from '../../../../types/deviceSpec';
+import { type DeviceSpecConfigFormValues, type PortMapping, type VmAppForm } from '../../../../types/deviceSpec';
 import TextField from '../../../form/TextField';
 import { DefaultHelperText } from '../../../form/FieldHelperText';
 import TextAreaField from '../../../form/TextAreaField';

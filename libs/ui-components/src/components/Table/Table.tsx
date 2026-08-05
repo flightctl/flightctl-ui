@@ -1,6 +1,14 @@
 import * as React from 'react';
 import { Button, EmptyState, EmptyStateActions, EmptyStateBody, Spinner } from '@patternfly/react-core';
-import { Table as PFTable, TableProps as PFTableProps, Td, Th, ThProps, Thead, Tr } from '@patternfly/react-table';
+import {
+  Table as PFTable,
+  type TableProps as PFTableProps,
+  Td,
+  Th,
+  type ThProps,
+  Thead,
+  Tr,
+} from '@patternfly/react-table';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons';
 
 import { useTranslation } from '../../hooks/useTranslation';

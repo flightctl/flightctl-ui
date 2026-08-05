@@ -12,7 +12,7 @@ import {
   GridItem,
 } from '@patternfly/react-core';
 
-import { Fleet, ResourceKind } from '@flightctl/types';
+import { type Fleet, ResourceKind } from '@flightctl/types';
 import LabelsView from '../../common/LabelsView';
 import { getDateDisplay } from '../../../utils/dates';
 import { getFleetRolloutStatusWarning } from '../../../utils/status/fleet';

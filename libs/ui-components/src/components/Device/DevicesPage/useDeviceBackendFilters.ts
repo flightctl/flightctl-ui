@@ -4,14 +4,14 @@ import { ApplicationsSummaryStatusType, DeviceSummaryStatusType, DeviceUpdatedSt
 import {
   DEVICE_TEXT_FILTER_KEYS,
   type DeviceOsModeFilterValue,
-  DeviceTextFilterKey,
+  type DeviceTextFilterKey,
   FilterSearchParams,
   isDeviceOsModeFilterValue,
   isValidCveIdFilterValue,
 } from '../../../utils/status/devices';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { FilterStatusMap } from './types';
-import { FlightCtlLabel } from '../../../types/extraTypes';
+import { type FilterStatusMap } from './types';
+import { type FlightCtlLabel } from '../../../types/extraTypes';
 import { labelToString } from '../../../utils/labels';
 
 const validAppStatuses = Object.values(ApplicationsSummaryStatusType) as string[];

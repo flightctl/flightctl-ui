@@ -1,5 +1,5 @@
 import { DEVICE_LOGS_STREAM_FOOTER_PREFIX } from './deviceLogCommandBuilder';
-import { DeviceLogFileErrorType, MAX_DEVICE_LOG_FILE_BYTES } from './deviceLogs';
+import { type DeviceLogFileErrorType, MAX_DEVICE_LOG_FILE_BYTES } from './deviceLogs';
 
 type DeviceLogFileProbe = {
   exists: boolean;

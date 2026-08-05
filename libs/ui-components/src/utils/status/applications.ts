@@ -1,10 +1,10 @@
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
 import {
   ApplicationStatusType as AppStatus,
   ApplicationsSummaryStatusType as AppSummaryStatus,
 } from '@flightctl/types';
-import { StatusItem } from './common';
+import { type StatusItem } from './common';
 import { ResourcesEmptyIcon } from '@patternfly/react-icons/dist/js/icons/resources-empty-icon';
 import { PausedIcon } from '@patternfly/react-icons/dist/js/icons/paused-icon';
 

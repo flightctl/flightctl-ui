@@ -13,7 +13,7 @@ import {
 } from '@patternfly/react-core';
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
-import { Fleet } from '@flightctl/types';
+import { type Fleet } from '@flightctl/types';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import { getErrorMessage } from '../../../../utils/error';

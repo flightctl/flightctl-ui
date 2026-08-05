@@ -9,7 +9,7 @@ import {
   putData,
   wsEndpoint,
 } from '../utils/apiCalls';
-import { PatchRequest } from '@flightctl/types';
+import { type PatchRequest } from '@flightctl/types';
 
 export const useFetch = () => {
   const get = React.useCallback(

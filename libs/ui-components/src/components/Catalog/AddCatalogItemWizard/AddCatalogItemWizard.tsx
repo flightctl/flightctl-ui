@@ -9,10 +9,10 @@ import {
   Title,
   Wizard,
   WizardStep,
-  WizardStepType,
+  type WizardStepType,
 } from '@patternfly/react-core';
-import { CatalogItem } from '@flightctl/types/alpha';
-import { Formik, FormikErrors } from 'formik';
+import { type CatalogItem } from '@flightctl/types/alpha';
+import { Formik, type FormikErrors } from 'formik';
 
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useFetch } from '../../../hooks/useFetch';
@@ -30,7 +30,7 @@ import {
   getValidationSchema,
 } from './utils';
 import { isWizardStepDisabled } from '../../../utils/wizards';
-import { AddCatalogItemFormValues } from './types';
+import { type AddCatalogItemFormValues } from './types';
 import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';

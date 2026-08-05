@@ -1,4 +1,4 @@
-import { Duration } from '@flightctl/types';
+import { type Duration } from '@flightctl/types';
 
 export const formatTimePart = (val: number | string) => val.toString().padStart(2, '0');
 

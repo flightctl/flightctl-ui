@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Alert, AlertActionCloseButton, PageSection, Stack, StackItem } from '@patternfly/react-core';
 import { Trans } from 'react-i18next';
 
-import { ConditionType, ResourceSync, ResourceSyncList } from '@flightctl/types';
+import { ConditionType, type ResourceSync, type ResourceSyncList } from '@flightctl/types';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';

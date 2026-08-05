@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { Formik, FormikProps } from 'formik';
+import { Formik, type FormikProps } from 'formik';
 import { Alert } from '@patternfly/react-core';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import * as Yup from 'yup';
 
-import { Device } from '@flightctl/types';
+import { type Device } from '@flightctl/types';
 import LabelsField from '../../form/LabelsField';
 import FlightCtlForm from '../../form/FlightCtlForm';
-import { FlightCtlLabel } from '../../../types/extraTypes';
+import { type FlightCtlLabel } from '../../../types/extraTypes';
 import { useFetch } from '../../../hooks/useFetch';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { fromAPILabel } from '../../../utils/labels';

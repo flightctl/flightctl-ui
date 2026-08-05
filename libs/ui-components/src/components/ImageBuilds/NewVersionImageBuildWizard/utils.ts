@@ -1,19 +1,19 @@
-import { ApiVersion, CatalogItem } from '@flightctl/types/alpha';
+import { ApiVersion, type CatalogItem } from '@flightctl/types/alpha';
 import {
   ExistingCatalogItemTarget,
-  ImagePromotion,
+  type ImagePromotion,
   NewCatalogItemTarget,
   ResourceKind,
 } from '@flightctl/types/imagebuilder';
 import semver from 'semver';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import * as Yup from 'yup';
 
 import { validImageBuildName } from '../../form/validations';
 import { getImageTagValidationError } from '../CreateImageBuildWizard/utils';
 import { defaultInitialValues, getImagePromotionValidationSchema } from '../../ImagePromotion/utils';
-import { ImagePromotionFormValues } from '../../ImagePromotion/types';
-import { NewVersionWizardFormValues } from './types';
+import { type ImagePromotionFormValues } from '../../ImagePromotion/types';
+import { type NewVersionWizardFormValues } from './types';
 
 const TESTING_CHANNEL = 'testing';
 

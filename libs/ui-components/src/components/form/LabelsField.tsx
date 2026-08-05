@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useField } from 'formik';
 import { Label, LabelGroup } from '@patternfly/react-core';
 
-import { FlightCtlLabel } from '../../types/extraTypes';
+import { type FlightCtlLabel } from '../../types/extraTypes';
 import EditableLabelControl from '../common/EditableLabelControl';
 import LabelsView from '../common/LabelsView';
 import { toAPILabel } from '../../utils/labels';

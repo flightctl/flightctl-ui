@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useDebounce } from 'use-debounce';
 
-import { Fleet, FleetList } from '@flightctl/types';
+import { type Fleet, type FleetList } from '@flightctl/types';
 import { useAppContext } from '../../hooks/useAppContext';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
+import { type PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
 import { PAGE_SIZE } from '../../constants';
 
 export enum FleetSearchParams {

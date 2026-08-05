@@ -1,4 +1,4 @@
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons/power-off-icon';
 import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-circle-icon';
 import { BanIcon } from '@patternfly/react-icons/dist/js/icons/ban-icon';
@@ -7,16 +7,16 @@ import suspendedColor from '@patternfly/react-tokens/dist/js/t_color_orange_40';
 import pendingSyncColor from '@patternfly/react-tokens/dist/js/t_global_color_status_info_200';
 
 import {
-  ApplicationsSummaryStatusType,
-  DeviceSummaryStatus as BEDeviceSummaryStatus,
-  Device,
-  DeviceIntegrityStatusSummaryType,
+  type ApplicationsSummaryStatusType,
+  type DeviceSummaryStatus as BEDeviceSummaryStatus,
+  type Device,
+  type DeviceIntegrityStatusSummaryType,
   DeviceLifecycleStatusType,
   DeviceSummaryStatusType,
-  DeviceUpdatedStatusType,
+  type DeviceUpdatedStatusType,
   OsModeType,
 } from '@flightctl/types';
-import { StatusItem } from './common';
+import { type StatusItem } from './common';
 
 export enum FilterSearchParams {
   Fleet = 'fleetId',

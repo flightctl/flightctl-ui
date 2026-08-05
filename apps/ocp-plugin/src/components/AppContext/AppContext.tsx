@@ -1,10 +1,10 @@
 import * as React from 'react';
 import {
   AppContext,
-  AppContextProps,
+  type AppContextProps,
   FlightCtlApp,
-  NavLinkFC,
-  PromptFC,
+  type NavLinkFC,
+  type PromptFC,
 } from '@flightctl/ui-components/src/hooks/useAppContext';
 import { ROUTE } from '@flightctl/ui-components/src/hooks/useNavigate';
 import {

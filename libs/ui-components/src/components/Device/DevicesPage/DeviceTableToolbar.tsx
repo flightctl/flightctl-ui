@@ -18,7 +18,7 @@ import {
   DEVICE_OS_MODE_FILTER_VALUES,
   DEVICE_TEXT_FILTER_KEYS,
   type DeviceOsModeFilterValue,
-  DeviceTextFilterKey,
+  type DeviceTextFilterKey,
   getDeviceFilterLabel,
   getOsModeFilterLabel,
 } from '../../../utils/status/devices';

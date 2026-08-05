@@ -8,7 +8,7 @@ import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
 import UploadField from '../../../form/UploadField';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { AppSpecType, HelmAppForm } from '../../../../types/deviceSpec';
+import { AppSpecType, type HelmAppForm } from '../../../../types/deviceSpec';
 import ApplicationImageForm from './ApplicationImageForm';
 
 const ApplicationHelmForm = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {

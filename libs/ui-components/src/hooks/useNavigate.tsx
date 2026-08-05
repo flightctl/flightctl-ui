@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { LinkProps as RouterLinkProps } from 'react-router-dom';
+import { type LinkProps as RouterLinkProps } from 'react-router-dom';
 import { useAppContext } from './useAppContext';
 
 export interface NavigateFunction {

@@ -28,7 +28,7 @@ import { MinusCircleIcon, OutlinedQuestionCircleIcon, PlusCircleIcon } from '@pa
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
-import { RepositoryFormValues } from './types';
+import { type RepositoryFormValues } from './types';
 import CreateResourceSyncsForm from './CreateResourceSyncsForm';
 
 import {
@@ -41,7 +41,7 @@ import {
   handlePromises,
   repositorySchema,
 } from './utils';
-import { OciRepoSpec, RepoSpecType, Repository, ResourceSync } from '@flightctl/types';
+import { OciRepoSpec, RepoSpecType, type Repository, type ResourceSync } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import LabelWithHelperText, { FormGroupWithHelperText } from '../../common/WithHelperText';

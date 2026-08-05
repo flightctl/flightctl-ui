@@ -1,6 +1,6 @@
 import { getResourceId } from '../utils/resource';
-import { OnSelect } from '@patternfly/react-table';
-import { ObjectMeta } from '@flightctl/types';
+import { type OnSelect } from '@patternfly/react-table';
+import { type ObjectMeta } from '@flightctl/types';
 import * as React from 'react';
 
 export const useTableSelect = <R extends { kind: string; metadata: ObjectMeta }>() => {

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { ImagePromotion } from '@flightctl/types/imagebuilder';
+import { type ImagePromotion } from '@flightctl/types/imagebuilder';
 import { useTranslation } from '../../hooks/useTranslation';
 import { StatusDisplayContent } from '../Status/StatusDisplay';
 import { getImagePromotionStatus } from '../../utils/status/imagePromotion';

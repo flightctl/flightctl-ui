@@ -1,11 +1,11 @@
 import {
-  BindingType,
-  ImageBuildDestination,
-  ImageBuildSource,
-  ImageBuildUserConfiguration,
+  type BindingType,
+  type ImageBuildDestination,
+  type ImageBuildSource,
+  type ImageBuildUserConfiguration,
 } from '@flightctl/types/imagebuilder';
-import { ExportFormatType } from '@flightctl/types/imagebuilder';
-import { CatalogStepValues } from './steps/CatalogStep';
+import { type ExportFormatType } from '@flightctl/types/imagebuilder';
+import { type CatalogStepValues } from './steps/CatalogStep';
 
 export type ImageBuildFormValues = CatalogStepValues & {
   buildName: string;

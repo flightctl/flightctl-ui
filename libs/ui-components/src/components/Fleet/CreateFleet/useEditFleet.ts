@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useFetch } from '../../../hooks/useFetch';
-import { Fleet } from '@flightctl/types';
+import { type Fleet } from '@flightctl/types';
 
 export const useEditFleet = (): [string | undefined, Fleet | undefined, boolean, unknown] => {
   const {

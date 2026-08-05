@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import { ApplicationPort } from '@flightctl/types';
+import { type ApplicationPort } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { toFormPortMappingWithProtocol } from '../Device/EditDeviceWizard/deviceSpecUtils';
 

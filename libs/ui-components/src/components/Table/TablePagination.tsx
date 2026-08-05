@@ -3,9 +3,9 @@ import { Trans } from 'react-i18next';
 import { Pagination, PaginationVariant, Spinner } from '@patternfly/react-core';
 
 import { PAGE_SIZE } from '../../constants';
-import { PaginationDetails } from '../../hooks/useTablePagination';
+import { type PaginationDetails } from '../../hooks/useTablePagination';
 import { useTranslation } from '../../hooks/useTranslation';
-import { ApiList } from '../../utils/api';
+import { type ApiList } from '../../utils/api';
 
 const PaginationTemplate = ({
   currentPage,

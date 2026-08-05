@@ -1,24 +1,24 @@
 import {
   AppType,
-  ApplicationProviderSpec,
-  CatalogItemRefSpec,
-  ComposeApplication,
-  ConfigProviderSpec,
-  ContainerApplication,
-  DisruptionBudget,
-  GitConfigProviderSpec,
-  HelmApplication,
-  HttpConfigProviderSpec,
-  ImageApplicationProviderSpec,
-  ImageOrCatalogItemRefSpec,
-  InlineApplicationProviderSpec,
-  InlineConfigProviderSpec,
-  KubernetesSecretProviderSpec,
-  QuadletApplication,
+  type ApplicationProviderSpec,
+  type CatalogItemRefSpec,
+  type ComposeApplication,
+  type ConfigProviderSpec,
+  type ContainerApplication,
+  type DisruptionBudget,
+  type GitConfigProviderSpec,
+  type HelmApplication,
+  type HttpConfigProviderSpec,
+  type ImageApplicationProviderSpec,
+  type ImageOrCatalogItemRefSpec,
+  type InlineApplicationProviderSpec,
+  type InlineConfigProviderSpec,
+  type KubernetesSecretProviderSpec,
+  type QuadletApplication,
   type VmApplication,
 } from '@flightctl/types';
-import { FlightCtlLabel } from './extraTypes';
-import { UpdateScheduleMode } from '../utils/time';
+import { type FlightCtlLabel } from './extraTypes';
+import { type UpdateScheduleMode } from '../utils/time';
 import { formatCatalogItemRef } from '../utils/catalog';
 import type { ApplicationVolumeForm } from '../utils/volumes';
 

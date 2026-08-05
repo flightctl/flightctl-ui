@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Alert, FormGroup, Grid, GridItem, Spinner, Title } from '@patternfly/react-core';
-import { FormikErrors, useFormikContext } from 'formik';
-import { CatalogList } from '@flightctl/types/alpha';
+import { type FormikErrors, useFormikContext } from 'formik';
+import { type CatalogList } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { AddCatalogItemFormValues } from '../types';
+import { type AddCatalogItemFormValues } from '../types';
 import NameField from '../../../form/NameField';
 import { getDnsSubdomainValidations } from '../../../form/validations';
 import TextField from '../../../form/TextField';
@@ -12,7 +12,7 @@ import TextAreaField from '../../../form/TextAreaField';
 import IconUploadField from '../../../form/IconUploadField';
 import CheckboxField from '../../../form/CheckboxField';
 import FlightCtlForm from '../../../form/FlightCtlForm';
-import FormSelect, { SelectItem } from '../../../form/FormSelect';
+import FormSelect, { type SelectItem } from '../../../form/FormSelect';
 import CreateCatalogModal from '../CreateCatalogModal';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';
