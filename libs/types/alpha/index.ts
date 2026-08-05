@@ -11,6 +11,8 @@ export type { CatalogItemArtifact } from './models/CatalogItemArtifact';
 export { CatalogItemArtifactType } from './models/CatalogItemArtifactType';
 export { CatalogItemCategory } from './models/CatalogItemCategory';
 export type { CatalogItemConfigurable } from './models/CatalogItemConfigurable';
+export type { CatalogItemDeployment } from './models/CatalogItemDeployment';
+export type { CatalogItemDeploymentList } from './models/CatalogItemDeploymentList';
 export type { CatalogItemDeprecation } from './models/CatalogItemDeprecation';
 export type { CatalogItemList } from './models/CatalogItemList';
 export type { CatalogItemMeta } from './models/CatalogItemMeta';

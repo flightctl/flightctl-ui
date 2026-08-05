@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Alert, CardBody, CardTitle, Divider, Spinner, Stack, StackItem } from '@patternfly/react-core';
 
-import type { Device, Fleet } from '@flightctl/types';
+import type { Device, Fleet, ImageOrCatalogItemRefSpec } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useDeviceOwnerFleet } from '../../../../hooks/useDeviceOwnerFleet';
 import { hasPackageModeCapability } from '../../../../utils/capabilities';
@@ -32,12 +32,12 @@ const DevicePackageModeOsImage = () => {
 
 const DeviceRunningOsImage = ({
   ownerFleetError,
-  specOsImage,
+  osSpec,
   statusOsImage,
 }: {
   ownerFleetError: boolean;
   statusOsImage: string | undefined;
-  specOsImage: string | undefined;
+  osSpec: ImageOrCatalogItemRefSpec | undefined;
 }) => {
   const { t } = useTranslation();
 
@@ -54,7 +54,7 @@ const DeviceRunningOsImage = ({
 
         <StackItem className="pf-v6-u-text-color-subtle">{t('System image (running)')}</StackItem>
         <StackItem>
-          <DeviceOs desiredOsImage={specOsImage} renderedOsImage={statusOsImage} />
+          <DeviceOs osSpec={osSpec} renderedOsImage={statusOsImage} />
         </StackItem>
       </Stack>
     </CardBody>
@@ -70,11 +70,12 @@ const DeviceOsImageCard = ({
   ownerFleet?: Fleet;
   ownerFleetError: unknown;
 }) => {
-  const deviceSpec = ownerFleet?.spec?.template?.spec || device.spec;
+  const osSpec = ownerFleet?.spec?.template?.spec?.os || device.spec?.os;
+  const hasImageInSpec = osSpec?.image || osSpec?.catalogItemRef;
   const isPackageMode = hasPackageModeCapability(device);
 
   const showPackageModeInfo = isPackageMode && !ownerFleetError;
-  if (showPackageModeInfo && !deviceSpec?.os?.image) {
+  if (showPackageModeInfo && !hasImageInSpec) {
     // There is no conflict since the device can fully satisfy its fleet spec
     return null;
   }
@@ -87,7 +88,7 @@ const DeviceOsImageCard = ({
     content = (
       <DeviceRunningOsImage
         ownerFleetError={!!ownerFleetError}
-        specOsImage={deviceSpec?.os?.image}
+        osSpec={osSpec}
         statusOsImage={device.status?.os?.image}
       />
     );

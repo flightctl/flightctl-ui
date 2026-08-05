@@ -14,7 +14,7 @@ import FormSelect from '../../../form/FormSelect';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import UploadField from '../../../form/UploadField';
-import { getArtifactLabel, getCatalogItemBadge } from '../../utils';
+import { getArtifactLabel, getCatalogItemBadge } from '../../../../utils/catalog';
 
 export const typeConfigStepId = 'type-config';
 
@@ -23,6 +23,12 @@ export const isTypeConfigStepValid = (errors: FormikErrors<AddCatalogItemFormVal
     !errors.type && !errors.artifacts && !errors.containerUri && !errors.defaultConfig && !errors.defaultConfigSchema
   );
 };
+
+const artifactTypes = Object.values(CatalogItemArtifactType).map((artifactType) => ({
+  type: artifactType,
+  name: '',
+  uri: '',
+}));
 
 const catalogItemTypeLabels = (
   t: TFunction,
@@ -38,8 +44,8 @@ const catalogItemTypeLabels = (
   [CatalogItemType.CatalogItemTypeData]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeData, t),
 });
 
-const getArtifactTitle = (artifact: ArtifactFormValue, index: number, t: ReturnType<typeof useTranslation>['t']) => {
-  const typeLabel = artifact.type ? getArtifactLabel(t, artifact.type, artifact.name) : artifact.name;
+const getArtifactTitle = (artifact: ArtifactFormValue, index: number, t: TFunction) => {
+  const typeLabel = getArtifactLabel(t, artifact);
   return typeLabel || t('Artifact {{ num }}', { num: index + 1 });
 };
 
@@ -118,8 +124,8 @@ const TypeConfigStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?:
                             <FormGroup label={t('Type')} isRequired>
                               <FormSelect
                                 name={`artifacts.${index}.type`}
-                                items={Object.values(CatalogItemArtifactType).reduce((acc, curr) => {
-                                  acc[curr] = getArtifactLabel(t, curr);
+                                items={artifactTypes.reduce((acc, artifact) => {
+                                  acc[artifact.type] = getArtifactLabel(t, artifact);
                                   return acc;
                                 }, {})}
                                 placeholderText={t('Select a type')}

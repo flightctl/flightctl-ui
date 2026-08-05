@@ -12,6 +12,7 @@ import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import FleetDevicesCount from './FleetDetails/FleetDevicesCount';
 import { FleetOwnerLinkIcon } from './FleetDetails/FleetOwnerLink';
 import FleetStatus from './FleetStatus';
+import { SystemImageDisplay } from '../Device/EditDeviceWizard/SystemImageDescriptionGroup';
 
 type FleetRowProps = {
   fleet: Fleet;
@@ -81,7 +82,9 @@ const FleetRow: React.FC<FleetRowProps> = ({
       ]
     : [];
   const actions = buildAllDropdownActions(regularActions, dangerActions);
-  const fleetRolloutError = getFleetRolloutStatusWarning(fleet, t);
+
+  // For the fleet list, we don't resolve the osImage for catalog item refs (to prevent performing an excessive amount of API calls)
+  const fleetOsSpec = fleet.spec.template.spec.os;
 
   return (
     <Tr>
@@ -99,12 +102,14 @@ const FleetRow: React.FC<FleetRowProps> = ({
           <ResourceLink id={fleetName} routeLink={ROUTE.FLEET_DETAILS} data-testid={`fleet-name-link-${fleetName}`} />
         </FleetOwnerLinkIcon>
       </Td>
-      <Td dataLabel={t('System image')}>{fleet.spec.template.spec.os?.image || '-'}</Td>
+      <Td dataLabel={t('System image')}>
+        <SystemImageDisplay catalogItemRef={fleetOsSpec?.catalogItemRef} imageUri={fleetOsSpec?.image} />
+      </Td>
       <Td dataLabel={t('Up-to-date/devices')}>
         <FleetDevicesCount
           fleetId={fleetName}
           devicesSummary={fleet.status?.devicesSummary}
-          error={fleetRolloutError}
+          error={getFleetRolloutStatusWarning(fleet, t)}
         />
       </Td>
       <Td dataLabel={t('Status')} data-testid={`fleet-row-status-${fleetName}`}>

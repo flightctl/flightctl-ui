@@ -1,4 +1,4 @@
-import { Catalog, CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
+import * as React from 'react';
 import {
   Alert,
   Button,
@@ -22,27 +22,30 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
-import * as React from 'react';
 import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 import { Formik, useFormikContext } from 'formik';
 import { ActionsColumn, IAction } from '@patternfly/react-table';
 
+import { type Catalog, type CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
+import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
-import { InstallSpec } from './InstallWizard/steps/SpecificationsStep';
+import { useItemIsInUse } from './useCatalogItems';
 import FlightCtlForm from '../form/FlightCtlForm';
 import { DeprecateModal, RestoreModal } from './DeprecateModal';
-import { getCatalogItemIcon, getFullContainerURI } from './utils';
+import { getCatalogItemIcon, getFullContainerURI } from '../../utils/catalog';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
-import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import WithTooltip from '../common/WithTooltip';
 import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import FlightCtlPageDrawer from '../common/FlightCtlPageDrawer';
+import { InstallSpec } from './InstallWizard/steps/SpecificationsStep';
 import { InstallSpecFormik } from './InstallWizard/types';
 
 import './CatalogItemDetails.css';
+
+type CatalogItemActions = 'deprecate' | 'restore' | 'delete';
 
 type CatalogItemDetailsPanelProps = {
   item: CatalogItem;
@@ -81,6 +84,163 @@ export const CatalogItemDetailsHeader = ({ item }: CatalogItemDetailsHeaderProps
   );
 };
 
+type CatalogItemDetailsModalProps = {
+  item: CatalogItem;
+  itemModalOpen: CatalogItemActions | undefined;
+  setItemModalOpen: (itemModalOpen: CatalogItemActions | undefined) => void;
+  refetch: VoidFunction;
+  onClose: VoidFunction;
+};
+
+const CatalogItemDetailsModal = ({
+  item,
+  itemModalOpen,
+  setItemModalOpen,
+  refetch,
+  onClose,
+}: CatalogItemDetailsModalProps) => {
+  const { t } = useTranslation();
+  const { patch, remove } = useFetch();
+
+  const displayName = item.spec.displayName || (item.metadata.name as string);
+  const itemEndpoint = `catalogs/${item.metadata.catalog}/items/${item.metadata.name}`;
+
+  switch (itemModalOpen) {
+    case 'deprecate':
+      return (
+        <DeprecateModal
+          itemName={displayName}
+          onClose={() => setItemModalOpen(undefined)}
+          onDeprecate={async (message) => {
+            const isDeprecated = !!item.spec.deprecation;
+            await patch(itemEndpoint, [
+              {
+                op: isDeprecated ? 'replace' : 'add',
+                path: '/spec/deprecation',
+                value: { message },
+              },
+            ]);
+            refetch();
+            setItemModalOpen(undefined);
+          }}
+        />
+      );
+    case 'restore':
+      return (
+        <RestoreModal
+          itemName={displayName}
+          onClose={() => setItemModalOpen(undefined)}
+          onRestore={async () => {
+            await patch(itemEndpoint, [
+              {
+                op: 'remove',
+                path: '/spec/deprecation',
+              },
+            ]);
+            refetch();
+            setItemModalOpen(undefined);
+          }}
+        />
+      );
+    case 'delete':
+      return (
+        <DeleteModal
+          resourceName={displayName}
+          resourceType={t('catalog item')}
+          onClose={() => setItemModalOpen(undefined)}
+          onDelete={async () => {
+            await remove(itemEndpoint);
+            setItemModalOpen(undefined);
+            refetch();
+            onClose();
+          }}
+        />
+      );
+  }
+
+  return null;
+};
+
+const isSafeHttpUrl = (value: string): boolean => {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+const CatalogItemPanelLink = ({ link }: { link: string | undefined }) => {
+  const { t } = useTranslation();
+  if (!link) {
+    return t('N/A');
+  }
+  if (!isSafeHttpUrl(link)) {
+    return link;
+  }
+  return (
+    <Button component="a" variant="link" href={link} isInline target="_blank" rel="noopener noreferrer">
+      {link}
+    </Button>
+  );
+};
+
+type CatalogItemDeployButtonProps = {
+  item: CatalogItem;
+  canInstall: boolean;
+  targetHasOwner?: boolean;
+  targetSet: boolean;
+};
+
+const CatalogItemDeployButton = ({ item, canInstall, targetHasOwner, targetSet }: CatalogItemDeployButtonProps) => {
+  const { t } = useTranslation();
+  const {
+    submitForm,
+    values: { version, channel },
+  } = useFormikContext<InstallSpecFormik>();
+
+  const disabledReasons: string[] = [];
+  if (targetHasOwner) {
+    disabledReasons.push(t('This resource is managed by an owner and cannot be modified directly'));
+  } else if (!canInstall) {
+    disabledReasons.push(t('You do not have permission to deploy'));
+  }
+  if (!channel) {
+    disabledReasons.push(t('A channel must be selected'));
+  }
+  if (!version) {
+    disabledReasons.push(t('A version must be selected'));
+  }
+
+  const catalogItemVersion = item.spec.versions.find((v) => v.version === version);
+  if (catalogItemVersion) {
+    // if target is given (fleet/device) or App catalog item is chosen, it must have container ref
+    if (
+      (targetSet || item.spec.type !== CatalogItemType.CatalogItemTypeOS) &&
+      !getFullContainerURI(item.spec.artifacts, catalogItemVersion)
+    ) {
+      disabledReasons.push(t('This catalog item does not have a deployable artifact'));
+    }
+  }
+
+  return (
+    <WithTooltip
+      showTooltip={!!disabledReasons.length}
+      content={
+        <Stack>
+          {disabledReasons.map((reason, index) => (
+            <StackItem key={index}>{reason}</StackItem>
+          ))}
+        </Stack>
+      }
+    >
+      <Button onClick={submitForm} isAriaDisabled={!!disabledReasons.length}>
+        {t('Deploy')}
+      </Button>
+    </WithTooltip>
+  );
+};
+
 const CatalogItemDetailsPanel = ({
   item,
   onClose,
@@ -92,46 +252,24 @@ const CatalogItemDetailsPanel = ({
 }: CatalogItemDetailsPanelProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { patch, remove } = useFetch();
-  const [isDeprecateModalOpen, setIsDeprecateModalOpen] = React.useState(false);
-  const [isRestoreModalOpen, setIsRestoreModalOpen] = React.useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+
+  const [itemModalOpen, setItemModalOpen] = React.useState<CatalogItemActions | undefined>(undefined);
+  const isInUse = useItemIsInUse(item);
 
   const isDeprecated = !!item.spec.deprecation;
-
-  const {
-    values: { version, channel },
-    submitForm,
-  } = useFormikContext<InstallSpecFormik>();
-
-  const deployDisabledReasons: string[] = [];
-  if (targetHasOwner) {
-    deployDisabledReasons.push(t('This resource is managed by an owner and cannot be modified directly'));
-  } else if (!canInstall) {
-    deployDisabledReasons.push(t('You do not have permission to deploy'));
-  }
-  if (!channel) {
-    deployDisabledReasons.push(t('A channel must be selected'));
-  }
-  if (!version) {
-    deployDisabledReasons.push(t('A version must be selected'));
-  }
-
-  const catalogItemVersion = item.spec.versions.find((v) => v.version === version);
-  if (catalogItemVersion) {
-    // if target is given (fleet/device) or App catalog item is chosen, it must have container ref
-    if (
-      (targetSet || item.spec.type !== CatalogItemType.CatalogItemTypeOS) &&
-      !getFullContainerURI(item.spec.artifacts, catalogItemVersion)
-    ) {
-      deployDisabledReasons.push('This catalog item does not have a deployable artifact');
-    }
-  }
-
   const isManaged = !!item.metadata.owner;
+  const managedActionDisabledReason = isManaged
+    ? {
+        content: t(
+          "This catalog item is managed by a resource sync and cannot be modified directly. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
+        ),
+      }
+    : undefined;
 
-  const regularActions: IAction[] = [
-    {
+  const regularActions: IAction[] = [];
+  const dangerActions: IAction[] = [];
+  if (showCatalogMgmt) {
+    regularActions.push({
       title: isManaged ? t('View') : t('Edit'),
       onClick: () => {
         navigate({
@@ -139,145 +277,93 @@ const CatalogItemDetailsPanel = ({
           postfix: `${item.metadata.catalog}/${item.metadata.name}`,
         });
       },
-    },
-    isDeprecated
-      ? {
-          title: t('Restore'),
-          onClick: () => setIsRestoreModalOpen(true),
-          tooltipProps: isManaged
-            ? {
-                content: t(
-                  "This catalog item is managed by a resource sync and cannot be directly restored. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
-                ),
-              }
-            : undefined,
-          isAriaDisabled: isManaged,
-        }
-      : {
-          title: t('Deprecate'),
-          onClick: () => setIsDeprecateModalOpen(true),
-          tooltipProps: isManaged
-            ? {
-                content: t(
-                  "This catalog item is managed by a resource sync and cannot be directly deprecated. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
-                ),
-              }
-            : undefined,
-          isAriaDisabled: isManaged,
-        },
-  ];
-  const dangerActions: IAction[] = [
-    {
-      title: t('Delete'),
-      onClick: () => setIsDeleteModalOpen(true),
-      tooltipProps: isManaged
-        ? {
-            content: t(
-              "This catalog item is managed by a resource sync and cannot be directly deleted. Either remove this catalog's definition from the resource sync configuration, or delete the resource sync first.",
-            ),
-          }
-        : undefined,
-      isAriaDisabled: isManaged,
-    },
-  ];
-  const catalogItemActions = buildAllDropdownActions(regularActions, dangerActions);
+    });
+    if (isDeprecated) {
+      regularActions.push({
+        title: t('Restore'),
+        onClick: () => setItemModalOpen('restore'),
+        tooltipProps: managedActionDisabledReason,
+        isAriaDisabled: !!managedActionDisabledReason,
+      });
+    } else {
+      regularActions.push({
+        title: t('Deprecate'),
+        onClick: () => setItemModalOpen('deprecate'),
+        tooltipProps: managedActionDisabledReason,
+        isAriaDisabled: !!managedActionDisabledReason,
+      });
+    }
 
-  const panelContent = (
-    <>
-      <DrawerHead>
-        <CatalogItemDetailsHeader item={item} />
-        <DrawerActions>
-          {showCatalogMgmt && <ActionsColumn items={catalogItemActions} />}
-          <DrawerCloseButton onClose={onClose} />
-        </DrawerActions>
-      </DrawerHead>
-      <DrawerPanelBody>
-        <Stack hasGutter>
-          <StackItem>
-            <FlightCtlForm>
-              <InstallSpec catalogItem={item} hideReadmeLink />
-            </FlightCtlForm>
-          </StackItem>
-          {item.spec.type === CatalogItemType.CatalogItemTypeData ? (
-            <Alert variant="info" isInline title={t('Data catalog item can be deployed as part of an application.')} />
-          ) : (
-            <StackItem>
-              <WithTooltip
-                showTooltip={!!deployDisabledReasons.length}
-                content={
-                  <Stack>
-                    {deployDisabledReasons.map((reason, index) => (
-                      <StackItem key={index}>{reason}</StackItem>
-                    ))}
-                  </Stack>
-                }
-              >
-                <Button onClick={submitForm} isAriaDisabled={!!deployDisabledReasons.length}>
-                  {t('Deploy')}
-                </Button>
-              </WithTooltip>
-            </StackItem>
-          )}
-          <StackItem>
-            <Divider />
-          </StackItem>
-          <StackItem>
-            <CatalogItemDetailsContent item={item} />
-          </StackItem>
-        </Stack>
-      </DrawerPanelBody>
-    </>
-  );
+    // Adding delete action
+    let disabledProps = managedActionDisabledReason;
+    const isDisabled = isManaged || isInUse;
+    if (!disabledProps && isInUse) {
+      disabledProps = { content: t('This catalog item is being used in at least one fleet or device.') };
+    }
+    dangerActions.push({
+      title: t('Delete'),
+      onClick: () => setItemModalOpen('delete'),
+      tooltipProps: disabledProps,
+      isAriaDisabled: isDisabled,
+    });
+  }
+
+  const catalogItemActions = buildAllDropdownActions(regularActions, dangerActions);
 
   return (
     <>
-      <FlightCtlPageDrawer isExpanded panelContent={panelContent} />
-      {isDeprecateModalOpen && (
-        <DeprecateModal
-          itemName={item.spec.displayName || item.metadata.name || ''}
-          onClose={() => setIsDeprecateModalOpen(false)}
-          onDeprecate={async (message) => {
-            await patch(`catalogs/${item.metadata.catalog}/items/${item.metadata.name}`, [
-              {
-                op: isDeprecated ? 'replace' : 'add',
-                path: '/spec/deprecation',
-                value: { message },
-              },
-            ]);
-            refetch();
-            setIsDeprecateModalOpen(false);
-          }}
-        />
-      )}
-      {isRestoreModalOpen && (
-        <RestoreModal
-          itemName={item.spec.displayName || item.metadata.name || ''}
-          onClose={() => setIsRestoreModalOpen(false)}
-          onRestore={async () => {
-            await patch(`catalogs/${item.metadata.catalog}/items/${item.metadata.name}`, [
-              {
-                op: 'remove',
-                path: '/spec/deprecation',
-              },
-            ]);
-            refetch();
-            setIsRestoreModalOpen(false);
-          }}
-        />
-      )}
-      {isDeleteModalOpen && (
-        <DeleteModal
-          resourceName={item.spec.displayName || item.metadata.name || ''}
-          resourceType={t('catalog item')}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onDelete={async () => {
-            await remove(`catalogs/${item.metadata.catalog}/items/${item.metadata.name}`);
-            refetch();
-            setIsDeleteModalOpen(false);
-            onClose();
-          }}
-        />
-      )}
+      <FlightCtlPageDrawer
+        isExpanded
+        panelContent={
+          <>
+            <DrawerHead>
+              <CatalogItemDetailsHeader item={item} />
+              <DrawerActions>
+                {catalogItemActions.length > 0 && <ActionsColumn items={catalogItemActions} />}
+                <DrawerCloseButton onClose={onClose} />
+              </DrawerActions>
+            </DrawerHead>
+            <DrawerPanelBody>
+              <Stack hasGutter>
+                <StackItem>
+                  <FlightCtlForm>
+                    <InstallSpec catalogItem={item} hideReadmeLink />
+                  </FlightCtlForm>
+                </StackItem>
+                {item.spec.type === CatalogItemType.CatalogItemTypeData ? (
+                  <Alert
+                    variant="info"
+                    isInline
+                    title={t('Data catalog item can be deployed as part of an application.')}
+                  />
+                ) : (
+                  <StackItem>
+                    <CatalogItemDeployButton
+                      item={item}
+                      canInstall={canInstall}
+                      targetHasOwner={targetHasOwner}
+                      targetSet={targetSet}
+                    />
+                  </StackItem>
+                )}
+                <StackItem>
+                  <Divider />
+                </StackItem>
+                <StackItem>
+                  <CatalogItemDetailsContent item={item} />
+                </StackItem>
+              </Stack>
+            </DrawerPanelBody>
+          </>
+        }
+      />
+      <CatalogItemDetailsModal
+        item={item}
+        itemModalOpen={itemModalOpen}
+        setItemModalOpen={setItemModalOpen}
+        refetch={refetch}
+        onClose={onClose}
+      />
     </>
   );
 };
@@ -318,37 +404,19 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Documentation URL')}</DescriptionListTerm>
             <DescriptionListDescription className="fctl-catalog-item-details">
-              {item.spec.documentationUrl ? (
-                <Button variant="link" href={item.spec.documentationUrl} isInline>
-                  {item.spec.documentationUrl}
-                </Button>
-              ) : (
-                t('N/A')
-              )}
+              <CatalogItemPanelLink link={item.spec.documentationUrl} />
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Support URL')}</DescriptionListTerm>
             <DescriptionListDescription className="fctl-catalog-item-details">
-              {item.spec.support ? (
-                <Button variant="link" href={item.spec.support} isInline>
-                  {item.spec.support}
-                </Button>
-              ) : (
-                t('N/A')
-              )}
+              <CatalogItemPanelLink link={item.spec.support} />
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Homepage')}</DescriptionListTerm>
             <DescriptionListDescription className="fctl-catalog-item-details">
-              {item.spec.homepage ? (
-                <Button variant="link" href={item.spec.homepage} isInline>
-                  {item.spec.homepage}
-                </Button>
-              ) : (
-                t('N/A')
-              )}
+              <CatalogItemPanelLink link={item.spec.homepage} />
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>

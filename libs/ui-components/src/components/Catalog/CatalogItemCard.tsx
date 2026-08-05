@@ -15,7 +15,7 @@ import * as React from 'react';
 import { CatalogItem, CatalogItemCategory } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { getCatalogItemBadge, getCatalogItemIcon } from './utils';
+import { getCatalogItemBadge, getCatalogItemIcon } from '../../utils/catalog';
 
 export type CatalogItemCardProps = {
   catalogItem: CatalogItem;

@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Label, LabelGroup } from '@patternfly/react-core';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { CATALOG_LABEL } from '../Catalog/const';
 
 interface LabelsViewProps {
   prefix: string;
@@ -11,7 +10,7 @@ interface LabelsViewProps {
 
 const LabelsView = ({ prefix, labels }: LabelsViewProps) => {
   const { t } = useTranslation();
-  const labelItems = Object.entries(labels || {}).filter(([key]) => !key.includes(CATALOG_LABEL));
+  const labelItems = Object.entries(labels || {});
   if (labelItems.length === 0) {
     return '-';
   }

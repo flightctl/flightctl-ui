@@ -48,26 +48,24 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
       canEdit={false}
       hasOwner
       hasPackageMode={hasPackageMode}
-      currentLabels={ownerFleet?.metadata?.labels}
       onPatch={async () => {}}
       spec={ownerFleet?.spec.template.spec}
-      specPath="/spec/template"
+      specPath="/spec/template/"
       onEdit={() => {}}
       onInstall={() => {}}
     />
   ) : (
     <ResourceCatalogPage
       canEdit={canEdit}
-      currentLabels={device.metadata.labels}
       onPatch={onPatch}
       spec={device.spec}
       specPath="/"
       hasPackageMode={hasPackageMode}
-      onEdit={(catalogId, catalogItemId, appName) => {
-        let path = `${device.metadata.name}/${catalogId}/${catalogItemId}`;
-        if (appName) {
+      onEdit={(id) => {
+        let path = `${device.metadata.name}/${id.ref.catalog}/${id.ref.item}`;
+        if (id.appName) {
           const params = new URLSearchParams({
-            appName,
+            appName: id.appName,
           });
           path = `${path}?${params.toString()}`;
         }

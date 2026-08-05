@@ -32,6 +32,7 @@ import CreateFleetWizardFooter from './CreateFleetWizardFooter';
 import { useEditFleet } from './useEditFleet';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
+import { CatalogItemsProvider } from '../../Catalog/CatalogItemsContext';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -88,84 +89,84 @@ const CreateFleetWizard = () => {
     );
   } else {
     body = (
-      <Formik<FleetFormValues>
-        initialValues={getInitialValues(fleet)}
-        validationSchema={getValidationSchema(t)}
-        validateOnMount
-        onSubmit={async (values) => {
-          setError(undefined);
-          try {
-            if (isEdit) {
-              const fleetPatches = getFleetPatches(fleet as Fleet, values);
-              if (fleetPatches.length > 0) {
-                await patch<Fleet>(`fleets/${fleetId}`, fleetPatches);
+      <CatalogItemsProvider spec={fleet?.spec.template.spec}>
+        <Formik<FleetFormValues>
+          initialValues={getInitialValues(fleet)}
+          validationSchema={getValidationSchema(t)}
+          validateOnMount
+          onSubmit={async (values) => {
+            setError(undefined);
+            try {
+              if (isEdit) {
+                const fleetPatches = getFleetPatches(fleet as Fleet, values);
+                if (fleetPatches.length > 0) {
+                  await patch<Fleet>(`fleets/${fleetId}`, fleetPatches);
+                }
+              } else {
+                await post<Fleet>('fleets', getFleetResource(values));
               }
+
+              navigate({ route: ROUTE.FLEET_DETAILS, postfix: values.name });
+            } catch (e) {
+              setError(e);
+            }
+          }}
+        >
+          {({ errors: formikErrors }) => {
+            const validStepIds = getValidStepIds(formikErrors);
+            let reviewStepLabel: string;
+            if (isReadOnly) {
+              reviewStepLabel = t('Review');
+            } else if (isEdit) {
+              reviewStepLabel = t('Review and save');
             } else {
-              await post<Fleet>('fleets', getFleetResource(values));
+              reviewStepLabel = t('Review and create');
             }
 
-            navigate({ route: ROUTE.FLEET_DETAILS, postfix: values.name });
-          } catch (e) {
-            setError(e);
-          }
-        }}
-      >
-        {({ errors: formikErrors }) => {
-          const validStepIds = getValidStepIds(formikErrors);
-          let reviewStepLabel: string;
-          if (isReadOnly) {
-            reviewStepLabel = t('Review');
-          } else if (isEdit) {
-            reviewStepLabel = t('Review and save');
-          } else {
-            reviewStepLabel = t('Review and create');
-          }
-
-          return (
-            <>
-              <LeaveFormConfirmation />
-              <Wizard
-                footer={<CreateFleetWizardFooter isReadOnly={isReadOnly} isEdit={isEdit} />}
-                onStepChange={(_, step) => {
-                  if (error) {
-                    setError(undefined);
-                  }
-                  setCurrentStep(step);
-                }}
-              >
-                <WizardStep name={t('General info')} id={generalInfoStepId}>
-                  {(!currentStep || currentStep?.id === generalInfoStepId) && (
-                    <GeneralInfoStep isEdit={isEdit} isReadOnly={isReadOnly} />
-                  )}
-                </WizardStep>
-                <WizardStep
-                  name={t('Device template')}
-                  id={deviceTemplateStepId}
-                  isDisabled={isWizardStepDisabled(deviceTemplateStepId, orderedIds, validStepIds)}
+            return (
+              <>
+                <LeaveFormConfirmation />
+                <Wizard
+                  footer={<CreateFleetWizardFooter isReadOnly={isReadOnly} isEdit={isEdit} />}
+                  onStepChange={(_, step) => {
+                    if (error) {
+                      setError(undefined);
+                    }
+                    setCurrentStep(step);
+                  }}
                 >
-                  {currentStep?.id === deviceTemplateStepId && (
-                    <DeviceTemplateStep isFleet isReadOnly={isReadOnly} labels={fleet?.metadata.labels} />
-                  )}
-                </WizardStep>
-                <WizardStep
-                  name={t('Updates')}
-                  id={updatePolicyStepId}
-                  isDisabled={isWizardStepDisabled(updatePolicyStepId, orderedIds, validStepIds)}
-                >
-                  {currentStep?.id === updatePolicyStepId && <UpdatePolicyStep isReadOnly={isReadOnly} />}
-                </WizardStep>
-                <WizardStep
-                  name={reviewStepLabel}
-                  id={reviewStepId}
-                  isDisabled={isWizardStepDisabled(reviewStepId, orderedIds, validStepIds)}
-                >
-                  {currentStep?.id === reviewStepId && <ReviewStep error={error} />}
-                </WizardStep>
-              </Wizard>
-            </>
-          );
-        }}
-      </Formik>
+                  <WizardStep name={t('General info')} id={generalInfoStepId}>
+                    {(!currentStep || currentStep?.id === generalInfoStepId) && (
+                      <GeneralInfoStep isEdit={isEdit} isReadOnly={isReadOnly} />
+                    )}
+                  </WizardStep>
+                  <WizardStep
+                    name={t('Device template')}
+                    id={deviceTemplateStepId}
+                    isDisabled={isWizardStepDisabled(deviceTemplateStepId, orderedIds, validStepIds)}
+                  >
+                    {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep isFleet isReadOnly={isReadOnly} />}
+                  </WizardStep>
+                  <WizardStep
+                    name={t('Updates')}
+                    id={updatePolicyStepId}
+                    isDisabled={isWizardStepDisabled(updatePolicyStepId, orderedIds, validStepIds)}
+                  >
+                    {currentStep?.id === updatePolicyStepId && <UpdatePolicyStep isReadOnly={isReadOnly} />}
+                  </WizardStep>
+                  <WizardStep
+                    name={reviewStepLabel}
+                    id={reviewStepId}
+                    isDisabled={isWizardStepDisabled(reviewStepId, orderedIds, validStepIds)}
+                  >
+                    {currentStep?.id === reviewStepId && <ReviewStep error={error} />}
+                  </WizardStep>
+                </Wizard>
+              </>
+            );
+          }}
+        </Formik>
+      </CatalogItemsProvider>
     );
   }
 

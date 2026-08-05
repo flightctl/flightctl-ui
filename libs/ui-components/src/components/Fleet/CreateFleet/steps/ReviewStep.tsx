@@ -17,6 +17,7 @@ import { toAPILabel } from '../../../../utils/labels';
 import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
 import { getErrorMessage } from '../../../../utils/error';
 import { getApiConfig } from '../../../Device/EditDeviceWizard/deviceSpecUtils';
+import SystemImage from '../../../Device/EditDeviceWizard/SystemImageDescriptionGroup';
 import ReviewApplications from '../../../Device/EditDeviceWizard/steps/ReviewApplications';
 import ReviewTrackedSystemdServices from '../../../Device/EditDeviceWizard/steps/ReviewTrackedSystemdServices';
 import {
@@ -61,12 +62,7 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
             </DescriptionListGroup>
           )}
 
-          <DescriptionListGroup>
-            <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
-            <DescriptionListDescription>
-              {values.osImage || t(`The fleet will not manage system image`)}
-            </DescriptionListDescription>
-          </DescriptionListGroup>
+          <SystemImage osSpec={values.osSpec} isFleet={true} />
           {values.configTemplates.length > 0 && (
             <DescriptionListGroup>
               <DescriptionListTerm>{t('Configurations')}</DescriptionListTerm>

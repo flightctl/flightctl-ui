@@ -26,16 +26,17 @@ import FleetDevicesCount from './FleetDevicesCount';
 import EventsCard from '../../Events/EventsCard';
 import FleetVulnerabilities from './FleetVulnerabilities';
 import FleetDetailsOsMode from './FleetDetailsOsMode';
+import SystemImage from '../../Device/EditDeviceWizard/SystemImageDescriptionGroup';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
+
   const [vulnerabilitiesEnabled, canListVulnerabilities] = useVulnerabilitiesEnabled();
   const showVulnerabilities = vulnerabilitiesEnabled && canListVulnerabilities;
 
   const fleetId = fleet.metadata.name as string;
   const devicesSummary = fleet.status?.devicesSummary;
   const osModeCounts = devicesSummary?.capabilities?.osMode;
-  const rolloutError = getFleetRolloutStatusWarning(fleet, t);
 
   return (
     <Grid hasGutter>
@@ -56,10 +57,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
                   <FleetStatus fleet={fleet} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
-                <DescriptionListDescription>{fleet.spec.template.spec.os?.image || '-'}</DescriptionListDescription>
-              </DescriptionListGroup>
+              <SystemImage osSpec={fleet.spec.template.spec.os} isFleet={true} />
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Device selector')}</DescriptionListTerm>
                 <DescriptionListDescription>
@@ -69,7 +67,11 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Up-to-date/devices')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <FleetDevicesCount fleetId={fleetId} devicesSummary={devicesSummary} error={rolloutError} />
+                  <FleetDevicesCount
+                    fleetId={fleetId}
+                    devicesSummary={devicesSummary}
+                    error={getFleetRolloutStatusWarning(fleet, t)}
+                  />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>

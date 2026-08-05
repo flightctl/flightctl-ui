@@ -30,7 +30,7 @@ import CatalogItemCard from './CatalogItemCard';
 import CatalogPageToolbar, { CreateCatalogItemBtn, ImportCatalogBtn } from './CatalogPageToolbar';
 import { CatalogFilter, useCatalogFilter } from './useCatalogFilter';
 import CatalogItemDetails from './CatalogItemDetails';
-import { appTypeIds, useCatalogItems } from './useCatalogs';
+import { appTypeIds, useCatalogItems } from './useCatalogItems';
 import ListPageBody from '../ListPage/ListPageBody';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import { RESOURCE, VERB } from '../../types/rbac';
@@ -448,6 +448,7 @@ export const CatalogPageContent = ({
           onClose={() => setCatalogToDelete(undefined)}
           onDeleteSuccess={() => {
             setCatalogToDelete(undefined);
+            catalogFilter.setCatalogs([]);
             refetchCatalogs();
             refetch();
           }}

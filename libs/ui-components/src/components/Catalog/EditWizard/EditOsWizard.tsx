@@ -1,14 +1,14 @@
-import { Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
 import * as React from 'react';
-import { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
-import { Formik, FormikErrors, useFormikContext } from 'formik';
+import { Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
+import { Formik, type FormikErrors, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import semver from 'semver';
 
+import type { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { InstallSpecFormik } from '../InstallWizard/types';
+import type { InstallSpecFormik } from '../InstallWizard/types';
 import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
-import { getUpdates } from '../utils';
+import { getUpdates } from '../../../utils/catalog';
 import UpdateStep, { isUpdateStepValid } from './steps/UpdateStep';
 import { getErrorMessage } from '../../../utils/error';
 import ReviewStep from './steps/ReviewStep';
@@ -93,7 +93,6 @@ type EditOsWizardProps = {
   currentVersion: CatalogItemVersion;
   onUpdate: (catalogItemVersion: CatalogItemVersion, values: InstallSpecFormik) => Promise<void>;
   currentChannel: string;
-  currentLabels: Record<string, string> | undefined;
   isEdit: boolean;
   version: string;
   channel: string;

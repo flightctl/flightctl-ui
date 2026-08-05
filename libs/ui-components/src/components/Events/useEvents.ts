@@ -112,6 +112,9 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.RESOURCE_SYNC_ACCESSIBLE]: t('Resourcesync is available'),
     [Event.reason.RESOURCE_SYNC_INACCESSIBLE]: t('Resourcesync is not available'),
     [Event.reason.RESOURCE_SYNC_COMMIT_DETECTED]: t('Resourcesync new commit detected'),
+    // Encryption migration events
+    [Event.reason.ENCRYPTION_MIGRATION_STARTED]: t('Encryption migration started'),
+    [Event.reason.ENCRYPTION_MIGRATION_COMPLETED]: t('Encryption migration completed'),
     // Dependency sync events
     [Event.reason.DEPENDENCY_SYNC_PROBE_FAILED]: t('Dependency sync probe failed'),
     [Event.reason.DEPENDENCY_CHANGE_DETECTED]: t('Dependency change detected'),

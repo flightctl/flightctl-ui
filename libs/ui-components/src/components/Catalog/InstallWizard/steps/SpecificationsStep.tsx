@@ -24,6 +24,7 @@ import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 import { TFunction } from 'react-i18next';
 
+import type { ApplicationProviderSpec } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import RadioField from '../../../form/RadioField';
@@ -35,21 +36,23 @@ import { useDevicesPaginated } from '../../../Device/DevicesPage/useDevices';
 import { applyInitialConfig, getInitialAppConfig } from '../utils';
 import { InstallAppFormik, InstallSpecFormik, TargetPickerFormik } from '../types';
 import WithTooltip from '../../../common/WithTooltip';
-import { getFullContainerURI } from '../../utils';
+import { getFullContainerURI } from '../../../../utils/catalog';
 
 type VersionDropdownProps = {
   catalogItem: CatalogItem;
   versions: CatalogItemVersion[];
+  /** When editing an installed app, keep its config (volumes, env, etc.) across version changes. */
+  existingApp?: ApplicationProviderSpec;
 };
 
-export const VersionDropdown = ({ catalogItem, versions }: VersionDropdownProps) => {
+export const VersionDropdown = ({ catalogItem, versions, existingApp }: VersionDropdownProps) => {
   const { setFieldValue } = useFormikContext<InstallSpecFormik>();
   const { t } = useTranslation();
   return (
     <FormSelect
       name="version"
       onChange={(val) => {
-        const appConfig = getInitialAppConfig(catalogItem, val);
+        const appConfig = getInitialAppConfig(catalogItem, val, existingApp);
         applyInitialConfig(setFieldValue, appConfig);
       }}
       items={versions.reduce((acc, v) => {

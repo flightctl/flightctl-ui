@@ -7,8 +7,7 @@ import TextField from '../../../form/TextField';
 import ApplicationPortMappingField from '../../../form/ApplicationPortMappingField';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { PortMapping, SingleContainerAppForm } from '../../../../types/deviceSpec';
-
-import './ApplicationContainerForm.css';
+import ApplicationImageForm from './ApplicationImageForm';
 
 const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
@@ -30,14 +29,8 @@ const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isRead
       >
         <TextField aria-label={t('Application name')} name={`${appFieldName}.name`} isDisabled={isReadOnly} />
       </FormGroupWithHelperText>
-      <FormGroup label={t('Image')} isRequired>
-        <TextField
-          aria-label={t('Image')}
-          name={`${appFieldName}.image`}
-          isDisabled={isReadOnly}
-          helperText={t('Provide a valid image reference')}
-        />
-      </FormGroup>
+
+      <ApplicationImageForm applicationName={appFieldName} isReadOnly={isReadOnly} />
 
       <ApplicationPortMappingField
         ports={ports}

@@ -40,6 +40,7 @@ import DeviceAliasEdit from './DeviceAliasEdit';
 import { SystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 import DeviceDetailsCatalog from './DeviceDetailsCatalog';
 import ActionsDropdownList from '../../common/ActionsDropdownList';
+import { CatalogItemsProvider } from '../../Catalog/CatalogItemsContext';
 
 const deviceDetailsPermissions = [
   { kind: RESOURCE.DEVICE_CONSOLE, verb: VERB.GET },
@@ -210,38 +211,40 @@ const DeviceDetailsPage = ({ children }: React.PropsWithChildren) => {
       }
     >
       {device && (
-        <Routes>
-          <Route index element={<Navigate to="details" replace />} />
-          <Route
-            path="details"
-            element={
-              <DeviceDetailsTab device={device} refetch={refetch} canEdit={hasEditPermissions}>
-                {children}
-              </DeviceDetailsTab>
-            }
-          />
-          {isEnrolled && (
+        <CatalogItemsProvider spec={device.spec}>
+          <Routes>
+            <Route index element={<Navigate to="details" replace />} />
             <Route
-              path="catalog"
-              element={<DeviceDetailsCatalog device={device} refetch={refetch} canEdit={hasEditPermissions} />}
+              path="details"
+              element={
+                <DeviceDetailsTab device={device} refetch={refetch} canEdit={hasEditPermissions}>
+                  {children}
+                </DeviceDetailsTab>
+              }
             />
-          )}
-          <Route
-            path="yaml"
-            element={
-              <YamlEditorLoader
-                apiObj={device}
-                refetch={refetch}
-                disabledEditReason={editDisabledReason}
-                canEdit={hasEditPermissions}
-                shouldFetchInitially={hasActiveConsoleSessions(device)}
+            {isEnrolled && (
+              <Route
+                path="catalog"
+                element={<DeviceDetailsCatalog device={device} refetch={refetch} canEdit={hasEditPermissions} />}
               />
-            }
-          />
-          {canViewTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
-          {canViewLogs && <Route path="logs" element={<DeviceLogsTab deviceId={deviceId} />} />}
-          <Route path="events" element={<EventsCard kind={ResourceKind.DEVICE} objId={deviceId} />} />
-        </Routes>
+            )}
+            <Route
+              path="yaml"
+              element={
+                <YamlEditorLoader
+                  apiObj={device}
+                  refetch={refetch}
+                  disabledEditReason={editDisabledReason}
+                  canEdit={hasEditPermissions}
+                  shouldFetchInitially={hasActiveConsoleSessions(device)}
+                />
+              }
+            />
+            {canViewTerminal && <Route path="terminal" element={<TerminalTab device={device} />} />}
+            {canViewLogs && <Route path="logs" element={<DeviceLogsTab deviceId={deviceId} />} />}
+            <Route path="events" element={<EventsCard kind={ResourceKind.DEVICE} objId={deviceId} />} />
+          </Routes>
+        </CatalogItemsProvider>
       )}
 
       {deleteModal || decommissionModal || resumeModal}

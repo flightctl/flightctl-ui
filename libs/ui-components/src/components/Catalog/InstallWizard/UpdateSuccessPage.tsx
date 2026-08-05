@@ -17,10 +17,23 @@ import { useTranslation } from '../../../hooks/useTranslation';
 
 type UpdateSuccessPageContentProps = React.PropsWithChildren<{
   isDevice: boolean;
+  isSpecUnchanged: boolean;
 }>;
 
-export const UpdateSuccessPageContent = ({ isDevice, children }: UpdateSuccessPageContentProps) => {
+export const UpdateSuccessPageContent = ({ isDevice, isSpecUnchanged, children }: UpdateSuccessPageContentProps) => {
   const { t } = useTranslation();
+  if (isSpecUnchanged) {
+    return (
+      <EmptyState status={EmptyStateStatus.info} titleText={t('No action performed')}>
+        <EmptyStateBody>
+          {t('The selection from the catalog matches the current target spec, so no update was performed.')}
+        </EmptyStateBody>
+        <EmptyStateFooter>
+          <EmptyStateActions>{children}</EmptyStateActions>
+        </EmptyStateFooter>
+      </EmptyState>
+    );
+  }
   return (
     <EmptyState status={EmptyStateStatus.success} titleText={t('Update configuration successful')}>
       <EmptyStateBody>
@@ -35,14 +48,14 @@ export const UpdateSuccessPageContent = ({ isDevice, children }: UpdateSuccessPa
   );
 };
 
-const UpdateSuccessPage = () => {
+const UpdateSuccessPage = ({ isSpecUnchanged }: { isSpecUnchanged: boolean }) => {
   const { t } = useTranslation();
   const {
     values: { target, device, fleet },
   } = useFormikContext<TargetPickerFormik>();
   const navigate = useNavigate();
   return (
-    <UpdateSuccessPageContent isDevice={target === 'device'}>
+    <UpdateSuccessPageContent isDevice={target === 'device'} isSpecUnchanged={isSpecUnchanged}>
       <Stack hasGutter>
         <StackItem>
           <Button

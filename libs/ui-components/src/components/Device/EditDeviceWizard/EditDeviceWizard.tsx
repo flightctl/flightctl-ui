@@ -23,6 +23,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
+import { CatalogItemsProvider } from '../../Catalog/CatalogItemsContext';
 import GeneralInfoStep, { generalInfoStepId, isGeneralInfoStepValid } from './steps/GeneralInfoStep';
 import DeviceTemplateStep, { deviceTemplateStepId, isDeviceTemplateStepValid } from './steps/DeviceTemplateStep';
 import DeviceUpdateStep, { deviceUpdatePolicyStepId, isUpdatePolicyStepValid } from './steps/DeviceUpdateStep';
@@ -99,87 +100,87 @@ const EditDeviceWizard = () => {
     const updatePolicyValues = getUpdatePolicyValues(device.spec?.updatePolicy);
     const isOsPackageMode = hasPackageModeCapability(device);
     body = (
-      <Formik<EditDeviceFormValues>
-        initialValues={{
-          deviceAlias,
-          osImage: device.spec?.os?.image || '',
-          labels: fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias'),
-          configTemplates: getConfigTemplatesValues(device.spec, registerMicroShift),
-          fleetMatch: '', // Initially this is always a fleetless device
-          applications: getApplicationValues(device.spec),
-          systemdUnits: getSystemdUnitsValues(device.spec),
-          registerMicroShift,
-          updatePolicy: {
-            ...updatePolicyValues,
-            isAdvanced: true,
-          },
-          useBasicUpdateConfig: !updatePolicyValues.isAdvanced,
-        }}
-        validationSchema={getValidationSchema(t)}
-        validateOnMount
-        onSubmit={async (values) => {
-          setSubmitError(undefined);
-          try {
-            const patches = getDevicePatches(device, values);
-            if (patches.length > 0) {
-              await patch<Device>(`devices/${deviceId}`, patches);
+      <CatalogItemsProvider spec={device.spec}>
+        <Formik<EditDeviceFormValues>
+          initialValues={{
+            deviceAlias,
+            osSpec: device.spec?.os,
+            labels: fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias'),
+            configTemplates: getConfigTemplatesValues(device.spec, registerMicroShift),
+            fleetMatch: '', // Initially this is always a fleetless device
+            applications: getApplicationValues(device.spec),
+            systemdUnits: getSystemdUnitsValues(device.spec),
+            registerMicroShift,
+            updatePolicy: {
+              ...updatePolicyValues,
+              isAdvanced: true,
+            },
+            useBasicUpdateConfig: !updatePolicyValues.isAdvanced,
+          }}
+          validationSchema={getValidationSchema(t)}
+          validateOnMount
+          onSubmit={async (values) => {
+            setSubmitError(undefined);
+            try {
+              const patches = getDevicePatches(device, values);
+              if (patches.length > 0) {
+                await patch<Device>(`devices/${deviceId}`, patches);
+              }
+              navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceId });
+            } catch (e) {
+              setSubmitError(getErrorMessage(e));
             }
-            navigate({ route: ROUTE.DEVICE_DETAILS, postfix: deviceId });
-          } catch (e) {
-            setSubmitError(getErrorMessage(e));
-          }
-        }}
-      >
-        {({ values, errors: formikErrors }) => {
-          const validStepIds = getValidStepIds(formikErrors);
+          }}
+        >
+          {({ values, errors: formikErrors }) => {
+            const validStepIds = getValidStepIds(formikErrors);
 
-          const isFleetless = !values.fleetMatch;
+            const isFleetless = !values.fleetMatch;
 
-          return (
-            <>
-              <LeaveFormConfirmation />
-              <Wizard
-                footer={<EditDeviceWizardFooter />}
-                nav={<EditDeviceWizardNav isFleetless={isFleetless} />}
-                onStepChange={() => {
-                  if (submitError) {
-                    setSubmitError(undefined);
-                  }
-                }}
-              >
-                <WizardStep name={t('General info')} id={generalInfoStepId}>
-                  <GeneralInfoStep />
-                </WizardStep>
-                <WizardStep
-                  name={t('Device template')}
-                  id={deviceTemplateStepId}
-                  isDisabled={isWizardStepDisabled(deviceTemplateStepId, orderedIds, validStepIds) || !isFleetless}
+            return (
+              <>
+                <LeaveFormConfirmation />
+                <Wizard
+                  footer={<EditDeviceWizardFooter />}
+                  nav={<EditDeviceWizardNav isFleetless={isFleetless} />}
+                  onStepChange={() => {
+                    if (submitError) {
+                      setSubmitError(undefined);
+                    }
+                  }}
                 >
-                  <DeviceTemplateStep
-                    isFleet={false}
-                    labels={device.metadata.labels}
-                    isOsPackageMode={isOsPackageMode}
-                  />
-                </WizardStep>
-                <WizardStep
-                  name={t('Updates')}
-                  id={deviceUpdatePolicyStepId}
-                  isDisabled={isWizardStepDisabled(deviceUpdatePolicyStepId, orderedIds, validStepIds) || !isFleetless}
-                >
-                  <DeviceUpdateStep />
-                </WizardStep>
-                <WizardStep
-                  name={t('Review and save')}
-                  id={reviewDeviceStepId}
-                  isDisabled={isWizardStepDisabled(reviewDeviceStepId, orderedIds, validStepIds)}
-                >
-                  <ReviewDeviceStep error={submitError} />
-                </WizardStep>
-              </Wizard>
-            </>
-          );
-        }}
-      </Formik>
+                  <WizardStep name={t('General info')} id={generalInfoStepId}>
+                    <GeneralInfoStep />
+                  </WizardStep>
+                  <WizardStep
+                    name={t('Device template')}
+                    id={deviceTemplateStepId}
+                    isDisabled={isWizardStepDisabled(deviceTemplateStepId, orderedIds, validStepIds) || !isFleetless}
+                  >
+                    <DeviceTemplateStep isFleet={false} isOsPackageMode={isOsPackageMode} />
+                  </WizardStep>
+                  <WizardStep
+                    name={t('Updates')}
+                    id={deviceUpdatePolicyStepId}
+                    isDisabled={
+                      isWizardStepDisabled(deviceUpdatePolicyStepId, orderedIds, validStepIds) || !isFleetless
+                    }
+                  >
+                    <DeviceUpdateStep />
+                  </WizardStep>
+                  <WizardStep
+                    name={t('Review and save')}
+                    id={reviewDeviceStepId}
+                    isDisabled={isWizardStepDisabled(reviewDeviceStepId, orderedIds, validStepIds)}
+                  >
+                    <ReviewDeviceStep error={submitError} />
+                  </WizardStep>
+                </Wizard>
+              </>
+            );
+          }}
+        </Formik>
+      </CatalogItemsProvider>
     );
   }
 

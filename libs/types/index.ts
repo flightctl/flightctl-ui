@@ -37,6 +37,8 @@ export type { AuthStaticRoleAssignment } from './models/AuthStaticRoleAssignment
 export type { BaseImageEntry } from './models/BaseImageEntry';
 export type { Batch } from './models/Batch';
 export type { BatchSequence } from './models/BatchSequence';
+export type { CatalogItemRefApplicationProviderSpec } from './models/CatalogItemRefApplicationProviderSpec';
+export type { CatalogItemRefSpec } from './models/CatalogItemRefSpec';
 export type { CertificateSigningRequest } from './models/CertificateSigningRequest';
 export type { CertificateSigningRequestList } from './models/CertificateSigningRequestList';
 export type { CertificateSigningRequestSpec } from './models/CertificateSigningRequestSpec';
@@ -144,7 +146,9 @@ export type { HttpConfigProviderSpec } from './models/HttpConfigProviderSpec';
 export type { HttpRepoSpec } from './models/HttpRepoSpec';
 export type { ImageApplicationProviderSpec } from './models/ImageApplicationProviderSpec';
 export type { ImageMountVolumeProviderSpec } from './models/ImageMountVolumeProviderSpec';
+export type { ImageOrCatalogItemRefSpec } from './models/ImageOrCatalogItemRefSpec';
 export { ImagePullPolicy } from './models/ImagePullPolicy';
+export type { ImageSpec } from './models/ImageSpec';
 export type { ImageVolumeProviderSpec } from './models/ImageVolumeProviderSpec';
 export type { ImageVolumeSource } from './models/ImageVolumeSource';
 export type { InlineApplicationProviderSpec } from './models/InlineApplicationProviderSpec';

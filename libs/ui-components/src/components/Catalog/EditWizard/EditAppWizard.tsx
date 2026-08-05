@@ -1,18 +1,19 @@
-import { Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
 import * as React from 'react';
-import { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
-import { Formik, FormikErrors, useFormikContext } from 'formik';
+import { Formik, type FormikErrors, useFormikContext } from 'formik';
+import { Wizard, WizardStep, type WizardStepType } from '@patternfly/react-core';
 import * as Yup from 'yup';
-import { RJSFValidationError } from '@rjsf/utils';
-import { ApplicationProviderSpec } from '@flightctl/types';
+import type { RJSFValidationError } from '@rjsf/utils';
 import semver from 'semver';
+
+import type { ApplicationProviderSpec } from '@flightctl/types';
+import type { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { getInitialAppConfig } from '../InstallWizard/utils';
 import AppConfigStep, { isAppConfigStepValid } from '../InstallWizard/steps/AppConfigStep';
 import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
 import { useSubmitCatalogForm } from '../useSubmitCatalogForm';
-import { getUpdates } from '../utils';
+import { getUpdates } from '../../../utils/catalog';
 import { AppUpdateFormik } from './types';
 import UpdateStep, { isUpdateStepValid } from './steps/UpdateStep';
 import ReviewStep from './steps/ReviewStep';
@@ -95,7 +96,12 @@ const WizardContent: React.FC<WizardContentProps> = ({
       >
         <WizardStep name={t('Version')} id={versionStepId}>
           {(!currentStep || currentStep?.id === versionStepId) && (
-            <UpdateStep catalogItem={catalogItem} currentVersion={currentVersion} isEdit={!!appSpec} />
+            <UpdateStep
+              catalogItem={catalogItem}
+              currentVersion={currentVersion}
+              isEdit={!!appSpec}
+              existingApp={appSpec}
+            />
           )}
         </WizardStep>
         <WizardStep
@@ -125,7 +131,6 @@ type EditAppWizardProps = {
   onUpdate: (catalogItemVersion: CatalogItemVersion, values: AppUpdateFormik) => Promise<void>;
   currentChannel: string;
   appSpec?: ApplicationProviderSpec;
-  currentLabels: Record<string, string> | undefined;
   currentApps: ApplicationProviderSpec[] | undefined;
   version: string;
   channel: string;
@@ -137,7 +142,6 @@ const EditAppWizard: React.FC<EditAppWizardProps> = ({
   onUpdate,
   currentChannel,
   appSpec,
-  currentLabels,
   currentApps,
   version,
   channel,
@@ -148,7 +152,7 @@ const EditAppWizard: React.FC<EditAppWizardProps> = ({
     semver.rcompare(a.version, b.version),
   )[0]?.version;
   const appVersion = appSpec ? latestVersion || currentVersion.version : version;
-  const appConfig = getInitialAppConfig(catalogItem, appVersion, appSpec, currentLabels);
+  const appConfig = getInitialAppConfig(catalogItem, appVersion, appSpec);
 
   const validationSchema = Yup.object({
     version: Yup.string().required(t('Version must be selected')),

@@ -9,7 +9,7 @@ import { defaultInitialValues, getEditInitialValues, getInitialValues } from './
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { useCatalogItem } from '../Catalog/useCatalogs';
+import { useCatalogItemsLookup } from '../Catalog/useCatalogItemsLookup';
 import { ExportFormatType, ImageExport, ImagePromotion, ImagePromotionList } from '@flightctl/types/imagebuilder';
 import { PatchRequest } from '@flightctl/types';
 import { getErrorMessage } from '../../utils/error';
@@ -62,7 +62,10 @@ const ImagePromotionFormContainer = ({
   const isEdit = !!imagePromotion;
 
   const target = parentPromotion?.spec.target;
-  const [catalogItem, catalogItemLoading] = useCatalogItem(target?.catalogName, target?.catalogItemName);
+  const hasCatalogParams = target?.catalogName && target?.catalogItemName;
+  const { getItem, isLoading: catalogItemLoading } = useCatalogItemsLookup(
+    hasCatalogParams ? [{ catalog: target.catalogName, item: target.catalogItemName }] : [],
+  );
 
   if (parentPromotion && catalogItemLoading) {
     return <LoadingModal onClose={onClose} />;
@@ -72,6 +75,7 @@ const ImagePromotionFormContainer = ({
   if (imagePromotion) {
     initialValues = getEditInitialValues(imagePromotion);
   } else if (parentPromotion) {
+    const catalogItem = hasCatalogParams ? getItem(target.catalogName, target.catalogItemName) : undefined;
     initialValues = {
       ...getInitialValues(catalogItem),
       exportFormats: imageBuild.imageExports.filter(Boolean).map((ie) => (ie as ImageExport).spec.format),

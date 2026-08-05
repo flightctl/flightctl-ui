@@ -7,10 +7,7 @@ import {
   EmptyState,
   EmptyStateActions,
   EmptyStateBody,
-  FormHelperText,
   Gallery,
-  HelperText,
-  HelperTextItem,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -24,15 +21,19 @@ import {
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
+import { Formik } from 'formik';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
 import { CubeIcon } from '@patternfly/react-icons/dist/js/icons/cube-icon';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
-import { FieldProps } from '@rjsf/utils';
-import { CatalogItem, CatalogItemList, CatalogItemType, CatalogItemVersion } from '@flightctl/types/alpha';
+import type { FieldProps } from '@rjsf/utils';
 
-import CatalogItemCard from '../Catalog/CatalogItemCard';
-import { getFullContainerURI } from '../Catalog/utils';
+import {
+  type CatalogItem,
+  type CatalogItemList,
+  CatalogItemType,
+  type CatalogItemVersion,
+} from '@flightctl/types/alpha';
+
 import { DynamicFormContext } from './DynamicForm';
 import { useTranslation } from '../../hooks/useTranslation';
 import { usePermissionsContext } from '../common/PermissionsContext';
@@ -44,15 +45,18 @@ import {
   CatalogItemDetailsHeader,
   getDefaultChannelAndVersion,
 } from '../Catalog/CatalogItemDetails';
-import { Formik } from 'formik';
-import { InstallSpec } from '../Catalog/InstallWizard/steps/SpecificationsStep';
 import FlightCtlForm from '../form/FlightCtlForm';
-import { useCatalogItems } from '../Catalog/useCatalogs';
 import { PaginationDetails } from '../../hooks/useTablePagination';
 import { getErrorMessage } from '../../utils/error';
+import { buildCatalogItemRef, formatCatalogItemRef } from '../../utils/catalog';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
-import { CatalogItemTitle } from '../Catalog/InstalledSoftware';
+import FlightCtlModal from '../common/FlightCtlModal';
+import { InstallSpec } from '../Catalog/InstallWizard/steps/SpecificationsStep';
+import CatalogItemTitle from '../Catalog/CatalogItemTitle';
 import { InstallSpecFormik } from '../Catalog/InstallWizard/types';
+import { useCatalogItems } from '../Catalog/useCatalogItems';
+import { useResolvedCatalogRef } from '../Catalog/useResolvedCatalogRef';
+import CatalogItemCard from '../Catalog/CatalogItemCard';
 
 /**
  * Regex for volume image reference field IDs.
@@ -75,13 +79,15 @@ type SelectAssetModalProps = {
   onSelect: (item: CatalogItem, version: CatalogItemVersion, channel: string) => void;
 };
 
+const assetItemTypeFilter = [CatalogItemType.CatalogItemTypeData];
+
 const SelectAssetModal = ({ onClose, onSelect }: SelectAssetModalProps) => {
   const [selectedAsset, setSelectedAsset] = React.useState<CatalogItem>();
   const [nameFilter, setNameFilter] = React.useState('');
   const { t } = useTranslation();
   const [assetCatalogItems, isLoading, error, pagination, isUpdating] = useCatalogItems({
     catalogFilter: {
-      itemType: [CatalogItemType.CatalogItemTypeData],
+      itemType: assetItemTypeFilter,
       nameFilter,
     },
   });
@@ -268,61 +274,66 @@ const CatalogItemDetails = ({
 
 const catalogItemListPermission = [{ kind: RESOURCE.CATALOG_ITEM, verb: VERB.LIST }];
 
+// Setting "reference" to an empty string satisfies JSON Schema `required`, making the field valid.
+const VALID_EMPTY_IMAGE_REFERENCE = '';
+// Setting "reference" to undefined makes the field invalid, as required validation fails.
+const INVALID_EMPTY_IMAGE_REFERENCE = undefined;
+
 /**
  * Custom field for the volume image "reference" property.
  * Renders a text input plus "Choose from catalog" for Asset selection.
  * Used only when the field ID matches root_volumes_N_image_reference.
+ * Catalog selections are tracked via "volumeSelection" and persisted as catalogItemRef on submit.
  */
-const VolumeImageField: React.FC<FieldProps> = ({
-  idSchema,
-  schema,
-  formData,
-  onChange,
-  rawErrors,
-  formContext,
-  disabled,
-  readonly,
-}) => {
+const VolumeImageField = ({ idSchema, formData, onChange, rawErrors, formContext, disabled, readonly }: FieldProps) => {
   const { t } = useTranslation();
   const { checkPermissions } = usePermissionsContext();
   const [canListCatalogItems] = checkPermissions(catalogItemListPermission);
-  const { onAssetSelected, selectedAssets, onAssetCleared } = formContext as DynamicFormContext;
-  const referenceValue = typeof formData === 'string' ? formData : '';
+  const { onVolumeSelected, volumeSelection, onVolumeCleared } = formContext as DynamicFormContext;
+  const imageReference = typeof formData === 'string' ? formData : '';
   const volumeIndex = getVolumeIndexFromId(idSchema.$id);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
-  const handleTextChange = (_event: React.FormEvent<HTMLInputElement>, newReference: string) => {
-    onChange(newReference);
+  const currentVolumeSelection = volumeSelection.find((a) => a.volumeIndex === volumeIndex);
+  const catalogRef = currentVolumeSelection?.catalogItemRef;
+  const catalogItem = useResolvedCatalogRef(catalogRef)?.item;
+
+  const handleTextChange = (_event: React.FormEvent<HTMLInputElement>, newImgValue: string) => {
+    if (currentVolumeSelection) {
+      onVolumeCleared(volumeIndex);
+    }
+    onChange(newImgValue === '' ? INVALID_EMPTY_IMAGE_REFERENCE : newImgValue);
   };
 
   const onSelect = (item: CatalogItem, version: CatalogItemVersion, channel: string) => {
-    const reference = getFullContainerURI(item.spec.artifacts, version);
-    onAssetSelected({
+    onVolumeSelected({
       volumeIndex,
-      assetChannel: channel,
-      assetVersion: version.version,
-      assetItem: item,
-      assetCatalog: item.metadata.catalog,
-      assetItemName: item.metadata.name || '',
+      catalogItemRef: buildCatalogItemRef({
+        catalogItem: item,
+        catalogItemVersion: version,
+        channel,
+      }),
     });
-    onChange(reference);
+    // Clear reference so submit path writes catalogItemRef exclusively
+    onChange(VALID_EMPTY_IMAGE_REFERENCE);
   };
 
   const hasErrors = !!rawErrors?.length;
-  const selectedAsset = selectedAssets.find((a) => a.volumeIndex === volumeIndex);
 
   // Render only the control content; parent FieldTemplate provides the FormGroup label and errors
   return (
     <>
-      {selectedAsset?.assetItem ? (
+      {catalogRef ? (
         <Split hasGutter>
           <SplitItem isFilled>
-            <CatalogItemTitle
-              item={selectedAsset.assetItem}
-              channel={selectedAsset.assetChannel}
-              version={selectedAsset.assetVersion}
-            />
+            {catalogItem ? (
+              <CatalogItemTitle item={catalogItem} channel={catalogRef.channel || ''} version={catalogRef.version} />
+            ) : (
+              t('Catalog item {{ catalogItemRef }}', {
+                catalogItemRef: formatCatalogItemRef(catalogRef),
+              })
+            )}
           </SplitItem>
           <SplitItem>
             <Button
@@ -332,8 +343,8 @@ const VolumeImageField: React.FC<FieldProps> = ({
               iconPosition="start"
               isDisabled={disabled || readonly}
               onClick={() => {
-                onAssetCleared(volumeIndex);
-                onChange('');
+                onVolumeCleared(volumeIndex);
+                onChange(INVALID_EMPTY_IMAGE_REFERENCE);
               }}
             />
           </SplitItem>
@@ -343,7 +354,7 @@ const VolumeImageField: React.FC<FieldProps> = ({
           <SplitItem isFilled>
             <TextInput
               id={idSchema.$id}
-              value={referenceValue}
+              value={imageReference}
               onChange={handleTextChange}
               isDisabled={disabled}
               readOnlyVariant={readonly ? 'default' : undefined}
@@ -360,14 +371,6 @@ const VolumeImageField: React.FC<FieldProps> = ({
           )}
         </Split>
       )}
-      {schema.description && (
-        <FormHelperText>
-          <HelperText>
-            <HelperTextItem variant="default">{schema.description}</HelperTextItem>
-          </HelperText>
-        </FormHelperText>
-      )}
-
       {isModalOpen && <SelectAssetModal onClose={() => setIsModalOpen(false)} onSelect={onSelect} />}
     </>
   );
