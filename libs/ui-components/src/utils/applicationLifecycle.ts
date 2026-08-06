@@ -151,6 +151,12 @@ export const getDeviceAppLifecycleOverrides = (
   return mergeApplicationLifecycleLayers(fleetOverrides, deviceOverrides);
 };
 
+/**
+ * The "status.apps[].restarts" field is only modified on "real" app restarts/crashes, not by successful restarts.
+ * Successfully restarting an application is not observable through status, and the action is cleared after a timeout.
+ */
+export const RESTART_PENDING_TIMEOUT_MS = 500;
+
 export const shouldClearPendingLifecycleAction = (
   pendingAction: ApplicationLifecycleAction,
   currentStatus: ApplicationStatusType,
@@ -168,11 +174,13 @@ export const shouldClearPendingLifecycleAction = (
 
     case 'start':
       return (
-        currentStatus === ApplicationStatusType.ApplicationStatusStarting ||
+        currentStatus === ApplicationStatusType.ApplicationStatusCompleted ||
         currentStatus === ApplicationStatusType.ApplicationStatusRunning ||
         currentStatus === ApplicationStatusType.ApplicationStatusError
       );
     case 'restart':
+      // The following conditions to clearing pending "restart" actions may not always eventually be satisfied.
+      // See RESTART_PENDING_TIMEOUT_MS for more details.
       return (
         currentStatus === ApplicationStatusType.ApplicationStatusStarting ||
         currentStatus !== statusAtRequest ||

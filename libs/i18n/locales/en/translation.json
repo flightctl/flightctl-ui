@@ -602,6 +602,7 @@
   "Stop": "Stop",
   "Restart": "Restart",
   "Open console": "Open console",
+  "The requested action failed": "The requested action failed",
   "Expand row": "Expand row",
   "Ready": "Ready",
   "Restarts": "Restarts",
