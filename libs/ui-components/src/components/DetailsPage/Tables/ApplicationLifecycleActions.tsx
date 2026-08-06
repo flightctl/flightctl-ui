@@ -216,7 +216,7 @@ const ApplicationLifecycleActions = ({
           <Alert
             isInline
             variant="danger"
-            title={t('An error occurred')}
+            title={t('The requested action failed')}
             isPlain
             actionClose={<AlertActionCloseButton onClose={clearError} />}
           >
