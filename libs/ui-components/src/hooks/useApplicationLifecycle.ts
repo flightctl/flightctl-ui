@@ -2,7 +2,11 @@ import * as React from 'react';
 
 import type { ApplicationStatusType, Device } from '@flightctl/types';
 
-import { type ApplicationLifecycleAction, shouldClearPendingLifecycleAction } from '../utils/applicationLifecycle';
+import {
+  type ApplicationLifecycleAction,
+  RESTART_PENDING_TIMEOUT_MS,
+  shouldClearPendingLifecycleAction,
+} from '../utils/applicationLifecycle';
 import { getErrorMessage } from '../utils/error';
 import { useFetch } from './useFetch';
 
@@ -56,6 +60,21 @@ export const useApplicationLifecycle = ({
       restartsAtRequestRef.current = undefined;
     }
   }, [appRestarts, appStatus, pendingAction]);
+
+  React.useEffect(() => {
+    if (pendingAction !== 'restart') {
+      return;
+    }
+
+    // Restarting a running application does not produce an observable change in status.
+    // If the action was successfully submitted, it is considered finished after a short timeout.
+    const timer = window.setTimeout(() => {
+      setPendingAction(null);
+      restartsAtRequestRef.current = undefined;
+    }, RESTART_PENDING_TIMEOUT_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [pendingAction]);
 
   const executeAction = React.useCallback(
     async (action: ApplicationLifecycleAction) => {
