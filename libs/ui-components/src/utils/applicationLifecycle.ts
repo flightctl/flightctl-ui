@@ -147,6 +147,14 @@ export const hasAplicationStatusMismatch = (
   return reconcileStartStatuses.includes(status);
 };
 
+/** Console is available only while status is Running and desired state is not Stopped. */
+export const isAppConsoleAvailable = (
+  status: ApplicationStatusType,
+  desiredState: ApplicationDesiredState | undefined,
+): boolean =>
+  status === ApplicationStatusType.ApplicationStatusRunning &&
+  desiredState !== ApplicationDesiredState.ApplicationDesiredStateStopped;
+
 /** Parses fleet and device lifecycle annotations; newer desiredStateVersion wins per application. */
 export const getDeviceAppLifecycleOverrides = (
   deviceAnnotations: Record<string, string> = {},

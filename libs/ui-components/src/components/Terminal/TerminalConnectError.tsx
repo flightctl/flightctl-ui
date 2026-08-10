@@ -17,6 +17,10 @@ const getAppConsoleConnectErrorMessage = (error: AppConsoleConnectError, t: TFun
       );
     case 'sessionTakenOver':
       return t('This console session was ended because another user connected to the same virtual machine.');
+    case 'appNotReady':
+      return t(
+        'The virtual machine console is unavailable at the moment. The VM may be starting, stopping, or stopped.',
+      );
     case 'forbidden':
       return t('You do not have permission to access the virtual machine console.');
     case 'notFound':
@@ -24,7 +28,7 @@ const getAppConsoleConnectErrorMessage = (error: AppConsoleConnectError, t: TFun
     case 'timeout':
       return t('Timed out connecting to the virtual machine console. The VM may still be starting.');
     case 'unknownError':
-      return t('Failed to connect to the virtual machine console.');
+      return error.detail || t('Failed to connect to the virtual machine console.');
   }
 };
 
