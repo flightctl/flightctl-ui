@@ -21,6 +21,7 @@ import {
   type ApplicationLifecycleAction,
   hasAplicationStatusMismatch,
   startableStatuses,
+  stoppableStatuses,
   transitionalStatuses,
 } from '../../../utils/applicationLifecycle';
 import {
@@ -107,6 +108,7 @@ const ApplicationLifecycleActions = ({
   const isAppRunning = appStatus === ApplicationStatusType.ApplicationStatusRunning;
   const desiredStateIsStopped = desiredState === ApplicationDesiredState.ApplicationDesiredStateStopped;
   const canStart = startableStatuses.includes(appStatus);
+  const canStop = stoppableStatuses.includes(appStatus);
   const isTransitioning = transitionalStatuses.includes(appStatus);
   const hasStatusMismatch = hasAplicationStatusMismatch(appStatus, desiredState);
   const isUserInitiatedTransition = pendingAction != null;
@@ -162,7 +164,7 @@ const ApplicationLifecycleActions = ({
             {t('Start')}
           </DropdownItem>
         )}
-        {isAppRunning && (
+        {canStop && (
           <DropdownItem component="button" onClick={() => handleAction('stop')}>
             {t('Stop')}
           </DropdownItem>

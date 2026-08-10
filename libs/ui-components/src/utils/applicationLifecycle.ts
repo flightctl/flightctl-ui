@@ -29,6 +29,13 @@ export const startableStatuses = [
   ApplicationStatusType.ApplicationStatusStopping,
   ApplicationStatusType.ApplicationStatusStopped,
   ApplicationStatusType.ApplicationStatusError,
+  ApplicationStatusType.ApplicationStatusUnknown,
+];
+
+export const stoppableStatuses = [
+  ApplicationStatusType.ApplicationStatusRunning,
+  ApplicationStatusType.ApplicationStatusError,
+  ApplicationStatusType.ApplicationStatusUnknown,
 ];
 
 export type ApplicationLifecycleAction = 'start' | 'stop' | 'restart';
