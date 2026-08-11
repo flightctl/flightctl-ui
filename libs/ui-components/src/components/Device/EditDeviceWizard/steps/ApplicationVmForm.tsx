@@ -193,6 +193,14 @@ const ApplicationVmForm = ({ index, isReadOnly }: { index: number; isReadOnly?: 
         </HelperText>
       </FormGroup>
 
+      {app.isExisting && (
+        <Alert isInline variant="warning" title={t('VM restart notice')}>
+          {t(
+            'Updating the VM configuration will restart existing virtual machine applications. Cloud-init user data and credentials are reapplied when the VM boots.',
+          )}
+        </Alert>
+      )}
+
       {app.configMode === 'yaml' && app.hasAdvancedVmSettings && (
         <Alert isInline variant="warning" title={t('Advanced YAML configuration detected')}>
           {t(
@@ -257,16 +265,14 @@ const ApplicationVmForm = ({ index, isReadOnly }: { index: number; isReadOnly?: 
               minHeight="auto"
               isDisabled={isReadOnly}
               helperText={t(
-                'Cloud-init user data in YAML format. Applied on first boot only. SSH key and password entries in this field are managed by the Credentials section below and may be overwritten when toggling those options.',
+                'Cloud-init user data in YAML format. SSH key and password entries in this field are managed by the Credentials section below and may be overwritten when toggling those options.',
               )}
               onChangeCustom={handleCloudInitCustom}
             />
 
             <FormSection title={t('Credentials')}>
               <Content component={ContentVariants.small}>
-                {t(
-                  'Credentials are applied through cloud-init on first boot only. Changes here will take effect on newly created VMs but will not update VMs already running on existing devices. To update credentials on a running VM, access it directly through the console.',
-                )}
+                {t('Credentials are written into the cloud-init user data above.')}
               </Content>
 
               <SwitchField
