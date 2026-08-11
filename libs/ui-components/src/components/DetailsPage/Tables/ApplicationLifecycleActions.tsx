@@ -14,13 +14,13 @@ import {
   StackItem,
 } from '@patternfly/react-core';
 import { TerminalIcon } from '@patternfly/react-icons/dist/js/icons/terminal-icon';
-import { useApplicationLifecycle } from '../../../hooks/useApplicationLifecycle';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { getDisabledTooltipProps } from '../../../utils/tooltip';
 import {
   type ApplicationLifecycleAction,
   hasAplicationStatusMismatch,
   startableStatuses,
+  stoppableStatuses,
   transitionalStatuses,
 } from '../../../utils/applicationLifecycle';
 import {
@@ -72,23 +72,31 @@ const ApplicationStatusMismatchAlert = ({
   );
 };
 
+export type ApplicationLifecycleControls = {
+  start: () => Promise<void>;
+  stop: () => Promise<void>;
+  restart: () => Promise<void>;
+  isSubmitting: boolean;
+  pendingAction: ApplicationLifecycleAction | null;
+  error: string | undefined;
+  clearError: VoidFunction;
+};
+
 type ApplicationLifecycleActionsProps = {
-  deviceName: string;
-  refetch: VoidFunction;
   lifecycleDisabledReason?: string;
   desiredState?: ApplicationDesiredState;
   appStatus: DeviceApplicationStatus;
   canManageLifecycle: boolean;
+  lifecycle: ApplicationLifecycleControls;
   onOpenConsole?: (name: string) => void;
 };
 
 const ApplicationLifecycleActions = ({
-  deviceName,
-  refetch,
   lifecycleDisabledReason,
   desiredState,
   appStatus: appStatusObj,
   canManageLifecycle,
+  lifecycle,
   onOpenConsole,
 }: ApplicationLifecycleActionsProps) => {
   const { t } = useTranslation();
@@ -96,17 +104,12 @@ const ApplicationLifecycleActions = ({
   const appStatus = appStatusObj.status;
   const isVm = appStatusObj.appType === AppType.AppTypeVm;
 
-  const { start, stop, restart, isSubmitting, pendingAction, error, clearError } = useApplicationLifecycle({
-    deviceName,
-    appName: appStatusObj.name,
-    appStatus,
-    appRestarts: appStatusObj.restarts,
-    refetch,
-  });
+  const { start, stop, restart, isSubmitting, pendingAction, error, clearError } = lifecycle;
 
   const isAppRunning = appStatus === ApplicationStatusType.ApplicationStatusRunning;
   const desiredStateIsStopped = desiredState === ApplicationDesiredState.ApplicationDesiredStateStopped;
   const canStart = startableStatuses.includes(appStatus);
+  const canStop = stoppableStatuses.includes(appStatus);
   const isTransitioning = transitionalStatuses.includes(appStatus);
   const hasStatusMismatch = hasAplicationStatusMismatch(appStatus, desiredState);
   const isUserInitiatedTransition = pendingAction != null;
@@ -162,7 +165,7 @@ const ApplicationLifecycleActions = ({
             {t('Start')}
           </DropdownItem>
         )}
-        {isAppRunning && (
+        {canStop && (
           <DropdownItem component="button" onClick={() => handleAction('stop')}>
             {t('Stop')}
           </DropdownItem>
@@ -216,7 +219,7 @@ const ApplicationLifecycleActions = ({
           <Alert
             isInline
             variant="danger"
-            title={t('An error occurred')}
+            title={t('The requested action failed')}
             isPlain
             actionClose={<AlertActionCloseButton onClose={clearError} />}
           >
