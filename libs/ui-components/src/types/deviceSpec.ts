@@ -149,6 +149,8 @@ export type VmAppForm = {
   configMode: VmConfigMode;
   // Full vm.yaml file that can be edited in YAML mode; independent from form field
   vmYaml: string;
+  // Whether this app was loaded from an existing device/fleet spec (not newly added in the form).
+  isExisting: boolean;
   // Whether vm.yaml has settings which are not supported by the guided form.
   // Only meaningful for existing applications.
   hasAdvancedVmSettings: boolean;
