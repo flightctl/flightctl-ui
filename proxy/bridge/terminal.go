@@ -63,8 +63,12 @@ func truncateWSCloseReason(msg string) string {
 func dialErrorCloseReason(statusCode int, resp *http.Response) string {
 	detail := http.StatusText(statusCode)
 	if resp != nil && resp.Body != nil {
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				log.Warnf("Failed to close dial error response body: %v", err)
+			}
+		}()
 		body, err := io.ReadAll(io.LimitReader(resp.Body, maxDialErrorBodyBytes))
-		_ = resp.Body.Close()
 		if err == nil {
 			if trimmed := strings.TrimSpace(string(body)); trimmed != "" {
 				detail = trimmed
