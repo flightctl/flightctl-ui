@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type { TFunction } from 'react-i18next';
 import {
   Alert,
   AlertActionLink,
@@ -13,13 +14,42 @@ import {
   StackItem,
 } from '@patternfly/react-core';
 
-import { ApplicationStatusType, type Device, type DeviceApplicationStatus } from '@flightctl/types';
+import {
+  ApplicationDesiredState,
+  ApplicationStatusType,
+  type Device,
+  type DeviceApplicationStatus,
+} from '@flightctl/types';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { type AppConsoleConnectError, useAppConsoleWebSocket } from '../../hooks/useAppConsoleWebSocket';
+import { getDeviceAppLifecycleOverrides, isAppConsoleAvailable } from '../../utils/applicationLifecycle';
 import { useOrganizationGuardContext } from '../common/OrganizationGuard';
 import TerminalConnectError from './TerminalConnectError';
 import Terminal, { type ImperativeTerminalType } from './Terminal';
+
+const getAppTerminalUnavailableTitle = (
+  t: TFunction,
+  status: ApplicationStatusType,
+  desiredState: ApplicationDesiredState | undefined,
+) => {
+  switch (status) {
+    case ApplicationStatusType.ApplicationStatusStarting:
+    case ApplicationStatusType.ApplicationStatusPreparing:
+      return t('The virtual machine is starting. Console will be available once running.');
+    case ApplicationStatusType.ApplicationStatusStopped:
+    case ApplicationStatusType.ApplicationStatusCompleted:
+      return t('The virtual machine is stopped. Start the VM to access the console.');
+    case ApplicationStatusType.ApplicationStatusStopping:
+      return t('The virtual machine is stopping. Start the VM to access the console.');
+    default:
+      if (desiredState === ApplicationDesiredState.ApplicationDesiredStateStopped) {
+        // App is currently running, but it has been signaled to stop.
+        return t('The virtual machine is stopping. Start the VM to access the console.');
+      }
+      return t('The virtual machine is not running. Start the VM to access the console.');
+  }
+};
 
 const AppTerminalContent = ({
   appStatus,
@@ -48,23 +78,6 @@ const AppTerminalContent = ({
     [terminalRef, reconnect],
   );
 
-  if (appStatus.status !== ApplicationStatusType.ApplicationStatusRunning) {
-    return (
-      <Bullseye>
-        <Alert
-          variant="info"
-          isInline
-          isPlain
-          title={
-            appStatus.status === ApplicationStatusType.ApplicationStatusStarting
-              ? t('The virtual machine is starting. Console will be available once running.')
-              : t('The virtual machine is not running. Start the VM to access the console.')
-          }
-        />
-      </Bullseye>
-    );
-  }
-
   if (isConnecting) {
     return (
       <Bullseye data-testid="app-console-loading">
@@ -90,7 +103,7 @@ const AppTerminalContent = ({
         <Alert
           isInline
           variant="info"
-          title={t('Connection was closed')}
+          title={t('Connection was closed. The VM may be starting, stopping, or stopped.')}
           actionLinks={<AlertActionLink onClick={() => handleReconnect()}>{t('Reconnect')}</AlertActionLink>}
         />
       )}
@@ -123,8 +136,34 @@ const AppTerminal = ({
   const [isOpen, setIsOpen] = React.useState(false);
   const terminal = React.useRef<ImperativeTerminalType>(null);
 
-  const selectedApp = appName ? consoleAppStatuses.find((app) => app.name === appName) : undefined;
-  const activeAppName = selectedApp?.status === ApplicationStatusType.ApplicationStatusRunning ? selectedApp.name : '';
+  const lifecycleOverrides = React.useMemo(
+    () => getDeviceAppLifecycleOverrides(device.metadata.annotations ?? {}),
+    [device.metadata.annotations],
+  );
+
+  const availableApps = consoleAppStatuses.filter((app) =>
+    isAppConsoleAvailable(app.status, lifecycleOverrides[app.name]),
+  );
+
+  // The app that is currently connected to the terminal.
+  let connectedApp: DeviceApplicationStatus | undefined = undefined;
+  if (appName) {
+    connectedApp = availableApps.find((app) => app.name === appName);
+  }
+  // Only select an app by default if it's the only VM app in the device, and it's available.
+  if (!connectedApp && consoleAppStatuses.length === 1 && availableApps.length === 1) {
+    connectedApp = availableApps[0];
+  }
+
+  // The app that is selected in the dropdown. It will remain selected even if the VM becomes unavailable (it's stopped, etc).
+  let selectedApp: DeviceApplicationStatus | undefined = undefined;
+  if (connectedApp) {
+    selectedApp = connectedApp;
+  } else if (appName) {
+    selectedApp = consoleAppStatuses.find((app) => app.name === appName);
+  } else if (consoleAppStatuses.length === 1) {
+    selectedApp = consoleAppStatuses[0];
+  }
 
   const onMsgReceived = React.useCallback((data: string) => {
     terminal.current?.onDataReceived(data);
@@ -133,7 +172,7 @@ const AppTerminal = ({
 
   const { sendMessage, isClosed, error, reconnect, isConnecting, disconnect } = useAppConsoleWebSocket(
     device.metadata.name || '',
-    activeAppName,
+    connectedApp?.name || '',
     currentOrganization?.id || undefined,
     onMsgReceived,
   );
@@ -168,7 +207,7 @@ const AppTerminal = ({
             setIsOpen(false);
             handleAppSelect(String(value));
           }}
-          selected={appName}
+          selected={selectedApp?.name}
           shouldFocusToggleOnSelect
           toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
             <MenuToggle
@@ -183,12 +222,13 @@ const AppTerminal = ({
         >
           <SelectList>
             {consoleAppStatuses.map((app) => {
-              const isAvailable = app.status === ApplicationStatusType.ApplicationStatusRunning;
+              const desiredState = lifecycleOverrides[app.name];
+              const isAvailable = isAppConsoleAvailable(app.status, desiredState);
               return (
                 <SelectOption
                   key={app.name}
                   value={app.name}
-                  isSelected={app.name === appName}
+                  isSelected={app.name === (appName || connectedApp?.name)}
                   description={
                     isAvailable
                       ? t('Serial console · {{status}}', { status: app.status })
@@ -204,9 +244,9 @@ const AppTerminal = ({
         </Select>
       </StackItem>
       <StackItem isFilled style={{ minHeight: 0 }}>
-        {selectedApp ? (
+        {connectedApp ? (
           <AppTerminalContent
-            appStatus={selectedApp}
+            appStatus={connectedApp}
             sendMessage={sendMessage}
             isConnecting={isConnecting}
             isClosed={isClosed}
@@ -214,6 +254,15 @@ const AppTerminal = ({
             reconnect={reconnect}
             terminalRef={terminal}
           />
+        ) : selectedApp ? (
+          <Bullseye>
+            <Alert
+              variant="info"
+              isInline
+              isPlain
+              title={getAppTerminalUnavailableTitle(t, selectedApp.status, lifecycleOverrides[selectedApp.name])}
+            />
+          </Bullseye>
         ) : (
           <Bullseye>
             <Alert

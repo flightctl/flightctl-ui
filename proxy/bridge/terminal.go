@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/textproto"
 	"net/url"
@@ -31,6 +32,60 @@ var (
 		textproto.CanonicalMIMEHeaderKey("Upgrade"),
 	}
 )
+
+// maxWSCloseReasonBytes is the RFC 6455 limit for a close-frame reason (control payload
+// is at most 125 bytes, 2 of which are the status code).
+const maxWSCloseReasonBytes = 123
+
+// maxDialErrorBodyBytes caps how much of a failed Dial response body we read when building
+// the close reason for the browser.
+const maxDialErrorBodyBytes = 1024
+
+// Matches flightctl/internal/consts: machine-readable app console error signaling that the
+// VM application has no active compute workload (stopped / still starting).
+const (
+	appConsoleErrorCodeHeader   = "X-Flightctl-App-Console-Error"
+	appConsoleErrorCodeNotReady = "app-not-ready"
+	appConsoleNotReadyCloseCode = 4002
+)
+
+// truncateWSCloseReason bounds msg to fit in a WebSocket close frame reason field.
+func truncateWSCloseReason(msg string) string {
+	if len(msg) <= maxWSCloseReasonBytes {
+		return msg
+	}
+	return strings.ToValidUTF8(msg[:maxWSCloseReasonBytes], "")
+}
+
+// dialErrorCloseReason builds a close reason of the form "<status> <detail>" so the UI can
+// map the status code while still receiving the backend/agent error text.
+// Falls back to the HTTP status text when the body is empty.
+func dialErrorCloseReason(statusCode int, resp *http.Response) string {
+	detail := http.StatusText(statusCode)
+	if resp != nil && resp.Body != nil {
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				log.Warnf("Failed to close dial error response body: %v", err)
+			}
+		}()
+		body, err := io.ReadAll(io.LimitReader(resp.Body, maxDialErrorBodyBytes))
+		if err == nil {
+			if trimmed := strings.TrimSpace(string(body)); trimmed != "" {
+				detail = trimmed
+			}
+		}
+	}
+	return truncateWSCloseReason(fmt.Sprintf("%d %s", statusCode, detail))
+}
+
+// dialErrorCloseCode picks a WebSocket close code for a failed Dial. Prefers the backend's
+// app-not-ready code (4002) over a generic internal server error.
+func dialErrorCloseCode(resp *http.Response) int {
+	if resp != nil && resp.Header.Get(appConsoleErrorCodeHeader) == appConsoleErrorCodeNotReady {
+		return appConsoleNotReadyCloseCode
+	}
+	return websocket.CloseInternalServerErr
+}
 
 type TerminalBridge struct {
 	TlsConfig *tls.Config
@@ -252,10 +307,11 @@ func (t TerminalBridge) bridgeWebSocket(w http.ResponseWriter, r *http.Request, 
 		}
 		log.Warnf("dial statusCode: '%v'", statusCode)
 
-		// On any backend error, upgrade the client to WebSocket to send a close frame
-		// The UI will receive a CloseEvent with a websocket code error and reason.
-		closeReason := fmt.Sprintf("%d %s", statusCode, http.StatusText(statusCode))
-		closeCode := websocket.CloseInternalServerErr
+		// On any backend error, upgrade the client to WebSocket to send a close frame.
+		// Include the response body (agent/API message) so the UI can show more than
+		// a generic status text such as "404 Not Found".
+		closeReason := dialErrorCloseReason(statusCode, resp)
+		closeCode := dialErrorCloseCode(resp)
 		upgrader := &websocket.Upgrader{
 			Subprotocols: websocket.Subprotocols(r),
 			CheckOrigin:  checkOrigin,
