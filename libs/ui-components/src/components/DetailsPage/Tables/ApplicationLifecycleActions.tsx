@@ -19,6 +19,7 @@ import { getDisabledTooltipProps } from '../../../utils/tooltip';
 import {
   type ApplicationLifecycleAction,
   hasAplicationStatusMismatch,
+  isAppConsoleAvailable,
   startableStatuses,
   stoppableStatuses,
   transitionalStatuses,
@@ -108,6 +109,7 @@ const ApplicationLifecycleActions = ({
 
   const isAppRunning = appStatus === ApplicationStatusType.ApplicationStatusRunning;
   const desiredStateIsStopped = desiredState === ApplicationDesiredState.ApplicationDesiredStateStopped;
+  const canOpenConsole = isAppConsoleAvailable(appStatus, desiredState);
   const canStart = startableStatuses.includes(appStatus);
   const canStop = stoppableStatuses.includes(appStatus);
   const isTransitioning = transitionalStatuses.includes(appStatus);
@@ -192,7 +194,7 @@ const ApplicationLifecycleActions = ({
                 <Button
                   variant={ButtonVariant.link}
                   icon={<TerminalIcon />}
-                  isDisabled={!isAppRunning}
+                  isDisabled={!canOpenConsole}
                   onClick={() => onOpenConsole?.(appStatusObj.name)}
                 >
                   {t('Open console')}

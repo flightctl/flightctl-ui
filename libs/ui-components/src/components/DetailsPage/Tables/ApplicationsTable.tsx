@@ -89,27 +89,49 @@ const AppExpandedDetails = ({
   return <WorkloadAppExpandedDetails application={application} desiredState={desiredState} />;
 };
 
-type RestartLoopStopButtonProps = {
-  onStop: () => void;
-  isDisabled: boolean;
-  isLoading: boolean;
-};
-
-const RestartLoopStopButton = ({ onStop, isDisabled, isLoading }: RestartLoopStopButtonProps) => {
-  const { t } = useTranslation();
-  return (
-    <Button variant="secondary" onClick={onStop} isDisabled={isDisabled} isLoading={isLoading}>
-      {t('Stop application')}
-    </Button>
-  );
-};
-
 type RestartLoopWarningProps = {
   restartDelta: number;
   canStop: boolean;
   stopDisabled: boolean;
   stopLoading: boolean;
-  onStop: () => void;
+  onStop: VoidFunction;
+};
+
+const RestartLoopWarningContent = ({
+  restartDelta,
+  canStop,
+  stopDisabled,
+  stopLoading,
+  onStop,
+}: RestartLoopWarningProps) => {
+  const { t } = useTranslation();
+  return (
+    <Stack hasGutter>
+      <StackItem>
+        {canStop
+          ? t(
+              'The application has restarted {{ restartDelta }} times this session and may be misconfigured. Stop the application to prevent further restarts and investigate the issue.',
+              { restartDelta },
+            )
+          : t(
+              'The application has restarted {{ restartDelta }} times this session and may be misconfigured. Contact an administrator to stop the application and investigate the issue.',
+              { restartDelta },
+            )}
+      </StackItem>
+      {canStop && (
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={onStop}
+          isDisabled={stopDisabled}
+          isLoading={stopLoading}
+          style={{ width: 'fit-content' }}
+        >
+          {t('Stop application')}
+        </Button>
+      )}
+    </Stack>
+  );
 };
 
 const AppRestartsWarning = ({
@@ -121,59 +143,28 @@ const AppRestartsWarning = ({
   onStop,
 }: RestartLoopWarningProps & { restarts: number }) => {
   const { t } = useTranslation();
+  const warningTitle = t('Restart loop detected');
   return (
     <Popover
-      aria-label={t('Restart loop detected')}
-      headerContent={t('Restart loop detected')}
+      aria-label={warningTitle}
+      headerContent={warningTitle}
       bodyContent={
-        <Stack hasGutter>
-          <StackItem>
-            {t(
-              'This application has restarted {{ count }} times this session. Stop the application to prevent further restarts and investigate the issue.',
-              {
-                count: restartDelta,
-              },
-            )}
-          </StackItem>
-
-          {canStop && (
-            <StackItem>
-              <RestartLoopStopButton onStop={onStop} isDisabled={stopDisabled} isLoading={stopLoading} />
-            </StackItem>
-          )}
-        </Stack>
+        <RestartLoopWarningContent
+          restartDelta={restartDelta}
+          canStop={canStop}
+          stopDisabled={stopDisabled}
+          stopLoading={stopLoading}
+          onStop={onStop}
+        />
       }
       withFocusTrap={false}
     >
-      <Button aria-label={t('Restart loop detected')} variant="link" isInline>
+      <Button aria-label={warningTitle} variant="link" isInline>
         <Label status="warning" variant="outline">
           {restarts}
         </Label>
       </Button>
     </Popover>
-  );
-};
-
-const RestartLoopAlert = ({ restartDelta, canStop, stopDisabled, stopLoading, onStop }: RestartLoopWarningProps) => {
-  const { t } = useTranslation();
-  return (
-    <Alert isInline variant="warning" title={t('This application is restarting repeatedly')}>
-      <Stack hasGutter>
-        <StackItem>
-          {t(
-            'The application has restarted {{ count }} times this session and may be misconfigured. Stop the application to prevent further restarts and investigate the issue.',
-            {
-              count: restartDelta,
-            },
-          )}
-        </StackItem>
-        {canStop && (
-          <StackItem>
-            <RestartLoopStopButton onStop={onStop} isDisabled={stopDisabled} isLoading={stopLoading} />
-          </StackItem>
-        )}
-      </Stack>
-    </Alert>
   );
 };
 
@@ -284,13 +275,15 @@ const ApplicationTableRow = ({
               </StackItem>
               {showRestartLoopWarning && isExpanded && (
                 <StackItem>
-                  <RestartLoopAlert
-                    restartDelta={restartDelta}
-                    canStop={canStop}
-                    stopDisabled={isStopDisabled}
-                    stopLoading={lifecycle.isSubmitting}
-                    onStop={onStop}
-                  />
+                  <Alert isInline variant="warning" title={t('This application is restarting repeatedly')}>
+                    <RestartLoopWarningContent
+                      restartDelta={restartDelta}
+                      canStop={canStop}
+                      stopDisabled={isStopDisabled}
+                      stopLoading={lifecycle.isSubmitting}
+                      onStop={onStop}
+                    />
+                  </Alert>
                 </StackItem>
               )}
               <StackItem>
