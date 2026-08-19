@@ -652,6 +652,7 @@
   "New label": "New label",
   "Add label": "Add label",
   "Unexpected error occurred": "Unexpected error occurred",
+  "Reload page": "Reload page",
   "Please reload the page and try again.": "Please reload the page and try again.",
   "Resize panel": "Resize panel",
   "This managed label matches a property reported by the device, but its value differs. The label could be out of sync if its value derives from that property.": "This managed label matches a property reported by the device, but its value differs. The label could be out of sync if its value derives from that property.",
