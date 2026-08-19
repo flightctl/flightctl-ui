@@ -7,18 +7,23 @@ const APP_CONSOLE_CLOSE_REASON = 'client disconnect';
 /** WebSocket close code from the remote-access service when another client took over the session. */
 const WS_CLOSE_SESSION_TAKEN_OVER = 4001;
 
+/**
+ * WebSocket close code from the remote-access service when the VM app has no active compute workload.
+ * App is likely starting, stopping, or stopped.
+ */
+const WS_CLOSE_APP_NOT_READY = 4002;
+
 /** HTTP status embedded in the WebSocket close reason when the console session is already in use. */
 const HTTP_SESSION_IN_USE = 409;
+
+/** HTTP status when the VM app console is temporarily unavailable. */
+const HTTP_APP_NOT_READY = 503;
 
 const isErrorCloseEvent = (evt: CloseEvent) => evt.code !== 1000 && evt.code !== 1001;
 
 export type AppConsoleConnectError =
-  | { kind: 'sessionInUse' }
-  | { kind: 'sessionTakenOver' }
-  | { kind: 'forbidden' }
-  | { kind: 'notFound' }
-  | { kind: 'timeout' }
-  | { kind: 'unknownError' };
+  | { kind: 'sessionInUse' | 'sessionTakenOver' | 'appNotReady' | 'forbidden' | 'notFound' | 'timeout' }
+  | { kind: 'unknownError'; detail?: string };
 
 const closeAppConsoleWebSocket = (ws: WebSocket) => {
   if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
@@ -26,18 +31,49 @@ const closeAppConsoleWebSocket = (ws: WebSocket) => {
   }
 };
 
-const parseCloseReasonStatus = (reason: string): number | undefined => {
-  const match = reason.trim().match(/^(\d{3})\b/);
+/** Parses proxy close reasons of the form "<status> <optional detail>". */
+export const parseCloseReason = (reason: string): { status?: number; detail?: string } => {
+  const trimmed = reason.trim();
+  const match = trimmed.match(/^(\d{3})(?:\s+(.*))?$/);
   if (!match) {
-    return undefined;
+    return trimmed ? { detail: trimmed } : {};
   }
-  return Number.parseInt(match[1], 10);
+  const status = Number.parseInt(match[1], 10);
+  const detail = match[2]?.trim();
+  if (!detail) {
+    return { status };
+  }
+  // Drop generic HTTP status text so callers can fall back to canned copy.
+  const statusText = (
+    {
+      403: 'Forbidden',
+      404: 'Not Found',
+      409: 'Conflict',
+      503: 'Service Unavailable',
+      504: 'Gateway Timeout',
+      502: 'Bad Gateway',
+    } as Record<number, string>
+  )[status];
+  if (statusText && detail.toLowerCase() === statusText.toLowerCase()) {
+    return { status };
+  }
+  return { status, detail };
 };
 
-const connectErrorFromHttpStatus = (status: number | undefined): AppConsoleConnectError => {
+const connectErrorFromCloseEvent = (evt: CloseEvent): AppConsoleConnectError => {
+  if (evt.code === WS_CLOSE_SESSION_TAKEN_OVER) {
+    return { kind: 'sessionTakenOver' };
+  }
+  if (evt.code === WS_CLOSE_APP_NOT_READY) {
+    return { kind: 'appNotReady' };
+  }
+  // Fall back to HTTP status code if no WebSocket close code is present.
+  const { status, detail } = parseCloseReason(evt.reason);
   switch (status) {
     case HTTP_SESSION_IN_USE:
       return { kind: 'sessionInUse' };
+    case HTTP_APP_NOT_READY:
+      return { kind: 'appNotReady' };
     case 403:
       return { kind: 'forbidden' };
     case 404:
@@ -45,15 +81,8 @@ const connectErrorFromHttpStatus = (status: number | undefined): AppConsoleConne
     case 504:
       return { kind: 'timeout' };
     default:
-      return { kind: 'unknownError' };
+      return { kind: 'unknownError', detail };
   }
-};
-
-const connectErrorFromCloseEvent = (evt: CloseEvent): AppConsoleConnectError => {
-  if (evt.code === WS_CLOSE_SESSION_TAKEN_OVER) {
-    return { kind: 'sessionTakenOver' };
-  }
-  return connectErrorFromHttpStatus(parseCloseReasonStatus(evt.reason));
 };
 
 const decodeMessageData = (data: ArrayBuffer | string): string => {
@@ -193,14 +222,15 @@ export const useAppConsoleWebSocket = (
         sessionActiveRef.current = false;
         if (isMountedRef.current) {
           setIsConnecting(false);
-          if (evt.code === WS_CLOSE_SESSION_TAKEN_OVER) {
-            setError(connectErrorFromCloseEvent(evt));
+          const connectError = connectErrorFromCloseEvent(evt);
+          if (connectError.kind === 'sessionTakenOver' || connectError.kind === 'appNotReady') {
+            setError(connectError);
             wsRef.current = undefined;
             return;
           }
           setIsClosed(true);
           if (isErrorCloseEvent(evt) && !hasReceivedMessageRef.current) {
-            setError(connectErrorFromCloseEvent(evt));
+            setError(connectError);
           }
         }
         wsRef.current = undefined;
