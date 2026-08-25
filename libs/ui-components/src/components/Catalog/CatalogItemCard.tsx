@@ -15,7 +15,8 @@ import * as React from 'react';
 import { type CatalogItem, CatalogItemCategory } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { getCatalogItemBadge, getCatalogItemIcon } from '../../utils/catalog';
+import { getCatalogItemBadge, getCatalogItemIcon, getCatalogItemLabel } from '../../utils/catalog';
+import { CatalogItemLabel } from './CatalogItemLabels';
 
 export type CatalogItemCardProps = {
   catalogItem: CatalogItem;
@@ -31,7 +32,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({ catalogItem, onSelect
           onClickAction: onSelect,
           onChange: onSelect,
           selectableActionAriaLabel: t('Select {{ name }}', {
-            name: catalogItem.spec.displayName || catalogItem.metadata.name,
+            name: getCatalogItemLabel(catalogItem),
           }),
         }}
       >
@@ -57,8 +58,10 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({ catalogItem, onSelect
         <Stack hasGutter>
           <StackItem>
             <Stack>
-              <StackItem>
-                <Title headingLevel="h3">{catalogItem.spec.displayName || catalogItem.metadata.name}</Title>
+              <StackItem isFilled>
+                <Title headingLevel="h3">
+                  <CatalogItemLabel item={catalogItem} shortened />
+                </Title>
               </StackItem>
               {catalogItem.spec.provider && (
                 <StackItem>

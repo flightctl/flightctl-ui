@@ -34,6 +34,8 @@ import { hasPackageModeCapability } from '../../../utils/capabilities';
 import { appendJSONPatch } from '../../../utils/patch';
 import EditOsWizard from './EditOsWizard';
 import EditAppWizard from './EditAppWizard';
+import { CatalogItemLabel } from '../CatalogItemLabels';
+import TruncatedText from '../../common/TruncatedText';
 
 type EditWizardProps = {
   specPath: string;
@@ -188,7 +190,11 @@ const EditWizard = ({
     }
   }
 
-  const catalogDisplayName = catalogItem?.spec.displayName || params.itemId;
+  const titleEl = catalogItem ? (
+    <CatalogItemLabel item={catalogItem} shortened />
+  ) : (
+    <TruncatedText text={params.itemId} maxChars={30} />
+  );
 
   return (
     <>
@@ -209,16 +215,17 @@ const EditWizard = ({
               {t('Software catalog')}
             </Link>
           </BreadcrumbItem>
-          <BreadcrumbItem isActive>{`${catalogDisplayName}${appName ? ` (${appName})` : ''}`}</BreadcrumbItem>
+          <BreadcrumbItem isActive>
+            {titleEl}
+            {appName ? ` (${appName})` : ''}
+          </BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
       <PageSection hasBodyWrapper={false}>
         <Stack>
           <StackItem>
             <Title headingLevel="h1" size="3xl">
-              {version
-                ? t('Deploy {{ name }}', { name: catalogDisplayName })
-                : t('Edit {{name}}', { name: catalogDisplayName })}
+              {version ? t('Deploy') : t('Edit')} {titleEl}
             </Title>
           </StackItem>
           <StackItem>

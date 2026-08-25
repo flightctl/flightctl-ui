@@ -48,11 +48,12 @@ import {
 import FlightCtlForm from '../form/FlightCtlForm';
 import { type PaginationDetails } from '../../hooks/useTablePagination';
 import { getErrorMessage } from '../../utils/error';
-import { buildCatalogItemRef, formatCatalogItemRef } from '../../utils/catalog';
+import { buildCatalogItemRef } from '../../utils/catalog';
 import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import FlightCtlModal from '../common/FlightCtlModal';
 import { InstallSpec } from '../Catalog/InstallWizard/steps/SpecificationsStep';
 import CatalogItemTitle from '../Catalog/CatalogItemTitle';
+import { CatalogItemRefLabel } from '../Catalog/CatalogItemLabels';
 import { type InstallSpecFormik } from '../Catalog/InstallWizard/types';
 import { useCatalogItems } from '../Catalog/useCatalogItems';
 import { useResolvedCatalogRef } from '../Catalog/useResolvedCatalogRef';
@@ -330,9 +331,7 @@ const VolumeImageField = ({ idSchema, formData, onChange, rawErrors, formContext
             {catalogItem ? (
               <CatalogItemTitle item={catalogItem} channel={catalogRef.channel || ''} version={catalogRef.version} />
             ) : (
-              t('Catalog item {{ catalogItemRef }}', {
-                catalogItemRef: formatCatalogItemRef(catalogRef),
-              })
+              <CatalogItemRefLabel catalogItemRef={catalogRef} />
             )}
           </SplitItem>
           <SplitItem>
