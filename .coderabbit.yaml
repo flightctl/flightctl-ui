@@ -157,12 +157,25 @@ reviews:
     - path: "{libs,apps}/*/src/**/*.{ts,tsx}"
       instructions: |
         i18n review:
-        - All user-visible strings must use the t() translation function
+        - User-facing copy that a translator can meaningfully localize
+          must use the t() translation function. Translation changes
+          visual wording only — it must not alter UX behavior, layout
+          structure, or functional semantics.
         - Translation keys must be hardcoded string literals so the
           i18next-parser can extract them — never use variables as keys:
           GOOD: t('Device enrolled')  BAD: t(statusMessage)
         - Interpolation variables are fine: t('Found {{count}} devices', { count })
         - Do not hand-edit libs/i18n/locales/en/translation.json
+
+        Do NOT flag these as missing i18n (common false positives):
+        - Dynamic or system values rendered as-is: resource names, IDs, or
+          other data from the backend or user input. Example:
+          `(${appName})` where appName is a variable — a translator
+          cannot meaningfully localize this.
+        - UX design tokens with fixed meaning across the UI, such as
+          '-' for missing/empty values. These are not translatable copy.
+        - Programming-language or configuration code snippets. Example:
+          #cloud-config\npackage_update: true\npackages:\n  - nginx
 
     # ── Accessibility (a11y) ─────────────────────────────────────
     - path: "**/*.tsx"
@@ -498,9 +511,13 @@ reviews:
 
       - name: "i18n-compliance"
         instructions: |
-          Flag user-visible strings in .tsx files that are not wrapped
-          in the t() translation function. Flag t() calls that use
-          variables as keys instead of hardcoded string literals.
+          Flag user-facing copy in .tsx files that a translator could
+          meaningfully localize but is not wrapped in t(). Flag t()
+          calls that use variables as keys instead of hardcoded string
+          literals. Do NOT flag: dynamic/system values (names, IDs,
+          API data); UX tokens like '-' for empty/missing values; or
+          literal code or configuration snippet content (source/config
+          shown as-is, not UI labels).
         mode: "warning"
 
 # ── Knowledge base ───────────────────────────────────────────
