@@ -211,7 +211,7 @@ const getFleetDisabledReason = (
     return t('You do not have permissions to edit fleets');
   }
   if (size === 0) {
-    return t('No fleet is available');
+    return t('No fleet eligible for catalog deployment is available');
   }
   if (!hasContainer) {
     return t('Container artifact not available');
@@ -247,14 +247,14 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
   const deviceRadioRef = React.useRef<HTMLSpanElement>(null);
   const newDeviceRadioRef = React.useRef<HTMLSpanElement>(null);
 
-  const { fleets, isLoading: fleetsLoading } = useFleets({});
+  const { isLoading: fleetsLoading, pagination: fleetPagination } = useFleets({ onlyUnmanaged: true });
   const { devices, isLoading: devicesLoading } = useDevicesPaginated({
     onlyDecommissioned: false,
     onlyFleetless: true,
     excludePackageMode: catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS,
   });
 
-  const unmanagedFleetsCount = fleets.filter((f) => !f.metadata?.owner).length;
+  const eligibleFleetsCount = fleetPagination.itemCount;
 
   const hasContainer = catalogItem.spec.versions.some(
     (v) => v.version === values.version && v.references[CatalogItemArtifactType.CatalogItemArtifactTypeContainer],
@@ -263,7 +263,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
   const fleetDisabledReason = getFleetDisabledReason(t, {
     canEdit: canEditFleet,
     canList: canListFleet,
-    size: unmanagedFleetsCount,
+    size: eligibleFleetsCount,
     hasContainer,
   });
 
@@ -317,7 +317,9 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                         name="target"
                         checkedValue="fleet"
                         label={<span ref={fleetRadioRef}>{t('Existing Fleet')}</span>}
-                        description={t('Deploy to all devices in a fleet')}
+                        description={t(
+                          'Deploy to all devices in a fleet. Fleets managed by a resource sync are excluded.',
+                        )}
                         isDisabled={!!fleetDisabledReason}
                       />
                     </WithTooltip>

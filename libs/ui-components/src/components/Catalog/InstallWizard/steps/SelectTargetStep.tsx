@@ -153,6 +153,7 @@ const FleetTarget = ({
     pagination: fleetPagination,
   } = useFleets({
     name: fleetNameFilter || undefined,
+    onlyUnmanaged: true,
     addDevicesSummary: true,
   });
 
@@ -215,7 +216,6 @@ const FleetTarget = ({
                 }}
                 singleSelect
                 hideActions
-                isSelectDisabled={!!fleet.metadata?.owner}
               />
             ))}
           </Tbody>
