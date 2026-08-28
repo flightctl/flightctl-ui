@@ -20,7 +20,7 @@ COPY proxy /app
 USER 0
 RUN CGO_ENABLED=1 CGO_CFLAGS=-flto GOEXPERIMENT=strictfipsruntime go build
 
-FROM quay.io/flightctl/flightctl-base:el10-10.1-1769518576
+FROM quay.io/flightctl/flightctl-base:10.1-1769518576
 COPY --from=ui-build /app/apps/ocp-plugin/dist /app/proxy/dist
 COPY --from=proxy-build /app/flightctl-ui /app/proxy
 WORKDIR /app/proxy
