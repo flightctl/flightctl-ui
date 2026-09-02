@@ -28,7 +28,7 @@ const EnrollmentRequestEmptyState = () => {
   return <ResourceListEmptyState icon={MicrochipIcon} titleText={t('No enrollment requests here!')} />;
 };
 
-const getEnrollmentColumns = (t: TFunction) => [
+export const getEnrollmentRequestTableColumns = (t: TFunction) => [
   {
     name: t('Alias'),
   },
@@ -57,7 +57,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const { remove } = useFetch();
   const [search, setSearch] = React.useState<string>('');
 
-  const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
+  const enrollmentColumns = React.useMemo(() => getEnrollmentRequestTableColumns(t), [t]);
   const [pendingEnrollments, isLoading, error, refetch, pagination] = usePendingEnrollments(search);
   const itemCount = pendingEnrollments.length;
 
