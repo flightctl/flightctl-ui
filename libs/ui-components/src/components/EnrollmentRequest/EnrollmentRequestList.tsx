@@ -80,8 +80,10 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
     },
   });
 
-  // In non-standalone mode, hide the entire component when the search result is empty (and not due to filtering)
-  const isLastUnfilteredListEmpty = !search && itemCount === 0;
+  const isInitialUnfilteredLoad = !search && itemCount === 0 && isLoading;
+
+  // In non-standalone mode, hide the entire component when the unfiltered list is empty.
+  const isLastUnfilteredListEmpty = !search && itemCount === 0 && !isLoading;
   if (!isStandalone && isLastUnfilteredListEmpty) {
     return null;
   }
@@ -93,8 +95,13 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
       title={t('Devices pending approval')}
       headingLevel="h2"
       description={t('Review and approve devices requesting to join your environment.')}
+      testId="pending-enrollment-requests-section"
     >
-      <ListPageBody error={error} loading={false}>
+      <ListPageBody
+        error={error}
+        loading={!isStandalone && isInitialUnfilteredLoad}
+        loadingTestId="pending-enrollment-requests-loading"
+      >
         <EnrollmentRequestTableToolbar search={search} setSearch={setSearch} enrollments={pendingEnrollments}>
           {(canApprove || canDelete) && (
             <ToolbarItem>
@@ -113,7 +120,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
         </EnrollmentRequestTableToolbar>
         <Table
           aria-label={t('Table for devices pending approval')}
-          loading={!!isStandalone && isLoading && isLastUnfilteredListEmpty}
+          loading={!!isStandalone && isInitialUnfilteredLoad}
           columns={enrollmentColumns}
           emptyData={itemCount === 0}
           clearFilters={() => setSearch('')}
