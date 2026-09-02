@@ -1,0 +1,7 @@
+.fctl-quickstart-card {
+  margin-bottom: var(--pf-t--global--spacer--xl);
+}
+
+.fctl-quickstart-card__expanded {
+  border-top: 3px solid var(--pf-t--global--color--brand--default, #06c);
+}
