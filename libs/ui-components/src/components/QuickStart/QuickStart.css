@@ -1,7 +1,25 @@
-.fctl-quickstart-card {
+/* Quick start panel on the Overview page */
+.fctl-quickstart-panel {
   margin-bottom: var(--pf-t--global--spacer--xl);
 }
 
-.fctl-quickstart-card__expanded {
+.fctl-quickstart-panel__expanded {
   border-top: 3px solid var(--pf-t--global--color--brand--default, #06c);
+}
+
+/* Individual phase cards in the quick start panel */
+.fctl-quickstart-phase {
+  width: 100%;
+}
+
+.fctl-quickstart-phase.fctl-quickstart-phase--locked {
+  opacity: 65%;
+}
+
+.fctl-quickstart-phase .fctl-quickstart-phase__icon .pf-v6-c-icon__content {
+  --pf-v6-c-icon__content--Color: var(--pf-t--global--icon--color--brand--default);
+}
+
+.fctl-quickstart-phase.fctl-quickstart-phase--locked .pf-v6-c-icon__content {
+  --pf-v6-c-icon__content--Color: var(--pf-t--global--icon--color--disabled);
 }

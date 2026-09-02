@@ -20,7 +20,7 @@ import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circl
 
 import { BindingType } from '@flightctl/types/imagebuilder';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { useAppContext } from '../../../../hooks/useAppContext';
+import { useProductName } from '../../../../hooks/useProductName';
 import { type ImageBuildFormValues, type ImageBuildWizardError } from '../types';
 import { getImageReference } from '../../../../utils/imageBuilds';
 import { getExportFormatLabel } from '../../../../utils/imageBuilds';
@@ -39,9 +39,8 @@ type ReviewStepProps = {
 
 const ReviewStep = ({ error }: ReviewStepProps) => {
   const { t } = useTranslation();
-  const { settings } = useAppContext();
   const { values } = useFormikContext<ImageBuildFormValues>();
-  const productName = settings.isRHEM ? t('Red Hat Edge Manager') : t('Flight Control');
+  const productName = useProductName();
   const { ociRegistries } = useOciRegistriesContext();
 
   const srcImageReference = React.useMemo(

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type { TFunction } from 'i18next';
 import {
   Button,
   Card,
@@ -31,14 +32,18 @@ import HomeIcon from '@patternfly/react-icons/dist/js/icons/home-icon';
 import BuilderImageIcon from '@patternfly/react-icons/dist/js/icons/builder-image-icon';
 import PlusCircleIcon from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import CubesIcon from '@patternfly/react-icons/dist/js/icons/cubes-icon';
+import CheckCircleIcon from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
 
-import type { QuickStartPhase } from './types';
+import type { PhaseCardStatus, QuickStartPhase, QuickStartPhaseIcon, QuickStartPhaseId } from './types';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useProductName } from '../../hooks/useProductName';
+import { usePermissionsContext } from '../common/PermissionsContext';
 import { useQuickStart } from './QuickStartContext';
+import { getPhaseDescription, getPhaseTitle } from './quickStartDefinitions';
 
 import './QuickStart.css';
 
-const PHASE_ICONS: Record<string, React.ComponentType> = {
+const PHASE_ICONS: Record<QuickStartPhaseIcon, React.ComponentType> = {
   home: HomeIcon,
   image: BuilderImageIcon,
   plus: PlusCircleIcon,
@@ -47,104 +52,128 @@ const PHASE_ICONS: Record<string, React.ComponentType> = {
 
 interface PhaseCardProps {
   card: QuickStartPhase;
-  isLocked: boolean;
-  prevPhaseTitle: string | undefined;
+  prevPhaseId?: QuickStartPhaseId;
 }
 
-const PhaseCard = ({ card, isLocked, prevPhaseTitle }: PhaseCardProps) => {
+const getActionLabel = (t: TFunction, status: PhaseCardStatus) => {
+  switch (status) {
+    case 'complete':
+      return t('Restart');
+    case 'in-progress':
+      return t('Continue');
+    default:
+      return t('Start');
+  }
+};
+
+const CardStatusLabel = ({ status }: { status: PhaseCardStatus }) => {
+  const { t } = useTranslation();
+
+  switch (status) {
+    case 'complete':
+      return (
+        <Label isCompact color="green" icon={<CheckCircleIcon />}>
+          {t('Complete')}
+        </Label>
+      );
+    case 'in-progress':
+      return (
+        <Label isCompact color="blue">
+          {t('In progress')}
+        </Label>
+      );
+    case 'locked':
+      return (
+        <Label isCompact color="grey" icon={<LockIcon />}>
+          {t('Locked')}
+        </Label>
+      );
+    default:
+      return null;
+  }
+};
+
+const PhaseCard = ({ card, prevPhaseId }: PhaseCardProps) => {
   const { t } = useTranslation();
   const { startPhase } = useQuickStart();
-  const PhaseIcon = PHASE_ICONS[card.icon] || HomeIcon;
+  const { checkPermissions } = usePermissionsContext();
+  const PhaseIcon = PHASE_ICONS[card.icon];
+
+  const isLocked = card.status === 'locked';
+  const actionLabel = getActionLabel(t, card.status);
+  const productName = useProductName();
+
+  let lockedByPhase: string | undefined;
+  if (isLocked) {
+    lockedByPhase = prevPhaseId ? getPhaseTitle(t, prevPhaseId) : undefined;
+  }
 
   return (
     <Card
       id={`quickstart-phase-${card.id}`}
+      className={`fctl-quickstart-phase ${isLocked ? 'fctl-quickstart-phase--locked' : ''}`}
       isFullHeight
-      style={isLocked ? { opacity: 0.65, width: '100%' } : { width: '100%' }}
     >
-      <CardBody
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-        }}
-      >
-        <Stack hasGutter style={{ flex: 1 }}>
-          <StackItem>
-            <Icon
-              size="xl"
-              style={
-                {
-                  '--pf-v6-c-icon__content--Color': isLocked
-                    ? 'var(--pf-t--global--icon--color--disabled)'
-                    : 'var(--pf-t--global--icon--color--brand--default)',
-                } as React.CSSProperties
-              }
-            >
+      <CardBody>
+        <Stack hasGutter>
+          <StackItem className="fctl-quickstart-phase__icon">
+            <Icon size="xl">
               <PhaseIcon />
             </Icon>
           </StackItem>
           <StackItem>
-            <Content component={ContentVariants.h3} className="pf-v6-u-mb-0">
-              {card.title}
-            </Content>
+            <Content component={ContentVariants.h3}>{getPhaseTitle(t, card.id)}</Content>
           </StackItem>
           <StackItem>
             <LabelGroup>
               <Label isCompact icon={<OutlinedClockIcon />}>
-                {t('{{count}} minutes', { count: 3 })}
+                {t('{{count}} minutes', { count: card.estimatedMinutes })}
               </Label>
-              <Label isCompact color="blue">
-                {t('{{count}} tasks', { count: 1 })}
-              </Label>
-              {isLocked && (
-                <Label isCompact color="grey" icon={<LockIcon />}>
-                  {t('Locked')}
+              {card.stepCount > 0 && (
+                <Label isCompact color="blue">
+                  {t('{{count}} tasks', { count: card.stepCount })}
                 </Label>
               )}
+              <CardStatusLabel status={card.status} />
             </LabelGroup>
           </StackItem>
           <StackItem>
-            <Content component={ContentVariants.p} className="pf-v6-u-color-200 pf-v6-u-mb-0">
-              {card.description}
+            <Content component={ContentVariants.p}>
+              {getPhaseDescription(t, card.id, productName, checkPermissions)}
             </Content>
           </StackItem>
-        </Stack>
-        <div style={{ marginTop: 'auto', paddingTop: 'var(--pf-t--global--spacer--md, 16px)' }}>
-          {isLocked ? (
-            <Popover
-              headerContent={t('Prerequisites')}
-              bodyContent={
-                <ul className="pf-v6-u-mb-0">
-                  <li>{t('Complete "{{prevPhaseTitle}}"', { prevPhaseTitle })}</li>
-                </ul>
-              }
-              triggerAction="hover"
-            >
-              <Button
-                variant="link"
-                isInline
-                icon={<InfoCircleIcon />}
-                iconPosition="end"
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
+          <StackItem style={{ marginTop: 'auto' }}>
+            {lockedByPhase ? (
+              <Popover
+                headerContent={t('Prerequisites')}
+                bodyContent={t('Complete "{{prevPhaseTitle}}"', { prevPhaseTitle: lockedByPhase })}
+                triggerAction="hover"
               >
-                {t('Prerequisites (1)')}
+                <Button
+                  variant="link"
+                  isInline
+                  icon={<InfoCircleIcon />}
+                  iconPosition="end"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  {t('Prerequisites (1)')}
+                </Button>
+              </Popover>
+            ) : (
+              <Button variant="primary" onClick={() => startPhase(card.id)}>
+                {actionLabel}
               </Button>
-            </Popover>
-          ) : (
-            <Button variant="primary" onClick={() => startPhase(card.id)}>
-              {t('Start')}
-            </Button>
-          )}
-        </div>
+            )}
+          </StackItem>
+        </Stack>
       </CardBody>
     </Card>
   );
 };
 
-const QuickStartToggleAction = ({ onToggle, compact = false }: { onToggle: () => void; compact?: boolean }) => {
+const QuickStartToggleAction = ({ onToggle, compact = false }: { onToggle: VoidFunction; compact?: boolean }) => {
   const { t } = useTranslation();
 
   return (
@@ -158,31 +187,33 @@ const QuickStartToggleAction = ({ onToggle, compact = false }: { onToggle: () =>
 
 const QuickStart = () => {
   const { t } = useTranslation();
-  const { panelVisibility, phases, toggleVisibility, toggleCollapsed } = useQuickStart();
+  const { panelVisibility, phases, totalPhaseCount, totalMinutes, toggleVisibility, toggleCollapsed } = useQuickStart();
 
   if (panelVisibility === 'hidden') {
     return null;
   }
 
-  const totalPhases = phases.length;
+  const heading = t('Quick start guide');
+  const subtitle = t('Follow these phases to get your edge management environment up and running.');
+  const completedPhaseCount = phases.filter((phase) => phase.status === 'complete').length;
 
   if (panelVisibility === 'collapsed') {
     return (
-      <Card className="fctl-quickstart-card">
+      <Card className="fctl-quickstart-panel">
         <CardBody>
           <Split hasGutter>
             <SplitItem isFilled>
               <Flex alignItems={{ default: 'alignItemsCenter' }} spaceItems={{ default: 'spaceItemsMd' }}>
                 <FlexItem>
                   <Content component="p" className="pf-v6-u-font-weight-bold">
-                    {t('Quick start guide')}
+                    {heading}
                   </Content>
                 </FlexItem>
                 <FlexItem>
                   <Content component={ContentVariants.small}>
                     {t('{{completed}}/{{total}} phases complete', {
-                      completed: 0,
-                      total: totalPhases,
+                      completed: completedPhaseCount,
+                      total: totalPhaseCount,
                     })}
                   </Content>
                 </FlexItem>
@@ -210,8 +241,10 @@ const QuickStart = () => {
     );
   }
 
+  const progressValue = totalPhaseCount > 0 ? Math.round((completedPhaseCount / totalPhaseCount) * 100) : 0;
+
   return (
-    <Card className="fctl-quickstart-card fctl-quickstart-card__expanded">
+    <Card className="fctl-quickstart-panel fctl-quickstart-panel__expanded">
       <CardHeader
         actions={{
           actions: (
@@ -229,12 +262,10 @@ const QuickStart = () => {
         <CardTitle>
           <Stack>
             <StackItem>
-              <Content component={ContentVariants.h2}>{t('Quick start guide')}</Content>
+              <Content component={ContentVariants.h2}>{heading}</Content>
             </StackItem>
             <StackItem>
-              <Content component="p" className="pf-v6-u-color-200">
-                {t('Follow these phases to get your edge management environment up and running.')}
-              </Content>
+              <Content component="p">{subtitle}</Content>
             </StackItem>
           </Stack>
         </CardTitle>
@@ -245,10 +276,13 @@ const QuickStart = () => {
             <Split hasGutter>
               <SplitItem isFilled>
                 <Progress
-                  value={0}
+                  value={progressValue}
                   title={t('Progress')}
                   measureLocation="outside"
-                  label={t('{{completed}} of {{total}}', { completed: 0, total: totalPhases })}
+                  label={t('{{completed}} of {{total}}', {
+                    completed: completedPhaseCount,
+                    total: totalPhaseCount,
+                  })}
                 />
               </SplitItem>
               <SplitItem>
@@ -259,8 +293,8 @@ const QuickStart = () => {
                     </Icon>
                   </FlexItem>
                   <FlexItem>
-                    <Content component={ContentVariants.small} className="pf-v6-u-color-200">
-                      {t('~{{count}} minutes', { count: 44 })}
+                    <Content component={ContentVariants.small}>
+                      {t('~{{count}} minutes', { count: totalMinutes })}
                     </Content>
                   </FlexItem>
                 </Flex>
@@ -269,15 +303,14 @@ const QuickStart = () => {
           </StackItem>
           <StackItem>
             <Grid hasGutter>
-              {phases.map((phase, index) => (
-                <GridItem key={phase.id} md={6} lg={3} style={{ display: 'flex' }}>
-                  <PhaseCard
-                    card={phase}
-                    isLocked={index > 0}
-                    prevPhaseTitle={index === 0 ? undefined : phases[index - 1].title}
-                  />
-                </GridItem>
-              ))}
+              {phases.map((phase, index) => {
+                const prevPhaseId = index === 0 ? undefined : phases[index - 1]?.id;
+                return (
+                  <GridItem key={phase.id} md={6} lg={3} style={{ display: 'flex' }}>
+                    <PhaseCard card={phase} prevPhaseId={prevPhaseId} />
+                  </GridItem>
+                );
+              })}
             </Grid>
           </StackItem>
           <StackItem>

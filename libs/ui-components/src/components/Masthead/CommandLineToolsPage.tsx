@@ -14,7 +14,7 @@ import {
 import ExternalLinkAltIcon from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { useAppContext } from '../../hooks/useAppContext';
+import { useProductName } from '../../hooks/useProductName';
 import { type CliArtifactsDisplayResponse, useCliArtifacts } from '../../hooks/useCliArtifacts';
 import { type CliArtifact, CliArtifactTool } from '../../types/extraTypes';
 import { getArtifactDownloadLabel, getArtifactUrl } from '../../utils/cliArtifacts';
@@ -145,10 +145,9 @@ const CommandLineToolsContent = ({
 
 const CommandLineToolsPage = () => {
   const { t } = useTranslation();
-  const { settings } = useAppContext();
   const { loading, loadError, hasArtifactsEnabled, artifactsResponse } = useCliArtifacts();
 
-  const productName = settings.isRHEM ? t('Red Hat Edge Manager') : t('Flight Control');
+  const productName = useProductName();
 
   return (
     <PageSection hasBodyWrapper={false}>

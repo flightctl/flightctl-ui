@@ -14,7 +14,6 @@ import { type PaginationDetails, useTablePagination } from '../../hooks/useTable
 import { PAGE_SIZE } from '../../constants';
 import { toImageBuildWithExports } from './CreateImageBuildWizard/utils';
 import { getLatestPromotion } from './NewVersionImageBuildWizard/utils';
-
 export enum ImageBuildsSearchParams {
   Name = 'name',
 }
