@@ -41,4 +41,21 @@ describe('Enrollment requests approval', () => {
     // NOTE: The ER will still appear in the device list as such.
     // To mock it properly, we'd need to remove it from the ER list, and add its equivalent item to the Device list.
   });
+
+  it('Pending enrollment requests remain visible while clearing an empty search result', () => {
+    cy.wait('@all-enrollment-requests');
+    devicesPage.firstEnrollmentRequestRow.should('be.visible');
+
+    devicesPage.enrollmentRequestSearchInput.type('fake');
+    cy.wait('@all-enrollment-requests');
+    devicesPage.pendingEnrollmentRequestsNoResults.should('be.visible');
+    devicesPage.firstEnrollmentRequestRow.should('not.exist');
+
+    devicesPage.enrollmentRequestSearchInput.clear();
+    devicesPage.pendingEnrollmentRequestsSection.should('be.visible');
+    devicesPage.pendingEnrollmentRequestsLoading.should('be.visible');
+
+    cy.wait('@all-enrollment-requests');
+    devicesPage.firstEnrollmentRequestRow.scrollIntoView().should('be.visible');
+  });
 });

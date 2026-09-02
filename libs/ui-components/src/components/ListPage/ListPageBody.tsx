@@ -9,9 +9,10 @@ type ListPageBodyProps = {
   error: unknown;
   loading: boolean;
   children: React.ReactNode;
+  loadingTestId?: string;
 };
 
-const ListPageBody: React.FC<ListPageBodyProps> = ({ error, loading, children }) => {
+const ListPageBody: React.FC<ListPageBodyProps> = ({ error, loading, children, loadingTestId }) => {
   const { t } = useTranslation();
   if (error) {
     return (
@@ -24,7 +25,7 @@ const ListPageBody: React.FC<ListPageBodyProps> = ({ error, loading, children })
   if (loading) {
     return (
       <Bullseye>
-        <Spinner />
+        <Spinner data-testid={loadingTestId} />
       </Bullseye>
     );
   }
