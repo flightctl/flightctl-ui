@@ -257,6 +257,11 @@ export type SystemdUnitFormValue = {
   exists: boolean;
 };
 
+export enum UpdateMode {
+  Default = 'default',
+  Customized = 'customized',
+}
+
 export type DeviceSpecConfigFormValues = {
   osSpec?: ImageOrCatalogItemRefSpec;
   configTemplates: SpecConfigTemplate[];
@@ -264,7 +269,7 @@ export type DeviceSpecConfigFormValues = {
   systemdUnits: SystemdUnitFormValue[];
   updatePolicy: UpdatePolicyForm;
   registerMicroShift: boolean;
-  useBasicUpdateConfig: boolean;
+  updateMode: UpdateMode;
 };
 
 export type EditDeviceFormValues = DeviceSpecConfigFormValues & {
@@ -295,17 +300,17 @@ export type BatchForm = {
 };
 
 export type RolloutPolicyForm = {
-  isAdvanced: boolean;
+  isCustomized: boolean;
   updateTimeout: number;
   batches: BatchForm[];
 };
 
 export type DisruptionBudgetForm = DisruptionBudget & {
-  isAdvanced: boolean;
+  isCustomized: boolean;
 };
 
 export type UpdatePolicyForm = {
-  isAdvanced: boolean;
+  isCustomized: boolean;
   downloadAndInstallDiffer: boolean;
   downloadStartsAt?: string;
   downloadEndsAt?: string;

@@ -40,7 +40,7 @@ export const getRolloutPolicyValues = (fleetSpec?: FleetSpec): RolloutPolicyForm
   // If the policy does not specify the timeout, we set the backend's default as the field is required in the UI
   const updateTimeout = fleetSpec?.rolloutPolicy?.defaultUpdateTimeout || `${DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES}m`;
   return {
-    isAdvanced: batches.length > 0,
+    isCustomized: batches.length > 0,
     batches: batches.length ? batches : [getEmptyInitializedBatch()],
     updateTimeout: timeUtils.durationToMinutes(updateTimeout),
   };
@@ -50,7 +50,7 @@ export const getDisruptionBudgetValues = (fleetSpec?: FleetSpec) => {
   const budget = fleetSpec?.rolloutPolicy?.disruptionBudget || {};
   const groupLabels = budget.groupBy || [];
   return {
-    isAdvanced: Boolean(groupLabels.length > 0 || budget.minAvailable || budget.maxUnavailable),
+    isCustomized: Boolean(groupLabels.length > 0 || budget.minAvailable || budget.maxUnavailable),
     groupBy: groupLabels,
     minAvailable: budget.minAvailable,
     maxUnavailable: budget.maxUnavailable,
@@ -72,7 +72,7 @@ export const getUpdatePolicyValues = (updateSpec?: DeviceUpdatePolicySpec): Upda
     : updateSpec?.updateSchedule?.startGraceDuration;
 
   return {
-    isAdvanced: Boolean(updateSpec?.downloadSchedule?.at || updateSpec?.updateSchedule?.at),
+    isCustomized: Boolean(updateSpec?.downloadSchedule?.at || updateSpec?.updateSchedule?.at),
     downloadAndInstallDiffer: !isEqual,
     downloadStartsAt,
     downloadEndsAt: timeUtils.getEndTime(downloadStartsAt, downloadStartGraceDuration),

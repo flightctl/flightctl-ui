@@ -1122,7 +1122,7 @@ export const validApplicationsSchema = (t: TFunction) => {
 export const validFleetRolloutPolicySchema = (t: TFunction) => {
   return Yup.object()
     .shape({
-      isAdvanced: Yup.boolean().required(),
+      isCustomized: Yup.boolean().required(),
       updateTimeout: Yup.number()
         .required('Update timeout is required')
         .test('not-decimal', t('Cannot be decimal'), isInteger),
@@ -1183,8 +1183,8 @@ export const validFleetRolloutPolicySchema = (t: TFunction) => {
 };
 
 const requiredDownloadTimes = (t: TFunction, isStartTime: boolean) =>
-  Yup.string().when(['isAdvanced', 'downloadAndInstallDiffer'], ([isAdvanced, downloadAndInstallDiffer]) => {
-    if (!isAdvanced) {
+  Yup.string().when(['isCustomized', 'downloadAndInstallDiffer'], ([isCustomized, downloadAndInstallDiffer]) => {
+    if (!isCustomized) {
       return Yup.string();
     }
     if (downloadAndInstallDiffer) {
@@ -1202,8 +1202,8 @@ const requiredDownloadTimes = (t: TFunction, isStartTime: boolean) =>
   });
 
 const requiredInstallTimes = (t: TFunction, isStartTime: boolean) =>
-  Yup.string().when(['isAdvanced', 'downloadAndInstallDiffer'], ([isAdvanced, downloadAndInstallDiffer]) => {
-    if (isAdvanced && downloadAndInstallDiffer) {
+  Yup.string().when(['isCustomized', 'downloadAndInstallDiffer'], ([isCustomized, downloadAndInstallDiffer]) => {
+    if (isCustomized && downloadAndInstallDiffer) {
       return Yup.string()
         .required(isStartTime ? t('Installing start time is required') : t('Installing end time is required'))
         .matches(TIME_VALUE_REGEXP, t('Time must be in hh:mm with 24-hour format', { nsSeparator: '|' }));
@@ -1212,8 +1212,8 @@ const requiredInstallTimes = (t: TFunction, isStartTime: boolean) =>
   });
 
 const requiredStartGraceDuration = (t: TFunction, isInstallField: boolean = false) =>
-  Yup.string().when(['isAdvanced', 'downloadAndInstallDiffer'], ([isAdvanced, downloadAndInstallDiffer]) => {
-    if (!isAdvanced || (isInstallField && !downloadAndInstallDiffer)) {
+  Yup.string().when(['isCustomized', 'downloadAndInstallDiffer'], ([isCustomized, downloadAndInstallDiffer]) => {
+    if (!isCustomized || (isInstallField && !downloadAndInstallDiffer)) {
       return Yup.string();
     }
     return Yup.string()
@@ -1244,9 +1244,9 @@ const updateWeekDaysSchema = (t: TFunction) =>
 
 export const validUpdatePolicySchema = (t: TFunction) => {
   return Yup.object().shape({
-    isAdvanced: Yup.boolean().required(),
+    isCustomized: Yup.boolean().required(),
     downloadAndInstallDiffer: Yup.boolean().required(),
-    // Fields are flattened so "isAdvanced" can be used for validating them
+    // Fields are flattened so "isCustomized" can be used for validating them
     downloadStartsAt: requiredDownloadTimes(t, true),
     downloadEndsAt: requiredDownloadTimes(t, false),
     downloadStartGraceDuration: requiredStartGraceDuration(t, false),
@@ -1265,7 +1265,7 @@ export const validUpdatePolicySchema = (t: TFunction) => {
 export const validFleetDisruptionBudgetSchema = (t: TFunction) => {
   return Yup.object()
     .shape({
-      isAdvanced: Yup.boolean().required(),
+      isCustomized: Yup.boolean().required(),
       minAvailable: Yup.number().test('not-decimal', t('Number of devices cannot be decimal'), isInteger),
       maxUnavailable: Yup.number().test('not-decimal', t('Number of devices cannot be decimal'), isInteger),
       groupBy: validGroupLabelKeysSchema(t),
@@ -1274,7 +1274,7 @@ export const validFleetDisruptionBudgetSchema = (t: TFunction) => {
       'has-min-or-max',
       t('At least one of minimum available or maximum unavailable devices is required.'),
       (value: DisruptionBudgetForm) =>
-        !(value.isAdvanced && value.minAvailable === undefined && value.maxUnavailable === undefined),
+        !(value.isCustomized && value.minAvailable === undefined && value.maxUnavailable === undefined),
     );
 };
 
