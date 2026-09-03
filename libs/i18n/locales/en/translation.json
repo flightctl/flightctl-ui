@@ -1098,6 +1098,7 @@
   "Device selector": "Device selector",
   "Rollout policy": "Rollout policy",
   "Disruption budget": "Disruption budget",
+  "Customize updates": "Customize updates",
   "Maintenance windows": "Maintenance windows",
   "Set rollout order": "Set rollout order",
   "Rollout order controls in what sequence fleet devices are updated.": "Rollout order controls in what sequence fleet devices are updated.",

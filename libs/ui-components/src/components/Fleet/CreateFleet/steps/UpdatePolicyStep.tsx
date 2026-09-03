@@ -22,15 +22,20 @@ export const isUpdatePolicyStepValid = (errors: FormikErrors<FleetFormValues>) =
 
 export const CustomizedUpdatesSectionBody = ({
   updateMode,
+  isFleet,
   children,
-}: React.PropsWithChildren<{ updateMode: UpdateMode }>) => {
+}: React.PropsWithChildren<{ updateMode: UpdateMode; isFleet: boolean }>) => {
   const { t } = useTranslation();
   if (updateMode === UpdateMode.Default) {
     return null;
   }
 
   return (
-    <div className="fctl-update-policy--customize-options" role="group" aria-label={t('Maintenance windows')}>
+    <div
+      className="fctl-update-policy--customize-options"
+      role="group"
+      aria-label={isFleet ? t('Customize updates') : t('Maintenance windows')}
+    >
       {children}
     </div>
   );
@@ -112,7 +117,7 @@ const UpdatePolicyStep = ({ isReadOnly }: { isReadOnly: boolean }) => {
               checkedValue={UpdateMode.Customized}
               isDisabled={isReadOnly}
               body={
-                <CustomizedUpdatesSectionBody updateMode={updateMode}>
+                <CustomizedUpdatesSectionBody updateMode={updateMode} isFleet>
                   <CustomizedUpdatesSection isReadOnly={isReadOnly} />
                 </CustomizedUpdatesSectionBody>
               }

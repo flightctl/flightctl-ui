@@ -49,7 +49,7 @@ const UpdatePolicyStep = ({ isReadOnly }: { isReadOnly?: boolean }) => {
               checkedValue={UpdateMode.Customized}
               isDisabled={isReadOnly}
               body={
-                <CustomizedUpdatesSectionBody updateMode={updateMode}>
+                <CustomizedUpdatesSectionBody updateMode={updateMode} isFleet={false}>
                   <UpdateStepUpdatePolicy isReadOnly={isReadOnly} />
                 </CustomizedUpdatesSectionBody>
               }
