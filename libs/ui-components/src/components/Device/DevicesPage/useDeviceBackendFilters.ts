@@ -18,10 +18,13 @@ const validAppStatuses = Object.values(ApplicationsSummaryStatusType) as string[
 const validUpdatedStatuses = Object.values(DeviceUpdatedStatusType) as string[];
 const validDeviceStatuses = Object.values(DeviceSummaryStatusType) as string[];
 
+const DEVICE_FILTER_PARAM_KEYS = Object.values(FilterSearchParams);
+
 const getSearchParamsQueryKey = (searchParams: URLSearchParams): string => {
   return (
-    [...searchParams.entries()]
-      .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    DEVICE_FILTER_PARAM_KEYS.flatMap((key) =>
+      searchParams.getAll(key).map((value) => `${key}=${encodeURIComponent(value)}`),
+    )
       .sort()
       .join('&') || ''
   );
