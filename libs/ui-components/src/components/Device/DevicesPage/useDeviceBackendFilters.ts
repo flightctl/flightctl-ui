@@ -18,6 +18,18 @@ const validAppStatuses = Object.values(ApplicationsSummaryStatusType) as string[
 const validUpdatedStatuses = Object.values(DeviceUpdatedStatusType) as string[];
 const validDeviceStatuses = Object.values(DeviceSummaryStatusType) as string[];
 
+const DEVICE_FILTER_PARAM_KEYS = Object.values(FilterSearchParams);
+
+const getSearchParamsQueryKey = (searchParams: URLSearchParams): string => {
+  return (
+    DEVICE_FILTER_PARAM_KEYS.flatMap((key) =>
+      searchParams.getAll(key).map((value) => `${key}=${encodeURIComponent(value)}`),
+    )
+      .sort()
+      .join('&') || ''
+  );
+};
+
 const getNewParams = (currentParams: URLSearchParams, newValues: { [key: string]: string[] }) => {
   let newParams = [...currentParams.entries()];
   const keys = Object.keys(newValues);
@@ -170,7 +182,10 @@ export const useDeviceBackendFilters = () => {
     Object.values(activeStatuses).some((s) => !!s.length) ||
     DEVICE_TEXT_FILTER_KEYS.some((key) => !!textFilters[key]);
 
+  const filterKey = React.useMemo(() => getSearchParamsQueryKey(searchParams), [searchParams]);
+
   return {
+    filterKey,
     textFilters,
     setTextFilter,
     clearTextFilters,
