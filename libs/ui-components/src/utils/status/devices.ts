@@ -16,7 +16,7 @@ import {
   type DeviceUpdatedStatusType,
   OsModeType,
 } from '@flightctl/types';
-import { type StatusItem } from './common';
+import { type StatusItem, type StatusLevel, getStatusLevelFromMap } from './common';
 
 export enum FilterSearchParams {
   Fleet = 'fleetId',
@@ -96,49 +96,73 @@ export const getDeviceLifecycleStatus = (device: Device): DeviceLifecycleStatusT
   return lifecycleStatus;
 };
 
+const DEVICE_SUMMARY_STATUS_LEVELS: Record<DeviceSummaryStatusType, StatusLevel> = {
+  [DeviceSummaryStatusType.DeviceSummaryStatusError]: 'danger',
+  [DeviceSummaryStatusType.DeviceSummaryStatusDegraded]: 'warning',
+  [DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused]: 'custom',
+  [DeviceSummaryStatusType.DeviceSummaryStatusPoweredOff]: 'custom',
+  [DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect]: 'info',
+  [DeviceSummaryStatusType.DeviceSummaryStatusRebooting]: 'info',
+  [DeviceSummaryStatusType.DeviceSummaryStatusOnline]: 'success',
+  [DeviceSummaryStatusType.DeviceSummaryStatusUnknown]: 'unknown',
+};
+
+export const getDeviceSummaryStatusLevel = (status?: DeviceSummaryStatusType) =>
+  getStatusLevelFromMap(status, DEVICE_SUMMARY_STATUS_LEVELS);
+
+const DEVICE_LIFECYCLE_STATUS_LEVELS: Record<DeviceLifecycleStatusType, StatusLevel> = {
+  [DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning]: 'warning',
+  [DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioned]: 'unknown',
+  [DeviceLifecycleStatusType.DeviceLifecycleStatusEnrolled]: 'success',
+  [DeviceLifecycleStatusType.DeviceLifecycleStatusUnknown]: 'unknown',
+};
+
+export const getDeviceLifecycleStatusLevel = (status?: DeviceLifecycleStatusType) =>
+  getStatusLevelFromMap(status, DEVICE_LIFECYCLE_STATUS_LEVELS);
+
 export const getDeviceStatusItems = (t: TFunction): StatusItem<DeviceSummaryStatusType>[] => [
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusError,
     label: t('Error'),
-    level: 'danger',
+    level: DEVICE_SUMMARY_STATUS_LEVELS[DeviceSummaryStatusType.DeviceSummaryStatusError],
   },
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusDegraded,
     label: t('Degraded'),
-    level: 'warning',
+    level: DEVICE_SUMMARY_STATUS_LEVELS[DeviceSummaryStatusType.DeviceSummaryStatusDegraded],
   },
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusUnknown,
     label: t('Unknown'),
-    level: 'unknown',
+    level: DEVICE_SUMMARY_STATUS_LEVELS[DeviceSummaryStatusType.DeviceSummaryStatusUnknown],
   },
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusRebooting,
     label: t('Rebooting'),
-    level: 'info',
+    level: DEVICE_SUMMARY_STATUS_LEVELS[DeviceSummaryStatusType.DeviceSummaryStatusRebooting],
   },
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusPoweredOff,
     label: t('Powered Off'),
-    level: 'custom',
+    level: DEVICE_SUMMARY_STATUS_LEVELS[DeviceSummaryStatusType.DeviceSummaryStatusPoweredOff],
     customIcon: PowerOffIcon,
   },
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusOnline,
     label: t('Online'),
-    level: 'success',
+    level: DEVICE_SUMMARY_STATUS_LEVELS[DeviceSummaryStatusType.DeviceSummaryStatusOnline],
   },
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect,
     label: t('Pending sync'),
-    level: 'info',
+    level: DEVICE_SUMMARY_STATUS_LEVELS[DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect],
     customIcon: PendingIcon,
     customColor: pendingSyncColor.value,
   },
   {
     id: DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused,
     label: t('Suspended'),
-    level: 'custom',
+    level: DEVICE_SUMMARY_STATUS_LEVELS[DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused],
     customIcon: PauseCircleIcon,
     customColor: suspendedColor.value,
   },
@@ -190,23 +214,23 @@ export const getDeviceLifecycleStatusItems = (t: TFunction): StatusItem<DeviceLi
   {
     id: DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioned,
     label: t('Decommissioned'),
-    level: 'unknown',
+    level: DEVICE_LIFECYCLE_STATUS_LEVELS[DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioned],
     customIcon: BanIcon,
   },
   {
     id: DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning,
     label: t('Decommissioning'),
-    level: 'warning',
+    level: DEVICE_LIFECYCLE_STATUS_LEVELS[DeviceLifecycleStatusType.DeviceLifecycleStatusDecommissioning],
   },
   {
     id: DeviceLifecycleStatusType.DeviceLifecycleStatusUnknown,
     label: t('Unknown'),
-    level: 'unknown',
+    level: DEVICE_LIFECYCLE_STATUS_LEVELS[DeviceLifecycleStatusType.DeviceLifecycleStatusUnknown],
   },
   {
     id: DeviceLifecycleStatusType.DeviceLifecycleStatusEnrolled,
     label: t('Enrolled'),
-    level: 'success',
+    level: DEVICE_LIFECYCLE_STATUS_LEVELS[DeviceLifecycleStatusType.DeviceLifecycleStatusEnrolled],
   },
 ];
 

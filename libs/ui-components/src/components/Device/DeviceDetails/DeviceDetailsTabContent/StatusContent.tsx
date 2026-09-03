@@ -1,92 +1,81 @@
 import * as React from 'react';
-import {
-  CardBody,
-  CardTitle,
-  DescriptionList,
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
-} from '@patternfly/react-core';
+import { DescriptionList } from '@patternfly/react-core';
 
-import { type Device, type DeviceLastSeen } from '@flightctl/types';
+import { type Device } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
-import DetailsPageCard from '../../../DetailsPage/DetailsPageCard';
+import { getAppSummaryStatusLevel } from '../../../../utils/status/applications';
+import { getDeviceSummaryStatusLevel } from '../../../../utils/status/devices';
+import { getIntegrityStatusLevel } from '../../../../utils/status/integrity';
+import { getSystemUpdateStatusLevel } from '../../../../utils/status/system';
 import LabelWithHelperText from '../../../common/WithHelperText';
 import ApplicationSummaryStatus from '../../../Status/ApplicationSummaryStatus';
 import DeviceStatus from '../../../Status/DeviceStatus';
 import SystemUpdateStatus from '../../../Status/SystemUpdateStatus';
 import IntegrityStatus from '../../../Status/IntegrityStatus';
-import { timeSinceText } from '../../../../utils/dates';
+import DeviceDetailsStatusAccent from '../DeviceDetailsStatusAccent';
 
-const LAST_SEEN_REFRESH_INTERVAL = 60 * 1000; // 1 minute
+type StatusContentProps = {
+  device: Required<Device>;
+};
 
-const StatusContent = ({ device }: { device: Required<Device> }) => {
+const StatusContent = ({ device }: StatusContentProps) => {
   const { t } = useTranslation();
 
-  const [lastSeenResponse] = useFetchPeriodically<DeviceLastSeen>({
-    endpoint: `devices/${device.metadata.name}/lastseen`,
-    timeout: LAST_SEEN_REFRESH_INTERVAL,
-  });
+  const appStatus = device.status?.applicationsSummary;
+  const deviceStatus = device.status?.summary;
+  const updateStatus = device.status?.updated;
+  const integrityStatus = device.status?.integrity;
 
   return (
-    <DetailsPageCard>
-      <CardTitle>{t('System status')}</CardTitle>
-      <CardBody>
-        <DescriptionList columnModifier={{ default: '3Col' }}>
-          <DescriptionListGroup>
-            <DescriptionListTerm>
-              <LabelWithHelperText
-                label={t('Application status')}
-                content={t('Indicates the overall status of application workloads on the device.')}
-              />
-            </DescriptionListTerm>
-            <DescriptionListDescription>
-              <ApplicationSummaryStatus statusSummary={device.status.applicationsSummary} />
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>
-              <LabelWithHelperText
-                label={t('Device status')}
-                content={t('Indicates the overall status of the device hardware and operating system.')}
-              />{' '}
-            </DescriptionListTerm>
-            <DescriptionListDescription>
-              <DeviceStatus deviceStatus={device.status} />
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>
-              <LabelWithHelperText
-                label={t('Update status')}
-                content={t(
-                  'Indicates whether a system is running the latest target configuration or is updating towards it.',
-                )}
-              />
-            </DescriptionListTerm>
-            <DescriptionListDescription>
-              <SystemUpdateStatus deviceStatus={device.status} />
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>
-              <LabelWithHelperText
-                label={t('Integrity status')}
-                content={t('Indicates whether the device has been verified as secure and authentic.')}
-              />
-            </DescriptionListTerm>
-            <DescriptionListDescription>
-              <IntegrityStatus integrityStatus={device.status.integrity} />
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>{t('Last seen')}</DescriptionListTerm>
-            <DescriptionListDescription>{timeSinceText(t, lastSeenResponse?.lastSeen)}</DescriptionListDescription>
-          </DescriptionListGroup>
-        </DescriptionList>
-      </CardBody>
-    </DetailsPageCard>
+    <DescriptionList isCompact className="fctl-device-status-fields">
+      <DeviceDetailsStatusAccent
+        statusLabel={
+          <LabelWithHelperText
+            label={t('Application status')}
+            content={t('Indicates the overall status of application workloads on the device.')}
+            isInline
+          />
+        }
+        statusContent={<ApplicationSummaryStatus statusSummary={appStatus} />}
+        level={getAppSummaryStatusLevel(appStatus?.status)}
+      />
+      <DeviceDetailsStatusAccent
+        statusLabel={
+          <LabelWithHelperText
+            label={t('Device status')}
+            content={t('Indicates the overall status of the device hardware and operating system.')}
+            isInline
+          />
+        }
+        statusContent={<DeviceStatus summaryStatus={deviceStatus} />}
+        level={getDeviceSummaryStatusLevel(deviceStatus?.status)}
+      />
+      <DeviceDetailsStatusAccent
+        statusLabel={
+          <LabelWithHelperText
+            label={t('Update status')}
+            content={t(
+              'Indicates whether a system is running the latest target configuration or is updating towards it.',
+            )}
+            isInline
+          />
+        }
+        statusContent={<SystemUpdateStatus updateStatus={updateStatus} />}
+        level={getSystemUpdateStatusLevel(updateStatus?.status)}
+      />
+
+      <DeviceDetailsStatusAccent
+        statusLabel={
+          <LabelWithHelperText
+            label={t('Integrity status')}
+            content={t('Indicates whether the device has been verified as secure and authentic.')}
+            isInline
+          />
+        }
+        statusContent={<IntegrityStatus integrityStatus={integrityStatus} />}
+        level={getIntegrityStatusLevel(integrityStatus?.status)}
+      />
+    </DescriptionList>
   );
 };
 

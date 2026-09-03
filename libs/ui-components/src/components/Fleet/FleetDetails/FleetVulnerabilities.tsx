@@ -1,10 +1,11 @@
 import * as React from 'react';
 
+import { useFleetVulnerabilitySummary } from '../../../hooks/useVulnerabilitySummary';
 import { useVulnerabilities } from '../../../hooks/useVulnerabilities';
-import ListPageBody from '../../ListPage/ListPageBody';
-import VulnerabilitiesTable from '../../SecurityOverview/VulnerabilitiesTable';
+import EntitySecurityOverviewCard from '../../SecurityOverview/EntitySecurityOverviewCard';
 
 const FleetVulnerabilities = ({ fleetId }: { fleetId: string }) => {
+  const { counts, isLoading: isSummaryLoading } = useFleetVulnerabilitySummary(fleetId);
   const {
     vulnerabilities,
     currentPage,
@@ -25,22 +26,26 @@ const FleetVulnerabilities = ({ fleetId }: { fleetId: string }) => {
   });
 
   return (
-    <ListPageBody error={error} loading={isLoading}>
-      <VulnerabilitiesTable
-        fleetName={fleetId}
-        vulnerabilities={vulnerabilities}
-        isSingleDevice={false}
-        isUpdating={isUpdating}
-        selectedSeverities={selectedSeverities}
-        setSelectedSeverities={setSelectedSeverities}
-        search={search}
-        setSearch={setSearch}
-        sortBy={sortBy}
-        sortDirection={sortDirection}
-        onSort={onSort}
-        pagination={{ currentPage, setCurrentPage, itemCount }}
-      />
-    </ListPageBody>
+    <EntitySecurityOverviewCard
+      isSingleDevice={false}
+      fleetName={fleetId}
+      counts={counts}
+      isSummaryLoading={isSummaryLoading}
+      vulnerabilities={vulnerabilities}
+      currentPage={currentPage}
+      setCurrentPage={setCurrentPage}
+      itemCount={itemCount}
+      search={search}
+      setSearch={setSearch}
+      selectedSeverities={selectedSeverities}
+      setSelectedSeverities={setSelectedSeverities}
+      sortBy={sortBy}
+      sortDirection={sortDirection}
+      onSort={onSort}
+      isLoading={isLoading}
+      isUpdating={isUpdating}
+      error={error}
+    />
   );
 };
 

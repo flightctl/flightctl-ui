@@ -4,32 +4,15 @@ import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/exter
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 import {
-  type GitConfigProviderSpec,
-  type HttpConfigProviderSpec,
-  type InlineConfigProviderSpec,
-  type KubernetesSecretProviderSpec,
-} from '@flightctl/types';
-import {
   type ConfigSourceProvider,
-  ConfigType,
-  type RepoConfig,
   getConfigFullRepoUrl,
   getRepoName,
+  isGitProviderSpec,
   isHttpProviderSpec,
 } from '../../../types/deviceSpec';
-import CopyButton from '../../common/CopyButton';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { getConfigType } from '../../Device/EditDeviceWizard/deviceSpecUtils';
-
-type ExtraArgs = Record<string, string>;
-
-export const DefaultConfigDetails = ({
-  config,
-}: {
-  config: InlineConfigProviderSpec | KubernetesSecretProviderSpec;
-}) => {
-  return <>{config.name}</>;
-};
+import type { RepositoryDetails } from '../../../hooks/useRepositoryDetailsMap';
+import CopyButton from '../../common/CopyButton';
 
 export const HttpRepositoryUrl = ({ name, url }: { name?: string; url: string }) => {
   const { t } = useTranslation();
@@ -55,12 +38,25 @@ export const GitRepositoryLink = ({ name, url }: { name?: string; url: string })
   </Button>
 );
 
-export const RepositoryConfigDetails = ({ config, extraArgs }: { config: RepoConfig; extraArgs: ExtraArgs }) => {
+const RepositorySource = ({
+  config,
+  repoDetails,
+}: {
+  config: ConfigSourceProvider;
+  repoDetails?: RepositoryDetails;
+}) => {
   const { t } = useTranslation();
-  if (extraArgs.errorMsg) {
+
+  const isGitConfig = isGitProviderSpec(config);
+  const isHttpConfig = isHttpProviderSpec(config);
+  if (!repoDetails || !(isGitConfig || isHttpConfig)) {
+    return <>{config.name}</>;
+  }
+
+  if (repoDetails.errorMsg) {
     const fullError = `${t('The repository "{{name}}" defined for this source failed to load.', {
       name: getRepoName(config),
-    })} ${extraArgs.errorMsg}`;
+    })} ${repoDetails.errorMsg}`;
     return (
       <>
         {config.name}{' '}
@@ -73,24 +69,11 @@ export const RepositoryConfigDetails = ({ config, extraArgs }: { config: RepoCon
     );
   }
 
-  const url = getConfigFullRepoUrl(config, extraArgs.url);
+  const url = getConfigFullRepoUrl(config, repoDetails.url || '');
   if (isHttpProviderSpec(config)) {
     return <HttpRepositoryUrl name={config.name} url={url} />;
   }
   return <GitRepositoryLink name={config.name} url={url} />;
 };
 
-export const getConfigDetails = (config: ConfigSourceProvider, extraArgs: ExtraArgs) => {
-  switch (getConfigType(config)) {
-    case ConfigType.GIT:
-    case ConfigType.HTTP:
-      return (
-        <RepositoryConfigDetails
-          config={config as GitConfigProviderSpec | HttpConfigProviderSpec}
-          extraArgs={extraArgs}
-        />
-      );
-    default:
-      return <DefaultConfigDetails config={config as KubernetesSecretProviderSpec | InlineConfigProviderSpec} />;
-  }
-};
+export default RepositorySource;

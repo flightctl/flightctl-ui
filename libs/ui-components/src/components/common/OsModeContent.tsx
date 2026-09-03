@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Icon, Tooltip } from '@patternfly/react-core';
+import { Icon, Label, Tooltip } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 import { OsImageIcon } from '@patternfly/react-icons/dist/js/icons/os-image-icon';
 import { ArchiveIcon } from '@patternfly/react-icons/dist/js/icons/archive-icon';
@@ -7,7 +7,23 @@ import { ArchiveIcon } from '@patternfly/react-icons/dist/js/icons/archive-icon'
 import { OsModeType } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 
-const OsModeContent = ({ osMode }: { osMode: OsModeType | undefined }) => {
+export const OsModeLabel = ({ osMode }: { osMode: OsModeType | undefined }) => {
+  const { t } = useTranslation();
+
+  if (!osMode) {
+    return '-';
+  }
+
+  const isImageMode = osMode === OsModeType.OsModeImage;
+
+  return (
+    <Label variant="outline" isCompact icon={isImageMode ? <OsImageIcon /> : <ArchiveIcon />}>
+      {isImageMode ? t('Image') : t('Package')}
+    </Label>
+  );
+};
+
+const OsModeIcon = ({ osMode }: { osMode: OsModeType | undefined }) => {
   const { t } = useTranslation();
 
   let content: string;
@@ -32,4 +48,4 @@ const OsModeContent = ({ osMode }: { osMode: OsModeType | undefined }) => {
   );
 };
 
-export default OsModeContent;
+export default OsModeIcon;

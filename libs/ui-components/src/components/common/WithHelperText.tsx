@@ -2,8 +2,11 @@ import * as React from 'react';
 import { Button, FormGroup, Popover } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 
+import './WithHelperText.css';
+
 type HelperTextPopoverProps = {
   label: string;
+  isInline?: boolean;
   triggerAction?: 'click' | 'hover';
   content: React.ReactNode;
 };
@@ -35,13 +38,14 @@ const HelperTextPopover = ({
 const LabelWithHelperText = ({
   label,
   hideLabel,
+  isInline,
   content,
   triggerAction,
 }: HelperTextPopoverProps & { hideLabel?: boolean }) => (
-  <>
+  <span className={`fctl-label-withhelpertext${isInline ? ' fctl-label-withhelpertext--inline' : ''}`}>
     {!hideLabel && label}
     <HelperTextPopover ariaLabel={label} content={content} triggerAction={triggerAction} />
-  </>
+  </span>
 );
 
 export const FormGroupWithHelperText = ({

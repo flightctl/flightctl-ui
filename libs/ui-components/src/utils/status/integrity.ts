@@ -1,28 +1,38 @@
 import { type TFunction } from 'react-i18next';
 
 import { DeviceIntegrityCheckStatusType, DeviceIntegrityStatusSummaryType } from '@flightctl/types';
-import { type StatusItem } from './common';
+import { type StatusItem, type StatusLevel, getStatusLevelFromMap } from './common';
+
+const INTEGRITY_STATUS_LEVELS: Record<DeviceIntegrityStatusSummaryType, StatusLevel> = {
+  [DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusFailed]: 'warning',
+  [DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusVerified]: 'success',
+  [DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusUnsupported]: 'unknown',
+  [DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusUnknown]: 'unknown',
+};
+
+export const getIntegrityStatusLevel = (status?: DeviceIntegrityStatusSummaryType) =>
+  getStatusLevelFromMap(status, INTEGRITY_STATUS_LEVELS);
 
 export const getIntegrityStatusItems = (t: TFunction): StatusItem<DeviceIntegrityStatusSummaryType>[] => [
   {
     id: DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusFailed,
     label: t('Failed'),
-    level: 'warning',
+    level: INTEGRITY_STATUS_LEVELS[DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusFailed],
   },
   {
     id: DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusUnsupported,
     label: t('Unsupported'),
-    level: 'unknown',
+    level: INTEGRITY_STATUS_LEVELS[DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusUnsupported],
   },
   {
     id: DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusUnknown,
     label: t('Unknown'),
-    level: 'unknown',
+    level: INTEGRITY_STATUS_LEVELS[DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusUnknown],
   },
   {
     id: DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusVerified,
     label: t('Verified'),
-    level: 'success',
+    level: INTEGRITY_STATUS_LEVELS[DeviceIntegrityStatusSummaryType.DeviceIntegrityStatusVerified],
   },
 ];
 

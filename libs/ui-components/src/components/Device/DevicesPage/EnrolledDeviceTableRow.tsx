@@ -14,7 +14,7 @@ import SystemUpdateStatus from '../../Status/SystemUpdateStatus';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import ResourceLink from '../../common/ResourceLink';
-import OsModeContent from '../../common/OsModeContent';
+import OsModeIcon from '../../common/OsModeContent';
 import { buildAllDropdownActions } from '../../common/ActionsDropdownList';
 import { type ApiTableColumn } from '../../Table/Table';
 
@@ -51,7 +51,7 @@ const EnrolledDeviceTableRow = ({
   const navigate = useNavigate();
   const deviceName = device.metadata.name as string;
   const deviceAlias = device.metadata.labels?.alias;
-  const osMode = getDeviceCapability(device, 'osMode');
+  const osMode = getDeviceCapability(device.status?.capabilities, 'osMode');
   const editActionProps = getDisabledTooltipProps(getEditDisabledReason(device, t));
   const decommissionDisabledReason = getDecommissionDisabledReason(device, t);
   const resumeDisabledReason = getResumeDisabledReason(device, t);
@@ -114,7 +114,7 @@ const EnrolledDeviceTableRow = ({
             flexWrap={{ default: 'nowrap' }}
           >
             <FlexItem>
-              <OsModeContent osMode={osMode} />
+              <OsModeIcon osMode={osMode} />
             </FlexItem>
             <FlexItem>
               <ResourceLink
@@ -144,12 +144,12 @@ const EnrolledDeviceTableRow = ({
       )}
       {columnIds.includes('deviceStatus') && (
         <Td dataLabel={t('Device status')}>
-          <DeviceStatus deviceStatus={device.status} />
+          <DeviceStatus summaryStatus={device.status?.summary} />
         </Td>
       )}
       {columnIds.includes('updateStatus') && (
         <Td dataLabel={t('Update status')} data-testid={`device-update-status-${rowIndex}`}>
-          <SystemUpdateStatus deviceStatus={device.status} />
+          <SystemUpdateStatus updateStatus={device.status?.updated} />
         </Td>
       )}
       {!hideActions && (

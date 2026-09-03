@@ -1,7 +1,13 @@
 import * as React from 'react';
 import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
-import { Icon, Popover, Stack, StackItem } from '@patternfly/react-core';
+import {
+  DescriptionListDescription,
+  DescriptionListGroup,
+  DescriptionListTerm,
+  Icon,
+  Popover,
+} from '@patternfly/react-core';
 import { useAppContext } from '@flightctl/ui-components/src/hooks/useAppContext';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import DeviceDetails from '@flightctl/ui-components/src/components/Device/DeviceDetails/DeviceDetailsPage';
@@ -65,10 +71,10 @@ const DeviceDetailsPage = () => {
   return (
     <WithPageLayout>
       <DeviceDetails>
-        <Stack>
-          <StackItem className="fctl-device-details-tab__label">{t('MicroShift cluster')}</StackItem>
-          <StackItem>{mcContent}</StackItem>
-        </Stack>
+        <DescriptionListGroup>
+          <DescriptionListTerm>{t('MicroShift cluster')}</DescriptionListTerm>
+          <DescriptionListDescription>{mcContent}</DescriptionListDescription>
+        </DescriptionListGroup>
       </DeviceDetails>
     </WithPageLayout>
   );

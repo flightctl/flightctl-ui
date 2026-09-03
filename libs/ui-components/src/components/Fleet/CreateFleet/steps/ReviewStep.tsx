@@ -14,7 +14,7 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import { type FleetFormValues, UpdateMode } from '../../../../types/deviceSpec';
 import LabelsView from '../../../common/LabelsView';
 import { toAPILabel } from '../../../../utils/labels';
-import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
+import { RepositorySourcePlainList } from '../../../Repository/RepositoryDetails/RepositorySourceList';
 import { getErrorMessage } from '../../../../utils/error';
 import { getApiConfig } from '../../../Device/EditDeviceWizard/deviceSpecUtils';
 import SystemImage from '../../../Device/EditDeviceWizard/SystemImageDescriptionGroup';
@@ -67,7 +67,7 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
             <DescriptionListGroup>
               <DescriptionListTerm>{t('Configurations')}</DescriptionListTerm>
               <DescriptionListDescription>
-                <RepositorySourceList configs={values.configTemplates.map(getApiConfig)} />
+                <RepositorySourcePlainList configs={values.configTemplates.map(getApiConfig)} />
               </DescriptionListDescription>
             </DescriptionListGroup>
           )}

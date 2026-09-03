@@ -1,14 +1,6 @@
 import * as React from 'react';
 import { Button } from '@patternfly/react-core';
-import {
-  ActionsColumn,
-  ExpandableRowContent,
-  Tbody,
-  Td,
-  type TdProps,
-  Tr,
-  type TrProps,
-} from '@patternfly/react-table';
+import { ExpandableRowContent, Tbody, Td, type TdProps, Tr, type TrProps } from '@patternfly/react-table';
 
 import { type Vulnerability, type VulnerabilityGroup } from '@flightctl/types/alpha';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -53,16 +45,6 @@ const VulnerabilitiesBaseTr = ({
       {children}
       <Td dataLabel={t('Published')}>
         {getDateNoTimeDisplay(isGroupItem ? vulnerability.maxPublishedAt : vulnerability.publishedAt)}
-      </Td>
-      <Td isActionCell dataLabel={t('Actions')}>
-        <ActionsColumn
-          items={[
-            {
-              title: t('View details'),
-              onClick: setSelectedRow,
-            },
-          ]}
-        />
       </Td>
     </Tr>
   );
@@ -128,7 +110,7 @@ export const VulnerabilitiesTableFullRow = ({
         compoundExpand={compoundExpand}
       />
       <Tr isExpanded={imagesExpanded}>
-        <Td dataLabel={t('Affected images')} colSpan={6}>
+        <Td dataLabel={t('Affected images')} colSpan={5}>
           <ExpandableRowContent>
             <VulnerabilityAffectedImages findings={vulnerability.findings} />
           </ExpandableRowContent>

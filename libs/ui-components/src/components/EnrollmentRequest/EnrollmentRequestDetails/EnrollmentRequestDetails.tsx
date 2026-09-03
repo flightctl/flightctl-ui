@@ -26,6 +26,7 @@ import {
 import { useFetch } from '../../../hooks/useFetch';
 import ApproveDeviceModal from '../../modals/ApproveDeviceModal/ApproveDeviceModal';
 import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
+import DeviceCustomDataCard from '../../Device/DeviceDetails/DeviceCustomDataCard';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import EnrollmentRequestStatus from '../../Status/EnrollmentRequestStatus';
 import LabelWithHelperText from '../../common/WithHelperText';
@@ -60,7 +61,10 @@ const EnrollmentRequestDetails = () => {
   const [canApprove, canDelete] = checkPermissions(enrollmentRequestDetailsPermissions);
 
   const [isApprovalModalOpen, setIsApprovalModalOpen] = React.useState(false);
-  const erSystemInfo = useDeviceSpecSystemInfo(er?.spec.deviceStatus, t);
+  const systemInfo = er?.spec.deviceStatus?.systemInfo;
+  const erSystemInfo = useDeviceSpecSystemInfo(systemInfo, t);
+  const customInfo = Object.entries<string>(systemInfo?.customInfo || {});
+
   const hasDefaultLabels = Object.keys(er?.spec.labels || {}).length > 0;
   const deviceId = er?.metadata.name as string;
 
@@ -130,7 +134,7 @@ const EnrollmentRequestDetails = () => {
                     <EnrollmentRequestStatus er={er} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
-                {erSystemInfo.baseInfo.map((systemInfo) => (
+                {erSystemInfo.map((systemInfo) => (
                   <DescriptionListGroup key={systemInfo.title}>
                     <DescriptionListTerm>{systemInfo.title}</DescriptionListTerm>
                     <DescriptionListDescription>{systemInfo.value}</DescriptionListDescription>
@@ -140,21 +144,9 @@ const EnrollmentRequestDetails = () => {
             </CardBody>
           </DetailsPageCard>
         </GridItem>
-        {erSystemInfo.customInfo.length > 0 && (
+        {customInfo.length > 0 && (
           <GridItem md={6}>
-            <DetailsPageCard>
-              <CardTitle>{t('Custom data')}</CardTitle>
-              <CardBody>
-                <DescriptionList columnModifier={{ lg: '3Col' }}>
-                  {erSystemInfo.customInfo.map((systemInfo) => (
-                    <DescriptionListGroup key={systemInfo.title}>
-                      <DescriptionListTerm>{systemInfo.title}</DescriptionListTerm>
-                      <DescriptionListDescription>{systemInfo.value}</DescriptionListDescription>
-                    </DescriptionListGroup>
-                  ))}
-                </DescriptionList>
-              </CardBody>
-            </DetailsPageCard>
+            <DeviceCustomDataCard customInfo={customInfo} />
           </GridItem>
         )}
         <GridItem md={6}>

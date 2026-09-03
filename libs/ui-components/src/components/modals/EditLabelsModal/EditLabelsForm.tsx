@@ -6,7 +6,6 @@ import * as Yup from 'yup';
 
 import { type Device } from '@flightctl/types';
 import LabelsField from '../../form/LabelsField';
-import FlightCtlForm from '../../form/FlightCtlForm';
 import { type FlightCtlLabel } from '../../../types/extraTypes';
 import { useFetch } from '../../../hooks/useFetch';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -45,10 +44,10 @@ const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormConte
   };
 
   return (
-    <FlightCtlForm>
+    <>
       <LabelsField name="labels" isLoading={isSubmitting} onChangeCallback={onChangedLabels} />
       {submitError && <Alert isInline title={submitError} variant="danger" />}
-    </FlightCtlForm>
+    </>
   );
 };
 
