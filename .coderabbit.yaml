@@ -157,10 +157,17 @@ reviews:
     - path: "{libs,apps}/*/src/**/*.{ts,tsx}"
       instructions: |
         i18n review:
-        - User-facing copy that a translator can meaningfully localize
-          must use the t() translation function. Translation changes
-          visual wording only — it must not alter UX behavior, layout
-          structure, or functional semantics.
+        - User-facing strings that contain at least one literal word
+          (alphabetic text outside {{interpolation}} placeholders) must
+          use the t() translation function. Translation changes visual
+          wording only — it must not alter UX behavior, layout structure,
+          or functional semantics.
+        - Strings made only of interpolation variables plus
+          punctuation/symbols are NOT translatable — do not flag them.
+          Examples: {{a}} / {{b}}, ({{name}}), '-' for empty values.
+        - Strings with literal words ARE translatable even when mixed
+          with variables or units — use t(). Examples:
+          t('{{progress}} of {{total}}', …), t('{{size}} GB', …)
         - Translation keys must be hardcoded string literals so the
           i18next-parser can extract them — never use variables as keys:
           GOOD: t('Device enrolled')  BAD: t(statusMessage)
@@ -168,13 +175,8 @@ reviews:
         - Do not hand-edit libs/i18n/locales/en/translation.json
 
         Do NOT flag these as missing i18n (common false positives):
-        - Dynamic or system values rendered as-is: resource names, IDs, or
-          other data from the backend or user input. Example:
-          `(${appName})` where appName is a variable — a translator
-          cannot meaningfully localize this.
-        - UX design tokens with fixed meaning across the UI, such as
-          '-' for missing/empty values. These are not translatable copy.
-        - Programming-language or configuration code snippets. Example:
+        - Programming-language or configuration code snippets shown as-is
+          in the UI, not as labels. Example:
           #cloud-config\npackage_update: true\npackages:\n  - nginx
 
     # ── Accessibility (a11y) ─────────────────────────────────────
@@ -211,7 +213,10 @@ reviews:
       instructions: |
         CSS review:
         - Use PatternFly CSS variables (--pf-*) for colors, spacing,
-          and typography — avoid hardcoded values
+          and typography — avoid hardcoded values. Fallbacks are allowed
+          when a token may be unset, to maintain visual consistency.
+          Examples: var(--pf-t--global--spacer--md, 16px) or
+          var(--pf-t--global--text--color--subtle, #6a6e73)
         - Scope styles to the component; avoid global selectors
         - No !important unless overriding a PF default that cannot be
           configured otherwise
@@ -511,13 +516,16 @@ reviews:
 
       - name: "i18n-compliance"
         instructions: |
-          Flag user-facing copy in .tsx files that a translator could
-          meaningfully localize but is not wrapped in t(). Flag t()
-          calls that use variables as keys instead of hardcoded string
-          literals. Do NOT flag: dynamic/system values (names, IDs,
-          API data); UX tokens like '-' for empty/missing values; or
-          literal code or configuration snippet content (source/config
-          shown as-is, not UI labels).
+          Flag user-facing strings in .tsx files that contain at least
+          one literal word (alphabetic text outside {{interpolation}}
+          placeholders) but are not wrapped in t(). Flag t() calls that
+          use variables as keys instead of hardcoded string literals.
+          Do NOT flag strings made only of interpolation variables plus
+          punctuation/symbols (e.g. {{a}} / {{b}}, ({{name}}), '-').
+          Do flag strings with literal words mixed with variables or
+          units (e.g. {{progress}} of {{total}}, {{size}} GB). Do NOT
+          flag literal code or configuration snippet content shown
+          as-is in the UI, not as labels.
         mode: "warning"
 
 # ── Knowledge base ───────────────────────────────────────────
