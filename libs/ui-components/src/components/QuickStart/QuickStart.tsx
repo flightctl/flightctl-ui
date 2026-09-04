@@ -260,7 +260,7 @@ const QuickStart = () => {
                   </FlexItem>
                   <FlexItem>
                     <Content component={ContentVariants.small} className="pf-v6-u-color-200">
-                      {t('~{{count}} minutes', { count: 44 })}
+                      {t('About {{count}} minutes', { count: 44 })}
                     </Content>
                   </FlexItem>
                 </Flex>
