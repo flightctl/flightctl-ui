@@ -23,6 +23,7 @@ import PageNavigation from '@flightctl/ui-components/src/components/common/PageN
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import { SystemRestoreProvider } from '@flightctl/ui-components/src/hooks/useSystemRestoreContext';
 import { PermissionsContextProvider } from '@flightctl/ui-components/src/components/common/PermissionsContext';
+import QuickStartHost from '@flightctl/ui-components/src/components/QuickStart/QuickStartHost';
 import { useBrandLogo } from '../../hooks/useBrandLogo';
 
 import AppNavigation from './AppNavigation';
@@ -118,9 +119,11 @@ const AppLayout = () => {
   return (
     <OrganizationGuard>
       <PermissionsContextProvider>
-        <SystemRestoreProvider>
-          <AppLayoutContent />
-        </SystemRestoreProvider>
+        <QuickStartHost>
+          <SystemRestoreProvider>
+            <AppLayoutContent />
+          </SystemRestoreProvider>
+        </QuickStartHost>
       </PermissionsContextProvider>
     </OrganizationGuard>
   );

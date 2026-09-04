@@ -21,6 +21,7 @@ import { useAppContext } from '../../hooks/useAppContext';
 import LoginCommandModal from '../modals/LoginCommandModal/LoginCommandModal';
 import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from './PermissionsContext';
+import { useQuickStart } from '../QuickStart/QuickStartContext';
 import OrganizationSelector from './OrganizationSelector';
 import { type OrganizationItem, useOrganizationGuardContext } from './OrganizationGuard';
 
@@ -124,14 +125,70 @@ const getRedirectPathAfterOrgSwitch = (pathname: string, appRoutes: Record<ROUTE
   return appRoutes[ROUTE.ROOT];
 };
 
-const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => {
+const SettingsDropdown = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { router } = useAppContext();
+  const { panelVisibility, toggleVisibility } = useQuickStart();
+  const { checkPermissions } = usePermissionsContext();
+  const [canManageAuthProviders] = checkPermissions([{ kind: RESOURCE.AUTH_PROVIDER, verb: VERB.CREATE }]);
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const authProvidersPath = router.appRoutes[ROUTE.AUTH_PROVIDERS];
+  const showAuthProvidersItem =
+    canManageAuthProviders && authProvidersPath !== '/' && authProvidersPath !== router.appRoutes[ROUTE.ROOT];
+
+  const isGuideHidden = panelVisibility === 'hidden';
+
+  const onToggleQuickStart = () => {
+    toggleVisibility();
+    setIsOpen(false);
+  };
+
+  const onManageAuthProviders = () => {
+    navigate(ROUTE.AUTH_PROVIDERS);
+    setIsOpen(false);
+  };
+
+  const onDropdownToggle = () => {
+    setIsOpen((prev) => !prev);
+  };
+
+  return (
+    <Dropdown
+      isOpen={isOpen}
+      onOpenChange={setIsOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
+          onClick={onDropdownToggle}
+          aria-label={t('Settings')}
+          isExpanded={isOpen}
+          variant="plain"
+          icon={<CogIcon />}
+        >
+          {t('Settings')}
+        </MenuToggle>
+      )}
+      popperProps={{ position: 'right' }}
+    >
+      <DropdownList>
+        <DropdownItem onClick={onToggleQuickStart}>
+          {isGuideHidden ? t('Show quick start guide') : t('Hide quick start guide')}
+        </DropdownItem>
+        {showAuthProvidersItem && (
+          <DropdownItem onClick={onManageAuthProviders}>{t('Manage authentication providers')}</DropdownItem>
+        )}
+      </DropdownList>
+    </Dropdown>
+  );
+};
+
+const PageNavigation = () => {
+  const { t } = useTranslation();
+  const { router } = useAppContext();
   const location = router.useLocation();
   const { currentOrganization, availableOrganizations } = useOrganizationGuardContext();
-  const { checkPermissions } = usePermissionsContext();
-  const [isAdmin] = checkPermissions([{ kind: RESOURCE.AUTH_PROVIDER, verb: VERB.CREATE }]);
   const [showOrganizationModal, setShowOrganizationModal] = React.useState(false);
   const [showLoginCommandModal, setShowLoginCommandModal] = React.useState(false);
 
@@ -162,20 +219,9 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
                     {t('Copy login command')}
                   </Button>
                 </ToolbarItem>
-                {isAdmin && showSettings && (
-                  <ToolbarItem>
-                    <Tooltip content={t('Manage authentication providers')}>
-                      <Button
-                        variant="link"
-                        aria-label={t('Settings')}
-                        onClick={() => navigate(ROUTE.AUTH_PROVIDERS)}
-                        icon={<CogIcon />}
-                      >
-                        {t('Settings')}
-                      </Button>
-                    </Tooltip>
-                  </ToolbarItem>
-                )}
+                <ToolbarItem>
+                  <SettingsDropdown />
+                </ToolbarItem>
               </ToolbarContent>
             </Toolbar>
           </PanelMainBody>

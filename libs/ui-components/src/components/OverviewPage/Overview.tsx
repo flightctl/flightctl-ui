@@ -7,6 +7,7 @@ import { RESOURCE, VERB } from '../../types/rbac';
 import PageWithPermissions from '../common/PageWithPermissions';
 import { GlobalSystemRestoreBanners } from '../SystemRestore/SystemRestoreBanners';
 
+import QuickStart from '../QuickStart/QuickStart';
 import AlertsCard from './Cards/Alerts/AlertsCard';
 import StatusCard from './Cards/Status/StatusCard';
 import TasksCard from './Cards/Tasks/TasksCard';
@@ -30,6 +31,8 @@ const Overview = () => {
       loading={loading || vulnerabilitiesLoading}
     >
       <GlobalSystemRestoreBanners className="pf-v6-u-py-0" />
+
+      <QuickStart />
 
       <Grid hasGutter>
         <GridItem md={alertsEnabled ? 9 : 12}>

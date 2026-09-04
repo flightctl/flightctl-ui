@@ -29,7 +29,7 @@ const WithPageLayoutContent = ({ children }: React.PropsWithChildren) => {
 
   return (
     <WithPageLayoutRoot>
-      <PageNavigation showSettings={false} />
+      <PageNavigation />
       {children}
     </WithPageLayoutRoot>
   );
