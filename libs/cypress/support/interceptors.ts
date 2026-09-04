@@ -5,10 +5,12 @@ import { loadInterceptors as loadDeviceInterceptors } from './interceptors/devic
 import { loadInterceptors as loadRepositoryInterceptors } from './interceptors/repositories';
 import { loadInterceptors as loadAuthInterceptors } from './interceptors/auth';
 import { loadInterceptors as loadGeneralInterceptors } from './interceptors/general';
+import { loadInterceptors as loadVulnerabilityInterceptors } from './interceptors/vulnerabilities';
 
 const loadApiInterceptors = () => {
   loadAuthInterceptors();
   loadGeneralInterceptors();
+  loadVulnerabilityInterceptors();
   loadResourceSyncsInterceptors();
   loadFleetInterceptors();
   loadDeviceInterceptors();
