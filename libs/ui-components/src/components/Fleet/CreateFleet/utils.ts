@@ -36,11 +36,12 @@ import {
   toApiApplication,
 } from '../../Device/EditDeviceWizard/deviceSpecUtils';
 import { getDisruptionBudgetValues, getRolloutPolicyValues, getUpdatePolicyValues } from './fleetSpecUtils';
-import { type FleetFormValues, type UpdatePolicyForm } from '../../../types/deviceSpec';
+import { type FleetFormValues, UpdateMode, type UpdatePolicyForm } from '../../../types/deviceSpec';
 
 export const getValidationSchema = (t: TFunction) => {
-  return Yup.lazy((values: FleetFormValues) =>
-    Yup.object<FleetFormValues>({
+  return Yup.lazy((values: FleetFormValues) => {
+    const hasCustomUpdates = values.updateMode === UpdateMode.Customized;
+    return Yup.object<FleetFormValues>({
       name: validKubernetesDnsSubdomain(t, { isRequired: true }),
       osSpec: validOsFormValue(t, { isFleet: true }),
       fleetLabels: validLabelsSchema(t),
@@ -49,17 +50,12 @@ export const getValidationSchema = (t: TFunction) => {
       applications: validApplicationsSchema(t),
       systemdUnits: systemdUnitListValidationSchema(t),
       rolloutPolicy:
-        !values.useBasicUpdateConfig && values.rolloutPolicy?.isAdvanced
-          ? validFleetRolloutPolicySchema(t)
-          : Yup.object(),
+        hasCustomUpdates && values.rolloutPolicy?.isCustomized ? validFleetRolloutPolicySchema(t) : Yup.object(),
       disruptionBudget:
-        !values.useBasicUpdateConfig && values.disruptionBudget?.isAdvanced
-          ? validFleetDisruptionBudgetSchema(t)
-          : Yup.object(),
-      updatePolicy:
-        !values.useBasicUpdateConfig && values.updatePolicy?.isAdvanced ? validUpdatePolicySchema(t) : Yup.object(),
-    }),
-  );
+        hasCustomUpdates && values.disruptionBudget?.isCustomized ? validFleetDisruptionBudgetSchema(t) : Yup.object(),
+      updatePolicy: hasCustomUpdates && values.updatePolicy?.isCustomized ? validUpdatePolicySchema(t) : Yup.object(),
+    });
+  });
 };
 
 export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValues) => {
@@ -142,7 +138,7 @@ export const getFleetPatches = (currentFleet: Fleet, updatedFleet: FleetFormValu
     currentFleet.spec.template.spec.updatePolicy,
     {
       ...updatedFleet.updatePolicy,
-      isAdvanced: !updatedFleet.useBasicUpdateConfig && updatedFleet.updatePolicy.isAdvanced,
+      isCustomized: updatedFleet.updateMode === UpdateMode.Customized && updatedFleet.updatePolicy.isCustomized,
     } as Required<UpdatePolicyForm>,
   );
   allPatches = allPatches.concat(updatePolicyPatches);
@@ -190,11 +186,11 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
   if (values.registerMicroShift) {
     fleet.spec.template.spec.config?.push(ACMCrdConfig, ACMImportConfig, MicroshiftRegistrationHook);
   }
-  if (!values.useBasicUpdateConfig) {
-    if (values.rolloutPolicy.isAdvanced || values.disruptionBudget.isAdvanced) {
+  if (values.updateMode === UpdateMode.Customized) {
+    if (values.rolloutPolicy.isCustomized || values.disruptionBudget.isCustomized) {
       fleet.spec.rolloutPolicy = getRolloutPolicyData(values);
     }
-    if (values.updatePolicy.isAdvanced) {
+    if (values.updatePolicy.isCustomized) {
       fleet.spec.template.spec.updatePolicy = updatePolicyFormToApi(values.updatePolicy as Required<UpdatePolicyForm>);
     }
   }
@@ -207,6 +203,8 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
     const rolloutPolicy = getRolloutPolicyValues(fleet.spec);
     const disruptionBudget = getDisruptionBudgetValues(fleet.spec);
     const updatePolicy = getUpdatePolicyValues(fleet.spec.template?.spec?.updatePolicy);
+
+    const isCustomUpdateMode = rolloutPolicy.isCustomized || disruptionBudget.isCustomized || updatePolicy.isCustomized;
     return {
       name: fleet.metadata.name || '',
       labels: Object.keys(fleet.spec.selector?.matchLabels || {}).map((key) => ({
@@ -225,7 +223,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
       rolloutPolicy,
       disruptionBudget,
       updatePolicy,
-      useBasicUpdateConfig: !rolloutPolicy.isAdvanced && !disruptionBudget.isAdvanced && !updatePolicy.isAdvanced,
+      updateMode: isCustomUpdateMode ? UpdateMode.Customized : UpdateMode.Default,
     };
   }
 
@@ -241,6 +239,6 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
     rolloutPolicy: getRolloutPolicyValues(undefined),
     disruptionBudget: getDisruptionBudgetValues(undefined),
     updatePolicy: getUpdatePolicyValues(undefined),
-    useBasicUpdateConfig: true,
+    updateMode: UpdateMode.Default,
   };
 };

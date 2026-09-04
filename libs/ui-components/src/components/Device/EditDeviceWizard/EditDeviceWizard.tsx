@@ -14,7 +14,7 @@ import {
 
 import { type Device } from '@flightctl/types';
 import { getUpdatePolicyValues } from '../../Fleet/CreateFleet/fleetSpecUtils';
-import { type EditDeviceFormValues } from './../../../types/deviceSpec';
+import { type EditDeviceFormValues, UpdateMode } from './../../../types/deviceSpec';
 import { getErrorMessage } from '../../../utils/error';
 import { fromAPILabel } from '../../../utils/labels';
 import { getEditDisabledReason } from '../../../utils/devices';
@@ -111,11 +111,8 @@ const EditDeviceWizard = () => {
             applications: getApplicationValues(device.spec),
             systemdUnits: getSystemdUnitsValues(device.spec),
             registerMicroShift,
-            updatePolicy: {
-              ...updatePolicyValues,
-              isAdvanced: true,
-            },
-            useBasicUpdateConfig: !updatePolicyValues.isAdvanced,
+            updatePolicy: updatePolicyValues,
+            updateMode: updatePolicyValues.isCustomized ? UpdateMode.Customized : UpdateMode.Default,
           }}
           validationSchema={getValidationSchema(t)}
           validateOnMount

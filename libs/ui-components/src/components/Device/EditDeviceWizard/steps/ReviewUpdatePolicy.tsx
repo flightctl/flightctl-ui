@@ -9,14 +9,14 @@ import LabelsView from '../../../common/LabelsView';
 export const ReviewUpdateRolloutPolicy = ({ rolloutPolicy }: { rolloutPolicy: RolloutPolicyForm }) => {
   const { t } = useTranslation();
 
-  return rolloutPolicy.isAdvanced
+  return rolloutPolicy.isCustomized
     ? t('{{ count }} batches have been defined', { count: rolloutPolicy.batches.length })
     : '-';
 };
 
 export const ReviewUpdateDisruptionBudget = ({ disruptionBudget }: { disruptionBudget: DisruptionBudgetForm }) => {
   const { t } = useTranslation();
-  if (!disruptionBudget.isAdvanced) {
+  if (!disruptionBudget.isCustomized) {
     return '-';
   }
 

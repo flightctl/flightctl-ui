@@ -1,4 +1,5 @@
-.fctl-update-policy--advanced .pf-v6-c-check {
-  /* Prevents Patternfly from moving these checkboxes too high relative to the center of their label */
-  --pf-v6-c-check__input--TranslateY: 0.7rem;
+.fctl-update-policy--customize-options {
+  padding-inline-start: var(--pf-t--global--spacer--md);
+  border-inline-start: var(--pf-t--global--border--width--control--default) solid
+    var(--pf-t--global--border--color--default);
 }
