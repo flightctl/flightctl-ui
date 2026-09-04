@@ -38,6 +38,8 @@ import { getErrorMessage } from '../../../utils/error';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import { CatalogItemLabel } from '../CatalogItemLabels';
+import TruncatedText from '../../common/TruncatedText';
 
 const orderedIds = [generalInfoStepId, typeConfigStepId, versionStepId, reviewStepId];
 
@@ -109,13 +111,20 @@ const AddCatalogItemWizard = () => {
   const initialValues = editItem ? getInitialValuesFromItem(editItem) : getInitialValues();
   const isReadOnly = !!editItem?.metadata?.owner;
 
-  let pageTitle: string;
-  if (isReadOnly) {
-    pageTitle = t('View {{ name }}', { name: editItem?.spec.displayName || editItem?.metadata.name });
-  } else if (isEdit) {
-    pageTitle = t('Edit {{ name }}', { name: editItem?.spec.displayName || editItem?.metadata.name });
+  let titleEl: React.ReactNode;
+  if (isReadOnly || isEdit) {
+    const title = editItem ? (
+      <CatalogItemLabel item={editItem} shortened />
+    ) : (
+      <TruncatedText text={itemId || ''} maxChars={30} />
+    );
+    titleEl = (
+      <>
+        {isReadOnly ? t('View') : t('Edit')} {title}
+      </>
+    );
   } else {
-    pageTitle = t('Create catalog item');
+    titleEl = t('Create catalog item');
   }
 
   let content: React.ReactNode = (
@@ -230,12 +239,12 @@ const AddCatalogItemWizard = () => {
           <BreadcrumbItem>
             <Link to={ROUTE.CATALOG}>{t('Software Catalog')}</Link>
           </BreadcrumbItem>
-          <BreadcrumbItem isActive>{pageTitle}</BreadcrumbItem>
+          <BreadcrumbItem isActive>{titleEl}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
       <PageSection hasBodyWrapper={false}>
         <Title headingLevel="h1" size="3xl">
-          {pageTitle}
+          {titleEl}
         </Title>
       </PageSection>
       {content}

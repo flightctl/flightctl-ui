@@ -7,6 +7,7 @@ import type { CatalogItemRefSpec } from '@flightctl/types';
 import type { CatalogItem } from '@flightctl/types/alpha';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getCatalogItemIcon } from '../../utils/catalog';
+import { CatalogItemLabel, CatalogItemRefLabel } from './CatalogItemLabels';
 
 const formatVersionLine = (t: TFunction, version?: string, channel?: string) => {
   if (!version) {
@@ -79,7 +80,9 @@ export const BrokenCatalogItemTitle = ({
               )}
             />
           </StackItem>
-          <StackItem>{`${catalogRef.catalog}/${catalogRef.item}`}</StackItem>
+          <StackItem>
+            <CatalogItemRefLabel catalogItemRef={catalogRef} />
+          </StackItem>
         </Stack>
       }
       description={description}
@@ -102,7 +105,7 @@ const CatalogItemTitle = ({
 }) => (
   <CatalogTitleLayout
     icon={<img src={getCatalogItemIcon(item)} alt={`${item.metadata.name} icon`} style={{ maxWidth: '40px' }} />}
-    title={item.spec.displayName || item.metadata.name || ''}
+    title={<CatalogItemLabel item={item} />}
     description={description}
     version={version}
     channel={channel}

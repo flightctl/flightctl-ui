@@ -103,7 +103,7 @@ const FleetRow: React.FC<FleetRowProps> = ({
         </FleetOwnerLinkIcon>
       </Td>
       <Td dataLabel={t('System image')}>
-        <SystemImageDisplay catalogItemRef={fleetOsSpec?.catalogItemRef} imageUri={fleetOsSpec?.image} />
+        {fleetOsSpec?.image || <SystemImageDisplay catalogItemRef={fleetOsSpec?.catalogItemRef} />}
       </Td>
       <Td dataLabel={t('Up-to-date/devices')}>
         <FleetDevicesCount
