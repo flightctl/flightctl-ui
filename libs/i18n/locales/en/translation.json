@@ -1687,6 +1687,8 @@
   "Follow these phases to get your edge management environment up and running.": "Follow these phases to get your edge management environment up and running.",
   "Progress": "Progress",
   "{{completed}} of {{total}}": "{{completed}} of {{total}}",
+  "About {{count}} minutes_one": "About {{count}} minute",
+  "About {{count}} minutes_other": "About {{count}} minutes",
   "Welcome & Orientation": "Welcome & Orientation",
   "Get familiar with {{ productName }} and learn how to navigate the console.": "Get familiar with {{ productName }} and learn how to navigate the console.",
   "Build an OS Image": "Build an OS Image",
