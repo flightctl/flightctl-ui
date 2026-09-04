@@ -1,6 +1,6 @@
 import React from 'react';
 import { type TFunction, withTranslation } from 'react-i18next';
-import { Alert } from '@patternfly/react-core';
+import { Alert, AlertActionLink } from '@patternfly/react-core';
 
 import { getErrorMessage } from '../../utils/error';
 
@@ -38,7 +38,12 @@ class ErrorBoundary extends React.Component<Props, State> {
     }
 
     return hasError ? (
-      <Alert variant="danger" title={t('Unexpected error occurred')} isInline>
+      <Alert
+        variant="danger"
+        title={t('Unexpected error occurred')}
+        isInline
+        actionLinks={<AlertActionLink onClick={() => window.location.reload()}>{t('Reload page')}</AlertActionLink>}
+      >
         {t('Please reload the page and try again.')}
         <details>{getErrorMessage(error)}</details>
       </Alert>
