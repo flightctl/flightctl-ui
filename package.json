@@ -57,6 +57,7 @@
   },
   "overrides": {
     "js-yaml": "4.3.2",
-    "immutable": "4.3.9"
+    "immutable": "4.3.9",
+    "fast-uri": "3.1.7"
   }
 }
