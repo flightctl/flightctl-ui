@@ -24,6 +24,7 @@ import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/redu
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
 import { apiProxy } from '../../utils/apiCalls';
+import QuickStartHost from '@flightctl/ui-components/src/components/QuickStart/QuickStartHost';
 
 import '@flightctl/ui-components/src/styles/global.css';
 import './AppContext.css';
@@ -59,7 +60,11 @@ export const OCPPluginAppContext: React.FC<React.PropsWithChildren<{ value: AppC
   children,
   value,
 }) => {
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={value}>
+      <QuickStartHost>{children}</QuickStartHost>
+    </AppContext.Provider>
+  );
 };
 
 const appRoutes = {
