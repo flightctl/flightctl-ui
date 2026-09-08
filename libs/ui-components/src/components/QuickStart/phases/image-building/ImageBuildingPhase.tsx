@@ -5,9 +5,9 @@ import { useAppContext } from '../../../../hooks/useAppContext';
 import { ROUTE } from '../../../../hooks/useNavigate';
 import { usePermissionsContext } from '../../../common/PermissionsContext';
 import { pathMatchesRoute } from '../../quickStartPhaseUtils';
-import { buildImageBuildingGuideSteps } from './imageBuildingGuideSteps';
 import { useQuickStartGuide } from '../../QuickStartContext';
 import { useQuickStartListHasItems } from '../../useQuickStartListHasItems';
+import { buildImageBuildingGuideSteps } from './imageBuildingGuideSteps';
 import { RESOURCE, VERB } from '../../../../types/rbac';
 
 const listPermissions = [{ kind: RESOURCE.IMAGE_BUILD, verb: VERB.LIST }];
@@ -21,19 +21,19 @@ const ImageBuildingPhase = () => {
 
   const [canListBuilds] = checkPermissions(listPermissions);
   const isOnBuildsPage = pathMatchesRoute(location.pathname, router.appRoutes[ROUTE.IMAGE_BUILDS]);
-  const { hasItems: hasBuilds } = useQuickStartListHasItems(
-    canListBuilds ? ImageBuilderResourceKind.IMAGE_BUILD : undefined,
-  );
+  const buildsProbe = useQuickStartListHasItems(canListBuilds ? ImageBuilderResourceKind.IMAGE_BUILD : undefined);
+  const isListProbeLoading = canListBuilds && buildsProbe.isLoading;
 
-  const steps = React.useMemo(
-    () =>
-      buildImageBuildingGuideSteps({
-        checkPermissions,
-        isOnBuildsPage,
-        hasBuilds,
-      }),
-    [checkPermissions, hasBuilds, isOnBuildsPage],
-  );
+  const steps = React.useMemo(() => {
+    if (isListProbeLoading) {
+      return [];
+    }
+    return buildImageBuildingGuideSteps({
+      checkPermissions,
+      isOnBuildsPage,
+      hasBuilds: buildsProbe.hasItems,
+    });
+  }, [buildsProbe.hasItems, checkPermissions, isListProbeLoading, isOnBuildsPage]);
 
   const activeStep = steps[activeStepIndex];
   const isLastStep = activeStep ? activeStepIndex >= steps.length - 1 : false;
@@ -54,6 +54,9 @@ const ImageBuildingPhase = () => {
   }, [activeStepIndex, setStepIndex]);
 
   React.useEffect(() => {
+    if (isListProbeLoading) {
+      return;
+    }
     if (!activeStep) {
       return;
     }
@@ -63,22 +66,26 @@ const ImageBuildingPhase = () => {
       canGoNext: activeStep.mustBeOnListPage ? isOnBuildsPage : true,
       isLastStep: activeStepIndex >= steps.length - 1,
     });
-  }, [activeStep, activeStepIndex, setGuidePresentation, isOnBuildsPage, steps.length]);
+  }, [activeStep, activeStepIndex, isListProbeLoading, setGuidePresentation, isOnBuildsPage, steps.length]);
 
   React.useEffect(() => {
+    if (isListProbeLoading) {
+      setGuideActions(null);
+      return;
+    }
     if (!activeStep) {
       setGuideActions(null);
       return;
     }
     setGuideActions({ onBack, onNext });
     return () => setGuideActions(null);
-  }, [activeStep, onBack, onNext, setGuideActions]);
+  }, [activeStep, isListProbeLoading, onBack, onNext, setGuideActions]);
 
   if (activePhaseId !== 'build-image') {
     throw new Error('ImageBuildingPhase expected image-building to be active');
   }
 
-  if (!activeStep) {
+  if (isListProbeLoading || !activeStep) {
     return null;
   }
 

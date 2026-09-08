@@ -25,23 +25,33 @@ const EnrollmentPhase = () => {
   const [canListDevices, canListEnrollmentRequests] = checkPermissions(listPermissions);
 
   const [completedNavigationSteps, setCompletedNavigationSteps] = React.useState<Record<number, boolean>>({});
-  const { hasItems: hasDevices } = useQuickStartListHasItems(canListDevices ? ResourceKind.DEVICE : undefined);
-  const { hasItems: hasPendingDevices } = useQuickStartListHasItems(
+  const devicesProbe = useQuickStartListHasItems(canListDevices ? ResourceKind.DEVICE : undefined);
+  const pendingProbe = useQuickStartListHasItems(
     canListEnrollmentRequests ? ResourceKind.ENROLLMENT_REQUEST : undefined,
   );
+  const isListProbeLoading =
+    (canListDevices && devicesProbe.isLoading) || (canListEnrollmentRequests && pendingProbe.isLoading);
   const isOnDevicesPage = pathMatchesRoute(location.pathname, router.appRoutes[ROUTE.DEVICES]);
 
-  const steps = React.useMemo(
-    () =>
-      buildEnrollmentGuideSteps({
-        isStepActionCompleted: (stepIndex) => completedNavigationSteps[stepIndex] ?? false,
-        checkPermissions,
-        isOnDevicesPage,
-        hasDevices,
-        hasPendingDevices,
-      }),
-    [checkPermissions, completedNavigationSteps, hasDevices, hasPendingDevices, isOnDevicesPage],
-  );
+  const steps = React.useMemo(() => {
+    if (isListProbeLoading) {
+      return [];
+    }
+    return buildEnrollmentGuideSteps({
+      isStepActionCompleted: (stepIndex) => completedNavigationSteps[stepIndex] ?? false,
+      checkPermissions,
+      isOnDevicesPage,
+      hasDevices: devicesProbe.hasItems,
+      hasPendingDevices: pendingProbe.hasItems,
+    });
+  }, [
+    checkPermissions,
+    completedNavigationSteps,
+    devicesProbe.hasItems,
+    isListProbeLoading,
+    isOnDevicesPage,
+    pendingProbe.hasItems,
+  ]);
 
   const activeStep = steps[activeStepIndex];
   const isLastStep = activeStep ? activeStepIndex >= steps.length - 1 : false;
@@ -64,6 +74,9 @@ const EnrollmentPhase = () => {
   }, [activeStepIndex, setStepIndex]);
 
   React.useEffect(() => {
+    if (isListProbeLoading) {
+      return;
+    }
     if (!activeStep) {
       return;
     }
@@ -73,22 +86,26 @@ const EnrollmentPhase = () => {
       canGoNext: activeStep.mustBeOnListPage ? isOnDevicesPage : true,
       isLastStep: activeStepIndex >= steps.length - 1,
     });
-  }, [activeStep, activeStepIndex, setGuidePresentation, isOnDevicesPage, steps.length]);
+  }, [activeStep, activeStepIndex, isListProbeLoading, setGuidePresentation, isOnDevicesPage, steps.length]);
 
   React.useEffect(() => {
+    if (isListProbeLoading) {
+      setGuideActions(null);
+      return;
+    }
     if (!activeStep) {
       setGuideActions(null);
       return;
     }
     setGuideActions({ onBack, onNext });
     return () => setGuideActions(null);
-  }, [activeStep, onBack, onNext, setGuideActions]);
+  }, [activeStep, isListProbeLoading, onBack, onNext, setGuideActions]);
 
   if (activePhaseId !== 'enroll-device') {
     throw new Error('EnrollmentPhase expected enrollment to be active');
   }
 
-  if (!activeStep) {
+  if (isListProbeLoading || !activeStep) {
     return null;
   }
 

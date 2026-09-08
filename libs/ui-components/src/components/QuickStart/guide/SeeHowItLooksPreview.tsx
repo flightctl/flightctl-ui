@@ -15,11 +15,9 @@ export const HealthyStatusPreview = ({ label }: { label: string }) => {
 export const PreviewButton = ({ title }: { title: string }) => {
   const { t } = useTranslation();
   return (
-    <Button variant="link" isInline onClick={() => {}}>
-      <WithTooltip showTooltip content={t('Action not available in preview mode')}>
-        <span>{title}</span>
-      </WithTooltip>
-    </Button>
+    <WithTooltip showTooltip content={t('Action not available in preview mode')}>
+      <span className="pf-v6-c-button pf-m-link pf-m-inline">{title}</span>
+    </WithTooltip>
   );
 };
 

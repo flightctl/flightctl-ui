@@ -144,6 +144,9 @@ export const buildImageBuildingGuideSteps = (options: ImageBuildingGuideRuntimeO
         />
       ),
     });
+  }
+
+  if (canViewBuild) {
     steps.push({
       render: () => <OpenBuildDetailPageStep />,
     });

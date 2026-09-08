@@ -20,18 +20,20 @@ const FleetManagementPhase = () => {
     useQuickStartGuide();
 
   const [canListFleets] = checkPermissions(listPermissions);
-  const { hasItems: hasFleets } = useQuickStartListHasItems(canListFleets ? ResourceKind.FLEET : undefined);
+  const fleetsProbe = useQuickStartListHasItems(canListFleets ? ResourceKind.FLEET : undefined);
+  const isListProbeLoading = canListFleets && fleetsProbe.isLoading;
   const isOnFleetsPage = pathMatchesRoute(location.pathname, router.appRoutes[ROUTE.FLEETS]);
 
-  const steps = React.useMemo(
-    () =>
-      buildFleetManagementGuideSteps({
-        checkPermissions,
-        isOnFleetsPage,
-        hasFleets,
-      }),
-    [checkPermissions, hasFleets, isOnFleetsPage],
-  );
+  const steps = React.useMemo(() => {
+    if (isListProbeLoading) {
+      return [];
+    }
+    return buildFleetManagementGuideSteps({
+      checkPermissions,
+      isOnFleetsPage,
+      hasFleets: fleetsProbe.hasItems,
+    });
+  }, [checkPermissions, fleetsProbe.hasItems, isListProbeLoading, isOnFleetsPage]);
 
   const activeStep = steps[activeStepIndex];
   const isLastStep = activeStep ? activeStepIndex >= steps.length - 1 : false;
@@ -53,6 +55,9 @@ const FleetManagementPhase = () => {
   }, [activeStepIndex, setStepIndex]);
 
   React.useEffect(() => {
+    if (isListProbeLoading) {
+      return;
+    }
     if (!activeStep) {
       return;
     }
@@ -62,22 +67,26 @@ const FleetManagementPhase = () => {
       canGoNext: activeStep.mustBeOnListPage ? isOnFleetsPage : true,
       isLastStep: activeStepIndex >= steps.length - 1,
     });
-  }, [activeStep, activeStepIndex, setGuidePresentation, isOnFleetsPage, steps.length]);
+  }, [activeStep, activeStepIndex, isListProbeLoading, setGuidePresentation, isOnFleetsPage, steps.length]);
 
   React.useEffect(() => {
+    if (isListProbeLoading) {
+      setGuideActions(null);
+      return;
+    }
     if (!activeStep) {
       setGuideActions(null);
       return;
     }
     setGuideActions({ onBack, onNext });
     return () => setGuideActions(null);
-  }, [activeStep, onBack, onNext, setGuideActions]);
+  }, [activeStep, isListProbeLoading, onBack, onNext, setGuideActions]);
 
   if (activePhaseId !== 'manage-fleet') {
     throw new Error('FleetManagementPhase expected fleet-management to be active');
   }
 
-  if (!activeStep) {
+  if (isListProbeLoading || !activeStep) {
     return null;
   }
 
