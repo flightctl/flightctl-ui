@@ -3,7 +3,7 @@ import { useAppContext } from './useAppContext';
 // Links to other flightctl upstream resources
 export const DEMO_REPOSITORY_URL = 'https://github.com/flightctl/flightctl-demos';
 
-export const RHEM_VERSION = '1.2';
+export const RHEM_VERSION = '1.3';
 
 const baseUpstreamDocs = 'https://github.com/flightctl/flightctl/blob/main/docs';
 
@@ -21,7 +21,7 @@ const downstreamLinks = {
   createApp: `${baseDownstreamDocs}/managing_applications_on_an_edge_device/build-app-packages_managing-apps-edge-device`,
   useTemplateVars: `${baseDownstreamDocs}/managing_device_fleets/device-fleets_managing-device-fleets`,
   addNewDevice: `${baseDownstreamDocs}/operating_system_images_for_the_red_hat_edge_manager/edge-mgr-images_os-images-edge-manager#build-images-consider_os-images-edge-manager`,
-  createAcmRepo: `${baseDownstreamDocs}/managing_devices/devices-air-gapped#manage-git-repository_managing-devices`,
+  createAcmRepo: `${baseDownstreamDocs}/managing_devices/manage-devices-intro_managing-devices#manage-git-repository_managing-devices`,
   provisionDevice: `${baseDownstreamDocs}/provisioning_devices/provision-devices-intro_provisioning-devices`,
   catalog: `${baseDownstreamDocs}/managing_devices/manage-devices-intro_managing-devices#software-catalog_managing-devices`,
 };
