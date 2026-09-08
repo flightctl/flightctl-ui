@@ -60,8 +60,10 @@ reviews:
       - "WIP"
 
   # ── Risk classification (Ship/Show/Ask) ───────────────────────
-  # Informational labels only — no automation. Builds trust in the
-  # classification before any merge-path changes.
+  # Informational labels only — no merge automation. Builds trust in the
+  # classification before any merge-path changes. Automatic application
+  # intentionally covers both risk labels and the existing area labels;
+  # CodeRabbit's auto_apply_labels setting applies to all suggested labels.
   auto_apply_labels: true
   labeling_instructions:
     - label: "risk:ship"
