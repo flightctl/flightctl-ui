@@ -24,7 +24,11 @@ reviews:
     UI components, platform-specific app code, the Go auth proxy, container
     builds, E2E tests, or CI configuration, and flag any cross-cutting
     implications (e.g., shared component changes that affect both standalone
-    and OCP plugin).
+    and OCP plugin). End the summary with a "Risk classification" section
+    that states which risk label (risk:ship, risk:show, or risk:ask) was
+    applied and the specific criteria from the labeling instructions that
+    determined the classification. If the PR was close to a different
+    classification, note which one and why it did not qualify.
   collapse_walkthrough: false
   sequence_diagrams: true
 
@@ -55,7 +59,115 @@ reviews:
       - "[skip-review]"
       - "WIP"
 
+  # ── Risk classification (Ship/Show/Ask) ───────────────────────
+  # Informational labels only — no automation. Builds trust in the
+  # classification before any merge-path changes.
+  auto_apply_labels: true
   labeling_instructions:
+    - label: "risk:ship"
+      instructions: >
+        Apply when the PR makes ONLY trivial, mechanical changes with
+        near-zero risk of runtime impact. ALL changed files must fall
+        into one or more of these categories — if ANY file falls outside,
+        do not apply this label. The explicit risk:ask triggers take
+        precedence over eligible categories.
+
+        Eligible file categories:
+        - Documentation (*.md, docs/**), excluding review-policy files
+          (AGENTS.md, CLAUDE.md, CONTRIBUTING.md, UI-ARCHITECTURE.md)
+          and executable code or configuration stored under docs/
+        - CI configuration — comment and formatting changes only to
+          existing files under .github/workflows/** and .github/actions/**.
+          Any semantic change (including run, uses, on, if, needs,
+          runs-on, concurrency, timeout-minutes, continue-on-error,
+          defaults, environment, artifacts, build inputs, test matrix,
+          secrets, or permissions) and new workflows are not Ship.
+        - Dependency version bumps in root or workspace package.json
+          and matching package-lock.json updates, or proxy/go.mod and
+          matching proxy/go.sum updates, with no API surface change
+          (patch or minor only; no added or removed direct dependencies,
+          major bumps, script changes, registry changes, overrides,
+          replace directives, or toolchain changes)
+        - Pure regeneration of API models under libs/types/models/**,
+          libs/types/alpha/models/**, libs/types/imagebuilder/models/**
+          and their generated index.ts exports, or translations in
+          libs/i18n/locales/en/translation.json, with no hand edits.
+          Source or generator changes must qualify independently;
+          regeneration does not make the rest of a PR Ship-eligible.
+        - .gitignore or .editorconfig maintenance; Makefile comment-only
+          or whitespace-only changes with no effect on targets or recipes;
+          lint rule additions or formatting (no rule removal, disablement,
+          or other executable configuration changes)
+
+        Never Ship: hand-maintained TypeScript, JavaScript, JSX, TSX,
+        CSS, HTML, or Go source (including tests), except the lint config
+        changes allowed above; container or deployment changes; packaging/
+        changes; shell scripts; semantic build configuration changes;
+        .coderabbit.yaml or review-policy changes.
+
+        When uncertain, do not apply this label.
+
+    - label: "risk:show"
+      instructions: >
+        Apply when the PR is low-to-medium risk — it changes functional
+        code but is well-scoped and unlikely to cause incidents if the
+        AI review is the only review. Apply ONLY if risk:ship does not
+        fit, none of the explicit risk:ask triggers below applies, and
+        ALL of the following are true:
+
+        1. The change is additive or isolated — no removal of existing
+           behavior, no cross-cutting refactors.
+        2. The blast radius is contained to one feature or helper.
+           A feature in libs/ui-components/ may qualify, but assess its
+           use in both standalone and OCP plugin. Changes to shared
+           infrastructure used across features are not isolated.
+        3. The PR does NOT introduce a new direct dependency, remove an
+           existing one, or bump a major version. Transitive dependency
+           changes must be explained by eligible patch/minor updates.
+        4. The change preserves API contracts, permission enforcement,
+           and existing resource mutation behavior.
+
+        Typical Show changes: Cypress test additions or fixes, isolated
+        component styling or accessibility fixes, translated help text
+        with regenerated translations, single-function bug fixes in
+        non-critical paths, and new utility functions with tests.
+
+        When uncertain, do not apply this label.
+
+    - label: "risk:ask"
+      instructions: >
+        Apply when the PR does not qualify for risk:ship or risk:show.
+        This is the default — if neither of the other labels fits,
+        apply this one. The following triggers take precedence over
+        both Ship and Show:
+
+        - Authentication, authorization/RBAC, organization isolation,
+          secrets, credentials, certificates, or security-sensitive
+          configuration anywhere in the frontend or proxy
+        - Go proxy runtime code (proxy/**/*.go, excluding test-only
+          changes), including middleware, routing, and WebSocket bridging
+        - API contracts or request/response handling, except pure
+          regeneration of models and exports eligible for Ship
+        - Resource mutation behavior: enrollment, fleet rollout settings,
+          create/update/delete payloads, decommissioning, or validation
+          and confirmation safeguards for those operations
+        - Shared infrastructure affecting multiple features or platforms
+          (AppContext, API transport, routing, polling, shared form or
+          wizard behavior), or other cross-cutting refactors
+        - New or removed direct dependencies, major dependency bumps,
+          unexplained lockfile changes, dependency source/registry changes,
+          overrides, replace directives, or toolchain changes
+        - Containerfiles, Dockerfiles, deployment manifests, packaging/,
+          shell scripts, or semantic build/release configuration changes
+        - Semantic CI changes or new workflows/actions
+        - Removal or weakening of lint rules, type checking, test coverage,
+          or other validation gates
+        - .coderabbit.yaml or review-policy files (AGENTS.md, CLAUDE.md,
+          CONTRIBUTING.md, UI-ARCHITECTURE.md)
+        - Hand-edited generated API models/exports or translation.json
+        - Uncertainty about the appropriate risk level
+
+    # Area labels remain independent of the mutually exclusive risk labels.
     - label: "ui-components"
       instructions: >-
         Apply when the PR modifies files in libs/ui-components/. Changes here
@@ -101,6 +213,12 @@ reviews:
       instructions: >-
         Apply when the PR modifies files in libs/i18n/ or adds/changes
         translation keys in source code.
+
+  mutually_exclusive_groups:
+    risk:
+      - "risk:ship"
+      - "risk:show"
+      - "risk:ask"
 
   path_instructions:
 
