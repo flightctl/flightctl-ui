@@ -11,7 +11,7 @@ import {
 import { useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { type FleetFormValues } from '../../../../types/deviceSpec';
+import { type FleetFormValues, UpdateMode } from '../../../../types/deviceSpec';
 import LabelsView from '../../../common/LabelsView';
 import { toAPILabel } from '../../../../utils/labels';
 import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
@@ -88,9 +88,9 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
               </DescriptionListDescription>
             </DescriptionListGroup>
           )}
-          {!values.useBasicUpdateConfig && (
+          {values.updateMode === UpdateMode.Customized && (
             <>
-              {values.rolloutPolicy.isAdvanced && (
+              {values.rolloutPolicy.isCustomized && (
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Rollout policy')}</DescriptionListTerm>
                   <DescriptionListDescription>
@@ -98,7 +98,7 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               )}
-              {values.disruptionBudget.isAdvanced && (
+              {values.disruptionBudget.isCustomized && (
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t('Disruption budget')}</DescriptionListTerm>
                   <DescriptionListDescription>

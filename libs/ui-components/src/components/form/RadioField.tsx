@@ -31,7 +31,7 @@ const RadioField = ({
       if (noDefaultOnChange) {
         return;
       }
-      await setValue(checkedValue || true, true);
+      await setValue(checkedValue !== undefined ? checkedValue : true, true);
       await setTouched(true);
     }
   };
@@ -45,7 +45,7 @@ const RadioField = ({
         {...props}
         id={fieldId}
         onChange={onChange}
-        isChecked={checkedValue ? field.value === checkedValue : !!field.value}
+        isChecked={checkedValue !== undefined ? field.value === checkedValue : !!field.value}
       />
 
       <DefaultHelperText helperText={helperText} />

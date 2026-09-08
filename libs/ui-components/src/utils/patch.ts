@@ -17,6 +17,7 @@ import {
   type DisruptionBudgetForm,
   type FleetFormValues,
   type RolloutPolicyForm,
+  UpdateMode,
   type UpdatePolicyForm,
 } from '../types/deviceSpec';
 import { getUpdateCronExpression, localDeviceTimezone } from './time';
@@ -181,9 +182,9 @@ export const getUpdatePolicyPatches = (
   currentPolicy: DeviceUpdatePolicySpec | undefined,
   form: Required<UpdatePolicyForm>,
 ): PatchRequest => {
-  // Switching from basic mode to advanced or viceversa
+  // Switching from default mode to customized mode or viceversa
   if (!currentPolicy) {
-    return form.isAdvanced
+    return form.isCustomized
       ? ([
           {
             op: 'add',
@@ -192,7 +193,7 @@ export const getUpdatePolicyPatches = (
           },
         ] as PatchRequest)
       : [];
-  } else if (!form.isAdvanced) {
+  } else if (!form.isCustomized) {
     return [
       {
         op: 'remove',
@@ -201,7 +202,7 @@ export const getUpdatePolicyPatches = (
     ] as PatchRequest;
   }
 
-  // Making changes to existing advaced settings
+  // Making changes to existing customized settings
   const updatePatches: PatchRequest = [];
   const { downloadSchedule: newDownloadSched, updateSchedule: newInstallSched } = updatePolicyFormToApi(form);
   if (!schedulesAreEqual(currentPolicy.downloadSchedule, newDownloadSched)) {
@@ -246,11 +247,11 @@ export const getUpdatePolicyPatches = (
 
 export const getRolloutPolicyData = ({ rolloutPolicy, disruptionBudget }: FleetFormValues) => {
   const newRolloutPolicy: RolloutPolicy = {};
-  if (rolloutPolicy.isAdvanced) {
+  if (rolloutPolicy.isCustomized) {
     newRolloutPolicy.defaultUpdateTimeout = toApiDuration(rolloutPolicy.updateTimeout);
     newRolloutPolicy.deviceSelection = toApiDeviceSelection(rolloutPolicy);
   }
-  if (disruptionBudget.isAdvanced) {
+  if (disruptionBudget.isCustomized) {
     newRolloutPolicy.disruptionBudget = toApiDisruptionBudget(disruptionBudget);
   }
   return newRolloutPolicy;
@@ -263,14 +264,15 @@ export const getRolloutPolicyPatches = (
   const currentBatches = currentPolicy?.deviceSelection?.sequence || [];
   const currentDisruption = currentPolicy?.disruptionBudget;
 
-  const hadAdvancedSettings = currentBatches.length > 0 || !!currentDisruption;
-  const wantsAdvancedSettings =
-    !fleetValues.useBasicUpdateConfig &&
-    (fleetValues.rolloutPolicy.isAdvanced || fleetValues.disruptionBudget.isAdvanced);
+  const hadCustomSettings =
+    currentPolicy?.defaultUpdateTimeout !== undefined || currentBatches.length > 0 || !!currentDisruption;
+  const wantsCustomSettings =
+    fleetValues.updateMode === UpdateMode.Customized &&
+    (fleetValues.rolloutPolicy.isCustomized || fleetValues.disruptionBudget.isCustomized);
   const updatedPolicy = fleetValues.rolloutPolicy;
 
-  if (hadAdvancedSettings !== wantsAdvancedSettings) {
-    return wantsAdvancedSettings
+  if (hadCustomSettings !== wantsCustomSettings) {
+    return wantsCustomSettings
       ? [
           {
             op: 'add',
@@ -287,7 +289,7 @@ export const getRolloutPolicyPatches = (
   }
 
   const patches: PatchRequest = [];
-  if (fleetValues.rolloutPolicy.isAdvanced) {
+  if (fleetValues.rolloutPolicy.isCustomized) {
     // The timeout will be always expressed in minutes
     if ((currentPolicy?.defaultUpdateTimeout || '') !== (updatedPolicy.updateTimeout || '')) {
       appendJSONPatch({
@@ -339,7 +341,7 @@ export const getRolloutPolicyPatches = (
     });
   }
 
-  if (fleetValues.disruptionBudget.isAdvanced) {
+  if (fleetValues.disruptionBudget.isCustomized) {
     const hasMinChanged = (currentDisruption?.minAvailable || '') !== (fleetValues.disruptionBudget.minAvailable || '');
     const hasMaxChanged =
       (currentDisruption?.maxUnavailable || '') !== (fleetValues.disruptionBudget.maxUnavailable || '');
@@ -354,7 +356,7 @@ export const getRolloutPolicyPatches = (
         path: '/spec/rolloutPolicy/disruptionBudget',
         patches,
         originalValue: currentDisruption,
-        newValue: fleetValues.disruptionBudget.isAdvanced
+        newValue: fleetValues.disruptionBudget.isCustomized
           ? toApiDisruptionBudget(fleetValues.disruptionBudget)
           : undefined,
       });

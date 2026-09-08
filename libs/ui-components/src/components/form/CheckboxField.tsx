@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useField } from 'formik';
 import { Checkbox, type CheckboxProps, FormGroup } from '@patternfly/react-core';
-import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
+import ErrorHelperText from './FieldHelperText';
 
 interface BaseCheckboxProps extends Omit<CheckboxProps, 'onChange' | 'id' | 'ref'> {
   name: string;
@@ -34,7 +34,7 @@ export const CheckboxFieldGroupValidation = ({ onChangeCustom, ...props }: BaseC
   );
 };
 
-const CheckboxField = ({ onChangeCustom, helperText, children, ...props }: CheckboxFieldProps) => {
+const CheckboxField = ({ onChangeCustom, children, ...props }: CheckboxFieldProps) => {
   const [{ value, ...rest }, meta, { setValue, setTouched }] = useField<boolean>({
     name: props.name,
   });
@@ -53,7 +53,6 @@ const CheckboxField = ({ onChangeCustom, helperText, children, ...props }: Check
       <FormGroup id={`form-control__${fieldId}`} fieldId={fieldId}>
         <Checkbox {...rest} {...props} isChecked={value} id={fieldId} onChange={onChange} body={value && props.body} />
 
-        <DefaultHelperText helperText={helperText} />
         <ErrorHelperText meta={meta} />
       </FormGroup>
       {value && children}

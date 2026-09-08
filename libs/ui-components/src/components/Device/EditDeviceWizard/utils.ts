@@ -11,7 +11,7 @@ import {
 } from '../../form/validations';
 import { getDeviceLabelPatches, getStringListPatches, getUpdatePolicyPatches } from '../../../utils/patch';
 import { type Device, type PatchRequest } from '@flightctl/types';
-import { type EditDeviceFormValues, type UpdatePolicyForm } from './../../../types/deviceSpec';
+import { type EditDeviceFormValues, UpdateMode, type UpdatePolicyForm } from './../../../types/deviceSpec';
 import {
   ACMCrdConfig,
   ACMImportConfig,
@@ -30,8 +30,7 @@ export const getValidationSchema = (t: TFunction) =>
       labels: validLabelsSchema(t),
       configTemplates: validConfigTemplatesSchema(t),
       applications: validApplicationsSchema(t),
-      updatePolicy:
-        !values.useBasicUpdateConfig && values.updatePolicy.isAdvanced ? validUpdatePolicySchema(t) : Yup.object(),
+      updatePolicy: values.updateMode === UpdateMode.Customized ? validUpdatePolicySchema(t) : Yup.object(),
     }),
   );
 
@@ -78,7 +77,7 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
   // Updates
   const updatesPatches = getUpdatePolicyPatches('/spec/updatePolicy', currentDevice.spec?.updatePolicy, {
     ...updatedDevice.updatePolicy,
-    isAdvanced: !updatedDevice.useBasicUpdateConfig,
+    isCustomized: updatedDevice.updateMode === UpdateMode.Customized,
   } as Required<UpdatePolicyForm>);
   allPatches = allPatches.concat(updatesPatches);
 
