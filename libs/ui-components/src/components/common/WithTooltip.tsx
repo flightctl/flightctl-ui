@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { PropsWithChildren } from 'react';
+import { type PropsWithChildren } from 'react';
 import { Tooltip } from '@patternfly/react-core';
 
 type WithTooltipProps = {

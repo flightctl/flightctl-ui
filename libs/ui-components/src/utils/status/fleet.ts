@@ -1,7 +1,7 @@
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
-import { Condition, ConditionStatus, ConditionType, Fleet } from '@flightctl/types';
-import { FleetConditionType } from '../../types/extraTypes';
+import { type Condition, ConditionStatus, ConditionType, type Fleet } from '@flightctl/types';
+import { type FleetConditionType } from '../../types/extraTypes';
 import { getConditionMessage } from '../error';
 
 const FLEET_ROLLOUT_FAILED_REASON = 'Suspended';

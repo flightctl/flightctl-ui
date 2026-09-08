@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useFetch } from '../../hooks/useFetch';
 import { Bullseye, EmptyState, EmptyStateBody, PageSection, Spinner, Title } from '@patternfly/react-core';
-import { ResourceSync } from '@flightctl/types';
+import { type ResourceSync } from '@flightctl/types';
 import { Trans } from 'react-i18next';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';

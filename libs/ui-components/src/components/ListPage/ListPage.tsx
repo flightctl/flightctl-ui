@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Content, PageSection, Stack, StackItem, Title, TitleProps } from '@patternfly/react-core';
+import { Content, PageSection, Stack, StackItem, Title, type TitleProps } from '@patternfly/react-core';
 
 type ListPageProps = {
   title: string;

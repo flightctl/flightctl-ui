@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import { DeviceList } from '@flightctl/types';
+import { type DeviceList } from '@flightctl/types';
 
 import ListPage from '../../ListPage/ListPage';
 import ListPageBody from '../../ListPage/ListPageBody';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { useTablePagination } from '../../../hooks/useTablePagination';
+import { useResetPaginationOnFilterChange, useTablePagination } from '../../../hooks/useTablePagination';
 import { useDevices } from './useDevices';
 import { useDeviceBackendFilters } from './useDeviceBackendFilters';
 
@@ -20,6 +20,7 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
   const { t } = useTranslation();
 
   const {
+    filterKey,
     textFilters,
     clearTextFilters,
     setTextFilter,
@@ -30,12 +31,16 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
     setOwnerFleets,
     setOnlyFleetless,
     setActiveStatuses,
+    selectedOsModes,
+    setSelectedOsModes,
     selectedLabels,
     setSelectedLabels,
   } = useDeviceBackendFilters();
   const [onlyDecommissioned, setOnlyDecommissioned] = React.useState<boolean>(false);
 
   const { currentPage, setCurrentPage, onPageFetched, nextContinue, itemCount } = useTablePagination<DeviceList>();
+
+  useResetPaginationOnFilterChange(`${filterKey}|${onlyDecommissioned}`, setCurrentPage);
 
   const {
     devices: data,
@@ -49,6 +54,7 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
     onlyFleetless,
     onlyDecommissioned,
     activeStatuses,
+    selectedOsModes,
     labels: selectedLabels,
     nextContinue,
     onPageFetched,
@@ -99,6 +105,8 @@ const DevicesPage = ({ canListER }: { canListER: boolean }) => {
               setOwnerFleets={setOwnerFleets}
               setOnlyFleetless={setOnlyFleetless}
               setActiveStatuses={setActiveStatuses}
+              selectedOsModes={selectedOsModes}
+              setSelectedOsModes={setSelectedOsModes}
               selectedLabels={selectedLabels}
               setSelectedLabels={setSelectedLabels}
               isFilterUpdating={updating}

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { DropdownItem, Grid, GridItem, Tab } from '@patternfly/react-core';
 
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { RepoSpecType, Repository, ResourceKind } from '@flightctl/types';
+import { RepoSpecType, type Repository, ResourceKind } from '@flightctl/types';
 
 import DetailsPage from '../../DetailsPage/DetailsPage';
 import DetailsPageActions from '../../DetailsPage/DetailsPageActions';

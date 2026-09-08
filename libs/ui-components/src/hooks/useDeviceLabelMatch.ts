@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Fleet, FleetList } from '@flightctl/types';
-import { FlightCtlLabel } from '../types/extraTypes';
+import { type Fleet, type FleetList } from '@flightctl/types';
+import { type FlightCtlLabel } from '../types/extraTypes';
 import { useFetch } from './useFetch';
 import { getErrorMessage } from '../utils/error';
 

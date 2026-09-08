@@ -24,7 +24,7 @@ import {
 } from '@patternfly/react-core';
 import ArrowLeftIcon from '@patternfly/react-icons/dist/js/icons/arrow-left-icon';
 
-import { AuthProvider } from '@flightctl/types';
+import { type AuthProvider } from '@flightctl/types';
 import { ORGANIZATION_STORAGE_KEY } from '../../utils/organizationStorage';
 import { isValidJwtTokenFormat } from '../../utils/k8sProvider';
 import { useTranslation } from '../../hooks/useTranslation';

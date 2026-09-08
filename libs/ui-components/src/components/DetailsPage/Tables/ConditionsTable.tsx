@@ -1,6 +1,6 @@
 import { Bullseye } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { Condition } from '@flightctl/types';
+import { type Condition } from '@flightctl/types';
 import * as React from 'react';
 import { useTranslation } from '../../../hooks/useTranslation';
 

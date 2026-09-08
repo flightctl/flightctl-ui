@@ -1,13 +1,28 @@
 import { useDebounce } from 'use-debounce';
 
-import { Device, DeviceLifecycleStatusType, DeviceList, DevicesSummary } from '@flightctl/types';
-import { DeviceTextFilterKey, FilterSearchParams, isValidCveIdFilterValue } from '../../../utils/status/devices';
+import {
+  type Device,
+  DeviceLifecycleStatusType,
+  type DeviceList,
+  type DevicesSummary,
+  OsModeType,
+} from '@flightctl/types';
+import {
+  type DeviceOsModeFilterValue,
+  type DeviceTextFilterKey,
+  FilterSearchParams,
+  isValidCveIdFilterValue,
+} from '../../../utils/status/devices';
 import * as queryUtils from '../../../utils/query';
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
-import { FlightCtlLabel } from '../../../types/extraTypes';
-import { FilterStatusMap } from './types';
+import { type FlightCtlLabel } from '../../../types/extraTypes';
+import { type FilterStatusMap } from './types';
 import { PAGE_SIZE } from '../../../constants';
-import { PaginationDetails, useTablePagination } from '../../../hooks/useTablePagination';
+import {
+  type PaginationDetails,
+  useResetPaginationOnFilterChange,
+  useTablePagination,
+} from '../../../hooks/useTablePagination';
 
 type DevicesEndpointArgs = {
   /** Free-text filters synced with URL (name/alias, CVE ID, …). */
@@ -15,7 +30,9 @@ type DevicesEndpointArgs = {
   ownerFleets?: string[];
   onlyFleetless?: boolean;
   activeStatuses?: FilterStatusMap;
+  selectedOsModes?: DeviceOsModeFilterValue[];
   onlyDecommissioned?: boolean;
+  excludePackageMode?: boolean;
   labels?: FlightCtlLabel[];
   summaryOnly?: boolean;
   nextContinue?: string;
@@ -35,9 +52,11 @@ const getDevicesEndpoint = ({
   textFilters,
   ownerFleets,
   activeStatuses,
+  selectedOsModes,
   labels,
   onlyDecommissioned,
   onlyFleetless,
+  excludePackageMode,
   nextContinue,
   summaryOnly,
 }: DevicesEndpointArgs) => {
@@ -52,6 +71,7 @@ const getDevicesEndpoint = ({
   queryUtils.addQueryConditions(fieldSelectors, 'status.applicationsSummary.status', filterByAppStatus);
   queryUtils.addQueryConditions(fieldSelectors, 'status.summary.status', filterByDevStatus);
   queryUtils.addQueryConditions(fieldSelectors, 'status.updated.status', filterByUpdateStatus);
+  queryUtils.addOsModeQueryConditions(fieldSelectors, selectedOsModes);
 
   if (nameOrAlias) {
     queryUtils.addTextContainsCondition(fieldSelectors, 'metadata.nameOrAlias', nameOrAlias);
@@ -71,6 +91,11 @@ const getDevicesEndpoint = ({
     queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', decommissionedStatuses);
   } else {
     queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', enrolledStatuses);
+  }
+
+  if (excludePackageMode) {
+    // Only exclude devices known to be in package mode. Keep devices that did not report package mode yet.
+    fieldSelectors.push(`status.capabilities.osMode!=${OsModeType.OsModePackage}`);
   }
 
   const params = new URLSearchParams();
@@ -127,6 +152,7 @@ export const useDevices = (args: {
   textFilters?: Partial<Record<DeviceTextFilterKey, string>>;
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
+  selectedOsModes?: DeviceOsModeFilterValue[];
   labels?: FlightCtlLabel[];
   onlyDecommissioned: boolean;
   nextContinue?: string;
@@ -164,17 +190,34 @@ export type DevicesPaginatedResult = {
 
 /**
  * Hook for fetching devices with built-in pagination support.
- * Use this for paginated tables/modals.
+
+* Use this for paginated tables/modals of enrolled, fleetless devices.
  */
-export const useDevicesPaginated = (args: {
-  textFilters?: Partial<Record<DeviceTextFilterKey, string>>;
-  ownerFleets?: string[];
-  onlyDecommissioned: boolean;
-  onlyFleetless?: boolean;
-}): DevicesPaginatedResult => {
+export const useDevicesPaginated = ({
+  deviceNameFilter,
+  excludePackageMode,
+}: {
+  deviceNameFilter?: string;
+  excludePackageMode?: boolean;
+} = {}): DevicesPaginatedResult => {
   const pagination = useTablePagination<DeviceList>();
+
+  useResetPaginationOnFilterChange(
+    `${deviceNameFilter || ''}|${excludePackageMode ?? false}`,
+    pagination.setCurrentPage,
+  );
+
+  const textFilters = deviceNameFilter
+    ? {
+        [FilterSearchParams.NameOrAlias]: deviceNameFilter,
+      }
+    : undefined;
+
   const [devicesEndpoint, devicesDebouncing] = useDevicesEndpoint({
-    ...args,
+    textFilters,
+    onlyDecommissioned: false,
+    onlyFleetless: true,
+    excludePackageMode,
     nextContinue: pagination.nextContinue,
   });
 

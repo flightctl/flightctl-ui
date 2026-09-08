@@ -4,7 +4,7 @@ import InfoCircleIcon from '@patternfly/react-icons/dist/js/icons/info-circle-ic
 import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 
 import { Event } from '@flightctl/types';
-import { DisplayEvent } from './useEvents';
+import { type DisplayEvent } from './useEvents';
 
 const NormalEventIcon = () => (
   <Icon status="info" size="md">

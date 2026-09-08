@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import { DeviceSummaryStatusType, Fleet } from '@flightctl/types';
+import { DeviceSummaryStatusType, type Fleet } from '@flightctl/types';
 
 import { SystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 import { fromAPILabel, labelToExactApiMatchString } from '../../../utils/labels';

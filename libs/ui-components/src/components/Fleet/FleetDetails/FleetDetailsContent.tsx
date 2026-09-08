@@ -12,7 +12,7 @@ import {
   GridItem,
 } from '@patternfly/react-core';
 
-import { Fleet, ResourceKind } from '@flightctl/types';
+import { type Fleet, ResourceKind } from '@flightctl/types';
 import LabelsView from '../../common/LabelsView';
 import { getDateDisplay } from '../../../utils/dates';
 import { getFleetRolloutStatusWarning } from '../../../utils/status/fleet';
@@ -25,14 +25,18 @@ import FleetStatus from '../FleetStatus';
 import FleetDevicesCount from './FleetDevicesCount';
 import EventsCard from '../../Events/EventsCard';
 import FleetVulnerabilities from './FleetVulnerabilities';
+import FleetDetailsOsMode from './FleetDetailsOsMode';
+import SystemImage from '../../Device/EditDeviceWizard/SystemImageDescriptionGroup';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
+
   const [vulnerabilitiesEnabled, canListVulnerabilities] = useVulnerabilitiesEnabled();
   const showVulnerabilities = vulnerabilitiesEnabled && canListVulnerabilities;
+
   const fleetId = fleet.metadata.name as string;
   const devicesSummary = fleet.status?.devicesSummary;
-  const rolloutError = getFleetRolloutStatusWarning(fleet, t);
+  const osModeCounts = devicesSummary?.capabilities?.osMode;
 
   return (
     <Grid hasGutter>
@@ -53,10 +57,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
                   <FleetStatus fleet={fleet} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('System image')}</DescriptionListTerm>
-                <DescriptionListDescription>{fleet.spec.template.spec.os?.image || '-'}</DescriptionListDescription>
-              </DescriptionListGroup>
+              <SystemImage osSpec={fleet.spec.template.spec.os} isFleet={true} />
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Device selector')}</DescriptionListTerm>
                 <DescriptionListDescription>
@@ -66,7 +67,11 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Up-to-date/devices')}</DescriptionListTerm>
                 <DescriptionListDescription>
-                  <FleetDevicesCount fleetId={fleetId} devicesSummary={devicesSummary} error={rolloutError} />
+                  <FleetDevicesCount
+                    fleetId={fleetId}
+                    devicesSummary={devicesSummary}
+                    error={getFleetRolloutStatusWarning(fleet, t)}
+                  />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
@@ -75,6 +80,15 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
                   <FleetOwnerLink owner={fleet.metadata.owner} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
+              {osModeCounts && devicesSummary?.total > 0 ? (
+                <DescriptionListGroup>
+                  <DescriptionListTerm>{t('OS mode')}</DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <FleetDetailsOsMode osModeCounts={osModeCounts} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+              ) : null}
+
               <DescriptionListGroup>
                 <DescriptionListTerm>
                   {t('Sources ({{size}})', { size: fleet.spec.template.spec.config?.length || 0 })}

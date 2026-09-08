@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useTranslation } from './useTranslation';
 import { useAppContext } from './useAppContext';
 import { useOrganizationGuardContext } from '../components/common/OrganizationGuard';
-import { DeviceLogCategory, DeviceLogErrorType, type DeviceLogSearchParams } from '../utils/deviceLogs';
+import { DeviceLogCategory, type DeviceLogErrorType, type DeviceLogSearchParams } from '../utils/deviceLogs';
 import {
   DeviceLogFileProbeError,
   parseCompletedDeviceLogStreamBuffer,

@@ -14,7 +14,7 @@ import {
 import { getErrorMessage } from '../../utils/error';
 import DetailsNotFound from './DetailsNotFound';
 import { useTranslation } from '../../hooks/useTranslation';
-import { Link, Route } from '../../hooks/useNavigate';
+import { Link, type Route } from '../../hooks/useNavigate';
 import ErrorBoundary from '../common/ErrorBoundary';
 import ResourceLink from '../common/ResourceLink';
 

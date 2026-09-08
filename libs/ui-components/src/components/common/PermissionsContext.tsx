@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Permission, PermissionList } from '@flightctl/types';
-import { RESOURCE, VERB } from '../../types/rbac';
+import { type RESOURCE, type VERB } from '../../types/rbac';
 import { useFetch } from '../../hooks/useFetch';
 import { useOrganizationGuardContext } from './OrganizationGuard';
 

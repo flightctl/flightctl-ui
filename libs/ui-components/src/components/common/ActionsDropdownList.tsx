@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Divider, DropdownList } from '@patternfly/react-core';
-import { IAction } from '@patternfly/react-table';
+import { type IAction } from '@patternfly/react-table';
 
 type ActionsDropdownListItemProps = {
   isDanger?: boolean;

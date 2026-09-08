@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
-import { Event, EventList, ObjectReference, ResourceKind } from '@flightctl/types';
+import { Event, type EventList, type ObjectReference, ResourceKind } from '@flightctl/types';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { EVENT_PAGE_SIZE } from '../../constants';
 import { getDateDisplay } from '../../utils/dates';
@@ -112,9 +112,14 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.RESOURCE_SYNC_ACCESSIBLE]: t('Resourcesync is available'),
     [Event.reason.RESOURCE_SYNC_INACCESSIBLE]: t('Resourcesync is not available'),
     [Event.reason.RESOURCE_SYNC_COMMIT_DETECTED]: t('Resourcesync new commit detected'),
+    // Encryption migration events
+    [Event.reason.ENCRYPTION_MIGRATION_STARTED]: t('Encryption migration started'),
+    [Event.reason.ENCRYPTION_MIGRATION_COMPLETED]: t('Encryption migration completed'),
     // Dependency sync events
     [Event.reason.DEPENDENCY_SYNC_PROBE_FAILED]: t('Dependency sync probe failed'),
     [Event.reason.DEPENDENCY_CHANGE_DETECTED]: t('Dependency change detected'),
+    // Application lifecycle events
+    [Event.reason.APPLICATION_LIFECYCLE_CHANGED]: t('Application lifecycle changed'),
   };
 };
 

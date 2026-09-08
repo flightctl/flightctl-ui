@@ -10,4 +10,5 @@ export enum AppType {
   AppTypeQuadlet = 'quadlet',
   AppTypeContainer = 'container',
   AppTypeHelm = 'helm',
+  AppTypeVm = 'vm',
 }

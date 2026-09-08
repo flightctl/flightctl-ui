@@ -1,8 +1,8 @@
 import percentRound from 'percent-round';
 
-import { StatusItem, getDefaultStatusColor } from '../../utils/status/common';
-import { FilterSearchParams } from '../../utils/status/devices';
-import { ROUTE, Route } from '../../hooks/useNavigate';
+import { type StatusItem, getDefaultStatusColor } from '../../utils/status/common';
+import { type FilterSearchParams } from '../../utils/status/devices';
+import { ROUTE, type Route } from '../../hooks/useNavigate';
 
 export type StatusMap = Record<string, number>;
 

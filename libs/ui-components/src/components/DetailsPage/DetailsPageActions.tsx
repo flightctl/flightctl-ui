@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Dropdown, DropdownItem, MenuToggle } from '@patternfly/react-core';
 import { Trans } from 'react-i18next';
 
-import { DeviceDecommissionTargetType } from '@flightctl/types';
+import { type DeviceDecommissionTargetType } from '@flightctl/types';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { getDisabledTooltipProps } from '../../utils/tooltip';

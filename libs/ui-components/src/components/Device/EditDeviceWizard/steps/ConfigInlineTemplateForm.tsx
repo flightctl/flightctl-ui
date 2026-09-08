@@ -10,7 +10,7 @@ import TextField from '../../../form/TextField';
 import UploadField from '../../../form/UploadField';
 import CheckboxField from '../../../form/CheckboxField';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
-import { DeviceSpecConfigFormValues, InlineConfigTemplate } from '../../../../types/deviceSpec';
+import { type DeviceSpecConfigFormValues, type InlineConfigTemplate } from '../../../../types/deviceSpec';
 import { formatFileMode } from '../deviceSpecUtils';
 
 const MAX_INLINE_FILE_SIZE_BYTES = 1024 * 1024;

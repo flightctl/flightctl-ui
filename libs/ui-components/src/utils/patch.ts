@@ -1,23 +1,23 @@
 import {
-  BatchSequence,
-  DeviceUpdatePolicySpec,
-  DisruptionBudget,
-  PatchRequest,
-  RolloutPolicy,
-  UpdateSchedule,
+  type BatchSequence,
+  type DeviceUpdatePolicySpec,
+  type DisruptionBudget,
+  type PatchRequest,
+  type RolloutPolicy,
+  type UpdateSchedule,
 } from '@flightctl/types';
 import isNil from 'lodash/isNil';
 import isEqual from 'lodash/isEqual';
 
-import { FlightCtlLabel } from '../types/extraTypes';
+import { type FlightCtlLabel } from '../types/extraTypes';
 import { toAPILabel } from './labels';
 import {
-  BatchForm,
+  type BatchForm,
   BatchLimitType,
-  DisruptionBudgetForm,
-  FleetFormValues,
-  RolloutPolicyForm,
-  UpdatePolicyForm,
+  type DisruptionBudgetForm,
+  type FleetFormValues,
+  type RolloutPolicyForm,
+  type UpdatePolicyForm,
 } from '../types/deviceSpec';
 import { getUpdateCronExpression, localDeviceTimezone } from './time';
 

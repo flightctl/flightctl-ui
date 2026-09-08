@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ExpandableSection, ExpandableSectionProps, Split, SplitItem } from '@patternfly/react-core';
+import { ExpandableSection, type ExpandableSectionProps, Split, SplitItem } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 import { useField, useFormikContext } from 'formik';
 

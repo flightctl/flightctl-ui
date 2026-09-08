@@ -22,8 +22,8 @@ import SyncAltIcon from '@patternfly/react-icons/dist/js/icons/sync-alt-icon';
 import { Event } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { timeSinceEpochText } from '../../utils/dates';
-import { FlightctlKind } from '../../types/extraTypes';
-import useEvents, { DisplayEvent, SelectableEventType } from './useEvents';
+import { type FlightctlKind } from '../../types/extraTypes';
+import useEvents, { type DisplayEvent, type SelectableEventType } from './useEvents';
 import EventItem from './EventItem';
 
 import './EventsCard.css';

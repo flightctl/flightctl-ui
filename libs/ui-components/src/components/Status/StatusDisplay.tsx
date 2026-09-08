@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import { Button, Flex, FlexItem, Icon, Popover } from '@patternfly/react-core';
-import { SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
+import { type SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
 
-import { StatusLevel, getDefaultStatusColor, getDefaultStatusIcon } from '../../utils/status/common';
+import { type StatusLevel, getDefaultStatusColor, getDefaultStatusIcon } from '../../utils/status/common';
 import { useTranslation } from '../../hooks/useTranslation';
 
 import './StatusDisplay.css';

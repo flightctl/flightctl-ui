@@ -5,7 +5,7 @@ import {
   DropdownItem,
   DropdownList,
   MenuToggle,
-  MenuToggleElement,
+  type MenuToggleElement,
   Panel,
   PanelMain,
   PanelMainBody,
@@ -17,23 +17,49 @@ import {
 import CogIcon from '@patternfly/react-icons/dist/js/icons/cog-icon';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
-import { useOrganizationGuardContext } from './OrganizationGuard';
-import OrganizationSelector from './OrganizationSelector';
+import { useAppContext } from '../../hooks/useAppContext';
 import LoginCommandModal from '../modals/LoginCommandModal/LoginCommandModal';
 import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from './PermissionsContext';
-import { useAppContext } from '../../hooks/useAppContext';
+import { useQuickStart } from '../QuickStart/QuickStartContext';
+import OrganizationSelector from './OrganizationSelector';
+import { type OrganizationItem, useOrganizationGuardContext } from './OrganizationGuard';
 
 import './PageNavigation.css';
 
-type OrganizationDropdownProps = {
-  organizationName?: string;
-  onSwitchOrganization: () => void;
+type OrganizationDisplayProps = {
+  organization: OrganizationItem;
+  hasSingleOrg: boolean;
+  onSwitchOrganization: VoidFunction;
 };
 
-const OrganizationDropdown = ({ organizationName, onSwitchOrganization }: OrganizationDropdownProps) => {
+const OrganizationDisplay = ({ organization, hasSingleOrg, onSwitchOrganization }: OrganizationDisplayProps) => {
   const { t } = useTranslation();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+
+  if (!organization) {
+    return null;
+  }
+
+  if (hasSingleOrg) {
+    return (
+      <Tooltip
+        content={
+          <>
+            <div className="pf-v6-u-font-weight-bold">{t('Organization ID')}</div>
+            <div>{organization.id}</div>
+          </>
+        }
+        position="bottom"
+        maxWidth="36ch"
+        isContentLeftAligned
+      >
+        <span tabIndex={0} className="fctl-subnav_organization" data-testid="page-navigation-organization">
+          {organization.label || t('Default')}
+        </span>
+      </Tooltip>
+    );
+  }
 
   const onDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -49,11 +75,12 @@ const OrganizationDropdown = ({ organizationName, onSwitchOrganization }: Organi
           ref={toggleRef}
           onClick={onDropdownToggle}
           id="organizationMenu"
+          data-testid="page-navigation-organization"
           isFullHeight
           isExpanded={isDropdownOpen}
           variant="plainText"
         >
-          {organizationName}
+          {organization.label}
         </MenuToggle>
       )}
       popperProps={{ position: 'right' }}
@@ -98,18 +125,72 @@ const getRedirectPathAfterOrgSwitch = (pathname: string, appRoutes: Record<ROUTE
   return appRoutes[ROUTE.ROOT];
 };
 
-const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => {
+const SettingsDropdown = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { router } = useAppContext();
+  const { panelVisibility, toggleVisibility } = useQuickStart();
+  const { checkPermissions } = usePermissionsContext();
+  const [canManageAuthProviders] = checkPermissions([{ kind: RESOURCE.AUTH_PROVIDER, verb: VERB.CREATE }]);
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const authProvidersPath = router.appRoutes[ROUTE.AUTH_PROVIDERS];
+  const showAuthProvidersItem =
+    canManageAuthProviders && authProvidersPath !== '/' && authProvidersPath !== router.appRoutes[ROUTE.ROOT];
+
+  const isGuideHidden = panelVisibility === 'hidden';
+
+  const onToggleQuickStart = () => {
+    toggleVisibility();
+    setIsOpen(false);
+  };
+
+  const onManageAuthProviders = () => {
+    navigate(ROUTE.AUTH_PROVIDERS);
+    setIsOpen(false);
+  };
+
+  const onDropdownToggle = () => {
+    setIsOpen((prev) => !prev);
+  };
+
+  return (
+    <Dropdown
+      isOpen={isOpen}
+      onOpenChange={setIsOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
+          onClick={onDropdownToggle}
+          aria-label={t('Settings')}
+          isExpanded={isOpen}
+          variant="plain"
+          icon={<CogIcon />}
+        >
+          {t('Settings')}
+        </MenuToggle>
+      )}
+      popperProps={{ position: 'right' }}
+    >
+      <DropdownList>
+        <DropdownItem onClick={onToggleQuickStart}>
+          {isGuideHidden ? t('Show quick start guide') : t('Hide quick start guide')}
+        </DropdownItem>
+        {showAuthProvidersItem && (
+          <DropdownItem onClick={onManageAuthProviders}>{t('Manage authentication providers')}</DropdownItem>
+        )}
+      </DropdownList>
+    </Dropdown>
+  );
+};
+
+const PageNavigation = () => {
+  const { t } = useTranslation();
+  const { router } = useAppContext();
   const location = router.useLocation();
   const { currentOrganization, availableOrganizations } = useOrganizationGuardContext();
-  const { checkPermissions } = usePermissionsContext();
-  const [isAdmin] = checkPermissions([{ kind: RESOURCE.AUTH_PROVIDER, verb: VERB.CREATE }]);
   const [showOrganizationModal, setShowOrganizationModal] = React.useState(false);
   const [showLoginCommandModal, setShowLoginCommandModal] = React.useState(false);
-  const showOrganizationSelection = availableOrganizations.length > 1;
-  const currentOrgDisplayName = currentOrganization?.label || currentOrganization?.id;
 
   return (
     <>
@@ -118,10 +199,11 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
           <PanelMainBody>
             <Toolbar isFullHeight isStatic className="fctl-subnav_toolbar">
               <ToolbarContent>
-                {showOrganizationSelection && (
+                {currentOrganization && (
                   <ToolbarItem>
-                    <OrganizationDropdown
-                      organizationName={currentOrgDisplayName}
+                    <OrganizationDisplay
+                      organization={currentOrganization}
+                      hasSingleOrg={availableOrganizations.length === 1}
                       onSwitchOrganization={() => {
                         setShowOrganizationModal(true);
                       }}
@@ -129,30 +211,17 @@ const PageNavigation = ({ showSettings = true }: { showSettings?: boolean }) => 
                   </ToolbarItem>
                 )}
                 <ToolbarItem>
-                  <Tooltip content={t('Copy login command')}>
-                    <Button
-                      variant="link"
-                      aria-label={t('Copy login command')}
-                      onClick={() => setShowLoginCommandModal(true)}
-                    >
-                      {t('Copy login command')}
-                    </Button>
-                  </Tooltip>
+                  <Button
+                    variant="link"
+                    aria-label={t('Copy login command')}
+                    onClick={() => setShowLoginCommandModal(true)}
+                  >
+                    {t('Copy login command')}
+                  </Button>
                 </ToolbarItem>
-                {isAdmin && showSettings && (
-                  <ToolbarItem>
-                    <Tooltip content={t('Manage authentication providers')}>
-                      <Button
-                        variant="link"
-                        aria-label={t('Settings')}
-                        onClick={() => navigate(ROUTE.AUTH_PROVIDERS)}
-                        icon={<CogIcon />}
-                      >
-                        {t('Settings')}
-                      </Button>
-                    </Tooltip>
-                  </ToolbarItem>
-                )}
+                <ToolbarItem>
+                  <SettingsDropdown />
+                </ToolbarItem>
               </ToolbarContent>
             </Toolbar>
           </PanelMainBody>

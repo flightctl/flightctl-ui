@@ -19,7 +19,7 @@ import DeviceStatusChart from './DeviceStatusChart';
 import SystemUpdateStatusChart from './SystemUpdateStatusChart';
 import StatusCardFilters from './StatusCardFilters';
 import ErrorAlert from '../../../ErrorAlert/ErrorAlert';
-import { FlightCtlLabel } from '../../../../types/extraTypes';
+import { type FlightCtlLabel } from '../../../../types/extraTypes';
 import { useDevicesSummary } from '../../../Device/DevicesPage/useDevices';
 
 const StatusCard = () => {

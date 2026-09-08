@@ -1,21 +1,21 @@
 import * as React from 'react';
 import { Stack, StackItem } from '@patternfly/react-core';
-import { TFunction } from 'react-i18next';
-import { SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
+import { type TFunction } from 'react-i18next';
+import { type SVGIconProps } from '@patternfly/react-icons/dist/js/createIcon';
 import { PendingIcon } from '@patternfly/react-icons/dist/js/icons/pending-icon';
 
 import {
-  ImageBuildCondition,
+  type ImageBuildCondition,
   ImageBuildConditionReason,
   ImageBuildConditionType,
-  ImageBuildStatus,
-  ImageExportCondition,
+  type ImageBuildStatus,
+  type ImageExportCondition,
   ImageExportConditionReason,
   ImageExportConditionType,
-  ImageExportStatus,
+  type ImageExportStatus,
 } from '@flightctl/types/imagebuilder';
 import { useTranslation } from '../../hooks/useTranslation';
-import { StatusLevel } from '../../utils/status/common';
+import { type StatusLevel } from '../../utils/status/common';
 import { StatusDisplayContent } from '../Status/StatusDisplay';
 import ImageUrl from './ImageUrl';
 

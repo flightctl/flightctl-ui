@@ -39,6 +39,8 @@ type YamlEditorBaseProps = {
   readOnly?: boolean;
   showActions?: boolean;
   onChange?: (val: string) => void;
+  /** Editor height. If not provided, the editor will use a viewport-based height (60vh). */
+  height?: string;
 };
 
 const YamlEditorBase = ({
@@ -53,6 +55,7 @@ const YamlEditorBase = ({
   readOnly = false,
   showActions = true,
   onChange,
+  height,
 }: YamlEditorBaseProps) => {
   const { t } = useTranslation();
   const monacoRef = React.useRef<typeof monacoEditor | null>(null);
@@ -127,7 +130,7 @@ const YamlEditorBase = ({
               theme: `console-${resolvedTheme}`,
               readOnly: readOnly || !!disabledEditReason,
             }}
-            height="60vh"
+            height={height || '60vh'}
             onChange={(val) => onChange?.(val)}
           />
         </StackItem>

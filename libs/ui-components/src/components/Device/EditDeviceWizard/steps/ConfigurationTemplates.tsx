@@ -15,8 +15,8 @@ import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
-import { RepoSpecType, Repository, RepositoryList } from '@flightctl/types';
-import { ConfigType, DeviceSpecConfigFormValues, SpecConfigTemplate } from '../../../../types/deviceSpec';
+import { RepoSpecType, type Repository, type RepositoryList } from '@flightctl/types';
+import { ConfigType, type DeviceSpecConfigFormValues, type SpecConfigTemplate } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../../../hooks/useFetchPeriodically';
 import { getErrorMessage } from '../../../../utils/error';

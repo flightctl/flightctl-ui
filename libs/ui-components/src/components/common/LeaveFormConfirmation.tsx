@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Button, Content, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-core';
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
-import { Blocker, BlockerFunction } from 'react-router-dom';
+import { type Blocker, type BlockerFunction } from 'react-router-dom';
 import { useFormikContext } from 'formik';
 
 import { useTranslation } from '../../hooks/useTranslation';

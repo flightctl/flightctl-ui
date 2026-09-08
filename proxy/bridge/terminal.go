@@ -2,7 +2,9 @@ package bridge
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/textproto"
 	"net/url"
@@ -31,14 +33,86 @@ var (
 	}
 )
 
+// maxWSCloseReasonBytes is the RFC 6455 limit for a close-frame reason (control payload
+// is at most 125 bytes, 2 of which are the status code).
+const maxWSCloseReasonBytes = 123
+
+// maxDialErrorBodyBytes caps how much of a failed Dial response body we read when building
+// the close reason for the browser.
+const maxDialErrorBodyBytes = 1024
+
+// Matches flightctl/internal/consts: machine-readable app console error signaling that the
+// VM application has no active compute workload (stopped / still starting).
+const (
+	appConsoleErrorCodeHeader   = "X-Flightctl-App-Console-Error"
+	appConsoleErrorCodeNotReady = "app-not-ready"
+	appConsoleNotReadyCloseCode = 4002
+)
+
+// truncateWSCloseReason bounds msg to fit in a WebSocket close frame reason field.
+func truncateWSCloseReason(msg string) string {
+	if len(msg) <= maxWSCloseReasonBytes {
+		return msg
+	}
+	return strings.ToValidUTF8(msg[:maxWSCloseReasonBytes], "")
+}
+
+// dialErrorCloseReason builds a close reason of the form "<status> <detail>" so the UI can
+// map the status code while still receiving the backend/agent error text.
+// Falls back to the HTTP status text when the body is empty.
+func dialErrorCloseReason(statusCode int, resp *http.Response) string {
+	detail := http.StatusText(statusCode)
+	if resp != nil && resp.Body != nil {
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				log.Warnf("Failed to close dial error response body: %v", err)
+			}
+		}()
+		body, err := io.ReadAll(io.LimitReader(resp.Body, maxDialErrorBodyBytes))
+		if err == nil {
+			if trimmed := strings.TrimSpace(string(body)); trimmed != "" {
+				detail = trimmed
+			}
+		}
+	}
+	return truncateWSCloseReason(fmt.Sprintf("%d %s", statusCode, detail))
+}
+
+// dialErrorCloseCode picks a WebSocket close code for a failed Dial. Prefers the backend's
+// app-not-ready code (4002) over a generic internal server error.
+func dialErrorCloseCode(resp *http.Response) int {
+	if resp != nil && resp.Header.Get(appConsoleErrorCodeHeader) == appConsoleErrorCodeNotReady {
+		return appConsoleNotReadyCloseCode
+	}
+	return websocket.CloseInternalServerErr
+}
+
 type TerminalBridge struct {
 	TlsConfig *tls.Config
+}
+
+func writeCloseFrame(writeMutex *sync.Mutex, dest *websocket.Conn, code int, text string) {
+	deadline := time.Now().Add(websocketTimeout)
+	msg := websocket.FormatCloseMessage(code, text)
+
+	if writeMutex != nil {
+		writeMutex.Lock()
+		defer writeMutex.Unlock()
+	}
+
+	if err := dest.WriteControl(websocket.CloseMessage, msg, deadline); err != nil {
+		log.Warnf("Failed to write close frame: %v", err)
+	}
 }
 
 func copyMsgs(writeMutex *sync.Mutex, dest, src *websocket.Conn) error {
 	for {
 		messageType, msg, err := src.ReadMessage()
 		if err != nil {
+			var closeErr *websocket.CloseError
+			if errors.As(err, &closeErr) {
+				writeCloseFrame(writeMutex, dest, closeErr.Code, closeErr.Text)
+			}
 			return err
 		}
 
@@ -176,21 +250,12 @@ func isOpenShiftConsolePluginProxyOriginAllowed(
 }
 
 func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
-	isWebsocket := false
-	upgrades := r.Header["Upgrade"]
-
-	for _, upgrade := range upgrades {
-		if strings.ToLower(upgrade) == "websocket" {
-			isWebsocket = true
-			break
-		}
-	}
-
-	if !isWebsocket {
+	if !isWebsocketUpgrade(r) {
 		errMsg := "not a websocket connection"
 		log.Warn(errMsg)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(errMsg))
+		return
 	}
 
 	consoleURL, err := buildDeviceConsoleURL(r)
@@ -200,10 +265,21 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extract deviceId for logging purposes
 	deviceId, _ := strings.CutPrefix(r.URL.Path, "/api/terminal/")
 	log.Infof("Starting terminal session for device: %s", deviceId)
+	t.bridgeWebSocket(w, r, consoleURL, fmt.Sprintf("device: %s", deviceId))
+}
 
+func isWebsocketUpgrade(r *http.Request) bool {
+	for _, upgrade := range r.Header["Upgrade"] {
+		if strings.EqualFold(upgrade, "websocket") {
+			return true
+		}
+	}
+	return false
+}
+
+func (t TerminalBridge) bridgeWebSocket(w http.ResponseWriter, r *http.Request, consoleURL, sessionLabel string) {
 	dialer := &websocket.Dialer{
 		TLSClientConfig: t.TlsConfig,
 	}
@@ -231,10 +307,11 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Warnf("dial statusCode: '%v'", statusCode)
 
-		// On any backend error, upgrade the client to WebSocket to send a close frame
-		// The UI will receive a CloseEvent with a websocket code error and reason.
-		closeReason := fmt.Sprintf("%d %s", statusCode, http.StatusText(statusCode))
-		closeCode := websocket.CloseInternalServerErr
+		// On any backend error, upgrade the client to WebSocket to send a close frame.
+		// Include the response body (agent/API message) so the UI can show more than
+		// a generic status text such as "404 Not Found".
+		closeReason := dialErrorCloseReason(statusCode, resp)
+		closeCode := dialErrorCloseCode(resp)
 		upgrader := &websocket.Upgrader{
 			Subprotocols: websocket.Subprotocols(r),
 			CheckOrigin:  checkOrigin,
@@ -265,7 +342,7 @@ func (t TerminalBridge) HandleTerminal(w http.ResponseWriter, r *http.Request) {
 	var writeMutex sync.Mutex // Needed because ticker & copy are writing to frontend in separate goroutines
 
 	defer func() {
-		log.Infof("Closing terminal session for device: %s", deviceId)
+		log.Infof("Closing terminal session for %s", sessionLabel)
 		ticker.Stop()
 		frontend.Close()
 	}()

@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { Button, Stack, StackItem } from '@patternfly/react-core';
 
-import { AuthProvider } from '@flightctl/types';
+import { type AuthProvider } from '@flightctl/types';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { isOAuth2Provider } from '../AuthProvider/CreateAuthProvider/types';
 import { getProviderDisplayName } from '../../utils/authProvider';
-import { DynamicAuthProviderSpec } from '../../types/extraTypes';
+import { type DynamicAuthProviderSpec } from '../../types/extraTypes';
 
 type ProviderSelectorProps = {
   providers: AuthProvider[];

@@ -60,6 +60,7 @@ func main() {
 
 	terminalBridge := bridge.TerminalBridge{TlsConfig: tlsConfig}
 	apiRouter.HandleFunc("/terminal/{forward:.*}", terminalBridge.HandleTerminal)
+	apiRouter.HandleFunc("/app-terminal/{deviceId}/{appName}", terminalBridge.HandleAppTerminal)
 
 	testAuthHandler := bridge.NewTestAuthHandler(tlsConfig)
 	apiRouter.HandleFunc("/test-auth-provider-connection", testAuthHandler.TestConnection)

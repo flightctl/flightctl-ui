@@ -12,7 +12,7 @@ import {
   GridItem,
   TextArea,
 } from '@patternfly/react-core';
-import { EnrollmentRequest } from '@flightctl/types';
+import { type EnrollmentRequest } from '@flightctl/types';
 
 import ConditionsTable from '../../DetailsPage/Tables/ConditionsTable';
 import DetailsPage from '../../DetailsPage/DetailsPage';
@@ -60,7 +60,7 @@ const EnrollmentRequestDetails = () => {
   const [canApprove, canDelete] = checkPermissions(enrollmentRequestDetailsPermissions);
 
   const [isApprovalModalOpen, setIsApprovalModalOpen] = React.useState(false);
-  const erSystemInfo = useDeviceSpecSystemInfo(er?.spec.deviceStatus?.systemInfo, t);
+  const erSystemInfo = useDeviceSpecSystemInfo(er?.spec.deviceStatus, t);
   const hasDefaultLabels = Object.keys(er?.spec.labels || {}).length > 0;
   const deviceId = er?.metadata.name as string;
 

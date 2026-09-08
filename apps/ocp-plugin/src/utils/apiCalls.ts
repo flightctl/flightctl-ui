@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import { PatchRequest } from '@flightctl/types';
+import { type PatchRequest } from '@flightctl/types';
 import { getCSRFToken } from '@openshift-console/dynamic-plugin-sdk/lib/utils/fetch/console-fetch-utils';
 import {
   getErrorMsgFromAlertsApiResponse,

@@ -10,8 +10,15 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import { Navigate, RouteObject, RouterProvider, createBrowserRouter, useParams, useRouteError } from 'react-router-dom';
-import { TFunction } from 'i18next';
+import {
+  Navigate,
+  type RouteObject,
+  RouterProvider,
+  createBrowserRouter,
+  useParams,
+  useRouteError,
+} from 'react-router-dom';
+import { type TFunction } from 'i18next';
 import { PathMissingIcon } from '@patternfly/react-icons/dist/js/icons/path-missing-icon';
 
 import { useDocumentTitle } from '@flightctl/ui-components/src/hooks/useDocumentTitle';

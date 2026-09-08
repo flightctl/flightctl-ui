@@ -2,10 +2,5 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ImageApplicationProviderSpec = {
-  /**
-   * Reference to the OCI image or artifact for the application package.
-   */
-  image: string;
-};
-
+import type { ImageSpec } from './ImageSpec';
+export type ImageApplicationProviderSpec = ImageSpec;

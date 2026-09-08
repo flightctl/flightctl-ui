@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useDebounce } from 'use-debounce';
 
-import { Repository, RepositoryList } from '@flightctl/types';
+import { type Repository, type RepositoryList } from '@flightctl/types';
 
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
+import { type PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
 
 import { PAGE_SIZE } from '../../constants';
 

@@ -1,11 +1,19 @@
 import * as React from 'react';
 import { Button, Content, Flex, FlexItem, Icon, Stack, StackItem, Title } from '@patternfly/react-core';
-import { ActionsColumn, ExpandableRowContent, IAction, OnSelect, Tbody, Td, Tr } from '@patternfly/react-table';
+import {
+  ActionsColumn,
+  ExpandableRowContent,
+  type IAction,
+  type OnSelect,
+  Tbody,
+  Td,
+  Tr,
+} from '@patternfly/react-table';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
-import { ImageBuild, ImageBuildConditionReason, ImagePromotion } from '@flightctl/types/imagebuilder';
+import { type ImageBuild, ImageBuildConditionReason, type ImagePromotion } from '@flightctl/types/imagebuilder';
 import ImagePromotionStatus from '../ImagePromotion/ImagePromotionStatus';
-import { ImageBuildWithExports } from '../../types/extraTypes';
+import { type ImageBuildWithExports } from '../../types/extraTypes';
 import { useTranslation } from '../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { getImageBuildImage, getImageBuildStatusReason, isImageBuildCancelable } from '../../utils/imageBuilds';

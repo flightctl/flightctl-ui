@@ -1,31 +1,31 @@
 import * as Yup from 'yup';
 import * as semver from 'semver';
 import validator from '@rjsf/validator-ajv8';
-import { RJSFSchema } from '@rjsf/utils';
+import { type RJSFSchema } from '@rjsf/utils';
 import { dump, load } from 'js-yaml';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import isEqual from 'lodash/isEqual';
 import {
   ApiVersion,
-  Catalog,
-  CatalogItem,
-  CatalogItemArtifact,
+  type Catalog,
+  type CatalogItem,
+  type CatalogItemArtifact,
   CatalogItemArtifactType,
   CatalogItemCategory,
-  CatalogItemConfigurable,
+  type CatalogItemConfigurable,
   CatalogItemType,
-  CatalogItemVersion,
+  type CatalogItemVersion,
 } from '@flightctl/types/alpha';
-import { PatchRequest } from '@flightctl/types';
+import { type PatchRequest } from '@flightctl/types';
 
 import {
-  AddCatalogItemFormValues,
-  ArtifactFormValue,
-  CreateCatalogFormValues,
-  VersionFormValues,
+  type AddCatalogItemFormValues,
+  type ArtifactFormValue,
+  type CreateCatalogFormValues,
+  type VersionFormValues,
   configurableAppTypes,
 } from './types';
-import { appTypeIds } from '../useCatalogs';
+import { appTypeIds } from '../useCatalogItems';
 import { getKubernetesDnsSubdomainErrors, validKubernetesDnsSubdomain, validURLSchema } from '../../form/validations';
 import { appendJSONPatch } from '../../../utils/patch';
 

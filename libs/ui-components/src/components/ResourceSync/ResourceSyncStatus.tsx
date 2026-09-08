@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import { LabelProps, Popover, Stack, StackItem } from '@patternfly/react-core';
+import { type LabelProps, Popover, Stack, StackItem } from '@patternfly/react-core';
 
-import { ConditionType, ResourceSync } from '@flightctl/types';
+import { ConditionType, type ResourceSync } from '@flightctl/types';
 import { getRepositorySyncStatus, repositoryStatusLabels } from '../../utils/status/repository';
-import { StatusLevel } from '../../utils/status/common';
+import { type StatusLevel } from '../../utils/status/common';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Link, ROUTE } from '../../hooks/useNavigate';
 import { StatusDisplayContent } from '../Status/StatusDisplay';

@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { ClipboardCopy, Content, Flex, FlexItem, Tooltip, TruncateProps } from '@patternfly/react-core';
+import { ClipboardCopy, Content, Flex, FlexItem, Tooltip, type TruncateProps } from '@patternfly/react-core';
 
-import { DependencySyncConfigRefStatus } from '@flightctl/types';
+import { type DependencySyncConfigRefStatus } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { timeSinceText } from '../../../utils/dates';
 

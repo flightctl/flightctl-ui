@@ -6,6 +6,7 @@ import type { Condition } from './Condition';
 import type { DependencySyncStatus } from './DependencySyncStatus';
 import type { DeviceApplicationsSummaryStatus } from './DeviceApplicationsSummaryStatus';
 import type { DeviceApplicationStatus } from './DeviceApplicationStatus';
+import type { DeviceCapabilities } from './DeviceCapabilities';
 import type { DeviceConfigStatus } from './DeviceConfigStatus';
 import type { DeviceIntegrityStatus } from './DeviceIntegrityStatus';
 import type { DeviceLifecycleStatus } from './DeviceLifecycleStatus';
@@ -45,5 +46,6 @@ export type DeviceStatus = {
   lastSeen?: string;
   lifecycle: DeviceLifecycleStatus;
   dependencySync?: DependencySyncStatus;
+  capabilities?: DeviceCapabilities;
 };
 

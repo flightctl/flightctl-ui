@@ -1,19 +1,19 @@
 import * as Yup from 'yup';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import {
   ApiVersion,
-  AuthDynamicRoleAssignment,
-  AuthOrganizationAssignment,
-  AuthProvider,
-  AuthProviderSpec,
-  AuthRoleAssignment,
-  AuthStaticRoleAssignment,
-  OAuth2ProviderSpec,
-  PatchRequest,
+  type AuthDynamicRoleAssignment,
+  type AuthOrganizationAssignment,
+  type AuthProvider,
+  type AuthProviderSpec,
+  type AuthRoleAssignment,
+  type AuthStaticRoleAssignment,
+  type OAuth2ProviderSpec,
+  type PatchRequest,
 } from '@flightctl/types';
 import { appendJSONPatch } from '../../../utils/patch';
 import {
-  AuthProviderFormValues,
+  type AuthProviderFormValues,
   DEFAULT_ROLE_SEPARATOR,
   OrgAssignmentType,
   RoleAssignmentType,
@@ -25,7 +25,7 @@ import {
   isRoleAssignmentStatic,
 } from './types';
 import { validKubernetesDnsSubdomain } from '../../form/validations';
-import { DynamicAuthProviderSpec, ProviderType } from '../../../types/extraTypes';
+import { type DynamicAuthProviderSpec, ProviderType } from '../../../types/extraTypes';
 
 export const getAssignmentTypeLabel = (
   type: AuthOrganizationAssignment['type'] | AuthRoleAssignment['type'] | undefined,

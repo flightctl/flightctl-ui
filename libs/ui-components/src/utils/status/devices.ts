@@ -1,4 +1,4 @@
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons/power-off-icon';
 import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-circle-icon';
 import { BanIcon } from '@patternfly/react-icons/dist/js/icons/ban-icon';
@@ -7,15 +7,16 @@ import suspendedColor from '@patternfly/react-tokens/dist/js/t_color_orange_40';
 import pendingSyncColor from '@patternfly/react-tokens/dist/js/t_global_color_status_info_200';
 
 import {
-  ApplicationsSummaryStatusType,
-  DeviceSummaryStatus as BEDeviceSummaryStatus,
-  Device,
-  DeviceIntegrityStatusSummaryType,
+  type ApplicationsSummaryStatusType,
+  type DeviceSummaryStatus as BEDeviceSummaryStatus,
+  type Device,
+  type DeviceIntegrityStatusSummaryType,
   DeviceLifecycleStatusType,
   DeviceSummaryStatusType,
-  DeviceUpdatedStatusType,
+  type DeviceUpdatedStatusType,
+  OsModeType,
 } from '@flightctl/types';
-import { StatusItem } from './common';
+import { type StatusItem } from './common';
 
 export enum FilterSearchParams {
   Fleet = 'fleetId',
@@ -23,10 +24,38 @@ export enum FilterSearchParams {
   DeviceStatus = 'devSt',
   AppStatus = 'appSt',
   UpdatedStatus = 'updSt',
+  OsMode = 'osMode',
   Label = 'label',
   NameOrAlias = 'nameOrAlias',
   CveId = 'cveId',
 }
+
+/** Sentinel for devices that have not reported status.capabilities.osMode. */
+export const UNKNOWN_CAPABILITY_VALUE = 'unknown' as const;
+
+export type DeviceOsModeFilterValue = OsModeType | typeof UNKNOWN_CAPABILITY_VALUE;
+
+export const DEVICE_OS_MODE_FILTER_VALUES: DeviceOsModeFilterValue[] = [
+  OsModeType.OsModeImage,
+  OsModeType.OsModePackage,
+  UNKNOWN_CAPABILITY_VALUE,
+];
+
+export const KNOWN_OS_MODE_FILTER_VALUES: OsModeType[] = [OsModeType.OsModeImage, OsModeType.OsModePackage];
+
+export const isDeviceOsModeFilterValue = (value: string): value is DeviceOsModeFilterValue =>
+  (DEVICE_OS_MODE_FILTER_VALUES as string[]).includes(value);
+
+export const getOsModeFilterLabel = (t: TFunction, mode: DeviceOsModeFilterValue) => {
+  switch (mode) {
+    case OsModeType.OsModeImage:
+      return t('Image');
+    case OsModeType.OsModePackage:
+      return t('Package');
+    case UNKNOWN_CAPABILITY_VALUE:
+      return t('Unknown');
+  }
+};
 
 // Filters that require the user to enter some free-text
 export const DEVICE_TEXT_FILTER_KEYS = [FilterSearchParams.NameOrAlias, FilterSearchParams.CveId];

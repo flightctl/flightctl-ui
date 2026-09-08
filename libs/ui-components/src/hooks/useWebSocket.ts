@@ -2,20 +2,28 @@ import * as React from 'react';
 import { useTranslation } from './useTranslation';
 import { useAppContext } from './useAppContext';
 
-const msgToBytes = (msg: string, resize?: boolean) => {
-  const encoder = new TextEncoder();
-  const encodedData = encoder.encode(msg);
-  const result = new Uint8Array(encodedData.length + 1);
-  result[0] = resize ? 0x4 : 0x00;
-  result.set(encodedData, 1);
-  return result;
-};
-
 const isErrorCloseEvent = (evt: CloseEvent) => evt.code !== 1000 && evt.code !== 1001;
 
-export type WsMetadata = {
+const k8sStreamChannel = 0x00;
+const k8sResizeChannel = 0x04;
+
+/** Device console uses k8s stream channels */
+const encodeK8sChannelFrame = (msg: string, resize?: boolean): Uint8Array<ArrayBuffer> => {
+  const encodedData = new TextEncoder().encode(msg);
+  const frame = new Uint8Array(new ArrayBuffer(encodedData.length + 1));
+  frame[0] = resize ? k8sResizeChannel : k8sStreamChannel;
+  frame.set(encodedData, 1);
+  return frame;
+};
+
+type WsMetadata = {
   tty: boolean;
   term: string;
+};
+
+export const wsMeta: WsMetadata = {
+  tty: true,
+  term: 'xterm-256color',
 };
 
 export const useWebSocket = <T>(
@@ -45,7 +53,7 @@ export const useWebSocket = <T>(
   const sendMessage = React.useCallback((data: string, resize?: boolean) => {
     const ws = wsRef.current;
     if (ws?.readyState === WebSocket.OPEN) {
-      ws.send(msgToBytes(data, resize));
+      ws.send(encodeK8sChannelFrame(data, resize));
     }
   }, []);
 

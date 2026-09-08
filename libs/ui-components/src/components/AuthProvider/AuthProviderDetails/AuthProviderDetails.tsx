@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DropdownItem, Tab } from '@patternfly/react-core';
 
-import { AuthProvider } from '@flightctl/types';
+import { type AuthProvider } from '@flightctl/types';
 
 import { useFetchPeriodically } from '../../../hooks/useFetchPeriodically';
 import DetailsPage from '../../DetailsPage/DetailsPage';

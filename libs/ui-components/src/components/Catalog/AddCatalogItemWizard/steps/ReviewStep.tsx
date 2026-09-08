@@ -13,12 +13,11 @@ import {
 } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
+import type { AddCatalogItemFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getErrorMessage } from '../../../../utils/error';
-import { AddCatalogItemFormValues } from '../types';
-import { appTypeIds } from '../../useCatalogs';
-import { getArtifactLabel } from '../../utils';
-import { CatalogItemArtifactType } from '@flightctl/types/alpha';
+import { appTypeIds } from '../../useCatalogItems';
+import { getArtifactLabel } from '../../../../utils/catalog';
 
 export const reviewStepId = 'review';
 
@@ -74,11 +73,7 @@ const ReviewStep = ({ error, isEdit, isReadOnly }: { error: unknown; isEdit?: bo
               <DescriptionListDescription>
                 <List isPlain>
                   {values.artifacts.map((a) => {
-                    return (
-                      <ListItem
-                        key={a.type}
-                      >{`${getArtifactLabel(t, a.type as CatalogItemArtifactType, a.name)} - ${a.uri}`}</ListItem>
-                    );
+                    return <ListItem key={a.type}>{`${getArtifactLabel(t, a)} - ${a.uri}`}</ListItem>;
                   })}
                 </List>
               </DescriptionListDescription>

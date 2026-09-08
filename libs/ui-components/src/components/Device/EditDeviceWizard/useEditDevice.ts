@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Device } from '@flightctl/types';
+import { type Device } from '@flightctl/types';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useFetch } from '../../../hooks/useFetch';
 

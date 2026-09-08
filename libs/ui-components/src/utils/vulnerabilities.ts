@@ -1,5 +1,10 @@
-import { TFunction } from 'react-i18next';
-import { CveCountsBySeverity, Vulnerability, VulnerabilityGroup, VulnerabilityGroupItem } from '@flightctl/types/alpha';
+import { type TFunction } from 'react-i18next';
+import {
+  type CveCountsBySeverity,
+  Vulnerability,
+  type VulnerabilityGroup,
+  type VulnerabilityGroupItem,
+} from '@flightctl/types/alpha';
 
 const SeverityColorCritical = 'var(--pf-t--global--icon--color--severity--critical--default)';
 const SeverityColorImportant = 'var(--pf-t--global--icon--color--severity--important--default)';

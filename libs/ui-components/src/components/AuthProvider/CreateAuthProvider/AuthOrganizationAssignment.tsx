@@ -6,7 +6,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import RadioField from '../../form/RadioField';
 import TextField from '../../form/TextField';
 import ListItemField from '../../form/ListItemField';
-import { AuthProviderFormValues, OrgAssignmentType } from './types';
+import { type AuthProviderFormValues, OrgAssignmentType } from './types';
 
 const OrganizationAssignmentSection = () => {
   const { t } = useTranslation();

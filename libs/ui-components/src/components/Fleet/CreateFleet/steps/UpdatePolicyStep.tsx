@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Alert, FormSection } from '@patternfly/react-core';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type FormikErrors, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import LabelWithHelperText from '../../../common/WithHelperText';
-import { FleetFormValues } from '../../../../types/deviceSpec';
+import { type FleetFormValues } from '../../../../types/deviceSpec';
 
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import UpdateStepRolloutPolicy from './UpdateStepRolloutPolicy';

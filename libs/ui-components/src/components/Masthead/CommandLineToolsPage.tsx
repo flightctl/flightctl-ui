@@ -15,8 +15,8 @@ import ExternalLinkAltIcon from '@patternfly/react-icons/dist/js/icons/external-
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAppContext } from '../../hooks/useAppContext';
-import { CliArtifactsDisplayResponse, useCliArtifacts } from '../../hooks/useCliArtifacts';
-import { CliArtifact, CliArtifactTool } from '../../types/extraTypes';
+import { type CliArtifactsDisplayResponse, useCliArtifacts } from '../../hooks/useCliArtifacts';
+import { type CliArtifact, CliArtifactTool } from '../../types/extraTypes';
 import { getArtifactDownloadLabel, getArtifactUrl } from '../../utils/cliArtifacts';
 
 const ToolArtifactsSection = ({

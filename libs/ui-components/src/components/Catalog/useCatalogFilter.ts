@@ -1,4 +1,4 @@
-import { CatalogItemType } from '@flightctl/types/alpha';
+import { type CatalogItemType } from '@flightctl/types/alpha';
 import * as React from 'react';
 
 export type CatalogFilter = {

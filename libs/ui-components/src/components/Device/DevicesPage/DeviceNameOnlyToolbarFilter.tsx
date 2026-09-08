@@ -1,7 +1,7 @@
 import * as React from 'react';
 import debounce from 'lodash/debounce';
 
-import { DeviceTextFilterKey, FilterSearchParams } from '../../../utils/status/devices';
+import { type DeviceTextFilterKey, FilterSearchParams } from '../../../utils/status/devices';
 import TableTextSearch from '../../Table/TableTextSearch';
 
 import './DeviceToolbarFilters.css';

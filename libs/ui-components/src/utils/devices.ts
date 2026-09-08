@@ -1,5 +1,5 @@
-import { Device, DeviceSummaryStatusType, ObjectMeta } from '@flightctl/types';
-import { TFunction } from 'react-i18next';
+import { type Device, DeviceSummaryStatusType, type ObjectMeta } from '@flightctl/types';
+import { type TFunction } from 'react-i18next';
 
 const DEVICE_CONSOLE_ANNOTATION = 'device-controller/console';
 
@@ -35,6 +35,19 @@ export const isDeviceResumable = (device: Device) =>
 export const getResumeDisabledReason = (device: Device, t: TFunction) => {
   if (!isDeviceResumable(device)) {
     return t('Device is not suspended.');
+  }
+  return undefined;
+};
+
+export const getLifecycleDisabledReason = (device: Device, t: TFunction) => {
+  if (!isDeviceEnrolled(device)) {
+    return t('Device is decommissioning and applications cannot be managed.');
+  }
+  if (device.status?.summary.status === DeviceSummaryStatusType.DeviceSummaryStatusAwaitingReconnect) {
+    return t('Device is awaiting reconnect and applications cannot be managed.');
+  }
+  if (device.status?.summary.status === DeviceSummaryStatusType.DeviceSummaryStatusConflictPaused) {
+    return t('Device is paused after a conflict and applications cannot be managed.');
   }
   return undefined;
 };

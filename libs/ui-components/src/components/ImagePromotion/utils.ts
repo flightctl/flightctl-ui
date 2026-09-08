@@ -1,10 +1,14 @@
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 import * as Yup from 'yup';
-import { ExistingCatalogItemTarget, ImagePromotion, NewCatalogItemTarget } from '@flightctl/types/imagebuilder';
-import { CatalogItem } from '@flightctl/types/alpha';
+import {
+  ExistingCatalogItemTarget,
+  type ImagePromotion,
+  type NewCatalogItemTarget,
+} from '@flightctl/types/imagebuilder';
+import { type CatalogItem } from '@flightctl/types/alpha';
 import semver from 'semver';
 
-import { ImagePromotionFormValues } from './types';
+import { type ImagePromotionFormValues } from './types';
 import { validKubernetesDnsSubdomain } from '../form/validations';
 import {
   isValidCatalogSingleSemver,

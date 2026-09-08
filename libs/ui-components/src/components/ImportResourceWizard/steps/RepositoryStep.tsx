@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { FormGroup, FormSection, Radio } from '@patternfly/react-core';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type FormikErrors, useFormikContext } from 'formik';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { GitRepoSpec, Repository } from '@flightctl/types';
+import { type GitRepoSpec, type Repository } from '@flightctl/types';
 
-import { ImportResourceFormValues } from '../types';
+import { type ImportResourceFormValues } from '../types';
 import { RepositoryForm } from '../../Repository/CreateRepository/CreateRepositoryForm';
 import RepositoryStatus from '../../Status/RepositoryStatus';
 import { getLastTransitionTimeText } from '../../../utils/status/repository';

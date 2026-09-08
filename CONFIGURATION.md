@@ -15,6 +15,7 @@ This document describes all environment variables and configuration options avai
 | --------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------- |
 | `BASE_UI_URL`                           | Base URL for UI application                                                                         | `http://localhost:9000`  | `https://ui.flightctl.example.com`           |
 | `FLIGHTCTL_SERVER`                      | Flight Control API server URL                                                                       | `https://localhost:3443` | `https://api.flightctl.example.com`          |
+| `FLIGHTCTL_REMOTE_ACCESS_SERVER`        | Remote access service URL for application console WebSocket bridging (serial console is VM-only today) | `https://localhost:3444` | `https://flightctl-remote-access:3444` |
 | `FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY` | Skip backend server TLS verification                                                                | `false`                  | `true`, `false`                              |
 | `FLIGHTCTL_CLI_ARTIFACTS_SERVER`        | CLI artifacts server URL                                                                            | `http://localhost:8090`  | `https://cli.flightctl.example.com`          |
 | `FLIGHTCTL_ALERTMANAGER_PROXY`          | AlertManager proxy server URL                                                                       | `https://localhost:8443` | `https://alerts.flightctl.example.com`       |
@@ -43,6 +44,7 @@ ENABLE_CLI_ARTIFACTS=false npm run dev:kind
 ```shell
 # Use remote backend and custom settings
 FLIGHTCTL_SERVER=https://flightctl.prod.example.com \
+FLIGHTCTL_REMOTE_ACCESS_SERVER=https://remote-access.flightctl.prod.example.com \
 ENABLE_CLI_ARTIFACTS=false \
 npm run dev
 ```

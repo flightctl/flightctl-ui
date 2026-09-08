@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { FormGroup, Switch, SwitchProps } from '@patternfly/react-core';
+import { FormGroup, Switch, type SwitchProps } from '@patternfly/react-core';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 export interface SwitchFieldProps extends Omit<SwitchProps, 'onChange' | 'ref' | 'checked' | 'id'> {

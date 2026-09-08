@@ -4,24 +4,21 @@ import {
   Button,
   ExpandableSection,
   FormGroup,
-  FormHelperText,
   FormSection,
   Grid,
   GridItem,
-  HelperText,
-  HelperTextItem,
   Split,
   SplitItem,
 } from '@patternfly/react-core';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import {
-  ArrayFieldTemplateProps,
-  BaseInputTemplateProps,
-  FieldProps,
-  FieldTemplateProps,
-  ObjectFieldTemplateProps,
-  RegistryFieldsType,
+  type ArrayFieldTemplateProps,
+  type BaseInputTemplateProps,
+  type FieldProps,
+  type FieldTemplateProps,
+  type ObjectFieldTemplateProps,
+  type RegistryFieldsType,
 } from '@rjsf/utils';
 import { getDefaultRegistry } from '@rjsf/core';
 
@@ -29,8 +26,9 @@ import VolumeImageField, { ROOT_VOLUMES_IMAGE_REFERENCE_FIELD_REGEX } from './Vo
 import FieldErrors from './FieldErrors';
 import { PFEmailWidget, PFPasswordWidget, PFTextWidget, PFURLWidget } from './FormWidget';
 import { useTranslation } from '../../hooks/useTranslation';
-import { DynamicFormContext } from './DynamicForm';
+import { type DynamicFormContext } from './DynamicForm';
 import { FormGroupWithHelperText } from '../common/WithHelperText';
+import { DefaultHelperText } from '../form/FieldHelperText';
 
 /** When true, the object template should hide its title (used for array item objects). */
 const DirectArrayItemContext = React.createContext<boolean>(false);
@@ -39,16 +37,6 @@ const DirectArrayItemContext = React.createContext<boolean>(false);
 const defaultRegistry = getDefaultRegistry();
 const DefaultObjectField = defaultRegistry.fields.ObjectField;
 const DefaultStringField = defaultRegistry.fields.StringField;
-
-// Helper component for description text
-const DescriptionText = ({ description }: { description?: React.ReactNode }) =>
-  !!description && (
-    <FormHelperText>
-      <HelperText>
-        <HelperTextItem variant="default">{description}</HelperTextItem>
-      </HelperText>
-    </FormHelperText>
-  );
 
 // Field Template - wraps each field with FormGroup
 const PFFieldTemplate: React.FC<FieldTemplateProps> = ({
@@ -71,7 +59,7 @@ const PFFieldTemplate: React.FC<FieldTemplateProps> = ({
     return (
       <FormGroup fieldId={id}>
         {children}
-        <DescriptionText description={description} />
+        <DefaultHelperText helperText={description} />
         <FieldErrors errors={rawErrors} />
       </FormGroup>
     );
@@ -80,7 +68,7 @@ const PFFieldTemplate: React.FC<FieldTemplateProps> = ({
   return (
     <FormGroup fieldId={id} label={displayLabel ? label : undefined} isRequired={required}>
       {children}
-      <DescriptionText description={description} />
+      <DefaultHelperText helperText={description} />
       <FieldErrors errors={rawErrors} />
     </FormGroup>
   );
@@ -95,7 +83,7 @@ const PFObjectFieldTemplate: React.FC<ObjectFieldTemplateProps> = ({ title, desc
   if (isRoot || isDirectArrayItem) {
     const content = (
       <>
-        {description && <DescriptionText description={description} />}
+        {description && <DefaultHelperText helperText={description} />}
         {properties.map((prop) => (
           <React.Fragment key={prop.name}>{prop.content}</React.Fragment>
         ))}

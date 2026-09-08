@@ -1,7 +1,7 @@
 import * as React from 'react';
 import disabledColor from '@patternfly/react-tokens/dist/js/t_global_color_disabled_200';
 
-import { Device, DeviceLifecycleStatusType } from '@flightctl/types';
+import { type Device, DeviceLifecycleStatusType } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getDeviceLifecycleStatus, getDeviceLifecycleStatusItems } from '../../utils/status/devices';
 import StatusDisplay, { StatusDisplayContent } from './StatusDisplay';

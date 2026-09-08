@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { ConditionType, Fleet } from '@flightctl/types';
+import { ConditionType, type Fleet } from '@flightctl/types';
 import { fleetStatusLabels, getFleetSyncStatus } from '../../utils/status/fleet';
 import { useTranslation } from '../../hooks/useTranslation';
 import { StatusDisplayContent } from '../Status/StatusDisplay';
-import { StatusLevel } from '../../utils/status/common';
+import { type StatusLevel } from '../../utils/status/common';
 
 const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();

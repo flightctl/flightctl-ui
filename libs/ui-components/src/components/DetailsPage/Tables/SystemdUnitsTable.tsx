@@ -4,7 +4,7 @@ import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { CogIcon } from '@patternfly/react-icons/dist/js/icons/cog-icon';
 import { ClockIcon } from '@patternfly/react-icons/dist/js/icons/clock-icon';
 
-import { SystemdUnitStatus } from '@flightctl/types';
+import { type SystemdUnitStatus } from '@flightctl/types';
 import FolderIcon from '@patternfly/react-icons/dist/js/icons/folder-icon';
 import { DatabaseIcon } from '@patternfly/react-icons/dist/js/icons/database-icon';
 import { NetworkIcon } from '@patternfly/react-icons/dist/js/icons/network-icon';

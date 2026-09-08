@@ -1,4 +1,4 @@
-import { Device, TemplateVersion } from '@flightctl/types';
+import { type Device, type TemplateVersion } from '@flightctl/types';
 import { useFetchPeriodically } from './useFetchPeriodically';
 import { getDeviceFleet } from '../utils/devices';
 import { getMetadataAnnotation } from '../utils/api';

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 import {
   FormGroup,
   FormSection,
@@ -19,7 +19,7 @@ import RadioField from '../../form/RadioField';
 import ListItemField from '../../form/ListItemField';
 import TextField from '../../form/TextField';
 import ErrorHelperText, { DefaultHelperText } from '../../form/FieldHelperText';
-import { AuthProviderFormValues, RoleAssignmentType } from './types';
+import { type AuthProviderFormValues, RoleAssignmentType } from './types';
 import { FormGroupWithHelperText } from '../../common/WithHelperText';
 import { RoleClaimHelperText, RoleSeparatorHelperText } from './AuthProviderHelperText';
 

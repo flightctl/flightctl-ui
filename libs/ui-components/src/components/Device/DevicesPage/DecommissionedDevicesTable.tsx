@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { Button, Switch, Toolbar, ToolbarContent, ToolbarGroup, ToolbarItem } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
-import { Device, DeviceList } from '@flightctl/types';
+import { type Device, type DeviceList } from '@flightctl/types';
 
-import { PaginationDetails } from '../../../hooks/useTablePagination';
+import { type PaginationDetails } from '../../../hooks/useTablePagination';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useTableSelect } from '../../../hooks/useTableSelect';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { useFetch } from '../../../hooks/useFetch';
 import { RESOURCE, VERB } from '../../../types/rbac';
-import { DeviceTextFilterKey, FilterSearchParams } from '../../../utils/status/devices';
+import { type DeviceTextFilterKey, FilterSearchParams } from '../../../utils/status/devices';
 
 import Table from '../../Table/Table';
 import { useDeleteListAction } from '../../ListPage/ListPageActions';

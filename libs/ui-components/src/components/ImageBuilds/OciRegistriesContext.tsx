@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { RepoSpecType, Repository, RepositoryList } from '@flightctl/types';
+import { RepoSpecType, type Repository, type RepositoryList } from '@flightctl/types';
 
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 

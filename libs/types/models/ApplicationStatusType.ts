@@ -12,4 +12,6 @@ export enum ApplicationStatusType {
   ApplicationStatusError = 'Error',
   ApplicationStatusUnknown = 'Unknown',
   ApplicationStatusCompleted = 'Completed',
+  ApplicationStatusStopped = 'Stopped',
+  ApplicationStatusStopping = 'Stopping',
 }

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useField } from 'formik';
-import { Checkbox, CheckboxProps, FormGroup } from '@patternfly/react-core';
+import { Checkbox, type CheckboxProps, FormGroup } from '@patternfly/react-core';
 import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 
 interface BaseCheckboxProps extends Omit<CheckboxProps, 'onChange' | 'id' | 'ref'> {

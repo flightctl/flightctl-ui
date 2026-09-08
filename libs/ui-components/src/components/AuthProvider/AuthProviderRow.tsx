@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { ActionsColumn, IAction, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, type IAction, Td, Tr } from '@patternfly/react-table';
 import { Label } from '@patternfly/react-core';
 import CheckCircleIcon from '@patternfly/react-icons/dist/js/icons/check-circle-icon';
 import TimesCircleIcon from '@patternfly/react-icons/dist/js/icons/times-circle-icon';
-import { AuthProvider } from '@flightctl/types';
+import { type AuthProvider } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { RESOURCE, VERB } from '../../types/rbac';
-import { DynamicAuthProviderSpec, ProviderType } from '../../types/extraTypes';
+import { type DynamicAuthProviderSpec, ProviderType } from '../../types/extraTypes';
 import { isOAuth2Provider } from './CreateAuthProvider/types';
 import { getProviderTypeLabel } from './CreateAuthProvider/utils';
 import { usePermissionsContext } from '../common/PermissionsContext';

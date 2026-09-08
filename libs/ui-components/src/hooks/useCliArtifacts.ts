@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useAppContext } from './useAppContext';
 import { getErrorMessage } from '../utils/error';
 import { getArtifactTool, sortCliArtifacts } from '../utils/cliArtifacts';
-import { CliArtifact, CliArtifactTool, CliArtifactsResponse } from '../types/extraTypes';
+import { type CliArtifact, type CliArtifactTool, type CliArtifactsResponse } from '../types/extraTypes';
 
 export type CliArtifactsDisplayResponse = {
   baseUrl: string;

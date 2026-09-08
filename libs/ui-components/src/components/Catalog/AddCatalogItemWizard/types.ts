@@ -1,4 +1,4 @@
-import { CatalogItemArtifactType, CatalogItemType } from '@flightctl/types/alpha';
+import { type CatalogItemArtifactType, CatalogItemType } from '@flightctl/types/alpha';
 
 export type CreateCatalogFormValues = {
   name: string;

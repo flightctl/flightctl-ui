@@ -16,14 +16,14 @@ import {
 } from '@patternfly/react-core';
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 import { CodeBranchIcon } from '@patternfly/react-icons/dist/js/icons/code-branch-icon';
 import { Formik, useFormikContext } from 'formik';
 
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { useFetch } from '../../hooks/useFetch';
-import { ResourceSync, ResourceSyncList, ResourceSyncType } from '@flightctl/types';
+import { type ResourceSync, type ResourceSyncList, ResourceSyncType } from '@flightctl/types';
 import { getObservedHash } from '../../utils/status/repository';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import Table from '../Table/Table';
@@ -37,7 +37,7 @@ import { getErrorMessage } from '../../utils/error';
 import { commonQueries } from '../../utils/query';
 
 import {
-  SingleResourceSyncValues,
+  type SingleResourceSyncValues,
   getResourceSync,
   singleResourceSyncSchema,
 } from '../Repository/CreateRepository/utils';

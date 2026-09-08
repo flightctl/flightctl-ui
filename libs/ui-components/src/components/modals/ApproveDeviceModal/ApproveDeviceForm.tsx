@@ -2,12 +2,12 @@ import * as React from 'react';
 import { useFormikContext } from 'formik';
 import { ActionGroup, Alert, Button, FormGroup } from '@patternfly/react-core';
 
-import { EnrollmentRequest } from '@flightctl/types';
+import { type EnrollmentRequest } from '@flightctl/types';
 import RichValidationTextField from '../../form/RichValidationTextField';
 import LabelsField from '../../form/LabelsField';
 import { getLabelValueValidations } from '../../form/validations';
 import FlightCtlForm from '../../form/FlightCtlForm';
-import { FlightCtlLabel } from '../../../types/extraTypes';
+import { type FlightCtlLabel } from '../../../types/extraTypes';
 import { useTranslation } from '../../../hooks/useTranslation';
 import useDeviceLabelMatch from '../../../hooks/useDeviceLabelMatch';
 import DeviceLabelMatch from './DeviceLabelMatch';

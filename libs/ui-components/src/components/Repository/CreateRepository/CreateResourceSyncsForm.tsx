@@ -8,7 +8,7 @@ import { ResourceSyncType } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import TextField from '../../form/TextField';
 import { FormGroupWithHelperText } from '../../common/WithHelperText';
-import { RepositoryFormValues, ResourceSyncFormValue } from './types';
+import { type RepositoryFormValues, type ResourceSyncFormValue } from './types';
 import NameField from '../../form/NameField';
 import { getDnsSubdomainValidations } from '../../form/validations';
 import RadioField from '../../form/RadioField';

@@ -105,6 +105,9 @@ export namespace Event {
     DEPENDENCY_CHANGE_DETECTED = 'DependencyChangeDetected',
     DEPENDENCY_SYNC_PROBE_FAILED = 'DependencySyncProbeFailed',
     SYSTEM_RESTORED = 'SystemRestored',
+    ENCRYPTION_MIGRATION_STARTED = 'EncryptionMigrationStarted',
+    ENCRYPTION_MIGRATION_COMPLETED = 'EncryptionMigrationCompleted',
+    APPLICATION_LIFECYCLE_CHANGED = 'ApplicationLifecycleChanged',
   }
   /**
    * The type of the event. One of Normal, Warning.

@@ -14,7 +14,7 @@ import FlightCtlModal from '@flightctl/ui-components/src/components/common/Fligh
 
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import { Device, EnrollmentRequest } from '@flightctl/types';
+import { type Device, type EnrollmentRequest } from '@flightctl/types';
 import { isEnrollmentRequest } from '../../../../types/extraTypes';
 
 import { getErrorMessage } from '../../../../utils/error';

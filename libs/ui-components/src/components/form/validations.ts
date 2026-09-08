@@ -1,29 +1,30 @@
 import * as Yup from 'yup';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import countBy from 'lodash/countBy';
 import yaml from 'js-yaml';
 
-import { AppType, ImagePullPolicy } from '@flightctl/types';
-import { FlightCtlLabel } from '../../types/extraTypes';
+import { AppType, type ImageOrCatalogItemRefSpec, ImagePullPolicy } from '@flightctl/types';
+import { type FlightCtlLabel } from '../../types/extraTypes';
 import {
-  AppForm,
+  type AppForm,
   AppSpecType,
-  BatchForm,
+  type BatchForm,
   BatchLimitType,
-  ComposeAppForm,
-  DisruptionBudgetForm,
-  GitConfigTemplate,
-  HelmAppForm,
-  HttpConfigTemplate,
-  InlineConfigTemplate,
-  InlineFileForm,
-  KubeSecretTemplate,
-  PortMapping,
-  QuadletAppForm,
-  RolloutPolicyForm,
-  SpecConfigTemplate,
-  SystemdUnitFormValue,
-  UpdatePolicyForm,
+  type ComposeAppForm,
+  type DisruptionBudgetForm,
+  type GitConfigTemplate,
+  type HelmAppForm,
+  type HttpConfigTemplate,
+  type InlineConfigTemplate,
+  type InlineFileForm,
+  type KubeSecretTemplate,
+  type PortMapping,
+  type QuadletAppForm,
+  type RolloutPolicyForm,
+  type SpecConfigTemplate,
+  type SystemdUnitFormValue,
+  type UpdatePolicyForm,
+  type VmAppForm,
   getAppIdentifier,
   isGitConfigTemplate,
   isHttpConfigTemplate,
@@ -31,7 +32,9 @@ import {
   isKubeSecretTemplate,
 } from '../../types/deviceSpec';
 import { labelToString } from '../../utils/labels';
+import { isValidKubernetesQuantity } from '../../utils/kubernetesQuantity';
 import { UpdateScheduleMode } from '../../utils/time';
+import { VM_PORT_PROTOCOLS, loadYamlDocument, parseVmCloudInitUserData } from '../../utils/vmApplications';
 
 const SYSTEMD_PATTERNS_REGEXP =
   /^[0-9a-zA-Z:\-_.\\\[\]!\-\*\?]+(@[0-9a-zA-Z:\-_.\\\[\]!\-\*\?]+)?(\.[a-zA-Z\[\]!\-\*\?]+)?$/;
@@ -305,6 +308,20 @@ export const validOsImage = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
       return OCI_IMAGE_FULL_REGEXP.test(validateOsImage);
     },
   );
+
+export const validOsFormValue = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
+  Yup.mixed().test('os-image-or-catalog', t('System image is invalid'), function (value) {
+    const osSpec = value as ImageOrCatalogItemRefSpec;
+    if (!osSpec || !osSpec.image || osSpec.catalogItemRef) {
+      return true;
+    }
+    try {
+      validOsImage(t, { isFleet }).validateSync(osSpec.image);
+      return true;
+    } catch (e) {
+      return this.createError({ message: (e as Yup.ValidationError).message || t('System image is invalid') });
+    }
+  });
 
 export const validHelmNamespace = (t: TFunction) =>
   genericNameSchema(t).max(
@@ -644,24 +661,74 @@ export const isValidPortNumber = (port: string): boolean => {
 
 export const isDuplicatePortMapping = (
   hostPort: string,
-  containerPort: string,
+  targetPort: string,
   existingPorts: PortMapping[] = [],
 ): boolean => {
-  if (!hostPort || !containerPort) {
+  if (!hostPort || !targetPort) {
     return false;
   }
-  return existingPorts.some((port) => port.hostPort === hostPort && port.containerPort === containerPort);
+  return existingPorts.some((port) => port.hostPort === hostPort && port.targetPort === targetPort);
 };
 
 export const isValidPortMapping = (
   hostPort: string,
-  containerPort: string,
+  targetPort: string,
   existingPorts: PortMapping[] = [],
 ): boolean => {
-  if (!isValidPortNumber(hostPort) || !isValidPortNumber(containerPort)) {
+  if (!isValidPortNumber(hostPort) || !isValidPortNumber(targetPort)) {
     return false;
   }
-  return !isDuplicatePortMapping(hostPort, containerPort, existingPorts);
+  return !isDuplicatePortMapping(hostPort, targetPort, existingPorts);
+};
+
+export const PUBLIC_KEY_MAX_LENGTH = 8 * 1024; // (8 KB)
+
+const VALID_SSH_PUBLIC_KEY_TYPES = [
+  'ssh-rsa',
+  'ssh-ed25519',
+  'ecdsa-sha2-nistp256',
+  'ecdsa-sha2-nistp384',
+  'ecdsa-sha2-nistp521',
+  'ssh-dss',
+];
+
+const SSH_PUBLIC_KEY_BASE64_DATA_REGEX = /^(?=.{50,}$)[A-Za-z0-9+/]+=*$/;
+// Characters that could be used for injection attacks
+const MALICIOUS_PUBLIC_KEY_CHARACTERS = /[;|&`()[\]{}<>"'\\\t$]/;
+
+export const validateSshPublicKey = (publicKey: string, t: TFunction): string | undefined => {
+  if (publicKey.length > PUBLIC_KEY_MAX_LENGTH) {
+    return t('SSH public key is too long');
+  }
+
+  // Allow newlines only at the end
+  const trimmedKey = publicKey.replace(/[\r\n]+$/g, '');
+  if (/[\r\n]/.test(trimmedKey)) {
+    return t('A single public key can be provided only');
+  }
+
+  if (MALICIOUS_PUBLIC_KEY_CHARACTERS.test(trimmedKey)) {
+    return t('Invalid SSH public key');
+  }
+
+  const parts = trimmedKey.trim().split(/\s+/);
+  if (parts.length < 2) {
+    return t('Invalid SSH public key format. Expected: "[TYPE] key [comment]"');
+  }
+
+  const keyType = parts[0];
+  if (!VALID_SSH_PUBLIC_KEY_TYPES.includes(keyType)) {
+    return t('Unsupported SSH public key type. Supported types: {{supportedTypes}}', {
+      supportedTypes: VALID_SSH_PUBLIC_KEY_TYPES.join(', '),
+    });
+  }
+
+  const base64Data = parts[1];
+  if (!SSH_PUBLIC_KEY_BASE64_DATA_REGEX.test(base64Data)) {
+    return t('Invalid SSH public key data');
+  }
+
+  return undefined;
 };
 
 export const validateCPULimit = (cpu: string | undefined): boolean => {
@@ -690,6 +757,14 @@ export const validateMemoryLimit = (memory: string | undefined): boolean => {
   return true;
 };
 
+export const validateKubevirtMemoryGuest = (memory: string | undefined): boolean => {
+  if (!memory) {
+    return true;
+  }
+
+  return isValidKubernetesQuantity(memory);
+};
+
 const ociImageSchema = (t: TFunction) =>
   Yup.string().test('oci-image-format', (value, testContext) => {
     if (!value) return true;
@@ -706,8 +781,24 @@ const ociImageSchema = (t: TFunction) =>
     return true;
   });
 
-const requiredOciImageSchema = (t: TFunction, requiredMessage?: string) =>
-  ociImageSchema(t).required(requiredMessage || t('Image is required.'));
+const imageSpecSchema = (t: TFunction, imageRequired: boolean, requiredMessage: string) =>
+  Yup.mixed().test('image-or-catalog-ref', function (val) {
+    const value = val as ImageOrCatalogItemRefSpec;
+    if (!value) {
+      return imageRequired ? this.createError({ message: requiredMessage }) : true;
+    }
+    if (value.catalogItemRef) {
+      // For now, CatalogItems cannot be edited via the UI, so if they are set they must be valid
+      return true;
+    }
+    try {
+      const schema = imageRequired ? ociImageSchema(t).required(requiredMessage) : ociImageSchema(t);
+      schema.validateSync(value.image);
+      return true;
+    } catch (e) {
+      return this.createError({ message: (e as Yup.ValidationError).message || requiredMessage });
+    }
+  });
 
 const volumeNameSchema = (t: TFunction) => validApplicationAndVolumeName(t).required(t('Volume name is required'));
 
@@ -728,7 +819,7 @@ export const singleContainerVolumesSchema = (t: TFunction) =>
   Yup.array().of(
     Yup.object().shape({
       name: volumeNameSchema(t),
-      imageRef: ociImageSchema(t),
+      imageSpec: imageSpecSchema(t, false, ''),
       imagePullPolicy: Yup.string(),
       mountPath: mountPathSchema(t, true),
     }),
@@ -738,9 +829,45 @@ export const composeQuadletVolumesSchema = (t: TFunction) =>
   Yup.array().of(
     Yup.object().shape({
       name: volumeNameSchema(t),
-      imageRef: requiredOciImageSchema(t, t('Image reference is required for this volume type')),
+      imageSpec: imageSpecSchema(t, true, t('Image reference is required for this volume type')),
       imagePullPolicy: imagePullPolicySchema(t),
     }),
+  );
+
+const portNumberField = (t: TFunction, requiredMessage: string, testName: string) =>
+  Yup.string()
+    .required(requiredMessage)
+    .test(testName, (value, testContext) => {
+      const error = validatePortNumber(value || '', t);
+      return error ? testContext.createError({ message: error }) : true;
+    });
+
+const containerAppPortMappingSchema = (t: TFunction) =>
+  Yup.array().of(
+    Yup.object()
+      .shape({
+        hostPort: portNumberField(t, t('Host port is required'), 'valid-host-port'),
+        targetPort: portNumberField(t, t('Container port is required'), 'valid-target-port'),
+      })
+      .required(),
+  );
+
+const vmAppPortMappingSchema = (t: TFunction) =>
+  Yup.array().of(
+    Yup.object()
+      .shape({
+        hostPort: portNumberField(t, t('Host port is required'), 'valid-host-port'),
+        targetPort: portNumberField(t, t('VM port is required'), 'valid-target-port'),
+        protocol: Yup.string()
+          .required(t('Protocol is required'))
+          .test('valid-protocol', (value, testContext) => {
+            const normalizedProtocol = (value || 'tcp').toLowerCase();
+            return VM_PORT_PROTOCOLS.includes(normalizedProtocol as (typeof VM_PORT_PROTOCOLS)[number])
+              ? true
+              : testContext.createError({ message: t('Invalid port values') });
+          }),
+      })
+      .required(),
   );
 
 export const validApplicationsSchema = (t: TFunction) => {
@@ -755,29 +882,18 @@ export const validApplicationsSchema = (t: TFunction) => {
               .required(t('Definition source must be image for this type of applications')),
             appType: Yup.string().oneOf([AppType.AppTypeContainer]).required(t('Application type is required')),
             name: validApplicationAndVolumeName(t),
-            image: requiredOciImageSchema(t),
-            ports: Yup.array().of(
-              Yup.object()
-                .shape({
-                  hostPort: Yup.string()
-                    .required(t('Host port is required'))
-                    .test('valid-host-port', (value, testContext) => {
-                      const error = validatePortNumber(value || '', t);
-                      return error ? testContext.createError({ message: error }) : true;
-                    }),
-                  containerPort: Yup.string()
-                    .required(t('Container port is required'))
-                    .test('valid-container-port', (value, testContext) => {
-                      const error = validatePortNumber(value || '', t);
-                      return error ? testContext.createError({ message: error }) : true;
-                    }),
-                })
-                .required(),
+            imageSpec: imageSpecSchema(t, true, t('Image is required.')),
+            ports: containerAppPortMappingSchema(t),
+            cpuLimit: Yup.string().test(
+              'valid-cpu-format',
+              t('CPU limit is invalid. Use a positive number of cores (e.g. 0.5 or 2).'),
+              validateCPULimit,
             ),
-            limits: Yup.object().shape({
-              cpu: Yup.string().test('valid-cpu-format', t('CPU limit is invalid.'), validateCPULimit),
-              memory: Yup.string().test('valid-memory-format', t('Memory limit is invalid.'), validateMemoryLimit),
-            }),
+            memoryLimit: Yup.string().test(
+              'valid-memory-format',
+              t('Memory limit is invalid. Use a number with optional unit b, k, m, or g (e.g. 512m or 2g).'),
+              validateMemoryLimit,
+            ),
             volumes: singleContainerVolumesSchema(t),
             variables: appVariablesSchema(t),
             runAs: Yup.string(),
@@ -792,7 +908,7 @@ export const validApplicationsSchema = (t: TFunction) => {
               .required(t('Definition source must be image for this type of applications')),
             appType: Yup.string().oneOf([AppType.AppTypeHelm]).required(t('Application type is required')),
             name: validApplicationAndVolumeName(t),
-            image: requiredOciImageSchema(t),
+            imageSpec: imageSpecSchema(t, true, t('Image is required.')),
             namespace: validHelmNamespace(t),
             valuesYaml: Yup.string().test('valid-yaml', t('YAML content is invalid.'), (value) => {
               if (!value || value.trim() === '') {
@@ -809,7 +925,120 @@ export const validApplicationsSchema = (t: TFunction) => {
           });
         }
 
-        // Image applications (Quadlet or Compose)
+        // VM applications
+        if (value.appType === AppType.AppTypeVm) {
+          return Yup.object<VmAppForm>().shape({
+            specType: Yup.string()
+              .oneOf([AppSpecType.INLINE])
+              .required(t('Definition source must be inline for this type of applications')),
+            appType: Yup.string().oneOf([AppType.AppTypeVm]).required(t('Application type is required')),
+            name: validApplicationAndVolumeName(t).required(t('Name is required for VM applications.')),
+            configMode: Yup.string().oneOf(['form', 'yaml']).required(),
+            vmYaml: Yup.string().when('configMode', {
+              is: 'yaml',
+              then: (schema) =>
+                schema
+                  .required(t('VM specification is required.'))
+                  .test(
+                    'valid-kubevirt-virtual-machine',
+                    t(
+                      'Provide a valid KubeVirt VirtualMachine manifest with metadata.name matching the application name.',
+                    ),
+                    function validateVmYamlManifest(vmYaml) {
+                      if (!vmYaml) {
+                        return true;
+                      }
+
+                      const doc = loadYamlDocument(vmYaml);
+                      if (!doc) {
+                        return this.createError({ message: t('YAML manifest could not be parsed.') });
+                      }
+                      if (!doc || typeof doc !== 'object') {
+                        return this.createError({ message: t('Invalid KubeVirt VirtualMachine manifest.') });
+                      }
+                      if (doc.apiVersion !== 'kubevirt.io/v1' || doc.kind !== 'VirtualMachine') {
+                        return this.createError({
+                          message: t(
+                            'KubeVirt VirtualMachine manifest must have apiVersion: kubevirt.io/v1 and kind: VirtualMachine.',
+                          ),
+                        });
+                      }
+                      if (!doc.spec || typeof doc.spec !== 'object') {
+                        return this.createError({
+                          message: t('KubeVirt VirtualMachine manifest must have a spec object.'),
+                        });
+                      }
+                      const appName = (this.parent as VmAppForm).name;
+                      if (appName && doc.metadata?.name !== appName) {
+                        return this.createError({
+                          message: t(
+                            'KubeVirt VirtualMachine manifest must have metadata.name matching the application name.',
+                          ),
+                        });
+                      }
+                      return true;
+                    },
+                  ),
+            }),
+            diskImage: Yup.string().when('configMode', {
+              is: 'form',
+              then: () => ociImageSchema(t).required(t('Disk image is required for VM applications.')),
+            }),
+            cpuCores: Yup.number().when('configMode', {
+              is: 'form',
+              then: (schema) =>
+                schema
+                  .integer(t('CPU cores must be a whole number.'))
+                  .min(1, t('CPU cores must be at least 1.'))
+                  .required(t('CPU cores is required.')),
+            }),
+            memory: Yup.string().when('configMode', {
+              is: 'form',
+              then: (schema) =>
+                schema
+                  .required(t('Memory is required.'))
+                  .test(
+                    'valid-kubevirt-memory-guest',
+                    t('Provide a valid KubeVirt memory value.'),
+                    validateKubevirtMemoryGuest,
+                  ),
+            }),
+            cloudInit: Yup.string().when('configMode', {
+              is: 'form',
+              then: (schema) =>
+                schema.test('valid-cloud-init-ssh-key', function (cloudInitValue) {
+                  const parsed = parseVmCloudInitUserData(cloudInitValue);
+                  if (parsed.enableSshKey && parsed.sshPublicKey) {
+                    const error = validateSshPublicKey(parsed.sshPublicKey, t);
+                    if (error) {
+                      return this.createError({ message: error });
+                    }
+                  }
+                  return true;
+                }),
+            }),
+            sshPublicKey: Yup.string().when(['configMode', 'enableSshKey'], {
+              is: (configMode: string, enableSshKey: boolean) => configMode === 'form' && enableSshKey,
+              then: (schema) =>
+                schema
+                  .required(t('SSH public key is required when SSH is enabled.'))
+                  .test('flightctl-ssh-public-key', function (publicKey) {
+                    if (!publicKey) {
+                      return true;
+                    }
+                    const error = validateSshPublicKey(publicKey, t);
+                    return error ? this.createError({ message: error }) : true;
+                  }),
+            }),
+            password: Yup.string().when(['configMode', 'enablePassword'], {
+              is: (configMode: string, enablePassword: boolean) => configMode === 'form' && enablePassword,
+              then: (schema) => schema.required(t('Password is required when password authentication is enabled.')),
+            }),
+            publishPorts: vmAppPortMappingSchema(t),
+          });
+        }
+
+        // Image applications (Quadlet or Compose) — OCI string or catalog ref
         if (value.specType === AppSpecType.OCI_IMAGE) {
           return Yup.object<QuadletAppForm | ComposeAppForm>().shape({
             specType: Yup.string()
@@ -819,7 +1048,7 @@ export const validApplicationsSchema = (t: TFunction) => {
               .oneOf([AppType.AppTypeCompose, AppType.AppTypeQuadlet])
               .required(t('Application type is required')),
             name: validApplicationAndVolumeName(t),
-            image: requiredOciImageSchema(t),
+            imageSpec: imageSpecSchema(t, true, t('Image is required.')),
             volumes: composeQuadletVolumesSchema(t),
             variables: appVariablesSchema(t),
           });

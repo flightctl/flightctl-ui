@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Alert, Stack, StackItem } from '@patternfly/react-core';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type FormikErrors, useFormikContext } from 'formik';
 
 import ImagePromotionForm from '../../../ImagePromotion/ImagePromotionForm';
-import { ImagePromotionFormValues } from '../../../ImagePromotion/types';
+import { type ImagePromotionFormValues } from '../../../ImagePromotion/types';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import CheckboxField from '../../../form/CheckboxField';
 import { useTranslation } from '../../../../hooks/useTranslation';

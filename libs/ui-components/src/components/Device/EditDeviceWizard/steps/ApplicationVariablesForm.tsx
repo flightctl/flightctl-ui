@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { FieldArray, useField } from 'formik';
-import { Button, FormGroup, FormSection, Grid, Split, SplitItem } from '@patternfly/react-core';
+import { Button, Content, FormGroup, FormSection, Grid, Split, SplitItem } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
-import { VariablesForm } from '../../../../types/deviceSpec';
+import { type VariablesForm } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import ErrorHelperText from '../../../form/FieldHelperText';
@@ -80,6 +80,7 @@ const ApplicationVariablesForm = ({ appFieldName, isReadOnly }: ApplicationVaria
           </>
         )}
       </FieldArray>
+      {variables.length === 0 && isReadOnly && <Content>{t('None defined')}</Content>}
     </FormGroup>
   );
 };

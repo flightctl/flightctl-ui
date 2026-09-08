@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useDebounce } from 'use-debounce';
 
-import { Fleet, FleetList } from '@flightctl/types';
+import { type Fleet, type FleetList } from '@flightctl/types';
 import { useAppContext } from '../../hooks/useAppContext';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
+import { type PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
 import { PAGE_SIZE } from '../../constants';
 
 export enum FleetSearchParams {
@@ -13,6 +13,8 @@ export enum FleetSearchParams {
 
 type FleetsEndpointArgs = {
   name?: string;
+  /** When true, retrieve only fleets not managed by a resource sync. */
+  onlyUnmanaged?: boolean;
   nextContinue?: string;
   addDevicesSummary?: boolean;
   limit?: number;
@@ -48,18 +50,27 @@ export const useFleetBackendFilters = () => {
 
 const getFleetsEndpoint = ({
   name,
+  onlyUnmanaged,
   addDevicesSummary,
   nextContinue,
 }: {
   name?: string;
+  onlyUnmanaged?: boolean;
   addDevicesSummary?: boolean;
   nextContinue?: string;
 }) => {
   const params = new URLSearchParams({
     limit: `${PAGE_SIZE}`,
   });
+  const fieldSelectors: string[] = [];
+  if (onlyUnmanaged) {
+    fieldSelectors.push('!metadata.owner');
+  }
   if (name) {
-    params.set('fieldSelector', `metadata.name contains ${name}`);
+    fieldSelectors.push(`metadata.name contains ${name}`);
+  }
+  if (fieldSelectors.length > 0) {
+    params.set('fieldSelector', fieldSelectors.join(','));
   }
   if (addDevicesSummary) {
     params.set('addDevicesSummary', 'true');

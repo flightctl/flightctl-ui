@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ResolvedTheme, Theme, useThemePreferences } from '../../hooks/useThemePreferences';
+import { type ResolvedTheme, type Theme, useThemePreferences } from '../../hooks/useThemePreferences';
 
 type ThemeContext = {
   userTheme: Theme; // Theme setting chosen by the user

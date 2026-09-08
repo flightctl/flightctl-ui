@@ -8,7 +8,7 @@ import {
   HelperTextItem,
   Icon,
   MenuToggle,
-  MenuToggleElement,
+  type MenuToggleElement,
   Select,
   SelectGroup,
   SelectList,
@@ -23,8 +23,8 @@ import {
 import { TimesIcon } from '@patternfly/react-icons/dist/js/icons/times-icon';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
 
-import { Fleet, FleetList, LabelList } from '@flightctl/types';
-import { FlightCtlLabel } from '../../../types/extraTypes';
+import { type Fleet, type FleetList, type LabelList } from '@flightctl/types';
+import { type FlightCtlLabel } from '../../../types/extraTypes';
 import { isPromiseFulfilled } from '../../../types/typeUtils';
 
 import TableTextSearch from '../../Table/TableTextSearch';
@@ -35,8 +35,8 @@ import { MAX_TOTAL_SEARCH_RESULTS, getEmptyFleetSearch, getSearchResultsCount } 
 import { labelToString, stringToLabel } from '../../../utils/labels';
 import {
   DEVICE_TEXT_FILTER_KEYS,
-  DeviceFilterTypes,
-  DeviceTextFilterKey,
+  type DeviceFilterTypes,
+  type DeviceTextFilterKey,
   FilterSearchParams,
   getDeviceFilterLabel,
   isValidCveIdFilterValue,

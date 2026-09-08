@@ -7,7 +7,7 @@ import {
   DropdownItem,
   DropdownList,
   MenuToggle,
-  MenuToggleElement,
+  type MenuToggleElement,
   ModalBody,
   ModalFooter,
   ModalHeader,

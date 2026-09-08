@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { EnrollmentRequest } from '@flightctl/types';
+import { type EnrollmentRequest } from '@flightctl/types';
 import {
   EnrollmentRequestStatus as EnrollmentRequestStatusType,
   getApprovalStatus,

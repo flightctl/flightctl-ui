@@ -1,4 +1,4 @@
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
 const EMPTY_DATE = '0001-01-01T00:00:00Z';
 const defaultLang = 'en-US';

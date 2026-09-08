@@ -60,7 +60,7 @@
     "html-webpack-plugin": "^5.6.3",
     "mini-css-extract-plugin": "^2.10.0",
     "monaco-editor-webpack-plugin": "^7.1.0",
-    "postcss": "^8.4.25",
+    "postcss": "^8.5.23",
     "prop-types": "^15.8.1",
     "raw-loader": "^4.0.2",
     "style-loader": "^3.3.3",
@@ -70,7 +70,7 @@
     "ts-loader": "^9.4.4",
     "url-loader": "^4.1.1",
     "webpack": "^5.105.4",
-    "webpack-dev-server": "^5.2.3"
+    "webpack-dev-server": "^6.0.0"
   },
   "dependencies": {
     "@openshift-console/dynamic-plugin-sdk": "4.19.1",
@@ -86,7 +86,7 @@
     "@types/react-redux": "^7.1.33",
     "formik": "^2.4.9",
     "i18next": "^21.8.14",
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.3.0",
     "monaco-editor": "^0.51.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",

@@ -1,5 +1,5 @@
-import { ExportFormatType } from '@flightctl/types/imagebuilder';
-import { ImagePromotionFormValues } from '../../ImagePromotion/types';
+import { type ExportFormatType } from '@flightctl/types/imagebuilder';
+import { type ImagePromotionFormValues } from '../../ImagePromotion/types';
 
 export type NewVersionWizardFormValues = ImagePromotionFormValues & {
   buildName: string;

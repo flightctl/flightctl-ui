@@ -1,5 +1,5 @@
 import React from 'react';
-import { DevicesSummary } from '@flightctl/types';
+import { type DevicesSummary } from '@flightctl/types';
 import { Icon, Popover } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 

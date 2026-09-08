@@ -13,6 +13,7 @@ export type ImageBuildSpec = {
   source: ImageBuildSource;
   destination: ImageBuildDestination;
   binding: ImageBuildBinding;
+  onboarding?: boolean;
   userConfiguration?: ImageBuildUserConfiguration;
 };
 

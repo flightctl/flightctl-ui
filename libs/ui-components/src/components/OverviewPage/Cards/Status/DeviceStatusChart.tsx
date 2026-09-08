@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { DeviceSummaryStatusType } from '@flightctl/types';
-import { FlightCtlLabel } from '../../../../types/extraTypes';
+import { type FlightCtlLabel } from '../../../../types/extraTypes';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getDeviceStatusHelperText } from '../../../Status/utils';

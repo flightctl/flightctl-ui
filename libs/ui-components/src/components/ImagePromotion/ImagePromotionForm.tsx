@@ -2,21 +2,21 @@ import * as React from 'react';
 import { Alert, Button, FormGroup, FormSection, Spinner, Stack, StackItem } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
-import { CatalogItem, CatalogList } from '@flightctl/types/alpha';
-import { ExportFormatType } from '@flightctl/types/imagebuilder';
+import { type CatalogItem, type CatalogList } from '@flightctl/types/alpha';
+import { type ExportFormatType } from '@flightctl/types/imagebuilder';
 import FlightCtlForm from '../form/FlightCtlForm';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import FormSelect, { SelectItem } from '../form/FormSelect';
+import FormSelect, { type SelectItem } from '../form/FormSelect';
 import RadioField from '../form/RadioField';
 import TextField from '../form/TextField';
 import TextAreaField from '../form/TextAreaField';
 import NameField from '../form/NameField';
 import { getDnsSubdomainValidations } from '../form/validations';
-import { useCatalogItems } from '../Catalog/useCatalogs';
+import { useCatalogItems } from '../Catalog/useCatalogItems';
 import { getErrorMessage } from '../../utils/error';
 import { getExportFormatLabel } from '../../utils/imageBuilds';
-import { ImagePromotionFormValues } from './types';
+import { type ImagePromotionFormValues } from './types';
 
 const NewItemForm = ({ isDisabled }: { isDisabled?: boolean }) => {
   const { t } = useTranslation();
@@ -129,9 +129,15 @@ const ImagePromotionForm = ({
     endpoint: 'catalogs',
   });
 
-  const [catalogItems, , itemsErr] = useCatalogItems({
-    catalogs: values.catalog ? [values.catalog] : undefined,
-  });
+  const catalogFilter = React.useMemo(() => {
+    return {
+      catalogFilter: {
+        catalogs: values.catalog ? [values.catalog] : undefined,
+      },
+    };
+  }, [values.catalog]);
+
+  const [catalogItems, , itemsErr] = useCatalogItems(catalogFilter);
 
   const catalogs = (catalogList?.items || [])
     .sort((a, b) => {

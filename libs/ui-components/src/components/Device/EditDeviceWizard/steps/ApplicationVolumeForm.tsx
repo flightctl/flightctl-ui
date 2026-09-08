@@ -1,20 +1,19 @@
 import * as React from 'react';
 import { FieldArray, useField } from 'formik';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 import { Button, FormGroup, FormSection, Grid, Split, SplitItem } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
 
 import { ImagePullPolicy } from '@flightctl/types';
-import { ApplicationVolumeForm as VolumeFormType } from '../../../../types/deviceSpec';
+import type { ApplicationVolumeForm as VolumeFormType } from '../../../../utils/volumes';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import FormSelect from '../../../form/FormSelect';
 import ErrorHelperText from '../../../form/FieldHelperText';
+import ImageOrCatalogRefField from '../../../form/ImageOrCatalogRefField';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
-
-import './ApplicationVolumeForm.css';
 
 type ApplicationVolumeFormProps = {
   appFieldName: string;
@@ -28,6 +27,9 @@ const getPullPolicyOptions = (t: TFunction) => ({
   [ImagePullPolicy.PullNever]: t('Never'),
 });
 
+const hasVolumeImageSource = (volume: VolumeFormType) =>
+  Boolean(volume.imageSpec?.image || volume.imageSpec?.catalogItemRef);
+
 const ApplicationVolumeForm = ({
   appFieldName,
   isReadOnly,
@@ -40,7 +42,7 @@ const ApplicationVolumeForm = ({
   const volumesError = typeof error === 'string' ? error : undefined;
 
   return (
-    <FormGroup label={t('Volumes')} className="fctl-application-volume-form">
+    <FormGroup label={t('Volumes')}>
       <FieldArray name={`${appFieldName}.volumes`}>
         {(arrayHelpers) => (
           <>
@@ -76,9 +78,9 @@ const ApplicationVolumeForm = ({
                           )}
 
                           <FormGroup label={t('Image reference')} isRequired={!isSingleContainerApp}>
-                            <TextField
-                              name={`${volumeFieldName}.imageRef`}
-                              aria-label={t('Image reference')}
+                            <ImageOrCatalogRefField
+                              label={t('Image reference')}
+                              name={`${volumeFieldName}.imageSpec`}
                               isDisabled={isReadOnly}
                               helperText={
                                 isSingleContainerApp
@@ -88,7 +90,7 @@ const ApplicationVolumeForm = ({
                             />
                           </FormGroup>
 
-                          {volume.imageRef && (
+                          {hasVolumeImageSource(volume) && (
                             <FormGroupWithHelperText label={t('Pull policy')} content={t('Pull policy for the image')}>
                               <FormSelect
                                 name={`${volumeFieldName}.imagePullPolicy`}
@@ -126,7 +128,7 @@ const ApplicationVolumeForm = ({
                   onClick={() => {
                     arrayHelpers.push({
                       name: '',
-                      imageRef: '',
+                      imageSpec: { image: '' },
                       imagePullPolicy: ImagePullPolicy.PullIfNotPresent,
                       mountPath: '',
                     });

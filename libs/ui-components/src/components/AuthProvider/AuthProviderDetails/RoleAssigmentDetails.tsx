@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Label, LabelGroup } from '@patternfly/react-core';
 
-import { AuthRoleAssignment } from '@flightctl/types';
+import { type AuthRoleAssignment } from '@flightctl/types';
 import { getAssignmentTypeLabel } from '../CreateAuthProvider/utils';
 import { useTranslation } from '../../../hooks/useTranslation';
 import {

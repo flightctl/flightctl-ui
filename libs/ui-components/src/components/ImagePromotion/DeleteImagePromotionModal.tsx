@@ -6,7 +6,7 @@ import FlightCtlModal from '@flightctl/ui-components/src/components/common/Fligh
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
 import { getErrorMessage } from '../../utils/error';
-import { ImagePromotion } from '@flightctl/types/imagebuilder';
+import { type ImagePromotion } from '@flightctl/types/imagebuilder';
 
 const DeleteImagePromotionModal = ({
   promotion,

@@ -1,4 +1,9 @@
-import { CatalogItem, CatalogItemArtifactType, CatalogItemVersion } from '@flightctl/types/alpha';
+import {
+  type CatalogItem,
+  CatalogItemArtifactType,
+  CatalogItemType,
+  type CatalogItemVersion,
+} from '@flightctl/types/alpha';
 import {
   Alert,
   Button,
@@ -19,37 +24,40 @@ import {
 } from '@patternfly/react-core';
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import * as React from 'react';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type FormikErrors, useFormikContext } from 'formik';
 import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
+import type { ApplicationProviderSpec } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import RadioField from '../../../form/RadioField';
 import FormSelect from '../../../form/FormSelect';
-import { PermissionCheck, usePermissionsContext } from '../../../common/PermissionsContext';
+import { type PermissionCheck, usePermissionsContext } from '../../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../../types/rbac';
 import { useFleets } from '../../../Fleet/useFleets';
 import { useDevicesPaginated } from '../../../Device/DevicesPage/useDevices';
 import { applyInitialConfig, getInitialAppConfig } from '../utils';
-import { InstallAppFormik, InstallSpecFormik, TargetPickerFormik } from '../types';
+import { type InstallAppFormik, type InstallSpecFormik, type TargetPickerFormik } from '../types';
 import WithTooltip from '../../../common/WithTooltip';
-import { getFullContainerURI } from '../../utils';
+import { getFullContainerURI } from '../../../../utils/catalog';
 
 type VersionDropdownProps = {
   catalogItem: CatalogItem;
   versions: CatalogItemVersion[];
+  /** When editing an installed app, keep its config (volumes, env, etc.) across version changes. */
+  existingApp?: ApplicationProviderSpec;
 };
 
-export const VersionDropdown = ({ catalogItem, versions }: VersionDropdownProps) => {
+export const VersionDropdown = ({ catalogItem, versions, existingApp }: VersionDropdownProps) => {
   const { setFieldValue } = useFormikContext<InstallSpecFormik>();
   const { t } = useTranslation();
   return (
     <FormSelect
       name="version"
       onChange={(val) => {
-        const appConfig = getInitialAppConfig(catalogItem, val);
+        const appConfig = getInitialAppConfig(catalogItem, val, existingApp);
         applyInitialConfig(setFieldValue, appConfig);
       }}
       items={versions.reduce((acc, v) => {
@@ -203,7 +211,7 @@ const getFleetDisabledReason = (
     return t('You do not have permissions to edit fleets');
   }
   if (size === 0) {
-    return t('No fleet is available');
+    return t('No fleet eligible for catalog deployment is available');
   }
   if (!hasContainer) {
     return t('Container artifact not available');
@@ -239,13 +247,12 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
   const deviceRadioRef = React.useRef<HTMLSpanElement>(null);
   const newDeviceRadioRef = React.useRef<HTMLSpanElement>(null);
 
-  const { fleets, isLoading: fleetsLoading } = useFleets({});
+  const { isLoading: fleetsLoading, pagination: fleetPagination } = useFleets({ onlyUnmanaged: true });
   const { devices, isLoading: devicesLoading } = useDevicesPaginated({
-    onlyDecommissioned: false,
-    onlyFleetless: true,
+    excludePackageMode: catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS,
   });
 
-  const unmanagedFleetsCount = fleets.filter((f) => !f.metadata?.owner).length;
+  const eligibleFleetsCount = fleetPagination.itemCount;
 
   const hasContainer = catalogItem.spec.versions.some(
     (v) => v.version === values.version && v.references[CatalogItemArtifactType.CatalogItemArtifactTypeContainer],
@@ -254,7 +261,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
   const fleetDisabledReason = getFleetDisabledReason(t, {
     canEdit: canEditFleet,
     canList: canListFleet,
-    size: unmanagedFleetsCount,
+    size: eligibleFleetsCount,
     hasContainer,
   });
 
@@ -308,7 +315,9 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                         name="target"
                         checkedValue="fleet"
                         label={<span ref={fleetRadioRef}>{t('Existing Fleet')}</span>}
-                        description={t('Deploy to all devices in a fleet')}
+                        description={t(
+                          'Deploy to all devices in a fleet. Fleets managed by a resource sync are excluded.',
+                        )}
                         isDisabled={!!fleetDisabledReason}
                       />
                     </WithTooltip>
@@ -324,7 +333,13 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                         name="target"
                         checkedValue="device"
                         label={<span ref={deviceRadioRef}>{t('Existing Device')}</span>}
-                        description={t('Deploy to a single fleetless device')}
+                        description={
+                          catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS
+                            ? t(
+                                'Deploy to a single fleetless device. Devices using package-based OS management are excluded.',
+                              )
+                            : t('Deploy to a single fleetless device.')
+                        }
                         isDisabled={!!deviceDisabledReason}
                       />
                     </WithTooltip>

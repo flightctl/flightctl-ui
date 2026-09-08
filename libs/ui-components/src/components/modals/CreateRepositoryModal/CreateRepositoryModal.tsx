@@ -2,7 +2,7 @@ import * as React from 'react';
 import { ModalBody, ModalHeader } from '@patternfly/react-core';
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
-import { RepoSpecType, Repository } from '@flightctl/types';
+import { type RepoSpecType, type Repository } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import CreateRepositoryForm from '../../Repository/CreateRepository/CreateRepositoryForm';
 
@@ -12,6 +12,7 @@ type CreateRepositoryModalProps = {
   onSuccess: (repository: Repository) => void;
   options?: {
     writeAccessOnly?: boolean;
+    enforcedRepoTypeMessage?: string;
   };
 };
 
@@ -27,6 +28,7 @@ const CreateRepositoryModal = ({ type, onClose, onSuccess, options }: CreateRepo
           options={{
             canUseResourceSyncs: false,
             allowedRepoTypes: [type],
+            enforcedRepoTypeMessage: options?.enforcedRepoTypeMessage,
             writeAccessOnly: options?.writeAccessOnly,
           }}
         />

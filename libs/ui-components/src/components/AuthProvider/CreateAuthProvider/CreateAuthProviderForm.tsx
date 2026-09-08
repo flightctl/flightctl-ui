@@ -15,7 +15,7 @@ import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icon
 import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 
-import { AuthProvider } from '@flightctl/types';
+import { type AuthProvider } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import NameField from '../../form/NameField';
@@ -24,7 +24,7 @@ import SwitchField from '../../form/SwitchField';
 import ListItemField from '../../form/ListItemField';
 import FlightCtlForm from '../../form/FlightCtlForm';
 import { getDnsSubdomainValidations } from '../../form/validations';
-import { AuthProviderFormValues, FieldValidationResult } from './types';
+import { type AuthProviderFormValues, type FieldValidationResult } from './types';
 import { ProviderType } from '../../../types/extraTypes';
 
 import { authProviderSchema, getAuthProvider, getAuthProviderPatches, getInitValues } from './utils';

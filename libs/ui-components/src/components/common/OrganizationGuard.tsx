@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Organization, OrganizationList } from '@flightctl/types';
+import { type Organization, type OrganizationList } from '@flightctl/types';
 import { useAppContext } from '../../hooks/useAppContext';
 import { getErrorMessage } from '../../utils/error';
 import { getCurrentOrganizationId, storeCurrentOrganizationId } from '../../utils/organizationStorage';

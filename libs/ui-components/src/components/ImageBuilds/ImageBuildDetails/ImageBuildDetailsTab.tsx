@@ -19,24 +19,25 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import { TFunction, Trans } from 'react-i18next';
+import { type TFunction, Trans } from 'react-i18next';
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
-import { BindingType, ImagePromotion } from '@flightctl/types/imagebuilder';
+import { BindingType, type ImagePromotion } from '@flightctl/types/imagebuilder';
 import ImagePromotionModal from '../../ImagePromotion/ImagePromotionModal';
 import ImagePromotionStatus from '../../ImagePromotion/ImagePromotionStatus';
 import { getDateDisplay } from '../../../utils/dates';
 import { getExportFormatLabel, getImageReference } from '../../../utils/imageBuilds';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { useAppContext } from '../../../hooks/useAppContext';
 import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 import { CERTIFICATE_VALIDITY_IN_YEARS } from '../../../constants';
-import { ImageBuildWithExports } from '../../../types/extraTypes';
+import { type ImageBuildWithExports } from '../../../types/extraTypes';
 import { useOciRegistriesContext } from '../OciRegistriesContext';
 import { ImageBuildStatusDisplay } from '../ImageBuildAndExportStatus';
 import ImageUrl from '../ImageUrl';
 import { getErrorMessage } from '../../../utils/error';
 import Table from '../../Table/Table';
-import { ActionsColumn, IAction, Tbody, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, type IAction, Tbody, Td, Tr } from '@patternfly/react-table';
 import TablePagination from '../../Table/TablePagination';
 import { getResourceId } from '../../../utils/resource';
 import DeleteImagePromotionModal from '../../ImagePromotion/DeleteImagePromotionModal';
@@ -202,7 +203,9 @@ const ImagePromotionsCard = ({
 
 const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExports }) => {
   const { t } = useTranslation();
+  const { settings } = useAppContext();
   const { checkPermissions } = usePermissionsContext();
+  const productName = settings.isRHEM ? t('Red Hat Edge Manager') : t('Flight Control');
   const [canListPromotions, canEditPromotions, canDeletePromotions] = checkPermissions(detailsPermissions);
   const srcRepositoryName = imageBuild.spec.source.repository;
   const dstRepositoryName = imageBuild.spec.destination.repository;
@@ -292,6 +295,12 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
                       </DescriptionListGroup>
                     </>
                   )}
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('{{ productName }} onboarding', { productName })}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      {imageBuild.spec.onboarding ? t('Enabled') : t('Disabled')}
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
                   {remoteAccessUsername && (
                     <DescriptionListGroup>
                       <DescriptionListTerm>{t('Remote access')}</DescriptionListTerm>

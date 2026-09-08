@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { TFunction, Trans } from 'react-i18next';
+import { type TFunction, Trans } from 'react-i18next';
 
-import { DeviceDecommissionTargetType } from '@flightctl/types';
-import { ListAction, ListActionProps, ListActionResult } from './types';
+import { type DeviceDecommissionTargetType } from '@flightctl/types';
+import { type ListAction, type ListActionProps, type ListActionResult } from './types';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { getDisabledTooltipProps } from '../../utils/tooltip';

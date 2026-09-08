@@ -1,16 +1,16 @@
 import {
   ConditionStatus,
-  DeviceList,
-  EnrollmentRequestList,
-  FleetList,
-  ObjectMeta,
-  RepositoryList,
-  ResourceSyncList,
+  type DeviceList,
+  type EnrollmentRequestList,
+  type FleetList,
+  type ObjectMeta,
+  type RepositoryList,
+  type ResourceSyncList,
 } from '@flightctl/types';
-import { ImageBuildList, ImagePromotionList } from '@flightctl/types/imagebuilder';
-import { CatalogItemList, VulnerabilityGroupList, VulnerabilityList } from '@flightctl/types/alpha';
+import { type ImageBuildList, type ImagePromotionList } from '@flightctl/types/imagebuilder';
+import { type CatalogItemList, type VulnerabilityGroupList, type VulnerabilityList } from '@flightctl/types/alpha';
 
-import { AnnotationType, GenericCondition, GenericConditionType } from '../types/extraTypes';
+import { type AnnotationType, type GenericCondition, type GenericConditionType } from '../types/extraTypes';
 
 export type ApiList =
   | EnrollmentRequestList

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ChartContainer, ChartDonut } from '@patternfly/react-charts/victory';
 import { Content, ContentVariants, Flex, FlexItem, Stack, StackItem } from '@patternfly/react-core';
-import { Link, LinkProps } from '../../hooks/useNavigate';
+import { Link, type LinkProps } from '../../hooks/useNavigate';
 import LabelWithHelperText from '../common/WithHelperText';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getDefaultStatusColor } from '../../utils/status/common';

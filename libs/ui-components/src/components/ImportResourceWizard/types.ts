@@ -1,7 +1,7 @@
-import { ResourceSyncType } from '@flightctl/types';
+import { type ResourceSyncType } from '@flightctl/types';
 
-import { RepositoryFormValues } from '../Repository/CreateRepository/types';
-import { Route } from '../../hooks/useNavigate';
+import { type RepositoryFormValues } from '../Repository/CreateRepository/types';
+import { type Route } from '../../hooks/useNavigate';
 
 export type ImportResourceFormValues = RepositoryFormValues & {
   useExistingRepo: boolean;

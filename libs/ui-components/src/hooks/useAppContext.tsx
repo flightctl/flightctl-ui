@@ -4,7 +4,7 @@ import {
   NavLink,
   Navigate,
   Route,
-  NavigateFunction as RouterNavigateFunction,
+  type NavigateFunction as RouterNavigateFunction,
   Routes,
   useBlocker,
   useLocation,
@@ -12,7 +12,7 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
-import { PatchRequest } from '@flightctl/types';
+import { type PatchRequest } from '@flightctl/types';
 import { ROUTE } from './useNavigate';
 
 export const appRoutes = {
@@ -84,6 +84,7 @@ export type AppContextProps = {
   fetch: {
     apiProxy: string;
     getWsEndpoint: (deviceId: string) => string;
+    getAppConsoleWsEndpoint: (deviceId: string, appName: string) => string;
     get: <R>(kind: string, abortSignal?: AbortSignal) => Promise<R>;
     post: <TRequest, TResponse = TRequest>(
       kind: string,
@@ -123,6 +124,7 @@ export const AppContext = React.createContext<AppContextProps>({
   fetch: {
     apiProxy: '',
     getWsEndpoint: () => '',
+    getAppConsoleWsEndpoint: () => '',
     get: async () => ({}) as any,
     post: async () => ({}) as any,
     put: async () => ({}) as any,

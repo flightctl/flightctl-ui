@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { ImagePromotion, ImagePromotionList } from '@flightctl/types/imagebuilder';
+import { type ImagePromotion, type ImagePromotionList } from '@flightctl/types/imagebuilder';
 
-import { PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
+import { type PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
 import { PAGE_SIZE } from '../../constants';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { RESOURCE, VERB } from '../../types/rbac';

@@ -1,11 +1,16 @@
 import * as React from 'react';
 import { useDebounce } from 'use-debounce';
 
-import { ImageBuild, ImageBuildList, ImagePromotion, ImagePromotionList } from '@flightctl/types/imagebuilder';
-import { ImageBuildWithExports } from '../../types/extraTypes';
+import {
+  type ImageBuild,
+  type ImageBuildList,
+  type ImagePromotion,
+  type ImagePromotionList,
+} from '@flightctl/types/imagebuilder';
+import { type ImageBuildWithExports } from '../../types/extraTypes';
 import { useAppContext } from '../../hooks/useAppContext';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
+import { type PaginationDetails, useTablePagination } from '../../hooks/useTablePagination';
 import { PAGE_SIZE } from '../../constants';
 import { toImageBuildWithExports } from './CreateImageBuildWizard/utils';
 import { getLatestPromotion } from './NewVersionImageBuildWizard/utils';

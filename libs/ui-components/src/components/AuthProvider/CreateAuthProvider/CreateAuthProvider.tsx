@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Alert, Breadcrumb, BreadcrumbItem, Bullseye, PageSection, Spinner, Title } from '@patternfly/react-core';
 
-import { AuthProvider } from '@flightctl/types';
+import { type AuthProvider } from '@flightctl/types';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';

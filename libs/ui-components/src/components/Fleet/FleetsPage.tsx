@@ -15,7 +15,7 @@ import {
 } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 import { TopologyIcon } from '@patternfly/react-icons/dist/js/icons/topology-icon';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';

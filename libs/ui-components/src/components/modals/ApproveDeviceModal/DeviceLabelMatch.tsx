@@ -6,7 +6,7 @@ import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/e
 import { InfoCircleIcon } from '@patternfly/react-icons/dist/js/icons/info-circle-icon';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import { DeviceMatchStatus } from '../../../hooks/useDeviceLabelMatch';
+import { type DeviceMatchStatus } from '../../../hooks/useDeviceLabelMatch';
 import { StatusDisplayContent } from '../../Status/StatusDisplay';
 
 export const DeviceLabelMatch = ({

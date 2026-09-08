@@ -19,8 +19,8 @@ export class CreateFleetWizardPage {
     return cy.get('input[aria-label="Fleet name"]');
   }
 
-  openFleetRichValidationsPopover() {
-    return cy.get('button[aria-label="Validation"').click();
+  toggleFleetRichValidationsPopover() {
+    return cy.get('[data-testid="rich-validation-field-name-validation-button"]').click();
   }
 
   get newFleetRichValidationsPopoverError() {

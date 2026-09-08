@@ -4,19 +4,24 @@ import { Formik } from 'formik';
 import * as React from 'react';
 
 import ImagePromotionForm from './ImagePromotionForm';
-import { ImagePromotionFormValues } from './types';
+import { type ImagePromotionFormValues } from './types';
 import { defaultInitialValues, getEditInitialValues, getInitialValues } from './utils';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { useCatalogItem } from '../Catalog/useCatalogs';
-import { ExportFormatType, ImageExport, ImagePromotion, ImagePromotionList } from '@flightctl/types/imagebuilder';
-import { PatchRequest } from '@flightctl/types';
+import { useCatalogItemsLookup } from '../Catalog/useCatalogItemsLookup';
+import {
+  type ExportFormatType,
+  type ImageExport,
+  type ImagePromotion,
+  type ImagePromotionList,
+} from '@flightctl/types/imagebuilder';
+import { type PatchRequest } from '@flightctl/types';
 import { getErrorMessage } from '../../utils/error';
 import { getImagePromotionValidationSchema } from './utils';
 import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from '../common/PermissionsContext';
-import { ImageBuildWithExports } from '../../types/extraTypes';
+import { type ImageBuildWithExports } from '../../types/extraTypes';
 import { getImagePromotion } from '../ImageBuilds/NewVersionImageBuildWizard/utils';
 
 const NEW_VERSION_FROM_ANNOTATION = 'flightctl.io/new-version-from';
@@ -62,7 +67,10 @@ const ImagePromotionFormContainer = ({
   const isEdit = !!imagePromotion;
 
   const target = parentPromotion?.spec.target;
-  const [catalogItem, catalogItemLoading] = useCatalogItem(target?.catalogName, target?.catalogItemName);
+  const hasCatalogParams = target?.catalogName && target?.catalogItemName;
+  const { getItem, isLoading: catalogItemLoading } = useCatalogItemsLookup(
+    hasCatalogParams ? [{ catalog: target.catalogName, item: target.catalogItemName }] : [],
+  );
 
   if (parentPromotion && catalogItemLoading) {
     return <LoadingModal onClose={onClose} />;
@@ -72,6 +80,7 @@ const ImagePromotionFormContainer = ({
   if (imagePromotion) {
     initialValues = getEditInitialValues(imagePromotion);
   } else if (parentPromotion) {
+    const catalogItem = hasCatalogParams ? getItem(target.catalogName, target.catalogItemName) : undefined;
     initialValues = {
       ...getInitialValues(catalogItem),
       exportFormats: imageBuild.imageExports.filter(Boolean).map((ie) => (ie as ImageExport).spec.format),

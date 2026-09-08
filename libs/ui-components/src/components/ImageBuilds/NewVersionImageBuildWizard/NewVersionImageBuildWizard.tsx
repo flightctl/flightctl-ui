@@ -9,18 +9,18 @@ import {
   Title,
   Wizard,
   WizardStep,
-  WizardStepType,
+  type WizardStepType,
 } from '@patternfly/react-core';
-import { Formik, FormikErrors } from 'formik';
+import { Formik, type FormikErrors } from 'formik';
 
 import {
-  ExportFormatType,
-  ImageBuild,
-  ImageExport,
-  ImagePromotion,
-  ImagePromotionList,
+  type ExportFormatType,
+  type ImageBuild,
+  type ImageExport,
+  type ImagePromotion,
+  type ImagePromotionList,
 } from '@flightctl/types/imagebuilder';
-import { CatalogItem } from '@flightctl/types/alpha';
+import { type CatalogItem } from '@flightctl/types/alpha';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useFetch } from '../../../hooks/useFetch';
@@ -33,12 +33,12 @@ import ErrorBoundary from '../../common/ErrorBoundary';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { OciRegistriesContextProvider, useOciRegistriesContext } from '../OciRegistriesContext';
-import { useCatalogItem } from '../../Catalog/useCatalogs';
+import { useCatalogItemsLookup } from '../../Catalog/useCatalogItemsLookup';
 import NewVersionStep, { isNewVersionStepValid, newVersionStepId } from './steps/NewVersionStep';
 import CatalogStep, { catalogStepId, isCatalogStepValid } from '../CreateImageBuildWizard/steps/CatalogStep';
 import ReviewStep, { reviewStepId } from './steps/ReviewStep';
 import NewVersionImageBuildWizardFooter from './NewVersionImageBuildWizardFooter';
-import { NewVersionWizardFormValues } from './types';
+import { type NewVersionWizardFormValues } from './types';
 import {
   bumpImageTag,
   getCatalogInitialValues,
@@ -46,11 +46,11 @@ import {
   getLatestPromotion,
   getValidationSchema,
 } from './utils';
-import { ImageBuildWithExports } from '../../../types/extraTypes';
+import { type ImageBuildWithExports } from '../../../types/extraTypes';
 import { useImageBuild } from '../useImageBuilds';
 import { getImageExportResources } from '../CreateImageBuildWizard/utils';
 import { isPromiseRejected } from '../../../types/typeUtils';
-import { ImageBuildWizardError } from '../CreateImageBuildWizard/types';
+import { type ImageBuildWizardError } from '../CreateImageBuildWizard/types';
 import { isWizardStepDisabled } from '../../../utils/wizards';
 
 const orderedIds = [newVersionStepId, catalogStepId, reviewStepId];
@@ -237,21 +237,27 @@ const NewVersionImageBuildWizard = () => {
 
   const activePromotion = getLatestPromotion(promotionList?.items || []);
   const promotionTarget = activePromotion?.spec.target;
-
-  const [catalogItem, , catalogItemError] = useCatalogItem(
-    promotionTarget?.catalogName,
-    promotionTarget?.catalogItemName,
+  const hasCatalogParams = promotionTarget && promotionTarget.catalogName && promotionTarget.catalogItemName;
+  const {
+    getItem,
+    isLoading: catalogItemLoading,
+    error: catalogItemError,
+  } = useCatalogItemsLookup(
+    hasCatalogParams ? [{ catalog: promotionTarget.catalogName, item: promotionTarget.catalogItemName }] : [],
   );
+  const catalogItem = hasCatalogParams
+    ? getItem(promotionTarget.catalogName, promotionTarget.catalogItemName)
+    : undefined;
 
-  // useFetchPeriodically never resets isLoading back to true when the endpoint changes,
-  // so we can't rely on the loading flag. Instead, wait until we have the item or an error.
   const isLoading =
     permissionsLoading ||
     imageBuildLoading ||
     registriesLoading ||
     (canListPromotions && promotionsLoading) ||
-    (!!activePromotion && !catalogItem && !catalogItemError);
-  const loadError = imageBuildError || registriesError || promotionsError;
+    (!!activePromotion && hasCatalogParams && catalogItemLoading) ||
+    (!!activePromotion && hasCatalogParams && !catalogItem && !catalogItemError);
+  const loadError =
+    imageBuildError || registriesError || promotionsError || (hasCatalogParams ? catalogItemError : undefined);
 
   return (
     <>

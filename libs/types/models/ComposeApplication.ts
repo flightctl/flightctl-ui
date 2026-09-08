@@ -5,7 +5,8 @@
 import type { ApplicationEnvVars } from './ApplicationEnvVars';
 import type { ApplicationProviderBase } from './ApplicationProviderBase';
 import type { ApplicationVolumeProviderSpec } from './ApplicationVolumeProviderSpec';
+import type { CatalogItemRefApplicationProviderSpec } from './CatalogItemRefApplicationProviderSpec';
 import type { ImageApplicationProviderSpec } from './ImageApplicationProviderSpec';
 import type { InlineApplicationProviderSpec } from './InlineApplicationProviderSpec';
-export type ComposeApplication = (ApplicationProviderBase & ApplicationEnvVars & ApplicationVolumeProviderSpec & (ImageApplicationProviderSpec | InlineApplicationProviderSpec));
+export type ComposeApplication = (ApplicationProviderBase & ApplicationEnvVars & ApplicationVolumeProviderSpec & (ImageApplicationProviderSpec | CatalogItemRefApplicationProviderSpec | InlineApplicationProviderSpec));
 

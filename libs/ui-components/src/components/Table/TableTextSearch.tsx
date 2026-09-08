@@ -1,5 +1,12 @@
 import * as React from 'react';
-import { HelperText, HelperTextItem, SearchInput, SearchInputProps, Stack, StackItem } from '@patternfly/react-core';
+import {
+  HelperText,
+  HelperTextItem,
+  SearchInput,
+  type SearchInputProps,
+  Stack,
+  StackItem,
+} from '@patternfly/react-core';
 
 import { useTranslation } from '../../hooks/useTranslation';
 

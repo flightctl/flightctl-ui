@@ -13,7 +13,7 @@ import {
   Title,
 } from '@patternfly/react-core';
 
-import { Repository, ResourceSync, ResourceSyncList } from '@flightctl/types';
+import { type Repository, type ResourceSync, type ResourceSyncList } from '@flightctl/types';
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
@@ -25,7 +25,7 @@ import { RESOURCE, VERB } from '../../../types/rbac';
 import { getErrorMessage } from '../../../utils/error';
 import { commonQueries } from '../../../utils/query';
 import PageWithPermissions from '../../common/PageWithPermissions';
-import CreateRepositoryForm, { CreateRepositoryFormProps } from './CreateRepositoryForm';
+import CreateRepositoryForm, { type CreateRepositoryFormProps } from './CreateRepositoryForm';
 
 const CreateRepository = () => {
   const { t } = useTranslation();

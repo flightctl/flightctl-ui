@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Flex, FlexItem } from '@patternfly/react-core';
 
-import { DeviceSummaryStatusType, DevicesSummary } from '@flightctl/types';
+import { DeviceSummaryStatusType, type DevicesSummary } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { FilterSearchParams, getOverviewDeviceStatusItems } from '../../../utils/status/devices';
 import { getSystemUpdateStatusItems } from '../../../utils/status/system';

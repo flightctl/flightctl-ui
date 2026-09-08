@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 import {
   Button,
   Flex,
@@ -19,7 +19,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import {
   DEVICE_LOG_BASE_PATH,
   DeviceLogCategory,
-  DeviceLogSearchParams,
+  type DeviceLogSearchParams,
   getDeviceLogsFormResetValues,
 } from '../../../utils/deviceLogs';
 import FormSelect from '../../form/FormSelect';

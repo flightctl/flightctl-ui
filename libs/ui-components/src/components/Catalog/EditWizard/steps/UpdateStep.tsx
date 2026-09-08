@@ -13,21 +13,22 @@ import {
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import ArrowRightIcon from '@patternfly/react-icons/dist/js/icons/arrow-right-icon';
 import * as React from 'react';
-import { FormikErrors, useFormikContext } from 'formik';
-import { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
+import { type FormikErrors, useFormikContext } from 'formik';
+import { type CatalogItem, type CatalogItemVersion } from '@flightctl/types/alpha';
 import semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 
+import type { ApplicationProviderSpec } from '@flightctl/types';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelect from '../../../form/FormSelect';
-import { InstallSpecFormik } from '../../InstallWizard/types';
+import { type InstallSpecFormik } from '../../InstallWizard/types';
 import { StatusDisplayContent } from '../../../Status/StatusDisplay';
 import { InstallSpec, VersionDropdown } from '../../InstallWizard/steps/SpecificationsStep';
 import UpdateGraph from './UpdateGraph';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import { applyInitialConfig, getInitialAppConfig } from '../../InstallWizard/utils';
-import { getUpdates } from '../../utils';
+import { getUpdates } from '../../../../utils/catalog';
 
 export const isUpdateStepValid = (errors: FormikErrors<InstallSpecFormik>) => {
   return !errors.version && !errors.channel;
@@ -37,9 +38,10 @@ type UpdateStepProps = {
   currentVersion: CatalogItemVersion;
   catalogItem: CatalogItem;
   isEdit: boolean;
+  existingApp?: ApplicationProviderSpec;
 };
 
-const UpdateStep = ({ currentVersion, catalogItem, isEdit }: UpdateStepProps) => {
+const UpdateStep = ({ currentVersion, catalogItem, isEdit, existingApp }: UpdateStepProps) => {
   const [showReadme, setShowReadme] = React.useState(false);
   const { t } = useTranslation();
   const { values, initialValues, setFieldValue } = useFormikContext<InstallSpecFormik>();
@@ -89,7 +91,8 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit }: UpdateStepProps) =>
                         )[0]?.version;
                         const newVersion = latestVersion || currentVersion.version;
                         setFieldValue('version', newVersion);
-                        const appConfig = getInitialAppConfig(catalogItem, newVersion);
+                        // Keep the current app config when the channel changes.
+                        const appConfig = getInitialAppConfig(catalogItem, newVersion, existingApp);
                         applyInitialConfig(setFieldValue, appConfig);
                       }}
                     />
@@ -115,7 +118,11 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit }: UpdateStepProps) =>
                   </GridItem>
                   <GridItem span={4}>
                     {updates.length ? (
-                      <VersionDropdown catalogItem={catalogItem} versions={[...updates, currentVersion]} />
+                      <VersionDropdown
+                        catalogItem={catalogItem}
+                        versions={[...updates, currentVersion]}
+                        existingApp={existingApp}
+                      />
                     ) : (
                       <StatusDisplayContent level="success" label={t('Up to date')} />
                     )}

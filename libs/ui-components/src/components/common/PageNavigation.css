@@ -5,4 +5,10 @@
 
 .fctl-subnav_toolbar {
   justify-content: flex-end;
+  align-items: center;
+}
+
+/* Align single-org label vertically within the toolbar */
+.fctl-subnav_organization {
+  align-self: center;
 }

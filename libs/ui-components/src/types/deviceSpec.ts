@@ -1,21 +1,26 @@
 import {
-  ApplicationProviderSpec,
-  ComposeApplication,
-  ConfigProviderSpec,
-  ContainerApplication,
-  DisruptionBudget,
-  GitConfigProviderSpec,
-  HelmApplication,
-  HttpConfigProviderSpec,
-  ImageApplicationProviderSpec,
-  ImagePullPolicy,
-  InlineApplicationProviderSpec,
-  InlineConfigProviderSpec,
-  KubernetesSecretProviderSpec,
-  QuadletApplication,
+  AppType,
+  type ApplicationProviderSpec,
+  type CatalogItemRefSpec,
+  type ComposeApplication,
+  type ConfigProviderSpec,
+  type ContainerApplication,
+  type DisruptionBudget,
+  type GitConfigProviderSpec,
+  type HelmApplication,
+  type HttpConfigProviderSpec,
+  type ImageApplicationProviderSpec,
+  type ImageOrCatalogItemRefSpec,
+  type InlineApplicationProviderSpec,
+  type InlineConfigProviderSpec,
+  type KubernetesSecretProviderSpec,
+  type QuadletApplication,
+  type VmApplication,
 } from '@flightctl/types';
-import { FlightCtlLabel } from './extraTypes';
-import { UpdateScheduleMode } from '../utils/time';
+import { type FlightCtlLabel } from './extraTypes';
+import { type UpdateScheduleMode } from '../utils/time';
+import { formatCatalogItemRef } from '../utils/catalog';
+import type { ApplicationVolumeForm } from '../utils/volumes';
 
 // At the moment the "root" user is the default user when no user is specified.
 export const RUN_AS_ROOT_USER = 'root';
@@ -66,20 +71,34 @@ export const isRepoConfig = (config: ConfigSourceProvider): config is RepoConfig
 export const isImageVariantApp = (
   app: ApplicationProviderSpec,
 ): app is ApplicationProviderSpec & ImageApplicationProviderSpec => 'image' in app;
+
+export const isCatalogItemRefVariantApp = (
+  app: ApplicationProviderSpec,
+): app is ApplicationProviderSpec & { catalogItemRef: CatalogItemRefSpec } =>
+  'catalogItemRef' in app && !!(app as { catalogItemRef?: CatalogItemRefSpec }).catalogItemRef;
+
 export const isInlineVariantApp = (
   app: ApplicationProviderSpec,
 ): app is ApplicationProviderSpec & InlineApplicationProviderSpec => 'inline' in app;
 
-export type ApplicationVolumeForm = {
-  name: string;
-  imageRef: string;
-  imagePullPolicy: ImagePullPolicy;
-  mountPath: string;
-};
+export const isVmAppSpec = (app: ApplicationProviderSpec): app is VmApplication => app.appType === AppType.AppTypeVm;
+
+export const isHelmAppSpec = (app: ApplicationProviderSpec): app is HelmApplication =>
+  app.appType === AppType.AppTypeHelm;
+
+export const isQuadletAppSpec = (app: ApplicationProviderSpec): app is QuadletApplication =>
+  app.appType === AppType.AppTypeQuadlet;
+
+export const isComposeAppSpec = (app: ApplicationProviderSpec): app is ComposeApplication =>
+  app.appType === AppType.AppTypeCompose;
+
+export const isContainerAppSpec = (app: ApplicationProviderSpec): app is ContainerApplication =>
+  app.appType === AppType.AppTypeContainer;
 
 export type PortMapping = {
   hostPort: string;
-  containerPort: string;
+  targetPort: string;
+  protocol?: string;
 };
 
 export type VariablesForm = { name: string; value: string }[];
@@ -88,12 +107,13 @@ export type InlineFileForm = { path: string; content?: string; base64?: boolean 
 
 type InlineOrImageVariantForm = {
   specType: AppSpecType;
-  image: string;
+  imageSpec: ImageOrCatalogItemRefSpec;
   files: InlineFileForm[];
 };
 
 export type SingleContainerAppForm = Omit<ContainerApplication, 'ports' | 'resources' | 'envVars' | 'volumes'> & {
   specType: AppSpecType.OCI_IMAGE;
+  imageSpec: ImageOrCatalogItemRefSpec;
   ports: PortMapping[];
   cpuLimit: string;
   memoryLimit: string;
@@ -103,29 +123,63 @@ export type SingleContainerAppForm = Omit<ContainerApplication, 'ports' | 'resou
 
 export type HelmAppForm = Omit<HelmApplication, 'values'> & {
   specType: AppSpecType.OCI_IMAGE;
+  imageSpec: ImageOrCatalogItemRefSpec;
   valuesYaml?: string;
   valuesFiles: string[];
 };
 
-export type QuadletAppForm = Omit<QuadletApplication, 'envVars' | 'volumes' | 'image' | 'inline'> &
+export type QuadletAppForm = Omit<QuadletApplication, 'envVars' | 'volumes' | 'inline'> &
   InlineOrImageVariantForm & {
     variables: VariablesForm;
     volumes: ApplicationVolumeForm[];
   };
 
-export type ComposeAppForm = Omit<ComposeApplication, 'envVars' | 'volumes' | 'image' | 'inline'> &
+export type ComposeAppForm = Omit<ComposeApplication, 'envVars' | 'volumes' | 'inline'> &
   InlineOrImageVariantForm & {
     variables: VariablesForm;
     volumes: ApplicationVolumeForm[];
   };
 
-export type AppForm = SingleContainerAppForm | HelmAppForm | QuadletAppForm | ComposeAppForm;
+export type VmConfigMode = 'form' | 'yaml';
+
+export type VmAppForm = {
+  appType: AppType.AppTypeVm;
+  name: string;
+  specType: AppSpecType.INLINE;
+  configMode: VmConfigMode;
+  // Full vm.yaml file that can be edited in YAML mode; independent from form field
+  vmYaml: string;
+  // Whether this app was loaded from an existing device/fleet spec (not newly added in the form).
+  isExisting: boolean;
+  // Whether vm.yaml has settings which are not supported by the guided form.
+  // Only meaningful for existing applications.
+  hasAdvancedVmSettings: boolean;
+  diskImage: string;
+  cpuCores: number;
+  memory: string;
+  enableSshKey: boolean;
+  sshPublicKey: string;
+  enablePassword: boolean;
+  password: string;
+  cloudInit: string;
+  // Protocol is mandatory for VM publish ports
+  publishPorts: Required<PortMapping>[];
+};
+
+export type AppForm = SingleContainerAppForm | HelmAppForm | QuadletAppForm | ComposeAppForm | VmAppForm;
 
 const hasTemplateVariables = (str: string) => /{{.+?}}/.test(str);
 
-export const getAppIdentifier = (app: AppForm | ApplicationProviderSpec): string => {
+export const isCatalogAppForm = (app: AppForm): boolean =>
+  app.specType === AppSpecType.OCI_IMAGE && Boolean(app.imageSpec?.catalogItemRef);
+
+export const getAppIdentifier = (app: AppForm): string => {
   if (app.name) return app.name;
-  if ('image' in app && app.image) return app.image;
+  // Name is mandatory for all apps, except when the apps have an image which then becomes the ID.
+  if ('imageSpec' in app) {
+    const catalogItemRef = app.imageSpec.catalogItemRef;
+    return catalogItemRef ? formatCatalogItemRef(catalogItemRef) : app.imageSpec.image || '';
+  }
   return '';
 };
 
@@ -204,7 +258,7 @@ export type SystemdUnitFormValue = {
 };
 
 export type DeviceSpecConfigFormValues = {
-  osImage?: string;
+  osSpec?: ImageOrCatalogItemRefSpec;
   configTemplates: SpecConfigTemplate[];
   applications: AppForm[];
   systemdUnits: SystemdUnitFormValue[];

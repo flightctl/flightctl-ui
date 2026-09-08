@@ -1,6 +1,11 @@
-import { type DeviceUpdatePolicySpec, FleetSpec, Percentage } from '@flightctl/types';
+import { type DeviceUpdatePolicySpec, type FleetSpec, type Percentage } from '@flightctl/types';
 
-import { BatchForm, BatchLimitType, RolloutPolicyForm, UpdatePolicyForm } from './../../../types/deviceSpec';
+import {
+  type BatchForm,
+  BatchLimitType,
+  type RolloutPolicyForm,
+  type UpdatePolicyForm,
+} from './../../../types/deviceSpec';
 import { fromAPILabel } from '../../../utils/labels';
 import * as timeUtils from '../../../utils/time';
 import { schedulesAreEqual } from '../../../utils/patch';

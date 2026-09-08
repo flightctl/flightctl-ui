@@ -15,7 +15,7 @@ import FlightCtlModal from '@flightctl/ui-components/src/components/common/Fligh
 
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
-import { ImageBuild } from '@flightctl/types/imagebuilder';
+import { type ImageBuild } from '@flightctl/types/imagebuilder';
 import { getErrorMessage } from '../../../../utils/error';
 import { useFetch } from '../../../../hooks/useFetch';
 import { useTranslation } from '../../../../hooks/useTranslation';

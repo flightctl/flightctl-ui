@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  Bullseye,
   CardBody,
   CardTitle,
   DescriptionList,
@@ -10,10 +11,10 @@ import {
   GridItem,
   Stack,
   StackItem,
-  gridSpans,
+  type gridSpans,
 } from '@patternfly/react-core';
 
-import { Device } from '@flightctl/types';
+import { type Device } from '@flightctl/types';
 import { isDeviceEnrolled } from '../../../utils/devices';
 
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -47,7 +48,7 @@ const EnrolledDeviceDetails = ({
   children,
 }: React.PropsWithChildren<DeviceDetailsTabProps>) => {
   const { t } = useTranslation();
-  const devSystemInfo = useDeviceSpecSystemInfo(device.status.systemInfo, t);
+  const devSystemInfo = useDeviceSpecSystemInfo(device.status, t);
   const [vulnerabilitiesEnabled, canListVulnerabilities] = useVulnerabilitiesEnabled();
   const showVulnerabilities = vulnerabilitiesEnabled && canListVulnerabilities;
 
@@ -93,7 +94,7 @@ const EnrolledDeviceDetails = ({
               </GridItem>
             </Grid>
             {devSystemInfo.baseInfo.length > 0 && (
-              <Grid hasGutter>
+              <Grid hasGutter className="pf-v6-u-pt-md">
                 {devSystemInfo.baseInfo.map((systemInfo, index) => {
                   const sizes: gridSpans[] = hasExtraColumn ? [2, 2, 2, 6] : [3, 3, 6];
                   const colSize = sizes[index % (hasExtraColumn ? 4 : 3)];
@@ -146,8 +147,8 @@ const EnrolledDeviceDetails = ({
           <DeviceVulnerabilities deviceId={device.metadata.name as string} />
         </GridItem>
       )}
-      <GridItem md={12} lg={6}>
-        <DeviceApplications device={device} />
+      <GridItem md={12}>
+        <DeviceApplications device={device} refetch={refetch} />
       </GridItem>
       <GridItem md={12} lg={6}>
         <DeviceSystemdUnits device={device} />
@@ -194,7 +195,12 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
         <ConfigurationsContent device={device} />
       </GridItem>
       <GridItem md={12} lg={6}>
-        <DeviceApplications device={device} />
+        <DetailsPageCard>
+          <CardTitle>{t('Applications')}</CardTitle>
+          <CardBody>
+            <Bullseye>{t('Application status is not available for decommissioned devices')}</Bullseye>
+          </CardBody>
+        </DetailsPageCard>
       </GridItem>
     </Grid>
   );

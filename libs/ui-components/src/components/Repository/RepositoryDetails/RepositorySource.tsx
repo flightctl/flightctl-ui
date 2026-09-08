@@ -4,15 +4,15 @@ import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/exter
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 import {
-  GitConfigProviderSpec,
-  HttpConfigProviderSpec,
-  InlineConfigProviderSpec,
-  KubernetesSecretProviderSpec,
+  type GitConfigProviderSpec,
+  type HttpConfigProviderSpec,
+  type InlineConfigProviderSpec,
+  type KubernetesSecretProviderSpec,
 } from '@flightctl/types';
 import {
-  ConfigSourceProvider,
+  type ConfigSourceProvider,
   ConfigType,
-  RepoConfig,
+  type RepoConfig,
   getConfigFullRepoUrl,
   getRepoName,
   isHttpProviderSpec,

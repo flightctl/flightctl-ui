@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { FormGroup } from '@patternfly/react-core';
-import { FormikErrors } from 'formik';
+import { type FormikErrors } from 'formik';
 
-import { FleetFormValues } from '../../../../types/deviceSpec';
+import { type FleetFormValues } from '../../../../types/deviceSpec';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import NameField from '../../../form/NameField';
 import LabelsField from '../../../form/LabelsField';

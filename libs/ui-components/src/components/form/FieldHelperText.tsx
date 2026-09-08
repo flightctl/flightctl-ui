@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FieldMetaProps } from 'formik';
+import { type FieldMetaProps } from 'formik';
 
 import { FormHelperText, HelperText, HelperTextItem } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';

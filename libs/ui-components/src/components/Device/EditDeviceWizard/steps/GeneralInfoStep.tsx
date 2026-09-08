@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FormGroup } from '@patternfly/react-core';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type FormikErrors, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import useDeviceLabelMatch from '../../../../hooks/useDeviceLabelMatch';
@@ -9,7 +9,7 @@ import LabelsField from '../../../form/LabelsField';
 import RichValidationTextField from '../../../form/RichValidationTextField';
 import { getLabelValueValidations } from '../../../form/validations';
 import DeviceLabelMatch from '../../../modals/ApproveDeviceModal/DeviceLabelMatch';
-import { EditDeviceFormValues } from '../../../../types/deviceSpec';
+import { type EditDeviceFormValues } from '../../../../types/deviceSpec';
 
 export const generalInfoStepId = 'general-info';
 

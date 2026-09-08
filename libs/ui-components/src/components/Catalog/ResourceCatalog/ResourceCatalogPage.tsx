@@ -1,14 +1,14 @@
-import { DeviceSpec, PatchRequest } from '@flightctl/types';
+import { type DeviceSpec, type PatchRequest } from '@flightctl/types';
 import * as React from 'react';
 import { Stack, StackItem } from '@patternfly/react-core';
 
-import { CatalogItem } from '@flightctl/types/alpha';
-import { getRemoveAppPatches, getRemoveOsPatches } from '../../Catalog/utils';
+import type { CatalogItem } from '@flightctl/types/alpha';
+import { type SpecCatalogItemId, getRemoveAppPatches, getRemoveOsPatches } from '../../../utils/catalog';
+import { RESOURCE, VERB } from '../../../types/rbac';
+import { usePermissionsContext } from '../../common/PermissionsContext';
+import PageWithPermissions from '../../common/PageWithPermissions';
 import { CatalogPageContent } from '../../Catalog/CatalogPage';
 import InstalledSoftware from '../../Catalog/InstalledSoftware';
-import { usePermissionsContext } from '../../common/PermissionsContext';
-import { RESOURCE, VERB } from '../../../types/rbac';
-import PageWithPermissions from '../../common/PageWithPermissions';
 
 import './ResourceCatalogPage.css';
 
@@ -16,10 +16,10 @@ type ResourceCatalogPageProps = {
   specPath: string;
   canEdit: boolean;
   hasOwner?: boolean;
+  hasPackageMode?: boolean;
   spec: DeviceSpec | undefined;
-  currentLabels: Record<string, string> | undefined;
   onPatch: (allPatches: PatchRequest) => Promise<void>;
-  onEdit: (catalogId: string, catalogItemId: string, appName?: string) => void;
+  onEdit: (id: SpecCatalogItemId) => void;
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
 };
 
@@ -29,47 +29,53 @@ const catalogPagePermissions = [
 ];
 
 const ResourceCatalogPage = ({
-  currentLabels,
   spec,
   onPatch,
   specPath,
   canEdit,
+  hasPackageMode,
   hasOwner,
   onEdit,
   onInstall,
 }: ResourceCatalogPageProps) => {
   const { checkPermissions, loading } = usePermissionsContext();
   const [canListItems, canListCatalogs] = checkPermissions(catalogPagePermissions);
-  const onDeleteOs = async () => {
-    const allPatches = getRemoveOsPatches({ currentLabels, specPath });
-    await onPatch(allPatches);
-  };
 
-  const onDeleteApp = async (appName: string) => {
-    const allPatches = getRemoveAppPatches({
-      appName,
-      currentApps: spec?.applications,
-      currentLabels,
-      specPath,
-    });
-    await onPatch(allPatches);
+  const onDeleteItem = async (id: SpecCatalogItemId) => {
+    let allPatches: PatchRequest = [];
+    if (id.type === 'os') {
+      allPatches = getRemoveOsPatches({ specPath });
+    } else if (id.type === 'app') {
+      allPatches = getRemoveAppPatches({
+        appName: id.appName as string,
+        currentApps: spec?.applications,
+        specPath,
+      });
+    }
+    if (allPatches.length > 0) {
+      await onPatch(allPatches);
+    }
   };
 
   return (
     <PageWithPermissions allowed={canListItems && canListCatalogs} loading={loading}>
-      <Stack>
+      <Stack hasGutter>
         <StackItem>
           <InstalledSoftware
-            labels={currentLabels}
-            spec={spec}
-            onDeleteOs={onDeleteOs}
+            hasPackageMode={hasPackageMode}
+            onDeleteItem={onDeleteItem}
             onEdit={onEdit}
-            onDeleteApp={onDeleteApp}
             canEdit={canEdit}
           />
         </StackItem>
         <StackItem className="fctl-resource-catalog-page">
-          <CatalogPageContent canInstall={canEdit} targetHasOwner={hasOwner} onInstall={onInstall} targetSet />
+          <CatalogPageContent
+            canInstall={canEdit}
+            targetHasOwner={hasOwner}
+            targetHasPackageMode={hasPackageMode}
+            onInstall={onInstall}
+            targetSet
+          />
         </StackItem>
       </Stack>
     </PageWithPermissions>

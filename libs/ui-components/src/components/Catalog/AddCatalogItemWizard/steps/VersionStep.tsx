@@ -2,14 +2,14 @@ import * as React from 'react';
 import { Button, FormGroup, FormSection, Grid, GridItem, Split, SplitItem, Title } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
-import { FieldArray, FormikErrors, useField, useFormikContext } from 'formik';
+import { FieldArray, type FormikErrors, useField, useFormikContext } from 'formik';
 
 import { CatalogItemArtifactType } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { AddCatalogItemFormValues, VersionFormValues, configurableAppTypes } from '../types';
+import { type AddCatalogItemFormValues, type VersionFormValues, configurableAppTypes } from '../types';
 import { getEmptyVersion } from '../utils';
-import { appTypeIds } from '../../useCatalogs';
+import { appTypeIds } from '../../useCatalogItems';
 import TextField from '../../../form/TextField';
 import TextAreaField from '../../../form/TextAreaField';
 import CheckboxField from '../../../form/CheckboxField';
@@ -18,7 +18,7 @@ import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import ChannelsSelect from '../ChannelsSelect';
 import UploadField from '../../../form/UploadField';
 import ErrorHelperText from '../../../form/FieldHelperText';
-import { getArtifactLabel } from '../../utils';
+import { getArtifactLabel } from '../../../../utils/catalog';
 
 export const versionStepId = 'version';
 
@@ -153,10 +153,7 @@ const ReferencesField = ({ index, isReadOnly }: { index: number; isReadOnly?: bo
     <FormSection title={t('References')}>
       {artifactsWithType.map((artifact) => {
         return (
-          <FormGroup
-            key={artifact.type}
-            label={getArtifactLabel(t, artifact.type as CatalogItemArtifactType, artifact.name)}
-          >
+          <FormGroup key={artifact.type} label={getArtifactLabel(t, artifact)}>
             <TextField
               name={`${prefix}.references.${artifact.type}`}
               aria-label={t('{{type}} reference', { type: artifact.type })}

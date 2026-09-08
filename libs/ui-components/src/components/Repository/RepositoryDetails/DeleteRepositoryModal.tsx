@@ -13,7 +13,7 @@ import {
 } from '@patternfly/react-core';
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
-import { ResourceSyncList } from '@flightctl/types';
+import { type ResourceSyncList } from '@flightctl/types';
 
 import { getErrorMessage } from '../../../utils/error';
 import { commonQueries } from '../../../utils/query';

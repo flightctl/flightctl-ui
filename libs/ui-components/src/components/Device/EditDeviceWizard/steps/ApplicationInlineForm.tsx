@@ -9,7 +9,7 @@ import CheckboxField from '../../../form/CheckboxField';
 import UploadField from '../../../form/UploadField';
 import TextField from '../../../form/TextField';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
-import { InlineFileForm } from '../../../../types/deviceSpec';
+import { type InlineFileForm } from '../../../../types/deviceSpec';
 
 const MAX_INLINE_FILE_SIZE_BYTES = 1024 * 1024;
 

@@ -8,7 +8,7 @@ import {
   TextArea,
   TextInput,
 } from '@patternfly/react-core';
-import { WidgetProps } from '@rjsf/utils';
+import { type WidgetProps } from '@rjsf/utils';
 import * as React from 'react';
 
 // PatternFly Text Widget

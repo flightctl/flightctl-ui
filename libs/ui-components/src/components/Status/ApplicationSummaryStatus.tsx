@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { DeviceApplicationsSummaryStatus } from '@flightctl/types';
+import { type DeviceApplicationsSummaryStatus } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getApplicationSummaryStatusItems } from '../../utils/status/applications';
 import StatusDisplay from './StatusDisplay';

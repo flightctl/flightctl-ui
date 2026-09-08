@@ -1,4 +1,4 @@
-import { ManagedCluster } from '../types/k8s';
+import { type ManagedCluster } from '../types/k8s';
 import { getErrorMessage } from '@flightctl/ui-components/src/utils/error';
 
 const isMicroShiftCluster = (mc: ManagedCluster) =>

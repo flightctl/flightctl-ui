@@ -8,7 +8,7 @@ import DeviceDetails from '@flightctl/ui-components/src/components/Device/Device
 import WithTooltip from '@flightctl/ui-components/src/components/common/WithTooltip';
 import WithPageLayout from '../common/WithPageLayout';
 import { getWatchK8sResourceResult, isMicroShiftCluster } from '../../utils/clusters';
-import { ManagedCluster } from '../../types/k8s';
+import { type ManagedCluster } from '../../types/k8s';
 
 type K8sWatchResourceError = string | object;
 

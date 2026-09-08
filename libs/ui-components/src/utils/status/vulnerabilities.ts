@@ -1,4 +1,4 @@
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
 import { SeverityCriticalIcon } from '@patternfly/react-icons/dist/js/icons/severity-critical-icon';
 import SeverityImportantIcon from '@patternfly/react-icons/dist/js/icons/severity-important-icon';
@@ -8,7 +8,7 @@ import SeverityNoneIcon from '@patternfly/react-icons/dist/js/icons/severity-non
 import SeverityUndefinedIcon from '@patternfly/react-icons/dist/js/icons/severity-undefined-icon';
 
 import { Vulnerability } from '@flightctl/types/alpha';
-import { StatusItem } from './common';
+import { type StatusItem } from './common';
 import { VULNERABILITY_SEVERITY_COLOR } from '../vulnerabilities';
 
 export const defaultVulnerabilitySeverityStatusItem = (t: TFunction): StatusItem<Vulnerability.severity> => ({

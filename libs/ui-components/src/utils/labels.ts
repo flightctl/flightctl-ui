@@ -1,4 +1,4 @@
-import { FlightCtlLabel } from '../types/extraTypes';
+import { type FlightCtlLabel } from '../types/extraTypes';
 
 export const fromAPILabel = (labels: Record<string, string>): FlightCtlLabel[] =>
   Object.entries(labels).map((labelEntry) => ({

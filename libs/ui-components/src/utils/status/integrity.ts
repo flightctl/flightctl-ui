@@ -1,7 +1,7 @@
-import { TFunction } from 'react-i18next';
+import { type TFunction } from 'react-i18next';
 
 import { DeviceIntegrityCheckStatusType, DeviceIntegrityStatusSummaryType } from '@flightctl/types';
-import { StatusItem } from './common';
+import { type StatusItem } from './common';
 
 export const getIntegrityStatusItems = (t: TFunction): StatusItem<DeviceIntegrityStatusSummaryType>[] => [
   {

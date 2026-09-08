@@ -8,18 +8,18 @@ import {
   Title,
   Wizard,
   WizardStep,
-  WizardStepType,
+  type WizardStepType,
 } from '@patternfly/react-core';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { TFunction } from 'i18next';
-import { Formik, FormikErrors } from 'formik';
-import { RepoSpecType, Repository, RepositoryList, ResourceSync } from '@flightctl/types';
+import { type TFunction } from 'i18next';
+import { Formik, type FormikErrors } from 'formik';
+import { RepoSpecType, type Repository, type RepositoryList, type ResourceSync } from '@flightctl/types';
 
 import RepositoryStep, { isRepoStepValid, repositoryStepId } from './steps/RepositoryStep';
 import ReviewStep, { reviewStepId } from './steps/ReviewStep';
 import ResourceSyncStep, { isResourceSyncStepValid, resourceSyncStepId } from './steps/ResourceSyncStep';
-import { ImportResourceFormValues, ImportResourceWizardProps } from './types';
+import { type ImportResourceFormValues, type ImportResourceWizardProps } from './types';
 import { useFetch } from '../../hooks/useFetch';
 import {
   getInitValues,

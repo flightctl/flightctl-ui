@@ -1,6 +1,6 @@
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
-import { CliArtifact, CliArtifactTool } from '../types/extraTypes';
+import { type CliArtifact, CliArtifactTool } from '../types/extraTypes';
 
 // The OpenShift Console sorts links alphabetically using case-sensitive comparison.
 // To match the same ordering, we define the sorting here.

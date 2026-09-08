@@ -9,11 +9,11 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { ActionsColumn, IAction, OnSelect, Tbody, Td, Tr } from '@patternfly/react-table';
+import { ActionsColumn, type IAction, type OnSelect, Tbody, Td, Tr } from '@patternfly/react-table';
 import { RepositoryIcon } from '@patternfly/react-icons/dist/js/icons/repository-icon';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 
-import { Repository } from '@flightctl/types';
+import { type Repository } from '@flightctl/types';
 import ListPageBody from '../ListPage/ListPageBody';
 import ListPage from '../ListPage/ListPage';
 import { getLastTransitionTimeText } from '../../utils/status/repository';

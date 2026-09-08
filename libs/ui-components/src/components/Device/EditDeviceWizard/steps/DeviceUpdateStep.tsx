@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { Alert, Title } from '@patternfly/react-core';
-import { FormikErrors, useFormikContext } from 'formik';
+import { type FormikErrors, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import UpdateStepUpdatePolicy from '../../../Fleet/CreateFleet/steps/UpdateStepUpdatePolicy';
 
 import FlightCtlForm from '../../../form/FlightCtlForm';
-import { DeviceSpecConfigFormValues } from '../../../../types/deviceSpec';
+import { type DeviceSpecConfigFormValues } from '../../../../types/deviceSpec';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import CheckboxField from '../../../form/CheckboxField';
 

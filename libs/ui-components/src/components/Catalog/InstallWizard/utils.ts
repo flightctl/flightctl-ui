@@ -1,27 +1,38 @@
-import { CatalogItem } from '@flightctl/types/alpha';
 import validator from '@rjsf/validator-ajv8';
 import { createSchemaUtils } from '@rjsf/utils';
-import { ApplicationProviderSpec, ApplicationVolume } from '@flightctl/types';
 import merge from 'lodash/merge';
-import { FormikHelpers } from 'formik';
+import type { FormikHelpers } from 'formik';
 
-import {
-  APP_VOLUME_CATALOG_LABEL_KEY,
-  APP_VOLUME_CHANNEL_LABEL_KEY,
-  APP_VOLUME_ITEM_LABEL_KEY,
-  getAppVolumeName,
-} from '../const';
-import { AssetSelection } from '../../DynamicForm/DynamicForm';
-import { DynamicFormConfigFormik } from './types';
+import type { ApplicationProviderSpec, CatalogItemRefSpec, ImageMountVolumeProviderSpec } from '@flightctl/types';
+import type { CatalogItem } from '@flightctl/types/alpha';
+import type { VolumeCatalogSelection } from '../../../utils/catalog';
+import type { DynamicFormConfigFormik } from './types';
 import { convertObjToYAMLString } from '../../common/CodeEditor/YamlEditor';
 
-const appSpecFilteredKeys = ['name', 'image', 'appType'];
+const appSpecFilteredKeys = ['name', 'appType', 'catalogItemRef'];
+
+export const isSameCatalogRef = (
+  catalogRef: CatalogItemRefSpec | undefined,
+  catalogItem: CatalogItem,
+  version: string,
+  channel: string,
+) => {
+  if (!catalogRef) {
+    return false;
+  }
+  return (
+    catalogRef.item === catalogItem.metadata.name &&
+    catalogRef.catalog === catalogItem.metadata.catalog &&
+    catalogRef.version === version &&
+    // channel is optional on the API; treat undefined and '' as equivalent
+    (catalogRef.channel || '') === (channel || '')
+  );
+};
 
 export const getInitialAppConfig = (
   catalogItem: CatalogItem,
   version: string | undefined,
   existingApp?: ApplicationProviderSpec,
-  currentLabels?: Record<string, string>,
 ): DynamicFormConfigFormik => {
   const configSchema =
     catalogItem.spec.versions.find((v) => v.version === version)?.configSchema ??
@@ -35,7 +46,7 @@ export const getInitialAppConfig = (
     formValues = schemaUtils.getDefaultFormState(configSchema) as Record<string, unknown>;
   }
 
-  const selectedAssets: AssetSelection[] = [];
+  const volumeSelection: VolumeCatalogSelection[] = [];
   if (existingApp) {
     const appConfig = Object.keys(existingApp).reduce(
       (acc, key) => {
@@ -50,31 +61,20 @@ export const getInitialAppConfig = (
     formValues = merge({}, formValues, appConfig);
     defaultConfig = merge({}, defaultConfig || {}, appConfig);
 
-    if (currentLabels) {
-      const existingVolumes = formValues['volumes'];
-      if (Array.isArray(existingVolumes)) {
-        (existingVolumes as ApplicationVolume[]).forEach((vol, idx) => {
-          const volumeName = vol.name;
-          if (volumeName) {
-            const volumeCatalog =
-              currentLabels[`${getAppVolumeName(existingApp.name, volumeName, APP_VOLUME_CATALOG_LABEL_KEY)}`];
-            const volumeChannel =
-              currentLabels[`${getAppVolumeName(existingApp.name, volumeName, APP_VOLUME_CHANNEL_LABEL_KEY)}`];
-            const volumeItem =
-              currentLabels[`${getAppVolumeName(existingApp.name, volumeName, APP_VOLUME_ITEM_LABEL_KEY)}`];
-
-            if (volumeCatalog && volumeChannel && volumeItem) {
-              selectedAssets.push({
-                assetCatalog: volumeCatalog,
-                assetChannel: volumeChannel,
-                assetItemName: volumeItem,
-                volumeIndex: idx,
-                assetVersion: '', // populated async by the parent
-              } as AssetSelection);
-            }
-          }
-        });
-      }
+    const existingVolumes = formValues.volumes;
+    if (Array.isArray(existingVolumes)) {
+      (existingVolumes as ImageMountVolumeProviderSpec[]).forEach((vol, idx) => {
+        const catalogItemRef = vol.image?.catalogItemRef;
+        if (catalogItemRef) {
+          volumeSelection.push({
+            volumeIndex: idx,
+            catalogItemRef,
+          });
+          // Ensure the "image.reference" field is the empty string when there's a Catalog item reference.
+          // The JSON schema `required` validation fails if the value is undefined.
+          vol.image.reference = '';
+        }
+      });
     }
   }
 
@@ -86,7 +86,7 @@ export const getInitialAppConfig = (
     appName: existingApp?.name || '',
     configureVia: configSchema ? 'form' : 'editor',
     editorContent: defaultConfig ? convertObjToYAMLString(defaultConfig) : '',
-    selectedAssets,
+    volumeSelection,
     formValues,
     configSchema,
     dynamicFormValid,
@@ -102,5 +102,5 @@ export const applyInitialConfig = (
   setFieldValue('dynamicFormValid', appConfig.dynamicFormValid, true);
   setFieldValue('editorContent', appConfig.editorContent, true);
   setFieldValue('formValues', appConfig.formValues, true);
-  setFieldValue('selectedAssets', appConfig.selectedAssets, true);
+  setFieldValue('volumeSelection', appConfig.volumeSelection, true);
 };

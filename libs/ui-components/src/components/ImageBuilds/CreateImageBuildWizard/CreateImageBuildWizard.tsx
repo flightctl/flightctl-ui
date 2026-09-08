@@ -9,11 +9,11 @@ import {
   Title,
   Wizard,
   WizardStep,
-  WizardStepType,
+  type WizardStepType,
 } from '@patternfly/react-core';
-import { Formik, FormikErrors } from 'formik';
+import { Formik, type FormikErrors } from 'formik';
 
-import { ExportFormatType, ImageBuild } from '@flightctl/types/imagebuilder';
+import { type ExportFormatType, type ImageBuild } from '@flightctl/types/imagebuilder';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { Link, ROUTE, useNavigate } from '../../../hooks/useNavigate';
@@ -22,7 +22,7 @@ import ReviewStep, { reviewStepId } from './steps/ReviewStep';
 import { getErrorMessage } from '../../../utils/error';
 import { getImageBuildResource, getImageExportResources, getInitialValues, getValidationSchema } from './utils';
 import { isPromiseRejected } from '../../../types/typeUtils';
-import { ImageBuildFormValues, ImageBuildWizardError } from './types';
+import { type ImageBuildFormValues, type ImageBuildWizardError } from './types';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import ErrorBoundary from '../../common/ErrorBoundary';
 import PageWithPermissions from '../../common/PageWithPermissions';

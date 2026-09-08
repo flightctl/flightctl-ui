@@ -5,8 +5,8 @@ import { FormGroup, TextInput } from '@patternfly/react-core';
 
 import { useFetch } from '../../hooks/useFetch';
 import { useTranslation } from '../../hooks/useTranslation';
-import RichValidationTextField, { RichValidationTextFieldProps } from './RichValidationTextField';
-import { TextFieldProps } from './TextField';
+import RichValidationTextField, { type RichValidationTextFieldProps } from './RichValidationTextField';
+import { type TextFieldProps } from './TextField';
 import { DefaultHelperText } from './FieldHelperText';
 
 type NameFieldProps = TextFieldProps & {

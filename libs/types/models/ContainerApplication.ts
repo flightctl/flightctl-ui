@@ -8,11 +8,9 @@ import type { ApplicationProviderBase } from './ApplicationProviderBase';
 import type { ApplicationResources } from './ApplicationResources';
 import type { ApplicationUser } from './ApplicationUser';
 import type { ApplicationVolumeProviderSpec } from './ApplicationVolumeProviderSpec';
-export type ContainerApplication = (ApplicationProviderBase & ApplicationEnvVars & ApplicationUser & ApplicationVolumeProviderSpec & {
-  /**
-   * Reference to the image for this container.
-   */
-  image: string;
+import type { CatalogItemRefApplicationProviderSpec } from './CatalogItemRefApplicationProviderSpec';
+import type { ImageApplicationProviderSpec } from './ImageApplicationProviderSpec';
+export type ContainerApplication = (ApplicationProviderBase & ApplicationEnvVars & ApplicationUser & ApplicationVolumeProviderSpec & (ImageApplicationProviderSpec | CatalogItemRefApplicationProviderSpec) & {
   /**
    * Port mappings.
    */

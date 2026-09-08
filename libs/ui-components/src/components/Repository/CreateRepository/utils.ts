@@ -1,23 +1,23 @@
 import * as Yup from 'yup';
-import { TFunction } from 'i18next';
+import { type TFunction } from 'i18next';
 import {
   ApiVersion,
-  DockerAuth,
-  GitRepoSpec,
-  HttpConfig,
-  HttpRepoSpec,
+  type DockerAuth,
+  type GitRepoSpec,
+  type HttpConfig,
+  type HttpRepoSpec,
   OciAuthType,
   OciRepoSpec,
-  PatchRequest,
+  type PatchRequest,
   RepoSpecType,
-  Repository,
-  RepositorySpec,
-  ResourceSync,
+  type Repository,
+  type RepositorySpec,
+  type ResourceSync,
   ResourceSyncType,
-  SshConfig,
+  type SshConfig,
 } from '@flightctl/types';
 
-import { BaseImage, RepositoryFormValues, ResourceSyncFormValue } from './types';
+import { type BaseImage, type RepositoryFormValues, type ResourceSyncFormValue } from './types';
 import { getErrorMessage } from '../../../utils/error';
 import { appendJSONPatch } from '../../../utils/patch';
 import {

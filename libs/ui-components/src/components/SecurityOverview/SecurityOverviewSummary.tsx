@@ -5,7 +5,7 @@ import SeverityUndefinedIcon from '@patternfly/react-icons/dist/js/icons/severit
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { useVulnerabilitySummary } from '../../hooks/useVulnerabilitySummary';
-import { StatusItem } from '../../utils/status/common';
+import { type StatusItem } from '../../utils/status/common';
 import { VULNERABILITY_SEVERITY_ORDER, getSeverityCountValue, getSeverityLabel } from '../../utils/vulnerabilities';
 import { useDevicesSummary } from '../Device/DevicesPage/useDevices';
 import {
