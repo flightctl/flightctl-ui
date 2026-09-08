@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Flex, FlexItem } from '@patternfly/react-core';
+import { Flex, FlexItem } from '@patternfly/react-core';
 import { Td, Tr } from '@patternfly/react-table';
 
 import { OsModeType } from '@flightctl/types';
@@ -7,7 +7,7 @@ import { OsModeType } from '@flightctl/types';
 import { useTranslation } from '../../../../../hooks/useTranslation';
 import ResourceLink from '../../../../common/ResourceLink';
 import OsModeContent from '../../../../common/OsModeContent';
-import { HealthyStatusPreview, SeeHowItLooksPreview } from '../../../guide/SeeHowItLooksPreview';
+import { HealthyStatusPreview, PreviewButton, SeeHowItLooksPreview } from '../../../guide/SeeHowItLooksPreview';
 import { ListPreviewTable } from '../../../guide/ListPreviewTable';
 import type { ApiTableColumn } from '../../../../Table/Table';
 
@@ -28,9 +28,7 @@ const EnrolledDeviceListPreviewRow = ({ columns }: { columns: ApiTableColumn[] }
             <OsModeContent osMode={OsModeType.OsModeImage} />
           </FlexItem>
           <FlexItem>
-            <Button variant="link" onClick={() => {}} isInline>
-              {t('Example device')}
-            </Button>
+            <PreviewButton title={t('Example device')} />
           </FlexItem>
         </Flex>
       </Td>

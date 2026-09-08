@@ -8,6 +8,9 @@ import { pathMatchesRoute } from '../../quickStartPhaseUtils';
 import { buildImageBuildingGuideSteps } from './imageBuildingGuideSteps';
 import { useQuickStartGuide } from '../../QuickStartContext';
 import { useQuickStartListHasItems } from '../../useQuickStartListHasItems';
+import { RESOURCE, VERB } from '../../../../types/rbac';
+
+const listPermissions = [{ kind: RESOURCE.IMAGE_BUILD, verb: VERB.LIST }];
 
 const ImageBuildingPhase = () => {
   const { checkPermissions } = usePermissionsContext();
@@ -16,8 +19,11 @@ const ImageBuildingPhase = () => {
   const { activePhaseId, activeStepIndex, setStepIndex, setGuidePresentation, setGuideActions, completePhase } =
     useQuickStartGuide();
 
+  const [canListBuilds] = checkPermissions(listPermissions);
   const isOnBuildsPage = pathMatchesRoute(location.pathname, router.appRoutes[ROUTE.IMAGE_BUILDS]);
-  const { hasItems: hasBuilds } = useQuickStartListHasItems(ImageBuilderResourceKind.IMAGE_BUILD);
+  const { hasItems: hasBuilds } = useQuickStartListHasItems(
+    canListBuilds ? ImageBuilderResourceKind.IMAGE_BUILD : undefined,
+  );
 
   const steps = React.useMemo(
     () =>

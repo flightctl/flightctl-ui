@@ -3,11 +3,24 @@ import { Button, ModalFooter, ModalHeader, ModalVariant } from '@patternfly/reac
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import FlightCtlModal from '../../common/FlightCtlModal';
+import WithTooltip from '../../common/WithTooltip';
 import { StatusDisplayContent } from '../../Status/StatusDisplay';
 
 export const HealthyStatusPreview = ({ label }: { label: string }) => {
   const { t } = useTranslation();
   return <StatusDisplayContent level="success" label={label} message={t('No issues detected.')} />;
+};
+
+// This button does not have an action handler as the items in preview are dummy data
+export const PreviewButton = ({ title }: { title: string }) => {
+  const { t } = useTranslation();
+  return (
+    <Button variant="link" isInline onClick={() => {}}>
+      <WithTooltip showTooltip content={t('Action not available in preview mode')}>
+        <span>{title}</span>
+      </WithTooltip>
+    </Button>
+  );
 };
 
 export const SeeHowItLooksPreview = ({ children, title }: React.PropsWithChildren<{ title: string }>) => {

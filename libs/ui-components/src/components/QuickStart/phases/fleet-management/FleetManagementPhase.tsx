@@ -8,6 +8,9 @@ import { buildFleetManagementGuideSteps } from './fleetManagementGuideSteps';
 import { pathMatchesRoute } from '../../quickStartPhaseUtils';
 import { ROUTE } from '../../../../hooks/useNavigate';
 import { useQuickStartListHasItems } from '../../useQuickStartListHasItems';
+import { RESOURCE, VERB } from '../../../../types/rbac';
+
+const listPermissions = [{ kind: RESOURCE.FLEET, verb: VERB.LIST }];
 
 const FleetManagementPhase = () => {
   const { checkPermissions } = usePermissionsContext();
@@ -16,7 +19,8 @@ const FleetManagementPhase = () => {
   const { activePhaseId, activeStepIndex, setStepIndex, setGuidePresentation, setGuideActions, completePhase } =
     useQuickStartGuide();
 
-  const { hasItems: hasFleets } = useQuickStartListHasItems(ResourceKind.FLEET);
+  const [canListFleets] = checkPermissions(listPermissions);
+  const { hasItems: hasFleets } = useQuickStartListHasItems(canListFleets ? ResourceKind.FLEET : undefined);
   const isOnFleetsPage = pathMatchesRoute(location.pathname, router.appRoutes[ROUTE.FLEETS]);
 
   const steps = React.useMemo(

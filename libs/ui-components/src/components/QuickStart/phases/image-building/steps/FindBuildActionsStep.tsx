@@ -20,7 +20,8 @@ const FindBuildActionsStep = ({
 }: FindBuildActionsStepProps) => {
   const { t } = useTranslation();
 
-  const actions = [];
+  const actions = [t('Create a new build')];
+
   if (canViewBuild) {
     actions.push(t('View details'));
   }

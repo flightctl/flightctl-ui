@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Gallery, Stack, StackItem, Title } from '@patternfly/react-core';
+import { Gallery, Stack, StackItem, Title } from '@patternfly/react-core';
 import { ExpandableRowContent, Td, Tr } from '@patternfly/react-table';
 
 import {
@@ -15,7 +15,7 @@ import { useTranslation } from '../../../../../hooks/useTranslation';
 import { getAllExportFormats } from '../../../../../utils/imageBuilds';
 import { getDateDisplay } from '../../../../../utils/dates';
 import { type ImageExportAction, ViewImageBuildExportCard } from '../../../../ImageBuilds/ImageExportCards';
-import { HealthyStatusPreview, SeeHowItLooksPreview } from '../../../guide/SeeHowItLooksPreview';
+import { HealthyStatusPreview, PreviewButton, SeeHowItLooksPreview } from '../../../guide/SeeHowItLooksPreview';
 import { ListPreviewTable } from '../../../guide/ListPreviewTable';
 import type { ApiTableColumn } from '../../../../Table/Table';
 
@@ -84,9 +84,7 @@ const ImageBuildListPreviewRow = ({ columns }: { columns: ApiTableColumn[] }) =>
           }}
         />
         <Td dataLabel={columns[0].name}>
-          <Button variant="link" onClick={() => {}} isInline>
-            {t('Example image build')}
-          </Button>
+          <PreviewButton title={t('Example image build')} />
         </Td>
         <Td dataLabel={columns[1].name}>registry.example.com/rhel-bootc:9.4</Td>
         <Td dataLabel={columns[2].name}>registry.example.com/org/edge-image:1.0.0</Td>
@@ -109,9 +107,7 @@ const ImageBuildListPreviewRow = ({ columns }: { columns: ApiTableColumn[] }) =>
                     </Title>
                   </StackItem>
                   <StackItem>
-                    <Button variant="link" isInline onClick={() => {}} isDisabled>
-                      {t('View more')}
-                    </Button>
+                    <PreviewButton title={t('View more')} />
                   </StackItem>
                 </Stack>
               </StackItem>

@@ -36,11 +36,7 @@ export const StepHint = ({ children, hasGap }: React.PropsWithChildren<{ hasGap?
   </Content>
 );
 
-interface StepHeaderProps {
-  title: React.ReactNode;
-}
-
-export const StepHeader = ({ title }: StepHeaderProps) => {
+export const StepHeader = ({ title }: { title: string }) => {
   const { setGuidePresentation } = useQuickStartGuide();
 
   React.useLayoutEffect(() => {

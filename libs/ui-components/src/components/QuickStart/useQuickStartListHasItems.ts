@@ -15,7 +15,7 @@ type QuickStartListKind =
   | ResourceKind.FLEET
   | ImageBuilderResourceKind.IMAGE_BUILD;
 
-const getKindQuery = (kind: QuickStartListKind) => {
+const getKindQuery = (kind?: QuickStartListKind) => {
   switch (kind) {
     case ResourceKind.DEVICE:
       return `devices?fieldSelector=status.lifecycle.status in (${enrolledDevicesStatuses.join(',')})`;
@@ -25,17 +25,26 @@ const getKindQuery = (kind: QuickStartListKind) => {
       return 'fleets';
     case ImageBuilderResourceKind.IMAGE_BUILD as const:
       return 'imagebuilds';
+    case undefined:
+      return '';
   }
+};
+
+const queryWithLimit = (query: string) => {
+  if (!query) {
+    return '';
+  }
+  return `${query}${query.includes('?') ? '&' : '?'}limit=1`;
 };
 
 /**
  * Opt-in list probe for a QuickStart step content component.
  * Polls a single list endpoint
  */
-export const useQuickStartListHasItems = (kind: QuickStartListKind): { hasItems: boolean; isLoading: boolean } => {
+export const useQuickStartListHasItems = (kind?: QuickStartListKind): { hasItems: boolean; isLoading: boolean } => {
   const query = getKindQuery(kind);
   const [list, isLoading] = useFetchPeriodically<ApiList>({
-    endpoint: `${query}${query.includes('?') ? '&' : '?'}limit=1`,
+    endpoint: queryWithLimit(query),
   });
 
   const count = getApiListCount(list);

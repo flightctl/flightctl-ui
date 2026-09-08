@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { Button } from '@patternfly/react-core';
 import { Td, Tr } from '@patternfly/react-table';
 
 import { useTranslation } from '../../../../../hooks/useTranslation';
-import { HealthyStatusPreview, SeeHowItLooksPreview } from '../../../guide/SeeHowItLooksPreview';
+import { HealthyStatusPreview, PreviewButton, SeeHowItLooksPreview } from '../../../guide/SeeHowItLooksPreview';
 import { ListPreviewTable } from '../../../guide/ListPreviewTable';
 import type { ApiTableColumn } from '../../../../Table/Table';
 
@@ -13,9 +12,7 @@ const FleetListPreviewRow = ({ columns }: { columns: ApiTableColumn[] }) => {
   return (
     <Tr data-testid="example-fleet-row">
       <Td dataLabel={columns[0].name}>
-        <Button variant="link" onClick={() => {}} isInline>
-          {t('Example fleet')}
-        </Button>
+        <PreviewButton title={t('Example fleet')} />
       </Td>
       <Td dataLabel={columns[1].name}>registry/organization/edge-image:1.0.0</Td>
       <Td dataLabel={columns[2].name} style={{ minWidth: '11.5rem', whiteSpace: 'nowrap' }}>

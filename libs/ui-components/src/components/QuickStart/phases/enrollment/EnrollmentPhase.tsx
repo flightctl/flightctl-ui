@@ -8,6 +8,12 @@ import { buildEnrollmentGuideSteps } from './enrollmentGuideSteps';
 import { pathMatchesRoute } from '../../quickStartPhaseUtils';
 import { ROUTE } from '../../../../hooks/useNavigate';
 import { useQuickStartListHasItems } from '../../useQuickStartListHasItems';
+import { RESOURCE, VERB } from '../../../../types/rbac';
+
+const listPermissions = [
+  { kind: RESOURCE.DEVICE, verb: VERB.LIST },
+  { kind: RESOURCE.ENROLLMENT_REQUEST, verb: VERB.LIST },
+];
 
 const EnrollmentPhase = () => {
   const { checkPermissions } = usePermissionsContext();
@@ -16,9 +22,13 @@ const EnrollmentPhase = () => {
   const { activePhaseId, activeStepIndex, setStepIndex, setGuidePresentation, setGuideActions, completePhase } =
     useQuickStartGuide();
 
+  const [canListDevices, canListEnrollmentRequests] = checkPermissions(listPermissions);
+
   const [completedNavigationSteps, setCompletedNavigationSteps] = React.useState<Record<number, boolean>>({});
-  const { hasItems: hasDevices } = useQuickStartListHasItems(ResourceKind.DEVICE);
-  const { hasItems: hasPendingDevices } = useQuickStartListHasItems(ResourceKind.ENROLLMENT_REQUEST);
+  const { hasItems: hasDevices } = useQuickStartListHasItems(canListDevices ? ResourceKind.DEVICE : undefined);
+  const { hasItems: hasPendingDevices } = useQuickStartListHasItems(
+    canListEnrollmentRequests ? ResourceKind.ENROLLMENT_REQUEST : undefined,
+  );
   const isOnDevicesPage = pathMatchesRoute(location.pathname, router.appRoutes[ROUTE.DEVICES]);
 
   const steps = React.useMemo(

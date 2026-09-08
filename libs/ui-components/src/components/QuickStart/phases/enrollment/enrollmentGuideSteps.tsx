@@ -49,9 +49,7 @@ export const buildEnrollmentGuideSteps = (options: EnrollmentGuideRuntimeOptions
   if (canListDevices) {
     steps.push({
       mustBeOnListPage: true,
-      render: () => (
-        <OpenDevicesStep hasDevices={hasDevices} canApproveEr={canApproveEr} isOnDevicesPage={isOnDevicesPage} />
-      ),
+      render: () => <OpenDevicesStep hasDevices={hasDevices} isOnDevicesPage={isOnDevicesPage} />,
     });
   }
 
