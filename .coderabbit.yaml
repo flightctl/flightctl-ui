@@ -143,6 +143,8 @@ reviews:
         apply this one. The following triggers take precedence over
         both Ship and Show:
 
+        - Security-sensitive code, trust boundaries, or security controls
+          anywhere in the frontend or proxy
         - Authentication, authorization/RBAC, organization isolation,
           secrets, credentials, certificates, or security-sensitive
           configuration anywhere in the frontend or proxy
