@@ -57,13 +57,13 @@ const SeverityStat = ({
   const isSelectable = interactive && count > 0;
   const severityLabel = getSeverityLabel(severity, t);
 
-  const handleClick = () => {
+  const onClick = () => {
     if (isSelectable) {
       onToggle?.(severity);
     }
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
+  const onKeyDown = (event: React.KeyboardEvent) => {
     if (!isSelectable) {
       return;
     }
@@ -89,8 +89,8 @@ const SeverityStat = ({
       alignItems={{ default: 'alignItemsCenter' }}
       role={isSelectable ? 'button' : undefined}
       tabIndex={isSelectable ? 0 : undefined}
-      onClick={isSelectable ? handleClick : undefined}
-      onKeyDown={isSelectable ? handleKeyDown : undefined}
+      onClick={isSelectable ? onClick : undefined}
+      onKeyDown={isSelectable ? onKeyDown : undefined}
       aria-pressed={isSelectable ? isSelected : undefined}
       aria-label={
         isSelectable ? t('Filter table by {{severity}} severity', { severity: severityLabel }) : severityLabel

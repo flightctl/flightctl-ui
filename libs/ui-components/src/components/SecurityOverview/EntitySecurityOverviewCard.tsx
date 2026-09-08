@@ -73,7 +73,7 @@ const EntitySecurityOverviewCard = ({
   const { t } = useTranslation();
   const [isTableExpanded, setIsTableExpanded] = React.useState(false);
 
-  const handleSeverityToggle = React.useCallback(
+  const onSeverityToggle = React.useCallback(
     (severity: Severity) => {
       setSelectedSeverities((currentSeverities) => {
         const { selectedSeverities: nextSeverities, expandTable } = getSeverityToggleResult(
@@ -113,7 +113,7 @@ const EntitySecurityOverviewCard = ({
         <SecurityOverviewSummary
           counts={counts}
           selectedSeverities={selectedSeverities}
-          onSeverityToggle={handleSeverityToggle}
+          onSeverityToggle={onSeverityToggle}
           isLoading={isSummaryLoading}
         />
       </CardBody>

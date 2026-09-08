@@ -71,11 +71,11 @@ const getApplicationHealth = (deviceStatus: DeviceStatus): DeviceHealthItem => {
 
   deviceStatus.applications.forEach((app) => {
     const level = getAppStatusLevel(app.status);
-    if (level === 'danger') {
-      hasErrors = true;
-    }
-    if (level !== null) {
+    if (isAttentionHealthLevel(level)) {
       counts += 1;
+      if (level === 'danger') {
+        hasErrors = true;
+      }
     }
   });
 

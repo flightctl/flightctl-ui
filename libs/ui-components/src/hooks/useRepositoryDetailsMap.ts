@@ -25,7 +25,7 @@ const useStableStringArray = (array: string[]) => {
 export const useRepositoryDetailsMap = (configs: ConfigSourceProvider[]) => {
   const { get } = useFetch();
   const repoConfigs = configs.filter(isRepoConfig);
-  const repositoryNames = useStableStringArray(repoConfigs.map(getRepoName));
+  const repositoryNames = useStableStringArray([...new Set(repoConfigs.map(getRepoName))]);
   const [repoDetailsMap, setRepoDetailsMap] = React.useState<Record<string, RepositoryDetails>>({});
   const [isLoading, setIsLoading] = React.useState(repositoryNames.length > 0);
 
@@ -36,11 +36,18 @@ export const useRepositoryDetailsMap = (configs: ConfigSourceProvider[]) => {
       return;
     }
 
+    const abortController = new AbortController();
     setIsLoading(true);
 
     const fetchRepositories = async () => {
-      const promises = repositoryNames.map((repoName) => get<Repository>(`repositories/${repoName}`));
+      const promises = repositoryNames.map((repoName) =>
+        get<Repository>(`repositories/${repoName}`, abortController.signal),
+      );
       const results = await Promise.allSettled(promises);
+
+      if (abortController.signal.aborted) {
+        return;
+      }
 
       const map: Record<string, RepositoryDetails> = {};
       results.forEach((result, index) => {
@@ -58,6 +65,10 @@ export const useRepositoryDetailsMap = (configs: ConfigSourceProvider[]) => {
     };
 
     void fetchRepositories();
+
+    return () => {
+      abortController.abort();
+    };
   }, [get, repositoryNames]);
 
   return {
