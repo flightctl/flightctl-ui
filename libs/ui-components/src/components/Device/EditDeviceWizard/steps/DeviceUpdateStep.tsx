@@ -1,14 +1,15 @@
 import * as React from 'react';
-import { Alert, Title } from '@patternfly/react-core';
+import { FormGroup, Stack, StackItem, Title } from '@patternfly/react-core';
 import { type FormikErrors, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import UpdateStepUpdatePolicy from '../../../Fleet/CreateFleet/steps/UpdateStepUpdatePolicy';
+import { CustomizedUpdatesSectionBody } from '../../../Fleet/CreateFleet/steps/UpdatePolicyStep';
 
 import FlightCtlForm from '../../../form/FlightCtlForm';
-import { type DeviceSpecConfigFormValues } from '../../../../types/deviceSpec';
-import { FormGroupWithHelperText } from '../../../common/WithHelperText';
-import CheckboxField from '../../../form/CheckboxField';
+import { type DeviceSpecConfigFormValues, UpdateMode } from '../../../../types/deviceSpec';
+import RadioField from '../../../form/RadioField';
+import { DefaultHelperText } from '../../../form/FieldHelperText';
 
 export const deviceUpdatePolicyStepId = 'update-policy';
 
@@ -18,27 +19,44 @@ const UpdatePolicyStep = ({ isReadOnly }: { isReadOnly?: boolean }) => {
   const { t } = useTranslation();
 
   const {
-    values: { useBasicUpdateConfig },
+    values: { updateMode },
   } = useFormikContext<DeviceSpecConfigFormValues>();
 
   return (
     <FlightCtlForm>
-      <CheckboxField name="useBasicUpdateConfig" label={t('Use basic configurations')} isDisabled={isReadOnly} />
-      {!useBasicUpdateConfig ? (
-        <>
-          <Title headingLevel="h3">{t('Advanced configurations')}</Title>
-          <FormGroupWithHelperText
-            label={t('Update policies')}
-            content={t('Update policies allow you to control when updates should be downloaded and applied.')}
-          >
-            <UpdateStepUpdatePolicy isReadOnly={isReadOnly} />
-          </FormGroupWithHelperText>
-        </>
-      ) : (
-        <Alert isInline variant="info" title={t('Default update policy')}>
-          {t('The device will download and apply updates as soon as they are available.')}
-        </Alert>
-      )}
+      <Stack hasGutter>
+        <StackItem>
+          <Title headingLevel="h2" size="xl">
+            {t('Updates')}
+          </Title>
+          <DefaultHelperText helperText={t('Choose how updates are delivered to this device.')} />
+        </StackItem>
+        <StackItem>
+          <FormGroup label={t('Update behavior')} role="radiogroup" isStack>
+            <RadioField
+              id="device-update-defaults"
+              name="updateMode"
+              label={t('Immediate updates')}
+              description={t('Devices receive updates as soon as they are available.')}
+              checkedValue={UpdateMode.Default}
+              isDisabled={isReadOnly}
+            />
+            <RadioField
+              id="device-update-customized"
+              name="updateMode"
+              label={t('Customize maintenance window and scheduling')}
+              description={t('Set maintenance windows to control when updates are downloaded and applied.')}
+              checkedValue={UpdateMode.Customized}
+              isDisabled={isReadOnly}
+              body={
+                <CustomizedUpdatesSectionBody updateMode={updateMode} isFleet={false}>
+                  <UpdateStepUpdatePolicy isReadOnly={isReadOnly} />
+                </CustomizedUpdatesSectionBody>
+              }
+            />
+          </FormGroup>
+        </StackItem>
+      </Stack>
     </FlightCtlForm>
   );
 };
