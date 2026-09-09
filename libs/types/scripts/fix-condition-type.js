@@ -4,6 +4,41 @@ const path = require('path');
 const YAML = require('js-yaml');
 
 const CONDITION_TYPE_PATH = path.resolve(__dirname, '../models/ConditionType.ts');
+const DEFAULT_DESCRIPTION = 'Type of condition in CamelCase.';
+const TS_IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+
+function validateMemberName(name, index) {
+  if (typeof name !== 'string' || !TS_IDENTIFIER.test(name)) {
+    throw new Error(`Invalid x-enum-varnames entry at index ${index}: ${JSON.stringify(name)}`);
+  }
+}
+
+function validateUniqueMemberNames(names) {
+  const seen = new Set();
+  for (const name of names) {
+    if (seen.has(name)) {
+      throw new Error(`Duplicate x-enum-varnames entry: ${name}`);
+    }
+    seen.add(name);
+  }
+}
+
+function validateEnumValue(value, index) {
+  if (typeof value !== 'string') {
+    throw new Error(`Invalid enum value at index ${index}: expected string, got ${typeof value}`);
+  }
+}
+
+function sanitizeDescription(description) {
+  if (typeof description !== 'string' || description.trim() === '') {
+    return DEFAULT_DESCRIPTION;
+  }
+
+  return description
+    .replace(/\*\//g, '* /')
+    .replace(/\/\*/g, '/ *')
+    .replace(/\r\n|\r|\n/g, ' ');
+}
 
 function buildConditionTypeSource({ description, varnames, enumValues }) {
   if (varnames.length !== enumValues.length) {
@@ -12,14 +47,20 @@ function buildConditionTypeSource({ description, varnames, enumValues }) {
     );
   }
 
-  const members = varnames.map((name, index) => `  ${name} = '${enumValues[index]}',`).join('\n');
+  varnames.forEach(validateMemberName);
+  validateUniqueMemberNames(varnames);
+  enumValues.forEach(validateEnumValue);
+
+  const members = varnames
+    .map((name, index) => `  ${name} = ${JSON.stringify(enumValues[index])},`)
+    .join('\n');
 
   return `/* generated using openapi-typescript-codegen -- do no edit */
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
 /**
- * ${description}
+ * ${sanitizeDescription(description)}
  */
 export enum ConditionType {
 ${members}
@@ -44,7 +85,7 @@ function extractConditionType(openApiDocument) {
   }
 
   return {
-    description: schema.description || 'Type of condition in CamelCase.',
+    description: schema.description || DEFAULT_DESCRIPTION,
     varnames,
     enumValues,
   };
