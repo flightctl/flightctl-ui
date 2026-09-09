@@ -1,67 +1,34 @@
 import * as React from 'react';
-import { Alert, CardBody, CardTitle, Divider, Spinner, Stack, StackItem } from '@patternfly/react-core';
+import {
+  DescriptionListDescription,
+  DescriptionListGroup,
+  DescriptionListTerm,
+  Icon,
+  Spinner,
+  Stack,
+  StackItem,
+} from '@patternfly/react-core';
 
-import type { Device, Fleet, ImageOrCatalogItemRefSpec } from '@flightctl/types';
+import type { Device, Fleet } from '@flightctl/types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { useDeviceOwnerFleet } from '../../../../hooks/useDeviceOwnerFleet';
 import { hasPackageModeCapability } from '../../../../utils/capabilities';
-import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
-import DetailsPageCard from '../../../DetailsPage/DetailsPageCard';
+import RepositorySourceDescriptionList from '../../../Repository/RepositoryDetails/RepositorySourceList';
+import ConfigurationSourcesHeader from '../../../Repository/RepositoryDetails/ConfigurationSourcesHeader';
 import DeviceOs from '../DeviceOs';
+import SidebarDescriptionList from '../SidebarDescriptionList';
+import WithTooltip from '../../../common/WithTooltip';
+import WarningTriangleIcon from '@patternfly/react-icons/dist/js/icons/warning-triangle-icon';
 
-const DevicePackageModeOsImage = () => {
-  const { t } = useTranslation();
-  return (
-    <CardBody>
-      <Stack hasGutter>
-        <StackItem className="pf-v6-u-text-color-subtle">{t('System image')}</StackItem>
-        <StackItem>
-          <Alert
-            isInline
-            isPlain
-            variant="warning"
-            title={t(
-              "This device uses package-based OS management and cannot satisfy the fleet's OS image requirement. The device will remain out of date and unable to apply any fleet updates. To resolve this, remove the device from the fleet or update it to a bootable container image.",
-            )}
-          />
-        </StackItem>
-      </Stack>
-    </CardBody>
-  );
-};
+const DeviceOsImageWarning = ({ content }: { content: string }) => (
+  <WithTooltip showTooltip={true} content={content}>
+    <Icon status="warning">
+      <WarningTriangleIcon />
+    </Icon>
+  </WithTooltip>
+);
 
-const DeviceRunningOsImage = ({
-  ownerFleetError,
-  osSpec,
-  statusOsImage,
-}: {
-  ownerFleetError: boolean;
-  statusOsImage: string | undefined;
-  osSpec: ImageOrCatalogItemRefSpec | undefined;
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <CardBody>
-      <Stack hasGutter>
-        {ownerFleetError ? (
-          <StackItem>
-            <Alert isInline variant="warning" title={t('OS image status not fully determined')}>
-              {t('The device is bound to a fleet, but its OS image status could not be determined.')}
-            </Alert>
-          </StackItem>
-        ) : null}
-
-        <StackItem className="pf-v6-u-text-color-subtle">{t('System image (running)')}</StackItem>
-        <StackItem>
-          <DeviceOs osSpec={osSpec} renderedOsImage={statusOsImage} />
-        </StackItem>
-      </Stack>
-    </CardBody>
-  );
-};
-
-const DeviceOsImageCard = ({
+const DeviceOsImageSection = ({
   device,
   ownerFleet,
   ownerFleetError,
@@ -70,6 +37,7 @@ const DeviceOsImageCard = ({
   ownerFleet?: Fleet;
   ownerFleetError: unknown;
 }) => {
+  const { t } = useTranslation();
   const osSpec = ownerFleet?.spec?.template?.spec?.os || device.spec?.os;
   const hasImageInSpec = osSpec?.image || osSpec?.catalogItemRef;
   const isPackageMode = hasPackageModeCapability(device);
@@ -83,27 +51,42 @@ const DeviceOsImageCard = ({
   let content: React.ReactNode = null;
   if (showPackageModeInfo) {
     // Only show this section when the fleet spec could be fetched and it defines an OS image
-    content = <DevicePackageModeOsImage />;
-  } else {
     content = (
-      <DeviceRunningOsImage
-        ownerFleetError={!!ownerFleetError}
-        osSpec={osSpec}
-        statusOsImage={device.status?.os?.image}
+      <DeviceOsImageWarning
+        content={t(
+          "This device uses package-based OS management and cannot satisfy the fleet's OS image requirement. The device will remain out of date and unable to apply any fleet updates. To resolve this, remove the device from the fleet or update it to a bootable container image.",
+        )}
       />
     );
+  } else if (ownerFleetError) {
+    content = (
+      <DeviceOsImageWarning
+        content={t('The device is bound to a fleet, and its OS image status could not be determined.')}
+      />
+    );
+  } else {
+    content = <DeviceOs osSpec={osSpec} renderedOsImage={device.status?.os?.image} />;
   }
+
+  if (!content) {
+    return null;
+  }
+
   return (
-    <>
-      {content}
-      <Divider />
-    </>
+    <SidebarDescriptionList>
+      <DescriptionListGroup>
+        <DescriptionListTerm>{t('System image (running)')}</DescriptionListTerm>
+        <DescriptionListDescription>{content}</DescriptionListDescription>
+      </DescriptionListGroup>
+    </SidebarDescriptionList>
   );
 };
 
-const ConfigurationsContent = ({ device }: { device: Required<Device> }) => {
-  const { t } = useTranslation();
+type ConfigurationsContentProps = {
+  device: Required<Device>;
+};
 
+const ConfigurationsContent = ({ device }: ConfigurationsContentProps) => {
   const configs = device.spec?.config || [];
   const [hasOwnerFleet, ownerFleet, ownerFleetLoading, ownerFleetError] = useDeviceOwnerFleet(device.metadata.owner);
 
@@ -111,21 +94,22 @@ const ConfigurationsContent = ({ device }: { device: Required<Device> }) => {
     return <Spinner />;
   }
 
+  const osImageSection = (
+    <DeviceOsImageSection device={device} ownerFleet={ownerFleet} ownerFleetError={ownerFleetError} />
+  );
+
   return (
-    <DetailsPageCard>
-      <CardTitle>{t('Configurations')}</CardTitle>
-      <DeviceOsImageCard device={device} ownerFleet={ownerFleet} ownerFleetError={ownerFleetError} />
-      <CardBody>
-        <Stack hasGutter>
-          <StackItem className="pf-v6-u-font-weight-bold">
-            {t('Sources ({{size}})', { size: configs.length })}
-          </StackItem>
-          <StackItem>
-            <RepositorySourceList configs={configs} dependencyStatus={device.status.dependencySync} />
-          </StackItem>
-        </Stack>
-      </CardBody>
-    </DetailsPageCard>
+    <Stack hasGutter>
+      {osImageSection && <StackItem>{osImageSection}</StackItem>}
+      <StackItem>
+        <ConfigurationSourcesHeader count={configs.length} className="pf-v6-u-mb-sm" />
+      </StackItem>
+      {configs.length > 0 && (
+        <StackItem>
+          <RepositorySourceDescriptionList configs={configs} dependencyStatus={device.status.dependencySync} />
+        </StackItem>
+      )}
+    </Stack>
   );
 };
 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ClipboardCopy, Content, Flex, FlexItem, Tooltip, type TruncateProps } from '@patternfly/react-core';
+import { ClipboardCopy, Content, Tooltip, type TruncateProps } from '@patternfly/react-core';
 
 import { type DependencySyncConfigRefStatus } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -28,34 +28,30 @@ const ConfigSourceSyncDetails = ({ syncRef }: ConfigSourceSyncDetailsProps) => {
   const { t } = useTranslation();
 
   const fingerprint = syncRef.fingerprint;
-  return (
-    <Flex>
-      {fingerprint && (
-        <FlexItem>
-          <ClipboardCopy
-            variant="inline-compact"
-            copyAriaLabel={t('Copy fingerprint')}
-            hoverTip={t('Copy fingerprint')}
-            clickTip={t('Copied!')}
-            entryDelay={TOOLTIP_DELAY}
-            exitDelay={TOOLTIP_DELAY}
-            truncation={getFingerprintTruncation(fingerprint)}
-          >
-            {fingerprint}
-          </ClipboardCopy>
-        </FlexItem>
-      )}
 
-      {syncRef.lastUpdatedAt && (
-        <FlexItem>
-          <Tooltip content={syncRef.lastUpdatedAt} entryDelay={TOOLTIP_DELAY} exitDelay={TOOLTIP_DELAY}>
-            <Content component="small">
-              {t('Last synced')} {timeSinceText(t, syncRef.lastUpdatedAt)}
-            </Content>
-          </Tooltip>
-        </FlexItem>
+  return (
+    <>
+      {fingerprint && (
+        <ClipboardCopy
+          variant="inline-compact"
+          copyAriaLabel={t('Copy fingerprint')}
+          hoverTip={t('Copy fingerprint')}
+          clickTip={t('Copied!')}
+          entryDelay={TOOLTIP_DELAY}
+          exitDelay={TOOLTIP_DELAY}
+          truncation={getFingerprintTruncation(fingerprint)}
+        >
+          {fingerprint}
+        </ClipboardCopy>
       )}
-    </Flex>
+      {syncRef.lastUpdatedAt && (
+        <Tooltip content={syncRef.lastUpdatedAt} entryDelay={TOOLTIP_DELAY} exitDelay={TOOLTIP_DELAY}>
+          <Content component="small">
+            {t('Last synced {{syncTime}}', { syncTime: timeSinceText(t, syncRef.lastUpdatedAt) })}
+          </Content>
+        </Tooltip>
+      )}
+    </>
   );
 };
 

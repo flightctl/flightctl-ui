@@ -13,7 +13,6 @@ import { SearchIcon } from '@patternfly/react-icons/dist/js/icons';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import LabelWithHelperText from '../common/WithHelperText';
-import './Table.css';
 
 export type ApiTableColumn = {
   id?: string;
@@ -87,9 +86,9 @@ export const Table = ({
           {!emptyData && singleSelect && <Th screenReaderText={t('Row select')} />}
           {isExpandable && !emptyData && <Th screenReaderText={t('Expand row')} />}
           {columns.map((c) => (
-            <Th key={c.name} {...c.thProps} aria-label={c.name} className="fctl-tableth__helper-text">
+            <Th key={c.name} {...c.thProps} aria-label={c.name}>
               {c.helperText ? (
-                <LabelWithHelperText label={c.name} content={c.helperText} triggerAction="hover" />
+                <LabelWithHelperText label={c.name} content={c.helperText} isInline triggerAction="hover" />
               ) : (
                 c.name
               )}

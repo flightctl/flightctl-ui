@@ -1,9 +1,9 @@
 import { type Device, type DeviceCapabilities, OsModeType } from '@flightctl/types';
 
 export const getDeviceCapability = (
-  device: Device,
+  capabilities: DeviceCapabilities | undefined,
   capability: keyof DeviceCapabilities,
-): DeviceCapabilities[keyof DeviceCapabilities] | undefined => device.status?.capabilities?.[capability];
+): DeviceCapabilities[keyof DeviceCapabilities] | undefined => capabilities?.[capability];
 
 export const hasPackageModeCapability = (device: Device): boolean =>
-  getDeviceCapability(device, 'osMode') === OsModeType.OsModePackage;
+  getDeviceCapability(device?.status?.capabilities, 'osMode') === OsModeType.OsModePackage;

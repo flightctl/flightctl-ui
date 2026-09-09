@@ -68,6 +68,42 @@ export const getSeverityCountValue = (severity: Severity, counts: CveCountsBySev
   }
 };
 
+export type SeverityTileColumnSpan = 2 | 3 | 4;
+
+export type SeverityTilesLayout = 'overview' | 'entityDetail';
+
+export type VisibleSeverityTilesConfig = {
+  severities: Severity[];
+  columnSpan: SeverityTileColumnSpan;
+};
+
+export const getVisibleSeverityTilesConfig = (
+  counts: Pick<CveCountsBySeverity, 'none' | 'unknown'>,
+  layout: SeverityTilesLayout = 'overview',
+): VisibleSeverityTilesConfig => {
+  const hasAllSeverities = counts.none > 0 || counts.unknown > 0;
+  const severityThresholdIndex = VULNERABILITY_SEVERITY_ORDER.indexOf(Vulnerability.severity.LOW);
+
+  const severities = VULNERABILITY_SEVERITY_ORDER.filter((severity, index) => {
+    if (!hasAllSeverities && index > severityThresholdIndex) {
+      return false;
+    }
+    return true;
+  });
+
+  let columnSpan: SeverityTileColumnSpan;
+  if (hasAllSeverities) {
+    columnSpan = layout === 'entityDetail' ? 2 : 4;
+  } else {
+    columnSpan = 3;
+  }
+
+  return {
+    severities,
+    columnSpan,
+  };
+};
+
 export const getSeverityLabel = (severity: Severity, t: TFunction): string => {
   switch (severity) {
     case Vulnerability.severity.CRITICAL:
@@ -84,4 +120,23 @@ export const getSeverityLabel = (severity: Severity, t: TFunction): string => {
     default:
       return t('Undefined');
   }
+};
+
+export const getSeverityToggleResult = (
+  severity: Severity,
+  selectedSeverities: Severity[],
+): { selectedSeverities: Severity[]; expandTable: boolean } => {
+  const isSelected = selectedSeverities.includes(severity);
+
+  if (isSelected) {
+    return {
+      selectedSeverities: selectedSeverities.filter((selectedSeverity) => selectedSeverity !== severity),
+      expandTable: false,
+    };
+  }
+
+  return {
+    selectedSeverities: selectedSeverities.concat(severity),
+    expandTable: true,
+  };
 };

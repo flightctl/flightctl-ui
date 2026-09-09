@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Button, Grid, GridItem, Icon } from '@patternfly/react-core';
+import { Alert, Button, Flex, FlexItem, Icon } from '@patternfly/react-core';
 import { PencilAltIcon } from '@patternfly/react-icons/dist/js/icons/pencil-alt-icon';
 import { Formik, useField } from 'formik';
 import * as Yup from 'yup';
@@ -129,7 +129,7 @@ const DeviceAliasEdit = ({ deviceId, hasLabels, alias: originalAlias = '', onAli
   );
 
   return (
-    <Grid hasGutter>
+    <Flex direction={{ default: 'column' }} alignItems={{ default: 'alignItemsFlexStart' }} gap={{ default: 'gapSm' }}>
       <Formik<DeviceAliasEditValues>
         initialValues={{
           alias: originalAlias,
@@ -140,7 +140,7 @@ const DeviceAliasEdit = ({ deviceId, hasLabels, alias: originalAlias = '', onAli
         validateOnBlur
         onSubmit={onSubmit}
       >
-        <GridItem md={6}>
+        <FlexItem>
           {isEditing ? (
             <DeviceAliasInputField
               alias={originalAlias}
@@ -149,31 +149,37 @@ const DeviceAliasEdit = ({ deviceId, hasLabels, alias: originalAlias = '', onAli
               toggleIsEditing={toggleIsEditing}
             />
           ) : (
-            <>
-              {originalAlias || t('Untitled')}
-              <Button
-                variant="plain"
-                aria-label={t('Edit alias')}
-                onClick={toggleIsEditing}
-                isDisabled={isSubmitting}
-                icon={
-                  <Icon size="md">
-                    <PencilAltIcon />
-                  </Icon>
-                }
-              />
-            </>
+            <Flex
+              alignItems={{ default: 'alignItemsCenter' }}
+              gap={{ default: 'gapSm' }}
+              flexWrap={{ default: 'nowrap' }}
+            >
+              <FlexItem>{originalAlias || t('Untitled')}</FlexItem>
+              <FlexItem>
+                <Button
+                  variant="plain"
+                  aria-label={t('Edit alias')}
+                  onClick={toggleIsEditing}
+                  isDisabled={isSubmitting}
+                  icon={
+                    <Icon size="md">
+                      <PencilAltIcon />
+                    </Icon>
+                  }
+                />
+              </FlexItem>
+            </Flex>
           )}
-        </GridItem>
+        </FlexItem>
       </Formik>
-      <GridItem md={8}>
-        {submitError && (
+      {submitError && (
+        <FlexItem>
           <Alert isInline variant="danger" title={t('Device alias could not be updated')}>
             {getErrorMessage(submitError)}
           </Alert>
-        )}
-      </GridItem>
-    </Grid>
+        </FlexItem>
+      )}
+    </Flex>
   );
 };
 

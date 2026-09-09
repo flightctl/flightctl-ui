@@ -1,0 +1,11 @@
+.fctl-device-details-status-accent {
+  padding-inline-start: var(--pf-global--spacer--sm, 0.5rem);
+}
+
+.fctl-device-details-status-accent--warning {
+  border-inline-start: 3px solid var(--pf-t--global--border--color--status--warning--default, #dca614);
+}
+
+.fctl-device-details-status-accent--danger {
+  border-inline-start: 3px solid var(--pf-t--global--border--color--status--danger--default, #b1380b);
+}

@@ -8,6 +8,7 @@ type EditableLabelControlProps = {
   addButtonText?: string;
   defaultLabel: string;
   onAddLabel: (text: string) => void;
+  className?: string;
 };
 
 const EditableLabelControl = ({
@@ -15,6 +16,7 @@ const EditableLabelControl = ({
   defaultLabel,
   onAddLabel,
   isEditable = true,
+  className,
 }: EditableLabelControlProps) => {
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
   const [label, setLabel] = React.useState<string>('');
@@ -56,6 +58,7 @@ const EditableLabelControl = ({
       variant="link"
       isInline
       isDisabled={!isEditable}
+      className={className}
       onClick={() => {
         setIsEditing(true);
         setLabel(defaultLabel);

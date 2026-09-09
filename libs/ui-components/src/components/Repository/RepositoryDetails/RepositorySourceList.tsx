@@ -1,24 +1,20 @@
 import React from 'react';
-import { Divider, List, ListItem, Spinner, Stack, StackItem } from '@patternfly/react-core';
+import {
+  DescriptionList,
+  DescriptionListDescription,
+  DescriptionListGroup,
+  DescriptionListTerm,
+  Divider,
+  Spinner,
+  Stack,
+  StackItem,
+} from '@patternfly/react-core';
 
-import { type DependencySyncConfigRefStatus, type DependencySyncStatus, type Repository } from '@flightctl/types';
-import { useFetch } from '../../../hooks/useFetch';
+import { type DependencySyncConfigRefStatus, type DependencySyncStatus } from '@flightctl/types';
 import { type ConfigSourceProvider, getRepoName, isRepoConfig } from '../../../types/deviceSpec';
-import { isPromiseRejected } from '../../../types/typeUtils';
-import { getErrorMessage } from '../../../utils/error';
+import { type RepositoryDetails, useRepositoryDetailsMap } from '../../../hooks/useRepositoryDetailsMap';
+import RepositorySource from './RepositorySource';
 import ConfigSourceSyncDetails from './ConfigSourceSyncDetails';
-import { getConfigDetails } from './RepositorySource';
-import { getRepoUrlOrRegistry } from '../CreateRepository/utils';
-
-const useArrayEq = (array: string[]) => {
-  const prevArrayRef = React.useRef(array);
-
-  if (prevArrayRef.current.length !== array.length || prevArrayRef.current.some((item) => !array.includes(item))) {
-    prevArrayRef.current = array;
-  }
-
-  return prevArrayRef.current;
-};
 
 const getSyncRef = (
   configProviderName: string,
@@ -31,48 +27,46 @@ const getSyncRef = (
   return null;
 };
 
-type RepoLoadDetails = { url?: string; errorMsg?: string };
-
 type RepositorySourceListProps = {
   configs: Array<ConfigSourceProvider>;
   dependencyStatus?: DependencySyncStatus;
+  showNames?: boolean;
 };
 
-const RepositorySourceList = ({ configs, dependencyStatus }: RepositorySourceListProps) => {
-  const { get } = useFetch();
+export const RepositorySourcePlainList = ({ configs }: { configs: ConfigSourceProvider[] }) => {
+  const { repoDetailsMap, isLoading } = useRepositoryDetailsMap(configs);
+
+  if (configs.length === 0) {
+    return '-';
+  }
+
+  if (isLoading) {
+    return <Spinner size="sm" />;
+  }
+
+  return (
+    <Stack hasGutter>
+      {configs.map((config) => {
+        const repoName = isRepoConfig(config) ? getRepoName(config) : undefined;
+        const repoDetails = repoName ? repoDetailsMap[repoName] : undefined;
+
+        return (
+          <StackItem key={config.name}>
+            <RepositorySource config={config} repoDetails={repoDetails} />
+          </StackItem>
+        );
+      })}
+    </Stack>
+  );
+};
+
+const RepositorySourceDescriptionList = ({
+  configs,
+  dependencyStatus,
+  showNames = true,
+}: RepositorySourceListProps) => {
   const repoConfigs = configs.filter(isRepoConfig);
-
-  // Map indexed by repository name, with the result of fetching the repository details
-  const [repoDetailsMap, setRepoDetailsMap] = React.useState<Record<string, Record<string, RepoLoadDetails>>>({});
-
-  const repoConfigNames = useArrayEq(repoConfigs.map((config) => config.name));
-  const repositoryNames = useArrayEq(repoConfigs.map(getRepoName));
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
-
-  React.useEffect(() => {
-    const fetch = async () => {
-      const promises = repositoryNames.map((repoName) => get<Repository>(`repositories/${repoName}`));
-      const results = await Promise.allSettled(promises);
-
-      const map = {};
-      results.forEach((result, index) => {
-        const isRepoMissing = isPromiseRejected(result);
-        const repoName = repositoryNames[index];
-
-        const repoInfo: { url?: string; errorMsg?: string } = {};
-        if (isRepoMissing) {
-          repoInfo.errorMsg = getErrorMessage(result.reason);
-        } else {
-          repoInfo.url = getRepoUrlOrRegistry(result.value.spec);
-        }
-        map[repoName] = repoInfo;
-      });
-      setRepoDetailsMap(map);
-      setIsLoading(false);
-    };
-
-    void fetch();
-  }, [get, repoConfigNames, repositoryNames]);
+  const { repoDetailsMap, isLoading } = useRepositoryDetailsMap(repoConfigs);
 
   if (isLoading) {
     return <Spinner size="sm" />;
@@ -86,43 +80,48 @@ const RepositorySourceList = ({ configs, dependencyStatus }: RepositorySourceLis
   const hasSyncDetails = configSyncs.some((sync) => sync !== null);
 
   return (
-    <List isPlain>
+    <DescriptionList isHorizontal isCompact horizontalTermWidthModifier={{ default: '12ch' }}>
       {configs.map((config, index) => {
         const addDivider = hasSyncDetails && index !== configs.length - 1;
 
-        let extraArgs = {};
+        let repoDetails: RepositoryDetails | undefined = undefined;
         if (isRepoConfig(config)) {
           const repoName = getRepoName(config);
-          extraArgs = repoDetailsMap[repoName] || {};
+          repoDetails = repoDetailsMap[repoName] || undefined;
         }
 
         const syncRef = configSyncs[index];
         return (
-          <ListItem key={config.name}>
-            <Stack>
-              <StackItem>{getConfigDetails(config, extraArgs)}</StackItem>
-              {syncRef && (
+          <DescriptionListGroup key={config.name}>
+            {showNames && <DescriptionListTerm>{config.name}</DescriptionListTerm>}
+            <DescriptionListDescription>
+              <Stack hasGutter className="fctl-config-source-description">
                 <StackItem>
-                  <ConfigSourceSyncDetails syncRef={syncRef} />
+                  <RepositorySource config={config} repoDetails={repoDetails} />
                 </StackItem>
-              )}
-              {addDivider && (
-                <StackItem className="pf-v6-u-my-sm">
-                  <Divider
-                    style={
-                      {
-                        '--pf-v6-c-divider--Color': 'var(--pf-t--global--border--color--50)',
-                      } as React.CSSProperties
-                    }
-                  />
-                </StackItem>
-              )}
-            </Stack>
-          </ListItem>
+                {syncRef && (
+                  <StackItem className="fctl-config-source-description__sync">
+                    <ConfigSourceSyncDetails syncRef={syncRef} />
+                  </StackItem>
+                )}
+                {addDivider && (
+                  <StackItem className="pf-v6-u-my-sm">
+                    <Divider
+                      style={
+                        {
+                          '--pf-v6-c-divider--Color': 'var(--pf-t--global--border--color--50)',
+                        } as React.CSSProperties
+                      }
+                    />
+                  </StackItem>
+                )}
+              </Stack>
+            </DescriptionListDescription>
+          </DescriptionListGroup>
         );
       })}
-    </List>
+    </DescriptionList>
   );
 };
 
-export default RepositorySourceList;
+export default RepositorySourceDescriptionList;

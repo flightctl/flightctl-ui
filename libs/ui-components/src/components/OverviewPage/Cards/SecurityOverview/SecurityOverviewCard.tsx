@@ -14,7 +14,7 @@ import {
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../../hooks/useNavigate';
 import { useVulnerabilitySummary } from '../../../../hooks/useVulnerabilitySummary';
-import SecurityOverviewSummary from '../../../SecurityOverview/SecurityOverviewSummary';
+import { SecurityOverviewSummaryOverview } from '../../../SecurityOverview/SecurityOverviewSummary';
 import LabelWithHelperText from '../../../common/WithHelperText';
 
 const SecurityOverviewCard = () => {
@@ -63,7 +63,7 @@ const SecurityOverviewCard = () => {
             <Spinner />
           </Bullseye>
         ) : (
-          <SecurityOverviewSummary />
+          <SecurityOverviewSummaryOverview />
         )}
       </CardBody>
     </Card>

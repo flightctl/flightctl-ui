@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Trans } from 'react-i18next';
-import { Button, DropdownItem, Tab } from '@patternfly/react-core';
+import { Button, DropdownItem, Flex, FlexItem, Tab } from '@patternfly/react-core';
 
 import {
   type Device,
@@ -37,6 +37,7 @@ import EventsCard from '../../Events/EventsCard';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { YamlEditorLoader } from '../../common/CodeEditor/YamlEditor';
 import DeviceAliasEdit from './DeviceAliasEdit';
+import DeviceLastSeenHeader from './DeviceLastSeenHeader';
 import { SystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 import DeviceDetailsCatalog from './DeviceDetailsCatalog';
 import ActionsDropdownList from '../../common/ActionsDropdownList';
@@ -142,18 +143,27 @@ const DeviceDetailsPage = ({ children }: React.PropsWithChildren) => {
       breadcrumbTitle={deviceAlias}
       titleDataTestId="device-details-title"
       title={
-        canEdit ? (
-          /* key={deviceAlias} is needed for the input field to be initialized with the alias as its value */
-          <DeviceAliasEdit
-            key={deviceAlias}
-            deviceId={deviceId}
-            alias={deviceAlias}
-            hasLabels={!!deviceLabels}
-            onAliasEdited={refetch}
-          />
-        ) : (
-          deviceAlias
-        )
+        <Flex alignItems={{ default: 'alignItemsBaseline' }} gap={{ default: 'gapSm' }} flexWrap={{ default: 'wrap' }}>
+          <FlexItem>
+            {canEdit ? (
+              /* key={deviceAlias} is needed for the input field to be initialized with the alias as its value */
+              <DeviceAliasEdit
+                key={deviceAlias}
+                deviceId={deviceId}
+                alias={deviceAlias}
+                hasLabels={!!deviceLabels}
+                onAliasEdited={refetch}
+              />
+            ) : (
+              deviceAlias
+            )}
+          </FlexItem>
+          {device && isEnrolled && (
+            <FlexItem>
+              <DeviceLastSeenHeader device={device} />
+            </FlexItem>
+          )}
+        </Flex>
       }
       banner={
         device && (

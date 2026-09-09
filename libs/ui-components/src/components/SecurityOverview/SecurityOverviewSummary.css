@@ -1,7 +1,79 @@
+.fctl-security-overview-summary-tile-wrapper {
+  display: block;
+  height: 100%;
+}
+
 .fctl-security-overview-summary-box {
   padding: var(--pf-t--global--spacer--sm);
   border-radius: var(--pf-t--global--border--radius--medium);
   font-weight: var(--pf-t--global--font--weight--body--bold);
+  border: 2px solid transparent;
+  box-sizing: border-box;
+}
+
+.fctl-security-overview-summary-box--interactive {
+  cursor: pointer;
+}
+
+.fctl-security-overview-summary-box--interactive.critical:hover,
+.fctl-security-overview-summary-box--interactive.critical.fctl-security-overview-summary-box--selected {
+  border-color: var(--pf-t--global--icon--color--severity--critical--default);
+}
+
+.fctl-security-overview-summary-box--interactive.high:hover,
+.fctl-security-overview-summary-box--interactive.high.fctl-security-overview-summary-box--selected {
+  border-color: var(--pf-t--global--icon--color--severity--important--default);
+}
+
+.fctl-security-overview-summary-box--interactive.medium:hover,
+.fctl-security-overview-summary-box--interactive.medium.fctl-security-overview-summary-box--selected {
+  border-color: var(--pf-t--global--icon--color--severity--moderate--default);
+}
+
+.fctl-security-overview-summary-box--interactive.low:hover,
+.fctl-security-overview-summary-box--interactive.low.fctl-security-overview-summary-box--selected,
+.fctl-security-overview-summary-box--interactive.unknown:hover,
+.fctl-security-overview-summary-box--interactive.unknown.fctl-security-overview-summary-box--selected {
+  border-color: var(--pf-t--global--icon--color--severity--minor--default);
+}
+
+.fctl-security-overview-summary-box--interactive.none:hover,
+.fctl-security-overview-summary-box--interactive.none.fctl-security-overview-summary-box--selected {
+  border-color: var(--pf-t--global--icon--color--severity--none--default);
+}
+
+/* Dark theme - interactive border colors (hover/selected only) */
+.pf-v6-theme-dark .fctl-security-overview-summary-box--interactive.critical:hover,
+.pf-v6-theme-dark
+  .fctl-security-overview-summary-box--interactive.critical.fctl-security-overview-summary-box--selected {
+  border-color: var(--pf-t--global--color--nonstatus--orangered--default);
+}
+
+.pf-v6-theme-dark .fctl-security-overview-summary-box--interactive.high:hover,
+.pf-v6-theme-dark .fctl-security-overview-summary-box--interactive.high.fctl-security-overview-summary-box--selected {
+  border-color: var(--pf-t--global--color--nonstatus--orange--default);
+}
+
+.pf-v6-theme-dark .fctl-security-overview-summary-box--interactive.medium:hover,
+.pf-v6-theme-dark .fctl-security-overview-summary-box--interactive.medium.fctl-security-overview-summary-box--selected {
+  /* Patternfly does not have a semantic token for moderate severity border in dark mode. */
+  border-color: #fff4cc;
+}
+
+.pf-v6-theme-dark .fctl-security-overview-summary-box--interactive.unknown:hover,
+.pf-v6-theme-dark .fctl-security-overview-summary-box--interactive.unknown.fctl-security-overview-summary-box--selected,
+.pf-v6-theme-dark .fctl-security-overview-summary-box--interactive.none:hover,
+.pf-v6-theme-dark .fctl-security-overview-summary-box--interactive.none.fctl-security-overview-summary-box--selected {
+  border-color: var(--pf-t--color--white);
+}
+
+.pf-v6-theme-dark .fctl-security-overview-summary-box--interactive.low:hover,
+.pf-v6-theme-dark .fctl-security-overview-summary-box--interactive.low.fctl-security-overview-summary-box--selected {
+  border-color: var(--pf-t--global--color--nonstatus--blue--default);
+}
+
+.fctl-security-overview-summary-box--interactive.fctl-security-overview-summary-box--selected {
+  border-width: 3px;
 }
 
 /* 

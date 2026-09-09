@@ -72,19 +72,7 @@ const LabelsField = ({
 
   return (
     <>
-      <LabelGroup
-        numLabels={5}
-        isEditable={!isLoading}
-        data-testid={labelGroupTestId}
-        addLabelControl={
-          <EditableLabelControl
-            defaultLabel="key=value"
-            addButtonText={addButtonText}
-            onAddLabel={onAdd}
-            isEditable={!isLoading}
-          />
-        }
-      >
+      <LabelGroup numLabels={5} isEditable={!isLoading} data-testid={labelGroupTestId}>
         {labels
           .map((label, originalIndex) => ({ ...label, originalIndex }))
           .map(({ key, value, originalIndex }) => {
@@ -110,6 +98,13 @@ const LabelsField = ({
             );
           })}
       </LabelGroup>
+      <EditableLabelControl
+        defaultLabel="key=value"
+        addButtonText={addButtonText}
+        onAddLabel={onAdd}
+        isEditable={!isLoading}
+        className={labels.length === 0 ? '' : 'pf-v6-u-mt-md'}
+      />
       <DefaultHelperText helperText={helperText} />
       <ErrorHelperText meta={meta} touchRequired={false} />
     </>

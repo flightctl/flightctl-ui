@@ -15,7 +15,7 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import LabelsView from '../../../common/LabelsView';
 import { toAPILabel } from '../../../../utils/labels';
 import { getErrorMessage } from '../../../../utils/error';
-import RepositorySourceList from '../../../Repository/RepositoryDetails/RepositorySourceList';
+import { RepositorySourcePlainList } from '../../../Repository/RepositoryDetails/RepositorySourceList';
 import { getApiConfig } from '../deviceSpecUtils';
 import ReviewApplications from './ReviewApplications';
 import SystemImage from '../SystemImageDescriptionGroup';
@@ -59,7 +59,7 @@ const ReviewStep = ({ error }: { error?: string }) => {
             <DescriptionListGroup>
               <DescriptionListTerm>{t('Configurations')}</DescriptionListTerm>
               <DescriptionListDescription>
-                <RepositorySourceList configs={values.configTemplates.map(getApiConfig)} />
+                <RepositorySourcePlainList configs={values.configTemplates.map(getApiConfig)} />
               </DescriptionListDescription>
             </DescriptionListGroup>
           )}

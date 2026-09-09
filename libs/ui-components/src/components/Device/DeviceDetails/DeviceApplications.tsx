@@ -1,20 +1,23 @@
 import * as React from 'react';
-import { CardBody, CardTitle } from '@patternfly/react-core';
+import { CardBody, Label } from '@patternfly/react-core';
+import CubesIcon from '@patternfly/react-icons/dist/js/icons/cubes-icon';
 
-import { type Device } from '@flightctl/types';
+import type { Device } from '@flightctl/types';
+import type { DeviceHealthItem } from '../../../hooks/useDeviceOverallHealth';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { getLifecycleDisabledReason } from '../../../utils/devices';
 import { getDeviceAppLifecycleOverrides } from '../../../utils/applicationLifecycle';
 import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
-import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
+import DetailsPageCard, { DetailsPageCardTitle } from '../../DetailsPage/DetailsPageCard';
 
 type DeviceDetailsTabProps = {
   device: Required<Device>;
+  health: DeviceHealthItem;
   refetch?: VoidFunction;
 };
 
-const DeviceApplications = ({ device, refetch = () => undefined }: DeviceDetailsTabProps) => {
+const DeviceApplications = ({ device, health, refetch = () => undefined }: DeviceDetailsTabProps) => {
   const { t } = useTranslation();
   const {
     router: { useNavigate: useRouterNavigate },
@@ -32,8 +35,16 @@ const DeviceApplications = ({ device, refetch = () => undefined }: DeviceDetails
   );
 
   return (
-    <DetailsPageCard isCompact>
-      <CardTitle>{t('Applications')}</CardTitle>
+    <DetailsPageCard id="device-applications-card" isCompact>
+      <DetailsPageCardTitle
+        title={t('Applications')}
+        icon={<CubesIcon />}
+        badge={
+          health.level !== null && (
+            <Label status={health.level}>{t('{{count}} application errors', { count: health.itemCount })}</Label>
+          )
+        }
+      />
       <CardBody>
         <ApplicationsTable
           deviceName={device.metadata.name as string}

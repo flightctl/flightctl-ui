@@ -1,0 +1,10 @@
+.fctl-label-withhelpertext {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--pf-t--global--spacer--xs);
+}
+
+.fctl-label-withhelpertext.fctl-label-withhelpertext--inline .pf-v6-c-button {
+  --pf-v6-c-button--PaddingBlockEnd: 0;
+  --pf-v6-c-button--PaddingBlockStart: 0;
+}

@@ -9,29 +9,18 @@ import {
   DescriptionListTerm,
   Grid,
   GridItem,
-  Stack,
-  StackItem,
-  type gridSpans,
 } from '@patternfly/react-core';
 
 import { type Device } from '@flightctl/types';
 import { isDeviceEnrolled } from '../../../utils/devices';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import { useDeviceSpecSystemInfo } from '../../../hooks/useDeviceSpecSystemInfo';
-import { useVulnerabilitiesEnabled } from '../../../hooks/useServicesEnabled';
-import EditLabelsForm, { ViewLabels } from '../../modals/EditLabelsModal/EditLabelsForm';
 import ResourceLink from '../../common/ResourceLink';
 import LabelWithHelperText from '../../common/WithHelperText';
 import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 import DeviceLifecycleStatus from '../../Status/DeviceLifecycleStatus';
-import DeviceFleet from './DeviceFleet';
-import DeviceApplications from './DeviceApplications';
-import DeviceSystemdUnits from './DeviceSystemdUnits';
-import DeviceVulnerabilities from './DeviceVulnerabilities';
 import ConfigurationsContent from './DeviceDetailsTabContent/ConfigurationsContent';
-import StatusContent from './DeviceDetailsTabContent/StatusContent';
-import SystemResourcesContent from './DeviceDetailsTabContent/SystemResourcesContent';
+import DeviceOverviewLayout from './DeviceOverviewLayout';
 
 import './DeviceDetailsTab.css';
 
@@ -46,116 +35,11 @@ const EnrolledDeviceDetails = ({
   refetch,
   canEdit,
   children,
-}: React.PropsWithChildren<DeviceDetailsTabProps>) => {
-  const { t } = useTranslation();
-  const devSystemInfo = useDeviceSpecSystemInfo(device.status, t);
-  const [vulnerabilitiesEnabled, canListVulnerabilities] = useVulnerabilitiesEnabled();
-  const showVulnerabilities = vulnerabilitiesEnabled && canListVulnerabilities;
-
-  const hasExtraColumn = !!children;
-  return (
-    <Grid hasGutter>
-      <GridItem md={12}>
-        <DetailsPageCard>
-          <CardBody>
-            <Grid>
-              <GridItem md={6} lg={hasExtraColumn ? 2 : 3}>
-                <Stack>
-                  <StackItem className="fctl-device-details-tab__label">{t('Name')}</StackItem>
-                  <StackItem>
-                    <ResourceLink id={device.metadata.name || '-'} />
-                  </StackItem>
-                </Stack>
-              </GridItem>
-              {hasExtraColumn && (
-                <GridItem md={6} lg={2}>
-                  {children}
-                </GridItem>
-              )}
-              <GridItem md={6} lg={hasExtraColumn ? 2 : 3}>
-                <Stack>
-                  <StackItem className="fctl-device-details-tab__label">{t('Fleet name')}</StackItem>
-                  <StackItem>
-                    <DeviceFleet device={device} />
-                  </StackItem>
-                </Stack>
-              </GridItem>
-              <GridItem md={12} lg={6}>
-                <Stack>
-                  <StackItem className="fctl-device-details-tab__label">{t('Labels')}</StackItem>
-                  <StackItem>
-                    {canEdit ? (
-                      <EditLabelsForm device={device} onDeviceUpdate={refetch} />
-                    ) : (
-                      <ViewLabels device={device} />
-                    )}
-                  </StackItem>
-                </Stack>
-              </GridItem>
-            </Grid>
-            {devSystemInfo.baseInfo.length > 0 && (
-              <Grid hasGutter className="pf-v6-u-pt-md">
-                {devSystemInfo.baseInfo.map((systemInfo, index) => {
-                  const sizes: gridSpans[] = hasExtraColumn ? [2, 2, 2, 6] : [3, 3, 6];
-                  const colSize = sizes[index % (hasExtraColumn ? 4 : 3)];
-                  return (
-                    <GridItem md={6} lg={colSize} key={systemInfo.title}>
-                      <Stack>
-                        <StackItem className="fctl-device-details-tab__label">{systemInfo.title}</StackItem>
-                        <StackItem>{systemInfo.value}</StackItem>
-                      </Stack>
-                    </GridItem>
-                  );
-                })}
-              </Grid>
-            )}
-          </CardBody>
-        </DetailsPageCard>
-      </GridItem>
-      {devSystemInfo.customInfo.length > 0 && (
-        <GridItem md={12} lg={6}>
-          <DetailsPageCard>
-            <CardTitle>{t('Custom data')}</CardTitle>
-            <CardBody>
-              <Grid hasGutter>
-                {devSystemInfo.customInfo.map((systemInfo) => {
-                  return (
-                    <GridItem md={4} key={systemInfo.title}>
-                      <Stack>
-                        <StackItem className="fctl-device-details-tab__label">{systemInfo.title}</StackItem>
-                        <StackItem>{systemInfo.value}</StackItem>
-                      </Stack>
-                    </GridItem>
-                  );
-                })}
-              </Grid>
-            </CardBody>
-          </DetailsPageCard>
-        </GridItem>
-      )}
-      <GridItem md={12} lg={6}>
-        <StatusContent device={device} />
-      </GridItem>
-      <GridItem md={12} lg={6}>
-        <SystemResourcesContent device={device} />
-      </GridItem>
-      <GridItem md={12} lg={6}>
-        <ConfigurationsContent device={device} />
-      </GridItem>
-      {showVulnerabilities && (
-        <GridItem md={12}>
-          <DeviceVulnerabilities deviceId={device.metadata.name as string} />
-        </GridItem>
-      )}
-      <GridItem md={12}>
-        <DeviceApplications device={device} refetch={refetch} />
-      </GridItem>
-      <GridItem md={12} lg={6}>
-        <DeviceSystemdUnits device={device} />
-      </GridItem>
-    </Grid>
-  );
-};
+}: React.PropsWithChildren<DeviceDetailsTabProps>) => (
+  <DeviceOverviewLayout device={device} refetch={refetch} canEdit={canEdit}>
+    {children}
+  </DeviceOverviewLayout>
+);
 
 const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildren<{ device: Required<Device> }>) => {
   const { t } = useTranslation();
@@ -192,7 +76,12 @@ const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildr
       </GridItem>
 
       <GridItem md={12} lg={6}>
-        <ConfigurationsContent device={device} />
+        <DetailsPageCard>
+          <CardTitle>{t('Configurations')}</CardTitle>
+          <CardBody>
+            <ConfigurationsContent device={device} />
+          </CardBody>
+        </DetailsPageCard>
       </GridItem>
       <GridItem md={12} lg={6}>
         <DetailsPageCard>

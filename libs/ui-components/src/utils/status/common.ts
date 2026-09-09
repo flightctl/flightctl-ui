@@ -15,6 +15,19 @@ import defaultColor from '@patternfly/react-tokens/dist/js/t_chart_color_black_2
 
 export type StatusLevel = 'custom' | 'info' | 'success' | 'warning' | 'danger' | 'unknown';
 
+export type HealthLevel = 'danger' | 'warning' | null;
+
+export const getStatusLevelFromMap = <T extends string>(
+  status: T | undefined,
+  levels: Record<T, StatusLevel>,
+): StatusLevel => {
+  if (!status || !Object.prototype.hasOwnProperty.call(levels, status)) {
+    // Unrecognized status value (or a prototype key such as "toString")
+    return 'unknown';
+  }
+  return levels[status];
+};
+
 export interface StatusItem<T extends string> {
   id: T;
   label: string;

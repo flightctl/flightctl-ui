@@ -10,7 +10,7 @@ import {
 } from '@flightctl/types';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import { type StatusLevel } from '../../utils/status/common';
+import { getDeviceResourceStatusLevel } from '../../utils/status/resources';
 import { StatusDisplayContent } from './StatusDisplay';
 
 export enum MonitorType {
@@ -70,7 +70,6 @@ const DeviceResourceStatus = ({ device, monitorType }: { device: Device | undefi
     return <StatusDisplayContent level="unknown" label={t('Unknown')} />;
   }
 
-  let level: StatusLevel;
   let label: string;
   let messageTitle: string = '';
   const status = device.status?.resources[monitorType];
@@ -88,26 +87,9 @@ const DeviceResourceStatus = ({ device, monitorType }: { device: Device | undefi
     label = status || t('Unknown');
   }
 
-  switch (status) {
-    case DeviceResourceStatusType.DeviceResourceStatusHealthy:
-      level = 'success';
-      break;
-    case DeviceResourceStatusType.DeviceResourceStatusWarning:
-      level = 'warning';
-      break;
-    case DeviceResourceStatusType.DeviceResourceStatusCritical:
-    case DeviceResourceStatusType.DeviceResourceStatusError:
-      level = 'danger';
-      break;
-    case DeviceResourceStatusType.DeviceResourceStatusUnknown:
-    case undefined:
-      level = 'unknown';
-      break;
-  }
-
   return (
     <StatusDisplayContent
-      level={level}
+      level={getDeviceResourceStatusLevel(status)}
       label={label}
       messageTitle={messageTitle}
       message={triggeredAlert?.description}
