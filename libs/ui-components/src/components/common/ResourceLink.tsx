@@ -1,54 +1,32 @@
 import * as React from 'react';
 
 import { Link, type RouteWithPostfix } from '../../hooks/useNavigate';
-import CopyButton from './CopyButton';
+import TruncatedText from './TruncatedText';
 
-import './ResourceLink.css';
-
-const maxDisplayLength = 50;
+export { getDisplayText } from '../../utils/displayText';
 
 type ResourceDisplayLinkProps = {
   id: string;
   name?: string;
-  variant?: 'shortened' | 'full';
   routeLink?: RouteWithPostfix;
   'data-testid'?: string;
 };
 
-export const getDisplayText = (name: string | undefined) => {
-  if (!name) {
-    return '-';
-  }
-  if (name.length <= maxDisplayLength) {
-    return name;
-  }
-  return `${name.substring(0, 6)}...${name.substring(name.length - 7)}`;
-};
-
-const ResourceLink = ({
-  id,
-  name,
-  variant = 'shortened',
-  routeLink,
-  'data-testid': dataTestId,
-}: ResourceDisplayLinkProps) => {
+const ResourceLink = ({ id, name, routeLink, 'data-testid': dataTestId }: ResourceDisplayLinkProps) => {
   const nameOrId = name || id;
-  const displayText = getDisplayText(nameOrId);
-  const showCopy = nameOrId !== displayText;
-
-  const textEl = <span className="fctl-resource-link__text">{variant === 'full' ? nameOrId : displayText}</span>;
 
   return (
-    <span className={`fctl-resource-link fctl-resource-link__${variant}`}>
-      {routeLink ? (
-        <Link to={{ route: routeLink, postfix: id }} data-testid={dataTestId}>
-          {textEl}
-        </Link>
-      ) : (
-        <span data-testid={dataTestId}>{textEl}</span>
-      )}
-      {showCopy && nameOrId && <CopyButton text={nameOrId} />}
-    </span>
+    <TruncatedText text={nameOrId}>
+      {(textContent) =>
+        routeLink ? (
+          <Link to={{ route: routeLink, postfix: id }} data-testid={dataTestId}>
+            {textContent}
+          </Link>
+        ) : (
+          <span data-testid={dataTestId}>{textContent}</span>
+        )
+      }
+    </TruncatedText>
   );
 };
 

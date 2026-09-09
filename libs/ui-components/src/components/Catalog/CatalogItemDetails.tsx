@@ -35,9 +35,10 @@ import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { useItemIsInUse } from './useCatalogItems';
 import FlightCtlForm from '../form/FlightCtlForm';
 import { DeprecateModal, RestoreModal } from './DeprecateModal';
-import { getCatalogItemIcon, getFullContainerURI } from '../../utils/catalog';
+import { getCatalogItemIcon, getCatalogItemLabel, getFullContainerURI } from '../../utils/catalog';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import WithTooltip from '../common/WithTooltip';
+import { CatalogItemLabel } from './CatalogItemLabels';
 import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import FlightCtlPageDrawer from '../common/FlightCtlPageDrawer';
 import { InstallSpec } from './InstallWizard/steps/SpecificationsStep';
@@ -73,7 +74,9 @@ export const CatalogItemDetailsHeader = ({ item }: CatalogItemDetailsHeaderProps
         <img src={getCatalogItemIcon(item)} alt={`${item.metadata.name} icon`} style={{ maxWidth: '40px' }} />
       </SplitItem>
       <SplitItem isFilled>
-        <Title headingLevel="h1">{item.spec.displayName || item.metadata.name}</Title>
+        <Title headingLevel="h1">
+          <CatalogItemLabel item={item} shortened />
+        </Title>
         {item.spec.provider && (
           <Content component={ContentVariants.small}>
             {t('Provided by {{provider}}', { provider: item.spec.provider })}
@@ -102,7 +105,7 @@ const CatalogItemDetailsModal = ({
   const { t } = useTranslation();
   const { patch, remove } = useFetch();
 
-  const displayName = item.spec.displayName || (item.metadata.name as string);
+  const displayName = getCatalogItemLabel(item);
   const itemEndpoint = `catalogs/${item.metadata.catalog}/items/${item.metadata.name}`;
 
   switch (itemModalOpen) {

@@ -59,6 +59,9 @@ export const catalogItemCacheKey = (id: CatalogItemId): string => `${id.catalog}
 
 export const formatCatalogItemRef = (ref: CatalogItemRefSpec): string => `${ref.catalog}/${ref.item}:${ref.version}`;
 
+/** User-facing catalog item label: display name when set, otherwise system name. */
+export const getCatalogItemLabel = (item: CatalogItem): string => item.spec.displayName || item.metadata.name || '';
+
 export const toCatalogItemId = (ref: Pick<CatalogItemRefSpec, 'catalog' | 'item'>): CatalogItemId => ({
   catalog: ref.catalog,
   item: ref.item,
@@ -172,7 +175,7 @@ export const getFullContainerURI = (artifacts: CatalogItemArtifact[], version: C
 
 export const resolveCatalogRef = (item: CatalogItem, ref: CatalogItemRefSpec): ResolvedCatalogRef => {
   const version = getCurrentVersion(item, ref.version, ref);
-  const displayName = item.spec.displayName || item.metadata.name || ref.item;
+  const displayName = getCatalogItemLabel(item) || ref.item;
   const imageUri = version ? getFullContainerURI(item.spec.artifacts, version) : undefined;
   return {
     item,

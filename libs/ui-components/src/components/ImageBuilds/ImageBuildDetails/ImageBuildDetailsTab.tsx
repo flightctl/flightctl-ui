@@ -28,6 +28,7 @@ import ImagePromotionStatus from '../../ImagePromotion/ImagePromotionStatus';
 import { getDateDisplay } from '../../../utils/dates';
 import { getExportFormatLabel, getImageReference } from '../../../utils/imageBuilds';
 import { useTranslation } from '../../../hooks/useTranslation';
+import TruncatedText from '../../common/TruncatedText';
 import { useAppContext } from '../../../hooks/useAppContext';
 import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 import { CERTIFICATE_VALIDITY_IN_YEARS } from '../../../constants';
@@ -89,7 +90,9 @@ const ImagePromotionRow = ({
     <Tr>
       <Td dataLabel={t('Name')}>{imagePromotion.metadata.name || ''}</Td>
       <Td dataLabel={t('Target catalog')}>{imagePromotion.spec.target.catalogName}</Td>
-      <Td dataLabel={t('Target catalog item')}>{imagePromotion.spec.target.catalogItemName}</Td>
+      <Td dataLabel={t('Target catalog item')}>
+        <TruncatedText text={imagePromotion.spec.target.catalogItemName || ''} />
+      </Td>
 
       <Td dataLabel={t('Status')}>
         <ImagePromotionStatus promotion={imagePromotion} />
