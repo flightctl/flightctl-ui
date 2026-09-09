@@ -8,7 +8,7 @@ import FleetListPreview from './FleetListPreview';
 
 const viewerOrientation = (t: TFunction) =>
   t(
-    'Fleets group edge devices that share the same desired configuration: OS image, installed applications, and update policies. From this page you can see which devices belong to each fleet and check fleet compliance and system image versions.',
+    'Fleets group edge devices that share the same desired configuration: OS image, installed applications, and update policies. In the Fleets page, you can see which devices belong to each fleet and check fleet compliance and system image versions.',
   );
 
 const emptyTable = (t: TFunction) =>
@@ -30,7 +30,7 @@ type OpenFleetsStepProps = {
 const StepBodyContent = ({ hasFleets, canCreateFleet, isOnFleetsPage }: OpenFleetsStepProps) => {
   const { t } = useTranslation();
 
-  if (!isOnFleetsPage && !canCreateFleet) {
+  if (!isOnFleetsPage || !canCreateFleet) {
     return <StepBody>{viewerOrientation(t)}</StepBody>;
   }
 

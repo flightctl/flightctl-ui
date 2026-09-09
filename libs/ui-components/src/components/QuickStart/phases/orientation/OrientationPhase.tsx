@@ -40,7 +40,7 @@ const OrientationPhase = () => {
   }, [onBack, onNext, setGuideActions]);
 
   if (activePhaseId !== 'orientation') {
-    throw new Error('OrientationPhase expected orientation to be active');
+    throw new Error('OrientationPhase expected to be active');
   }
 
   switch (activeStepIndex) {

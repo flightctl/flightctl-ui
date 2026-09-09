@@ -2,7 +2,8 @@
   position: fixed;
   bottom: var(--pf-t--global--spacer--lg, 1.5rem);
   right: var(--pf-t--global--spacer--lg, 1.5rem);
-  z-index: 900;
+  /* Make the guide appear above the FlightCtlPageDrawer and below PatternFly modals */
+  z-index: 450;
   pointer-events: auto;
   width: 380px;
   max-width: calc(100vw - 2rem);

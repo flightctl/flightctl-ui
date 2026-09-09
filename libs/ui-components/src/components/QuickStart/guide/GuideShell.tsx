@@ -116,6 +116,8 @@ export const GuideShell = ({ children }: GuideShellProps) => {
   return ReactDOM.createPortal(
     <div
       ref={panelRef}
+      role="region"
+      aria-label={t('Quick start guide')}
       className={panelClassName}
       style={panelStyle}
       onPointerDown={handlePointerDown}

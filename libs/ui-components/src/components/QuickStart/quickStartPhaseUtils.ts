@@ -64,7 +64,6 @@ export const getPhaseStepCount = (
       return buildEnrollmentGuideSteps({
         checkPermissions,
         isOnDevicesPage: false,
-        isStepActionCompleted: () => false,
       }).length;
     case 'manage-fleet':
       return buildFleetManagementGuideSteps({

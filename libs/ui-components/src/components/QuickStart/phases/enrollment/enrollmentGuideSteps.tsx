@@ -17,7 +17,6 @@ import TeamEscalationStep from './steps/TeamEscalationStep';
 export interface EnrollmentGuideRuntimeOptions {
   checkPermissions: (checks: PermissionCheck[]) => boolean[];
   isOnDevicesPage: boolean;
-  isStepActionCompleted: (stepIndex: number) => boolean;
   hasDevices?: boolean;
   hasPendingDevices?: boolean;
 }

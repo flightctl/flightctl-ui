@@ -6,6 +6,7 @@ import ResourceLink from '../../../../common/ResourceLink';
 import { PreviewButton, SeeHowItLooksPreview } from '../../../guide/SeeHowItLooksPreview';
 import { ListPreviewTable } from '../../../guide/ListPreviewTable';
 import type { ApiTableColumn } from '../../../../Table/Table';
+import { getEnrollmentRequestTableColumns } from '../../../../EnrollmentRequest/EnrollmentRequestList';
 
 const enrollmentRequestId = 'mul6f5j1qiak0nsm9bl4n3f32bo4eub6oemntql56daoupdli2n0';
 
@@ -31,7 +32,15 @@ const PendingDeviceListPreviewRow = ({ columns }: { columns: ApiTableColumn[] })
 const PendingDeviceListPreview = () => {
   const { t } = useTranslation();
 
-  const columns = React.useMemo(() => [{ name: t('Alias') }, { name: t('Name') }, { name: t('Created') }], [t]);
+  const columns = React.useMemo(
+    () =>
+      getEnrollmentRequestTableColumns(t).concat({
+        id: 'approve',
+        name: '',
+        thProps: { screenReaderText: t('Approve') },
+      }),
+    [t],
+  );
 
   return (
     <SeeHowItLooksPreview title={t('Devices pending approval')}>

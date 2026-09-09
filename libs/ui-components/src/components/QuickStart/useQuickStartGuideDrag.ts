@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { QuickStartPhaseId } from './types';
 
 const VIEWPORT_MARGIN = 8;
+const DRAG_THRESHOLD_PX = 3;
 
 const clampPosition = (x: number, y: number, width: number, height: number) => {
   const maxX = Math.max(VIEWPORT_MARGIN, window.innerWidth - width - VIEWPORT_MARGIN);
@@ -16,19 +17,18 @@ export const useQuickStartGuideDrag = (activePhaseId: QuickStartPhaseId | undefi
   const panelRef = React.useRef<HTMLDivElement>(null);
   const [position, setPosition] = React.useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = React.useState(false);
-  const userPositionedRef = React.useRef(false);
   const dragRef = React.useRef<{
     pointerId: number;
     startX: number;
     startY: number;
     originX: number;
     originY: number;
+    hasMoved: boolean;
   } | null>(null);
 
   React.useEffect(() => {
     setPosition(null);
     setIsDragging(false);
-    userPositionedRef.current = false;
     dragRef.current = null;
   }, [activePhaseId]);
 
@@ -44,12 +44,9 @@ export const useQuickStartGuideDrag = (activePhaseId: QuickStartPhaseId | undefi
     return { x: rect.left, y: rect.top };
   }, [position]);
 
-  const endDrag = React.useCallback((pointerId: number, moved: boolean) => {
+  const endDrag = React.useCallback((pointerId: number) => {
     dragRef.current = null;
     setIsDragging(false);
-    if (moved) {
-      userPositionedRef.current = true;
-    }
     panelRef.current?.releasePointerCapture(pointerId);
   }, []);
 
@@ -70,15 +67,14 @@ export const useQuickStartGuideDrag = (activePhaseId: QuickStartPhaseId | undefi
       }
 
       const current = getPanelPosition();
-      setPosition(current);
       dragRef.current = {
         pointerId: event.pointerId,
         startX: event.clientX,
         startY: event.clientY,
         originX: current.x,
         originY: current.y,
+        hasMoved: false,
       };
-      setIsDragging(true);
       panel.setPointerCapture(event.pointerId);
       event.preventDefault();
     },
@@ -92,12 +88,17 @@ export const useQuickStartGuideDrag = (activePhaseId: QuickStartPhaseId | undefi
       return;
     }
 
-    const next = clampPosition(
-      drag.originX + event.clientX - drag.startX,
-      drag.originY + event.clientY - drag.startY,
-      panel.offsetWidth,
-      panel.offsetHeight,
-    );
+    const deltaX = event.clientX - drag.startX;
+    const deltaY = event.clientY - drag.startY;
+    if (!drag.hasMoved) {
+      if (Math.hypot(deltaX, deltaY) < DRAG_THRESHOLD_PX) {
+        return;
+      }
+      drag.hasMoved = true;
+      setIsDragging(true);
+    }
+
+    const next = clampPosition(drag.originX + deltaX, drag.originY + deltaY, panel.offsetWidth, panel.offsetHeight);
     setPosition(next);
   }, []);
 
@@ -107,8 +108,7 @@ export const useQuickStartGuideDrag = (activePhaseId: QuickStartPhaseId | undefi
       if (!drag || drag.pointerId !== event.pointerId) {
         return;
       }
-      const moved = Math.abs(event.clientX - drag.startX) > 3 || Math.abs(event.clientY - drag.startY) > 3;
-      endDrag(event.pointerId, moved);
+      endDrag(event.pointerId);
     },
     [endDrag],
   );
@@ -119,7 +119,7 @@ export const useQuickStartGuideDrag = (activePhaseId: QuickStartPhaseId | undefi
       if (!drag || drag.pointerId !== event.pointerId) {
         return;
       }
-      endDrag(event.pointerId, false);
+      endDrag(event.pointerId);
     },
     [endDrag],
   );

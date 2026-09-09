@@ -50,7 +50,7 @@ const ImageBuildingPhase = () => {
   }, [activeStep, activeStepIndex, completePhase, isLastStep, setStepIndex]);
 
   const onBack = React.useCallback(() => {
-    setStepIndex(activeStepIndex - 1);
+    setStepIndex(Math.max(activeStepIndex - 1, 0));
   }, [activeStepIndex, setStepIndex]);
 
   React.useEffect(() => {
@@ -82,7 +82,7 @@ const ImageBuildingPhase = () => {
   }, [activeStep, isListProbeLoading, onBack, onNext, setGuideActions]);
 
   if (activePhaseId !== 'build-image') {
-    throw new Error('ImageBuildingPhase expected image-building to be active');
+    throw new Error('ImageBuildingPhase expected to be active');
   }
 
   if (isListProbeLoading || !activeStep) {

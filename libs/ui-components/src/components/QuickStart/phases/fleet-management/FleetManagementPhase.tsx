@@ -83,7 +83,7 @@ const FleetManagementPhase = () => {
   }, [activeStep, isListProbeLoading, onBack, onNext, setGuideActions]);
 
   if (activePhaseId !== 'manage-fleet') {
-    throw new Error('FleetManagementPhase expected fleet-management to be active');
+    throw new Error('FleetManagementPhase expected to be active');
   }
 
   if (isListProbeLoading || !activeStep) {
