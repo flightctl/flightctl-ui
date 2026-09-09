@@ -13,7 +13,10 @@ export type ImageBuildSpec = {
   source: ImageBuildSource;
   destination: ImageBuildDestination;
   binding: ImageBuildBinding;
-  onboarding?: boolean;
   userConfiguration?: ImageBuildUserConfiguration;
+  /**
+   * When true, installs the flightctl-onboarding RPM and enables flightctl-onboarding-setup.service for first-boot device configuration via a Cockpit-based onboarding wizard. Compatible with both early and late binding. Defaults to false.
+   */
+  onboarding?: boolean;
 };
 
