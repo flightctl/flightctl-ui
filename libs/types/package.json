@@ -32,6 +32,7 @@
     "prebuild": "tsc --noEmit && rimraf dist",
     "build": "tsc --build",
     "gen-types": "node ./scripts/openapi-typescript.js && npm run build",
+    "fix-condition-type": "node ./scripts/fix-condition-type.js",
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}'"
   },
   "devDependencies": {
