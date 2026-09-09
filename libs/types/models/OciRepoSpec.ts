@@ -34,6 +34,18 @@ export type OciRepoSpec = {
    */
   skipServerVerification?: boolean;
   /**
+   * Optional OCI repository path under spec.registry (e.g. my-org/diffs). When set, this object is that repo (`my-registry.com/my-org/diffs`), not only a registry. Mutually exclusive with namespace. ImageBuild destination imageName must equal this value.
+   */
+  repository?: string;
+  /**
+   * Optional org/subpath under spec.registry (e.g. my-org). Concrete names are spec.registry/namespace/<name>. Mutually exclusive with repository. Used by delta push (`{registry}/{namespace}/{imageName}`). Invalid on an ImageBuild or ImageExport destination Repository.
+   */
+  namespace?: string;
+  /**
+   * When true, generated deltas are pushed to this object (at most one per org). Auth is the existing ociAuth / accessMode. Placement follows repository / namespace / registry-only as above.
+   */
+  deltaStorageTarget?: boolean;
+  /**
    * Curated list of trusted base images available in this registry. When present, the Image Builder source picker surfaces these entries as selectable options.
    */
   baseImages?: Array<BaseImageEntry>;
