@@ -1,13 +1,13 @@
 import * as React from 'react';
 
-import { QuickStartProvider, useQuickStartGuide } from './QuickStartContext';
+import { QuickStartProvider, useQuickStart } from './QuickStartContext';
 
 const QuickStartGuideLoader = React.lazy(() => import('./QuickStartGuide'));
 
 const QuickStartGuideGate = () => {
-  const { activePhase } = useQuickStartGuide();
+  const { activePhaseId } = useQuickStart();
 
-  if (!activePhase) {
+  if (!activePhaseId) {
     return null;
   }
 

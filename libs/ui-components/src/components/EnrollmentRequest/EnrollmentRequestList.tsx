@@ -4,7 +4,7 @@ import { Tbody } from '@patternfly/react-table';
 import { SelectList, SelectOption, ToolbarItem } from '@patternfly/react-core';
 import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons';
 
-import Table from '../Table/Table';
+import Table, { type ApiTableColumn } from '../Table/Table';
 import TableActions from '../Table/TableActions';
 import ListPage from '../ListPage/ListPage';
 import ListPageBody from '../ListPage/ListPageBody';
@@ -28,7 +28,7 @@ const EnrollmentRequestEmptyState = () => {
   return <ResourceListEmptyState icon={MicrochipIcon} titleText={t('No enrollment requests here!')} />;
 };
 
-const getEnrollmentColumns = (t: TFunction) => [
+export const getEnrollmentRequestTableColumns = (t: TFunction): ApiTableColumn[] => [
   {
     name: t('Alias'),
   },
@@ -57,7 +57,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const { remove } = useFetch();
   const [search, setSearch] = React.useState<string>('');
 
-  const enrollmentColumns = React.useMemo(() => getEnrollmentColumns(t), [t]);
+  const enrollmentColumns = React.useMemo(() => getEnrollmentRequestTableColumns(t), [t]);
   const [pendingEnrollments, isLoading, error, refetch, pagination] = usePendingEnrollments(search);
   const itemCount = pendingEnrollments.length;
 

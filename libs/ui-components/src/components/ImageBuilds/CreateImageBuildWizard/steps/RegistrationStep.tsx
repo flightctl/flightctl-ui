@@ -23,7 +23,7 @@ import { BindingType } from '@flightctl/types/imagebuilder';
 import { type ImageBuildFormValues } from '../types';
 import { PUBLIC_KEY_MAX_LENGTH } from '../../../form/validations';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import { useAppContext } from '../../../../hooks/useAppContext';
+import { useProductName } from '../../../../hooks/useProductName';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import TextField from '../../../form/TextField';
 import UploadField from '../../../form/UploadField';
@@ -43,9 +43,8 @@ export const isRegistrationStepValid = (errors: FormikErrors<ImageBuildFormValue
 
 const RegistrationStep = () => {
   const { t } = useTranslation();
-  const { settings } = useAppContext();
   const { values, setFieldValue } = useFormikContext<ImageBuildFormValues>();
-  const productName = settings.isRHEM ? t('Red Hat Edge Manager') : t('Flight Control');
+  const productName = useProductName();
 
   const isEarlyBindingSelected = values.bindingType === BindingType.BindingTypeEarly;
 
