@@ -7,4 +7,6 @@ export enum DeviceLifecycleHookType {
   DeviceLifecycleHookAfterUpdating = 'AfterUpdating',
   DeviceLifecycleHookBeforeRebooting = 'BeforeRebooting',
   DeviceLifecycleHookAfterRebooting = 'AfterRebooting',
+  DeviceLifecycleHookBeforeEnrolling = 'BeforeEnrolling',
+  DeviceLifecycleHookAfterEnrolling = 'AfterEnrolling',
 }
