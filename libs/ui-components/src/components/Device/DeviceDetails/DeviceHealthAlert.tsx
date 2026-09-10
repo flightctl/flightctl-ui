@@ -23,7 +23,7 @@ const DeviceHealthAlertLink = ({ healthItem }: { healthItem: DeviceHealthItem })
   return (
     <Button variant="link" isInline onClick={() => scrollToSection(targetId)}>
       {type === 'apps'
-        ? t('{{count}} application errors', { count: itemCount })
+        ? t('{{count}} application issues', { count: itemCount })
         : t('{{count}} status issues', { count: itemCount })}
     </Button>
   );

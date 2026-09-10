@@ -10,7 +10,7 @@ export type SystemInfoEntry = {
 
 // Converts a camelCase variable into words. Example: "someInfoData" --> "Some info data"
 // Keeps acronyms together, converted to lowercase. Example: "bootID" --> Boot id
-const propNameToTitle = (input: string) => {
+export const propNameToTitle = (input: string) => {
   const words = input.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2');
   return words.charAt(0).toUpperCase() + words.slice(1).toLowerCase();
 };
