@@ -84,6 +84,7 @@ const LabelsField = ({
             return (
               <Label
                 key={elKey}
+                color="blue"
                 textMaxWidth={maxLabelWidth}
                 closeBtnProps={closeButtonProps}
                 onClose={(e) => onDelete(e, originalIndex)}

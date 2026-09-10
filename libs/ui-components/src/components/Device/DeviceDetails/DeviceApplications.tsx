@@ -41,7 +41,7 @@ const DeviceApplications = ({ device, health, refetch = () => undefined }: Devic
         icon={<CubesIcon />}
         badge={
           health.level !== null && (
-            <Label status={health.level}>{t('{{count}} application errors', { count: health.itemCount })}</Label>
+            <Label status={health.level}>{t('{{appCount}} need attention', { appCount: health.itemCount })}</Label>
           )
         }
       />
