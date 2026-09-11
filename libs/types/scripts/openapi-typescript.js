@@ -6,6 +6,7 @@ const OpenAPI = require('openapi-typescript-codegen');
 const YAML = require('js-yaml');
 
 const { rimraf, copyDir, fixCoreReferences } = require('./openapi-utils');
+const { fixConditionType } = require('./fix-condition-type');
 
 const CORE_API = 'core';
 const ALPHA_CORE_API = 'alphacore';
@@ -78,6 +79,10 @@ async function generateTypes(mode) {
     await rimraf(finalDir);
     await copyDir(output, path.resolve(__dirname, '..'));
     await rimraf(output);
+
+    console.log('Fixing ConditionType enum (duplicate OpenAPI enum values)...');
+    const conditionType = await fixConditionType(data);
+    console.log(`✅ ConditionType fixed (${conditionType.varnames.length} entries)`);
   } else {
     // Image builder and alpha types need to be fixed before they can be moved to their final location
     await rimraf(finalDir);
