@@ -18,7 +18,7 @@ const LabelsView = ({ prefix, labels }: LabelsViewProps) => {
   return (
     <LabelGroup numLabels={5} expandedText={t('Show less')} collapsedText={'${remaining} ' + t('more')}>
       {labelItems.map(([key, value], index: number) => (
-        <Label key={`${prefix}_${index}`} id={`${prefix}_${index}`}>
+        <Label color="blue" key={`${prefix}_${index}`} id={`${prefix}_${index}`}>
           {value ? `${key}=${value}` : key}
         </Label>
       ))}
