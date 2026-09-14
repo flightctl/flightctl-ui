@@ -15,6 +15,7 @@ import {
   type RouteObject,
   RouterProvider,
   createBrowserRouter,
+  useLocation,
   useParams,
   useRouteError,
 } from 'react-router-dom';
@@ -25,96 +26,101 @@ import { useDocumentTitle } from '@flightctl/ui-components/src/hooks/useDocument
 import { APP_TITLE } from '@flightctl/ui-components/src/constants';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import ErrorBoundary from '@flightctl/ui-components/src/components/common/ErrorBoundary';
+import { lazyResetter } from '@flightctl/ui-components/src/utils/resettableLazy';
 
 import AppLayout from './components/AppLayout/AppLayout';
 import NotFound from './components/AppLayout/NotFound';
 import LoginPage from './components/Login/LoginPage';
 import { AuthContext } from './context/AuthContext';
 
-const EnrollmentRequestDetails = React.lazy(
+const EnrollmentRequestDetails = lazyResetter(
   () =>
     import(
       '@flightctl/ui-components/src/components/EnrollmentRequest/EnrollmentRequestDetails/EnrollmentRequestDetails'
     ),
 );
-const DevicesPage = React.lazy(() => import('@flightctl/ui-components/src/components/Device/DevicesPage/DevicesPage'));
-const DeviceDetails = React.lazy(
+const DevicesPage = lazyResetter(
+  () => import('@flightctl/ui-components/src/components/Device/DevicesPage/DevicesPage'),
+);
+const DeviceDetails = lazyResetter(
   () => import('@flightctl/ui-components/src/components/Device/DeviceDetails/DeviceDetailsPage'),
 );
-const EditDeviceWizard = React.lazy(
+const EditDeviceWizard = lazyResetter(
   () => import('@flightctl/ui-components/src/components/Device/EditDeviceWizard/EditDeviceWizard'),
 );
-const CreateRepository = React.lazy(
+const CreateRepository = lazyResetter(
   () => import('@flightctl/ui-components/src/components/Repository/CreateRepository/CreateRepository'),
 );
-const RepositoryList = React.lazy(() => import('@flightctl/ui-components/src/components/Repository/RepositoryList'));
-const RepositoryDetails = React.lazy(
+const RepositoryList = lazyResetter(() => import('@flightctl/ui-components/src/components/Repository/RepositoryList'));
+const RepositoryDetails = lazyResetter(
   () => import('@flightctl/ui-components/src/components/Repository/RepositoryDetails/RepositoryDetails'),
 );
-const ResourceSyncToRepository = React.lazy(
+const ResourceSyncToRepository = lazyResetter(
   () => import('@flightctl/ui-components/src/components/ResourceSync/ResourceSyncToRepository'),
 );
 
-const ImportFleetWizard = React.lazy(
+const ImportFleetWizard = lazyResetter(
   () => import('@flightctl/ui-components/src/components/Fleet/ImportFleetWizard/ImportFleetWizard'),
 );
-const CreateFleetWizard = React.lazy(
+const CreateFleetWizard = lazyResetter(
   () => import('@flightctl/ui-components/src/components/Fleet/CreateFleet/CreateFleetWizard'),
 );
 
-const FleetsPage = React.lazy(() => import('@flightctl/ui-components/src/components/Fleet/FleetsPage'));
-const FleetDetails = React.lazy(
+const FleetsPage = lazyResetter(() => import('@flightctl/ui-components/src/components/Fleet/FleetsPage'));
+const FleetDetails = lazyResetter(
   () => import('@flightctl/ui-components/src/components/Fleet/FleetDetails/FleetDetailsPage'),
 );
 
-const OverviewPage = React.lazy(() => import('@flightctl/ui-components/src/components/OverviewPage/OverviewPage'));
-const SecurityOverviewPage = React.lazy(
+const OverviewPage = lazyResetter(() => import('@flightctl/ui-components/src/components/OverviewPage/OverviewPage'));
+const SecurityOverviewPage = lazyResetter(
   () => import('@flightctl/ui-components/src/components/SecurityOverview/SecurityOverviewPage'),
 );
-const PendingEnrollmentRequestsBadge = React.lazy(
+const PendingEnrollmentRequestsBadge = lazyResetter(
   () => import('@flightctl/ui-components/src/components/EnrollmentRequest/PendingEnrollmentRequestsBadge'),
 );
-const CommandLineToolsPage = React.lazy(
+const CommandLineToolsPage = lazyResetter(
   () => import('@flightctl/ui-components/src/components/Masthead/CommandLineToolsPage'),
 );
-const AuthProvidersPage = React.lazy(
+const AuthProvidersPage = lazyResetter(
   () => import('@flightctl/ui-components/src/components/AuthProvider/AuthProvidersPage'),
 );
-const CreateAuthProvider = React.lazy(
+const CreateAuthProvider = lazyResetter(
   () => import('@flightctl/ui-components/src/components/AuthProvider/CreateAuthProvider/CreateAuthProvider'),
 );
-const AuthProviderDetails = React.lazy(
+const AuthProviderDetails = lazyResetter(
   () => import('@flightctl/ui-components/src/components/AuthProvider/AuthProviderDetails/AuthProviderDetails'),
 );
-const ImageBuildsPage = React.lazy(() => import('@flightctl/ui-components/src/components/ImageBuilds/ImageBuildsPage'));
-const ImageBuildDetails = React.lazy(
+const ImageBuildsPage = lazyResetter(
+  () => import('@flightctl/ui-components/src/components/ImageBuilds/ImageBuildsPage'),
+);
+const ImageBuildDetails = lazyResetter(
   () => import('@flightctl/ui-components/src/components/ImageBuilds/ImageBuildDetails/ImageBuildDetailsPage'),
 );
-const CreateImageBuildWizard = React.lazy(
+const CreateImageBuildWizard = lazyResetter(
   () => import('@flightctl/ui-components/src/components/ImageBuilds/CreateImageBuildWizard/CreateImageBuildWizard'),
 );
-const NewVersionImageBuildWizard = React.lazy(
+const NewVersionImageBuildWizard = lazyResetter(
   () =>
     import('@flightctl/ui-components/src/components/ImageBuilds/NewVersionImageBuildWizard/NewVersionImageBuildWizard'),
 );
 
-const CatalogPage = React.lazy(() => import('@flightctl/ui-components/src/components/Catalog/CatalogPage'));
-const ImportCatalogWizard = React.lazy(
+const CatalogPage = lazyResetter(() => import('@flightctl/ui-components/src/components/Catalog/CatalogPage'));
+const ImportCatalogWizard = lazyResetter(
   () => import('@flightctl/ui-components/src/components/Catalog/ImportCatalogWizard/ImportCatalogWizard'),
 );
-const AddCatalogItemWizard = React.lazy(
+const AddCatalogItemWizard = lazyResetter(
   () => import('@flightctl/ui-components/src/components/Catalog/AddCatalogItemWizard/AddCatalogItemWizard'),
 );
-const CatalogInstallWizard = React.lazy(
+const CatalogInstallWizard = lazyResetter(
   () => import('@flightctl/ui-components/src/components/Catalog/InstallWizard/InstallWizard'),
 );
-const CatalogEditFleetWizard = React.lazy(() =>
+const CatalogEditFleetWizard = lazyResetter(() =>
   import('@flightctl/ui-components/src/components/Catalog/EditWizard/EditWizard').then((module) => ({
     default: module.EditFleetWizard,
   })),
 );
 
-const CatalogEditDeviceWizard = React.lazy(() =>
+const CatalogEditDeviceWizard = lazyResetter(() =>
   import('@flightctl/ui-components/src/components/Catalog/EditWizard/EditWizard').then((module) => ({
     default: module.EditDeviceWizard,
   })),
@@ -143,6 +149,7 @@ const ErrorPage = () => {
 };
 
 const TitledRoute = ({ title, children }: React.PropsWithChildren<{ title: string }>) => {
+  const location = useLocation();
   useDocumentTitle(`${APP_TITLE} | ${title}`);
   return (
     <React.Suspense
@@ -152,7 +159,7 @@ const TitledRoute = ({ title, children }: React.PropsWithChildren<{ title: strin
         </Bullseye>
       }
     >
-      <ErrorBoundary>{children}</ErrorBoundary>
+      <ErrorBoundary key={location.key}>{children}</ErrorBoundary>
     </React.Suspense>
   );
 };
