@@ -10,6 +10,7 @@
     "types": ["cypress"],
     "paths": {
       "@flightctl/types": ["../types"],
+      "@flightctl/types/alpha": ["../types/alpha"],
     },
   },
 }
