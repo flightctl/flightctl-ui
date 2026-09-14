@@ -4,6 +4,7 @@ import {
   Vulnerability,
   type VulnerabilityGroup,
   type VulnerabilityGroupItem,
+  VulnerabilitySource,
 } from '@flightctl/types/alpha';
 
 const SeverityColorCritical = 'var(--pf-t--global--icon--color--severity--critical--default)';
@@ -55,11 +56,11 @@ const DEFAULT_VULNERABILITY_SOURCE_US = 'Trustify';
 const DEFAULT_VULNERABILITY_SOURCE_DS = 'Red Hat Trusted Profile Analyzer';
 const QUAY_VULNERABILITY_SOURCE = 'Quay';
 
-export const getVulnerabilitySource = (vulnerability: Vulnerability, isRHEM: boolean) => {
+export const getVulnerabilitySource = (vulnerability: Vulnerability | VulnerabilityGroupItem, isRHEM: boolean) => {
   switch (vulnerability.source) {
-    case Vulnerability.source.Trustify:
+    case VulnerabilitySource.Trustify:
       return isRHEM ? DEFAULT_VULNERABILITY_SOURCE_DS : DEFAULT_VULNERABILITY_SOURCE_US;
-    case Vulnerability.source.Quay:
+    case VulnerabilitySource.Quay:
       return QUAY_VULNERABILITY_SOURCE;
     case undefined:
       // Source is missing, fallback to the default backend.
