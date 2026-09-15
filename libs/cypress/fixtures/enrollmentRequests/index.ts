@@ -1,4 +1,4 @@
-import { ConditionStatus, ConditionType } from '@flightctl/types';
+import { ConditionStatus, ConditionType, type EnrollmentRequest } from '@flightctl/types';
 import { API_VERSION } from '../../support/constants';
 
 const approvedErStatus = {
@@ -20,7 +20,7 @@ const approvedErStatus = {
   ],
 };
 
-const getErList = (onlyPending: boolean) =>
+const getErList = (onlyPending: boolean): EnrollmentRequest[] =>
   [
     {
       apiVersion: API_VERSION,
@@ -75,7 +75,7 @@ const getErList = (onlyPending: boolean) =>
       status: { conditions: [] },
     },
   ].filter((er) => {
-    return onlyPending ? er.status.conditions.length === 0 : true;
+    return onlyPending ? er.status?.conditions?.length === 0 : true;
   });
 
 export { getErList };
