@@ -120,6 +120,9 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.DEPENDENCY_CHANGE_DETECTED]: t('Dependency change detected'),
     // Application lifecycle events
     [Event.reason.APPLICATION_LIFECYCLE_CHANGED]: t('Application lifecycle changed'),
+    // Delta updates events
+    [Event.reason.PREPARE_DELTAS]: t('Preparing delta updates'),
+    [Event.reason.DELTA_GENERATION_COMPLETED]: t('Delta updates generation complete'),
   };
 };
 

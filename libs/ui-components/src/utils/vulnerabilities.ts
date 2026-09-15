@@ -4,6 +4,7 @@ import {
   Vulnerability,
   type VulnerabilityGroup,
   type VulnerabilityGroupItem,
+  VulnerabilitySource,
 } from '@flightctl/types/alpha';
 
 const SeverityColorCritical = 'var(--pf-t--global--icon--color--severity--critical--default)';
@@ -49,6 +50,25 @@ export const getPrimaryVulnerabilityGroupFinding = (
 ): VulnerabilityGroupItem | undefined => {
   const findingsWithLink = findings.filter((finding) => finding.link);
   return findingsWithLink.find((finding) => isRedHatIssuer(finding.issuer)) || findingsWithLink[0] || findings[0];
+};
+
+const DEFAULT_VULNERABILITY_SOURCE_US = 'Trustify';
+const DEFAULT_VULNERABILITY_SOURCE_DS = 'Red Hat Trusted Profile Analyzer';
+const QUAY_VULNERABILITY_SOURCE = 'Quay';
+
+export const getVulnerabilitySource = (vulnerability: Vulnerability | VulnerabilityGroupItem, isRHEM: boolean) => {
+  switch (vulnerability.source) {
+    case VulnerabilitySource.Trustify:
+      return isRHEM ? DEFAULT_VULNERABILITY_SOURCE_DS : DEFAULT_VULNERABILITY_SOURCE_US;
+    case VulnerabilitySource.Quay:
+      return QUAY_VULNERABILITY_SOURCE;
+    case undefined:
+      // Source is missing, fallback to the default backend.
+      return DEFAULT_VULNERABILITY_SOURCE_US;
+    default:
+      // Source is unknown to the UI, return it as is.
+      return vulnerability.source;
+  }
 };
 
 export const getSeverityCountValue = (severity: Severity, counts: CveCountsBySeverity) => {

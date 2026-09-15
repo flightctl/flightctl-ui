@@ -38,4 +38,5 @@ export type { VulnerabilityImageRef } from './models/VulnerabilityImageRef';
 export { VulnerabilityImpact } from './models/VulnerabilityImpact';
 export type { VulnerabilityList } from './models/VulnerabilityList';
 export type { VulnerabilitySeveritySummary } from './models/VulnerabilitySeveritySummary';
+export { VulnerabilitySource } from './models/VulnerabilitySource';
 export type { VulnerabilitySummaryResponse } from './models/VulnerabilitySummaryResponse';

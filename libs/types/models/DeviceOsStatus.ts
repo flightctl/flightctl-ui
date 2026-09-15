@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { DeviceDeltaApplyStatus } from './DeviceDeltaApplyStatus';
 /**
  * Current status of the device OS.
  */
@@ -14,5 +15,6 @@ export type DeviceOsStatus = {
    * The digest of the OS image (e.g. sha256:a0...).
    */
   imageDigest: string;
+  lastDelta?: DeviceDeltaApplyStatus;
 };
 
