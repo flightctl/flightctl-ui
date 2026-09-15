@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { DeviceStatus } from './DeviceStatus';
 import type { OsModeType } from './OsModeType';
+import type { PreEnrollmentResult } from './PreEnrollmentResult';
 /**
  * EnrollmentRequestSpec is a description of a EnrollmentRequest's target state.
  */
@@ -22,5 +23,6 @@ export type EnrollmentRequestSpec = {
    */
   knownRenderedVersion?: string;
   osMode?: OsModeType;
+  preEnrollment?: PreEnrollmentResult;
 };
 

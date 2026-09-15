@@ -1098,6 +1098,8 @@
   "Dependency sync probe failed": "Dependency sync probe failed",
   "Dependency change detected": "Dependency change detected",
   "Application lifecycle changed": "Application lifecycle changed",
+  "Preparing delta updates": "Preparing delta updates",
+  "Delta updates generation is complete": "Delta updates generation is complete",
   "Resource": "Resource",
   "Edit fleet": "Edit fleet",
   "Create fleet": "Create fleet",

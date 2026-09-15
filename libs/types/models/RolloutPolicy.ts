@@ -14,5 +14,9 @@ export type RolloutPolicy = {
   deviceSelection?: RolloutDeviceSelection;
   successThreshold?: Percentage;
   defaultUpdateTimeout?: Duration;
+  /**
+   * When false, skip control-plane OS delta generation for this fleet. Omitted means true.
+   */
+  generateDelta?: boolean;
 };
 

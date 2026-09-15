@@ -5,6 +5,7 @@
 import type { ApplicationStatusType } from './ApplicationStatusType';
 import type { ApplicationVolumeStatus } from './ApplicationVolumeStatus';
 import type { AppType } from './AppType';
+import type { DeviceDeltaApplyStatus } from './DeviceDeltaApplyStatus';
 export type DeviceApplicationStatus = {
   /**
    * Human readable name of the application.
@@ -32,5 +33,6 @@ export type DeviceApplicationStatus = {
    * Status of volumes used by this application.
    */
   volumes?: Array<ApplicationVolumeStatus>;
+  lastDelta?: DeviceDeltaApplyStatus;
 };
 

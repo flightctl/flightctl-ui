@@ -40,6 +40,11 @@ function sanitizeDescription(description) {
     .replace(/\r\n|\r|\n/g, ' ');
 }
 
+// Match openapi-typescript-codegen string literal style (single quotes).
+function quoteTsString(value) {
+  return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+}
+
 function buildConditionTypeSource({ description, varnames, enumValues }) {
   if (varnames.length !== enumValues.length) {
     throw new Error(
@@ -52,7 +57,7 @@ function buildConditionTypeSource({ description, varnames, enumValues }) {
   enumValues.forEach(validateEnumValue);
 
   const members = varnames
-    .map((name, index) => `  ${name} = ${JSON.stringify(enumValues[index])},`)
+    .map((name, index) => `  ${name} = ${quoteTsString(enumValues[index])},`)
     .join('\n');
 
   return `/* generated using openapi-typescript-codegen -- do no edit */
