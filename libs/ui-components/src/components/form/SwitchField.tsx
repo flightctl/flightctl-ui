@@ -6,14 +6,23 @@ import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 export interface SwitchFieldProps extends Omit<SwitchProps, 'onChange' | 'ref' | 'checked' | 'id'> {
   name: string;
   helperText?: React.ReactNode;
+  confirmText?: React.ReactNode;
+  onChangeCustom?: (value: boolean) => void;
+  noDefaultOnChange?: boolean;
 }
 
-const SwitchField = ({ helperText, name, ...props }: SwitchFieldProps) => {
+const SwitchField = ({ name, helperText, onChangeCustom, noDefaultOnChange, ...props }: SwitchFieldProps) => {
   const [field, meta, { setValue, setTouched }] = useField({
     name,
   });
 
   const onChange: SwitchProps['onChange'] = async (_, checked) => {
+    if (onChangeCustom) {
+      onChangeCustom(checked);
+    }
+    if (noDefaultOnChange) {
+      return;
+    }
     await setValue(checked);
     await setTouched(true);
   };

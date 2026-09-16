@@ -10,7 +10,7 @@ import {
 import { type ImageBuildList, type ImagePromotionList } from '@flightctl/types/imagebuilder';
 import { type CatalogItemList, type VulnerabilityGroupList, type VulnerabilityList } from '@flightctl/types/alpha';
 
-import { type AnnotationType, type GenericCondition, type GenericConditionType } from '../types/extraTypes';
+import type { AnnotationType, FleetStatusType, GenericCondition, GenericConditionType } from '../types/extraTypes';
 
 export type ApiList =
   | EnrollmentRequestList
@@ -42,7 +42,7 @@ const getMetadataAnnotation = (metadata: ObjectMeta | undefined, annotation: Ann
 
 const getCondition = (
   conditions: GenericCondition[] | undefined,
-  type: GenericConditionType,
+  type: GenericConditionType | FleetStatusType,
   status: ConditionStatus = ConditionStatus.ConditionStatusTrue,
 ): GenericCondition | undefined => {
   const typeCond = conditions?.filter((c) => c.type === type);

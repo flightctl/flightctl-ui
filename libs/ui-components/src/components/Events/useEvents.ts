@@ -122,6 +122,7 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.APPLICATION_LIFECYCLE_CHANGED]: t('Application lifecycle changed'),
     // Delta generation events
     [Event.reason.PREPARE_DELTAS]: t('Preparing delta updates'),
+    [Event.reason.DELTA_GENERATION_PROGRESS]: t('Delta updates are being generated'),
     [Event.reason.DELTA_GENERATION_COMPLETED]: t('Delta updates generation is complete'),
   };
 };

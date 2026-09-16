@@ -1221,6 +1221,30 @@ const requiredStartGraceDuration = (t: TFunction, isInstallField: boolean = fals
       .matches(DURATION_REGEXP, t('Duration must be a number followed by a unit ("s", "m", or "h")'));
   });
 
+const validDeltaGenerationDuration = (t: TFunction) =>
+  Yup.string().when(['isCustomized', 'generateDelta'], ([isCustomized, generateDelta]) => {
+    if (isCustomized && generateDelta) {
+      return Yup.string()
+        .test(
+          'at-least-one-delta-timing',
+          t('Enter at least one of rollout hold deadline or per-job generation timeout.'),
+          function (value) {
+            const { maxWaitForDelta, deltaGenerationTimeout } = this.parent as {
+              maxWaitForDelta?: string;
+              deltaGenerationTimeout?: string;
+            };
+            return Boolean(value || maxWaitForDelta || deltaGenerationTimeout);
+          },
+        )
+        .test(
+          'valid-duration',
+          t('Duration must be a number followed by a unit ("s", "m", or "h")'),
+          (value) => !value || DURATION_REGEXP.test(value),
+        );
+    }
+    return Yup.string();
+  });
+
 const updateWeekDaysSchema = (t: TFunction) =>
   Yup.array()
     .required()
@@ -1261,6 +1285,14 @@ export const validUpdatePolicySchema = (t: TFunction) => {
     installTimeZone: Yup.string().required(t('Select the timezone for installing updates')),
   });
 };
+
+export const validDeltaGenerationSchema = (t: TFunction) =>
+  Yup.object().shape({
+    isCustomized: Yup.boolean(),
+    generateDelta: Yup.boolean().required(),
+    maxWaitForDelta: validDeltaGenerationDuration(t),
+    deltaGenerationTimeout: validDeltaGenerationDuration(t),
+  });
 
 export const validFleetDisruptionBudgetSchema = (t: TFunction) => {
   return Yup.object()

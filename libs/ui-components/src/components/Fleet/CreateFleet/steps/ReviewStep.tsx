@@ -24,6 +24,7 @@ import {
   ReviewUpdateDisruptionBudget,
   ReviewUpdateRolloutPolicy,
 } from '../../../Device/EditDeviceWizard/steps/ReviewUpdatePolicy';
+import DeltaGenerationSummary from '../DeltaGenerationSummary';
 
 export const reviewStepId = 'review';
 
@@ -108,6 +109,12 @@ const ReviewStep = ({ error }: { error?: unknown }) => {
               )}
             </>
           )}
+          <DescriptionListGroup>
+            <DescriptionListTerm>{t('Delta generation')}</DescriptionListTerm>
+            <DescriptionListDescription>
+              <DeltaGenerationSummary deltaGeneration={values.deltaGeneration} />
+            </DescriptionListDescription>
+          </DescriptionListGroup>
         </DescriptionList>
       </StackItem>
       {!!error && (

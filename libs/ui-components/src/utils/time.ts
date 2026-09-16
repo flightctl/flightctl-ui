@@ -1,4 +1,4 @@
-import { type Duration } from '@flightctl/types';
+import { type Duration, type UpdateSchedule } from '@flightctl/types';
 
 export const formatTimePart = (val: number | string) => val.toString().padStart(2, '0');
 
@@ -120,6 +120,22 @@ export const getUpdateCronExpression = (startTime: string, scheduleMode: UpdateS
     })
     .filter((num) => num !== null);
   return `${minutes} ${hours} * * ${weekDayVals.join(',')}`;
+};
+
+export const schedulesAreEqual = (a: UpdateSchedule | undefined, b: UpdateSchedule | undefined) => {
+  if (!a && !b) {
+    return true;
+  }
+  if (!a || !b) {
+    return false;
+  }
+  if (a.at !== b.at) {
+    return false;
+  }
+  if ((a.timeZone || localDeviceTimezone) !== (b.timeZone || localDeviceTimezone)) {
+    return false;
+  }
+  return (a.startGraceDuration || '0s') === (b.startGraceDuration || '0s');
 };
 
 // Adds an artificial delay to make sure that the user notices the data is refreshing.

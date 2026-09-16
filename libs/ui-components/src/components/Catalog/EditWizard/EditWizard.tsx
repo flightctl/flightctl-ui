@@ -31,7 +31,7 @@ import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../../types/rbac';
 import { hasPackageModeCapability } from '../../../utils/capabilities';
-import { appendJSONPatch } from '../../../utils/patch';
+import { appendJSONPatch } from '../../../utils/patches/patch';
 import EditOsWizard from './EditOsWizard';
 import EditAppWizard from './EditAppWizard';
 

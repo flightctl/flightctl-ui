@@ -19,6 +19,9 @@ const excludedKnownProps = [
   'distroVersion', // It's combined with "distroName"
   'customInfo', // Custom properies are evaluated separately from the predefined, known properties
   'attestation', // In Phase1 this includes only the raw data, without a report of success or failure.
+  // "deltaEligible" and "ociDeltaVersion" are shown in a separate section on the device details page
+  'deltaEligible',
+  'ociDeltaVersion',
 ];
 
 const getInfoDataKnownKeys = (t: TFunction) => ({
@@ -28,6 +31,7 @@ const getInfoDataKnownKeys = (t: TFunction) => ({
   tpmVendorInfo: t('TPM vendor info'),
   architecture: t('Architecture'),
   distroName: t('Distro'),
+  bootcVersion: t('Bootc version'),
   bootID: t('Boot ID'),
   kernel: t('Kernel'),
   netInterfaceDefault: t('Net interface default'),

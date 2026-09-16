@@ -14,13 +14,17 @@ type DefaultHelperTextProps = {
   helperText: React.ReactNode;
 };
 
+const FlightCtlHelperText = ({ children }: React.PropsWithChildren) => (
+  <FormHelperText className="pf-v6-u-mt-xs">
+    <HelperText>{children}</HelperText>
+  </FormHelperText>
+);
+
 export const DefaultHelperText = ({ helperText }: DefaultHelperTextProps) => {
   return helperText ? (
-    <FormHelperText>
-      <HelperText>
-        <HelperTextItem variant="default">{helperText}</HelperTextItem>
-      </HelperText>
-    </FormHelperText>
+    <FlightCtlHelperText>
+      <HelperTextItem variant="default">{helperText}</HelperTextItem>
+    </FlightCtlHelperText>
   ) : null;
 };
 
@@ -32,13 +36,11 @@ const ErrorHelperText = ({ meta, error, touchRequired = true }: ErrorHelperTextP
     content = error;
   }
   return content ? (
-    <FormHelperText>
-      <HelperText>
-        <HelperTextItem icon={<ExclamationCircleIcon />} variant="error">
-          {content}
-        </HelperTextItem>
-      </HelperText>
-    </FormHelperText>
+    <FlightCtlHelperText>
+      <HelperTextItem variant="error" icon={<ExclamationCircleIcon />}>
+        {content}
+      </HelperTextItem>
+    </FlightCtlHelperText>
   ) : null;
 };
 

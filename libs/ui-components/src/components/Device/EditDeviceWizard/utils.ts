@@ -9,7 +9,7 @@ import {
   validOsFormValue,
   validUpdatePolicySchema,
 } from '../../form/validations';
-import { getDeviceLabelPatches, getStringListPatches, getUpdatePolicyPatches } from '../../../utils/patch';
+import { getDeviceLabelPatches, getStringListPatches, getUpdatePolicyPatches } from '../../../utils/patches/patch';
 import { type Device, type PatchRequest } from '@flightctl/types';
 import { type EditDeviceFormValues, UpdateMode, type UpdatePolicyForm } from './../../../types/deviceSpec';
 import {

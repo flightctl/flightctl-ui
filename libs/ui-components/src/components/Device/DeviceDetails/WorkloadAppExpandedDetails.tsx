@@ -17,6 +17,7 @@ import ApplicationExpandedSections, {
 import ApplicationPortsTable from '../../Application/ApplicationPortsTable';
 import DesiredStateLabel from '../../Application/DesiredStateLabel';
 import ApplicationVolumesDescriptionList from '../../Application/ApplicationVolumesDescriptionList';
+import ApplicationDeltaStatusFields from '../../Application/ApplicationDeltaStatusFields';
 
 const WorkloadAppExpandedDetails = ({
   application,
@@ -72,6 +73,7 @@ const WorkloadAppExpandedDetails = ({
           <DesiredStateLabel desiredState={desiredState} />
         </DescriptionListDescription>
       </DescriptionListGroup>
+      <ApplicationDeltaStatusFields lastDelta={appStatus.lastDelta} />
       {volumes.length > 0 && <ApplicationVolumesDescriptionList volumes={volumes} />}
     </DescriptionList>
   );

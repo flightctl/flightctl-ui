@@ -12,7 +12,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { fromAPILabel } from '../../../utils/labels';
 import { validLabelsSchema } from '../../form/validations';
 import { getErrorMessage } from '../../../utils/error';
-import { getDeviceLabelPatches } from '../../../utils/patch';
+import { getDeviceLabelPatches } from '../../../utils/patches/patch';
 import LabelsView from '../../common/LabelsView';
 
 type EditLabelsFormValues = {

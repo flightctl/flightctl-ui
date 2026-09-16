@@ -278,6 +278,13 @@ export type EditDeviceFormValues = DeviceSpecConfigFormValues & {
   fleetMatch: string;
 };
 
+export type DeltaGenerationForm = {
+  isCustomized: boolean;
+  generateDelta: boolean;
+  maxWaitForDelta: string;
+  deltaGenerationTimeout: string;
+};
+
 export type FleetFormValues = DeviceSpecConfigFormValues & {
   name: string;
   fleetLabels: FlightCtlLabel[];
@@ -285,6 +292,7 @@ export type FleetFormValues = DeviceSpecConfigFormValues & {
   rolloutPolicy: RolloutPolicyForm;
   disruptionBudget: DisruptionBudgetForm;
   updatePolicy: UpdatePolicyForm;
+  deltaGeneration: DeltaGenerationForm;
 };
 
 export enum BatchLimitType {

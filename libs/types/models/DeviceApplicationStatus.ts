@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ApplicationImageDigest } from './ApplicationImageDigest';
 import type { ApplicationStatusType } from './ApplicationStatusType';
 import type { ApplicationVolumeStatus } from './ApplicationVolumeStatus';
 import type { AppType } from './AppType';
@@ -34,5 +35,13 @@ export type DeviceApplicationStatus = {
    */
   volumes?: Array<ApplicationVolumeStatus>;
   lastDelta?: DeviceDeltaApplyStatus;
+  /**
+   * Image references this application uses and their digests in local storage. image is the ref from the current rendered spec (tag or digest). digest is what is in storage. When image is already a digest ref it matches digest.
+   */
+  imageDigests?: Array<ApplicationImageDigest>;
+  /**
+   * Expected total download size for this application update in IEC units (e.g. "245.3 MiB", "1 GiB"). Computed as the sum of all image pair sizes (parent + nested + volumes), using delta size when available or full manifest size otherwise. Absent when no size information is available.
+   */
+  size?: string;
 };
 

@@ -19,7 +19,7 @@ import FlightCtlWizardFooter, { type FlightCtlWizardFooterProps } from '../../co
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { isWizardStepDisabled } from '../../../utils/wizards';
-import { appendJSONPatch } from '../../../utils/patch';
+import { appendJSONPatch } from '../../../utils/patches/patch';
 
 const getOrderedStepIds = (target: InstallOsFormik['target']) =>
   target === 'new-device'

@@ -4,10 +4,12 @@ import {
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
+  Label,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
   ToolbarItem,
+  Tooltip,
 } from '@patternfly/react-core';
 import { ActionsColumn, type IAction, type OnSelect, Tbody, Td, Tr } from '@patternfly/react-table';
 import { RepositoryIcon } from '@patternfly/react-icons/dist/js/icons/repository-icon';
@@ -33,7 +35,7 @@ import { RESOURCE, VERB } from '../../types/rbac';
 import { usePermissionsContext } from '../common/PermissionsContext';
 import { useRepositories } from './useRepositories';
 import TablePagination from '../Table/TablePagination';
-import { getRepoTypeLabel, getRepoUrlOrRegistry } from './CreateRepository/utils';
+import { getRepoTypeLabel, getRepoUrlOrRegistry, isDeltaStorageTargetRepo } from './CreateRepository/utils';
 
 const CreateRepositoryButton = ({ buttonText }: { buttonText?: string }) => {
   const { t } = useTranslation();
@@ -136,6 +138,13 @@ const RepositoryTableRow = ({
       />
       <Td dataLabel={t('Name')}>
         <ResourceLink id={repoName} routeLink={ROUTE.REPO_DETAILS} data-testid={`repository-name-link-${repoName}`} />
+        {isDeltaStorageTargetRepo(repository.spec) && (
+          <Tooltip content={t("This is the organization's repository for delta update artifacts.")}>
+            <Label color="blue" variant="outline" isCompact className="pf-v6-u-ml-sm">
+              {t('Delta repository')}
+            </Label>
+          </Tooltip>
+        )}
       </Td>
       <Td dataLabel={t('Type')}>{getRepoTypeLabel(t, repository.spec.type)}</Td>
       <Td dataLabel={t('URL')}>{getRepoUrlOrRegistry(repository.spec) || '-'}</Td>

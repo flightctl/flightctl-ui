@@ -1,34 +1,17 @@
 import * as React from 'react';
 
-import { ConditionType, type Fleet } from '@flightctl/types';
-import { fleetStatusLabels, getFleetSyncStatus } from '../../utils/status/fleet';
+import { type Fleet } from '@flightctl/types';
+import { getFleetStatus, getFleetStatusItems } from '../../utils/status/fleet';
 import { useTranslation } from '../../hooks/useTranslation';
-import { StatusDisplayContent } from '../Status/StatusDisplay';
-import { type StatusLevel } from '../../utils/status/common';
+import StatusDisplay from '../Status/StatusDisplay';
 
 const FleetStatus = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
-  const syncStatus = getFleetSyncStatus(fleet, t);
-  const statusLabels = fleetStatusLabels(t);
+  const fleetStatus = getFleetStatus(t, fleet);
+  const statusItems = getFleetStatusItems(t);
+  const item = statusItems.find((statusItem) => statusItem.id === fleetStatus.type);
 
-  let level: StatusLevel;
-
-  switch (syncStatus.status) {
-    case ConditionType.FleetValid:
-      level = 'success';
-      break;
-    case 'SyncPending':
-      level = 'info';
-      break;
-    case 'Invalid':
-      level = 'danger';
-      break;
-    default:
-      level = 'unknown';
-      break;
-  }
-
-  return <StatusDisplayContent label={statusLabels[syncStatus.status]} level={level} message={syncStatus.message} />;
+  return <StatusDisplay item={item} message={fleetStatus.info} />;
 };
 
 export default FleetStatus;

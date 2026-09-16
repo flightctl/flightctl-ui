@@ -11,7 +11,7 @@ import {
   type OAuth2ProviderSpec,
   type PatchRequest,
 } from '@flightctl/types';
-import { appendJSONPatch } from '../../../utils/patch';
+import { appendJSONPatch } from '../../../utils/patches/patch';
 import {
   type AuthProviderFormValues,
   DEFAULT_ROLE_SEPARATOR,

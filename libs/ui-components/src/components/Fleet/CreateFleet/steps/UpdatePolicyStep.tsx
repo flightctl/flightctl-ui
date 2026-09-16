@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FormGroup, List, ListItem, Stack, StackItem, Title } from '@patternfly/react-core';
+import { Divider, FormGroup, List, ListItem, Stack, StackItem, Title } from '@patternfly/react-core';
 import { type FormikErrors, useFormikContext } from 'formik';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
@@ -12,13 +12,14 @@ import RadioField from '../../../form/RadioField';
 import UpdateStepRolloutPolicy from './UpdateStepRolloutPolicy';
 import UpdateStepDisruptionBudget from './UpdateStepDisruptionBudget';
 import UpdateStepUpdatePolicy from './UpdateStepUpdatePolicy';
+import UpdateStepDeltaGeneration from './UpdateStepDeltaGeneration';
 
 import './UpdatePolicyStep.css';
 
 export const updatePolicyStepId = 'update-policy';
 
 export const isUpdatePolicyStepValid = (errors: FormikErrors<FleetFormValues>) =>
-  !errors.rolloutPolicy && !errors.disruptionBudget && !errors.updatePolicy;
+  !errors.rolloutPolicy && !errors.disruptionBudget && !errors.updatePolicy && !errors.deltaGeneration;
 
 export const CustomizedUpdatesSectionBody = ({
   updateMode,
@@ -94,9 +95,7 @@ const UpdatePolicyStep = ({ isReadOnly }: { isReadOnly: boolean }) => {
     <FlightCtlForm>
       <Stack hasGutter>
         <StackItem>
-          <Title headingLevel="h2" size="xl" className="pf-v6-u-mb-sm">
-            {t('Updates')}
-          </Title>
+          <Title headingLevel="h2">{t('Updates')}</Title>
           <DefaultHelperText helperText={t('Choose how updates are delivered to devices in this fleet.')} />
         </StackItem>
         <StackItem>
@@ -123,6 +122,12 @@ const UpdatePolicyStep = ({ isReadOnly }: { isReadOnly: boolean }) => {
               }
             />
           </FormGroup>
+        </StackItem>
+        <StackItem>
+          <Divider />
+        </StackItem>
+        <StackItem>
+          <UpdateStepDeltaGeneration isReadOnly={isReadOnly} />
         </StackItem>
       </Stack>
     </FlightCtlForm>
