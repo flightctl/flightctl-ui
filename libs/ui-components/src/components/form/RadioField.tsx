@@ -6,7 +6,6 @@ import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 export interface RadioFieldProps extends Omit<RadioProps, 'onChange' | 'ref' | 'checked'> {
   checkedValue?: unknown;
   name: string;
-  showGlobalError?: boolean;
   helperText?: React.ReactNode;
   onChangeCustom?: (checkedValue: unknown) => void;
   noDefaultOnChange?: boolean;
@@ -16,7 +15,6 @@ const RadioField = ({
   helperText,
   checkedValue,
   name,
-  showGlobalError = true,
   onChangeCustom,
   noDefaultOnChange,
   ...props
@@ -51,7 +49,7 @@ const RadioField = ({
       />
 
       <DefaultHelperText helperText={helperText} />
-      {showGlobalError && <ErrorHelperText meta={meta} />}
+      <ErrorHelperText meta={meta} />
     </FormGroup>
   );
 };

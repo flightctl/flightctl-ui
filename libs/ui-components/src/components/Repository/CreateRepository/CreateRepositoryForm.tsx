@@ -5,8 +5,6 @@ import {
   Button,
   ButtonVariant,
   Checkbox,
-  Flex,
-  FlexItem,
   FormGroup,
   FormSection,
   Grid,
@@ -16,6 +14,8 @@ import {
   Popover,
   Split,
   SplitItem,
+  Stack,
+  StackItem,
 } from '@patternfly/react-core';
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
@@ -28,9 +28,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { useFetch } from '../../../hooks/useFetch';
 import { type RepositoryFormValues } from './types';
 import CreateResourceSyncsForm from './CreateResourceSyncsForm';
-import DeltaStorageSelection from './DeltaStorageSelection';
-import OciBaseImagesSection from './OciBaseImagesSection';
-import OciPushPlacementSection from './OciPushPlacementSection';
+import OciRegistryForm from './OciRegistryForm';
 
 import {
   getInitValues,
@@ -43,20 +41,18 @@ import {
   isDuplicateDeltaTargetError,
   repositorySchema,
 } from './utils';
-import { OciRepoSpec, RepoSpecType, type Repository, type RepositoryList, type ResourceSync } from '@flightctl/types';
+import { OciRepoSpec, RepoSpecType, type Repository, type ResourceSync } from '@flightctl/types';
 import { getErrorMessage } from '../../../utils/error';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import LabelWithHelperText, { FormGroupWithHelperText } from '../../common/WithHelperText';
-import ErrorHelperText from '../../form/FieldHelperText';
 import NameField from '../../form/NameField';
 import TextAreaField from '../../form/TextAreaField';
 import CheckboxField from '../../form/CheckboxField';
 import RadioField from '../../form/RadioField';
 import TextField from '../../form/TextField';
-import FlightCtlForm from '../../form/FlightCtlForm';
+import FlightCtlForm, { FlightCtlFormSection } from '../../form/FlightCtlForm';
 import { getDnsSubdomainValidations } from '../../form/validations';
 import { DEMO_REPOSITORY_URL } from '../../../hooks/useAppLinks';
-import WithTooltip from '../../common/WithTooltip';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
 
@@ -71,32 +67,30 @@ const AdvancedSection = () => {
   if (isOciRepo) {
     return (
       <FormSection>
-        <Grid hasGutter>
-          <CheckboxField
-            name="ociConfig.ociAuth.use"
-            label={t('Basic authentication')}
-            body={
-              <>
-                <FormGroup label={t('Username')} isRequired>
-                  <TextField name="ociConfig.ociAuth.username" aria-label={t('Username')} />
-                </FormGroup>
-                <FormGroup label={t('Password')} isRequired>
-                  <TextField name="ociConfig.ociAuth.password" aria-label={t('Password')} type="password" />
-                </FormGroup>
-              </>
-            }
+        <CheckboxField
+          name="ociConfig.ociAuth.use"
+          label={t('Basic authentication')}
+          body={
+            <>
+              <FormGroup label={t('Username')} isRequired>
+                <TextField name="ociConfig.ociAuth.username" aria-label={t('Username')} />
+              </FormGroup>
+              <FormGroup label={t('Password')} isRequired>
+                <TextField name="ociConfig.ociAuth.password" aria-label={t('Password')} type="password" />
+              </FormGroup>
+            </>
+          }
+        />
+        <FormGroup>
+          <CheckboxField name="ociConfig.skipServerVerification" label={t('Skip server verification')} />
+        </FormGroup>
+        <FormGroup label={t('CA certificate')}>
+          <TextAreaField
+            name="ociConfig.caCrt"
+            aria-label={t('CA certificate')}
+            isDisabled={values.ociConfig?.skipServerVerification}
           />
-          <FormGroup>
-            <CheckboxField name="ociConfig.skipServerVerification" label={t('Skip server verification')} />
-          </FormGroup>
-          <FormGroup label={t('CA certificate')}>
-            <TextAreaField
-              name="ociConfig.caCrt"
-              aria-label={t('CA certificate')}
-              isDisabled={values.ociConfig?.skipServerVerification}
-            />
-          </FormGroup>
-        </Grid>
+        </FormGroup>
       </FormSection>
     );
   }
@@ -114,7 +108,7 @@ const AdvancedSection = () => {
         </Split>
       )}
       {values.configType === 'http' && (
-        <Grid hasGutter className={showConfigTypeRadios ? 'fctl-create-repo__adv-section--nested' : ''}>
+        <FlightCtlFormSection>
           {values.repoType === RepoSpecType.RepoSpecTypeHttp && (
             <FormSection>
               <FormGroupWithHelperText
@@ -168,10 +162,10 @@ const AdvancedSection = () => {
               <TextField name="httpConfig.token" aria-label={t('Token')} />
             </FormGroupWithHelperText>
           )}
-        </Grid>
+        </FlightCtlFormSection>
       )}
       {values.configType === 'ssh' && (
-        <Grid hasGutter className={showConfigTypeRadios ? 'fctl-create-repo__adv-section--nested' : ''}>
+        <FlightCtlFormSection>
           <FormGroup label={t('SSH private key')}>
             <TextAreaField name="sshConfig.sshPrivateKey" aria-label={t('SSH private key')} />
           </FormGroup>
@@ -181,7 +175,7 @@ const AdvancedSection = () => {
           <FormGroup>
             <CheckboxField name="sshConfig.skipServerVerification" label={t('Skip server verification')} />
           </FormGroup>
-        </Grid>
+        </FlightCtlFormSection>
       )}
     </FormSection>
   );
@@ -334,70 +328,6 @@ const RepositoryType = ({
   );
 };
 
-const DeltaStorageSection = ({ currentRepoName, isEdit }: { currentRepoName?: string; isEdit?: boolean }) => {
-  const { t } = useTranslation();
-  const { get } = useFetch();
-  const { values, setFieldValue } = useFormikContext<RepositoryFormValues>();
-  const [existingDeltaTargetName, setExistingDeltaTargetName] = React.useState<string>();
-  const [isLoadingDeltaTarget, setIsLoadingDeltaTarget] = React.useState(true);
-
-  const ociConfig = values.ociConfig as NonNullable<RepositoryFormValues['ociConfig']>;
-  const deltaStorageTarget = ociConfig.deltaStorageTarget;
-  const isDeltaStorageBlocked = Boolean(existingDeltaTargetName);
-
-  React.useEffect(() => {
-    const abortController = new AbortController();
-    setIsLoadingDeltaTarget(true);
-
-    const loadExistingDeltaRepo = async () => {
-      try {
-        const repoList = await get<RepositoryList>(
-          'repositories?fieldSelector=spec.deltaStorageTarget=true&limit=1',
-          abortController.signal,
-        );
-        const deltaStorageRepo = repoList.items.find((repo) => repo.metadata.name !== currentRepoName);
-        if (!abortController.signal.aborted) {
-          setExistingDeltaTargetName(deltaStorageRepo?.metadata.name);
-        }
-      } catch {
-        if (!abortController.signal.aborted) {
-          setExistingDeltaTargetName(undefined);
-        }
-      } finally {
-        if (!abortController.signal.aborted) {
-          setIsLoadingDeltaTarget(false);
-        }
-      }
-    };
-
-    void loadExistingDeltaRepo();
-    return () => {
-      abortController.abort();
-    };
-  }, [currentRepoName, get]);
-
-  React.useEffect(() => {
-    if (isDeltaStorageBlocked && deltaStorageTarget) {
-      void setFieldValue('ociConfig.deltaStorageTarget', false);
-    }
-  }, [isDeltaStorageBlocked, deltaStorageTarget, setFieldValue]);
-
-  return (
-    <>
-      <DeltaStorageSelection isDisabled={isDeltaStorageBlocked || isLoadingDeltaTarget} isEdit={isEdit} />
-
-      {isDeltaStorageBlocked && existingDeltaTargetName && (
-        <Alert isInline variant="info" title={t('This organization already has a repository for delta storage')}>
-          <Trans t={t} values={{ name: existingDeltaTargetName }}>
-            The repository <strong>{'{{name}}'}</strong> is currently configured as the delta storage repository for
-            this organization.
-          </Trans>
-        </Alert>
-      )}
-    </>
-  );
-};
-
 export const RepositoryForm = ({
   isEdit,
   accessModeDisabledReason,
@@ -410,29 +340,35 @@ export const RepositoryForm = ({
   currentRepoName?: string;
 }) => {
   const { t } = useTranslation();
-  const { values, errors } = useFormikContext<RepositoryFormValues>();
+  const { values } = useFormikContext<RepositoryFormValues>();
   const isOciRepo = values.repoType === RepoSpecType.RepoSpecTypeOci;
   const isAccessModeDisabled = Boolean(accessModeDisabledReason);
 
-  const accessModeError = (errors.ociConfig as unknown as RepositoryFormValues['ociConfig'])?.accessMode;
   return (
     <>
-      <NameField
-        name="name"
-        aria-label={t('Repository name')}
-        isRequired
-        isDisabled={isEdit}
-        resourceType="repositories"
-        validations={getDnsSubdomainValidations(t)}
-      />
-      {isOciRepo ? (
-        <FormGroup label={t('Registry hostname')} isRequired>
-          <TextField
-            name="ociConfig.registry"
-            aria-label={t('Registry hostname')}
-            helperText={t('For example: quay.io, registry.redhat.io, myregistry.com:5000')}
+      <Stack hasGutter>
+        <StackItem>
+          <NameField
+            name="name"
+            aria-label={t('Repository name')}
+            isRequired
+            isDisabled={isEdit}
+            resourceType="repositories"
+            validations={getDnsSubdomainValidations(t)}
           />
-        </FormGroup>
+        </StackItem>
+        <StackItem>
+          <RepositoryType isEdit={isEdit} enforcedRepoTypeMessage={enforcedRepoTypeMessage} />
+        </StackItem>
+      </Stack>
+
+      {isOciRepo ? (
+        <OciRegistryForm
+          isAccessModeDisabled={isAccessModeDisabled}
+          accessModeDisabledReason={accessModeDisabledReason}
+          currentRepoName={currentRepoName}
+          isEdit={isEdit}
+        />
       ) : (
         <FormGroup label={t('Repository URL')} isRequired>
           <TextField
@@ -441,62 +377,6 @@ export const RepositoryForm = ({
             helperText={t('For example: {{ demoRepositoryUrl }}', { demoRepositoryUrl: DEMO_REPOSITORY_URL })}
           />
         </FormGroup>
-      )}
-
-      <RepositoryType isEdit={isEdit} enforcedRepoTypeMessage={enforcedRepoTypeMessage} />
-      {isOciRepo && (
-        <>
-          <FormGroup label={t('Scheme')}>
-            <Split hasGutter>
-              <SplitItem>
-                <RadioField
-                  id="oci-scheme-https"
-                  name="ociConfig.scheme"
-                  label={t('HTTPS')}
-                  checkedValue={OciRepoSpec.scheme.HTTPS}
-                />
-              </SplitItem>
-              <SplitItem>
-                <RadioField
-                  id="oci-scheme-http"
-                  name="ociConfig.scheme"
-                  label={t('HTTP')}
-                  checkedValue={OciRepoSpec.scheme.HTTP}
-                />
-              </SplitItem>
-            </Split>
-          </FormGroup>
-          <FormGroup label={t('Access mode')}>
-            <WithTooltip showTooltip={isAccessModeDisabled} content={accessModeDisabledReason}>
-              <Flex>
-                <FlexItem>
-                  <RadioField
-                    id="oci-access-read"
-                    name="ociConfig.accessMode"
-                    label={t('Read only')}
-                    checkedValue={OciRepoSpec.accessMode.READ}
-                    isDisabled={isAccessModeDisabled}
-                    showGlobalError={false}
-                  />
-                </FlexItem>
-                <FlexItem>
-                  <RadioField
-                    id="oci-access-readwrite"
-                    name="ociConfig.accessMode"
-                    label={t('Read and write')}
-                    checkedValue={OciRepoSpec.accessMode.READ_WRITE}
-                    isDisabled={isAccessModeDisabled}
-                    showGlobalError={false}
-                  />
-                </FlexItem>
-              </Flex>
-            </WithTooltip>
-            {accessModeError && <ErrorHelperText error={accessModeError} />}
-          </FormGroup>
-          <OciPushPlacementSection />
-          {values.allowDeltaStorage && <DeltaStorageSection currentRepoName={currentRepoName} isEdit={isEdit} />}
-          <OciBaseImagesSection />
-        </>
       )}
       <CheckboxField name="useAdvancedConfig" label={t('Use advanced configurations')} body={<AdvancedSection />} />
     </>
@@ -533,7 +413,7 @@ const CreateRepositoryFormContent = ({
             enforcedRepoTypeMessage={options?.enforcedRepoTypeMessage}
             accessModeDisabledReason={
               options?.writeAccessOnly
-                ? t('Access mode must be set to read and write for this repository type')
+                ? t('Registry usage must be set to read and write for this repository type')
                 : undefined
             }
           />

@@ -141,7 +141,7 @@ const RepositoryTableRow = ({
         {isDeltaStorageTargetRepo(repository.spec) && (
           <Tooltip content={t("This is the organization's repository for delta update artifacts.")}>
             <Label color="blue" variant="outline" isCompact className="pf-v6-u-ml-sm">
-              {t('Delta repository')}
+              {t('Delta storage')}
             </Label>
           </Tooltip>
         )}

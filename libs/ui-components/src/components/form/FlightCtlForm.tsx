@@ -4,6 +4,11 @@ import { Form } from '@patternfly/react-core';
 
 import './FlightCtlForm.css';
 
+// Nested form section that adds a left padding to the children.
+export const FlightCtlFormSection = ({ children }: React.PropsWithChildren) => (
+  <div className="fctl-form-section">{children}</div>
+);
+
 const FlightCtlForm = ({
   className,
   children,

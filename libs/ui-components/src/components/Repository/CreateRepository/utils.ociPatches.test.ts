@@ -202,7 +202,7 @@ describe('getOciRepositoryPatches', () => {
       );
     });
 
-    it('sets deltaStorageTarget to false when allowDeltaStorage is disabled', () => {
+    it('skips deltaStorageTarget patch when allowDeltaStorage is disabled', () => {
       const repoSpec = baseRepoSpec({ deltaStorageTarget: true });
       const values = baseFormValues({
         allowDeltaStorage: false,
@@ -212,8 +212,8 @@ describe('getOciRepositoryPatches', () => {
         },
       });
 
-      expect(getOciRepositoryPatches(values, repoSpec)).toEqual(
-        expect.arrayContaining([{ op: 'replace', path: '/spec/deltaStorageTarget', value: false }]),
+      expect(getOciRepositoryPatches(values, repoSpec)).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ path: '/spec/deltaStorageTarget' })]),
       );
     });
 

@@ -6,7 +6,6 @@ import ErrorHelperText, { DefaultHelperText } from './FieldHelperText';
 export interface SwitchFieldProps extends Omit<SwitchProps, 'onChange' | 'ref' | 'checked' | 'id'> {
   name: string;
   helperText?: React.ReactNode;
-  confirmText?: React.ReactNode;
   onChangeCustom?: (value: boolean) => void;
   noDefaultOnChange?: boolean;
 }

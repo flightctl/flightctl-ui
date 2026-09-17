@@ -1,6 +1,6 @@
 import * as React from 'react';
+import type { TFunction } from 'react-i18next';
 import {
-  Button,
   Card,
   CardBody,
   CardTitle,
@@ -10,24 +10,24 @@ import {
   DescriptionListTerm,
   Icon,
   Label,
-  Popover,
 } from '@patternfly/react-core';
 import { LockIcon } from '@patternfly/react-icons/dist/js/icons/lock-icon';
 import { LockOpenIcon } from '@patternfly/react-icons/dist/js/icons/lock-open-icon';
 
 import type { OciRepoSpec, Repository } from '@flightctl/types';
-
 import { getLastTransitionTimeText } from '../../../utils/status/repository';
 import { useTranslation } from '../../../hooks/useTranslation';
 import RepositoryStatus from '../../Status/RepositoryStatus';
 import {
-  getOciRepoPushDisplayPath,
+  getOciAccessModeLabel,
+  getOciPlacementModeFromSpec,
   getRepoTypeLabel,
   getRepoUrlOrRegistry,
   hasCredentialsSettings,
   isHttpRepoSpec,
   isOciRepoSpec,
 } from '../CreateRepository/utils';
+import { OciPlacementMode } from '../CreateRepository/types';
 import { GitRepositoryLink, HttpRepositoryUrl } from './RepositorySource';
 
 const RepoPrivacy = ({ repo }: { repo: Repository }) => {
@@ -55,7 +55,7 @@ const RepoPrivacy = ({ repo }: { repo: Repository }) => {
 const RegistryOrUrl = ({ repo }: { repo: Repository }) => {
   const urlOrRegistry = getRepoUrlOrRegistry(repo.spec);
   if (isOciRepoSpec(repo.spec)) {
-    return <div>{urlOrRegistry}</div>;
+    return urlOrRegistry;
   }
   if (isHttpRepoSpec(repo.spec)) {
     return <HttpRepositoryUrl url={urlOrRegistry} />;
@@ -63,40 +63,16 @@ const RegistryOrUrl = ({ repo }: { repo: Repository }) => {
   return <GitRepositoryLink url={urlOrRegistry} />;
 };
 
-const ImagePlacementDetails = ({ spec }: { spec: OciRepoSpec }) => {
-  const { t } = useTranslation();
-
-  let content: React.ReactNode;
-  if (spec.namespace) {
-    content = (
-      <>
-        <span className="pf-v6-u-font-weight-bold">{t('Namespace')}</span>: {spec.namespace}
-      </>
-    );
-  } else if (spec.repository) {
-    content = (
-      <>
-        <span className="pf-v6-u-font-weight-bold">{t('Repository')}</span>: {spec.repository}
-      </>
-    );
-  } else {
-    content = (
-      <>
-        <span>{t('Images are stored mirroring their image paths')}</span>
-      </>
-    );
+const getImagePlacementLabel = (t: TFunction, spec: OciRepoSpec) => {
+  const placementMode = getOciPlacementModeFromSpec(spec);
+  switch (placementMode) {
+    case OciPlacementMode.Namespace:
+      return t('Group by image name');
+    case OciPlacementMode.Repository:
+      return t('Fixed repository path');
+    default:
+      return t('Mirror source image path');
   }
-
-  return (
-    <>
-      {content}
-      <p className="pf-v6-u-mt-md">
-        {t('Example: An image named "my-org/my-app" would be stored at {{path}}.', {
-          path: getOciRepoPushDisplayPath(spec),
-        })}
-      </p>
-    </>
-  );
 };
 
 const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
@@ -121,12 +97,18 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
               <RegistryOrUrl repo={repoDetails} />
             </DescriptionListDescription>
           </DescriptionListGroup>
+          {isOciRepo && (
+            <DescriptionListGroup>
+              <DescriptionListTerm>{t('Registry usage')}</DescriptionListTerm>
+              <DescriptionListDescription>{getOciAccessModeLabel(t, spec.accessMode)}</DescriptionListDescription>
+            </DescriptionListGroup>
+          )}
           {isOciRepo && spec.deltaStorageTarget && (
             <DescriptionListGroup>
-              <DescriptionListTerm>{t('Delta repository')}</DescriptionListTerm>
+              <DescriptionListTerm>{t('Delta storage')}</DescriptionListTerm>
               <DescriptionListDescription>
                 <Label isCompact variant="outline" color="blue">
-                  {t('Enabled')}
+                  {t('Delta artifact storage enabled')}
                 </Label>
               </DescriptionListDescription>
             </DescriptionListGroup>
@@ -134,16 +116,7 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
           {isOciRepo && (
             <DescriptionListGroup>
               <DescriptionListTerm>{t('Image placement')}</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Popover
-                  headerContent={t('Placement configuration')}
-                  bodyContent={<ImagePlacementDetails spec={spec} />}
-                >
-                  <Button variant="link" isInline>
-                    {t('View details')}
-                  </Button>
-                </Popover>
-              </DescriptionListDescription>
+              <DescriptionListDescription>{getImagePlacementLabel(t, spec)}</DescriptionListDescription>
             </DescriptionListGroup>
           )}
           <DescriptionListGroup>

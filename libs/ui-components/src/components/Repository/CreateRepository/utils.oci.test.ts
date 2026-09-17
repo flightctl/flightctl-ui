@@ -85,11 +85,20 @@ describe('OCI repository utils', () => {
   it('builds OCI display paths', () => {
     expect(
       getOciRepoDisplayPath({
-        type: RepoSpecType.RepoSpecTypeOci,
         registry: testRegistry,
         repository: testRepo,
       }),
     ).toBe('my-registry.com/my-org/diffs');
+
+    expect(
+      getOciRepoDisplayPath(
+        {
+          registry: testRegistry,
+          repository: testRepo,
+        },
+        'my-org/my-image',
+      ),
+    ).toBe('my-registry.com/my-org/diffs/my-org/my-image');
   });
 
   it('maps delta target create payload for each placement mode', () => {
@@ -184,7 +193,8 @@ describe('OCI repository utils', () => {
     const schema = repositorySchema(t, undefined)(values);
     await expect(schema.validate(values)).rejects.toMatchObject({
       path: 'ociConfig.accessMode',
-      message: 'To use this registry as a delta storage target, the repository must have read and write access',
+      message:
+        'A read-only registry cannot be used as a delta storage target. Please switch to read and write registry usage.',
     });
   });
 

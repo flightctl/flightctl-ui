@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, FormGroup, Grid, Label, LabelGroup, Split, SplitItem } from '@patternfly/react-core';
+import { Button, FormGroup, Grid, Label, LabelGroup, Split, SplitItem, Stack, StackItem } from '@patternfly/react-core';
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon, PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons';
 
@@ -52,21 +52,22 @@ const TagsField = ({
 const OciBaseImagesSection = () => {
   const { t } = useTranslation();
   const { values } = useFormikContext<RepositoryFormValues>();
+  const baseImageCount = values.ociConfig?.baseImages?.length ?? 0;
 
   return (
-    <FieldArray name="ociConfig.baseImages">
-      {(arrayHelpers) => (
-        <>
-          <FormGroup label={t('Base images')}>
-            {values.ociConfig?.baseImages?.map((baseImage, index) => (
-              <Split hasGutter key={index}>
-                <SplitItem isFilled>
-                  <ExpandableFormSection
-                    title={
-                      baseImage.displayName || baseImage.imageName || t('Base image {{ idx }}', { idx: index + 1 })
-                    }
-                    fieldName={`ociConfig.baseImages.${index}`}
-                  >
+    <ExpandableFormSection
+      fieldName="ociConfig.baseImages"
+      title={t('Base images for Image Builder')}
+      description={baseImageCount > 0 ? t('{{ count }} configured', { count: baseImageCount }) : t('Optional')}
+      defaultExpanded={false}
+    >
+      <FieldArray name="ociConfig.baseImages">
+        {(arrayHelpers) => (
+          <Stack hasGutter>
+            {values.ociConfig?.baseImages?.map((_baseImage, index) => (
+              <StackItem key={index}>
+                <Split hasGutter>
+                  <SplitItem isFilled>
                     <Grid hasGutter>
                       <FormGroup label={t('Display name')}>
                         <TextField name={`ociConfig.baseImages.${index}.displayName`} aria-label={t('Display name')} />
@@ -91,38 +92,39 @@ const OciBaseImagesSection = () => {
                         </FieldArray>
                       </FormGroup>
                     </Grid>
-                  </ExpandableFormSection>
-                </SplitItem>
-                <SplitItem>
-                  <Button
-                    aria-label={t('Remove base image')}
-                    variant="link"
-                    icon={<MinusCircleIcon />}
-                    iconPosition="start"
-                    onClick={() => arrayHelpers.remove(index)}
-                  />
-                </SplitItem>
-              </Split>
+                  </SplitItem>
+                  <SplitItem>
+                    <Button
+                      aria-label={t('Remove base image')}
+                      variant="link"
+                      icon={<MinusCircleIcon />}
+                      iconPosition="start"
+                      onClick={() => arrayHelpers.remove(index)}
+                    />
+                  </SplitItem>
+                </Split>
+              </StackItem>
             ))}
-          </FormGroup>
-          <Button
-            style={{ marginRight: 'auto' }}
-            variant="link"
-            icon={<PlusCircleIcon />}
-            iconPosition="start"
-            onClick={() =>
-              arrayHelpers.push({
-                displayName: '',
-                imageName: '',
-                tags: [],
-              })
-            }
-          >
-            {t('Add base image')}
-          </Button>
-        </>
-      )}
-    </FieldArray>
+            <StackItem>
+              <Button
+                variant="link"
+                icon={<PlusCircleIcon />}
+                iconPosition="start"
+                onClick={() =>
+                  arrayHelpers.push({
+                    displayName: '',
+                    imageName: '',
+                    tags: [],
+                  })
+                }
+              >
+                {t('Add base image')}
+              </Button>
+            </StackItem>
+          </Stack>
+        )}
+      </FieldArray>
+    </ExpandableFormSection>
   );
 };
 

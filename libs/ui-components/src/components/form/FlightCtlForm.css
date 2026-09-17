@@ -30,3 +30,8 @@
     width: 66.666%;
   }
 }
+
+.fctl-form-section {
+  margin-block-start: var(--pf-t--global--spacer--sm);
+  padding-inline-start: var(--pf-t--global--spacer--lg);
+}

@@ -7,10 +7,12 @@ import type { DeltaGenerationForm, FleetFormValues } from '../../../../types/dev
 import SwitchField from '../../../form/SwitchField';
 import RadioField from '../../../form/RadioField';
 import TextField from '../../../form/TextField';
-import ErrorHelperText from '../../../form/FieldHelperText';
+import ErrorHelperText, { DefaultHelperText } from '../../../form/FieldHelperText';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import { useAppLinks } from '../../../../hooks/useAppLinks';
+import { useExistingDeltaStorageTarget } from '../../../../hooks/useExistingDeltaStorageTarget';
+import { Link, ROUTE } from '../../../../hooks/useNavigate';
 import DeltaGenerationHelpContent from '../DeltaGenerationHelpContent';
 
 const DeltaGenerationSettings = ({ isReadOnly }: { isReadOnly: boolean }) => {
@@ -71,6 +73,8 @@ const UpdateStepDeltaGeneration = ({ isReadOnly }: { isReadOnly: boolean }) => {
   } = useFormikContext<FleetFormValues>();
 
   const deltaUpdatesDocLink = useAppLinks('deltaGenerationBasics');
+  const { existingDeltaTargetName, isLoading: isLoadingDeltaTarget } = useExistingDeltaStorageTarget();
+  const orgHasDeltaRepository = isLoadingDeltaTarget || Boolean(existingDeltaTargetName);
 
   const [hasCustomFieldsError, setHasCustomFieldsError] = React.useState(false);
 
@@ -99,59 +103,66 @@ const UpdateStepDeltaGeneration = ({ isReadOnly }: { isReadOnly: boolean }) => {
           />
         </StackItem>
 
+        {deltaGeneration.generateDelta && !orgHasDeltaRepository && (
+          <StackItem>
+            <Alert isInline variant="warning" title={t('Delta storage not configured')}>
+              {t(
+                'Delta generation is enabled, but no repository is configured for delta artifact storage. Create one before this fleet rolls out updates.',
+              )}{' '}
+              <Link to={ROUTE.REPOSITORIES}>{t('Go to Repositories')}</Link>
+            </Alert>
+          </StackItem>
+        )}
         <StackItem>
           {deltaGeneration.generateDelta ? (
-            <FormGroup
-              label={t('Generation timeouts')}
-              role="radiogroup"
-              className="fctl-update-policy--customize-options"
-              isStack
-            >
-              <RadioField
-                id="delta-settings-default"
-                name="deltaGeneration.isCustomized"
-                label={t("Use admin's settings")}
-                description={t(
-                  'Use timeout values set by your administrator at deployment. Fleet settings do not override these unless you customize below.',
-                )}
-                checkedValue={false}
-                isDisabled={isReadOnly}
-                body={
-                  !deltaGeneration.isCustomized && (
-                    <Content component={ContentVariants.p}>
-                      {t(
-                        'Deployment timeout values are not shown here. If you are unsure which values apply, ask your administrator or check your deployment configuration.',
-                      )}
-                    </Content>
-                  )
-                }
-              />
-              <RadioField
-                id="delta-settings-customize"
-                name="deltaGeneration.isCustomized"
-                label={t('Customize timeouts')}
-                description={t('Set fleet-specific rollout hold and per-job generation timeout values.')}
-                checkedValue={true}
-                isDisabled={isReadOnly}
-                body={deltaGeneration.isCustomized ? <DeltaGenerationSettings isReadOnly={isReadOnly} /> : undefined}
-              />
-              {hasCustomFieldsError && (
-                <ErrorHelperText
-                  error={t(
-                    'To use custom settings, enter at least one of rollout hold deadline or per-job generation timeout.',
+            <>
+              <FormGroup
+                label={t('Generation timeouts')}
+                role="radiogroup"
+                className="fctl-update-policy--customize-options"
+                isStack
+              >
+                <RadioField
+                  id="delta-settings-default"
+                  name="deltaGeneration.isCustomized"
+                  label={t("Use admin's settings")}
+                  description={t(
+                    'Use timeout values set by your administrator at deployment. Fleet settings do not override these unless you customize below.',
                   )}
+                  checkedValue={false}
+                  isDisabled={isReadOnly}
+                  body={
+                    !deltaGeneration.isCustomized && (
+                      <DefaultHelperText
+                        helperText={t(
+                          'Deployment timeout values are not shown here. If you are unsure which values apply, ask your administrator or check your deployment configuration.',
+                        )}
+                      />
+                    )
+                  }
                 />
-              )}
-            </FormGroup>
+                <RadioField
+                  id="delta-settings-customize"
+                  name="deltaGeneration.isCustomized"
+                  label={t('Customize timeouts')}
+                  description={t('Set fleet-specific rollout hold and per-job generation timeout values.')}
+                  checkedValue={true}
+                  isDisabled={isReadOnly}
+                  body={deltaGeneration.isCustomized ? <DeltaGenerationSettings isReadOnly={isReadOnly} /> : undefined}
+                />
+                {hasCustomFieldsError && (
+                  <ErrorHelperText
+                    error={t(
+                      'To use custom settings, enter at least one of rollout hold deadline or per-job generation timeout.',
+                    )}
+                  />
+                )}
+              </FormGroup>
+            </>
           ) : (
-            <Alert
-              isInline
-              variant="info"
-              className="fctl-update-delta-generation__opt-out-alert"
-              title={t('Delta generation disabled for this fleet')}
-            >
+            <Alert isInline variant="info" title={t('Delta generation disabled for this fleet')}>
               {t(
-                'You chose to disable server-side delta generation for this fleet. Devices may still apply deltas published in container images when available.',
+                'You disabled server-side delta generation for this fleet. Your devices may still apply deltas published in container images when available.',
               )}
             </Alert>
           )}

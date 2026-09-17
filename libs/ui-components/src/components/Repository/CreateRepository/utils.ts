@@ -59,27 +59,17 @@ export const getOciPlacementModeFromSpec = (spec: OciRepoSpec): OciPlacementMode
   return OciPlacementMode.Registry;
 };
 
-export const getOciRepoDisplayPath = (spec: OciRepoSpec): string => {
-  const registry = spec.registry || '';
-  if (spec.repository) {
-    return `${registry}/${spec.repository}`;
-  }
-  if (spec.namespace) {
-    return `${registry}/${spec.namespace}`;
-  }
-  return registry;
-};
-
-export const getOciRepoPushDisplayPath = (
-  ociRepo: Pick<OciRepoSpec, 'registry' | 'repository' | 'namespace'>,
+export const getOciRepoDisplayPath = (
+  spec: Pick<OciRepoSpec, 'registry' | 'repository' | 'namespace'>,
+  exampleImage?: string,
 ): string => {
-  if (ociRepo.repository) {
-    return `${ociRepo.registry}/${ociRepo.repository}`;
+  let path = spec.registry || '';
+  if (spec.repository) {
+    path = `${path}/${spec.repository}`;
+  } else if (spec.namespace) {
+    path = `${path}/${spec.namespace}`;
   }
-  if (ociRepo.namespace) {
-    return `${ociRepo.registry}/${ociRepo.namespace}/my-org/my-app`;
-  }
-  return `${ociRepo.registry}/my-org/my-app`;
+  return exampleImage ? `${path}/${exampleImage}` : path;
 };
 
 export const isDeltaStorageTargetRepo = (repoSpec: RepositorySpec): boolean =>
@@ -350,15 +340,17 @@ export const getOciRepositoryPatches = (values: RepositoryFormValues, repoSpec: 
     path: '/spec/namespace',
   });
 
-  const originalDeltaStorage = repoSpec.deltaStorageTarget;
-  const isNewDeltaStorage = Boolean(values.allowDeltaStorage && formOciConfig.deltaStorageTarget);
-  if (Boolean(originalDeltaStorage) !== isNewDeltaStorage) {
-    appendJSONPatch({
-      patches,
-      newValue: isNewDeltaStorage,
-      originalValue: originalDeltaStorage,
-      path: '/spec/deltaStorageTarget',
-    });
+  if (values.allowDeltaStorage) {
+    const originalDeltaStorage = repoSpec.deltaStorageTarget;
+    const isNewDeltaStorage = Boolean(formOciConfig.deltaStorageTarget);
+    if (Boolean(originalDeltaStorage) !== isNewDeltaStorage) {
+      appendJSONPatch({
+        patches,
+        newValue: isNewDeltaStorage,
+        originalValue: originalDeltaStorage,
+        path: '/spec/deltaStorageTarget',
+      });
+    }
   }
 
   if (!formOciConfig.baseImages?.length) {
@@ -577,9 +569,22 @@ export const httpConfigToFormValues = (httpConfig?: HttpConfig): RepositoryFormV
 
 export const getRepoUrlOrRegistry = (repoSpec: RepositorySpec): string => {
   if (isOciRepoSpec(repoSpec)) {
-    return getOciRepoDisplayPath(repoSpec);
+    return repoSpec.registry || '';
   }
   return repoSpec.url || '';
+};
+
+export const getOciAccessModeLabel = (
+  t: TFunction,
+  accessMode: OciRepoSpec.accessMode = OciRepoSpec.accessMode.READ,
+): string => {
+  switch (accessMode) {
+    case OciRepoSpec.accessMode.READ_WRITE:
+      return t('Read and write');
+    case OciRepoSpec.accessMode.READ:
+    default:
+      return t('Read only');
+  }
 };
 
 export const getOciImagePlacementLabel = (t: TFunction, spec: OciRepoSpec): string => {
@@ -969,7 +974,7 @@ export const repositorySchema =
             ),
           ),
         }),
-      }).test('delta-storage-access-mode', function (value) {
+      }).test('oci-registry-incompatible-settings', function (value) {
         const ociConfig = value?.ociConfig;
         if (
           values.allowDeltaStorage &&
@@ -979,7 +984,7 @@ export const repositorySchema =
           return this.createError({
             path: 'ociConfig.accessMode',
             message: t(
-              'To use this registry as a delta storage target, the repository must have read and write access',
+              'A read-only registry cannot be used as a delta storage target. Please switch to read and write registry usage.',
             ),
           });
         }

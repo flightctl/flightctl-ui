@@ -15,12 +15,12 @@ const DeltaGenerationSummary = ({ deltaGeneration }: DeltaGenerationSummaryProps
     return <Content>{t('Disabled for this fleet')}</Content>;
   }
   if (!deltaGeneration.isCustomized) {
-    return <Content>{t('Enabled (deployment defaults)')}</Content>;
+    return <Content>{t("Enabled (admin's settings)")}</Content>;
   }
 
   return (
     <Stack>
-      <StackItem>{t('Enabled (custom timing)')}</StackItem>
+      <StackItem>{t('Enabled (custom timeouts)')}</StackItem>
       {deltaGeneration.maxWaitForDelta && (
         <StackItem>
           {t('Rollout hold deadline')}: {deltaGeneration.maxWaitForDelta}
