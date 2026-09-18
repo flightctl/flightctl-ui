@@ -105,15 +105,16 @@ export type VariablesForm = { name: string; value: string }[];
 
 export type InlineFileForm = { path: string; content?: string; base64?: boolean };
 
+// Manual apps can only use plain images, not catalogItemRef
 type InlineOrImageVariantForm = {
   specType: AppSpecType;
-  imageSpec: ImageOrCatalogItemRefSpec;
+  image?: string;
   files: InlineFileForm[];
 };
 
 export type SingleContainerAppForm = Omit<ContainerApplication, 'ports' | 'resources' | 'envVars' | 'volumes'> & {
   specType: AppSpecType.OCI_IMAGE;
-  imageSpec: ImageOrCatalogItemRefSpec;
+  image?: string;
   ports: PortMapping[];
   cpuLimit: string;
   memoryLimit: string;
@@ -123,7 +124,7 @@ export type SingleContainerAppForm = Omit<ContainerApplication, 'ports' | 'resou
 
 export type HelmAppForm = Omit<HelmApplication, 'values'> & {
   specType: AppSpecType.OCI_IMAGE;
-  imageSpec: ImageOrCatalogItemRefSpec;
+  image?: string;
   valuesYaml?: string;
   valuesFiles: string[];
 };
@@ -166,21 +167,43 @@ export type VmAppForm = {
   publishPorts: Required<PortMapping>[];
 };
 
-export type AppForm = SingleContainerAppForm | HelmAppForm | QuadletAppForm | ComposeAppForm | VmAppForm;
+/** Curated form apps added/edited manually (not via Software Catalog). */
+export type ManualAppForm = SingleContainerAppForm | HelmAppForm | QuadletAppForm | ComposeAppForm | VmAppForm;
+
+/**
+ * Catalog-sourced application in the fleet/device template wizard.
+ * Holds the API application for round-trip load/save; channel/version stay pinned on catalogItemRef.
+ */
+export type CatalogAppForm = {
+  catalogItemRef: CatalogItemRefSpec;
+  name?: string;
+  apiApp: ApplicationProviderSpec;
+};
+
+export type ApplicationEntry = { type: 'manual'; app: ManualAppForm } | { type: 'catalog'; app: CatalogAppForm };
+
+export const isManualAppEntry = (entry: ApplicationEntry): entry is { type: 'manual'; app: ManualAppForm } =>
+  entry.type === 'manual';
+
+export const isCatalogAppEntry = (entry: ApplicationEntry): entry is { type: 'catalog'; app: CatalogAppForm } =>
+  entry.type === 'catalog';
 
 const hasTemplateVariables = (str: string) => /{{.+?}}/.test(str);
 
-export const isCatalogAppForm = (app: AppForm): boolean =>
-  app.specType === AppSpecType.OCI_IMAGE && Boolean(app.imageSpec?.catalogItemRef);
-
-export const getAppIdentifier = (app: AppForm): string => {
+export const getManualAppIdentifier = (app: ManualAppForm): string => {
   if (app.name) return app.name;
   // Name is mandatory for all apps, except when the apps have an image which then becomes the ID.
-  if ('imageSpec' in app) {
-    const catalogItemRef = app.imageSpec.catalogItemRef;
-    return catalogItemRef ? formatCatalogItemRef(catalogItemRef) : app.imageSpec.image || '';
+  if ('image' in app && app.image) {
+    return app.image;
   }
   return '';
+};
+
+export const getAppIdentifier = (entry: ApplicationEntry): string => {
+  if (entry.type === 'catalog') {
+    return entry.app.name || formatCatalogItemRef(entry.app.catalogItemRef);
+  }
+  return getManualAppIdentifier(entry.app);
 };
 
 const removeSlashes = (url: string | undefined) => (url || '').replace(/^\/+|\/+$/g, '');
@@ -266,7 +289,7 @@ export enum UpdateMode {
 export type DeviceSpecConfigFormValues = {
   osSpec?: ImageOrCatalogItemRefSpec;
   configTemplates: SpecConfigTemplate[];
-  applications: AppForm[];
+  applications: ApplicationEntry[];
   systemdUnits: SystemdUnitFormValue[];
   updatePolicy: UpdatePolicyForm;
   registerMicroShift: boolean;

@@ -9,6 +9,7 @@ import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { CatalogPageContent } from '../../Catalog/CatalogPage';
 import InstalledSoftware from '../../Catalog/InstalledSoftware';
+import { type CatalogEditWizardMode } from '../../../utils/catalog';
 
 import './ResourceCatalogPage.css';
 
@@ -19,7 +20,7 @@ type ResourceCatalogPageProps = {
   hasPackageMode?: boolean;
   spec: DeviceSpec | undefined;
   onPatch: (allPatches: PatchRequest) => Promise<void>;
-  onEdit: (id: SpecCatalogItemId) => void;
+  onEdit: (id: SpecCatalogItemId, mode: CatalogEditWizardMode) => void;
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
 };
 

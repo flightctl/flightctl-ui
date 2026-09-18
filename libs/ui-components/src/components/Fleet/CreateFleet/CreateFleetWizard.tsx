@@ -145,7 +145,9 @@ const CreateFleetWizard = () => {
                     id={deviceTemplateStepId}
                     isDisabled={isWizardStepDisabled(deviceTemplateStepId, orderedIds, validStepIds)}
                   >
-                    {currentStep?.id === deviceTemplateStepId && <DeviceTemplateStep isFleet isReadOnly={isReadOnly} />}
+                    {currentStep?.id === deviceTemplateStepId && (
+                      <DeviceTemplateStep isFleet isReadOnly={isReadOnly} isEdit={isEdit} />
+                    )}
                   </WizardStep>
                   <WizardStep
                     name={t('Updates')}
@@ -159,7 +161,7 @@ const CreateFleetWizard = () => {
                     id={reviewStepId}
                     isDisabled={isWizardStepDisabled(reviewStepId, orderedIds, validStepIds)}
                   >
-                    {currentStep?.id === reviewStepId && <ReviewStep error={error} />}
+                    {currentStep?.id === reviewStepId && <ReviewStep error={error} showUpdateStatus={isEdit} />}
                   </WizardStep>
                 </Wizard>
               </>

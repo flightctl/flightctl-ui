@@ -23,7 +23,7 @@ import { Formik, useFormikContext } from 'formik';
 
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
 import { useFetch } from '../../hooks/useFetch';
-import { type ResourceSync, type ResourceSyncList, ResourceSyncType } from '@flightctl/types';
+import { ResourceKind, type ResourceSync, type ResourceSyncList, ResourceSyncType } from '@flightctl/types';
 import { getObservedHash } from '../../utils/status/repository';
 import { useDeleteListAction } from '../ListPage/ListPageActions';
 import Table from '../Table/Table';
@@ -188,7 +188,7 @@ const RepositoryResourceSyncList = ({ repositoryId }: { repositoryId: string }) 
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
   const { action: deleteAction, modal: deleteModal } = useDeleteListAction({
-    resourceType: 'ResourceSync',
+    resourceType: ResourceKind.RESOURCE_SYNC,
     onConfirm: async (resourceId: string) => {
       await remove(`resourcesyncs/${resourceId}`);
       refetch();

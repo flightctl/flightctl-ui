@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   Content,
   DescriptionList,
@@ -10,7 +11,6 @@ import {
   EmptyStateActions,
   EmptyStateBody,
   EmptyStateFooter,
-  Gallery,
   MenuToggle,
   PageSection,
   Split,
@@ -22,7 +22,6 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
 import { EllipsisVIcon } from '@patternfly/react-icons/dist/js/icons/ellipsis-v-icon';
-import * as React from 'react';
 import {
   type Catalog,
   type CatalogItem,
@@ -32,7 +31,6 @@ import {
 } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../hooks/useTranslation';
-import CatalogItemCard from './CatalogItemCard';
 import CatalogPageToolbar, { CreateCatalogItemBtn, ImportCatalogBtn } from './CatalogPageToolbar';
 import { type CatalogFilter, useCatalogFilter } from './useCatalogFilter';
 import CatalogItemDetails from './CatalogItemDetails';
@@ -51,6 +49,7 @@ import ActionsDropdownList from '../common/ActionsDropdownList';
 import ResourceSyncImportStatus from '../ResourceSync/ResourceSyncImportStatus';
 import CatalogLandingPage, { CatalogLandingPageContent, useLandingPagePermissions } from './CatalogLandingPage';
 import PageWithPermissions from '../common/PageWithPermissions';
+import CatalogItemGallery from './CatalogItemGallery';
 
 import './CatalogPage.css';
 
@@ -116,10 +115,10 @@ const CatalogPageFilter = ({
     const id = item.id as string;
 
     if (id === CatalogItemCategory.CatalogItemCategoryApplication) {
-      if (appTypeIds.every((id) => catalogFilter.itemType.includes(id))) {
-        catalogFilter.setItemType(catalogFilter.itemType.filter((id) => !appTypeIds.includes(id)));
+      if (appTypeIds.every((typeId) => catalogFilter.itemType.includes(typeId))) {
+        catalogFilter.setItemType(catalogFilter.itemType.filter((typeId) => !appTypeIds.includes(typeId)));
       } else {
-        const newTypes = catalogFilter.itemType.filter((id) => !appTypeIds.includes(id));
+        const newTypes = catalogFilter.itemType.filter((typeId) => !appTypeIds.includes(typeId));
         catalogFilter.setItemType([...newTypes, ...appTypeIds]);
       }
     } else {
@@ -131,7 +130,7 @@ const CatalogPageFilter = ({
   };
 
   const osTypeChecked = catalogFilter.itemType.includes(CatalogItemType.CatalogItemTypeOS);
-  const anyAppTypeChecked = appTypeIds.some((t) => catalogFilter.itemType.includes(t));
+  const anyAppTypeChecked = appTypeIds.some((typeId) => catalogFilter.itemType.includes(typeId));
 
   const filterData: TreeViewDataItem[] = [
     {
@@ -157,7 +156,7 @@ const CatalogPageFilter = ({
       name: t('Application'),
       id: CatalogItemCategory.CatalogItemCategoryApplication,
       checkProps: {
-        checked: appTypeIds.every((id) => catalogFilter.itemType.includes(id))
+        checked: appTypeIds.every((typeId) => catalogFilter.itemType.includes(typeId))
           ? true
           : anyAppTypeChecked
             ? null
@@ -243,6 +242,19 @@ export const CatalogPageContent = ({
     : undefined;
 
   const filterIsEmpty = catalogFilter.itemType.length === 0 && !catalogFilter.nameFilter.trim();
+
+  const onSelectItem = React.useCallback((selection: CatalogItem) => {
+    setSelectedItem((val) => {
+      if (!val || val.itemName !== selection.metadata.name || val.catalog !== selection.metadata.catalog) {
+        return {
+          itemName: selection.metadata.name || '',
+          catalog: selection.metadata.catalog,
+        };
+      } else {
+        return undefined;
+      }
+    });
+  }, []);
 
   return (
     <>
@@ -392,30 +404,7 @@ export const CatalogPageContent = ({
                         </StackItem>
                       )}
                       <StackItem>
-                        <Gallery hasGutter>
-                          {catalogItems.map((ci) => (
-                            <CatalogItemCard
-                              catalogItem={ci}
-                              key={`${ci.metadata.catalog}/${ci.metadata.name}`}
-                              onSelect={() =>
-                                setSelectedItem((val) => {
-                                  if (
-                                    !val ||
-                                    val.itemName !== ci.metadata.name ||
-                                    val.catalog !== ci.metadata.catalog
-                                  ) {
-                                    return {
-                                      itemName: ci.metadata.name || '',
-                                      catalog: ci.metadata.catalog,
-                                    };
-                                  } else {
-                                    return undefined;
-                                  }
-                                })
-                              }
-                            />
-                          ))}
-                        </Gallery>
+                        <CatalogItemGallery catalogItems={catalogItems} onSelect={onSelectItem} />
                       </StackItem>
                     </Stack>
                   )}

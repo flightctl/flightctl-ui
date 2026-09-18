@@ -4,6 +4,7 @@ import { Tbody } from '@patternfly/react-table';
 import { SelectList, SelectOption, ToolbarItem } from '@patternfly/react-core';
 import { MicrochipIcon } from '@patternfly/react-icons/dist/js/icons';
 
+import { ResourceKind } from '@flightctl/types';
 import Table, { type ApiTableColumn } from '../Table/Table';
 import TableActions from '../Table/TableActions';
 import ListPage from '../ListPage/ListPage';
@@ -73,7 +74,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
   const { action: deleteAction, modal: deleteModal } = useDeleteListAction({
-    resourceType: 'EnrollmentRequest',
+    resourceType: ResourceKind.ENROLLMENT_REQUEST,
     onConfirm: async (enrollmentId: string) => {
       await remove(`enrollmentrequests/${enrollmentId}`);
       refetch();

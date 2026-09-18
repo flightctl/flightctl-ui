@@ -5,6 +5,7 @@ import type {
   RolloutPolicy,
   RolloutPolicyDeltaGeneration,
 } from '@flightctl/types';
+import { type TFunction } from 'i18next';
 
 import {
   type BatchForm,
@@ -100,6 +101,34 @@ export const getUpdatePolicyValues = (updateSpec?: DeviceUpdatePolicySpec): Upda
       : timeUtils.UpdateScheduleMode.Weekly,
     installTimeZone: updateSpec?.updateSchedule?.timeZone || timeUtils.localDeviceTimezone,
   };
+};
+
+export const getDownloadPolicyText = (updatePolicy: UpdatePolicyForm, t: TFunction): string => {
+  return timeUtils.getScheduleUpdateText(
+    {
+      startsAt: updatePolicy.downloadStartsAt,
+      endsAt: updatePolicy.downloadEndsAt,
+      scheduleMode: updatePolicy.downloadScheduleMode,
+      weekDays: updatePolicy.downloadWeekDays,
+      timeZone: updatePolicy.downloadTimeZone,
+      startGraceDuration: updatePolicy.downloadStartGraceDuration,
+    },
+    t,
+  );
+};
+
+export const getInstallPolicyText = (updatePolicy: UpdatePolicyForm, t: TFunction): string => {
+  return timeUtils.getScheduleUpdateText(
+    {
+      startsAt: updatePolicy.installStartsAt,
+      endsAt: updatePolicy.installEndsAt,
+      scheduleMode: updatePolicy.installScheduleMode,
+      weekDays: updatePolicy.installWeekDays,
+      timeZone: updatePolicy.installTimeZone,
+      startGraceDuration: updatePolicy.installStartGraceDuration,
+    },
+    t,
+  );
 };
 
 /** True when the user customized rollout hold and/or per-job timeout (non-empty inputs). */

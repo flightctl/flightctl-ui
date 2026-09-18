@@ -219,7 +219,6 @@ const InstallAppWizard = ({ catalogItem }: InstallAppWizardProps) => {
       formValues:
         values.configureVia === 'editor' ? (load(values.editorContent) as Record<string, unknown>) : values.formValues,
       specPath,
-      volumeSelection: values.configureVia === 'form' ? values.volumeSelection : [],
     });
     if (!allPatches.length) {
       return;

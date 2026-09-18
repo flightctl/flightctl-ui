@@ -6,7 +6,7 @@ import type { TFunction } from 'i18next';
 import type { CatalogItemRefSpec } from '@flightctl/types';
 import type { CatalogItem } from '@flightctl/types/alpha';
 import { useTranslation } from '../../hooks/useTranslation';
-import { getCatalogItemIcon } from '../../utils/catalog';
+import CatalogItemIcon from './CatalogItemIcon';
 
 const formatVersionLine = (t: TFunction, version?: string, channel?: string) => {
   if (!version) {
@@ -20,7 +20,7 @@ const formatVersionLine = (t: TFunction, version?: string, channel?: string) => 
 type CatalogTitleLayoutProps = {
   icon: React.ReactNode;
   title: React.ReactNode;
-  description?: string;
+  description?: React.ReactNode;
   version?: string;
   channel?: string;
 };
@@ -38,7 +38,7 @@ const CatalogTitleLayout = ({ icon, title, description, version, channel }: Cata
           </StackItem>
           {description && (
             <StackItem>
-              <Content component={ContentVariants.h6}>{description}</Content>
+              <Content component={ContentVariants.small}>{description}</Content>
             </StackItem>
           )}
           {versionLine && (
@@ -54,10 +54,10 @@ const CatalogTitleLayout = ({ icon, title, description, version, channel }: Cata
 
 export const BrokenCatalogItemTitle = ({
   catalogRef,
-  description,
+  headerTitle,
 }: {
   catalogRef: CatalogItemRefSpec;
-  description?: string;
+  headerTitle: string;
 }) => {
   const { t } = useTranslation();
   return (
@@ -67,8 +67,9 @@ export const BrokenCatalogItemTitle = ({
           <OutlinedQuestionCircleIcon />
         </Icon>
       }
-      title={
-        <Stack hasGutter>
+      title={headerTitle}
+      description={
+        <Stack>
           <StackItem>
             <Alert
               isInline
@@ -82,7 +83,6 @@ export const BrokenCatalogItemTitle = ({
           <StackItem>{`${catalogRef.catalog}/${catalogRef.item}`}</StackItem>
         </Stack>
       }
-      description={description}
       version={catalogRef.version}
       channel={catalogRef.channel}
     />
@@ -90,19 +90,21 @@ export const BrokenCatalogItemTitle = ({
 };
 
 const CatalogItemTitle = ({
+  headerTitle,
   item,
-  description,
   version,
   channel,
+  description,
 }: {
   item: CatalogItem;
-  description?: string;
+  headerTitle: string;
   version?: string;
   channel?: string;
+  description?: string;
 }) => (
   <CatalogTitleLayout
-    icon={<img src={getCatalogItemIcon(item)} alt={`${item.metadata.name} icon`} style={{ maxWidth: '40px' }} />}
-    title={item.spec.displayName || item.metadata.name || ''}
+    icon={<CatalogItemIcon catalogItem={item} />}
+    title={headerTitle}
     description={description}
     version={version}
     channel={channel}

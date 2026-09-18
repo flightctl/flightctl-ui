@@ -124,6 +124,7 @@ const CreateResourceSyncsForm = ({
                     aria-label={t('Delete resource sync')}
                     isDisabled={values.resourceSyncs.length === 1}
                     variant="link"
+                    isDanger
                     icon={<MinusCircleIcon />}
                     iconPosition="start"
                     onClick={() => arrayHelpers.remove(index)}

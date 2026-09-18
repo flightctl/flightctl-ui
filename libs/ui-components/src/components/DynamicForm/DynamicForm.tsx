@@ -21,16 +21,6 @@ import {
   PFObjectFieldTemplate,
   pfFields,
 } from './FieldTemplate';
-import type { VolumeCatalogSelection } from '../../utils/catalog';
-
-export type DynamicFormContext = {
-  volumeSelection: VolumeCatalogSelection[];
-  onVolumeSelected: (selection: VolumeCatalogSelection) => void;
-  /** Called when an array item is removed, before the form state is updated. Use to sync e.g. volumeSelection when the array is "volumes". */
-  onBeforeArrayItemRemoved: (arrayId: string, index: number) => void;
-  /** Called when the user clears the catalog item selection for a volume (e.g. "Delete Item"). Use to remove the entry from volumeSelection. */
-  onVolumeCleared: (volumeIndex: number) => void;
-};
 
 // All PatternFly widgets
 const pfWidgets: RegistryWidgetsType = {
@@ -57,19 +47,17 @@ type DynamicFormProps = {
   formData: Record<string, unknown> | undefined;
   onChange: (data: Record<string, unknown> | undefined) => void;
   onValidate?: (isValid: boolean) => void;
-  formContext?: DynamicFormContext;
 };
 
-const DynamicForm = ({ valuesSchema, formData, onChange, onValidate, formContext }: DynamicFormProps) => {
+const DynamicForm = ({ valuesSchema, formData, onChange, onValidate }: DynamicFormProps) => {
   return (
     <Form<Record<string, unknown>>
       schema={valuesSchema}
       formData={formData}
-      validator={validator as AJV8Validator<Record<string, unknown>, RJSFSchema, DynamicFormContext>}
+      validator={validator as AJV8Validator<Record<string, unknown>, RJSFSchema>}
       widgets={pfWidgets}
       templates={pfTemplates}
       fields={pfFields}
-      formContext={formContext}
       onChange={(e) => {
         onChange(e.formData);
         onValidate?.(e.errors.length === 0);

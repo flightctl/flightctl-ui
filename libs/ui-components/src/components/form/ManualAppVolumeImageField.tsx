@@ -8,15 +8,14 @@ import { formatCatalogItemRef } from '../../utils/catalog';
 import { useResolvedCatalogRef } from '../Catalog/useResolvedCatalogRef';
 import { DefaultHelperText } from './FieldHelperText';
 
-export interface ImageOrCatalogRefFieldProps extends TextInputProps {
+export interface ManualAppVolumeImageFieldProps extends TextInputProps {
   name: string;
   helperText?: React.ReactNode;
 }
 
-// Field for an OCI image or catalog item reference
-// Currently the Form only allows editing the image field.
-// If the value is set as a catalog item reference, the field is read-only.
-const ImageOrCatalogRefField = ({ name, helperText, ...props }: ImageOrCatalogRefFieldProps) => {
+// The UI does not allow defining catalog volumes in manual applications.
+// Therefore, if the volume image uses a catalog item reference, the field is read-only.
+const ManualAppVolumeImageField = ({ name, helperText, ...props }: ManualAppVolumeImageFieldProps) => {
   const { t } = useTranslation();
   const [field, meta, { setValue }] = useField<ImageOrCatalogItemRefSpec>({
     name,
@@ -60,4 +59,4 @@ const ImageOrCatalogRefField = ({ name, helperText, ...props }: ImageOrCatalogRe
   );
 };
 
-export default ImageOrCatalogRefField;
+export default ManualAppVolumeImageField;

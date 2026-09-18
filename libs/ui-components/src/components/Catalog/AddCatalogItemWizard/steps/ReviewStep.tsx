@@ -17,7 +17,7 @@ import type { AddCatalogItemFormValues } from '../types';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getErrorMessage } from '../../../../utils/error';
 import { appTypeIds } from '../../useCatalogItems';
-import { getArtifactLabel } from '../../../../utils/catalog';
+import { getArtifactLabel } from '../../../../utils/catalogTypes';
 
 export const reviewStepId = 'review';
 

@@ -162,6 +162,7 @@ const UpdateStepRolloutPolicy = ({ isReadOnly }: { isReadOnly: boolean }) => {
                         <Button
                           aria-label={t('Delete batch')}
                           variant="link"
+                          isDanger
                           icon={<MinusCircleIcon />}
                           iconPosition="start"
                           onClick={() => arrayHelpers.remove(index)}

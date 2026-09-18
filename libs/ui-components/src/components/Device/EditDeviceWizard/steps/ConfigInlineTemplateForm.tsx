@@ -135,6 +135,7 @@ const ConfigInlineTemplateForm = ({ index, isReadOnly }: ConfigInlineTemplateFor
                     <Button
                       aria-label={t('Delete file')}
                       variant="link"
+                      isDanger
                       icon={<MinusCircleIcon />}
                       iconPosition="start"
                       onClick={() => arrayHelpers.remove(fileIndex)}

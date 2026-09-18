@@ -47,7 +47,7 @@ type ViewMode = 'form' | 'yaml';
 
 const ApplicationVmForm = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
-  const appFieldName = `applications[${index}]`;
+  const appFieldName = `applications[${index}].app`;
   const [{ value: app }, { error: appErrors }, { setValue }] = useField<VmAppForm>(appFieldName);
   const { setFieldValue, setFieldTouched, validateForm } = useFormikContext<DeviceSpecConfigFormValues>();
   const editorRef = React.useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);

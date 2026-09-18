@@ -11,7 +11,7 @@ import {
 import { useApplicationLifecycle } from '../../../hooks/useApplicationLifecycle';
 import { useRestartSpikes } from '../../../hooks/useRestartSpikes';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { getAppTypeLabel } from '../../../utils/apps';
+import { getAppTypeLabel } from '../../../utils/catalogTypes';
 import {
   type DeviceAppLifecycleOverrides,
   hasAplicationStatusMismatch,

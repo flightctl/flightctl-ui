@@ -6,8 +6,8 @@ import yaml from 'js-yaml';
 import { AppType, type ImageOrCatalogItemRefSpec, ImagePullPolicy } from '@flightctl/types';
 import { type FlightCtlLabel } from '../../types/extraTypes';
 import {
-  type AppForm,
   AppSpecType,
+  type ApplicationEntry,
   type BatchForm,
   BatchLimitType,
   type ComposeAppForm,
@@ -18,6 +18,7 @@ import {
   type InlineConfigTemplate,
   type InlineFileForm,
   type KubeSecretTemplate,
+  type ManualAppForm,
   type PortMapping,
   type QuadletAppForm,
   type RolloutPolicyForm,
@@ -245,6 +246,37 @@ export const validApplicationAndVolumeName = (t: TFunction) =>
     }),
   );
 
+export const requiredApplicationNameSchema = (t: TFunction) =>
+  validApplicationAndVolumeName(t).required(t('Application name is required.'));
+
+/** Normalize a display name into a DNS-safe application name. */
+export const toValidApplicationName = (rawName: string): string => {
+  const normalized = rawName
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  if (!normalized) {
+    return 'application';
+  }
+
+  if (GENERIC_NAME_REGEXP.test(normalized)) {
+    return normalized.slice(0, EXTENDED_MAX_LENGTH);
+  }
+
+  let fixed = normalized;
+  if (!/^[a-z0-9]/.test(fixed)) {
+    fixed = `a${fixed}`;
+  }
+  if (!/[a-z0-9]$/.test(fixed)) {
+    fixed = `${fixed}a`;
+  }
+  fixed = fixed.slice(0, EXTENDED_MAX_LENGTH);
+
+  return GENERIC_NAME_REGEXP.test(fixed) ? fixed : 'application';
+};
+
 export const validConfigName = (t: TFunction) =>
   Yup.string()
     .matches(
@@ -310,18 +342,21 @@ export const validOsImage = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
   );
 
 export const validOsFormValue = (t: TFunction, { isFleet }: { isFleet: boolean }) =>
-  Yup.mixed().test('os-image-or-catalog', t('System image is invalid'), function (value) {
-    const osSpec = value as ImageOrCatalogItemRefSpec;
-    if (!osSpec || !osSpec.image || osSpec.catalogItemRef) {
-      return true;
-    }
-    try {
-      validOsImage(t, { isFleet }).validateSync(osSpec.image);
-      return true;
-    } catch (e) {
-      return this.createError({ message: (e as Yup.ValidationError).message || t('System image is invalid') });
-    }
-  });
+  Yup.object({
+    image: Yup.string().test('os-image', t('System image is invalid'), function (image) {
+      const parent = this.parent as ImageOrCatalogItemRefSpec;
+      if (!image || parent?.catalogItemRef) {
+        return true;
+      }
+      try {
+        validOsImage(t, { isFleet }).validateSync(image);
+        return true;
+      } catch (e) {
+        return this.createError({ message: (e as Yup.ValidationError).message || t('System image is invalid') });
+      }
+    }),
+    catalogItemRef: Yup.mixed(),
+  }).nullable();
 
 export const validHelmNamespace = (t: TFunction) =>
   genericNameSchema(t).max(
@@ -870,215 +905,247 @@ const vmAppPortMappingSchema = (t: TFunction) =>
       .required(),
   );
 
+const manualContainerAppSchema = (t: TFunction) =>
+  Yup.object().shape({
+    specType: Yup.string()
+      .oneOf([AppSpecType.OCI_IMAGE])
+      .required(t('Definition source must be image for this type of applications')),
+    appType: Yup.string().oneOf([AppType.AppTypeContainer]).required(t('Application type is required')),
+    name: validApplicationAndVolumeName(t),
+    image: ociImageSchema(t).required(t('Image is required.')),
+    ports: containerAppPortMappingSchema(t),
+    cpuLimit: Yup.string().test(
+      'valid-cpu-format',
+      t('CPU limit is invalid. Use a positive number of cores (e.g. 0.5 or 2).'),
+      validateCPULimit,
+    ),
+    memoryLimit: Yup.string().test(
+      'valid-memory-format',
+      t('Memory limit is invalid. Use a number with optional unit b, k, m, or g (e.g. 512m or 2g).'),
+      validateMemoryLimit,
+    ),
+    volumes: singleContainerVolumesSchema(t),
+    variables: appVariablesSchema(t),
+    runAs: Yup.string(),
+  });
+
+const manualHelmAppSchema = (t: TFunction) =>
+  Yup.object<HelmAppForm>().shape({
+    specType: Yup.string()
+      .oneOf([AppSpecType.OCI_IMAGE])
+      .required(t('Definition source must be image for this type of applications')),
+    appType: Yup.string().oneOf([AppType.AppTypeHelm]).required(t('Application type is required')),
+    name: validApplicationAndVolumeName(t),
+    image: ociImageSchema(t).required(t('Image is required.')),
+    namespace: validHelmNamespace(t),
+    valuesYaml: Yup.string().test('valid-yaml', t('YAML content is invalid.'), (value) => {
+      if (!value || value.trim() === '') {
+        return true;
+      }
+      try {
+        yaml.load(value);
+      } catch {
+        return false;
+      }
+      return true;
+    }),
+    valuesFiles: Yup.array().of(validHelmValuesFile(t)),
+  });
+
+const manualVmAppSchema = (t: TFunction) =>
+  Yup.object<VmAppForm>().shape({
+    specType: Yup.string()
+      .oneOf([AppSpecType.INLINE])
+      .required(t('Definition source must be inline for this type of applications')),
+    appType: Yup.string().oneOf([AppType.AppTypeVm]).required(t('Application type is required')),
+    name: validApplicationAndVolumeName(t).required(t('Name is required for VM applications.')),
+    configMode: Yup.string().oneOf(['form', 'yaml']).required(),
+    vmYaml: Yup.string().when('configMode', {
+      is: 'yaml',
+      then: (schema) =>
+        schema
+          .required(t('VM specification is required.'))
+          .test(
+            'valid-kubevirt-virtual-machine',
+            t('Provide a valid KubeVirt VirtualMachine manifest with metadata.name matching the application name.'),
+            function validateVmYamlManifest(vmYaml) {
+              if (!vmYaml) {
+                return true;
+              }
+
+              const doc = loadYamlDocument(vmYaml);
+              if (!doc) {
+                return this.createError({ message: t('YAML manifest could not be parsed.') });
+              }
+              if (!doc || typeof doc !== 'object') {
+                return this.createError({ message: t('Invalid KubeVirt VirtualMachine manifest.') });
+              }
+              if (doc.apiVersion !== 'kubevirt.io/v1' || doc.kind !== 'VirtualMachine') {
+                return this.createError({
+                  message: t(
+                    'KubeVirt VirtualMachine manifest must have apiVersion: kubevirt.io/v1 and kind: VirtualMachine.',
+                  ),
+                });
+              }
+              if (!doc.spec || typeof doc.spec !== 'object') {
+                return this.createError({
+                  message: t('KubeVirt VirtualMachine manifest must have a spec object.'),
+                });
+              }
+              const appName = (this.parent as VmAppForm).name;
+              if (appName && doc.metadata?.name !== appName) {
+                return this.createError({
+                  message: t('KubeVirt VirtualMachine manifest must have metadata.name matching the application name.'),
+                });
+              }
+              return true;
+            },
+          ),
+    }),
+    diskImage: Yup.string().when('configMode', {
+      is: 'form',
+      then: () => ociImageSchema(t).required(t('Disk image is required for VM applications.')),
+    }),
+    cpuCores: Yup.number().when('configMode', {
+      is: 'form',
+      then: (schema) =>
+        schema
+          .integer(t('CPU cores must be a whole number.'))
+          .min(1, t('CPU cores must be at least 1.'))
+          .required(t('CPU cores is required.')),
+    }),
+    memory: Yup.string().when('configMode', {
+      is: 'form',
+      then: (schema) =>
+        schema
+          .required(t('Memory is required.'))
+          .test(
+            'valid-kubevirt-memory-guest',
+            t('Provide a valid KubeVirt memory value.'),
+            validateKubevirtMemoryGuest,
+          ),
+    }),
+    cloudInit: Yup.string().when('configMode', {
+      is: 'form',
+      then: (schema) =>
+        schema.test('valid-cloud-init-ssh-key', function (cloudInitValue) {
+          const parsed = parseVmCloudInitUserData(cloudInitValue);
+          if (parsed.enableSshKey && parsed.sshPublicKey) {
+            const error = validateSshPublicKey(parsed.sshPublicKey, t);
+            if (error) {
+              return this.createError({ message: error });
+            }
+          }
+          return true;
+        }),
+    }),
+    sshPublicKey: Yup.string().when(['configMode', 'enableSshKey'], {
+      is: (configMode: string, enableSshKey: boolean) => configMode === 'form' && enableSshKey,
+      then: (schema) =>
+        schema
+          .required(t('SSH public key is required when SSH is enabled.'))
+          .test('flightctl-ssh-public-key', function (publicKey) {
+            if (!publicKey) {
+              return true;
+            }
+            const error = validateSshPublicKey(publicKey, t);
+            return error ? this.createError({ message: error }) : true;
+          }),
+    }),
+    password: Yup.string().when(['configMode', 'enablePassword'], {
+      is: (configMode: string, enablePassword: boolean) => configMode === 'form' && enablePassword,
+      then: (schema) => schema.required(t('Password is required when password authentication is enabled.')),
+    }),
+    publishPorts: vmAppPortMappingSchema(t),
+  });
+
+const manualImageAppSchema = (t: TFunction) =>
+  Yup.object<QuadletAppForm | ComposeAppForm>().shape({
+    specType: Yup.string()
+      .oneOf([AppSpecType.OCI_IMAGE])
+      .required(t('Definition source must be image for this type of applications')),
+    appType: Yup.string()
+      .oneOf([AppType.AppTypeCompose, AppType.AppTypeQuadlet])
+      .required(t('Application type is required')),
+    name: validApplicationAndVolumeName(t),
+    image: ociImageSchema(t).required(t('Image is required.')),
+    volumes: composeQuadletVolumesSchema(t),
+    variables: appVariablesSchema(t),
+  });
+
+const manualInlineQuadletAppSchema = (t: TFunction) =>
+  Yup.object<QuadletAppForm>().shape({
+    specType: appSpecTypeSchema(t),
+    appType: Yup.string().oneOf([AppType.AppTypeQuadlet]).required(t('Application type is required')),
+    name: validApplicationAndVolumeName(t).required(t('Name is required for quadlet applications.')),
+    files: inlineAppFileSchema(t)
+      .test('unique-file-paths', uniqueFilePathsTest(t))
+      .test('quadlet-file-types', quadletFileTypesValidation(t))
+      .test('quadlet-files-at-root', quadletFilesAtRoot(t)),
+    volumes: composeQuadletVolumesSchema(t),
+    variables: appVariablesSchema(t),
+  });
+
+const manualInlineComposeAppSchema = (t: TFunction) =>
+  Yup.object<ComposeAppForm>().shape({
+    specType: appSpecTypeSchema(t),
+    appType: Yup.string().oneOf([AppType.AppTypeCompose]).required(t('Application type is required')),
+    name: validApplicationAndVolumeName(t).required(t('Name is required for compose applications.')),
+    files: inlineAppFileSchema(t)
+      .test('unique-file-paths', uniqueFilePathsTest(t))
+      .test('compose-file-name', composeFileName(t)),
+    volumes: composeQuadletVolumesSchema(t),
+    variables: appVariablesSchema(t),
+  });
+
+const manualAppSchema = (t: TFunction) =>
+  Yup.lazy((value: ManualAppForm) => {
+    // Container applications (image-based with ports and resources)
+    if (value.appType === AppType.AppTypeContainer) {
+      return manualContainerAppSchema(t);
+    }
+
+    // Helm applications
+    if (value.appType === AppType.AppTypeHelm) {
+      return manualHelmAppSchema(t);
+    }
+
+    // VM applications
+    if (value.appType === AppType.AppTypeVm) {
+      return manualVmAppSchema(t);
+    }
+
+    // Image applications (Quadlet or Compose) — OCI string
+    if (value.specType === AppSpecType.OCI_IMAGE) {
+      return manualImageAppSchema(t);
+    }
+
+    // Inline quadlet applications
+    if (value.appType === AppType.AppTypeQuadlet && value.specType === AppSpecType.INLINE) {
+      return manualInlineQuadletAppSchema(t);
+    }
+
+    // Inline compose applications
+    return manualInlineComposeAppSchema(t);
+  });
+
 export const validApplicationsSchema = (t: TFunction) => {
   return Yup.array()
     .of(
-      Yup.lazy((value: AppForm) => {
-        // Container applications (image-based with ports and resources)
-        if (value.appType === AppType.AppTypeContainer) {
+      Yup.lazy((value: ApplicationEntry) => {
+        if (value?.type === 'catalog') {
+          // Pinned catalog apps: channel/version are locked on catalogItemRef; config edits rebuild apiApp.
           return Yup.object().shape({
-            specType: Yup.string()
-              .oneOf([AppSpecType.OCI_IMAGE])
-              .required(t('Definition source must be image for this type of applications')),
-            appType: Yup.string().oneOf([AppType.AppTypeContainer]).required(t('Application type is required')),
-            name: validApplicationAndVolumeName(t),
-            imageSpec: imageSpecSchema(t, true, t('Image is required.')),
-            ports: containerAppPortMappingSchema(t),
-            cpuLimit: Yup.string().test(
-              'valid-cpu-format',
-              t('CPU limit is invalid. Use a positive number of cores (e.g. 0.5 or 2).'),
-              validateCPULimit,
-            ),
-            memoryLimit: Yup.string().test(
-              'valid-memory-format',
-              t('Memory limit is invalid. Use a number with optional unit b, k, m, or g (e.g. 512m or 2g).'),
-              validateMemoryLimit,
-            ),
-            volumes: singleContainerVolumesSchema(t),
-            variables: appVariablesSchema(t),
-            runAs: Yup.string(),
+            type: Yup.string().oneOf(['catalog']).required(),
+            app: Yup.object().shape({
+              catalogItemRef: Yup.mixed().required(),
+              apiApp: Yup.mixed().required(),
+            }),
           });
         }
-
-        // Helm applications
-        if (value.appType === AppType.AppTypeHelm) {
-          return Yup.object<HelmAppForm>().shape({
-            specType: Yup.string()
-              .oneOf([AppSpecType.OCI_IMAGE])
-              .required(t('Definition source must be image for this type of applications')),
-            appType: Yup.string().oneOf([AppType.AppTypeHelm]).required(t('Application type is required')),
-            name: validApplicationAndVolumeName(t),
-            imageSpec: imageSpecSchema(t, true, t('Image is required.')),
-            namespace: validHelmNamespace(t),
-            valuesYaml: Yup.string().test('valid-yaml', t('YAML content is invalid.'), (value) => {
-              if (!value || value.trim() === '') {
-                return true;
-              }
-              try {
-                yaml.load(value);
-              } catch {
-                return false;
-              }
-              return true;
-            }),
-            valuesFiles: Yup.array().of(validHelmValuesFile(t)),
-          });
-        }
-
-        // VM applications
-        if (value.appType === AppType.AppTypeVm) {
-          return Yup.object<VmAppForm>().shape({
-            specType: Yup.string()
-              .oneOf([AppSpecType.INLINE])
-              .required(t('Definition source must be inline for this type of applications')),
-            appType: Yup.string().oneOf([AppType.AppTypeVm]).required(t('Application type is required')),
-            name: validApplicationAndVolumeName(t).required(t('Name is required for VM applications.')),
-            configMode: Yup.string().oneOf(['form', 'yaml']).required(),
-            vmYaml: Yup.string().when('configMode', {
-              is: 'yaml',
-              then: (schema) =>
-                schema
-                  .required(t('VM specification is required.'))
-                  .test(
-                    'valid-kubevirt-virtual-machine',
-                    t(
-                      'Provide a valid KubeVirt VirtualMachine manifest with metadata.name matching the application name.',
-                    ),
-                    function validateVmYamlManifest(vmYaml) {
-                      if (!vmYaml) {
-                        return true;
-                      }
-
-                      const doc = loadYamlDocument(vmYaml);
-                      if (!doc) {
-                        return this.createError({ message: t('YAML manifest could not be parsed.') });
-                      }
-                      if (!doc || typeof doc !== 'object') {
-                        return this.createError({ message: t('Invalid KubeVirt VirtualMachine manifest.') });
-                      }
-                      if (doc.apiVersion !== 'kubevirt.io/v1' || doc.kind !== 'VirtualMachine') {
-                        return this.createError({
-                          message: t(
-                            'KubeVirt VirtualMachine manifest must have apiVersion: kubevirt.io/v1 and kind: VirtualMachine.',
-                          ),
-                        });
-                      }
-                      if (!doc.spec || typeof doc.spec !== 'object') {
-                        return this.createError({
-                          message: t('KubeVirt VirtualMachine manifest must have a spec object.'),
-                        });
-                      }
-                      const appName = (this.parent as VmAppForm).name;
-                      if (appName && doc.metadata?.name !== appName) {
-                        return this.createError({
-                          message: t(
-                            'KubeVirt VirtualMachine manifest must have metadata.name matching the application name.',
-                          ),
-                        });
-                      }
-                      return true;
-                    },
-                  ),
-            }),
-            diskImage: Yup.string().when('configMode', {
-              is: 'form',
-              then: () => ociImageSchema(t).required(t('Disk image is required for VM applications.')),
-            }),
-            cpuCores: Yup.number().when('configMode', {
-              is: 'form',
-              then: (schema) =>
-                schema
-                  .integer(t('CPU cores must be a whole number.'))
-                  .min(1, t('CPU cores must be at least 1.'))
-                  .required(t('CPU cores is required.')),
-            }),
-            memory: Yup.string().when('configMode', {
-              is: 'form',
-              then: (schema) =>
-                schema
-                  .required(t('Memory is required.'))
-                  .test(
-                    'valid-kubevirt-memory-guest',
-                    t('Provide a valid KubeVirt memory value.'),
-                    validateKubevirtMemoryGuest,
-                  ),
-            }),
-            cloudInit: Yup.string().when('configMode', {
-              is: 'form',
-              then: (schema) =>
-                schema.test('valid-cloud-init-ssh-key', function (cloudInitValue) {
-                  const parsed = parseVmCloudInitUserData(cloudInitValue);
-                  if (parsed.enableSshKey && parsed.sshPublicKey) {
-                    const error = validateSshPublicKey(parsed.sshPublicKey, t);
-                    if (error) {
-                      return this.createError({ message: error });
-                    }
-                  }
-                  return true;
-                }),
-            }),
-            sshPublicKey: Yup.string().when(['configMode', 'enableSshKey'], {
-              is: (configMode: string, enableSshKey: boolean) => configMode === 'form' && enableSshKey,
-              then: (schema) =>
-                schema
-                  .required(t('SSH public key is required when SSH is enabled.'))
-                  .test('flightctl-ssh-public-key', function (publicKey) {
-                    if (!publicKey) {
-                      return true;
-                    }
-                    const error = validateSshPublicKey(publicKey, t);
-                    return error ? this.createError({ message: error }) : true;
-                  }),
-            }),
-            password: Yup.string().when(['configMode', 'enablePassword'], {
-              is: (configMode: string, enablePassword: boolean) => configMode === 'form' && enablePassword,
-              then: (schema) => schema.required(t('Password is required when password authentication is enabled.')),
-            }),
-            publishPorts: vmAppPortMappingSchema(t),
-          });
-        }
-
-        // Image applications (Quadlet or Compose) — OCI string or catalog ref
-        if (value.specType === AppSpecType.OCI_IMAGE) {
-          return Yup.object<QuadletAppForm | ComposeAppForm>().shape({
-            specType: Yup.string()
-              .oneOf([AppSpecType.OCI_IMAGE])
-              .required(t('Definition source must be image for this type of applications')),
-            appType: Yup.string()
-              .oneOf([AppType.AppTypeCompose, AppType.AppTypeQuadlet])
-              .required(t('Application type is required')),
-            name: validApplicationAndVolumeName(t),
-            imageSpec: imageSpecSchema(t, true, t('Image is required.')),
-            volumes: composeQuadletVolumesSchema(t),
-            variables: appVariablesSchema(t),
-          });
-        }
-
-        // Inline quadlet applications
-        if (value.appType === AppType.AppTypeQuadlet && value.specType === AppSpecType.INLINE) {
-          return Yup.object<QuadletAppForm>().shape({
-            specType: appSpecTypeSchema(t),
-            appType: Yup.string().oneOf([AppType.AppTypeQuadlet]).required(t('Application type is required')),
-            name: validApplicationAndVolumeName(t).required(t('Name is required for quadlet applications.')),
-            files: inlineAppFileSchema(t)
-              .test('unique-file-paths', uniqueFilePathsTest(t))
-              .test('quadlet-file-types', quadletFileTypesValidation(t))
-              .test('quadlet-files-at-root', quadletFilesAtRoot(t)),
-            volumes: composeQuadletVolumesSchema(t),
-            variables: appVariablesSchema(t),
-          });
-        }
-
-        // Inline compose applications
-        return Yup.object<ComposeAppForm>().shape({
-          specType: appSpecTypeSchema(t),
-          appType: Yup.string().oneOf([AppType.AppTypeCompose]).required(t('Application type is required')),
-          name: validApplicationAndVolumeName(t).required(t('Name is required for compose applications.')),
-          files: inlineAppFileSchema(t)
-            .test('unique-file-paths', uniqueFilePathsTest(t))
-            .test('compose-file-name', composeFileName(t)),
-          volumes: composeQuadletVolumesSchema(t),
-          variables: appVariablesSchema(t),
+        return Yup.object().shape({
+          type: Yup.string().oneOf(['manual']).required(),
+          app: manualAppSchema(t),
         });
       }),
     )
@@ -1087,8 +1154,8 @@ export const validApplicationsSchema = (t: TFunction) => {
         return true;
       }
 
-      const apps = appsValue as AppForm[];
-      const appIds = apps.map(getAppIdentifier);
+      const entries = appsValue as ApplicationEntry[];
+      const appIds = entries.map(getAppIdentifier);
       const duplicateIds = Object.entries(countBy(appIds))
         .filter(([, count]) => {
           return count > 1;
@@ -1098,19 +1165,20 @@ export const validApplicationsSchema = (t: TFunction) => {
         return true;
       }
 
-      const errors = apps.reduce((errors, app, appIndex) => {
+      const errors = entries.reduce((acc, entry, appIndex) => {
         if (duplicateIds.includes(appIds[appIndex] || '')) {
-          const error = app.name
-            ? new Yup.ValidationError(t('Application name must be unique.'), '', `applications[${appIndex}].name`)
+          const name = entry.app.name;
+          const error = name
+            ? new Yup.ValidationError(t('Application name must be unique.'), '', `applications[${appIndex}].app.name`)
             : new Yup.ValidationError(
                 t('Name is required, another application uses the same image.'),
                 '',
-                `applications[${appIndex}].name`,
+                `applications[${appIndex}].app.name`,
               );
 
-          errors.push(error);
+          acc.push(error);
         }
-        return errors;
+        return acc;
       }, [] as Yup.ValidationError[]);
 
       return testContext.createError({

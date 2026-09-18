@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { type TFunction, Trans } from 'react-i18next';
 
-import { type DeviceDecommissionTargetType } from '@flightctl/types';
+import { type DeviceDecommissionTargetType, ResourceKind } from '@flightctl/types';
 import { type ListAction, type ListActionProps, type ListActionResult } from './types';
 
 import { useTranslation } from '../../hooks/useTranslation';
@@ -10,18 +10,16 @@ import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import DecommissionModal from '../modals/DecommissionModal/DecommissionModal';
 import ResumeDevicesModal from '../modals/ResumeDevicesModal/ResumeDevicesModal';
 
-type DeleteResourceType = 'EnrollmentRequest' | 'ResourceSync' | 'Device';
-type DeviceOnlyResourceType = 'Device';
+type DeleteResourceType = ResourceKind.DEVICE | ResourceKind.ENROLLMENT_REQUEST | ResourceKind.RESOURCE_SYNC;
+type DeviceOnlyResourceType = ResourceKind.DEVICE;
 
-type ResourceType = 'Device' | 'EnrollmentRequest' | 'ResourceSync';
-
-const getResourceTypeLabel = (t: TFunction, resourceType: ResourceType) => {
+const getResourceTypeLabel = (t: TFunction, resourceType: DeleteResourceType) => {
   switch (resourceType) {
-    case 'Device':
+    case ResourceKind.DEVICE:
       return t('device');
-    case 'EnrollmentRequest':
+    case ResourceKind.ENROLLMENT_REQUEST:
       return t('pending device');
-    case 'ResourceSync':
+    case ResourceKind.RESOURCE_SYNC:
       return t('resource sync');
   }
 };
@@ -56,8 +54,12 @@ export const useDeleteListAction = ({
 
   const deleteModal = deleteResourceId && (
     <DeleteModal
-      resourceType={resourceTypeLabel}
-      resourceName={name || deleteResourceId}
+      resourceType={resourceType}
+      confirmText={
+        <Trans t={t}>
+          Are you sure you want to delete {resourceTypeLabel} <b>{name || deleteResourceId}</b>?
+        </Trans>
+      }
       onClose={onClose}
       onDelete={async () => {
         await onConfirm(deleteResourceId);

@@ -4,8 +4,7 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import { useAppLinks } from '../../../../hooks/useAppLinks';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import LearnMoreLink from '../../../common/LearnMoreLink';
-
-import ImageOrCatalogRefField from '../../../form/ImageOrCatalogRefField';
+import TextField from '../../../form/TextField';
 
 const CreateImageContent = () => {
   const { t } = useTranslation();
@@ -35,8 +34,8 @@ const ApplicationImageForm = ({
       content={groupContent || <CreateImageContent />}
       isRequired={isRequired}
     >
-      <ImageOrCatalogRefField
-        name={`${applicationName}.imageSpec`}
+      <TextField
+        name={`${applicationName}.image`}
         aria-label={t('Image')}
         helperText={t('Provide a valid image reference')}
         isDisabled={isReadOnly}

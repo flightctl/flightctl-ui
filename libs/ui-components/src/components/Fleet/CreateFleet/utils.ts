@@ -222,7 +222,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
         key,
         value: fleet.metadata.labels?.[key],
       })),
-      osSpec: fleet.spec.template.spec.os,
+      osSpec: fleet.spec.template.spec.os || { image: '' },
       configTemplates: getConfigTemplatesValues(fleet.spec.template.spec, registerMicroShift),
       applications: getApplicationValues(fleet.spec.template.spec),
       systemdUnits: getSystemdUnitsValues(fleet.spec.template.spec),

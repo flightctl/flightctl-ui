@@ -6,13 +6,13 @@ import { type DeviceDecommissionTargetType } from '@flightctl/types';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { getDisabledTooltipProps } from '../../utils/tooltip';
-import DeleteModal from '../modals/DeleteModal/DeleteModal';
+import DeleteModal, { type DeleteModalResourceType, getDeleteLabel } from '../modals/DeleteModal/DeleteModal';
 import DecommissionModal from '../modals/DecommissionModal/DecommissionModal';
 import ResumeDevicesModal from '../modals/ResumeDevicesModal/ResumeDevicesModal';
 
 type DeleteActionProps = {
   onDelete: () => Promise<unknown>;
-  resourceType: string;
+  resourceType: DeleteModalResourceType;
   resourceName: string;
   buttonLabel?: string;
   disabledReason?: string | boolean;
@@ -39,6 +39,8 @@ export const useDeleteAction = ({
 }: DeleteActionProps) => {
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+  const deleteLabel = getDeleteLabel(t, resourceType);
+
   const deleteAction = (
     <DropdownItem
       onClick={() => setIsDeleteModalOpen(true)}
@@ -51,13 +53,17 @@ export const useDeleteAction = ({
           }
         : undefined)}
     >
-      {buttonLabel || t('Delete {{ resourceType }}', { resourceType })}
+      {buttonLabel || deleteLabel}
     </DropdownItem>
   );
   const deleteModal = isDeleteModalOpen && (
     <DeleteModal
       resourceType={resourceType}
-      resourceName={resourceName}
+      confirmText={
+        <Trans t={t}>
+          Are you sure you want to delete <b>{resourceName}</b>?
+        </Trans>
+      }
       onClose={() => setIsDeleteModalOpen(false)}
       onDelete={onDelete}
     />

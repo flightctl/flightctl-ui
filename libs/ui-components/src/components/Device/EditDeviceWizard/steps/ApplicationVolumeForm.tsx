@@ -11,7 +11,7 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import FormSelect from '../../../form/FormSelect';
 import ErrorHelperText from '../../../form/FieldHelperText';
-import ImageOrCatalogRefField from '../../../form/ImageOrCatalogRefField';
+import ManualAppVolumeImageField from '../../../form/ManualAppVolumeImageField';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 
@@ -78,7 +78,7 @@ const ApplicationVolumeForm = ({
                           )}
 
                           <FormGroup label={t('Image reference')} isRequired={!isSingleContainerApp}>
-                            <ImageOrCatalogRefField
+                            <ManualAppVolumeImageField
                               label={t('Image reference')}
                               name={`${volumeFieldName}.imageSpec`}
                               isDisabled={isReadOnly}
@@ -108,6 +108,7 @@ const ApplicationVolumeForm = ({
                         <Button
                           aria-label={t('Delete volume')}
                           variant="link"
+                          isDanger
                           icon={<MinusCircleIcon />}
                           iconPosition="start"
                           onClick={() => arrayHelpers.remove(volumeIndex)}

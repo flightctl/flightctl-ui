@@ -11,20 +11,14 @@ import {
   type CatalogItem,
   type CatalogItemArtifact,
   CatalogItemArtifactType,
-  CatalogItemCategory,
   CatalogItemType,
   type CatalogItemVersion,
 } from '@flightctl/types/alpha';
 
-import { type TFunction } from 'i18next';
 import semver from 'semver';
 
 import { type FullAppVolume, buildApiVolume } from './volumes';
-import type { ArtifactFormValue } from '../components/Catalog/AddCatalogItemWizard/types';
 import { RUN_AS_ROOT_USER, isComposeAppSpec, isContainerAppSpec, isQuadletAppSpec } from '../types/deviceSpec';
-
-import appIcon from '../../assets/application.svg';
-import osIcon from '../../assets/os.svg';
 
 export type CatalogItemId = { catalog: string; item: string };
 
@@ -38,12 +32,6 @@ export type SpecCatalogItemId = {
   appName?: string;
 };
 
-/** Tracks which volume slots use a catalog Data item. */
-export type VolumeCatalogSelection = {
-  volumeIndex: number;
-  catalogItemRef: CatalogItemRefSpec;
-};
-
 export type ResolvedCatalogRef = {
   item: CatalogItem;
   displayName: string;
@@ -51,6 +39,11 @@ export type ResolvedCatalogRef = {
   channel: string;
   imageUri?: string;
 };
+
+export type CatalogEditWizardMode = 'edit' | 'update';
+
+export const getEditWizardMode = (modeParam: string): CatalogEditWizardMode =>
+  modeParam === 'update' ? modeParam : 'edit';
 
 export const getAppCatalogItemRef = (app: ApplicationProviderSpec): CatalogItemRefSpec | undefined =>
   'catalogItemRef' in app ? app.catalogItemRef : undefined;
@@ -170,9 +163,19 @@ export const getFullContainerURI = (artifacts: CatalogItemArtifact[], version: C
   return getFullArtifactURI(containerArtifact, version);
 };
 
+export const getCatalogRefDisplayName = (
+  ref: Pick<CatalogItemRefSpec, 'catalog' | 'item'>,
+  item?: CatalogItem | null,
+): string => {
+  if (item) {
+    return item.spec.displayName || item.metadata.name || ref.item;
+  }
+  return `${ref.catalog}/${ref.item}`;
+};
+
 export const resolveCatalogRef = (item: CatalogItem, ref: CatalogItemRefSpec): ResolvedCatalogRef => {
   const version = getCurrentVersion(item, ref.version, ref);
-  const displayName = item.spec.displayName || item.metadata.name || ref.item;
+  const displayName = getCatalogRefDisplayName(ref, item);
   const imageUri = version ? getFullContainerURI(item.spec.artifacts, version) : undefined;
   return {
     item,
@@ -181,32 +184,6 @@ export const resolveCatalogRef = (item: CatalogItem, ref: CatalogItemRefSpec): R
     channel: ref.channel || '',
     imageUri,
   };
-};
-
-export const getCatalogItemBadge = (itemType: CatalogItemType | undefined, t: TFunction) => {
-  switch (itemType) {
-    case CatalogItemType.CatalogItemTypeCompose: {
-      return t('Compose');
-    }
-    case CatalogItemType.CatalogItemTypeContainer: {
-      return t('Container');
-    }
-    case CatalogItemType.CatalogItemTypeData: {
-      return t('Data');
-    }
-    case CatalogItemType.CatalogItemTypeHelm: {
-      return t('Helm');
-    }
-    case CatalogItemType.CatalogItemTypeQuadlet: {
-      return t('Quadlet');
-    }
-    case CatalogItemType.CatalogItemTypeOS: {
-      return t('OS image');
-    }
-    default: {
-      return t('Unknown');
-    }
-  }
 };
 
 export const getRemoveOsPatches = ({ specPath }: { specPath: string }) => {
@@ -240,7 +217,7 @@ export const getRemoveAppPatches = ({
   return allPatches;
 };
 
-const getAppType = (catalogItem: CatalogItem): AppType | undefined => {
+export const getAppType = (catalogItem: CatalogItem): AppType | undefined => {
   switch (catalogItem.spec.type) {
     case CatalogItemType.CatalogItemTypeCompose:
       return AppType.AppTypeCompose;
@@ -255,23 +232,16 @@ const getAppType = (catalogItem: CatalogItem): AppType | undefined => {
   }
 };
 
-// Combines the form volumes with their selected Data catalog assets.
-const getCatalogApiVolumes = (
-  volumes: ApplicationVolume[] | undefined,
-  volumeSelection: VolumeCatalogSelection[],
-): ApplicationVolume[] => {
+/** Maps form volumes to API volumes (reference XOR catalogItemRef already in form data). */
+const getCatalogApiVolumes = (volumes: ApplicationVolume[] | undefined): ApplicationVolume[] => {
   if (!volumes?.length) {
     return [];
   }
 
-  return volumes.map((v, idx) => {
+  return volumes.map((v) => {
     const vol = v as FullAppVolume;
-
-    // Ensure only one of catalogItemRef or image is set.
-    const selectedVolume = volumeSelection.find((a) => a.volumeIndex === idx);
-    const volumeImageSpec = selectedVolume
-      ? { catalogItemRef: selectedVolume.catalogItemRef }
-      : { image: vol.image?.reference || '' };
+    const catalogItemRef = vol.image?.catalogItemRef;
+    const volumeImageSpec = catalogItemRef ? { catalogItemRef } : { image: vol.image?.reference || '' };
     return buildApiVolume(vol.name, volumeImageSpec, vol.image?.pullPolicy, vol.mount?.path || '');
   });
 };
@@ -304,25 +274,19 @@ const sanitizePorts = (ports: unknown): string[] | undefined => {
   return cleaned.length > 0 ? cleaned : undefined;
 };
 
-export const getAppPatches = ({
+export const buildCatalogApplicationSpec = ({
   appName,
-  currentApps,
   catalogItem,
   catalogItemVersion,
   channel,
   formValues,
-  specPath,
-  volumeSelection,
 }: {
   appName: string;
-  currentApps: ApplicationProviderSpec[] | undefined;
   catalogItem: CatalogItem;
   catalogItemVersion: CatalogItemVersion;
   channel: string;
   formValues: Record<string, unknown> | undefined;
-  specPath: string;
-  volumeSelection: VolumeCatalogSelection[];
-}) => {
+}): ApplicationProviderSpec => {
   const appType = getAppType(catalogItem);
   if (!appType) {
     throw new Error('Unknown application type');
@@ -354,8 +318,36 @@ export const getAppPatches = ({
 
   // Only set volumes to the application types that support them.
   if (isContainerOrQuadletApp || isComposeAppSpec(appSpec)) {
-    appSpec.volumes = getCatalogApiVolumes(userVolumes, volumeSelection);
+    appSpec.volumes = getCatalogApiVolumes(userVolumes);
   }
+
+  return appSpec;
+};
+
+export const getAppPatches = ({
+  appName,
+  currentApps,
+  catalogItem,
+  catalogItemVersion,
+  channel,
+  formValues,
+  specPath,
+}: {
+  appName: string;
+  currentApps: ApplicationProviderSpec[] | undefined;
+  catalogItem: CatalogItem;
+  catalogItemVersion: CatalogItemVersion;
+  channel: string;
+  formValues: Record<string, unknown> | undefined;
+  specPath: string;
+}) => {
+  const appSpec = buildCatalogApplicationSpec({
+    appName,
+    catalogItem,
+    catalogItemVersion,
+    channel,
+    formValues,
+  });
 
   const existingAppIndex = currentApps?.findIndex((app) => app.name === appSpec.name);
 
@@ -406,41 +398,5 @@ export const getUpdates = (catalogItem: CatalogItem, currentChannel: string, cur
   return updateVersions.filter((v) => !!getFullContainerURI(catalogItem.spec.artifacts, v));
 };
 
-export const getCatalogItemIcon = (catalogItem: CatalogItem): string =>
-  catalogItem.spec.icon ||
-  ((catalogItem.spec.category === CatalogItemCategory.CatalogItemCategorySystem ? osIcon : appIcon) as string);
-
-export const getArtifactLabel = (t: TFunction, artifact: ArtifactFormValue | CatalogItemArtifact) => {
-  const { type, name } = artifact;
-  if (type === '') {
-    return name;
-  }
-  if (name) {
-    return `${name} (${type})`;
-  }
-  switch (type) {
-    case CatalogItemArtifactType.CatalogItemArtifactTypeQcow2:
-      return t('QCOW2 (qcow2)');
-    case CatalogItemArtifactType.CatalogItemArtifactTypeIso:
-      return t('Bare Metal (iso)');
-    case CatalogItemArtifactType.CatalogItemArtifactTypeAmi:
-      return t('Amazon Web Services (ami)');
-    case CatalogItemArtifactType.CatalogItemArtifactTypeAnacondaIso:
-      return t('Anaconda Installer (anaconda-iso)');
-    case CatalogItemArtifactType.CatalogItemArtifactTypeGce:
-      return t('Google Cloud (gce)');
-    case CatalogItemArtifactType.CatalogItemArtifactTypeRaw:
-      return t('KVM/custom cloud import (raw)');
-    case CatalogItemArtifactType.CatalogItemArtifactTypeVhd:
-      return t('Microsoft Hyper-V (vhd)');
-    case CatalogItemArtifactType.CatalogItemArtifactTypeVmdk:
-      return t('VMware vSphere (vmdk)');
-    case CatalogItemArtifactType.CatalogItemArtifactTypeContainer:
-      return t('Cloud native (container)');
-    case CatalogItemArtifactType.CatalogItemArtifactTypeQcow2DiskContainer:
-      return t('OpenShift Virtualization (qcow2-disk-container)');
-    default: {
-      return t('Unknown ({{ type }})', { type });
-    }
-  }
-};
+export const getSortedUpdates = (catalogItem: CatalogItem, currentChannel: string, currentVersion: string) =>
+  getUpdates(catalogItem, currentChannel, currentVersion).sort((a, b) => semver.rcompare(a.version, b.version));

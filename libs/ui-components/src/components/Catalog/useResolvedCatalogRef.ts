@@ -17,19 +17,34 @@ export type UseResolvedCatalogRefResult = {
 
 /**
  * Resolves one catalogItemRef to display label and optional OCI URI.
- * Uses CatalogItemsProvider when present; otherwise fetches locally.
+ * Prefers CatalogItemsProvider cache when present; falls back to a local
+ * fetch for refs not yet in the provider's saved-spec id list (e.g. newly
+ * added catalog apps in a wizard before save).
  */
 export const useResolvedCatalogRef = (ref: CatalogItemRefSpec | undefined): UseResolvedCatalogRefResult | undefined => {
   const contextLookup = useOptionalCatalogItemsContext();
-  const localIds = React.useMemo(() => (!contextLookup && ref ? [toCatalogItemId(ref)] : []), [contextLookup, ref]);
+  const contextItem = ref && contextLookup ? contextLookup.getItem(ref.catalog, ref.item) : undefined;
+
+  // Wait for the shared provider to finish before treating a miss as "needs local fetch",
+  // so we don't duplicate requests for items that are already on the saved spec.
+  const needsLocalFetch = Boolean(ref && !contextItem && (!contextLookup || !contextLookup.isLoading));
+
+  const catalog = ref?.catalog;
+  const itemName = ref?.item;
+  const localIds = React.useMemo(() => {
+    if (!needsLocalFetch || !catalog || !itemName) {
+      return [];
+    }
+    return [toCatalogItemId({ catalog, item: itemName })];
+  }, [needsLocalFetch, catalog, itemName]);
+
   const localLookup = useCatalogItemsLookup(localIds);
 
   if (!ref) {
     return undefined;
   }
 
-  const lookup = contextLookup ?? localLookup;
-  const item = lookup.getItem(ref.catalog, ref.item);
+  const item = contextItem ?? localLookup.getItem(ref.catalog, ref.item);
   const resolved: ResolvedCatalogRef | undefined = item ? resolveCatalogRef(item, ref) : undefined;
 
   return {
@@ -37,7 +52,8 @@ export const useResolvedCatalogRef = (ref: CatalogItemRefSpec | undefined): UseR
     version: resolved?.version,
     channel: resolved?.channel || ref.channel || '',
     imageUri: resolved?.imageUri,
-    isLoading: lookup.isLoading,
-    error: lookup.error,
+    isLoading:
+      !item && Boolean(contextLookup?.isLoading || localLookup.isLoading || (needsLocalFetch && !localLookup.error)),
+    error: item ? undefined : localLookup.error ?? contextLookup?.error,
   };
 };

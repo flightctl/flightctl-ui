@@ -1,378 +1,349 @@
 import * as React from 'react';
-import {
-  Alert,
-  Bullseye,
-  Button,
-  Divider,
-  EmptyState,
-  EmptyStateActions,
-  EmptyStateBody,
-  Gallery,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  Spinner,
-  Split,
-  SplitItem,
-  Stack,
-  StackItem,
-  TextInput,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem,
-} from '@patternfly/react-core';
-import { Formik } from 'formik';
-import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
-import { CubeIcon } from '@patternfly/react-icons/dist/js/icons/cube-icon';
+import { Button, FormGroup, Split, SplitItem, Stack, StackItem, TextInput } from '@patternfly/react-core';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
-import type { FieldProps } from '@rjsf/utils';
+import { CatalogIcon } from '@patternfly/react-icons/dist/js/icons/catalog-icon';
+import cloneDeep from 'lodash/cloneDeep';
+import type { FieldProps, RJSFSchema } from '@rjsf/utils';
 
-import {
-  type CatalogItem,
-  type CatalogItemList,
-  CatalogItemType,
-  type CatalogItemVersion,
-} from '@flightctl/types/alpha';
+import type { CatalogItemRefSpec, ImagePullPolicy, ImageVolumeSource } from '@flightctl/types';
+import { type CatalogItem, type CatalogItemVersion } from '@flightctl/types/alpha';
 
-import { type DynamicFormContext } from './DynamicForm';
 import { useTranslation } from '../../hooks/useTranslation';
 import { usePermissionsContext } from '../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../types/rbac';
-import TableTextSearch from '../Table/TableTextSearch';
-import TablePagination from '../Table/TablePagination';
-import {
-  CatalogItemDetailsContent,
-  CatalogItemDetailsHeader,
-  getDefaultChannelAndVersion,
-} from '../Catalog/CatalogItemDetails';
-import FlightCtlForm from '../form/FlightCtlForm';
-import { type PaginationDetails } from '../../hooks/useTablePagination';
-import { getErrorMessage } from '../../utils/error';
 import { buildCatalogItemRef, formatCatalogItemRef } from '../../utils/catalog';
-import ResourceListEmptyState from '../common/ResourceListEmptyState';
-import FlightCtlModal from '../common/FlightCtlModal';
-import { InstallSpec } from '../Catalog/InstallWizard/steps/SpecificationsStep';
-import CatalogItemTitle from '../Catalog/CatalogItemTitle';
-import { type InstallSpecFormik } from '../Catalog/InstallWizard/types';
-import { useCatalogItems } from '../Catalog/useCatalogItems';
 import { useResolvedCatalogRef } from '../Catalog/useResolvedCatalogRef';
-import CatalogItemCard from '../Catalog/CatalogItemCard';
+import CatalogRefCard from '../CatalogRef/CatalogRefCard';
+import VolumeImagePullPolicy, { getPullPolicySchema } from './VolumeImagePullPolicy';
+import VolumeImageSelectAssetModal from './VolumeImageSelectAssetModal';
+
+export enum VolumeImageSourceMode {
+  // Volume accepts only an image reference
+  ImageOnly = 'imageOnly',
+  // Volume accepts only a catalog item reference
+  CatalogOnly = 'catalogOnly',
+  // Volume accepts can use either
+  Both = 'both',
+}
 
 /**
- * Regex for volume image reference field IDs.
- * Matches IDs like: root_volumes_0_image_reference, root_volumes_1_image_reference, etc.
- * Capture group 1 is the volume index.
+ * Regex for volume image object field IDs.
+ * Matches IDs like: root_volumes_0_image, root_volumes_1_image, etc.
  */
-export const ROOT_VOLUMES_IMAGE_REFERENCE_FIELD_REGEX = /root_volumes_(\d+)_image_reference$/;
+export const ROOT_VOLUMES_IMAGE_FIELD_REGEX = /^root_volumes_(\d+)_image$/;
+
+/** Schema fragment for catalogItemRef, injected when Both-mode schemas omit it. */
+export const CATALOG_ITEM_REF_PROPERTY_SCHEMA: RJSFSchema = {
+  type: 'object',
+  title: 'Catalog data asset',
+  description: 'Reference to a data catalog item (set via software catalog picker)',
+  required: ['catalog', 'item', 'version'],
+  properties: {
+    catalog: { type: 'string' },
+    item: { type: 'string' },
+    version: { type: 'string' },
+    channel: { type: 'string' },
+  },
+};
+
+/** Resolve the shared volumes[].image schema from the form root schema. */
+export const getVolumeImageSchema = (rootSchema: RJSFSchema | undefined): RJSFSchema | undefined => {
+  const volumes = rootSchema?.properties?.volumes;
+  if (!volumes || typeof volumes === 'boolean') {
+    return undefined;
+  }
+  const items = Array.isArray(volumes.items) ? volumes.items[0] : volumes.items;
+  if (!items || typeof items === 'boolean') {
+    return undefined;
+  }
+  const image = items.properties?.image;
+  return typeof image === 'object' ? image : undefined;
+};
+
+export const hasVolumeImageCatalogItemRefProperty = (imageSchema: RJSFSchema | undefined): boolean =>
+  !!imageSchema?.properties && 'catalogItemRef' in imageSchema.properties;
+
+export const getVolumeImageSourceMode = (rootSchema: RJSFSchema | undefined): VolumeImageSourceMode => {
+  const volumeImageSchema = getVolumeImageSchema(rootSchema);
+  const requiredList = Array.isArray(volumeImageSchema?.required) ? volumeImageSchema.required : [];
+  if (requiredList.includes('catalogItemRef')) {
+    return VolumeImageSourceMode.CatalogOnly;
+  }
+  if (requiredList.includes('reference')) {
+    return VolumeImageSourceMode.ImageOnly;
+  }
+  return VolumeImageSourceMode.Both;
+};
 
 /**
- * Extract the volume index from the field ID.
- * Field ID format: "root_volumes_0_image_reference" -> extracts index 0
+ * For Both-mode volume image schemas that only declare `reference`, inject `catalogItemRef`
+ * so catalog picks can live in RJSF formData (no side-channel state).
  */
-export const getVolumeIndexFromId = (fieldId: string): number => {
-  const match = fieldId.match(ROOT_VOLUMES_IMAGE_REFERENCE_FIELD_REGEX);
-  return match ? parseInt(match[1], 10) : -1;
-};
-
-type SelectAssetModalProps = {
-  onClose: VoidFunction;
-  onSelect: (item: CatalogItem, version: CatalogItemVersion, channel: string) => void;
-};
-
-const assetItemTypeFilter = [CatalogItemType.CatalogItemTypeData];
-
-const SelectAssetModal = ({ onClose, onSelect }: SelectAssetModalProps) => {
-  const [selectedAsset, setSelectedAsset] = React.useState<CatalogItem>();
-  const [nameFilter, setNameFilter] = React.useState('');
-  const { t } = useTranslation();
-  const [assetCatalogItems, isLoading, error, pagination, isUpdating] = useCatalogItems({
-    catalogFilter: {
-      itemType: assetItemTypeFilter,
-      nameFilter,
-    },
-  });
-
-  return (
-    <FlightCtlModal isOpen onClose={onClose} variant="large" aria-label={t('Choose asset from catalog')}>
-      {selectedAsset ? (
-        <CatalogItemDetails
-          item={selectedAsset}
-          onCancel={onClose}
-          onBack={() => setSelectedAsset(undefined)}
-          onSelect={(version, channel) => {
-            onSelect(selectedAsset, version, channel);
-            onClose();
-          }}
-        />
-      ) : (
-        <AssetsList
-          onSelect={setSelectedAsset}
-          onClose={onClose}
-          assetCatalogItems={assetCatalogItems}
-          isLoading={isLoading}
-          isUpdating={isUpdating}
-          error={error}
-          pagination={pagination}
-          nameFilter={nameFilter}
-          setNameFilter={setNameFilter}
-        />
-      )}
-    </FlightCtlModal>
-  );
-};
-
-type AssetsListProps = {
-  assetCatalogItems: CatalogItem[];
-  isLoading: boolean;
-  isUpdating: boolean;
-  error: unknown;
-  pagination: PaginationDetails<CatalogItemList>;
-  onSelect: (asset: CatalogItem) => void;
-  onClose: VoidFunction;
-  nameFilter: string;
-  setNameFilter: (name: string) => void;
-};
-
-const AssetsList = ({
-  assetCatalogItems,
-  isLoading,
-  isUpdating,
-  error,
-  pagination,
-  onSelect,
-  onClose,
-  nameFilter,
-  setNameFilter,
-}: AssetsListProps) => {
-  const { t } = useTranslation();
-  const hasFilters = !!nameFilter?.trim();
-
-  let modalContent = (
-    <>
-      <Toolbar inset={{ default: 'insetNone' }}>
-        <ToolbarContent>
-          <ToolbarItem>
-            <TableTextSearch value={nameFilter} setValue={setNameFilter} placeholder={t('Search by name')} />
-          </ToolbarItem>
-          <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
-            <TablePagination pagination={pagination} isUpdating={isUpdating} />
-          </ToolbarItem>
-        </ToolbarContent>
-      </Toolbar>
-      {assetCatalogItems.length === 0 ? (
-        hasFilters ? (
-          <EmptyState headingLevel="h4" icon={SearchIcon} titleText={t('No results found')} variant="full">
-            <EmptyStateBody>{t('Clear all filters and try again.')}</EmptyStateBody>
-            <EmptyStateActions>
-              <Button variant="link" onClick={() => setNameFilter('')}>
-                {t('Clear all filters')}
-              </Button>
-            </EmptyStateActions>
-          </EmptyState>
-        ) : (
-          <ResourceListEmptyState icon={CubeIcon} titleText={t('No assets available in catalog')}>
-            <EmptyStateBody>
-              {t('There are no asset catalog items to choose from. Add assets to your catalogs to select them here.')}
-            </EmptyStateBody>
-          </ResourceListEmptyState>
-        )
-      ) : (
-        <Gallery hasGutter>
-          {assetCatalogItems.map((asset) => (
-            <CatalogItemCard key={asset.metadata.name} catalogItem={asset} onSelect={() => onSelect(asset)} />
-          ))}
-        </Gallery>
-      )}
-    </>
-  );
-
-  if (error) {
-    modalContent = (
-      <Alert variant="danger" title={t('An error occurred')} isInline>
-        {getErrorMessage(error)}
-      </Alert>
-    );
-  } else if (isLoading) {
-    modalContent = (
-      <Bullseye>
-        <Spinner />
-      </Bullseye>
-    );
+export const enrichConfigSchemaForVolumeImages = (rootSchema: RJSFSchema): RJSFSchema => {
+  const imageSchema = getVolumeImageSchema(rootSchema);
+  if (!imageSchema) {
+    return rootSchema;
+  }
+  if (getVolumeImageSourceMode(rootSchema) !== VolumeImageSourceMode.Both) {
+    return rootSchema;
+  }
+  if (hasVolumeImageCatalogItemRefProperty(imageSchema)) {
+    return rootSchema;
   }
 
-  return (
-    <>
-      <ModalHeader title={t('Choose asset from catalog')} />
-      <ModalBody>{modalContent}</ModalBody>
-      <ModalFooter>
-        <Button variant="secondary" onClick={onClose}>
-          {t('Cancel')}
-        </Button>
-      </ModalFooter>
-    </>
-  );
-};
-
-const CatalogItemDetails = ({
-  item,
-  onBack,
-  onCancel,
-  onSelect,
-}: {
-  item: CatalogItem;
-  onBack: VoidFunction;
-  onCancel: VoidFunction;
-  onSelect: (selectedVersion: CatalogItemVersion, channel: string) => void;
-}) => {
-  const { t } = useTranslation();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const initialValues = React.useMemo(() => getDefaultChannelAndVersion(item), []);
-
-  const onSubmit = (values: InstallSpecFormik) => {
-    const selectedVersion = item.spec.versions.find((v) => v.version === values.version);
-    if (item && selectedVersion) {
-      onSelect(selectedVersion, values.channel);
-    }
+  const enriched = cloneDeep(rootSchema);
+  const enrichedImage = getVolumeImageSchema(enriched);
+  if (!enrichedImage) {
+    return rootSchema;
+  }
+  enrichedImage.properties = {
+    ...(enrichedImage.properties || {}),
+    catalogItemRef: CATALOG_ITEM_REF_PROPERTY_SCHEMA,
   };
-
-  return (
-    <Formik<InstallSpecFormik> initialValues={initialValues} enableReinitialize onSubmit={onSubmit}>
-      {({ submitForm }) => (
-        <>
-          <ModalHeader>
-            <CatalogItemDetailsHeader item={item} />
-          </ModalHeader>
-          <ModalBody>
-            <Stack hasGutter>
-              <StackItem>
-                <FlightCtlForm>
-                  <InstallSpec catalogItem={item} hideReadmeLink />
-                </FlightCtlForm>
-              </StackItem>
-              <StackItem>
-                <Divider />
-              </StackItem>
-              <StackItem>
-                <CatalogItemDetailsContent item={item} />
-              </StackItem>
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="secondary" onClick={onBack}>
-              {t('Back')}
-            </Button>
-            <Button onClick={submitForm}>{t('Select')}</Button>
-            <Button variant="link" onClick={onCancel}>
-              {t('Cancel')}
-            </Button>
-          </ModalFooter>
-        </>
-      )}
-    </Formik>
-  );
+  return enriched;
 };
 
 const catalogItemListPermission = [{ kind: RESOURCE.CATALOG_ITEM, verb: VERB.LIST }];
 
-// Setting "reference" to an empty string satisfies JSON Schema `required`, making the field valid.
-const VALID_EMPTY_IMAGE_REFERENCE = '';
-// Setting "reference" to undefined makes the field invalid, as required validation fails.
-const INVALID_EMPTY_IMAGE_REFERENCE = undefined;
+/** RJSF default-form-state may seed required catalogItemRef as {} or empty strings — ignore those. */
+const isCompleteCatalogItemRef = (ref: unknown): ref is CatalogItemRefSpec => {
+  if (!ref || typeof ref !== 'object') {
+    return false;
+  }
+  const { catalog, item, version } = ref as CatalogItemRefSpec;
+  return !!catalog && !!item && !!version;
+};
 
+/** Normalize formData: keep reference/pullPolicy, drop incomplete catalogItemRef placeholders. */
+const getImageFormData = (formData: unknown): ImageVolumeSource => {
+  if (!formData || typeof formData !== 'object') {
+    return {};
+  }
+  const image = { ...(formData as ImageVolumeSource) };
+  if (!isCompleteCatalogItemRef(image.catalogItemRef)) {
+    delete image.catalogItemRef;
+  }
+  if (typeof image.reference !== 'string') {
+    delete image.reference;
+  }
+  if (typeof image.pullPolicy !== 'string') {
+    delete image.pullPolicy;
+  }
+  return image;
+};
+
+const getSourceLabel = (schema: RJSFSchema, name: string, id: string, mode: VolumeImageSourceMode) => {
+  if (typeof schema.title === 'string' && schema.title) {
+    return schema.title;
+  }
+  const properties = schema.properties || {};
+  const preferredKey = mode === VolumeImageSourceMode.CatalogOnly ? 'catalogItemRef' : 'reference';
+  const preferred = properties[preferredKey];
+  if (preferred && typeof preferred === 'object' && typeof preferred.title === 'string' && preferred.title) {
+    return preferred.title;
+  }
+  return name || id;
+};
+
+/** Apply reference XOR catalogItemRef and optional pullPolicy onto the image object. */
+const buildImageFormData = (
+  current: ImageVolumeSource,
+  updates: {
+    reference?: string;
+    catalogItemRef?: CatalogItemRefSpec;
+    pullPolicy?: ImagePullPolicy;
+    /** When true, replace source from reference/catalogItemRef (possibly clearing both). */
+    replaceSource?: boolean;
+  },
+): ImageVolumeSource => {
+  const next: ImageVolumeSource = {};
+  const pullPolicy = updates.pullPolicy ?? current.pullPolicy;
+  if (pullPolicy) {
+    next.pullPolicy = pullPolicy;
+  }
+
+  if (updates.replaceSource) {
+    if (isCompleteCatalogItemRef(updates.catalogItemRef)) {
+      next.catalogItemRef = updates.catalogItemRef;
+    } else if (updates.reference) {
+      next.reference = updates.reference;
+    }
+  } else if (isCompleteCatalogItemRef(current.catalogItemRef)) {
+    next.catalogItemRef = current.catalogItemRef;
+  } else if (current.reference) {
+    next.reference = current.reference;
+  }
+
+  return next;
+};
+
+const SelectedVolumeDataAsset = ({
+  displayName,
+  imageRef,
+  canUnselect,
+  onUnselectAsset,
+}: {
+  displayName: string;
+  imageRef: CatalogItemRefSpec;
+  canUnselect: boolean;
+  onUnselectAsset: VoidFunction;
+}) => {
+  const { t } = useTranslation();
+  return (
+    <Split hasGutter>
+      <SplitItem isFilled>
+        {displayName ? (
+          <CatalogRefCard catalogItemRef={imageRef} headerTitle={displayName} showUpdateStatus={false} isCompact />
+        ) : (
+          t('Catalog item {{ catalogItemRef }}', {
+            catalogItemRef: formatCatalogItemRef(imageRef),
+          })
+        )}
+      </SplitItem>
+      <SplitItem>
+        <Button
+          aria-label={t('Delete item')}
+          variant="link"
+          isDanger
+          icon={<MinusCircleIcon />}
+          iconPosition="start"
+          isDisabled={!canUnselect}
+          onClick={onUnselectAsset}
+        />
+      </SplitItem>
+    </Split>
+  );
+};
 /**
- * Custom field for the volume image "reference" property.
- * Renders a text input plus "Choose from catalog" for Asset selection.
- * Used only when the field ID matches root_volumes_N_image_reference.
- * Catalog selections are tracked via "volumeSelection" and persisted as catalogItemRef on submit.
+ * Custom field for volumes[].image: OCI reference and/or catalog item, plus pullPolicy.
+ * Mounted on root_volumes_N_image. Writes XOR source + pullPolicy into formData.
  */
-const VolumeImageField = ({ idSchema, formData, onChange, rawErrors, formContext, disabled, readonly }: FieldProps) => {
+const VolumeImageField = ({
+  idSchema,
+  schema,
+  name,
+  formData,
+  onChange,
+  rawErrors,
+  disabled,
+  readonly,
+  required,
+  mode,
+}: FieldProps & { mode: VolumeImageSourceMode }) => {
   const { t } = useTranslation();
   const { checkPermissions } = usePermissionsContext();
   const [canListCatalogItems] = checkPermissions(catalogItemListPermission);
-  const { onVolumeSelected, volumeSelection, onVolumeCleared } = formContext as DynamicFormContext;
-  const imageReference = typeof formData === 'string' ? formData : '';
-  const volumeIndex = getVolumeIndexFromId(idSchema.$id);
+  const isCatalogOnly = mode === VolumeImageSourceMode.CatalogOnly;
+  const image = getImageFormData(formData);
 
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-
-  const currentVolumeSelection = volumeSelection.find((a) => a.volumeIndex === volumeIndex);
-  const catalogRef = currentVolumeSelection?.catalogItemRef;
-  const catalogItem = useResolvedCatalogRef(catalogRef)?.item;
+  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const catalogItem = useResolvedCatalogRef(image.catalogItemRef)?.item;
+  const requiredList = Array.isArray(schema.required) ? schema.required : [];
+  const sourceRequired = !!required || requiredList.includes('reference') || requiredList.includes('catalogItemRef');
+  const sourceLabel = getSourceLabel(schema, name, idSchema.$id, mode);
+  const pullPolicySchema = getPullPolicySchema(schema);
+  const hasErrors = !!rawErrors?.length;
 
   const handleTextChange = (_event: React.FormEvent<HTMLInputElement>, newImgValue: string) => {
-    if (currentVolumeSelection) {
-      onVolumeCleared(volumeIndex);
-    }
-    onChange(newImgValue === '' ? INVALID_EMPTY_IMAGE_REFERENCE : newImgValue);
+    onChange(buildImageFormData(image, { reference: newImgValue, replaceSource: true }));
   };
 
   const onSelect = (item: CatalogItem, version: CatalogItemVersion, channel: string) => {
-    onVolumeSelected({
-      volumeIndex,
-      catalogItemRef: buildCatalogItemRef({
-        catalogItem: item,
-        catalogItemVersion: version,
-        channel,
+    onChange(
+      buildImageFormData(image, {
+        catalogItemRef: buildCatalogItemRef({
+          catalogItem: item,
+          catalogItemVersion: version,
+          channel,
+        }),
+        replaceSource: true,
       }),
-    });
-    // Clear reference so submit path writes catalogItemRef exclusively
-    onChange(VALID_EMPTY_IMAGE_REFERENCE);
+    );
   };
 
-  const hasErrors = !!rawErrors?.length;
+  const onUnselectAsset = () => {
+    onChange(buildImageFormData(image, { replaceSource: true }));
+  };
 
-  // Render only the control content; parent FieldTemplate provides the FormGroup label and errors
-  return (
-    <>
-      {catalogRef ? (
-        <Split hasGutter>
-          <SplitItem isFilled>
-            {catalogItem ? (
-              <CatalogItemTitle item={catalogItem} channel={catalogRef.channel || ''} version={catalogRef.version} />
-            ) : (
-              t('Catalog item {{ catalogItemRef }}', {
-                catalogItemRef: formatCatalogItemRef(catalogRef),
-              })
-            )}
-          </SplitItem>
+  const isEditable = !disabled && !readonly;
+  const canSelectFromCatalog = isEditable && canListCatalogItems && mode !== VolumeImageSourceMode.ImageOnly;
+
+  let fieldContent: React.ReactNode;
+  if (image.catalogItemRef) {
+    fieldContent = (
+      <SelectedVolumeDataAsset
+        displayName={catalogItem?.spec.displayName || catalogItem?.metadata.name || ''}
+        imageRef={image.catalogItemRef}
+        canUnselect={isEditable}
+        onUnselectAsset={onUnselectAsset}
+      />
+    );
+  } else if (isCatalogOnly) {
+    fieldContent = (
+      <Button
+        variant="secondary"
+        icon={<CatalogIcon />}
+        onClick={() => setIsAddModalOpen(true)}
+        isDisabled={!canSelectFromCatalog}
+      >
+        {t('Add from software catalog')}
+      </Button>
+    );
+  } else {
+    fieldContent = (
+      <Split hasGutter>
+        <SplitItem isFilled>
+          <TextInput
+            id={idSchema.$id}
+            value={image.reference || ''}
+            onChange={handleTextChange}
+            isDisabled={disabled}
+            readOnlyVariant={readonly ? 'default' : undefined}
+            validated={hasErrors ? 'error' : 'default'}
+            placeholder={
+              canSelectFromCatalog ? t('Enter image reference or choose from catalog') : t('Enter image reference')
+            }
+          />
+        </SplitItem>
+        {canSelectFromCatalog && (
           <SplitItem>
             <Button
-              aria-label={t('Delete item')}
-              variant="link"
-              icon={<MinusCircleIcon />}
-              iconPosition="start"
-              isDisabled={disabled || readonly}
-              onClick={() => {
-                onVolumeCleared(volumeIndex);
-                onChange(INVALID_EMPTY_IMAGE_REFERENCE);
-              }}
-            />
+              variant="secondary"
+              icon={<CatalogIcon />}
+              onClick={() => setIsAddModalOpen(true)}
+              isDisabled={!canSelectFromCatalog}
+            >
+              {t('Add from software catalog')}
+            </Button>
           </SplitItem>
-        </Split>
-      ) : (
-        <Split hasGutter>
-          <SplitItem isFilled>
-            <TextInput
-              id={idSchema.$id}
-              value={imageReference}
-              onChange={handleTextChange}
-              isDisabled={disabled}
-              readOnlyVariant={readonly ? 'default' : undefined}
-              validated={hasErrors ? 'error' : 'default'}
-              placeholder={t('Enter image reference or choose from catalog')}
-            />
-          </SplitItem>
-          {canListCatalogItems && (
-            <SplitItem>
-              <Button variant="secondary" onClick={() => setIsModalOpen(true)} isDisabled={disabled || readonly}>
-                {t('Choose from catalog')}
-              </Button>
-            </SplitItem>
-          )}
-        </Split>
+        )}
+      </Split>
+    );
+  }
+
+  return (
+    <Stack hasGutter>
+      <StackItem>
+        <FormGroup fieldId={idSchema.$id} label={sourceLabel} isRequired={sourceRequired}>
+          {fieldContent}
+        </FormGroup>
+      </StackItem>
+      {pullPolicySchema && (
+        <StackItem>
+          <VolumeImagePullPolicy
+            id={`${idSchema.$id}_pullPolicy`}
+            schema={pullPolicySchema}
+            value={image.pullPolicy}
+            isRequired={requiredList.includes('pullPolicy')}
+            isDisabled={disabled || readonly}
+            onChange={(pullPolicy) => {
+              onChange(buildImageFormData(image, { pullPolicy }));
+            }}
+          />
+        </StackItem>
       )}
-      {isModalOpen && <SelectAssetModal onClose={() => setIsModalOpen(false)} onSelect={onSelect} />}
-    </>
+      {isAddModalOpen && <VolumeImageSelectAssetModal onClose={() => setIsAddModalOpen(false)} onSelect={onSelect} />}
+    </Stack>
   );
 };
 

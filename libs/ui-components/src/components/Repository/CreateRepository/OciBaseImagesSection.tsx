@@ -95,8 +95,9 @@ const OciBaseImagesSection = () => {
                   </SplitItem>
                   <SplitItem>
                     <Button
-                      aria-label={t('Remove base image')}
+                      aria-label={t('Delete base image')}
                       variant="link"
+                      isDanger
                       icon={<MinusCircleIcon />}
                       iconPosition="start"
                       onClick={() => arrayHelpers.remove(index)}

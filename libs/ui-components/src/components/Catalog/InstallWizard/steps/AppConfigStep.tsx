@@ -5,7 +5,6 @@ import { type FormikErrors, useFormikContext } from 'formik';
 import type * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
-import type { VolumeCatalogSelection } from '../../../../utils/catalog';
 import DynamicForm from '../../../DynamicForm/DynamicForm';
 import YamlEditorBase from '../../../common/CodeEditor/YamlEditorBase';
 import TextField from '../../../form/TextField';
@@ -25,42 +24,6 @@ export const DynamicAppForm = ({ schemaErrors, isEdit }: DynamicAppFormProps) =>
   const editorRef = React.useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
   const { t } = useTranslation();
   const { values, setFieldValue, setFieldTouched } = useFormikContext<InstallAppFormik>();
-
-  const formContext = React.useMemo(() => {
-    const onVolumeSelected = (selection: VolumeCatalogSelection) => {
-      const existing = values.volumeSelection.findIndex((a) => a.volumeIndex === selection.volumeIndex);
-      let newVolumeSelection: VolumeCatalogSelection[];
-      if (existing >= 0) {
-        const updated = [...values.volumeSelection];
-        updated[existing] = selection;
-        newVolumeSelection = updated;
-      } else {
-        newVolumeSelection = [...values.volumeSelection, selection];
-      }
-      setFieldValue('volumeSelection', newVolumeSelection);
-    };
-
-    const onBeforeArrayItemRemoved = (arrayId: string, removedIndex: number) => {
-      if (arrayId === 'root_volumes') {
-        const newVolumeSelection = values.volumeSelection
-          .filter((a) => a.volumeIndex !== removedIndex)
-          .map((a) => (a.volumeIndex > removedIndex ? { ...a, volumeIndex: a.volumeIndex - 1 } : a));
-        setFieldValue('volumeSelection', newVolumeSelection);
-      }
-    };
-
-    const onVolumeSelectionCleared = (volumeIndex: number) => {
-      const newVolumeSelection = values.volumeSelection.filter((a) => a.volumeIndex !== volumeIndex);
-      setFieldValue('volumeSelection', newVolumeSelection);
-    };
-
-    return {
-      onVolumeSelected,
-      onBeforeArrayItemRemoved,
-      onVolumeCleared: onVolumeSelectionCleared,
-      volumeSelection: values.volumeSelection,
-    };
-  }, [values.volumeSelection, setFieldValue]);
 
   return (
     <Stack hasGutter>
@@ -123,7 +86,6 @@ export const DynamicAppForm = ({ schemaErrors, isEdit }: DynamicAppFormProps) =>
                 onValidate={(valid) => {
                   setFieldValue('dynamicFormValid', valid);
                 }}
-                formContext={formContext}
               />
             </StackItem>
           </Stack>

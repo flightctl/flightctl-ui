@@ -61,14 +61,14 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
       spec={device.spec}
       specPath="/"
       hasPackageMode={hasPackageMode}
-      onEdit={(id) => {
-        let path = `${device.metadata.name}/${id.ref.catalog}/${id.ref.item}`;
+      onEdit={(id, mode) => {
+        const params = new URLSearchParams({
+          mode,
+        });
         if (id.appName) {
-          const params = new URLSearchParams({
-            appName: id.appName,
-          });
-          path = `${path}?${params.toString()}`;
+          params.set('appName', id.appName);
         }
+        const path = `${device.metadata.name}/${id.ref.catalog}/${id.ref.item}?${params.toString()}`;
         navigate({
           route: ROUTE.CATALOG_DEVICE_EDIT,
           postfix: path,

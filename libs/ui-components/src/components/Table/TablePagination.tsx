@@ -55,7 +55,7 @@ function TablePagination<T extends ApiList>({
     setCurrentPage(newPage);
   };
 
-  if (itemCount === 0) {
+  if (itemCount === 0 && !isUpdating) {
     return null;
   }
 

@@ -3,7 +3,7 @@ import { Button, Switch, Toolbar, ToolbarContent, ToolbarGroup, ToolbarItem } fr
 import { Tbody } from '@patternfly/react-table';
 import { type TFunction } from 'react-i18next';
 
-import { type Device, type DeviceList } from '@flightctl/types';
+import { type Device, type DeviceList, ResourceKind } from '@flightctl/types';
 
 import { type PaginationDetails } from '../../../hooks/useTablePagination';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -64,7 +64,7 @@ const DecommissionedDevicesTable = ({
   const { onRowSelect, hasSelectedRows, isAllSelected, isRowSelected, setAllSelected } = useTableSelect();
 
   const { action: deleteDeviceAction, modal: deleteDeviceModal } = useDeleteListAction({
-    resourceType: 'Device',
+    resourceType: ResourceKind.DEVICE,
     onConfirm: async (resourceId: string) => {
       await remove(`devices/${resourceId}`);
       refetch();

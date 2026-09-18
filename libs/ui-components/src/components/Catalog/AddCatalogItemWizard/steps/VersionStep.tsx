@@ -18,7 +18,7 @@ import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import ChannelsSelect from '../ChannelsSelect';
 import UploadField from '../../../form/UploadField';
 import ErrorHelperText from '../../../form/FieldHelperText';
-import { getArtifactLabel } from '../../../../utils/catalog';
+import { getArtifactLabel } from '../../../../utils/catalogTypes';
 
 export const versionStepId = 'version';
 
@@ -209,8 +209,9 @@ const VersionStep = ({ isReadOnly, isEdit }: { isReadOnly?: boolean; isEdit: boo
                     {!isReadOnly && (
                       <SplitItem>
                         <Button
-                          aria-label={t('Remove version')}
+                          aria-label={t('Delete version')}
                           variant="link"
+                          isDanger
                           icon={<MinusCircleIcon />}
                           iconPosition="start"
                           onClick={() => arrayHelpers.remove(index)}

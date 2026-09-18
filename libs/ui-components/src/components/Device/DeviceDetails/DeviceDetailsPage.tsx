@@ -90,7 +90,7 @@ const DeviceDetailsPage = ({ children }: React.PropsWithChildren) => {
       navigate(ROUTE.DEVICES);
     },
     resourceName: deviceNameOrAlias,
-    resourceType: 'device',
+    resourceType: ResourceKind.DEVICE,
     buttonLabel: isEnrolled ? undefined : t('Delete forever'),
   });
 

@@ -49,7 +49,7 @@ export const getDevicePatches = (currentDevice: Device, updatedDevice: EditDevic
     return allPatches;
   }
 
-  // OS patches. ATM only the image can be modified via the Device form.
+  // OS patches
   allPatches = allPatches.concat(getFormOsSpecPatches('/spec/os', currentDevice.spec?.os, updatedDevice.osSpec));
 
   // Configurations

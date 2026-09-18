@@ -14,7 +14,7 @@ import FormSelect from '../../../form/FormSelect';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import UploadField from '../../../form/UploadField';
-import { getArtifactLabel, getCatalogItemBadge } from '../../../../utils/catalog';
+import { allCatalogTypeOptions, getArtifactLabel } from '../../../../utils/catalogTypes';
 
 export const typeConfigStepId = 'type-config';
 
@@ -29,20 +29,6 @@ const artifactTypes = Object.values(CatalogItemArtifactType).map((artifactType) 
   name: '',
   uri: '',
 }));
-
-const catalogItemTypeLabels = (
-  t: TFunction,
-): Record<
-  Exclude<CatalogItemType, CatalogItemType.CatalogItemTypeDriver | CatalogItemType.CatalogItemTypeFirmware>,
-  string
-> => ({
-  [CatalogItemType.CatalogItemTypeOS]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeOS, t),
-  [CatalogItemType.CatalogItemTypeContainer]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeContainer, t),
-  [CatalogItemType.CatalogItemTypeHelm]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeHelm, t),
-  [CatalogItemType.CatalogItemTypeQuadlet]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeQuadlet, t),
-  [CatalogItemType.CatalogItemTypeCompose]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeCompose, t),
-  [CatalogItemType.CatalogItemTypeData]: getCatalogItemBadge(CatalogItemType.CatalogItemTypeData, t),
-});
 
 const getArtifactTitle = (artifact: ArtifactFormValue, index: number, t: TFunction) => {
   const typeLabel = getArtifactLabel(t, artifact);
@@ -103,7 +89,7 @@ const TypeConfigStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?:
           <FormGroup label={t('Type')} isRequired>
             <FormSelect
               name="type"
-              items={catalogItemTypeLabels(t)}
+              items={allCatalogTypeOptions(t)}
               placeholderText={t('Select a type')}
               isDisabled={isEdit || isReadOnly}
             />
@@ -154,8 +140,9 @@ const TypeConfigStep = ({ isEdit, isReadOnly }: { isEdit?: boolean; isReadOnly?:
                       {!isReadOnly && (
                         <SplitItem>
                           <Button
-                            aria-label={t('Remove artifact')}
+                            aria-label={t('Delete artifact')}
                             variant="link"
+                            isDanger
                             icon={<MinusCircleIcon />}
                             iconPosition="start"
                             onClick={() => arrayHelpers.remove(index)}

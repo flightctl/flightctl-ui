@@ -1,3 +1,4 @@
+import { type TFunction } from 'i18next';
 import { type Duration, type UpdateSchedule } from '@flightctl/types';
 
 export const formatTimePart = (val: number | string) => val.toString().padStart(2, '0');
@@ -136,6 +137,54 @@ export const schedulesAreEqual = (a: UpdateSchedule | undefined, b: UpdateSchedu
     return false;
   }
   return (a.startGraceDuration || '0s') === (b.startGraceDuration || '0s');
+};
+
+export type UpdateScheduleDisplayFields = {
+  startsAt?: string;
+  endsAt?: string;
+  scheduleMode: UpdateScheduleMode;
+  weekDays: boolean[];
+  timeZone?: string;
+  startGraceDuration?: string;
+};
+
+const getWeekDayShortLabels = (t: TFunction) => [t('Sun'), t('Mon'), t('Tue'), t('Wed'), t('Thu'), t('Fri'), t('Sat')];
+
+export const getScheduleUpdateText = (schedule: UpdateScheduleDisplayFields, t: TFunction): string => {
+  const start = schedule.startsAt || defaultStartTime;
+  const end = schedule.endsAt || defaultEndTime;
+  const timeZone =
+    !schedule.timeZone || schedule.timeZone === localDeviceTimezone ? t("device's local timezone") : schedule.timeZone;
+
+  let scheduleText: string;
+  if (schedule.scheduleMode === UpdateScheduleMode.Weekly) {
+    const dayLabels = getWeekDayShortLabels(t);
+    const days = schedule.weekDays
+      .map((isSelected, index) => (isSelected ? dayLabels[index] : null))
+      .filter(Boolean)
+      .join(', ');
+    scheduleText = t('Weekly on {{ days }} from {{ start }} to {{ end }} ({{ timeZone }})', {
+      days: days || '-',
+      start,
+      end,
+      timeZone,
+    });
+  } else {
+    scheduleText = t('Daily from {{ start }} to {{ end }} ({{ timeZone }})', {
+      start,
+      end,
+      timeZone,
+    });
+  }
+
+  if (schedule.startGraceDuration && schedule.startGraceDuration !== '0s') {
+    return t('{{ schedule }}, grace {{ duration }}', {
+      schedule: scheduleText,
+      duration: schedule.startGraceDuration,
+    });
+  }
+
+  return scheduleText;
 };
 
 // Adds an artificial delay to make sure that the user notices the data is refreshing.

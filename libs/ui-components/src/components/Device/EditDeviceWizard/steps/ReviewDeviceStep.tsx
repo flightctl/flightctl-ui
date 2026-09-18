@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useFormikContext } from 'formik';
+
 import {
   Alert,
   DescriptionList,
@@ -9,44 +9,41 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-
-import { type EditDeviceFormValues } from '../../../../types/deviceSpec';
+import { useFormikContext } from 'formik';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import LabelsView from '../../../common/LabelsView';
-import { toAPILabel } from '../../../../utils/labels';
+import type { EditDeviceFormValues } from '../../../../types/deviceSpec';
+import {
+  ApplicationWorkloadsReviewCard,
+  ConfigurationsReviewCard,
+  DeviceSpecUpdatesReviewCard,
+  ReviewCard,
+  ReviewLabelSection,
+  SystemImageReviewCard,
+  SystemdUnitsReviewCard,
+} from '../ReviewStepSections';
 import { getErrorMessage } from '../../../../utils/error';
-import { RepositorySourcePlainList } from '../../../Repository/RepositoryDetails/RepositorySourceList';
-import { getApiConfig } from '../deviceSpecUtils';
-import ReviewApplications from './ReviewApplications';
-import SystemImage from '../SystemImageDescriptionGroup';
 
 export const reviewDeviceStepId = 'review-device';
 
-const ReviewStep = ({ error }: { error?: string }) => {
+type ReviewDeviceStepProps = {
+  showUpdateStatus?: boolean;
+  error?: unknown;
+};
+
+const ReviewDeviceStep = ({ showUpdateStatus, error }: ReviewDeviceStepProps) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<EditDeviceFormValues>();
 
   return (
     <Stack hasGutter>
-      <StackItem isFilled>
-        <DescriptionList
-          isHorizontal
-          horizontalTermWidthModifier={{
-            default: '25ch',
-          }}
-        >
+      <ReviewCard title={t('General information')}>
+        <DescriptionList isHorizontal isCompact>
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Device alias')}</DescriptionListTerm>
             <DescriptionListDescription>{values.deviceAlias || t('Untitled')}</DescriptionListDescription>
           </DescriptionListGroup>
-          {values.labels.length > 0 && (
-            <DescriptionListGroup>
-              <DescriptionListTerm>{t('Device labels')}</DescriptionListTerm>
-              <DescriptionListDescription>
-                <LabelsView prefix="device" labels={toAPILabel(values.labels)} />
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-          )}
+
+          <ReviewLabelSection title={t('Device labels')} labels={values.labels} />
 
           {values.fleetMatch && (
             <DescriptionListGroup>
@@ -54,34 +51,28 @@ const ReviewStep = ({ error }: { error?: string }) => {
               <DescriptionListDescription>{values.fleetMatch}</DescriptionListDescription>
             </DescriptionListGroup>
           )}
-          <SystemImage osSpec={values.osSpec} isFleet={false} />
-          {values.configTemplates.length > 0 && (
-            <DescriptionListGroup>
-              <DescriptionListTerm>{t('Configurations')}</DescriptionListTerm>
-              <DescriptionListDescription>
-                <RepositorySourcePlainList configs={values.configTemplates.map(getApiConfig)} />
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-          )}
-          {values.applications.length > 0 && (
-            <DescriptionListGroup>
-              <DescriptionListTerm>{t('Applications')}</DescriptionListTerm>
-              <DescriptionListDescription>
-                <ReviewApplications apps={values.applications} />
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-          )}
         </DescriptionList>
-      </StackItem>
-      {!!error && (
+      </ReviewCard>
+
+      <SystemImageReviewCard values={values} showUpdateStatus={showUpdateStatus} />
+
+      <ConfigurationsReviewCard values={values} />
+
+      <ApplicationWorkloadsReviewCard apps={values.applications} showUpdateStatus={showUpdateStatus} />
+
+      <DeviceSpecUpdatesReviewCard values={values} />
+
+      <SystemdUnitsReviewCard values={values} />
+
+      {error ? (
         <StackItem>
           <Alert isInline variant="danger" title={t('An error occurred')}>
             {getErrorMessage(error)}
           </Alert>
         </StackItem>
-      )}
+      ) : null}
     </Stack>
   );
 };
 
-export default ReviewStep;
+export default ReviewDeviceStep;
