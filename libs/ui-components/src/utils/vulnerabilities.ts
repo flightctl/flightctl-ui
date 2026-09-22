@@ -59,12 +59,10 @@ const QUAY_VULNERABILITY_SOURCE = 'Quay';
 export const getVulnerabilitySource = (vulnerability: Vulnerability | VulnerabilityGroupItem, isRHEM: boolean) => {
   switch (vulnerability.source) {
     case VulnerabilitySource.Trustify:
+    case undefined:
       return isRHEM ? DEFAULT_VULNERABILITY_SOURCE_DS : DEFAULT_VULNERABILITY_SOURCE_US;
     case VulnerabilitySource.Quay:
       return QUAY_VULNERABILITY_SOURCE;
-    case undefined:
-      // Source is missing, fallback to the default backend.
-      return DEFAULT_VULNERABILITY_SOURCE_US;
     default:
       // Source is unknown to the UI, return it as is.
       return vulnerability.source;
