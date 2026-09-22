@@ -11,10 +11,17 @@ import {
 } from '@patternfly/react-core';
 
 import { type DependencySyncConfigRefStatus, type DependencySyncStatus } from '@flightctl/types';
-import { type ConfigSourceProvider, getRepoName, isRepoConfig } from '../../../types/deviceSpec';
+import {
+  type ConfigSourceProvider,
+  getRepoName,
+  isInlineProviderSpec,
+  isK8sSecretProviderSpec,
+  isRepoConfig,
+} from '../../../types/deviceSpec';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { type RepositoryDetails, useRepositoryDetailsMap } from '../../../hooks/useRepositoryDetailsMap';
-import RepositorySource from './RepositorySource';
 import ConfigSourceSyncDetails from './ConfigSourceSyncDetails';
+import RepositoryConfig from './RepositorySource';
 
 const getSyncRef = (
   configProviderName: string,
@@ -31,6 +38,24 @@ type RepositorySourceListProps = {
   configs: Array<ConfigSourceProvider>;
   dependencyStatus?: DependencySyncStatus;
   showNames?: boolean;
+};
+
+const RepositorySourceItem = ({
+  config,
+  repoDetails,
+}: {
+  config: ConfigSourceProvider;
+  repoDetails?: RepositoryDetails;
+}) => {
+  const { t } = useTranslation();
+  if (isK8sSecretProviderSpec(config)) {
+    return <>{`${config.secretRef.namespace}:${config.secretRef.name}`}</>;
+  }
+  if (isInlineProviderSpec(config)) {
+    return <>{t('{{count}} files', { count: config.inline.length })}</>;
+  }
+
+  return <RepositoryConfig config={config} repoDetails={repoDetails} />;
 };
 
 export const RepositorySourcePlainList = ({ configs }: { configs: ConfigSourceProvider[] }) => {
@@ -52,7 +77,11 @@ export const RepositorySourcePlainList = ({ configs }: { configs: ConfigSourcePr
 
         return (
           <StackItem key={config.name}>
-            <RepositorySource config={config} repoDetails={repoDetails} />
+            {isRepoConfig(config) ? (
+              <RepositoryConfig config={config} repoDetails={repoDetails} showConfigName />
+            ) : (
+              <>{config.name}</>
+            )}
           </StackItem>
         );
       })}
@@ -97,7 +126,7 @@ const RepositorySourceDescriptionList = ({
             <DescriptionListDescription>
               <Stack hasGutter className="fctl-config-source-description">
                 <StackItem>
-                  <RepositorySource config={config} repoDetails={repoDetails} />
+                  <RepositorySourceItem config={config} repoDetails={repoDetails} />
                 </StackItem>
                 {syncRef && (
                   <StackItem className="fctl-config-source-description__sync">

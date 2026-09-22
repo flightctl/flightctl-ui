@@ -53,7 +53,7 @@ import {
   isHttpProviderSpec,
   isInlineProviderSpec,
   isInlineVariantApp,
-  isKubeProviderSpec,
+  isK8sSecretProviderSpec,
   isKubeSecretTemplate,
 } from '../../../types/deviceSpec';
 import {
@@ -104,7 +104,7 @@ export const getConfigType = (config: ConfigSourceProvider): ConfigType | undefi
     return ConfigType.INLINE;
   } else if (isHttpProviderSpec(config)) {
     return ConfigType.HTTP;
-  } else if (isKubeProviderSpec(config)) {
+  } else if (isK8sSecretProviderSpec(config)) {
     return ConfigType.K8S_SECRET;
   }
   // Fallback in case a new configType is added to the Backend which the UI doesn't support yet
@@ -1008,7 +1008,7 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec, registerMicroS
           targetRevision: c.gitRef.targetRevision,
         } as GitConfigTemplate;
       }
-      if (isKubeProviderSpec(c)) {
+      if (isK8sSecretProviderSpec(c)) {
         return {
           type: ConfigType.K8S_SECRET,
           name: c.name,
