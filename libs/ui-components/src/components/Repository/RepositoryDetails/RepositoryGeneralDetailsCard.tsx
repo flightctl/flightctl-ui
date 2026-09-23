@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type { TFunction } from 'react-i18next';
 import {
   Card,
   CardBody,
@@ -8,22 +9,25 @@ import {
   DescriptionListGroup,
   DescriptionListTerm,
   Icon,
+  Label,
 } from '@patternfly/react-core';
 import { LockIcon } from '@patternfly/react-icons/dist/js/icons/lock-icon';
 import { LockOpenIcon } from '@patternfly/react-icons/dist/js/icons/lock-open-icon';
 
-import { type Repository } from '@flightctl/types';
-
+import type { OciRepoSpec, Repository } from '@flightctl/types';
 import { getLastTransitionTimeText } from '../../../utils/status/repository';
 import { useTranslation } from '../../../hooks/useTranslation';
 import RepositoryStatus from '../../Status/RepositoryStatus';
 import {
+  getOciAccessModeLabel,
+  getOciPlacementModeFromSpec,
   getRepoTypeLabel,
   getRepoUrlOrRegistry,
   hasCredentialsSettings,
   isHttpRepoSpec,
   isOciRepoSpec,
 } from '../CreateRepository/utils';
+import { OciPlacementMode } from '../CreateRepository/types';
 import { GitRepositoryLink, HttpRepositoryUrl } from './RepositorySource';
 
 const RepoPrivacy = ({ repo }: { repo: Repository }) => {
@@ -51,7 +55,7 @@ const RepoPrivacy = ({ repo }: { repo: Repository }) => {
 const RegistryOrUrl = ({ repo }: { repo: Repository }) => {
   const urlOrRegistry = getRepoUrlOrRegistry(repo.spec);
   if (isOciRepoSpec(repo.spec)) {
-    return <div>{urlOrRegistry}</div>;
+    return urlOrRegistry;
   }
   if (isHttpRepoSpec(repo.spec)) {
     return <HttpRepositoryUrl url={urlOrRegistry} />;
@@ -59,10 +63,24 @@ const RegistryOrUrl = ({ repo }: { repo: Repository }) => {
   return <GitRepositoryLink url={urlOrRegistry} />;
 };
 
+const getImagePlacementLabel = (t: TFunction, spec: OciRepoSpec) => {
+  const placementMode = getOciPlacementModeFromSpec(spec);
+  switch (placementMode) {
+    case OciPlacementMode.Namespace:
+      return t('Group by image name');
+    case OciPlacementMode.Repository:
+      return t('Fixed repository path');
+    default:
+      return t('Mirror source image path');
+  }
+};
+
 const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
   const { t } = useTranslation();
 
-  const repoLabel = getRepoTypeLabel(t, repoDetails.spec.type);
+  const spec = repoDetails.spec;
+  const repoLabel = getRepoTypeLabel(t, spec.type);
+  const isOciRepo = isOciRepoSpec(spec);
 
   return (
     <Card>
@@ -70,16 +88,37 @@ const DetailsTab = ({ repoDetails }: { repoDetails: Repository }) => {
       <CardBody>
         <DescriptionList columnModifier={{ lg: '3Col' }}>
           <DescriptionListGroup>
-            <DescriptionListTerm>{isOciRepoSpec(repoDetails.spec) ? t('Registry') : t('URL')}</DescriptionListTerm>
+            <DescriptionListTerm>{t('Type')}</DescriptionListTerm>
+            <DescriptionListDescription>{repoLabel}</DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>{isOciRepo ? t('Registry') : t('URL')}</DescriptionListTerm>
             <DescriptionListDescription>
               <RegistryOrUrl repo={repoDetails} />
             </DescriptionListDescription>
           </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>{t('Type')}</DescriptionListTerm>
-            <DescriptionListDescription>{repoLabel}</DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup />
+          {isOciRepo && (
+            <DescriptionListGroup>
+              <DescriptionListTerm>{t('Registry usage')}</DescriptionListTerm>
+              <DescriptionListDescription>{getOciAccessModeLabel(t, spec.accessMode)}</DescriptionListDescription>
+            </DescriptionListGroup>
+          )}
+          {isOciRepo && spec.deltaStorageTarget && (
+            <DescriptionListGroup>
+              <DescriptionListTerm>{t('Delta storage')}</DescriptionListTerm>
+              <DescriptionListDescription>
+                <Label isCompact variant="outline" color="blue">
+                  {t('Delta artifact storage enabled')}
+                </Label>
+              </DescriptionListDescription>
+            </DescriptionListGroup>
+          )}
+          {isOciRepo && (
+            <DescriptionListGroup>
+              <DescriptionListTerm>{t('Image placement')}</DescriptionListTerm>
+              <DescriptionListDescription>{getImagePlacementLabel(t, spec)}</DescriptionListDescription>
+            </DescriptionListGroup>
+          )}
           <DescriptionListGroup>
             <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
             <DescriptionListDescription>

@@ -6,6 +6,7 @@ import ErrorHelperText from './FieldHelperText';
 interface BaseCheckboxProps extends Omit<CheckboxProps, 'onChange' | 'id' | 'ref'> {
   name: string;
   onChangeCustom?: (value: boolean) => void;
+  noDefaultOnChange?: boolean;
 }
 
 export interface CheckboxFieldProps extends BaseCheckboxProps {
@@ -13,16 +14,19 @@ export interface CheckboxFieldProps extends BaseCheckboxProps {
 }
 
 // Checkboxes that are validated as a group rather than individually
-export const CheckboxFieldGroupValidation = ({ onChangeCustom, ...props }: BaseCheckboxProps) => {
+export const CheckboxFieldGroupValidation = ({ onChangeCustom, noDefaultOnChange, ...props }: BaseCheckboxProps) => {
   const [{ value, ...rest }, , { setValue, setTouched }] = useField<boolean>({
     name: props.name,
   });
 
   const onChange: CheckboxProps['onChange'] = async (_, value) => {
-    await setValue(value);
     if (onChangeCustom) {
       onChangeCustom(value);
     }
+    if (noDefaultOnChange) {
+      return;
+    }
+    await setValue(value);
     await setTouched(true);
   };
 
@@ -34,16 +38,19 @@ export const CheckboxFieldGroupValidation = ({ onChangeCustom, ...props }: BaseC
   );
 };
 
-const CheckboxField = ({ onChangeCustom, children, ...props }: CheckboxFieldProps) => {
+const CheckboxField = ({ onChangeCustom, noDefaultOnChange, children, ...props }: CheckboxFieldProps) => {
   const [{ value, ...rest }, meta, { setValue, setTouched }] = useField<boolean>({
     name: props.name,
   });
 
   const onChange: CheckboxProps['onChange'] = async (_, value) => {
-    await setValue(value);
     if (onChangeCustom) {
       onChangeCustom(value);
     }
+    if (noDefaultOnChange) {
+      return;
+    }
+    await setValue(value);
     await setTouched(true);
   };
 

@@ -6,6 +6,7 @@ import type { DisruptionBudget } from './DisruptionBudget';
 import type { Duration } from './Duration';
 import type { Percentage } from './Percentage';
 import type { RolloutDeviceSelection } from './RolloutDeviceSelection';
+import type { RolloutPolicyDeltaGeneration } from './RolloutPolicyDeltaGeneration';
 /**
  * RolloutPolicy is the rollout policy of the fleet.
  */
@@ -14,9 +15,6 @@ export type RolloutPolicy = {
   deviceSelection?: RolloutDeviceSelection;
   successThreshold?: Percentage;
   defaultUpdateTimeout?: Duration;
-  /**
-   * When false, skip control-plane OS delta generation for this fleet. Omitted means true.
-   */
-  generateDelta?: boolean;
+  deltaGeneration?: RolloutPolicyDeltaGeneration;
 };
 

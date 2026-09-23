@@ -143,5 +143,14 @@ module.exports = defineConfig([
       ],
     },
   },
+  {
+    files: ['libs/ui-components/src/**/*.test.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: './libs/ui-components/tsconfig.test.json',
+        tsconfigRootDir: __dirname,
+      },
+    },
+  },
   globalIgnores(['**/*.json']),
 ]);

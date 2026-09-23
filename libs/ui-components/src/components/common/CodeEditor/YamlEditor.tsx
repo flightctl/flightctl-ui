@@ -16,7 +16,7 @@ import {
 import { type ImageBuild } from '@flightctl/types/imagebuilder';
 import { showSpinnerBriefly } from '../../../utils/time';
 import { fromAPILabel } from '../../../utils/labels';
-import { getLabelPatches } from '../../../utils/patch';
+import { getLabelPatches } from '../../../utils/patches/patch';
 import { getErrorMessage, isResourceVersionTestFailure } from '../../../utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useAppContext } from '../../../hooks/useAppContext';

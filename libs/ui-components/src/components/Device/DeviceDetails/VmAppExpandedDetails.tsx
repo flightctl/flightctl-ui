@@ -7,7 +7,7 @@ import {
   DescriptionListTerm,
 } from '@patternfly/react-core';
 
-import { type ApplicationDesiredState, type VmApplication } from '@flightctl/types';
+import { type ApplicationDesiredState, type DeviceApplicationStatus, type VmApplication } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { getVmYamlContent, parseVmYaml } from '../../../utils/vmApplications';
 import ApplicationExpandedSections, {
@@ -15,14 +15,17 @@ import ApplicationExpandedSections, {
 } from '../../Application/ApplicationExpandedSections';
 import DesiredStateLabel from '../../Application/DesiredStateLabel';
 import ApplicationPortsTable from '../../Application/ApplicationPortsTable';
+import ApplicationDeltaStatusFields from '../../Application/ApplicationDeltaStatusFields';
 
 const VmAppExpandedDetails = ({
   vmSpec,
   vmName,
+  appStatus,
   desiredState,
 }: {
   vmSpec: VmApplication;
   vmName: string;
+  appStatus: DeviceApplicationStatus;
   desiredState?: ApplicationDesiredState;
 }) => {
   const { t } = useTranslation();
@@ -64,6 +67,7 @@ const VmAppExpandedDetails = ({
           <DesiredStateLabel desiredState={desiredState} />
         </DescriptionListDescription>
       </DescriptionListGroup>
+      <ApplicationDeltaStatusFields lastDelta={appStatus.lastDelta} />
     </DescriptionList>
   );
 

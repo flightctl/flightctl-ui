@@ -66,7 +66,7 @@ const DeviceSpecificationsCard = ({ device }: { device: Required<Device> }) => {
             </Title>
           </StackItem>
           <StackItem>
-            <CapabilitiesFieldsList capabilities={device.status?.capabilities} />
+            <CapabilitiesFieldsList deviceStatus={device.status} />
           </StackItem>
           <StackItem>
             <Divider />

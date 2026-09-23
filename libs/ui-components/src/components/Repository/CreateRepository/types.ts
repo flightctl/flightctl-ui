@@ -14,6 +14,12 @@ export type BaseImage = {
   tags: string[];
 };
 
+export enum OciPlacementMode {
+  Registry = 'registry',
+  Repository = 'repository',
+  Namespace = 'namespace',
+}
+
 export type RepositoryFormValues = {
   exists: boolean;
   name: string;
@@ -22,6 +28,7 @@ export type RepositoryFormValues = {
   validationSuffix?: string;
   allowedRepoTypes?: RepoSpecType[];
   showRepoTypes: boolean;
+  allowDeltaStorage: boolean;
   useAdvancedConfig: boolean;
   configType: 'http' | 'ssh';
   httpConfig?: {
@@ -56,6 +63,10 @@ export type RepositoryFormValues = {
     };
     skipServerVerification?: boolean;
     baseImages?: BaseImage[];
+    deltaStorageTarget?: boolean;
+    placementMode?: OciPlacementMode;
+    repository?: string;
+    namespace?: string;
   };
   canUseResourceSyncs: boolean;
   useResourceSyncs: boolean;

@@ -84,7 +84,14 @@ const AppExpandedDetails = ({
 }) => {
   const appSpec = application.spec;
   if (appSpec && isVmAppSpec(appSpec)) {
-    return <VmAppExpandedDetails vmSpec={appSpec} vmName={application.status.name} desiredState={desiredState} />;
+    return (
+      <VmAppExpandedDetails
+        vmSpec={appSpec}
+        vmName={application.status.name}
+        appStatus={application.status}
+        desiredState={desiredState}
+      />
+    );
   }
   return <WorkloadAppExpandedDetails application={application} desiredState={desiredState} />;
 };

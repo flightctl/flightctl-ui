@@ -27,7 +27,7 @@ import {
 } from './types';
 import { appTypeIds } from '../useCatalogItems';
 import { getKubernetesDnsSubdomainErrors, validKubernetesDnsSubdomain, validURLSchema } from '../../form/validations';
-import { appendJSONPatch } from '../../../utils/patch';
+import { appendJSONPatch } from '../../../utils/patches/patch';
 
 const parseYamlField = (value: string): Record<string, unknown> | undefined => {
   if (!value.trim()) {

@@ -22,4 +22,6 @@ export enum ConditionType {
   DeviceSpecValid = 'SpecValid',
   DeviceMultipleOwners = 'MultipleOwners',
   DeviceDecommissioning = 'DeviceDecommissioning',
+  FleetDeltaPreparing = 'FleetDeltaPreparing',
+  DeviceDeltaPreparing = 'DeviceDeltaPreparing',
 }

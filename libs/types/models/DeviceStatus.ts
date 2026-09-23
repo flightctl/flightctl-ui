@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Condition } from './Condition';
+import type { DeltaGenerationStatus } from './DeltaGenerationStatus';
 import type { DependencySyncStatus } from './DependencySyncStatus';
 import type { DeviceApplicationsSummaryStatus } from './DeviceApplicationsSummaryStatus';
 import type { DeviceApplicationStatus } from './DeviceApplicationStatus';
@@ -47,5 +48,6 @@ export type DeviceStatus = {
   lifecycle: DeviceLifecycleStatus;
   dependencySync?: DependencySyncStatus;
   capabilities?: DeviceCapabilities;
+  deltaGeneration?: DeltaGenerationStatus;
 };
 

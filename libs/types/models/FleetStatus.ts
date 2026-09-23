@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Condition } from './Condition';
+import type { DeltaGenerationStatus } from './DeltaGenerationStatus';
 import type { DevicesSummary } from './DevicesSummary';
 import type { FleetRolloutStatus } from './FleetRolloutStatus';
 /**
@@ -15,5 +16,6 @@ export type FleetStatus = {
    */
   conditions: Array<Condition>;
   devicesSummary?: DevicesSummary;
+  deltaGeneration?: DeltaGenerationStatus;
 };
 

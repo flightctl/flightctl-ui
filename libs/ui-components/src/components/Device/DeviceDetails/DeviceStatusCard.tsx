@@ -8,6 +8,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import DetailsPageCard, { DetailsPageCardTitle } from '../../DetailsPage/DetailsPageCard';
 import StatusContent from './DeviceDetailsTabContent/StatusContent';
 import SystemResourcesContent from './DeviceDetailsTabContent/SystemResourcesContent';
+import DeviceDeltaUpdateStatusFields from './DeviceDeltaUpdateStatusFields';
 
 const DEVICE_STATUS_CARD_ID = 'device-status-card';
 
@@ -51,6 +52,7 @@ const DeviceStatusCard = ({ device, health }: { device: Required<Device>; health
               </StackItem>
             </Stack>
           </StackItem>
+          <DeviceDeltaUpdateStatusFields deviceStatus={device.status} />
         </Stack>
       </CardBody>
     </DetailsPageCard>

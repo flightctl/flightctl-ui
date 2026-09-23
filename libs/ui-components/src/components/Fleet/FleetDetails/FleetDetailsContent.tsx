@@ -27,6 +27,7 @@ import FleetDevicesCount from './FleetDevicesCount';
 import EventsCard from '../../Events/EventsCard';
 import FleetVulnerabilities from './FleetVulnerabilities';
 import FleetDetailsOsMode from './FleetDetailsOsMode';
+import FleetDeltaGenerationContent from './FleetDeltaGenerationContent';
 import SystemImage from '../../Device/EditDeviceWizard/SystemImageDescriptionGroup';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
@@ -78,6 +79,7 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
                   />
                 </DescriptionListDescription>
               </DescriptionListGroup>
+              <FleetDeltaGenerationContent fleet={fleet} />
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Managed by')}</DescriptionListTerm>
                 <DescriptionListDescription>

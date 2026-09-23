@@ -6,6 +6,7 @@ import {
   systemdUnitListValidationSchema,
   validApplicationsSchema,
   validConfigTemplatesSchema,
+  validDeltaGenerationSchema,
   validFleetDisruptionBudgetSchema,
   validFleetRolloutPolicySchema,
   validKubernetesDnsSubdomain,
@@ -20,7 +21,7 @@ import {
   getStringListPatches,
   getUpdatePolicyPatches,
   updatePolicyFormToApi,
-} from '../../../utils/patch';
+} from '../../../utils/patches/patch';
 import {
   ACMCrdConfig,
   ACMImportConfig,
@@ -35,7 +36,13 @@ import {
   hasMicroshiftRegistrationConfig,
   toApiApplication,
 } from '../../Device/EditDeviceWizard/deviceSpecUtils';
-import { getDisruptionBudgetValues, getRolloutPolicyValues, getUpdatePolicyValues } from './fleetSpecUtils';
+import {
+  getDeltaGenerationValues,
+  getDisruptionBudgetValues,
+  getRolloutPolicyValues,
+  getUpdatePolicyValues,
+  shouldIncludeRolloutPolicy,
+} from './fleetSpecUtils';
 import { type FleetFormValues, UpdateMode, type UpdatePolicyForm } from '../../../types/deviceSpec';
 
 export const getValidationSchema = (t: TFunction) => {
@@ -54,6 +61,7 @@ export const getValidationSchema = (t: TFunction) => {
       disruptionBudget:
         hasCustomUpdates && values.disruptionBudget?.isCustomized ? validFleetDisruptionBudgetSchema(t) : Yup.object(),
       updatePolicy: hasCustomUpdates && values.updatePolicy?.isCustomized ? validUpdatePolicySchema(t) : Yup.object(),
+      deltaGeneration: validDeltaGenerationSchema(t),
     });
   });
 };
@@ -186,13 +194,11 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
   if (values.registerMicroShift) {
     fleet.spec.template.spec.config?.push(ACMCrdConfig, ACMImportConfig, MicroshiftRegistrationHook);
   }
-  if (values.updateMode === UpdateMode.Customized) {
-    if (values.rolloutPolicy.isCustomized || values.disruptionBudget.isCustomized) {
-      fleet.spec.rolloutPolicy = getRolloutPolicyData(values);
-    }
-    if (values.updatePolicy.isCustomized) {
-      fleet.spec.template.spec.updatePolicy = updatePolicyFormToApi(values.updatePolicy as Required<UpdatePolicyForm>);
-    }
+  if (shouldIncludeRolloutPolicy(values)) {
+    fleet.spec.rolloutPolicy = getRolloutPolicyData(values);
+  }
+  if (values.updateMode === UpdateMode.Customized && values.updatePolicy.isCustomized) {
+    fleet.spec.template.spec.updatePolicy = updatePolicyFormToApi(values.updatePolicy as Required<UpdatePolicyForm>);
   }
   return fleet;
 };
@@ -203,6 +209,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
     const rolloutPolicy = getRolloutPolicyValues(fleet.spec);
     const disruptionBudget = getDisruptionBudgetValues(fleet.spec);
     const updatePolicy = getUpdatePolicyValues(fleet.spec.template?.spec?.updatePolicy);
+    const deltaGeneration = getDeltaGenerationValues(fleet.spec);
 
     const isCustomUpdateMode = rolloutPolicy.isCustomized || disruptionBudget.isCustomized || updatePolicy.isCustomized;
     return {
@@ -223,6 +230,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
       rolloutPolicy,
       disruptionBudget,
       updatePolicy,
+      deltaGeneration,
       updateMode: isCustomUpdateMode ? UpdateMode.Customized : UpdateMode.Default,
     };
   }
@@ -239,6 +247,7 @@ export const getInitialValues = (fleet?: Fleet): FleetFormValues => {
     rolloutPolicy: getRolloutPolicyValues(undefined),
     disruptionBudget: getDisruptionBudgetValues(undefined),
     updatePolicy: getUpdatePolicyValues(undefined),
+    deltaGeneration: getDeltaGenerationValues(undefined),
     updateMode: UpdateMode.Default,
   };
 };

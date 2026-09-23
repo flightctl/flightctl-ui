@@ -1,14 +1,23 @@
-import { type DeviceUpdatePolicySpec, type FleetSpec, type Percentage } from '@flightctl/types';
+import type {
+  DeviceUpdatePolicySpec,
+  FleetSpec,
+  Percentage,
+  RolloutPolicy,
+  RolloutPolicyDeltaGeneration,
+} from '@flightctl/types';
 
 import {
   type BatchForm,
   BatchLimitType,
+  type DeltaGenerationForm,
+  type FleetFormValues,
   type RolloutPolicyForm,
+  UpdateMode,
   type UpdatePolicyForm,
 } from './../../../types/deviceSpec';
 import { fromAPILabel } from '../../../utils/labels';
 import * as timeUtils from '../../../utils/time';
-import { schedulesAreEqual } from '../../../utils/patch';
+import { schedulesAreEqual } from '../../../utils/time';
 
 export const DEFAULT_BACKEND_UPDATE_TIMEOUT_MINUTES = 1140; // 24h, expressed in minutes
 const DEFAULT_BACKEND_SUCCESS_THRESHOLD_PERCENTAGE = '90%';
@@ -90,5 +99,68 @@ export const getUpdatePolicyValues = (updateSpec?: DeviceUpdatePolicySpec): Upda
       ? timeUtils.UpdateScheduleMode.Daily
       : timeUtils.UpdateScheduleMode.Weekly,
     installTimeZone: updateSpec?.updateSchedule?.timeZone || timeUtils.localDeviceTimezone,
+  };
+};
+
+/** True when the user customized rollout hold and/or per-job timeout (non-empty inputs). */
+export const hasCustomDeltaTiming = (deltaGeneration?: DeltaGenerationForm): boolean =>
+  Boolean(deltaGeneration?.isCustomized && (deltaGeneration.maxWaitForDelta || deltaGeneration.deltaGenerationTimeout));
+
+export const rolloutPolicyHasSchedulingFields = (policy?: RolloutPolicy): boolean =>
+  policy?.defaultUpdateTimeout !== undefined ||
+  (policy?.deviceSelection?.sequence?.length ?? 0) > 0 ||
+  Boolean(policy?.disruptionBudget);
+
+/**
+ * Maps deltaGeneration form → RolloutPolicyDeltaGeneration.
+ *
+ * | Form state                | API output                                              |
+ * | ------------------------- | ------------------------------------------------------- |
+ * | Disabled                  | { generateDelta: false }                                |
+ * | Enabled + default timing  | undefined (omit deltaGeneration block)                  |
+ * | Enabled + custom timing   | { generateDelta: true, maxWait?, timeout? }             |
+ */
+export const toApiDeltaGeneration = (deltaForm: DeltaGenerationForm): RolloutPolicyDeltaGeneration | undefined => {
+  if (!deltaForm.generateDelta) {
+    return { generateDelta: false };
+  }
+
+  if (hasCustomDeltaTiming(deltaForm)) {
+    const deltaGeneration: RolloutPolicyDeltaGeneration = { generateDelta: true };
+    if (deltaForm.maxWaitForDelta) {
+      deltaGeneration.maxWaitForDelta = deltaForm.maxWaitForDelta;
+    }
+    if (deltaForm.deltaGenerationTimeout) {
+      deltaGeneration.deltaGenerationTimeout = deltaForm.deltaGenerationTimeout;
+    }
+    return deltaGeneration;
+  }
+
+  return undefined;
+};
+
+/** Whether the fleet spec should include rolloutPolicy (scheduling, delta opt-out, or custom timing). */
+export const shouldIncludeRolloutPolicy = (fleetValues: FleetFormValues): boolean => {
+  const hasCustomRolloutScheduling =
+    fleetValues.updateMode === UpdateMode.Customized &&
+    (fleetValues.rolloutPolicy.isCustomized || fleetValues.disruptionBudget.isCustomized);
+
+  return (
+    hasCustomRolloutScheduling ||
+    !fleetValues.deltaGeneration.generateDelta ||
+    hasCustomDeltaTiming(fleetValues.deltaGeneration)
+  );
+};
+
+export const getDeltaGenerationValues = (fleetSpec?: FleetSpec): DeltaGenerationForm => {
+  const deltaGeneration = fleetSpec?.rolloutPolicy?.deltaGeneration;
+  const maxWaitForDelta = deltaGeneration?.maxWaitForDelta;
+  const deltaGenerationTimeout = deltaGeneration?.deltaGenerationTimeout;
+
+  return {
+    isCustomized: Boolean(maxWaitForDelta || deltaGenerationTimeout),
+    generateDelta: deltaGeneration?.generateDelta ?? true,
+    maxWaitForDelta: maxWaitForDelta || '',
+    deltaGenerationTimeout: deltaGenerationTimeout || '',
   };
 };
