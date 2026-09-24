@@ -7,6 +7,7 @@ const YAML = require('js-yaml');
 
 const { rimraf, copyDir, fixCoreReferences } = require('./openapi-utils');
 const { fixConditionType } = require('./fix-condition-type');
+const { fixDeviceSystemInfo } = require('./fix-device-system-info');
 
 const CORE_API = 'core';
 const ALPHA_CORE_API = 'alphacore';
@@ -83,6 +84,10 @@ async function generateTypes(mode) {
     console.log('Fixing ConditionType enum (duplicate OpenAPI enum values)...');
     const conditionType = await fixConditionType(data);
     console.log(`✅ ConditionType fixed (${conditionType.varnames.length} entries)`);
+
+    console.log('Fixing DeviceSystemInfo (named properties + string additionalProperties)...');
+    const deviceSystemInfo = await fixDeviceSystemInfo(data);
+    console.log(`✅ DeviceSystemInfo fixed (${deviceSystemInfo.properties.length} named properties)`);
   } else {
     // Image builder and alpha types need to be fixed before they can be moved to their final location
     await rimraf(finalDir);
