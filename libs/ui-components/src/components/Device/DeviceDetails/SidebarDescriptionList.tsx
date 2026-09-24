@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type { TFunction } from 'react-i18next';
 import {
   DescriptionList,
   DescriptionListDescription,
@@ -12,24 +13,45 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { getDeviceCapability } from '../../../utils/capabilities';
 import { OsModeLabel } from '../../common/OsModeContent';
 import LabelWithHelperText from '../../common/WithHelperText';
-import DeviceDeltaUpdateDetails from './DeviceDeltaUpdateDetails';
 
-const DeltaDescriptionGroupItem = ({ deviceStatus }: { deviceStatus: DeviceStatus | undefined }) => {
+const getEligibilityStatus = (t: TFunction, isDeltaEligible?: boolean) => {
+  if (isDeltaEligible) {
+    return t('Eligible');
+  }
+  return isDeltaEligible === undefined ? t('Unknown') : t('Not eligible');
+};
+
+const DeltaGenerationDescriptionGroups = ({ deviceStatus }: { deviceStatus: DeviceStatus | undefined }) => {
   const { t } = useTranslation();
+
+  const { bootcVersion, ociDeltaVersion, deltaEligible } = deviceStatus?.systemInfo || {};
+
   return (
-    <DescriptionListGroup>
-      <DescriptionListTerm>
-        <LabelWithHelperText
-          label={t('Delta eligibility')}
-          content={t(
-            'Whether this device can apply incremental OCI delta updates. Requires bootc and the oci-delta tool on the device',
-          )}
-        />
-      </DescriptionListTerm>
-      <DescriptionListDescription>
-        <DeviceDeltaUpdateDetails deviceStatus={deviceStatus} />
-      </DescriptionListDescription>
-    </DescriptionListGroup>
+    <>
+      <DescriptionListGroup>
+        <DescriptionListTerm>
+          <LabelWithHelperText
+            label={t('Delta generation')}
+            content={t(
+              'Delta updates download only the incremental changes between versions, reducing download size for updates. To receive delta updates, a device needs a compatible bootc version and the OCI delta package installed on its OS image.',
+            )}
+          />
+        </DescriptionListTerm>
+        <DescriptionListDescription>{getEligibilityStatus(t, deltaEligible)}</DescriptionListDescription>
+      </DescriptionListGroup>
+      {bootcVersion && (
+        <DescriptionListGroup className="pf-v6-u-ml-md">
+          <DescriptionListTerm>{t('Bootc version')}</DescriptionListTerm>
+          <DescriptionListDescription>{bootcVersion}</DescriptionListDescription>
+        </DescriptionListGroup>
+      )}
+      {ociDeltaVersion && (
+        <DescriptionListGroup className="pf-v6-u-ml-md">
+          <DescriptionListTerm>{t('OCI delta version')}</DescriptionListTerm>
+          <DescriptionListDescription>{ociDeltaVersion}</DescriptionListDescription>
+        </DescriptionListGroup>
+      )}
+    </>
   );
 };
 
@@ -46,7 +68,7 @@ export const CapabilitiesFieldsList = ({ deviceStatus }: { deviceStatus: DeviceS
           <OsModeLabel osMode={osModeCapability} />
         </DescriptionListDescription>
       </DescriptionListGroup>
-      <DeltaDescriptionGroupItem deviceStatus={deviceStatus} />
+      <DeltaGenerationDescriptionGroups deviceStatus={deviceStatus} />
     </SidebarDescriptionList>
   );
 };
