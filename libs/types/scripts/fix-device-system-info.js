@@ -176,7 +176,7 @@ ${namedProps}
 
 function parseOpenApiInput(input) {
   if (typeof input === 'string') {
-    return YAML.load(input);
+    return YAML.load(input, { schema: YAML.JSON_SCHEMA });
   }
   return input;
 }
