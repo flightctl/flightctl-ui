@@ -24,4 +24,5 @@ export enum ConditionType {
   DeviceDecommissioning = 'DeviceDecommissioning',
   FleetDeltaPreparing = 'FleetDeltaPreparing',
   DeviceDeltaPreparing = 'DeviceDeltaPreparing',
+  DeviceEnrollmentHooks = 'EnrollmentHooks',
 }
