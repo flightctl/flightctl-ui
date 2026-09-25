@@ -223,8 +223,9 @@ export type KubeSecretTemplate = ConfigTemplate & {
 export const isKubeSecretTemplate = (configTemplate: ConfigTemplate): configTemplate is KubeSecretTemplate =>
   configTemplate.type === ConfigType.K8S_SECRET;
 
-export const isKubeProviderSpec = (providerSpec: ConfigProviderSpec): providerSpec is KubernetesSecretProviderSpec =>
-  'secretRef' in providerSpec;
+export const isK8sSecretProviderSpec = (
+  providerSpec: ConfigProviderSpec,
+): providerSpec is KubernetesSecretProviderSpec => 'secretRef' in providerSpec;
 
 export type InlineConfigTemplate = ConfigTemplate & {
   type: ConfigType.INLINE;

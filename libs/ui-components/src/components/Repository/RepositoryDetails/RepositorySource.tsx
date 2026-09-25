@@ -1,55 +1,65 @@
 import React from 'react';
-import { Button, Icon, Tooltip } from '@patternfly/react-core';
+import { Button, ClipboardCopy, Icon, Tooltip } from '@patternfly/react-core';
 import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/external-link-alt-icon';
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
-import {
-  type ConfigSourceProvider,
-  getConfigFullRepoUrl,
-  getRepoName,
-  isGitProviderSpec,
-  isHttpProviderSpec,
-} from '../../../types/deviceSpec';
+import { type RepoConfig, getConfigFullRepoUrl, getRepoName, isHttpProviderSpec } from '../../../types/deviceSpec';
 import { useTranslation } from '../../../hooks/useTranslation';
 import type { RepositoryDetails } from '../../../hooks/useRepositoryDetailsMap';
 import CopyButton from '../../common/CopyButton';
 
 export const HttpRepositoryUrl = ({ name, url }: { name?: string; url: string }) => {
   const { t } = useTranslation();
+
+  if (name) {
+    return (
+      <>
+        <span>{name}</span>
+        <CopyButton text={url} ariaLabel={t('Copy Url for http configuration {{name}}', { name })} />
+      </>
+    );
+  }
+
   return (
-    <>
-      {name || url}
-      <CopyButton text={url} ariaLabel={t('Copy Url')} />
-    </>
+    <ClipboardCopy
+      variant="inline-compact"
+      truncation
+      hoverTip={t('Copy Url')}
+      clickTip={t('Copied')}
+      copyAriaLabel={t('Copy Url')}
+    >
+      {url}
+    </ClipboardCopy>
   );
 };
 
-export const GitRepositoryLink = ({ name, url }: { name?: string; url: string }) => (
-  <Button
-    component="a"
-    variant="link"
-    isInline
-    href={url}
-    target="_blank"
-    icon={<ExternalLinkAltIcon />}
-    iconPosition="end"
-  >
-    {name || url}
-  </Button>
-);
+export const GitRepositoryLink = ({ name, url }: { name?: string; url: string }) => {
+  const { t } = useTranslation();
+  return (
+    <Button
+      component="a"
+      variant="link"
+      isInline
+      href={url}
+      target="_blank"
+      icon={<ExternalLinkAltIcon />}
+      iconPosition="end"
+    >
+      {name || t('View in repository')}
+    </Button>
+  );
+};
 
-const RepositorySource = ({
-  config,
-  repoDetails,
-}: {
-  config: ConfigSourceProvider;
+type RepositoryConfigProps = {
+  config: RepoConfig;
   repoDetails?: RepositoryDetails;
-}) => {
+  showConfigName?: boolean;
+};
+
+const RepositoryConfig = ({ config, repoDetails, showConfigName }: RepositoryConfigProps) => {
   const { t } = useTranslation();
 
-  const isGitConfig = isGitProviderSpec(config);
-  const isHttpConfig = isHttpProviderSpec(config);
-  if (!repoDetails || !(isGitConfig || isHttpConfig)) {
+  if (!repoDetails) {
     return <>{config.name}</>;
   }
 
@@ -70,10 +80,11 @@ const RepositorySource = ({
   }
 
   const url = getConfigFullRepoUrl(config, repoDetails.url || '');
+  const name = showConfigName ? config.name : undefined;
   if (isHttpProviderSpec(config)) {
-    return <HttpRepositoryUrl name={config.name} url={url} />;
+    return <HttpRepositoryUrl name={name} url={url} />;
   }
-  return <GitRepositoryLink name={config.name} url={url} />;
+  return <GitRepositoryLink name={name} url={url} />;
 };
 
-export default RepositorySource;
+export default RepositoryConfig;
