@@ -69,8 +69,8 @@ const ReviewStep = ({ showUpdateStatus, error }: { showUpdateStatus?: boolean; e
             <DescriptionListDescription>{values.name}</DescriptionListDescription>
           </DescriptionListGroup>
 
-          <ReviewLabelSection title={t('Fleet labels')} labels={values.fleetLabels} />
-          <ReviewLabelSection title={t('Device selector')} labels={values.labels} />
+          <ReviewLabelSection sectionId="fleet-labels" title={t('Fleet labels')} labels={values.fleetLabels} />
+          <ReviewLabelSection sectionId="device-labels" title={t('Device selector')} labels={values.labels} />
         </DescriptionList>
       </ReviewCard>
 

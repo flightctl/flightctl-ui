@@ -120,7 +120,7 @@ const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?:
     }
   }, [shouldResetApp, appType, appName, setValue]);
 
-  const applicationTitle = appName || '' || t('Application {{ appNum }}', { appNum: index + 1 });
+  const applicationTitle: string = appName || t('Application {{ appNum }}', { appNum: index + 1 });
 
   const handleToggle = () => {
     setTouched(true);

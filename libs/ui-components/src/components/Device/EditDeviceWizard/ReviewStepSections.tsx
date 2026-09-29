@@ -175,7 +175,15 @@ export const SystemdUnitsReviewCard = ({ values }: { values: DeviceSpecConfigFor
   );
 };
 
-export const ReviewLabelSection = ({ title, labels }: { title: string; labels: FlightCtlLabel[] }) => {
+export const ReviewLabelSection = ({
+  sectionId,
+  title,
+  labels,
+}: {
+  sectionId: string;
+  title: string;
+  labels: FlightCtlLabel[];
+}) => {
   if (labels.length === 0) {
     return null;
   }
@@ -184,7 +192,7 @@ export const ReviewLabelSection = ({ title, labels }: { title: string; labels: F
     <DescriptionListGroup>
       <DescriptionListTerm>{title}</DescriptionListTerm>
       <DescriptionListDescription>
-        <LabelsView prefix={title} labels={toAPILabel(labels)} />
+        <LabelsView prefix={sectionId} labels={toAPILabel(labels)} />
       </DescriptionListDescription>
     </DescriptionListGroup>
   );

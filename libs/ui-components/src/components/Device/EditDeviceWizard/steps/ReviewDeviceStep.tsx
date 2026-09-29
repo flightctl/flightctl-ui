@@ -43,7 +43,7 @@ const ReviewDeviceStep = ({ showUpdateStatus, error }: ReviewDeviceStepProps) =>
             <DescriptionListDescription>{values.deviceAlias || t('Untitled')}</DescriptionListDescription>
           </DescriptionListGroup>
 
-          <ReviewLabelSection title={t('Device labels')} labels={values.labels} />
+          <ReviewLabelSection sectionId="device-labels" title={t('Device labels')} labels={values.labels} />
 
           {values.fleetMatch && (
             <DescriptionListGroup>
