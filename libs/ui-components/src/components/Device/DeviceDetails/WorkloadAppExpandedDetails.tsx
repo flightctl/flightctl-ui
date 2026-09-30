@@ -73,7 +73,7 @@ const WorkloadAppExpandedDetails = ({
           <DesiredStateLabel desiredState={desiredState} />
         </DescriptionListDescription>
       </DescriptionListGroup>
-      <ApplicationDeltaStatusFields lastDelta={appStatus.lastDelta} />
+      <ApplicationDeltaStatusFields appStatus={appStatus} />
       {volumes.length > 0 && <ApplicationVolumesDescriptionList volumes={volumes} />}
     </DescriptionList>
   );

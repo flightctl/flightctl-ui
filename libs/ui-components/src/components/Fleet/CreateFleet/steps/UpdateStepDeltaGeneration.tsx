@@ -94,9 +94,11 @@ const UpdateStepDeltaGeneration = ({ isReadOnly }: { isReadOnly: boolean }) => {
             helperText={
               <Content component={ContentVariants.p} style={{ color: 'var(--pf-t--global--text--color--subtle)' }}>
                 {t(
-                  'Generates incremental update artifacts during rollouts so your devices download only what changed for operating systems and applications.',
+                  'When delta generation is enabled for a fleet, the platform pushes only the incremental changes between versions, reducing download size and bandwidth demand for updates. Ensure your devices and OCI registry are configured to apply deltas.',
                 )}{' '}
-                {deltaUpdatesDocLink && <LearnMoreLink text={t('View documentation')} link={deltaUpdatesDocLink} />}
+                {deltaUpdatesDocLink && (
+                  <LearnMoreLink text={t('Learn how delta updates work')} link={deltaUpdatesDocLink} />
+                )}
               </Content>
             }
             isDisabled={isReadOnly}

@@ -111,6 +111,10 @@ export namespace Event {
     PREPARE_DELTAS = 'PrepareDeltas',
     DELTA_GENERATION_PROGRESS = 'DeltaGenerationProgress',
     DELTA_GENERATION_COMPLETED = 'DeltaGenerationCompleted',
+    ENROLLMENT_HOOK_SUCCEEDED = 'EnrollmentHookSucceeded',
+    ENROLLMENT_HOOK_FAILED = 'EnrollmentHookFailed',
+    ENROLLMENT_HOOK_NOTIFY_FAILED = 'EnrollmentHookNotifyFailed',
+    ENROLLMENT_HOOK_MANUAL_OVERRIDE = 'EnrollmentHookManualOverride',
   }
   /**
    * The type of the event. One of Normal, Warning.
