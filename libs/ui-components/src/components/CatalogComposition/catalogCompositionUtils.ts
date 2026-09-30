@@ -157,7 +157,7 @@ export const getDefaultChannelAndVersion = (item: CatalogItem) => {
     };
   }
 
-  const versions = item.spec.versions.sort((v1, v2) => semver.rcompare(v1.version, v2.version));
+  const versions = [...item.spec.versions].sort((v1, v2) => semver.rcompare(v1.version, v2.version));
 
   // release then prerelease
   const latestVersion = versions.find((v) => !semver.prerelease(v.version)) || versions[0];

@@ -1,4 +1,4 @@
-import type { TFunction } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { RESOURCE, VERB } from '../../types/rbac';
 import type { PermissionCheck } from '../common/PermissionsContext';
 import type { QuickStartPhaseDefinition } from './types';

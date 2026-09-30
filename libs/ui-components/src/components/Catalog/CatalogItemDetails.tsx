@@ -41,6 +41,7 @@ import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import WithTooltip from '../common/WithTooltip';
 import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import FlightCtlPageDrawer from '../common/FlightCtlPageDrawer';
+import TruncatedText from '../common/TruncatedText';
 import CatalogItemIcon from './CatalogItemIcon';
 import { InstallSpec } from './InstallWizard/steps/SpecificationsStep';
 import { type InstallSpecFormik } from './InstallWizard/types';
@@ -67,6 +68,21 @@ type CatalogItemDetailsHeaderProps = {
   item: CatalogItem;
 };
 
+export const CatalogItemLabel = ({
+  item,
+  fallbackId,
+  shortened,
+}: {
+  item?: CatalogItem;
+  fallbackId?: string;
+  shortened?: boolean;
+}) => (
+  <TruncatedText
+    text={item?.spec.displayName || item?.metadata.name || fallbackId || ''}
+    maxChars={shortened ? 30 : undefined}
+  />
+);
+
 export const CatalogItemDetailsHeader = ({ item }: CatalogItemDetailsHeaderProps) => {
   const { t } = useTranslation();
   return (
@@ -75,7 +91,9 @@ export const CatalogItemDetailsHeader = ({ item }: CatalogItemDetailsHeaderProps
         <CatalogItemIcon catalogItem={item} />
       </SplitItem>
       <SplitItem isFilled>
-        <Title headingLevel="h1">{item.spec.displayName || item.metadata.name}</Title>
+        <Title headingLevel="h1">
+          <CatalogItemLabel item={item} shortened />
+        </Title>
         {item.spec.provider && (
           <Content component={ContentVariants.small}>
             {t('Provided by {{provider}}', { provider: item.spec.provider })}
