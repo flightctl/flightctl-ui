@@ -23,7 +23,6 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
-import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 import { Formik, useFormikContext } from 'formik';
 import { ActionsColumn, type IAction } from '@patternfly/react-table';
@@ -32,6 +31,7 @@ import { type Catalog, type CatalogItem, CatalogItemType } from '@flightctl/type
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
+import { getDefaultChannelAndVersion } from '../CatalogComposition/catalogCompositionUtils';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { useItemIsInUse } from './useCatalogItems';
 import FlightCtlForm from '../form/FlightCtlForm';
@@ -441,25 +441,6 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
       </GridItem>
     </Grid>
   );
-};
-
-export const getDefaultChannelAndVersion = (item: CatalogItem) => {
-  if (!item.spec.versions.length) {
-    return {
-      version: '',
-      channel: '',
-    };
-  }
-
-  const versions = item.spec.versions.sort((v1, v2) => semver.rcompare(v1.version, v2.version));
-
-  // release then prerelease
-  const latestVersion = versions.find((v) => !semver.prerelease(v.version)) || versions[0];
-
-  return {
-    version: latestVersion.version,
-    channel: latestVersion.channels[0],
-  };
 };
 
 const CatalogItemDetails = ({ item, onInstall, ...rest }: CatalogItemDetailsProps) => {

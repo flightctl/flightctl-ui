@@ -37,14 +37,11 @@ import ResourceListEmptyState from '../common/ResourceListEmptyState';
 import FlightCtlModal from '../common/FlightCtlModal';
 import { useCatalogItems } from '../Catalog/useCatalogItems';
 import CatalogItemGallery from '../Catalog/CatalogItemGallery';
-import {
-  CatalogItemDetailsContent,
-  CatalogItemDetailsHeader,
-  getDefaultChannelAndVersion,
-} from '../Catalog/CatalogItemDetails';
+import { CatalogItemDetailsContent, CatalogItemDetailsHeader } from '../Catalog/CatalogItemDetails';
 import type { InstallSpecFormik } from '../Catalog/InstallWizard/types';
 import FlightCtlForm from '../form/FlightCtlForm';
 import { InstallSpec } from '../Catalog/InstallWizard/steps/SpecificationsStep';
+import { getDefaultChannelAndVersion } from '../CatalogComposition/catalogCompositionUtils';
 
 const assetItemTypeFilter = [CatalogItemType.CatalogItemTypeData];
 

@@ -149,12 +149,23 @@ export const getFormValuesFromAdvancedConfig = (
     : undefined;
 };
 
-export const getDefaultChannel = (catalogItem: CatalogItem): string => {
-  const channels = new Set<string>();
-  catalogItem.spec.versions.forEach((version) => {
-    version.channels.forEach((channel) => channels.add(channel));
-  });
-  return [...channels][0] || 'stable';
+export const getDefaultChannelAndVersion = (item: CatalogItem) => {
+  if (!item.spec.versions.length) {
+    return {
+      version: '',
+      channel: '',
+    };
+  }
+
+  const versions = item.spec.versions.sort((v1, v2) => semver.rcompare(v1.version, v2.version));
+
+  // release then prerelease
+  const latestVersion = versions.find((v) => !semver.prerelease(v.version)) || versions[0];
+
+  return {
+    version: latestVersion.version,
+    channel: latestVersion.channels[0],
+  };
 };
 
 export const getSortedChannelVersions = (catalogItem: CatalogItem, channel: string): CatalogItemVersion[] =>
@@ -208,7 +219,7 @@ export const updateCatalogAppFormConfig = ({
   if (!versionEntry) {
     return renameCatalogAppForm(appForm, appName);
   }
-  const channel = appForm.catalogItemRef.channel || getDefaultChannel(catalogItem);
+  const channel = appForm.catalogItemRef.channel || getDefaultChannelAndVersion(catalogItem).channel;
   const formValues = getFormValuesFromAdvancedConfig(advancedConfig);
 
   const apiApp = buildCatalogApplicationSpec({

@@ -8,8 +8,7 @@ import {
   type CatalogAdvancedConfigValues,
   type CatalogSelectionConfirm,
   getCatalogItemDefaultAppName,
-  getDefaultChannel,
-  getSortedChannelVersions,
+  getDefaultChannelAndVersion,
 } from './catalogCompositionUtils';
 import { getInitialAppConfig } from '../Catalog/InstallWizard/utils';
 import type { DynamicFormConfigFormik } from '../Catalog/InstallWizard/types';
@@ -58,9 +57,7 @@ const CatalogAddAppModal = ({ appName = '', onClose, onConfirm }: CatalogAddAppM
     if (!selectedItem) {
       return { channel: 'stable', version: '', appName, wantAdvancedConfig: false };
     }
-    const channel = getDefaultChannel(selectedItem);
-    const versions = getSortedChannelVersions(selectedItem, channel);
-    const version = versions[0]?.version || '';
+    const { channel, version } = getDefaultChannelAndVersion(selectedItem);
     return {
       channel,
       version,
