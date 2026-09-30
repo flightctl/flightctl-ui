@@ -16,11 +16,11 @@ const CatalogApplicationNameField = () => {
   const hasError = !!errors.appName;
 
   const cancelEditing = React.useCallback(() => {
-    if (!hasError && acceptedAppName) {
+    if (acceptedAppName) {
       void setFieldValue('appName', acceptedAppName, false);
-      setIsEditing(false);
     }
-  }, [hasError, acceptedAppName, setFieldValue]);
+    setIsEditing(false);
+  }, [acceptedAppName, setFieldValue]);
 
   const acceptEditing = React.useCallback(() => {
     if (!hasError && updatedName) {
