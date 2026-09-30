@@ -7,6 +7,10 @@
  */
 export type ImageDeltaHint = {
   /**
+   * The target image reference this delta applies to.
+   */
+  targetImage: string;
+  /**
    * The content digest of the target image.
    */
   targetDigest: string;

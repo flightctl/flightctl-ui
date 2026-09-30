@@ -124,6 +124,11 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.PREPARE_DELTAS]: t('Preparing delta updates'),
     [Event.reason.DELTA_GENERATION_PROGRESS]: t('Delta updates are being generated'),
     [Event.reason.DELTA_GENERATION_COMPLETED]: t('Delta updates generation is complete'),
+    // Enrollment hook events
+    [Event.reason.ENROLLMENT_HOOK_SUCCEEDED]: t('Enrollment hook succeeded'),
+    [Event.reason.ENROLLMENT_HOOK_FAILED]: t('Enrollment hook failed'),
+    [Event.reason.ENROLLMENT_HOOK_NOTIFY_FAILED]: t('Enrollment hook notify failed'),
+    [Event.reason.ENROLLMENT_HOOK_MANUAL_OVERRIDE]: t('Enrollment hook has manual override'),
   };
 };
 

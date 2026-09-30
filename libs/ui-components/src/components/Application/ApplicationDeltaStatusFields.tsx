@@ -1,23 +1,23 @@
 import * as React from 'react';
 import { DescriptionListDescription, DescriptionListGroup, DescriptionListTerm } from '@patternfly/react-core';
 
-import type { DeviceDeltaApplyStatus } from '@flightctl/types';
+import type { DeviceApplicationStatus } from '@flightctl/types';
 import { useTranslation } from '../../hooks/useTranslation';
 import LabelWithHelperText from '../common/WithHelperText';
 
-const ApplicationDeltaStatusFields = ({ lastDelta }: { lastDelta?: DeviceDeltaApplyStatus }) => {
+const ApplicationDeltaStatusFields = ({ appStatus }: { appStatus: DeviceApplicationStatus }) => {
   const { t } = useTranslation();
 
-  const lastDeltaSize = lastDelta?.size;
-  const lastReason = lastDelta?.fallbackReason;
-
-  if (!lastDeltaSize && !lastReason) {
+  // Applications use the "status.applications.size" field
+  const deltaSize = appStatus.size;
+  const fallbackReason = appStatus.lastDelta?.fallbackReason;
+  if (!deltaSize && !fallbackReason) {
     return null;
   }
 
   return (
     <>
-      {lastDeltaSize && (
+      {deltaSize && (
         <DescriptionListGroup>
           <DescriptionListTerm>
             <LabelWithHelperText
@@ -27,10 +27,10 @@ const ApplicationDeltaStatusFields = ({ lastDelta }: { lastDelta?: DeviceDeltaAp
               )}
             />
           </DescriptionListTerm>
-          <DescriptionListDescription>{lastDeltaSize}</DescriptionListDescription>
+          <DescriptionListDescription>{deltaSize}</DescriptionListDescription>
         </DescriptionListGroup>
       )}
-      {lastReason && (
+      {fallbackReason && (
         <DescriptionListGroup>
           <DescriptionListTerm>
             <LabelWithHelperText
@@ -40,7 +40,7 @@ const ApplicationDeltaStatusFields = ({ lastDelta }: { lastDelta?: DeviceDeltaAp
               )}
             />
           </DescriptionListTerm>
-          <DescriptionListDescription>{lastReason}</DescriptionListDescription>
+          <DescriptionListDescription>{fallbackReason}</DescriptionListDescription>
         </DescriptionListGroup>
       )}
     </>

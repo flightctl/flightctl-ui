@@ -67,7 +67,7 @@ const VmAppExpandedDetails = ({
           <DesiredStateLabel desiredState={desiredState} />
         </DescriptionListDescription>
       </DescriptionListGroup>
-      <ApplicationDeltaStatusFields lastDelta={appStatus.lastDelta} />
+      <ApplicationDeltaStatusFields appStatus={appStatus} />
     </DescriptionList>
   );
 

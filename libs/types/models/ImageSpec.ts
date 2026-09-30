@@ -16,7 +16,7 @@ export type ImageSpec = {
    */
   deltaImage?: string;
   /**
-   * Optional hints for nested images within this application (e.g. service images in a compose app, OCI volume images). Each entry maps a target digest to its delta artifact reference.
+   * Optional hints for nested images within this application (e.g. service images in a compose app, OCI volume images). Each entry identifies a target image reference and digest and names its delta artifact reference.
    */
   deltaImages?: Array<ImageDeltaHint>;
 };
