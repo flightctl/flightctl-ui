@@ -14,7 +14,7 @@ type ApplicationIntegritySettingsProps = {
 
 const ApplicationIntegritySettings = ({ index, isReadOnly }: ApplicationIntegritySettingsProps) => {
   const { t } = useTranslation();
-  const appFieldName = `applications[${index}]`;
+  const appFieldName = `applications[${index}].app`;
   const [{ value: runAs }, , { setValue: setRunAs }] = useField<string | undefined>(`${appFieldName}.runAs`);
   const isRootless = runAs !== RUN_AS_ROOT_USER;
 

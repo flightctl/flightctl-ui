@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Trans } from 'react-i18next';
 import {
   Alert,
   Button,
@@ -22,7 +23,6 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
-import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 import { Formik, useFormikContext } from 'formik';
 import { ActionsColumn, type IAction } from '@patternfly/react-table';
@@ -31,15 +31,17 @@ import { type Catalog, type CatalogItem, CatalogItemType } from '@flightctl/type
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
+import { getDefaultChannelAndVersion } from '../CatalogComposition/catalogCompositionUtils';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { useItemIsInUse } from './useCatalogItems';
 import FlightCtlForm from '../form/FlightCtlForm';
 import { DeprecateModal, RestoreModal } from './DeprecateModal';
-import { getCatalogItemIcon, getFullContainerURI } from '../../utils/catalog';
+import { getFullContainerURI } from '../../utils/catalog';
 import DeleteModal from '../modals/DeleteModal/DeleteModal';
 import WithTooltip from '../common/WithTooltip';
 import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import FlightCtlPageDrawer from '../common/FlightCtlPageDrawer';
+import CatalogItemIcon from './CatalogItemIcon';
 import { InstallSpec } from './InstallWizard/steps/SpecificationsStep';
 import { type InstallSpecFormik } from './InstallWizard/types';
 
@@ -70,7 +72,7 @@ export const CatalogItemDetailsHeader = ({ item }: CatalogItemDetailsHeaderProps
   return (
     <Split hasGutter>
       <SplitItem>
-        <img src={getCatalogItemIcon(item)} alt={`${item.metadata.name} icon`} style={{ maxWidth: '40px' }} />
+        <CatalogItemIcon catalogItem={item} />
       </SplitItem>
       <SplitItem isFilled>
         <Title headingLevel="h1">{item.spec.displayName || item.metadata.name}</Title>
@@ -145,8 +147,12 @@ const CatalogItemDetailsModal = ({
     case 'delete':
       return (
         <DeleteModal
-          resourceName={displayName}
-          resourceType={t('catalog item')}
+          resourceType="catalogItem"
+          confirmText={
+            <Trans t={t}>
+              Are you sure you want to delete catalog item <b>{displayName}</b>?
+            </Trans>
+          }
           onClose={() => setItemModalOpen(undefined)}
           onDelete={async () => {
             await remove(itemEndpoint);
@@ -435,25 +441,6 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
       </GridItem>
     </Grid>
   );
-};
-
-export const getDefaultChannelAndVersion = (item: CatalogItem) => {
-  if (!item.spec.versions.length) {
-    return {
-      version: '',
-      channel: '',
-    };
-  }
-
-  const versions = item.spec.versions.sort((v1, v2) => semver.rcompare(v1.version, v2.version));
-
-  // release then prerelease
-  const latestVersion = versions.find((v) => !semver.prerelease(v.version)) || versions[0];
-
-  return {
-    version: latestVersion.version,
-    channel: latestVersion.channels[0],
-  };
 };
 
 const CatalogItemDetails = ({ item, onInstall, ...rest }: CatalogItemDetailsProps) => {

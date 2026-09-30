@@ -33,7 +33,8 @@ import EnrolledDeviceTableRow from '../../../Device/DevicesPage/EnrolledDeviceTa
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { type InstallAppFormik, type InstallOsFormik } from '../types';
 import FormSelect from '../../../form/FormSelect';
-import { getArtifactLabel, getFullArtifactURI } from '../../../../utils/catalog';
+import { getArtifactLabel } from '../../../../utils/catalogTypes';
+import { getFullArtifactURI } from '../../../../utils/catalog';
 import LearnMoreLink from '../../../common/LearnMoreLink';
 import { useAppLinks } from '../../../../hooks/useAppLinks';
 import { isSameCatalogRef } from '../utils';

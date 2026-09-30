@@ -11,7 +11,7 @@ import ApplicationImageForm from './ApplicationImageForm';
 
 const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
-  const appFieldName = `applications[${index}]`;
+  const appFieldName = `applications[${index}].app`;
   const [{ value: app }] = useField<SingleContainerAppForm>(`${appFieldName}`);
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const ports = React.useMemo(() => app.ports || [], [app.ports]);

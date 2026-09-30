@@ -1,14 +1,15 @@
 import * as React from 'react';
-import { ArrowCircleUpIcon } from '@patternfly/react-icons/dist/js/icons/arrow-circle-up-icon';
 import { ActionsColumn, type IAction } from '@patternfly/react-table';
-import { Button, Flex, FlexItem, Label, Popover, StackItem } from '@patternfly/react-core';
+import { Flex, FlexItem, Label, Popover, StackItem } from '@patternfly/react-core';
 
 import type { SpecCatalogItemId } from '../../utils/catalog';
 import { getUpdates } from '../../utils/catalog';
 import { useTranslation } from '../../hooks/useTranslation';
 import { buildAllDropdownActions } from '../common/ActionsDropdownList';
 import type { ResolvedCatalogItemData } from './specCatalogItems';
+import { type CatalogEditWizardMode } from '../../utils/catalog';
 import CatalogItemTitle, { BrokenCatalogItemTitle } from './CatalogItemTitle';
+import { CatalogItemUpdateBadge } from './CatalogItemBadges';
 
 const SoftwareItemTitle = ({
   catalogItemId,
@@ -17,22 +18,24 @@ const SoftwareItemTitle = ({
   catalogItemId: SpecCatalogItemId;
   data?: ResolvedCatalogItemData;
 }) => {
-  const description = catalogItemId.type === 'app' && catalogItemId.appName ? catalogItemId.appName : '';
-
+  const appName = catalogItemId.type === 'app' && catalogItemId.appName ? catalogItemId.appName : '';
   if (!data) {
-    return <BrokenCatalogItemTitle catalogRef={catalogItemId.ref} description={description} />;
+    return <BrokenCatalogItemTitle catalogRef={catalogItemId.ref} headerTitle={appName} />;
   }
+
+  const itemName = (data.item.spec.displayName || data.item.metadata.name) as string;
   return (
     <CatalogItemTitle
+      headerTitle={appName || itemName}
+      description={appName ? itemName : undefined}
       item={data.item}
       channel={data.channel}
       version={data.version?.version}
-      description={description}
     />
   );
 };
 
-const SoftwareItemVersionInfo = ({
+const SoftwareItemUpdateBadge = ({
   data,
   onEdit,
   canEdit,
@@ -41,26 +44,13 @@ const SoftwareItemVersionInfo = ({
   onEdit: VoidFunction;
   canEdit: boolean;
 }) => {
-  const { t } = useTranslation();
   const { item, version, channel } = data;
   if (!version) {
     return null;
   }
 
   const updates = getUpdates(item, channel, version.version);
-  if (!updates.length) {
-    return null;
-  }
-
-  return canEdit ? (
-    <Button variant="link" isInline onClick={onEdit} icon={<ArrowCircleUpIcon />}>
-      {t('Update available')}
-    </Button>
-  ) : (
-    <Label variant="outline" color="blue">
-      {t('Update available')}
-    </Label>
-  );
+  return <CatalogItemUpdateBadge hasUpdates={updates.length > 0} onUpdate={canEdit ? onEdit : undefined} />;
 };
 
 const SoftwareItemDeprecation = ({ data }: { data: ResolvedCatalogItemData }) => {
@@ -82,7 +72,7 @@ const SoftwareItemDeprecation = ({ data }: { data: ResolvedCatalogItemData }) =>
 type InstalledSoftwareItemProps = {
   catalogItemId: SpecCatalogItemId;
   data?: ResolvedCatalogItemData;
-  onEdit: VoidFunction;
+  onEdit: (id: SpecCatalogItemId, mode: CatalogEditWizardMode) => void;
   onDelete: VoidFunction;
   canEdit: boolean;
 };
@@ -105,7 +95,7 @@ const InstalledSoftwareItem = ({ catalogItemId, data, onEdit, onDelete, canEdit 
         };
     regularActions.push({
       title: t('Edit'),
-      onClick: onEdit,
+      onClick: () => onEdit(catalogItemId, 'edit'),
       ...invalidItemProps,
     });
   }
@@ -128,7 +118,7 @@ const InstalledSoftwareItem = ({ catalogItemId, data, onEdit, onDelete, canEdit 
         {isValidCatalogItem && (
           <>
             <FlexItem>
-              <SoftwareItemVersionInfo data={data} onEdit={onEdit} canEdit={canEdit} />
+              <SoftwareItemUpdateBadge data={data} onEdit={() => onEdit(catalogItemId, 'update')} canEdit={canEdit} />
             </FlexItem>
             <FlexItem>
               <SoftwareItemDeprecation data={data} />

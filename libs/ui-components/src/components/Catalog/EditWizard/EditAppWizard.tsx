@@ -3,7 +3,6 @@ import { Formik, type FormikErrors, useFormikContext } from 'formik';
 import { Wizard, WizardStep, type WizardStepType } from '@patternfly/react-core';
 import * as Yup from 'yup';
 import type { RJSFValidationError } from '@rjsf/utils';
-import semver from 'semver';
 
 import type { ApplicationProviderSpec } from '@flightctl/types';
 import type { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
@@ -13,26 +12,33 @@ import { getInitialAppConfig } from '../InstallWizard/utils';
 import AppConfigStep, { isAppConfigStepValid } from '../InstallWizard/steps/AppConfigStep';
 import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
 import { useSubmitCatalogForm } from '../useSubmitCatalogForm';
-import { getUpdates } from '../../../utils/catalog';
+import { type CatalogEditWizardMode, getSortedUpdates } from '../../../utils/catalog';
+import { isWizardStepDisabled } from '../../../utils/wizards';
 import { type AppUpdateFormik } from './types';
 import UpdateStep, { isUpdateStepValid } from './steps/UpdateStep';
 import ReviewStep from './steps/ReviewStep';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import { validApplicationAndVolumeName } from '../../form/validations';
-import { isWizardStepDisabled } from '../../../utils/wizards';
+import { isAdvancedConfigRequired } from '../../CatalogComposition/catalogCompositionUtils';
 
 const versionStepId = 'version-step';
 const configStepId = 'config-step';
 const reviewStepId = 'review-step';
 
-const orderedIds = [versionStepId, configStepId, reviewStepId];
+const getOrderedIds = (showConfigStep: boolean) =>
+  showConfigStep ? [versionStepId, configStepId, reviewStepId] : [versionStepId, reviewStepId];
 
-const getValidStepIds = (errors: FormikErrors<AppUpdateFormik>, values: AppUpdateFormik): string[] => {
+const getValidStepIds = (
+  errors: FormikErrors<AppUpdateFormik>,
+  values: AppUpdateFormik,
+  showConfigStep: boolean,
+): string[] => {
+  const orderedIds = getOrderedIds(showConfigStep);
   const validStepIds: string[] = [];
   if (isUpdateStepValid(errors)) {
     validStepIds.push(versionStepId);
   }
-  if (isAppConfigStepValid(values, errors)) {
+  if (showConfigStep && isAppConfigStepValid(values, errors)) {
     validStepIds.push(configStepId);
   }
   if (validStepIds.length === orderedIds.length - 1) {
@@ -52,6 +58,7 @@ const validateUpdateWizardStep = (
 };
 
 type WizardContentProps = {
+  mode: CatalogEditWizardMode;
   currentVersion: CatalogItemVersion;
   appSpec?: ApplicationProviderSpec;
   catalogItem: CatalogItem;
@@ -60,20 +67,28 @@ type WizardContentProps = {
   setError: (err: string | undefined) => void;
 };
 
-const WizardContent: React.FC<WizardContentProps> = ({
+const WizardContent = ({
+  mode,
   currentVersion,
   appSpec,
   catalogItem,
   error,
   schemaErrors,
   setError,
-}) => {
+}: WizardContentProps) => {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
 
   const { values, errors } = useFormikContext<AppUpdateFormik>();
 
-  const validStepIds = getValidStepIds(errors, values);
+  const isVersionStep = !currentStep || currentStep?.id === versionStepId;
+  const requiresAdvancedConfig = React.useMemo(
+    () => isAdvancedConfigRequired(catalogItem, values.version, appSpec),
+    [catalogItem, values.version, appSpec],
+  );
+  const showConfigStep = requiresAdvancedConfig || values.wantAdvancedConfig;
+  const orderedIds = getOrderedIds(showConfigStep);
+  const validStepIds = getValidStepIds(errors, values, showConfigStep);
 
   return (
     <>
@@ -95,22 +110,26 @@ const WizardContent: React.FC<WizardContentProps> = ({
         }}
       >
         <WizardStep name={t('Version')} id={versionStepId}>
-          {(!currentStep || currentStep?.id === versionStepId) && (
+          {isVersionStep && (
             <UpdateStep
+              mode={mode}
               catalogItem={catalogItem}
               currentVersion={currentVersion}
               isEdit={!!appSpec}
               existingApp={appSpec}
+              requiresAdvancedConfig={requiresAdvancedConfig}
             />
           )}
         </WizardStep>
-        <WizardStep
-          name={t('Configuration')}
-          id={configStepId}
-          isDisabled={isWizardStepDisabled(configStepId, orderedIds, validStepIds)}
-        >
-          {currentStep?.id === configStepId && <AppConfigStep isEdit={!!appSpec} />}
-        </WizardStep>
+        {showConfigStep && (
+          <WizardStep
+            name={t('Configuration')}
+            id={configStepId}
+            isDisabled={isWizardStepDisabled(configStepId, orderedIds, validStepIds)}
+          >
+            {currentStep?.id === configStepId && <AppConfigStep isEdit={!!appSpec} />}
+          </WizardStep>
+        )}
         <WizardStep
           name={t('Review and deploy')}
           id={reviewStepId}
@@ -134,9 +153,11 @@ type EditAppWizardProps = {
   currentApps: ApplicationProviderSpec[] | undefined;
   version: string;
   channel: string;
+  mode: CatalogEditWizardMode;
 };
 
-const EditAppWizard: React.FC<EditAppWizardProps> = ({
+const EditAppWizard = ({
+  mode,
   catalogItem,
   currentVersion,
   onUpdate,
@@ -145,12 +166,10 @@ const EditAppWizard: React.FC<EditAppWizardProps> = ({
   currentApps,
   version,
   channel,
-}) => {
+}: EditAppWizardProps) => {
   const { t } = useTranslation();
 
-  const latestVersion = getUpdates(catalogItem, currentChannel, currentVersion.version).sort((a, b) =>
-    semver.rcompare(a.version, b.version),
-  )[0]?.version;
+  const latestVersion = getSortedUpdates(catalogItem, currentChannel, currentVersion.version)[0]?.version;
   const appVersion = appSpec ? latestVersion || currentVersion.version : version;
   const appConfig = getInitialAppConfig(catalogItem, appVersion, appSpec);
 
@@ -185,12 +204,14 @@ const EditAppWizard: React.FC<EditAppWizardProps> = ({
       initialValues={{
         version: appVersion,
         channel: appSpec ? currentChannel : channel,
+        wantAdvancedConfig: mode === 'edit',
         ...appConfig,
       }}
       validateOnMount
       onSubmit={onSubmit}
     >
       <WizardContent
+        mode={mode}
         currentVersion={currentVersion}
         appSpec={appSpec}
         catalogItem={catalogItem}

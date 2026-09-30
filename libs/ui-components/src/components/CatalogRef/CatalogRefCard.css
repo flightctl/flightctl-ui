@@ -1,0 +1,4 @@
+.fctl-catalog-ref-card.fctl-catalog-ref-card--compact .pf-v6-c-card__body {
+  padding-block-end: var(--pf-t--global--spacer--sm);
+  padding-block-start: var(--pf-t--global--spacer--sm);
+}

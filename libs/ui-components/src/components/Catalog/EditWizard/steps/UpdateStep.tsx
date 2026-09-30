@@ -14,11 +14,10 @@ import FlightCtlModal from '@flightctl/ui-components/src/components/common/Fligh
 import ArrowRightIcon from '@patternfly/react-icons/dist/js/icons/arrow-right-icon';
 import * as React from 'react';
 import { type FormikErrors, useFormikContext } from 'formik';
-import { type CatalogItem, type CatalogItemVersion } from '@flightctl/types/alpha';
-import semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 
 import type { ApplicationProviderSpec } from '@flightctl/types';
+import { type CatalogItem, CatalogItemCategory, type CatalogItemVersion } from '@flightctl/types/alpha';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FormSelect from '../../../form/FormSelect';
@@ -28,27 +27,38 @@ import { InstallSpec, VersionDropdown } from '../../InstallWizard/steps/Specific
 import UpdateGraph from './UpdateGraph';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import { applyInitialConfig, getInitialAppConfig } from '../../InstallWizard/utils';
-import { getUpdates } from '../../../../utils/catalog';
+import { type CatalogEditWizardMode, getSortedUpdates, getUpdates } from '../../../../utils/catalog';
+import { type AppUpdateFormik } from '../types';
+import { AdvancedConfigControl } from '../../../CatalogComposition/CatalogDefinitionFields';
 
 export const isUpdateStepValid = (errors: FormikErrors<InstallSpecFormik>) => {
   return !errors.version && !errors.channel;
 };
 
 type UpdateStepProps = {
+  mode: CatalogEditWizardMode;
   currentVersion: CatalogItemVersion;
   catalogItem: CatalogItem;
   isEdit: boolean;
   existingApp?: ApplicationProviderSpec;
+  requiresAdvancedConfig: boolean;
 };
 
-const UpdateStep = ({ currentVersion, catalogItem, isEdit, existingApp }: UpdateStepProps) => {
+const UpdateStep = ({
+  mode,
+  currentVersion,
+  catalogItem,
+  isEdit,
+  existingApp,
+  requiresAdvancedConfig,
+}: UpdateStepProps) => {
   const [showReadme, setShowReadme] = React.useState(false);
   const { t } = useTranslation();
-  const { values, initialValues, setFieldValue } = useFormikContext<InstallSpecFormik>();
+  const { values, initialValues, setFieldValue } = useFormikContext<AppUpdateFormik>();
 
   const updates = getUpdates(catalogItem, values.channel, currentVersion.version);
-
   const updateVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
+  const showAdvancedConfig = catalogItem.spec.category === CatalogItemCategory.CatalogItemCategoryApplication;
 
   return isEdit ? (
     <>
@@ -79,23 +89,25 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit, existingApp }: Update
                     </Icon>
                   </GridItem>
                   <GridItem span={4}>
-                    <FormSelect
-                      name="channel"
-                      items={currentVersion.channels.reduce((acc, curr) => {
-                        acc[curr] = curr;
-                        return acc;
-                      }, {})}
-                      onChange={(val) => {
-                        const latestVersion = getUpdates(catalogItem, val, currentVersion.version).sort((a, b) =>
-                          semver.rcompare(a.version, b.version),
-                        )[0]?.version;
-                        const newVersion = latestVersion || currentVersion.version;
-                        setFieldValue('version', newVersion);
-                        // Keep the current app config when the channel changes.
-                        const appConfig = getInitialAppConfig(catalogItem, newVersion, existingApp);
-                        applyInitialConfig(setFieldValue, appConfig);
-                      }}
-                    />
+                    {mode === 'edit' ? (
+                      <FormSelect
+                        name="channel"
+                        items={currentVersion.channels.reduce((acc, curr) => {
+                          acc[curr] = curr;
+                          return acc;
+                        }, {})}
+                        onChange={(val) => {
+                          const latestVersion = getSortedUpdates(catalogItem, val, currentVersion.version)[0]?.version;
+                          const newVersion = latestVersion || currentVersion.version;
+                          setFieldValue('version', newVersion);
+                          // Keep the current app config when the channel changes.
+                          const appConfig = getInitialAppConfig(catalogItem, newVersion, existingApp);
+                          applyInitialConfig(setFieldValue, appConfig);
+                        }}
+                      />
+                    ) : (
+                      values.channel
+                    )}
                   </GridItem>
                   <GridItem span={3} />
                 </Grid>
@@ -118,11 +130,15 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit, existingApp }: Update
                   </GridItem>
                   <GridItem span={4}>
                     {updates.length ? (
-                      <VersionDropdown
-                        catalogItem={catalogItem}
-                        versions={[...updates, currentVersion]}
-                        existingApp={existingApp}
-                      />
+                      mode === 'edit' ? (
+                        <VersionDropdown
+                          catalogItem={catalogItem}
+                          versions={[...updates, currentVersion]}
+                          existingApp={existingApp}
+                        />
+                      ) : (
+                        values.version
+                      )
                     ) : (
                       <StatusDisplayContent level="success" label={t('Up to date')} />
                     )}
@@ -161,6 +177,11 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit, existingApp }: Update
               )}
             </Grid>
           </GridItem>
+          {showAdvancedConfig && (
+            <GridItem>
+              <AdvancedConfigControl requiresAdvancedConfig={requiresAdvancedConfig} />
+            </GridItem>
+          )}
         </Grid>
       </FlightCtlForm>
       {showReadme && updateVersion?.readme && (
@@ -183,6 +204,13 @@ const UpdateStep = ({ currentVersion, catalogItem, isEdit, existingApp }: Update
         <FlightCtlForm>
           <InstallSpec catalogItem={catalogItem} targetSet />
         </FlightCtlForm>
+      </GridItem>
+      <GridItem>
+        {showAdvancedConfig && (
+          <FlightCtlForm>
+            <AdvancedConfigControl requiresAdvancedConfig={requiresAdvancedConfig} />
+          </FlightCtlForm>
+        )}
       </GridItem>
     </Grid>
   );

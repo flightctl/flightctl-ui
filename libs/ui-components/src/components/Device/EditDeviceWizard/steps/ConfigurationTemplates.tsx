@@ -173,6 +173,7 @@ const ConfigurationTemplatesForm = ({
                       <Button
                         aria-label={t('Delete configuration')}
                         variant="link"
+                        isDanger
                         icon={<MinusCircleIcon />}
                         iconPosition="start"
                         onClick={() => arrayHelpers.remove(index)}

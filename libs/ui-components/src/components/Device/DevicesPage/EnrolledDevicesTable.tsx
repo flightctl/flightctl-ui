@@ -3,7 +3,13 @@ import { Button, Switch, ToolbarItem } from '@patternfly/react-core';
 import { Tbody } from '@patternfly/react-table';
 import { type TFunction } from 'react-i18next';
 
-import { type Device, type DeviceDecommission, DeviceDecommissionTargetType, type DeviceList } from '@flightctl/types';
+import {
+  type Device,
+  type DeviceDecommission,
+  DeviceDecommissionTargetType,
+  type DeviceList,
+  ResourceKind,
+} from '@flightctl/types';
 
 import { type FilterStatusMap } from './types';
 import { type FlightCtlLabel } from '../../../types/extraTypes';
@@ -125,7 +131,7 @@ const EnrolledDevicesTable = ({
 
   const { action: resumeDeviceAction, modal: resumeDeviceModal } = useResumeListAction(refetchDevices);
   const { action: decommissionDeviceAction, modal: decommissionDeviceModal } = useDecommissionListAction({
-    resourceType: 'Device',
+    resourceType: ResourceKind.DEVICE,
     onConfirm: async (deviceId: string, params) => {
       await put<DeviceDecommission>(`devices/${deviceId}/decommission`, {
         target: params?.target || DeviceDecommissionTargetType.DeviceDecommissionTargetTypeUnenroll,

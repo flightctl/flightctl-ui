@@ -54,6 +54,7 @@ const ApplicationVariablesForm = ({ appFieldName, isReadOnly }: ApplicationVaria
                         <Button
                           aria-label={t('Delete variable')}
                           variant="link"
+                          isDanger
                           icon={<MinusCircleIcon />}
                           iconPosition="start"
                           onClick={() => arrayHelpers.remove(variableIndex)}

@@ -9,6 +9,7 @@ import type { DeviceApplicationsSummaryStatus } from './DeviceApplicationsSummar
 import type { DeviceApplicationStatus } from './DeviceApplicationStatus';
 import type { DeviceCapabilities } from './DeviceCapabilities';
 import type { DeviceConfigStatus } from './DeviceConfigStatus';
+import type { DeviceEnrollmentHooksStatus } from './DeviceEnrollmentHooksStatus';
 import type { DeviceIntegrityStatus } from './DeviceIntegrityStatus';
 import type { DeviceLifecycleStatus } from './DeviceLifecycleStatus';
 import type { DeviceOsStatus } from './DeviceOsStatus';
@@ -49,5 +50,6 @@ export type DeviceStatus = {
   dependencySync?: DependencySyncStatus;
   capabilities?: DeviceCapabilities;
   deltaGeneration?: DeltaGenerationStatus;
+  enrollmentHooks?: DeviceEnrollmentHooksStatus;
 };
 

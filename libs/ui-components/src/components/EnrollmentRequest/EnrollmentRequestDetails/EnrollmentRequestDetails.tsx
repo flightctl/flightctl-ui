@@ -12,7 +12,7 @@ import {
   GridItem,
   TextArea,
 } from '@patternfly/react-core';
-import { type EnrollmentRequest } from '@flightctl/types';
+import { type EnrollmentRequest, ResourceKind } from '@flightctl/types';
 
 import ConditionsTable from '../../DetailsPage/Tables/ConditionsTable';
 import DetailsPage from '../../DetailsPage/DetailsPage';
@@ -70,7 +70,7 @@ const EnrollmentRequestDetails = () => {
 
   const { deleteAction, deleteModal } = useDeleteAction({
     resourceName: enrollmentRequestId,
-    resourceType: 'Enrollment request',
+    resourceType: ResourceKind.ENROLLMENT_REQUEST,
     onDelete: async () => {
       await remove(`enrollmentrequests/${enrollmentRequestId}`);
       navigate(ROUTE.DEVICES);

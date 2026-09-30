@@ -1,32 +1,72 @@
 import * as React from 'react';
-import { Trans } from 'react-i18next';
+import type { TFunction } from 'react-i18next';
 import { Alert, Button, ModalBody, ModalFooter, ModalHeader, Stack, StackItem } from '@patternfly/react-core';
+
+import { ResourceKind } from '@flightctl/types';
 import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 
 import { getErrorMessage } from '../../../utils/error';
 import { useTranslation } from '../../../hooks/useTranslation';
 
+export type DeleteModalResourceType = ResourceKind | 'catalogItem' | 'application' | 'os';
+
 type DeleteModalProps = {
   onDelete: () => Promise<unknown>;
   onClose: VoidFunction;
-  resourceType: string;
-  resourceName: string;
+  resourceType: DeleteModalResourceType;
+  confirmText: React.ReactNode;
 };
 
-const DeleteModal: React.FC<DeleteModalProps> = ({ onDelete, onClose, resourceType, resourceName }) => {
+export const getConfirmDeleteLabel = (t: TFunction, resourceType: DeleteModalResourceType) => {
+  switch (resourceType) {
+    case 'catalogItem':
+      return t('Delete catalog item?');
+    case 'application':
+      return t('Delete application?');
+    case 'os':
+      return t('Delete system image?');
+    case ResourceKind.DEVICE:
+      return t('Delete device?');
+    case ResourceKind.ENROLLMENT_REQUEST:
+      return t('Delete enrollment request?');
+    case ResourceKind.RESOURCE_SYNC:
+      return t('Delete resource sync?');
+    default:
+      return t('Delete resource?');
+  }
+};
+
+export const getDeleteLabel = (t: TFunction, resourceType: DeleteModalResourceType) => {
+  switch (resourceType) {
+    case 'catalogItem':
+      return t('Delete catalog item');
+    case 'application':
+      return t('Delete application');
+    case 'os':
+      return t('Delete system image');
+    case ResourceKind.DEVICE:
+      return t('Delete device');
+    case ResourceKind.ENROLLMENT_REQUEST:
+      return t('Delete enrollment request');
+    case ResourceKind.RESOURCE_SYNC:
+      return t('Delete resource sync');
+    default:
+      return t('Delete resource');
+  }
+};
+
+const DeleteModal = ({ onDelete, onClose, resourceType, confirmText }: DeleteModalProps) => {
   const { t } = useTranslation();
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [error, setError] = React.useState<string>();
+
+  const titleLabel = getConfirmDeleteLabel(t, resourceType);
   return (
     <FlightCtlModal isOpen onClose={onClose} variant="small">
-      <ModalHeader title={t('Delete {{resourceType}} ?', { resourceType })} titleIconVariant="warning" />
+      <ModalHeader title={titleLabel} titleIconVariant="warning" />
       <ModalBody>
         <Stack hasGutter>
-          <StackItem>
-            <Trans t={t}>
-              Are you sure you want to delete {resourceType} <b>{resourceName}</b>?
-            </Trans>
-          </StackItem>
+          <StackItem>{confirmText}</StackItem>
           {error && (
             <StackItem>
               <Alert isInline variant="danger" title={t('An error occurred')}>
@@ -54,7 +94,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ onDelete, onClose, resourceTy
             }
           }}
         >
-          {t('Delete {{ resourceType }}', { resourceType })}
+          {t('Delete')}
         </Button>
         <Button key="cancel" variant="link" onClick={onClose} isDisabled={isDeleting}>
           {t('Cancel')}

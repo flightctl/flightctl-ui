@@ -72,11 +72,11 @@ const ApplicationInlineForm = ({
 
   return (
     <Grid hasGutter>
-      <FieldArray name={`applications.${index}.files`}>
+      <FieldArray name={`applications[${index}].app.files`}>
         {(arrayHelpers) => (
           <>
             {fileList.map((file, fileIndex) => {
-              const fieldName = `applications[${index}].files[${fileIndex}]`;
+              const fieldName = `applications[${index}].app.files[${fileIndex}]`;
               return (
                 <Split key={fileIndex} hasGutter>
                   <SplitItem isFilled>
@@ -92,6 +92,7 @@ const ApplicationInlineForm = ({
                       <Button
                         aria-label={t('Delete file')}
                         variant="link"
+                        isDanger
                         icon={<MinusCircleIcon />}
                         iconPosition="start"
                         onClick={() => arrayHelpers.remove(fileIndex)}

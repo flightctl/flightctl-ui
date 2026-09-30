@@ -1,13 +1,12 @@
 import * as React from 'react';
 
 import {
-  Alert,
   Button,
-  Content,
+  Flex,
   FormGroup,
   FormSection,
   Grid,
-  GridItem,
+  Label,
   Split,
   SplitItem,
   Stack,
@@ -16,22 +15,24 @@ import {
 import { FieldArray, useField, useFormikContext } from 'formik';
 import { MinusCircleIcon } from '@patternfly/react-icons/dist/js/icons/minus-circle-icon';
 import { PlusCircleIcon } from '@patternfly/react-icons/dist/js/icons/plus-circle-icon';
+import CatalogIcon from '@patternfly/react-icons/dist/js/icons/catalog-icon';
 
 import { AppType } from '@flightctl/types';
 import {
-  type AppForm,
   AppSpecType,
+  type CatalogAppForm,
   type DeviceSpecConfigFormValues,
-  isCatalogAppForm,
+  type ManualAppForm,
+  isCatalogAppEntry,
 } from '../../../../types/deviceSpec';
-import { createInitialAppForm } from '../deviceSpecUtils';
+import { createInitialAppForm, createInitialManualAppEntry } from '../deviceSpecUtils';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import TextField from '../../../form/TextField';
 import FormSelect from '../../../form/FormSelect';
 import RadioField from '../../../form/RadioField';
-import ExpandableFormSection from '../../../form/ExpandableFormSection';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
-import { appTypeOptions } from '../../../../utils/apps';
+import { getAppTypeLabel, manualAppTypeOptions } from '../../../../utils/catalogTypes';
+import DeleteModal from '../../../modals/DeleteModal/DeleteModal';
 import ApplicationImageForm from './ApplicationImageForm';
 import ApplicationInlineForm from './ApplicationInlineForm';
 import ApplicationContainerForm from './ApplicationContainerForm';
@@ -40,32 +41,69 @@ import ApplicationVmForm from './ApplicationVmForm';
 import ApplicationVolumeForm from './ApplicationVolumeForm';
 import ApplicationVariablesForm from './ApplicationVariablesForm';
 import ApplicationIntegritySettings from './ApplicationIntegritySettings';
+import CatalogRefCard from '../../../CatalogRef/CatalogRefCard';
+import ApplicationWorkloadCard from './ApplicationWorkloadCard';
+import CatalogAddAppModal from '../../../CatalogComposition/CatalogAddAppModal';
+import CatalogEditAppModal from '../../../CatalogComposition/CatalogEditAppModal';
+import { createCatalogAppEntry } from '../../../CatalogComposition/catalogCompositionUtils';
+import { useResolvedCatalogRef } from '../../../Catalog/useResolvedCatalogRef';
 
 import './ApplicationsForm.css';
 
-const ApplicationSection = ({
+const CatalogManagedApplicationSection = ({
   index,
-  isReadOnly: isReadOnlyForm,
-  isCatalogApp,
+  isReadOnly,
+  showUpdateStatus,
 }: {
   index: number;
   isReadOnly?: boolean;
-  isCatalogApp: boolean;
+  showUpdateStatus: boolean;
 }) => {
+  const appFieldName = `applications[${index}].app`;
+  const [{ value: app }, { error }, { setValue }] = useField<CatalogAppForm>(appFieldName);
+  const resolved = useResolvedCatalogRef(app.catalogItemRef);
+  const [isAdvancedEditOpen, setIsAdvancedEditOpen] = React.useState(false);
+
+  return (
+    <>
+      <CatalogRefCard
+        catalogItemRef={app.catalogItemRef}
+        headerTitle={app.name}
+        showUpdateStatus={showUpdateStatus}
+        onEdit={isReadOnly || !resolved?.item ? undefined : () => setIsAdvancedEditOpen(true)}
+        formikError={error as unknown as CatalogAppForm}
+      />
+      {resolved?.item && isAdvancedEditOpen && (
+        <CatalogEditAppModal
+          catalogItem={resolved.item}
+          appForm={app}
+          onClose={() => setIsAdvancedEditOpen(false)}
+          onSave={(nextApp) => {
+            void setValue(nextApp);
+            setIsAdvancedEditOpen(false);
+          }}
+        />
+      )}
+    </>
+  );
+};
+
+const ApplicationSection = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
-  const appFieldName = `applications[${index}]`;
-  const [{ value: app }, , { setValue }] = useField<AppForm>(appFieldName);
+  const { setFieldTouched } = useFormikContext<DeviceSpecConfigFormValues>();
+  const appFieldName = `applications[${index}].app`;
+  const [{ value: app }, , { setValue }] = useField<ManualAppForm>(appFieldName);
   const { appType, specType, name: appName } = app;
+  const [, { error }, { setTouched }] = useField(appFieldName);
+  // Initial expanded state: an app that have been just created is expanded, otherwise it's collapsed.
+  const [isExpanded, setIsExpanded] = React.useState(!appName);
 
   const isContainer = app.appType === AppType.AppTypeContainer;
   const isHelm = app.appType === AppType.AppTypeHelm;
   const isQuadlet = app.appType === AppType.AppTypeQuadlet;
   const isCompose = app.appType === AppType.AppTypeCompose;
   const isVm = app.appType === AppType.AppTypeVm;
-  const isReadOnly = isReadOnlyForm || isCatalogApp;
 
-  // Each AppForm type has all data structures it needs initialized with safe defaults (eg. empty arrays, etc).
-  // However, when the user switches to a type that doesn't have those fields, we must reset the app to define the missing fields.
   const isContainerIncomplete = isContainer && !('ports' in app);
   const isHelmIncomplete = isHelm && !('valuesFiles' in app);
   const isQuadletComposeIncomplete = (isQuadlet || isCompose) && !('volumes' in app);
@@ -73,7 +111,7 @@ const ApplicationSection = ({
 
   const shouldResetApp = isContainerIncomplete || isHelmIncomplete || isQuadletComposeIncomplete || isVmIncomplete;
 
-  const appTypesOptions = appTypeOptions(t);
+  const appTypesOptions = manualAppTypeOptions(t);
 
   React.useEffect(() => {
     if (shouldResetApp) {
@@ -82,17 +120,30 @@ const ApplicationSection = ({
     }
   }, [shouldResetApp, appType, appName, setValue]);
 
+  const applicationTitle: string = appName || t('Application {{ appNum }}', { appNum: index + 1 });
+
+  const handleToggle = () => {
+    setTouched(true);
+    Object.keys((error as unknown as object) || {}).forEach((key) => {
+      setFieldTouched(`${appFieldName}.${key}`, true);
+    });
+    setIsExpanded((expanded) => !expanded);
+  };
+
   return (
-    <ExpandableFormSection
-      title={app.name || t('Application {{ appNum }}', { appNum: index + 1 })}
-      fieldName={appFieldName}
+    <ApplicationWorkloadCard
+      title={applicationTitle}
+      isExpanded={isExpanded}
+      onToggle={handleToggle}
+      hasError={!isExpanded && !!error}
+      errorLabel={applicationTitle}
+      headerActions={
+        <Label isCompact variant="filled" color="purple">
+          {getAppTypeLabel(appType, t)}
+        </Label>
+      }
     >
       <Grid span={12} hasGutter>
-        {isCatalogApp && (
-          <GridItem>
-            <Alert isInline variant="info" title={t('Application is managed by Software Catalog')} />
-          </GridItem>
-        )}
         <FormGroup label={t('Application type')} isRequired>
           <FormSelect
             items={appTypesOptions}
@@ -158,11 +209,11 @@ const ApplicationSection = ({
             <FormGroupWithHelperText
               label={t('Application name')}
               content={
-                isCatalogApp || specType === AppSpecType.INLINE
+                specType === AppSpecType.INLINE
                   ? t('The unique identifier for this application.')
                   : t('If not specified, the image name will be used. Application name must be unique.')
               }
-              isRequired={isCatalogApp || specType === AppSpecType.INLINE}
+              isRequired={specType === AppSpecType.INLINE}
             >
               <TextField aria-label={t('Application name')} name={`${appFieldName}.name`} isDisabled={isReadOnly} />
             </FormGroupWithHelperText>
@@ -189,13 +240,16 @@ const ApplicationSection = ({
           </>
         )}
       </Grid>
-    </ExpandableFormSection>
+    </ApplicationWorkloadCard>
   );
 };
 
-const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
+const ApplicationTemplates = ({ isReadOnly, isEdit = false }: { isReadOnly?: boolean; isEdit?: boolean }) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<DeviceSpecConfigFormValues>();
+  const [appIndexToDelete, setAppIndexToDelete] = React.useState<number | undefined>(undefined);
+  const [isCatalogSelectOpen, setIsCatalogSelectOpen] = React.useState(false);
+
   if (isReadOnly && values.applications.length === 0) {
     return null;
   }
@@ -203,61 +257,103 @@ const ApplicationTemplates = ({ isReadOnly }: { isReadOnly?: boolean }) => {
   return (
     <FormGroupWithHelperText
       label={t('Application workloads')}
-      content={t('Define the application workloads that shall run on the device.')}
+      content={t(
+        'Add workloads from the Software Catalog or define them manually. Catalog items pin a channel and version in this template.',
+      )}
     >
-      <>
-        <Content>
-          {t(
-            'Configure containerized applications and services that will run on your fleet devices. You can deploy single containers, Quadlet applications for advanced container orchestration or inline applications with custom files.',
-          )}
-        </Content>
-        <FieldArray name="applications">
-          {(arrayHelpers) => (
-            <>
-              {values.applications.map((app, index) => {
-                const isCatalogApp = isCatalogAppForm(app);
-                return (
-                  <FormSection key={index}>
-                    <Split hasGutter>
-                      <SplitItem isFilled>
-                        <ApplicationSection index={index} isReadOnly={isReadOnly} isCatalogApp={isCatalogApp} />
-                      </SplitItem>
-                      {!isReadOnly && !isCatalogApp && (
-                        <SplitItem>
-                          <Button
-                            aria-label={t('Delete application')}
-                            variant="link"
-                            icon={<MinusCircleIcon />}
-                            iconPosition="start"
-                            onClick={() => arrayHelpers.remove(index)}
-                          />
-                        </SplitItem>
+      <FieldArray name="applications">
+        {(arrayHelpers) => (
+          <>
+            {values.applications.map((entry, index) => {
+              const isCatalogApp = isCatalogAppEntry(entry);
+              return (
+                <FormSection key={index}>
+                  <Split hasGutter>
+                    <SplitItem isFilled>
+                      {isCatalogApp ? (
+                        <CatalogManagedApplicationSection
+                          index={index}
+                          isReadOnly={isReadOnly}
+                          showUpdateStatus={isEdit}
+                        />
+                      ) : (
+                        <ApplicationSection index={index} isReadOnly={isReadOnly} />
                       )}
-                    </Split>
-                  </FormSection>
-                );
-              })}
-
-              {!isReadOnly && (
-                <FormSection>
-                  <FormGroup>
-                    <Button
-                      variant="link"
-                      icon={<PlusCircleIcon />}
-                      iconPosition="start"
-                      onClick={() => {
-                        arrayHelpers.push(createInitialAppForm(AppType.AppTypeContainer));
-                      }}
-                    >
-                      {t('Add application')}
-                    </Button>
-                  </FormGroup>
+                    </SplitItem>
+                    {!isReadOnly && (
+                      <SplitItem>
+                        <Button
+                          aria-label={t('Delete application')}
+                          variant="link"
+                          isDanger
+                          icon={<MinusCircleIcon />}
+                          iconPosition="start"
+                          onClick={() => {
+                            if (isEdit) {
+                              setAppIndexToDelete(index);
+                            } else {
+                              arrayHelpers.remove(index);
+                            }
+                          }}
+                        />
+                      </SplitItem>
+                    )}
+                  </Split>
                 </FormSection>
-              )}
-            </>
-          )}
-        </FieldArray>
-      </>
+              );
+            })}
+
+            {appIndexToDelete !== undefined && (
+              <DeleteModal
+                onClose={() => setAppIndexToDelete(undefined)}
+                onDelete={() => {
+                  arrayHelpers.remove(appIndexToDelete);
+                  setAppIndexToDelete(undefined);
+                  return Promise.resolve();
+                }}
+                resourceType="application"
+                confirmText={t(
+                  'This removes the application from the template. You can add it again from the catalog or manually.',
+                )}
+              />
+            )}
+
+            {!isReadOnly && (
+              <FormSection>
+                <Flex
+                  alignItems={{ default: 'alignItemsCenter' }}
+                  gap={{ default: 'gapSm' }}
+                  flexWrap={{ default: 'wrap' }}
+                >
+                  <Button variant="secondary" icon={<CatalogIcon />} onClick={() => setIsCatalogSelectOpen(true)}>
+                    {t('Add from software catalog')}
+                  </Button>
+                  <Button
+                    variant="link"
+                    icon={<PlusCircleIcon />}
+                    iconPosition="start"
+                    onClick={() => {
+                      arrayHelpers.push(createInitialManualAppEntry(AppType.AppTypeContainer));
+                    }}
+                  >
+                    {t('Add application manually')}
+                  </Button>
+                </Flex>
+              </FormSection>
+            )}
+
+            {isCatalogSelectOpen && (
+              <CatalogAddAppModal
+                onClose={() => setIsCatalogSelectOpen(false)}
+                onConfirm={(selection, appName, advancedConfig) => {
+                  arrayHelpers.push(createCatalogAppEntry(appName, selection, advancedConfig));
+                  setIsCatalogSelectOpen(false);
+                }}
+              />
+            )}
+          </>
+        )}
+      </FieldArray>
     </FormGroupWithHelperText>
   );
 };

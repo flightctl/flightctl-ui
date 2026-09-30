@@ -74,6 +74,7 @@ export type { DeviceConsole } from './models/DeviceConsole';
 export type { DeviceDecommission } from './models/DeviceDecommission';
 export { DeviceDecommissionTargetType } from './models/DeviceDecommissionTargetType';
 export type { DeviceDeltaApplyStatus } from './models/DeviceDeltaApplyStatus';
+export type { DeviceEnrollmentHooksStatus } from './models/DeviceEnrollmentHooksStatus';
 export type { DeviceIntegrityCheckStatus } from './models/DeviceIntegrityCheckStatus';
 export { DeviceIntegrityCheckStatusType } from './models/DeviceIntegrityCheckStatusType';
 export type { DeviceIntegrityStatus } from './models/DeviceIntegrityStatus';
@@ -116,6 +117,8 @@ export type { EnrollmentHookPolicyList } from './models/EnrollmentHookPolicyList
 export type { EnrollmentHookPolicySpec } from './models/EnrollmentHookPolicySpec';
 export type { EnrollmentHookPolicyStatus } from './models/EnrollmentHookPolicyStatus';
 export type { EnrollmentHookRetryPolicy } from './models/EnrollmentHookRetryPolicy';
+export type { EnrollmentHookSnapshot } from './models/EnrollmentHookSnapshot';
+export type { EnrollmentHookSnapshotAction } from './models/EnrollmentHookSnapshotAction';
 export type { EnrollmentHookStageSpec } from './models/EnrollmentHookStageSpec';
 export type { EnrollmentRequest } from './models/EnrollmentRequest';
 export type { EnrollmentRequestApproval } from './models/EnrollmentRequestApproval';

@@ -1,8 +1,6 @@
 import type { Device, Fleet } from '@flightctl/types';
 import type { CatalogItemArtifactType } from '@flightctl/types/alpha';
 
-import type { VolumeCatalogSelection } from '../../../utils/catalog';
-
 export const specificationsStepId = 'specifications';
 export const selectTargetStepId = 'select-target';
 export const appConfigStepId = 'app-config';
@@ -30,7 +28,6 @@ export type DynamicFormConfigFormik = {
   appName: string;
   configureVia: 'editor' | 'form';
   editorContent: string;
-  volumeSelection: VolumeCatalogSelection[];
   formValues: Record<string, unknown> | undefined;
   configSchema: Record<string, unknown> | undefined;
   /** Set by AppConfigStep when form view is used; used by wizard footer validation */

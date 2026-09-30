@@ -104,7 +104,7 @@ const EditDeviceWizard = () => {
         <Formik<EditDeviceFormValues>
           initialValues={{
             deviceAlias,
-            osSpec: device.spec?.os,
+            osSpec: device.spec?.os || { image: '' },
             labels: fromAPILabel(device.metadata.labels || {}).filter((label) => label.key !== 'alias'),
             configTemplates: getConfigTemplatesValues(device.spec, registerMicroShift),
             fleetMatch: '', // Initially this is always a fleetless device
@@ -154,7 +154,7 @@ const EditDeviceWizard = () => {
                     id={deviceTemplateStepId}
                     isDisabled={isWizardStepDisabled(deviceTemplateStepId, orderedIds, validStepIds) || !isFleetless}
                   >
-                    <DeviceTemplateStep isFleet={false} isOsPackageMode={isOsPackageMode} />
+                    <DeviceTemplateStep isFleet={false} isOsPackageMode={isOsPackageMode} isEdit />
                   </WizardStep>
                   <WizardStep
                     name={t('Updates')}
@@ -170,7 +170,7 @@ const EditDeviceWizard = () => {
                     id={reviewDeviceStepId}
                     isDisabled={isWizardStepDisabled(reviewDeviceStepId, orderedIds, validStepIds)}
                   >
-                    <ReviewDeviceStep error={submitError} />
+                    <ReviewDeviceStep error={submitError} showUpdateStatus />
                   </WizardStep>
                 </Wizard>
               </>
