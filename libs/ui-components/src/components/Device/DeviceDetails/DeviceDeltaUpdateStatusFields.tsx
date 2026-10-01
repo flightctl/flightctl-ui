@@ -17,9 +17,8 @@ import { getCondition } from '../../../utils/api';
 const DeviceDeltaUpdateStatusFields = ({ deviceStatus }: { deviceStatus?: DeviceStatus }) => {
   const { t } = useTranslation();
 
-  const lastDelta = deviceStatus?.os?.lastDelta;
-  const downloadSize = lastDelta?.size;
-  const fallbackReason = lastDelta?.fallbackReason;
+  const downloadSize = deviceStatus?.os?.deltaSize;
+  const fallbackReason = deviceStatus?.os?.lastDelta?.fallbackReason;
   const deltaGeneration = deviceStatus?.deltaGeneration;
   const deltaPreparingCondition = getCondition(deviceStatus?.conditions, ConditionType.DeviceDeltaPreparing);
   const showProgress = Boolean(deltaPreparingCondition && deltaGeneration);

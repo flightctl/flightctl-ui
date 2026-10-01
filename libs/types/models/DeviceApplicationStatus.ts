@@ -36,12 +36,12 @@ export type DeviceApplicationStatus = {
   volumes?: Array<ApplicationVolumeStatus>;
   lastDelta?: DeviceDeltaApplyStatus;
   /**
-   * Image references this application uses and their known content digests in local storage. image is the ref from the current rendered spec (tag or digest). digest is omitted when the local digest is unknown. When image is already a digest ref, digest matches the ref's digest.
+   * Image references this application uses and the registry digest associated with each image. image is the ref from the current rendered spec (tag or digest). For a multi-platform index, digest is the platform-specific manifest selected by the runtime when available; if the runtime exposes only an opaque ID, an immutable image reference's digest may be reported. digest is omitted when no registry digest is known.
    */
   imageDigests?: Array<ApplicationImageDigest>;
   /**
-   * Expected total download size for this application update in IEC units (e.g. "245.3 MiB", "1 GiB"). Computed as the sum of all required image pair sizes (parent + nested + volumes), using delta payload size when available or full image payload size otherwise. Absent when no image download is required or any required image size is unknown.
+   * Expected total size of control-plane generated delta images for this application update in IEC units (e.g. "245.3 MiB", "1 GiB"). Computed as the sum of generated delta image sizes across the application. Absent when no delta image was generated or any generated delta image size is unknown. Full image sizes are not included.
    */
-  size?: string;
+  deltaSize?: string;
 };
 

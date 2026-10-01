@@ -16,6 +16,7 @@ export enum ConditionType {
   ResourceSyncAccessible = 'Accessible',
   ResourceSyncResourceParsed = 'ResourceParsed',
   ResourceSyncSynced = 'Synced',
+  LabelSyncMappingReady = 'Ready',
   FleetValid = 'Valid',
   FleetRolloutInProgress = 'RolloutInProgress',
   DeviceUpdating = 'Updating',
