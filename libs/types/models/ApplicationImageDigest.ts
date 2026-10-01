@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * An image reference and, when known, its content digest in local storage.
+ * An image reference and its known registry image digest.
  */
 export type ApplicationImageDigest = {
   /**
@@ -11,7 +11,7 @@ export type ApplicationImageDigest = {
    */
   image: string;
   /**
-   * Content digest of the image in local storage (e.g. sha256:abc...). Omitted when the local digest is unknown.
+   * Registry digest associated with this image. If the runtime identifies a platform-specific image, this may differ from the digest in the image reference. Omitted when unavailable.
    */
   digest?: string;
 };

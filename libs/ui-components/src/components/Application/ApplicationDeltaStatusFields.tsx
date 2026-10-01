@@ -8,8 +8,8 @@ import LabelWithHelperText from '../common/WithHelperText';
 const ApplicationDeltaStatusFields = ({ appStatus }: { appStatus: DeviceApplicationStatus }) => {
   const { t } = useTranslation();
 
-  // Applications use the "status.applications.size" field
-  const deltaSize = appStatus.size;
+  // Applications use the "status.applications.deltaSize" field
+  const deltaSize = appStatus.deltaSize;
   const fallbackReason = appStatus.lastDelta?.fallbackReason;
   if (!deltaSize && !fallbackReason) {
     return null;

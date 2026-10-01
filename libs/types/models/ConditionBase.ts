@@ -17,11 +17,11 @@ export type ConditionBase = {
    */
   lastTransitionTime: string;
   /**
-   * Human readable message indicating details about last transition.
+   * A human-readable message describing the condition, including details or progress. Consumers should not parse this field.
    */
   message: string;
   /**
-   * A (brief) reason for the condition's last transition.
+   * A brief, machine-readable reason for the condition's last transition. Use a stable CamelCase identifier and put human-readable details in message.
    */
   reason: string;
 };

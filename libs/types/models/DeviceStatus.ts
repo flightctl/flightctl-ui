@@ -16,6 +16,7 @@ import type { DeviceOsStatus } from './DeviceOsStatus';
 import type { DeviceResourceStatus } from './DeviceResourceStatus';
 import type { DeviceSummaryStatus } from './DeviceSummaryStatus';
 import type { DeviceSystemInfo } from './DeviceSystemInfo';
+import type { DeviceSystemInfoStatus } from './DeviceSystemInfoStatus';
 import type { DeviceUpdatedStatus } from './DeviceUpdatedStatus';
 import type { SystemdUnitStatus } from './SystemdUnitStatus';
 /**
@@ -51,5 +52,6 @@ export type DeviceStatus = {
   capabilities?: DeviceCapabilities;
   deltaGeneration?: DeltaGenerationStatus;
   enrollmentHooks?: DeviceEnrollmentHooksStatus;
+  systemInfoStatus?: DeviceSystemInfoStatus;
 };
 

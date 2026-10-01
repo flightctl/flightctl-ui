@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * A delta hint for a nested image within an application.
+ * A control-plane-generated delta hint for a nested image within an application. Present only in rendered application specs delivered to the agent.
  */
 export type ImageDeltaHint = {
   /**
