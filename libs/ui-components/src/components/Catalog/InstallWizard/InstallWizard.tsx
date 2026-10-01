@@ -25,6 +25,7 @@ import { getErrorMessage } from '../../../utils/error';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import { CatalogItemLabel } from '../CatalogItemDetails';
 
 const InstallWizard = () => {
   const { t } = useTranslation();
@@ -49,6 +50,8 @@ const InstallWizard = () => {
     content = <InstallAppWizard catalogItem={catalogItem} />;
   }
 
+  const titleEl = <CatalogItemLabel item={catalogItem} fallbackId={params.itemId} shortened />;
+
   return (
     <>
       <PageSection hasBodyWrapper={false} type="breadcrumb">
@@ -56,14 +59,14 @@ const InstallWizard = () => {
           <BreadcrumbItem>
             <Link to={ROUTE.CATALOG}>{t('Software Catalog')}</Link>
           </BreadcrumbItem>
-          <BreadcrumbItem isActive>{catalogItem?.spec.displayName || params.itemId}</BreadcrumbItem>
+          <BreadcrumbItem isActive>{titleEl}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
       <PageSection hasBodyWrapper={false}>
         <Stack>
           <StackItem>
             <Title headingLevel="h1" size="3xl">
-              {t('Deploy {{name}}', { name: catalogItem?.spec.displayName || params.itemId })}
+              {t('Deploy')} {titleEl}
             </Title>
           </StackItem>
           <StackItem>

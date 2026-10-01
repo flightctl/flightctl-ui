@@ -23,16 +23,7 @@ const SoftwareItemTitle = ({
     return <BrokenCatalogItemTitle catalogRef={catalogItemId.ref} headerTitle={appName} />;
   }
 
-  const itemName = (data.item.spec.displayName || data.item.metadata.name) as string;
-  return (
-    <CatalogItemTitle
-      headerTitle={appName || itemName}
-      description={appName ? itemName : undefined}
-      item={data.item}
-      channel={data.channel}
-      version={data.version?.version}
-    />
-  );
+  return <CatalogItemTitle item={data.item} title={appName} channel={data.channel} version={data.version?.version} />;
 };
 
 const SoftwareItemUpdateBadge = ({

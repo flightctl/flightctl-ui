@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Alert, AlertActionLink } from '@patternfly/react-core';
-import type { TFunction } from 'react-i18next';
+import type { TFunction } from 'i18next';
 
 import type { AppConsoleConnectError } from '../../hooks/useAppConsoleWebSocket';
 import { useTranslation } from '../../hooks/useTranslation';
