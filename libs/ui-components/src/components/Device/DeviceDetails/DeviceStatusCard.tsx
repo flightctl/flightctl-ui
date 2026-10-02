@@ -5,18 +5,16 @@ import TachometerAltIcon from '@patternfly/react-icons/dist/js/icons/tachometer-
 import type { Device } from '@flightctl/types';
 import type { DeviceHealthItem } from '../../../hooks/useDeviceOverallHealth';
 import { useTranslation } from '../../../hooks/useTranslation';
-import DetailsPageCard, { DetailsPageCardTitle } from '../../DetailsPage/DetailsPageCard';
+import DetailsPageCard, { DetailsPageCardTitle, deviceCardIds } from '../../DetailsPage/DetailsPageCard';
 import StatusContent from './DeviceDetailsTabContent/StatusContent';
 import SystemResourcesContent from './DeviceDetailsTabContent/SystemResourcesContent';
 import DeviceDeltaUpdateStatusFields from './DeviceDeltaUpdateStatusFields';
-
-const DEVICE_STATUS_CARD_ID = 'device-status-card';
 
 const DeviceStatusCard = ({ device, health }: { device: Required<Device>; health: DeviceHealthItem }) => {
   const { t } = useTranslation();
 
   return (
-    <DetailsPageCard id={DEVICE_STATUS_CARD_ID}>
+    <DetailsPageCard id={deviceCardIds.status}>
       <DetailsPageCardTitle
         title={t('Status')}
         icon={<TachometerAltIcon />}

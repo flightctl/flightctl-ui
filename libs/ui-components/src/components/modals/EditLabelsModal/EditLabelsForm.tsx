@@ -4,11 +4,12 @@ import { Alert } from '@patternfly/react-core';
 import { type TFunction } from 'i18next';
 import * as Yup from 'yup';
 
-import { type Device } from '@flightctl/types';
+import type { Device } from '@flightctl/types';
 import LabelsField from '../../form/LabelsField';
 import { type FlightCtlLabel } from '../../../types/extraTypes';
 import { useFetch } from '../../../hooks/useFetch';
 import { useTranslation } from '../../../hooks/useTranslation';
+import type { ManagedLabel } from '../../../hooks/useDeviceLabelProvenance';
 import { fromAPILabel } from '../../../utils/labels';
 import { validLabelsSchema } from '../../form/validations';
 import { getErrorMessage } from '../../../utils/error';
@@ -18,6 +19,8 @@ import LabelsView from '../../common/LabelsView';
 type EditLabelsFormValues = {
   labels: FlightCtlLabel[];
 };
+
+type ApiLabels = Record<string, string>;
 
 type EditLabelsFormContentProps = {
   isSubmitting: FormikProps<EditLabelsFormValues>['isSubmitting'];
@@ -30,6 +33,18 @@ const getValidationSchema = (t: TFunction) => {
   return Yup.object<EditLabelsFormValues>({
     labels: validLabelsSchema(t, forbiddenDeviceLabels),
   });
+};
+
+const omitManagedLabels = (labels: ApiLabels, managedLabels: ManagedLabel[]): ApiLabels => {
+  const managedLabelKeys = managedLabels.map((label) => label.key);
+
+  const result = {};
+  for (const [key, value] of Object.entries(labels)) {
+    if (key !== 'alias' && !managedLabelKeys.includes(key)) {
+      result[key] = value;
+    }
+  }
+  return result;
 };
 
 const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormContentProps) => {
@@ -54,28 +69,35 @@ const EditLabelsFormContent = ({ isSubmitting, submitForm }: EditLabelsFormConte
 type EditLabelsFormProps = {
   device: Device;
   onDeviceUpdate: () => void;
+  managedLabels: ManagedLabel[];
 };
 
-export const ViewLabels = ({ device }: { device: Device }) => {
-  const currentLabels = device.metadata.labels || {};
-  return <LabelsView prefix="read-only-labels" labels={currentLabels} />;
+export const ViewLabels = ({ device, managedLabels }: { device: Device; managedLabels: ManagedLabel[] }) => {
+  const viewableLabels = omitManagedLabels(device.metadata.labels || {}, managedLabels);
+  return <LabelsView prefix="read-only-labels" labels={viewableLabels} />;
 };
 
-const EditLabelsForm = ({ device, onDeviceUpdate }: EditLabelsFormProps) => {
+const EditLabelsForm = ({ device, onDeviceUpdate, managedLabels }: EditLabelsFormProps) => {
   const { t } = useTranslation();
   const { patch } = useFetch();
 
-  const currentLabelsMap = device.metadata.labels || {};
-  const currentLabelsList = fromAPILabel(currentLabelsMap || {});
+  const currentLabels = device.metadata.labels || {};
+  const editableLabels = fromAPILabel(omitManagedLabels(currentLabels, managedLabels));
 
   return (
     <Formik<EditLabelsFormValues>
       initialValues={{
-        labels: currentLabelsList.filter((label) => label.key !== 'alias'),
+        labels: editableLabels,
       }}
       onSubmit={async (values: EditLabelsFormValues) => {
         try {
-          const labelsPatch = getDeviceLabelPatches(currentLabelsMap, values.labels);
+          // Add back all the managed labels, even though the server should ignore them and not remove them if they are not present in the request.
+          const allLabels: FlightCtlLabel[] = [];
+          managedLabels.forEach((label) => {
+            allLabels.push({ key: label.key, value: label.value });
+          });
+          allLabels.push(...values.labels);
+          const labelsPatch = getDeviceLabelPatches(currentLabels, allLabels);
           if (labelsPatch.length > 0) {
             await patch(`devices/${device.metadata.name}`, labelsPatch);
             onDeviceUpdate();

@@ -1,12 +1,92 @@
 import * as React from 'react';
-import { Label, LabelGroup } from '@patternfly/react-core';
+import { Flex, FlexItem, Icon, Label, LabelGroup, Tooltip } from '@patternfly/react-core';
+import { ExclamationTriangleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-triangle-icon';
 
+import type { ManagedLabel } from '../../hooks/useDeviceLabelProvenance';
 import { useTranslation } from '../../hooks/useTranslation';
 
 interface LabelsViewProps {
   prefix: string;
   labels: Record<string, string | undefined> | undefined;
 }
+
+const ManagedLabelChip = ({ label, withMaxWidth }: { label: ManagedLabel; withMaxWidth?: boolean }) => {
+  const { t } = useTranslation();
+  const text = label.value ? `${label.key}=${label.value}` : label.key;
+  const hasMismatch = label.kind === 'primary-mismatch';
+
+  const maxWidth = withMaxWidth ? (hasMismatch ? '14ch' : '20ch') : undefined;
+
+  const labelContent = (
+    <Flex flexWrap={{ default: 'wrap' }} gap={{ default: 'gapNone' }}>
+      {hasMismatch && (
+        <FlexItem>
+          <Tooltip
+            content={t(
+              'This managed label matches a property reported by the device, but its value differs. The label could be out of sync if its value derives from that property.',
+            )}
+          >
+            <Icon status="warning">
+              <ExclamationTriangleIcon />
+            </Icon>
+          </Tooltip>
+        </FlexItem>
+      )}
+      <FlexItem>
+        <span tabIndex={0} role="img" aria-label={t('Managed label value mismatch')}>
+          <Label color="grey" textMaxWidth={maxWidth}>
+            {text}
+          </Label>
+        </span>
+      </FlexItem>
+    </Flex>
+  );
+
+  return withMaxWidth ? (
+    labelContent
+  ) : (
+    <Tooltip
+      content={t(
+        'Promoted from device status by organization mappings. Used for device selection and mapping; cannot be edited on the device.',
+      )}
+    >
+      <span tabIndex={0}>{labelContent}</span>
+    </Tooltip>
+  );
+};
+
+export const ManagedLabelsView = ({
+  managedLabels,
+  showOnly,
+  onlyDerived,
+}: {
+  managedLabels: ManagedLabel[];
+  showOnly?: number;
+  onlyDerived?: boolean;
+}) => {
+  let visibleLabels: ManagedLabel[] = [];
+  if (onlyDerived || showOnly) {
+    visibleLabels = managedLabels.filter((label, index) => {
+      if (onlyDerived && label.kind === 'primary') {
+        return false;
+      }
+      if (showOnly && index >= showOnly) {
+        return false;
+      }
+      return true;
+    });
+  } else {
+    visibleLabels = managedLabels;
+  }
+
+  return (
+    <LabelGroup numLabels={visibleLabels.length}>
+      {visibleLabels.map((label) => (
+        <ManagedLabelChip key={label.key} label={label} withMaxWidth={onlyDerived} />
+      ))}
+    </LabelGroup>
+  );
+};
 
 const LabelsView = ({ prefix, labels }: LabelsViewProps) => {
   const { t } = useTranslation();

@@ -27,12 +27,13 @@ import { useFetch } from '../../../hooks/useFetch';
 import ApproveDeviceModal from '../../modals/ApproveDeviceModal/ApproveDeviceModal';
 import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 import DeviceCustomDataCard from '../../Device/DeviceDetails/DeviceCustomDataCard';
+import SystemInfoDescriptionGroup from '../../Device/DeviceDetails/SystemInfoDescriptionGroup';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import EnrollmentRequestStatus from '../../Status/EnrollmentRequestStatus';
 import LabelWithHelperText from '../../common/WithHelperText';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
-import { useDeviceSpecSystemInfo } from '../../../hooks/useDeviceSpecSystemInfo';
+import { useDeviceSystemInfo } from '../../../hooks/useDeviceSystemInfo';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../types/rbac';
@@ -61,9 +62,12 @@ const EnrollmentRequestDetails = () => {
   const [canApprove, canDelete] = checkPermissions(enrollmentRequestDetailsPermissions);
 
   const [isApprovalModalOpen, setIsApprovalModalOpen] = React.useState(false);
-  const systemInfo = er?.spec.deviceStatus?.systemInfo;
-  const erSystemInfo = useDeviceSpecSystemInfo(systemInfo, t);
-  const customInfo = Object.entries<string>(systemInfo?.customInfo || {});
+  const deviceStatus = er?.spec.deviceStatus;
+  const { systemInfo: systemInfoResult, customInfo: customInfoResult } = useDeviceSystemInfo(
+    t,
+    deviceStatus?.systemInfo,
+    deviceStatus?.systemInfoStatus?.statuses,
+  );
 
   const hasDefaultLabels = Object.keys(er?.spec.labels || {}).length > 0;
   const deviceId = er?.metadata.name as string;
@@ -134,19 +138,16 @@ const EnrollmentRequestDetails = () => {
                     <EnrollmentRequestStatus er={er} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
-                {erSystemInfo.map((systemInfo) => (
-                  <DescriptionListGroup key={systemInfo.title}>
-                    <DescriptionListTerm>{systemInfo.title}</DescriptionListTerm>
-                    <DescriptionListDescription>{systemInfo.value}</DescriptionListDescription>
-                  </DescriptionListGroup>
+                {systemInfoResult.mainEntries.map((entry) => (
+                  <SystemInfoDescriptionGroup key={entry.key} entry={entry} />
                 ))}
               </DescriptionList>
             </CardBody>
           </DetailsPageCard>
         </GridItem>
-        {customInfo.length > 0 && (
+        {customInfoResult.entries.length > 0 && (
           <GridItem md={6}>
-            <DeviceCustomDataCard customInfo={customInfo} />
+            <DeviceCustomDataCard customInfoResult={customInfoResult} />
           </GridItem>
         )}
         <GridItem md={6}>

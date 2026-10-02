@@ -186,6 +186,8 @@ export { LabelSyncMapping } from './models/LabelSyncMapping';
 export type { LabelSyncMappingList } from './models/LabelSyncMappingList';
 export { LabelSyncMappingSpec } from './models/LabelSyncMappingSpec';
 export type { LabelSyncMappingStatus } from './models/LabelSyncMappingStatus';
+export type { LabelSyncProvenanceItem } from './models/LabelSyncProvenanceItem';
+export type { LabelSyncProvenanceList } from './models/LabelSyncProvenanceList';
 export type { ListMeta } from './models/ListMeta';
 export { MatchExpression } from './models/MatchExpression';
 export type { MatchExpressions } from './models/MatchExpressions';
