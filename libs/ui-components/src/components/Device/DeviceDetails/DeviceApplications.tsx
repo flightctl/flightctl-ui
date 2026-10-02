@@ -9,7 +9,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { getLifecycleDisabledReason } from '../../../utils/devices';
 import { getDeviceAppLifecycleOverrides } from '../../../utils/applicationLifecycle';
 import ApplicationsTable from '../../DetailsPage/Tables/ApplicationsTable';
-import DetailsPageCard, { DetailsPageCardTitle } from '../../DetailsPage/DetailsPageCard';
+import DetailsPageCard, { DetailsPageCardTitle, deviceCardIds } from '../../DetailsPage/DetailsPageCard';
 
 type DeviceDetailsTabProps = {
   device: Required<Device>;
@@ -35,7 +35,7 @@ const DeviceApplications = ({ device, health, refetch = () => undefined }: Devic
   );
 
   return (
-    <DetailsPageCard id="device-applications-card" isCompact>
+    <DetailsPageCard id={deviceCardIds.applications} isCompact>
       <DetailsPageCardTitle
         title={t('Applications')}
         icon={<CubesIcon />}

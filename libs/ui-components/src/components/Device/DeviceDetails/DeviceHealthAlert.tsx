@@ -2,10 +2,8 @@ import * as React from 'react';
 import { Alert, Button, List, ListItem } from '@patternfly/react-core';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import type { DeviceHealthItem, DeviceOverallHealth } from '../../../hooks/useDeviceOverallHealth';
-
-const DEVICE_STATUS_CARD_ID = 'device-status-card';
-const DEVICE_APPLICATIONS_CARD_ID = 'device-applications-card';
+import type { DeviceOverallHealth } from '../../../hooks/useDeviceOverallHealth';
+import { deviceCardIds } from '../../DetailsPage/DetailsPageCard';
 
 const scrollToSection = (targetId: string) => {
   requestAnimationFrame(() => {
@@ -13,25 +11,21 @@ const scrollToSection = (targetId: string) => {
   });
 };
 
-const DeviceHealthAlertLink = ({ healthItem }: { healthItem: DeviceHealthItem }) => {
-  const { t } = useTranslation();
-  const { type, itemCount } = healthItem;
-  if (itemCount === 0) {
-    return null;
-  }
-  const targetId = type === 'apps' ? DEVICE_APPLICATIONS_CARD_ID : DEVICE_STATUS_CARD_ID;
-  return (
-    <Button variant="link" isInline onClick={() => scrollToSection(targetId)}>
-      {type === 'apps'
-        ? t('{{count}} application issues', { count: itemCount })
-        : t('{{count}} status issues', { count: itemCount })}
-    </Button>
-  );
+type DeviceHealthAlertProps = {
+  deviceHealth: DeviceOverallHealth;
+  systemInfoHasErrors?: boolean;
+  customInfoHasErrors?: boolean;
 };
 
-const DeviceHealthAlert = ({ deviceHealth }: { deviceHealth: DeviceOverallHealth }) => {
+const DeviceHealthAlert = ({
+  deviceHealth,
+  systemInfoHasErrors = false,
+  customInfoHasErrors = false,
+}: DeviceHealthAlertProps) => {
   const { t } = useTranslation();
   const alertRef = React.useRef<HTMLDivElement>(null);
+
+  const hasOverallHealthIssues = deviceHealth.level !== null || systemInfoHasErrors || customInfoHasErrors;
 
   // PatternFly Alert manages expand state internally (defaults collapsed); expand on mount so jump links are visible.
   React.useLayoutEffect(() => {
@@ -39,25 +33,45 @@ const DeviceHealthAlert = ({ deviceHealth }: { deviceHealth: DeviceOverallHealth
     if (toggle?.getAttribute('aria-expanded') !== 'true') {
       toggle?.click();
     }
-  }, []);
+  }, [hasOverallHealthIssues]);
 
-  if (deviceHealth.level === null) {
+  if (!hasOverallHealthIssues) {
     return null;
   }
 
   const { statusHealth, appsHealth } = deviceHealth;
+  const variant = deviceHealth.level === 'danger' ? 'danger' : 'warning';
+
   return (
     <div ref={alertRef}>
-      <Alert variant={deviceHealth.level} isInline isExpandable title={t('Issues detected')}>
+      <Alert variant={variant} isInline isExpandable title={t('Issues detected')}>
         <List isPlain>
           {statusHealth.itemCount > 0 && (
             <ListItem>
-              <DeviceHealthAlertLink healthItem={statusHealth} />
+              <Button variant="link" isInline onClick={() => scrollToSection(deviceCardIds.status)}>
+                {t('{{count}} status issues', { count: statusHealth.itemCount })}
+              </Button>
             </ListItem>
           )}
           {appsHealth.itemCount > 0 && (
             <ListItem>
-              <DeviceHealthAlertLink healthItem={appsHealth} />
+              <Button variant="link" isInline onClick={() => scrollToSection(deviceCardIds.applications)}>
+                {t('{{count}} application issues', { count: appsHealth.itemCount })}
+              </Button>
+            </ListItem>
+          )}
+          {systemInfoHasErrors && (
+            <ListItem>
+              <Button variant="link" isInline onClick={() => scrollToSection(deviceCardIds.systemInfo)}>
+                {t('System information reporting is stale')}
+              </Button>
+            </ListItem>
+          )}
+          {customInfoHasErrors && (
+            <ListItem>
+              <Button variant="link" isInline onClick={() => scrollToSection(deviceCardIds.customInfo)}>
+                {t('Custom data reporting is stale')}
+              </Button>
             </ListItem>
           )}
         </List>

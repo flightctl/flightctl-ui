@@ -1,6 +1,13 @@
 import * as React from 'react';
 import { Card, type CardProps, CardTitle, Flex, FlexItem, Icon } from '@patternfly/react-core';
 
+export const deviceCardIds = {
+  applications: 'device-applications-card',
+  customInfo: 'device-customInfo-card',
+  systemInfo: 'device-systemInfo-card',
+  status: 'device-status-card',
+};
+
 export const DetailsPageCardTitle = ({
   icon,
   title,
