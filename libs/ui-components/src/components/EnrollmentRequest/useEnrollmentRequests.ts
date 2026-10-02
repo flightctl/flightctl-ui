@@ -50,9 +50,18 @@ export const usePendingEnrollments = (
 ] => {
   const { currentPage, setCurrentPage, itemCount, nextContinue, onPageFetched } =
     useTablePagination<EnrollmentRequestList>();
+
+  const previousSearch = React.useRef(search);
+  React.useLayoutEffect(() => {
+    if (previousSearch.current !== search) {
+      previousSearch.current = search;
+      setCurrentPage(1);
+    }
+  }, [search, setCurrentPage]);
+
   const [pendingErEndpoint, isDebouncing] = useEnrollmentRequestsEndpoint({ search, nextContinue });
 
-  const [erList, isLoading, error, refetch] = useFetchPeriodically<EnrollmentRequestList>(
+  const [erList, isLoading, error, refetch, updating] = useFetchPeriodically<EnrollmentRequestList>(
     {
       endpoint: pendingErEndpoint,
     },
@@ -68,5 +77,5 @@ export const usePendingEnrollments = (
     [currentPage, setCurrentPage, itemCount],
   );
 
-  return [erList?.items || [], isLoading || isDebouncing, error, refetch, pagination];
+  return [erList?.items || [], isLoading || isDebouncing || updating, error, refetch, pagination];
 };

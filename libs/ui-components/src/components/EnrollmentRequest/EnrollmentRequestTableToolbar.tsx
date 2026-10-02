@@ -24,7 +24,12 @@ const EnrollmentRequestTableToolbar = ({
       <ToolbarContent>
         <ToolbarGroup>
           <ToolbarItem>
-            <TableTextSearch value={search} setValue={setSearch} placeholder={t('Search by name')} />
+            <TableTextSearch
+              value={search}
+              setValue={setSearch}
+              placeholder={t('Search by name')}
+              inputProps={{ 'data-testid': 'pending-enrollment-request-search-input' }}
+            />
           </ToolbarItem>
         </ToolbarGroup>
         {children}
