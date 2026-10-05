@@ -2,16 +2,18 @@ import * as React from 'react';
 import { Grid, GridItem, Stack, StackItem } from '@patternfly/react-core';
 
 import { type Device } from '@flightctl/types';
+import { useDeviceSystemInfo } from '../../../hooks/useDeviceSystemInfo';
 import { useDeviceOverallHealth } from '../../../hooks/useDeviceOverallHealth';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { useVulnerabilitiesEnabled } from '../../../hooks/useServicesEnabled';
-import DeviceInformationCard from './DeviceInformationCard';
-import DeviceSpecificationsCard from './DeviceSpecificationsCard';
-import DeviceCustomDataCard from './DeviceCustomDataCard';
-import DeviceStatusCard from './DeviceStatusCard';
 import DeviceApplications from './DeviceApplications';
-import DeviceVulnerabilities from './DeviceVulnerabilities';
-import DeviceSystemdUnits from './DeviceSystemdUnits';
 import DeviceHealthAlert from './DeviceHealthAlert';
+import DeviceIdentityCard from './DeviceIdentityCard';
+import DeviceInformationCard from './DeviceInformationCard';
+import DeviceStatusCard from './DeviceStatusCard';
+import DeviceSystemdUnits from './DeviceSystemdUnits';
+import DeviceVulnerabilities from './DeviceVulnerabilities';
+import DeviceCustomDataCard from './DeviceCustomDataCard';
 
 import './DeviceDetailsTab.css';
 
@@ -27,15 +29,26 @@ const DeviceOverviewLayout = ({
   canEdit,
   children,
 }: React.PropsWithChildren<DeviceOverviewLayoutProps>) => {
+  const { t } = useTranslation();
   const deviceHealth = useDeviceOverallHealth(device);
   const [vulnerabilitiesEnabled, canListVulnerabilities] = useVulnerabilitiesEnabled();
   const showVulnerabilities = vulnerabilitiesEnabled && canListVulnerabilities;
 
-  const customInfo = Object.entries<string>(device.status?.systemInfo?.customInfo || {});
+  const fullSystemInfoResult = useDeviceSystemInfo(
+    t,
+    device.status?.systemInfo,
+    device.status?.systemInfoStatus?.statuses,
+    true,
+  );
+  const { systemInfo, customInfo } = fullSystemInfoResult;
 
   return (
     <Stack hasGutter>
-      <DeviceHealthAlert deviceHealth={deviceHealth} />
+      <DeviceHealthAlert
+        deviceHealth={deviceHealth}
+        systemInfoHasErrors={systemInfo.hasMainErrors || systemInfo.hasExpandErrors}
+        customInfoHasErrors={customInfo.hasErrors}
+      />
       <Grid hasGutter>
         <GridItem lg={8}>
           <Stack hasGutter>
@@ -58,16 +71,16 @@ const DeviceOverviewLayout = ({
         <GridItem lg={4}>
           <Stack hasGutter>
             <StackItem>
-              <DeviceInformationCard device={device} refetch={refetch} canEdit={canEdit}>
+              <DeviceIdentityCard device={device} refetch={refetch} canEdit={canEdit}>
                 {children}
-              </DeviceInformationCard>
+              </DeviceIdentityCard>
             </StackItem>
             <StackItem>
-              <DeviceSpecificationsCard device={device} />
+              <DeviceInformationCard device={device} systemInfoResult={systemInfo} />
             </StackItem>
-            {customInfo.length > 0 && (
+            {customInfo.entries.length > 0 && (
               <StackItem>
-                <DeviceCustomDataCard customInfo={customInfo} />
+                <DeviceCustomDataCard customInfoResult={customInfo} />
               </StackItem>
             )}
           </Stack>

@@ -33,6 +33,7 @@
     "build": "tsc --build",
     "gen-types": "node ./scripts/openapi-typescript.js && npm run build",
     "fix-condition-type": "node ./scripts/fix-condition-type.js",
+    "fix-device-system-info": "node ./scripts/fix-device-system-info.js",
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}'"
   },
   "devDependencies": {

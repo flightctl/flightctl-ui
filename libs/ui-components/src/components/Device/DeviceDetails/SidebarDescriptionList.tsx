@@ -8,17 +8,18 @@ import {
 } from '@patternfly/react-core';
 import { type DeviceStatus } from '@flightctl/types';
 
-import type { SystemInfoEntry } from '../../../hooks/useDeviceSpecSystemInfo';
+import type { SystemInfoEntry } from '../../../hooks/useDeviceSystemInfo';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { getDeviceCapability } from '../../../utils/capabilities';
 import { OsModeLabel } from '../../common/OsModeContent';
 import LabelWithHelperText from '../../common/WithHelperText';
+import SystemInfoDescriptionGroup from './SystemInfoDescriptionGroup';
 
-const getEligibilityStatus = (t: TFunction, isDeltaEligible?: string) => {
+const getEligibilityStatus = (t: TFunction, isDeltaEligible?: boolean) => {
   if (isDeltaEligible === undefined) {
     return t('Unknown');
   }
-  return Boolean(isDeltaEligible) ? t('Eligible') : t('Not eligible');
+  return isDeltaEligible ? t('Eligible') : t('Not eligible');
 };
 
 const DeltaGenerationDescriptionGroups = ({ deviceStatus }: { deviceStatus: DeviceStatus | undefined }) => {
@@ -57,6 +58,14 @@ const DeltaGenerationDescriptionGroups = ({ deviceStatus }: { deviceStatus: Devi
   );
 };
 
+export const SystemInfoFieldsList = ({ entries }: { entries: SystemInfoEntry[] }) => (
+  <SidebarDescriptionList isWide>
+    {entries.map((entry) => (
+      <SystemInfoDescriptionGroup key={entry.key} entry={entry} />
+    ))}
+  </SidebarDescriptionList>
+);
+
 export const CapabilitiesFieldsList = ({ deviceStatus }: { deviceStatus: DeviceStatus | undefined }) => {
   const { t } = useTranslation();
 
@@ -75,23 +84,16 @@ export const CapabilitiesFieldsList = ({ deviceStatus }: { deviceStatus: DeviceS
   );
 };
 
-const SidebarDescriptionList = ({ children }: React.PropsWithChildren) => (
-  <DescriptionList isHorizontal isCompact horizontalTermWidthModifier={{ default: '12ch' }}>
+const defaultHorizontalTermWidthModifier = { default: '30ch', md: '20ch' };
+const compactHorizontalTermWidthModifier = { default: '12ch' };
+
+const SidebarDescriptionList = ({ children, isWide = false }: React.PropsWithChildren<{ isWide?: boolean }>) => (
+  <DescriptionList
+    isHorizontal
+    isCompact
+    horizontalTermWidthModifier={isWide ? defaultHorizontalTermWidthModifier : compactHorizontalTermWidthModifier}
+  >
     {children}
   </DescriptionList>
 );
-
-export const SystemInfoFieldsList = ({ fields }: { fields: SystemInfoEntry[] }) => {
-  return (
-    <SidebarDescriptionList>
-      {fields.map((field, index) => (
-        <DescriptionListGroup key={index}>
-          <DescriptionListTerm>{field.title}</DescriptionListTerm>
-          <DescriptionListDescription>{field.value}</DescriptionListDescription>
-        </DescriptionListGroup>
-      ))}
-    </SidebarDescriptionList>
-  );
-};
-
 export default SidebarDescriptionList;
