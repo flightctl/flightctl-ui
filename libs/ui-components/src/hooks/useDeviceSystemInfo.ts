@@ -62,6 +62,7 @@ const systemInfoKnownKeys = [
   'tpmVendorInfo',
   'architecture',
   'distroName',
+  'distroVersion',
   'bootID',
   'kernel',
   'netInterfaceDefault',
@@ -79,9 +80,10 @@ const toReporting = (sourceStatus: SystemInfoSourceStatus | undefined, t: TFunct
   if (!sourceStatus) {
     return null;
   }
+  const timeSince = timeSinceText(t, sourceStatus.lastTransitionTime);
   return {
     status: sourceStatus.status,
-    timeSince: timeSinceText(t, sourceStatus.lastTransitionTime),
+    timeSince: timeSince === 'N/A' ? undefined : timeSince,
     error: sourceStatus.message,
   };
 };
