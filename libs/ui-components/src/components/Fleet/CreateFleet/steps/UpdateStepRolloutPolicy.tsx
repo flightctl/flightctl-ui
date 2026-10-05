@@ -17,12 +17,12 @@ import { MinusCircleIcon, PlusCircleIcon } from '@patternfly/react-icons/dist/js
 import { type BatchForm, BatchLimitType, type FleetFormValues } from '../../../../types/deviceSpec';
 import ErrorHelperText from '../../../form/FieldHelperText';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
-import LabelsField from '../../../form/LabelsField';
 import FormSelect from '../../../form/FormSelect';
 import NumberField from '../../../form/NumberField';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { getEmptyInitializedBatch } from '../fleetSpecUtils';
+import RolloutPolicyBatchSelectorField from './RolloutPolicyBatchSelectorField';
 
 const RolloutPolicyBatch = ({ index, isReadOnly }: { index: number; isReadOnly: boolean }) => {
   const { t } = useTranslation();
@@ -50,13 +50,13 @@ const RolloutPolicyBatch = ({ index, isReadOnly }: { index: number; isReadOnly: 
             <ErrorHelperText meta={meta} touchRequired={false} />
           </GridItem>
         )}
-        <FormGroup label={t('Select devices using labels')}>
-          <LabelsField
-            aria-label={t('Label selector')}
+        <GridItem>
+          <RolloutPolicyBatchSelectorField
             name={`rolloutPolicy.batches.${index}.selector`}
             isDisabled={isReadOnly}
+            aria-label={t('Label selector')}
           />
-        </FormGroup>
+        </GridItem>
         <FormGroup label={t('Select a subset using')}>
           <Split hasGutter>
             <SplitItem>

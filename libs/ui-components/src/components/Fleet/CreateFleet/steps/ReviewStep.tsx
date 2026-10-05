@@ -11,6 +11,7 @@ import {
 } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
+import useLabelKeyProvenance from '../../../../hooks/useLabelKeyProvenance';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import type { FleetFormValues } from '../../../../types/deviceSpec';
 import { getErrorMessage } from '../../../../utils/error';
@@ -59,6 +60,7 @@ const FleetUpdatePolicyContent = ({ values }: { values: FleetFormValues }) => {
 const ReviewStep = ({ showUpdateStatus, error }: { showUpdateStatus?: boolean; error?: unknown }) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<FleetFormValues>();
+  const { isManagedLabel } = useLabelKeyProvenance(values.labels);
 
   return (
     <Stack hasGutter>
@@ -70,7 +72,12 @@ const ReviewStep = ({ showUpdateStatus, error }: { showUpdateStatus?: boolean; e
           </DescriptionListGroup>
 
           <ReviewLabelSection sectionId="fleet-labels" title={t('Fleet labels')} labels={values.fleetLabels} />
-          <ReviewLabelSection sectionId="device-labels" title={t('Device selector')} labels={values.labels} />
+          <ReviewLabelSection
+            sectionId="device-labels"
+            title={t('Device selector')}
+            labels={values.labels}
+            isManagedLabel={isManagedLabel}
+          />
         </DescriptionList>
       </ReviewCard>
 
