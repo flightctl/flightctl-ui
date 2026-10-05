@@ -734,6 +734,8 @@
   "System information reporting is stale": "System information reporting is stale",
   "Custom data reporting is stale": "Custom data reporting is stale",
   "Labels": "Labels",
+  "Labels are read-only because some of them could be managed by the system.": "Labels are read-only because some of them could be managed by the system.",
+  "Labels are read-only": "Labels are read-only",
   "Device-reported labels": "Device-reported labels",
   "Values promoted from device status by organization label sync mappings. They influence device selection and mapping, and cannot be edited on the device.": "Values promoted from device status by organization label sync mappings. They influence device selection and mapping, and cannot be edited on the device.",
   "Device identity": "Device identity",

@@ -62,7 +62,6 @@ const systemInfoKnownKeys = [
   'tpmVendorInfo',
   'architecture',
   'distroName',
-  'bootcVersion',
   'bootID',
   'kernel',
   'netInterfaceDefault',
@@ -122,7 +121,9 @@ const buildSystemInfoList = (
   const includedKeys = new Set<string>();
 
   const systemInfoKeys = Object.keys(systemInfo);
-  const totalLen = systemInfoKeys.length;
+  const statusKeys = Object.keys(infoStatus || {});
+  // Count displayable fields: value keys and status-only keys, excluding nested/special props.
+  const totalLen = new Set([...systemInfoKeys, ...statusKeys].filter((key) => !excludedKnownProps.includes(key))).size;
   const result = {
     mainEntries: [],
     hasMainErrors: false,
@@ -158,6 +159,26 @@ const buildSystemInfoList = (
     if (!value && !itemStatus) {
       return;
     }
+    includedKeys.add(infoKey);
+    addEntry(
+      result,
+      {
+        key: infoKey,
+        title: propNameToTitle(infoKey),
+        value: systemInfo[infoKey],
+        reporting: toReporting(infoStatus?.[infoKey], t),
+      },
+      totalLen,
+      split,
+    );
+  });
+
+  // Include status-only fields that have no value yet (key present only in statusInfo)
+  statusKeys.forEach((infoKey) => {
+    if (includedKeys.has(infoKey) || excludedKnownProps.includes(infoKey)) {
+      return;
+    }
+    includedKeys.add(infoKey);
     addEntry(
       result,
       {
@@ -184,7 +205,8 @@ const buildCustomInfoList = (
     hasErrors: false,
   };
 
-  Object.keys(customInfo || {}).forEach((key) => {
+  const keys = new Set([...Object.keys(customInfo || {}), ...Object.keys(infoStatus || {})]);
+  keys.forEach((key) => {
     const reporting = toReporting(infoStatus?.[key], t);
     if (hasReportingError(reporting)) {
       result.hasErrors = true;

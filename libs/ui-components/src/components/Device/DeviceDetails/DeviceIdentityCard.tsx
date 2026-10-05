@@ -4,14 +4,17 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
+  Icon,
   Spinner,
 } from '@patternfly/react-core';
 import IdBadgeIcon from '@patternfly/react-icons/dist/js/icons/id-badge-icon';
+import ExclamationCircleIcon from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
 
 import type { Device } from '@flightctl/types';
 import useDeviceLabelProvenance from '../../../hooks/useDeviceLabelProvenance';
 import { useTranslation } from '../../../hooks/useTranslation';
 import ResourceLink from '../../common/ResourceLink';
+import WithTooltip from '../../common/WithTooltip';
 import LabelWithHelperText from '../../common/WithHelperText';
 import DetailsPageCard, { DetailsPageCardTitle } from '../../DetailsPage/DetailsPageCard';
 import EditLabelsForm, { ViewLabels } from '../../modals/EditLabelsModal/EditLabelsForm';
@@ -37,14 +40,31 @@ const DeviceLabelsSection = ({
   refetch: VoidFunction;
 }) => {
   const { t } = useTranslation();
-  const { managedLabels, isLoading } = useDeviceLabelProvenance(device);
+  const { managedLabels, isLoading, error } = useDeviceLabelProvenance(device);
 
-  if (isLoading) {
+  if (isLoading || error) {
     return (
       <DescriptionListGroup>
         <DescriptionListTerm>{t('Labels')}</DescriptionListTerm>
         <DescriptionListDescription>
-          <Spinner />
+          {error ? (
+            <>
+              <WithTooltip
+                showTooltip
+                content={t('Labels are read-only because some of them could be managed by the system.')}
+              >
+                <>
+                  <Icon status="danger">
+                    <ExclamationCircleIcon />
+                  </Icon>{' '}
+                  {t('Labels are read-only')}
+                </>
+              </WithTooltip>
+              <ViewLabels device={device} managedLabels={[]} />
+            </>
+          ) : (
+            <Spinner />
+          )}
         </DescriptionListDescription>
       </DescriptionListGroup>
     );

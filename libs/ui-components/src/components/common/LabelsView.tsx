@@ -26,18 +26,18 @@ const ManagedLabelChip = ({ label, withMaxWidth }: { label: ManagedLabel; withMa
               'This managed label matches a property reported by the device, but its value differs. The label could be out of sync if its value derives from that property.',
             )}
           >
-            <Icon status="warning">
-              <ExclamationTriangleIcon />
-            </Icon>
+            <span tabIndex={0} role="img" aria-label={t('Managed label value mismatch')}>
+              <Icon status="warning">
+                <ExclamationTriangleIcon />
+              </Icon>
+            </span>
           </Tooltip>
         </FlexItem>
       )}
       <FlexItem>
-        <span tabIndex={0} role="img" aria-label={t('Managed label value mismatch')}>
-          <Label color="grey" textMaxWidth={maxWidth}>
-            {text}
-          </Label>
-        </span>
+        <Label color="grey" textMaxWidth={maxWidth}>
+          {text}
+        </Label>
       </FlexItem>
     </Flex>
   );
