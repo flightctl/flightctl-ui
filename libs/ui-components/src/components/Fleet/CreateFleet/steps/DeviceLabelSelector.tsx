@@ -7,19 +7,25 @@ import debounce from 'lodash/debounce';
 import { type DeviceList } from '@flightctl/types';
 import LabelsField from '../../../form/LabelsField';
 import { getInvalidKubernetesLabels, hasUniqueLabelKeys } from '../../../form/validations';
-import { useTranslation } from '../../../../hooks/useTranslation';
 import { useFetch } from '../../../../hooks/useFetch';
+import useLabelKeyProvenance from '../../../../hooks/useLabelKeyProvenance';
+import { useTranslation } from '../../../../hooks/useTranslation';
 import { type FlightCtlLabel } from '../../../../types/extraTypes';
 import { getApiListCount } from '../../../../utils/api';
 import { getErrorMessage } from '../../../../utils/error';
+import { toAPILabel } from '../../../../utils/labels';
 import { commonQueries } from '../../../../utils/query';
 import LabelsView from '../../../common/LabelsView';
-import { toAPILabel } from '../../../../utils/labels';
 
 const validateLabels = (labels: FlightCtlLabel[]) =>
   hasUniqueLabelKeys(labels) && getInvalidKubernetesLabels(labels).length === 0;
 
-const DeviceLabelSelector = () => {
+type DeviceLabelSelectorProps = {
+  managedKeys: string[];
+  isManagedLabel: (key: string) => boolean;
+};
+
+const DeviceLabelSelector = ({ managedKeys, isManagedLabel }: DeviceLabelSelectorProps) => {
   const { t } = useTranslation();
   const { get } = useFetch();
   const [{ value: labels }] = useField<FlightCtlLabel[]>('labels');
@@ -97,26 +103,44 @@ const DeviceLabelSelector = () => {
       />
     );
   } else {
-    message = t('Labels used to select devices for your fleet. If not specified, no devices will be added.');
+    message = t(
+      'Add labels to select devices, or add device-reported labels (shown in gray) when organizing by device status.',
+    );
   }
 
   return (
     <Stack hasGutter>
       <StackItem>
-        <LabelsField name="labels" helperText={showHelperText ? message : undefined} />
+        <LabelsField
+          name="labels"
+          helperText={showHelperText ? message : undefined}
+          addButtonText={t('Add label or device-reported label')}
+          isManagedLabel={isManagedLabel}
+        />
       </StackItem>
       {!showHelperText && message && <StackItem>{message}</StackItem>}
+      {managedKeys.length > 0 && (
+        <StackItem>
+          <Alert isInline variant="warning" title={t('Device-reported labels can change fleet membership')}>
+            {t(
+              'You selected device-reported labels ({{keys}}). If a device later reports different values, it may leave this fleet or become fleetless. Membership does not roll up when device status changes.',
+              { keys: managedKeys.join(', ') },
+            )}
+          </Alert>
+        </StackItem>
+      )}
     </Stack>
   );
 };
 
 const DeviceLabelSelectorWrapper = ({ isReadOnly }: { isReadOnly: boolean }) => {
   const [{ value: labels }] = useField<FlightCtlLabel[]>('labels');
+  const { isManagedLabel, managedKeys } = useLabelKeyProvenance(labels);
 
   if (isReadOnly) {
-    return <LabelsView prefix="device-selector" labels={toAPILabel(labels)} />;
+    return <LabelsView prefix="device-selector" labels={toAPILabel(labels)} isManagedLabel={isManagedLabel} />;
   }
-  return <DeviceLabelSelector />;
+  return <DeviceLabelSelector managedKeys={managedKeys} isManagedLabel={isManagedLabel} />;
 };
 
 export default DeviceLabelSelectorWrapper;

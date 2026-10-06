@@ -8,6 +8,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 interface LabelsViewProps {
   prefix: string;
   labels: Record<string, string | undefined> | undefined;
+  isManagedLabel?: (key: string) => boolean;
 }
 
 const ManagedLabelChip = ({ label, withMaxWidth }: { label: ManagedLabel; withMaxWidth?: boolean }) => {
@@ -88,7 +89,7 @@ export const ManagedLabelsView = ({
   );
 };
 
-const LabelsView = ({ prefix, labels }: LabelsViewProps) => {
+const LabelsView = ({ prefix, labels, isManagedLabel }: LabelsViewProps) => {
   const { t } = useTranslation();
   const labelItems = Object.entries(labels || {});
   if (labelItems.length === 0) {
@@ -98,7 +99,7 @@ const LabelsView = ({ prefix, labels }: LabelsViewProps) => {
   return (
     <LabelGroup numLabels={5} expandedText={t('Show less')} collapsedText={'${remaining} ' + t('more')}>
       {labelItems.map(([key, value], index: number) => (
-        <Label color="blue" key={`${prefix}_${index}`} id={`${prefix}_${index}`}>
+        <Label color={isManagedLabel?.(key) ? 'grey' : 'blue'} key={`${prefix}_${index}`} id={`${prefix}_${index}`}>
           {value ? `${key}=${value}` : key}
         </Label>
       ))}

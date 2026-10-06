@@ -16,6 +16,7 @@ type LabelsFieldProps = {
   onChangeCallback?: (newLabels: FlightCtlLabel[], hasErrors: boolean) => void;
   /** Applied to the PatternFly `LabelGroup` root for E2E selectors (e.g. fleet wizard fleet labels). */
   labelGroupTestId?: string;
+  isManagedLabel?: (key: string) => boolean;
 };
 
 const maxLabelWidth = '25ch';
@@ -27,6 +28,7 @@ const LabelsField = ({
   helperText,
   isLoading,
   labelGroupTestId,
+  isManagedLabel,
 }: LabelsFieldProps) => {
   const [{ value: labels }, meta, { setValue: setLabels }] = useField<FlightCtlLabel[]>(name);
   const updateLabels = async (newLabels: FlightCtlLabel[]) => {
@@ -84,7 +86,7 @@ const LabelsField = ({
             return (
               <Label
                 key={elKey}
-                color="blue"
+                color={isManagedLabel?.(key) ? 'grey' : 'blue'}
                 textMaxWidth={maxLabelWidth}
                 closeBtnProps={closeButtonProps}
                 onClose={(e) => onDelete(e, originalIndex)}
@@ -112,12 +114,17 @@ const LabelsField = ({
   );
 };
 
-const LabelsFieldWrapper = ({ name, isDisabled, ...rest }: LabelsFieldProps & { isDisabled?: boolean }) => {
+const LabelsFieldWrapper = ({
+  name,
+  isDisabled,
+  isManagedLabel,
+  ...rest
+}: LabelsFieldProps & { isDisabled?: boolean }) => {
   const [{ value }] = useField<FlightCtlLabel[]>(name);
   if (isDisabled) {
-    return <LabelsView prefix={name} labels={toAPILabel(value)} />;
+    return <LabelsView prefix={name} labels={toAPILabel(value)} isManagedLabel={isManagedLabel} />;
   }
-  return <LabelsField name={name} {...rest} />;
+  return <LabelsField name={name} isManagedLabel={isManagedLabel} {...rest} />;
 };
 
 export default LabelsFieldWrapper;

@@ -179,10 +179,12 @@ export const ReviewLabelSection = ({
   sectionId,
   title,
   labels,
+  isManagedLabel,
 }: {
   sectionId: string;
   title: string;
   labels: FlightCtlLabel[];
+  isManagedLabel?: (key: string) => boolean;
 }) => {
   if (labels.length === 0) {
     return null;
@@ -192,7 +194,7 @@ export const ReviewLabelSection = ({
     <DescriptionListGroup>
       <DescriptionListTerm>{title}</DescriptionListTerm>
       <DescriptionListDescription>
-        <LabelsView prefix={sectionId} labels={toAPILabel(labels)} />
+        <LabelsView prefix={sectionId} labels={toAPILabel(labels)} isManagedLabel={isManagedLabel} />
       </DescriptionListDescription>
     </DescriptionListGroup>
   );

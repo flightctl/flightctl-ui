@@ -153,6 +153,13 @@ export const commonQueries = {
     );
     return `devices?${searchParams.toString()}`;
   },
+  getOrgLabelSyncProvenance: (labelKeys: string[]) => {
+    const searchParams = new URLSearchParams();
+    labelKeys.forEach((key) => {
+      searchParams.append('labelKeys', key);
+    });
+    return `labelsyncprovenance?${searchParams.toString()}`;
+  },
 };
 
 export { addQueryConditions, addOsModeQueryConditions, addTextContainsCondition, setLabelParams };
