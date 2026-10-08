@@ -7,10 +7,12 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl/api/v1beta1"
 	"github.com/openshift/osincli"
+	log "github.com/sirupsen/logrus"
 )
 
 type OIDCAuthHandler struct {
@@ -23,13 +25,41 @@ type OIDCAuthHandler struct {
 	tokenEndpoint          string
 	clientId               string
 	providerName           string
+	promptValuesSupported  []string
 }
 
 type oidcServerResponse struct {
-	TokenEndpoint      string `json:"token_endpoint"`
-	AuthEndpoint       string `json:"authorization_endpoint"`
-	UserInfoEndpoint   string `json:"userinfo_endpoint"`
-	EndSessionEndpoint string `json:"end_session_endpoint"`
+	TokenEndpoint         string   `json:"token_endpoint"`
+	AuthEndpoint          string   `json:"authorization_endpoint"`
+	UserInfoEndpoint      string   `json:"userinfo_endpoint"`
+	EndSessionEndpoint    string   `json:"end_session_endpoint"`
+	PromptValuesSupported []string `json:"prompt_values_supported"`
+}
+
+const (
+	promptSelectAccount = "select_account"
+)
+
+// promptValue determines the best "prompt" parameter to send in the OIDC
+// authorization request based on the provider's advertised
+// prompt_values_supported field.
+//
+// prompt_values_supported is OPTIONAL per the OpenID Connect prompt=create
+// extension spec. Most major providers (Google, Entra ID, Okta, PingOne) omit
+// it while supporting select_account, so absence means "no information" — we
+// keep the existing default of select_account.
+//
+// When prompt_values_supported IS present the provider is explicitly declaring
+// its capabilities. If it does not list select_account we omit the prompt
+// parameter entirely to avoid sending an unsupported value.
+func (a *OIDCAuthHandler) promptValue() string {
+	if a.promptValuesSupported == nil {
+		return promptSelectAccount // absent → no info, keep default
+	}
+	if slices.Contains(a.promptValuesSupported, promptSelectAccount) {
+		return promptSelectAccount
+	}
+	return ""
 }
 
 func getOIDCAuthHandler(provider *v1beta1.AuthProvider, oidcSpec *v1beta1.OIDCProviderSpec) (*OIDCAuthHandler, error) {
@@ -96,6 +126,7 @@ func getOIDCAuthHandler(provider *v1beta1.AuthProvider, oidcSpec *v1beta1.OIDCPr
 		tokenEndpoint:          oidcResponse.TokenEndpoint,
 		clientId:               clientId,
 		providerName:           providerName,
+		promptValuesSupported:  oidcResponse.PromptValuesSupported,
 	}
 
 	if internalAuthURL != nil {
@@ -182,5 +213,9 @@ func (a *OIDCAuthHandler) GetLoginRedirectURL(state string, codeChallenge string
 	if err != nil {
 		return "", fmt.Errorf("failed to create OIDC client: %w", err)
 	}
-	return loginRedirect(client, state, codeChallenge), nil
+
+	prompt := a.promptValue()
+	log.Debugf("OIDC prompt value determined: %q (supported values: %v)", prompt, a.promptValuesSupported)
+
+	return loginRedirect(client, state, codeChallenge, prompt), nil
 }

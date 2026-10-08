@@ -88,5 +88,5 @@ func (o *OAuth2AuthHandler) GetLoginRedirectURL(state string, codeChallenge stri
 	if err != nil {
 		return "", err
 	}
-	return loginRedirect(client, state, codeChallenge), nil
+	return loginRedirect(client, state, codeChallenge, "select_account"), nil
 }
