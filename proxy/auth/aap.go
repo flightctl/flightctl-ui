@@ -142,5 +142,5 @@ func (a *AAPAuthHandler) GetLoginRedirectURL(state string, codeChallenge string,
 	if err != nil {
 		return "", fmt.Errorf("failed to create AAP OAuth client: %w", err)
 	}
-	return loginRedirect(client, state, codeChallenge), nil
+	return loginRedirect(client, state, codeChallenge, "select_account"), nil
 }
