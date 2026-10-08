@@ -33,9 +33,9 @@ export type DeltaGenerationProgressDetails = {
    */
   templateVersion?: string;
   /**
-   * Device only. The rendered spec hash this prepare is for.
+   * Device only. The desired spec generation this prepare is for.
    */
-  specHash?: string;
+  generation?: number;
 };
 export namespace DeltaGenerationProgressDetails {
   /**
