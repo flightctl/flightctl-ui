@@ -111,7 +111,7 @@ func getAAPClient(authorizationUrl, tokenUrl string, tlsConfig *tls.Config, clie
 	return client, nil
 }
 
-func (a *AAPAuthHandler) Logout(token string, _ string) (string, error) {
+func (a *AAPAuthHandler) Logout(token string, postLogoutBase string) (string, error) {
 	data := url.Values{}
 	data.Set("client_id", a.clientId)
 	data.Set("token", token)
@@ -130,11 +130,55 @@ func (a *AAPAuthHandler) Logout(token string, _ string) (string, error) {
 
 	res, err := httpClient.Do(req)
 	if err != nil {
+		// Token revocation failed; do not issue a browser redirect. Preserve the
+		// original behavior of surfacing the error to the caller.
 		log.GetLogger().WithError(err).Warn("Failed to logout")
 		return "", err
 	}
-	defer res.Body.Close()
-	return "", nil
+	defer func() {
+		if cerr := res.Body.Close(); cerr != nil {
+			log.GetLogger().WithError(cerr).Debug("failed to close revocation response body")
+		}
+	}()
+
+	// A successful revocation returns a 2xx status. On any non-2xx response the token may
+	// still be valid, so surface an error and do not issue the browser redirect.
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		revokeErr := fmt.Errorf("AAP token revocation failed with status %d", res.StatusCode)
+		log.GetLogger().WithError(revokeErr).Warn("Failed to logout")
+		return "", revokeErr
+	}
+
+	// The server-to-server token revocation above invalidates the OAuth token, but AAP
+	// also keeps a browser session cookie (awx_sessionid) that revocation alone does not
+	// clear. Return a redirect to AAP's session-termination endpoint so the browser's
+	// visit clears that cookie; the "next" parameter then sends the user back to RHEM's
+	// login page.
+	//
+	// AAP is built on Django/AWX. When AWX runs behind the AAP Gateway,
+	// LoggedLogoutView.dispatch() in awx/api/generics.py redirects logout requests to the
+	// Gateway's session-termination endpoint "/api/gateway/v1/logout/" (carrying a "next"
+	// query parameter), so we send the browser directly there to terminate the Gateway
+	// session.
+	//
+	// Security: both the redirect target and the "next" value are derived exclusively
+	// from configured values -- a.internalAuthURL (provider config) and postLogoutBase
+	// (resolved by the caller from an allow-listed origin or BASE_UI_URL). No
+	// user-supplied URL fragment is incorporated, which prevents open-redirect
+	// vulnerabilities.
+	logoutURL, err := url.Parse(a.internalAuthURL)
+	if err != nil {
+		log.GetLogger().WithError(err).Warn("failed to parse AAP internal auth URL for logout redirect")
+		return "", err
+	}
+	// JoinPath normalizes any duplicate or trailing slashes in the configured base URL and
+	// preserves the trailing slash the Gateway expects on the logout path.
+	logoutURL = logoutURL.JoinPath("api", "gateway", "v1", "logout/")
+	q := logoutURL.Query()
+	q.Set("next", postLogoutBase)
+	logoutURL.RawQuery = q.Encode()
+
+	return logoutURL.String(), nil
 }
 
 func (a *AAPAuthHandler) GetLoginRedirectURL(state string, codeChallenge string, redirectURI string) (string, error) {
