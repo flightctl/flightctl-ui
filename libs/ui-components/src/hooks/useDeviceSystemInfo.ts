@@ -49,10 +49,13 @@ const propNameToTitle = (input: string) => {
 const excludedKnownProps = [
   'customInfo', // Custom properies are evaluated separately from the predefined, known properties
   'attestation', // In Phase1 this includes only the raw data, without a report of success or failure.
-  // "deltaEligible", "bootcVersion", and "ociDeltaVersion" are shown in a separate section on the device details page
+  // exclude all fields reported as part of the capabilities section
   'deltaEligible',
   'bootcVersion',
   'ociDeltaVersion',
+  'kvm',
+  'gpus',
+  'osMode',
 ];
 
 const systemInfoKnownKeys = [
@@ -114,6 +117,15 @@ const addEntry = (result: SystemInfoSplitResult, entry: SystemInfoEntry, totalLe
   }
 };
 
+// Guard against newly added fields that are object-like values.
+// The field should either be excluded, or displayed to a separate section with more advanced display logic.
+const getDisplayValue = (value: string | undefined) => {
+  if (typeof value === 'object' && value !== null) {
+    return 'N/A';
+  }
+  return value;
+};
+
 const buildSystemInfoList = (
   t: TFunction,
   systemInfo: DeviceSystemInfo,
@@ -167,7 +179,7 @@ const buildSystemInfoList = (
       {
         key: infoKey,
         title: propNameToTitle(infoKey),
-        value: systemInfo[infoKey],
+        value: getDisplayValue(value),
         reporting: toReporting(infoStatus?.[infoKey], t),
       },
       totalLen,
@@ -186,7 +198,7 @@ const buildSystemInfoList = (
       {
         key: infoKey,
         title: propNameToTitle(infoKey),
-        value: systemInfo[infoKey],
+        value: getDisplayValue(systemInfo[infoKey]),
         reporting: toReporting(infoStatus?.[infoKey], t),
       },
       totalLen,

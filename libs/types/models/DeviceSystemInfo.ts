@@ -3,6 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CustomDeviceInfo } from './CustomDeviceInfo';
+import type { DeviceGpu } from './DeviceGpu';
+import type { DeviceKvm } from './DeviceKvm';
+import type { OsModeType } from './OsModeType';
 /**
  * System information collected from the device.
  */
@@ -36,6 +39,12 @@ export type DeviceSystemInfo = {
    */
   deltaEligible?: boolean;
   customInfo?: CustomDeviceInfo;
+  /**
+   * List of GPU devices discovered on the device.
+   */
+  gpus?: Array<DeviceGpu>;
+  kvm?: DeviceKvm;
+  osMode?: OsModeType;
 } & {
   /**
    * Corrected by fix-device-system-info.js:

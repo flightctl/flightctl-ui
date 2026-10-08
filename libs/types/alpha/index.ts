@@ -24,6 +24,8 @@ export type { CatalogSpec } from './models/CatalogSpec';
 export type { CatalogStatus } from './models/CatalogStatus';
 export type { CveCountsBySeverity } from './models/CveCountsBySeverity';
 export type { DeviceCountsBySeverity } from './models/DeviceCountsBySeverity';
+export { DeviceFeatureBoolean } from './models/DeviceFeatureBoolean';
+export type { DeviceFeatures } from './models/DeviceFeatures';
 export type { DeviceVulnerabilitySummaryResponse } from './models/DeviceVulnerabilitySummaryResponse';
 export type { FleetVulnerabilitySummary } from './models/FleetVulnerabilitySummary';
 export type { FleetVulnerabilitySummaryResponse } from './models/FleetVulnerabilitySummaryResponse';

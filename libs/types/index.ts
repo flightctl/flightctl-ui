@@ -76,10 +76,12 @@ export { DeviceDecommissionTargetType } from './models/DeviceDecommissionTargetT
 export { DeviceDeltaApplyOutcomeType } from './models/DeviceDeltaApplyOutcomeType';
 export type { DeviceDeltaApplyStatus } from './models/DeviceDeltaApplyStatus';
 export type { DeviceEnrollmentHooksStatus } from './models/DeviceEnrollmentHooksStatus';
+export type { DeviceGpu } from './models/DeviceGpu';
 export type { DeviceIntegrityCheckStatus } from './models/DeviceIntegrityCheckStatus';
 export { DeviceIntegrityCheckStatusType } from './models/DeviceIntegrityCheckStatusType';
 export type { DeviceIntegrityStatus } from './models/DeviceIntegrityStatus';
 export { DeviceIntegrityStatusSummaryType } from './models/DeviceIntegrityStatusSummaryType';
+export type { DeviceKvm } from './models/DeviceKvm';
 export type { DeviceLastSeen } from './models/DeviceLastSeen';
 export { DeviceLifecycleHookType } from './models/DeviceLifecycleHookType';
 export type { DeviceLifecycleStatus } from './models/DeviceLifecycleStatus';

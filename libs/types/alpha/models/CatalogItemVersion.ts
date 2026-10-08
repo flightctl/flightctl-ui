@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { CatalogItemConfigurable } from './CatalogItemConfigurable';
 import type { CatalogItemDeprecation } from './CatalogItemDeprecation';
+import type { DeviceFeatures } from './DeviceFeatures';
 import type { SemVer } from './SemVer';
 import type { SemVerRange } from './SemVerRange';
 /**
@@ -40,5 +41,9 @@ export type CatalogItemVersion = (CatalogItemConfigurable & {
    */
   skipRange?: SemVerRange;
   deprecation?: CatalogItemDeprecation;
+  /**
+   * Device feature requirements that a target device must satisfy for this version to be considered compatible.
+   */
+  deviceFeatures?: DeviceFeatures;
 });
 

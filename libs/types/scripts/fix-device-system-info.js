@@ -59,7 +59,38 @@ function assertNoUnsupportedValueConstraints(propertiesSchema) {
   }
 }
 
-function openApiPropertyToTsType(propertySchema, localSchemas) {
+const ARRAY_PROPERTY_EXCEPTIONS = {
+  gpus: 'DeviceGpu',
+};
+
+function arrayPropertyToTsType(propertyName, propertySchema, localSchemas) {
+  const expectedItemName = ARRAY_PROPERTY_EXCEPTIONS[propertyName];
+  if (!expectedItemName) {
+    throw new Error(
+      `Unsupported DeviceSystemInfo property type "array" on ${JSON.stringify(propertyName)}; only ${JSON.stringify(
+        Object.keys(ARRAY_PROPERTY_EXCEPTIONS),
+      )} may be arrays. Update fix-device-system-info.js if the schema intentionally changed.`,
+    );
+  }
+
+  const items = propertySchema.items;
+  if (!items || typeof items !== 'object' || Array.isArray(items) || !items.$ref) {
+    throw new Error(
+      `DeviceSystemInfo.${propertyName}.items has unexpected shape ${JSON.stringify(items)}; expected { $ref: "#/components/schemas/${expectedItemName}" }.`,
+    );
+  }
+
+  const importName = refToTypeName(items.$ref, localSchemas);
+  if (importName !== expectedItemName) {
+    throw new Error(
+      `DeviceSystemInfo.${propertyName}.items $ref resolves to ${JSON.stringify(importName)}; expected ${JSON.stringify(expectedItemName)}. Update fix-device-system-info.js if the schema intentionally changed.`,
+    );
+  }
+
+  return { tsType: `Array<${importName}>`, importName };
+}
+
+function openApiPropertyToTsType(propertyName, propertySchema, localSchemas) {
   if (!propertySchema || typeof propertySchema !== 'object') {
     throw new Error(`Invalid property schema: ${JSON.stringify(propertySchema)}`);
   }
@@ -78,6 +109,8 @@ function openApiPropertyToTsType(propertySchema, localSchemas) {
     case 'integer':
     case 'number':
       return { tsType: 'number' };
+    case 'array':
+      return arrayPropertyToTsType(propertyName, propertySchema, localSchemas);
     default:
       throw new Error(
         `Unsupported DeviceSystemInfo property type ${JSON.stringify(propertySchema.type)}; update fix-device-system-info.js`,
@@ -157,7 +190,7 @@ function extractDeviceSystemInfo(openApiDocument) {
     if (!TS_IDENTIFIER.test(name)) {
       throw new Error(`Invalid DeviceSystemInfo property name: ${JSON.stringify(name)}`);
     }
-    const { tsType, importName } = openApiPropertyToTsType(propertySchema, localSchemas);
+    const { tsType, importName } = openApiPropertyToTsType(name, propertySchema, localSchemas);
     if (importName) {
       imports.add(importName);
     }
