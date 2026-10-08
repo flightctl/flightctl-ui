@@ -133,5 +133,5 @@ func (o *OpenShiftAuthHandler) GetLoginRedirectURL(state string, codeChallenge s
 	if err != nil {
 		return "", err
 	}
-	return loginRedirect(client, state, codeChallenge), nil
+	return loginRedirect(client, state, codeChallenge, "select_account"), nil
 }
