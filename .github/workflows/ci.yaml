@@ -9,7 +9,7 @@ on:
 jobs:
   preflight-check:
     # Prevents running the workflow when a PR is marked as draft.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       skip: ${{ steps.check.outputs.skip }}
     steps:
@@ -32,7 +32,7 @@ jobs:
           echo "skip=${skip}"
   unit-tests:
     name: Unit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
@@ -50,7 +50,7 @@ jobs:
         run: npm run test
   lint:
     name: Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -66,7 +66,7 @@ jobs:
         run: npm run lint
   build-standalone:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -80,7 +80,7 @@ jobs:
         run: npm run build
   build-ocp:
     name: Build ocp plugin
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
         run: npm run build:ocp
   build-containers:
     name: Build containers
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         os: [el9, el10]
@@ -152,7 +152,7 @@ jobs:
   integration-tests:
     needs: preflight-check
     if: needs.preflight-check.outputs.skip == 'false'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
