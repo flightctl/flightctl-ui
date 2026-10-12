@@ -16,7 +16,7 @@ jobs:
   generate-tags:
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       image_tags: ${{ steps.get-tags.outputs.image_tags }}
     steps:
