@@ -18,6 +18,8 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import { getErrorMessage } from '../../../../utils/error';
 import { appTypeIds } from '../../useCatalogItems';
 import { getArtifactLabel } from '../../../../utils/catalogTypes';
+import { deviceFeaturesToApi } from '../../../../utils/catalogDeviceFeatures';
+import CatalogFeatureRequirements from '../../CatalogFeatureRequirements';
 
 export const reviewStepId = 'review';
 
@@ -116,10 +118,14 @@ const ReviewStep = ({ error, isEdit, isReadOnly }: { error: unknown; isEdit?: bo
             </DescriptionListGroup>
           )}
 
-          <DescriptionListGroup>
-            <DescriptionListTerm>{t('Versions')}</DescriptionListTerm>
-            <DescriptionListDescription>{values.versions.map((v) => v.version).join(', ')}</DescriptionListDescription>
-          </DescriptionListGroup>
+          {values.versions.map((v) => (
+            <DescriptionListGroup key={v.version}>
+              <DescriptionListTerm>{t('Version {{version}}', { version: v.version })}</DescriptionListTerm>
+              <DescriptionListDescription>
+                <CatalogFeatureRequirements deviceFeatures={deviceFeaturesToApi(v.deviceFeatures)} />
+              </DescriptionListDescription>
+            </DescriptionListGroup>
+          ))}
         </DescriptionList>
       </StackItem>
       {!!error && (

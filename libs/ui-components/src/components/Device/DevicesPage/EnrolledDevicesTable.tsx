@@ -33,11 +33,7 @@ import AddDeviceModal from '../AddDeviceModal/AddDeviceModal';
 import { EnrolledDevicesEmptyState } from './DevicesEmptyStates';
 import DeviceTableToolbar from './DeviceTableToolbar';
 import EnrolledDeviceTableRow from './EnrolledDeviceTableRow';
-import {
-  type DeviceOsModeFilterValue,
-  type DeviceTextFilterKey,
-  FilterSearchParams,
-} from '../../../utils/status/devices';
+import { type DeviceFeatureFilter, type DeviceTextFilterKey, FilterSearchParams } from '../../../utils/status/devices';
 import { GlobalSystemRestoreBanners } from '../../SystemRestore/SystemRestoreBanners';
 
 interface EnrolledDeviceTableProps {
@@ -53,8 +49,9 @@ interface EnrolledDeviceTableProps {
   setOwnerFleets: (ownerFleets: string[]) => void;
   setOnlyFleetless: (enabled: boolean) => void;
   setActiveStatuses: (activeStatuses: FilterStatusMap) => void;
-  selectedOsModes: DeviceOsModeFilterValue[];
-  setSelectedOsModes: (modes: DeviceOsModeFilterValue[]) => void;
+  selectedFeatures: DeviceFeatureFilter[];
+  selectedFeaturesCount: number;
+  setSelectedFeatures: (filters: DeviceFeatureFilter[]) => void;
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
   isFilterUpdating: boolean;
@@ -63,7 +60,7 @@ interface EnrolledDeviceTableProps {
   // getSortParams: (columnIndex: number) => ThProps['sort'];
 }
 
-export const getDeviceTableColumns = (t: TFunction) => [
+const getDeviceTableColumns = (t: TFunction) => [
   {
     id: 'alias',
     name: t('Alias'),
@@ -111,8 +108,9 @@ const EnrolledDevicesTable = ({
   activeStatuses,
   setActiveStatuses,
   setOnlyDecommissioned,
-  selectedOsModes,
-  setSelectedOsModes,
+  selectedFeatures,
+  selectedFeaturesCount,
+  setSelectedFeatures,
   selectedLabels,
   setSelectedLabels,
   hasFiltersEnabled,
@@ -154,7 +152,7 @@ const EnrolledDevicesTable = ({
       setOnlyFleetless(false);
       clearTextFilters();
       setSelectedLabels([]);
-      setSelectedOsModes([]);
+      setSelectedFeatures([]);
     }
   };
 
@@ -172,8 +170,9 @@ const EnrolledDevicesTable = ({
         setOnlyFleetless={setOnlyFleetless}
         activeStatuses={activeStatuses}
         setActiveStatuses={setActiveStatuses}
-        selectedOsModes={selectedOsModes}
-        setSelectedOsModes={setSelectedOsModes}
+        selectedFeatures={selectedFeatures}
+        selectedFeaturesCount={selectedFeaturesCount}
+        setSelectedFeatures={setSelectedFeatures}
         selectedLabels={selectedLabels}
         setSelectedLabels={setSelectedLabels}
         isFilterUpdating={isFilterUpdating}

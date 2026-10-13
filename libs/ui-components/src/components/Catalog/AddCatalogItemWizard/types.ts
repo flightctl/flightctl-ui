@@ -1,5 +1,7 @@
 import { type CatalogItemArtifactType, CatalogItemType } from '@flightctl/types/alpha';
 
+import type { DeviceFeaturesFormValues } from '../../../utils/catalogDeviceFeatures';
+
 export type CreateCatalogFormValues = {
   name: string;
   displayName: string;
@@ -11,6 +13,7 @@ export type CreateCatalogFormValues = {
 export type VersionFormValues = {
   version: string;
   references: Record<string, string>;
+  deviceFeatures: DeviceFeaturesFormValues | null;
   channels: string[];
   replaces: string;
   skips: string;

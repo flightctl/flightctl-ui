@@ -4,7 +4,7 @@ import { Wizard, WizardStep, type WizardStepType } from '@patternfly/react-core'
 import * as Yup from 'yup';
 import type { RJSFValidationError } from '@rjsf/utils';
 
-import type { ApplicationProviderSpec } from '@flightctl/types';
+import type { ApplicationProviderSpec, Device, Fleet } from '@flightctl/types';
 import type { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -19,7 +19,11 @@ import UpdateStep, { isUpdateStepValid } from './steps/UpdateStep';
 import ReviewStep from './steps/ReviewStep';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import { validApplicationAndVolumeName } from '../../form/validations';
-import { isAdvancedConfigRequired } from '../../CatalogComposition/catalogCompositionUtils';
+import {
+  getVersionFeatureRequirements,
+  isAdvancedConfigRequired,
+} from '../../CatalogComposition/catalogCompositionUtils';
+import EditWizardCompatibilityBanners from './EditWizardCompatibilityBanners';
 
 const versionStepId = 'version-step';
 const configStepId = 'config-step';
@@ -65,6 +69,8 @@ type WizardContentProps = {
   error: string | undefined;
   schemaErrors: RJSFValidationError[] | undefined;
   setError: (err: string | undefined) => void;
+  targetDevice?: Device;
+  targetFleet?: Fleet;
 };
 
 const WizardContent = ({
@@ -75,6 +81,8 @@ const WizardContent = ({
   error,
   schemaErrors,
   setError,
+  targetDevice,
+  targetFleet,
 }: WizardContentProps) => {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
@@ -92,6 +100,7 @@ const WizardContent = ({
 
   return (
     <>
+      <EditWizardCompatibilityBanners targetDevice={targetDevice} targetFleet={targetFleet} />
       <LeaveFormConfirmation />
       <Wizard
         footer={
@@ -154,6 +163,8 @@ type EditAppWizardProps = {
   version: string;
   channel: string;
   mode: CatalogEditWizardMode;
+  targetDevice?: Device;
+  targetFleet?: Fleet;
 };
 
 const EditAppWizard = ({
@@ -166,6 +177,8 @@ const EditAppWizard = ({
   currentApps,
   version,
   channel,
+  targetDevice,
+  targetFleet,
 }: EditAppWizardProps) => {
   const { t } = useTranslation();
 
@@ -204,6 +217,7 @@ const EditAppWizard = ({
       initialValues={{
         version: appVersion,
         channel: appSpec ? currentChannel : channel,
+        featureRequirements: getVersionFeatureRequirements(catalogItem, appVersion),
         wantAdvancedConfig: mode === 'edit',
         ...appConfig,
       }}
@@ -218,6 +232,8 @@ const EditAppWizard = ({
         error={error}
         schemaErrors={schemaErrors}
         setError={setError}
+        targetDevice={targetDevice}
+        targetFleet={targetFleet}
       />
     </Formik>
   );

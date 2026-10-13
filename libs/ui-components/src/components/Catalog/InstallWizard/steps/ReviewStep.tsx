@@ -21,6 +21,10 @@ import type { InstallAppFormik, InstallOsFormik } from '../types';
 
 import { useTranslation } from '../../../../hooks/useTranslation';
 import FlightCtlForm from '../../../form/FlightCtlForm';
+import {
+  DeviceCatalogItemCompatibilityAlert,
+  FleetCatalogItemCompatibilityAlert,
+} from '../../CatalogItemCompatibilityAlert';
 import { isSameCatalogRef } from '../utils';
 
 const isOsUnset = (osSpec: ImageOrCatalogItemRefSpec | undefined) => !(osSpec?.image || osSpec?.catalogItemRef);
@@ -144,9 +148,12 @@ type ReviewStepProps = {
 const ReviewStep = ({ error, catalogItem }: ReviewStepProps) => {
   const { t } = useTranslation();
   const { values } = useFormikContext<InstallOsFormik | InstallAppFormik>();
+  const featureRequirements = values.featureRequirements;
 
   const isOsCatalogItem = catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS;
-  const resourceMeta = values.target === 'fleet' ? values.fleet?.metadata : values.device?.metadata;
+  const isDeviceTarget = values.target === 'device';
+  const isFleetTarget = values.target === 'fleet';
+  const resourceMeta = isFleetTarget ? values.fleet?.metadata : values.device?.metadata;
 
   return (
     <FlightCtlForm>
@@ -155,6 +162,16 @@ const ReviewStep = ({ error, catalogItem }: ReviewStepProps) => {
           <Title headingLevel="h3">{t('Review deployment specifications')}</Title>
         </StackItem>
         {isOsCatalogItem && <UpdateOsUpdateAlerts catalogItem={catalogItem} />}
+        {isDeviceTarget && values.device && (
+          <DeviceCatalogItemCompatibilityAlert device={values.device} featureRequirements={featureRequirements} />
+        )}
+        {isFleetTarget && (
+          <FleetCatalogItemCompatibilityAlert
+            fleetName={resourceMeta?.name as string}
+            featureRequirements={featureRequirements}
+            totalDevices={values.fleet?.status?.devicesSummary?.total || 0}
+          />
+        )}
         <StackItem>
           <Card>
             <CardTitle>{t('Deployment specifications')}</CardTitle>

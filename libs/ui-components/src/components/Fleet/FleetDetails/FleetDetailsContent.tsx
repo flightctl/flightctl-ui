@@ -10,6 +10,8 @@ import {
   DescriptionListTerm,
   Grid,
   GridItem,
+  Stack,
+  StackItem,
 } from '@patternfly/react-core';
 
 import { type Fleet, ResourceKind } from '@flightctl/types';
@@ -29,6 +31,7 @@ import FleetVulnerabilities from './FleetVulnerabilities';
 import FleetDetailsOsMode from './FleetDetailsOsMode';
 import FleetDeltaGenerationContent from './FleetDeltaGenerationContent';
 import SystemImage from '../../Device/EditDeviceWizard/SystemImageDescriptionGroup';
+import FleetCatalogCompatibilityAlert from './FleetCatalogCompatibilityAlert';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
@@ -46,81 +49,90 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   return (
     <Grid hasGutter>
       <GridItem md={9}>
-        <Card>
-          <CardTitle>{t('Details')}</CardTitle>
-          <CardBody>
-            <DescriptionList columnModifier={{ lg: '3Col' }}>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {getDateDisplay(fleet.metadata.creationTimestamp || '')}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  <FleetStatus fleet={fleet} />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <SystemImage osSpec={fleet.spec.template.spec.os} isFleet={true} />
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Device selector')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  <LabelsView prefix="device" labels={fleet.spec.selector?.matchLabels} />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Up-to-date/devices')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  <FleetDevicesCount
-                    fleetId={fleetId}
-                    devicesSummary={devicesSummary}
-                    error={getFleetRolloutStatusWarning(fleet, t)}
-                  />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <FleetDeltaGenerationContent fleet={fleet} />
-              <DescriptionListGroup>
-                <DescriptionListTerm>{t('Managed by')}</DescriptionListTerm>
-                <DescriptionListDescription>
-                  <FleetOwnerLink owner={fleet.metadata.owner} />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              {osModeCounts && devicesSummary?.total > 0 ? (
-                <DescriptionListGroup>
-                  <DescriptionListTerm>{t('OS mode')}</DescriptionListTerm>
-                  <DescriptionListDescription>
-                    <FleetDetailsOsMode osModeCounts={osModeCounts} />
-                  </DescriptionListDescription>
-                </DescriptionListGroup>
-              ) : null}
+        <Stack hasGutter>
+          <StackItem>
+            <FleetCatalogCompatibilityAlert fleet={fleet} />
+          </StackItem>
+          <StackItem>
+            <Card>
+              <CardTitle>{t('Details')}</CardTitle>
+              <CardBody>
+                <DescriptionList columnModifier={{ lg: '3Col' }}>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Created')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      {getDateDisplay(fleet.metadata.creationTimestamp || '')}
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      <FleetStatus fleet={fleet} />
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                  <SystemImage osSpec={fleet.spec.template.spec.os} isFleet={true} />
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Device selector')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      <LabelsView prefix="device" labels={fleet.spec.selector?.matchLabels} />
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Up-to-date/devices')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      <FleetDevicesCount
+                        fleetId={fleetId}
+                        devicesSummary={devicesSummary}
+                        error={getFleetRolloutStatusWarning(fleet, t)}
+                      />
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                  <FleetDeltaGenerationContent fleet={fleet} />
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>{t('Managed by')}</DescriptionListTerm>
+                    <DescriptionListDescription>
+                      <FleetOwnerLink owner={fleet.metadata.owner} />
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                  {osModeCounts && devicesSummary?.total > 0 ? (
+                    <DescriptionListGroup>
+                      <DescriptionListTerm>{t('OS mode')}</DescriptionListTerm>
+                      <DescriptionListDescription>
+                        <FleetDetailsOsMode osModeCounts={osModeCounts} />
+                      </DescriptionListDescription>
+                    </DescriptionListGroup>
+                  ) : null}
 
-              <DescriptionListGroup>
-                <DescriptionListTerm>
-                  <ConfigurationSourcesHeader count={fleetConfigCount} />
-                </DescriptionListTerm>
-                <DescriptionListDescription>
-                  <RepositorySourcePlainList configs={fleetConfig} />
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-            </DescriptionList>
-          </CardBody>
-        </Card>
+                  <DescriptionListGroup>
+                    <DescriptionListTerm>
+                      <ConfigurationSourcesHeader count={fleetConfigCount} />
+                    </DescriptionListTerm>
+                    <DescriptionListDescription>
+                      <RepositorySourcePlainList configs={fleetConfig} />
+                    </DescriptionListDescription>
+                  </DescriptionListGroup>
+                </DescriptionList>
+              </CardBody>
+            </Card>
+          </StackItem>
 
-        {showVulnerabilities && (
-          <div className="pf-v6-u-mt-md">
-            <FleetVulnerabilities fleetId={fleetId} />
-          </div>
-        )}
+          {showVulnerabilities && (
+            <StackItem>
+              <FleetVulnerabilities fleetId={fleetId} />
+            </StackItem>
+          )}
 
-        {devicesSummary && (
-          <Card className="pf-v6-u-mt-md">
-            <CardTitle>{t('Fleet devices')}</CardTitle>
-            <CardBody>
-              <FleetDevicesCharts fleetId={fleetId} devicesSummary={devicesSummary} />
-            </CardBody>
-          </Card>
-        )}
+          {devicesSummary && (
+            <StackItem>
+              <Card>
+                <CardTitle>{t('Fleet devices')}</CardTitle>
+                <CardBody>
+                  <FleetDevicesCharts fleetId={fleetId} devicesSummary={devicesSummary} />
+                </CardBody>
+              </Card>
+            </StackItem>
+          )}
+        </Stack>
       </GridItem>
       <GridItem md={3}>
         <EventsCard kind={ResourceKind.FLEET} objId={fleetId} />

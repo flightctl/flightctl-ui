@@ -27,6 +27,7 @@ import {
 } from './types';
 import { appTypeIds } from '../useCatalogItems';
 import { getKubernetesDnsSubdomainErrors, validKubernetesDnsSubdomain, validURLSchema } from '../../form/validations';
+import { deviceFeaturesFromApi, deviceFeaturesToApi } from '../../../utils/catalogDeviceFeatures';
 import { appendJSONPatch } from '../../../utils/patches/patch';
 
 const parseYamlField = (value: string): Record<string, unknown> | undefined => {
@@ -46,6 +47,7 @@ const dumpYamlField = (value: Record<string, unknown> | undefined): string => {
 export const getEmptyVersion = (): VersionFormValues => ({
   version: '',
   references: {},
+  deviceFeatures: null,
   channels: [],
   replaces: '',
   skips: '',
@@ -95,7 +97,7 @@ const isAppType = (type: CatalogItemType): boolean => appTypeIds.includes(type);
 
 const isConfigurableType = (type: CatalogItemType): boolean => configurableAppTypes.includes(type);
 
-const formVersionsToApi = (values: AddCatalogItemFormValues) => {
+const formVersionsToApi = (values: AddCatalogItemFormValues, specVersions?: CatalogItemVersion[]) => {
   const configurable = isConfigurableType(values.type as CatalogItemType);
   return values.versions.map((v) => {
     const skips = v.skips
@@ -105,6 +107,7 @@ const formVersionsToApi = (values: AddCatalogItemFormValues) => {
 
     const references = Object.fromEntries(Object.entries(v.references).filter(([, val]) => val.trim() !== ''));
 
+    const originalVersion = specVersions?.find((original) => original.version === v.version);
     const versionDef: CatalogItemVersion = {
       version: v.version,
       references,
@@ -116,6 +119,7 @@ const formVersionsToApi = (values: AddCatalogItemFormValues) => {
       config: configurable ? parseYamlField(v.config) : undefined,
       configSchema: configurable ? parseSchemaField(v.configSchema) : undefined,
       deprecation: v.deprecated ? { message: v.deprecationMessage } : undefined,
+      deviceFeatures: deviceFeaturesToApi(v.deviceFeatures, originalVersion?.deviceFeatures),
     };
 
     return Object.fromEntries(
@@ -241,7 +245,8 @@ export const getCatalogItemPatches = (values: AddCatalogItemFormValues, original
     originalValue: spec.artifacts,
   });
 
-  addVersionPatches(patches, spec.versions, formVersionsToApi(values));
+  const updatedVersions = formVersionsToApi(values, spec.versions);
+  addVersionPatches(patches, spec.versions, updatedVersions);
 
   const newDefaults = formDefaultsToApi(values);
   appendJSONPatch({
@@ -494,6 +499,13 @@ const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: bool
     skips: optionalSemverList(t),
     skipRange: optionalSemverRange(t),
     readme: Yup.string(),
+    deviceFeatures: Yup.object()
+      .shape({
+        gpuPresent: Yup.string(),
+        kvmEnabled: Yup.string(),
+        osMode: Yup.string(),
+      })
+      .nullable(),
     config: configurable ? yamlFieldSchema(t) : Yup.string(),
     configSchema: configurable ? jsonSchemaFieldSchema(t) : Yup.string(),
     deprecated: Yup.boolean(),
@@ -619,6 +631,7 @@ export const getInitialValuesFromItem = (item: CatalogItem): AddCatalogItemFormV
       skips: v.skips?.join(', ') || '',
       skipRange: v.skipRange || '',
       readme: v.readme || '',
+      deviceFeatures: deviceFeaturesFromApi(v.deviceFeatures),
       config: dumpYamlField(v.config as Record<string, unknown> | undefined),
       configSchema: dumpYamlField(v.configSchema as Record<string, unknown> | undefined),
       deprecated: !!v.deprecation,

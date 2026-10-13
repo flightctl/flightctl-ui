@@ -30,6 +30,7 @@ import { applyInitialConfig, getInitialAppConfig } from '../../InstallWizard/uti
 import { type CatalogEditWizardMode, getSortedUpdates, getUpdates } from '../../../../utils/catalog';
 import { type AppUpdateFormik } from '../types';
 import { AdvancedConfigControl } from '../../../CatalogComposition/CatalogDefinitionFields';
+import { getVersionFeatureRequirements } from '../../../CatalogComposition/catalogCompositionUtils';
 
 export const isUpdateStepValid = (errors: FormikErrors<InstallSpecFormik>) => {
   return !errors.version && !errors.channel;
@@ -100,6 +101,10 @@ const UpdateStep = ({
                           const latestVersion = getSortedUpdates(catalogItem, val, currentVersion.version)[0]?.version;
                           const newVersion = latestVersion || currentVersion.version;
                           setFieldValue('version', newVersion);
+                          void setFieldValue(
+                            'featureRequirements',
+                            getVersionFeatureRequirements(catalogItem, newVersion),
+                          );
                           // Keep the current app config when the channel changes.
                           const appConfig = getInitialAppConfig(catalogItem, newVersion, existingApp);
                           applyInitialConfig(setFieldValue, appConfig);

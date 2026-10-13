@@ -3,6 +3,9 @@ import { Trans } from 'react-i18next';
 import {
   Alert,
   Button,
+  Card,
+  CardBody,
+  CardTitle,
   Content,
   ContentVariants,
   DescriptionList,
@@ -31,7 +34,10 @@ import { type Catalog, type CatalogItem, CatalogItemType } from '@flightctl/type
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { getDefaultChannelAndVersion } from '../CatalogComposition/catalogCompositionUtils';
+import {
+  getDefaultChannelAndVersion,
+  getVersionFeatureRequirements,
+} from '../CatalogComposition/catalogCompositionUtils';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { useItemIsInUse } from './useCatalogItems';
 import FlightCtlForm from '../form/FlightCtlForm';
@@ -44,6 +50,7 @@ import FlightCtlPageDrawer from '../common/FlightCtlPageDrawer';
 import CatalogItemIcon from './CatalogItemIcon';
 import { InstallSpec } from './InstallWizard/steps/SpecificationsStep';
 import { type InstallSpecFormik } from './InstallWizard/types';
+import CatalogFeatureRequirements from './CatalogFeatureRequirements';
 
 import './CatalogItemDetails.css';
 
@@ -258,7 +265,9 @@ const CatalogItemDetailsPanel = ({
 }: CatalogItemDetailsPanelProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
+  const {
+    values: { version },
+  } = useFormikContext<InstallSpecFormik>();
   const [itemModalOpen, setItemModalOpen] = React.useState<CatalogItemActions | undefined>(undefined);
   const isInUse = useItemIsInUse(item);
 
@@ -315,6 +324,7 @@ const CatalogItemDetailsPanel = ({
   }
 
   const catalogItemActions = buildAllDropdownActions(regularActions, dangerActions);
+  const deviceFeatures = getVersionFeatureRequirements(item, version);
 
   return (
     <>
@@ -335,6 +345,14 @@ const CatalogItemDetailsPanel = ({
                   <FlightCtlForm>
                     <InstallSpec catalogItem={item} hideReadmeLink />
                   </FlightCtlForm>
+                </StackItem>
+                <StackItem>
+                  <Card isCompact>
+                    <CardTitle>{t('Device requirements')}</CardTitle>
+                    <CardBody>
+                      <CatalogFeatureRequirements deviceFeatures={deviceFeatures} />
+                    </CardBody>
+                  </Card>
                 </StackItem>
                 {item.spec.type === CatalogItemType.CatalogItemTypeData ? (
                   <Alert
@@ -389,7 +407,10 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
     endpoint: `catalogs/${item.metadata.catalog}`,
   });
 
-  const readme = item.spec.versions.find((v) => v.version === version)?.readme;
+  const selectedVersion = item.spec.versions.find((v) => v.version === version);
+  const readme = selectedVersion?.readme;
+  const deviceFeatures = selectedVersion?.deviceFeatures;
+  const hasDeviceFeatures = !!deviceFeatures && Object.keys(deviceFeatures).length > 0;
 
   return (
     <Grid hasGutter>
@@ -425,6 +446,14 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
               <CatalogItemPanelLink link={item.spec.homepage} />
             </DescriptionListDescription>
           </DescriptionListGroup>
+          {hasDeviceFeatures && (
+            <DescriptionListGroup>
+              <DescriptionListTerm>{t('Device requirements')}</DescriptionListTerm>
+              <DescriptionListDescription className="fctl-catalog-item-details">
+                <CatalogFeatureRequirements deviceFeatures={deviceFeatures} />
+              </DescriptionListDescription>
+            </DescriptionListGroup>
+          )}
         </DescriptionList>
       </GridItem>
       <GridItem span={9}>
@@ -444,9 +473,16 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
 };
 
 const CatalogItemDetails = ({ item, onInstall, ...rest }: CatalogItemDetailsProps) => {
-  // reinitialize when item changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const initialValues = React.useMemo(() => getDefaultChannelAndVersion(item), [item.metadata.name]);
+  const initialValues = React.useMemo(() => {
+    const { channel, version } = getDefaultChannelAndVersion(item);
+    return {
+      channel,
+      version,
+      featureRequirements: getVersionFeatureRequirements(item, version),
+    };
+    // reinitialize when item changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.metadata.name]);
 
   return (
     <Formik<InstallSpecFormik>
