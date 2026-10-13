@@ -40,9 +40,8 @@ const (
 	promptSelectAccount = "select_account"
 )
 
-// promptValue determines the best "prompt" parameter to send in the OIDC
-// authorization request based on the provider's advertised
-// prompt_values_supported field.
+// promptValue ensures only a supported prompt value is sent in the OIDC
+// authorization request.
 //
 // prompt_values_supported is OPTIONAL per the OpenID Connect prompt=create
 // extension spec. Most major providers (Google, Entra ID, Okta, PingOne) omit
