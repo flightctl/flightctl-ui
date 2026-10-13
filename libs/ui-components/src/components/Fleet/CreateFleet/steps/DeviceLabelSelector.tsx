@@ -123,7 +123,7 @@ const DeviceLabelSelector = ({ managedKeys, isManagedLabel }: DeviceLabelSelecto
         <StackItem>
           <Alert isInline variant="warning" title={t('Device-reported labels can change fleet membership')}>
             {t(
-              'You selected device-reported labels ({{keys}}). If a device later reports different values, it may leave this fleet or become fleetless. Membership does not roll up when device status changes.',
+              'You selected device-reported labels ({{keys}}). If the value reported by a device changes, the device may unexpectedly leave this fleet.',
               { keys: managedKeys.join(', ') },
             )}
           </Alert>
