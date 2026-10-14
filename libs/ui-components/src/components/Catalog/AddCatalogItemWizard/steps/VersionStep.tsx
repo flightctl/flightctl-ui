@@ -9,13 +9,14 @@ import { CatalogItemArtifactType } from '@flightctl/types/alpha';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { type AddCatalogItemFormValues, type VersionFormValues, configurableAppTypes } from '../types';
 import { getEmptyVersion } from '../utils';
+import DeviceRequirementsFields from '../DeviceRequirementsFields';
+import ChannelsSelect from '../ChannelsSelect';
 import { appTypeIds } from '../../useCatalogItems';
 import TextField from '../../../form/TextField';
 import TextAreaField from '../../../form/TextAreaField';
 import CheckboxField from '../../../form/CheckboxField';
 import FlightCtlForm from '../../../form/FlightCtlForm';
 import ExpandableFormSection from '../../../form/ExpandableFormSection';
-import ChannelsSelect from '../ChannelsSelect';
 import UploadField from '../../../form/UploadField';
 import ErrorHelperText from '../../../form/FieldHelperText';
 import { getArtifactLabel } from '../../../../utils/catalogTypes';
@@ -57,6 +58,7 @@ const VersionEntry = ({
         <ChannelsSelect name={`${prefix}.channels`} availableChannels={availableChannels} isDisabled={isReadOnly} />
       </FormGroup>
       <ReferencesField index={index} isReadOnly={isReadOnly} />
+      <DeviceRequirementsFields namePrefix={prefix} isDisabled={isReadOnly} />
       <FormSection title={t('Updates')}>
         <FormGroup label={t('Replaces')}>
           <TextField

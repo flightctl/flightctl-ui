@@ -25,10 +25,11 @@ import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import UpdateSuccessPage from './UpdateSuccessPage';
 import FlightCtlWizardFooter, { type FlightCtlWizardFooterProps } from '../../common/FlightCtlWizardFooter';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { getInitialAppConfig } from './utils';
 import { useSubmitCatalogForm } from '../useSubmitCatalogForm';
+import { getInitialAppConfig } from './utils';
 import { validApplicationAndVolumeName } from '../../form/validations';
 import { isWizardStepDisabled } from '../../../utils/wizards';
+import { getVersionFeatureRequirements } from '../../CatalogComposition/catalogCompositionUtils';
 
 const orderedIds = [specificationsStepId, selectTargetStepId, appConfigStepId, reviewStepId];
 
@@ -181,6 +182,7 @@ const InstallAppWizard = ({ catalogItem }: InstallAppWizardProps) => {
     return {
       version,
       channel,
+      featureRequirements: getVersionFeatureRequirements(catalogItem, version),
       target: undefined,
       fleet: undefined,
       device: undefined,

@@ -20,6 +20,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { isWizardStepDisabled } from '../../../utils/wizards';
 import { appendJSONPatch } from '../../../utils/patches/patch';
+import { getVersionFeatureRequirements } from '../../CatalogComposition/catalogCompositionUtils';
 
 const getOrderedStepIds = (target: InstallOsFormik['target']) =>
   target === 'new-device'
@@ -161,6 +162,7 @@ const InstallOsWizard = ({ catalogItem }: InstallOsWizardProps) => {
     () => ({
       version,
       channel,
+      featureRequirements: getVersionFeatureRequirements(catalogItem, version),
       target: undefined,
       fleet: undefined,
       device: undefined,

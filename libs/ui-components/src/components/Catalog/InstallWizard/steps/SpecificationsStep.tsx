@@ -1,9 +1,4 @@
-import {
-  type CatalogItem,
-  CatalogItemArtifactType,
-  CatalogItemType,
-  type CatalogItemVersion,
-} from '@flightctl/types/alpha';
+import * as React from 'react';
 import {
   Alert,
   Button,
@@ -22,26 +17,33 @@ import {
   StackItem,
   Title,
 } from '@patternfly/react-core';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
-import * as React from 'react';
 import { type FormikErrors, useFormikContext } from 'formik';
 import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 import { type TFunction } from 'react-i18next';
 
 import type { ApplicationProviderSpec } from '@flightctl/types';
+import {
+  type CatalogItem,
+  CatalogItemArtifactType,
+  CatalogItemType,
+  type CatalogItemVersion,
+} from '@flightctl/types/alpha';
 import { useTranslation } from '../../../../hooks/useTranslation';
-import FlightCtlForm from '../../../form/FlightCtlForm';
-import RadioField from '../../../form/RadioField';
-import FormSelect from '../../../form/FormSelect';
-import { type PermissionCheck, usePermissionsContext } from '../../../common/PermissionsContext';
 import { RESOURCE, VERB } from '../../../../types/rbac';
-import { useFleets } from '../../../Fleet/useFleets';
-import { useDevicesPaginated } from '../../../Device/DevicesPage/useDevices';
-import { applyInitialConfig, getInitialAppConfig } from '../utils';
-import { type InstallAppFormik, type InstallSpecFormik, type TargetPickerFormik } from '../types';
-import WithTooltip from '../../../common/WithTooltip';
 import { getFullContainerURI } from '../../../../utils/catalog';
+import { OS_EXCLUDE_PACKAGE_MODE_FILTERS } from '../../../../utils/status/devices';
+import { getVersionFeatureRequirements } from '../../../CatalogComposition/catalogCompositionUtils';
+import { type PermissionCheck, usePermissionsContext } from '../../../common/PermissionsContext';
+import FlightCtlModal from '../../../common/FlightCtlModal';
+import WithTooltip from '../../../common/WithTooltip';
+import { useDevicesPaginated } from '../../../Device/DevicesPage/useDevices';
+import { useFleets } from '../../../Fleet/useFleets';
+import FlightCtlForm from '../../../form/FlightCtlForm';
+import FormSelect from '../../../form/FormSelect';
+import RadioField from '../../../form/RadioField';
+import { type InstallAppFormik, type InstallSpecFormik, type TargetPickerFormik } from '../types';
+import { applyInitialConfig, getInitialAppConfig } from '../utils';
 
 type VersionDropdownProps = {
   catalogItem: CatalogItem;
@@ -59,6 +61,7 @@ export const VersionDropdown = ({ catalogItem, versions, existingApp }: VersionD
       onChange={(val) => {
         const appConfig = getInitialAppConfig(catalogItem, val, existingApp);
         applyInitialConfig(setFieldValue, appConfig);
+        void setFieldValue('featureRequirements', getVersionFeatureRequirements(catalogItem, val));
       }}
       items={versions.reduce((acc, v) => {
         return {
@@ -137,6 +140,7 @@ export const InstallSpec = ({
                   setFieldValue('version', newVersion, true);
                   const appConfig = getInitialAppConfig(catalogItem, newVersion);
                   applyInitialConfig(setFieldValue, appConfig);
+                  void setFieldValue('featureRequirements', getVersionFeatureRequirements(catalogItem, newVersion));
                 }
               }}
             />
@@ -248,8 +252,9 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
   const newDeviceRadioRef = React.useRef<HTMLSpanElement>(null);
 
   const { isLoading: fleetsLoading, pagination: fleetPagination } = useFleets({ onlyUnmanaged: true });
+  const isOsItem = catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS;
   const { devices, isLoading: devicesLoading } = useDevicesPaginated({
-    excludePackageMode: catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS,
+    selectedFeatures: isOsItem ? OS_EXCLUDE_PACKAGE_MODE_FILTERS : undefined,
   });
 
   const eligibleFleetsCount = fleetPagination.itemCount;
@@ -334,7 +339,7 @@ const SpecificationsStep = ({ catalogItem, showNewDevice }: SpecificationsStepPr
                         checkedValue="device"
                         label={<span ref={deviceRadioRef}>{t('Existing Device')}</span>}
                         description={
-                          catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS
+                          isOsItem
                             ? t(
                                 'Deploy to a single fleetless device. Devices using package-based OS management are excluded.',
                               )

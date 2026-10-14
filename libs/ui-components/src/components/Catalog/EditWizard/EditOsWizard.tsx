@@ -3,16 +3,19 @@ import { Wizard, WizardStep, type WizardStepType } from '@patternfly/react-core'
 import { Formik, type FormikErrors, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 
+import type { Device, Fleet } from '@flightctl/types';
 import type { CatalogItem, CatalogItemVersion } from '@flightctl/types/alpha';
 import { useTranslation } from '../../../hooks/useTranslation';
 import type { InstallSpecFormik } from '../InstallWizard/types';
 import FlightCtlWizardFooter from '../../common/FlightCtlWizardFooter';
+import { getVersionFeatureRequirements } from '../../CatalogComposition/catalogCompositionUtils';
 import { type CatalogEditWizardMode, getSortedUpdates } from '../../../utils/catalog';
 import UpdateStep, { isUpdateStepValid } from './steps/UpdateStep';
 import { getErrorMessage } from '../../../utils/error';
 import ReviewStep from './steps/ReviewStep';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import { isWizardStepDisabled } from '../../../utils/wizards';
+import EditWizardCompatibilityBanners from '../CatalogItemCompatibility/EditWizardCompatibilityBanners';
 
 const versionStepId = 'version-step';
 const reviewStepId = 'review-step';
@@ -42,6 +45,8 @@ type WizardContentProps = {
   error: string | undefined;
   setError: (err: string | undefined) => void;
   isEdit: boolean;
+  targetDevice?: Device;
+  targetFleet?: Fleet;
 };
 
 const WizardContent: React.FC<WizardContentProps> = ({
@@ -51,6 +56,8 @@ const WizardContent: React.FC<WizardContentProps> = ({
   error,
   setError,
   isEdit,
+  targetDevice,
+  targetFleet,
 }) => {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = React.useState<WizardStepType>();
@@ -61,6 +68,7 @@ const WizardContent: React.FC<WizardContentProps> = ({
 
   return (
     <>
+      <EditWizardCompatibilityBanners targetDevice={targetDevice} targetFleet={targetFleet} />
       <LeaveFormConfirmation />
       <Wizard
         footer={
@@ -110,6 +118,8 @@ type EditOsWizardProps = {
   isEdit: boolean;
   version: string;
   channel: string;
+  targetDevice?: Device;
+  targetFleet?: Fleet;
 };
 
 const EditOsWizard: React.FC<EditOsWizardProps> = ({
@@ -121,6 +131,8 @@ const EditOsWizard: React.FC<EditOsWizardProps> = ({
   isEdit,
   version,
   channel,
+  targetDevice,
+  targetFleet,
 }) => {
   const [error, setError] = React.useState<string>();
   const { t } = useTranslation();
@@ -130,13 +142,16 @@ const EditOsWizard: React.FC<EditOsWizardProps> = ({
   });
 
   const latestVersion = getSortedUpdates(catalogItem, currentChannel, currentVersion.version)[0]?.version;
+  const initialVersion = isEdit ? latestVersion || currentVersion.version : version;
+  const initialChannel = isEdit ? currentChannel : channel;
 
   return (
     <Formik<InstallSpecFormik>
       validationSchema={validationSchema}
       initialValues={{
-        version: isEdit ? latestVersion || currentVersion.version : version,
-        channel: isEdit ? currentChannel : channel,
+        version: initialVersion,
+        channel: initialChannel,
+        featureRequirements: getVersionFeatureRequirements(catalogItem, initialVersion),
       }}
       validateOnMount
       onSubmit={async (values) => {
@@ -159,6 +174,8 @@ const EditOsWizard: React.FC<EditOsWizardProps> = ({
         error={error}
         setError={setError}
         isEdit={isEdit}
+        targetDevice={targetDevice}
+        targetFleet={targetFleet}
       />
     </Formik>
   );

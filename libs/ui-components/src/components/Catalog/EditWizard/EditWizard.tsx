@@ -33,6 +33,7 @@ import { RESOURCE, VERB } from '../../../types/rbac';
 import { hasPackageModeCapability } from '../../../utils/capabilities';
 import { appendJSONPatch } from '../../../utils/patches/patch';
 import { type CatalogEditWizardMode, getEditWizardMode } from '../../../utils/catalog';
+import { commonQueries } from '../../../utils/query';
 import EditOsWizard from './EditOsWizard';
 import EditAppWizard from './EditAppWizard';
 
@@ -47,6 +48,8 @@ type EditWizardProps = {
   isDevice: boolean;
   hasPackageMode?: boolean;
   resourceName?: string;
+  targetDevice?: Device;
+  targetFleet?: Fleet;
 };
 
 const EditWizard = ({
@@ -60,6 +63,8 @@ const EditWizard = ({
   isDevice,
   hasPackageMode,
   resourceName,
+  targetDevice,
+  targetFleet,
 }: EditWizardProps) => {
   const { t } = useTranslation();
   const { patch } = useFetch();
@@ -121,6 +126,8 @@ const EditWizard = ({
           currentVersion={currentVersion}
           version={version}
           channel={channel}
+          targetDevice={targetDevice}
+          targetFleet={targetFleet}
           onUpdate={async (catalogItemVersion, values) => {
             const allPatches: PatchRequest = [];
             appendJSONPatch({
@@ -165,6 +172,8 @@ const EditWizard = ({
             currentChannel={currentChannel}
             version={version}
             channel={channel}
+            targetDevice={targetDevice}
+            targetFleet={targetFleet}
             onUpdate={async (catalogItemVersion, values) => {
               const allPatches = getAppPatches({
                 appName: values.appName,
@@ -288,6 +297,7 @@ export const EditDeviceWizard = () => {
         resourceName={device?.metadata.labels?.alias}
         isDevice
         hasPackageMode={hasPackageMode}
+        targetDevice={device}
       />
     </PageWithPermissions>
   );
@@ -305,7 +315,7 @@ export const EditFleetWizard = () => {
   const [canGetItem] = checkPermissions(editWizardPermissions);
 
   const [fleet, loading, error] = useFetchPeriodically<Required<Fleet>>({
-    endpoint: `fleets/${fleetId}`,
+    endpoint: commonQueries.getFleetWithDevicesSummary(fleetId),
   });
   return (
     <PageWithPermissions allowed={canGetItem} loading={permissionsLoading}>
@@ -318,6 +328,7 @@ export const EditFleetWizard = () => {
         specPath="/spec/template/"
         resourceId={fleetId}
         isDevice={false}
+        targetFleet={fleet}
       />
     </PageWithPermissions>
   );

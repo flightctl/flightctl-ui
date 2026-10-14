@@ -3,8 +3,6 @@ import {
   Button,
   Label,
   LabelGroup,
-  SelectList,
-  SelectOption,
   Split,
   SplitItem,
   Toolbar,
@@ -15,19 +13,19 @@ import {
 
 import { useTranslation } from '../../../hooks/useTranslation';
 import {
-  DEVICE_OS_MODE_FILTER_VALUES,
   DEVICE_TEXT_FILTER_KEYS,
-  type DeviceOsModeFilterValue,
+  type DeviceFeatureFilter,
   type DeviceTextFilterKey,
+  getDeviceFeatureFilterLabel,
   getDeviceFilterLabel,
-  getOsModeFilterLabel,
+  toggleFeatureFilterValue,
 } from '../../../utils/status/devices';
 import { labelToString } from '../../../utils/labels';
 import DeviceStatusFilter, { getStatusItem } from './DeviceFilterSelect';
 import type { FilterStatusMap, UpdateStatus } from './types';
 import type { FlightCtlLabel } from '../../../types/extraTypes';
 import DeviceTableToolbarFilters from './DeviceToolbarFilters';
-import FilterSelect from '../../form/FilterSelect';
+import DeviceFeatureFilters from './DeviceFeatureFilters';
 
 type DeviceTableToolbarProps = {
   textFilters: Partial<Record<DeviceTextFilterKey, string>>;
@@ -39,53 +37,12 @@ type DeviceTableToolbarProps = {
   setOnlyFleetless: (enabled: boolean) => void;
   activeStatuses: FilterStatusMap;
   setActiveStatuses: (statuses: FilterStatusMap) => void;
-  selectedOsModes: DeviceOsModeFilterValue[];
-  setSelectedOsModes: (modes: DeviceOsModeFilterValue[]) => void;
+  selectedFeatures: DeviceFeatureFilter[];
+  selectedFeaturesCount: number;
+  setSelectedFeatures: (filters: DeviceFeatureFilter[]) => void;
   selectedLabels: FlightCtlLabel[];
   setSelectedLabels: (labels: FlightCtlLabel[]) => void;
   isFilterUpdating: boolean;
-};
-
-const OsModeFilter = ({
-  selectedOsModes,
-  setSelectedOsModes,
-  isFilterUpdating,
-}: {
-  selectedOsModes: DeviceOsModeFilterValue[];
-  setSelectedOsModes: (modes: DeviceOsModeFilterValue[]) => void;
-  isFilterUpdating: boolean;
-}) => {
-  const { t } = useTranslation();
-
-  const onToggleOsMode = (mode: DeviceOsModeFilterValue) => {
-    if (selectedOsModes.includes(mode)) {
-      setSelectedOsModes(selectedOsModes.filter((m) => m !== mode));
-    } else {
-      setSelectedOsModes([...selectedOsModes, mode]);
-    }
-  };
-
-  return (
-    <FilterSelect
-      selectedFilters={selectedOsModes.length}
-      placeholder={t('OS mode')}
-      isFilterUpdating={isFilterUpdating}
-    >
-      <SelectList>
-        {DEVICE_OS_MODE_FILTER_VALUES.map((mode) => (
-          <SelectOption
-            key={mode}
-            hasCheckbox
-            value={mode}
-            isSelected={selectedOsModes.includes(mode)}
-            onClick={() => onToggleOsMode(mode)}
-          >
-            {getOsModeFilterLabel(t, mode)}
-          </SelectOption>
-        ))}
-      </SelectList>
-    </FilterSelect>
-  );
 };
 
 const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarProps>> = ({ children, ...rest }) => {
@@ -96,8 +53,9 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
     setTextFilter,
     activeStatuses,
     setActiveStatuses,
-    selectedOsModes,
-    setSelectedOsModes,
+    selectedFeatures,
+    selectedFeaturesCount,
+    setSelectedFeatures,
     selectedLabels,
     setSelectedLabels,
     isFilterUpdating,
@@ -139,9 +97,10 @@ const DeviceTableToolbar: React.FC<React.PropsWithChildren<DeviceTableToolbarPro
               />
             </ToolbarItem>
             <ToolbarItem>
-              <OsModeFilter
-                selectedOsModes={selectedOsModes}
-                setSelectedOsModes={setSelectedOsModes}
+              <DeviceFeatureFilters
+                selectedFeatures={selectedFeatures}
+                selectedFeaturesCount={selectedFeaturesCount}
+                setSelectedFeatures={setSelectedFeatures}
                 isFilterUpdating={isFilterUpdating}
               />
             </ToolbarItem>
@@ -178,8 +137,9 @@ const DeviceToolbarChips = ({
   setOwnerFleets,
   onlyFleetless,
   setOnlyFleetless,
-  selectedOsModes,
-  setSelectedOsModes,
+  selectedFeatures,
+  selectedFeaturesCount,
+  setSelectedFeatures,
   selectedLabels,
   setSelectedLabels,
 }: DeviceToolbarChipsProps) => {
@@ -187,13 +147,17 @@ const DeviceToolbarChips = ({
   const statusKeys = Object.keys(activeStatuses).filter((k) => !!activeStatuses[k as keyof FilterStatusMap].length);
   const activeTextFilterKeys = DEVICE_TEXT_FILTER_KEYS.filter((key) => !!textFilters[key]);
 
+  const featureChips = selectedFeatures.flatMap((feature) =>
+    feature.values.map((value) => ({ featureId: feature.fieldId, value })),
+  );
+
   const hasAnyFilter =
     !!statusKeys.length ||
     !!ownerFleets.length ||
     onlyFleetless ||
     !!activeTextFilterKeys.length ||
     !!selectedLabels.length ||
-    !!selectedOsModes.length;
+    selectedFeaturesCount > 0;
 
   return (
     <Split hasGutter>
@@ -270,16 +234,16 @@ const DeviceToolbarChips = ({
           </LabelGroup>
         </SplitItem>
       )}
-      {selectedOsModes.length > 0 && (
+      {featureChips.length > 0 && (
         <SplitItem>
-          <LabelGroup categoryName={t('OS mode')} isClosable onClick={() => setSelectedOsModes([])}>
-            {selectedOsModes.map((mode) => (
+          <LabelGroup categoryName={t('Device requirements')} isClosable onClick={() => setSelectedFeatures([])}>
+            {featureChips.map(({ featureId, value }) => (
               <Label
                 variant="outline"
-                key={mode}
-                onClose={() => setSelectedOsModes(selectedOsModes.filter((m) => m !== mode))}
+                key={`${featureId}-${value}`}
+                onClose={() => setSelectedFeatures(toggleFeatureFilterValue(selectedFeatures, featureId, value))}
               >
-                {getOsModeFilterLabel(t, mode)}
+                {getDeviceFeatureFilterLabel(t, featureId, value)}
               </Label>
             ))}
           </LabelGroup>
@@ -295,7 +259,7 @@ const DeviceToolbarChips = ({
               setOnlyFleetless(false);
               clearTextFilters();
               setSelectedLabels([]);
-              setSelectedOsModes([]);
+              setSelectedFeatures([]);
             }}
           >
             {t('Clear all filters')}

@@ -7,7 +7,6 @@ import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useDeviceOwnerFleet } from '../../../hooks/useDeviceOwnerFleet';
 import { getErrorMessage } from '../../../utils/error';
-import { hasPackageModeCapability } from '../../../utils/capabilities';
 import ResourceCatalogPage from '../../Catalog/ResourceCatalog/ResourceCatalogPage';
 
 type DeviceDetailsCatalogProps = {
@@ -41,26 +40,19 @@ const DeviceDetailsCatalog = ({ device, refetch, canEdit }: DeviceDetailsCatalog
     );
   }
 
-  const hasPackageMode = hasPackageModeCapability(device);
-
   return hasOwnerFleet ? (
     <ResourceCatalogPage
+      targetFleet={ownerFleet}
       canEdit={false}
-      hasOwner
-      hasPackageMode={hasPackageMode}
       onPatch={async () => {}}
-      spec={ownerFleet?.spec.template.spec}
-      specPath="/spec/template/"
       onEdit={() => {}}
       onInstall={() => {}}
     />
   ) : (
     <ResourceCatalogPage
+      targetDevice={device}
       canEdit={canEdit}
       onPatch={onPatch}
-      spec={device.spec}
-      specPath="/"
-      hasPackageMode={hasPackageMode}
       onEdit={(id, mode) => {
         const params = new URLSearchParams({
           mode,

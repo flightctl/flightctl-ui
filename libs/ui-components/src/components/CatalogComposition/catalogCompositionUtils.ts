@@ -3,12 +3,20 @@ import semver from 'semver';
 import { load } from 'js-yaml';
 import validator from '@rjsf/validator-ajv8';
 import type { RJSFSchema, RJSFValidationError } from '@rjsf/utils';
-import type { ApplicationProviderSpec, CatalogItemRefSpec } from '@flightctl/types';
-import { type CatalogItem, CatalogItemCategory, type CatalogItemVersion } from '@flightctl/types/alpha';
 import type { TFunction } from 'i18next';
+
+import { type ApplicationProviderSpec, type CatalogItemRefSpec, OsModeType } from '@flightctl/types';
+import {
+  type CatalogItem,
+  CatalogItemCategory,
+  CatalogItemType,
+  type CatalogItemVersion,
+  type DeviceFeatures,
+} from '@flightctl/types/alpha';
 
 import type { ApplicationEntry, CatalogAppForm } from '../../types/deviceSpec';
 import { buildCatalogApplicationSpec, buildCatalogItemRef } from '../../utils/catalog';
+import { DEVICE_FEATURE_OS_MODE } from '../../utils/catalogDeviceFeatures';
 import { toValidApplicationName, validApplicationAndVolumeName } from '../form/validations';
 import { getInitialAppConfig } from '../Catalog/InstallWizard/utils';
 import type { DynamicFormConfigFormik } from '../Catalog/InstallWizard/types';
@@ -37,6 +45,21 @@ export const getAppNameValidationSchema = (t: TFunction) =>
   Yup.object().shape({
     appName: validApplicationAndVolumeName(t).required(t('Application name is required')),
   });
+
+export const getVersionFeatureRequirements = (
+  catalogItem: CatalogItem,
+  version: string | undefined,
+): DeviceFeatures | undefined => {
+  const versionFeatures = catalogItem.spec.versions.find((v) => v.version === version)?.deviceFeatures;
+  // OS catalog items require image-mode devices; the API rejects package-mode OS targets.
+  if (catalogItem.spec.type === CatalogItemType.CatalogItemTypeOS) {
+    return {
+      ...(versionFeatures || {}),
+      [DEVICE_FEATURE_OS_MODE]: OsModeType.OsModeImage,
+    };
+  }
+  return versionFeatures;
+};
 
 /** Shared Formik/Yup validation for catalog advanced config (form view or YAML editor). */
 export const validateCatalogAdvancedConfig = (

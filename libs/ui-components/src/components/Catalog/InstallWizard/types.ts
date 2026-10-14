@@ -1,5 +1,5 @@
 import type { Device, Fleet } from '@flightctl/types';
-import type { CatalogItemArtifactType } from '@flightctl/types/alpha';
+import type { CatalogItemArtifactType, DeviceFeatures } from '@flightctl/types/alpha';
 
 export const specificationsStepId = 'specifications';
 export const selectTargetStepId = 'select-target';
@@ -9,6 +9,7 @@ export const reviewStepId = 'review';
 export type InstallSpecFormik = {
   version: string;
   channel: string;
+  featureRequirements?: DeviceFeatures;
 };
 
 export type TargetPickerFormik = {

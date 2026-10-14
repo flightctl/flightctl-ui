@@ -1,14 +1,8 @@
 import { useDebounce } from 'use-debounce';
 
+import { type Device, DeviceLifecycleStatusType, type DeviceList, type DevicesSummary } from '@flightctl/types';
 import {
-  type Device,
-  DeviceLifecycleStatusType,
-  type DeviceList,
-  type DevicesSummary,
-  OsModeType,
-} from '@flightctl/types';
-import {
-  type DeviceOsModeFilterValue,
+  type DeviceFeatureFilter,
   type DeviceTextFilterKey,
   FilterSearchParams,
   isValidCveIdFilterValue,
@@ -30,9 +24,8 @@ type DevicesEndpointArgs = {
   ownerFleets?: string[];
   onlyFleetless?: boolean;
   activeStatuses?: FilterStatusMap;
-  selectedOsModes?: DeviceOsModeFilterValue[];
+  selectedFeatures?: DeviceFeatureFilter[];
   onlyDecommissioned?: boolean;
-  excludePackageMode?: boolean;
   labels?: FlightCtlLabel[];
   summaryOnly?: boolean;
   nextContinue?: string;
@@ -52,11 +45,10 @@ const getDevicesEndpoint = ({
   textFilters,
   ownerFleets,
   activeStatuses,
-  selectedOsModes,
+  selectedFeatures,
   labels,
   onlyDecommissioned,
   onlyFleetless,
-  excludePackageMode,
   nextContinue,
   summaryOnly,
 }: DevicesEndpointArgs) => {
@@ -71,7 +63,6 @@ const getDevicesEndpoint = ({
   queryUtils.addQueryConditions(fieldSelectors, 'status.applicationsSummary.status', filterByAppStatus);
   queryUtils.addQueryConditions(fieldSelectors, 'status.summary.status', filterByDevStatus);
   queryUtils.addQueryConditions(fieldSelectors, 'status.updated.status', filterByUpdateStatus);
-  queryUtils.addOsModeQueryConditions(fieldSelectors, selectedOsModes);
 
   if (nameOrAlias) {
     queryUtils.addTextContainsCondition(fieldSelectors, 'metadata.nameOrAlias', nameOrAlias);
@@ -93,11 +84,6 @@ const getDevicesEndpoint = ({
     queryUtils.addQueryConditions(fieldSelectors, 'status.lifecycle.status', enrolledStatuses);
   }
 
-  if (excludePackageMode) {
-    // Only exclude devices known to be in package mode. Keep devices that did not report package mode yet.
-    fieldSelectors.push(`status.capabilities.osMode!=${OsModeType.OsModePackage}`);
-  }
-
   const params = new URLSearchParams();
   if (fieldSelectors.length > 0) {
     params.set('fieldSelector', fieldSelectors.join(','));
@@ -105,7 +91,7 @@ const getDevicesEndpoint = ({
   if (cveId && isValidCveIdFilterValue(cveId)) {
     params.set('cveId', cveId);
   }
-  queryUtils.setLabelParams(params, labels);
+  queryUtils.setLabelParams(params, labels, queryUtils.buildDeviceFeatureLabelSelectors(selectedFeatures));
   if (summaryOnly) {
     params.set('summaryOnly', 'true');
   }
@@ -152,7 +138,7 @@ export const useDevices = (args: {
   textFilters?: Partial<Record<DeviceTextFilterKey, string>>;
   ownerFleets?: string[];
   activeStatuses?: FilterStatusMap;
-  selectedOsModes?: DeviceOsModeFilterValue[];
+  selectedFeatures?: DeviceFeatureFilter[];
   labels?: FlightCtlLabel[];
   onlyDecommissioned: boolean;
   nextContinue?: string;
@@ -195,15 +181,15 @@ export type DevicesPaginatedResult = {
  */
 export const useDevicesPaginated = ({
   deviceNameFilter,
-  excludePackageMode,
+  selectedFeatures,
 }: {
   deviceNameFilter?: string;
-  excludePackageMode?: boolean;
+  selectedFeatures?: DeviceFeatureFilter[];
 } = {}): DevicesPaginatedResult => {
   const pagination = useTablePagination<DeviceList>();
 
   useResetPaginationOnFilterChange(
-    `${deviceNameFilter || ''}|${excludePackageMode ?? false}`,
+    `${deviceNameFilter || ''}|${JSON.stringify(selectedFeatures || [])}`,
     pagination.setCurrentPage,
   );
 
@@ -217,7 +203,7 @@ export const useDevicesPaginated = ({
     textFilters,
     onlyDecommissioned: false,
     onlyFleetless: true,
-    excludePackageMode,
+    selectedFeatures,
     nextContinue: pagination.nextContinue,
   });
 

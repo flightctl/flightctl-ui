@@ -75,7 +75,7 @@ const DeviceInformationCard = ({
           </StackItem>
           <StackItem>
             <Title headingLevel="h3" size="md">
-              {t('Capabilities')}
+              {t('Device features')}
             </Title>
           </StackItem>
           <StackItem>

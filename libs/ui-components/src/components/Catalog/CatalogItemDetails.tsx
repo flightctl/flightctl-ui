@@ -3,6 +3,9 @@ import { Trans } from 'react-i18next';
 import {
   Alert,
   Button,
+  Card,
+  CardBody,
+  CardTitle,
   Content,
   ContentVariants,
   DescriptionList,
@@ -27,11 +30,15 @@ import ReactMarkdown from 'react-markdown';
 import { Formik, useFormikContext } from 'formik';
 import { ActionsColumn, type IAction } from '@patternfly/react-table';
 
+import { type Device, type Fleet } from '@flightctl/types';
 import { type Catalog, type CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
 import { useFetchPeriodically } from '../../hooks/useFetchPeriodically';
-import { getDefaultChannelAndVersion } from '../CatalogComposition/catalogCompositionUtils';
+import {
+  getDefaultChannelAndVersion,
+  getVersionFeatureRequirements,
+} from '../CatalogComposition/catalogCompositionUtils';
 import { ROUTE, useNavigate } from '../../hooks/useNavigate';
 import { useItemIsInUse } from './useCatalogItems';
 import FlightCtlForm from '../form/FlightCtlForm';
@@ -44,6 +51,7 @@ import FlightCtlPageDrawer from '../common/FlightCtlPageDrawer';
 import CatalogItemIcon from './CatalogItemIcon';
 import { InstallSpec } from './InstallWizard/steps/SpecificationsStep';
 import { type InstallSpecFormik } from './InstallWizard/types';
+import CatalogFeatureRequirements from './CatalogItemCompatibility/CatalogFeatureRequirements';
 
 import './CatalogItemDetails.css';
 
@@ -53,10 +61,10 @@ type CatalogItemDetailsPanelProps = {
   item: CatalogItem;
   onClose: VoidFunction;
   canInstall: boolean;
-  targetHasOwner?: boolean;
+  targetDevice?: Device;
+  targetFleet?: Fleet;
   refetch: VoidFunction;
   showCatalogMgmt: boolean;
-  targetSet: boolean;
 };
 
 type CatalogItemDetailsProps = CatalogItemDetailsPanelProps & {
@@ -249,16 +257,18 @@ const CatalogItemDeployButton = ({ item, canInstall, targetHasOwner, targetSet }
 
 const CatalogItemDetailsPanel = ({
   item,
+  targetDevice,
+  targetFleet,
   onClose,
   canInstall,
-  targetHasOwner,
   refetch,
   showCatalogMgmt,
-  targetSet,
 }: CatalogItemDetailsPanelProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
+  const {
+    values: { version },
+  } = useFormikContext<InstallSpecFormik>();
   const [itemModalOpen, setItemModalOpen] = React.useState<CatalogItemActions | undefined>(undefined);
   const isInUse = useItemIsInUse(item);
 
@@ -315,6 +325,7 @@ const CatalogItemDetailsPanel = ({
   }
 
   const catalogItemActions = buildAllDropdownActions(regularActions, dangerActions);
+  const deviceFeatures = getVersionFeatureRequirements(item, version);
 
   return (
     <>
@@ -336,6 +347,18 @@ const CatalogItemDetailsPanel = ({
                     <InstallSpec catalogItem={item} hideReadmeLink />
                   </FlightCtlForm>
                 </StackItem>
+                <StackItem>
+                  <Card isCompact>
+                    <CardTitle>{t('Device requirements')}</CardTitle>
+                    <CardBody>
+                      <CatalogFeatureRequirements
+                        deviceFeatures={deviceFeatures}
+                        targetDevice={targetDevice}
+                        targetFleet={targetFleet}
+                      />
+                    </CardBody>
+                  </Card>
+                </StackItem>
                 {item.spec.type === CatalogItemType.CatalogItemTypeData ? (
                   <Alert
                     variant="info"
@@ -347,8 +370,8 @@ const CatalogItemDetailsPanel = ({
                     <CatalogItemDeployButton
                       item={item}
                       canInstall={canInstall}
-                      targetHasOwner={targetHasOwner}
-                      targetSet={targetSet}
+                      targetHasOwner={Boolean(targetDevice?.metadata.owner || targetFleet?.metadata.owner)}
+                      targetSet={Boolean(targetDevice || targetFleet)}
                     />
                   </StackItem>
                 )}
@@ -389,8 +412,8 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
     endpoint: `catalogs/${item.metadata.catalog}`,
   });
 
-  const readme = item.spec.versions.find((v) => v.version === version)?.readme;
-
+  const selectedVersion = item.spec.versions.find((v) => v.version === version);
+  const readme = selectedVersion?.readme;
   return (
     <Grid hasGutter>
       <GridItem span={3}>
@@ -444,9 +467,16 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
 };
 
 const CatalogItemDetails = ({ item, onInstall, ...rest }: CatalogItemDetailsProps) => {
-  // reinitialize when item changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const initialValues = React.useMemo(() => getDefaultChannelAndVersion(item), [item.metadata.name]);
+  const initialValues = React.useMemo(() => {
+    const { channel, version } = getDefaultChannelAndVersion(item);
+    return {
+      channel,
+      version,
+      featureRequirements: getVersionFeatureRequirements(item, version),
+    };
+    // reinitialize when item changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.metadata.name]);
 
   return (
     <Formik<InstallSpecFormik>

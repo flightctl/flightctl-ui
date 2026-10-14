@@ -12,9 +12,11 @@ import {
   buildSelectionConfirm,
   getAppNameValidationSchema,
   getSortedChannelVersions,
+  getVersionFeatureRequirements,
   isAdvancedConfigRequired,
 } from './catalogCompositionUtils';
 import CatalogDefinitionFields from './CatalogDefinitionFields';
+import CatalogAddCompatibilityInfo from '../Catalog/CatalogItemCompatibility/CatalogAddCompatibilityInfo';
 
 export type ConfigureFormValues = {
   channel: string;
@@ -66,6 +68,8 @@ const CatalogAddAppContent = ({ catalogItem, onBack }: { catalogItem: CatalogIte
     return acc;
   }, {});
 
+  const featureRequirements = getVersionFeatureRequirements(catalogItem, values.version);
+
   return (
     <>
       <FlightCtlForm>
@@ -99,6 +103,9 @@ const CatalogAddAppContent = ({ catalogItem, onBack }: { catalogItem: CatalogIte
               </FormGroup>
             </StackItem>
           </CatalogDefinitionFields>
+          <StackItem>
+            <CatalogAddCompatibilityInfo featureRequirements={featureRequirements} />
+          </StackItem>
         </Stack>
       </FlightCtlForm>
       <ModalFooter>

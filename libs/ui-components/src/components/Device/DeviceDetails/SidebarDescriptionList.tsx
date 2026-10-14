@@ -6,11 +6,12 @@ import {
   DescriptionListGroup,
   DescriptionListTerm,
 } from '@patternfly/react-core';
-import { type DeviceStatus } from '@flightctl/types';
 
+import type { DeviceGpu, DeviceStatus } from '@flightctl/types';
+import { DeviceFeatureBoolean } from '@flightctl/types/alpha';
 import type { SystemInfoEntry } from '../../../hooks/useDeviceSystemInfo';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { getDeviceCapability } from '../../../utils/capabilities';
+import { getKvmFeature } from '../../../utils/capabilities';
 import { OsModeLabel } from '../../common/OsModeContent';
 import LabelWithHelperText from '../../common/WithHelperText';
 import SystemInfoDescriptionGroup from './SystemInfoDescriptionGroup';
@@ -66,17 +67,51 @@ export const SystemInfoFieldsList = ({ entries }: { entries: SystemInfoEntry[] }
   </SidebarDescriptionList>
 );
 
-export const CapabilitiesFieldsList = ({ deviceStatus }: { deviceStatus: DeviceStatus | undefined }) => {
+const CapabilityValue = ({ value }: { value: DeviceFeatureBoolean | undefined }) => {
   const { t } = useTranslation();
 
-  const osModeCapability = getDeviceCapability(deviceStatus?.capabilities, 'osMode');
+  switch (value) {
+    case DeviceFeatureBoolean.DeviceFeatureBooleanTrue:
+      return t('Enabled');
+    case DeviceFeatureBoolean.DeviceFeatureBooleanFalse:
+      return t('Disabled');
+    default:
+      return t('Unknown');
+  }
+};
+
+const GpuCapabilityValue = ({ gpus }: { gpus: DeviceGpu[] | undefined }) => {
+  const { t } = useTranslation();
+  if (!gpus) {
+    return t('Unknown');
+  }
+  if (gpus.length === 0) {
+    return t('No GPUs found');
+  }
+  return <>{gpus.map((gpu) => `${gpu.vendor} ${gpu.model}`).join(', ')}</>;
+};
+
+export const CapabilitiesFieldsList = ({ deviceStatus }: { deviceStatus: DeviceStatus | undefined }) => {
+  const { t } = useTranslation();
 
   return (
     <SidebarDescriptionList>
       <DescriptionListGroup>
         <DescriptionListTerm>{t('OS mode')}</DescriptionListTerm>
         <DescriptionListDescription>
-          <OsModeLabel osMode={osModeCapability} />
+          <OsModeLabel osMode={deviceStatus?.systemInfo?.osMode} />
+        </DescriptionListDescription>
+      </DescriptionListGroup>
+      <DescriptionListGroup>
+        <DescriptionListTerm>{t('KVM virtualization')}</DescriptionListTerm>
+        <DescriptionListDescription>
+          <CapabilityValue value={getKvmFeature(deviceStatus)} />
+        </DescriptionListDescription>
+      </DescriptionListGroup>
+      <DescriptionListGroup>
+        <DescriptionListTerm>{t('GPU')}</DescriptionListTerm>
+        <DescriptionListDescription>
+          <GpuCapabilityValue gpus={deviceStatus?.systemInfo?.gpus} />
         </DescriptionListDescription>
       </DescriptionListGroup>
       <DeltaGenerationDescriptionGroups deviceStatus={deviceStatus} />
