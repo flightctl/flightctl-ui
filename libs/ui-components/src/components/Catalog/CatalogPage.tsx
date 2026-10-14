@@ -243,7 +243,8 @@ export const CatalogPageContent = ({
       )
     : undefined;
 
-  const filterIsEmpty = catalogFilter.itemType.length === 0 && !catalogFilter.nameFilter.trim();
+  const filterIsEmpty =
+    catalogFilter.itemType.length === 0 && !catalogFilter.nameFilter.trim() && catalogFilter.catalogs.length === 0;
 
   const onSelectItem = React.useCallback((selection: CatalogItem) => {
     setSelectedItem((val) => {
