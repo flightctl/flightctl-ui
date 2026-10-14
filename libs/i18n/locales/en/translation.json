@@ -1268,7 +1268,7 @@
   "Add labels to select devices, or add device-reported labels (shown in gray) when organizing by device status.": "Add labels to select devices, or add device-reported labels (shown in gray) when organizing by device status.",
   "Add label or device-reported label": "Add label or device-reported label",
   "Device-reported labels can change fleet membership": "Device-reported labels can change fleet membership",
-  "You selected device-reported labels ({{keys}}). If a device later reports different values, it may leave this fleet or become fleetless. Membership does not roll up when device status changes.": "You selected device-reported labels ({{keys}}). If a device later reports different values, it may leave this fleet or become fleetless. Membership does not roll up when device status changes.",
+  "You selected device-reported labels ({{keys}}). If the value reported by a device changes, the device may unexpectedly leave this fleet.": "You selected device-reported labels ({{keys}}). If the value reported by a device changes, the device may unexpectedly leave this fleet.",
   "Fleet name": "Fleet name",
   "Fleet labels": "Fleet labels",
   "Device selector": "Device selector",
