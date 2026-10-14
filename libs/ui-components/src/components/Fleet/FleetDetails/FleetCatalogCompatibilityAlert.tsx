@@ -7,24 +7,22 @@ import type { DeviceFeatures } from '@flightctl/types/alpha';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { mergeDeviceFeatures } from '../../../utils/catalogDeviceFeatures';
 import { useCatalogItemsContext } from '../../Catalog/CatalogItemsContext';
-import { FleetCatalogItemCompatibilityAlert } from '../../Catalog/CatalogItemCompatibilityAlert';
+import { FleetCatalogItemCompatibilityAlert } from '../../Catalog/CatalogItemCompatibility/CatalogItemCompatibilityAlert';
 import { getVersionFeatureRequirements } from '../../CatalogComposition/catalogCompositionUtils';
 
-/**
- * Warns on fleet details when some devices may not meet the combined device-feature
- * requirements of catalog items currently deployed on the fleet template.
- * Uses one compatibility count query for this fleet (not per-fleet list queries).
- */
+// Placement: Fleet details page (above the main content).
+// Condition: Fleet template has deployed catalog items with device features, catalog items are
+// loaded, requirements are not contradictory, and some devices may not meet the merged requirements.
 const FleetCatalogCompatibilityAlert = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
   const { getItem, isLoading, catalogItemIds } = useCatalogItemsContext();
 
-  const { allFeatureRequirements, hasContradingRequirements } = React.useMemo((): {
+  const { allFeatureRequirements, hasContradictingRequirements } = React.useMemo((): {
     allFeatureRequirements: DeviceFeatures | undefined;
-    hasContradingRequirements: boolean;
+    hasContradictingRequirements: boolean;
   } => {
     if (isLoading || catalogItemIds.length === 0) {
-      return { allFeatureRequirements: undefined, hasContradingRequirements: false };
+      return { allFeatureRequirements: undefined, hasContradictingRequirements: false };
     }
     try {
       return {
@@ -37,17 +35,17 @@ const FleetCatalogCompatibilityAlert = ({ fleet }: { fleet: Fleet }) => {
             return getVersionFeatureRequirements(item, ref.version);
           }),
         ),
-        hasContradingRequirements: false,
+        hasContradictingRequirements: false,
       };
     } catch {
-      return { allFeatureRequirements: undefined, hasContradingRequirements: true };
+      return { allFeatureRequirements: undefined, hasContradictingRequirements: true };
     }
   }, [catalogItemIds, getItem, isLoading]);
 
   const fleetName = fleet.metadata.name as string;
   const totalDevices = fleet.status?.devicesSummary?.total || 0;
 
-  if (hasContradingRequirements) {
+  if (hasContradictingRequirements) {
     return (
       <Alert isInline variant="danger" title={t('Catalog requirements conflict')}>
         {t(

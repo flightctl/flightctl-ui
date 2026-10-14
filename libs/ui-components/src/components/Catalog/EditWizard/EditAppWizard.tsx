@@ -23,7 +23,7 @@ import {
   getVersionFeatureRequirements,
   isAdvancedConfigRequired,
 } from '../../CatalogComposition/catalogCompositionUtils';
-import EditWizardCompatibilityBanners from './EditWizardCompatibilityBanners';
+import EditWizardCompatibilityBanners from '../CatalogItemCompatibility/EditWizardCompatibilityBanners';
 
 const versionStepId = 'version-step';
 const configStepId = 'config-step';

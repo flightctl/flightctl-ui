@@ -15,7 +15,7 @@ import { getErrorMessage } from '../../../utils/error';
 import ReviewStep from './steps/ReviewStep';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import { isWizardStepDisabled } from '../../../utils/wizards';
-import EditWizardCompatibilityBanners from './EditWizardCompatibilityBanners';
+import EditWizardCompatibilityBanners from '../CatalogItemCompatibility/EditWizardCompatibilityBanners';
 
 const versionStepId = 'version-step';
 const reviewStepId = 'review-step';

@@ -24,7 +24,7 @@ import FlightCtlForm from '../../../form/FlightCtlForm';
 import {
   DeviceCatalogItemCompatibilityAlert,
   FleetCatalogItemCompatibilityAlert,
-} from '../../CatalogItemCompatibilityAlert';
+} from '../../CatalogItemCompatibility/CatalogItemCompatibilityAlert';
 import { isSameCatalogRef } from '../utils';
 
 const isOsUnset = (osSpec: ImageOrCatalogItemRefSpec | undefined) => !(osSpec?.image || osSpec?.catalogItemRef);
@@ -163,14 +163,18 @@ const ReviewStep = ({ error, catalogItem }: ReviewStepProps) => {
         </StackItem>
         {isOsCatalogItem && <UpdateOsUpdateAlerts catalogItem={catalogItem} />}
         {isDeviceTarget && values.device && (
-          <DeviceCatalogItemCompatibilityAlert device={values.device} featureRequirements={featureRequirements} />
+          <StackItem>
+            <DeviceCatalogItemCompatibilityAlert device={values.device} featureRequirements={featureRequirements} />
+          </StackItem>
         )}
         {isFleetTarget && (
-          <FleetCatalogItemCompatibilityAlert
-            fleetName={resourceMeta?.name as string}
-            featureRequirements={featureRequirements}
-            totalDevices={values.fleet?.status?.devicesSummary?.total || 0}
-          />
+          <StackItem>
+            <FleetCatalogItemCompatibilityAlert
+              fleetName={resourceMeta?.name as string}
+              featureRequirements={featureRequirements}
+              totalDevices={values.fleet?.status?.devicesSummary?.total || 0}
+            />
+          </StackItem>
         )}
         <StackItem>
           <Card>

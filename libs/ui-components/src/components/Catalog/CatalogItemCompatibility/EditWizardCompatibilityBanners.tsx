@@ -1,39 +1,32 @@
 import * as React from 'react';
-import { Alert, Stack, StackItem } from '@patternfly/react-core';
+import { Stack, StackItem } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 
 import type { Device, Fleet } from '@flightctl/types';
 
-import { useTranslation } from '../../../hooks/useTranslation';
-import CatalogFeatureRequirements from '../CatalogFeatureRequirements';
+import type { InstallSpecFormik } from '../InstallWizard/types';
 import {
   DeviceCatalogItemCompatibilityAlert,
   FleetCatalogItemCompatibilityAlert,
-} from '../CatalogItemCompatibilityAlert';
-import type { InstallSpecFormik } from '../InstallWizard/types';
+} from './CatalogItemCompatibilityAlert';
 
 type EditWizardCompatibilityBannersProps = {
   targetDevice?: Device;
   targetFleet?: Fleet;
 };
 
-/** Requirements + target compatibility alerts shown above the edit/deploy catalog wizard. */
+// Placement: Fleet/Device catalog tab --> Edit/Deploy catalog item. (Seen above the wizard content)
+// Condition: A target device or fleet is set (always true in this entry path).
 const EditWizardCompatibilityBanners = ({ targetDevice, targetFleet }: EditWizardCompatibilityBannersProps) => {
-  const { t } = useTranslation();
   const { values } = useFormikContext<InstallSpecFormik>();
-  const featureRequirements = values.featureRequirements;
 
   if (!targetDevice && !targetFleet) {
     return null;
   }
 
+  const featureRequirements = values.featureRequirements;
   return (
     <Stack hasGutter className="pf-v6-u-m-md" style={{ height: 'fit-content' }}>
-      <StackItem>
-        <Alert isInline variant="info" title={t('Device requirements')}>
-          <CatalogFeatureRequirements deviceFeatures={featureRequirements} />
-        </Alert>
-      </StackItem>
       {!!targetDevice && (
         <StackItem>
           <DeviceCatalogItemCompatibilityAlert device={targetDevice} featureRequirements={featureRequirements} />

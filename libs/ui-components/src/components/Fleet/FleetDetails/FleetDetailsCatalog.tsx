@@ -29,11 +29,9 @@ const FleetDetailsCatalog = ({ fleet, refetch }: FleetDetailsCatalogProps) => {
 
   return (
     <ResourceCatalogPage
+      targetFleet={fleet}
       canEdit={canEdit && !fleet.metadata.owner}
-      hasOwner={!!fleet.metadata.owner}
       onPatch={onPatch}
-      spec={fleet.spec.template.spec}
-      specPath="/spec/template/"
       onEdit={(id, mode) => {
         const params = new URLSearchParams({
           mode,

@@ -19,7 +19,7 @@ import { getErrorMessage } from '../../../../utils/error';
 import { appTypeIds } from '../../useCatalogItems';
 import { getArtifactLabel } from '../../../../utils/catalogTypes';
 import { deviceFeaturesToApi } from '../../../../utils/catalogDeviceFeatures';
-import CatalogFeatureRequirements from '../../CatalogFeatureRequirements';
+import CatalogFeatureRequirements from '../../CatalogItemCompatibility/CatalogFeatureRequirements';
 
 export const reviewStepId = 'review';
 

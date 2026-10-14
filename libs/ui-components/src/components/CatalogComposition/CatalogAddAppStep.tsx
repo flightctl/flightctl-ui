@@ -16,7 +16,7 @@ import {
   isAdvancedConfigRequired,
 } from './catalogCompositionUtils';
 import CatalogDefinitionFields from './CatalogDefinitionFields';
-import CatalogAddCompatibilityInfo from './CatalogAddCompatibilityInfo';
+import CatalogAddCompatibilityInfo from '../Catalog/CatalogItemCompatibility/CatalogAddCompatibilityInfo';
 
 export type ConfigureFormValues = {
   channel: string;

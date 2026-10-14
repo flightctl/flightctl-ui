@@ -5,23 +5,24 @@ import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/exter
 import type { DeviceList } from '@flightctl/types';
 import type { DeviceFeatures } from '@flightctl/types/alpha';
 
-import { useFetch } from '../../hooks/useFetch';
-import { Link, ROUTE } from '../../hooks/useNavigate';
-import { useTranslation } from '../../hooks/useTranslation';
-import { getApiListCount } from '../../utils/api';
-import { getFeatureRequirementText } from '../../utils/status/devices';
+import { useFetch } from '../../../hooks/useFetch';
+import { Link, ROUTE } from '../../../hooks/useNavigate';
+import { useTranslation } from '../../../hooks/useTranslation';
+import { getApiListCount } from '../../../utils/api';
+import { getFeatureRequirementText } from '../../../utils/status/devices';
 import {
   type IncompatibleFleetDevicesLink,
   buildIncompatibleFleetDevicesQueries,
   commonQueries,
-} from '../../utils/query';
+} from '../../../utils/query';
 
 type IncompatibleFleetDevicesActionLinksProps = {
   fleetName: string;
   featureRequirements?: DeviceFeatures;
 };
 
-/** List of failing feature requirements with links to matching incompatible devices. */
+// Placement: Used only by FleetCatalogItemCompatibilityAlert
+// For each feature requirement, it shows a link if the requirement is not met by at least one of the fleet's devices.
 const IncompatibleFleetDevicesActionLinks = ({
   fleetName,
   featureRequirements,

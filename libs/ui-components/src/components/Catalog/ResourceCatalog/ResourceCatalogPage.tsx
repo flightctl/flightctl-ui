@@ -1,5 +1,5 @@
-import { type DeviceSpec, type PatchRequest } from '@flightctl/types';
 import * as React from 'react';
+import { type Device, type Fleet, OsModeType, type PatchRequest } from '@flightctl/types';
 import { Stack, StackItem } from '@patternfly/react-core';
 
 import type { CatalogItem } from '@flightctl/types/alpha';
@@ -14,11 +14,9 @@ import { type CatalogEditWizardMode } from '../../../utils/catalog';
 import './ResourceCatalogPage.css';
 
 type ResourceCatalogPageProps = {
-  specPath: string;
   canEdit: boolean;
-  hasOwner?: boolean;
-  hasPackageMode?: boolean;
-  spec: DeviceSpec | undefined;
+  targetDevice?: Device;
+  targetFleet?: Fleet;
   onPatch: (allPatches: PatchRequest) => Promise<void>;
   onEdit: (id: SpecCatalogItemId, mode: CatalogEditWizardMode) => void;
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
@@ -30,23 +28,25 @@ const catalogPagePermissions = [
 ];
 
 const ResourceCatalogPage = ({
-  spec,
+  targetFleet,
+  targetDevice,
   onPatch,
-  specPath,
   canEdit,
-  hasPackageMode,
-  hasOwner,
   onEdit,
   onInstall,
 }: ResourceCatalogPageProps) => {
   const { checkPermissions, loading } = usePermissionsContext();
   const [canListItems, canListCatalogs] = checkPermissions(catalogPagePermissions);
 
+  const hasPackageMode = targetDevice?.status?.systemInfo?.osMode === OsModeType.OsModePackage;
+
   const onDeleteItem = async (id: SpecCatalogItemId) => {
+    const specPath = Boolean(targetFleet) ? '/spec/template/' : '/';
     let allPatches: PatchRequest = [];
     if (id.type === 'os') {
       allPatches = getRemoveOsPatches({ specPath });
     } else if (id.type === 'app') {
+      const spec = targetFleet?.spec.template.spec || targetDevice?.spec;
       allPatches = getRemoveAppPatches({
         appName: id.appName as string,
         currentApps: spec?.applications,
@@ -71,11 +71,10 @@ const ResourceCatalogPage = ({
         </StackItem>
         <StackItem className="fctl-resource-catalog-page">
           <CatalogPageContent
+            targetFleet={targetFleet}
+            targetDevice={targetDevice}
             canInstall={canEdit}
-            targetHasOwner={hasOwner}
-            targetHasPackageMode={hasPackageMode}
             onInstall={onInstall}
-            targetSet
           />
         </StackItem>
       </Stack>

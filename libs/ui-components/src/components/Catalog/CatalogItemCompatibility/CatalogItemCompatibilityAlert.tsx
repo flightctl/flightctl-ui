@@ -5,19 +5,19 @@ import { ExternalLinkAltIcon } from '@patternfly/react-icons/dist/js/icons/exter
 import type { Device, DeviceList } from '@flightctl/types';
 import { DeviceFeatureBoolean, type DeviceFeatures } from '@flightctl/types/alpha';
 
-import { useFetch } from '../../hooks/useFetch';
-import { Link, ROUTE } from '../../hooks/useNavigate';
-import { useTranslation } from '../../hooks/useTranslation';
-import { getApiListCount } from '../../utils/api';
-import { deviceMeetsFeatureRequirements } from '../../utils/capabilities';
-import { deviceFeaturesToFilters } from '../../utils/catalogDeviceFeatures';
-import { commonQueries } from '../../utils/query';
+import { useFetch } from '../../../hooks/useFetch';
+import { Link, ROUTE } from '../../../hooks/useNavigate';
+import { useTranslation } from '../../../hooks/useTranslation';
+import { getApiListCount } from '../../../utils/api';
+import { deviceMeetsFeatureRequirements } from '../../../utils/capabilities';
+import { deviceFeaturesToFilters } from '../../../utils/catalogDeviceFeatures';
+import { commonQueries } from '../../../utils/query';
 import IncompatibleFleetDevicesActionLinks from './IncompatibleFleetDevicesActionLinks';
 
-// The compatibility of an individual device with a catalog item can be:
-// - Unknown: the device has not reported on all the required features
-// - Compatible: the device reported all the required features, and it meets all the feature requirements
-// - Incompatible: the device reported all the required features, and it does not meet at least one of the feature requirements
+// Placement:
+// - Software Catalog -> Deploy to device (Review step)
+// - Device Catalog tab -> Edit/Deploy catalog item. (via EditWizardCompatibilityBanners)
+// Condition: Catalog item has device features, and the device is incompatible/unknown with the item.
 export const DeviceCatalogItemCompatibilityAlert = ({
   device,
   featureRequirements,
@@ -73,11 +73,13 @@ export const DeviceCatalogItemCompatibilityAlert = ({
   );
 };
 
-// The compatibility of the fleet's devices with a catalog item can be:
-// - Compatible: for devices that have reported all the required features, and all the requirements are met
-// - Unknown/Incompatible: for devices where the above is not true. The device may have a mix of unreported or incompatible features
-//   It's not possible to obtain a more precise count, as filters are always ANDed together.
-
+// Displays an alert indicating that the fleet compatibility is not fully met.
+// For each feature, it shows a link to review the fleet's devices that are not fully compatible with it.
+// Placement:
+// - Software Catalog -> Deploy to fleet -> Review
+// - Fleet catalog tab -> Deploy or Edit catalog item (banner above the wizard content)
+// - Fleet details page
+// Condition: Catalog items in the fleet have device features, and at least one device in the fleet is not fully compatible.
 export const FleetCatalogItemCompatibilityAlert = ({
   fleetName,
   totalDevices,

@@ -42,10 +42,10 @@ import {
 import Table from '../../../Table/Table';
 import TablePagination from '../../../Table/TablePagination';
 import TableTextSearch from '../../../Table/TableTextSearch';
-import DeviceFeatureCompatibility from '../DeviceFeatureCompatibility';
+import DeviceFeatureCompatibility from '../../CatalogItemCompatibility/DeviceFeatureCompatibility';
 import type { InstallAppFormik, InstallOsFormik, InstallSpecFormik, TargetPickerFormik } from '../types';
 import { isSameCatalogRef } from '../utils';
-import CatalogFeatureRequirements from '../../CatalogFeatureRequirements';
+import CatalogFeatureRequirements from '../../CatalogItemCompatibility/CatalogFeatureRequirements';
 
 export const isSelectTargetStepValid = (errors: FormikErrors<InstallAppFormik>) => {
   return !errors.device && !errors.fleet;

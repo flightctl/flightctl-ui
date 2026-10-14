@@ -22,6 +22,8 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons/dist/js/icons/search-icon';
 import { EllipsisVIcon } from '@patternfly/react-icons/dist/js/icons/ellipsis-v-icon';
+
+import { type Device, type Fleet, OsModeType } from '@flightctl/types';
 import {
   type Catalog,
   type CatalogItem,
@@ -55,13 +57,12 @@ import './CatalogPage.css';
 
 type CatalogPageContentProps = {
   canInstall: boolean;
-  targetHasOwner?: boolean;
-  targetHasPackageMode?: boolean;
+  targetFleet?: Fleet;
+  targetDevice?: Device;
   onInstall: (installItem: { item: CatalogItem; channel: string; version: string }) => void;
   showCatalogMgmt?: boolean;
   canEditCatalog?: boolean;
   canDeleteCatalog?: boolean;
-  targetSet?: boolean;
 };
 
 type CatalogEmptyStateProps = {
@@ -207,14 +208,13 @@ const CatalogPageFilter = ({
 };
 
 export const CatalogPageContent = ({
+  targetFleet,
+  targetDevice,
   canInstall,
-  targetHasOwner,
-  targetHasPackageMode,
   onInstall,
   showCatalogMgmt,
   canEditCatalog,
   canDeleteCatalog,
-  targetSet,
 }: CatalogPageContentProps) => {
   const { t } = useTranslation();
 
@@ -228,6 +228,8 @@ export const CatalogPageContent = ({
   const [catalogToEdit, setCatalogToEdit] = React.useState<Catalog>();
   const [catalogToDelete, setCatalogToDelete] = React.useState<Catalog>();
   const catalogFilter = useCatalogFilter();
+
+  const targetHasPackageMode = targetDevice?.status?.systemInfo?.osMode === OsModeType.OsModePackage;
   const excludeItemType = targetHasPackageMode ? CatalogItemType.CatalogItemTypeOS : undefined;
 
   const [catalogItems, isLoading, error, pagination, isUpdating, refetch] = useCatalogItems({
@@ -419,11 +421,11 @@ export const CatalogPageContent = ({
           onClose={() => setSelectedItem(undefined)}
           item={item}
           canInstall={canInstall}
-          targetHasOwner={targetHasOwner}
+          targetFleet={targetFleet}
+          targetDevice={targetDevice}
           onInstall={onInstall}
           refetch={refetch}
           showCatalogMgmt={!!showCatalogMgmt}
-          targetSet={!!targetSet}
         />
       )}
       {!!catalogToEdit && (

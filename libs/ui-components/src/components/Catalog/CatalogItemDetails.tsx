@@ -30,6 +30,7 @@ import ReactMarkdown from 'react-markdown';
 import { Formik, useFormikContext } from 'formik';
 import { ActionsColumn, type IAction } from '@patternfly/react-table';
 
+import { type Device, type Fleet } from '@flightctl/types';
 import { type Catalog, type CatalogItem, CatalogItemType } from '@flightctl/types/alpha';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useFetch } from '../../hooks/useFetch';
@@ -50,7 +51,7 @@ import FlightCtlPageDrawer from '../common/FlightCtlPageDrawer';
 import CatalogItemIcon from './CatalogItemIcon';
 import { InstallSpec } from './InstallWizard/steps/SpecificationsStep';
 import { type InstallSpecFormik } from './InstallWizard/types';
-import CatalogFeatureRequirements from './CatalogFeatureRequirements';
+import CatalogFeatureRequirements from './CatalogItemCompatibility/CatalogFeatureRequirements';
 
 import './CatalogItemDetails.css';
 
@@ -60,10 +61,10 @@ type CatalogItemDetailsPanelProps = {
   item: CatalogItem;
   onClose: VoidFunction;
   canInstall: boolean;
-  targetHasOwner?: boolean;
+  targetDevice?: Device;
+  targetFleet?: Fleet;
   refetch: VoidFunction;
   showCatalogMgmt: boolean;
-  targetSet: boolean;
 };
 
 type CatalogItemDetailsProps = CatalogItemDetailsPanelProps & {
@@ -256,12 +257,12 @@ const CatalogItemDeployButton = ({ item, canInstall, targetHasOwner, targetSet }
 
 const CatalogItemDetailsPanel = ({
   item,
+  targetDevice,
+  targetFleet,
   onClose,
   canInstall,
-  targetHasOwner,
   refetch,
   showCatalogMgmt,
-  targetSet,
 }: CatalogItemDetailsPanelProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -350,7 +351,11 @@ const CatalogItemDetailsPanel = ({
                   <Card isCompact>
                     <CardTitle>{t('Device requirements')}</CardTitle>
                     <CardBody>
-                      <CatalogFeatureRequirements deviceFeatures={deviceFeatures} />
+                      <CatalogFeatureRequirements
+                        deviceFeatures={deviceFeatures}
+                        targetDevice={targetDevice}
+                        targetFleet={targetFleet}
+                      />
                     </CardBody>
                   </Card>
                 </StackItem>
@@ -365,8 +370,8 @@ const CatalogItemDetailsPanel = ({
                     <CatalogItemDeployButton
                       item={item}
                       canInstall={canInstall}
-                      targetHasOwner={targetHasOwner}
-                      targetSet={targetSet}
+                      targetHasOwner={Boolean(targetDevice?.metadata.owner || targetFleet?.metadata.owner)}
+                      targetSet={Boolean(targetDevice || targetFleet)}
                     />
                   </StackItem>
                 )}
@@ -409,9 +414,6 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
 
   const selectedVersion = item.spec.versions.find((v) => v.version === version);
   const readme = selectedVersion?.readme;
-  const deviceFeatures = selectedVersion?.deviceFeatures;
-  const hasDeviceFeatures = !!deviceFeatures && Object.keys(deviceFeatures).length > 0;
-
   return (
     <Grid hasGutter>
       <GridItem span={3}>
@@ -446,14 +448,6 @@ export const CatalogItemDetailsContent = ({ item }: CatalogItemDetailsContentPro
               <CatalogItemPanelLink link={item.spec.homepage} />
             </DescriptionListDescription>
           </DescriptionListGroup>
-          {hasDeviceFeatures && (
-            <DescriptionListGroup>
-              <DescriptionListTerm>{t('Device requirements')}</DescriptionListTerm>
-              <DescriptionListDescription className="fctl-catalog-item-details">
-                <CatalogFeatureRequirements deviceFeatures={deviceFeatures} />
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-          )}
         </DescriptionList>
       </GridItem>
       <GridItem span={9}>

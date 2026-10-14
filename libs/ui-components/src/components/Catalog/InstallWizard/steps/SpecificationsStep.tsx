@@ -29,13 +29,13 @@ import {
   CatalogItemType,
   type CatalogItemVersion,
 } from '@flightctl/types/alpha';
-import FlightCtlModal from '@flightctl/ui-components/src/components/common/FlightCtlModal';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { RESOURCE, VERB } from '../../../../types/rbac';
 import { getFullContainerURI } from '../../../../utils/catalog';
 import { OS_EXCLUDE_PACKAGE_MODE_FILTERS } from '../../../../utils/status/devices';
 import { getVersionFeatureRequirements } from '../../../CatalogComposition/catalogCompositionUtils';
 import { type PermissionCheck, usePermissionsContext } from '../../../common/PermissionsContext';
+import FlightCtlModal from '../../../common/FlightCtlModal';
 import WithTooltip from '../../../common/WithTooltip';
 import { useDevicesPaginated } from '../../../Device/DevicesPage/useDevices';
 import { useFleets } from '../../../Fleet/useFleets';
