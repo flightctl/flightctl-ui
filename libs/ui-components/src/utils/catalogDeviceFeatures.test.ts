@@ -44,6 +44,7 @@ describe('catalogDeviceFeatures', () => {
         gpuPresent: DeviceFeatureBoolean.DeviceFeatureBooleanTrue,
         kvmEnabled: DeviceFeatureBoolean.DeviceFeatureBooleanFalse,
         osMode: OsModeType.OsModeImage,
+        extra: {},
       },
     },
     {
@@ -56,10 +57,11 @@ describe('catalogDeviceFeatures', () => {
         gpuPresent: DeviceFeatureBoolean.DeviceFeatureBooleanTrue,
         kvmEnabled: DeviceFeatureBoolean.DeviceFeatureBooleanFalse,
         osMode: '',
+        extra: {},
       },
     },
     {
-      name: 'When unknown keys are present it should ignore them',
+      name: 'When unknown keys are present it should load them into extra',
       features: {
         [DEVICE_FEATURE_GPU_PRESENT]: DeviceFeatureBoolean.DeviceFeatureBooleanTrue,
         'custom.feature': 'enabled',
@@ -68,6 +70,23 @@ describe('catalogDeviceFeatures', () => {
         gpuPresent: DeviceFeatureBoolean.DeviceFeatureBooleanTrue,
         kvmEnabled: '',
         osMode: '',
+        extra: { 'custom.feature': 'enabled' },
+      },
+    },
+    {
+      name: 'When only unknown keys exist it should return a form with extra',
+      features: {
+        'vendor.extra': DeviceFeatureBoolean.DeviceFeatureBooleanFalse,
+        'custom.count': 2,
+      },
+      expected: {
+        gpuPresent: '',
+        kvmEnabled: '',
+        osMode: '',
+        extra: {
+          'vendor.extra': DeviceFeatureBoolean.DeviceFeatureBooleanFalse,
+          'custom.count': 2,
+        },
       },
     },
     {
@@ -92,6 +111,7 @@ describe('catalogDeviceFeatures', () => {
         gpuPresent: DeviceFeatureBoolean.DeviceFeatureBooleanTrue,
         kvmEnabled: DeviceFeatureBoolean.DeviceFeatureBooleanFalse,
         osMode: OsModeType.OsModePackage,
+        extra: {},
       }),
     ).toEqual({
       [DEVICE_FEATURE_GPU_PRESENT]: DeviceFeatureBoolean.DeviceFeatureBooleanTrue,
@@ -100,20 +120,28 @@ describe('catalogDeviceFeatures', () => {
     });
   });
 
-  it('When converting to API and back it should keep unknown fields', () => {
+  it('When converting to API and back it should keep unknown fields from the form', () => {
     const original = {
       [DEVICE_FEATURE_KVM_ENABLED]: DeviceFeatureBoolean.DeviceFeatureBooleanFalse,
       'vendor.extra': DeviceFeatureBoolean.DeviceFeatureBooleanFalse,
+      'custom.feature': 'enabled',
     };
-    expect(deviceFeaturesToApi(deviceFeaturesFromApi(original), original)).toEqual({
+    expect(deviceFeaturesToApi(deviceFeaturesFromApi(original))).toEqual({
       [DEVICE_FEATURE_KVM_ENABLED]: DeviceFeatureBoolean.DeviceFeatureBooleanFalse,
       'vendor.extra': DeviceFeatureBoolean.DeviceFeatureBooleanFalse,
+      'custom.feature': 'enabled',
     });
   });
 
-  it('When only unknown keys exist it should preserve them on save', () => {
-    const original = { 'vendor.extra': DeviceFeatureBoolean.DeviceFeatureBooleanFalse };
-    expect(deviceFeaturesToApi(deviceFeaturesFromApi(original), original)).toEqual({
+  it('When clearing known features it should still emit remaining extras', () => {
+    expect(
+      deviceFeaturesToApi({
+        gpuPresent: '',
+        kvmEnabled: '',
+        osMode: '',
+        extra: { 'vendor.extra': DeviceFeatureBoolean.DeviceFeatureBooleanFalse },
+      }),
+    ).toEqual({
       'vendor.extra': DeviceFeatureBoolean.DeviceFeatureBooleanFalse,
     });
   });

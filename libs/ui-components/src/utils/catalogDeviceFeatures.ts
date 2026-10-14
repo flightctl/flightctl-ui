@@ -19,12 +19,15 @@ export type DeviceFeaturesFormValues = {
   gpuPresent: DeviceFeatureBooleanFormValue;
   kvmEnabled: DeviceFeatureBooleanFormValue;
   osMode: DeviceFeatureOsModeFormValue;
+  /** Non-known keys; values preserved as returned by the API (any type). */
+  extra: Record<string, unknown>;
 };
 
 export const getEmptyDeviceFeaturesFormValues = (): DeviceFeaturesFormValues => ({
   gpuPresent: '',
   kvmEnabled: '',
   osMode: '',
+  extra: {},
 });
 
 const getFeatureBoolean = (value: unknown): DeviceFeatureBoolean | undefined => {
@@ -33,9 +36,6 @@ const getFeatureBoolean = (value: unknown): DeviceFeatureBoolean | undefined => 
     value === DeviceFeatureBoolean.DeviceFeatureBooleanFalse
   ) {
     return value;
-  }
-  if (typeof value === 'boolean') {
-    return value ? DeviceFeatureBoolean.DeviceFeatureBooleanTrue : DeviceFeatureBoolean.DeviceFeatureBooleanFalse;
   }
   return undefined;
 };
@@ -48,6 +48,32 @@ const getFeatureOsMode = (value: unknown): OsModeType | undefined => {
     return OsModeType.OsModePackage;
   }
   return undefined;
+};
+
+const KNOWN_DEVICE_FEATURE_KEYS = new Set([
+  DEVICE_FEATURE_GPU_PRESENT,
+  DEVICE_FEATURE_KVM_ENABLED,
+  DEVICE_FEATURE_OS_MODE,
+]);
+
+export const formatDeviceFeatureValue = (value: unknown): string => {
+  if (value === undefined) {
+    return '';
+  }
+  if (value === null) {
+    return 'null';
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return 'unknown';
+  }
 };
 
 export const deviceFeaturesFromApi = (features?: DeviceFeatures | null): DeviceFeaturesFormValues | null => {
@@ -74,35 +100,20 @@ export const deviceFeaturesFromApi = (features?: DeviceFeatures | null): DeviceF
     hasSetFeatures = true;
   }
 
+  Object.entries(features).forEach(([key, value]) => {
+    if (!KNOWN_DEVICE_FEATURE_KEYS.has(key)) {
+      form.extra[key] = value;
+      hasSetFeatures = true;
+    }
+  });
+
   return hasSetFeatures ? form : null;
 };
 
-const KNOWN_DEVICE_FEATURE_KEYS = new Set([
-  DEVICE_FEATURE_GPU_PRESENT,
-  DEVICE_FEATURE_KVM_ENABLED,
-  DEVICE_FEATURE_OS_MODE,
-]);
-
 type RequirementValue = DeviceFeatureBoolean | OsModeType;
 
-export const deviceFeaturesToApi = (
-  form: DeviceFeaturesFormValues | null,
-  original?: DeviceFeatures | null,
-): DeviceFeatures | undefined => {
+export const deviceFeaturesToApi = (form: DeviceFeaturesFormValues | null): DeviceFeatures | undefined => {
   const result: DeviceFeatures = {};
-
-  // Preserve arbitrary features definitions. These are not shown and cannot be managed via the UI.
-  if (original) {
-    Object.entries(original).forEach(([key, value]) => {
-      if (
-        !KNOWN_DEVICE_FEATURE_KEYS.has(key) &&
-        (value === DeviceFeatureBoolean.DeviceFeatureBooleanTrue ||
-          value === DeviceFeatureBoolean.DeviceFeatureBooleanFalse)
-      ) {
-        result[key] = value as DeviceFeatureBoolean;
-      }
-    });
-  }
 
   if (form?.gpuPresent) {
     result[DEVICE_FEATURE_GPU_PRESENT] = form.gpuPresent;
@@ -112,6 +123,11 @@ export const deviceFeaturesToApi = (
   }
   if (form?.osMode) {
     result[DEVICE_FEATURE_OS_MODE] = form.osMode;
+  }
+  if (form?.extra) {
+    Object.entries(form.extra).forEach(([key, value]) => {
+      result[key] = value;
+    });
   }
   return Object.keys(result).length > 0 ? result : undefined;
 };

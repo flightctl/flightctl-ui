@@ -1,10 +1,16 @@
 import * as React from 'react';
 import {
   Alert,
+  Content,
+  ContentVariants,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
+  Flex,
+  FlexItem,
+  Label,
+  LabelGroup,
   List,
   ListItem,
   Stack,
@@ -18,10 +24,35 @@ import { useTranslation } from '../../../../hooks/useTranslation';
 import { getErrorMessage } from '../../../../utils/error';
 import { appTypeIds } from '../../useCatalogItems';
 import { getArtifactLabel } from '../../../../utils/catalogTypes';
-import { deviceFeaturesToApi } from '../../../../utils/catalogDeviceFeatures';
+import { deviceFeaturesToApi, formatDeviceFeatureValue } from '../../../../utils/catalogDeviceFeatures';
 import CatalogFeatureRequirements from '../../CatalogItemCompatibility/CatalogFeatureRequirements';
 
 export const reviewStepId = 'review';
+
+const ReviewVersionCustomRequirements = ({ extraFeatures }: { extraFeatures: Record<string, unknown> }) => {
+  const { t } = useTranslation();
+  const extraEntries = React.useMemo(
+    () => Object.entries(extraFeatures).map(([key, value]) => ({ key, value: formatDeviceFeatureValue(value) })),
+    [extraFeatures],
+  );
+  if (extraEntries.length === 0) {
+    return null;
+  }
+  return (
+    <Flex className="pf-v6-u-mt-sm">
+      <FlexItem>
+        <Content component={ContentVariants.h4}>{t('Custom device requirements:')}</Content>
+      </FlexItem>
+      <FlexItem>
+        <LabelGroup>
+          {extraEntries.map(({ key, value }) => (
+            <Label key={key}>{`${key}=${value}`}</Label>
+          ))}
+        </LabelGroup>
+      </FlexItem>
+    </Flex>
+  );
+};
 
 const ReviewStep = ({ error, isEdit, isReadOnly }: { error: unknown; isEdit?: boolean; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
@@ -123,6 +154,7 @@ const ReviewStep = ({ error, isEdit, isReadOnly }: { error: unknown; isEdit?: bo
               <DescriptionListTerm>{t('Version {{version}}', { version: v.version })}</DescriptionListTerm>
               <DescriptionListDescription>
                 <CatalogFeatureRequirements deviceFeatures={deviceFeaturesToApi(v.deviceFeatures)} />
+                <ReviewVersionCustomRequirements deviceFeatures={v.deviceFeatures.extra} />
               </DescriptionListDescription>
             </DescriptionListGroup>
           ))}

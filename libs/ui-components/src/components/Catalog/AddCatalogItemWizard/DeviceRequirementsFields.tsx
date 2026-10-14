@@ -5,6 +5,8 @@ import {
   DropdownItem,
   DropdownList,
   FormGroup,
+  Label,
+  LabelGroup,
   MenuToggle,
   Select,
   SelectList,
@@ -19,16 +21,20 @@ import { useField } from 'formik';
 import { DeviceFeatureBoolean } from '@flightctl/types/alpha';
 import { OsModeType } from '@flightctl/types';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { type DeviceFeaturesFormValues, getEmptyDeviceFeaturesFormValues } from '../../../utils/catalogDeviceFeatures';
+import {
+  type DeviceFeaturesFormValues,
+  formatDeviceFeatureValue,
+  getEmptyDeviceFeaturesFormValues,
+} from '../../../utils/catalogDeviceFeatures';
 import { FormGroupWithHelperText } from '../../common/WithHelperText';
 
-type FeatureKey = keyof DeviceFeaturesFormValues;
-
 type FeatureValue = '' | DeviceFeatureBoolean;
-const FEATURE_KEYS: FeatureKey[] = ['gpuPresent', 'kvmEnabled', 'osMode'];
+
+type KnownFeatureKey = 'gpuPresent' | 'kvmEnabled' | 'osMode';
+const FEATURE_KEYS: KnownFeatureKey[] = ['gpuPresent', 'kvmEnabled', 'osMode'];
 
 type FeatureSelectProps = {
-  featureKey: FeatureKey;
+  featureKey: KnownFeatureKey;
   value: FeatureValue;
   label: string;
   isDisabled?: boolean;
@@ -99,6 +105,9 @@ const FeatureSelect = ({ featureKey, label, value, isDisabled, onUpdate }: Featu
   );
 };
 
+const hasAnyDeviceRequirement = (features: DeviceFeaturesFormValues): boolean =>
+  Boolean(features.gpuPresent || features.kvmEnabled || features.osMode || Object.keys(features.extra).length > 0);
+
 const DeviceRequirementsFields = ({ namePrefix, isDisabled }: { namePrefix: string; isDisabled?: boolean }) => {
   const { t } = useTranslation();
   const [{ value }, , { setValue, setTouched }] = useField<DeviceFeaturesFormValues | null>(
@@ -106,17 +115,21 @@ const DeviceRequirementsFields = ({ namePrefix, isDisabled }: { namePrefix: stri
   );
   const [isAddOpen, setIsAddOpen] = React.useState(false);
 
-  const featureLabels: Record<FeatureKey, string> = {
+  const featureLabels: Record<KnownFeatureKey, string> = {
     gpuPresent: t('GPU acceleration'),
     kvmEnabled: t('KVM virtualization'),
     osMode: t('OS mode'),
   };
 
-  const current = value ?? getEmptyDeviceFeaturesFormValues();
+  const current = {
+    ...(value ?? getEmptyDeviceFeaturesFormValues()),
+    extra: value?.extra ?? {},
+  };
   const remainingKeys = FEATURE_KEYS.filter((key) => !current[key]);
-  const hasAnyRequirement = remainingKeys.length < FEATURE_KEYS.length;
+  const extraEntries = Object.entries(current.extra);
+  const hasAnyRequirement = hasAnyDeviceRequirement(current);
 
-  const updateFeature = (feature: FeatureKey) => (value: FeatureValue) => {
+  const updateFeature = (feature: KnownFeatureKey) => (value: FeatureValue) => {
     let featureValue: DeviceFeatureBoolean | OsModeType | '';
     if (feature === 'osMode' && value !== '') {
       featureValue =
@@ -125,8 +138,7 @@ const DeviceRequirementsFields = ({ namePrefix, isDisabled }: { namePrefix: stri
       featureValue = value;
     }
     const next = { ...current, [feature]: featureValue };
-    const nextHasAnyRequirement = Boolean(next.gpuPresent || next.kvmEnabled || next.osMode);
-    void setValue(nextHasAnyRequirement ? next : null, true);
+    void setValue(hasAnyDeviceRequirement(next) ? next : null, true);
     void setTouched(true);
   };
 
@@ -202,6 +214,18 @@ const DeviceRequirementsFields = ({ namePrefix, isDisabled }: { namePrefix: stri
             </DropdownList>
           </Dropdown>
         </FormGroup>
+      )}
+      {extraEntries.length > 0 && (
+        <FormGroupWithHelperText
+          label={t('Custom device requirements')}
+          content={t('This version includes custom device requirements. These cannot be managed in the Console.')}
+        >
+          <LabelGroup>
+            {extraEntries.map(([key, extraValue]) => (
+              <Label key={key}>{`${key}=${formatDeviceFeatureValue(extraValue)}`}</Label>
+            ))}
+          </LabelGroup>
+        </FormGroupWithHelperText>
       )}
     </FormGroupWithHelperText>
   );

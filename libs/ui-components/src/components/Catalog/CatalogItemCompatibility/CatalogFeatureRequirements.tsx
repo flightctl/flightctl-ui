@@ -1,15 +1,5 @@
 import * as React from 'react';
-import {
-  Button,
-  Content,
-  ContentVariants,
-  Flex,
-  FlexItem,
-  Label,
-  List,
-  ListItem,
-  Popover,
-} from '@patternfly/react-core';
+import { Button, Flex, FlexItem, Label, List, ListItem, Popover } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons/dist/js/icons/outlined-question-circle-icon';
 
 import type { Device, DeviceList, Fleet } from '@flightctl/types';
@@ -78,7 +68,7 @@ const FleetFeatureCompatibilityBadge = ({
         triggerAction="click"
       >
         <Button
-          icon={<OutlinedQuestionCircleIcon aria-label="View device feature compatibility details" />}
+          icon={<OutlinedQuestionCircleIcon aria-label="t('View device feature compatibility details')" />}
           isInline
           variant="plain"
         />
@@ -173,9 +163,7 @@ const CatalogFeatureRequirements = ({
   }, [fleetName, featureFilters, totalDevices, hasDeviceTarget, get]);
 
   if (!hasRequirements) {
-    return (
-      <Content component={ContentVariants.small}>{t('No device requirements were detected for this version.')}</Content>
-    );
+    return t('No device requirements were detected for this version.');
   }
 
   const showBadges = Boolean(targetDevice || (targetFleet && totalDevices > 0));

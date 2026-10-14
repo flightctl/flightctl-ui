@@ -97,7 +97,7 @@ const isAppType = (type: CatalogItemType): boolean => appTypeIds.includes(type);
 
 const isConfigurableType = (type: CatalogItemType): boolean => configurableAppTypes.includes(type);
 
-const formVersionsToApi = (values: AddCatalogItemFormValues, specVersions?: CatalogItemVersion[]) => {
+const formVersionsToApi = (values: AddCatalogItemFormValues) => {
   const configurable = isConfigurableType(values.type as CatalogItemType);
   return values.versions.map((v) => {
     const skips = v.skips
@@ -107,7 +107,6 @@ const formVersionsToApi = (values: AddCatalogItemFormValues, specVersions?: Cata
 
     const references = Object.fromEntries(Object.entries(v.references).filter(([, val]) => val.trim() !== ''));
 
-    const originalVersion = specVersions?.find((original) => original.version === v.version);
     const versionDef: CatalogItemVersion = {
       version: v.version,
       references,
@@ -119,7 +118,7 @@ const formVersionsToApi = (values: AddCatalogItemFormValues, specVersions?: Cata
       config: configurable ? parseYamlField(v.config) : undefined,
       configSchema: configurable ? parseSchemaField(v.configSchema) : undefined,
       deprecation: v.deprecated ? { message: v.deprecationMessage } : undefined,
-      deviceFeatures: deviceFeaturesToApi(v.deviceFeatures, originalVersion?.deviceFeatures),
+      deviceFeatures: deviceFeaturesToApi(v.deviceFeatures),
     };
 
     return Object.fromEntries(
@@ -245,7 +244,7 @@ export const getCatalogItemPatches = (values: AddCatalogItemFormValues, original
     originalValue: spec.artifacts,
   });
 
-  const updatedVersions = formVersionsToApi(values, spec.versions);
+  const updatedVersions = formVersionsToApi(values);
   addVersionPatches(patches, spec.versions, updatedVersions);
 
   const newDefaults = formDefaultsToApi(values);
@@ -504,6 +503,7 @@ const versionSchema = (t: TFunction, duplicates: Set<string>, configurable: bool
         gpuPresent: Yup.string(),
         kvmEnabled: Yup.string(),
         osMode: Yup.string(),
+        extra: Yup.object(),
       })
       .nullable(),
     config: configurable ? yamlFieldSchema(t) : Yup.string(),
