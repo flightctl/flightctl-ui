@@ -29,10 +29,10 @@ import CatalogFeatureRequirements from '../../CatalogItemCompatibility/CatalogFe
 
 export const reviewStepId = 'review';
 
-const ReviewVersionCustomRequirements = ({ extraFeatures }: { extraFeatures: Record<string, unknown> }) => {
+const ReviewVersionCustomRequirements = ({ extraFeatures }: { extraFeatures: Record<string, unknown> | undefined }) => {
   const { t } = useTranslation();
   const extraEntries = React.useMemo(
-    () => Object.entries(extraFeatures).map(([key, value]) => ({ key, value: formatDeviceFeatureValue(value) })),
+    () => Object.entries(extraFeatures || {}).map(([key, value]) => ({ key, value: formatDeviceFeatureValue(value) })),
     [extraFeatures],
   );
   if (extraEntries.length === 0) {
@@ -154,7 +154,7 @@ const ReviewStep = ({ error, isEdit, isReadOnly }: { error: unknown; isEdit?: bo
               <DescriptionListTerm>{t('Version {{version}}', { version: v.version })}</DescriptionListTerm>
               <DescriptionListDescription>
                 <CatalogFeatureRequirements deviceFeatures={deviceFeaturesToApi(v.deviceFeatures)} />
-                <ReviewVersionCustomRequirements deviceFeatures={v.deviceFeatures.extra} />
+                <ReviewVersionCustomRequirements extraFeatures={v.deviceFeatures?.extra} />
               </DescriptionListDescription>
             </DescriptionListGroup>
           ))}

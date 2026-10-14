@@ -88,8 +88,8 @@ const RequirementBadge = ({
   fleetCompatibleCount?: number;
   totalDevices: number;
 }) => {
-  if (targetDevice && targetDevice.status) {
-    const compatibility = deviceMeetsFeatureRequirements(targetDevice.status, [featureFilter]);
+  if (targetDevice) {
+    const compatibility = deviceMeetsFeatureRequirements([featureFilter], targetDevice.status);
     return <FeatureCompatibilityBadge compatibility={compatibility} />;
   }
 
@@ -127,8 +127,8 @@ const CatalogFeatureRequirements = ({
   const [fleetCompatibleCounts, setFleetCompatibleCounts] = React.useState<Record<string, number>>({});
 
   React.useEffect(() => {
+    setFleetCompatibleCounts({});
     if (!fleetName || !featureFilters?.length || totalDevices <= 0 || hasDeviceTarget) {
-      setFleetCompatibleCounts({});
       return;
     }
 
@@ -149,10 +149,7 @@ const CatalogFeatureRequirements = ({
         });
         setFleetCompatibleCounts(counts);
       } catch {
-        if (!cancelled) {
-          // Fail open: omit badges when the compatibility check cannot be loaded.
-          setFleetCompatibleCounts({});
-        }
+        // Counts were already cleared at the start of the effect.
       }
     };
 

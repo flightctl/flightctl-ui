@@ -3,6 +3,7 @@ import { DeviceFeatureBoolean } from '@flightctl/types/alpha';
 import { OsModeType } from '@flightctl/types';
 
 import {
+  ContradictingFeaturesError,
   DEVICE_FEATURE_GPU_PRESENT,
   DEVICE_FEATURE_KVM_ENABLED,
   DEVICE_FEATURE_LABEL_KVM_ENABLED,
@@ -48,17 +49,12 @@ describe('catalogDeviceFeatures', () => {
       },
     },
     {
-      name: 'When boolean true or false is set it should map them to feature enums',
+      name: 'When boolean true or false is set it should ignore those as invalid values',
       features: {
         [DEVICE_FEATURE_GPU_PRESENT]: true,
         [DEVICE_FEATURE_KVM_ENABLED]: false,
       },
-      expected: {
-        gpuPresent: DeviceFeatureBoolean.DeviceFeatureBooleanTrue,
-        kvmEnabled: DeviceFeatureBoolean.DeviceFeatureBooleanFalse,
-        osMode: '',
-        extra: {},
-      },
+      expected: null,
     },
     {
       name: 'When unknown keys are present it should load them into extra',
@@ -233,13 +229,13 @@ describe('catalogDeviceFeatures', () => {
     expect(mergeDeviceFeatures(...featuresList)).toEqual(expected);
   });
 
-  it('When the same key appears with different values it should throw', () => {
+  it('When the same key appears with different values it should throw ContradictoryDeviceFeaturesError', () => {
     expect(() =>
       mergeDeviceFeatures(
         { [DEVICE_FEATURE_GPU_PRESENT]: DeviceFeatureBoolean.DeviceFeatureBooleanTrue },
         { [DEVICE_FEATURE_GPU_PRESENT]: DeviceFeatureBoolean.DeviceFeatureBooleanFalse },
       ),
-    ).toThrow();
+    ).toThrow(ContradictingFeaturesError);
   });
 
   it('When inverting a present requirement it should select false and unknown', () => {

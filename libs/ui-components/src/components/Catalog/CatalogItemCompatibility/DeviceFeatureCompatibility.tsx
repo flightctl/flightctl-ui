@@ -63,7 +63,7 @@ const DeviceFeatureCompatibility = ({
     return t('Requirement compatibility cannot be determined');
   }
 
-  const compatibility = deviceMeetsFeatureRequirements(device.status, featureFilters);
+  const compatibility = deviceMeetsFeatureRequirements(featureFilters, device.status);
   return <DeviceFeatureCompatibilityContent compatibility={compatibility} />;
 };
 

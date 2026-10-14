@@ -147,7 +147,7 @@ export const deviceFeaturesToFilters = (features?: DeviceFeatures): DeviceFeatur
 
   Object.entries(features).forEach(([featureId, val]) => {
     const filterId = featureFilterMap[featureId];
-    if (!filterId || !val) {
+    if (!filterId) {
       return;
     }
 
@@ -189,6 +189,14 @@ export const mergeDeviceFeatureFilters = (
   return Array.from(byField.values());
 };
 
+/** Thrown when mergeDeviceFeatures finds the same key with conflicting values. */
+export class ContradictingFeaturesError extends Error {
+  constructor(public readonly featureKey: string) {
+    super(`Contradictory device feature requirements for "${featureKey}"`);
+    this.name = 'ContradictingFeaturesError';
+  }
+}
+
 /** Union deviceFeatures from multiple catalog versions; throws when the same key has conflicting values. */
 export const mergeDeviceFeatures = (
   ...featuresList: Array<DeviceFeatures | undefined | null>
@@ -204,7 +212,7 @@ export const mergeDeviceFeatures = (
         return;
       }
       if (key in merged && merged[key] !== value) {
-        throw new Error(`Contradictory device feature requirements for "${key}"`);
+        throw new ContradictingFeaturesError(key);
       }
       merged[key] = value as RequirementValue;
       hasEntries = true;

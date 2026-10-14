@@ -5,7 +5,7 @@ import type { Fleet } from '@flightctl/types';
 import type { DeviceFeatures } from '@flightctl/types/alpha';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import { mergeDeviceFeatures } from '../../../utils/catalogDeviceFeatures';
+import { ContradictingFeaturesError, mergeDeviceFeatures } from '../../../utils/catalogDeviceFeatures';
 import { useCatalogItemsContext } from '../../Catalog/CatalogItemsContext';
 import { FleetCatalogItemCompatibilityAlert } from '../../Catalog/CatalogItemCompatibility/CatalogItemCompatibilityAlert';
 import { getVersionFeatureRequirements } from '../../CatalogComposition/catalogCompositionUtils';
@@ -37,8 +37,9 @@ const FleetCatalogCompatibilityAlert = ({ fleet }: { fleet: Fleet }) => {
         ),
         hasContradictingRequirements: false,
       };
-    } catch {
-      return { allFeatureRequirements: undefined, hasContradictingRequirements: true };
+    } catch (error) {
+      const isContradictingError = error instanceof ContradictingFeaturesError;
+      return { allFeatureRequirements: undefined, hasContradictingRequirements: isContradictingError };
     }
   }, [catalogItemIds, getItem, isLoading]);
 

@@ -36,7 +36,7 @@ export const getOsModeFeature = (deviceStatus?: DeviceStatus): DeviceFeatureBool
 };
 
 export const getDeviceReportedFeatures = (
-  deviceStatus: DeviceStatus,
+  deviceStatus?: DeviceStatus,
 ): Partial<Record<DeviceFeatureId, DeviceFeatureBoolean | undefined>> => {
   return {
     gpuPresent: getGpuFeature(deviceStatus),
@@ -46,8 +46,8 @@ export const getDeviceReportedFeatures = (
 };
 
 export const deviceMeetsFeatureRequirements = (
-  deviceStatus: DeviceStatus,
   featureFilters: DeviceFeatureFilter[],
+  deviceStatus?: DeviceStatus,
 ): DeviceFeatureBoolean | undefined => {
   const reported = getDeviceReportedFeatures(deviceStatus);
   const findings = featureFilters.reduce(

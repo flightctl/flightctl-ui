@@ -27,11 +27,11 @@ export const DeviceCatalogItemCompatibilityAlert = ({
 }) => {
   const { t } = useTranslation();
   const featureFilters = deviceFeaturesToFilters(featureRequirements);
-  if (!featureFilters?.length || !device.status) {
+  if (!featureFilters?.length) {
     return null;
   }
 
-  const compatibility = deviceMeetsFeatureRequirements(device.status, featureFilters);
+  const compatibility = deviceMeetsFeatureRequirements(featureFilters, device.status);
   if (compatibility === DeviceFeatureBoolean.DeviceFeatureBooleanTrue) {
     return null;
   }
