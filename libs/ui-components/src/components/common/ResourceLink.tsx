@@ -1,11 +1,10 @@
 import * as React from 'react';
 
 import { Link, type RouteWithPostfix } from '../../hooks/useNavigate';
+import { getDisplayText } from '../../utils/displayText';
 import CopyButton from './CopyButton';
 
 import './ResourceLink.css';
-
-const maxDisplayLength = 50;
 
 type ResourceDisplayLinkProps = {
   id: string;
@@ -13,16 +12,6 @@ type ResourceDisplayLinkProps = {
   variant?: 'shortened' | 'full';
   routeLink?: RouteWithPostfix;
   'data-testid'?: string;
-};
-
-export const getDisplayText = (name: string | undefined) => {
-  if (!name) {
-    return '-';
-  }
-  if (name.length <= maxDisplayLength) {
-    return name;
-  }
-  return `${name.substring(0, 6)}...${name.substring(name.length - 7)}`;
 };
 
 const ResourceLink = ({

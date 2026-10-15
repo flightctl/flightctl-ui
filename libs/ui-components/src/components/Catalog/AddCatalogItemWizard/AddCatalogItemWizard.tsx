@@ -11,6 +11,7 @@ import {
   WizardStep,
   type WizardStepType,
 } from '@patternfly/react-core';
+import { Trans } from 'react-i18next';
 import { type CatalogItem } from '@flightctl/types/alpha';
 import { Formik, type FormikErrors } from 'formik';
 
@@ -38,6 +39,7 @@ import { getErrorMessage } from '../../../utils/error';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import { CatalogItemLabel } from '../CatalogItemDetails';
 
 const orderedIds = [generalInfoStepId, typeConfigStepId, versionStepId, reviewStepId];
 
@@ -109,13 +111,22 @@ const AddCatalogItemWizard = () => {
   const initialValues = editItem ? getInitialValuesFromItem(editItem) : getInitialValues();
   const isReadOnly = !!editItem?.metadata?.owner;
 
-  let pageTitle: string;
+  const catalogItemEl = <CatalogItemLabel item={editItem} />;
+  let titleEl: React.ReactNode;
   if (isReadOnly) {
-    pageTitle = t('View {{ name }}', { name: editItem?.spec.displayName || editItem?.metadata.name });
+    titleEl = (
+      <Trans t={t} values={{ catalogItemEl }}>
+        View {catalogItemEl}
+      </Trans>
+    );
   } else if (isEdit) {
-    pageTitle = t('Edit {{ name }}', { name: editItem?.spec.displayName || editItem?.metadata.name });
+    titleEl = (
+      <Trans t={t} values={{ catalogItemEl }}>
+        Edit {catalogItemEl}
+      </Trans>
+    );
   } else {
-    pageTitle = t('Create catalog item');
+    titleEl = t('Create catalog item');
   }
 
   let content: React.ReactNode = (
@@ -230,12 +241,12 @@ const AddCatalogItemWizard = () => {
           <BreadcrumbItem>
             <Link to={ROUTE.CATALOG}>{t('Software Catalog')}</Link>
           </BreadcrumbItem>
-          <BreadcrumbItem isActive>{pageTitle}</BreadcrumbItem>
+          <BreadcrumbItem isActive>{titleEl}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
       <PageSection hasBodyWrapper={false}>
         <Title headingLevel="h1" size="3xl">
-          {pageTitle}
+          {titleEl}
         </Title>
       </PageSection>
       {content}
