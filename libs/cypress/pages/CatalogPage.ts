@@ -16,6 +16,6 @@ export class CatalogPage {
   }
 
   selectCatalog(displayName: string) {
-    this.body.get('[role="treeitem"]').contains(displayName).click();
+    this.body.find('[data-testid="catalog-filter-tree"]').find('[role="treeitem"]').contains(displayName).click();
   }
 }

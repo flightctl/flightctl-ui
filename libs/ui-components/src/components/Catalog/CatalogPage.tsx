@@ -289,6 +289,7 @@ export const CatalogPageContent = ({
                       <DescriptionListTerm>{t('Catalog')}</DescriptionListTerm>
                       <DescriptionListDescription>
                         <TreeView
+                          data-testid="catalog-filter-tree"
                           hasAnimations
                           onCheck={(_, item) => {
                             const itemId = item.id as string;

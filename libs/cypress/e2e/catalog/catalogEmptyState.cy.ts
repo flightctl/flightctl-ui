@@ -5,14 +5,12 @@ describe('Software Catalog empty states', () => {
 
   beforeEach(() => {
     cy.loadApiInterceptors();
-  });
-
-  beforeEach(() => {
     CatalogPage.visit();
     catalogPage = new CatalogPage();
   });
 
   it('shows the empty-catalog message when no filters are selected', () => {
+    cy.wait(['@catalog-list', '@catalog-items']);
     catalogPage.body.contains('h4', 'No catalog items yet').should('be.visible');
   });
 
