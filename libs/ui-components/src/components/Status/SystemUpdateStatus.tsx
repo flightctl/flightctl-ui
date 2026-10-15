@@ -12,7 +12,8 @@ const SystemUpdateStatus = ({ updateStatus }: { updateStatus?: DeviceUpdatedStat
   const item = statusItems.find((statusItem) => {
     return statusItem.id === updateStatus?.status;
   });
-  return <StatusDisplay item={item} message={updateStatus?.info} />;
+  const stageItem = item && updateStatus?.stage ? { ...item, label: t(updateStatus.stage) } : item;
+  return <StatusDisplay item={stageItem} message={updateStatus?.info} />;
 };
 
 export default SystemUpdateStatus;

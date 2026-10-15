@@ -95,6 +95,7 @@ export type { DeviceSummaryStatus } from './models/DeviceSummaryStatus';
 export { DeviceSummaryStatusType } from './models/DeviceSummaryStatusType';
 export type { DeviceSystemInfo } from './models/DeviceSystemInfo';
 export type { DeviceUpdatedStatus } from './models/DeviceUpdatedStatus';
+export { DeviceUpdatedStageType } from './models/DeviceUpdatedStageType';
 export { DeviceUpdatedStatusType } from './models/DeviceUpdatedStatusType';
 export type { DeviceUpdatePolicySpec } from './models/DeviceUpdatePolicySpec';
 export type { DeviceVulnerabilityCveDetails } from './models/DeviceVulnerabilityCveDetails';
