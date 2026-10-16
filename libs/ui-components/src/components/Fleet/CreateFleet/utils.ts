@@ -176,11 +176,6 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
         matchLabels: toAPILabel(values.labels),
       },
       template: {
-        metadata: {
-          labels: {
-            fleet: values.name,
-          },
-        },
         spec: {
           os: isOsSet ? values.osSpec : undefined,
           config: values.configTemplates.map(getApiConfig),
