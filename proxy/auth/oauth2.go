@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/flightctl/flightctl-ui/bridge"
-	"github.com/flightctl/flightctl/api/v1beta1"
+	"github.com/flightctl/flightctl/api/core/v1beta1"
 	"github.com/openshift/osincli"
 )
 
@@ -18,6 +18,7 @@ type OAuth2AuthHandler struct {
 	clientId         string
 	scope            string
 	providerName     string
+	prompt           *string
 }
 
 // getOAuth2AuthHandler creates an OAuth2 handler using explicit endpoints
@@ -49,6 +50,7 @@ func getOAuth2AuthHandler(provider *v1beta1.AuthProvider, oauth2Spec *v1beta1.OA
 		clientId:         clientId,
 		scope:            scope,
 		providerName:     providerName,
+		prompt:           oauth2Spec.Prompt,
 	}
 
 	return handler, nil
@@ -88,5 +90,5 @@ func (o *OAuth2AuthHandler) GetLoginRedirectURL(state string, codeChallenge stri
 	if err != nil {
 		return "", err
 	}
-	return loginRedirect(client, state, codeChallenge, "select_account"), nil
+	return loginRedirect(client, state, codeChallenge, normalizeLoginPrompt(o.prompt)), nil
 }
