@@ -28,6 +28,29 @@ testing conventions, see [UI-ARCHITECTURE.md](UI-ARCHITECTURE.md).
 
 - **`resource.metadata.name`**: In this codebase, `metadata.name` is known to be defined for all resources that have been created or returned by the API. However, TypeScript still sees the field as potentially undefined due to the type definitions. Casting the field to string or falling back to a default empty string are valid ways to make the linter pass and should not be flagged as potential issues.
 
+## Testing
+
+### Unit tests (Vitest)
+
+Unit tests use **Vitest** and live in `libs/ui-components/src/` alongside the
+code they test (e.g. `utils/labels.test.ts`). The configuration is in
+`vitest.config.ts` at the repo root.
+
+- **Run:** `npm run test` (runs `tsc --noEmit` type-check then `vitest run`)
+- **Watch mode:** `npm run test:watch`
+- **Scope:** `libs/ui-components/src/**/*.test.ts`
+
+### Cypress E2E tests (existing suite — no new coverage)
+
+Existing Cypress E2E tests live in `libs/cypress/`. The existing suite and its
+CI integration must be preserved.
+
+**Do not add new Cypress test specs, test cases, coverage, or placeholder/stub
+tests.** The presence of the existing Cypress suite is not permission to extend
+it. New test coverage belongs in Vitest unit tests. See
+[UI-ARCHITECTURE.md](UI-ARCHITECTURE.md) for the existing Cypress conventions
+that apply when maintaining the current suite.
+
 ## Build and development
 
 - **Install:** `npm install`
@@ -35,6 +58,7 @@ testing conventions, see [UI-ARCHITECTURE.md](UI-ARCHITECTURE.md).
 - **Build:** `npm run build`
 - **Lint:** `npm run lint` (includes ESLint, Prettier, and i18n check)
 - **Format:** `npm run format` (auto-fix Prettier violations)
+- **Unit tests:** `npm run test`
 - **Proxy (Go):** `cd proxy && go build ./...` to build; `cd proxy && go test ./...` to test
 
 Before committing, run `npm run lint`. After API or copy changes, run `npm run gen-types` or `npm run i18n` as needed and commit the generated updates.
