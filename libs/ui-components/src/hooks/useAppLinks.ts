@@ -4,7 +4,7 @@ import { useAppContext } from './useAppContext';
 export const DEMO_REPOSITORY_URL = 'https://github.com/flightctl/flightctl-demos';
 
 // RHEM-1.4-WIP Update version before completing the release.
-export const RHEM_VERSION = '1.3';
+export const RHEM_VERSION = '1.4';
 
 const baseUpstreamDocs = 'https://github.com/flightctl/flightctl/blob/main/docs';
 
