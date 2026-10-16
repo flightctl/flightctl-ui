@@ -357,11 +357,25 @@ For button-level checks, conditionally render:
 Reference: `components/Catalog/ResourceCatalog/ResourceCatalogPage.tsx`,
 `components/AuthProvider/AuthProvidersPage.tsx`
 
-## Testing (Cypress E2E)
+## Testing
 
-No unit or component test framework exists — the project tests exclusively
-through Cypress e2e tests. Do not introduce Jest, Vitest, or
-`@testing-library/react` unless explicitly asked.
+### Unit Tests (Vitest)
+
+Unit tests use **Vitest** (`vitest.config.ts` at the repo root). Test files
+live in `libs/ui-components/src/` alongside the modules they test, named
+`*.test.ts`. The test environment is `node` (not jsdom) — tests cover pure
+logic and utilities, not rendered component output.
+
+- **Run:** `npm run test` (type-check via `tsc --noEmit`, then `vitest run`)
+- **Watch:** `npm run test:watch`
+- **Include pattern:** `libs/ui-components/src/**/*.test.ts`
+
+### Cypress E2E (existing suite only — no new coverage)
+
+Existing Cypress E2E tests live in `libs/cypress/`. The existing suite and its
+CI integration must be preserved, but **do not add new Cypress test specs, test
+cases, coverage, or placeholder/stub tests.** The presence of the existing
+suite is not permission to extend it.
 
 ### Test Structure
 
