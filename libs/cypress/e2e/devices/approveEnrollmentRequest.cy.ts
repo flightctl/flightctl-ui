@@ -25,9 +25,12 @@ describe('Enrollment requests approval', () => {
     approveERModalPage.modalTitle.should('contain.text', 'Approve pending device');
     approveERModalPage.deviceName.should('contain.text', FIRST_PENDING_ENROLLMENT_REQUEST_NAME);
 
-    // Define a new label. The field for adding the new label is focused and can be changed
+    // Define a new label. Format guidance is a placeholder, not an input value.
     approveERModalPage.addNewLabelButton.click();
-    cy.focused().should('have.value', 'key=value').clear().type('this-is-a-test=yes');
+    approveERModalPage.newLabelField
+      .should('have.value', '')
+      .and('have.attr', 'placeholder', 'key=value')
+      .type('this-is-a-test=yes');
 
     // Fill in the rest of the form
     approveERModalPage.deviceAliasField.type('new-device');

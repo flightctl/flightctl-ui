@@ -7,6 +7,7 @@ type EditableLabelControlProps = {
   isEditable?: boolean;
   addButtonText?: string;
   defaultLabel: string;
+  placeholder?: string;
   onAddLabel: (text: string) => void;
   className?: string;
 };
@@ -14,6 +15,7 @@ type EditableLabelControlProps = {
 const EditableLabelControl = ({
   addButtonText,
   defaultLabel,
+  placeholder,
   onAddLabel,
   isEditable = true,
   className,
@@ -37,6 +39,7 @@ const EditableLabelControl = ({
     <TextInput
       aria-label={t('New label')}
       autoFocus
+      placeholder={placeholder}
       value={label}
       onChange={(ev: React.FormEvent<HTMLInputElement>) => {
         setLabel(ev.currentTarget.value);
