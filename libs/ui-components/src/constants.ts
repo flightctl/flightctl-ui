@@ -2,7 +2,6 @@ import { ApiVersion } from '@flightctl/types';
 import { ApiVersion as ImageBuilderApiVersion } from '@flightctl/types/imagebuilder';
 import { ApiVersion as AlphaVersion } from '@flightctl/types/alpha';
 
-export const APP_TITLE = 'Flight Control';
 export const PAGE_SIZE = 15;
 export const EVENT_PAGE_SIZE = 200; // It's 500 in OCP console
 
