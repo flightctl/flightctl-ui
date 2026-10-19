@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { type LinkProps as RouterLinkProps } from 'react-router-dom';
+import { useNavigationGuard } from '../components/common/NavigationGuard';
 import { useAppContext } from './useAppContext';
 
 export interface NavigateFunction {
@@ -68,32 +69,36 @@ export const useNavigate = () => {
   const {
     router: { useNavigate: useRouterNavigate, appRoutes },
   } = useAppContext();
+  const { tryNavigate } = useNavigationGuard();
 
   const navigate = useRouterNavigate();
 
   return React.useCallback<NavigateFunction>(
     (to: Route | number | ToObj, urlParams?: Record<string, string>) => {
-      if (typeof to === 'number') {
-        navigate(to);
-      } else {
-        const urlParamsStr = urlParams ? `?${new URLSearchParams(urlParams).toString()}` : '';
-
-        if (toParamIsToObj(to)) {
-          const route = appRoutes[to.route];
-          navigate(`${route}/${to.postfix}${urlParamsStr}`);
+      tryNavigate(() => {
+        if (typeof to === 'number') {
+          navigate(to);
         } else {
-          const route = appRoutes[to];
-          navigate(`${route}${urlParamsStr}`);
+          const urlParamsStr = urlParams ? `?${new URLSearchParams(urlParams).toString()}` : '';
+
+          if (toParamIsToObj(to)) {
+            const route = appRoutes[to.route];
+            navigate(`${route}/${to.postfix}${urlParamsStr}`);
+          } else {
+            const route = appRoutes[to];
+            navigate(`${route}${urlParamsStr}`);
+          }
         }
-      }
+      });
     },
-    [navigate, appRoutes],
+    [navigate, appRoutes, tryNavigate],
   );
 };
 
-export type LinkProps = Omit<RouterLinkProps, 'to'> & {
+export type LinkProps = Omit<RouterLinkProps, 'to' | 'state'> & {
   to: Route | ToObj;
   query?: string;
+  state?: unknown; // override the "any" type from react-router
 };
 
 const toParamIsToObj = (to: LinkProps['to']): to is ToObj => {
@@ -103,10 +108,12 @@ const toParamIsToObj = (to: LinkProps['to']): to is ToObj => {
   return false;
 };
 
-export const Link = ({ to, query, ...rest }: LinkProps) => {
+export const Link = ({ to, query, onClick, ...rest }: LinkProps) => {
   const {
-    router: { Link: RouterLink, appRoutes },
+    router: { Link: RouterLink, appRoutes, useNavigate: useRouterNavigate },
   } = useAppContext();
+  const { tryNavigate } = useNavigationGuard();
+  const navigate = useRouterNavigate();
 
   let route = '';
   if (toParamIsToObj(to)) {
@@ -115,5 +122,26 @@ export const Link = ({ to, query, ...rest }: LinkProps) => {
     route = appRoutes[to];
   }
 
-  return <RouterLink to={query ? `${route}?${query}` : route} {...rest} />;
+  const href = query ? `${route}?${query}` : route;
+
+  return (
+    <RouterLink
+      to={href}
+      {...rest}
+      onClick={(event) => {
+        onClick?.(event);
+        if (event.defaultPrevented) {
+          return;
+        }
+        const isModified = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+        // Let the browser handle new-tab/window / non-primary clicks.
+        if (event.button !== 0 || isModified || (rest.target && rest.target !== '_self')) {
+          return;
+        }
+        // Always route through the guard so we never miss a lock due to stale React state.
+        event.preventDefault();
+        tryNavigate(() => navigate(href, { replace: rest.replace, state: rest.state }));
+      }}
+    />
+  );
 };
