@@ -220,4 +220,19 @@ describe('OCI repository utils', () => {
     const schema = repositorySchema(t, undefined)(values);
     await expect(schema.validate(values)).rejects.toThrow();
   });
+
+  it('rejects an undefined tag without throwing a runtime error', async () => {
+    const values = getOciFormValues({
+      deltaStorageTarget: false,
+      baseImages: [
+        {
+          displayName: '',
+          imageName: 'my-org/base',
+          tags: [undefined as unknown as string],
+        },
+      ],
+    });
+    const schema = repositorySchema(t, undefined)(values);
+    await expect(schema.validate(values)).rejects.toThrow('The following tags are not valid');
+  });
 });
