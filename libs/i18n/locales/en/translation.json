@@ -1401,6 +1401,7 @@
   "Add port mapping": "Add port mapping",
   "Add": "Add",
   "Ports": "Ports",
+  "Validation error": "Validation error",
   "The provided icon file is invalid. Please upload a valid SVG, PNG, JPEG, or WebP image under 256 KB.": "The provided icon file is invalid. Please upload a valid SVG, PNG, JPEG, or WebP image under 256 KB.",
   "Drag an image or browse to upload": "Drag an image or browse to upload",
   "Browse...": "Browse...",

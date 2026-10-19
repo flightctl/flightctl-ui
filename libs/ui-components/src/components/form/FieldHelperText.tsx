@@ -3,6 +3,7 @@ import { type FieldMetaProps } from 'formik';
 
 import { FormHelperText, HelperText, HelperTextItem } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exclamation-circle-icon';
+import { useTranslation } from '../../hooks/useTranslation';
 
 type ErrorHelperTextProps = {
   meta?: FieldMetaProps<unknown>;
@@ -14,9 +15,12 @@ type DefaultHelperTextProps = {
   helperText: React.ReactNode;
 };
 
-const FlightCtlHelperText = ({ children }: React.PropsWithChildren) => (
+const FlightCtlHelperText = ({
+  isLiveRegion = false,
+  children,
+}: React.PropsWithChildren<{ isLiveRegion?: boolean }>) => (
   <FormHelperText className="pf-v6-u-mt-xs">
-    <HelperText>{children}</HelperText>
+    <HelperText isLiveRegion={isLiveRegion}>{children}</HelperText>
   </FormHelperText>
 );
 
@@ -29,6 +33,7 @@ export const DefaultHelperText = ({ helperText }: DefaultHelperTextProps) => {
 };
 
 const ErrorHelperText = ({ meta, error, touchRequired = true }: ErrorHelperTextProps) => {
+  const { t } = useTranslation();
   let content: React.ReactNode;
   if (meta) {
     content = !touchRequired || meta.touched ? meta.error : undefined;
@@ -36,8 +41,8 @@ const ErrorHelperText = ({ meta, error, touchRequired = true }: ErrorHelperTextP
     content = error;
   }
   return content ? (
-    <FlightCtlHelperText>
-      <HelperTextItem variant="error" icon={<ExclamationCircleIcon />}>
+    <FlightCtlHelperText isLiveRegion>
+      <HelperTextItem variant="error" icon={<ExclamationCircleIcon />} screenReaderText={t('Validation error')}>
         {content}
       </HelperTextItem>
     </FlightCtlHelperText>

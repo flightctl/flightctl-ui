@@ -20,8 +20,8 @@ const isAcceptedIconFile = (file: File): boolean => {
   if (file.size > MAX_ICON_BYTES) {
     return false;
   }
-  if (file.type && ACCEPTED_MIME_TYPES.includes(file.type)) {
-    return true;
+  if (file.type) {
+    return ACCEPTED_MIME_TYPES.includes(file.type);
   }
   const nameLower = file.name.toLowerCase();
   return ACCEPTED_EXTENSIONS.some((ext) => nameLower.endsWith(ext));
@@ -38,6 +38,11 @@ const IconUploadField = ({ name, isDisabled }: IconUploadFieldProps) => {
     'The provided icon file is invalid. Please upload a valid SVG, PNG, JPEG, or WebP image under 256 KB.',
   );
   const isRejectedRef = React.useRef(false);
+  // PatternFly does not cancel in-flight FileReaders. Each accepted read gets an id so that
+  // a subsequent selection does not affect in-flight completions / rejections.
+  const selectionIdRef = React.useRef(0);
+  const readIdByFileRef = React.useRef(new WeakMap<File, number>());
+  const completedReadIdRef = React.useRef<number | null>(null);
   const [filename, setFilename] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const [isRejected, setIsRejected] = React.useState(false);
@@ -50,12 +55,19 @@ const IconUploadField = ({ name, isDisabled }: IconUploadFieldProps) => {
   const hasValue = !!field.value;
   const fieldId = `iconuploadfield-${name}`;
 
+  const invalidateInFlightReads = React.useCallback(() => {
+    selectionIdRef.current += 1;
+    completedReadIdRef.current = null;
+    setIsLoading(false);
+  }, []);
+
   const applyRejection = React.useCallback(() => {
+    invalidateInFlightReads();
     isRejectedRef.current = true;
     setIsRejected(true);
     setError(rejectedFileMsg);
     void setTouched(true, false);
-  }, [rejectedFileMsg, setError, setTouched]);
+  }, [invalidateInFlightReads, rejectedFileMsg, setError, setTouched]);
 
   const clearRejection = React.useCallback(() => {
     isRejectedRef.current = false;
@@ -98,6 +110,10 @@ const IconUploadField = ({ name, isDisabled }: IconUploadFieldProps) => {
         validated={isRejected || hasError ? 'error' : 'default'}
         hideDefaultPreview
         onDataChange={(_event, data) => {
+          // PF calls onReadFinished then onDataChange for the same read; use the id captured there.
+          if (completedReadIdRef.current !== selectionIdRef.current) {
+            return;
+          }
           clearRejection();
           void setValue(data, true);
           void setTouched(true);
@@ -111,9 +127,20 @@ const IconUploadField = ({ name, isDisabled }: IconUploadFieldProps) => {
             applyRejection();
           }
         }}
-        onReadStarted={() => setIsLoading(true)}
-        onReadFinished={() => setIsLoading(false)}
+        onReadStarted={(_event, file) => {
+          const readId = ++selectionIdRef.current;
+          readIdByFileRef.current.set(file, readId);
+          setIsLoading(true);
+        }}
+        onReadFinished={(_event, file) => {
+          const readId = readIdByFileRef.current.get(file) ?? null;
+          completedReadIdRef.current = readId;
+          if (readId === selectionIdRef.current) {
+            setIsLoading(false);
+          }
+        }}
         onClearClick={() => {
+          invalidateInFlightReads();
           setFilename('');
           clearRejection();
           void setValue('', true);
