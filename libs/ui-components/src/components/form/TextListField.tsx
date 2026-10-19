@@ -52,9 +52,7 @@ const TextListField = ({ name, onChangeCallback, addButtonText, helperText }: Te
       <LabelGroup
         numLabels={5}
         isEditable
-        addLabelControl={
-          <EditableLabelControl defaultLabel="" addButtonText={addButtonText} onAddLabel={onAdd} isEditable />
-        }
+        addLabelControl={<EditableLabelControl addButtonText={addButtonText} onAddLabel={onAdd} isEditable />}
       >
         {valueList.map((text, index) => {
           return (
