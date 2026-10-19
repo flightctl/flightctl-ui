@@ -55,7 +55,7 @@ import CatalogFeatureRequirements from './CatalogItemCompatibility/CatalogFeatur
 
 import './CatalogItemDetails.css';
 
-type CatalogItemActions = 'deprecate' | 'restore' | 'delete';
+type CatalogItemActions = 'deprecate' | 'clear-deprecation' | 'delete';
 
 type CatalogItemDetailsPanelProps = {
   item: CatalogItem;
@@ -135,7 +135,7 @@ const CatalogItemDetailsModal = ({
           }}
         />
       );
-    case 'restore':
+    case 'clear-deprecation':
       return (
         <RestoreModal
           itemName={displayName}
@@ -296,8 +296,8 @@ const CatalogItemDetailsPanel = ({
     });
     if (isDeprecated) {
       regularActions.push({
-        title: t('Restore'),
-        onClick: () => setItemModalOpen('restore'),
+        title: t('Clear deprecation'),
+        onClick: () => setItemModalOpen('clear-deprecation'),
         tooltipProps: managedActionDisabledReason,
         isAriaDisabled: !!managedActionDisabledReason,
       });
