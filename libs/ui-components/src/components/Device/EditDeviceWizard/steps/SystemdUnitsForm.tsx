@@ -52,7 +52,7 @@ const SystemdUnitsForm = () => {
         isEditable
         addLabelControl={
           <EditableLabelControl
-            defaultLabel="name.service"
+            placeholder="name.service"
             addButtonText={t('Add service')}
             onAddLabel={onAdd}
             isEditable
