@@ -82,7 +82,6 @@ const ListItemField = ({
         isEditable={!isLoading}
         addLabelControl={
           <EditableLabelControl
-            defaultLabel=""
             addButtonText={addButtonText || t('Add item')}
             onAddLabel={onAdd}
             isEditable={!isLoading}

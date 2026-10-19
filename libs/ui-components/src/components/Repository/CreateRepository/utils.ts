@@ -949,7 +949,7 @@ export const repositorySchema =
                   .test('invalid-tags', (tags: string[] | undefined, testContext) => {
                     const tagsValidation = (tags || []).reduce(
                       (acc, tag) => {
-                        if (!tag.trim()) {
+                        if (!tag) {
                           acc[tag] = t('Tag is required');
                           return acc;
                         }

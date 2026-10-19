@@ -19,12 +19,8 @@ export class ApproveEnrollmentRequestModalPage {
     return cy.get('button').contains('Add label');
   }
 
-  get newlyAddedLabelButton() {
-    return cy.get('button').contains('key=value');
-  }
-
   get newLabelField() {
-    return cy.get('#editable-input').should('contain.value', 'key=value');
+    return this.body.get('input[aria-label="New label"]');
   }
 
   get deviceName() {

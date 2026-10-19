@@ -28,7 +28,7 @@ const TagsField = ({
       <LabelGroup
         numLabels={5}
         isEditable
-        addLabelControl={<EditableLabelControl defaultLabel="tag" addButtonText={t('Add tag')} onAddLabel={onAdd} />}
+        addLabelControl={<EditableLabelControl placeholder="tag" addButtonText={t('Add tag')} onAddLabel={onAdd} />}
       >
         {value?.map((tag, idx) => (
           <Label

@@ -102,7 +102,7 @@ const LabelsField = ({
           })}
       </LabelGroup>
       <EditableLabelControl
-        defaultLabel="key=value"
+        placeholder="key=value"
         addButtonText={addButtonText}
         onAddLabel={onAdd}
         isEditable={!isLoading}
