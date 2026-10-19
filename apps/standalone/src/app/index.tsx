@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { NavigationGuardProvider } from '@flightctl/ui-components/src/components/common/NavigationGuard';
 import { AppContext } from '@flightctl/ui-components/src/hooks/useAppContext';
 import { FLIGHTCTL_APP_CLASS } from '@flightctl/ui-components/src/constants';
 
@@ -18,9 +19,11 @@ const StandaloneApp: React.FunctionComponent = () => {
 
   return (
     <AppContext.Provider value={appContextValue}>
-      <div className={FLIGHTCTL_APP_CLASS}>
-        <AppRouter />
-      </div>
+      <NavigationGuardProvider>
+        <div className={FLIGHTCTL_APP_CLASS}>
+          <AppRouter />
+        </div>
+      </NavigationGuardProvider>
     </AppContext.Provider>
   );
 };
