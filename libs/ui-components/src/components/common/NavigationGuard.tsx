@@ -3,29 +3,10 @@ import { Button, ModalBody, ModalFooter, ModalHeader } from '@patternfly/react-c
 
 import { useTranslation } from '../../hooks/useTranslation';
 import FlightCtlModal from './FlightCtlModal';
+import { NavigationGuardContext } from './NavigationGuardContext';
 import { NavigationGuardController } from './NavigationGuardController';
 
-type NavigationGuardContextValue = {
-  isLocked: boolean;
-  isBlocked: boolean;
-  tryNavigate: (run: () => void) => void;
-  register: () => VoidFunction;
-  proceed: VoidFunction;
-  reset: () => void;
-};
-
-const noop = () => undefined;
-
-const defaultValue: NavigationGuardContextValue = {
-  isLocked: false,
-  isBlocked: false,
-  tryNavigate: (run) => run(),
-  register: () => noop,
-  proceed: noop,
-  reset: noop,
-};
-
-const NavigationGuardContext = React.createContext<NavigationGuardContextValue>(defaultValue);
+export { useNavigationGuard, useRegisterNavigationLock } from './NavigationGuardContext';
 
 const ConfirmNavigationDialog = ({ onProceed, onReset }: { onProceed: VoidFunction; onReset: VoidFunction }) => {
   const { t } = useTranslation();
@@ -80,7 +61,7 @@ export const NavigationGuardProvider = ({ children }: React.PropsWithChildren) =
   const proceed = React.useCallback(() => controller.proceed(), [controller]);
   const reset = React.useCallback(() => controller.reset(), [controller]);
 
-  const value = React.useMemo<NavigationGuardContextValue>(
+  const value = React.useMemo(
     () => ({
       isLocked,
       isBlocked,
@@ -98,18 +79,4 @@ export const NavigationGuardProvider = ({ children }: React.PropsWithChildren) =
       {isBlocked && <ConfirmNavigationDialog onProceed={proceed} onReset={reset} />}
     </NavigationGuardContext.Provider>
   );
-};
-
-export const useNavigationGuard = () => React.useContext(NavigationGuardContext);
-
-/** Register a leave lock while `lock` is true (e.g. dirty Formik form). */
-export const useRegisterNavigationLock = (lock: boolean) => {
-  const { register } = useNavigationGuard();
-
-  React.useEffect(() => {
-    if (!lock) {
-      return undefined;
-    }
-    return register();
-  }, [lock, register]);
 };

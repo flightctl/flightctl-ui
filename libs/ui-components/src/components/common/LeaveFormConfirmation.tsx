@@ -1,6 +1,6 @@
 import { useFormikContext } from 'formik';
 
-import { useRegisterNavigationLock } from './NavigationGuard';
+import { useRegisterNavigationLock } from './NavigationGuardContext';
 
 const LeaveFormConfirmation = () => {
   const { dirty, isSubmitting } = useFormikContext();

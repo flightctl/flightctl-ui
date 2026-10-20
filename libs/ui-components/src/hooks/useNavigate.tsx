@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { type LinkProps as RouterLinkProps } from 'react-router-dom';
-import { useNavigationGuard } from '../components/common/NavigationGuard';
+import { useNavigationGuard } from '../components/common/NavigationGuardContext';
 import { useAppContext } from './useAppContext';
 
 export interface NavigateFunction {
