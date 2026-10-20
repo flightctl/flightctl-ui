@@ -104,12 +104,12 @@ export const RestoreModal = ({ onRestore, onClose, itemName }: RestoreModalProps
 
   return (
     <FlightCtlModal isOpen onClose={onClose} variant="small">
-      <ModalHeader title={t('Restore catalog item')} />
+      <ModalHeader title={t('Clear deprecation')} />
       <ModalBody>
         <Stack hasGutter>
           <StackItem>
             <Trans t={t}>
-              Are you sure you want to restore <b>{itemName}</b> from its deprecated state?
+              Are you sure you want to clear the deprecated status of <b>{itemName}</b>?
             </Trans>
           </StackItem>
           {error && (
@@ -138,7 +138,7 @@ export const RestoreModal = ({ onRestore, onClose, itemName }: RestoreModalProps
             }
           }}
         >
-          {t('Restore')}
+          {t('Clear deprecation')}
         </Button>
         <Button variant="link" onClick={onClose} isDisabled={isSubmitting}>
           {t('Cancel')}
