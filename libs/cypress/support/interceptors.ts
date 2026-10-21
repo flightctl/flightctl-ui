@@ -5,6 +5,7 @@ import { loadInterceptors as loadDeviceInterceptors } from './interceptors/devic
 import { loadInterceptors as loadRepositoryInterceptors } from './interceptors/repositories';
 import { loadInterceptors as loadAuthInterceptors } from './interceptors/auth';
 import { loadInterceptors as loadGeneralInterceptors } from './interceptors/general';
+import { loadInterceptors as loadCatalogInterceptors } from './interceptors/catalogs';
 
 const loadApiInterceptors = () => {
   loadAuthInterceptors();
@@ -15,6 +16,7 @@ const loadApiInterceptors = () => {
   loadEnrollmentRequestsInterceptors();
   loadRepositoryInterceptors();
   loadResourceSyncsInterceptors();
+  loadCatalogInterceptors();
 };
 
 Cypress.Commands.add('loadApiInterceptors', loadApiInterceptors);

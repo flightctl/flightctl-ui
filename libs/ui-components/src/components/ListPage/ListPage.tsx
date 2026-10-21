@@ -7,11 +7,12 @@ type ListPageProps = {
   description?: string;
   headingLevel?: TitleProps['headingLevel'];
   children: React.ReactNode;
+  testId?: string;
 };
 
-const ListPage: React.FC<ListPageProps> = ({ title, description, headingLevel = 'h1', children }) => {
+const ListPage: React.FC<ListPageProps> = ({ title, description, headingLevel = 'h1', children, testId }) => {
   return (
-    <PageSection hasBodyWrapper={false}>
+    <PageSection hasBodyWrapper={false} data-testid={testId}>
       <Stack hasGutter>
         <StackItem>
           <Title headingLevel={headingLevel} size="3xl" data-testid="list-page-title">

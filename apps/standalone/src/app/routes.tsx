@@ -22,7 +22,6 @@ import { type TFunction } from 'i18next';
 import { PathMissingIcon } from '@patternfly/react-icons/dist/js/icons/path-missing-icon';
 
 import { useDocumentTitle } from '@flightctl/ui-components/src/hooks/useDocumentTitle';
-import { APP_TITLE } from '@flightctl/ui-components/src/constants';
 import { useTranslation } from '@flightctl/ui-components/src/hooks/useTranslation';
 import ErrorBoundary from '@flightctl/ui-components/src/components/common/ErrorBoundary';
 
@@ -30,6 +29,8 @@ import AppLayout from './components/AppLayout/AppLayout';
 import NotFound from './components/AppLayout/NotFound';
 import LoginPage from './components/Login/LoginPage';
 import { AuthContext } from './context/AuthContext';
+
+const APP_TITLE = 'Flight Control';
 
 const EnrollmentRequestDetails = React.lazy(
   () =>

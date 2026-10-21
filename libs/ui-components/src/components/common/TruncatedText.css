@@ -1,0 +1,35 @@
+.fctl-truncated-text {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.fctl-truncated-text__copy {
+  text-wrap: nowrap;
+  overflow-x: hidden;
+}
+
+.fctl-truncated-text .pf-v6-c-button {
+  /* The copy button is hidden by default */
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.fctl-truncated-text:hover .pf-v6-c-button,
+.fctl-truncated-text:focus-within .pf-v6-c-button {
+  /* Reveal the copy button on hover or when a descendant has keyboard focus */
+  clip-path: none;
+  overflow: visible;
+  white-space: initial;
+}
+
+@media (hover: none) {
+  .fctl-truncated-text .pf-v6-c-button {
+    /* Touch devices have no reliable hover; keep the copy button visible */
+    clip-path: none;
+    overflow: visible;
+    white-space: initial;
+  }
+}

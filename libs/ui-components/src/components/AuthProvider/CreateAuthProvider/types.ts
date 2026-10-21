@@ -21,6 +21,7 @@ export enum OrgAssignmentType {
 export const DEFAULT_USERNAME_CLAIM = 'preferred_username';
 export const DEFAULT_ROLE_CLAIM = 'groups';
 export const DEFAULT_ROLE_SEPARATOR = ':';
+export const DEFAULT_PROMPT = 'select_account';
 
 export const isOidcProvider = (providerSpec: AuthProviderSpec): providerSpec is OIDCProviderSpec =>
   providerSpec.providerType === ProviderType.OIDC;
@@ -63,6 +64,7 @@ export type AuthProviderFormValues = {
   clientSecret: string;
   enabled: boolean;
   scopes: string[];
+  prompt: string;
   usernameClaim?: string[]; // Array of path segments (e.g., ["preferred_username"] or ["custom", "user_id"])
   roleAssignmentType?: RoleAssignmentType;
   roleClaimPath?: string[]; // For dynamic role assignment

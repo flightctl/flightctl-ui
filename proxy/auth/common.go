@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/flightctl/flightctl-ui/common"
-	"github.com/flightctl/flightctl/api/v1beta1"
+	"github.com/flightctl/flightctl/api/core/v1beta1"
 	"github.com/openshift/osincli"
 )
 
@@ -146,6 +146,15 @@ func loginRedirect(client *osincli.Client, state string, codeChallenge string, p
 	parsedURL.RawQuery = query.Encode()
 
 	return parsedURL.String()
+}
+
+// normalizeLoginPrompt returns the prompt value to send in an authorization request.
+// nil uses the API default; an empty string means omit the prompt parameter.
+func normalizeLoginPrompt(prompt *string) string {
+	if prompt == nil {
+		return v1beta1.DefaultAuthProviderPrompt
+	}
+	return *prompt
 }
 
 // buildScopeParam builds a space-separated scope string from provider scopes or default scopes

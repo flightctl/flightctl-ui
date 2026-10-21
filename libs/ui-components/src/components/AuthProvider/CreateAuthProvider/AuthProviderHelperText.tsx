@@ -19,6 +19,29 @@ export const ScopesHelperText = () => {
   );
 };
 
+export const PromptHelperText = () => {
+  const { t } = useTranslation();
+  return (
+    <div>
+      <p>
+        <strong>{t('Purpose')}:</strong>{' '}
+        {t('Controls the authorization prompt sent to the identity provider during login.')}
+      </p>
+      <p>
+        <strong>{t('Format')}:</strong>{' '}
+        {t('Space-separated, case-sensitive values. Leave empty to omit the prompt parameter.')}
+      </p>
+      <p>
+        <strong>{t('Common examples')}:</strong>{' '}
+        {t('login, consent, select_account, none. Combinations like "login consent" are allowed.')}
+      </p>
+      <p>
+        <strong>{t('Note')}:</strong> {t('The value "none" cannot be combined with other prompt values.')}
+      </p>
+    </div>
+  );
+};
+
 export const UsernameClaimHelperText = () => {
   const { t } = useTranslation();
   return (

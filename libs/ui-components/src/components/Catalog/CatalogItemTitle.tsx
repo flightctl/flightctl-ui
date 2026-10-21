@@ -7,6 +7,7 @@ import type { CatalogItemRefSpec } from '@flightctl/types';
 import type { CatalogItem } from '@flightctl/types/alpha';
 import { useTranslation } from '../../hooks/useTranslation';
 import CatalogItemIcon from './CatalogItemIcon';
+import { CatalogItemLabel } from './CatalogItemDetails';
 
 const formatVersionLine = (t: TFunction, version?: string, channel?: string) => {
   if (!version) {
@@ -90,25 +91,26 @@ export const BrokenCatalogItemTitle = ({
 };
 
 const CatalogItemTitle = ({
-  headerTitle,
   item,
+  title,
   version,
   channel,
-  description,
 }: {
   item: CatalogItem;
-  headerTitle: string;
+  title?: string;
   version?: string;
   channel?: string;
-  description?: string;
-}) => (
-  <CatalogTitleLayout
-    icon={<CatalogItemIcon catalogItem={item} />}
-    title={headerTitle}
-    description={description}
-    version={version}
-    channel={channel}
-  />
-);
+}) => {
+  const nameEl = <CatalogItemLabel item={item} shortened />;
+  return (
+    <CatalogTitleLayout
+      icon={<CatalogItemIcon catalogItem={item} />}
+      title={title || nameEl}
+      description={title ? nameEl : undefined}
+      version={version}
+      channel={channel}
+    />
+  );
+};
 
 export default CatalogItemTitle;

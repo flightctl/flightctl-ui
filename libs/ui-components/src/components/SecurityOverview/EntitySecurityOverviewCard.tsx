@@ -18,6 +18,7 @@ import ListPageBody from '../ListPage/ListPageBody';
 import DetailsPageCard, { DetailsPageCardTitle } from '../DetailsPage/DetailsPageCard';
 import SecurityOverviewSummary from './SecurityOverviewSummary';
 import VulnerabilitiesTable from './VulnerabilitiesTable';
+import { VulnerabilitiesSingleEntityEmptyState } from './VulnerabilitiesEmptyState';
 
 type Severity = Vulnerability.severity;
 
@@ -98,6 +99,15 @@ const EntitySecurityOverviewCard = ({
     itemCount,
   };
 
+  const hasFilters = search.trim() !== '' || selectedSeverities.length > 0;
+  const isEmptyState = vulnerabilities.length === 0 && !isLoading && !isUpdating && !hasFilters && !error;
+  if (isEmptyState) {
+    return (
+      <DetailsPageCard isExpanded={isTableExpanded} isFullHeight={false}>
+        <VulnerabilitiesSingleEntityEmptyState entityType={scopeProps.isSingleDevice ? 'device' : 'fleet'} />
+      </DetailsPageCard>
+    );
+  }
   return (
     <DetailsPageCard isExpanded={isTableExpanded} isFullHeight={false}>
       <CardHeader

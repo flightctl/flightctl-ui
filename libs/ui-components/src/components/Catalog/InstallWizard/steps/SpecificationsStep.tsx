@@ -18,7 +18,6 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { type FormikErrors, useFormikContext } from 'formik';
-import * as semver from 'semver';
 import ReactMarkdown from 'react-markdown';
 import { type TFunction } from 'react-i18next';
 
@@ -44,6 +43,7 @@ import FormSelect from '../../../form/FormSelect';
 import RadioField from '../../../form/RadioField';
 import { type InstallAppFormik, type InstallSpecFormik, type TargetPickerFormik } from '../types';
 import { applyInitialConfig, getInitialAppConfig } from '../utils';
+import { getSortedChannelVersions } from '../../../CatalogComposition/catalogCompositionUtils';
 
 type VersionDropdownProps = {
   catalogItem: CatalogItem;
@@ -109,14 +109,11 @@ export const InstallSpec = ({
     return acc;
   }, {});
 
-  const versions = catalogItem.spec.versions.sort((v1, v2) => semver.compare(v2.version, v1.version));
-
-  const channelVersions = versions.filter(
-    (v) =>
-      v.channels.includes(values.channel) && (targetSet ? !!getFullContainerURI(catalogItem.spec.artifacts, v) : true),
+  const channelVersions = getSortedChannelVersions(catalogItem, values.channel).filter((v) =>
+    targetSet ? !!getFullContainerURI(catalogItem.spec.artifacts, v) : true,
   );
 
-  const currentVersion = versions.find((v) => v.version === values.version);
+  const currentVersion = catalogItem.spec.versions.find((v) => v.version === values.version);
 
   return (
     <>
@@ -134,7 +131,7 @@ export const InstallSpec = ({
               name="channel"
               items={channels}
               onChange={(val) => {
-                const newChannelVersions = versions.filter((v) => v.channels.includes(val));
+                const newChannelVersions = getSortedChannelVersions(catalogItem, val);
                 if (!newChannelVersions.some((v) => v.version === values.version)) {
                   const newVersion = newChannelVersions.length ? newChannelVersions[0].version : undefined;
                   setFieldValue('version', newVersion, true);

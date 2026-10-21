@@ -7,6 +7,8 @@ import {
   Content,
   ContentVariants,
   EmptyState,
+  Flex,
+  FlexItem,
   PageSection,
   Spinner,
   Stack,
@@ -15,6 +17,7 @@ import {
 } from '@patternfly/react-core';
 import { CatalogItemCategory } from '@flightctl/types/alpha';
 import { load } from 'js-yaml';
+import { Trans } from 'react-i18next';
 
 import type { ApplicationProviderSpec, Device, Fleet, ImageOrCatalogItemRefSpec, PatchRequest } from '@flightctl/types';
 import ErrorBoundary from '../../common/ErrorBoundary';
@@ -36,6 +39,7 @@ import { type CatalogEditWizardMode, getEditWizardMode } from '../../../utils/ca
 import { commonQueries } from '../../../utils/query';
 import EditOsWizard from './EditOsWizard';
 import EditAppWizard from './EditAppWizard';
+import { CatalogItemLabel } from '../CatalogItemDetails';
 
 type EditWizardProps = {
   mode: CatalogEditWizardMode;
@@ -201,7 +205,21 @@ const EditWizard = ({
     }
   }
 
-  const catalogDisplayName = catalogItem?.spec.displayName || params.itemId;
+  const catalogItemEl = <CatalogItemLabel item={catalogItem} fallbackId={params.itemId} shortened />;
+  let titleEl: React.ReactNode;
+  if (version) {
+    titleEl = (
+      <Trans t={t} values={{ catalogItemEl }}>
+        Deploy {catalogItemEl}
+      </Trans>
+    );
+  } else {
+    titleEl = (
+      <Trans t={t} values={{ catalogItemEl }}>
+        Edit {catalogItemEl}
+      </Trans>
+    );
+  }
 
   return (
     <>
@@ -222,16 +240,19 @@ const EditWizard = ({
               {t('Software catalog')}
             </Link>
           </BreadcrumbItem>
-          <BreadcrumbItem isActive>{`${catalogDisplayName}${appName ? ` (${appName})` : ''}`}</BreadcrumbItem>
+          <BreadcrumbItem isActive>
+            <Flex gap={{ default: 'gapSm' }}>
+              <FlexItem>{appName ? `(${appName}) ` : ''}</FlexItem>
+              <FlexItem>{titleEl}</FlexItem>
+            </Flex>
+          </BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
       <PageSection hasBodyWrapper={false}>
         <Stack>
           <StackItem>
             <Title headingLevel="h1" size="3xl">
-              {version
-                ? t('Deploy {{ name }}', { name: catalogDisplayName })
-                : t('Edit {{name}}', { name: catalogDisplayName })}
+              {titleEl}
             </Title>
           </StackItem>
           <StackItem>

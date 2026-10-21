@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Trans } from 'react-i18next';
 import {
   Card,
   CardBody,
@@ -19,7 +20,12 @@ import {
 import { type AuthProvider } from '@flightctl/types';
 
 import { useTranslation } from '../../../hooks/useTranslation';
-import { DEFAULT_USERNAME_CLAIM, OrgAssignmentType, isOAuth2Provider } from '../CreateAuthProvider/types';
+import {
+  DEFAULT_PROMPT,
+  DEFAULT_USERNAME_CLAIM,
+  OrgAssignmentType,
+  isOAuth2Provider,
+} from '../CreateAuthProvider/types';
 import { getAssignmentTypeLabel, getProviderTypeLabel } from '../CreateAuthProvider/utils';
 import RoleAssigmentDetails from './RoleAssigmentDetails';
 import { type DynamicAuthProviderSpec } from '../../../types/extraTypes';
@@ -35,6 +41,21 @@ const Scopes = ({ scopes }: { scopes: string[] | undefined }) => {
       ))}
     </LabelGroup>
   );
+};
+
+const PromptValue = ({ prompt }: { prompt: string | null | undefined }) => {
+  const { t } = useTranslation();
+  if (prompt === '') {
+    return <Content component={ContentVariants.small}>{t('Prompt is omitted')}</Content>;
+  }
+  if (prompt == null) {
+    return (
+      <Trans t={t}>
+        Use default prompt: <strong>{DEFAULT_PROMPT}</strong>
+      </Trans>
+    );
+  }
+  return <Label>{prompt}</Label>;
 };
 
 const CopyUrl = ({ url }: { url: string }) => {
@@ -150,13 +171,14 @@ const AuthProviderDetailsTab = ({ authProvider }: { authProvider: AuthProvider }
                   <Scopes scopes={spec.scopes} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
+
               <DescriptionListGroup>
                 <DescriptionListTerm>{t('Username claim path')}</DescriptionListTerm>
                 <DescriptionListDescription>
                   {spec.usernameClaim?.length ? (
                     <>
                       <LabelGroup>{spec.usernameClaim?.map((claim) => <Label key={claim}>{claim}</Label>)}</LabelGroup>
-                      <Content component={ContentVariants.small}>
+                      <Content component={ContentVariants.small} style={{ marginTop: '0.5rem' }}>
                         {t('Resulting username claim')}: <strong>{spec.usernameClaim.join('.')}</strong>
                       </Content>
                     </>
@@ -170,6 +192,12 @@ const AuthProviderDetailsTab = ({ authProvider }: { authProvider: AuthProvider }
                 <DescriptionListTerm>{t('Role assignment')}</DescriptionListTerm>
                 <DescriptionListDescription>
                   <RoleAssigmentDetails roleAssignment={spec.roleAssignment} />
+                </DescriptionListDescription>
+              </DescriptionListGroup>
+              <DescriptionListGroup>
+                <DescriptionListTerm>{t('Authorization prompt')}</DescriptionListTerm>
+                <DescriptionListDescription>
+                  <PromptValue prompt={spec.prompt} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>
