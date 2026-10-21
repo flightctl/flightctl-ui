@@ -1,7 +1,7 @@
-import { type TFunction } from 'i18next';
-import { ConditionType, type EnrollmentRequest } from '@flightctl/types';
-import { type StatusItem } from './common';
 import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-circle-icon';
+import { type TFunction } from 'i18next';
+import { type Condition, ConditionStatus, ConditionType, type EnrollmentRequest } from '@flightctl/types';
+import { type StatusItem } from './common';
 
 export enum EnrollmentRequestStatus {
   Pending = 'Pending',
@@ -9,6 +9,16 @@ export enum EnrollmentRequestStatus {
   Denied = 'Denied',
   Unknown = 'Unknown',
 }
+
+// The "TPM verification status" is a result of its "TPMVerified" condition.
+export enum EnrollmentRequestTpmVerificationStatus {
+  Verified = 'Verified', // fully verified
+  Failed = 'Failed', // verification completed but failed
+  Pending = 'Pending', // verification in progress (challenge required)
+  NotAvailable = 'NotAvailable', // device does not have a TPM, or it's not available.
+}
+
+const TPM_CHALLENGE_REQUIRED_REASON = 'TPMChallengeRequired';
 
 export const getEnrollmentRequestsStatusItems = (t: TFunction): StatusItem<EnrollmentRequestStatus>[] => [
   {
@@ -34,6 +44,30 @@ export const getEnrollmentRequestsStatusItems = (t: TFunction): StatusItem<Enrol
   },
 ];
 
+export const getTpmVerificationStatusItems = (t: TFunction): StatusItem<EnrollmentRequestTpmVerificationStatus>[] => [
+  {
+    id: EnrollmentRequestTpmVerificationStatus.Verified,
+    label: t('Verified'),
+    level: 'success',
+  },
+  {
+    id: EnrollmentRequestTpmVerificationStatus.Failed,
+    label: t('Failed'),
+    level: 'warning',
+  },
+  {
+    id: EnrollmentRequestTpmVerificationStatus.Pending,
+    label: t('Pending'),
+    level: 'info',
+    customIcon: PauseCircleIcon,
+  },
+  {
+    id: EnrollmentRequestTpmVerificationStatus.NotAvailable,
+    label: t('Not available'),
+    level: 'unknown',
+  },
+];
+
 export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): EnrollmentRequestStatus => {
   const approvedCondition = enrollmentRequest.status?.conditions?.find(
     (c) => c.type === ConditionType.EnrollmentRequestApproved,
@@ -46,4 +80,25 @@ export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): Enrollm
       return EnrollmentRequestStatus.Denied;
   }
   return EnrollmentRequestStatus.Pending;
+};
+
+export const getTpmVerifiedCondition = (enrollmentRequest: EnrollmentRequest | undefined): Condition | undefined =>
+  enrollmentRequest?.status?.conditions?.find((c) => c.type === ConditionType.EnrollmentRequestTPMVerified);
+
+export const getTpmVerificationStatus = (
+  tpmCondition: Condition | undefined,
+): EnrollmentRequestTpmVerificationStatus => {
+  if (!tpmCondition) {
+    return EnrollmentRequestTpmVerificationStatus.NotAvailable;
+  }
+
+  if (tpmCondition.status === ConditionStatus.ConditionStatusTrue) {
+    return EnrollmentRequestTpmVerificationStatus.Verified;
+  }
+
+  if (tpmCondition.reason === TPM_CHALLENGE_REQUIRED_REASON) {
+    return EnrollmentRequestTpmVerificationStatus.Pending;
+  }
+
+  return EnrollmentRequestTpmVerificationStatus.Failed;
 };

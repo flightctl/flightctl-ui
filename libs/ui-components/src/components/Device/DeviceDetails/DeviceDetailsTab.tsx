@@ -20,26 +20,13 @@ import LabelWithHelperText from '../../common/WithHelperText';
 import DetailsPageCard from '../../DetailsPage/DetailsPageCard';
 import DeviceLifecycleStatus from '../../Status/DeviceLifecycleStatus';
 import ConfigurationsContent from './DeviceDetailsTabContent/ConfigurationsContent';
-import DeviceOverviewLayout from './DeviceOverviewLayout';
-
-import './DeviceDetailsTab.css';
+import EnrolledDeviceDetails from './EnrolledDeviceDetails';
 
 type DeviceDetailsTabProps = {
   device: Required<Device>;
   refetch: VoidFunction;
   canEdit: boolean;
 };
-
-const EnrolledDeviceDetails = ({
-  device,
-  refetch,
-  canEdit,
-  children,
-}: React.PropsWithChildren<DeviceDetailsTabProps>) => (
-  <DeviceOverviewLayout device={device} refetch={refetch} canEdit={canEdit}>
-    {children}
-  </DeviceOverviewLayout>
-);
 
 const DecommissionedDeviceDetails = ({ device, children }: React.PropsWithChildren<{ device: Required<Device> }>) => {
   const { t } = useTranslation();
