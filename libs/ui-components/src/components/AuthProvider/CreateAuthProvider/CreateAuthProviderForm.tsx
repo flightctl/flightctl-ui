@@ -27,7 +27,8 @@ import { getDnsSubdomainValidations } from '../../form/validations';
 import { type AuthProviderFormValues, type FieldValidationResult } from './types';
 import { ProviderType } from '../../../types/extraTypes';
 
-import { authProviderSchema, getAuthProvider, getAuthProviderPatches, getInitValues } from './utils';
+import { authProviderSchema, getAuthProvider, getInitValues } from './utils';
+import { getAuthProviderPatches } from './patches';
 import { getErrorMessage } from '../../../utils/error';
 import LeaveFormConfirmation from '../../common/LeaveFormConfirmation';
 import { FormGroupWithHelperText } from '../../common/WithHelperText';
@@ -36,7 +37,7 @@ import Oauth2ProviderFields from './Oauth2ProviderFields';
 import OrganizationAssignmentSection from './AuthOrganizationAssignment';
 import RoleAssignmentSection from './RoleAssignmentSection';
 import TestConnectionModal from '../TestConnectionModal/TestConnectionModal';
-import { ScopesHelperText, UsernameClaimHelperText } from './AuthProviderHelperText';
+import { PromptHelperText, ScopesHelperText, UsernameClaimHelperText } from './AuthProviderHelperText';
 
 const EnableProviderSwitchLabel = () => {
   const { t } = useTranslation();
@@ -132,6 +133,16 @@ export const AuthProviderForm = ({ isEdit }: { isEdit?: boolean }) => {
       </FormSection>
 
       <RoleAssignmentSection />
+
+      <FormGroupWithHelperText label={t('Authorization prompt')} content={<PromptHelperText />}>
+        <TextField
+          name="prompt"
+          aria-label={t('Authorization prompt')}
+          helperText={t(
+            'Space-separated prompt values (for example login, consent, select_account). Leave empty to omit the prompt parameter.',
+          )}
+        />
+      </FormGroupWithHelperText>
 
       <Divider style={{ margin: '2rem 0 1rem' }} />
 
