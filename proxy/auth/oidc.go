@@ -8,9 +8,10 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"strings"
 
 	"github.com/flightctl/flightctl-ui/bridge"
-	"github.com/flightctl/flightctl/api/v1beta1"
+	"github.com/flightctl/flightctl/api/core/v1beta1"
 	"github.com/openshift/osincli"
 	log "github.com/sirupsen/logrus"
 )
@@ -25,6 +26,7 @@ type OIDCAuthHandler struct {
 	tokenEndpoint          string
 	clientId               string
 	providerName           string
+	prompt                 *string
 	promptValuesSupported  []string
 }
 
@@ -36,29 +38,20 @@ type oidcServerResponse struct {
 	PromptValuesSupported []string `json:"prompt_values_supported"`
 }
 
-const (
-	promptSelectAccount = "select_account"
-)
-
-// promptValue ensures only a supported prompt value is sent in the OIDC
-// authorization request.
-//
-// prompt_values_supported is OPTIONAL per the OpenID Connect prompt=create
-// extension spec. Most major providers (Google, Entra ID, Okta, PingOne) omit
-// it while supporting select_account, so absence means "no information" — we
-// keep the existing default of select_account.
-//
-// When prompt_values_supported IS present the provider is explicitly declaring
-// its capabilities. If it does not list select_account we omit the prompt
-// parameter entirely to avoid sending an unsupported value.
-func (a *OIDCAuthHandler) promptValue() string {
-	if a.promptValuesSupported == nil {
-		return promptSelectAccount // absent → no info, keep default
+// filterUnsupportedPrompt omits the prompt when discovery defines
+// prompt_values_supported and any token in the prompt is missing from that list.
+// A nil supported list means discovery did not declare capabilities, so prompt
+// is kept unchanged. An empty supported list rejects every non-empty prompt.
+func filterUnsupportedPrompt(prompt string, supportedPrompts []string) string {
+	if prompt == "" || supportedPrompts == nil {
+		return prompt
 	}
-	if slices.Contains(a.promptValuesSupported, promptSelectAccount) {
-		return promptSelectAccount
+	for _, token := range strings.Fields(prompt) {
+		if !slices.Contains(supportedPrompts, token) {
+			return ""
+		}
 	}
-	return ""
+	return prompt
 }
 
 func getOIDCAuthHandler(provider *v1beta1.AuthProvider, oidcSpec *v1beta1.OIDCProviderSpec) (*OIDCAuthHandler, error) {
@@ -125,6 +118,7 @@ func getOIDCAuthHandler(provider *v1beta1.AuthProvider, oidcSpec *v1beta1.OIDCPr
 		tokenEndpoint:          oidcResponse.TokenEndpoint,
 		clientId:               clientId,
 		providerName:           providerName,
+		prompt:                 oidcSpec.Prompt,
 		promptValuesSupported:  oidcResponse.PromptValuesSupported,
 	}
 
@@ -213,8 +207,9 @@ func (a *OIDCAuthHandler) GetLoginRedirectURL(state string, codeChallenge string
 		return "", fmt.Errorf("failed to create OIDC client: %w", err)
 	}
 
-	prompt := a.promptValue()
-	log.Debugf("OIDC prompt value determined: %q (supported values: %v)", prompt, a.promptValuesSupported)
+	normalizedPrompt := normalizeLoginPrompt(a.prompt)
+	resolvedPrompt := filterUnsupportedPrompt(normalizedPrompt, a.promptValuesSupported)
+	log.Debugf("OIDC prompt value: configured: %q, determined: %q", normalizedPrompt, resolvedPrompt)
 
-	return loginRedirect(client, state, codeChallenge, prompt), nil
+	return loginRedirect(client, state, codeChallenge, resolvedPrompt), nil
 }

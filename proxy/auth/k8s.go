@@ -8,7 +8,7 @@ import (
 
 	"github.com/flightctl/flightctl-ui/bridge"
 	"github.com/flightctl/flightctl-ui/common"
-	"github.com/flightctl/flightctl/api/v1beta1"
+	"github.com/flightctl/flightctl/api/core/v1beta1"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 

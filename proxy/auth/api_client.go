@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/flightctl/flightctl-ui/common"
-	"github.com/flightctl/flightctl/api/v1beta1"
+	"github.com/flightctl/flightctl/api/core/v1beta1"
 )
 
 // k8s service account prefix

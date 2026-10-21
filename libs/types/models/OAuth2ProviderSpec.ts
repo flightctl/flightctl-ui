@@ -49,6 +49,10 @@ export type OAuth2ProviderSpec = {
    * List of OAuth2 scopes to request.
    */
   scopes?: Array<string>;
+  /**
+   * Space-separated, case-sensitive authorization prompt values, such as login, consent, select_account, none, or provider-specific values. Omitted and null values are preserved in AuthProvider resources and exposed as select_account in public authentication configuration. An empty string instructs clients to omit the prompt parameter. Values must be printable ASCII separated by spaces; none cannot accompany a different value. Accepted values are preserved, including extra spaces and duplicates.
+   */
+  prompt?: string | null;
   organizationAssignment: AuthOrganizationAssignment;
   /**
    * JSON path to the username claim in the userinfo response as an array of path segments (e.g., ["preferred_username"], ["email"], ["sub"]).
