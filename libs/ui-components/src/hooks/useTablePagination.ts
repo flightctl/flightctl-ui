@@ -21,9 +21,9 @@ export const useTablePagination = <T extends ApiList>(): PaginationDetails<T> =>
   const onPageFetched = React.useCallback(
     (data: T) => {
       const prevItems = (currentPage - 1) * PAGE_SIZE;
-      setItemCount(prevItems + (data?.items.length || 0) + (data.metadata.remainingItemCount || 0));
+      setItemCount(prevItems + (data?.items?.length || 0) + (data?.metadata?.remainingItemCount || 0));
 
-      const nextToken = data.metadata?.continue || '';
+      const nextToken = data?.metadata?.continue || '';
       if (currentPage === 1) {
         // Always reset the list when at first page
         setContinueTokens([nextToken]);
