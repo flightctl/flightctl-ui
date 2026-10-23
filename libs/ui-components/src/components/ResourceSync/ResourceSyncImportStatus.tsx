@@ -53,14 +53,14 @@ const ResourceSyncInfoAlert = ({ rs, type }: { rs: ResourceSync; type: 'fleet' |
       variant="info"
       title={
         type === 'fleet' ? (
-          <Trans t={t}>
-            Importing fleets from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{name}</Link>. This
-            might take a few minutes to complete.
+          <Trans t={t} values={{ name }}>
+            Importing fleets from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{'{{name}}'}</Link>.
+            This might take a few minutes to complete.
           </Trans>
         ) : (
-          <Trans t={t}>
-            Importing catalogs from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{name}</Link>. This
-            might take a few minutes to complete.
+          <Trans t={t} values={{ name }}>
+            Importing catalogs from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{'{{name}}'}</Link>
+            . This might take a few minutes to complete.
           </Trans>
         )
       }
@@ -116,14 +116,14 @@ const ResourceSyncErrorAlert = ({
       actionClose={<AlertActionCloseButton onClose={dismissAlert} />}
     >
       {type === 'fleet' ? (
-        <Trans t={t}>
-          Importing fleets from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{name}</Link> failed.
-          Check the resource sync for more details.
+        <Trans t={t} values={{ name }}>
+          Importing fleets from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{'{{name}}'}</Link>{' '}
+          failed. Check the resource sync for more details.
         </Trans>
       ) : (
-        <Trans t={t}>
-          Importing catalogs from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{name}</Link> failed.
-          Check the resource sync for more details.
+        <Trans t={t} values={{ name }}>
+          Importing catalogs from <Link to={{ route: ROUTE.RESOURCE_SYNC_DETAILS, postfix: name }}>{'{{name}}'}</Link>{' '}
+          failed. Check the resource sync for more details.
         </Trans>
       )}
     </Alert>

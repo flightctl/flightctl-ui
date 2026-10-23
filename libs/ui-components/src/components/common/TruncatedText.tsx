@@ -11,6 +11,7 @@ type TruncatedTextProps = {
   maxChars?: number;
   leadingChars?: number;
   children?: (textContent: string) => React.ReactNode;
+  className?: string;
 };
 
 const TruncatedText = ({
@@ -19,12 +20,13 @@ const TruncatedText = ({
   leadingChars,
   maxChars = defaultMaxDisplayLength,
   children,
+  className,
 }: TruncatedTextProps) => {
   const displayText = getDisplayText(text, maxChars, leadingChars);
   const shouldShowCopy = showCopy ?? text !== displayText;
 
   return (
-    <span className="fctl-truncated-text">
+    <span className={`fctl-truncated-text ${className ?? ''}`}>
       <span className="fctl-truncated-text__copy">{children ? children(displayText) : displayText}</span>
       {shouldShowCopy && <CopyButton text={text} />}
     </span>
