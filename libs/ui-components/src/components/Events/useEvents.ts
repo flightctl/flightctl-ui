@@ -123,6 +123,9 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     // Delta generation events
     [Event.reason.PREPARE_DELTAS]: t('Preparing delta updates'),
     [Event.reason.DELTA_GENERATION_PROGRESS]: t('Delta updates are being generated'),
+    [Event.reason.DELTA_GENERATION_SUCCEEDED]: t('Delta updates were generated successfully'),
+    [Event.reason.DELTA_GENERATION_FAILED]: t('Delta update generation failed'),
+    [Event.reason.DELTA_GENERATION_REJECTED]: t('Delta update generation was rejected'),
     [Event.reason.DELTA_GENERATION_COMPLETED]: t('Delta updates generation is complete'),
     // Enrollment hook events
     [Event.reason.ENROLLMENT_HOOK_SUCCEEDED]: t('Enrollment hook succeeded'),
