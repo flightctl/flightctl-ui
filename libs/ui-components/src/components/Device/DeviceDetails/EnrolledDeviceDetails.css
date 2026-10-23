@@ -10,13 +10,13 @@
 
 /* System services: main column at lg+, bottom of stack below lg (992px). */
 @media (min-width: 992px) {
-  .fctl-device-overview__systemd-narrow {
+  .fctl-enrolled-device__systemd-narrow {
     display: none;
   }
 }
 
 @media (max-width: 991px) {
-  .fctl-device-overview__systemd-wide {
+  .fctl-enrolled-device__systemd-wide {
     display: none;
   }
 }
