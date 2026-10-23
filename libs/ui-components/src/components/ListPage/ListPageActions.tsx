@@ -56,8 +56,8 @@ export const useDeleteListAction = ({
     <DeleteModal
       resourceType={resourceType}
       confirmText={
-        <Trans t={t}>
-          Are you sure you want to delete {resourceTypeLabel} <b>{name || deleteResourceId}</b>?
+        <Trans t={t} values={{ resourceTypeLabel, resourceName: name || deleteResourceId }}>
+          Are you sure you want to delete {'{{resourceTypeLabel}}'} <b>{'{{resourceName}}'}</b>?
         </Trans>
       }
       onClose={onClose}
@@ -133,8 +133,8 @@ export const useResumeListAction = (onResumeComplete?: VoidFunction): ListAction
     <ResumeDevicesModal
       mode="device"
       title={
-        <Trans t={t}>
-          You are about to resume device <strong>{deviceName}</strong>
+        <Trans t={t} values={{ deviceName }}>
+          You are about to resume device <strong>{'{{deviceName}}'}</strong>
         </Trans>
       }
       selector={{ fieldSelector: `metadata.name=${deviceId}` }}

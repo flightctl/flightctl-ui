@@ -111,20 +111,12 @@ const AddCatalogItemWizard = () => {
   const initialValues = editItem ? getInitialValuesFromItem(editItem) : getInitialValues();
   const isReadOnly = !!editItem?.metadata?.owner;
 
-  const catalogItemEl = <CatalogItemLabel item={editItem} />;
+  const catalogItemEl = <CatalogItemLabel item={editItem} className="pf-v6-u-ml-xs" />;
   let titleEl: React.ReactNode;
   if (isReadOnly) {
-    titleEl = (
-      <Trans t={t} values={{ catalogItemEl }}>
-        View {catalogItemEl}
-      </Trans>
-    );
+    titleEl = <Trans t={t} i18nKey="View <htmlElement/>" components={{ htmlElement: catalogItemEl }} />;
   } else if (isEdit) {
-    titleEl = (
-      <Trans t={t} values={{ catalogItemEl }}>
-        Edit {catalogItemEl}
-      </Trans>
-    );
+    titleEl = <Trans t={t} i18nKey="Edit <htmlElement/>" components={{ htmlElement: catalogItemEl }} />;
   } else {
     titleEl = t('Create catalog item');
   }

@@ -299,14 +299,14 @@ constraints:
   double braces, not JSX expressions.
 - **Components take translated strings**, never i18n keys. The caller runs
   `t()` and passes the result: `<ListPage title={t('Fleets')}>`.
-- **Keys are flat** — `keySeparator: false` in the parser config. No dot
+- **Keys are flat** — `keySeparator: false` in the i18next-cli config. No dot
   notation nesting.
 - **Colons in translation text** require `nsSeparator` override — i18next
   treats `:` as a namespace separator by default:
   `t('e.g. https://example.com', { nsSeparator: '|' })`.
-- **`npm run i18n` is part of `npm run lint`** — if you add or change a
-  translation key in source, lint will fail until you run `npm run i18n` and
-  commit the updated `translation.json`.
+- **`npm run i18n:check` is part of `npm run lint`** — if you add or change a
+  translation key in source, lint will fail until you run `npm run i18n` to
+  regenerate and commit the updated `translation.json`.
 
 ## Permissions
 
