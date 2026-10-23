@@ -78,8 +78,8 @@ const HttpConfigForm = ({
   if (baseURL) {
     const fullURL = `${baseURL}${template.suffix || ''}`;
     suffixHelperText = (
-      <Trans t={t}>
-        Full HTTP service URL: <strong>{fullURL}</strong>
+      <Trans t={t} values={{ fullURL }}>
+        Full HTTP service URL: <strong>{'{{fullURL}}'}</strong>
       </Trans>
     );
   } else {

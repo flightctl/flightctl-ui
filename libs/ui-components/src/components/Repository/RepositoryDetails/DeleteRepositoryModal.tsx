@@ -114,8 +114,8 @@ const DeleteRepositoryModal = ({ repositoryId, onClose, onDeleteSuccess }: Delet
             </Alert>
           ) : (
             <StackItem>
-              <Trans t={t}>
-                Are you sure you want to delete the repository <b>{repositoryId}</b>?
+              <Trans t={t} values={{ repositoryId }}>
+                Are you sure you want to delete the repository <b>{'{{repositoryId}}'}</b>?
               </Trans>
             </StackItem>
           )}

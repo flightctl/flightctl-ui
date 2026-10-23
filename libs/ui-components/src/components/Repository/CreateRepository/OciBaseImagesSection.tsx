@@ -58,7 +58,9 @@ const OciBaseImagesSection = () => {
     <ExpandableFormSection
       fieldName="ociConfig.baseImages"
       title={t('Base images for Image Builder')}
-      description={baseImageCount > 0 ? t('{{ count }} configured', { count: baseImageCount }) : t('Optional')}
+      description={
+        baseImageCount > 0 ? t('{{ imageCount }} configured', { imageCount: baseImageCount }) : t('Optional')
+      }
       defaultExpanded={false}
     >
       <FieldArray name="ociConfig.baseImages">

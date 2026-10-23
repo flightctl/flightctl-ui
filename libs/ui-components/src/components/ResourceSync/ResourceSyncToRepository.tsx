@@ -47,8 +47,8 @@ const ResourceSyncToRepository = () => {
       {error ? (
         <EmptyState
           titleText={
-            <Trans t={t}>
-              Could not find the details for the resource sync <strong>{rsId}</strong>
+            <Trans t={t} values={{ rsId }}>
+              Could not find the details for the resource sync <strong>{'{{rsId}}'}</strong>
             </Trans>
           }
         >

@@ -33,13 +33,13 @@ import { UpdateSuccessPageContent } from '../InstallWizard/UpdateSuccessPage';
 import { usePermissionsContext } from '../../common/PermissionsContext';
 import PageWithPermissions from '../../common/PageWithPermissions';
 import { RESOURCE, VERB } from '../../../types/rbac';
+import { CatalogItemLabel } from '../CatalogItemDetails';
 import { hasPackageModeCapability } from '../../../utils/capabilities';
 import { appendJSONPatch } from '../../../utils/patches/patch';
 import { type CatalogEditWizardMode, getEditWizardMode } from '../../../utils/catalog';
 import { commonQueries } from '../../../utils/query';
 import EditOsWizard from './EditOsWizard';
 import EditAppWizard from './EditAppWizard';
-import { CatalogItemLabel } from '../CatalogItemDetails';
 
 type EditWizardProps = {
   mode: CatalogEditWizardMode;
@@ -208,17 +208,9 @@ const EditWizard = ({
   const catalogItemEl = <CatalogItemLabel item={catalogItem} fallbackId={params.itemId} shortened />;
   let titleEl: React.ReactNode;
   if (version) {
-    titleEl = (
-      <Trans t={t} values={{ catalogItemEl }}>
-        Deploy {catalogItemEl}
-      </Trans>
-    );
+    titleEl = <Trans t={t} i18nKey="Deploy <htmlElement/>" components={{ htmlElement: catalogItemEl }} />;
   } else {
-    titleEl = (
-      <Trans t={t} values={{ catalogItemEl }}>
-        Edit {catalogItemEl}
-      </Trans>
-    );
+    titleEl = <Trans t={t} i18nKey="Edit <htmlElement/>" components={{ htmlElement: catalogItemEl }} />;
   }
 
   return (
