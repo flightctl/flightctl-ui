@@ -26,9 +26,9 @@ const FleetRestoreBanner = ({ fleet, refetch }: { fleet?: Fleet; refetch: VoidFu
       resumeAction={{
         actionText: t('Resume all'),
         title: (
-          <Trans t={t} count={suspendedDevicesCountNum}>
-            You are about to resume all<strong>{suspendedDevicesCount}</strong> suspended devices in{' '}
-            <strong>{fleetId}</strong>
+          <Trans t={t} count={suspendedDevicesCountNum} values={{ suspendedDevicesCount, fleetId }}>
+            You are about to resume all<strong>{'{{suspendedDevicesCount}}'}</strong> suspended devices in{' '}
+            <strong>{'{{fleetId}}'}</strong>
           </Trans>
         ),
         requestSelector: {

@@ -121,8 +121,8 @@ const AdvancedSection = () => {
                   helperText={
                     values.validationSuffix &&
                     values.url && (
-                      <Trans t={t}>
-                        Full validation URL: <strong>{`${values.url}${values.validationSuffix || ''}`}</strong>
+                      <Trans t={t} values={{ fullValidationUrl: `${values.url}${values.validationSuffix || ''}` }}>
+                        Full validation URL: <strong>{'{{ fullValidationUrl }}'}</strong>
                       </Trans>
                     )
                   }
