@@ -28,7 +28,7 @@ const PlacementPreview = ({ ociConfig }: { ociConfig: NonNullable<RepositoryForm
     const previewPath = getOciRepoDisplayPath(ociConfig, EXAMPLE_SOURCE_IMAGE);
     content = (
       <Trans t={t} values={{ image: EXAMPLE_SOURCE_IMAGE, path: previewPath }}>
-        Example: &apos;{'{{ image }}'}&apos; is stored at <strong>{previewPath}</strong>
+        Example: &apos;{'{{ image }}'}&apos; is stored at <strong>{'{{path}}'}</strong>
       </Trans>
     );
   }

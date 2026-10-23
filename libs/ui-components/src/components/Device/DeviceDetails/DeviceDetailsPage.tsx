@@ -116,8 +116,8 @@ const DeviceDetailsPage = ({ children }: React.PropsWithChildren) => {
   const resumeDevice = {
     actionText: t('Resume device'),
     title: (
-      <Trans t={t}>
-        You are about to resume <strong>{deviceNameOrAlias}</strong>
+      <Trans t={t} values={{ deviceNameOrAlias }}>
+        You are about to resume <strong>{'{{deviceNameOrAlias}}'}</strong>
       </Trans>
     ),
     requestSelector: {

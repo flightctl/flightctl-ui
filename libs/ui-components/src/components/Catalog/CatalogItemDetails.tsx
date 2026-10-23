@@ -80,14 +80,17 @@ export const CatalogItemLabel = ({
   item,
   fallbackId,
   shortened,
+  className,
 }: {
   item?: CatalogItem;
   fallbackId?: string;
   shortened?: boolean;
+  className?: string;
 }) => (
   <TruncatedText
     text={item?.spec.displayName || item?.metadata.name || fallbackId || ''}
     maxChars={shortened ? 30 : undefined}
+    className={className}
   />
 );
 
@@ -175,8 +178,8 @@ const CatalogItemDetailsModal = ({
         <DeleteModal
           resourceType="catalogItem"
           confirmText={
-            <Trans t={t}>
-              Are you sure you want to delete catalog item <b>{displayName}</b>?
+            <Trans t={t} values={{ displayName }}>
+              Are you sure you want to delete catalog item <b>{'{{displayName}}'}</b>?
             </Trans>
           }
           onClose={() => setItemModalOpen(undefined)}

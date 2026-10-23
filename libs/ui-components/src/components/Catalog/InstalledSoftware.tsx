@@ -93,12 +93,12 @@ const InstalledSoftware = ({ onDeleteItem, onEdit, canEdit, hasPackageMode }: In
           resourceType={itemToDelete.type === 'os' ? 'os' : 'application'}
           confirmText={
             itemToDelete.type === 'os' ? (
-              <Trans t={t}>
-                Are you sure you want to delete operating system <b>{formatCatalogItemRef(itemToDelete.ref)}</b>?
+              <Trans t={t} values={{ itemRef: formatCatalogItemRef(itemToDelete.ref) }}>
+                Are you sure you want to delete operating system <b>{'{{ itemRef }}'}</b>?
               </Trans>
             ) : (
-              <Trans t={t}>
-                Are you sure you want to delete application <b>{itemToDelete.appName as string}</b>?
+              <Trans t={t} values={{ appName: itemToDelete.appName as string }}>
+                Are you sure you want to delete application <b>{'{{ appName }}'}</b>?
               </Trans>
             )
           }

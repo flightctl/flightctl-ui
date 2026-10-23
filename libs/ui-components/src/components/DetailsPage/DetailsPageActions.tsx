@@ -60,8 +60,8 @@ export const useDeleteAction = ({
     <DeleteModal
       resourceType={resourceType}
       confirmText={
-        <Trans t={t}>
-          Are you sure you want to delete <b>{resourceName}</b>?
+        <Trans t={t} values={{ resourceName }}>
+          Are you sure you want to delete <b>{'{{resourceName}}'}</b>?
         </Trans>
       }
       onClose={() => setIsDeleteModalOpen(false)}
@@ -106,8 +106,8 @@ export const useResumeAction = ({ disabledReason, deviceId, alias, onResumeCompl
     <ResumeDevicesModal
       mode="device"
       title={
-        <Trans t={t}>
-          You are about to resume device <strong>{deviceNameOrAlias}</strong>
+        <Trans t={t} values={{ deviceNameOrAlias }}>
+          You are about to resume device <strong>{'{{deviceNameOrAlias}}'}</strong>
         </Trans>
       }
       selector={resumeSelector}
