@@ -51,7 +51,7 @@
     "formik": "^2.4.5",
     "i18next": "^21.8.14",
     "i18next-browser-languagedetector": "^7.2.1",
-    "i18next-http-backend": "^2.5.0",
+    "i18next-http-backend": "^4.0.3",
     "js-yaml": "^4.3.0",
     "monaco-editor": "^0.51.0",
     "react": "17.0.1",
