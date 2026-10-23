@@ -2304,6 +2304,7 @@
   "TPM identity verification is pending.": "TPM identity verification is pending.",
   "TPM identity verification couldn't be completed.": "TPM identity verification couldn't be completed.",
   "This enrollment request doesn't use a TPM-backed identity.": "This enrollment request doesn't use a TPM-backed identity.",
+  "TPM verification status is unknown.": "TPM verification status is unknown.",
   "Device identity - {{ status }}": "Device identity - {{ status }}",
   "TPM - {{ status }}": "TPM - {{ status }}",
   "Last verification at: {{ timestamp }}": "Last verification at: {{ timestamp }}",

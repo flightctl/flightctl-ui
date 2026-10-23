@@ -16,6 +16,7 @@ export enum EnrollmentRequestTpmVerificationStatus {
   Failed = 'Failed', // verification completed but failed
   Pending = 'Pending', // verification in progress (challenge required)
   NotAvailable = 'NotAvailable', // device does not have a TPM, or it's not available.
+  Unknown = 'Unknown',
 }
 
 const TPM_CHALLENGE_REQUIRED_REASON = 'TPMChallengeRequired';
@@ -66,6 +67,11 @@ export const getTpmVerificationStatusItems = (t: TFunction): StatusItem<Enrollme
     label: t('Not available'),
     level: 'unknown',
   },
+  {
+    id: EnrollmentRequestTpmVerificationStatus.Unknown,
+    label: t('Unknown'),
+    level: 'unknown',
+  },
 ];
 
 export const getApprovalStatus = (enrollmentRequest: EnrollmentRequest): EnrollmentRequestStatus => {
@@ -98,6 +104,9 @@ export const getTpmVerificationStatus = (
 
   if (tpmCondition.reason === TPM_CHALLENGE_REQUIRED_REASON) {
     return EnrollmentRequestTpmVerificationStatus.Pending;
+  }
+  if (tpmCondition.status === ConditionStatus.ConditionStatusUnknown) {
+    return EnrollmentRequestTpmVerificationStatus.Unknown;
   }
 
   return EnrollmentRequestTpmVerificationStatus.Failed;

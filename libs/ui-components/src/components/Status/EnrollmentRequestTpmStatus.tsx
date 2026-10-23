@@ -24,6 +24,8 @@ const getConditionMessage = (t: TFunction, condition?: Condition) => {
       return withMessage(t("TPM identity verification couldn't be completed."), condition?.message);
     case EnrollmentRequestTpmVerificationStatus.NotAvailable:
       return withMessage(t("This enrollment request doesn't use a TPM-backed identity."), condition?.message);
+    default:
+      return withMessage(t('TPM verification status is unknown.'), condition?.message);
   }
 };
 
