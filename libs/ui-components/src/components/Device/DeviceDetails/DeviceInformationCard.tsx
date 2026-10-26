@@ -20,8 +20,6 @@ import ConfigurationsContent from './DeviceDetailsTabContent/ConfigurationsConte
 import { CapabilitiesFieldsList, SystemInfoFieldsList } from './SidebarDescriptionList';
 import SystemInfoReportingBadge from './SystemInfoReportingBadge';
 
-import './DeviceDetailsTab.css';
-
 const DeviceInformationCard = ({
   device,
   systemInfoResult,
