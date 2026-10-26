@@ -22,8 +22,6 @@ import DeviceFleet from './DeviceFleet';
 import DeviceManagedLabels from './DeviceManagedLabels';
 import SidebarDescriptionList from './SidebarDescriptionList';
 
-import './DeviceDetailsTab.css';
-
 type DeviceIdentityCardProps = {
   device: Required<Device>;
   refetch: VoidFunction;

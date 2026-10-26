@@ -30,6 +30,7 @@ import DeviceCustomDataCard from '../../Device/DeviceDetails/DeviceCustomDataCar
 import SystemInfoDescriptionGroup from '../../Device/DeviceDetails/SystemInfoDescriptionGroup';
 import DetailsPageActions, { useDeleteAction } from '../../DetailsPage/DetailsPageActions';
 import EnrollmentRequestStatus from '../../Status/EnrollmentRequestStatus';
+import EnrollmentRequestTpmStatus from '../../Status/EnrollmentRequestTpmStatus';
 import LabelWithHelperText from '../../common/WithHelperText';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { ROUTE, useNavigate } from '../../../hooks/useNavigate';
@@ -136,6 +137,20 @@ const EnrollmentRequestDetails = () => {
                   <DescriptionListTerm>{t('Status')}</DescriptionListTerm>
                   <DescriptionListDescription>
                     <EnrollmentRequestStatus er={er} />
+                  </DescriptionListDescription>
+                </DescriptionListGroup>
+                <DescriptionListGroup>
+                  <DescriptionListTerm>
+                    <LabelWithHelperText
+                      label={t('TPM verification status')}
+                      content={t(
+                        'Indicates whether this enrollment request used a TPM-backed identity and whether verification succeeded.',
+                      )}
+                      isInline
+                    />
+                  </DescriptionListTerm>
+                  <DescriptionListDescription>
+                    <EnrollmentRequestTpmStatus er={er} />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 {systemInfoResult.mainEntries.map((entry) => (
