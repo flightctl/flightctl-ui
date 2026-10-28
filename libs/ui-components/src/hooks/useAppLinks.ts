@@ -3,12 +3,6 @@ import { useAppContext } from './useAppContext';
 // Links to other flightctl upstream resources
 export const DEMO_REPOSITORY_URL = 'https://github.com/flightctl/flightctl-demos';
 
-// RHEM-1.4-WIP Update version before completing the release.
-export const RHEM_VERSION = '1.3';
-
-const baseUpstreamDocs = 'https://github.com/flightctl/flightctl/blob/main/docs';
-
-// RHEM-1.4-WIP: Add missing links related to delta generation, both upstream and downstream.
 type AppLink =
   | 'createApp'
   | 'useTemplateVars'
@@ -19,6 +13,7 @@ type AppLink =
   | 'deltaGenerationBasics'
   | 'deltaTargetRepo';
 
+const baseUpstreamDocs = 'https://github.com/flightctl/flightctl/blob/main/docs';
 const upstreamLinks: Record<AppLink, string> = {
   createApp: `${baseUpstreamDocs}/user/using/managing-devices.md#creating-applications`,
   useTemplateVars: `${baseUpstreamDocs}/user/using/managing-fleets.md#defining-device-templates`,
@@ -26,20 +21,21 @@ const upstreamLinks: Record<AppLink, string> = {
   createAcmRepo: `${baseUpstreamDocs}/user/using/registering-microshift-devices-acm.md#auto-registering-devices-with-microshift-into-acm`,
   provisionDevice: `${baseUpstreamDocs}/user/using/provisioning-devices.md#provisioning-physical-devices`,
   catalog: `${baseUpstreamDocs}/user/using/managing-catalogs.md`,
-  deltaGenerationBasics: '',
-  deltaTargetRepo: '',
+  deltaGenerationBasics: `${baseUpstreamDocs}/user/using/managing-devices.md#using-control-plane-generated-os-deltas`,
+  deltaTargetRepo: `${baseUpstreamDocs}/user/using/managing-repositories.md#optional-fields`,
 };
 
-const baseDownstreamDocs = `https://docs.redhat.com/en/documentation/red_hat_edge_manager/${RHEM_VERSION}/html`;
+const RHEM_VERSION = '1.4';
+const baseDownstreamDocs = `https://docs.redhat.com/en/documentation/red_hat_edge_manager/${RHEM_VERSION}`;
 const downstreamLinks: Record<AppLink, string> = {
-  createApp: `${baseDownstreamDocs}/managing_applications_on_an_edge_device/build-app-packages_managing-apps-edge-device`,
-  useTemplateVars: `${baseDownstreamDocs}/managing_device_fleets/device-fleets_managing-device-fleets`,
-  addNewDevice: `${baseDownstreamDocs}/operating_system_images_for_the_red_hat_edge_manager/edge-mgr-images_os-images-edge-manager#build-images-consider_os-images-edge-manager`,
-  createAcmRepo: `${baseDownstreamDocs}/managing_devices/manage-devices-intro_managing-devices#manage-git-repository_managing-devices`,
-  provisionDevice: `${baseDownstreamDocs}/provisioning_devices/provision-devices-intro_provisioning-devices`,
-  catalog: `${baseDownstreamDocs}/managing_devices/manage-devices-intro_managing-devices#software-catalog_managing-devices`,
-  deltaGenerationBasics: '',
-  deltaTargetRepo: '',
+  createApp: `${baseDownstreamDocs}/configure-con_build_app_packages`,
+  useTemplateVars: `${baseDownstreamDocs}/plan-managing_device_fleets`,
+  addNewDevice: `${baseDownstreamDocs}/plan-con_edge_mgr_images_consider`,
+  createAcmRepo: `${baseDownstreamDocs}/configure-con_config_git_repo`,
+  provisionDevice: `${baseDownstreamDocs}/deploy-con_edge_mgr_provision_intro`,
+  catalog: `${baseDownstreamDocs}/deploy-con_software_catalog`,
+  deltaGenerationBasics: `${baseDownstreamDocs}/configure-delta_updates_for_os_images_and_applications`,
+  deltaTargetRepo: `${baseDownstreamDocs}/configure-configuring_an_oci_repository`,
 };
 
 export const useAppLinks = (link: AppLink) => {
