@@ -15,20 +15,20 @@ import DeviceSystemdUnits from './DeviceSystemdUnits';
 import DeviceVulnerabilities from './DeviceVulnerabilities';
 import DeviceCustomDataCard from './DeviceCustomDataCard';
 
-import './DeviceDetailsTab.css';
+import './EnrolledDeviceDetails.css';
 
-type DeviceOverviewLayoutProps = {
+type EnrolledDeviceDetailsProps = {
   device: Required<Device>;
   refetch: VoidFunction;
   canEdit: boolean;
 };
 
-const DeviceOverviewLayout = ({
+const EnrolledDeviceDetails = ({
   device,
   refetch,
   canEdit,
   children,
-}: React.PropsWithChildren<DeviceOverviewLayoutProps>) => {
+}: React.PropsWithChildren<EnrolledDeviceDetailsProps>) => {
   const { t } = useTranslation();
   const deviceHealth = useDeviceOverallHealth(device);
   const [vulnerabilitiesEnabled, canListVulnerabilities] = useVulnerabilitiesEnabled();
@@ -63,7 +63,7 @@ const DeviceOverviewLayout = ({
                 <DeviceVulnerabilities deviceId={device.metadata.name as string} />
               </StackItem>
             )}
-            <StackItem className="fctl-device-overview__systemd-wide">
+            <StackItem className="fctl-enrolled-device__systemd-wide">
               <DeviceSystemdUnits device={device} />
             </StackItem>
           </Stack>
@@ -85,7 +85,7 @@ const DeviceOverviewLayout = ({
             )}
           </Stack>
         </GridItem>
-        <GridItem md={12} className="fctl-device-overview__systemd-narrow">
+        <GridItem md={12} className="fctl-enrolled-device__systemd-narrow">
           <DeviceSystemdUnits device={device} />
         </GridItem>
       </Grid>
@@ -93,4 +93,4 @@ const DeviceOverviewLayout = ({
   );
 };
 
-export default DeviceOverviewLayout;
+export default EnrolledDeviceDetails;

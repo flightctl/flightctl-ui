@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { DeltaGenerationPhase } from './DeltaGenerationPhase';
 /**
- * Structured details for DeltaGenerationProgress events. One event when a pair enters a phase or becomes terminal, fanned out to each waiting Fleet or standalone Device. Not a percent heartbeat.
+ * Structured details for delta generation lifecycle events. One event when a pair enters a phase or becomes terminal, fanned out to each waiting Fleet or standalone Device. Not a percent heartbeat.
  */
 export type DeltaGenerationProgressDetails = {
   /**
