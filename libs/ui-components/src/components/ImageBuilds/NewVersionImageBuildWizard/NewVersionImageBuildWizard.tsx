@@ -256,8 +256,7 @@ const NewVersionImageBuildWizard = () => {
     (canListPromotions && promotionsLoading) ||
     (!!activePromotion && hasCatalogParams && catalogItemLoading) ||
     (!!activePromotion && hasCatalogParams && !catalogItem && !catalogItemError);
-  const loadError =
-    imageBuildError || registriesError || promotionsError || (hasCatalogParams ? catalogItemError : undefined);
+  const loadError = imageBuildError || registriesError || promotionsError;
 
   return (
     <>
