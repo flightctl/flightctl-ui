@@ -256,8 +256,12 @@ const NewVersionImageBuildWizard = () => {
     (canListPromotions && promotionsLoading) ||
     (!!activePromotion && hasCatalogParams && catalogItemLoading) ||
     (!!activePromotion && hasCatalogParams && !catalogItem && !catalogItemError);
+  const isCatalogItemNotFound = !!catalogItemError && getErrorMessage(catalogItemError) === 'Error 404: Not Found';
   const loadError =
-    imageBuildError || registriesError || promotionsError || (hasCatalogParams ? catalogItemError : undefined);
+    imageBuildError ||
+    registriesError ||
+    promotionsError ||
+    (hasCatalogParams && catalogItemError && !isCatalogItemNotFound ? catalogItemError : undefined);
 
   return (
     <>
