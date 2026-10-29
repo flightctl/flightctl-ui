@@ -1,6 +1,7 @@
 name: CI
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches:
       - main
@@ -164,10 +165,16 @@ jobs:
         with:
           node-version: 22.x
       - name: Run integration tests
-        uses: cypress-io/github-action@be1bab96b388bbd9ce3887e397d373c8557e15af # v6.9.2
+        uses: cypress-io/github-action@c541a95ea92d9239347a2355f2e895cd4b3f8060 # v7.4.6
         with:
           install-command: npm ci
-          build: npm run build
+          # integration-tests:build runs `npm run build` then `build:libs`
+          # (the && lives inside the script because the action does not run
+          # this input through a shell). build:libs must come after the app
+          # build, whose `rimraf **/dist` prebuild would otherwise wipe the
+          # libs' dist, which Cypress's webpack preprocessor needs to resolve
+          # the @flightctl/* packages when compiling the specs.
+          build: npm run integration-tests:build
           config-file: libs/cypress/cypress.config.ts
           browser: chrome
           start: npm run integration-tests:ci
