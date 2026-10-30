@@ -4,7 +4,6 @@ import {
   type AppContextProps,
   FlightCtlApp,
   type NavLinkFC,
-  type PromptFC,
 } from '@flightctl/ui-components/src/hooks/useAppContext';
 import { ROUTE } from '@flightctl/ui-components/src/hooks/useNavigate';
 import {
@@ -18,12 +17,11 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom-v5-compat';
-// @ts-expect-error Provided by the OCP console in the runtime environment.
-import { Prompt } from 'react-router-dom';
 import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/reducers';
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
 import { apiProxy } from '../../utils/apiCalls';
+import { NavigationGuardProvider } from '@flightctl/ui-components/src/components/common/NavigationGuard';
 import OrganizationGuard from '@flightctl/ui-components/src/components/common/OrganizationGuard';
 import { PermissionsContextProvider } from '@flightctl/ui-components/src/components/common/PermissionsContext';
 import QuickStartHost from '@flightctl/ui-components/src/components/QuickStart/QuickStartHost';
@@ -64,11 +62,13 @@ export const OCPPluginAppContext: React.FC<React.PropsWithChildren<{ value: AppC
 }) => {
   return (
     <AppContext.Provider value={value}>
-      <OrganizationGuard>
-        <PermissionsContextProvider>
-          <QuickStartHost>{children}</QuickStartHost>
-        </PermissionsContextProvider>
-      </OrganizationGuard>
+      <NavigationGuardProvider>
+        <OrganizationGuard>
+          <PermissionsContextProvider>
+            <QuickStartHost>{children}</QuickStartHost>
+          </PermissionsContextProvider>
+        </OrganizationGuard>
+      </NavigationGuardProvider>
     </AppContext.Provider>
   );
 };
@@ -130,7 +130,6 @@ export const useValuesAppContext = (): AppContextProps => {
       useNavigate,
       useParams,
       useSearchParams,
-      Prompt: Prompt as PromptFC,
     },
     i18n: {
       transNamespace: 'plugin__flightctl-plugin',

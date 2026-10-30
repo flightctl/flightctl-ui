@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { AppContext } from '@flightctl/ui-components/src/hooks/useAppContext';
+import { NavigationGuardProvider } from '@flightctl/ui-components/src/components/common/NavigationGuard';
 import { FLIGHTCTL_APP_CLASS } from '@flightctl/ui-components/src/constants';
+import { AppContext } from '@flightctl/ui-components/src/hooks/useAppContext';
 
 import { AppRouter } from './routes';
 import { useStandaloneAppContext } from './hooks/useStandaloneAppContext';
@@ -21,9 +22,11 @@ const App: React.FunctionComponent = () => {
     <React.Suspense fallback={<div />}>
       <AuthContext.Provider value={authContextValue}>
         <AppContext.Provider value={appContextValue}>
-          <div className={FLIGHTCTL_APP_CLASS}>
-            <AppRouter />
-          </div>
+          <NavigationGuardProvider>
+            <div className={FLIGHTCTL_APP_CLASS}>
+              <AppRouter />
+            </div>
+          </NavigationGuardProvider>
         </AppContext.Provider>
       </AuthContext.Provider>
     </React.Suspense>
