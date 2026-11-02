@@ -162,10 +162,10 @@ const DeviceTemplateStep = ({
       <DeviceTemplateAlerts isReadOnly={isReadOnly} isFleet={isFleet} isEdit={isEdit} />
       {isFleet && !isReadOnly && (
         <Alert isInline variant="info" title={t('Using template variables')} isExpandable>
-          <Trans t={t}>
-            Add a variable by using <strong>{templateOption1}</strong> or <strong>{templateOption2}</strong> and it will
-            be applied based on each device&rsquo;s details. For example, you could set the following value to apply
-            different files in a Git configuration:
+          <Trans t={t} values={{ templateOption1, templateOption2 }}>
+            Add a variable by using <strong>{'{{templateOption1}}'}</strong> or <strong>{'{{templateOption2}}'}</strong>{' '}
+            and it will be applied based on each device&rsquo;s details. For example, you could set the following value
+            to apply different files in a Git configuration:
           </Trans>
           <CodeBlock className="pf-v6-u-my-md">
             <CodeBlockCode>{exampleCode}</CodeBlockCode>

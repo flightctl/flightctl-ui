@@ -304,8 +304,8 @@ const ImageBuildDetailsTab = ({ imageBuild }: { imageBuild: ImageBuildWithExport
                     <DescriptionListGroup>
                       <DescriptionListTerm>{t('Remote access')}</DescriptionListTerm>
                       <DescriptionListDescription>
-                        <Trans t={t}>
-                          Enabled for <strong>{remoteAccessUsername}</strong>
+                        <Trans t={t} values={{ remoteAccessUsername }}>
+                          Enabled for <strong>{'{{remoteAccessUsername}}'}</strong>
                         </Trans>
                       </DescriptionListDescription>
                     </DescriptionListGroup>

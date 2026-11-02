@@ -50,8 +50,8 @@ const PromptValue = ({ prompt }: { prompt: string | null | undefined }) => {
   }
   if (prompt == null) {
     return (
-      <Trans t={t}>
-        Use default prompt: <strong>{DEFAULT_PROMPT}</strong>
+      <Trans t={t} values={{ prompt: DEFAULT_PROMPT }}>
+        Use default prompt: <strong>{'{{prompt}}'}</strong>
       </Trans>
     );
   }
