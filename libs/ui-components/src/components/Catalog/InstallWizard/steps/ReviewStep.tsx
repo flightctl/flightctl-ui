@@ -50,9 +50,9 @@ const UpdateOsUpdateAlerts = ({ catalogItem }: { catalogItem: CatalogItem }) => 
 
   if (values.target === 'fleet') {
     const fleetName = values.fleet?.metadata.name;
-    const numOfDevices = `${values.fleet?.status?.devicesSummary?.total || 0}`;
+    const deviceCount = values.fleet?.status?.devicesSummary?.total || 0;
     if (
-      (values.fleet?.status?.devicesSummary?.total ?? 0) === 0 &&
+      deviceCount === 0 &&
       !isSameCatalogRef(resourceOs?.catalogItemRef, catalogItem, values.version, values.channel)
     ) {
       return (
@@ -77,8 +77,8 @@ const UpdateOsUpdateAlerts = ({ catalogItem }: { catalogItem: CatalogItem }) => 
     if (isOsUnset(resourceOs)) {
       return (
         <Alert isInline variant="warning" title={t('Fleet update')}>
-          <Trans t={t} values={{ osImageName, fleetName, numOfDevices }}>
-            This will deploy the OS <strong>{'{{osImageName}}'}</strong> for all <strong>({'{{numOfDevices}}'})</strong>{' '}
+          <Trans t={t} values={{ osImageName, fleetName, deviceCount }}>
+            This will deploy the OS <strong>{'{{osImageName}}'}</strong> for all <strong>({'{{deviceCount}}'})</strong>{' '}
             devices in the <strong>{'{{fleetName}}'}</strong> fleet. Devices will download and apply the update
             according to the configured update policies.
           </Trans>
@@ -99,10 +99,10 @@ const UpdateOsUpdateAlerts = ({ catalogItem }: { catalogItem: CatalogItem }) => 
     if (isOsUpdate(catalogItem, values.version, resourceOs)) {
       return (
         <Alert isInline variant="info" title={t('Version update')}>
-          <Trans t={t} values={{ osImageName, fleetName, numOfDevices }}>
+          <Trans t={t} values={{ osImageName, fleetName, deviceCount }}>
             You are about to update OS <strong>{'{{osImageName}}'}</strong>. This will update the OS image for all{' '}
-            <strong>({'{{numOfDevices}}'})</strong> devices in the <strong>{'{{fleetName}}'}</strong> fleet. Devices
-            will download and apply the update according to the configured update policies.
+            <strong>({'{{deviceCount}}'})</strong> devices in the <strong>{'{{fleetName}}'}</strong> fleet. Devices will
+            download and apply the update according to the configured update policies.
           </Trans>
         </Alert>
       );
@@ -110,9 +110,9 @@ const UpdateOsUpdateAlerts = ({ catalogItem }: { catalogItem: CatalogItem }) => 
 
     return (
       <Alert isInline variant="warning" title={t('Existing OS image detected')}>
-        <Trans t={t} values={{ osImageName, fleetName, numOfDevices }}>
+        <Trans t={t} values={{ osImageName, fleetName, deviceCount }}>
           You are about to replace OS with <strong>{'{{osImageName}}'}</strong>. This will update the OS image for all{' '}
-          <strong>({'{{numOfDevices}}'})</strong> devices in the <strong>{'{{fleetName}}'}</strong> fleet. Devices will
+          <strong>({'{{deviceCount}}'})</strong> devices in the <strong>{'{{fleetName}}'}</strong> fleet. Devices will
           download and apply the update according to the configured update policies.
         </Trans>
       </Alert>
