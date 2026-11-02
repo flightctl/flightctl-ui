@@ -95,7 +95,9 @@ export const useQuickStartGuide = (): QuickStartGuideValue => {
   };
 };
 
-export const QuickStartProvider = ({ children }: React.PropsWithChildren) => {
+type QuickStartProviderProps = React.PropsWithChildren<{ username: string }>;
+
+export const QuickStartProvider = ({ children, username }: QuickStartProviderProps) => {
   const { checkPermissions } = usePermissionsContext();
 
   const { visiblePhases, phasesStepCounts, totalMinutes } = React.useMemo(() => {
@@ -118,7 +120,9 @@ export const QuickStartProvider = ({ children }: React.PropsWithChildren) => {
     return { visiblePhases, phasesStepCounts: stepCounts, totalMinutes: minutesAcc };
   }, [checkPermissions]);
 
-  const [persisted, setPersisted] = React.useState<QuickStartPersistedState>(getPersistedQuickStartState);
+  const [persisted, setPersisted] = React.useState<QuickStartPersistedState>(() =>
+    getPersistedQuickStartState(username),
+  );
   const [activePhaseId, setActivePhaseId] = React.useState<QuickStartPhaseId | null>(null);
   const [activeStepIndex, setActiveStepIndex] = React.useState(0);
   const [isGuideMinimized, setIsGuideMinimized] = React.useState(false);
@@ -136,13 +140,16 @@ export const QuickStartProvider = ({ children }: React.PropsWithChildren) => {
     });
   }, [activePhaseId, persisted, phasesStepCounts, visiblePhases]);
 
-  const updatePersisted = React.useCallback((updater: (prev: QuickStartPersistedState) => QuickStartPersistedState) => {
-    setPersisted((prev) => {
-      const next = updater(prev);
-      persistQuickStartState(next);
-      return next;
-    });
-  }, []);
+  const updatePersisted = React.useCallback(
+    (updater: (prev: QuickStartPersistedState) => QuickStartPersistedState) => {
+      setPersisted((prev) => {
+        const next = updater(prev);
+        persistQuickStartState(username, next);
+        return next;
+      });
+    },
+    [username],
+  );
 
   const resetGuidePresentation = React.useCallback(() => {
     setGuidePresentationState(DEFAULT_GUIDE_PRESENTATION);
