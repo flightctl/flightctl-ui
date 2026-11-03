@@ -57,16 +57,16 @@ const UpdateOsUpdateAlerts = ({ catalogItem }: { catalogItem: CatalogItem }) => 
       return (
         <Alert isInline variant="info" title={t('Fleet update')}>
           {isOsUnset(resourceOs) ? (
-            <Trans t={t}>
-              This will configure the OS <strong>{osImageName}</strong> for the{' '}
-              <strong>{values.fleet?.metadata.name}</strong> fleet. No devices are currently in this fleet. Devices
-              added to this fleet will apply the OS according to the configured update policies.
+            <Trans t={t} values={{ osImageName, fleetName: values.fleet?.metadata.name }}>
+              This will configure the OS <strong>{'{{osImageName}}'}</strong> for the <strong>{'{{fleetName}}'}</strong>{' '}
+              fleet. No devices are currently in this fleet. Devices added to this fleet will apply the OS according to
+              the configured update policies.
             </Trans>
           ) : (
-            <Trans t={t}>
-              This will update the OS to <strong>{osImageName}</strong> for the{' '}
-              <strong>{values.fleet?.metadata.name}</strong> fleet. No devices are currently in this fleet. Devices
-              added to this fleet will apply the OS according to the configured update policies.
+            <Trans t={t} values={{ osImageName, fleetName: values.fleet?.metadata.name }}>
+              This will update the OS to <strong>{'{{osImageName}}'}</strong> for the <strong>{'{{fleetName}}'}</strong>{' '}
+              fleet. No devices are currently in this fleet. Devices added to this fleet will apply the OS according to
+              the configured update policies.
             </Trans>
           )}
         </Alert>
