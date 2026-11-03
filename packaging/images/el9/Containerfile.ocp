@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/nodejs-22-minimal:latest as ui-build
+FROM registry.access.redhat.com/ubi9/nodejs-22-minimal:9.8-1793616223 as ui-build
 USER root
 RUN microdnf install -y rsync
 
@@ -14,7 +14,7 @@ ARG PLUGIN_VERSION=""
 ENV PLUGIN_VERSION=$PLUGIN_VERSION
 RUN npm run build:ocp
 
-FROM registry.access.redhat.com/ubi9/go-toolset:1.26.7-1787774815 as proxy-build
+FROM registry.access.redhat.com/ubi9/go-toolset:1.26.10-1793621864 as proxy-build
 WORKDIR /app
 COPY proxy /app
 USER 0
