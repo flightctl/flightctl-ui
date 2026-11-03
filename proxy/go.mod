@@ -2,7 +2,7 @@ module github.com/flightctl/flightctl-ui
 
 go 1.25.0
 
-toolchain go1.25.9
+toolchain go1.26.10
 
 require (
 	github.com/flightctl/flightctl v1.0.0
@@ -10,7 +10,7 @@ require (
 	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/websocket v1.5.3
-	github.com/lestrrat-go/jwx/v2 v2.1.4
+	github.com/lestrrat-go/jwx/v2 v2.1.0
 	github.com/openshift/osincli v0.0.0-20160924135400-fababb0555f2
 	github.com/sirupsen/logrus v1.9.3
 )
@@ -18,7 +18,7 @@ require (
 require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/getkin/kin-openapi v0.145.0 // indirect
@@ -33,7 +33,7 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
-	github.com/lestrrat-go/httprc v1.0.6 // indirect
+	github.com/lestrrat-go/httprc v1.0.5 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
