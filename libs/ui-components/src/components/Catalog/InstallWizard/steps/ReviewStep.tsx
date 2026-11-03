@@ -50,6 +50,29 @@ const UpdateOsUpdateAlerts = ({ catalogItem }: { catalogItem: CatalogItem }) => 
 
   if (values.target === 'fleet') {
     const numOfDevices = `${values.fleet?.status?.devicesSummary?.total || 0}`;
+    if (
+      (values.fleet?.status?.devicesSummary?.total ?? 0) === 0 &&
+      !isSameCatalogRef(resourceOs?.catalogItemRef, catalogItem, values.version, values.channel)
+    ) {
+      return (
+        <Alert isInline variant="info" title={t('Fleet update')}>
+          {isOsUnset(resourceOs) ? (
+            <Trans t={t}>
+              This will configure the OS <strong>{osImageName}</strong> for the{' '}
+              <strong>{values.fleet?.metadata.name}</strong> fleet. No devices are currently in this fleet. Devices
+              added to this fleet will apply the OS according to the configured update policies.
+            </Trans>
+          ) : (
+            <Trans t={t}>
+              This will update the OS to <strong>{osImageName}</strong> for the{' '}
+              <strong>{values.fleet?.metadata.name}</strong> fleet. No devices are currently in this fleet. Devices
+              added to this fleet will apply the OS according to the configured update policies.
+            </Trans>
+          )}
+        </Alert>
+      );
+    }
+
     if (isOsUnset(resourceOs)) {
       return (
         <Alert isInline variant="warning" title={t('Fleet update')}>
