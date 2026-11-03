@@ -142,7 +142,7 @@ jobs:
         with:
           node-version: 22.x
       - name: Run integration tests
-        uses: cypress-io/github-action@be1bab96b388bbd9ce3887e397d373c8557e15af # v6.9.2
+        uses: cypress-io/github-action@c541a95ea92d9239347a2355f2e895cd4b3f8060 # v7.4.6
         with:
           install-command: npm ci
           build: npm run build
