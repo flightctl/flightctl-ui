@@ -13,18 +13,25 @@ import '@patternfly/react-styles/css/utilities/Text/text.css';
 import '@flightctl/ui-components/src/styles/global.css';
 import './app.css';
 
-const App: React.FunctionComponent = () => {
+const StandaloneApp: React.FunctionComponent = () => {
   const appContextValue = useStandaloneAppContext();
+
+  return (
+    <AppContext.Provider value={appContextValue}>
+      <div className={FLIGHTCTL_APP_CLASS}>
+        <AppRouter />
+      </div>
+    </AppContext.Provider>
+  );
+};
+
+const App: React.FunctionComponent = () => {
   const authContextValue = useAuthContext();
 
   return (
     <React.Suspense fallback={<div />}>
       <AuthContext.Provider value={authContextValue}>
-        <AppContext.Provider value={appContextValue}>
-          <div className={FLIGHTCTL_APP_CLASS}>
-            <AppRouter />
-          </div>
-        </AppContext.Provider>
+        <StandaloneApp />
       </AuthContext.Provider>
     </React.Suspense>
   );
