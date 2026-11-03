@@ -420,8 +420,10 @@ reviews:
       instructions: |
         Container security (prodsec-skills):
         - Base image: UBI or trusted images from registry.access.redhat.com
-        - Red Hat images: use floating tags (Red Hat manages updates);
-          non-RH images: pin by digest
+        - Red Hat images: use explicit version/build-specific tags and keep
+          them current through automated refreshes; never recommend floating
+          aliases such as :latest or :stable
+        - Non-Red Hat images: pin by digest
         - Multi-stage builds; no build tools in final image
         - USER non-root; minimize root usage in build stages
         - COPY specific files, not entire context
