@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi10/nodejs-22-minimal:latest as ui-build
+FROM registry.access.redhat.com/ubi10/nodejs-22-minimal:10.2-1793210640 as ui-build
 USER root
 RUN microdnf install -y rsync
 
@@ -12,7 +12,7 @@ ENV NODE_OPTIONS='--max-old-space-size=8192'
 RUN npm ci
 RUN npm run build
 
-FROM registry.access.redhat.com/ubi10/go-toolset:1.26.7-1787775323 as proxy-build
+FROM registry.access.redhat.com/ubi10/go-toolset:1.26.10-1793622842 as proxy-build
 WORKDIR /app
 COPY proxy /app
 USER 0
