@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useAppContext } from '../../hooks/useAppContext';
 import { QuickStartProvider, useQuickStart } from './QuickStartContext';
 
 const QuickStartGuideLoader = React.lazy(() => import('./QuickStartGuide'));
@@ -23,8 +24,10 @@ interface QuickStartHostProps {
 }
 
 const QuickStartHost = ({ children }: QuickStartHostProps) => {
+  const { user = '' } = useAppContext();
+
   return (
-    <QuickStartProvider>
+    <QuickStartProvider key={user} username={user}>
       {children}
       <QuickStartGuideGate />
     </QuickStartProvider>

@@ -6,7 +6,10 @@ import {
 } from './types';
 import { QUICK_START_PHASE_IDS } from './quickStartDefinitions';
 
-const QUICK_START_STORAGE_KEY = 'flightctl/quickstart-state';
+const QUICK_START_STORAGE_KEY_PREFIX = 'flightctl/quickstart-state';
+
+const getQuickStartStorageKey = (keySuffix: string): string =>
+  `${QUICK_START_STORAGE_KEY_PREFIX}/${encodeURIComponent(keySuffix)}`;
 
 const isPanelVisibility = (value: unknown): value is PanelVisibility =>
   value === 'expanded' || value === 'collapsed' || value === 'hidden';
@@ -42,9 +45,13 @@ const parsePhaseProgress = (value: unknown): QuickStartPersistedState['phaseProg
   return progress;
 };
 
-export const getPersistedQuickStartState = (): QuickStartPersistedState => {
+export const getPersistedQuickStartState = (keySuffix: string): QuickStartPersistedState => {
+  if (!keySuffix) {
+    return DEFAULT_QUICK_START_STATE;
+  }
+
   try {
-    const stored = window.localStorage.getItem(QUICK_START_STORAGE_KEY);
+    const stored = window.localStorage.getItem(getQuickStartStorageKey(keySuffix));
     if (!stored) {
       return DEFAULT_QUICK_START_STATE;
     }
@@ -65,9 +72,13 @@ export const getPersistedQuickStartState = (): QuickStartPersistedState => {
   return DEFAULT_QUICK_START_STATE;
 };
 
-export const persistQuickStartState = (state: QuickStartPersistedState): void => {
+export const persistQuickStartState = (keySuffix: string, state: QuickStartPersistedState): void => {
+  if (!keySuffix) {
+    return;
+  }
+
   try {
-    window.localStorage.setItem(QUICK_START_STORAGE_KEY, JSON.stringify(state));
+    window.localStorage.setItem(getQuickStartStorageKey(keySuffix), JSON.stringify(state));
   } catch {
     // Fall through — in-memory state still works; preference won't survive reload.
   }
