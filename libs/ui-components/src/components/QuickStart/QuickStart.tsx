@@ -95,11 +95,12 @@ const CardStatusLabel = ({ status }: { status: PhaseCardStatus }) => {
 
 const PhaseCard = ({ card, prevPhaseId }: PhaseCardProps) => {
   const { t } = useTranslation();
-  const { startPhase } = useQuickStart();
+  const { activePhaseId, isGuideOpen, startPhase } = useQuickStart();
   const { checkPermissions } = usePermissionsContext();
   const PhaseIcon = PHASE_ICONS[card.icon];
 
   const isLocked = card.status === 'locked';
+  const isContinueDisabled = card.status === 'in-progress' && activePhaseId === card.id && isGuideOpen;
   const actionLabel = getActionLabel(t, card.status);
   const productName = useProductName();
 
@@ -162,7 +163,7 @@ const PhaseCard = ({ card, prevPhaseId }: PhaseCardProps) => {
                 </Button>
               </Popover>
             ) : (
-              <Button variant="primary" onClick={() => startPhase(card.id)}>
+              <Button variant="primary" isDisabled={isContinueDisabled} onClick={() => startPhase(card.id)}>
                 {actionLabel}
               </Button>
             )}
