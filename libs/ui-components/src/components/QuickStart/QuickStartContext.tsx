@@ -22,6 +22,7 @@ export type QuickStartPanelValue = {
   totalMinutes: number;
   completedPhases: QuickStartPhaseId[];
   activePhaseId: QuickStartPhaseId | null;
+  isGuideOpen: boolean;
   activeStepIndex: number;
   toggleVisibility: VoidFunction;
   toggleCollapsed: VoidFunction;
@@ -70,6 +71,7 @@ export const useQuickStart = (): QuickStartPanelValue => {
     totalMinutes: store.totalMinutes,
     completedPhases: store.completedPhases,
     activePhaseId: store.activePhaseId,
+    isGuideOpen: store.isGuideOpen,
     activeStepIndex: store.activeStepIndex,
     toggleVisibility: store.toggleVisibility,
     toggleCollapsed: store.toggleCollapsed,
@@ -193,6 +195,12 @@ export const QuickStartProvider = ({ children, username }: QuickStartProviderPro
         return;
       }
 
+      if (activePhaseId === phaseId && phase.status !== 'complete') {
+        // Re-entering the active phase resets state without rerunning its guide effects.
+        setIsGuideMinimized(false);
+        return;
+      }
+
       const savedIndex = persisted.phaseProgress[phaseId]?.lastStepIndex ?? 0;
       const stepIndex = isPhaseComplete(phaseId, persisted)
         ? 0
@@ -211,7 +219,7 @@ export const QuickStartProvider = ({ children, username }: QuickStartProviderPro
         },
       }));
     },
-    [persisted, phases, resetGuidePresentation, updatePersisted],
+    [activePhaseId, persisted, phases, resetGuidePresentation, updatePersisted],
   );
 
   const setStepIndex = React.useCallback(
@@ -278,6 +286,7 @@ export const QuickStartProvider = ({ children, username }: QuickStartProviderPro
       totalMinutes: totalMinutes,
       completedPhases: persisted.completedPhases,
       activePhaseId,
+      isGuideOpen: activePhaseId !== null && !isGuideMinimized,
       activeStepIndex,
       guidePresentation,
       guideActions,
