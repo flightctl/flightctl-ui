@@ -91,7 +91,7 @@ const DonutChart = ({ data, title, helperText }: { data: Data[]; title: string; 
               alignContent={{ default: 'alignContentCenter' }}
               className="fctl-charts__title"
             >
-              {helperText ? <LabelWithHelperText label={title} content={helperText} /> : title}
+              {helperText ? <LabelWithHelperText label={title} content={helperText} hasNoPadding /> : title}
             </Flex>
           </foreignObject>
           <ChartDonut
