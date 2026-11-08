@@ -6,6 +6,7 @@ import { ExclamationCircleIcon } from '@patternfly/react-icons/dist/js/icons/exc
 import { useTranslation } from '../../hooks/useTranslation';
 
 type ErrorHelperTextProps = {
+  id?: string;
   meta?: FieldMetaProps<unknown>;
   touchRequired?: boolean;
   error?: React.ReactNode;
@@ -32,7 +33,7 @@ export const DefaultHelperText = ({ helperText }: DefaultHelperTextProps) => {
   ) : null;
 };
 
-const ErrorHelperText = ({ meta, error, touchRequired = true }: ErrorHelperTextProps) => {
+const ErrorHelperText = ({ id, meta, error, touchRequired = true }: ErrorHelperTextProps) => {
   const { t } = useTranslation();
   let content: React.ReactNode;
   if (meta) {
@@ -42,7 +43,7 @@ const ErrorHelperText = ({ meta, error, touchRequired = true }: ErrorHelperTextP
   }
   return content ? (
     <FlightCtlHelperText isLiveRegion>
-      <HelperTextItem variant="error" icon={<ExclamationCircleIcon />} screenReaderText={t('Validation error')}>
+      <HelperTextItem id={id} variant="error" icon={<ExclamationCircleIcon />} screenReaderText={t('Validation error')}>
         {content}
       </HelperTextItem>
     </FlightCtlHelperText>
