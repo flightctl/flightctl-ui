@@ -5,6 +5,7 @@ import { FormGroup, Grid } from '@patternfly/react-core';
 import { FormGroupWithHelperText } from '../../../common/WithHelperText';
 import TextField from '../../../form/TextField';
 import ApplicationPortMappingField from '../../../form/ApplicationPortMappingField';
+import ErrorHelperText from '../../../form/FieldHelperText';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { type PortMapping, type SingleContainerAppForm } from '../../../../types/deviceSpec';
 import ApplicationImageForm from './ApplicationImageForm';
@@ -12,7 +13,10 @@ import ApplicationImageForm from './ApplicationImageForm';
 const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isReadOnly?: boolean }) => {
   const { t } = useTranslation();
   const appFieldName = `applications[${index}].app`;
-  const [{ value: app }] = useField<SingleContainerAppForm>(`${appFieldName}`);
+  const [{ value: app }, appMeta] = useField<SingleContainerAppForm>(`${appFieldName}`);
+  const portsErrorId = `application-${index}-ports-error`;
+  const portsErrorMessage = (appMeta.error as { ports?: string } | undefined)?.ports;
+  const hasPortsError = !!portsErrorMessage;
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const ports = React.useMemo(() => app.ports || [], [app.ports]);
 
@@ -33,6 +37,7 @@ const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isRead
       <ApplicationImageForm applicationName={appFieldName} isReadOnly={isReadOnly} />
 
       <ApplicationPortMappingField
+        errorId={hasPortsError ? portsErrorId : undefined}
         ports={ports}
         onChange={updatePorts}
         isReadOnly={isReadOnly}
@@ -40,6 +45,7 @@ const ApplicationContainerForm = ({ index, isReadOnly }: { index: number; isRead
         targetPortAriaLabel={t('Container port')}
         targetPortPlaceholder={t('Enter container port')}
       />
+      {hasPortsError && <ErrorHelperText id={portsErrorId} error={portsErrorMessage} touchRequired={false} />}
 
       <FormGroup label={t('Resources')}>
         <Grid hasGutter>

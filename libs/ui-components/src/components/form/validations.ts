@@ -702,7 +702,7 @@ export const isDuplicatePortMapping = (
   if (!hostPort || !targetPort) {
     return false;
   }
-  return existingPorts.some((port) => port.hostPort === hostPort && port.targetPort === targetPort);
+  return existingPorts.some((port) => port.hostPort === hostPort);
 };
 
 export const isValidPortMapping = (
@@ -913,7 +913,6 @@ const manualContainerAppSchema = (t: TFunction) =>
     appType: Yup.string().oneOf([AppType.AppTypeContainer]).required(t('Application type is required')),
     name: validApplicationAndVolumeName(t),
     image: ociImageSchema(t).required(t('Image is required.')),
-    ports: containerAppPortMappingSchema(t),
     cpuLimit: Yup.string().test(
       'valid-cpu-format',
       t('CPU limit is invalid. Use a positive number of cores (e.g. 0.5 or 2).'),
@@ -1149,6 +1148,48 @@ export const validApplicationsSchema = (t: TFunction) => {
         });
       }),
     )
+    .test('valid-container-ports', (appsValue, testContext) => {
+      const entries = (appsValue || []) as ApplicationEntry[];
+      const hostPorts = entries.flatMap((entry) =>
+        entry.type === 'manual' && entry.app.appType === AppType.AppTypeContainer && 'ports' in entry.app
+          ? (entry.app.ports || []).map((port) => port.hostPort).filter(isValidPortNumber)
+          : [],
+      );
+      const counts = countBy(hostPorts);
+      const errors = entries.flatMap((entry, appIndex) => {
+        if (entry.type !== 'manual' || entry.app.appType !== AppType.AppTypeContainer || !('ports' in entry.app)) {
+          return [];
+        }
+        const ports = entry.app.ports || [];
+        // Keep mapping and duplicate errors at one path so Formik preserves both in the combined field.
+        const messages: string[] = [];
+        try {
+          containerAppPortMappingSchema(t).validateSync(ports, { abortEarly: false });
+        } catch (error) {
+          if (!(error instanceof Yup.ValidationError)) {
+            throw error;
+          }
+          messages.push(...error.errors);
+        }
+        const duplicatePorts = [...new Set(ports.map((port) => port.hostPort).filter((port) => counts[port] > 1))];
+        if (duplicatePorts.length > 0) {
+          messages.push(
+            t('The following host ports are used in more than one application: {{ports}}', {
+              ports: duplicatePorts.join(', '),
+            }),
+          );
+        }
+        return messages.length > 0
+          ? [
+              testContext.createError({
+                message: [...new Set(messages)].join(' '),
+                path: `${testContext.path}[${appIndex}].app.ports`,
+              }),
+            ]
+          : [];
+      });
+      return errors.length ? new Yup.ValidationError(errors) : true;
+    })
     .test('unique-app-ids', (appsValue, testContext) => {
       if (!appsValue?.length) {
         return true;

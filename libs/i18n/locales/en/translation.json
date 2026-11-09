@@ -1517,6 +1517,7 @@
   "Password is required when password authentication is enabled.": "Password is required when password authentication is enabled.",
   "Name is required for quadlet applications.": "Name is required for quadlet applications.",
   "Name is required for compose applications.": "Name is required for compose applications.",
+  "The following host ports are used in more than one application: {{ports}}": "The following host ports are used in more than one application: {{ports}}",
   "Name is required, another application uses the same image.": "Name is required, another application uses the same image.",
   "Cannot be decimal": "Cannot be decimal",
   "Percentage must be between 1 and 100.": "Percentage must be between 1 and 100.",

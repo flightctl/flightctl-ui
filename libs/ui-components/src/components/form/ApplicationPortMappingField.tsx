@@ -33,6 +33,7 @@ type ApplicationPortMappingFieldProps = {
   targetPortAriaLabel: string;
   targetPortPlaceholder: string;
   withProtocol?: boolean;
+  errorId?: string;
 };
 
 const normalizeProtocol = (protocol?: string) => (protocol || 'tcp').toLowerCase();
@@ -67,6 +68,7 @@ const ApplicationPortMappingField = ({
   targetPortAriaLabel,
   targetPortPlaceholder,
   withProtocol,
+  errorId,
 }: ApplicationPortMappingFieldProps) => {
   const { t } = useTranslation();
 
@@ -287,6 +289,8 @@ const ApplicationPortMappingField = ({
       <SplitItem isFilled>
         <TextInput
           aria-label={t('Host port')}
+          aria-invalid={errorId ? true : undefined}
+          aria-describedby={errorId}
           value={hostPort}
           placeholder={t('Enter host port')}
           onChange={(_, value) => {
