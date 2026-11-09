@@ -1174,7 +1174,7 @@ export const validApplicationsSchema = (t: TFunction) => {
         const duplicatePorts = [...new Set(ports.map((port) => port.hostPort).filter((port) => counts[port] > 1))];
         if (duplicatePorts.length > 0) {
           messages.push(
-            t('The following host ports are used more than once: {{ports}}', {
+            t('The following host ports are used in more than one application: {{ports}}', {
               ports: duplicatePorts.join(', '),
             }),
           );

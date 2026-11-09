@@ -50,7 +50,7 @@ describe('container host port validation', () => {
       expect(error).toBeInstanceOf(Yup.ValidationError);
       const errors = yupToFormErrors(error as Yup.ValidationError);
       expect(getIn(errors, 'applications[0].app.ports')).toBe(
-        'Port must be between 1 and 65535 The following host ports are used more than once: 8080',
+        'Port must be between 1 and 65535 The following host ports are used in more than one application: 8080',
       );
     },
   );
@@ -77,7 +77,9 @@ describe('container host port validation', () => {
       'applications[0].app.ports',
       'applications[1].app.ports',
     ]);
-    expect((error as Yup.ValidationError).errors).toContain('The following host ports are used more than once: 8080');
+    expect((error as Yup.ValidationError).errors).toContain(
+      'The following host ports are used in more than one application: 8080',
+    );
   });
 
   it('lists every conflicting host port once at the combined ports field', async () => {
@@ -101,11 +103,11 @@ describe('container host port validation', () => {
     expect((error as Yup.ValidationError).inner).toEqual([
       expect.objectContaining({
         path: 'applications[0].app.ports',
-        message: 'The following host ports are used more than once: 8080, 9090',
+        message: 'The following host ports are used in more than one application: 8080, 9090',
       }),
       expect.objectContaining({
         path: 'applications[1].app.ports',
-        message: 'The following host ports are used more than once: 9090',
+        message: 'The following host ports are used in more than one application: 9090',
       }),
     ]);
   });
