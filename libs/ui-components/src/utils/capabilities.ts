@@ -1,10 +1,16 @@
-import { type Device, type DeviceStatus, OsModeType } from '@flightctl/types';
+import type { TFunction } from 'i18next';
+import { type Device, type DeviceGpu, type DeviceStatus, OsModeType } from '@flightctl/types';
 import { DeviceFeatureBoolean } from '@flightctl/types/alpha';
 
 import type { DeviceFeatureFilter, DeviceFeatureId } from './status/devices';
 
 export const hasPackageModeCapability = (device: Device): boolean =>
   device.status?.systemInfo?.osMode === OsModeType.OsModePackage;
+
+export const getGpuLabel = (gpu: DeviceGpu, t: TFunction): string => {
+  const parts = [gpu.vendor, gpu.model].filter(Boolean);
+  return parts.length > 0 ? parts.join(' ') : t('Detected (details unavailable)');
+};
 
 export const getGpuFeature = (deviceStatus?: DeviceStatus): DeviceFeatureBoolean | undefined => {
   const gpus = deviceStatus?.systemInfo?.gpus;

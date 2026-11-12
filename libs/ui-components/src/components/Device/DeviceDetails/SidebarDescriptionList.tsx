@@ -11,7 +11,7 @@ import type { DeviceGpu, DeviceStatus } from '@flightctl/types';
 import { DeviceFeatureBoolean } from '@flightctl/types/alpha';
 import type { SystemInfoEntry } from '../../../hooks/useDeviceSystemInfo';
 import { useTranslation } from '../../../hooks/useTranslation';
-import { getKvmFeature } from '../../../utils/capabilities';
+import { getGpuLabel, getKvmFeature } from '../../../utils/capabilities';
 import { OsModeLabel } from '../../common/OsModeContent';
 import LabelWithHelperText from '../../common/WithHelperText';
 import SystemInfoDescriptionGroup from './SystemInfoDescriptionGroup';
@@ -88,7 +88,7 @@ const GpuCapabilityValue = ({ gpus }: { gpus: DeviceGpu[] | undefined }) => {
   if (gpus.length === 0) {
     return t('No GPUs found');
   }
-  return <>{gpus.map((gpu) => `${gpu.vendor} ${gpu.model}`).join(', ')}</>;
+  return <>{gpus.map((gpu) => getGpuLabel(gpu, t)).join(', ')}</>;
 };
 
 export const CapabilitiesFieldsList = ({ deviceStatus }: { deviceStatus: DeviceStatus | undefined }) => {

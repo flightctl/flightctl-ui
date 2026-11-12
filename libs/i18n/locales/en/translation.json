@@ -724,6 +724,7 @@
   "Details": "Details",
   "Details for {{name}}": "Details for {{name}}",
   "Details: {{errorDetails}}": "Details: {{errorDetails}}",
+  "Detected (details unavailable)": "Detected (details unavailable)",
   "Detected device ownership conflict": "Detected device ownership conflict",
   "device": "device",
   "Device": "Device",
