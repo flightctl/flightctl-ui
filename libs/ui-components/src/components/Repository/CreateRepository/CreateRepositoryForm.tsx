@@ -122,7 +122,7 @@ const AdvancedSection = () => {
                     values.validationSuffix &&
                     values.url && (
                       <Trans t={t} values={{ fullValidationUrl: `${values.url}${values.validationSuffix || ''}` }}>
-                        Full validation URL: <strong>{'{{ fullValidationUrl }}'}</strong>
+                        Full validation URL: <strong>{'{{fullValidationUrl}}'}</strong>
                       </Trans>
                     )
                   }
