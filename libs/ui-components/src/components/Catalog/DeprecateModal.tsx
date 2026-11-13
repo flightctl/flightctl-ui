@@ -37,8 +37,8 @@ export const DeprecateModal = ({ onDeprecate, onClose, itemName }: DeprecateModa
       <ModalBody>
         <Stack hasGutter>
           <StackItem>
-            <Trans t={t}>
-              Are you sure you want to deprecate <b>{itemName}</b>?
+            <Trans t={t} values={{ itemName }}>
+              Are you sure you want to deprecate <b>{'{{itemName}}'}</b>?
             </Trans>
           </StackItem>
           <StackItem>
@@ -108,8 +108,8 @@ export const RestoreModal = ({ onRestore, onClose, itemName }: RestoreModalProps
       <ModalBody>
         <Stack hasGutter>
           <StackItem>
-            <Trans t={t}>
-              Are you sure you want to clear the deprecated status of <b>{itemName}</b>?
+            <Trans t={t} values={{ itemName }}>
+              Are you sure you want to clear the deprecated status of <b>{'{{itemName}}'}</b>?
             </Trans>
           </StackItem>
           {error && (
