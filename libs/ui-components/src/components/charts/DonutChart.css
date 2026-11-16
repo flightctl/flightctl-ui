@@ -13,3 +13,7 @@
   color: var(--pf-t--global--text--color--subtle);
   font-size: 0.85rem;
 }
+
+.fctl-charts__title .fctl-label-withhelpertext {
+  gap: var(--pf-t--global--spacer--sm);
+}

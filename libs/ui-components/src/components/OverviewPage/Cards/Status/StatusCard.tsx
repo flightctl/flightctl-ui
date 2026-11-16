@@ -7,8 +7,8 @@ import {
   CardTitle,
   Content,
   ContentVariants,
-  Flex,
-  FlexItem,
+  Grid,
+  GridItem,
   Spinner,
   Stack,
   StackItem,
@@ -52,25 +52,25 @@ const StatusCard = () => {
           </Content>
         </StackItem>
         <StackItem>
-          <Flex justifyContent={{ default: 'justifyContentSpaceAround' }}>
-            <FlexItem>
+          <Grid hasGutter>
+            <GridItem md={4}>
               <ApplicationStatusChart
                 applicationStatus={devicesSummary?.applicationStatus || {}}
                 labels={labels}
                 fleets={fleets}
               />
-            </FlexItem>
-            <FlexItem>
+            </GridItem>
+            <GridItem md={4}>
               <DeviceStatusChart deviceStatus={devicesSummary?.summaryStatus || {}} labels={labels} fleets={fleets} />
-            </FlexItem>
-            <FlexItem>
+            </GridItem>
+            <GridItem md={4}>
               <SystemUpdateStatusChart
                 updatedStatus={devicesSummary?.updateStatus || {}}
                 labels={labels}
                 fleets={fleets}
               />
-            </FlexItem>
-          </Flex>
+            </GridItem>
+          </Grid>
         </StackItem>
       </Stack>
     );
