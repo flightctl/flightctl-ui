@@ -28,6 +28,7 @@ const NON_EDITABLE_PROMOTION_REASONS = new Set<ImagePromotionConditionReason>([
   ImagePromotionConditionReason.ImagePromotionConditionReasonBuildFailed,
   ImagePromotionConditionReason.ImagePromotionConditionReasonBuildCanceled,
   ImagePromotionConditionReason.ImagePromotionConditionReasonPublishing,
+  ImagePromotionConditionReason.ImagePromotionConditionReasonWaitingForArtifacts,
 ]);
 
 export const getAvailableExportFormats = (imageBuild: ImageBuildWithExports): ExportFormatType[] =>
