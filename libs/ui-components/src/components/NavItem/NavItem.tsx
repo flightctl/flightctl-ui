@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { NavItem as PFNavItem } from '@patternfly/react-core';
 import { useAppContext } from '../../hooks/useAppContext';
+import { type ClickEvent, isPlainLeftClick } from '../../utils/browser';
 import { useNavigationGuard } from '../common/NavigationGuardContext';
 
 type ActiveChildrenProps = {
@@ -29,9 +30,10 @@ const NavItem = ({ to, children }: React.PropsWithChildren<{ to: string }>) => {
       id={to}
       isActive={isActive}
       onClick={(event) => {
-        const ev = event as unknown as React.MouseEvent;
-        ev.preventDefault();
-        tryNavigate(() => navigate(to));
+        if (isPlainLeftClick(event as unknown as ClickEvent)) {
+          event.preventDefault();
+          tryNavigate(() => navigate(to));
+        }
       }}
     >
       <NavLink to={to}>

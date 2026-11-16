@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { type LinkProps as RouterLinkProps } from 'react-router-dom';
 import { useNavigationGuard } from '../components/common/NavigationGuardContext';
+import { isPlainLeftClick } from '../utils/browser';
 import { useAppContext } from './useAppContext';
 
 export interface NavigateFunction {
@@ -130,12 +131,7 @@ export const Link = ({ to, query, onClick, ...rest }: LinkProps) => {
       {...rest}
       onClick={(event) => {
         onClick?.(event);
-        if (event.defaultPrevented) {
-          return;
-        }
-        const isModified = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
-        // Let the browser handle new-tab/window / non-primary clicks.
-        if (event.button !== 0 || isModified || (rest.target && rest.target !== '_self')) {
+        if (event.defaultPrevented || !isPlainLeftClick(event) || (rest.target && rest.target !== '_self')) {
           return;
         }
         // Always route through the guard so we never miss a lock due to stale React state.
