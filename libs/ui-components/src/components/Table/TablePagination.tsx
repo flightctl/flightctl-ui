@@ -24,8 +24,8 @@ const PaginationTemplate = ({
   return (
     <>
       {isUpdating && <Spinner size="sm" />}{' '}
-      <Trans t={t}>
-        {page} of <strong>{totalPages}</strong>
+      <Trans t={t} values={{ page, totalPages }}>
+        {'{{page}}'} of <strong>{'{{totalPages}}'}</strong>
       </Trans>
     </>
   );

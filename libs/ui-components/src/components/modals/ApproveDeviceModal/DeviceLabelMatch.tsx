@@ -51,7 +51,7 @@ export const DeviceLabelMatch = ({
           level="success"
           label={
             <Trans t={t} values={{ fleetName }}>
-              Device matches fleet <strong>{fleetName}</strong>.
+              Device matches fleet <strong>{'{{fleetName}}'}</strong>.
             </Trans>
           }
           customIcon={CheckCircleIcon}

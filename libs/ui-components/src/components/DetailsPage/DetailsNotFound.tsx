@@ -26,8 +26,8 @@ const getKindMsgs = (t: TFunction, kind: string, id: string) => {
       return {
         title: t('Fleet not found'),
         msg: (
-          <Trans t={t}>
-            We could not find the fleet with id <strong>{id}</strong>
+          <Trans t={t} values={{ id }}>
+            We could not find the fleet with id <strong>{'{{id}}'}</strong>
           </Trans>
         ),
       };
@@ -35,8 +35,8 @@ const getKindMsgs = (t: TFunction, kind: string, id: string) => {
       return {
         title: t('Device not found'),
         msg: (
-          <Trans t={t}>
-            We could not find the device with id <strong>{id}</strong>
+          <Trans t={t} values={{ id }}>
+            We could not find the device with id <strong>{'{{id}}'}</strong>
           </Trans>
         ),
       };
@@ -44,8 +44,8 @@ const getKindMsgs = (t: TFunction, kind: string, id: string) => {
       return {
         title: t('Repository not found'),
         msg: (
-          <Trans t={t}>
-            We could not find the repository with id <strong>{id}</strong>
+          <Trans t={t} values={{ id }}>
+            We could not find the repository with id <strong>{'{{id}}'}</strong>
           </Trans>
         ),
       };
@@ -53,8 +53,8 @@ const getKindMsgs = (t: TFunction, kind: string, id: string) => {
       return {
         title: t('Enrollment request not found'),
         msg: (
-          <Trans t={t}>
-            We could not find the enrollment request with id <strong>{id}</strong>
+          <Trans t={t} values={{ id }}>
+            We could not find the enrollment request with id <strong>{'{{id}}'}</strong>
           </Trans>
         ),
       };
