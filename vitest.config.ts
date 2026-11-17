@@ -8,9 +8,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@flightctl/types': path.resolve(__dirname, 'libs/types'),
-      '@flightctl/types/imagebuilder': path.resolve(__dirname, 'libs/types/imagebuilder'),
-      '@flightctl/types/alpha': path.resolve(__dirname, 'libs/types/alpha'),
+      '@flightctl/types/imagebuilder': path.resolve(__dirname, 'libs/types/imagebuilder/index.ts'),
+      '@flightctl/types/alpha': path.resolve(__dirname, 'libs/types/alpha/index.ts'),
+      '@flightctl/types': path.resolve(__dirname, 'libs/types/index.ts'),
     },
   },
 });

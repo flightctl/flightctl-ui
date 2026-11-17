@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { load } from 'js-yaml';
-import { type RJSFSchema, type RJSFValidationError } from '@rjsf/utils';
+import { type RJSFValidationError } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 
 import { useTranslation } from '../../hooks/useTranslation';
@@ -35,7 +35,7 @@ export const useSubmitCatalogForm = <
         return false;
       }
       if (values.configSchema) {
-        const validationData = validator.validateFormData(yamlContent, values.configSchema as RJSFSchema);
+        const validationData = validator.validateFormData(yamlContent, values.configSchema);
         if (validationData.errors.length) {
           setSchemaErrors(validationData.errors);
           return false;

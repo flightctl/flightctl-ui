@@ -95,7 +95,7 @@ const UploadField = ({ ariaLabel, maxFileBytes, isRequired, name }: UploadFieldP
         allowEditingUploadedText
         style={{ resize: 'vertical' }}
         validated={isValid || isFileUploading ? 'default' : 'error'}
-        value={field.value as string}
+        value={field.value}
         filename={filename ? t('Content loaded from: {{ filename }}', { filename }) : ''}
         onDataChange={handleFileChange}
         onTextChange={handleFileChange}

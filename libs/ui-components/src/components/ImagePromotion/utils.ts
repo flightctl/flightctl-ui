@@ -24,7 +24,7 @@ export const getEditInitialValues = (imagePromotion: ImagePromotion): ImagePromo
   const newTarget = target as NewCatalogItemTarget;
 
   return {
-    name: (imagePromotion.metadata.name || '') as '',
+    name: imagePromotion.metadata.name || '',
     catalog: (isExisting ? existingTarget.catalogName : newTarget.catalogName) || '',
     type: isExisting ? 'existing' : 'new',
     exportFormats: imagePromotion.spec.source.exportFormats || [],

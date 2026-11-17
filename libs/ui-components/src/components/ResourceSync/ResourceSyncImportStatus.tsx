@@ -187,14 +187,14 @@ const ResourceSyncImport = ({ type }: { type: 'fleet' | 'catalog' }) => {
       <Stack hasGutter>
         {pendingRs.map((rs) => {
           return (
-            <StackItem key={rs.metadata.name as string}>
+            <StackItem key={rs.metadata.name}>
               <ResourceSyncInfoAlert rs={rs} type={type} />
             </StackItem>
           );
         })}
         {errorRs.map((rs) => {
           return (
-            <StackItem key={rs.metadata.name as string}>
+            <StackItem key={rs.metadata.name}>
               <ResourceSyncErrorAlert rs={rs} refetch={rsRefetch} type={type} />
             </StackItem>
           );

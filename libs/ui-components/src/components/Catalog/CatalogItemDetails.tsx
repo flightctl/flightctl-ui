@@ -130,7 +130,7 @@ const CatalogItemDetailsModal = ({
   const { t } = useTranslation();
   const { patch, remove } = useFetch();
 
-  const displayName = item.spec.displayName || (item.metadata.name as string);
+  const displayName = item.spec.displayName || item.metadata.name || '';
   const itemEndpoint = `catalogs/${item.metadata.catalog}/items/${item.metadata.name}`;
 
   switch (itemModalOpen) {

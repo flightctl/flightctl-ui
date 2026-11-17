@@ -1,7 +1,6 @@
 import * as Yup from 'yup';
 import * as semver from 'semver';
 import validator from '@rjsf/validator-ajv8';
-import { type RJSFSchema } from '@rjsf/utils';
 import { dump, load } from 'js-yaml';
 import { type TFunction } from 'i18next';
 import isEqual from 'lodash/isEqual';
@@ -342,7 +341,7 @@ const jsonSchemaFieldSchema = (t: TFunction) =>
       if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
         return false;
       }
-      validator.validateFormData({}, parsed as RJSFSchema);
+      validator.validateFormData({}, parsed);
       return true;
     } catch {
       return false;

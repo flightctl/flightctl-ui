@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import semver from 'semver';
 import { load } from 'js-yaml';
 import validator from '@rjsf/validator-ajv8';
-import type { RJSFSchema, RJSFValidationError } from '@rjsf/utils';
+import type { RJSFValidationError } from '@rjsf/utils';
 import type { TFunction } from 'i18next';
 
 import { type ApplicationProviderSpec, type CatalogItemRefSpec, OsModeType } from '@flightctl/types';
@@ -76,7 +76,7 @@ export const validateCatalogAdvancedConfig = (
   try {
     const yamlContent = load(values.editorContent || '');
     if (values.configSchema) {
-      const validationData = validator.validateFormData(yamlContent, values.configSchema as RJSFSchema);
+      const validationData = validator.validateFormData(yamlContent, values.configSchema);
       if (validationData.errors.length) {
         return {
           errors: { editorContent: t('Configuration is not valid') },

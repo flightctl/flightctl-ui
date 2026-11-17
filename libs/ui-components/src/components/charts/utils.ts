@@ -2,7 +2,7 @@ import percentRound from 'percent-round';
 
 import { type StatusItem, getDefaultStatusColor } from '../../utils/status/common';
 import { type FilterSearchParams } from '../../utils/status/devices';
-import { ROUTE, type Route } from '../../hooks/useNavigate';
+import { type LinkProps, ROUTE } from '../../hooks/useNavigate';
 
 export type StatusMap = Record<string, number>;
 
@@ -24,14 +24,16 @@ export const toChartData = <T extends string>(
     const query = new URLSearchParams(baseQuery);
     query.append(filterName, statusId);
 
+    const link: LinkProps = {
+      to: ROUTE.DEVICES,
+      query: query.toString(),
+    };
+
     return {
       x: `${statusItem.label}`,
       y: entryIndex === -1 ? 0 : percentages[entryIndex],
       color: statusItem.customColor || getDefaultStatusColor(statusItem.level),
-      link: {
-        to: ROUTE.DEVICES as Route,
-        query: query.toString(),
-      },
+      link,
       tooltip: `${map[statusId]} ${statusItem.label}`,
     };
   });

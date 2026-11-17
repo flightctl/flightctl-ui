@@ -2,7 +2,7 @@ module github.com/flightctl/flightctl-ui
 
 go 1.26.4
 
-toolchain go1.26.7
+toolchain go1.26.11
 
 require (
 	// Pinned to commit in main after v1.4.0-rc1. Includes the change for the default prompt value from "login" to "select_account"
@@ -47,11 +47,11 @@ require (
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
-	golang.org/x/crypto v0.56.0 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
-	golang.org/x/net v0.58.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 	google.golang.org/grpc v1.83.2 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	k8s.io/apimachinery v0.32.3 // indirect

@@ -569,7 +569,7 @@ export const useDeviceLogs = ({ deviceId }: UseDeviceLogsArgs) => {
         }
         if (isMountedRef.current) {
           if (err.message === 'TIMEOUT' || err.message === 'CONNECTION_ERROR') {
-            setErrorTypeOrMsg(err.message as DeviceLogErrorType);
+            setErrorTypeOrMsg(err.message);
           } else {
             setErrorTypeOrMsg(getErrorMessage(e) as DeviceLogErrorType);
           }

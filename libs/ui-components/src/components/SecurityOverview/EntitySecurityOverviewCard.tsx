@@ -134,7 +134,7 @@ const EntitySecurityOverviewCard = ({
               <VulnerabilitiesTable
                 isSingleDevice
                 isUpdating={isUpdating}
-                vulnerabilities={vulnerabilities as Vulnerability[]}
+                vulnerabilities={vulnerabilities}
                 selectedSeverities={selectedSeverities}
                 setSelectedSeverities={setSelectedSeverities}
                 search={search}
