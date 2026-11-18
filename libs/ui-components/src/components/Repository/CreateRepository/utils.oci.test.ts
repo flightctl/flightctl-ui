@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { type TFunction } from 'i18next';
 
 import { ApiVersion, OciRepoSpec, RepoSpecType, type Repository } from '@flightctl/types';
 
@@ -14,7 +15,7 @@ import { OciPlacementMode, type RepositoryFormValues } from './types';
 
 type DefinedOciConfig = NonNullable<RepositoryFormValues['ociConfig']>;
 
-const t = (key: string) => key;
+const t = ((key: string) => key) as unknown as TFunction;
 
 const testRegistry = 'my-registry.com';
 const testRepo = 'my-org/diffs';
