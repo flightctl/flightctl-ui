@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 
 import { type PatchRequest } from '@flightctl/types';
-import { getCSRFToken } from '@openshift-console/dynamic-plugin-sdk/lib/utils/fetch/console-fetch-utils';
 import {
   getErrorMsgFromAlertsApiResponse,
   getErrorMsgFromApiResponse,
@@ -17,6 +16,18 @@ declare global {
 }
 
 type Api = 'flightctl' | 'imagebuilder' | 'alerts' | 'catalog' | 'vulnerability';
+
+const getCSRFToken = (): string => {
+  const cookiePrefix = 'csrf-token=';
+  return (
+    document.cookie
+      .split(';')
+      .map((cookie) => cookie.trim())
+      .filter((cookie) => cookie.startsWith(cookiePrefix))
+      .map((cookie) => cookie.slice(cookiePrefix.length))
+      .pop() ?? ''
+  );
+};
 
 const addRequiredHeaders = (options: RequestInit, api?: Api): RequestInit => {
   const token = getCSRFToken();

@@ -7,10 +7,16 @@ export default defineConfig({
     environment: 'node',
   },
   resolve: {
-    alias: {
-      '@flightctl/types': path.resolve(__dirname, 'libs/types'),
-      '@flightctl/types/imagebuilder': path.resolve(__dirname, 'libs/types/imagebuilder'),
-      '@flightctl/types/alpha': path.resolve(__dirname, 'libs/types/alpha'),
-    },
+    alias: [
+      { find: /^@flightctl\/types$/, replacement: path.resolve(__dirname, 'libs/types/index.ts') },
+      {
+        find: /^@flightctl\/types\/imagebuilder$/,
+        replacement: path.resolve(__dirname, 'libs/types/imagebuilder/index.ts'),
+      },
+      {
+        find: /^@flightctl\/types\/alpha$/,
+        replacement: path.resolve(__dirname, 'libs/types/alpha/index.ts'),
+      },
+    ],
   },
 });
