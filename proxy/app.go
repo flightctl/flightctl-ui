@@ -19,7 +19,7 @@ import (
 
 func corsHandler(router *mux.Router) http.Handler {
 	return gorillaHandlers.CORS(
-		gorillaHandlers.AllowedOrigins([]string{config.BaseUiUrl}),
+		gorillaHandlers.AllowedOrigins([]string{config.UiOrigin()}),
 		gorillaHandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "PATCH"}),
 		gorillaHandlers.AllowedHeaders([]string{"Content-Type", "Authorization", "X-FlightCtl-Organization-ID", "Flightctl-API-Version"}),
 		gorillaHandlers.AllowCredentials(),
