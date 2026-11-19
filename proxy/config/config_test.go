@@ -62,3 +62,22 @@ func TestShouldTrustForwardedHeaders(t *testing.T) { //nolint:paralleltest // mu
 		t.Fatal("expected false when RemoteAddr is outside CIDR")
 	}
 }
+
+func TestOriginOf(t *testing.T) {
+	t.Parallel()
+	cases := map[string]string{
+		"https://ui.example.com/ui":    "https://ui.example.com",
+		"http://localhost:9000/":       "http://localhost:9000",
+		"http://LOCALHOST:9000":        "http://localhost:9000",
+		"HTTPS://HOST.Example.com:443": "https://host.example.com",
+		"http://host:80":               "http://host",
+		"http://host:8080":             "http://host:8080",
+		"not a url":                    "not a url",
+		"":                             "",
+	}
+	for raw, want := range cases {
+		if got := originOf(raw); got != want {
+			t.Fatalf("originOf(%q) = %q, want %q", raw, got, want)
+		}
+	}
+}

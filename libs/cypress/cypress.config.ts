@@ -6,7 +6,7 @@ export default defineConfig({
     setupNodeEvents() {},
     specPattern: './**/*.cy.ts',
     supportFile: 'libs/cypress/support/index.ts',
-    baseUrl: 'http://localhost:9000',
+    baseUrl: `http://localhost:${process.env.UI_PORT || 9000}`,
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 5,
