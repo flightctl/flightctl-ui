@@ -145,7 +145,7 @@ const CreateResourceSyncsForm = ({
                   path: '',
                   targetRevision: '',
                   type: defaultSyncType,
-                } as ResourceSyncFormValue)
+                })
               }
             >
               {t('Add resource sync')}

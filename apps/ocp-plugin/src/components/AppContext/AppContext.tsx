@@ -18,7 +18,6 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom-v5-compat';
-// @ts-expect-error Provided by the OCP console in the runtime environment.
 import { Prompt } from 'react-router-dom';
 import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/reducers';
 import { useSelector } from 'react-redux';

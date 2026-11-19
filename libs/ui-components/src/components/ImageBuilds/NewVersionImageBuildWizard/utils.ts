@@ -33,7 +33,7 @@ export const getImagePromotion = (values: ImagePromotionFormValues, buildName: s
       version: values.newItem.version,
       readme: optionalTrimmed(values.newItem.readme),
       displayName: optionalTrimmed(values.newItem.displayName),
-    } as NewCatalogItemTarget;
+    };
   } else {
     const skips = (values.existingItem.skips || '')
       .split(',')
@@ -48,7 +48,7 @@ export const getImagePromotion = (values: ImagePromotionFormValues, buildName: s
       replaces: optionalTrimmed(values.existingItem.replaces),
       skipRange: optionalTrimmed(values.existingItem.skipRange),
       skips: skips.length ? skips : undefined,
-    } as ExistingCatalogItemTarget;
+    };
   }
 
   const newImagePromotion: ImagePromotion = {

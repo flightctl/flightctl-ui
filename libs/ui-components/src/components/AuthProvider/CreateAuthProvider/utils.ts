@@ -196,14 +196,14 @@ const getRoleAssignment = (values: AuthProviderFormValues): AuthRoleAssignment =
       type: RoleAssignmentType.Static,
       roles: values.staticRoles || [],
     };
-    return staticAssignment as AuthRoleAssignment;
+    return staticAssignment;
   } else {
     const dynamicAssignment: AuthDynamicRoleAssignment = {
       type: RoleAssignmentType.Dynamic,
       claimPath: values.roleClaimPath || [],
       separator: values.roleSeparator || DEFAULT_ROLE_SEPARATOR,
     };
-    return dynamicAssignment as AuthRoleAssignment;
+    return dynamicAssignment;
   }
 };
 

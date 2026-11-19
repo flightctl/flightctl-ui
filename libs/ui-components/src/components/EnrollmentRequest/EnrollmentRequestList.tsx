@@ -135,7 +135,7 @@ const EnrollmentRequestList = ({ refetchDevices, isStandalone }: EnrollmentReque
                 isRowSelected={isRowSelected}
                 rowIndex={index}
                 onApprove={() => {
-                  setApprovingErId(er.metadata.name as string);
+                  setApprovingErId(er.metadata.name);
                 }}
                 canApprove={canApprove}
                 canDelete={canDelete}

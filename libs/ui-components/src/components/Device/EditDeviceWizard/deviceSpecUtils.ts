@@ -33,12 +33,10 @@ import {
   type ComposeAppForm,
   type ConfigSourceProvider,
   ConfigType,
-  type GitConfigTemplate,
   type HelmAppForm,
   type HttpConfigTemplate,
   type InlineConfigTemplate,
   type InlineFileForm,
-  type KubeSecretTemplate,
   type ManualAppForm,
   type PortMapping,
   type QuadletAppForm,
@@ -429,9 +427,9 @@ const hasApplicationChanged = (current: ApplicationProviderSpec, updated: Applic
     case AppType.AppTypeHelm:
       return hasHelmAppChanged(current as HelmApplication, updated as HelmApplication);
     case AppType.AppTypeQuadlet:
-      return hasQuadletAppChanged(current as QuadletApplication, updated as QuadletApplication, currentSpectType);
+      return hasQuadletAppChanged(current, updated, currentSpectType);
     case AppType.AppTypeCompose:
-      return hasComposeAppChanged(current as ComposeApplication, updated as ComposeApplication, currentSpectType);
+      return hasComposeAppChanged(current, updated, currentSpectType);
     case AppType.AppTypeVm:
       return hasVmAppChanged(current as VmApplication, updated as VmApplication);
   }
@@ -940,9 +938,9 @@ const toFormApps = (app: ApplicationProviderSpec): ManualAppForm => {
     case AppType.AppTypeHelm:
       return toHelmAppForm(app as HelmApplication);
     case AppType.AppTypeQuadlet:
-      return toQuadletAppForm(app as QuadletApplication);
+      return toQuadletAppForm(app);
     case AppType.AppTypeCompose:
-      return toComposeAppForm(app as ComposeApplication);
+      return toComposeAppForm(app);
     case AppType.AppTypeVm:
       return toVmAppForm(app as VmApplication);
     default:
@@ -1030,7 +1028,7 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec, registerMicroS
           path: c.gitRef.path,
           repository: c.gitRef.repository,
           targetRevision: c.gitRef.targetRevision,
-        } as GitConfigTemplate;
+        };
       }
       if (isK8sSecretProviderSpec(c)) {
         return {
@@ -1039,7 +1037,7 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec, registerMicroS
           mountPath: c.secretRef.mountPath,
           secretName: c.secretRef.name,
           secretNs: c.secretRef.namespace,
-        } as KubeSecretTemplate;
+        };
       }
       if (isHttpProviderSpec(c)) {
         return {
@@ -1062,7 +1060,7 @@ export const getConfigTemplatesValues = (deviceSpec?: DeviceSpec, registerMicroS
             permissions: inline.mode !== undefined ? formatFileMode(inline.mode) : undefined,
             content: inline.content,
             base64: inline.contentEncoding === EncodingType.EncodingBase64,
-          } as InlineConfigTemplate['files'][0];
+          };
         }),
       } as InlineConfigTemplate;
     }) || []

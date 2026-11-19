@@ -426,11 +426,9 @@ const DeviceToolbarFilter = ({
                     ref={toggleRef}
                     onClick={onToggle}
                     isExpanded={isSearchTypeExpanded}
-                    style={
-                      {
-                        width: '250px',
-                      } as React.CSSProperties
-                    }
+                    style={{
+                      width: '250px',
+                    }}
                   >
                     {getDeviceFilterLabel(t, selectedSearchType)}
                   </MenuToggle>

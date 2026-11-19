@@ -97,7 +97,7 @@ const getFilename = (obj: FlightCtlYamlResource) => {
   if (obj.kind === ResourceKind.DEVICE) {
     filename = obj.metadata.labels?.alias;
   }
-  return filename || (obj.metadata.name as string);
+  return filename || obj.metadata.name;
 };
 
 const createPatchList = (original: FlightCtlYamlResource, updated: FlightCtlYamlResource): PatchRequest => {

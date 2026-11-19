@@ -61,7 +61,7 @@ export const buildAllDropdownActions = (actions: IAction[], dangerActions: IActi
   if (dangerActions.length === 0) {
     return actions;
   }
-  return [...actions, { isSeparator: true } as IAction, ...dangerActions];
+  return [...actions, { isSeparator: true }, ...dangerActions];
 };
 
 export default ActionsDropdownList;
