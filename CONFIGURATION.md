@@ -13,7 +13,7 @@ This document describes all environment variables and configuration options avai
 
 | Variable                                | Description                                                                                         | Default                  | Values                                       |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------- |
-| `BASE_UI_URL`                           | Base URL for UI application                                                                         | `http://localhost:9000`  | `https://ui.flightctl.example.com`           |
+| `BASE_UI_URL`                           | Base URL for UI application (defaults to `http://localhost:$UI_PORT`)                               | `http://localhost:9000`  | `https://ui.flightctl.example.com`           |
 | `FLIGHTCTL_SERVER`                      | Flight Control API server URL                                                                       | `https://localhost:3443` | `https://api.flightctl.example.com`          |
 | `FLIGHTCTL_REMOTE_ACCESS_SERVER`        | Remote access service URL for application console WebSocket bridging (serial console is VM-only today) | `https://localhost:3444` | `https://flightctl-remote-access:3444` |
 | `FLIGHTCTL_SERVER_INSECURE_SKIP_VERIFY` | Skip backend server TLS verification                                                                | `false`                  | `true`, `false`                              |
@@ -26,6 +26,7 @@ This document describes all environment variables and configuration options avai
 | `TLS_CERT`                              | Path to TLS certificate                                                                             | _(empty)_                | `/path/to/server.crt`                        |
 | `TLS_KEY`                               | Path to TLS private key                                                                             | _(empty)_                | `/path/to/server.key`                        |
 | `API_PORT`                              | UI proxy server port                                                                                | `3001`                   | `8080`, `3000`, etc.                         |
+| `UI_PORT`                               | UI dev server port (standalone dev mode)                                                            | `9000`                   | `8000`, `8080`, etc.                         |
 | `IS_OCP_PLUGIN`                         | Run as OpenShift Console plugin                                                                     | `false`                  | `true`, `false`                              |
 | `IS_RHEM`                               | Red Hat Enterprise Mode                                                                             | _(empty)_                | `true`, `false`                              |
 
@@ -47,4 +48,9 @@ FLIGHTCTL_SERVER=https://flightctl.prod.example.com \
 FLIGHTCTL_REMOTE_ACCESS_SERVER=https://remote-access.flightctl.prod.example.com \
 ENABLE_CLI_ARTIFACTS=false \
 npm run dev
+```
+
+```shell
+# Run the dev servers on custom ports
+UI_PORT=8001 API_PORT=4000 npm run dev
 ```

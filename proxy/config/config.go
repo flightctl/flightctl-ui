@@ -19,7 +19,7 @@ var (
 	AlertManagerApiUrl     = getEnvUrlVar("FLIGHTCTL_ALERTMANAGER_PROXY", "https://localhost:8443")
 	TlsKeyPath             = getEnvVar("TLS_KEY", "")
 	TlsCertPath            = getEnvVar("TLS_CERT", "")
-	BaseUiUrl              = getEnvUrlVar("BASE_UI_URL", "http://localhost:9000")
+	BaseUiUrl              = getEnvUrlVar("BASE_UI_URL", "http://localhost:"+getEnvVar("UI_PORT", "9000"))
 	AuthInsecure           = getEnvVar("AUTH_INSECURE_SKIP_VERIFY", "")
 	OcpPlugin              = getEnvVar("IS_OCP_PLUGIN", "false")
 )
