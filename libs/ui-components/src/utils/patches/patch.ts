@@ -2,6 +2,7 @@ import type {
   BatchSequence,
   DeviceUpdatePolicySpec,
   DisruptionBudget,
+  OneTimeWindow,
   PatchRequest,
   RolloutPolicy,
   RolloutPolicyDeltaGeneration,
@@ -22,11 +23,19 @@ import {
   BatchLimitType,
   type DisruptionBudgetForm,
   type FleetFormValues,
+  type OneTimeWindowForm,
   type RolloutPolicyForm,
   UpdateMode,
   type UpdatePolicyForm,
 } from '../../types/deviceSpec';
-import { getUpdateCronExpression, localDeviceTimezone, schedulesAreEqual } from '../time';
+import {
+  type UpdateScheduleMode,
+  getUpdateCronExpression,
+  hasRecurringSchedule,
+  isUiSupportedCron,
+  localDeviceTimezone,
+  schedulesAreEqual,
+} from '../time';
 
 export const appendJSONPatch = <V = unknown>({
   patches,
@@ -148,25 +157,111 @@ const toApiDisruptionBudget = (disruptionValues: DisruptionBudgetForm) => {
 const ROLLOUT_POLICY_PATH = '/spec/rolloutPolicy';
 const DELTA_GENERATION_PATH = `${ROLLOUT_POLICY_PATH}/deltaGeneration`;
 
-export const updatePolicyFormToApi = (form: Required<UpdatePolicyForm>) => {
-  const downloadSchedule = {
-    at: getUpdateCronExpression(form.downloadStartsAt, form.downloadScheduleMode, form.downloadWeekDays),
-    startGraceDuration: form.downloadStartGraceDuration || '0s',
-    timeZone: form.downloadTimeZone === localDeviceTimezone ? undefined : form.downloadTimeZone,
-  };
-  let updateSchedule: UpdateSchedule;
-  if (form.downloadAndInstallDiffer) {
-    updateSchedule = {
-      at: getUpdateCronExpression(form.installStartsAt, form.installScheduleMode, form.installWeekDays),
-      startGraceDuration: form.installStartGraceDuration || '0s',
-      timeZone: form.installTimeZone === localDeviceTimezone ? undefined : form.installTimeZone,
-    };
-  } else {
-    updateSchedule = { ...downloadSchedule };
+const toApiTimeZone = (timeZone: string) => (timeZone === localDeviceTimezone ? undefined : timeZone);
+
+const formHasSchedules = (form: Required<UpdatePolicyForm>) =>
+  hasRecurringSchedule(form) ||
+  (form.downloadOneTimeWindows || []).length > 0 ||
+  (form.installOneTimeWindows || []).length > 0;
+
+const updatePolicyIsEqual = (a: DeviceUpdatePolicySpec, b: DeviceUpdatePolicySpec) =>
+  schedulesAreEqual(a.downloadSchedule, b.downloadSchedule) && schedulesAreEqual(a.updateSchedule, b.updateSchedule);
+
+const toApiRecurring = (
+  enabled: boolean,
+  cron: string | undefined,
+  startsAt: string,
+  scheduleMode: UpdateScheduleMode,
+  weekDays: boolean[],
+  startGraceDuration: string | undefined,
+  preserveRaw: boolean,
+) => {
+  if (!enabled) {
+    return {};
   }
   return {
-    downloadSchedule,
-    updateSchedule,
+    at:
+      !preserveRaw && isUiSupportedCron(cron) ? getUpdateCronExpression(startsAt, scheduleMode, weekDays) : cron || '',
+    startGraceDuration: startGraceDuration || '0s',
+  };
+};
+
+const toOneTimeWindows = (windows: OneTimeWindowForm[] = []): OneTimeWindow[] =>
+  windows.map((window) => ({
+    date: window.date,
+    at: window.startsAt,
+    startGraceDuration: window.startGraceDuration,
+    ...(window.timeZone ? { timeZone: window.timeZone } : {}),
+  }));
+
+export const updatePolicyFormToApi = (form: Required<UpdatePolicyForm>): DeviceUpdatePolicySpec => {
+  const downloadWindows = toOneTimeWindows(form.downloadOneTimeWindows);
+  const installWindows = toOneTimeWindows(form.installOneTimeWindows);
+  const hasOneSidedRecurring =
+    form.downloadAndInstallDiffer && Boolean(form.downloadCron) !== Boolean(form.installCron);
+  const downloadPreserveRaw =
+    Boolean(form.downloadCron) && (hasOneSidedRecurring || !isUiSupportedCron(form.downloadCron));
+  const installPreserveRaw =
+    Boolean(form.installCron) && (hasOneSidedRecurring || !isUiSupportedCron(form.installCron));
+
+  const downloadRecurring = toApiRecurring(
+    Boolean(form.downloadCron),
+    form.downloadCron,
+    form.downloadStartsAt,
+    form.downloadScheduleMode,
+    form.downloadWeekDays,
+    form.downloadStartGraceDuration,
+    downloadPreserveRaw,
+  );
+  const downloadSchedule: UpdateSchedule = {
+    ...downloadRecurring,
+    timeZone: toApiTimeZone(form.downloadTimeZone),
+    ...(downloadWindows.length ? { oneTimeWindows: downloadWindows } : {}),
+  };
+
+  const downloadHasData = Boolean(form.downloadCron) || downloadWindows.length > 0;
+  const updateHasData = Boolean(form.installCron) || installWindows.length > 0;
+  if (!downloadHasData && !updateHasData) {
+    return {};
+  }
+
+  const schedulesDiffer =
+    form.downloadAndInstallDiffer || form.downloadTimeZone !== form.installTimeZone;
+
+  if (!schedulesDiffer) {
+    const sharedUpdate: UpdateSchedule = {
+      ...downloadRecurring,
+      timeZone: toApiTimeZone(form.downloadTimeZone),
+      ...(installWindows.length ? { oneTimeWindows: installWindows } : {}),
+    };
+    const updateSchedule = updateHasData ? sharedUpdate : { ...downloadSchedule };
+    return {
+      ...(downloadHasData ? { downloadSchedule } : {}),
+      ...(updateHasData || downloadHasData ? { updateSchedule } : {}),
+    };
+  }
+
+  const updateRecurring = form.downloadAndInstallDiffer
+    ? toApiRecurring(
+        Boolean(form.installCron),
+        form.installCron,
+        form.installStartsAt,
+        form.installScheduleMode,
+        form.installWeekDays,
+        form.installStartGraceDuration,
+        installPreserveRaw,
+      )
+    : downloadRecurring;
+
+  const updateSchedule: UpdateSchedule = {
+    ...updateRecurring,
+    timeZone: toApiTimeZone(form.installTimeZone),
+    ...(installWindows.length ? { oneTimeWindows: installWindows } : {}),
+  };
+
+  return {
+    ...(downloadHasData ? { downloadSchedule } : {}),
+    ...(updateHasData ? { updateSchedule } : {}),
   };
 };
 
@@ -175,18 +270,20 @@ export const getUpdatePolicyPatches = (
   currentPolicy: DeviceUpdatePolicySpec | undefined,
   form: Required<UpdatePolicyForm>,
 ): PatchRequest => {
+  const newPolicy = updatePolicyFormToApi(form);
+
   // Switching from default mode to customized mode or viceversa
   if (!currentPolicy) {
-    return form.isCustomized
+    return form.isCustomized && formHasSchedules(form)
       ? ([
           {
             op: 'add',
             path: basePath,
-            value: updatePolicyFormToApi(form),
+            value: newPolicy,
           },
         ] as PatchRequest)
       : [];
-  } else if (!form.isCustomized) {
+  } else if (!form.isCustomized || !formHasSchedules(form)) {
     return [
       {
         op: 'remove',
@@ -194,48 +291,9 @@ export const getUpdatePolicyPatches = (
       },
     ] as PatchRequest;
   }
-
-  // Making changes to existing customized settings
-  const updatePatches: PatchRequest = [];
-  const { downloadSchedule: newDownloadSched, updateSchedule: newInstallSched } = updatePolicyFormToApi(form);
-  if (!schedulesAreEqual(currentPolicy.downloadSchedule, newDownloadSched)) {
-    if (form.downloadAndInstallDiffer) {
-      updatePatches.push({
-        op: currentPolicy.downloadSchedule ? 'replace' : 'add',
-        path: `${basePath}/downloadSchedule`,
-        value: newDownloadSched,
-      });
-    } else {
-      updatePatches.push({
-        op: 'replace',
-        path: basePath,
-        value: {
-          downloadSchedule: newDownloadSched,
-          updateSchedule: newInstallSched,
-        },
-      });
-    }
-  } else if (!form.downloadAndInstallDiffer) {
-    // DownloadSchedule did not change. Check if they just unchecked "useDifferent" and updateSchedule must be changed?
-    if (!schedulesAreEqual(currentPolicy.updateSchedule, newDownloadSched)) {
-      // Important: we are using downloadSchedule here since we don't copy settings from download to update when
-      // the checkbox for "useDifferent" is unchecked
-      updatePatches.push({
-        op: currentPolicy.updateSchedule ? 'replace' : 'add',
-        path: `${basePath}/updateSchedule`,
-        value: newDownloadSched,
-      });
-    }
-  }
-  if (form.downloadAndInstallDiffer && !schedulesAreEqual(currentPolicy.updateSchedule, newInstallSched)) {
-    updatePatches.push({
-      op: currentPolicy.updateSchedule ? 'replace' : 'add',
-      path: `${basePath}/updateSchedule`,
-      value: newInstallSched,
-    });
-  }
-
-  return updatePatches;
+  return updatePolicyIsEqual(currentPolicy, newPolicy)
+    ? []
+    : [{ op: 'replace', path: basePath, value: newPolicy } as const];
 };
 
 const formWantsRolloutScheduling = (fleetValues: FleetFormValues): boolean =>

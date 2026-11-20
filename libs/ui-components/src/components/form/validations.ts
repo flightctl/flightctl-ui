@@ -34,7 +34,8 @@ import {
 } from '../../types/deviceSpec';
 import { labelToString } from '../../utils/labels';
 import { isValidKubernetesQuantity } from '../../utils/kubernetesQuantity';
-import { UpdateScheduleMode } from '../../utils/time';
+import { isValidIsoCalendarDate } from '../../utils/dates';
+import { UpdateScheduleMode, isUiSupportedCron, isValidDuration } from '../../utils/time';
 import { VM_PORT_PROTOCOLS, loadYamlDocument, parseVmCloudInitUserData } from '../../utils/vmApplications';
 
 const SYSTEMD_PATTERNS_REGEXP =
@@ -1291,43 +1292,51 @@ export const validFleetRolloutPolicySchema = (t: TFunction) => {
     });
 };
 
-const requiredDownloadTimes = (t: TFunction, isStartTime: boolean) =>
-  Yup.string().when(['isCustomized', 'downloadAndInstallDiffer'], ([isCustomized, downloadAndInstallDiffer]) => {
-    if (!isCustomized) {
-      return Yup.string();
-    }
-    if (downloadAndInstallDiffer) {
-      return Yup.string().required(
-        isStartTime ? t('Downloading start time is required') : t('Downloading end time is required'),
-      );
-    }
-    return Yup.string()
-      .required(
-        isStartTime
-          ? t('Downloading and installing start times are required')
-          : t('Downloading and installing end times are required'),
-      )
-      .matches(TIME_VALUE_REGEXP, t('Time must be in hh:mm with 24-hour format', { nsSeparator: '|' }));
-  });
-
-const requiredInstallTimes = (t: TFunction, isStartTime: boolean) =>
-  Yup.string().when(['isCustomized', 'downloadAndInstallDiffer'], ([isCustomized, downloadAndInstallDiffer]) => {
-    if (isCustomized && downloadAndInstallDiffer) {
+const requiredDownloadStart = (t: TFunction) =>
+  Yup.string().when(
+    ['isCustomized', 'downloadAndInstallDiffer', 'downloadCron'],
+    ([isCustomized, downloadAndInstallDiffer, downloadCron]) => {
+      if (!isCustomized || !downloadCron || isUiSupportedCron(downloadCron as string)) {
+        return Yup.string();
+      }
+      if (downloadAndInstallDiffer) {
+        return Yup.string()
+          .required(t('Downloading start time is required'))
+          .matches(TIME_VALUE_REGEXP, t('Time must be in hh:mm with 24-hour format', { nsSeparator: '|' }));
+      }
       return Yup.string()
-        .required(isStartTime ? t('Installing start time is required') : t('Installing end time is required'))
+        .required(t('Downloading and installing start times are required'))
         .matches(TIME_VALUE_REGEXP, t('Time must be in hh:mm with 24-hour format', { nsSeparator: '|' }));
-    }
-    return Yup.string();
-  });
+    },
+  );
 
-const requiredStartGraceDuration = (t: TFunction, isInstallField: boolean = false) =>
-  Yup.string().when(['isCustomized', 'downloadAndInstallDiffer'], ([isCustomized, downloadAndInstallDiffer]) => {
-    if (!isCustomized || (isInstallField && !downloadAndInstallDiffer)) {
+const requiredInstallStart = (t: TFunction) =>
+  Yup.string().when(
+    ['isCustomized', 'downloadAndInstallDiffer', 'installCron'],
+    ([isCustomized, downloadAndInstallDiffer, installCron]) => {
+      if (isCustomized && downloadAndInstallDiffer && !isUiSupportedCron(installCron as string)) {
+        return Yup.string()
+          .required(t('Installing start time is required'))
+          .matches(TIME_VALUE_REGEXP, t('Time must be in hh:mm with 24-hour format', { nsSeparator: '|' }));
+      }
+      return Yup.string();
+    },
+  );
+
+const requiredStartGraceDuration = (t: TFunction, schedule: 'download' | 'install') =>
+  Yup.string().when(['isCustomized', 'downloadAndInstallDiffer', `${schedule}Cron`], (values: unknown[]) => {
+    const [isCustomized, downloadAndInstallDiffer, cron] = values as [boolean, boolean, string | undefined];
+    const applies = schedule === 'download' ? isCustomized : isCustomized && downloadAndInstallDiffer;
+    if (!applies || !cron || isUiSupportedCron(cron as string)) {
       return Yup.string();
     }
     return Yup.string()
       .required(t('Start grace duration is required'))
-      .matches(DURATION_REGEXP, t('Duration must be a number followed by a unit ("s", "m", or "h")'));
+      .test(
+        'valid-duration',
+        t('Duration must be a number followed by a unit ("s", "m", or "h")'),
+        (value) => !value || isValidDuration(value),
+      );
   });
 
 const validDeltaGenerationDuration = (t: TFunction) =>
@@ -1356,42 +1365,87 @@ const validDeltaGenerationDuration = (t: TFunction) =>
 
 const updateWeekDaysSchema = (t: TFunction) =>
   Yup.array()
-    .required()
     .of(Yup.boolean().required())
     .test(
       'selected weekdays',
       t('Select at least one day of the week for "weekly" schedules'),
-      (selectedDays: boolean[], { path, parent }) => {
-        const parentWeekMode =
-          path === 'updatePolicy.downloadWeekDays'
-            ? (parent as UpdatePolicyForm).downloadScheduleMode
-            : (parent as UpdatePolicyForm).installScheduleMode;
+      (selectedDays: boolean[] | undefined, { path, parent }) => {
+        const form = parent as UpdatePolicyForm;
+        const isDownload = path === 'updatePolicy.downloadWeekDays' || path === 'downloadWeekDays';
+        if (isDownload) {
+          if (!form.downloadCron || !isUiSupportedCron(form.downloadCron)) {
+            return true;
+          }
+        } else if (
+          (!form.downloadAndInstallDiffer && !form.installCron) ||
+          (form.installCron && !isUiSupportedCron(form.installCron))
+        ) {
+          return true;
+        }
+        const parentWeekMode = isDownload ? form.downloadScheduleMode : form.installScheduleMode;
 
         if (parentWeekMode === UpdateScheduleMode.Weekly) {
-          return selectedDays.some(Boolean);
+          return (selectedDays || []).some(Boolean);
         }
 
         return true;
       },
     );
 
+const oneTimeWindowSchema = (t: TFunction) =>
+  Yup.object().shape({
+    id: Yup.string().required(),
+    date: Yup.string()
+      .required(t('Select a date for the one-time window'))
+      .test('valid-calendar-date', t('Enter a valid date'), (value) => !value || isValidIsoCalendarDate(value)),
+    startsAt: Yup.string().required(t('Select a start time')),
+    startGraceDuration: Yup.string()
+      .required(t('Start grace duration is required'))
+      .test(
+        'valid-duration',
+        t('Duration must be a number followed by a unit ("s", "m", or "h")'),
+        (value) => !value || isValidDuration(value),
+      ),
+    timeZone: Yup.string().test(
+      'timezone-override',
+      t('Select a timezone'),
+      (value) => value === undefined || Boolean(value),
+    ),
+  });
+
 export const validUpdatePolicySchema = (t: TFunction) => {
   return Yup.object().shape({
     isCustomized: Yup.boolean().required(),
     downloadAndInstallDiffer: Yup.boolean().required(),
-    // Fields are flattened so "isCustomized" can be used for validating them
-    downloadStartsAt: requiredDownloadTimes(t, true),
-    downloadEndsAt: requiredDownloadTimes(t, false),
-    downloadStartGraceDuration: requiredStartGraceDuration(t, false),
+    // Fields are flattened so "isCustomized" and the crons can gate validation
+    downloadStartsAt: requiredDownloadStart(t),
+    downloadStartGraceDuration: requiredStartGraceDuration(t, 'download'),
     downloadScheduleMode: Yup.string().oneOf([UpdateScheduleMode.Weekly, UpdateScheduleMode.Daily]).required(),
     downloadWeekDays: updateWeekDaysSchema(t),
-    downloadTimeZone: Yup.string().required(t('Select the timezone for downloading updates')),
-    installStartsAt: requiredInstallTimes(t, true),
-    installEndsAt: requiredInstallTimes(t, false),
-    installStartGraceDuration: requiredStartGraceDuration(t, true),
+    downloadTimeZone: Yup.string().when(
+      ['isCustomized', 'downloadCron', 'downloadOneTimeWindows'],
+      ([isCustomized, downloadCron, downloadOneTimeWindows]) => {
+        const hasOneTimeWindows = ((downloadOneTimeWindows as unknown[] | undefined) || []).length > 0;
+        return isCustomized && !isUiSupportedCron(downloadCron as string) && (downloadCron || hasOneTimeWindows)
+          ? Yup.string().required(t('Select the timezone for downloading updates'))
+          : Yup.string();
+      },
+    ),
+    installStartsAt: requiredInstallStart(t),
+    installStartGraceDuration: requiredStartGraceDuration(t, 'install'),
     installScheduleMode: Yup.string().oneOf([UpdateScheduleMode.Weekly, UpdateScheduleMode.Daily]).required(),
     installWeekDays: updateWeekDaysSchema(t),
-    installTimeZone: Yup.string().required(t('Select the timezone for installing updates')),
+    installTimeZone: Yup.string().when(
+      ['isCustomized', 'installCron', 'installOneTimeWindows'],
+      ([isCustomized, installCron, installOneTimeWindows]) => {
+        const hasOneTimeWindows = ((installOneTimeWindows as unknown[] | undefined) || []).length > 0;
+        return isCustomized && !isUiSupportedCron(installCron as string) && (installCron || hasOneTimeWindows)
+          ? Yup.string().required(t('Select the timezone for installing updates'))
+          : Yup.string();
+      },
+    ),
+    downloadOneTimeWindows: Yup.array().of(oneTimeWindowSchema(t)).default([]),
+    installOneTimeWindows: Yup.array().of(oneTimeWindowSchema(t)).default([]),
   });
 };
 

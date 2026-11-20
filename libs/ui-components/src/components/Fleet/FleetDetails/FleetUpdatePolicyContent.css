@@ -1,0 +1,66 @@
+.fctl-fleet-update-policy__panel {
+  /* Softer than blue-10: mix PF blue-10 with primary/white surface */
+  background-color: color-mix(
+    in srgb,
+    var(--pf-t--color--blue--10) 45%,
+    var(--pf-t--global--background--color--primary--default)
+  );
+  border-radius: var(--pf-t--global--border--radius--small);
+}
+
+.fctl-fleet-update-policy__panel--collapsed {
+  padding-block: var(--pf-t--global--spacer--xs);
+  padding-inline: var(--pf-t--global--spacer--sm);
+}
+
+.fctl-fleet-update-policy__panel--expanded {
+  padding: var(--pf-t--global--spacer--sm);
+}
+
+.fctl-fleet-update-policy__panel--expired {
+  background-color: var(--pf-t--global--background--color--secondary--default);
+  border: var(--pf-t--global--border--width--regular) dashed var(--pf-t--global--border--color--default);
+}
+
+.fctl-fleet-update-policy__panel-header {
+  min-height: 0;
+}
+
+.fctl-fleet-update-policy__panel-title {
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.fctl-fleet-update-policy__section-title.pf-v6-c-title {
+  margin: 0;
+  line-height: 1.25;
+  font-size: var(--pf-t--global--font--size--sm);
+  font-weight: var(--pf-t--global--font--weight--heading--bold);
+}
+
+.fctl-fleet-update-policy__panel-body {
+  margin-block-start: var(--pf-t--global--spacer--sm);
+}
+
+.fctl-fleet-update-policy__toggle.pf-v6-c-button {
+  --pf-v6-c-button--PaddingBlockStart: var(--pf-t--global--spacer--xs);
+  --pf-v6-c-button--PaddingBlockEnd: var(--pf-t--global--spacer--xs);
+  --pf-v6-c-button--PaddingInlineStart: var(--pf-t--global--spacer--xs);
+  --pf-v6-c-button--PaddingInlineEnd: var(--pf-t--global--spacer--xs);
+  margin-inline-start: calc(-1 * var(--pf-t--global--spacer--xs));
+}
+
+.fctl-fleet-update-policy__fields {
+  --pf-v6-c-description-list--RowGap: var(--pf-t--global--spacer--sm);
+}
+
+.fctl-fleet-update-policy__expired-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pf-t--global--spacer--xs);
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--sm);
+}

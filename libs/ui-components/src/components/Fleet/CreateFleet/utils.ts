@@ -2,6 +2,7 @@ import { type TFunction } from 'i18next';
 import * as Yup from 'yup';
 import { ApiVersion, type Fleet, type PatchRequest } from '@flightctl/types';
 import { toAPILabel } from '../../../utils/labels';
+import { hasRecurringSchedule } from '../../../utils/time';
 import {
   systemdUnitListValidationSchema,
   validApplicationsSchema,
@@ -192,7 +193,13 @@ export const getFleetResource = (values: FleetFormValues): Fleet => {
   if (shouldIncludeRolloutPolicy(values)) {
     fleet.spec.rolloutPolicy = getRolloutPolicyData(values);
   }
-  if (values.updateMode === UpdateMode.Customized && values.updatePolicy.isCustomized) {
+  if (
+    values.updateMode === UpdateMode.Customized &&
+    values.updatePolicy.isCustomized &&
+    (hasRecurringSchedule(values.updatePolicy) ||
+      values.updatePolicy.downloadOneTimeWindows.length > 0 ||
+      values.updatePolicy.installOneTimeWindows.length > 0)
+  ) {
     fleet.spec.template.spec.updatePolicy = updatePolicyFormToApi(values.updatePolicy as Required<UpdatePolicyForm>);
   }
   return fleet;

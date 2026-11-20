@@ -4,8 +4,9 @@ import * as Yup from 'yup';
 import { getIn, yupToFormErrors } from 'formik';
 
 import { AppType } from '@flightctl/types';
-import { AppSpecType, type ApplicationEntry, type PortMapping } from '../../types/deviceSpec';
-import { isDuplicatePortMapping, validApplicationsSchema } from './validations';
+import { AppSpecType, type ApplicationEntry, type PortMapping, type UpdatePolicyForm } from '../../types/deviceSpec';
+import { UpdateScheduleMode } from '../../utils/time';
+import { isDuplicatePortMapping, validApplicationsSchema, validUpdatePolicySchema } from './validations';
 
 const app = (name: string, ports: PortMapping[]): ApplicationEntry => ({
   type: 'manual',
@@ -24,6 +25,24 @@ const app = (name: string, ports: PortMapping[]): ApplicationEntry => ({
 
 const translations = i18next.createInstance();
 const schema = Yup.object({ applications: validApplicationsSchema(translations.t) });
+
+const oneTimeOnlyUpdatePolicy = (overrides: Partial<UpdatePolicyForm> = {}): UpdatePolicyForm => ({
+  isCustomized: true,
+  downloadAndInstallDiffer: false,
+  downloadStartsAt: '00:00',
+  downloadStartGraceDuration: '30m',
+  downloadScheduleMode: UpdateScheduleMode.Daily,
+  downloadWeekDays: [true, true, true, true, true, true, true],
+  downloadTimeZone: 'UTC',
+  installStartsAt: '00:00',
+  installStartGraceDuration: '30m',
+  installScheduleMode: UpdateScheduleMode.Daily,
+  installWeekDays: [true, true, true, true, true, true, true],
+  installTimeZone: 'UTC',
+  downloadOneTimeWindows: [{ id: '1', date: '2026-11-15', startsAt: '22:00', startGraceDuration: '90m' }],
+  installOneTimeWindows: [],
+  ...overrides,
+});
 
 beforeAll(async () => {
   await translations.init({ lng: 'en', resources: { en: { translation: {} } } });
@@ -145,5 +164,41 @@ describe('container host port validation', () => {
 
   it('detects an occupied host port in the port editor regardless of target port', () => {
     expect(isDuplicatePortMapping('8080', '81', [{ hostPort: '8080', targetPort: '80' }])).toBe(true);
+  });
+});
+
+describe('validUpdatePolicySchema', () => {
+  it('accepts a one-time-only update policy without recurring fields', () => {
+    expect(validUpdatePolicySchema(translations.t).isValidSync(oneTimeOnlyUpdatePolicy())).toBe(true);
+  });
+
+  it('rejects a one-time window without a start grace duration', () => {
+    const policy = oneTimeOnlyUpdatePolicy({
+      downloadOneTimeWindows: [{ id: '1', date: '2026-11-15', startsAt: '22:00', startGraceDuration: '' }],
+    });
+    expect(validUpdatePolicySchema(translations.t).isValidSync(policy)).toBe(false);
+  });
+
+  it('rejects a one-time window with an invalid start grace duration', () => {
+    const policy = oneTimeOnlyUpdatePolicy({
+      downloadOneTimeWindows: [{ id: '1', date: '2026-11-15', startsAt: '22:00', startGraceDuration: '22:00' }],
+    });
+    expect(validUpdatePolicySchema(translations.t).isValidSync(policy)).toBe(false);
+  });
+
+  it('accepts durations longer than a day and compound durations', () => {
+    const policy = oneTimeOnlyUpdatePolicy({
+      downloadOneTimeWindows: [{ id: '1', date: '2026-11-15', startsAt: '22:00', startGraceDuration: '25h' }],
+      installOneTimeWindows: [{ id: '2', date: '2026-11-16', startsAt: '22:00', startGraceDuration: '1h30m' }],
+    });
+    expect(validUpdatePolicySchema(translations.t).isValidSync(policy)).toBe(true);
+  });
+
+  it('requires a start grace duration for an editable recurring schedule', () => {
+    const policy = oneTimeOnlyUpdatePolicy({
+      downloadCron: '0 2 * * *',
+      downloadStartGraceDuration: '',
+    });
+    expect(validUpdatePolicySchema(translations.t).isValidSync(policy)).toBe(false);
   });
 });

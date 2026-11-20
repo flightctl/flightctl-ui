@@ -32,6 +32,7 @@ import FleetDetailsOsMode from './FleetDetailsOsMode';
 import FleetDeltaGenerationContent from './FleetDeltaGenerationContent';
 import SystemImage from '../../Device/EditDeviceWizard/SystemImageDescriptionGroup';
 import FleetCatalogCompatibilityAlert from './FleetCatalogCompatibilityAlert';
+import FleetUpdatePolicyContent from './FleetUpdatePolicyContent';
 
 const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
   const { t } = useTranslation();
@@ -135,7 +136,14 @@ const FleetDetailsContent = ({ fleet }: { fleet: Fleet }) => {
         </Stack>
       </GridItem>
       <GridItem md={3}>
-        <EventsCard kind={ResourceKind.FLEET} objId={fleetId} />
+        <Stack hasGutter>
+          <StackItem>
+            <FleetUpdatePolicyContent fleet={fleet} />
+          </StackItem>
+          <StackItem>
+            <EventsCard kind={ResourceKind.FLEET} objId={fleetId} />
+          </StackItem>
+        </Stack>
       </GridItem>
     </Grid>
   );

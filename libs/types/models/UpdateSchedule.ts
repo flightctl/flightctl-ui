@@ -7,7 +7,7 @@ import type { Duration } from './Duration';
 import type { OneTimeWindow } from './OneTimeWindow';
 import type { TimeZone } from './TimeZone';
 /**
- * Defines a schedule for an activity. A schedule may contain a complete recurring definition (at and startGraceDuration), one or more oneTimeWindows, or both. at and startGraceDuration must be provided together. The schedule-level timeZone applies to the recurring schedule and to all one-time windows in this object.
+ * Defines a schedule for an activity. A schedule may contain a complete recurring definition (at and startGraceDuration), one or more oneTimeWindows, or both. at and startGraceDuration must be provided together. The schedule-level timeZone applies to the recurring schedule and to one-time windows without their own timeZone.
  */
 export type UpdateSchedule = {
   timeZone?: TimeZone;
