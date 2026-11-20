@@ -8,6 +8,7 @@ import type { DeviceConsole } from './DeviceConsole';
 import type { DeviceDecommission } from './DeviceDecommission';
 import type { DeviceOsSpec } from './DeviceOsSpec';
 import type { DeviceUpdatePolicySpec } from './DeviceUpdatePolicySpec';
+import type { FirmwareSpec } from './FirmwareSpec';
 import type { ResourceMonitor } from './ResourceMonitor';
 /**
  * DeviceSpec describes a device.
@@ -41,5 +42,6 @@ export type DeviceSpec = {
    */
   consoles?: Array<DeviceConsole>;
   decommissioning?: DeviceDecommission;
+  firmware?: FirmwareSpec;
 };
 

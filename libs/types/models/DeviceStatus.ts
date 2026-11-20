@@ -9,6 +9,7 @@ import type { DeviceApplicationsSummaryStatus } from './DeviceApplicationsSummar
 import type { DeviceApplicationStatus } from './DeviceApplicationStatus';
 import type { DeviceCapabilities } from './DeviceCapabilities';
 import type { DeviceConfigStatus } from './DeviceConfigStatus';
+import type { DeviceEnrollmentCredentialStatus } from './DeviceEnrollmentCredentialStatus';
 import type { DeviceEnrollmentHooksStatus } from './DeviceEnrollmentHooksStatus';
 import type { DeviceIntegrityStatus } from './DeviceIntegrityStatus';
 import type { DeviceLifecycleStatus } from './DeviceLifecycleStatus';
@@ -18,6 +19,7 @@ import type { DeviceSummaryStatus } from './DeviceSummaryStatus';
 import type { DeviceSystemInfo } from './DeviceSystemInfo';
 import type { DeviceSystemInfoStatus } from './DeviceSystemInfoStatus';
 import type { DeviceUpdatedStatus } from './DeviceUpdatedStatus';
+import type { FirmwareStatus } from './FirmwareStatus';
 import type { SystemdUnitStatus } from './SystemdUnitStatus';
 /**
  * DeviceStatus represents information about the status of a device. Status may trail the actual state of a device.
@@ -51,7 +53,9 @@ export type DeviceStatus = {
   dependencySync?: DependencySyncStatus;
   capabilities?: DeviceCapabilities;
   deltaGeneration?: DeltaGenerationStatus;
+  enrollmentCredential?: DeviceEnrollmentCredentialStatus;
   enrollmentHooks?: DeviceEnrollmentHooksStatus;
   systemInfoStatus?: DeviceSystemInfoStatus;
+  firmware?: FirmwareStatus;
 };
 
