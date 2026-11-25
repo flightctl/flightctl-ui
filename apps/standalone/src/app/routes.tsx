@@ -30,8 +30,6 @@ import NotFound from './components/AppLayout/NotFound';
 import LoginPage from './components/Login/LoginPage';
 import { AuthContext } from './context/AuthContext';
 
-const APP_TITLE = 'Flight Control';
-
 const EnrollmentRequestDetails = React.lazy(
   () =>
     import(
@@ -144,7 +142,7 @@ const ErrorPage = () => {
 };
 
 const TitledRoute = ({ title, children }: React.PropsWithChildren<{ title: string }>) => {
-  useDocumentTitle(`${APP_TITLE} | ${title}`);
+  useDocumentTitle(title);
   return (
     <React.Suspense
       fallback={
