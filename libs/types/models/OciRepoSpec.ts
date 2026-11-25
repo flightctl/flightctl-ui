@@ -24,6 +24,10 @@ export type OciRepoSpec = {
    * Access mode for the registry: "Read" for read-only (pull), "ReadWrite" for read-write (pull and push).
    */
   accessMode?: OciRepoSpec.accessMode;
+  /**
+   * Deliver this Repository's existing credentials, CA and transport settings to devices. This does not change the permissions of the configured credentials. False or omitted disables delivery for both Read and ReadWrite access modes. Service-side Repository access is unchanged.
+   */
+  devicePullAccess?: boolean;
   ociAuth?: OciAuth;
   /**
    * Base64 encoded root CA.

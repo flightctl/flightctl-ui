@@ -8,6 +8,7 @@
 export enum ResourceKind {
   CERTIFICATE_SIGNING_REQUEST = 'CertificateSigningRequest',
   ENROLLMENT_REQUEST = 'EnrollmentRequest',
+  ENROLLMENT_APPROVAL_POLICY = 'EnrollmentApprovalPolicy',
   DEVICE = 'Device',
   FLEET = 'Fleet',
   REPOSITORY = 'Repository',

@@ -9,6 +9,10 @@ import type { EnrollmentRequestApprovalStatus } from './EnrollmentRequestApprova
  */
 export type EnrollmentRequestStatus = {
   /**
+   * Optional tenant-local enrollment credential CSR reference. Consumers must resolve authoritative state before use; absence does not prevent enrollment.
+   */
+  enrollmentCertificateName?: string;
+  /**
    * The PEM-encoded signed certificate.
    */
   certificate?: string;

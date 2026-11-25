@@ -80,6 +80,7 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     [Event.reason.DEVICE_CONFLICT_PAUSED]: t('Device is paused after database restore'),
     [Event.reason.DEVICE_CONFLICT_RESOLVED]: t('Device conflict has been resolved'),
     [Event.reason.DEVICE_OSIMAGE_CHANGED]: t('Device OS image has changed'),
+    [Event.reason.DEVICE_LABEL_RECONCILIATION_REQUESTED]: t('Device label reconciliation requested'),
     // Device vulnerability events
     [Event.reason.DEVICE_VULNERABILITY_CVECRITICAL]: t('Critical vulnerability detected'),
     [Event.reason.DEVICE_VULNERABILITY_CVEWARNING]: t('Moderate vulnerability detected'),
@@ -87,6 +88,7 @@ const getEventReasonTitles = (t: TFunction, kindType: string): Record<Event.reas
     // Enrollment request events
     [Event.reason.ENROLLMENT_REQUEST_APPROVED]: t('Enrollment request was approved'),
     [Event.reason.ENROLLMENT_REQUEST_APPROVAL_FAILED]: t('Enrollment request approval failed'),
+    [Event.reason.ENROLLMENT_CREDENTIAL_REVOKED]: t('Enrollment credential revoked'),
     // Internal task events
     [Event.reason.INTERNAL_TASK_FAILED]: t('Internal task failed'),
     [Event.reason.INTERNAL_TASK_PERMANENTLY_FAILED]: t('Internal task permanently failed'),

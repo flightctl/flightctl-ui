@@ -75,6 +75,8 @@ export namespace Event {
     DEVICE_VULNERABILITY_CVERESOLVED = 'DeviceVulnerabilityCVEResolved',
     DEVICE_VULNERABILITY_CVEWARNING = 'DeviceVulnerabilityCVEWarning',
     DEVICE_OSIMAGE_CHANGED = 'DeviceOSImageChanged',
+    DEVICE_LABEL_RECONCILIATION_REQUESTED = 'DeviceLabelReconciliationRequested',
+    ENROLLMENT_CREDENTIAL_REVOKED = 'EnrollmentCredentialRevoked',
     ENROLLMENT_REQUEST_APPROVED = 'EnrollmentRequestApproved',
     ENROLLMENT_REQUEST_APPROVAL_FAILED = 'EnrollmentRequestApprovalFailed',
     DEVICE_MULTIPLE_OWNERS_DETECTED = 'DeviceMultipleOwnersDetected',

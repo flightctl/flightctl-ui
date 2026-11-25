@@ -4,13 +4,24 @@
 /* eslint-disable */
 import type { CronExpression } from './CronExpression';
 import type { Duration } from './Duration';
+import type { OneTimeWindow } from './OneTimeWindow';
 import type { TimeZone } from './TimeZone';
 /**
- * Defines the schedule for automatic downloading and updates, including timing and optional timeout.
+ * Defines a schedule for an activity. A schedule may contain a complete recurring definition (at and startGraceDuration), one or more oneTimeWindows, or both. at and startGraceDuration must be provided together. The schedule-level timeZone applies to the recurring schedule and to all one-time windows in this object.
  */
 export type UpdateSchedule = {
   timeZone?: TimeZone;
-  at: CronExpression;
-  startGraceDuration: Duration;
+  /**
+   * Cron expression format for the recurring schedule. See CronExpression for the supported syntax.
+   */
+  at?: CronExpression;
+  /**
+   * The maximum duration allowed for the recurring action to complete.
+   */
+  startGraceDuration?: Duration;
+  /**
+   * Date-specific windows in which the corresponding operation may start.
+   */
+  oneTimeWindows?: Array<OneTimeWindow>;
 };
 

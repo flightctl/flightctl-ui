@@ -116,6 +116,8 @@ const resourceKindLabel = (t: TFunction, resourceKind: ResourceKind | undefined)
       return t('Template version');
     case ResourceKind.AUTH_PROVIDER:
       return t('Authentication provider');
+    case ResourceKind.ENROLLMENT_APPROVAL_POLICY:
+      return t('Enrollment approval policy');
   }
 };
 const getAlertTitle = (alert: AlertManagerAlert, defaultTitle: string) => {
