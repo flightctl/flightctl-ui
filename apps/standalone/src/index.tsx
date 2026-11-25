@@ -1,5 +1,6 @@
 import React from 'react';
-import ReactDOM, { render } from 'react-dom';
+import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Bullseye, Spinner } from '@patternfly/react-core';
 import App from './app/index';
 import { UserPreferencesProvider } from '@flightctl/ui-components/src/components/Masthead/UserPreferencesProvider';
@@ -28,6 +29,7 @@ if (window.API_PORT) {
 }
 
 const root = document.getElementById('root') as Element;
+const rootContainer = createRoot(root);
 
 const rootApp = (
   <React.StrictMode>
@@ -45,4 +47,4 @@ const rootApp = (
   </React.StrictMode>
 );
 
-render(rootApp, root);
+rootContainer.render(rootApp);

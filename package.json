@@ -40,20 +40,20 @@
     "@eslint/compat": "^2.0.3",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^9.39.4",
-    "@typescript-eslint/eslint-plugin": "^8.57.1",
-    "@typescript-eslint/parser": "^8.57.1",
+    "@typescript-eslint/eslint-plugin": "8.57.1",
+    "@typescript-eslint/parser": "8.57.1",
     "concurrently": "^8.2.2",
     "cypress": "^15.10.0",
-    "eslint": "^9.39.4",
+    "eslint": "9.39.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^17.4.0",
     "nodemon": "^3.0.3",
-    "prettier": "^3.0.0",
+    "prettier": "3.2.4",
     "rimraf": "^6.x",
     "ts-node": "^10.9.2",
     "typescript": "^5.1.6",
-    "vitest": "^3.2.7",
+    "vitest": "^5.1.0",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
@@ -63,7 +63,10 @@
   "overrides": {
     "js-yaml": "4.3.2",
     "immutable": "4.3.9",
-    "fast-uri": "3.1.7",
+    "fast-uri": "3.1.9",
+    "glob": "14.0.6",
+    "minimatch": "11.0.9",
+    "zod": "4.6.7",
     "tinypool": ">=2.1.2"
   }
 }

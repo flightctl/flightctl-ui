@@ -16,8 +16,8 @@ import {
   useNavigate,
   useParams,
   useSearchParams,
-} from 'react-router-dom-v5-compat';
-import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/reducers';
+} from 'react-router-dom';
+import { getUser } from '@openshift-console/dynamic-plugin-sdk/lib/app/core/reducers/coreSelectors';
 import { useSelector } from 'react-redux';
 import { useFetch } from '../../hooks/useFetch';
 import { apiProxy } from '../../utils/apiCalls';

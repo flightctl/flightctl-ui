@@ -1,4 +1,4 @@
-import { type TFunction } from 'react-i18next';
+import { type TFunction } from 'i18next';
 import { PowerOffIcon } from '@patternfly/react-icons/dist/js/icons/power-off-icon';
 import { PauseCircleIcon } from '@patternfly/react-icons/dist/js/icons/pause-circle-icon';
 import { BanIcon } from '@patternfly/react-icons/dist/js/icons/ban-icon';
@@ -372,4 +372,6 @@ export const getDeviceLifecycleStatusItems = (t: TFunction): StatusItem<DeviceLi
   },
 ];
 
-export const deviceStatusOrder = getDeviceStatusItems((s: string) => s).map((item) => item.id);
+export const deviceStatusOrder = getDeviceStatusItems(((s: string) => s) as unknown as TFunction).map(
+  (item) => item.id,
+);
