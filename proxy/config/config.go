@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -19,7 +20,7 @@ var (
 	AlertManagerApiUrl     = getEnvUrlVar("FLIGHTCTL_ALERTMANAGER_PROXY", "https://localhost:8443")
 	TlsKeyPath             = getEnvVar("TLS_KEY", "")
 	TlsCertPath            = getEnvVar("TLS_CERT", "")
-	BaseUiUrl              = getEnvUrlVar("BASE_UI_URL", "http://localhost:9000")
+	BaseUiUrl              = getEnvUrlVar("BASE_UI_URL", "http://localhost:"+envOr("UI_PORT", "9000"))
 	AuthInsecure           = getEnvVar("AUTH_INSECURE_SKIP_VERIFY", "")
 	OcpPlugin              = getEnvVar("IS_OCP_PLUGIN", "false")
 )
@@ -140,6 +141,41 @@ func remoteAddrIP(r *http.Request) net.IP {
 func getEnvUrlVar(key string, defaultValue string) string {
 	urlValue := getEnvVar(key, defaultValue)
 	return strings.TrimSuffix(urlValue, "/")
+}
+
+func envOr(key string, defaultValue string) string {
+	if val := getEnvVar(key, ""); val != "" {
+		return val
+	}
+	return defaultValue
+}
+
+// UiOrigin returns the CORS origin for the configured UI URL, normalized to the
+// browser's representation.
+func UiOrigin() string {
+	return originOf(BaseUiUrl)
+}
+
+// originOf strips path/query so the value matches the browser's Origin header.
+// An unparsable URL is returned unchanged so it can never match a real origin.
+func originOf(rawUrl string) string {
+	u, err := url.Parse(rawUrl)
+	if err != nil || u.Scheme == "" || u.Hostname() == "" {
+		return rawUrl
+	}
+	scheme := strings.ToLower(u.Scheme)
+	port := u.Port()
+	if (scheme == "http" && port == "80") || (scheme == "https" && port == "443") {
+		port = ""
+	}
+	host := strings.ToLower(u.Hostname())
+	switch {
+	case port != "":
+		host = net.JoinHostPort(host, port)
+	case strings.Contains(host, ":"):
+		host = "[" + host + "]" // IPv6 literal
+	}
+	return scheme + "://" + host
 }
 
 func getEnvVar(key string, defaultValue string) string {

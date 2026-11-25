@@ -23,7 +23,7 @@ const config: Configuration & {
   devtool: 'eval-source-map',
   devServer: {
     host: 'localhost',
-    port: 9000,
+    port: Number(process.env.UI_PORT) || 9000,
     historyApiFallback: true,
     open: true,
     static: {
@@ -196,7 +196,7 @@ if (NODE_ENV === 'production') {
 } else {
   config.plugins?.push(
     new DefinePlugin({
-      'window.API_PORT': JSON.stringify(process.env.API_PORT) || '3001',
+      'window.API_PORT': JSON.stringify(process.env.API_PORT || '3001'),
     }),
   );
 }

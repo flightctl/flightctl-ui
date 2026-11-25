@@ -13,7 +13,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = Number(process.env.PORT) || 9000;
+const PORT = Number(process.env.UI_PORT) || 9000;
 const DIST_DIR = path.resolve(__dirname, '../../../apps/standalone/dist');
 const INDEX_FILE = path.join(DIST_DIR, 'index.html');
 
