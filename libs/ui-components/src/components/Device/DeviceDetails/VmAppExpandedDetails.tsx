@@ -33,6 +33,8 @@ const VmAppExpandedDetails = ({
   const vmYaml = getVmYamlContent(vmSpec);
   const config = parseVmYaml(vmYaml);
 
+  const reportedImages = appStatus.imageDigests?.map(({ image }) => image).filter(Boolean) ?? [];
+
   const configDescriptionList = (
     <DescriptionList
       isHorizontal
@@ -40,7 +42,7 @@ const VmAppExpandedDetails = ({
       className="fctl-applications-table__description-list"
     >
       <DescriptionListGroup>
-        <DescriptionListTerm>{t('Disk image')}</DescriptionListTerm>
+        <DescriptionListTerm>{t('Disk image (desired)')}</DescriptionListTerm>
         <DescriptionListDescription>
           {config?.diskImage ? (
             <ClipboardCopy isReadOnly hoverTip={t('Copy')} clickTip={t('Copied')} variant="inline-compact">
@@ -51,6 +53,16 @@ const VmAppExpandedDetails = ({
           )}
         </DescriptionListDescription>
       </DescriptionListGroup>
+      {reportedImages.length > 0 && (
+        <DescriptionListGroup>
+          <DescriptionListTerm>{t('Images (running)', { count: reportedImages.length })}</DescriptionListTerm>
+          <DescriptionListDescription>
+            <ClipboardCopy isReadOnly hoverTip={t('Copy')} clickTip={t('Copied')} variant="inline-compact">
+              {reportedImages.join(', ')}
+            </ClipboardCopy>
+          </DescriptionListDescription>
+        </DescriptionListGroup>
+      )}
       <DescriptionListGroup>
         <DescriptionListTerm>{t('CPU')}</DescriptionListTerm>
         <DescriptionListDescription>
