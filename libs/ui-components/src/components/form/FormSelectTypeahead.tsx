@@ -24,6 +24,7 @@ type FormSelectProps = {
   placeholderText?: string;
   isValidTypedItem?: (value: string) => boolean;
   transformTypedItem?: (value: string) => string;
+  onChangeCustom?: (value: string) => void;
 };
 
 const isItemObject = (item: string | SelectItem): item is SelectItem => typeof item === 'object';
@@ -38,6 +39,7 @@ const FormSelectTypeahead = ({
   placeholderText,
   isValidTypedItem,
   transformTypedItem,
+  onChangeCustom,
   children,
 }: React.PropsWithChildren<FormSelectProps>) => {
   const [field, meta, { setValue, setTouched }] = useField<string>({
@@ -134,6 +136,7 @@ const FormSelectTypeahead = ({
           event.preventDefault();
           setTouched(true);
           setValue(focusedItem, true);
+          onChangeCustom?.(focusedItem);
           setInputValue(undefined);
           setIsOpen(false);
           resetActiveAndFocusedItem();
@@ -164,6 +167,7 @@ const FormSelectTypeahead = ({
         onSelect={(_, value) => {
           setTouched(true);
           setValue(value as string, true);
+          onChangeCustom?.(value as string);
           setInputValue(undefined);
           setIsOpen(false);
           resetActiveAndFocusedItem();
@@ -220,6 +224,7 @@ const FormSelectTypeahead = ({
                   const transformedValue = transformTypedItem?.(inputValue) || inputValue;
                   setInputValue(undefined);
                   void setValue(transformedValue);
+                  onChangeCustom?.(transformedValue);
                   setIsOpen(false);
                 }}
                 id={`create-typeahead-select-input-${name}`}

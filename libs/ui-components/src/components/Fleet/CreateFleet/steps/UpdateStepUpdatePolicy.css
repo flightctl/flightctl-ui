@@ -1,3 +1,72 @@
 .fctl-policy-timezone .pf-v6-c-form__helper-text {
   margin-top: 0.5rem;
 }
+
+.fctl-recurring-schedule__decisions {
+  padding-block-end: var(--pf-t--global--spacer--sm);
+  border-block-end: var(--pf-t--global--border--width--regular) solid var(--pf-t--global--border--color--default);
+}
+
+.fctl-recurring-schedule__frequency .pf-v6-c-form__group {
+  margin-block-end: 0;
+}
+
+.fctl-recurring-schedule__time-sep {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--sm);
+}
+
+.fctl-recurring-schedule__weekdays {
+  margin-block-start: var(--pf-t--global--spacer--sm);
+}
+
+.fctl-expandable-form-card {
+  margin-block-end: 0;
+}
+
+.fctl-one-time-windows__to {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--sm);
+}
+
+.fctl-one-time-windows__past {
+  font-size: var(--pf-t--global--font--size--sm);
+  color: var(--pf-t--global--text--color--subtle);
+  margin-block-start: var(--pf-t--global--spacer--md);
+}
+
+.fctl-one-time-windows__past summary {
+  cursor: pointer;
+}
+
+.fctl-one-time-windows__past-list {
+  list-style: none;
+  margin: var(--pf-t--global--spacer--sm) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pf-t--global--spacer--sm);
+}
+
+.fctl-one-time-windows__expired {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--pf-t--global--spacer--sm);
+  align-items: center;
+  padding: var(--pf-t--global--spacer--md);
+  background: var(--pf-t--global--background--color--secondary--default);
+  border: var(--pf-t--global--border--width--regular) dashed var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--small);
+}
+
+.fctl-one-time-windows__expired-label {
+  flex-shrink: 0;
+  color: var(--pf-t--global--text--color--subtle);
+}
+
+.fctl-one-time-windows__expired-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pf-t--global--spacer--sm);
+  flex-shrink: 0;
+}

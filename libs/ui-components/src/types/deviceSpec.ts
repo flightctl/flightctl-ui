@@ -14,6 +14,7 @@ import {
   type InlineApplicationProviderSpec,
   type InlineConfigProviderSpec,
   type KubernetesSecretProviderSpec,
+  type OneTimeWindow,
   type QuadletApplication,
   type VmApplication,
 } from '@flightctl/types';
@@ -341,19 +342,31 @@ export type DisruptionBudgetForm = DisruptionBudget & {
   isCustomized: boolean;
 };
 
+/** One-time maintenance window edited in the UI. Start + grace duration are mapped to at/startGraceDuration. */
+export type OneTimeWindowForm = {
+  id: string;
+  date: string;
+  startsAt: string;
+  startGraceDuration: string;
+  timeZone?: OneTimeWindow['timeZone'];
+};
+
 export type UpdatePolicyForm = {
   isCustomized: boolean;
   downloadAndInstallDiffer: boolean;
   downloadStartsAt?: string;
-  downloadEndsAt?: string;
   downloadStartGraceDuration?: string;
   downloadScheduleMode: UpdateScheduleMode;
   downloadWeekDays: boolean[];
   downloadTimeZone: string;
   installStartsAt?: string;
-  installEndsAt?: string;
   installStartGraceDuration?: string;
   installScheduleMode: UpdateScheduleMode;
   installWeekDays: boolean[];
   installTimeZone: string;
+  /** Raw recurring cron (`at`). Its presence means a recurring schedule exists; unsupported expressions are not rewritten. */
+  downloadCron?: string;
+  installCron?: string;
+  downloadOneTimeWindows: OneTimeWindowForm[];
+  installOneTimeWindows: OneTimeWindowForm[];
 };
