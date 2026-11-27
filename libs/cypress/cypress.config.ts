@@ -1,14 +1,12 @@
 import { defineConfig } from 'cypress';
 
 export default defineConfig({
-  allowCypressEnv: false,
   e2e: {
     setupNodeEvents() {},
     specPattern: './**/*.cy.ts',
     supportFile: 'libs/cypress/support/index.ts',
     baseUrl: `http://localhost:${process.env.UI_PORT || 9000}`,
     experimentalRunAllSpecs: true,
-    experimentalMemoryManagement: true,
     numTestsKeptInMemory: 5,
   },
 
