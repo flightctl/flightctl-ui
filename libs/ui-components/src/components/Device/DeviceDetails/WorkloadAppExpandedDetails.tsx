@@ -29,16 +29,20 @@ const WorkloadAppExpandedDetails = ({
   const { status: appStatus, spec } = application;
   const { t } = useTranslation();
 
-  let image: string | undefined;
+  let desiredImage: string | undefined;
   let appPorts: ApplicationPort[] = [];
   if (spec) {
     if ('image' in spec && isImageVariantApp(spec)) {
-      image = spec.image;
+      desiredImage = spec.image;
     }
     if ('ports' in spec && spec.ports) {
       appPorts = spec.ports as ApplicationPort[];
     }
   }
+
+  const reportedImages = appStatus.imageDigests?.map(({ image }) => image).filter(Boolean) ?? [];
+  const reportedImageCount = reportedImages.length;
+  const displayImage = reportedImageCount === 0 ? desiredImage : reportedImages.join(', ');
 
   const volumes = appStatus.volumes || [];
 
@@ -49,16 +53,19 @@ const WorkloadAppExpandedDetails = ({
       horizontalTermWidthModifier={{ default: '25ch' }}
       className="fctl-applications-table__description-list"
     >
-      {image && (
+      {displayImage && (
         <DescriptionListGroup>
-          <DescriptionListTerm>{t('Image')}</DescriptionListTerm>
+          <DescriptionListTerm>
+            {reportedImageCount > 0 ? t('Images (running)', { count: reportedImageCount }) : t('Image (desired)')}
+          </DescriptionListTerm>
           <DescriptionListDescription>
             <ClipboardCopy isReadOnly hoverTip={t('Copy')} clickTip={t('Copied')} variant="inline-compact">
-              {image}
+              {displayImage}
             </ClipboardCopy>
           </DescriptionListDescription>
         </DescriptionListGroup>
       )}
+
       <DescriptionListGroup>
         <DescriptionListTerm>{t('Run as user')}</DescriptionListTerm>
         <DescriptionListDescription>{appStatus.runAs || RUN_AS_ROOT_USER}</DescriptionListDescription>
